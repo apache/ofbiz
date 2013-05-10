@@ -78,9 +78,6 @@ under the License.
                 <set field="titleProperty" value="PartyProfile"/>
                 <set field="headerItem" value="find"/>
                 <set field="labelTitleProperty" value="PartyTaxAuthInfos"/>
-                <set field="layoutSettings.javaScripts[]" value="/images/prototypejs/prototype.js" global="true"/>
-                <set field="layoutSettings.javaScripts[]" value="/images/prototypejs/control.progress_bar.js" global="true"/>
-                <set field="layoutSettings.styleSheets[]" value="/images/prototypejs/progress_bar.css" global="true"/>
                 <set field="layoutSettings.javaScripts[]" value="/partymgr/js/PartyProfileContent.js" global="true"/>
                 <script location="component://party/webapp/partymgr/WEB-INF/actions/party/ViewProfile.groovy"/>
                 <script location="component://party/webapp/partymgr/WEB-INF/actions/party/GetUserLoginPrimaryEmail.groovy"/>
@@ -105,7 +102,7 @@ under the License.
                                     <include-screen name="Contact" location="component://party/widget/partymgr/ProfileScreens.xml"/>
                                     <include-screen name="contactsAndAccounts" location="component://party/widget/partymgr/ProfileScreens.xml"/>
                                     <screenlet title="${uiLabelMap.PartyMemberRoles}" navigation-form-name="ViewPartyRoles">
-                                        <include-form name="ViewPartyRoles" location="component://party/webapp/partymgr/party/PartyForms.xml"/>
+                                        <include-form name="ViewPartyRoles" location="component://party/widget/partymgr/PartyForms.xml"/>
                                     </screenlet>
                                 </container>
                                 <container style="righthalf">
@@ -136,9 +133,9 @@ under the License.
                 <decorator-screen name="CommonPartyDecorator" location="${parameters.mainDecoratorLocation}">
                     <decorator-section name="body">
                         <screenlet id="AddPartyRatePanel" title="${uiLabelMap.PageTitleEditPartyRates}" collapsible="true">
-                            <include-form name="AddPartyRate" location="component://party/webapp/partymgr/party/PartyForms.xml"/>
+                            <include-form name="AddPartyRate" location="component://party/widget/partymgr/PartyForms.xml"/>
                         </screenlet>
-                        <include-form name="ListPartyRates" location="component://party/webapp/partymgr/party/PartyForms.xml"/>
+                        <include-form name="ListPartyRates" location="component://party/widget/partymgr/PartyForms.xml"/>
                     </decorator-section>
                 </decorator-screen>
             </widgets>
@@ -164,7 +161,7 @@ under the License.
                 <decorator-screen name="CommonPartyDecorator" location="${parameters.mainDecoratorLocation}">
                     <decorator-section name="body">
                         <screenlet title="${uiLabelMap.PartyMemberRoles}" navigation-form-name="ViewPartyRoles">
-                            <include-form name="ViewPartyRoles" location="component://party/webapp/partymgr/party/PartyForms.xml"/>
+                            <include-form name="ViewPartyRoles" location="component://party/widget/partymgr/PartyForms.xml"/>
                         </screenlet>
                         <screenlet title="${uiLabelMap.PartyAddToRole}">
                             <include-form name="AddPartyRole" location="component://projectmgr/widget/forms/ResourceForms.xml"/>

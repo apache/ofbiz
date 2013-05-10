@@ -36,6 +36,13 @@ under the License.
         <attribute type="String" mode="IN" name="trackingCodeId" optional="true"/>
         <attribute type="String" mode="IN" name="webSiteMountPoint" optional="false"/>
         <attribute type="String" mode="IN" name="countryCode" optional="false"/>
+        <attribute type="String" mode="IN" name="productStoreId" optional="true"/>
+        <attribute type="String" mode="IN" name="allowRecommended" optional="true"/>
+        <attribute type="String" mode="IN" name="utmSource" optional="true"/>
+        <attribute type="String" mode="IN" name="utmMedium" optional="true"/>
+        <attribute type="String" mode="IN" name="utmTerm" optional="true"/>
+        <attribute type="String" mode="IN" name="utmContent" optional="true"/>
+        <attribute type="String" mode="IN" name="utmCampaign" optional="true"/>
     </service>
     <service name="exportProductCategoryToGoogle" engine="java"
              location="org.ofbiz.googlebase.ProductsExportToGoogle" invoke="exportProductCategoryToGoogle" auth="true">
@@ -44,5 +51,28 @@ under the License.
         <attribute type="String" mode="IN" name="actionType" optional="false"/>
         <attribute type="String" mode="IN" name="webSiteUrl" optional="false"/>
         <attribute type="String" mode="IN" name="imageUrl" optional="true"/>
+    </service>
+    
+    <!-- Start configuration services -->
+    <service name="createGoogleBaseConfig" default-entity-name="GoogleBaseConfig" engine="entity-auto" invoke="create" auth="true">
+        <description>Create a GoogleBaseConfig</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="updateGoogleBaseConfig" default-entity-name="GoogleBaseConfig" engine="entity-auto" invoke="update" auth="true">
+        <description>Update a GoogleBaseConfig</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="deleteGoogleBaseConfig" default-entity-name="GoogleBaseConfig" engine="entity-auto" invoke="delete" auth="true">
+        <description>Delete a GoogleBaseConfig</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+    </service>
+    
+    <!-- Auto update to google base **scheduled service -->
+    <service name="autoUpdateToGoogleBase" engine="simple"
+        location="component://googlebase/script/org/ofbiz/googlebase/GooglebaseServices.xml" invoke="autoUpdateToGoogleBase" auth="true" use-transaction="false">
+        <description>Auto update to google base</description>
+        <attribute type="List" mode="OUT" name="allProductExportList" optional="true"/>
     </service>
 </services>

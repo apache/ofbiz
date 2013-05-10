@@ -21,6 +21,9 @@ import java.util.ArrayList;
 import org.ofbiz.base.util.UtilHttp;
 import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.base.util.UtilNumber;
+import org.ofbiz.entity.condition.EntityCondition;
+import org.ofbiz.entity.condition.EntityOperator;
+import org.ofbiz.entity.util.EntityUtil;
 
 // rounding mode
 decimals = UtilNumber.getBigDecimalScale("invoice.decimals");
@@ -42,7 +45,7 @@ if (!security.hasEntityPermission("ACCOUNTING", "_PRINT_CHECKS", session)) {
 // in the case of a single payment, the paymentId will be supplied
 paymentId = context.paymentId;
 if (paymentId) {
-    payment = delegator.findByPrimaryKey("Payment", [paymentId : paymentId]);
+    payment = delegator.findOne("Payment", [paymentId : paymentId], false);
     if (payment) payments.add(payment);
     context.payments = payments;
     return;
@@ -51,10 +54,14 @@ if (paymentId) {
 // in the case of a multi form, parse the multi data and get all of the selected payments
 selected = UtilHttp.parseMultiFormData(parameters);
 selected.each { row ->
-    payment = delegator.findByPrimaryKey("Payment", [paymentId : row.paymentId]);
+    payment = delegator.findOne("Payment", [paymentId : row.paymentId], false);
     if (payment) {
         payments.add(payment);
     }
 }
+paymentGroupMembers = EntityUtil.filterByDate(delegator.findList("PaymentGroupMember", EntityCondition.makeCondition("paymentGroupId", EntityOperator.EQUALS, parameters.paymentGroupId), null, null, null, false));
+//in the case of a multiple payments, paymentId List is supplied.
+paymentGroupMembers.each { paymentGropupMember->
+    payments.add(paymentGropupMember.getRelatedOne("Payment", false));
+}
 context.payments = payments;
-

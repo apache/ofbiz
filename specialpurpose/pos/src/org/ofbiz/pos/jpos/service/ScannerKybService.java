@@ -27,6 +27,7 @@ import jpos.ScannerConst;
 import jpos.services.EventCallbacks;
 import jpos.events.DataEvent;
 
+import org.ofbiz.base.util.UtilGenerics;
 import org.ofbiz.pos.adaptor.KeyboardAdaptor;
 import org.ofbiz.pos.adaptor.KeyboardReceiver;
 
@@ -46,11 +47,11 @@ public class ScannerKybService extends BaseService implements jpos.services.Scan
     private static final int TYPELOC_SUFFIX = 60;
     private static final int TYPELOC_NONE = 99;
 
-    protected Map barcodeIdMap = new HashMap();
+    protected Map<String, Integer> barcodeIdMap = new HashMap<String, Integer>();
 
     protected byte[] scannedDataLabel = new byte[0];
     protected byte[] scannedData = new byte[0];
-    protected String codeId = new String();
+    protected String codeId = "";
 
     protected boolean decodeData = true;
     protected boolean eventEnabled = true;
@@ -62,6 +63,7 @@ public class ScannerKybService extends BaseService implements jpos.services.Scan
         KeyboardAdaptor.getInstance(this, KeyboardAdaptor.SCANNER_DATA);
     }
 
+    @Override
     public void open(String deviceName, EventCallbacks ecb) throws JposException {
         super.open(deviceName, ecb);
         this.readCodeMap();
@@ -107,7 +109,7 @@ public class ScannerKybService extends BaseService implements jpos.services.Scan
 
     public int getScanDataType() throws JposException {
         if (codeId != null && barcodeIdMap.containsKey(codeId)) {
-            return ((Integer) barcodeIdMap.get(codeId)).intValue();
+            return (barcodeIdMap.get(codeId)).intValue();
         }
         return ScannerConst.SCAN_SDT_UNKNOWN;
     }
@@ -115,7 +117,7 @@ public class ScannerKybService extends BaseService implements jpos.services.Scan
     public void clearInput() throws JposException {
         this.scannedDataLabel = new byte[0];
         this.scannedData = new byte[0];
-        this.codeId = new String();
+        this.codeId = "";
     }
 
     // ScannerService13
@@ -170,42 +172,42 @@ public class ScannerKybService extends BaseService implements jpos.services.Scan
 
     private void readCodeMap() {
         if (barcodeIdMap == null) {
-            barcodeIdMap = new HashMap();
+            barcodeIdMap = new HashMap<String, Integer>();
         }
         if (barcodeIdMap.size() > 0) {
             return;
         }
 
-        Enumeration names = entry.getPropertyNames();
+        Enumeration<String> names = UtilGenerics.cast(entry.getPropertyNames());
         if (names != null) {
             while (names.hasMoreElements()) {
-                String codeType = (String) names.nextElement();
+                String codeType = names.nextElement();
                 if (codeType.startsWith("CodeType:")) {
                     String codeValue = entry.getProp(codeType).getValueAsString();
                     if ("CodeType:CODE11".equals(codeType)) {
-                        barcodeIdMap.put(codeValue.toUpperCase(), new Integer(ScannerConst.SCAN_SDT_OTHER));
+                        barcodeIdMap.put(codeValue.toUpperCase(), ScannerConst.SCAN_SDT_OTHER);
                     } else if ("CodeType:CODE39".equals(codeType)) {
-                        barcodeIdMap.put(codeValue.toUpperCase(), new Integer(ScannerConst.SCAN_SDT_Code39));
+                        barcodeIdMap.put(codeValue.toUpperCase(), ScannerConst.SCAN_SDT_Code39);
                     } else if ("CodeType:CODE93".equals(codeType)) {
-                        barcodeIdMap.put(codeValue.toUpperCase(), new Integer(ScannerConst.SCAN_SDT_Code93));
+                        barcodeIdMap.put(codeValue.toUpperCase(), ScannerConst.SCAN_SDT_Code93);
                     } else if ("CodeType:CODE128".equals(codeType)) {
-                        barcodeIdMap.put(codeValue.toUpperCase(), new Integer(ScannerConst.SCAN_SDT_Code128));
+                        barcodeIdMap.put(codeValue.toUpperCase(), ScannerConst.SCAN_SDT_Code128);
                     } else if ("CodeType:CODABAR".equals(codeType)) {
-                        barcodeIdMap.put(codeValue.toUpperCase(), new Integer(ScannerConst.SCAN_SDT_Codabar));
+                        barcodeIdMap.put(codeValue.toUpperCase(), ScannerConst.SCAN_SDT_Codabar);
                     } else if ("CodeType:I2OF5".equals(codeType)) {
-                        barcodeIdMap.put(codeValue.toUpperCase(), new Integer(ScannerConst.SCAN_SDT_OTHER));
+                        barcodeIdMap.put(codeValue.toUpperCase(), ScannerConst.SCAN_SDT_OTHER);
                     } else if ("CodeType:ID2OF5".equals(codeType)) {
-                        barcodeIdMap.put(codeValue.toUpperCase(), new Integer(ScannerConst.SCAN_SDT_OTHER));
+                        barcodeIdMap.put(codeValue.toUpperCase(), ScannerConst.SCAN_SDT_OTHER);
                     } else if ("CodeType:MSI".equals(codeType)) {
-                        barcodeIdMap.put(codeValue.toUpperCase(), new Integer(ScannerConst.SCAN_SDT_OTHER));
+                        barcodeIdMap.put(codeValue.toUpperCase(), ScannerConst.SCAN_SDT_OTHER);
                     } else if ("CodeType:UPCA".equals(codeType)) {
-                        barcodeIdMap.put(codeValue.toUpperCase(), new Integer(ScannerConst.SCAN_SDT_UPCA));
+                        barcodeIdMap.put(codeValue.toUpperCase(), ScannerConst.SCAN_SDT_UPCA);
                     } else if ("CodeType:UPCE".equals(codeType)) {
-                        barcodeIdMap.put(codeValue.toUpperCase(), new Integer(ScannerConst.SCAN_SDT_UPCE));
+                        barcodeIdMap.put(codeValue.toUpperCase(), ScannerConst.SCAN_SDT_UPCE);
                     } else if ("CodeType:EAN13".equals(codeType)) {
-                        barcodeIdMap.put(codeValue.toUpperCase(), new Integer(ScannerConst.SCAN_SDT_EAN13));
+                        barcodeIdMap.put(codeValue.toUpperCase(), ScannerConst.SCAN_SDT_EAN13);
                     } else if ("CodeType:EAN8".equals(codeType)) {
-                        barcodeIdMap.put(codeValue.toUpperCase(), new Integer(ScannerConst.SCAN_SDT_EAN8));
+                        barcodeIdMap.put(codeValue.toUpperCase(), ScannerConst.SCAN_SDT_EAN8);
                     }
                 }
             }

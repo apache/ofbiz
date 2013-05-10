@@ -18,105 +18,120 @@
  *******************************************************************************/
 package org.ofbiz.minilang.method.conditional;
 
-import java.util.*;
-import org.w3c.dom.*;
-import org.ofbiz.base.util.*;
-import org.ofbiz.minilang.*;
-import org.ofbiz.minilang.method.*;
+import java.util.Collections;
+import java.util.List;
+
+import org.ofbiz.base.util.ObjectType;
+import org.ofbiz.base.util.UtilXml;
+import org.ofbiz.base.util.collections.FlexibleMapAccessor;
+import org.ofbiz.minilang.MiniLangException;
+import org.ofbiz.minilang.MiniLangValidate;
+import org.ofbiz.minilang.SimpleMethod;
+import org.ofbiz.minilang.artifact.ArtifactInfoContext;
+import org.ofbiz.minilang.method.MethodContext;
+import org.ofbiz.minilang.method.MethodOperation;
+import org.w3c.dom.Element;
 
 /**
- * Implements compare to a constant condition.
+ * Implements the &lt;if-empty&gt; element.
+ * 
+ * @see <a href="https://cwiki.apache.org/OFBADMIN/mini-language-reference.html#Mini-languageReference-{{%3Cifempty%3E}}">Mini-language Reference</a>
  */
-public class EmptyCondition implements Conditional {
-    public static final class EmptyConditionFactory extends ConditionalFactory<EmptyCondition> {
-        public EmptyCondition createCondition(Element element, SimpleMethod simpleMethod) {
-            return new EmptyCondition(element, simpleMethod);
-        }
-
-        public String getName() {
-            return "if-empty";
-        }
-    }
-
+public final class EmptyCondition extends MethodOperation implements Conditional {
 
     public static final String module = EmptyCondition.class.getName();
 
-    SimpleMethod simpleMethod;
+    private final FlexibleMapAccessor<Object> fieldFma;
+    // Sub-operations are used only when this is a method operation.
+    private final List<MethodOperation> elseSubOps;
+    private final List<MethodOperation> subOps;
 
-    ContextAccessor<Map<String, ? extends Object>> mapAcsr;
-    ContextAccessor<Object> fieldAcsr;
-
-    public EmptyCondition(Element element, SimpleMethod simpleMethod) {
-        this.simpleMethod = simpleMethod;
-
-        // NOTE: this is still supported, but is deprecated
-        this.mapAcsr = new ContextAccessor<Map<String, ? extends Object>>(element.getAttribute("map-name"));
-        this.fieldAcsr = new ContextAccessor<Object>(element.getAttribute("field"));
-        if (this.fieldAcsr.isEmpty()) {
-            // NOTE: this is still supported, but is deprecated
-            this.fieldAcsr = new ContextAccessor<Object>(element.getAttribute("field-name"));
+    public EmptyCondition(Element element, SimpleMethod simpleMethod) throws MiniLangException {
+        super(element, simpleMethod);
+        if (MiniLangValidate.validationOn()) {
+            MiniLangValidate.attributeNames(simpleMethod, element, "field");
+            MiniLangValidate.requiredAttributes(simpleMethod, element, "field");
+            MiniLangValidate.expressionAttributes(simpleMethod, element, "field");
+        }
+        this.fieldFma = FlexibleMapAccessor.getInstance(element.getAttribute("field"));
+        Element childElement = UtilXml.firstChildElement(element);
+        if (childElement != null && !"else".equals(childElement.getTagName())) {
+            this.subOps = Collections.unmodifiableList(SimpleMethod.readOperations(element, simpleMethod));
+        } else {
+            this.subOps = null;
+        }
+        Element elseElement = UtilXml.firstChildElement(element, "else");
+        if (elseElement != null) {
+            this.elseSubOps = Collections.unmodifiableList(SimpleMethod.readOperations(elseElement, simpleMethod));
+        } else {
+            this.elseSubOps = null;
         }
     }
 
-    public boolean checkCondition(MethodContext methodContext) {
-        // only run subOps if element is empty/null
-        boolean runSubOps = false;
-        Object fieldVal = getFieldVal(methodContext);
-
-        if (fieldVal == null) {
-            runSubOps = true;
-        } else {
-            if (fieldVal instanceof String) {
-                String fieldStr = (String) fieldVal;
-
-                if (fieldStr.length() == 0) {
-                    runSubOps = true;
-                }
-            } else if (fieldVal instanceof Collection) {
-                Collection fieldCol = (Collection) fieldVal;
-
-                if (fieldCol.size() == 0) {
-                    runSubOps = true;
-                }
-            } else if (fieldVal instanceof Map) {
-                Map fieldMap = (Map) fieldVal;
-
-                if (fieldMap.size() == 0) {
-                    runSubOps = true;
-                }
-            }
-        }
-
-        return runSubOps;
+    @Override
+    public boolean checkCondition(MethodContext methodContext) throws MiniLangException {
+        return ObjectType.isEmpty(fieldFma.get(methodContext.getEnvMap()));
     }
 
-    protected Object getFieldVal(MethodContext methodContext) {
-        Object fieldVal = null;
-        if (!mapAcsr.isEmpty()) {
-            Map<String, ? extends Object> fromMap = mapAcsr.get(methodContext);
-            if (fromMap == null) {
-                if (Debug.infoOn()) Debug.logInfo("Map not found with name " + mapAcsr + ", running operations", module);
-            } else {
-                fieldVal = fieldAcsr.get(fromMap, methodContext);
+    @Override
+    public boolean exec(MethodContext methodContext) throws MiniLangException {
+        if (checkCondition(methodContext)) {
+            if (this.subOps != null) {
+                return SimpleMethod.runSubOps(subOps, methodContext);
             }
         } else {
-            // no map name, try the env
-            fieldVal = fieldAcsr.get(methodContext);
+            if (elseSubOps != null) {
+                return SimpleMethod.runSubOps(elseSubOps, methodContext);
+            }
         }
-        return fieldVal;
+        return true;
+    }
+
+    @Override
+    public void gatherArtifactInfo(ArtifactInfoContext aic) {
+        if (this.subOps != null) {
+            for (MethodOperation method : this.subOps) {
+                method.gatherArtifactInfo(aic);
+            }
+        }
+        if (this.elseSubOps != null) {
+            for (MethodOperation method : this.elseSubOps) {
+                method.gatherArtifactInfo(aic);
+            }
+        }
     }
 
     public void prettyPrint(StringBuilder messageBuffer, MethodContext methodContext) {
         messageBuffer.append("empty[");
-        if (!this.mapAcsr.isEmpty()) {
-            messageBuffer.append(this.mapAcsr);
-            messageBuffer.append(".");
-        }
-        messageBuffer.append(this.fieldAcsr);
-        if (methodContext != null) {
-            messageBuffer.append("=");
-            messageBuffer.append(getFieldVal(methodContext));
-        }
+        messageBuffer.append(fieldFma);
+        messageBuffer.append("=");
+        messageBuffer.append(fieldFma.get(methodContext.getEnvMap()));
         messageBuffer.append("]");
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder("<if-empty ");
+        sb.append("field=\"").append(this.fieldFma).append("\"/>");
+        return sb.toString();
+    }
+
+    /**
+     * A &lt;if-empty&gt; element factory. 
+     */
+    public static final class EmptyConditionFactory extends ConditionalFactory<EmptyCondition> implements Factory<EmptyCondition> {
+        @Override
+        public EmptyCondition createCondition(Element element, SimpleMethod simpleMethod) throws MiniLangException {
+            return new EmptyCondition(element, simpleMethod);
+        }
+
+        public EmptyCondition createMethodOperation(Element element, SimpleMethod simpleMethod) throws MiniLangException {
+            return new EmptyCondition(element, simpleMethod);
+        }
+
+        @Override
+        public String getName() {
+            return "if-empty";
+        }
     }
 }

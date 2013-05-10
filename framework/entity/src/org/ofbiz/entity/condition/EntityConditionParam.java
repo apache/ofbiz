@@ -26,6 +26,7 @@ import org.ofbiz.entity.model.ModelField;
  * Represents a single parameter to be used in the preparedStatement
  *
  */
+@SuppressWarnings("serial")
 public class EntityConditionParam implements Serializable {
     protected ModelField modelField;
     protected Object fieldValue;
@@ -48,6 +49,7 @@ public class EntityConditionParam implements Serializable {
         return fieldValue;
     }
 
+    @Override
     public String toString() {
         return modelField.getColName() + "=" + fieldValue.toString();
     }

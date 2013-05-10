@@ -38,7 +38,7 @@ import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.base.util.GeneralRuntimeException;
 import org.ofbiz.content.content.ContentWorker;
 import org.ofbiz.content.content.ContentWrapper;
-import org.ofbiz.entity.GenericDelegator;
+import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericValue;
 import org.ofbiz.entity.model.ModelEntity;
 import org.ofbiz.entity.model.ModelUtil;
@@ -88,7 +88,7 @@ public class CategoryContentWrapper implements ContentWrapper {
         return getProductCategoryContentAsText(productCategory, prodCatContentTypeId, locale, null, null, dispatcher);
     }
 
-    public static String getProductCategoryContentAsText(GenericValue productCategory, String prodCatContentTypeId, Locale locale, String mimeTypeId, GenericDelegator delegator, LocalDispatcher dispatcher) {
+    public static String getProductCategoryContentAsText(GenericValue productCategory, String prodCatContentTypeId, Locale locale, String mimeTypeId, Delegator delegator, LocalDispatcher dispatcher) {
         String candidateFieldName = ModelUtil.dbNameToVarName(prodCatContentTypeId);
         try {
             Writer outWriter = new StringWriter();
@@ -108,7 +108,7 @@ public class CategoryContentWrapper implements ContentWrapper {
         }
     }
 
-    public static void getProductCategoryContentAsText(String productCategoryId, GenericValue productCategory, String prodCatContentTypeId, Locale locale, String mimeTypeId, GenericDelegator delegator, LocalDispatcher dispatcher, Writer outWriter) throws GeneralException, IOException {
+    public static void getProductCategoryContentAsText(String productCategoryId, GenericValue productCategory, String prodCatContentTypeId, Locale locale, String mimeTypeId, Delegator delegator, LocalDispatcher dispatcher, Writer outWriter) throws GeneralException, IOException {
         if (productCategoryId == null && productCategory != null) {
             productCategoryId = productCategory.getString("productCategoryId");
         }
@@ -129,7 +129,7 @@ public class CategoryContentWrapper implements ContentWrapper {
         ModelEntity categoryModel = delegator.getModelEntity("ProductCategory");
         if (categoryModel.isField(candidateFieldName)) {
             if (productCategory == null) {
-                productCategory = delegator.findByPrimaryKeyCache("ProductCategory", UtilMisc.toMap("productCategoryId", productCategoryId));
+                productCategory = delegator.findOne("ProductCategory", UtilMisc.toMap("productCategoryId", productCategoryId), true);
             }
             if (productCategory != null) {
                 String candidateValue = productCategory.getString(candidateFieldName);
@@ -140,7 +140,7 @@ public class CategoryContentWrapper implements ContentWrapper {
             }
         }
 
-        List<GenericValue> categoryContentList = delegator.findByAndCache("ProductCategoryContent", UtilMisc.toMap("productCategoryId", productCategoryId, "prodCatContentTypeId", prodCatContentTypeId), UtilMisc.toList("-fromDate"));
+        List<GenericValue> categoryContentList = delegator.findByAnd("ProductCategoryContent", UtilMisc.toMap("productCategoryId", productCategoryId, "prodCatContentTypeId", prodCatContentTypeId), UtilMisc.toList("-fromDate"), true);
         categoryContentList = EntityUtil.filterByDate(categoryContentList);
         GenericValue categoryContent = EntityUtil.getFirst(categoryContentList);
         if (categoryContent != null) {
@@ -148,7 +148,7 @@ public class CategoryContentWrapper implements ContentWrapper {
             Map<String, Object> inContext = FastMap.newInstance();
             inContext.put("productCategory", productCategory);
             inContext.put("categoryContent", categoryContent);
-            ContentWorker.renderContentAsText(dispatcher, delegator, categoryContent.getString("contentId"), outWriter, inContext, locale, mimeTypeId, false);
+            ContentWorker.renderContentAsText(dispatcher, delegator, categoryContent.getString("contentId"), outWriter, inContext, locale, mimeTypeId, null, null, true);
         }
     }
 }

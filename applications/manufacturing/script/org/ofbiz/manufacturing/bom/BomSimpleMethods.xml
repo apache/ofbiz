@@ -19,7 +19,7 @@ under the License.
 -->
 
 <simple-methods xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/simple-methods.xsd">
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/simple-methods-v2.xsd">
     <!-- ProductAssoc -->
     <simple-method method-name="createBOMAssoc" short-description="Create Product to Product Association">
         <if-empty field="parameters.fromDate">
@@ -30,7 +30,7 @@ under the License.
         <set field="searchDuplicatedAncestorContext.productId" from-field="parameters.productId"/>
         <set field="searchDuplicatedAncestorContext.productIdTo" from-field="parameters.productIdTo"/>
         <if-not-empty field="parameters.fromDate">
-            <set field="searchDuplicatedAncestorContext.fromDate" from-field="parameters.fromDate"/>
+            <set field="searchDuplicatedAncestorContext.fromDate" from-field="parameters.fromDate" type="Timestamp"/>
         </if-not-empty>
         <set field="searchDuplicatedAncestorContext.productAssocTypeId" from-field="parameters.productAssocTypeId"/>
         <call-service service-name="searchDuplicatedAncestor" in-map-name="searchDuplicatedAncestorContext">

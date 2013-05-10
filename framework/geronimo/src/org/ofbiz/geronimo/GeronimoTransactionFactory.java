@@ -20,7 +20,6 @@ package org.ofbiz.geronimo;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.Collection;
 
 import javax.transaction.TransactionManager;
 import javax.transaction.UserTransaction;
@@ -29,12 +28,12 @@ import javax.transaction.xa.XAException;
 import org.apache.geronimo.transaction.log.UnrecoverableLog;
 import org.apache.geronimo.transaction.manager.GeronimoTransactionManager;
 import org.apache.geronimo.transaction.manager.TransactionLog;
-import org.apache.geronimo.transaction.manager.XidFactory;
 import org.apache.geronimo.transaction.manager.XidFactoryImpl;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.config.DatasourceInfo;
 import org.ofbiz.entity.config.EntityConfigUtil;
+import org.ofbiz.entity.datasource.GenericHelperInfo;
 import org.ofbiz.entity.jdbc.ConnectionFactory;
 import org.ofbiz.entity.transaction.TransactionFactoryInterface;
 
@@ -47,14 +46,13 @@ public class GeronimoTransactionFactory implements TransactionFactoryInterface {
 
     private static int defaultTransactionTimeoutSeconds = 60;
     private static TransactionLog transactionLog;
-    private static Collection resourceManagers = null;
     private static GeronimoTransactionManager geronimoTransactionManager;
 
     static {
         // creates an instance of Geronimo transaction context, etc with a local transaction factory which is not bound to a registry
         try {
             transactionLog = new UnrecoverableLog();
-            geronimoTransactionManager = new GeronimoTransactionManager(defaultTransactionTimeoutSeconds, (XidFactory)new XidFactoryImpl(), transactionLog);
+            geronimoTransactionManager = new GeronimoTransactionManager(defaultTransactionTimeoutSeconds, new XidFactoryImpl(), transactionLog);
         } catch (XAException e) {
             Debug.logError(e, "Error initializing Geronimo transaction manager: " + e.toString(), module);
         }
@@ -78,13 +76,13 @@ public class GeronimoTransactionFactory implements TransactionFactoryInterface {
         return "geronimo";
     }
 
-    public Connection getConnection(String helperName) throws SQLException, GenericEntityException {
-        DatasourceInfo datasourceInfo = EntityConfigUtil.getDatasourceInfo(helperName);
+    public Connection getConnection(GenericHelperInfo helperInfo) throws SQLException, GenericEntityException {
+        DatasourceInfo datasourceInfo = EntityConfigUtil.getDatasourceInfo(helperInfo.getHelperBaseName());
 
         if (datasourceInfo != null && datasourceInfo.inlineJdbcElement != null) {
-            return ConnectionFactory.getManagedConnection(helperName, datasourceInfo.inlineJdbcElement);
+            return ConnectionFactory.getManagedConnection(helperInfo, datasourceInfo.inlineJdbcElement);
         } else {
-            Debug.logError("Geronimo is the configured transaction manager but no inline-jdbc element was specified in the " + helperName + " datasource. Please check your configuration", module);
+            Debug.logError("Geronimo is the configured transaction manager but no inline-jdbc element was specified in the " + helperInfo.getHelperBaseName() + " datasource. Please check your configuration", module);
             return null;
         }
     }

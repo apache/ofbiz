@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import org.ofbiz.entity.GenericDelegator;
+import org.ofbiz.entity.Delegator;
 import org.ofbiz.webtools.artifactinfo.*;
 import org.ofbiz.base.util.*;
 import javolution.util.FastList;
@@ -26,8 +26,11 @@ name = parameters.name;
 location = parameters.location;
 type = parameters.type;
 uniqueId = parameters.uniqueId;
-
-aif = ArtifactInfoFactory.getArtifactInfoFactory(delegator.getDelegatorName());
+delegatorName = delegator.getDelegatorName()
+if (delegatorName.contains("default#")) {
+    delegatorName = "default";
+}
+aif = ArtifactInfoFactory.getArtifactInfoFactory(delegatorName);
 context.aif = aif;
 artifactInfo = null;
 if ("search".equals(parameters.findType)) {
@@ -49,15 +52,16 @@ if ("search".equals(parameters.findType)) {
 }
 
 if (artifactInfo) {
+    artifactInfoMap = [type : artifactInfo.getType(), uniqueId : artifactInfo.getUniqueId(), displayName : artifactInfo.getDisplayName()];
     // add to the recently viewed list
     recentArtifactInfoList = session.getAttribute("recentArtifactInfoList");
     if (!recentArtifactInfoList) {
         recentArtifactInfoList = FastList.newInstance();
         session.setAttribute("recentArtifactInfoList", recentArtifactInfoList);
     }
-    if (recentArtifactInfoList && recentArtifactInfoList.get(0).equals(artifactInfo)) {
+    if (recentArtifactInfoList && recentArtifactInfoList.get(0).equals(artifactInfoMap)) {
         // hmmm, I guess do nothing if it's already there
     } else {
-        recentArtifactInfoList.add(0, artifactInfo);
+        recentArtifactInfoList.add(0, artifactInfoMap);
     }
 }

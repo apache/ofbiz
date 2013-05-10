@@ -19,7 +19,7 @@ under the License.
 -->
 
 <simple-methods xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/simple-methods.xsd">
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/simple-methods-v2.xsd">
     <simple-method method-name="createCustomer" short-description="Create Customer" login-required="false">
         <set field="require_email" value="true"/>
         <set field="require_phone" value="false"/>
@@ -96,7 +96,7 @@ under the License.
                 <set field="userLoginExistsMap.userLoginId"  from-field="userLoginContext.userLoginId"/>
                 <find-by-primary-key entity-name="UserLogin" map="userLoginExistsMap" value-field="existingUserLogin"/>
                 <if-not-empty field="existingUserLogin">
-                    <set field="tempErrorMessage" value="Username in use, please choose another."/>
+                    <property-to-field field="tempErrorMessage" property="PartyUserNameInUse" resource="PartyUiLabels"/>
                     <field-to-list field="tempErrorMessage" list="error_list"/>
                 </if-not-empty>
             </if-not-empty>
@@ -130,6 +130,7 @@ under the License.
                 <process field="USER_TITLE"><copy to-field="personalTitle"/></process>
                 <process field="USER_SUFFIX"><copy to-field="suffix"/></process>
                 <process field="USER_BIRTHDATE"><convert type="Date" to-field="birthDate"><fail-property resource="PartyUiLabels" property="PartyBirthDateMissingError"/></convert></process>
+                <process field="USER_DECEASEDDATE"><convert type="Date" to-field="deceasedDate"><fail-property resource="PartyUiLabels" property="PartyDeceasedDateMissingError"/></convert></process>
                 <process field="USER_GENDER"><copy to-field="gender"/></process>
             </simple-map-processor>
         </call-map-processor>
@@ -319,6 +320,20 @@ under the License.
             <set field="newUserLogin.partyId" from-field="tempMap.partyId"/>
             <create-value value-field="newUserLogin"/>
             <set-current-user-login value-field="newUserLogin"/>
+            
+            <!-- On successful user creation, create password history record if configured -->
+            <set field="delegator" from-field="parameters.delegator" type="Object"/>
+            <call-class-method method-name="getPropertyValue" class-name="org.ofbiz.base.util.UtilProperties" ret-field="autoPasswordChangeEnabled">
+                <string value="security"/>
+                <string value="user.auto.change.password.enable"/>
+            </call-class-method>
+            <if-compare-field field="autoPasswordChangeEnabled" operator="equals" to-field="true">
+                <call-class-method method-name="createUserLoginPasswordHistory" class-name="org.ofbiz.common.login.LoginServices">
+                    <field field="delegator" type="org.ofbiz.entity.Delegator"/>
+                    <string value="${newUserLogin.userLoginId}"/>
+                    <string value="${newUserLogin.currentPassword}"/>
+                </call-class-method>
+            </if-compare-field>
         </if-not-empty>
 
         <create-value value-field="partyDataSource"/>
@@ -393,10 +408,21 @@ under the License.
         <!-- set the partyId in the request -->
         <field-to-request field="tempMap.partyId" request-name="partyId"/>
 
+        <!-- Associated to Product Store -->
+        <entity-one entity-name="UserLogin" value-field="userLogin">
+            <field-map field-name="userLoginId" value="system"/>
+        </entity-one>
+        <set field="createProductStoreRoleMap.userLogin" from-field="userLogin"/>
+        <set field="createProductStoreRoleMap.partyId" from-field="tempMap.partyId"/>
+        <set field="createProductStoreRoleMap.roleTypeId" from-field="parameters.roleTypeId"/>
+        <set field="createProductStoreRoleMap.productStoreId" from-field="parameters.PRODUCT_STORE_ID"/>
+        <call-service service-name="createProductStoreRole" in-map-name="createProductStoreRoleMap"/>
+
         <!--send New User Email Notification-->
         <set field="emailContext.partyId" from-field="partyId"/>
+        <set field="emailContext.productStoreId" from-field="parameters.PRODUCT_STORE_ID"/>
         <set-service-fields service-name="sendCreatePartyEmailNotification" map="emailContext" to-map="serviceInMap"/>
-        <call-service service-name="sendCreatePartyEmailNotification" in-map-name="serviceInMap"/>
+        <call-service-asynch service-name="sendCreatePartyEmailNotification" in-map-name="serviceInMap"/>
     </simple-method>
 
 </simple-methods>

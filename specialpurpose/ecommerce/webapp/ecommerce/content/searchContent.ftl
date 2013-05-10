@@ -17,8 +17,8 @@ specific language governing permissions and limitations
 under the License.
 -->
 
-<hr/>
-    <form method="post"  action="<@ofbizUrl>searchContent</@ofbizUrl>"  name="searchQuery" style="margin: 0;">
+
+<form method="post"  action="<@ofbizUrl>searchContent</@ofbizUrl>"  name="searchQuery">
 <table border="0" cellpadding="2" cellspacing="0">
 
 <tr>
@@ -35,28 +35,28 @@ under the License.
 
 <!-- category form -->
 <tr>
-  <table border="0" wdith="100%">
+  <table>
     <tr>
       <td align="right" valign="middle">
-        <div class="tabletext">${uiLabelMap.ProductFeatures}:</div>
+        <div>${uiLabelMap.ProductFeatures}:</div>
       </td>
       <td align="right" valign="middle">
-        <div class="tabletext">
-          ${uiLabelMap.CommonAll} <input type="radio" name="any_or_all" value="all" checked>
-          ${uiLabelMap.CommonAny} <input type="radio" name="any_or_all" value="any">
+        <div>
+          ${uiLabelMap.CommonAll} <input type="radio" name="any_or_all" value="all" checked="checked" />
+          ${uiLabelMap.CommonAny} <input type="radio" name="any_or_all" value="any" />
         </div>
       </td>
     </tr>
     <#list productFeatureTypeIdsOrdered as productFeatureTypeId>
       <#assign findPftMap = Static["org.ofbiz.base.util.UtilMisc"].toMap("productFeatureTypeId", productFeatureTypeId)>
-      <#assign productFeatureType = delegator.findByPrimaryKeyCache("ProductFeatureType", findPftMap)>
+      <#assign productFeatureType = delegator.findOne("ProductFeatureType", findPftMap, true)>
       <#assign productFeatures = productFeaturesByTypeMap[productFeatureTypeId]>
       <tr>
         <td align="right" valign="middle">
-          <div class="tabletext">${(productFeatureType.get("description",locale))?if_exists}:</div>
+          <div>${(productFeatureType.get("description",locale))?if_exists}:</div>
         </td>
         <td valign="middle">
-          <div class="tabletext">
+          <div>
             <select class="selectBox" name="pft_${productFeatureTypeId}">
               <option value="">- ${uiLabelMap.CommonSelectAny} -</option>
               <#list productFeatures as productFeature>
@@ -70,16 +70,16 @@ under the License.
     <#if searchConstraintStrings?has_content>
       <tr>
         <td align="right" valign="top">
-          <div class="tabletext">${uiLabelMap.ProductLastSearch}:</div>
+          <div>${uiLabelMap.ProductLastSearch}:</div>
         </td>
         <td valign="top">
             <#list searchConstraintStrings as searchConstraintString>
-                <div class="tabletext">&nbsp;-&nbsp;${searchConstraintString}</div>
+                <div>&nbsp;-&nbsp;${searchConstraintString}</div>
             </#list>
-            <div class="tabletext">${uiLabelMap.ProductSortedBy}: ${searchSortOrderString}</div>
-            <div class="tabletext">
-              ${uiLabelMap.ProductNewSearch}<input type="radio" name="clearSearch" value="Y" checked>
-              ${uiLabelMap.ProductRefineSearch}<input type="radio" name="clearSearch" value="N">
+            <div>${uiLabelMap.ProductSortedBy}: ${searchSortOrderString}</div>
+            <div>
+              ${uiLabelMap.ProductNewSearch}<input type="radio" name="clearSearch" value="Y" checked="checked" />
+              ${uiLabelMap.CommonRefineSearch}<input type="radio" name="clearSearch" value="N" />
             </div>
         </td>
       </tr>
@@ -96,7 +96,7 @@ under the License.
 </form>
 
 
-<hr/>
+
     ${listWrapper.renderFormString()}
 
 <#macro listSiteIds contentId indentIndex=0>

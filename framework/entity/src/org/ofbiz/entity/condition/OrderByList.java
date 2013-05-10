@@ -20,10 +20,8 @@
 package org.ofbiz.entity.condition;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
-import java.util.Iterator;
 import java.util.List;
 
 import org.ofbiz.entity.GenericEntity;
@@ -100,16 +98,19 @@ public class OrderByList implements Comparator<GenericEntity> {
         int result = 0;
         for (OrderByItem orderByItem: orderByList) {
             result = orderByItem.compare(entity1, entity2);
+            if (result != 0) break;
         }
         return result;
     }
 
+    @Override
     public boolean equals(java.lang.Object obj) {
         if (!(obj instanceof OrderByList)) return false;
         OrderByList that = (OrderByList) obj;
         return orderByList.equals(that.orderByList);
     }
 
+    @Override
     public String toString() {
         return makeOrderByString(null, false, null);
     }

@@ -36,7 +36,7 @@ under the License.
         <field name="costCustomMethodId">
             <display-entity entity-name="CustomMethod" key-field-name="customMethodId"/>
         </field>
-        <field name="removeCostComponentCalc" title="${uiLabelMap.CommonEmptyHeader}" widget-style="buttontext">
+        <field name="removeCostComponentCalc" title=" " widget-style="buttontext">
             <hyperlink target="removeCostComponentCalc" description="${uiLabelMap.CommonRemove}" also-hidden="false">
                 <parameter param-name="costComponentCalcId"/>
             </hyperlink>
@@ -50,10 +50,10 @@ under the License.
         <field name="costGlAccountTypeId"><hidden/></field>
         <field name="offsettingGlAccountTypeId"><hidden/></field>
         <field name="currencyUomId" title="${uiLabelMap.CommonCurrency}">
-            <drop-down allow-empty="false" no-current-selected-key="${defaultCurrencyUomId}">
-                <entity-options key-field-name="uomId" description="${abbreviation} - ${description}" entity-name="Uom">
+            <drop-down allow-empty="false" no-current-selected-key="${defaultOrganizationPartyCurrencyUomId}">
+                <entity-options key-field-name="uomId" description="${description} - ${abbreviation}" entity-name="Uom">
                     <entity-constraint name="uomTypeId" operator="equals" value="CURRENCY_MEASURE"/>
-                    <entity-order-by field-name="abbreviation"/>
+                    <entity-order-by field-name="description"/>
                 </entity-options>
             </drop-down>
         </field>

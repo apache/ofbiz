@@ -26,17 +26,93 @@ under the License.
             <actions>
                 <set field="headerItem" value="reports"/>
                 <set field="titleProperty" value="AccountingArPageTitleListReports"/>
+                <set field="invoiceTypeId" value="SALES_INVOICE"/>
+                <set field="organizationPartyId" from-field="userPreferences.ORGANIZATION_PARTY" default-value="${defaultOrganizationPartyId}"/>
+                <script location="component://accounting/webapp/accounting/WEB-INF/actions/invoice/InvoiceReport.groovy"/>
             </actions>
             <widgets>
                 <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
                     <decorator-section name="body">
-                        <screenlet title="${uiLabelMap.CommonList} ${uiLabelMap.AccountingReports}">
+                        <screenlet title="${uiLabelMap.AccountingPastDueInvoices}: (${PastDueInvoicestotalAmount})">
                             <section>
+                                <actions>
+                                    <set field="invoices" from-field="PastDueInvoices"/>
+                                </actions>
                                 <widgets>
                                     <include-form name="ListReports" location="component://accounting/widget/ar/forms/InvoiceForms.xml"/>
                                 </widgets>
                             </section>
                         </screenlet>
+                        <screenlet title="${uiLabelMap.AccountingInvoicesDueSoon}: (${InvoicesDueSoonTotalAmount})">
+                            <section>
+                                <actions>
+                                    <set field="invoices" from-field="InvoicesDueSoon"/>
+                                </actions>
+                                <widgets>
+                                    <include-form name="ListReports"  location="component://accounting/widget/ar/forms/InvoiceForms.xml"/>
+                                </widgets>
+                            </section>
+                        </screenlet>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="FindArInvoices">
+        <section>
+            <actions>
+                <set field="titleProperty" value="AccountingFindArInvoices"/>
+                <service service-name="performFind" result-map="result">
+                    <field-map field-name="inputFields" from-field="parameters"/>
+                    <field-map field-name="entityName" value="InvoiceAndType"/>
+                    <field-map field-name="orderBy" value="invoiceDate DESC"/>
+                </service>
+                <set field="invoices" from-field="result.listIt"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonInvoiceDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <section>
+                            <widgets>
+                                <decorator-screen name="FindScreenDecorator" location="component://common/widget/CommonScreens.xml">
+                                    <decorator-section name="menu-bar">
+                                        <container style="button-bar">
+                                            <link target="newInvoice" text="${uiLabelMap.CommonCreateNew}" style="buttontext create"/>
+                                        </container>
+                                    </decorator-section>
+                                    <decorator-section name="search-options">
+                                        <include-form name="FindArInvoices" location="component://accounting/widget/ar/forms/InvoiceForms.xml"/>
+                                    </decorator-section>
+                                    <decorator-section name="search-results">
+                                        <platform-specific>
+                                            <html><html-template location="component://accounting/webapp/ar/invoice/ListInvoices.ftl"/></html>
+                                        </platform-specific>
+                                    </decorator-section>
+                                </decorator-screen>
+                            </widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="NewSalesInvoice">
+        <section>
+            <actions>
+                <set field="titleProperty" value="AccountingCreateNewSalesInvoice"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <section>
+                            <widgets>
+                                <screenlet title="${uiLabelMap.AccountingCreateNewSalesInvoice}">
+                                    <include-form name="NewSalesInvoice" location="component://accounting/widget/InvoiceForms.xml"/>
+                                </screenlet>
+                            </widgets>
+                        </section>
                     </decorator-section>
                 </decorator-screen>
             </widgets>

@@ -21,18 +21,15 @@ package org.ofbiz.manufacturing.bom;
 
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
-import java.util.Iterator;
-import java.util.ArrayList;
 
-import org.ofbiz.entity.util.EntityUtil;
-import org.ofbiz.entity.GenericDelegator;
-import org.ofbiz.entity.GenericValue;
-import org.ofbiz.entity.GenericEntityException;
+import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.base.util.UtilValidate;
+import org.ofbiz.entity.Delegator;
+import org.ofbiz.entity.GenericEntityException;
+import org.ofbiz.entity.GenericValue;
+import org.ofbiz.entity.util.EntityUtil;
 import org.ofbiz.service.LocalDispatcher;
-import org.ofbiz.base.util.Debug;
 
 /** Helper class containing static method useful when dealing
  * with product's bills of materials.
@@ -63,19 +60,15 @@ public class BOMHelper {
      * 3.for every parent the method is called recursively, the llc returned is incremented by one and the max of these number is saved as maxDepth
      * 4.the maxDepth value is returned
      */
-    public static int getMaxDepth(String productId, String bomType, Date inDate, GenericDelegator delegator) throws GenericEntityException {
+    public static int getMaxDepth(String productId, String bomType, Date inDate, Delegator delegator) throws GenericEntityException {
         // If the date is null, set it to today.
         if (inDate == null) inDate = new Date();
         int maxDepth = 0;
-        List productNodesList = delegator.findByAndCache("ProductAssoc",
-                                         UtilMisc.toMap("productIdTo", productId,
-                                         "productAssocTypeId", bomType));
+        List<GenericValue> productNodesList = delegator.findByAnd("ProductAssoc", 
+                UtilMisc.toMap("productIdTo", productId, "productAssocTypeId", bomType), null, true);
         productNodesList = EntityUtil.filterByDate(productNodesList, inDate);
-        GenericValue oneNode = null;
-        Iterator nodesIterator = productNodesList.iterator();
         int depth = 0;
-        while (nodesIterator.hasNext()) {
-            oneNode = (GenericValue)nodesIterator.next();
+        for (GenericValue oneNode : productNodesList) {
             depth = 0;
             depth = getMaxDepth(oneNode.getString("productId"), bomType, inDate, delegator);
             depth++;
@@ -101,11 +94,12 @@ public class BOMHelper {
      * @return the ProductAssoc generic value for a duplicate productIdKey
      * ancestor if present, null otherwise.
      */
-    public static GenericValue searchDuplicatedAncestor(String productId, String productIdKey, String bomType, Date inDate, GenericDelegator delegator, LocalDispatcher dispatcher, GenericValue userLogin) throws GenericEntityException {
+    public static GenericValue searchDuplicatedAncestor(String productId, String productIdKey, String bomType, Date inDate, Delegator delegator, LocalDispatcher dispatcher, GenericValue userLogin) throws GenericEntityException {
         return searchDuplicatedAncestor(productId, productIdKey, null, bomType, inDate, delegator, dispatcher, userLogin);
     }
 
-    private static GenericValue searchDuplicatedAncestor(String productId, String productIdKey, ArrayList productIdKeys, String bomType, Date inDate, GenericDelegator delegator, LocalDispatcher dispatcher, GenericValue userLogin) throws GenericEntityException {
+    private static GenericValue searchDuplicatedAncestor(String productId, String productIdKey, List<String> productIdKeys,
+            String bomType, Date inDate, Delegator delegator, LocalDispatcher dispatcher, GenericValue userLogin) throws GenericEntityException {
         // If the date is null, set it to today.
         if (inDate == null) inDate = new Date();
         if (productIdKeys == null) {
@@ -113,17 +107,13 @@ public class BOMHelper {
             productIdKeys = tree.getAllProductsId();
             productIdKeys.add(productIdKey);
         }
-        List productNodesList = delegator.findByAndCache("ProductAssoc",
-                                         UtilMisc.toMap("productIdTo", productId,
-                                         "productAssocTypeId", bomType));
+        List<GenericValue> productNodesList = delegator.findByAnd("ProductAssoc",
+                UtilMisc.toMap("productIdTo", productId, "productAssocTypeId", bomType), null, true);
         productNodesList = EntityUtil.filterByDate(productNodesList, inDate);
-        GenericValue oneNode = null;
         GenericValue duplicatedNode = null;
-        Iterator nodesIterator = productNodesList.iterator();
-        while (nodesIterator.hasNext()) {
-            oneNode = (GenericValue)nodesIterator.next();
+        for(GenericValue oneNode : productNodesList) {
             for (int i = 0; i < productIdKeys.size(); i++) {
-                if (oneNode.getString("productId").equals((String)productIdKeys.get(i))) {
+                if (oneNode.getString("productId").equals(productIdKeys.get(i))) {
                     return oneNode;
                 }
             }
@@ -136,25 +126,23 @@ public class BOMHelper {
     }
 
     public static String createProductionRunsForShipment(javax.servlet.http.HttpServletRequest request, javax.servlet.http.HttpServletResponse response) {
-        GenericDelegator delegator = (GenericDelegator) request.getAttribute("delegator");
+        Delegator delegator = (Delegator) request.getAttribute("delegator");
         LocalDispatcher dispatcher = (LocalDispatcher) request.getAttribute("dispatcher");
         GenericValue userLogin = (GenericValue)request.getSession().getAttribute("userLogin");
 
         String shipmentId = request.getParameter("shipmentId");
 
         try {
-        List shipmentPlans = delegator.findByAnd("OrderShipment", UtilMisc.toMap("shipmentId", shipmentId));
-        Iterator shipmentPlansIt = shipmentPlans.iterator();
-        while (shipmentPlansIt.hasNext()) {
-            GenericValue shipmentPlan = (GenericValue)shipmentPlansIt.next();
-            GenericValue orderItem = shipmentPlan.getRelatedOne("OrderItem");
+        List<GenericValue> shipmentPlans = delegator.findByAnd("OrderShipment", UtilMisc.toMap("shipmentId", shipmentId), null, false);
+        for(GenericValue shipmentPlan : shipmentPlans) {
+            GenericValue orderItem = shipmentPlan.getRelatedOne("OrderItem", false);
 
-            List productionRuns = delegator.findByAndCache("WorkOrderItemFulfillment", UtilMisc.toMap("orderId", shipmentPlan.getString("orderId"), "orderItemSeqId", shipmentPlan.getString("orderItemSeqId")));
+            List<GenericValue> productionRuns = delegator.findByAnd("WorkOrderItemFulfillment", UtilMisc.toMap("orderId", shipmentPlan.getString("orderId"), "orderItemSeqId", shipmentPlan.getString("orderItemSeqId"), "shipGroupSeqId", shipmentPlan.getString("shipGroupSeqId")), null, true);
             if (UtilValidate.isNotEmpty(productionRuns)) {
                 Debug.logError("Production Run for order item (" + orderItem.getString("orderId") + "/" + orderItem.getString("orderItemSeqId") + ") not created.", module);
                 continue;
             }
-            Map result = dispatcher.runSync("createProductionRunsForOrder", UtilMisc.<String, Object>toMap("quantity", shipmentPlan.getBigDecimal("quantity"), "orderId", shipmentPlan.getString("orderId"), "orderItemSeqId", shipmentPlan.getString("orderItemSeqId"), "shipmentId", shipmentId, "userLogin", userLogin));
+            dispatcher.runSync("createProductionRunsForOrder", UtilMisc.<String, Object>toMap("quantity", shipmentPlan.getBigDecimal("quantity"), "orderId", shipmentPlan.getString("orderId"), "orderItemSeqId", shipmentPlan.getString("orderItemSeqId"), "shipGroupSeqId", shipmentPlan.getString("shipGroupSeqId"), "shipmentId", shipmentId, "userLogin", userLogin));
         }
         } catch (Exception e) {
             // if there is an exception for either, the other probably wont work

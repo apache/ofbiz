@@ -19,7 +19,7 @@ under the License.
 -->
 
 <simple-methods xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/simple-methods.xsd">
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/simple-methods-v2.xsd">
 
     <simple-method method-name="quickInitDataWarehouse" short-description="">
         <set-service-fields service-name="loadDateDimension" map="parameters" to-map="inMap"/>
@@ -47,6 +47,33 @@ under the License.
             <clear-field field="inMap"/>
             <set field="inMap.invoiceId" from-field="invoice.invoiceId"/>
             <call-service service-name="loadSalesInvoiceFact" in-map-name="inMap"/>
+            <check-errors/>
+        </iterate>
+        
+        <!-- loads the order items in the SalesOrderItemFact fact entity -->
+        <entity-condition entity-name="OrderHeader" list="orderHeaders">
+            <condition-list>
+                <condition-expr field-name="orderTypeId" value="SALES_ORDER"/>
+                <condition-expr field-name="orderDate" operator="greater-equals" from-field="parameters.fromDate"/>
+                <condition-expr field-name="orderDate" operator="less-equals" from-field="parameters.thruDate"/>
+            </condition-list>
+        </entity-condition>
+        <iterate list="orderHeaders" entry="orderHeader">
+            <clear-field field="inMap"/>
+            <set field="inMap.orderId" from-field="orderHeader.orderId"/>
+            <call-service service-name="loadSalesOrderFact" in-map-name="inMap"></call-service>
+            <check-errors/>
+        </iterate>
+        
+        
+        <!-- loads the inventory items in the InventoryItemFact fact entity -->
+        <entity-condition entity-name="InventoryItem" list="inventoryItems">
+            <condition-expr field-name="inventoryItemTypeId" operator="equals" value="NON_SERIAL_INV_ITEM"/>
+        </entity-condition>
+        <iterate list="inventoryItems" entry="inventoryItem">
+            <clear-field field="inventMap"/>
+            <set field="inventMap.inventoryItemId" from-field="inventoryItem.inventoryItemId"/>
+            <call-service service-name="loadInventoryFact" in-map-name="inventMap"></call-service>
             <check-errors/>
         </iterate>
     </simple-method>

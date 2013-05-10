@@ -47,6 +47,7 @@ public final class OFBizLdapAuthenticationHandler extends AbstractOFBizAuthentic
 
     }
 
+    @Override
     public SearchResult getLdapSearchResult(String username, String password, Element rootElement, boolean bindRequired) throws NamingException {
         DirContext ctx = null;
         SearchResult result = null;
@@ -81,7 +82,7 @@ public final class OFBizLdapAuthenticationHandler extends AbstractOFBizAuthentic
                     "(&(" + filter + ") (" + attribute +"))",
                     controls);
             if (answer.hasMoreElements()) {
-                result = (SearchResult) answer.next();
+                result = answer.next();
                 if (bindRequired) {
                     env.put(Context.SECURITY_AUTHENTICATION, authenType);
                     // specify the username

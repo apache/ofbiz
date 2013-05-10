@@ -22,80 +22,72 @@ They use the JasperReports reporting tool. They have not been polished yet, but
 they are good examples of creating detailed reports that you have a lot of
 control over. special thanks for Britton LaRoche for creating the first pass of
 these reports and helping to improve them.</div>
-<br/>
+<br />
 
-<FORM METHOD="post" NAME="orderreportform" ACTION="<@ofbizUrl>orderreportjasper.pdf</@ofbizUrl>" TARGET="OrderReport">
-<Table>
-<TR>
-<TD><div>From Date:</div></td>
-<td><INPUT TYPE="TEXT" NAME="fromDate" TABINDEX="10"  SIZE="22" MAXLENGTH="25" ALIGN="MIDDLE">
- <A TABINDEX="10" TARGET="_self" HREF="javascript:call_cal(document.orderreportform.fromDate, '${fromStr}');" onfocus="checkForChanges = true;" onblur="checkForChanges = true;">
-  <IMG SRC='/images/cal.gif' WIDTH='16' HEIGHT='16' BORDER='0' ALT='Click here For Calendar'>
- </A>
-</TD>
-</TR>
-<TR>
-<TD><div>To Date:</div></td>
-<td><INPUT TYPE="TEXT" NAME="toDate" TABINDEX="12"  SIZE="22" MAXLENGTH="25" ALIGN="MIDDLE">
- <A TABINDEX="12" TARGET="_self" HREF="javascript:call_cal(document.orderreportform.toDate, '${toStr}');" onfocus="checkForChanges = true;" onblur="checkForChanges = true;">
-  <IMG SRC='/images/cal.gif' WIDTH='16' HEIGHT='16' BORDER='0' ALT='Click here For Calendar'>
- </A>
-</TD>
-</TR>
+<form method="post" name="orderreportform" action="<@ofbizUrl>orderreportjasper.pdf</@ofbizUrl>" target="OrderReport">
+<table>
+<tr>
+<td><div>From Date:</div></td>
+<td>
+ <@htmlTemplate.renderDateTimeField name="fromDate" event="" action="" value="" className="" alert="" title="Format: yyyy-MM-dd HH:mm:ss.SSS" size="22" maxlength="25" id="fromDate1" dateType="date" shortDateInput=false timeDropdownParamName="" defaultDateTimeString="" localizedIconTitle="" timeDropdown="" timeHourName="" classString="" hour1="" hour2="" timeMinutesName="" minutes="" isTwelveHour="" ampmName="" amSelected="" pmSelected="" compositeType="" formName=""/>
+</td>
+</tr>
+<tr>
+<td><div>To Date:</div></td>
+<td>
+ <@htmlTemplate.renderDateTimeField name="toDate" event="" action="" value="" className="" alert="" title="Format: yyyy-MM-dd HH:mm:ss.SSS" size="22" maxlength="25" id="t" oDate1dateType="date" shortDateInput=false timeDropdownParamName="" defaultDateTimeString="" localizedIconTitle="" timeDropdown="" timeHourName="" classString="" hour1="" hour2="" timeMinutesName="" minutes="" isTwelveHour="" ampmName="" amSelected="" pmSelected="" compositeType="" formName=""/>
+</td>
+</tr>
 <#--
 <tr>
 <td><div>Report:</div></td>
 <td>
-   <SELECT NAME="groupName" tabindex="14"  CLASS="stateSelectBox">
-	 <OPTION VALUE="orderStatus"></OPTION>
-	 <OPTION VALUE="orderStatus">Orders by Order Status</OPTION>
-	 <OPTION VALUE="ship">Orders by Ship Method</OPTION>
-	 <OPTION VALUE="payment">Orders by Payment Method</OPTION>
-	 <OPTION VALUE="adjustment">Order Items by Adjustment</OPTION>
-	 <OPTION VALUE="itemStatus">Order Items by Status</OPTION>
-	 <OPTION VALUE="product">Order Items by Product</OPTION>
-   </SELECT>
+   <select name="groupName" tabindex="14"  CLASS="stateSelectBox">
+     <option value="orderStatus"></option>
+     <option value="orderStatus">Orders by Order Status</option>
+     <option value="ship">Orders by Ship Method</option>
+     <option value="payment">Orders by Payment Method</option>
+     <option value="adjustment">Order Items by Adjustment</option>
+     <option value="itemStatus">Order Items by Status</option>
+     <option value="product">Order Items by Product</option>
+   </select>
 </td>
 </tr>
 -->
 </table>
- <INPUT TYPE="submit" TABINDEX="16" CLASS="button" NAME="GoReport" VALUE="Order Report">
+ <input type="submit" tabindex="16" class="button" name="GoReport" value="Order Report">
 </form>
 
-<FORM METHOD="post" NAME="itemreportform" ACTION="<@ofbizUrl>orderitemreportjasper.pdf</@ofbizUrl>" TARGET="OrderReport">
-<Table>
-<TR>
-<TD><div>From Date:</div></td>
-<td><INPUT TYPE="TEXT" NAME="fromDate" TABINDEX="10"  SIZE="22" MAXLENGTH="25" ALIGN="MIDDLE">
- <A TABINDEX="10" TARGET="_self" HREF="javascript:call_cal(document.itemreportform.fromDate, '${fromStr}');" onfocus="checkForChanges = true;" onblur="checkForChanges = true;">
-  <IMG SRC='/images/cal.gif' WIDTH='16' HEIGHT='16' BORDER='0' ALT='Click here For Calendar'>
- </A>
-</TD>
-</TR>
-<TR>
-<TD><div>To Date:</div></td>
-<td><INPUT TYPE="TEXT" NAME="toDate" TABINDEX="12"  SIZE="22" MAXLENGTH="25" ALIGN="MIDDLE">
- <A TABINDEX="12" TARGET="_self" HREF="javascript:call_cal(document.itemreportform.toDate, '${toStr}');" onfocus="checkForChanges = true;" onblur="checkForChanges = true;">
-  <IMG SRC='/images/cal.gif' WIDTH='16' HEIGHT='16' BORDER='0' ALT='Click here For Calendar'>
- </A>
-</TD>
-</TR>
+<form method="post" name="itemreportform" action="<@ofbizUrl>orderitemreportjasper.pdf</@ofbizUrl>" target="OrderReport">
+<table>
+<tr>
+<td><div>From Date:</div></td>
+<td>
+ <@htmlTemplate.renderDateTimeField name="fromDate" event="" action="" value="" className="" alert="" title="Format: yyyy-MM-dd HH:mm:ss.SSS" size="22" maxlength="25" id="fromDate2" dateType="date" shortDateInput=false timeDropdownParamName="" defaultDateTimeString="" localizedIconTitle="" timeDropdown="" timeHourName="" classString="" hour1="" hour2="" timeMinutesName="" minutes="" isTwelveHour="" ampmName="" amSelected="" pmSelected="" compositeType="" formName=""/>
+</td>
+</tr>
+<tr>
+<td><div>To Date:</div></td>
+<td>
+ <@htmlTemplate.renderDateTimeField name="toDate" event="" action="" value="" className="" alert="" title="Format: yyyy-MM-dd HH:mm:ss.SSS" size="22" maxlength="25" id="toDate2" dateType="date" shortDateInput=false timeDropdownParamName="" defaultDateTimeString="" localizedIconTitle="" timeDropdown="" timeHourName="" classString="" hour1="" hour2="" timeMinutesName="" minutes="" isTwelveHour="" ampmName="" amSelected="" pmSelected="" compositeType="" formName=""/>
+</td>
+</tr>
 <#--
 <tr>
 <td><div>Report:</div></td>
 <td>
-   <SELECT NAME="groupName" tabindex="14"  CLASS="stateSelectBox">
-	 <OPTION VALUE="orderStatus"></OPTION>
-	 <OPTION VALUE="orderStatus">Orders by Order Status</OPTION>
-	 <OPTION VALUE="ship">Orders by Ship Method</OPTION>
-	 <OPTION VALUE="payment">Orders by Payment Method</OPTION>
-	 <OPTION VALUE="adjustment">Order Items by Adjustment</OPTION>
-	 <OPTION VALUE="itemStatus">Order Items by Status</OPTION>
-	 <OPTION VALUE="product">Order Items by Product</OPTION>
-   </SELECT>
+   <select name="groupName" tabindex="14"  class="stateSelectBox">
+     <option value="orderStatus"></option>
+     <option value="orderStatus">Orders by Order Status</option>
+     <option value="ship">Orders by Ship Method</option>
+     <option value="payment">Orders by Payment Method</option>
+     <option value="adjustment">Order Items by Adjustment</option>
+     <option value="itemStatus">Order Items by Status</option>
+     <option value="product">Order Items by Product</option>
+   </select>
 </td>
 </tr>
 -->
 </table>
- <INPUT TYPE="submit" TABINDEX="16" CLASS="button" NAME="GoReport" VALUE="Item Report">
+ <input type="submit" tabindex="16" class="button" name="GoReport" value="Item Report">
 </form>

@@ -29,7 +29,7 @@ under the License.
     <PartyContactMechPurpose partyId="DemoSupplier" contactMechId="9001" contactMechPurposeTypeId="BILLING_LOCATION" fromDate="2001-05-13 00:00:00.000"/>
     <PartyContactMechPurpose partyId="DemoSupplier" contactMechId="9001" contactMechPurposeTypeId="GENERAL_LOCATION" fromDate="2001-05-13 00:00:00.000"/>
     <PartyContactMechPurpose partyId="DemoSupplier" contactMechId="9001" contactMechPurposeTypeId="PAYMENT_LOCATION" fromDate="2001-05-13 00:00:00.000"/>
-    <UserLogin userLoginId="DemoSupplier" currentPassword="{SHA}47ca69ebb4bdc9ae0adec130880165d2cc05db1a" partyId="DemoSupplier"/>
+    <UserLogin userLoginId="DemoSupplier" currentPassword="{SHA}47b56994cbc2b6d10aa1be30f70165adb305a41a" partyId="DemoSupplier"/>
 
 
     <Party partyId="BigSupplier" partyTypeId="PARTY_GROUP" supplierProductName="" supplierProductId=""/>
@@ -41,7 +41,7 @@ under the License.
     <PartyContactMechPurpose partyId="BigSupplier" contactMechId="9002" contactMechPurposeTypeId="BILLING_LOCATION" fromDate="2000-01-01 00:00:00.000"/>
     <PartyContactMechPurpose partyId="BigSupplier" contactMechId="9002" contactMechPurposeTypeId="GENERAL_LOCATION" fromDate="2000-01-01 00:00:00.000"/>
     <PartyContactMechPurpose partyId="BigSupplier" contactMechId="9002" contactMechPurposeTypeId="PAYMENT_LOCATION" fromDate="2000-01-01 00:00:00.000"/>
-    <UserLogin userLoginId="BigSupplier" currentPassword="{SHA}47ca69ebb4bdc9ae0adec130880165d2cc05db1a" partyId="BigSupplier"/>
+    <UserLogin userLoginId="BigSupplier" currentPassword="{SHA}47b56994cbc2b6d10aa1be30f70165adb305a41a" partyId="BigSupplier"/>
 
     <Party partyId="EuroSupplier" partyTypeId="PARTY_GROUP" supplierProductName="" supplierProductId=""/>
     <PartyGroup partyId="EuroSupplier" groupName="European Supplier" supplierProductName="" supplierProductId=""/>
@@ -52,7 +52,7 @@ under the License.
     <PartyContactMechPurpose partyId="EuroSupplier" contactMechId="9003" contactMechPurposeTypeId="BILLING_LOCATION" fromDate="2000-01-01 00:00:00.000"/>
     <PartyContactMechPurpose partyId="EuroSupplier" contactMechId="9003" contactMechPurposeTypeId="GENERAL_LOCATION" fromDate="2000-01-01 00:00:00.000"/>
     <PartyContactMechPurpose partyId="EuroSupplier" contactMechId="9003" contactMechPurposeTypeId="PAYMENT_LOCATION" fromDate="2000-01-01 00:00:00.000"/>
-    <UserLogin userLoginId="EuroSupplier" currentPassword="{SHA}47ca69ebb4bdc9ae0adec130880165d2cc05db1a" partyId="EuroSupplier"/>
+    <UserLogin userLoginId="EuroSupplier" currentPassword="{SHA}47b56994cbc2b6d10aa1be30f70165adb305a41a" partyId="EuroSupplier"/>
 
     <!-- supplier pricing -->
     <SupplierProduct partyId="DemoSupplier" supplierPrefOrderId="10_MAIN_SUPPL" minimumOrderQuantity="0" currencyUomId="USD" productId="GZ-1000" lastPrice="7.5" supplierProductId="GZ-1000-0" availableFromDate="2005-01-01 00:00:00.000"/>
@@ -218,21 +218,73 @@ under the License.
     <ProductCategory description="DropShip Products" primaryParentCategoryId="CATALOG1" productCategoryId="dropShip" productCategoryTypeId="CATALOG_CATEGORY"/>
     <ProductCategoryRollup fromDate="2001-05-13 12:00:00.0" parentProductCategoryId="CATALOG1" productCategoryId="dropShip"/>
 
-    <Product productId="dropShip1" productTypeId="FINISHED_GOOD" internalName="DropShip from DemoSupplier" productName="DropShip from DemoSupplier" smallImageUrl="/images/products/small/dropShip1.jpg" mediumImageUrl="/images/products/medium/dropShip1.jpg" largeImageUrl="/images/products/large/dropShip1.jpg" isVirtual="N" isVariant="N" requirementMethodEnumId="PRODRQM_DS" billOfMaterialLevel="0" createdDate="2007-05-05 14:50:58.584" createdByUserLogin="admin" lastModifiedDate="2007-05-05 15:05:41.62" lastModifiedByUserLogin="admin" inShippingBox="N" lastUpdatedStamp="2007-05-06 15:02:03.466" lastUpdatedTxStamp="2007-05-06 15:02:02.465" createdStamp="2007-05-05 14:50:58.586" createdTxStamp="2007-05-05 14:50:58.21"/>
+    <Product productId="dropShip1" productTypeId="FINISHED_GOOD" internalName="DropShip from DemoSupplier" productName="DropShip from DemoSupplier" smallImageUrl="/images/products/dropShip1/small.jpg" mediumImageUrl="/images/products/dropShip1/medium.jpg" largeImageUrl="/images/products/dropShip1/large.jpg" isVirtual="N" isVariant="N" requirementMethodEnumId="PRODRQM_DS" billOfMaterialLevel="0" createdDate="2007-05-05 14:50:58.584" createdByUserLogin="admin" lastModifiedDate="2007-05-05 15:05:41.62" lastModifiedByUserLogin="admin" inShippingBox="N" lastUpdatedStamp="2007-05-06 15:02:03.466" lastUpdatedTxStamp="2007-05-06 15:02:02.465" createdStamp="2007-05-05 14:50:58.586" createdTxStamp="2007-05-05 14:50:58.21"/>
     <ProductCategoryMember productCategoryId="dropShip" productId="dropShip1" sequenceNum="1" fromDate="2001-05-13 12:00:00.0"/>
     <ProductPrice productId="dropShip1" productPricePurposeId="PURCHASE" productPriceTypeId="DEFAULT_PRICE" currencyUomId="USD" productStoreGroupId="_NA_" fromDate="2001-05-13 12:00:00.0" price="13.99" createdDate="2001-05-13 12:00:00.0" createdByUserLogin="admin" lastModifiedDate="2001-05-13 12:00:00.0" lastModifiedByUserLogin="admin"/>
-    <SupplierProduct productId="dropShip1" partyId="DemoSupplier" availableFromDate="2007-01-01 14:51:52.627" minimumOrderQuantity="0.0" lastPrice="10.0" currencyUomId="USD" supplierProductName="Drop ship product from demo supplier" supplierProductId="dropShip1-DS" canDropShip="Y" supplierCommissionPerc="20.0" lastUpdatedStamp="2007-05-05 14:53:35.248" lastUpdatedTxStamp="2007-05-05 14:53:35.15" createdStamp="2007-05-05 14:53:35.248" createdTxStamp="2007-05-05 14:53:35.15"/>
+    <SupplierProduct productId="dropShip1" partyId="DemoSupplier" availableFromDate="2007-01-01 14:51:52.627" minimumOrderQuantity="0.0" lastPrice="10.0" currencyUomId="USD" supplierProductName="Drop ship product from demo supplier" supplierProductId="dropShip1-DS" canDropShip="Y" lastUpdatedStamp="2007-05-05 14:53:35.248" lastUpdatedTxStamp="2007-05-05 14:53:35.15" createdStamp="2007-05-05 14:53:35.248" createdTxStamp="2007-05-05 14:53:35.15"/>
 
-    <Product productId="dropShip2" productTypeId="FINISHED_GOOD" internalName="DropShip from BigSupplier" productName="DropShip from BigSupplier" smallImageUrl="/images/products/small/dropShip1.jpg" mediumImageUrl="/images/products/medium/dropShip1.jpg" largeImageUrl="/images/products/large/dropShip1.jpg" isVirtual="N" isVariant="N" requirementMethodEnumId="PRODRQM_DS" billOfMaterialLevel="0" createdDate="2007-05-05 14:50:58.584" createdByUserLogin="admin" lastModifiedDate="2007-05-05 15:05:41.62" lastModifiedByUserLogin="admin" inShippingBox="N" lastUpdatedStamp="2007-05-06 15:02:03.466" lastUpdatedTxStamp="2007-05-06 15:02:02.465" createdStamp="2007-05-05 14:50:58.586" createdTxStamp="2007-05-05 14:50:58.21"/>
+    <Product productId="dropShip2" productTypeId="FINISHED_GOOD" internalName="DropShip from BigSupplier" productName="DropShip from BigSupplier" smallImageUrl="/images/products/dropShip2/small.jpg" mediumImageUrl="/images/products/dropShip2/medium.jpg" largeImageUrl="/images/products/dropShip2/large.jpg" isVirtual="N" isVariant="N" requirementMethodEnumId="PRODRQM_DS" billOfMaterialLevel="0" createdDate="2007-05-05 14:50:58.584" createdByUserLogin="admin" lastModifiedDate="2007-05-05 15:05:41.62" lastModifiedByUserLogin="admin" inShippingBox="N" lastUpdatedStamp="2007-05-06 15:02:03.466" lastUpdatedTxStamp="2007-05-06 15:02:02.465" createdStamp="2007-05-05 14:50:58.586" createdTxStamp="2007-05-05 14:50:58.21"/>
     <ProductCategoryMember productCategoryId="dropShip" productId="dropShip2" sequenceNum="1" fromDate="2001-05-13 12:00:00.0"/>
     <ProductPrice productId="dropShip2" productPricePurposeId="PURCHASE" productPriceTypeId="DEFAULT_PRICE" currencyUomId="USD" productStoreGroupId="_NA_" fromDate="2001-05-13 12:00:00.0" price="15.99" createdDate="2001-05-13 12:00:00.0" createdByUserLogin="admin" lastModifiedDate="2001-05-13 12:00:00.0" lastModifiedByUserLogin="admin"/>
-    <SupplierProduct productId="dropShip2" partyId="BigSupplier" availableFromDate="2007-01-01 14:51:52.627" minimumOrderQuantity="0.0" lastPrice="12.0" currencyUomId="USD" supplierProductName="Drop ship product from big supplier" supplierProductId="dropShip2-DS" canDropShip="Y" supplierCommissionPerc="20.0" lastUpdatedStamp="2007-05-05 14:53:35.248" lastUpdatedTxStamp="2007-05-05 14:53:35.15" createdStamp="2007-05-05 14:53:35.248" createdTxStamp="2007-05-05 14:53:35.15"/>
+    <SupplierProduct productId="dropShip2" partyId="BigSupplier" availableFromDate="2007-01-01 14:51:52.627" minimumOrderQuantity="0.0" lastPrice="12.0" currencyUomId="USD" supplierProductName="Drop ship product from big supplier" supplierProductId="dropShip2-DS" canDropShip="Y" lastUpdatedStamp="2007-05-05 14:53:35.248" lastUpdatedTxStamp="2007-05-05 14:53:35.15" createdStamp="2007-05-05 14:53:35.248" createdTxStamp="2007-05-05 14:53:35.15"/>
 
-    <Product productId="dropShip3" productTypeId="FINISHED_GOOD" internalName="DropShip from EuroSupplier" productName="DropShip from EuroSupplier" smallImageUrl="/images/products/small/dropShip1.jpg" mediumImageUrl="/images/products/medium/dropShip1.jpg" largeImageUrl="/images/products/large/dropShip1.jpg" isVirtual="N" isVariant="N" requirementMethodEnumId="PRODRQM_DS" billOfMaterialLevel="0" createdDate="2007-05-05 14:50:58.584" createdByUserLogin="admin" lastModifiedDate="2007-05-05 15:05:41.62" lastModifiedByUserLogin="admin" inShippingBox="N" lastUpdatedStamp="2007-05-06 15:02:03.466" lastUpdatedTxStamp="2007-05-06 15:02:02.465" createdStamp="2007-05-05 14:50:58.586" createdTxStamp="2007-05-05 14:50:58.21"/>
+    <Product productId="dropShip3" productTypeId="FINISHED_GOOD" internalName="DropShip from EuroSupplier" productName="DropShip from EuroSupplier" smallImageUrl="/images/products/dropShip3/small.jpg" mediumImageUrl="/images/products/dropShip3/medium.jpg" largeImageUrl="/images/products/dropShip3/large.jpg" isVirtual="N" isVariant="N" requirementMethodEnumId="PRODRQM_DS" billOfMaterialLevel="0" createdDate="2007-05-05 14:50:58.584" createdByUserLogin="admin" lastModifiedDate="2007-05-05 15:05:41.62" lastModifiedByUserLogin="admin" inShippingBox="N" lastUpdatedStamp="2007-05-06 15:02:03.466" lastUpdatedTxStamp="2007-05-06 15:02:02.465" createdStamp="2007-05-05 14:50:58.586" createdTxStamp="2007-05-05 14:50:58.21"/>
     <ProductCategoryMember productCategoryId="dropShip" productId="dropShip3" sequenceNum="1" fromDate="2001-05-13 12:00:00.0"/>
     <ProductPrice productId="dropShip3" productPricePurposeId="PURCHASE" productPriceTypeId="DEFAULT_PRICE" currencyUomId="EUR" productStoreGroupId="_NA_" fromDate="2001-05-13 12:00:00.0" price="14.99" createdDate="2001-05-13 12:00:00.0" createdByUserLogin="admin" lastModifiedDate="2001-05-13 12:00:00.0" lastModifiedByUserLogin="admin"/>
-    <SupplierProduct productId="dropShip3" partyId="EuroSupplier" availableFromDate="2007-01-01 14:51:52.627" minimumOrderQuantity="0.0" lastPrice="11.0" currencyUomId="EUR" supplierProductName="Drop ship product from Euro supplier" supplierProductId="dropShip3-DS" canDropShip="Y" supplierCommissionPerc="20.0" lastUpdatedStamp="2007-05-05 14:53:35.248" lastUpdatedTxStamp="2007-05-05 14:53:35.15" createdStamp="2007-05-05 14:53:35.248" createdTxStamp="2007-05-05 14:53:35.15"/>
+    <SupplierProduct productId="dropShip3" partyId="EuroSupplier" availableFromDate="2007-01-01 14:51:52.627" minimumOrderQuantity="0.0" lastPrice="11.0" currencyUomId="EUR" supplierProductName="Drop ship product from Euro supplier" supplierProductId="dropShip3-DS" canDropShip="Y" lastUpdatedStamp="2007-05-05 14:53:35.248" lastUpdatedTxStamp="2007-05-05 14:53:35.15" createdStamp="2007-05-05 14:53:35.248" createdTxStamp="2007-05-05 14:53:35.15"/>
     <ProductPrice productId="dropShip3" productPricePurposeId="PURCHASE" productPriceTypeId="DEFAULT_PRICE" currencyUomId="USD" productStoreGroupId="_NA_" fromDate="2001-05-13 12:00:00.0" price="14.99" createdDate="2001-05-13 12:00:00.0" createdByUserLogin="admin" lastModifiedDate="2001-05-13 12:00:00.0" lastModifiedByUserLogin="admin"/>
-    <SupplierProduct productId="dropShip3" partyId="EuroSupplier" availableFromDate="2007-01-01 14:51:52.627" minimumOrderQuantity="0.0" lastPrice="11.0" currencyUomId="USD" supplierProductName="Drop ship product from Euro supplier" supplierProductId="dropShip3-DS" canDropShip="Y" supplierCommissionPerc="20.0" lastUpdatedStamp="2007-05-05 14:53:35.248" lastUpdatedTxStamp="2007-05-05 14:53:35.15" createdStamp="2007-05-05 14:53:35.248" createdTxStamp="2007-05-05 14:53:35.15"/>
+    <SupplierProduct productId="dropShip3" partyId="EuroSupplier" availableFromDate="2007-01-01 14:51:52.627" minimumOrderQuantity="0.0" lastPrice="11.0" currencyUomId="USD" supplierProductName="Drop ship product from Euro supplier" supplierProductId="dropShip3-DS" canDropShip="Y" lastUpdatedStamp="2007-05-05 14:53:35.248" lastUpdatedTxStamp="2007-05-05 14:53:35.15" createdStamp="2007-05-05 14:53:35.248" createdTxStamp="2007-05-05 14:53:35.15"/>
 
+    <!-- order when product is sold -->
+    <Product productId="orderWhenSold" productTypeId="FINISHED_GOOD" internalName="Order product from DemoSupplier when sold" productName="Order product from DemoSupplier when sold" smallImageUrl="/images/products/orderWhenSold/small.jpg" mediumImageUrl="/images/products/orderWhenSold/medium.jpg" largeImageUrl="/images/products/orderWhenSold/large.jpg" isVirtual="N" isVariant="N" requirementMethodEnumId="PRODRQM_AUTO" billOfMaterialLevel="0" createdDate="2007-05-05 14:50:58.584" createdByUserLogin="admin" inShippingBox="N"/>
+    <ProductCategoryMember productCategoryId="dropShip" productId="orderWhenSold" sequenceNum="1" fromDate="2001-05-13 12:00:00.0"/>
+    <ProductPrice productId="orderWhenSold" productPricePurposeId="PURCHASE" productPriceTypeId="DEFAULT_PRICE" currencyUomId="USD" productStoreGroupId="_NA_" fromDate="2001-05-13 12:00:00.0" price="13.99" createdDate="2001-05-13 12:00:00.0" createdByUserLogin="admin" lastModifiedDate="2001-05-13 12:00:00.0" lastModifiedByUserLogin="admin"/>
+    <SupplierProduct productId="orderWhenSold" partyId="DemoSupplier" availableFromDate="2007-01-01 14:51:52.627" minimumOrderQuantity="0.0" lastPrice="10.0" currencyUomId="USD" supplierProductName="Drop ship product from demo supplier" supplierProductId="dropShip1-DS" canDropShip="Y" lastUpdatedStamp="2007-05-05 14:53:35.248" lastUpdatedTxStamp="2007-05-05 14:53:35.15" createdStamp="2007-05-05 14:53:35.248" createdTxStamp="2007-05-05 14:53:35.15"/>
+
+    <!-- alternative URL -->
+    <DataResource dataResourceTypeId="ELECTRONIC_TEXT" dataResourceId="dropShip-ALT" localeString="en"/>
+    <DataResource dataResourceTypeId="ELECTRONIC_TEXT" dataResourceId="DRdropShip-ALTEN" localeString="en_US"/>
+    <DataResource dataResourceTypeId="ELECTRONIC_TEXT" dataResourceId="dropShip1-ALT" localeString="en"/>
+    <DataResource dataResourceTypeId="ELECTRONIC_TEXT" dataResourceId="DRdropShip1-ALTEN" localeString="en_US"/>
+    <DataResource dataResourceTypeId="ELECTRONIC_TEXT" dataResourceId="dropShip2-ALT" localeString="en"/>
+    <DataResource dataResourceTypeId="ELECTRONIC_TEXT" dataResourceId="DRdropShip2-ALTEN" localeString="en_US"/>
+    <DataResource dataResourceTypeId="ELECTRONIC_TEXT" dataResourceId="dropShip3-ALT" localeString="en"/>
+    <DataResource dataResourceTypeId="ELECTRONIC_TEXT" dataResourceId="DRdropShip3-ALTEN" localeString="en_US"/>
+    <DataResource dataResourceTypeId="ELECTRONIC_TEXT" dataResourceId="orderWhenSold-ALT" localeString="en"/>
+    <DataResource dataResourceTypeId="ELECTRONIC_TEXT" dataResourceId="DRorderWhenSold-ALT" localeString="en_US"/>
+    
+    <ElectronicText dataResourceId="dropShip-ALT" textData="dropship"/>
+    <ElectronicText dataResourceId="dropShip1-ALT" textData="dropship1"/>
+    <ElectronicText dataResourceId="dropShip2-ALT" textData="dropship2"/>
+    <ElectronicText dataResourceId="dropShip3-ALT" textData="dropship3"/>
+    <ElectronicText dataResourceId="orderWhenSold-ALT" textData="order-when-sold"/>
+    
+    <ElectronicText dataResourceId="DRdropShip-ALTEN" textData="dropship"/>
+    <ElectronicText dataResourceId="DRdropShip1-ALTEN" textData="dropship1"/>
+    <ElectronicText dataResourceId="DRdropShip2-ALTEN" textData="dropship2"/>
+    <ElectronicText dataResourceId="DRdropShip3-ALTEN" textData="dropship3"/>
+    <ElectronicText dataResourceId="DRorderWhenSold-ALT" textData="order-when-sold"/>
+    
+    <Content contentId="dropShip-ALT" contentTypeId="DOCUMENT" dataResourceId="dropShip-ALT" localeString="en"/>
+    <Content contentId="CdropShip-ALTEN" contentTypeId="DOCUMENT" dataResourceId="DRdropShip-ALTEN" localeString="en_US"/>
+    <Content contentId="dropShip1-ALT" contentTypeId="DOCUMENT" dataResourceId="dropShip1-ALT" localeString="en"/>
+    <Content contentId="CdropShip1-ALTEN" contentTypeId="DOCUMENT" dataResourceId="DRdropShip1-ALTEN" localeString="en_US"/>
+    <Content contentId="dropShip2-ALT" contentTypeId="DOCUMENT" dataResourceId="dropShip2-ALT" localeString="en"/>
+    <Content contentId="CdropShip2-ALTEN" contentTypeId="DOCUMENT" dataResourceId="DRdropShip2-ALTEN" localeString="en_US"/>
+    <Content contentId="dropShip3-ALT" contentTypeId="DOCUMENT" dataResourceId="dropShip3-ALT" localeString="en"/>
+    <Content contentId="CdropShip3-ALTEN" contentTypeId="DOCUMENT" dataResourceId="DRdropShip3-ALTEN" localeString="en_US"/>
+    <Content contentId="orderWhenSold-ALT" contentTypeId="DOCUMENT" dataResourceId="orderWhenSold-ALT" localeString="en"/>
+    <Content contentId="CorderWhenSold-ALTEN" contentTypeId="DOCUMENT" dataResourceId="DRorderWhenSold-ALT" localeString="en_US"/>
+    
+    <ContentAssoc contentId="dropShip-ALT" contentIdTo="CdropShip-ALTEN" contentAssocTypeId="ALTERNATE_LOCALE" fromDate="2011-04-26 12:00:00.0"/>
+    <ContentAssoc contentId="dropShip1-ALT" contentIdTo="CdropShip1-ALTEN" contentAssocTypeId="ALTERNATE_LOCALE" fromDate="2011-04-26 12:00:00.0"/>
+    <ContentAssoc contentId="dropShip2-ALT" contentIdTo="CdropShip2-ALTEN" contentAssocTypeId="ALTERNATE_LOCALE" fromDate="2011-04-26 12:00:00.0"/>
+    <ContentAssoc contentId="dropShip3-ALT" contentIdTo="CdropShip3-ALTEN" contentAssocTypeId="ALTERNATE_LOCALE" fromDate="2011-04-26 12:00:00.0"/>
+    <ContentAssoc contentId="orderWhenSold-ALT" contentIdTo="CorderWhenSold-ALTEN" contentAssocTypeId="ALTERNATE_LOCALE" fromDate="2011-04-26 12:00:00.0"/>
+    
+    <ProductCategoryContent prodCatContentTypeId="ALTERNATIVE_URL" productCategoryId="dropShip" contentId="dropShip-ALT" fromDate="2001-05-13 12:00:00.0"/>
+    <ProductContent productId="dropShip1" contentId="dropShip1-ALT" productContentTypeId="ALTERNATIVE_URL" fromDate="2001-05-13 12:00:00.0"/>
+    <ProductContent productId="dropShip2" contentId="dropShip2-ALT" productContentTypeId="ALTERNATIVE_URL" fromDate="2001-05-13 12:00:00.0"/>
+    <ProductContent productId="dropShip3" contentId="dropShip3-ALT" productContentTypeId="ALTERNATIVE_URL" fromDate="2001-05-13 12:00:00.0"/>
+    <ProductContent productId="orderWhenSold" contentId="orderWhenSold-ALT" productContentTypeId="ALTERNATIVE_URL" fromDate="2001-05-13 12:00:00.0"/>
 </entity-engine-xml>

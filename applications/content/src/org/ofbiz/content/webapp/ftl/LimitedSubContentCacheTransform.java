@@ -31,15 +31,15 @@ import javolution.util.FastList;
 import javolution.util.FastMap;
 
 import org.ofbiz.base.util.Debug;
-import org.ofbiz.base.util.FileUtil;
 import org.ofbiz.base.util.GeneralException;
 import org.ofbiz.base.util.StringUtil;
 import org.ofbiz.base.util.UtilDateTime;
+import org.ofbiz.base.util.UtilGenerics;
 import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.base.util.template.FreeMarkerWorker;
 import org.ofbiz.content.content.ContentServicesComplex;
 import org.ofbiz.content.content.ContentWorker;
-import org.ofbiz.entity.GenericDelegator;
+import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
 import org.ofbiz.minilang.MiniLangException;
@@ -61,32 +61,42 @@ public class LimitedSubContentCacheTransform implements TemplateTransformModel {
     public static final String [] saveKeyNames = {"contentId", "subContentId", "entityList", "entityIndex", "subDataResourceTypeId", "mimeTypeId", "whenMap", "locale",  "entityList", "viewSize", "viewIndex", "highIndex", "lowIndex", "listSize", "wrapTemplateId", "encloseWrapText", "nullThruDatesOnly", "globalNodeTrail", "outputIndex"};
 
     /**
+     * @deprecated use FreeMarkerWorker.getWrappedObject()
      * A wrapper for the FreeMarkerWorker version.
      */
+    @Deprecated
     public static Object getWrappedObject(String varName, Environment env) {
         return FreeMarkerWorker.getWrappedObject(varName, env);
     }
 
-    public static String getArg(Map args, String key, Environment env) {
+    /**
+     * @deprecated use FreeMarkerWorker.getArg()
+     */
+    @Deprecated
+    public static String getArg(Map<String, ? extends Object> args, String key, Environment env) {
         return FreeMarkerWorker.getArg(args, key, env);
     }
 
-    public static String getArg(Map args, String key, Map ctx) {
+    /**
+     * @deprecated use FreeMarkerWorker.getArg()
+     */
+    @Deprecated
+    public static String getArg(Map<String, ? extends Object> args, String key, Map<String, ? extends Object> ctx) {
         return FreeMarkerWorker.getArg(args, key, ctx);
     }
 
-
+    @SuppressWarnings("unchecked")
     public Writer getWriter(final Writer out, Map args) {
         //Profiler.begin("Limited");
         final StringBuilder buf = new StringBuilder();
         final Environment env = Environment.getCurrentEnvironment();
-        final Map templateRoot = FreeMarkerWorker.createEnvironmentMap(env);
-        final GenericDelegator delegator = (GenericDelegator) FreeMarkerWorker.getWrappedObject("delegator", env);
-        final HttpServletRequest request = (HttpServletRequest) FreeMarkerWorker.getWrappedObject("request", env);
+        final Map<String, Object> templateRoot = FreeMarkerWorker.createEnvironmentMap(env);
+        final Delegator delegator = FreeMarkerWorker.getWrappedObject("delegator", env);
+        final HttpServletRequest request = FreeMarkerWorker.getWrappedObject("request", env);
         FreeMarkerWorker.getSiteParameters(request, templateRoot);
-        final Map savedValuesUp = FastMap.newInstance();
+        final Map<String, Object> savedValuesUp = FastMap.newInstance();
         FreeMarkerWorker.saveContextValues(templateRoot, upSaveKeyNames, savedValuesUp);
-        final Map savedValues = FastMap.newInstance();
+        final Map<String, Object> savedValues = FastMap.newInstance();
         FreeMarkerWorker.overrideWithArgs(templateRoot, args);
 
         String contentAssocTypeId = (String) templateRoot.get("contentAssocTypeId");
@@ -95,11 +105,11 @@ public class LimitedSubContentCacheTransform implements TemplateTransformModel {
             templateRoot.put("contentAssocTypeId ", contentAssocTypeId);
         }
 
-        final Map pickedEntityIds = FastMap.newInstance();
-        List assocTypes = StringUtil.split(contentAssocTypeId, "|");
+        final Map<String, GenericValue> pickedEntityIds = FastMap.newInstance();
+        List<String> assocTypes = StringUtil.split(contentAssocTypeId, "|");
 
         String contentPurposeTypeId = (String) templateRoot.get("contentPurposeTypeId");
-        List purposeTypes = StringUtil.split(contentPurposeTypeId, "|");
+        List<String> purposeTypes = StringUtil.split(contentPurposeTypeId, "|");
         templateRoot.put("purposeTypes", purposeTypes);
         Locale locale = (Locale) templateRoot.get("locale");
         if (locale == null) {
@@ -107,11 +117,11 @@ public class LimitedSubContentCacheTransform implements TemplateTransformModel {
             templateRoot.put("locale", locale);
         }
 
-        Map whenMap = FastMap.newInstance();
-        whenMap.put("followWhen", (String) templateRoot.get("followWhen"));
-        whenMap.put("pickWhen", (String) templateRoot.get("pickWhen"));
-        whenMap.put("returnBeforePickWhen", (String) templateRoot.get("returnBeforePickWhen"));
-        whenMap.put("returnAfterPickWhen", (String) templateRoot.get("returnAfterPickWhen"));
+        Map<String, Object> whenMap = FastMap.newInstance();
+        whenMap.put("followWhen", templateRoot.get("followWhen"));
+        whenMap.put("pickWhen", templateRoot.get("pickWhen"));
+        whenMap.put("returnBeforePickWhen", templateRoot.get("returnBeforePickWhen"));
+        whenMap.put("returnAfterPickWhen", templateRoot.get("returnAfterPickWhen"));
         templateRoot.put("whenMap", whenMap);
 
         String fromDateStr = (String) templateRoot.get("fromDateStr");
@@ -119,57 +129,60 @@ public class LimitedSubContentCacheTransform implements TemplateTransformModel {
         if (UtilValidate.isNotEmpty(fromDateStr)) {
             fromDate = UtilDateTime.toTimestamp(fromDateStr);
         }
-        if (fromDate == null)
+        if (fromDate == null) {
             fromDate = UtilDateTime.nowTimestamp();
+        }
 
         String limitSize = (String) templateRoot.get("limitSize");
         final int returnLimit = Integer.parseInt(limitSize);
         // limitMode will be "random" to begin with
-        String limitMode = (String) templateRoot.get("limitMode");
-        final GenericValue userLogin = (GenericValue) FreeMarkerWorker.getWrappedObject("userLogin", env);
-        List globalNodeTrail = (List) templateRoot.get("globalNodeTrail");
-        String strNullThruDatesOnly = (String) templateRoot.get("nullThruDatesOnly");
+        // String limitMode = (String) templateRoot.get("limitMode");
+        // final GenericValue userLogin = FreeMarkerWorker.getWrappedObject("userLogin", env);
+        // List<Map<String, ? extends Object>> globalNodeTrail = UtilGenerics.checkList(templateRoot.get("globalNodeTrail"));
+        // String strNullThruDatesOnly = (String) templateRoot.get("nullThruDatesOnly");
+        // Boolean nullThruDatesOnly = (strNullThruDatesOnly != null && strNullThruDatesOnly.equalsIgnoreCase("true")) ? Boolean.TRUE : Boolean.FALSE;
         String orderBy = (String) templateRoot.get("orderBy");
-        Boolean nullThruDatesOnly = (strNullThruDatesOnly != null && strNullThruDatesOnly.equalsIgnoreCase("true")) ? Boolean.TRUE : Boolean.FALSE;
-
+        
         // NOTE this was looking for subContentId, but that doesn't make ANY sense, so changed to contentId
         String contentId = (String) templateRoot.get("contentId");
 
         templateRoot.put("contentId", null);
         templateRoot.put("subContentId", null);
 
-        final String contentIdTo = contentId;
+        // final String contentIdTo = contentId;
 
-        Map results = null;
+        Map<String, Object> results = null;
         //if (Debug.infoOn()) Debug.logInfo("in LimitedSubContentCache(0), assocTypes ." + assocTypes, module);
         String contentAssocPredicateId = (String) templateRoot.get("contentAssocPredicateId");
         try {
             results = ContentServicesComplex.getAssocAndContentAndDataResourceCacheMethod(delegator, contentId, null, "From", fromDate, null, assocTypes, null, Boolean.TRUE, contentAssocPredicateId, orderBy);
-        } catch (MiniLangException e2) {
-            throw new RuntimeException(e2.getMessage());
+        } catch (MiniLangException e) {
+            throw new RuntimeException(e.getMessage(), e);
         } catch (GenericEntityException e) {
-            throw new RuntimeException(e.getMessage());
+            throw new RuntimeException(e.getMessage(), e);
         }
-        List longList = (List) results.get("entityList");
+        List<GenericValue> longList = UtilGenerics.checkList(results.get("entityList"));
         templateRoot.put("entityList", longList);
         //if (Debug.infoOn()) Debug.logInfo("in limited, longList:" + longList , "");
 
         return new LoopWriter(out) {
 
+            @Override
             public void write(char cbuf[], int off, int len) {
                 buf.append(cbuf, off, len);
                 //StringBuilder ctxBuf = (StringBuilder) templateRoot.get("buf");
                 //ctxBuf.append(cbuf, off, len);
             }
 
+            @Override
             public void flush() throws IOException {
                 out.flush();
             }
 
+            @Override
             public int onStart() throws TemplateModelException, IOException {
-
-                List globalNodeTrail = (List) templateRoot.get("globalNodeTrail");
-                String trailCsv = ContentWorker.nodeTrailToCsv(globalNodeTrail);
+                // List<Map<String, ? extends Object>> globalNodeTrail = UtilGenerics.checkList(templateRoot.get("globalNodeTrail"));
+                // String trailCsv = ContentWorker.nodeTrailToCsv(globalNodeTrail);
                 boolean inProgress = false;
                 //if (Debug.infoOn()) Debug.logInfo("in limited, returnLimit:" + returnLimit , "");
                 //if (Debug.infoOn()) Debug.logInfo("in limited, pickedEntityIds:" + pickedEntityIds , "");
@@ -184,10 +197,11 @@ public class LimitedSubContentCacheTransform implements TemplateTransformModel {
                 }
             }
 
+            @Override
             public int afterBody() throws TemplateModelException, IOException {
                 FreeMarkerWorker.reloadValues(templateRoot, savedValues, env);
-                List list = (List) templateRoot.get("globalNodeTrail");
-                List subList = list.subList(0, list.size() - 1);
+                List<Map<String, ? extends Object>> list = UtilGenerics.checkList(templateRoot.get("globalNodeTrail"));
+                List<Map<String, ? extends Object>> subList = list.subList(0, list.size() - 1);
                 templateRoot.put("globalNodeTrail", subList);
                 env.setVariable("globalNodeTrail", FreeMarkerWorker.autoWrap(subList, env));
 
@@ -207,6 +221,7 @@ public class LimitedSubContentCacheTransform implements TemplateTransformModel {
                 }
             }
 
+            @Override
             public void close() throws IOException {
                 FreeMarkerWorker.reloadValues(templateRoot, savedValuesUp, env);
                 String wrappedContent = buf.toString();
@@ -221,9 +236,8 @@ public class LimitedSubContentCacheTransform implements TemplateTransformModel {
                 //}
             }
 
-            public boolean prepCtx(GenericDelegator delegator, Map ctx, Environment env, GenericValue view) throws GeneralException {
-
-                String dataResourceId = (String) view.get("drDataResourceId");
+            public boolean prepCtx(Delegator delegator, Map<String, Object> ctx, Environment env, GenericValue view) throws GeneralException {
+                // String dataResourceId = (String) view.get("drDataResourceId");
                 String subContentIdSub = (String) view.get("contentId");
                 // This order is taken so that the dataResourceType can be overridden in the transform arguments.
                 String subDataResourceTypeId = (String) ctx.get("subDataResourceTypeId");
@@ -235,10 +249,8 @@ public class LimitedSubContentCacheTransform implements TemplateTransformModel {
                 }
 
                 String mimeTypeId = ContentWorker.getMimeTypeId(delegator, view, ctx);
-
-
-                Map trailNode = ContentWorker.makeNode(view);
-                Map whenMap = (Map) ctx.get("whenMap");
+                Map<String, Object> trailNode = ContentWorker.makeNode(view);
+                Map<String, Object> whenMap = UtilGenerics.checkMap(ctx.get("whenMap"));
                 Locale locale = (Locale) ctx.get("locale");
                 if (locale == null) {
                     locale = Locale.getDefault();
@@ -246,13 +258,13 @@ public class LimitedSubContentCacheTransform implements TemplateTransformModel {
                 GenericValue assocContent = null;
                 ContentWorker.checkConditions(delegator, trailNode, assocContent, whenMap);
                 Boolean isReturnBeforeObj = (Boolean) trailNode.get("isReturnBefore");
-                Boolean isReturnAfterObj = (Boolean) trailNode.get("isReturnAfter");
+                // Boolean isReturnAfterObj = (Boolean) trailNode.get("isReturnAfter");
                 Boolean isPickObj = (Boolean) trailNode.get("isPick");
                 Boolean isFollowObj = (Boolean) trailNode.get("isFollow");
                 //if (Debug.infoOn()) Debug.logInfo("in LimitedSubContentCache, isReturnBeforeObj" + isReturnBeforeObj + " isPickObj:" + isPickObj + " isFollowObj:" + isFollowObj + " isReturnAfterObj:" + isReturnAfterObj, module);
                 if ((isReturnBeforeObj == null || !isReturnBeforeObj.booleanValue()) && ((isPickObj != null &&
                         isPickObj.booleanValue()) || (isFollowObj != null && isFollowObj.booleanValue()))) {
-                    List globalNodeTrail = (List) ctx.get("globalNodeTrail");
+                    List<Map<String, ? extends Object>> globalNodeTrail = UtilGenerics.checkList(ctx.get("globalNodeTrail"));
                     if (globalNodeTrail == null) {
                         globalNodeTrail = FastList.newInstance();
                     }
@@ -283,9 +295,8 @@ public class LimitedSubContentCacheTransform implements TemplateTransformModel {
             }
 
             public GenericValue getRandomEntity() {
-
                 GenericValue pickEntity = null;
-                List lst = (List) templateRoot.get("entityList");
+                List<GenericValue> lst = UtilGenerics.checkList(templateRoot.get("entityList"));
                 if (Debug.verboseOn()) Debug.logVerbose("in limited, lst:" + lst, "");
 
                 while (pickEntity == null && lst.size() > 0) {
@@ -293,7 +304,7 @@ public class LimitedSubContentCacheTransform implements TemplateTransformModel {
                     //if (Debug.infoOn()) Debug.logInfo("in limited, randomValue:" + randomValue , "");
                     int idx = (int) (lst.size() * randomValue);
                     //if (Debug.infoOn()) Debug.logInfo("in limited, idx:" + idx , "");
-                    pickEntity = (GenericValue) lst.get(idx);
+                    pickEntity = lst.get(idx);
                     String pickEntityId = pickEntity.getString("contentId");
                     if (pickedEntityIds.get(pickEntityId) == null) {
                         pickedEntityIds.put(pickEntityId, pickEntity);
@@ -305,7 +316,7 @@ public class LimitedSubContentCacheTransform implements TemplateTransformModel {
                 return pickEntity;
             }
 
-            public boolean getNextMatchingEntity(Map templateRoot, GenericDelegator delegator, Environment env) throws IOException {
+            public boolean getNextMatchingEntity(Map<String, Object> templateRoot, Delegator delegator, Environment env) throws IOException {
                 boolean matchFound = false;
                 GenericValue pickEntity = getRandomEntity();
 

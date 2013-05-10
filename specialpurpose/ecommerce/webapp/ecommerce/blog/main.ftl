@@ -17,14 +17,12 @@ specific language governing permissions and limitations
 under the License.
 -->
 
+<#assign initialLocale = locale.toString()>
 <html>
 <head>
-    <title>Automation Groups - Main</title>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <script language="javascript" src="<@ofbizContentUrl>/images/prototypejs/prototype.js</@ofbizContentUrl>" type="text/javascript"></script>
-    <script language="javascript" src="<@ofbizContentUrl>/images/fieldlookup.js</@ofbizContentUrl>" type="text/javascript"></script>
+    <title>Main</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
     <script language="javascript" src="<@ofbizContentUrl>/images/selectall.js</@ofbizContentUrl>" type="text/javascript"></script>
-    <script language="javascript" src="<@ofbizContentUrl>/images/calendar_date_select.js</@ofbizContentUrl>" type="text/javascript"></script>
     <link rel='stylesheet' href='<@ofbizContentUrl>/images/maincss.css</@ofbizContentUrl>' type='text/css'>
     <link rel='stylesheet' href='<@ofbizContentUrl>/images/tabstyles.css</@ofbizContentUrl>' type='text/css'>
     <link rel='stylesheet' href='<@ofbizContentUrl>/ecommerce/images/blog.css</@ofbizContentUrl>' type='text/css'>
@@ -57,8 +55,8 @@ under the License.
             </div>
             <div style="padding-top: 10px;" class="insideHeaderText">
                 <form action="#">
-                    <input type="text" class="inputBox" name="search" size="20">
-                    <input type="submit" class="smallSubmit" value="Search">
+                    <input type="text" class="inputBox" name="search" size="20" />
+                    <input type="submit" class="smallSubmit" value="Search" />
                 </form>
             </div>
           </td>

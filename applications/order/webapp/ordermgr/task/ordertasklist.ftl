@@ -38,11 +38,11 @@ under the License.
 // -->
 </script>
 
-<#if security.hasRolePermission("ORDERMGR", "_VIEW", "", "", session) || security.hasRolePermission("ORDERMGR_ROLE", "_VIEW", "", "", session)>
+<#if security.hasEntityPermission("ORDERMGR", "_VIEW", session)>
 <#assign tasksFound = false>
 <div class="screenlet">
-    <div class="screenlet-header">
-        <div class="boxhead">${uiLabelMap.OrderOrderNeedingAttention}</div>
+    <div class="screenlet-title-bar">
+        <div class="h3">${uiLabelMap.OrderOrderNeedingAttention}</div>
     </div>
     <div class="screenlet-body">
         <table cellspacing="0" class="basic-table">
@@ -68,7 +68,7 @@ under the License.
                           <#assign alt_row = false>
                           <#list poList as orderHeaderAndRole>
                             <#assign orh = Static["org.ofbiz.order.order.OrderReadHelper"].getHelper(orderHeaderAndRole)>
-                            <#assign statusItem = orderHeaderAndRole.getRelatedOneCache("StatusItem")>
+                            <#assign statusItem = orderHeaderAndRole.getRelatedOne("StatusItem", true)>
                             <#assign placingParty = orh.getPlacingParty()?if_exists>
                             <tr valign="middle"<#if alt_row> class="alternate-row"</#if>>
                               <td><a href="<@ofbizUrl>orderview?orderId=${orderHeaderAndRole.orderId}</@ofbizUrl>" class='buttontext'>${orderHeaderAndRole.orderId}</a></td>
@@ -134,7 +134,7 @@ under the License.
                           <#list partyTasks as task>
                             <tr valign="middle"<#if alt_row> class="alternate-row"</#if>>
                               <td>
-                                <#assign orderStr = "orderId=" + task.orderId + "&partyId=" + userLogin.partyId + "&roleTypeId=" + task.roleTypeId + "&workEffortId=" + task.workEffortId + "&fromDate=" + task.get("fromDate").toString()>
+                                <#assign orderStr = "orderId=" + task.orderId + "&amp;partyId=" + userLogin.partyId + "&amp;roleTypeId=" + task.roleTypeId + "&amp;workEffortId=" + task.workEffortId + "&amp;fromDate=" + task.get("fromDate").toString()>
                                 <a href="<@ofbizUrl>orderview?${orderStr}</@ofbizUrl>" class="buttontext">
                                   ${task.orderId}
                                 </a>
@@ -202,24 +202,24 @@ under the License.
                           <#assign alt_row = false>
                           <#list roleTasks as task>
                             <form method="get" name="F${task.workEffortId}">
-                              <input type="hidden" name="orderId" value="${task.orderId}">
-                              <input type="hidden" name="workEffortId" value="${task.workEffortId}">
-                              <input type="hidden" name="taskStatus" value="${task.currentStatusId}">
+                              <input type="hidden" name="orderId" value="${task.orderId}" />
+                              <input type="hidden" name="workEffortId" value="${task.workEffortId}" />
+                              <input type="hidden" name="taskStatus" value="${task.currentStatusId}" />
                               <#if task.statusId?exists && task.statusId == "CAL_SENT">
-                                <input type="hidden" name="partyId" value="${userLogin.partyId}">
-                                <input type="hidden" name="roleTypeId" value="${task.roleTypeId}">
-                                <input type="hidden" name="fromDate" value="${task.get("fromDate").toString()}">
+                                <input type="hidden" name="partyId" value="${userLogin.partyId}" />
+                                <input type="hidden" name="roleTypeId" value="${task.roleTypeId}" />
+                                <input type="hidden" name="fromDate" value="${task.get("fromDate").toString()}" />
                               <#else>
-                                <input type="hidden" name="partyId" value="${userLogin.partyId}">
-                                <input type="hidden" name="roleTypeId" value="${task.roleTypeId}">
-                                <input type="hidden" name="fromDate" value="${task.get("fromDate").toString()}">
-                                <input type="hidden" name="fromPartyId" value="${task.wepaPartyId}">
-                                <input type="hidden" name="fromRoleTypeId" value="${task.roleTypeId}">
-                                <input type="hidden" name="fromFromDate" value="${task.get("fromDate").toString()}">
-                                <input type="hidden" name="toPartyId" value="${userLogin.partyId}">
-                                <input type="hidden" name="toRoleTypeId" value="${task.roleTypeId}">
-                                <input type="hidden" name="toFromDate" value="${now}">
-                                <input type="hidden" name="startActivity" value="true">
+                                <input type="hidden" name="partyId" value="${userLogin.partyId}" />
+                                <input type="hidden" name="roleTypeId" value="${task.roleTypeId}" />
+                                <input type="hidden" name="fromDate" value="${task.get("fromDate").toString()}" />
+                                <input type="hidden" name="fromPartyId" value="${task.wepaPartyId}" />
+                                <input type="hidden" name="fromRoleTypeId" value="${task.roleTypeId}" />
+                                <input type="hidden" name="fromFromDate" value="${task.get("fromDate").toString()}" />
+                                <input type="hidden" name="toPartyId" value="${userLogin.partyId}" />
+                                <input type="hidden" name="toRoleTypeId" value="${task.roleTypeId}" />
+                                <input type="hidden" name="toFromDate" value="${now}" />
+                                <input type="hidden" name="startActivity" value="true" />
                               </#if>
                               <tr valign="middle"<#if alt_row> class="alternate-row"</#if>>
                                 <td>
@@ -264,9 +264,9 @@ under the License.
                                   </a>
                                 </td>
                                 <#if task.statusId?exists && task.statusId == "CAL_SENT">
-                                  <td align="right"><input type="checkbox" name="delegate" value="true" checked></td>
+                                  <td align="right"><input type="checkbox" name="delegate" value="true" checked="checked" /></td>
                                 <#else>
-                                  <td align="right"><input type="checkbox" name="delegate" value="true"></td>
+                                  <td align="right"><input type="checkbox" name="delegate" value="true" /></td>
                                 </#if>
                               </tr>
                             </form>

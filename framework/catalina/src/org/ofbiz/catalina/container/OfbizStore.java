@@ -18,48 +18,40 @@
  *******************************************************************************/
 package org.ofbiz.catalina.container;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
 import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.io.BufferedOutputStream;
 import java.util.List;
-import java.util.Iterator;
 
-import org.ofbiz.entity.GenericDelegator;
+import org.apache.catalina.Container;
+import org.apache.catalina.Loader;
+import org.apache.catalina.Session;
+import org.apache.catalina.session.StandardSession;
+import org.apache.catalina.session.StoreBase;
+import org.apache.catalina.util.CustomObjectInputStream;
+import org.ofbiz.base.util.Debug;
+import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
-import org.ofbiz.base.util.UtilMisc;
-import org.ofbiz.base.util.Debug;
 
-import org.apache.catalina.session.StoreBase;
-import org.apache.catalina.session.StandardSession;
-import org.apache.catalina.Store;
-import org.apache.catalina.Session;
-import org.apache.catalina.Loader;
-import org.apache.catalina.Container;
-import org.apache.catalina.util.CustomObjectInputStream;
-
-public class OfbizStore extends StoreBase implements Store {
+public class OfbizStore extends StoreBase {
 
     public static final String module = OfbizStore.class.getName();
     public static final String entityName = "CatalinaSession";
 
-    protected static String info = "OfbizStore/1.0";
     protected static String storeName = "OfbizStore";
 
-    protected GenericDelegator delegator = null;
+    protected Delegator delegator = null;
 
-    public OfbizStore(GenericDelegator delegator) {
+    public OfbizStore(Delegator delegator) {
         this.delegator = delegator;
     }
 
-    public String getInfo() {
-        return info;
-    }
-
+    @Override
     public String getStoreName() {
         return storeName;
     }

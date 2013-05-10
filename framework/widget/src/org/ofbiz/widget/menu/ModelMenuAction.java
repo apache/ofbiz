@@ -25,30 +25,32 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
 
+import javax.servlet.ServletContext;
+import javax.servlet.http.HttpSession;
+
 import javolution.util.FastList;
 import javolution.util.FastMap;
 
-import org.ofbiz.base.util.BshUtil;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.GeneralException;
-import org.ofbiz.base.util.GroovyUtil;
 import org.ofbiz.base.util.ObjectType;
-import org.ofbiz.base.util.UtilGenerics;
+import org.ofbiz.base.util.ScriptUtil;
 import org.ofbiz.base.util.UtilFormatOut;
+import org.ofbiz.base.util.UtilGenerics;
 import org.ofbiz.base.util.UtilProperties;
 import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.base.util.UtilXml;
 import org.ofbiz.base.util.collections.FlexibleMapAccessor;
+import org.ofbiz.base.util.collections.ResourceBundleMapWrapper;
 import org.ofbiz.base.util.string.FlexibleStringExpander;
 import org.ofbiz.entity.finder.ByAndFinder;
 import org.ofbiz.entity.finder.ByConditionFinder;
 import org.ofbiz.entity.finder.PrimaryKeyFinder;
+import org.ofbiz.entity.util.EntityUtilProperties;
 import org.ofbiz.service.GenericServiceException;
 import org.ofbiz.service.ModelService;
-
+import org.ofbiz.widget.WidgetWorker;
 import org.w3c.dom.Element;
-import javax.servlet.*;
-import javax.servlet.http.*;
 
 
 /**
@@ -138,6 +140,7 @@ public abstract class ModelMenuAction {
             }
         }
 
+        @Override
         public void runAction(Map<String, Object> context) {
             String globalStr = this.globalExdr.expandString(context);
             // default to false
@@ -237,7 +240,7 @@ public abstract class ModelMenuAction {
 
     public static class PropertyMap extends ModelMenuAction {
         protected FlexibleStringExpander resourceExdr;
-        protected FlexibleMapAccessor<Map<String, Object>> mapNameAcsr;
+        protected FlexibleMapAccessor<ResourceBundleMapWrapper> mapNameAcsr;
         protected FlexibleStringExpander globalExdr;
 
         public PropertyMap(ModelMenu modelMenu, Element setElement) {
@@ -247,6 +250,7 @@ public abstract class ModelMenuAction {
             this.globalExdr = FlexibleStringExpander.getInstance(setElement.getAttribute("global"));
         }
 
+        @Override
         public void runAction(Map<String, Object> context) {
             String globalStr = this.globalExdr.expandString(context);
             // default to false
@@ -254,13 +258,36 @@ public abstract class ModelMenuAction {
 
             Locale locale = (Locale) context.get("locale");
             String resource = this.resourceExdr.expandString(context, locale);
-            Map<String, Object> propertyMap = UtilProperties.getResourceBundleMap(resource, locale);
-            this.mapNameAcsr.put(context, propertyMap);
+
+            ResourceBundleMapWrapper existingPropMap = this.mapNameAcsr.get(context);
+            if (existingPropMap == null) {
+                this.mapNameAcsr.put(context, UtilProperties.getResourceBundleMap(resource, locale, context));
+            } else {
+                try {
+                    existingPropMap.addBottomResourceBundle(resource);
+                } catch (IllegalArgumentException e) {
+                    // log the error, but don't let it kill everything just for a typo or bad char in an l10n file
+                    Debug.logError(e, "Error adding resource bundle [" + resource + "]: " + e.toString(), module);
+                }
+            }
 
             if (global) {
                 Map<String, Object> globalCtx = UtilGenerics.checkMap(context.get("globalContext"));
                 if (globalCtx != null) {
-                    this.mapNameAcsr.put(globalCtx, propertyMap);
+                    ResourceBundleMapWrapper globalExistingPropMap = this.mapNameAcsr.get(globalCtx);
+                    if (globalExistingPropMap == null) {
+                        this.mapNameAcsr.put(globalCtx, UtilProperties.getResourceBundleMap(resource, locale, context));
+                    } else {
+                        // is it the same object? if not add it in here too...
+                        if (existingPropMap != globalExistingPropMap) {
+                            try {
+                                globalExistingPropMap.addBottomResourceBundle(resource);
+                            } catch (IllegalArgumentException e) {
+                                // log the error, but don't let it kill everything just for a typo or bad char in an l10n file
+                                Debug.logError(e, "Error adding resource bundle [" + resource + "]: " + e.toString(), module);
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -287,6 +314,7 @@ public abstract class ModelMenuAction {
             this.globalExdr = FlexibleStringExpander.getInstance(setElement.getAttribute("global"));
         }
 
+        @Override
         public void runAction(Map<String, Object> context) {
             // default to false
 
@@ -296,11 +324,11 @@ public abstract class ModelMenuAction {
 
             String value = null;
             if (noLocale) {
-                value = UtilProperties.getPropertyValue(resource, property);
+                value = EntityUtilProperties.getPropertyValue(resource, property, WidgetWorker.getDelegator(context));
             } else {
-                value = UtilProperties.getMessage(resource, property, locale);
+                value = EntityUtilProperties.getMessage(resource, property, locale, WidgetWorker.getDelegator(context));
             }
-            if (value == null || value.length() == 0) {
+            if (UtilValidate.isEmpty(value)) {
                 value = this.defaultExdr.expandString(context);
             }
 
@@ -322,32 +350,18 @@ public abstract class ModelMenuAction {
 
     public static class Script extends ModelMenuAction {
         protected String location;
+        protected String method;
 
         public Script(ModelMenu modelMenu, Element scriptElement) {
             super (modelMenu, scriptElement);
-            this.location = scriptElement.getAttribute("location");
+            String scriptLocation = scriptElement.getAttribute("location");
+            this.location = WidgetWorker.getScriptLocation(scriptLocation);
+            this.method = WidgetWorker.getScriptMethodName(scriptLocation);
         }
 
+        @Override
         public void runAction(Map<String, Object> context) {
-            if (location.endsWith(".bsh")) {
-                try {
-                    BshUtil.runBshAtLocation(location, context);
-                } catch (GeneralException e) {
-                    String errMsg = "Error running BSH script at location [" + location + "]: " + e.toString();
-                    Debug.logError(e, errMsg, module);
-                    throw new IllegalArgumentException(errMsg);
-                }
-            } else if (location.endsWith(".groovy")) {
-                try {
-                    GroovyUtil.runScriptAtLocation(location, context);
-                } catch (GeneralException e) {
-                    String errMsg = "Error running Groovy script at location [" + location + "]: " + e.toString();
-                    Debug.logError(e, errMsg, module);
-                    throw new IllegalArgumentException(errMsg);
-                }
-            } else {
-                throw new IllegalArgumentException("For screen script actions the script type is not yet support for location:" + location);
-            }
+            ScriptUtil.executeScript(this.location, this.method, context);
         }
     }
 
@@ -375,6 +389,7 @@ public abstract class ModelMenuAction {
             }
         }
 
+        @Override
         public void runAction(Map<String, Object> context) {
             String serviceNameExpanded = this.serviceNameExdr.expandString(context);
             if (UtilValidate.isEmpty(serviceNameExpanded)) {
@@ -387,7 +402,7 @@ public abstract class ModelMenuAction {
             try {
                 Map<String, Object> serviceContext = null;
                 if (autoFieldMapBool) {
-                    serviceContext = this.modelMenu.getDispacher().getDispatchContext().makeValidContext(serviceNameExpanded, ModelService.IN_PARAM, context);
+                    serviceContext = WidgetWorker.getDispatcher(context).getDispatchContext().makeValidContext(serviceNameExpanded, ModelService.IN_PARAM, context);
                 } else {
                     serviceContext = FastMap.newInstance();
                 }
@@ -400,7 +415,7 @@ public abstract class ModelMenuAction {
                     }
                 }
 
-                Map<String, Object> result = this.modelMenu.getDispacher().runSync(serviceNameExpanded, serviceContext);
+                Map<String, Object> result = WidgetWorker.getDispatcher(context).runSync(serviceNameExpanded, serviceContext);
 
                 if (!this.resultMapNameAcsr.isEmpty()) {
                     this.resultMapNameAcsr.put(context, result);
@@ -423,9 +438,10 @@ public abstract class ModelMenuAction {
             finder = new PrimaryKeyFinder(entityOneElement);
         }
 
+        @Override
         public void runAction(Map<String, Object> context) {
             try {
-                finder.runFind(context, this.modelMenu.getDelegator());
+                finder.runFind(context, WidgetWorker.getDelegator(context));
             } catch (GeneralException e) {
                 String errMsg = "Error doing entity query by condition: " + e.toString();
                 Debug.logError(e, errMsg, module);
@@ -442,9 +458,10 @@ public abstract class ModelMenuAction {
             finder = new ByAndFinder(entityAndElement);
         }
 
+        @Override
         public void runAction(Map<String, Object> context) {
             try {
-                finder.runFind(context, this.modelMenu.getDelegator());
+                finder.runFind(context, WidgetWorker.getDelegator(context));
             } catch (GeneralException e) {
                 String errMsg = "Error doing entity query by condition: " + e.toString();
                 Debug.logError(e, errMsg, module);
@@ -461,9 +478,10 @@ public abstract class ModelMenuAction {
             finder = new ByConditionFinder(entityConditionElement);
         }
 
+        @Override
         public void runAction(Map<String, Object> context) {
             try {
-                finder.runFind(context, this.modelMenu.getDelegator());
+                finder.runFind(context, WidgetWorker.getDelegator(context));
             } catch (GeneralException e) {
                 String errMsg = "Error doing entity query by condition: " + e.toString();
                 Debug.logError(e, errMsg, module);

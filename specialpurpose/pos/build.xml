@@ -41,32 +41,13 @@ under the License.
         <fileset dir="../../framework/service/lib" includes="*.jar"/>
         <fileset dir="../../framework/service/build/lib" includes="*.jar"/>
         <fileset dir="../../framework/entityext/build/lib" includes="*.jar"/>
-        <fileset dir="../../framework/guiapp/lib" includes="*.jar"/>
-        <fileset dir="../../framework/guiapp/build/lib" includes="*.jar"/>
+        <fileset dir="../../framework/minilang/build/lib" includes="*.jar"/>
+        <fileset dir="../../framework/webapp/build/lib" includes="*.jar"/>
         <fileset dir="../../applications/party/build/lib" includes="*.jar"/>
         <fileset dir="../../applications/product/build/lib" includes="*.jar"/>
         <fileset dir="../../applications/order/build/lib" includes="*.jar"/>
         <fileset dir="../../applications/accounting/build/lib" includes="*.jar"/>
+      
+      
     </path>
-
-    <!-- ================================================================== -->
-    <!-- Compilation of the source files                                                                                                                         -->
-    <!-- ================================================================== -->
-
-    <target name="classes" depends="prepare">
-        <javac15/>
-    </target>
-
-    <!-- ================================================================== -->
-    <!-- Build JavaDoc                                                      -->
-    <!-- ================================================================== -->
-
-    <target name="docs" depends="prepare-docs">
-        <javadoc packagenames="org.ofbiz.pos.*"
-                 classpathref="local.class.path"
-                 destdir="${build.dir}/javadocs"
-                 Windowtitle="Open for Business - ${desc}">
-            <sourcepath path="${src.dir}"/>
-        </javadoc>
-    </target>
 </project>

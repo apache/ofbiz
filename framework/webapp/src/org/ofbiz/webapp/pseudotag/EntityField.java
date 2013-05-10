@@ -27,6 +27,7 @@ import java.util.Map;
 import javax.servlet.jsp.JspWriter;
 import javax.servlet.jsp.PageContext;
 
+import org.ofbiz.base.util.UtilGenerics;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
 import org.ofbiz.entity.model.ModelEntity;
@@ -121,8 +122,8 @@ public class EntityField {
                         fieldObject = defaultStr;
                         fieldObjectType = "comment"; // Default for NULL objects.
                     }
-                } else if (attrObject instanceof Map) {
-                    Map valueMap = (Map) attrObject;
+                } else if (attrObject instanceof Map<?, ?>) {
+                    Map<String, ?> valueMap = UtilGenerics.cast(attrObject);
 
                     fieldObject = valueMap.get(field);
                     fieldObjectType = "comment"; // Default for NULL objects.
@@ -164,10 +165,9 @@ public class EntityField {
         // Get the Locale from the Request object.
         Locale userLocale = null;
 
-        if (false) {
-            // disable this until we get i18n issues addressed
-            userLocale = pageContext.getRequest().getLocale();
-        }
+        // disable this until we get i18n issues addressed
+        //userLocale = pageContext.getRequest().getLocale();
+        
         if (userLocale == null) {
             userLocale = Locale.getDefault();
         }

@@ -30,31 +30,31 @@ context.imageFilenameFormat = imageFilenameFormat;
 context.imageServerPath = imageServerPath;
 context.imageUrlPrefix = imageUrlPrefix;
 
-filenameExpander = new FlexibleStringExpander(imageFilenameFormat);
+filenameExpander = FlexibleStringExpander.getInstance(imageFilenameFormat);
 context.imageNameSmall = imageUrlPrefix + "/" + filenameExpander.expandString([size : 'small', configItemId : configItemId]);
 
 // Start ProdConfItemContent stuff
 productContent = null;
 if (configItem) {
-    productContent = configItem.getRelated("ProdConfItemContent", null, ['confItemContentTypeId']);
+    productContent = configItem.getRelated("ProdConfItemContent", null, ['confItemContentTypeId'], false);
 }
 context.productContent = productContent;
 
 productContentDatas = [];
 productContent.each { productContent ->
-    content = productContent.getRelatedOne("Content");
+    content = productContent.getRelatedOne("Content", false);
     productContentDatas.add([productContent : productContent, content : content]);
 }
 
-updateProductContentWrapper = new HtmlFormWrapper("component://product/webapp/catalog/config/ConfigForms.xml", "UpdateProductConfigItemContentAssoc", request, response);
+updateProductContentWrapper = new HtmlFormWrapper("component://product/widget/catalog/ConfigForms.xml", "UpdateProductConfigItemContentAssoc", request, response);
 context.updateProductContentWrapper = updateProductContentWrapper;
 updateProductContentWrapper.putInContext("productContentDatas", productContentDatas);
 
-prepareAddProductContentWrapper = new HtmlFormWrapper("component://product/webapp/catalog/config/ConfigForms.xml", "PrepareAddProductConfigItemContentAssoc", request, response);
+prepareAddProductContentWrapper = new HtmlFormWrapper("component://product/widget/catalog/ConfigForms.xml", "PrepareAddProductConfigItemContentAssoc", request, response);
 context.prepareAddProductContentWrapper = prepareAddProductContentWrapper;
 prepareAddProductContentWrapper.putInContext("configItem", configItem);
 
-addProductContentWrapper = new HtmlFormWrapper("component://product/webapp/catalog/config/ConfigForms.xml", "AddProductConfigItemContentAssoc", request, response);
+addProductContentWrapper = new HtmlFormWrapper("component://product/widget/catalog/ConfigForms.xml", "AddProductConfigItemContentAssoc", request, response);
 context.addProductContentWrapper = addProductContentWrapper;
 addProductContentWrapper.putInContext("configItem", configItem);
 
@@ -82,7 +82,7 @@ if (fileType) {
     context.fileType = fileType;
 
     fileNameToUse = "productConfigItem." + configItemId;
-    fileLocation = filenameExpander.expandString(['size', fileType, configItemId, configItemId]);
+    fileLocation = filenameExpander.expandString([size : fileType, configItemId : configItemId]);
     filePathPrefix = "";
     filenameToUse = fileLocation;
     if (fileLocation.lastIndexOf("/") != -1) {

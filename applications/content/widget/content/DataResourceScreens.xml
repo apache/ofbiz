@@ -25,6 +25,7 @@ under the License.
                 <set field="headerItem" value="DataResource"/>
                 <set field="tabButtonItem" value="findDataResource"/>
                 <set field="titleProperty" value="PageTitleFindDataResource"/>
+                <set field="labelTitleProperty" value="PageTitleFindDataResource"/>
                 <set field="viewIndex" from-field="requestParameters.VIEW_INDEX" type="Integer"/>
                 <set field="viewSize" from-field="requestParameters.VIEW_SIZE" type="Integer" default-value="30"/>
             </actions>
@@ -33,7 +34,7 @@ under the License.
                     <decorator-section name="body">
                         <decorator-screen name="FindScreenDecorator" location="component://common/widget/CommonScreens.xml">
                             <decorator-section name="menu-bar">
-                                <container style="button-bar"><link target="EditDataResource" text="${uiLabelMap.CommonCreateNew}" style="buttontext"/></container>
+                                <container style="button-bar"><link target="EditDataResource" text="${uiLabelMap.CommonCreateNew}" style="buttontext create"/></container>
                             </decorator-section>
                             <decorator-section name="search-options">
                                 <include-form name="FindDataResource" location="component://content/widget/content/DataResourceForms.xml"/>
@@ -65,7 +66,6 @@ under the License.
     <screen name="navigateDataResource">
         <section>
             <actions>
-                <set field="layoutSettings.javaScripts[+0]" value="/images/dojo/dojo.js" global="true"/>
                 <set field="titleProperty" value="PageTitleNavigateDataResources"/>
                 <set field="tabButtonItem" value="navigateDataResource"/>
                 <set field="labelTitleProperty" value="PageTitleNavigateDataResources"/>
@@ -78,21 +78,10 @@ under the License.
                     <decorator-section name="body">
                         <section>
                             <widgets>
-                                <container id="cmsnav" style="left-border">
-                                    <container style="screenlet">
-                                        <container style="screenlet-title-bar">
-                                            <container style="h3">
-                                                <label text="${uiLabelMap.PageTitleNavigateDataResources}"/>
-                                            </container>
-                                        </container>
-                                        <container style="screenlet-body">
-                                            <section>
-                                                <widgets>
-                                                    <include-screen name="navigateMenu"/>
-                                                </widgets>
-                                            </section>
-                                        </container>
-                                    </container>
+                                <container id="cmsnav" style="left">
+                                    <screenlet title="${uiLabelMap.PageTitleNavigateDataResources}">
+                                        <include-screen name="navigateMenu"/>
+                                    </screenlet>
                                 </container>
                                 <container id="content-main-section" style="leftonly">
                                     <container id="cmscontent">
@@ -133,16 +122,9 @@ under the License.
                 <property-map resource="ContentUiLabels" map-name="uiLabelMap" global="true"/>
             </actions>
             <widgets>
-                <container style="screenlet">
-                    <container style="screenlet-title-bar">
-                        <container style="h3">
-                            <label text="${uiLabelMap.PageTitleNavigateDataResources}"/>
-                        </container>
-                    </container>
-                    <container style="screenlet-body">
-                        <include-form name="ListDataResource" location="component://content/widget/content/DataResourceForms.xml"/>
-                    </container>
-                </container>
+                <screenlet title="${uiLabelMap.PageTitleNavigateDataResources}">
+                    <include-form name="ListDataResource" location="component://content/widget/content/DataResourceForms.xml"/>
+                </screenlet>
             </widgets>
         </section>
     </screen>
@@ -171,36 +153,29 @@ under the License.
         <section>
             <actions>
                 <set field="titleProperty" value="PageTitleEditDataResource"/>
+                <set field="labelTitleProperty" value="PageTitleEditDataResource"/>
                 <set field="headerItem" value="DataResource"/>
                 <set field="tabButtonItem" value="editDataResource"/>
                 <set field="dataResourceId" from-field="parameters.dataResourceId"/>
                 <entity-one entity-name="DataResource" value-field="currentValue"/>
+                <set field="dataResource" from-field="currentValue"/>
                 <entity-condition entity-name="DataCategory" list="dataCategoryList"/>
             </actions>
             <widgets>
                 <decorator-screen name="commonDataResourceDecorator" location="${parameters.mainDecoratorLocation}">
                     <decorator-section name="body">
-                        <container style="screenlet">
-                            <container style="screenlet-title-bar">
-                                <container style="h3">
-                                    <label text="${uiLabelMap.PageTitleEditDataResource}"/>
-                                </container>
-                            </container>
-                            <container style="screenlet-body">
-                                <section>
-                                    <widgets>
-                                        <include-form name="EditDataResource" location="component://content/widget/content/DataResourceForms.xml"/>
-                                    </widgets>
-                                </section>
-                            </container>
-                        </container>
+                        <screenlet title="${uiLabelMap.ContentContentsAssociatedToDataResource}">
+                            <include-form name="EditDataResource" location="component://content/widget/content/DataResourceForms.xml"/>
+                        </screenlet>
                         <section>
                             <condition>
                                 <not><if-empty field="currentValue"/></not>
                             </condition>
                             <widgets>
-                                <label text="${uiLabelMap.ContentContentsAssociatedToDataResource}" style="h3"/>
-                                <include-form name="ListContentsAssociatedToDataResource" location="component://content/widget/content/DataResourceForms.xml"/>
+                                <include-screen name="DataResourceViewLink"/>
+                                <screenlet title="${uiLabelMap.PageTitleEditDataResource}">
+                                    <include-form name="ListContentsAssociatedToDataResource" location="component://content/widget/content/DataResourceForms.xml"/>
+                                </screenlet>
                             </widgets>
                         </section>
                     </decorator-section>
@@ -228,6 +203,7 @@ under the License.
         <section>
             <actions>
                 <set field="titleProperty" value="PageTitleUploadImageDataResource"/>
+                <set field="labelTitleProperty" value="PageTitleUploadImageDataResource"/>
                 <set field="headerItem" value="DataResource"/>
                 <set field="tabButtonItem" value="uploadImage"/>
                 <entity-one entity-name="DataResource" value-field="currentValue">
@@ -263,6 +239,7 @@ under the License.
         <section>
             <actions>
                 <set field="titleProperty" value="PageTitleAddDataResourceText"/>
+                <set field="labelTitleProperty" value="PageTitleAddDataResourceText"/>
                 <set field="headerItem" value="DataResource"/>
                 <set field="tabButtonItem" value="adddataresourcetext"/>
             </actions>
@@ -279,6 +256,7 @@ under the License.
         <section>
             <actions>
                 <set field="titleProperty" value="PageTitleAddDataResourceUrl"/>
+                <set field="labelTitleProperty" value="PageTitleAddDataResourceUrl"/>
                 <set field="headerItem" value="DataResource"/>
                 <set field="tabButtonItem" value="adddataresourceurl"/>
             </actions>
@@ -296,6 +274,7 @@ under the License.
         <section>
             <actions>
                 <set field="titleProperty" value="PageTitleAddDataResourceUpload"/>
+                <set field="labelTitleProperty" value="PageTitleAddDataResourceUpload"/>
                 <set field="headerItem" value="DataResource"/>
                 <set field="tabButtonItem" value="adddataresourceupload"/>
             </actions>
@@ -308,10 +287,28 @@ under the License.
             </widgets>
         </section>
     </screen>
+    <screen name="AddDataResourceFromContent">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleAddDataResourceFromContent"/>
+                <set field="labelTitleProperty" value="PageTitleAddDataResourceFromContent"/>
+                <set field="headerItem" value="DataResource"/>
+                <set field="tabButtonItem" value="adddataresource"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="commonDataResourceDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <include-form name="AddDataResourceFromContent" location="component://content/widget/content/DataResourceForms.xml"/>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
     <screen name="EditDataResourceText">
         <section>
             <actions>
                 <set field="titleProperty" value="PageTitleEditDataResourceText"/>
+                <set field="labelTitleProperty" value="PageTitleEditDataResourceText"/>
                 <set field="headerItem" value="DataResource"/>
                 <set field="tabButtonItem" value="editdataresourcetext"/>
             </actions>
@@ -328,6 +325,7 @@ under the License.
         <section>
             <actions>
                 <set field="titleProperty" value="PageTitleEditDataResourceUrl"/>
+                <set field="labelTitleProperty" value="PageTitleEditDataResourceUrl"/>
                 <set field="headerItem" value="DataResource"/>
                 <set field="tabButtonItem" value="editdataresourceurl"/>
             </actions>
@@ -344,6 +342,7 @@ under the License.
         <section>
             <actions>
                 <set field="titleProperty" value="PageTitleEditDataResourceUpload"/>
+                <set field="labelTitleProperty" value="PageTitleEditDataResourceUpload"/>
                 <set field="headerItem" value="DataResource"/>
                 <set field="tabButtonItem" value="editdataresourceupload"/>
             </actions>
@@ -360,6 +359,7 @@ under the License.
         <section>
             <actions>
                 <set field="titleProperty" value="PageTitleEditElectronicText"/>
+                <set field="labelTitleProperty" value="PageTitleEditElectronicText"/>
                 <set field="headerItem" value="DataResource"/>
                 <set field="tabButtonItem" value="editElectronicText"/>
                 <entity-one entity-name="DataResource" value-field="currentValue"/>
@@ -367,20 +367,9 @@ under the License.
             <widgets>
                 <decorator-screen name="commonDataResourceDecorator" location="${parameters.mainDecoratorLocation}">
                     <decorator-section name="body">
-                        <container style="screenlet">
-                            <container style="screenlet-title-bar">
-                                <container style="h3">
-                                    <label text="${uiLabelMap.PageTitleEditElectronicText}"/>
-                                </container>
-                            </container>
-                            <container style="screenlet-body">
-                                <section>
-                                    <widgets>
-                                        <include-form name="EditElectronicText" location="component://content/widget/content/DataResourceForms.xml"/>
-                                    </widgets>
-                                </section>
-                            </container>
-                        </container>
+                        <screenlet title="${uiLabelMap.PageTitleEditElectronicText}">
+                            <include-form name="EditElectronicText" location="component://content/widget/content/DataResourceForms.xml"/>
+                        </screenlet>
                     </decorator-section>
                 </decorator-screen>
             </widgets>
@@ -390,6 +379,7 @@ under the License.
         <section>
             <actions>
                 <set field="titleProperty" value="PageTitleEditDataResourceAttribute"/>
+                <set field="labelTitleProperty" value="PageTitleEditDataResourceAttribute"/>
                 <set field="headerItem" value="DataResource"/>
                 <set field="tabButtonItem" value="editDataResourceAttribute"/>
                 <entity-one entity-name="DataResource" value-field="currentValue">
@@ -413,6 +403,7 @@ under the License.
         <section>
             <actions>
                 <set field="titleProperty" value="PageTitleEditDataResourceRole"/>
+                <set field="labelTitleProperty" value="PageTitleEditDataResourceRole"/>
                 <set field="headerItem" value="DataResource"/>
                 <set field="tabButtonItem" value="editDataResourceRole"/>
                 <entity-one entity-name="DataResource" value-field="currentValue">
@@ -436,6 +427,7 @@ under the License.
         <section>
             <actions>
                 <set field="titleProperty" value="PageTitleEditDataResourceProductFeatures"/>
+                <set field="labelTitleProperty" value="PageTitleEditDataResourceProductFeatures"/>
                 <set field="headerItem" value="DataResource"/>
                 <set field="tabButtonItem" value="editDataResourceProductFeatures"/>
                 <entity-one entity-name="DataResource" value-field="currentValue">
@@ -459,6 +451,7 @@ under the License.
         <section>
             <actions>
                 <set field="titleProperty" value="PageTitleEditHtmlText"/>
+                <set field="labelTitleProperty" value="PageTitleEditHtmlText"/>
                 <set field="headerItem" value="DataResource"/>
                 <set field="tabButtonItem" value="editHtmlText"/>
                 <entity-one entity-name="DataResource" value-field="currentValue"/>
@@ -466,22 +459,33 @@ under the License.
             <widgets>
                 <decorator-screen name="commonDataResourceDecorator" location="${parameters.mainDecoratorLocation}">
                     <decorator-section name="body">
-                        <container style="screenlet">
-                            <container style="screenlet-title-bar">
-                                <container style="h3">
-                                    <label text="${uiLabelMap.PageTitleEditHtmlText}"/>
-                                </container>
-                            </container>
-                            <container style="screenlet-body">
-                                <section>
-                                    <widgets>
-                                        <include-form name="EditHtmlText" location="component://content/widget/content/DataResourceForms.xml"/>
-                                    </widgets>
-                                </section>
-                            </container>
-                        </container>
+                        <screenlet title="${uiLabelMap.PageTitleEditHtmlText}">
+                            <include-form name="EditHtmlText" location="component://content/widget/content/DataResourceForms.xml"/>
+                        </screenlet>
                     </decorator-section>
                 </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="DataResourceViewLink">
+        <section>
+            <condition>
+                <or>
+                    <if-compare field="dataResource.mimeTypeId" operator="equals" value="application/msword"/>
+                    <if-compare field="dataResource.mimeTypeId" operator="equals" value="application/pdf"/>
+                    <if-compare field="dataResource.mimeTypeId" operator="equals" value="application/vnd.oasis.opendocument.text"/>
+                    <if-compare field="dataResource.mimeTypeId" operator="equals" value="image/jpeg"/>
+                    <if-compare field="dataResource.mimeTypeId" operator="equals" value="image/gif"/>
+                    <if-compare field="dataResource.mimeTypeId" operator="equals" value="image/tiff"/>
+                    <if-compare field="dataResource.mimeTypeId" operator="equals" value="image/png"/>
+                </or>
+            </condition>
+            <widgets>
+                <container>
+                    <link target="ViewBinaryDataResource" text="${uiLabelMap.ContentDownload}" style="buttontext">
+                        <parameter param-name="dataResourceId"/>
+                   </link>
+                </container>
             </widgets>
         </section>
     </screen>

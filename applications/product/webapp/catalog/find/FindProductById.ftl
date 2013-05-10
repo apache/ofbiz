@@ -19,17 +19,17 @@ under the License.
 
 
 <div class="screenlet">
-    <div class="screenlet-header">
-        <div class="boxhead">${uiLabelMap.ProductFindProductWithIdValue}</div>
+    <div class="screenlet-title-bar">
+      <div class="h3">${uiLabelMap.ProductFindProductWithIdValue}</div>
     </div>
     <div class="screenlet-body">
         <form name="idsearchform" method="post" action="<@ofbizUrl>FindProductById</@ofbizUrl>" style="margin: 0;">
-          <span class="label">${uiLabelMap.CommonId} ${uiLabelMap.CommonValue}:</span> <input type="text" name="idValue" size="20" maxlength="50" value="${idValue?if_exists}">&nbsp;<a href="javascript:document.idsearchform.submit()" class="buttontext">${uiLabelMap.CommonFind}</a>
+          <span class="label">${uiLabelMap.CommonId} ${uiLabelMap.CommonValue}:</span> <input type="text" name="idValue" size="20" maxlength="50" value="${idValue?if_exists}" />&nbsp;<a href="javascript:document.idsearchform.submit()" class="buttontext">${uiLabelMap.CommonFind}</a>
         </form>
-        <br/>
+        <br />
         <h1>${uiLabelMap.ProductSearchResultsWithIdValue}: ${idValue?if_exists}</h1>
         <#if !goodIdentifications?has_content && !idProduct?has_content>
-          <br/>
+          <br />
           <h2>&nbsp;${uiLabelMap.ProductNoResultsFound}.</h2>
         <#else/>
           <table cellspacing="0" class="basic-table">
@@ -53,8 +53,8 @@ under the License.
                 <#else>
                   <#assign rowClass = "2">
                 </#if>
-                <#assign product = goodIdentification.getRelatedOneCache("Product")/>
-                <#assign goodIdentificationType = goodIdentification.getRelatedOneCache("GoodIdentificationType")/>
+                <#assign product = goodIdentification.getRelatedOne("Product", true)/>
+                <#assign goodIdentificationType = goodIdentification.getRelatedOne("GoodIdentificationType", true)/>
                 <tr valign="middle"<#if rowClass == "1"> class="alternate-row"</#if>>
                     <td>
                         ${product.productId}

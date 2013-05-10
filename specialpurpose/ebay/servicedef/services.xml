@@ -30,8 +30,9 @@ under the License.
         <description>Export products to eBay</description>
         <attribute type="List" mode="IN" name="selectResult" optional="false"/>
         <attribute type="String" mode="IN" name="country" optional="false"/>
-        <attribute type="String" mode="IN" name="location" optional="false"/>
-        <attribute type="String" mode="IN" name="ebayCategory" optional="false"/>
+        <attribute type="String" mode="IN" name="location" optional="true"/>
+        <attribute type="String" mode="IN" name="webSiteUrl" optional="false"/>
+        <attribute type="String" mode="IN" name="ebayCategory" optional="true"/>
         <attribute type="String" mode="IN" name="paymentPayPal" optional="true"/>
         <attribute type="String" mode="IN" name="paymentVisaMC" optional="true"/>
         <attribute type="String" mode="IN" name="paymentAmEx" optional="true"/>
@@ -46,13 +47,16 @@ under the License.
         <attribute type="String" mode="IN" name="paymentPersonalCheck" optional="true"/>
         <attribute type="String" mode="IN" name="payPalEmail" optional="true"/>
         <attribute type="String" mode="IN" name="listingDuration" optional="false"/>
-        <attribute type="String" mode="IN" name="startPrice" optional="false"/>
-        <attribute type="String" mode="IN" name="quantity" optional="false"/>
+        <attribute type="String" mode="IN" name="startPrice" optional="true"/>
+        <attribute type="String" mode="IN" name="quantity" optional="true"/>
+        <attribute type="String" mode="IN" name="productStoreId" optional="true"/>
+        <attribute type="String" mode="IN" name="customXml" optional="true" allow-html="any"/>
     </service>
     <service name="getEbayCategories" engine="java"
              location="org.ofbiz.ebay.ProductsExportToEbay" invoke="getEbayCategories" auth="true">
         <description>Get the list of eBay categories</description>
         <attribute type="String" mode="IN" name="categoryCode" optional="true"/>
+        <attribute type="String" mode="IN" name="productStoreId" optional="true"/>
         <attribute type="List" mode="OUT" name="categories" optional="true"/>
     </service>
 
@@ -105,4 +109,59 @@ under the License.
         <attribute type="String" mode="IN" name="paid" optional="true"/>
         <attribute type="String" mode="IN" name="shipped" optional="true"/>
     </service>
+    
+    <!-- Import Orders Services -->
+    <service name="getEbayOrders" engine="java" transaction-timeout="300"
+             location="org.ofbiz.ebay.EbayOrderServices" invoke="getEbayOrders" auth="true">
+        <description>Get Orders from eBay</description>
+        <attribute name="productStoreId" type="String" mode="IN" optional="false"/>
+        <attribute name="fromDate" type="String" mode="IN" optional="false"/>
+        <attribute name="thruDate" type="String" mode="IN" optional="false"/>
+        <attribute name="orderList" type="List" mode="OUT" optional="true"/>
+    </service>
+    
+    <service name="importEbayOrders" engine="java" transaction-timeout="7200"
+             location="org.ofbiz.ebay.EbayOrderServices" invoke="importEbayOrders" auth="true">
+        <description>Import Order from eBay</description>
+        <attribute name="productStoreId" type="String" mode="IN" optional="false"/>
+        <attribute name="externalId" type="String" mode="IN" optional="false"/>
+        <attribute name="emailBuyer" type="String" mode="IN" optional="true"/>
+        <attribute name="amountPaid" type="String" mode="IN" optional="true"/>                
+        <attribute name="createdDate" type="String" mode="IN" optional="false"/>
+        <attribute name="paidTime" type="String" mode="IN" optional="true"/>
+        <attribute name="shippedTime" type="String" mode="IN" optional="true"/>
+        <attribute name="ebayUserIdBuyer" type="String" mode="IN" optional="true"/>
+        <attribute name="orderList" type="List" mode="IN" optional="true"/>
+    </service>
+    
+    <service name="createEbayConfiguration" default-entity-name="EbayConfig" engine="entity-auto" invoke="create" auth="true">
+        <description>Create a EbayConfiguration</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true" allow-html="any"/>
+    </service>
+    <service name="updateEbayConfiguration" default-entity-name="EbayConfig" engine="entity-auto" invoke="update" auth="true">
+        <description>Update a EbayConfiguration</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true" allow-html="any"/>
+    </service>
+    <service name="deleteEbayConfiguration" default-entity-name="EbayConfig" engine="entity-auto" invoke="delete" auth="true">
+        <description>Delete a EbayConfiguration</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+    </service>
+    
+    <service name="createEbayShippingMethod" default-entity-name="EbayShippingMethod" engine="entity-auto" invoke="create" auth="true">
+        <description>Create a EbayShippingMethod</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="updateEbayShippingMethod" default-entity-name="EbayShippingMethod" engine="entity-auto" invoke="update" auth="true">
+        <description>Update a EbayShippingMethod</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="deleteEbayShippingMethod" default-entity-name="EbayShippingMethod" engine="entity-auto" invoke="delete" auth="true">
+        <description>Delete a EbayShippingMethod</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+    </service>
+    
 </services>

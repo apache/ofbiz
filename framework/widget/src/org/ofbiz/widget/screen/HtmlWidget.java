@@ -21,6 +21,7 @@ package org.ofbiz.widget.screen;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -41,6 +42,7 @@ import org.ofbiz.widget.html.HtmlWidgetRenderer;
 import org.w3c.dom.Element;
 
 import freemarker.ext.beans.BeansWrapper;
+import freemarker.ext.beans.CollectionModel;
 import freemarker.ext.beans.StringModel;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
@@ -55,12 +57,13 @@ import freemarker.template.TemplateModelException;
 public class HtmlWidget extends ModelScreenWidget {
     public static final String module = HtmlWidget.class.getName();
 
-    public static UtilCache<String, Template> specialTemplateCache = new UtilCache<String, Template>("widget.screen.template.ftl.general", 0, 0, false);
-    protected static BeansWrapper specialBeansWrapper = new ExtendedWrapper();
-    protected static Configuration specialConfig = FreeMarkerWorker.makeConfiguration(specialBeansWrapper);
+    private static final UtilCache<String, Template> specialTemplateCache = UtilCache.createUtilCache("widget.screen.template.ftl.general", 0, 0, false);
+    protected static Configuration specialConfig = FreeMarkerWorker.makeConfiguration(FreeMarkerWorker.configureBeansWrapper(new ExtendedWrapper()));
 
     // not sure if this is the best way to get FTL to use my fancy MapModel derivative, but should work at least...
     public static class ExtendedWrapper extends BeansWrapper {
+        @SuppressWarnings("unchecked")
+        @Override
         public TemplateModel wrap(Object object) throws TemplateModelException {
             /* NOTE: don't use this and the StringHtmlWrapperForFtl or things will be double-encoded
             if (object instanceof GenericValue) {
@@ -70,6 +73,9 @@ public class HtmlWidget extends ModelScreenWidget {
             // and handles most things without causing too many problems
             if (object instanceof String) {
                 return new StringHtmlWrapperForFtl((String) object, this);
+            } else if (object instanceof Collection && !(object instanceof Map)) {
+                // An additional wrapper to ensure ${aCollection} is properly encoded for html
+                return new CollectionHtmlWrapperForFtl((Collection) object, this);
             }
             return super.wrap(object);
         }
@@ -79,9 +85,24 @@ public class HtmlWidget extends ModelScreenWidget {
         public StringHtmlWrapperForFtl(String str, BeansWrapper wrapper) {
             super(str, wrapper);
         }
+        @Override
         public String getAsString() {
             return StringUtil.htmlEncoder.encode(super.getAsString());
         }
+    }
+
+    public static class CollectionHtmlWrapperForFtl extends CollectionModel {
+
+        @SuppressWarnings("unchecked")
+        public CollectionHtmlWrapperForFtl(Collection collection, BeansWrapper wrapper) {
+            super(collection, wrapper);
+        }
+
+        @Override
+        public String getAsString() {
+            return StringUtil.htmlEncoder.encode(super.getAsString());
+        }
+
     }
 
     // End Static, begin class section
@@ -102,12 +123,14 @@ public class HtmlWidget extends ModelScreenWidget {
         }
     }
 
+    @Override
     public void renderWidgetString(Appendable writer, Map<String, Object> context, ScreenStringRenderer screenStringRenderer) throws GeneralException, IOException {
         for (ModelScreenWidget subWidget : subWidgets) {
             subWidget.renderWidgetString(writer, context, screenStringRenderer);
         }
     }
 
+    @Override
     public String rawString() {
         StringBuilder buffer = new StringBuilder("<html-widget>");
         for (ModelScreenWidget subWidget : subWidgets) {
@@ -241,10 +264,12 @@ public class HtmlWidget extends ModelScreenWidget {
             this.locationExdr = FlexibleStringExpander.getInstance(htmlTemplateElement.getAttribute("location"));
         }
 
+        @Override
         public void renderWidgetString(Appendable writer, Map<String, Object> context, ScreenStringRenderer screenStringRenderer) {
             renderHtmlTemplate(writer, this.locationExdr, context);
         }
 
+        @Override
         public String rawString() {
             return "<html-template location=\"" + this.locationExdr.getOriginal() + "\"/>";
         }
@@ -265,10 +290,11 @@ public class HtmlWidget extends ModelScreenWidget {
             }
         }
 
+        @Override
         public void renderWidgetString(Appendable writer, Map<String, Object> context, ScreenStringRenderer screenStringRenderer) {
             // isolate the scope
             MapStack<String> contextMs;
-            if (!(context instanceof MapStack)) {
+            if (!(context instanceof MapStack<?>)) {
                 contextMs = MapStack.create(context);
                 context = contextMs;
             } else {
@@ -288,6 +314,7 @@ public class HtmlWidget extends ModelScreenWidget {
             contextMs.pop();
         }
 
+        @Override
         public String rawString() {
             return "<html-template-decorator location=\"" + this.locationExdr.getOriginal() + "\"/>";
         }
@@ -305,11 +332,13 @@ public class HtmlWidget extends ModelScreenWidget {
             this.subWidgets = ModelScreenWidget.readSubWidgets(this.modelScreen, subElementList);
         }
 
+        @Override
         public void renderWidgetString(Appendable writer, Map<String, Object> context, ScreenStringRenderer screenStringRenderer) throws GeneralException, IOException {
             // render sub-widgets
             renderSubWidgetsString(this.subWidgets, writer, context, screenStringRenderer);
         }
 
+        @Override
         public String rawString() {
             return "<html-template-decorator-section name=\"" + this.name + "\"/>";
         }

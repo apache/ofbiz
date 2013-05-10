@@ -84,8 +84,7 @@ public class ServiceArtifactInfo extends ArtifactInfoBase {
             // we can do something with this!
             SimpleMethod simpleMethodToCall = null;
             try {
-                Map<String, SimpleMethod> simpleMethods = SimpleMethod.getSimpleMethods(this.modelService.location, null);
-                simpleMethodToCall = (SimpleMethod) simpleMethods.get(this.modelService.invoke);
+                simpleMethodToCall = SimpleMethod.getSimpleMethod(this.modelService.location, this.modelService.invoke,null);
             } catch (MiniLangException e) {
                 Debug.logWarning("Error getting Simple-method [" + this.modelService.invoke + "] in [" + this.modelService.location + "] referenced in service [" + this.modelService.name + "]: " + e.toString(), module);
             }
@@ -145,8 +144,7 @@ public class ServiceArtifactInfo extends ArtifactInfoBase {
             // we can do something with this!
             SimpleMethod simpleMethodToCall = null;
             try {
-                Map<String, SimpleMethod> simpleMethods = SimpleMethod.getSimpleMethods(this.modelService.location, null);
-                simpleMethodToCall = (SimpleMethod) simpleMethods.get(this.modelService.invoke);
+                simpleMethodToCall = SimpleMethod.getSimpleMethod(this.modelService.location, this.modelService.invoke,null);
             } catch (MiniLangException e) {
                 Debug.logWarning("Error getting Simple-method [" + this.modelService.invoke + "] in [" + this.modelService.location + "] referenced in service [" + this.modelService.name + "]: " + e.toString(), module);
             }
@@ -234,6 +232,7 @@ public class ServiceArtifactInfo extends ArtifactInfoBase {
         this.displayPrefix = displayPrefix;
     }
 
+    @Override
     public String getDisplayName() {
         return this.getDisplayPrefixedName();
     }
@@ -241,18 +240,22 @@ public class ServiceArtifactInfo extends ArtifactInfoBase {
         return (this.displayPrefix != null ? this.displayPrefix : "") + this.modelService.name;
     }
 
+    @Override
     public String getDisplayType() {
         return "Service";
     }
 
+    @Override
     public String getType() {
         return ArtifactInfoFactory.ServiceInfoTypeId;
     }
 
+    @Override
     public String getUniqueId() {
         return this.modelService.name;
     }
 
+    @Override
     public URL getLocationURL() throws MalformedURLException {
         return FlexibleLocation.resolveLocation(this.modelService.definitionLocation, null);
     }
@@ -553,6 +556,7 @@ public class ServiceArtifactInfo extends ArtifactInfoBase {
         return topLevelMap;
     }
 
+    @Override
     public boolean equals(Object obj) {
         if (obj instanceof ServiceArtifactInfo) {
             return this.modelService.name.equals(((ServiceArtifactInfo) obj).modelService.name);

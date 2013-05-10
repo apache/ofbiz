@@ -29,26 +29,26 @@ invItemTypePrefix = context.invItemTypePrefix ?: "INV";
 invItemTypePrefix += "_%";
 
 organizationPartyId = parameters.organizationPartyId;
-
-invoiceItemTypes = delegator.findList("InvoiceItemType", EntityCondition.makeCondition("invoiceItemTypeId", EntityOperator.LIKE, invItemTypePrefix), null, null, null, false);
+exprBldr = new EntityConditionBuilder();
+invoiceItemTypes = delegator.findList("InvoiceItemType", exprBldr.LIKE(invoiceItemTypeId: invItemTypePrefix), null, null, null, false);
 allTypes = [];
 invoiceItemTypes.each { invoiceItemType ->
     activeGlDescription = "";
     remove = " ";
     glAccounts = null;
     glAccount = null;
-    invoiceItemTypeOrgs = invoiceItemType.getRelatedByAnd("InvoiceItemTypeGlAccount", [organizationPartyId : organizationPartyId]);
+    invoiceItemTypeOrgs = invoiceItemType.getRelated("InvoiceItemTypeGlAccount", [organizationPartyId : organizationPartyId], null, false);
     overrideGlAccountId = " ";
     if (invoiceItemTypeOrgs) {
         invoiceItemTypeOrg = invoiceItemTypeOrgs[0];
         overrideGlAccountId = invoiceItemTypeOrg.glAccountId;
 
-        glAccounts = invoiceItemTypeOrg.getRelated("GlAccount");
+        glAccounts = invoiceItemTypeOrg.getRelated("GlAccount", null, null, false);
         if (glAccounts) {
             glAccount = glAccounts[0];
         }
     } else {
-        glAccount = invoiceItemType.getRelatedOne("DefaultGlAccount");
+        glAccount = invoiceItemType.getRelatedOne("DefaultGlAccount", false);
     }
 
     if (glAccount) {

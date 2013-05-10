@@ -19,7 +19,7 @@ under the License.
 -->
 
 <simple-methods xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/simple-methods.xsd">
+    xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/simple-methods-v2.xsd">
 
     <!-- Timesheet Services -->
     <simple-method method-name="createTimesheet" short-description="Create Timesheet">
@@ -69,7 +69,9 @@ under the License.
         <if-empty field="timesheets">
                 <call-simple-method method-name="createTimesheet"/>
             <else>
-                <add-error><fail-message message="Time sheet already exist, not created an other one."/></add-error>
+                <add-error>
+                    <fail-property resource="WorkEffortUiLabels" property="WorkEffortTimesheetAlreadyExists"/>
+                </add-error>
                 <check-errors/>
             </else>
         </if-empty>
@@ -82,7 +84,9 @@ under the License.
        </iterate>
     </simple-method>
     <simple-method method-name="addTimesheetToInvoice" short-description="Add Timesheet to Invoice">
-        <check-permission permission="WORKEFFORTMGR" action="_CREATE"><fail-message message="You do not have permission to perform this operation: ${methodShortDescription}."/></check-permission>
+        <check-permission permission="WORKEFFORTMGR" action="_CREATE">
+            <fail-property resource="WorkEffortUiLabels" property="WorkEffortCreatePermissionError"/>
+        </check-permission>
         <check-errors/>
 
         <entity-one entity-name="Timesheet" value-field="timesheet"/>
@@ -103,14 +107,18 @@ under the License.
 
         <entity-one entity-name="Invoice" value-field="invoice"/>
         <if-empty field="invoice">
-            <add-error><fail-message message="Could not find invoice with ID [${invoiceId}], not adding Timesheet Entries to it."/></add-error>
+            <add-error>
+                <fail-property resource="WorkEffortUiLabels" property="WorkEffortTimesheetCannotFindInvoice"/>
+            </add-error>
             <check-errors/>
         </if-empty>
 
         <call-simple-method method-name="createTimeEntryInvoiceItemsInline"/>
     </simple-method>
     <simple-method method-name="addWorkEffortTimeToInvoice" short-description="Add Work Effort Time to Invoice">
-        <check-permission permission="WORKEFFORTMGR" action="_CREATE"><fail-message message="You do not have permission to perform this operation: ${methodShortDescription}."/></check-permission>
+        <check-permission permission="WORKEFFORTMGR" action="_CREATE">
+            <fail-property resource="WorkEffortUiLabels" property="WorkEffortCreatePermissionError"/>
+        </check-permission>
         <check-errors/>
         <entity-one entity-name="WorkEffort" value-field="workEffort"/>
         <if-empty field="parameters.invoiceId">
@@ -124,7 +132,9 @@ under the License.
         </if-empty>
         <entity-one entity-name="Invoice" value-field="invoice"/>
         <if-empty field="invoice">
-            <add-error><fail-message message="Could not find invoice with ID [${parameters.invoiceId}], not adding Timesheet Entries to it."/></add-error>
+            <add-error>
+                <fail-property resource="WorkEffortUiLabels" property="WorkEffortTimesheetCannotFindInvoice"/>
+            </add-error>
             <check-errors/>
         </if-empty>
         <!-- update currency, can be changed with regenerate -->
@@ -132,6 +142,9 @@ under the License.
         <entity-one entity-name="Party" value-field="party">
             <field-map field-name="partyId" value="${invoice.partyId}"/>
         </entity-one>
+        <if-empty field="party.preferredCurrencyUomId">
+            <property-to-field resource="general" property="currency.uom.id.default" field="party.preferredCurrencyUomId"/>
+        </if-empty>
         <set field="updateInvoiceMap.invoiceId" from-field="parameters.invoiceId"/>
         <set field="updateInvoiceMap.currencyUomId" from-field="party.preferredCurrencyUomId"/>
         <now-timestamp field="updateInvoiceMap.invoiceDate"/>
@@ -149,6 +162,16 @@ under the License.
         <set field="invoiceItemMap.taxableFlag" value="N"/>
         <set field="invoiceItemMap.invoiceItemTypeId" value="INV_TE_ITEM"/>
         <set field="invoiceItemMap.uomId" value="TF_hr"/>
+        <set field="invoiceItemMap.description" value="${workEffort.workEffortName} [Task:${workEffort.workEffortId}]"/>
+        <get-related value-field="workEffort" relation-name="CustRequestWorkEffort" list="custRequestWorkEfforts"/>
+        <if-not-empty field="custRequestWorkEfforts">
+            <first-from-list entry="custRequestWorkEffort" list="custRequestWorkEfforts"/>
+            <get-related-one value-field="custRequestWorkEffort" relation-name="CustRequest" to-value-field="custRequest"/>
+            <if-not-empty field="custRequest">
+                <set field="invoiceItemDescription" value="${custRequest.custRequestName} [CRQ:${custRequest.custRequestId}] ${custRequest.description}"/>
+                <set field="invoiceItemMap.description" value="${groovy:invoiceItemDescription.size()&gt;255?invoiceItemDescription.substring(0,251)+&quot; ...&quot;:invoiceItemDescription}"/>
+            </if-not-empty>
+        </if-not-empty>
         <iterate entry="timeEntry" list="timeEntryList">
             <if>
                 <condition>
@@ -182,12 +205,12 @@ under the License.
                                 <if-not-empty field="partyRates">
                                     <first-from-list entry="partyRate" list="partyRates"/>
                                     <if-not-empty field="partyRate.percentageUsed">
-                                        <calculate field="timeEntry.hours" type="BigDecimal">
+                                        <calculate field="timeEntry.hours" type="Double">
                                             <calcop operator="multiply" field="timeEntry.hours">
                                                 <calcop operator="get" field="partyRate.percentageUsed"/>
                                             </calcop>
                                         </calculate>
-                                        <calculate field="timeEntry.hours" type="BigDecimal">
+                                        <calculate field="timeEntry.hours" type="Double">
                                             <calcop operator="divide" field="timeEntry.hours">
                                                 <number value="100"/>
                                             </calcop>
@@ -200,29 +223,26 @@ under the License.
                             <call-service service-name="getTimeEntryRate" in-map-name="getTimeEntryRate">
                                 <result-to-field result-name="rateAmount"/>
                             </call-service>
-                            <!--  check if the RateTypeId changed or the first time entry record -->
+                            <!--  check if the RateTypeId changed or the first time entry record and invoice item is not exist with the same amount and description-->
+                            <entity-and list="existAmountAndDescriptionInvoiceItems" entity-name="InvoiceItem">
+                                <field-map field-name="invoiceId" from-field="invoiceItemMap.invoiceId"/>
+                                <field-map field-name="amount" from-field="rateAmount"/>
+                                <field-map field-name="description" from-field="invoiceItemMap.description"/>
+                            </entity-and>
+                            <set field="invoiceItemMap.invoiceItemSeqId" from-field="existAmountAndDescriptionInvoiceItems[0].invoiceItemSeqId"/>
                             <if>
                                 <condition>
-                                    <or>
-                                        <if-empty field="oldRateAmount"/>
-                                        <and>
-                                            <not><if-empty field="OldRateAmount"/></not>
+                                    <and>
+                                        <or>
+                                            <if-empty field="oldRateAmount"/>
                                             <if-compare-field field="rateAmount" operator="not-equals" to-field="oldRateAmount"/>
-                                        </and>
-                                    </or>
+                                        </or>
+                                        <if-empty field="existAmountAndDescriptionInvoiceItems"/>
+                                    </and>
                                 </condition>
                                 <then>
                                     <set field="invoiceItemMap.amount" from-field="rateAmount" default-value="0.0" type="BigDecimal"/>
                                     <if-compare field="parameters.combineInvoiceItem" operator="equals" value="Y" >
-                                        <set field="invoiceItemMap.description" value="${workEffort.workEffortName} [Task:${workEffort.workEffortId}]"/>
-                                        <get-related value-field="workEffort" relation-name="CustRequestWorkEffort" list="custRequestWorkEfforts"/>
-                                        <if-not-empty field="custRequestWorkEfforts">
-                                            <first-from-list entry="custRequestWorkEffort" list="custRequestWorkEfforts"/>
-                                            <get-related-one value-field="custRequestWorkEffort" relation-name="CustRequest" to-value-field="custRequest"/>
-                                            <if-not-empty field="custRequest">
-                                                <set field="invoiceItemMap.description" value="${custRequest.custRequestName} [CRQ:${custRequest.custRequestId}]"/>
-                                            </if-not-empty>
-                                        </if-not-empty>
                                         <set field="invoiceItemMap.quantity" from-field="timeEntry.hours" default-value="0.0" type="BigDecimal"/>
                                         <clear-field field="invoiceItemMap.invoiceItemSeqId"/><!-- make sure a new one is created -->
                                         <call-service service-name="createInvoiceItem" in-map-name="invoiceItemMap">
@@ -232,7 +252,8 @@ under the License.
                                 </then>
                                 <else>
                                     <if-compare field="parameters.combineInvoiceItem" operator="equals" value="Y" >
-                                        <!-- or combine them when it is the same rate -->
+                                        <!-- or combine them when it is the same rate, amount and description-->
+                                        <set field="invoiceItemMap.quantity" from-field="existAmountAndDescriptionInvoiceItems[0].quantity"/>
                                         <calculate field="invoiceItemMap.quantity">
                                             <calcop operator="get" field="invoiceItemMap.quantity"/>
                                             <calcop operator="add" field="timeEntry.hours"/>
@@ -260,14 +281,16 @@ under the License.
                             <set field="updTimeEntry.invoiceId" from-field="invoiceItemMap.invoiceId"/>
                             <set field="updTimeEntry.invoiceItemSeqId" from-field="invoiceItemMap.invoiceItemSeqId"/>
                             <call-service service-name="updateTimeEntry" in-map-name="updTimeEntry"/>
-                            <else>
+                            <!-- else>
                                 <log level="info" message="Timeentry: ${timeEntry.timeEntryId} already connected to invoiceId: ${timeEntry.invoiceId}...not added to invoiceItem"/>
-                            </else>
+                            </else-->
                         </if-empty>
                         <else>
                             <set field="errMsg" value="Invoice ${invoiceId} should have the status 'in progress', the status is however: ${invoice.statusId}"/>
                             <log level="error" message="${errMsg}"/>
-                            <add-error error-list-name="errorMessageList"><fail-message message="${errMsg}"/></add-error>
+                            <add-error error-list-name="errorMessageList">
+                                <fail-property resource="WorkEffortUiLabels" property="WorkEffortTimesheetInvoiceShuoldBeInProgressStatus"/>
+                            </add-error>
                             <return response-code="error"/>
                         </else>
                     </if-compare>
@@ -278,7 +301,9 @@ under the License.
 
     <!-- TimesheetRole Services -->
     <simple-method method-name="createTimesheetRole" short-description="Create TimesheetRole">
-        <check-permission permission="WORKEFFORTMGR" action="_CREATE"><fail-message message="You do not have permission to perform this operation: ${methodShortDescription}."/></check-permission>
+        <check-permission permission="WORKEFFORTMGR" action="_CREATE">
+            <fail-property resource="WorkEffortUiLabels" property="WorkEffortCreatePermissionError"/>
+        </check-permission>
         <check-errors/>
 
         <make-value value-field="newEntity" entity-name="TimesheetRole"/>
@@ -286,7 +311,9 @@ under the License.
         <create-value value-field="newEntity"/>
     </simple-method>
     <simple-method method-name="deleteTimesheetRole" short-description="Delete TimesheetRole">
-        <check-permission permission="WORKEFFORTMGR" action="_DELETE"><fail-message message="You do not have permission to perform this operation: ${methodShortDescription}."/></check-permission>
+        <check-permission permission="WORKEFFORTMGR" action="_DELETE">
+            <fail-property resource="WorkEffortUiLabels" property="WorkEffortCreatePermissionError"/>
+        </check-permission>
         <check-errors/>
 
         <entity-one entity-name="TimesheetRole" value-field="lookedUpValue"/>
@@ -312,17 +339,42 @@ under the License.
     </simple-method>
     <simple-method method-name="updateTimeEntry" short-description="Update TimeEntry">
         <entity-one entity-name="TimeEntry" value-field="lookedUpValue"/>
-        <!-- allow update of invoiceId and seqId if not yet filled, else check status -->
+        <call-simple-method method-name="checkTimesheetStatus"/>
+        
+        <!-- update all fields except invoiceId,invoiceItemSeqId and only those if they are not yet set -->
+        <map-to-map map="parameters" to-map="fieldsToCopy"/>
+        <clear-field field="fieldsToCopy.invoiceId"/>
+        <clear-field field="fieldsToCopy.invoiceItemSeqId"/>
+        
+        <!-- if dates are updated and no hours value is specified, calc it here -->
+        <if>
+            <condition>
+                <and>
+                    <if-empty field="fieldsToCopy.hours"/>
+                    <or>
+                        <not><if-empty field="fieldsToCopy.fromDate"/></not>
+                        <not><if-empty field="fieldsToCopy.thruDate"/></not>
+                    </or>
+                    <or>
+                        <if-compare-field field="fieldsToCopy.fromDate" operator="not-equals" to-field="lookedUpValue.fromDate"/>
+                        <if-compare-field field="fieldsToCopy.thruDate" operator="not-equals" to-field="lookedUpValue.thruDate"/>
+                    </or>
+                </and>
+            </condition>
+            <then>
+                <set field="fieldsToCopy.hours" value="${groovy:org.ofbiz.base.util.UtilDateTime.getInterval((fieldsToCopy.fromDate ? fieldsToCopy.fromDate : lookedUpValue.fromDate), (fieldsToCopy.thruDate ? fieldsToCopy.thruDate : lookedUpValue.thruDate))/3600000}" type="Double"/>
+            </then>
+        </if>
+        
+        <set-nonpk-fields map="fieldsToCopy" value-field="lookedUpValue"/>
+        
         <if-not-empty field="parameters.invoiceId">
             <if-empty field="lookedUpValue.invoiceId">
-            <set field="lookedUpValue.invoiceId" from-field="parameters.invoiceId"/>
-            <set field="lookedUpValue.invoiceItemSeqId" from-field="parameters.invoiceItemSeqId"/>
-            <else>
-                <call-simple-method method-name="checkTimesheetStatus"/>
-                <set-nonpk-fields map="parameters" value-field="lookedUpValue"/>
-            </else>
+                <set field="lookedUpValue.invoiceId" from-field="parameters.invoiceId"/>
+                <set field="lookedUpValue.invoiceItemSeqId" from-field="parameters.invoiceItemSeqId"/>
             </if-empty>
         </if-not-empty>
+        
         <store-value value-field="lookedUpValue"/>
     </simple-method>
     <simple-method method-name="deleteTimeEntry" short-description="Delete TimeEntry">
@@ -337,7 +389,9 @@ under the License.
         <store-value value-field="lookedUpValue"/>
     </simple-method>
     <simple-method method-name="getTimeEntryRate" short-description="Get TimeEntry Rate">
-        <check-permission permission="WORKEFFORTMGR" action="_VIEW"><fail-message message="You do not have permission to perform this operation: ${methodShortDescription}."/></check-permission>
+        <check-permission permission="WORKEFFORTMGR" action="_VIEW">
+            <fail-property resource="WorkEffortUiLabels" property="WorkEffortViewPermissionError"/>
+        </check-permission>
         <check-errors/>
 
         <entity-one entity-name="TimeEntry" value-field="timeEntry"/>
@@ -360,13 +414,16 @@ under the License.
     </simple-method>
 
     <!-- subroutines -->
-    <simple-method method-name="checkTimesheetStatus" short-description="Check access and if the timesheet is in progress">
+    <simple-method method-name="checkTimesheetStatus" short-description="Check access and if the timesheet is in progress, however do allow invoiceId to be updated when completed (need to invoice completed timesheets)">
         <if>
             <condition>
-                <or>
-                    <not><if-empty field="parameters.timesheetId"/></not>
-                    <not><if-empty field="lookedUpValue.timesheetId"/></not>
-                </or>
+                <and>
+                    <or>
+                        <not><if-empty field="parameters.timesheetId"/></not>
+                        <not><if-empty field="lookedUpValue.timesheetId"/></not>
+                    </or>
+                    <if-empty field="parameters.invoiceId"/>
+                </and>
             </condition>
             <then>
                 <if-empty field="parameters.timesheetId">
@@ -374,14 +431,18 @@ under the License.
                 </if-empty>
                 <entity-one entity-name="Timesheet" value-field="timesheet"/>
                 <if-empty field="timesheet">
-                    <add-error><fail-message message="Timesheet could not be found, timesheetId: ${parameters.timesheetId}"/></add-error>
+                    <add-error>
+                        <fail-property resource="WorkEffortUiLabels" property="WorkEffortTimesheetCouldNotBeFound"/>
+                    </add-error>
                     <log level="info" message="Timesheet not found, timesheet: ${parameters.timesheetId}"/>
                     <check-errors/>
                 </if-empty>
                 <!-- check if the status is in progress... -->
                 <if-compare field="timesheet.statusId" value="TIMESHEET_IN_PROCESS" operator="not-equals">
                     <get-related-one value-field="timesheet" relation-name="StatusItem" to-value-field="statusItem"/>
-                    <add-error><fail-message message="Can only update Timesheet, when status is in-process...current status: ${statusItem.description}"/></add-error>
+                    <add-error>
+                        <fail-property resource="WorkEffortUiLabels" property="WorkEffortTimesheetNotInProcessStatus"/>
+                    </add-error>
                     <log level="info" message="Can only update Timesheet, when status is in-process...is now: ${timesheet.statusId}"/>
                 </if-compare>
             </then>

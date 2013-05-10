@@ -20,32 +20,34 @@ under the License.
 <#assign shoppingCart = sessionAttributes.shoppingCart?if_exists>
 
 <div class="screenlet">
-    <div class="screenlet-header">
-        <div class="boxhead">${uiLabelMap.OrderOrderShortcuts}</div>
+    <div class="screenlet-title-bar">
+        <div class="h3">${uiLabelMap.OrderOrderShortcuts}</div>
     </div>
     <div class="screenlet-body">
         <ul>
             <#if shoppingCart.getOrderType() == "PURCHASE_ORDER">
-            <li><a href="<@ofbizUrl>RequirementsForSupplier</@ofbizUrl>" class="buttontext">${uiLabelMap.OrderRequirements}</a></li>
+              <li><a href="<@ofbizUrl>RequirementsForSupplier</@ofbizUrl>" class="buttontext">${uiLabelMap.OrderRequirements}</a></li>
+            </#if>
+            <#if shoppingCart.getOrderType()?has_content && shoppingCart.items()?has_content>
+              <li><a href="<@ofbizUrl>createQuoteFromCart?destroyCart=Y</@ofbizUrl>" class="buttontext">${uiLabelMap.OrderCreateQuoteFromCart}</a></li>
+              <li><a href="<@ofbizUrl>FindQuoteForCart</@ofbizUrl>" class="buttontext">${uiLabelMap.OrderOrderQuotes}</a></li>
             </#if>
             <#if shoppingCart.getOrderType() == "SALES_ORDER">
-            <li><a href="<@ofbizUrl>FindQuoteForCart</@ofbizUrl>" class="buttontext">${uiLabelMap.OrderOrderQuotes}</a></li>
-            <li><a href="<@ofbizUrl>createQuoteFromCart?destroyCart=Y</@ofbizUrl>" class="buttontext">${uiLabelMap.OrderCreateQuoteFromCart}</a></li>
-            <li><a href="<@ofbizUrl>createCustRequestFromCart?destroyCart=Y</@ofbizUrl>" class="buttontext">${uiLabelMap.OrderCreateCustRequestFromCart}</a></li>
+              <li><a href="<@ofbizUrl>createCustRequestFromCart?destroyCart=Y</@ofbizUrl>" class="buttontext">${uiLabelMap.OrderCreateCustRequestFromCart}</a></li>
             </#if>
             <li><a href="/partymgr/control/findparty?${externalKeyParam?if_exists}" class="buttontext">${uiLabelMap.PartyFindParty}</a></li>
-            <#if shoppingCart.getOrderType() == "SALES_ORDER" && shoppingCart.items()?has_content>
-            <li><a href="<@ofbizUrl>setCustomer</@ofbizUrl>" class="buttontext">${uiLabelMap.PartyCreateNewCustomer}</a></li>
+            <#if shoppingCart.getOrderType() == "SALES_ORDER">
+              <li><a href="<@ofbizUrl>setCustomer</@ofbizUrl>" class="buttontext">${uiLabelMap.PartyCreateNewCustomer}</a></li>
             </#if>
             <li><a href="<@ofbizUrl>checkinits</@ofbizUrl>" class="buttontext">${uiLabelMap.PartyChangeParty}</a></li>
             <#if security.hasEntityPermission("CATALOG", "_CREATE", session)>
-            <li><a href="/catalog/control/EditProduct?${externalKeyParam?if_exists}" target="catalog" class="buttontext">${uiLabelMap.ProductCreateNewProduct}</a></li>
+               <li><a href="/catalog/control/EditProduct?${externalKeyParam?if_exists}" target="catalog" class="buttontext">${uiLabelMap.ProductCreateNewProduct}</a></li>
             </#if>
             <li><a href="<@ofbizUrl>quickadd</@ofbizUrl>" class="buttontext">${uiLabelMap.OrderQuickAdd}</a></li>
             <#if shoppingLists?exists>
-            <li><a href="<@ofbizUrl>viewPartyShoppingLists?partyId=${partyId}</@ofbizUrl>" class="buttontext">${uiLabelMap.PageTitleShoppingList}</a></li>
+              <li><a href="<@ofbizUrl>viewPartyShoppingLists?partyId=${partyId}</@ofbizUrl>" class="buttontext">${uiLabelMap.PageTitleShoppingList}</a></li>
             </#if>
         </ul>
     </div>
 </div>
-<br/>
+<br />

@@ -44,6 +44,7 @@ under the License.
             <exclude field-name="availableToPromiseTotal"/>
             <exclude field-name="quantityOnHandTotal"/>
         </auto-attributes>
+        <attribute name="isReturned" mode="IN" type="String" default-value="N" />
         <override name="inventoryItemTypeId" optional="false"/>
         <override name="productId" optional="false"/>
         <override name="facilityId" optional="false"/>
@@ -164,6 +165,7 @@ under the License.
         <attribute name="productId" type="String" mode="IN" optional="false"/>
         <attribute name="facilityId" type="String" mode="IN" optional="false"/>
         <attribute name="statusId" type="String" mode="IN" optional="true"/>
+        <attribute name="lotId" mode="IN" type="String" optional="true"/>
         <attribute name="quantityOnHandTotal" type="BigDecimal" mode="OUT" optional="false"/>
         <attribute name="availableToPromiseTotal" type="BigDecimal" mode="OUT" optional="false"/>
         <attribute name="useCache" type="Boolean" mode="IN" optional="true"/>
@@ -207,6 +209,35 @@ under the License.
         <attribute name="statusId" type="String" mode="IN" optional="true"/>
         <attribute name="quantityOnHandTotal" type="BigDecimal" mode="OUT" optional="false"/>
         <attribute name="availableToPromiseTotal" type="BigDecimal" mode="OUT" optional="false"/>
+    </service>
+    <service name="getProductInventoryAvailableBySupplier" engine="simple"
+                location="component://product/script/org/ofbiz/product/inventory/InventoryServices.xml" invoke="getProductInventoryAvailable" auth="false" use-transaction="false">
+        <description>Get Inventory Availability for a Product by a Supplier</description>
+        <attribute name="productId" type="String" mode="IN" optional="false"/>
+        <attribute name="partyId" type="String" mode="IN" optional="false"/>
+        <attribute name="statusId" type="String" mode="IN" optional="true"/>
+        <attribute name="quantityOnHandTotal" type="BigDecimal" mode="OUT" optional="false"/>
+        <attribute name="availableToPromiseTotal" type="BigDecimal" mode="OUT" optional="false"/>
+        <attribute name="useCache" type="Boolean" mode="IN" optional="true"/>
+    </service>
+    <service name="countProductInventoryOnHand" engine="simple"
+                location="component://product/script/org/ofbiz/product/inventory/InventoryServices.xml" invoke="countProductInventoryOnHand" auth="true" use-transaction="false">
+        <description>Count Inventory On Hand for a Product constrained by a facilityId at a given date.</description>
+        <attribute name="productId" type="String" mode="IN" optional="false"/>
+        <attribute name="facilityId" type="String" mode="IN" optional="false"/>
+        <attribute name="statusId" type="String" mode="IN" optional="true"/>
+        <attribute name="inventoryCountDate" type="Timestamp" mode="IN" optional="false"/>
+        <attribute name="quantityOnHandTotal" type="BigDecimal" mode="OUT" optional="true"/>
+    </service>
+    <service name="countProductInventoryShippedForSales" engine="simple"
+                location="component://product/script/org/ofbiz/product/inventory/InventoryServices.xml" invoke="countProductInventoryShippedForSales" auth="true" use-transaction="false">
+        <description>Count Inventory Shipped for Sales Orders for a Product constrained by a facilityId in a given date range.</description>
+        <attribute name="productId" type="String" mode="IN" optional="false"/>
+        <attribute name="facilityId" type="String" mode="IN" optional="false"/>
+        <attribute name="statusId" type="String" mode="IN" optional="true"/>
+        <attribute name="fromDate" type="Timestamp" mode="IN" optional="false"/>
+        <attribute name="thruDate" type="Timestamp" mode="IN" optional="true"/>
+        <attribute name="quantityOnHandTotal" type="BigDecimal" mode="OUT" optional="true"/>
     </service>
     <service name="getProductInventorySummaryForItems" engine="java"
                 location="org.ofbiz.product.inventory.InventoryServices" invoke="getProductInventorySummaryForItems" auth="false" use-transaction="false">
@@ -301,6 +332,7 @@ under the License.
         <attribute name="requireInventory" type="String" mode="IN" optional="false"/>
         <attribute name="reserveOrderEnumId" type="String" mode="IN" optional="false"/>
         <attribute name="sequenceId" type="Long" mode="IN" optional="true"/>
+        <attribute name="lotId" mode="IN" type="String" optional="true" />
         <attribute name="quantityNotReserved" type="BigDecimal" mode="OUT" optional="false"/>
     </service>
     <service name="reserveProductInventoryByFacility" engine="simple"
@@ -321,6 +353,7 @@ under the License.
         <attribute name="sequenceId" type="Long" mode="IN" optional="true"/>
         <attribute name="quantityNotReserved" type="BigDecimal" mode="OUT" optional="false"/>
         <attribute name="priority" type="String" mode="IN"  optional="true"/>
+        <attribute name="lotId" type="String" mode="IN" optional="true" />
     </service>
     <service name="reserveProductInventoryByContainer" engine="simple"
                 location="component://product/script/org/ofbiz/product/inventory/InventoryReserveServices.xml" invoke="reserveProductInventory" auth="true">
@@ -418,6 +451,7 @@ under the License.
             location="org.ofbiz.product.inventory.InventoryServices" invoke="completeInventoryTransfer">
         <description>Completes the inventory transfer</description>
         <attribute name="inventoryTransferId" type="String" mode="IN" optional="false"/>
+        <attribute name="receiveDate" type="Timestamp" mode="IN" optional="true"/>
     </service>
     <service name="cancelInventoryTransfer" engine="java"
             location="org.ofbiz.product.inventory.InventoryServices" invoke="cancelInventoryTransfer">
@@ -524,6 +558,22 @@ under the License.
         <description>Delete a Facility</description>
         <permission-service service-name="facilityGenericPermission" main-action="DELETE"/>
         <auto-attributes include="pk" mode="IN" optional="false"/>
+    </service>
+
+    <!-- Facility Attribute -->
+    <service name="createFacilityAttribute" engine="entity-auto" default-entity-name="FacilityAttribute" invoke="create" auth="true">
+        <description>Create Facility Attribute</description>
+        <auto-attributes mode="IN" entity-name="FacilityAttribute" include="pk" optional="false"/>
+        <auto-attributes mode="IN" entity-name="FacilityAttribute" include="nonpk" optional="true"/>
+    </service>
+    <service name="updateFacilityAttribute" engine="entity-auto" default-entity-name="FacilityAttribute" invoke="update" auth="true">
+        <description>Update Facility Attribute</description>
+        <auto-attributes mode="IN" entity-name="FacilityAttribute" include="pk" optional="false"/>
+        <auto-attributes mode="IN" entity-name="FacilityAttribute" include="nonpk" optional="true"/>
+    </service>
+    <service name="deleteFacilityAttribute" engine="entity-auto" default-entity-name="FacilityAttribute" invoke="delete" auth="true">
+        <description>Delete Facility Attribute</description>
+        <auto-attributes mode="IN" entity-name="FacilityAttribute" include="pk" optional="false"/>
     </service>
 
     <service name="createFacilityLocation" default-entity-name="FacilityLocation" engine="simple"
@@ -768,6 +818,21 @@ under the License.
         <attribute name="partyId" type="String" mode="IN" optional="false"/>
         <attribute name="roleTypeId" type="String" mode="IN" optional="false"/>
     </service>
+    
+    <service name="createFacilityContent" engine="simple" default-entity-name="FacilityContent"
+        location="component://product/script/org/ofbiz/product/storage/StorageServices.xml" invoke="createFacilityContent" auth="true">
+        <description>Create a Facility Content</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+        <override name="fromDate" optional="true"/>
+    </service>
+    
+    <service name="deleteFacilityContent" engine="simple" default-entity-name="FacilityContent"
+                location="component://product/script/org/ofbiz/product/storage/StorageServices.xml" invoke="deleteFacilityContent" auth="true">
+        <description>Delete Content From Facility</description>
+        <permission-service service-name="facilityGenericPermission" main-action="DELETE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+    </service>
 
     <!-- Stock Move Services -->
     <service name="findStockMovesNeeded" engine="simple"
@@ -889,5 +954,20 @@ under the License.
        <attribute name="facilityId" type="String" mode="IN" optional="false"/>
        <attribute name="productId" type="String" mode="IN" optional="false"/>
        <attribute name="LocationList" type="List" mode="OUT" optional="true"/>
+    </service>
+    <service name="setLastInventoryCount" engine="simple"
+                location="component://product/script/org/ofbiz/product/inventory/InventoryServices.xml" invoke="setLastInventoryCount">
+        <description>Service which run as EECA (on InventoryItemDetail entity) and updates lastInventoryCount for products available in facility in ProductFacility entity</description>
+        <attribute name="inventoryItemId" mode="IN" type="String" optional="false"/>
+    </service>
+    <service name="createUpdateFacilityGeoPoint" engine="simple" default-entity-name="GeoPoint"
+                location="component://product/script/org/ofbiz/product/inventory/InventoryServices.xml" invoke="createUpdateFacilityGeoPoint">
+        <description>Create or update GeoPoint assigned to facility</description>
+        <permission-service service-name="facilityGenericPermission" main-action="UPDATE"/>
+        <attribute name="facilityId" mode="IN" type="String"/>
+        <auto-attributes include="all" mode="IN" optional="true"/>
+        <override name="dataSourceId" optional="false"/>
+        <override name="latitude" optional="false"/>
+        <override name="longitude" optional="false"/>
     </service>
 </services>

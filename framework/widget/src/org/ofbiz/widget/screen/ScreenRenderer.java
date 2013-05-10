@@ -35,6 +35,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import javolution.util.FastList;
 import javolution.util.FastMap;
 
+import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.GeneralException;
 import org.ofbiz.base.util.UtilDateTime;
 import org.ofbiz.base.util.UtilFormatOut;
@@ -43,22 +44,25 @@ import org.ofbiz.base.util.UtilHttp;
 import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.base.util.collections.MapStack;
-import org.ofbiz.entity.GenericDelegator;
+import org.ofbiz.base.util.template.FreeMarkerWorker;
+import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericEntity;
 import org.ofbiz.entity.GenericValue;
 import org.ofbiz.security.Security;
 import org.ofbiz.service.DispatchContext;
+import org.ofbiz.service.GenericServiceException;
 import org.ofbiz.service.LocalDispatcher;
 import org.ofbiz.webapp.control.LoginWorker;
+import org.ofbiz.webapp.website.WebSiteWorker;
 import org.ofbiz.widget.cache.GenericWidgetOutput;
 import org.ofbiz.widget.cache.ScreenCache;
 import org.ofbiz.widget.cache.WidgetContextCacheKey;
 import org.xml.sax.SAXException;
 
-import freemarker.ext.beans.BeansWrapper;
 import freemarker.ext.jsp.TaglibFactory;
 import freemarker.ext.servlet.HttpRequestHashModel;
 import freemarker.ext.servlet.HttpSessionHashModel;
+import freemarker.ext.servlet.ServletContextHashModel;
 
 /**
  * Widget Library - Screen model class
@@ -70,6 +74,7 @@ public class ScreenRenderer {
     protected Appendable writer;
     protected MapStack<String> context;
     protected ScreenStringRenderer screenStringRenderer;
+    protected int renderFormSeqNumber = 0;
 
     public ScreenRenderer(Appendable writer, MapStack<String> context, ScreenStringRenderer screenStringRenderer) {
         this.writer = writer;
@@ -118,9 +123,7 @@ public class ScreenRenderer {
             GenericWidgetOutput gwo = screenCache.get(screenCombinedName, wcck);
             if (gwo == null) {
                 Writer sw = new StringWriter();
-                screenStringRenderer.renderScreenBegin(writer, context);
                 modelScreen.renderScreenString(sw, context, screenStringRenderer);
-                screenStringRenderer.renderScreenEnd(writer, context);
                 gwo = new GenericWidgetOutput(sw.toString());
                 screenCache.put(screenCombinedName, wcck, gwo);
                 writer.append(gwo.toString());
@@ -128,22 +131,25 @@ public class ScreenRenderer {
                 writer.append(gwo.toString());
             }
         } else {
-            screenStringRenderer.renderScreenBegin(writer, context);
+            context.put("renderFormSeqNumber", String.valueOf(renderFormSeqNumber));
             modelScreen.renderScreenString(writer, context, screenStringRenderer);
-            screenStringRenderer.renderScreenEnd(writer, context);
         }
         return "";
+    }
+
+    public void setRenderFormUniqueSeq (int renderFormSeqNumber) {
+        this.renderFormSeqNumber = renderFormSeqNumber;
     }
 
     public ScreenStringRenderer getScreenStringRenderer() {
         return this.screenStringRenderer;
     }
 
-    public void populateBasicContext(Map<String, Object> parameters, GenericDelegator delegator, LocalDispatcher dispatcher, Security security, Locale locale, GenericValue userLogin) {
+    public void populateBasicContext(Map<String, Object> parameters, Delegator delegator, LocalDispatcher dispatcher, Security security, Locale locale, GenericValue userLogin) {
         populateBasicContext(context, this, parameters, delegator, dispatcher, security, locale, userLogin);
     }
 
-    public static void populateBasicContext(MapStack<String> context, ScreenRenderer screens, Map<String, Object> parameters, GenericDelegator delegator, LocalDispatcher dispatcher, Security security, Locale locale, GenericValue userLogin) {
+    public static void populateBasicContext(MapStack<String> context, ScreenRenderer screens, Map<String, Object> parameters, Delegator delegator, LocalDispatcher dispatcher, Security security, Locale locale, GenericValue userLogin) {
         // ========== setup values that should always be in a screen context
         // include an object to more easily render screens
         context.put("screens", screens);
@@ -161,6 +167,12 @@ public class ScreenRenderer {
         context.put("locale", locale);
         context.put("userLogin", userLogin);
         context.put("nowTimestamp", UtilDateTime.nowTimestamp());
+        try {
+            Map<String, Object> result = dispatcher.runSync("getUserPreferenceGroup", UtilMisc.toMap("userLogin", userLogin, "userPrefGroupTypeId", "GLOBAL_PREFERENCES"));
+            context.put("userPreferences", result.get("userPrefMap"));
+        } catch (GenericServiceException e) {
+            Debug.logError(e, "Error while getting user preferences: ", module);
+        }
     }
 
     /**
@@ -179,14 +191,15 @@ public class ScreenRenderer {
         HttpSession session = request.getSession();
 
         // attribute names to skip for session and application attributes; these are all handled as special cases, duplicating results and causing undesired messages
-        Set<String> attrNamesToSkip = UtilMisc.toSet("delegator", "dispatcher", "security", "webSiteId");
+        Set<String> attrNamesToSkip = UtilMisc.toSet("delegator", "dispatcher", "security", "webSiteId",
+                "org.apache.catalina.jsp_classpath");
         Map<String, Object> parameterMap = UtilHttp.getCombinedMap(request, attrNamesToSkip);
 
         GenericValue userLogin = (GenericValue) session.getAttribute("userLogin");
 
-        populateBasicContext(context, screens, parameterMap, (GenericDelegator) request.getAttribute("delegator"),
-                (LocalDispatcher) request.getAttribute("dispatcher"), (Security) request.getAttribute("security"),
-                UtilHttp.getLocale(request), userLogin);
+        populateBasicContext(context, screens, parameterMap, (Delegator) request.getAttribute("delegator"),
+                (LocalDispatcher) request.getAttribute("dispatcher"),
+                (Security) request.getAttribute("security"), UtilHttp.getLocale(request), userLogin);
 
         context.put("autoUserLogin", session.getAttribute("autoUserLogin"));
         context.put("person", session.getAttribute("person"));
@@ -213,7 +226,7 @@ public class ScreenRenderer {
                 context.put("rootDir", rootDir);
             }
             if (UtilValidate.isEmpty(webSiteId)) {
-                webSiteId = (String) servletContext.getAttribute("webSiteId");
+                webSiteId = WebSiteWorker.getWebSiteId(request);
                 context.put("webSiteId", webSiteId);
             }
             if (UtilValidate.isEmpty(https)) {
@@ -224,12 +237,15 @@ public class ScreenRenderer {
         context.put("javaScriptEnabled", Boolean.valueOf(UtilHttp.isJavaScriptEnabled(request)));
 
         // these ones are FreeMarker specific and will only work in FTL templates, mainly here for backward compatibility
-        BeansWrapper wrapper = BeansWrapper.getDefaultInstance();
-        context.put("sessionAttributes", new HttpSessionHashModel(session, wrapper));
-        context.put("requestAttributes", new HttpRequestHashModel(request, wrapper));
+        context.put("sessionAttributes", new HttpSessionHashModel(session, FreeMarkerWorker.getDefaultOfbizWrapper()));
+        context.put("requestAttributes", new HttpRequestHashModel(request, FreeMarkerWorker.getDefaultOfbizWrapper()));
         TaglibFactory JspTaglibs = new TaglibFactory(servletContext);
         context.put("JspTaglibs", JspTaglibs);
         context.put("requestParameters",  UtilHttp.getParameterMap(request));
+        
+        ServletContextHashModel ftlServletContext = (ServletContextHashModel) request.getAttribute("ftlServletContext");
+        context.put("Application", ftlServletContext);
+        context.put("Request", context.get("requestAttributes"));
 
         // this is a dummy object to stand-in for the JPublish page object for backward compatibility
         context.put("page", FastMap.newInstance());
@@ -296,7 +312,7 @@ public class ScreenRenderer {
     }
 
     public void populateContextForService(DispatchContext dctx, Map<String, Object> serviceContext) {
-        this.populateBasicContext(serviceContext, dctx.getDelegator(), dctx.getDispatcher(), dctx.getSecurity(),
-                (Locale) serviceContext.get("locale"), (GenericValue) serviceContext.get("userLogin"));
+        this.populateBasicContext(serviceContext, dctx.getDelegator(), dctx.getDispatcher(),
+                dctx.getSecurity(), (Locale) serviceContext.get("locale"), (GenericValue) serviceContext.get("userLogin"));
     }
 }

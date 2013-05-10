@@ -19,7 +19,7 @@
 package org.ofbiz.service.calendar;
 
 import java.util.Arrays;
-import java.util.Calendar;
+import com.ibm.icu.util.Calendar;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -27,7 +27,7 @@ import java.util.List;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.StringUtil;
 import org.ofbiz.base.util.UtilValidate;
-import org.ofbiz.entity.GenericDelegator;
+import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
 
@@ -88,15 +88,15 @@ public class RecurrenceRule {
     // **********************
     // * Parsed byXXX lists
     // **********************
-    protected List bySecondList;
-    protected List byMinuteList;
-    protected List byHourList;
-    protected List byDayList;
-    protected List byMonthDayList;
-    protected List byYearDayList;
-    protected List byWeekNoList;
-    protected List byMonthList;
-    protected List bySetPosList;
+    protected List<String> bySecondList;
+    protected List<String> byMinuteList;
+    protected List<String> byHourList;
+    protected List<String> byDayList;
+    protected List<String> byMonthDayList;
+    protected List<String> byYearDayList;
+    protected List<String> byWeekNoList;
+    protected List<String> byMonthList;
+    protected List<String> bySetPosList;
 
     /**
      * Creates a new RecurrenceRule object from a RecurrenceInfo entity.
@@ -171,7 +171,7 @@ public class RecurrenceRule {
         Debug.logVerbose("Stamp value: " + stamp, module);
 
         if (stamp != null) {
-            long nanos = (long) stamp.getNanos();
+            long nanos = stamp.getNanos();
             time = stamp.getTime();
             time += (nanos / 1000000);
         }
@@ -502,11 +502,11 @@ public class RecurrenceRule {
                 return false;
         }
         if (UtilValidate.isNotEmpty(byDayList)) {
-            Iterator iter = byDayList.iterator();
+            Iterator<String> iter = byDayList.iterator();
             boolean foundDay = false;
 
             while (iter.hasNext() && !foundDay) {
-                String dayRule = (String) iter.next();
+                String dayRule = iter.next();
                 String dayString = getDailyString(dayRule);
 
                 if (cal.get(Calendar.DAY_OF_WEEK) == getCalendarDay(dayString)) {
@@ -571,12 +571,12 @@ public class RecurrenceRule {
             }
         }
         if (UtilValidate.isNotEmpty(byMonthDayList)) {
-            Iterator iter = byMonthDayList.iterator();
+            Iterator<String> iter = byMonthDayList.iterator();
             boolean foundDay = false;
 
             while (iter.hasNext() && !foundDay) {
                 int day = 0;
-                String dayStr = (String) iter.next();
+                String dayStr = iter.next();
 
                 try {
                     day = Integer.parseInt(dayStr);
@@ -598,12 +598,12 @@ public class RecurrenceRule {
             }
         }
         if (UtilValidate.isNotEmpty(byYearDayList)) {
-            Iterator iter = byYearDayList.iterator();
+            Iterator<String> iter = byYearDayList.iterator();
             boolean foundDay = false;
 
             while (iter.hasNext() && !foundDay) {
                 int day = 0;
-                String dayStr = (String) iter.next();
+                String dayStr = iter.next();
 
                 try {
                     day = Integer.parseInt(dayStr);
@@ -622,12 +622,12 @@ public class RecurrenceRule {
                 return false;
         }
         if (UtilValidate.isNotEmpty(byWeekNoList)) {
-            Iterator iter = byWeekNoList.iterator();
+            Iterator<String> iter = byWeekNoList.iterator();
             boolean foundWeek = false;
 
             while (iter.hasNext() && !foundWeek) {
                 int week = 0;
-                String weekStr = (String) iter.next();
+                String weekStr = iter.next();
 
                 try {
                     week = Integer.parseInt(weekStr);
@@ -646,12 +646,12 @@ public class RecurrenceRule {
                 return false;
         }
         if (UtilValidate.isNotEmpty(byMonthList)) {
-            Iterator iter = byMonthList.iterator();
+            Iterator<String> iter = byMonthList.iterator();
             boolean foundMonth = false;
 
             while (iter.hasNext() && !foundMonth) {
                 int month = 0;
-                String monthStr = (String) iter.next();
+                String monthStr = iter.next();
 
                 try {
                     month = Integer.parseInt(monthStr);
@@ -672,7 +672,7 @@ public class RecurrenceRule {
     // Tests a string for the contents of a number at the beginning
     private boolean hasNumber(String str) {
         String list[] = {"+", "-", "1", "2", "3", "4", "5", "6", "7", "8", "9", "0"};
-        List numberList = Arrays.asList(list);
+        List<String> numberList = Arrays.asList(list);
         String firstChar = str.substring(0, 1);
 
         if (numberList.contains(firstChar))
@@ -742,17 +742,17 @@ public class RecurrenceRule {
         return rule.getString("recurrenceRuleId");
     }
 
-    public static RecurrenceRule makeRule(GenericDelegator delegator, int frequency, int interval, int count)
+    public static RecurrenceRule makeRule(Delegator delegator, int frequency, int interval, int count)
             throws RecurrenceRuleException {
         return makeRule(delegator, frequency, interval, count, 0);
     }
 
-    public static RecurrenceRule makeRule(GenericDelegator delegator, int frequency, int interval, long endTime)
+    public static RecurrenceRule makeRule(Delegator delegator, int frequency, int interval, long endTime)
             throws RecurrenceRuleException {
         return makeRule(delegator, frequency, interval, -1, endTime);
     }
 
-    public static RecurrenceRule makeRule(GenericDelegator delegator, int frequency, int interval, int count, long endTime)
+    public static RecurrenceRule makeRule(Delegator delegator, int frequency, int interval, int count, long endTime)
             throws RecurrenceRuleException {
         String freq[] = {"", "SECONDLY", "MINUTELY", "HOURLY", "DAILY", "WEEKLY", "MONTHLY", "YEARLY"};
 

@@ -21,10 +21,10 @@ package org.ofbiz.service.calendar;
 import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
+
+import com.ibm.icu.util.Calendar;
 
 /**
  * Recurrence Utilities
@@ -33,7 +33,7 @@ public class RecurrenceUtil {
 
     /** Returns a Date object from a String. */
     public static Date parseDate(String dateStr) {
-        String formatString = new String();
+        String formatString = "";
 
         if (dateStr.length() == 16)
             dateStr = dateStr.substring(0, 14);
@@ -61,7 +61,7 @@ public class RecurrenceUtil {
 
     /** Returns a String from a Date object */
     public static String formatDate(Date date) {
-        String formatString = new String();
+        String formatString = "";
         Calendar cal = Calendar.getInstance();
 
         cal.setTime(date);

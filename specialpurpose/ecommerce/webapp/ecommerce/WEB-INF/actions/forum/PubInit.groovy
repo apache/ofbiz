@@ -31,17 +31,13 @@ import org.ofbiz.entity.*;
 import org.ofbiz.security.*;
 import org.ofbiz.service.*;
 import org.ofbiz.entity.model.*;
+import org.ofbiz.webapp.website.WebSiteWorker;
 import org.ofbiz.widget.html.*;
 import org.ofbiz.widget.form.*;
 import org.ofbiz.securityext.login.*;
 import org.ofbiz.common.*;
 import org.ofbiz.entity.model.*;
 import org.ofbiz.content.ContentManagementWorker;
-import org.ofbiz.widget.html.HtmlMenuWrapper;
-import org.ofbiz.widget.WidgetWorker;
-
-import freemarker.template.SimpleHash;
-import freemarker.template.SimpleSequence;
 
 import javax.servlet.*;
 import javax.servlet.http.*;
@@ -49,7 +45,7 @@ import javax.servlet.http.*;
 paramMap = UtilHttp.getParameterMap(request);
 forumId = null;
 servletContext = session.getServletContext();
-rootForumId = servletContext.getAttribute("webSiteId");
+rootForumId = WebSiteWorker.getWebSiteId(request);
 context.rootPubId = rootForumId;
 session.setAttribute("rootPubId", rootForumId);
 request.setAttribute("rootPubId", rootForumId);

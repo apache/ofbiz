@@ -26,7 +26,6 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.sql.Timestamp;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -38,10 +37,12 @@ import javolution.util.FastMap;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.GeneralException;
 import org.ofbiz.base.util.UtilDateTime;
+import org.ofbiz.base.util.UtilGenerics;
 import org.ofbiz.base.util.UtilMisc;
+import org.ofbiz.base.util.UtilProperties;
 import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.content.data.DataResourceWorker;
-import org.ofbiz.entity.GenericDelegator;
+import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
 import org.ofbiz.entity.util.EntityUtil;
@@ -71,14 +72,16 @@ import com.lowagie.text.pdf.PdfWriter;
 public class PdfSurveyServices {
 
     public static final String module = PdfSurveyServices.class.getName();
+    public static final String resource = "ContentUiLabels";
 
     /**
      *
      */
     public static Map<String, Object> buildSurveyFromPdf(DispatchContext dctx, Map<String, ? extends Object> context) {
-        GenericDelegator delegator = dctx.getDelegator();
+        Delegator delegator = dctx.getDelegator();
         LocalDispatcher dispatcher = dctx.getDispatcher();
         GenericValue userLogin = (GenericValue) context.get("userLogin");
+        Locale locale = (Locale) context.get("locale");
         Timestamp nowTimestamp = UtilDateTime.nowTimestamp();
         String surveyId = null;
         try {
@@ -88,7 +91,7 @@ public class PdfSurveyServices {
             PdfReader pdfReader = new PdfReader(byteBuffer.array());
             PdfStamper pdfStamper = new PdfStamper(pdfReader, os);
             AcroFields acroFields = pdfStamper.getAcroFields();
-            Map acroFieldMap = acroFields.getFields();
+            Map<String, Object> acroFieldMap = UtilGenerics.checkMap(acroFields.getFields());
 
             String contentId = (String) context.get("contentId");
             GenericValue survey = null;
@@ -103,14 +106,11 @@ public class PdfSurveyServices {
             }
 
             // create a SurveyQuestionCategory to put the questions in
-            Map createCategoryResultMap = dispatcher.runSync("createSurveyQuestionCategory",
-                    UtilMisc.<String, Object>toMap("description", "From AcroForm in Content [" + contentId + "] for Survey [" + surveyId + "]", "userLogin", userLogin));
+            Map<String, Object> createCategoryResultMap = dispatcher.runSync("createSurveyQuestionCategory", UtilMisc.<String, Object>toMap("description", "From AcroForm in Content [" + contentId + "] for Survey [" + surveyId + "]", "userLogin", userLogin));
             String surveyQuestionCategoryId = (String) createCategoryResultMap.get("surveyQuestionCategoryId");
 
             pdfStamper.setFormFlattening(true);
-            Iterator i = acroFieldMap.keySet().iterator();
-            while (i.hasNext()) {
-                String fieldName = (String) i.next();
+            for(String fieldName : acroFieldMap.keySet()) {
                 AcroFields.Item item = acroFields.getFieldItem(fieldName);
                 int type = acroFields.getFieldType(fieldName);
                 String value = acroFields.getField(fieldName);
@@ -138,8 +138,8 @@ public class PdfSurveyServices {
 
                 // ==== create a good sequenceNum based on tab order or if no tab order then the page location
 
-                Integer tabPage = (Integer) item.page.get(0);
-                Integer tabOrder = (Integer) item.tabOrder.get(0);
+                Integer tabPage = item.getPage(0);
+                Integer tabOrder = item.getTabOrder(0);
                 Debug.logInfo("tabPage=" + tabPage + ", tabOrder=" + tabOrder, module);
 
                 //array of float  multiple of 5. For each of this groups the values are: [page, llx, lly, urx, ury]
@@ -162,9 +162,8 @@ public class PdfSurveyServices {
 
                 // TODO: need to find something better to put into these fields...
                 String annotation = null;
-                Iterator widgetIter = item.widgets.iterator();
-                while (widgetIter.hasNext()) {
-                    PdfDictionary dict = (PdfDictionary) widgetIter.next();
+                for (int k = 0; k < item.size(); ++k) {
+                    PdfDictionary dict = item.getWidget(k);
 
                     // if the "/Type" value is "/Annot", then get the value of "/TU" for the annotation
 
@@ -179,10 +178,8 @@ public class PdfSurveyServices {
                     PdfObject typeValue = null;
                     PdfObject tuValue = null;
 
-                    Set dictKeys = dict.getKeys();
-                    Iterator dictKeyIter = dictKeys.iterator();
-                    while (dictKeyIter.hasNext()) {
-                        PdfName dictKeyName = (PdfName) dictKeyIter.next();
+                    Set<PdfName> dictKeys = UtilGenerics.checkSet(dict.getKeys());
+                    for(PdfName dictKeyName : dictKeys) {
                         PdfObject dictObject = dict.get(dictKeyName);
 
                         if ("/Type".equals(dictKeyName.toString())) {
@@ -217,24 +214,22 @@ public class PdfSurveyServices {
             }
             pdfStamper.close();
             if (UtilValidate.isNotEmpty(contentId)) {
-                survey = delegator.findByPrimaryKey("Survey", UtilMisc.toMap("surveyId", surveyId));
+                survey = delegator.findOne("Survey", UtilMisc.toMap("surveyId", surveyId), false);
                 survey.set("acroFormContentId", contentId);
                 survey.store();
             }
         } catch (GenericEntityException e) {
-            String errMsg = "Error generating PDF: " + e.toString();
-            Debug.logError(e, errMsg, module);
-            return ServiceUtil.returnError(errMsg);
+            Debug.logError(e, "Error generating PDF: " + e.toString(), module);
+            return ServiceUtil.returnError(UtilProperties.getMessage(resource, "ContentPDFGeneratingError", UtilMisc.toMap("errorString", e.toString()), locale));
         } catch (GeneralException e) {
-            System.err.println(e.getMessage());
-            ServiceUtil.returnError(e.getMessage());
+            Debug.logError(e, "Error generating PDF: " + e.getMessage(), module);
+            return ServiceUtil.returnError(UtilProperties.getMessage(resource, "ContentPDFGeneratingError", UtilMisc.toMap("errorString", e.getMessage()), locale));
         } catch (Exception e) {
-            String errMsg = "Error generating PDF: " + e.toString();
-            Debug.logError(e, errMsg, module);
-            return ServiceUtil.returnError(errMsg);
+            Debug.logError(e, "Error generating PDF: " + e.toString(), module);
+            return ServiceUtil.returnError(UtilProperties.getMessage(resource, "ContentPDFGeneratingError", UtilMisc.toMap("errorString", e.toString()), locale));
         }
 
-        Map results = ServiceUtil.returnSuccess();
+        Map<String, Object> results = ServiceUtil.returnSuccess();
         results.put("surveyId", surveyId);
         return results;
     }
@@ -243,17 +238,16 @@ public class PdfSurveyServices {
      *
      */
     public static Map<String, Object> buildSurveyResponseFromPdf(DispatchContext dctx, Map<String, ? extends Object> context) {
-
         String surveyResponseId = null;
+        Locale locale = (Locale) context.get("locale");
         try {
-
-            GenericDelegator delegator = dctx.getDelegator();
+            Delegator delegator = dctx.getDelegator();
             String partyId = (String)context.get("partyId");
             String surveyId = (String)context.get("surveyId");
             //String contentId = (String)context.get("contentId");
             surveyResponseId = (String)context.get("surveyResponseId");
             if (UtilValidate.isNotEmpty(surveyResponseId)) {
-                GenericValue surveyResponse = delegator.findByPrimaryKey("SurveyResponse", UtilMisc.toMap("surveyResponseId", surveyResponseId));
+                GenericValue surveyResponse = delegator.findOne("SurveyResponse", UtilMisc.toMap("surveyResponseId", surveyResponseId), false);
                 if (surveyResponse != null) {
                     surveyId = surveyResponse.getString("surveyId");
                 }
@@ -270,24 +264,19 @@ public class PdfSurveyServices {
             PdfReader r = new PdfReader(byteBuffer.array());
             PdfStamper s = new PdfStamper(r,os);
             AcroFields fs = s.getAcroFields();
-            Map hm = fs.getFields();
-
-
+            Map<String, Object> hm = UtilGenerics.checkMap(fs.getFields());
             s.setFormFlattening(true);
-            Iterator i = hm.keySet().iterator();
-            while (i.hasNext()) {
-                String fieldName = (String)i.next();
+            for(String fieldName : hm.keySet()) {
                 //AcroFields.Item item = fs.getFieldItem(fieldName);
                 //int type = fs.getFieldType(fieldName);
                 String value = fs.getField(fieldName);
-
-                List questions = delegator.findByAnd("SurveyQuestionAndAppl", UtilMisc.toMap("surveyId", surveyId, "externalFieldRef", fieldName));
-                if (questions.size() == 0 ) {
+                List<GenericValue> questions = delegator.findByAnd("SurveyQuestionAndAppl", UtilMisc.toMap("surveyId", surveyId, "externalFieldRef", fieldName), null, false);
+                if (questions.size() == 0) {
                     Debug.logInfo("No question found for surveyId:" + surveyId + " and externalFieldRef:" + fieldName, module);
                     continue;
                 }
 
-                GenericValue surveyQuestionAndAppl = (GenericValue)questions.get(0);
+                GenericValue surveyQuestionAndAppl = questions.get(0);
                 String surveyQuestionId = (String)surveyQuestionAndAppl.get("surveyQuestionId");
                 String surveyQuestionTypeId = (String)surveyQuestionAndAppl.get("surveyQuestionTypeId");
                 GenericValue surveyResponseAnswer = delegator.makeValue("SurveyResponseAnswer", UtilMisc.toMap("surveyResponseId", surveyResponseId, "surveyQuestionId", surveyQuestionId));
@@ -299,19 +288,17 @@ public class PdfSurveyServices {
             }
             s.close();
         } catch (GenericEntityException e) {
-            String errMsg = "Error generating PDF: " + e.toString();
-            Debug.logError(e, errMsg, module);
-            return ServiceUtil.returnError(errMsg);
+            Debug.logError(e, "Error generating PDF: " + e.toString(), module);
+            return ServiceUtil.returnError(UtilProperties.getMessage(resource, "ContentPDFGeneratingError", UtilMisc.toMap("errorString", e.toString()), locale));
         } catch (GeneralException e) {
-            System.err.println(e.getMessage());
-            ServiceUtil.returnError(e.getMessage());
+            Debug.logError(e, "Error generating PDF: " + e.toString(), module);
+            return ServiceUtil.returnError(UtilProperties.getMessage(resource, "ContentPDFGeneratingError", UtilMisc.toMap("errorString", e.getMessage()), locale));
         } catch (Exception e) {
-            String errMsg = "Error generating PDF: " + e.toString();
-            Debug.logError(e, errMsg, module);
-            return ServiceUtil.returnError(errMsg);
+            Debug.logError(e, "Error generating PDF: " + e.toString(), module);
+            return ServiceUtil.returnError(UtilProperties.getMessage(resource, "ContentPDFGeneratingError", UtilMisc.toMap("errorString", e.toString()), locale));
         }
 
-        Map results = ServiceUtil.returnSuccess();
+        Map<String, Object> results = ServiceUtil.returnSuccess();
         results.put("surveyResponseId", surveyResponseId);
         return results;
     }
@@ -319,43 +306,39 @@ public class PdfSurveyServices {
     /**
      */
     public static Map<String, Object> getAcroFieldsFromPdf(DispatchContext dctx, Map<String, ? extends Object> context) {
-
-        Map acroFieldMap = FastMap.newInstance();
+        Map<String, Object> acroFieldMap = FastMap.newInstance();
         try {
             ByteArrayOutputStream os = new ByteArrayOutputStream();
-            GenericDelegator delegator = dctx.getDelegator();
+            Delegator delegator = dctx.getDelegator();
             ByteBuffer byteBuffer = getInputByteBuffer(context, delegator);
             PdfReader r = new PdfReader(byteBuffer.array());
             PdfStamper s = new PdfStamper(r,os);
             AcroFields fs = s.getAcroFields();
-            Map map = fs.getFields();
-
+            Map<String, Object> map = UtilGenerics.checkMap(fs.getFields());
             s.setFormFlattening(true);
 
             // Debug code to get the values for setting TDP
     //        String[] sa = fs.getAppearanceStates("TDP");
     //        for (int i=0;i<sa.length;i++)
-    //            Debug.log("Appearance="+sa[i]);
+    //            Debug.logInfo("Appearance="+sa[i]);
 
-            Iterator iter = map.keySet().iterator();
-            while (iter.hasNext()) {
-                String fieldName=(String)iter.next();
+            for(String fieldName : map.keySet()) {
                 String parmValue = fs.getField(fieldName);
                 acroFieldMap.put(fieldName, parmValue);
             }
 
         } catch (DocumentException e) {
             System.err.println(e.getMessage());
-            ServiceUtil.returnError(e.getMessage());
+            return ServiceUtil.returnError(e.getMessage());
         } catch (GeneralException e) {
             System.err.println(e.getMessage());
-            ServiceUtil.returnError(e.getMessage());
+            return ServiceUtil.returnError(e.getMessage());
         } catch (IOException ioe) {
             System.err.println(ioe.getMessage());
-            ServiceUtil.returnError(ioe.getMessage());
+            return ServiceUtil.returnError(ioe.getMessage());
         }
 
-    Map results = ServiceUtil.returnSuccess();
+    Map<String, Object> results = ServiceUtil.returnSuccess();
     results.put("acroFieldMap", acroFieldMap);
     return results;
     }
@@ -363,28 +346,24 @@ public class PdfSurveyServices {
     /**
      */
     public static Map<String, Object> setAcroFields(DispatchContext dctx, Map<String, ? extends Object> context) {
-
-        Map results = ServiceUtil.returnSuccess();
-        GenericDelegator delegator = dctx.getDelegator();
+        Map<String, Object> results = ServiceUtil.returnSuccess();
+        Delegator delegator = dctx.getDelegator();
         try {
-            Map acroFieldMap = (Map)context.get("acroFieldMap");
+            Map<String, Object> acroFieldMap = UtilGenerics.checkMap(context.get("acroFieldMap"));
             ByteBuffer byteBuffer = getInputByteBuffer(context, delegator);
             PdfReader r = new PdfReader(byteBuffer.array());
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             PdfStamper s = new PdfStamper(r, baos);
             AcroFields fs = s.getAcroFields();
-            Map map = fs.getFields();
-
+            Map<String, Object> map = UtilGenerics.checkMap(fs.getFields());
             s.setFormFlattening(true);
 
             // Debug code to get the values for setting TDP
     //      String[] sa = fs.getAppearanceStates("TDP");
     //      for (int i=0;i<sa.length;i++)
-    //          Debug.log("Appearance="+sa[i]);
+    //          Debug.logInfo("Appearance="+sa[i]);
 
-            Iterator iter = map.keySet().iterator();
-            while (iter.hasNext()) {
-                String fieldName=(String)iter.next();
+            for(String fieldName : map.keySet()) {
                 String fieldValue = fs.getField(fieldName);
                 Object obj = acroFieldMap.get(fieldName);
                 if (obj instanceof Date) {
@@ -400,8 +379,9 @@ public class PdfSurveyServices {
                     fieldValue=(String)obj;
                 }
 
-                if (UtilValidate.isNotEmpty(fieldValue))
+                if (UtilValidate.isNotEmpty(fieldValue)) {
                     fs.setField(fieldName, fieldValue);
+                }
             }
 
             s.close();
@@ -410,22 +390,21 @@ public class PdfSurveyServices {
             results.put("outByteBuffer", outByteBuffer);
         } catch (DocumentException e) {
             System.err.println(e.getMessage());
-            ServiceUtil.returnError(e.getMessage());
+            results = ServiceUtil.returnError(e.getMessage());
         } catch (GeneralException e) {
             System.err.println(e.getMessage());
-            ServiceUtil.returnError(e.getMessage());
+            results = ServiceUtil.returnError(e.getMessage());
         } catch (FileNotFoundException e) {
             System.err.println(e.getMessage());
-            ServiceUtil.returnError(e.getMessage());
+            results = ServiceUtil.returnError(e.getMessage());
         } catch (IOException ioe) {
             System.err.println(ioe.getMessage());
-            ServiceUtil.returnError(ioe.getMessage());
+            results = ServiceUtil.returnError(ioe.getMessage());
         } catch (Exception ioe) {
             System.err.println(ioe.getMessage());
-            ServiceUtil.returnError(ioe.getMessage());
+            results = ServiceUtil.returnError(ioe.getMessage());
         }
-
-    return results;
+        return results;
     }
 
 
@@ -433,9 +412,9 @@ public class PdfSurveyServices {
      */
     public static Map<String, Object> buildPdfFromSurveyResponse(DispatchContext dctx, Map<String, ? extends Object> rcontext) {
         Map<String, Object> context = UtilMisc.makeMapWritable(rcontext);
-        GenericDelegator delegator = dctx.getDelegator();
+        Delegator delegator = dctx.getDelegator();
         //LocalDispatcher dispatcher = dctx.getDispatcher();
-        Map results = ServiceUtil.returnSuccess();
+        Map<String, Object> results = ServiceUtil.returnSuccess();
         String surveyResponseId = (String)context.get("surveyResponseId");
         String contentId = (String)context.get("contentId");
         String surveyId = null;
@@ -443,13 +422,13 @@ public class PdfSurveyServices {
         Document document = new Document();
         try {
             if (UtilValidate.isNotEmpty(surveyResponseId)) {
-                GenericValue surveyResponse = delegator.findByPrimaryKey("SurveyResponse", UtilMisc.toMap("surveyResponseId", surveyResponseId));
+                GenericValue surveyResponse = delegator.findOne("SurveyResponse", UtilMisc.toMap("surveyResponseId", surveyResponseId), false);
                 if (surveyResponse != null) {
                     surveyId = surveyResponse.getString("surveyId");
                 }
             }
             if (UtilValidate.isNotEmpty(surveyId) && UtilValidate.isEmpty(contentId)) {
-                GenericValue survey = delegator.findByPrimaryKey("Survey", UtilMisc.toMap("surveyId", surveyId));
+                GenericValue survey = delegator.findOne("Survey", UtilMisc.toMap("surveyId", surveyId), false);
                 if (survey != null) {
                     String acroFormContentId = survey.getString("acroFormContentId");
                     if (UtilValidate.isNotEmpty(acroFormContentId)) {
@@ -461,13 +440,11 @@ public class PdfSurveyServices {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             PdfWriter.getInstance(document, baos);
 
-            List responses = delegator.findByAnd("SurveyResponseAnswer", UtilMisc.toMap("surveyResponseId", surveyResponseId));
-            Iterator iter = responses.iterator();
-            while (iter.hasNext()) {
+            List<GenericValue> responses = delegator.findByAnd("SurveyResponseAnswer", UtilMisc.toMap("surveyResponseId", surveyResponseId), null, false);
+            for(GenericValue surveyResponseAnswer : responses) {
                 String value = null;
-                GenericValue surveyResponseAnswer = (GenericValue) iter.next();
                 String surveyQuestionId = (String) surveyResponseAnswer.get("surveyQuestionId");
-                GenericValue surveyQuestion = delegator.findByPrimaryKey("SurveyQuestion", UtilMisc.toMap("surveyQuestionId", surveyQuestionId));
+                GenericValue surveyQuestion = delegator.findOne("SurveyQuestion", UtilMisc.toMap("surveyQuestionId", surveyQuestionId), false);
                 String questionType = surveyQuestion.getString("surveyQuestionTypeId");
                 // DEJ20060227 this isn't used, if needed in the future should get from SurveyQuestionAppl.externalFieldRef String fieldName = surveyQuestion.getString("description");
                 if ("OPTION".equals(questionType)) {
@@ -492,10 +469,10 @@ public class PdfSurveyServices {
             results.put("outByteBuffer", outByteBuffer);
         } catch (GenericEntityException e) {
             System.err.println(e.getMessage());
-            ServiceUtil.returnError(e.getMessage());
+            results = ServiceUtil.returnError(e.getMessage());
         } catch (DocumentException e) {
             System.err.println(e.getMessage());
-            ServiceUtil.returnError(e.getMessage());
+            results = ServiceUtil.returnError(e.getMessage());
         }
 
         return results;
@@ -505,35 +482,23 @@ public class PdfSurveyServices {
      * Returns list of maps with "question"->SurveyQuestion and "response"->SurveyResponseAnswer
      */
     public static Map<String, Object> buildSurveyQuestionsAndAnswers(DispatchContext dctx, Map<String, ? extends Object> context) {
-        GenericDelegator delegator = dctx.getDelegator();
+        Delegator delegator = dctx.getDelegator();
         //LocalDispatcher dispatcher = dctx.getDispatcher();
-        Map results = ServiceUtil.returnSuccess();
+        Map<String, Object> results = ServiceUtil.returnSuccess();
         String surveyResponseId = (String)context.get("surveyResponseId");
-        String surveyId = null;
-        List qAndA = FastList.newInstance();
+        List<Object> qAndA = FastList.newInstance();
 
-        Document document = new Document();
         try {
-            if (UtilValidate.isNotEmpty(surveyResponseId)) {
-                GenericValue surveyResponse = delegator.findByPrimaryKey("SurveyResponse", UtilMisc.toMap("surveyResponseId", surveyResponseId));
-                if (surveyResponse != null) {
-                    surveyId = surveyResponse.getString("surveyId");
-                }
-            }
-
-            List responses = delegator.findByAnd("SurveyResponseAnswer", UtilMisc.toMap("surveyResponseId", surveyResponseId));
-            Iterator iter = responses.iterator();
-            while (iter.hasNext()) {
-                String value = null;
-                GenericValue surveyResponseAnswer = (GenericValue) iter.next();
+            List<GenericValue> responses = delegator.findByAnd("SurveyResponseAnswer", UtilMisc.toMap("surveyResponseId", surveyResponseId), null, false);
+            for(GenericValue surveyResponseAnswer : responses) {
                 String surveyQuestionId = (String) surveyResponseAnswer.get("surveyQuestionId");
-                GenericValue surveyQuestion = delegator.findByPrimaryKey("SurveyQuestion", UtilMisc.toMap("surveyQuestionId", surveyQuestionId));
+                GenericValue surveyQuestion = delegator.findOne("SurveyQuestion", UtilMisc.toMap("surveyQuestionId", surveyQuestionId), false);
                 qAndA.add(UtilMisc.toMap("question", surveyQuestion, "response", surveyResponseAnswer));
             }
             results.put("questionsAndAnswers", qAndA);
         } catch (GenericEntityException e) {
             System.err.println(e.getMessage());
-            ServiceUtil.returnError(e.getMessage());
+            results = ServiceUtil.returnError(e.getMessage());
         }
 
         return results;
@@ -542,39 +507,37 @@ public class PdfSurveyServices {
     /**
      */
     public static Map<String, Object> setAcroFieldsFromSurveyResponse(DispatchContext dctx, Map<String, ? extends Object> context) {
-        GenericDelegator delegator = dctx.getDelegator();
+        Delegator delegator = dctx.getDelegator();
         LocalDispatcher dispatcher = dctx.getDispatcher();
-        Map results = ServiceUtil.returnSuccess();
-        Map acroFieldMap = FastMap.newInstance();
+        Map<String, Object> results = ServiceUtil.returnSuccess();
+        Map<String, Object> acroFieldMap = FastMap.newInstance();
         String surveyResponseId = (String)context.get("surveyResponseId");
         String acroFormContentId = null;
 
         try {
             String surveyId = null;
             if (UtilValidate.isNotEmpty(surveyResponseId)) {
-                GenericValue surveyResponse = delegator.findByPrimaryKey("SurveyResponse", UtilMisc.toMap("surveyResponseId", surveyResponseId));
+                GenericValue surveyResponse = delegator.findOne("SurveyResponse", UtilMisc.toMap("surveyResponseId", surveyResponseId), false);
                 if (surveyResponse != null) {
                     surveyId = surveyResponse.getString("surveyId");
                 }
             }
 
             if (UtilValidate.isNotEmpty(surveyId)) {
-                GenericValue survey = delegator.findByPrimaryKey("Survey", UtilMisc.toMap("surveyId", surveyId));
+                GenericValue survey = delegator.findOne("Survey", UtilMisc.toMap("surveyId", surveyId), false);
                 if (survey != null) {
                     acroFormContentId = survey.getString("acroFormContentId");
                 }
             }
 
-            List responses = delegator.findByAnd("SurveyResponseAnswer", UtilMisc.toMap("surveyResponseId", surveyResponseId));
-            Iterator iter = responses.iterator();
-            while (iter.hasNext()) {
+            List<GenericValue> responses = delegator.findByAnd("SurveyResponseAnswer", UtilMisc.toMap("surveyResponseId", surveyResponseId), null, false);
+            for(GenericValue surveyResponseAnswer : responses) {
                 String value = null;
-                GenericValue surveyResponseAnswer = (GenericValue) iter.next();
                 String surveyQuestionId = (String) surveyResponseAnswer.get("surveyQuestionId");
 
-                GenericValue surveyQuestion = delegator.findByPrimaryKeyCache("SurveyQuestion", UtilMisc.toMap("surveyQuestionId", surveyQuestionId));
+                GenericValue surveyQuestion = delegator.findOne("SurveyQuestion", UtilMisc.toMap("surveyQuestionId", surveyQuestionId), true);
 
-                List surveyQuestionApplList = EntityUtil.filterByDate(delegator.findByAndCache("SurveyQuestionAppl", UtilMisc.toMap("surveyId", surveyId, "surveyQuestionId", surveyQuestionId), UtilMisc.toList("-fromDate")), false);
+                List<GenericValue> surveyQuestionApplList = EntityUtil.filterByDate(delegator.findByAnd("SurveyQuestionAppl", UtilMisc.toMap("surveyId", surveyId, "surveyQuestionId", surveyQuestionId), UtilMisc.toList("-fromDate"), true), false);
                 GenericValue surveyQuestionAppl = EntityUtil.getFirst(surveyQuestionApplList);
 
                 String questionType = surveyQuestion.getString("surveyQuestionTypeId");
@@ -597,19 +560,17 @@ public class PdfSurveyServices {
             }
         } catch (GenericEntityException e) {
             System.err.println(e.getMessage());
-            ServiceUtil.returnError(e.getMessage());
+            return ServiceUtil.returnError(e.getMessage());
         }
 
         try {
             ModelService modelService = dispatcher.getDispatchContext().getModelService("setAcroFields");
-            Map ctx = modelService.makeValid(context, "IN");
+            Map<String, Object> ctx = modelService.makeValid(context, "IN");
             ctx.put("acroFieldMap", acroFieldMap);
             ctx.put("contentId", acroFormContentId);
-            Map map = dispatcher.runSync("setAcroFields", ctx);
+            Map<String, Object> map = dispatcher.runSync("setAcroFields", ctx);
             if (ServiceUtil.isError(map)) {
-                String errMsg = ServiceUtil.makeErrorMessage(map, null, null, null, null);
-                System.err.println(errMsg);
-                ServiceUtil.returnError(errMsg);
+                return ServiceUtil.returnError(ServiceUtil.makeErrorMessage(map, null, null, null, null));
             }
             String pdfFileNameOut = (String) context.get("pdfFileNameOut");
             ByteBuffer outByteBuffer = (ByteBuffer) map.get("outByteBuffer");
@@ -621,20 +582,19 @@ public class PdfSurveyServices {
             }
         } catch (FileNotFoundException e) {
             System.err.println(e.getMessage());
-            ServiceUtil.returnError(e.getMessage());
+            results = ServiceUtil.returnError(e.getMessage());
         } catch (IOException e) {
             System.err.println(e.getMessage());
-            ServiceUtil.returnError(e.getMessage());
+            results = ServiceUtil.returnError(e.getMessage());
         } catch (GenericServiceException e) {
             System.err.println(e.getMessage());
-            ServiceUtil.returnError(e.getMessage());
+            results = ServiceUtil.returnError(e.getMessage());
         }
 
     return results;
     }
 
-    public static ByteBuffer getInputByteBuffer(Map context, GenericDelegator delegator) throws GeneralException {
-
+    public static ByteBuffer getInputByteBuffer(Map<String, ? extends Object> context, Delegator delegator) throws GeneralException {
         ByteBuffer inputByteBuffer = (ByteBuffer)context.get("inputByteBuffer");
 
         if (inputByteBuffer == null) {
@@ -658,7 +618,7 @@ public class PdfSurveyServices {
                     String https = (String)context.get("https");
                     String webSiteId = (String)context.get("webSiteId");
                     String rootDir = (String)context.get("rootDir");
-                    GenericValue content = delegator.findByPrimaryKeyCache("Content", UtilMisc.toMap("contentId", contentId));
+                    GenericValue content = delegator.findOne("Content", UtilMisc.toMap("contentId", contentId), true);
                     String dataResourceId = content.getString("dataResourceId");
                     inputByteBuffer = DataResourceWorker.getContentAsByteBuffer(delegator, dataResourceId, https, webSiteId, locale, rootDir);
                 } catch (GenericEntityException e) {

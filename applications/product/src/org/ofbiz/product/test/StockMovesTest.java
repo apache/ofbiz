@@ -26,6 +26,7 @@ import java.util.Map;
 import javolution.util.FastList;
 import javolution.util.FastMap;
 
+import org.ofbiz.base.util.UtilGenerics;
 import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.entity.GenericValue;
 import org.ofbiz.service.testtools.OFBizTestCase;
@@ -41,39 +42,41 @@ public class StockMovesTest extends OFBizTestCase {
         super(name);
     }
 
+    @Override
     protected void setUp() throws Exception {
-        userLogin = delegator.findByPrimaryKey("UserLogin", UtilMisc.toMap("userLoginId", "system"));
+        userLogin = delegator.findOne("UserLogin", UtilMisc.toMap("userLoginId", "system"), false);
     }
 
+    @Override
     protected void tearDown() throws Exception {
     }
 
     public void testStockMoves() throws Exception {
         Map<String, Object> fsmnCtx = FastMap.newInstance();
-        Map stockMoveHandled = null;
-        List warningList = FastList.newInstance();
+        Map<?,?> stockMoveHandled = null;
+        List<?> warningList = FastList.newInstance();
 
         fsmnCtx.put("facilityId", "WebStoreWarehouse");
         fsmnCtx.put("userLogin", userLogin);
         Map<String, Object> respMap1 = dispatcher.runSync("findStockMovesNeeded", fsmnCtx);
-        stockMoveHandled = (Map) respMap1.get("stockMoveHandled");
-        warningList = (List) respMap1.get("warningMessageList");
+        stockMoveHandled = UtilGenerics.checkMap(respMap1.get("stockMoveHandled"));
+        warningList = UtilGenerics.checkList(respMap1.get("warningMessageList"));
         assertNull(warningList);
 
         if (stockMoveHandled != null) {
             fsmnCtx.put("stockMoveHandled", stockMoveHandled);
         }
         Map<String, Object> respMap2 = dispatcher.runSync("findStockMovesRecommended", fsmnCtx);
-        warningList = (List) respMap2.get("warningMessageList");
+        warningList = UtilGenerics.checkList(respMap2.get("warningMessageList"));
         assertNull(warningList);
 
         Map<String, Object> ppsmCtx = FastMap.newInstance();
         ppsmCtx.put("productId", "GZ-2644");
         ppsmCtx.put("facilityId", "WebStoreWarehouse");
-        ppsmCtx.put("locationSeqId","TLTLTLUL01" );
+        ppsmCtx.put("locationSeqId","TLTLTLUL01");
         ppsmCtx.put("targetLocationSeqId", "TLTLTLLL01");
         ppsmCtx.put("quantityMoved", new BigDecimal("5"));
         ppsmCtx.put("userLogin", userLogin);
-        Map<String, Object> respMap3 = dispatcher.runSync("processPhysicalStockMove", ppsmCtx);
+        dispatcher.runSync("processPhysicalStockMove", ppsmCtx);
     }
 }

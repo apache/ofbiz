@@ -18,133 +18,146 @@
  *******************************************************************************/
 package org.ofbiz.minilang.method.conditional;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
 
-import javolution.util.FastList;
-import org.w3c.dom.*;
-import org.ofbiz.base.util.*;
-import org.ofbiz.minilang.*;
-import org.ofbiz.minilang.method.*;
-import org.ofbiz.minilang.operation.*;
+import org.ofbiz.base.util.ObjectType;
+import org.ofbiz.base.util.UtilValidate;
+import org.ofbiz.base.util.UtilXml;
+import org.ofbiz.base.util.collections.FlexibleMapAccessor;
+import org.ofbiz.base.util.string.FlexibleStringExpander;
+import org.ofbiz.minilang.MiniLangException;
+import org.ofbiz.minilang.MiniLangRuntimeException;
+import org.ofbiz.minilang.MiniLangUtil;
+import org.ofbiz.minilang.MiniLangValidate;
+import org.ofbiz.minilang.SimpleMethod;
+import org.ofbiz.minilang.artifact.ArtifactInfoContext;
+import org.ofbiz.minilang.method.MethodContext;
+import org.ofbiz.minilang.method.MethodOperation;
+import org.w3c.dom.Element;
 
 /**
- * Implements compare to a constant condition.
+ * Implements the &lt;if-compare&gt; element.
+ * 
+ * @see <a href="https://cwiki.apache.org/OFBADMIN/mini-language-reference.html#Mini-languageReference-{{%3Cifcompare%3E}}">Mini-language Reference</a>
  */
-public class CompareCondition implements Conditional {
-    public static final class CompareConditionFactory extends ConditionalFactory<CompareCondition> {
-        public CompareCondition createCondition(Element element, SimpleMethod simpleMethod) {
-            return new CompareCondition(element, simpleMethod);
+public final class CompareCondition extends MethodOperation implements Conditional {
+
+    private final Compare compare;
+    private final FlexibleMapAccessor<Object> fieldFma;
+    private final FlexibleStringExpander formatFse;
+    private final String operator;
+    private final Class<?> targetClass;
+    private final String type;
+    private final FlexibleStringExpander valueFse;
+    // Sub-operations are used only when this is a method operation.
+    private final List<MethodOperation> elseSubOps;
+    private final List<MethodOperation> subOps;
+
+    public CompareCondition(Element element, SimpleMethod simpleMethod) throws MiniLangException {
+        super(element, simpleMethod);
+        if (MiniLangValidate.validationOn()) {
+            MiniLangValidate.attributeNames(simpleMethod, element, "field", "format", "operator", "type", "value");
+            MiniLangValidate.requiredAttributes(simpleMethod, element, "field", "operator", "value");
+            MiniLangValidate.constantAttributes(simpleMethod, element, "operator", "type");
+            MiniLangValidate.constantPlusExpressionAttributes(simpleMethod, element, "value");
+            MiniLangValidate.expressionAttributes(simpleMethod, element, "field");
         }
-
-        public String getName() {
-            return "if-compare";
-        }
-    }
-
-
-    public static final String module = CompareCondition.class.getName();
-
-    SimpleMethod simpleMethod;
-
-    ContextAccessor<Map<String, ? extends Object>> mapAcsr;
-    ContextAccessor<Object> fieldAcsr;
-    String value;
-
-    String operator;
-    String type;
-    String format;
-
-    public CompareCondition(Element element, SimpleMethod simpleMethod) {
-        this.simpleMethod = simpleMethod;
-
-        // NOTE: this is still supported, but is deprecated
-        this.mapAcsr = new ContextAccessor<Map<String, ? extends Object>>(element.getAttribute("map-name"));
-        this.fieldAcsr = new ContextAccessor<Object>(element.getAttribute("field"));
-        if (this.fieldAcsr.isEmpty()) {
-            // NOTE: this is still supported, but is deprecated
-            this.fieldAcsr = new ContextAccessor<Object>(element.getAttribute("field-name"));
-        }
-        this.value = element.getAttribute("value");
-
+        this.fieldFma = FlexibleMapAccessor.getInstance(element.getAttribute("field"));
+        this.formatFse = FlexibleStringExpander.getInstance(element.getAttribute("format"));
         this.operator = element.getAttribute("operator");
+        this.compare = Compare.getInstance(this.operator);
+        if (this.compare == null) {
+            MiniLangValidate.handleError("Invalid operator " + this.operator, simpleMethod, element);
+        }
         this.type = element.getAttribute("type");
-        this.format = element.getAttribute("format");
+        Class<?> targetClass = null;
+        if (!this.type.isEmpty()) {
+            if ("contains".equals(this.operator)) {
+                MiniLangValidate.handleError("Operator \"contains\" does not support type conversions (remove the type attribute).", simpleMethod, element);
+                targetClass = Object.class;
+            } else {
+                try {
+                    targetClass = ObjectType.loadClass(this.type);
+                } catch (ClassNotFoundException e) {
+                    MiniLangValidate.handleError("Invalid type " + this.type, simpleMethod, element);
+                }
+            }
+        }
+        this.targetClass = targetClass;
+        this.valueFse = FlexibleStringExpander.getInstance(element.getAttribute("value"));
+        Element childElement = UtilXml.firstChildElement(element);
+        if (childElement != null && !"else".equals(childElement.getTagName())) {
+            this.subOps = Collections.unmodifiableList(SimpleMethod.readOperations(element, simpleMethod));
+        } else {
+            this.subOps = null;
+        }
+        Element elseElement = UtilXml.firstChildElement(element, "else");
+        if (elseElement != null) {
+            this.elseSubOps = Collections.unmodifiableList(SimpleMethod.readOperations(elseElement, simpleMethod));
+        } else {
+            this.elseSubOps = null;
+        }
     }
 
-    public boolean checkCondition(MethodContext methodContext) {
-        String value = methodContext.expandString(this.value);
-        String operator = methodContext.expandString(this.operator);
-        String type = methodContext.expandString(this.type);
-        String format = methodContext.expandString(this.format);
-
-        Object fieldVal = getFieldVal(methodContext);
-
-        List<Object> messages = FastList.newInstance();
-        Boolean resultBool = BaseCompare.doRealCompare(fieldVal, value, operator, type, format, messages, null, methodContext.getLoader(), true);
-        if (messages.size() > 0) {
-            messages.add(0, "Error with comparison in if-compare between field [" + mapAcsr.toString() + "." + fieldAcsr.toString() + "] with value [" + fieldVal + "] and value [" + value + "] with operator [" + operator + "] and type [" + type + "]: ");
-            if (methodContext.getMethodType() == MethodContext.EVENT) {
-                StringBuilder fullString = new StringBuilder();
-
-                for (Object message: messages) {
-                    fullString.append(message);
-                }
-                Debug.logWarning(fullString.toString(), module);
-
-                methodContext.putEnv(simpleMethod.getEventErrorMessageName(), fullString.toString());
-                methodContext.putEnv(simpleMethod.getEventResponseCodeName(), simpleMethod.getDefaultErrorCode());
-            } else if (methodContext.getMethodType() == MethodContext.SERVICE) {
-                methodContext.putEnv(simpleMethod.getServiceErrorMessageListName(), messages);
-                methodContext.putEnv(simpleMethod.getServiceResponseMessageName(), simpleMethod.getDefaultErrorCode());
-            }
-            return false;
+    @Override
+    public boolean checkCondition(MethodContext methodContext) throws MiniLangException {
+        if (this.compare == null) {
+            throw new MiniLangRuntimeException("Invalid operator \"" + this.operator + "\"", this);
         }
-
-        if (resultBool != null) return resultBool.booleanValue();
-
+        Object fieldVal = fieldFma.get(methodContext.getEnvMap());
+        Class<?> targetClass = this.targetClass;
+        if (targetClass == null) {
+            targetClass = MiniLangUtil.getObjectClassForConversion(fieldVal);
+        }
+        String value = valueFse.expandString(methodContext.getEnvMap());
+        String format = formatFse.expandString(methodContext.getEnvMap());
+        try {
+            return this.compare.doCompare(fieldVal, value, targetClass, methodContext.getLocale(), methodContext.getTimeZone(), format);
+        } catch (Exception e) {
+            simpleMethod.addErrorMessage(methodContext, e.getMessage());
+        }
         return false;
     }
 
-    protected Object getFieldVal(MethodContext methodContext) {
-        Object fieldVal = null;
-        if (!mapAcsr.isEmpty()) {
-            Map<String, ? extends Object> fromMap = mapAcsr.get(methodContext);
-            if (fromMap == null) {
-                if (Debug.infoOn()) Debug.logInfo("Map not found with name " + mapAcsr + ", using empty string for comparison", module);
-            } else {
-                fieldVal = fieldAcsr.get(fromMap, methodContext);
+    @Override
+    public boolean exec(MethodContext methodContext) throws MiniLangException {
+        if (checkCondition(methodContext)) {
+            if (this.subOps != null) {
+                return SimpleMethod.runSubOps(subOps, methodContext);
             }
         } else {
-            // no map name, try the env
-            fieldVal = fieldAcsr.get(methodContext);
+            if (elseSubOps != null) {
+                return SimpleMethod.runSubOps(elseSubOps, methodContext);
+            }
         }
+        return true;
+    }
 
-        // always use an empty string by default
-        if (fieldVal == null) {
-            fieldVal = "";
+    @Override
+    public void gatherArtifactInfo(ArtifactInfoContext aic) {
+        if (this.subOps != null) {
+            for (MethodOperation method : this.subOps) {
+                method.gatherArtifactInfo(aic);
+            }
         }
-        return fieldVal;
+        if (this.elseSubOps != null) {
+            for (MethodOperation method : this.elseSubOps) {
+                method.gatherArtifactInfo(aic);
+            }
+        }
     }
 
     public void prettyPrint(StringBuilder messageBuffer, MethodContext methodContext) {
-        String value = methodContext.expandString(this.value);
-        String operator = methodContext.expandString(this.operator);
-        String type = methodContext.expandString(this.type);
-        String format = methodContext.expandString(this.format);
-        Object fieldVal = getFieldVal(methodContext);
-
+        String value = valueFse.expandString(methodContext.getEnvMap());
+        String format = formatFse.expandString(methodContext.getEnvMap());
+        Object fieldVal = fieldFma.get(methodContext.getEnvMap());
         messageBuffer.append("[");
-        if (!this.mapAcsr.isEmpty()) {
-            messageBuffer.append(this.mapAcsr);
-            messageBuffer.append(".");
-        }
-        messageBuffer.append(this.fieldAcsr);
+        messageBuffer.append(this.fieldFma);
         messageBuffer.append("=");
         messageBuffer.append(fieldVal);
         messageBuffer.append("] ");
-
         messageBuffer.append(operator);
-
         messageBuffer.append(" ");
         messageBuffer.append(value);
         messageBuffer.append(" as ");
@@ -152,6 +165,42 @@ public class CompareCondition implements Conditional {
         if (UtilValidate.isNotEmpty(format)) {
             messageBuffer.append(":");
             messageBuffer.append(format);
+        }
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder("<if-compare ");
+        sb.append("field=\"").append(this.fieldFma).append("\" operator=\"").append(operator).append("\" ");
+        if (!this.valueFse.isEmpty()) {
+            sb.append("value=\"").append(this.valueFse).append("\" ");
+        }
+        if (!this.type.isEmpty()) {
+            sb.append("type=\"").append(this.type).append("\" ");
+        }
+        if (!this.formatFse.isEmpty()) {
+            sb.append("format=\"").append(this.formatFse).append("\" ");
+        }
+        sb.append("/>");
+        return sb.toString();
+    }
+
+    /**
+     * A &lt;if-compare&gt; element factory. 
+     */
+    public static final class CompareConditionFactory extends ConditionalFactory<CompareCondition> implements Factory<CompareCondition> {
+        @Override
+        public CompareCondition createCondition(Element element, SimpleMethod simpleMethod) throws MiniLangException {
+            return new CompareCondition(element, simpleMethod);
+        }
+
+        public CompareCondition createMethodOperation(Element element, SimpleMethod simpleMethod) throws MiniLangException {
+            return new CompareCondition(element, simpleMethod);
+        }
+
+        @Override
+        public String getName() {
+            return "if-compare";
         }
     }
 }

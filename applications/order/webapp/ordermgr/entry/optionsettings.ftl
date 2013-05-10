@@ -18,14 +18,36 @@ under the License.
 -->
 
 <#if security.hasEntityPermission("ORDERMGR", "_CREATE", session) || security.hasEntityPermission("ORDERMGR", "_PURCHASE_CREATE", session)>
+<form method="post" action="<@ofbizUrl>finalizeOrder</@ofbizUrl>" name="checkoutsetupform">
 <table border="0" width='100%' cellspacing='0' cellpadding='0' class='boxoutside'>
 <tr>
     <td width='100%'>
-      <br/>
+      <br />
       <table width='100%' border='0' cellspacing='0' cellpadding='0' class='boxbottom'>
         <tr>
           <td>
-            <form method="post" action="<@ofbizUrl>finalizeOrder</@ofbizUrl>" name="checkoutsetupform">
+            <table width="100%" cellpadding="1" border="0" cellpadding="0" cellspacing="0">
+              <tr>
+                <td colspan="2">
+                  <h2>${uiLabelMap.OrderInternalNote}</h2>
+                </td>
+                <td colspan="2">
+                  <h2>${uiLabelMap.OrderShippingNotes}</h2>
+                </td>
+              </tr>
+              <tr>
+                <td colspan="2">
+                  <textarea cols="30" rows="3" name="internal_order_notes"><#if (cart.getInternalOrderNotes().size()>0)>${(cart.getInternalOrderNotes()[0])?if_exists}</#if></textarea>
+                </td>
+                <td colspan="2">
+                  <textarea cols="30" rows="3" name="shippingNotes"><#if (cart.getOrderNotes().size()>0)>${(cart.getOrderNotes()[0])?if_exists}</#if></textarea>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+        <tr>
+          <td>
               <input type="hidden" name="finalizeMode" value="options"/>
 <#list 1..cart.getShipGroupSize() as currIndex>
 <#assign shipGroupIndex = currIndex - 1>
@@ -34,26 +56,31 @@ under the License.
     <#assign chosenShippingMethod = cart.getShipmentMethodTypeId(shipGroupIndex) + '@' + cart.getCarrierPartyId(shipGroupIndex)>
 </#if>
 <#assign supplierPartyId = cart.getSupplierPartyId(shipGroupIndex)?if_exists>
-<#assign supplier =  delegator.findByPrimaryKey("PartyGroup", Static["org.ofbiz.base.util.UtilMisc"].toMap("partyId", supplierPartyId))?if_exists />
-<hr/>
+<#assign supplier =  delegator.findOne("PartyGroup", Static["org.ofbiz.base.util.UtilMisc"].toMap("partyId", supplierPartyId), false)?if_exists />
+
               <table width="100%" cellpadding="1" border="0" cellpadding="0" cellspacing="0">
+              <tr><td colspan="2"><hr /></td></tr>
               <tr>
                 <td colspan="2">
                     <h1><b>${uiLabelMap.OrderShipGroup} ${uiLabelMap.CommonNbr} ${currIndex}</b><#if supplier?has_content> - ${supplier.groupName?default(supplier.partyId)}</#if></h1>
                 </td>
               </tr>
-
                <#if cart.getOrderType() != "PURCHASE_ORDER">
+                <tr>
+                  <td colspan="2">
+                    <h2>${uiLabelMap.ProductShipmentMethod}</h2>
+                  </td>
+                </tr>
                 <#assign shipEstimateWrapper = Static["org.ofbiz.order.shoppingcart.shipping.ShippingEstimateWrapper"].getWrapper(dispatcher, cart, 0)>
                 <#assign carrierShipmentMethods = shipEstimateWrapper.getShippingMethods()>
                 <#list carrierShipmentMethods as carrierShipmentMethod>
                 <tr>
                   <td width='1%' valign="top" >
                     <#assign shippingMethod = carrierShipmentMethod.shipmentMethodTypeId + "@" + carrierShipmentMethod.partyId>
-                    <input type='radio' name='${shipGroupIndex?default("0")}_shipping_method' value='${shippingMethod}' <#if shippingMethod == chosenShippingMethod?default("N@A")>checked</#if>>
+                    <input type='radio' name='${shipGroupIndex?default("0")}_shipping_method' value='${shippingMethod}'<#if shippingMethod == chosenShippingMethod?default("N@A")> checked="checked"</#if> id='${shipGroupIndex?default("0")}_shipping_method_${shippingMethod}' />
                   </td>
                   <td valign="top">
-                    <div class='tabletext'>
+                    <label for="${shipGroupIndex?default("0")}_shipping_method_${shippingMethod}">
                       <#if carrierShipmentMethod.partyId != "_NA_">${carrierShipmentMethod.partyId?if_exists}&nbsp;</#if>${carrierShipmentMethod.description?if_exists}
                       <#if cart.getShippingContactMechId(shipGroupIndex)?exists>
                         <#assign shippingEst = shipEstimateWrapper.getShippingEstimate(carrierShipmentMethod)?default(-1)>
@@ -66,23 +93,32 @@ under the License.
                           </#if>
                         </#if>
                       </#if>
-                    </div>
+                    </label>
                   </td>
                 </tr>
                 </#list>
                 <#if !carrierShipmentMethodList?exists || carrierShipmentMethodList?size == 0>
                 <tr>
                   <td width='1%' valign="top">
-                    <input type='radio' name='${shipGroupIndex?default("0")}_shipping_method' value="Default" checked>
+                    <input type='radio' name='${shipGroupIndex?default("0")}_shipping_method' value="Default" checked="checked" />
                   </td>
                   <td valign="top">
                     <div class='tabletext'>${uiLabelMap.FacilityNoOtherShippingMethods}</div>
                   </td>
                 </tr>
                 </#if>
-                <tr><td colspan='2'><hr/></td></tr>
                <#else>
-                   <input type='hidden' name='${shipGroupIndex?default("0")}_shipping_method' value="NO_SHIPPING@_NA_">
+                   <tr>
+                     <td>
+                       <h2>${uiLabelMap.OrderOrderShipEstimate}</h2>
+                     </td>
+                   </tr>
+                   <tr>
+                     <input type='hidden' name='${shipGroupIndex?default("0")}_shipping_method' value="STANDARD@_NA_" />
+                     <td>
+                       <input type='text' name='${shipGroupIndex?default("0")}_ship_estimate'/>
+                     </td>
+                   </tr>
                </#if>
                 <tr>
                   <td colspan='2'>
@@ -91,7 +127,7 @@ under the License.
                 </tr>
                 <tr>
                   <td valign="top">
-                    <input type='radio' <#if cart.getMaySplit(shipGroupIndex)?default("N") == "N">checked</#if> name='${shipGroupIndex?default("0")}_may_split' value='false'>
+                    <input type='radio' <#if cart.getMaySplit(shipGroupIndex)?default("N") == "N">checked="checked"</#if> name='${shipGroupIndex?default("0")}_may_split' value='false' />
                   </td>
                   <td valign="top">
                     <div>${uiLabelMap.FacilityWaitEntireOrderReady}</div>
@@ -99,13 +135,36 @@ under the License.
                 </tr>
                 <tr>
                   <td valign="top">
-                    <input <#if cart.getMaySplit(shipGroupIndex)?default("N") == "Y">checked</#if> type='radio' name='${shipGroupIndex?default("0")}_may_split' value='true'>
+                    <input <#if cart.getMaySplit(shipGroupIndex)?default("N") == "Y">checked="checked"</#if> type='radio' name='${shipGroupIndex?default("0")}_may_split' value='true' />
                   </td>
                   <td valign="top">
                     <div>${uiLabelMap.FacilityShipAvailable}</div>
                   </td>
                 </tr>
-                <tr><td colspan="2"><hr/></td></tr>
+                <tr>
+                  <td colspan="2">
+                    <h2>${uiLabelMap.OrderShipBeforeDate}</h2>
+                  </td>
+                </tr>
+                <tr>
+                    <td colspan="2">
+                    <div>
+                      <@htmlTemplate.renderDateTimeField name="sgi${shipGroupIndex?default('0')}_shipBeforeDate" event="" action="" value="${(cart.getShipBeforeDate())?if_exists}" className="" alert="" title="Format: yyyy-MM-dd HH:mm:ss.SSS" size="25" maxlength="30" id="sgi${shipGroupIndex?default('0')}_shipBeforeDate" dateType="date" shortDateInput=false timeDropdownParamName="" defaultDateTimeString="" localizedIconTitle="" timeDropdown="" timeHourName="" classString="" hour1="" hour2="" timeMinutesName="" minutes="" isTwelveHour="" ampmName="" amSelected="" pmSelected="" compositeType="" formName=""/>
+                    </div>
+                    </td>
+                </tr>
+                <tr>
+                  <td colspan="2">
+                    <h2>${uiLabelMap.OrderShipAfterDate}</h2>
+                  </td>
+                </tr>
+                <tr>
+                    <td colspan="2">
+                    <div>
+                      <@htmlTemplate.renderDateTimeField name="sgi${shipGroupIndex?default('0')}_shipAfterDate" event="" action="" value="${(cart.getShipAfterDate())?if_exists}" className="" alert="" title="Format: yyyy-MM-dd HH:mm:ss.SSS" size="25" maxlength="30" id="sgi${shipGroupIndex?default('0')}_shipAfterDate" dateType="date" shortDateInput=false timeDropdownParamName="" defaultDateTimeString="" localizedIconTitle="" timeDropdown="" timeHourName="" classString="" hour1="" hour2="" timeMinutesName="" minutes="" isTwelveHour="" ampmName="" amSelected="" pmSelected="" compositeType="" formName=""/>
+                    </div>
+                    </td>
+                </tr>
                 <tr>
                   <td colspan="2">
                     <h2>${uiLabelMap.FacilitySpecialInstructions}</h2>
@@ -116,46 +175,46 @@ under the License.
                     <textarea cols="30" rows="3" name="${shipGroupIndex?default("0")}_shipping_instructions">${cart.getShippingInstructions(shipGroupIndex)?if_exists}</textarea>
                   </td>
                 </tr>
-                <tr>
-                  <td colspan="2">
-                    <#if cart.getOrderType() = "PURCHASE_ORDER">
-                       <input type='hidden' name='${shipGroupIndex?default("0")}_is_gift' value='false'>
-                    <#else>
-                    <div>
-                      <span class="h2"><b>${uiLabelMap.OrderIsThisGift}</b></span>
-                      <input type='radio' <#if cart.getIsGift(shipGroupIndex)?default("Y") == "Y">checked</#if> name='${shipGroupIndex?default("0")}_is_gift' value='true'><span class='tabletext'>${uiLabelMap.CommonYes}</span>
-                      <input type='radio' <#if cart.getIsGift(shipGroupIndex)?default("N") == "N">checked</#if> name='${shipGroupIndex?default("0")}_is_gift' value='false'><span class='tabletext'>${uiLabelMap.CommonNo}</span>
-                    </div>
+
+                <#if cart.getOrderType() == 'PURCHASE_ORDER'>
+                    <input type="hidden" name="${shipGroupIndex?default('0')}_is_gift" value="false" />
+                <#else>
+                    <#if (productStore.showCheckoutGiftOptions)?default('Y') != 'N'>
+                        <tr>
+                            <td colspan="2">
+                                <div>
+                                    <span class="h2"><b>${uiLabelMap.OrderIsThisGift}</b></span>
+                                    <input type="radio" <#if cart.getIsGift(shipGroupIndex)?default('Y') == 'Y'>checked="checked"</#if> name="${shipGroupIndex?default('0')}_is_gift" value="true" /><span>${uiLabelMap.CommonYes}</span>
+                                    <input type="radio" <#if cart.getIsGift(shipGroupIndex)?default('N') == 'N'>checked="checked"</#if> name="${shipGroupIndex?default('0')}_is_gift" value="false" /><span>${uiLabelMap.CommonNo}</span>
+                                </div>
+                            </td>
+                        </tr>
                     </#if>
-                  </td>
-                </tr>
-                <#if cart.getOrderType() != "PURCHASE_ORDER">
-                <tr><td colspan="2"><hr/></td></tr>
-                <tr>
-                  <td colspan="2">
-                    <h2>${uiLabelMap.OrderGiftMessage}</h2>
-                  </td>
-                </tr>
-                <tr>
-                  <td colspan="2">
-                    <textarea cols="30" rows="3" name="${shipGroupIndex?default("0")}_gift_message">${cart.getGiftMessage(shipGroupIndex)?if_exists}</textarea>
-                  </td>
-                </tr>
-                 </#if>
+                    <tr>
+                        <td colspan="2">
+                            <h2>${uiLabelMap.OrderGiftMessage}</h2>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="2">
+                            <textarea cols="30" rows="3" name="${shipGroupIndex?default('0')}_gift_message">${cart.getGiftMessage(shipGroupIndex)?if_exists}</textarea>
+                        </td>
+                    </tr>
+                </#if>
+
                    <tr>
                       <td colspan="2"></td>
                    </tr>
               </table>
 </#list>
-            </form>
           </td>
         </tr>
       </table>
     </td>
   </tr>
 </table>
-
-<br/>
+</form>
+<br />
 <#else>
   <h3>${uiLabelMap.OrderViewPermissionError}</h3>
 </#if>

@@ -26,7 +26,7 @@ under the License.
         <field name="partyId"><lookup target-form-name="LookupPartyName"/></field>
         <field name="contentId"><lookup target-form-name="LookupContent"/></field>
         <field name="resumeId"><lookup target-form-name="LookupPartyResume"/></field>
-        <field name="searchButton" widget-style="smallSubmit"><submit button-type="button"/></field>
+        <field name="searchButton" title="${uiLabelMap.CommonFind}" widget-style="smallSubmit"><submit button-type="button"/></field>
     </form>
     <form name="ListPartyResumes" type="list" separate-columns="true" default-entity-name="PartyResume" list-name="listIt" paginate-target="FindPartyResumes" paginate="true"
         odd-row-style="alternate-row" header-row-style="header-row-2" default-table-style="basic-table hover-bar">
@@ -35,6 +35,8 @@ under the License.
                 <field-map field-name="inputFields" from-field="partyResumeCtx"/>
                 <field-map field-name="entityName" value="PartyResume"/>
                 <field-map field-name="orderBy" value="resumeId"/>
+                <field-map field-name="viewIndex" from-field="viewIndex"/>
+                <field-map field-name="viewSize" from-field="viewSize"/>
             </service>
         </actions>
         <auto-fields-entity entity-name="PartyResume" default-field-type="display"/>

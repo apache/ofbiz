@@ -23,9 +23,9 @@ import java.io.IOException;
 import javax.servlet.ServletException;
 import javax.servlet.http.Cookie;
 
-import org.apache.catalina.Globals;
 import org.apache.catalina.connector.Request;
 import org.apache.catalina.connector.Response;
+import org.apache.catalina.util.SessionConfig;
 import org.apache.catalina.valves.ValveBase;
 import org.apache.tomcat.util.buf.MessageBytes;
 import org.apache.tomcat.util.http.MimeHeaders;
@@ -48,11 +48,10 @@ public class CrossSubdomainSessionValve extends ValveBase {
         request.getSession(true);
 
         // replace any Tomcat-generated session cookies with our own
-        Cookie[] cookies = response.getCookies();
+        Cookie[] cookies = request.getCookies();
         if (cookies != null) {
-            for (int i = 0; i < cookies.length; i++) {
-                Cookie cookie = cookies[i];
-                if (Globals.SESSION_COOKIE_NAME.equals(cookie.getName())) {
+            for(Cookie cookie : cookies) {
+                if (SessionConfig.getSessionCookieName(null).equals(cookie.getName())) {
                     replaceCookie(request, response, cookie);
                 }
             }
@@ -107,14 +106,14 @@ public class CrossSubdomainSessionValve extends ValveBase {
             }
 
             // find the Set-Cookie header for the existing cookie and replace its value with new cookie
-            MimeHeaders mimeHeaders = response.getCoyoteResponse().getMimeHeaders();
+            MimeHeaders mimeHeaders = request.getCoyoteRequest().getMimeHeaders();
             for (int i = 0, size = mimeHeaders.size(); i < size; i++) {
                 if (mimeHeaders.getName(i).equals("Set-Cookie")) {
                     MessageBytes value = mimeHeaders.getValue(i);
                     if (value.indexOf(cookie.getName()) >= 0) {
                         StringBuffer buffer = new StringBuffer();
                         ServerCookie.appendCookieValue(buffer, newCookie.getVersion(), newCookie.getName(), newCookie.getValue(), newCookie.getPath(),
-                                newCookie.getDomain(), newCookie.getComment(), newCookie.getMaxAge(), newCookie.getSecure());
+                                newCookie.getDomain(), newCookie.getComment(), newCookie.getMaxAge(), newCookie.getSecure(), true);
                         Debug.logVerbose("CrossSubdomainSessionValve: old Set-Cookie value: " + value.toString(), module);
                         Debug.logVerbose("CrossSubdomainSessionValve: new Set-Cookie value: " + buffer, module);
                         value.setString(buffer.toString());

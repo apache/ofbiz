@@ -19,9 +19,9 @@
 package org.ofbiz.accounting.thirdparty.gosoftware;
 
 import java.io.IOException;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.Map;
+
+import javolution.util.FastMap;
 
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.GeneralException;
@@ -92,19 +92,20 @@ public class RitaApi {
     protected static final int MODE_IN = 10;
 
     // instance variables
-    protected LinkedHashMap document = null;
+    protected Map<String, String> document = null;
     protected String host = null;
     protected boolean ssl = false;
     protected int port = 0;
     protected int mode = 0;
 
-    public RitaApi(Map document) {
-        this.document = new LinkedHashMap(document);
+    public RitaApi(Map<String, String> document) {
+        this.document = FastMap.newInstance();
+        this.document.putAll(document);
         this.mode = MODE_OUT;
     }
 
     public RitaApi() {
-        this.document = new LinkedHashMap();
+        this.document = FastMap.newInstance();
         this.mode = MODE_IN;
     }
 
@@ -145,16 +146,15 @@ public class RitaApi {
             throw new IllegalArgumentException("Field [" + name + "] is not a valid OUT parameter");
         }
 
-        return (String) document.get(name);
+        return document.get(name);
     }
 
+    @Override
     public String toString() {
-        StringBuffer buf = new StringBuffer();
-        Iterator i = document.entrySet().iterator();
-        while (i.hasNext()) {
-            Map.Entry entry = (Map.Entry) i.next();
-            String name = (String) entry.getKey();
-            String value = (String) entry.getValue();
+        StringBuilder buf = new StringBuilder();
+        for (Map.Entry<String, String> entry : document.entrySet()) {
+            String name = entry.getKey();
+            String value = entry.getValue();
             buf.append(name);
             buf.append(" ");
             buf.append(value);
@@ -164,7 +164,7 @@ public class RitaApi {
         return buf.toString();
     }
 
-    public Map getDocument() {
+    public Map<String, String> getDocument() {
         return this.document;
     }
 
@@ -175,7 +175,7 @@ public class RitaApi {
 
         if (mode == MODE_IN) {
             String stream = this.toString() + "..\r\n";
-            Debug.log("Sending - \n" + stream, module);
+            Debug.logInfo("Sending - \n" + stream, module);
             String urlString = "http://" + host + ":" + port;
             HttpClient http = new HttpClient(urlString);
             http.setDebug(true);
@@ -203,7 +203,7 @@ public class RitaApi {
 
             // read the response
             while ((line = br.readLine()) != null) {
-                Debug.log(line, module);
+                Debug.logInfo(line, module);
                 if (!line.trim().equals(".")) {
                     String[] lineSplit = line.trim().split(" ");
                     if (lineSplit != null && lineSplit.length == 2) {
@@ -215,7 +215,7 @@ public class RitaApi {
                     break;
                 }
             }
-            Debug.log("Reading finished.", module);
+            Debug.logInfo("Reading finished.", module);
 
             // send session finished signal
             ps.print("..\r\n");
@@ -226,7 +226,7 @@ public class RitaApi {
             br.close();
             */
 
-            LinkedHashMap docMap = new LinkedHashMap();
+            Map<String, String> docMap = FastMap.newInstance();
             String resp = null;
             try {
                 resp = http.post(stream);
@@ -237,7 +237,7 @@ public class RitaApi {
 
             String[] lines = resp.split("\n");
             for (int i = 0; i < lines.length; i++) {
-                Debug.log(lines[i], module);
+                Debug.logInfo(lines[i], module);
                 if (!lines[i].trim().equals(".")) {
                     String[] lineSplit = lines[i].trim().split(" ", 2);
                     if (lineSplit != null && lineSplit.length == 2) {

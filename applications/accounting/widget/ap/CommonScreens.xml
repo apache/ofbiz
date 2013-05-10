@@ -23,11 +23,14 @@ under the License.
                 <property-map resource="CommonUiLabels" map-name="uiLabelMap" global="true"/>
                 <property-map resource="AccountingUiLabels" map-name="uiLabelMap" global="true"/>
                 <property-map resource="PartyUiLabels" map-name="uiLabelMap" global="true"/>
+                <property-map resource="OrderUiLabels" map-name="uiLabelMap" global="true"/>
+                <property-map resource="ManufacturingUiLabels" map-name="uiLabelMap" global="true"/>
                 <set field="layoutSettings.companyName" from-field="uiLabelMap.AccountingApCompanyName" global="true"/>
                 <set field="layoutSettings.companySubtitle" from-field="uiLabelMap.AccountingCompanySubtitle" global="true"/>
                 <set field="applicationMenuName" value="ApAppBar" global="true"/>
-                <set field="applicationMenuLocation" value="component://accounting/widget/ap/Menus.xml" global="true"/>
+                <set field="applicationMenuLocation" value="component://accounting/widget/ap/ApMenus.xml" global="true"/>
                 <set field="applicationTitle" value="${uiLabelMap.AccountingApManagerApplication}" global="true"/>
+                <set field="invoiceMenuLocation" value="component://accounting/widget/ap/ApInvoiceMenus.xml" global="true"/>
             </actions>
             <widgets>
                 <include-screen name="ApplicationDecorator" location="component://commonext/widget/CommonScreens.xml"/>
@@ -39,119 +42,49 @@ under the License.
         <section>
             <actions>
                 <set field="tabButtonItem" value="main"></set>
-                <entity-condition entity-name="PaymentType" list="paymentTypes">
-                    <order-by field-name="paymentTypeId"/>
-                </entity-condition>
-                <entity-condition entity-name="InvoiceType" list="invoiceTypes">
-                    <order-by field-name="invoiceTypeId"/>
-                </entity-condition>
-                <entity-condition entity-name="PaymentMethodType" list="paymentMethodTypes">
-                    <order-by field-name="paymentMethodTypeId"/>
-                </entity-condition>
-                <entity-condition entity-name="StatusItem" list="invoiceStatus">
-                    <condition-expr field-name="statusTypeId" operator="equals" value="INVOICE_STATUS"/>
-                    <order-by field-name="statusId"/>
-                </entity-condition>
-                <entity-condition entity-name="StatusItem" list="paymentStatus">
-                    <condition-expr field-name="statusTypeId" operator="equals" value="PMNT_STATUS"/>
-                    <order-by field-name="statusId"/>
-                </entity-condition>
+                <set field="invoiceTypeId" value="PURCHASE_INVOICE"/>
             </actions>
             <widgets>
-                <decorator-screen name="main-decorator" location="${parameter.mainDecoratorLocation}">
+                <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
                     <decorator-section name="body">
-                        <screenlet title="${uiLabelMap.AccountingAp}">
-                        <container style="lefthalf">
-                            <container style="lefthalf">
-                                <label style="h1">${uiLabelMap.AccountingAgreements}</label>
-                                <section>
-                                    <widgets>
-                                        <include-menu name="ApMainAgreementMenu" location="component://accounting/widget/ap/Menus.xml"/>
-                                    </widgets>
-                                </section>
-                            </container>
-                            <container style="righthalf">
-                                <label style="h1">${uiLabelMap.PartyVendor} ${uiLabelMap.CommonList}</label>
-                                <section>
-                                    <widgets>
-                                        <include-menu name="ApMainVendorMenu" location="component://accounting/widget/ap/Menus.xml"/>
-                                    </widgets>
-                                </section>
-                            </container>
-                        </container>
-                        <container style="righthalf">
-                            <container style="lefthalf">
-                                <label style="h1">${uiLabelMap.AccountingReports}</label>
-                                <section>
-                                    <widgets>
-                                        <include-menu name="ApMainReportMenu" location="component://accounting/widget/ap/Menus.xml"/>
-                                    </widgets>
-                                </section>
-                            </container>
-                        </container>
-                        <container style="clear"/>
-                        <container>
-                            <label style="h1">${uiLabelMap.AccountingPaymentsMenu}</label>
-                                <container style="lefthalf">
-                                    <container style="lefthalf">
-                                        <iterate-section list="paymentTypes" entry="paymentType">
-                                            <section>
-                                                <widgets>
-                                                    <include-menu name="ApMainPaymentTypeMenu" location="component://accounting/widget/ap/Menus.xml"/>
-                                                </widgets>
-                                             </section>
-                                        </iterate-section>
-                                    </container>
-                                    <container style="righthalf">
-                                        <iterate-section list="paymentMethodTypes" entry="paymentMethodType">
-                                            <section>
-                                                <widgets>
-                                                    <include-menu name="ApMainPaymentMethodTypeMenu" location="component://accounting/widget/ap/Menus.xml"/>
-                                                </widgets>
-                                            </section>
-                                        </iterate-section>
-                                    </container>
-                                </container>
-                                <container style="righthalf">
-                                    <container style="lefthalf">
-                                        <iterate-section list="paymentStatus" entry="paymentsStatus">
-                                            <section>
-                                                <widgets>
-                                                    <include-menu name="ApMainPaymentStatusMenu" location="component://accounting/widget/ap/Menus.xml"/>
-                                                </widgets>
-                                            </section>
-                                        </iterate-section>
-                                    </container>
-                                </container>
-                        </container>
-                        <container style="clear"/>
-                        <container>
-                            <label style="h1">${uiLabelMap.AccountingInvoicesMenu}</label>
-                                <container style="lefthalf">
-                                    <container style="lefthalf">
-                                        <iterate-section list="invoiceTypes" entry="invoiceType">
-                                            <section>
-                                                <widgets>
-                                                    <include-menu name="ApMainInvoiceTypeMenu" location="component://accounting/widget/ap/Menus.xml"/>
-                                                </widgets>
-                                             </section>
-                                        </iterate-section>
-                                    </container>
-                                    <container style="righthalf">
-                                        <iterate-section list="invoiceStatus" entry="invoicesStatus">
-                                            <section>
-                                                <widgets>
-                                                    <include-menu name="ApMainInvoiceStatusMenu" location="component://accounting/widget/ap/Menus.xml"/>
-                                                </widgets>
-                                            </section>
-                                        </iterate-section>
-                                    </container>
-                                </container>
-                        </container>
-                        <container style="clear"/>
-                        </screenlet>
+                        <section>
+                            <actions>
+                                <set field="organizationPartyId" from-field="organizationPartyId" default-value="${defaultOrganizationPartyId}"/>
+                                <script location="component://accounting/webapp/accounting/WEB-INF/actions/invoice/InvoiceReport.groovy"/>
+                            </actions>
+                            <widgets>
+                                <include-portal-page id="ApPortalPage"/>
+                            </widgets>
+                        </section>
                     </decorator-section>
                 </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="ApPastDueInvoices">
+        <section>
+           <actions>
+                <property-map resource="AccountingUiLabels" map-name="uiLabelMap" global="true"/>
+                <set field="invoices" from-field="PastDueInvoices"/>
+            </actions>
+            <widgets>
+                <screenlet title="${uiLabelMap.AccountingPastDueInvoices}: (${PastDueInvoicestotalAmount})">
+                    <include-form name="ListReports" location="component://accounting/widget/ap/forms/InvoiceForms.xml"/>
+                </screenlet>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="ApInvoicesDueSoon">
+        <section>
+            <actions>
+                <property-map resource="AccountingUiLabels" map-name="uiLabelMap" global="true"/>
+                <set field="invoices" from-field="InvoicesDueSoon"/>
+            </actions>
+            <widgets>
+                <screenlet title="${uiLabelMap.AccountingInvoicesDueSoon}: (${InvoicesDueSoonTotalAmount})">
+                    <include-form name="ListReports"  location="component://accounting/widget/ap/forms/InvoiceForms.xml"/>
+                </screenlet>
             </widgets>
         </section>
     </screen>
@@ -164,7 +97,7 @@ under the License.
                 <set field="partyId" from-field="parameters.partyId"/>
             </actions>
             <widgets>
-                <decorator-screen name="main-decorator" location="${parameter.mainDecoratorLocation}">
+                <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
                     <decorator-section name="body">
                         <screenlet title="${uiLabelMap.CommonEdit} ${uiLabelMap.PartyVendor}">
                             <include-form name="EditVendor" location="component://accounting/widget/ap/forms/VendorForms.xml"/>
@@ -184,14 +117,14 @@ under the License.
                 <set field="viewSize" from-field="parameters.VIEW_SIZE" type="Integer" default-value="10"/>
             </actions>
             <widgets>
-                <decorator-screen name="main-decorator" location="${parameter.mainDecoratorLocation}">
+                <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
                     <decorator-section name="body">
                         <section>
                             <widgets>
                                 <decorator-screen name="FindScreenDecorator" location="component://common/widget/CommonScreens.xml">
                                     <decorator-section name="menu-bar">
                                         <container style="button-bar">
-                                            <link target="editVendor" text="${uiLabelMap.CommonNew} ${uiLabelMap.PartyVendor}" style="buttontext"/>
+                                            <link target="editVendor" text="${uiLabelMap.CommonNew} ${uiLabelMap.PartyVendor}" style="buttontext create"/>
                                         </container>
                                     </decorator-section>
                                     <decorator-section name="search-options">
@@ -203,6 +136,24 @@ under the License.
                                 </decorator-screen>
                             </widgets>
                         </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    
+    <screen name="CommonInvoiceDecorator">
+        <section>
+            <actions>
+                <set field="headerItem" value="invoices"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="pre-body">
+                        <include-menu location="component://accounting/widget/ap/ApMenus.xml" name="ApInvoiceTabBar"/>
+                    </decorator-section>
+                    <decorator-section name="body">
+                        <decorator-section-include name="body"/>
                     </decorator-section>
                 </decorator-screen>
             </widgets>
@@ -220,11 +171,11 @@ under the License.
                         <section>
                             <!-- do check for ACCOUNTING, _VIEW permission -->
                             <condition>
-                                <if-has-permission permission="ACCOUNTING" action="_VIEW"/>
+                                <if-service-permission service-name="acctgBasePermissionCheck" main-action="VIEW"/>
                             </condition>
                             <widgets>
-                                <include-menu name="PaymentTabBar" location="component://accounting/widget/Menus.xml"/>
-                                <include-menu name="PaymentSubTabBar" location="component://accounting/widget/Menus.xml"/>
+                                <include-menu name="PaymentTabBar" location="component://accounting/widget/AccountingMenus.xml"/>
+                                <include-menu name="PaymentSubTabBar" location="component://accounting/widget/AccountingMenus.xml"/>
                                 <label style="h2" text="${uiLabelMap[labelTitleProperty]} ${uiLabelMap.CommonId}:[${paymentId}]  ${${extraFunctionName}}"/>
                                 <decorator-section-include name="body"/>
                             </widgets>
@@ -232,6 +183,82 @@ under the License.
                                 <label style="h3" text="${uiLabelMap.AccountingViewPermissionError}"/>
                             </fail-widgets>
                         </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    
+    <screen name="CommonPaymentGroupDecorator">
+        <section>
+            <actions>
+                <set field="headerItem" value="PaymentGroup"/>
+                <set field="paymentGroupId" from-field="parameters.paymentGroupId"/>
+                <entity-one entity-name="PaymentGroup" value-field="paymentGroup"/>
+                <entity-and entity-name="PaymentGroupMember" list="paymentGroupMembers" filter-by-date="true">
+                    <field-map field-name="paymentGroupId"/>
+                </entity-and>
+            </actions>
+            <widgets>
+                <decorator-screen name="main-decorator">
+                    <decorator-section name="pre-body">
+                        <include-menu name="PaymentGroupTabBar" location="component://accounting/widget/AccountingMenus.xml"/>
+                    </decorator-section>
+                    <decorator-section name="body">
+                        <section>
+                            <widgets>
+                                <section>
+                                    <condition>
+                                        <not><if-empty field="paymentGroup"/></not>
+                                    </condition>
+                                    <widgets>
+                                        <include-menu name="PaymentGroupSubTabBar" location="component://accounting/widget/AccountingMenus.xml"/>
+                                        <label style="h1">${uiLabelMap.AccountingPaymentGroupOverviewFor} ${paymenGroup.paymentGroupName} [${paymentGroupId}]</label>
+                                    </widgets>
+                                    <fail-widgets>
+                                        <label style="h1">${uiLabelMap.AccountingNewPaymentGroup}</label>
+                                    </fail-widgets>
+                                </section>
+                                <decorator-section-include name="body"/>
+                            </widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="CommonApPaymentDecorator">
+        <section>
+            <actions>
+                <set field="headerItem" value="payments"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <section>
+                            <widgets>
+                                <decorator-section-include name="body"/>
+                            </widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="CommonApReportDecorator">
+        <section>
+            <actions>
+                <set field="headerItem" value="reports"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="pre-body">
+                        <include-menu name="ApReportTabBar" location="component://accounting/widget/ap/ApMenus.xml"/>
+                    </decorator-section>
+                    <decorator-section name="body">
+                        <decorator-section-include name="body"/>
                     </decorator-section>
                 </decorator-screen>
             </widgets>

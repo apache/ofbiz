@@ -133,23 +133,12 @@ under the License.
                         <section>
                             <!-- do check for PARTYMGR, _VIEW permission -->
                             <condition>
-                                <if-has-permission permission="PARTYMGR" action="_VIEW"/>
+                                <if-service-permission service-name="partyBasePermissionCheck" main-action="VIEW"/>
                             </condition>
                             <widgets>
-                                <container style="screenlet">
-                                    <container style="screenlet-title-bar">
-                                        <container style="h3">
-                                            <label text="${uiLabelMap.PageTitleEditAvsOverride}"/>
-                                        </container>
-                                    </container>
-                                    <container style="screenlet-body">
-                                        <section>
-                                            <widgets>
-                                                <include-form name="EditAvsOverride" location="component://party/widget/partymgr/PaymentMethodForms.xml"/>
-                                            </widgets>
-                                        </section>
-                                    </container>
-                                </container>
+                                <screenlet title="${uiLabelMap.PageTitleEditAvsOverride}">
+                                    <include-form name="EditAvsOverride" location="component://party/widget/partymgr/PaymentMethodForms.xml"/>
+                                </screenlet>
                             </widgets>
                             <fail-widgets>
                                 <label style="h3">${uiLabelMap.PartyMgrViewPermissionError}</label>
@@ -159,5 +148,29 @@ under the License.
                 </decorator-screen>
             </widgets>
         </section>
+    </screen>
+    
+    <screen name="EditBillingAccount">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleEditBillingAccount"/>
+                <set field="headerItem" value="billingaccount"/>
+                <set field="tabButtonItem" value="EditBillingAccount"/>
+                <property-to-field field="defaultCurrencyUomId" resource="general" property="currency.uom.id.default" default="USD"/>
+                <set field="billingAccountId" from-field="parameters.billingAccountId"/>
+                <entity-one entity-name="BillingAccount" value-field="billingAccount"/>
+                <set field="partyId" from-field="parameters.partyId"/>
+                <set field="roleTypeId" from-field="parameters.roleTypeId"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="PaymentMethodDecorator">
+                    <decorator-section name="body">
+                        <screenlet title="${uiLabelMap.PageTitleEditBillingAccount}">
+                            <include-form name="EditBillingAccount" location="component://party/widget/partymgr/PaymentMethodForms.xml"/>
+                        </screenlet>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+         </section>
     </screen>
 </screens>

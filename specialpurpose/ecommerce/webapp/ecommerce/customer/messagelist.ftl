@@ -29,10 +29,10 @@ under the License.
     <#assign partyNameTo = "${uiLabelMap.CommonNA}">
   </#if>
               <tr>
-                <td><div class="tabletext">${partyNameFrom}</div></td>
-                <td><div class="tabletext">${partyNameTo}</div></td>
-                <td><div class="tabletext">${communicationEvent.subject?default("")}</div></td>
-                <td><div class="tabletext">${communicationEvent.entryDate}</div></td>
+                <td><div>${partyNameFrom}</div></td>
+                <td><div>${partyNameTo}</div></td>
+                <td><div>${communicationEvent.subject?default("")}</div></td>
+                <td><div>${communicationEvent.entryDate}</div></td>
                 <td align="right">
                   <form method="post" action="<@ofbizUrl>readmessage</@ofbizUrl>" name="ecomm_read_mess${index}">
                     <input name="communicationEventId" value="${communicationEvent.communicationEventId}" type="hidden"/>
@@ -50,7 +50,7 @@ under the License.
 </#macro>
 
 <div class="screenlet">
-    <div class="screenlet-header">
+    <div class="screenlet-title-bar">
         <div class="boxlink">
             <#if parameters.showSent?if_exists == "true">
               <a href="<@ofbizUrl>messagelist</@ofbizUrl>" class="submenutextright">${uiLabelMap.EcommerceViewReceivedOnly}</a>
@@ -58,12 +58,12 @@ under the License.
               <a href="<@ofbizUrl>messagelist?showSent=true</@ofbizUrl>" class="submenutextright">${uiLabelMap.EcommerceViewSent}</a>
             </#if>
         </div>
-        <div class="boxhead">&nbsp;${uiLabelMap.CommonMessages}</div>
+        <div class="h3">${uiLabelMap.CommonMessages}</div>
     </div>
     <div class="screenlet-body">
         <table width="100%" border="0" cellpadding="1">
           <#if (!receivedCommunicationEvents?has_content && !sentCommunicationEvents?has_content)>
-            <tr><td><div class="tabletext">${uiLabelMap.EcommerceNoMessages}.</div></td></tr>
+            <tr><td><div>${uiLabelMap.EcommerceNoMessages}.</div></td></tr>
           <#else/>
             <tr>
               <td><div class="tableheadtext">${uiLabelMap.CommonFrom}</div></td>
@@ -72,7 +72,7 @@ under the License.
               <td><div class="tableheadtext">${uiLabelMap.EcommerceSentDate}</div></td>
               <td>&nbsp;</td>
             </tr>
-            <tr><td colspan="5"><hr/></td></tr>
+            <tr><td colspan="5"><hr /></td></tr>
             <#list receivedCommunicationEvents?if_exists as receivedCommunicationEvent>
               <@showMessage communicationEvent=receivedCommunicationEvent isSentMessage=false index=receivedCommunicationEvent_index/>
             </#list>

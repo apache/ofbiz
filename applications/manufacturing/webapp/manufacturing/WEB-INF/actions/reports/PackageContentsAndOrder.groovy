@@ -25,22 +25,22 @@ import org.ofbiz.order.order.OrderReadHelper;
 import org.ofbiz.order.order.OrderContentWrapper;
 
 if (productCategoryIdPar) {
-    category = delegator.findByPrimaryKey("ProductCategory", [productCategoryId : productCategoryIdPar]);
+    category = delegator.findOne("ProductCategory", [productCategoryId : productCategoryIdPar], false);
     context.category = category;
 }
 if (productFeatureTypeIdPar) {
-    featureType = delegator.findByPrimaryKey("ProductFeatureType", [productFeatureTypeId : productFeatureTypeIdPar]);
+    featureType = delegator.findOne("ProductFeatureType", [productFeatureTypeId : productFeatureTypeIdPar], false);
     context.featureType = featureType;
 }
-packageContents = delegator.findByAnd("ShipmentPackageContent", [shipmentId : shipmentId]);
+packageContents = delegator.findByAnd("ShipmentPackageContent", [shipmentId : shipmentId], null, false);
 
 packagesMap = [:];
 if (packageContents) {
     packageContents.each { packageContent ->
-        orderShipments = delegator.findByAnd("OrderShipment", [shipmentId : shipmentId, shipmentItemSeqId : packageContent.shipmentItemSeqId]);
+        orderShipments = delegator.findByAnd("OrderShipment", [shipmentId : shipmentId, shipmentItemSeqId : packageContent.shipmentItemSeqId], null, false);
         orderShipment = EntityUtil.getFirst(orderShipments);
-        orderItem = delegator.findByPrimaryKey("OrderItem", [orderId : orderShipment.orderId, orderItemSeqId : orderShipment.orderItemSeqId]);
-        product = orderItem.getRelatedOne("Product");
+        orderItem = delegator.findOne("OrderItem", [orderId : orderShipment.orderId, orderItemSeqId : orderShipment.orderItemSeqId], false);
+        product = orderItem.getRelatedOne("Product", false);
         // verify if the product is a member of the given category (based on the report's parameter)
         if (productCategoryIdPar) {
             if (!isProductInCategory(delegator, product.productId, productCategoryIdPar)) {

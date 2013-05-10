@@ -26,6 +26,7 @@ import org.ofbiz.product.catalog.*;
 import org.ofbiz.product.category.*;
 import org.ofbiz.product.product.ProductWorker;
 import org.ofbiz.product.product.ProductContentWrapper;
+import org.ofbiz.entity.util.EntityUtil;
 
 contentPathPrefix = CatalogWorker.getContentPathPrefix(request);
 catalogName = CatalogWorker.getCatalogName(request);
@@ -35,30 +36,43 @@ requestParams = UtilHttp.getParameterMap(request);
 detailScreen = "productdetail";
 productId = requestParams.product_id ?: request.getAttribute("product_id");
 
-/*
- * NOTE JLR 20070221 this should be done using the same method than in add to cart. I will do it like that and remove all this after.
- *
-if (productId) {
-    previousParams = session.getAttribute("_PREVIOUS_PARAMS_");
-    if (previousParams) {
-        previousParams = UtilHttp.stripNamedParamsFromQueryString(previousParams, ["product_id"]);
-        previousParams += "&product_id=" + productId;
-    } else {
-        previousParams = "product_id=" + productId;
-    }
-    session.setAttribute("_PREVIOUS_PARAMS_", previousParams);    // for login
-    context.previousParams = previousParams;
-}*/
+pageTitle = null;
+metaDescription = null;
+metaKeywords = null;
 
 // get the product entity
 if (productId) {
-    product = delegator.findByPrimaryKeyCache("Product", [productId : productId]);
-
+    product = delegator.findOne("Product", [productId : productId], true);
+    if (product) {
+        // first make sure this isn't a virtual-variant that has an associated virtual product, if it does show that instead of the variant
+        if("Y".equals(product.isVirtual) && "Y".equals(product.isVariant)){
+            virtualVariantProductAssocs = delegator.findByAnd("ProductAssoc", ["productId": productId, "productAssocTypeId": "ALTERNATIVE_PACKAGE"], ["-fromDate"], true);
+            virtualVariantProductAssocs = EntityUtil.filterByDate(virtualVariantProductAssocs);
+            if (virtualVariantProductAssocs) {
+                productAssoc = EntityUtil.getFirst(virtualVariantProductAssocs);
+                product = productAssoc.getRelatedOne("AssocProduct", true);
+            }
+        }
+    }
+    
     // first make sure this isn't a variant that has an associated virtual product, if it does show that instead of the variant
     virtualProductId = ProductWorker.getVariantVirtualId(product);
     if (virtualProductId) {
         productId = virtualProductId;
-        product = delegator.findByPrimaryKeyCache("Product", [productId : productId]);
+        product = delegator.findOne("Product", [productId : productId], true);
+    }
+
+    productPageTitle = delegator.findByAnd("ProductContentAndInfo", [productId : productId, productContentTypeId : "PAGE_TITLE"], null, true);
+    if (productPageTitle) {
+        pageTitle = delegator.findOne("ElectronicText", [dataResourceId : productPageTitle.get(0).dataResourceId], true);
+    }
+    productMetaDescription = delegator.findByAnd("ProductContentAndInfo", [productId : productId, productContentTypeId : "META_DESCRIPTION"], null, true);
+    if (productMetaDescription) {
+        metaDescription = delegator.findOne("ElectronicText", [dataResourceId : productMetaDescription.get(0).dataResourceId], true);
+    }
+    productMetaKeywords = delegator.findByAnd("ProductContentAndInfo", [productId : productId, productContentTypeId : "META_KEYWORD"], null, true);
+    if (productMetaKeywords) {
+        metaKeywords = delegator.findOne("ElectronicText", [dataResourceId : productMetaKeywords.get(0).dataResourceId], true);
     }
 
     context.productId = productId;
@@ -77,26 +91,42 @@ if (productId) {
     if (product) {
         context.product = product;
         contentWrapper = new ProductContentWrapper(product, request);
-        context.put("title", contentWrapper.get("PRODUCT_NAME"));
-        context.put("metaDescription", contentWrapper.get("DESCRIPTION"));
 
-        keywords = [];
-        keywords.add(product.productName);
-        keywords.add(catalogName);
-        members = delegator.findByAndCache("ProductCategoryMember", [productId : productId]);
-        members.each { member ->
-            category = member.getRelatedOneCache("ProductCategory");
-            categoryContentWrapper = new CategoryContentWrapper(category, request);
-            categoryDescription = categoryContentWrapper.DESCRIPTION;
-            if (categoryDescription) {
-                keywords.add(categoryDescription);
-            }
+        if (pageTitle) {
+            context.title = pageTitle.textData;
+        } else {
+            context.put("title", contentWrapper.get("PRODUCT_NAME"));
         }
-        context.metaKeywords = StringUtil.join(keywords, ", ");
+
+        if (metaDescription) {
+            context.metaDescription = metaDescription.textData;
+        } else {
+            context.put("metaDescription", contentWrapper.get("DESCRIPTION"));
+        }
+
+        if (metaKeywords) {
+            context.metaKeywords = metaKeywords.textData;
+        } else {
+            keywords = [];
+            keywords.add(contentWrapper.get("PRODUCT_NAME"));
+            keywords.add(catalogName);
+            members = delegator.findByAnd("ProductCategoryMember", [productId : productId], null, true);
+            members.each { member ->
+                category = member.getRelatedOne("ProductCategory", true);
+                if (category.description) {
+                    categoryContentWrapper = new CategoryContentWrapper(category, request);
+                    categoryDescription = categoryContentWrapper.DESCRIPTION;
+                    if (categoryDescription) {
+                            keywords.add(categoryDescription);
+                    }
+                }
+            }
+            context.metaKeywords = StringUtil.join(keywords, ", ");
+        }
 
         // Set the default template for aggregated product (product component configurator ui)
-        if (product.productTypeId && "AGGREGATED".equals(product.productTypeId) && configproductdetailScreen) {
-            detailScreen = configproductdetailScreen;
+        if (product.productTypeId && ("AGGREGATED".equals(product.productTypeId) || "AGGREGATED_SERVICE".equals(product.productTypeId)) && context.configproductdetailScreen) {
+            detailScreen = context.configproductdetailScreen;
         }
 
         productTemplate = product.detailScreen;

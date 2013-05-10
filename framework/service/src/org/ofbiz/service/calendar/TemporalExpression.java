@@ -19,7 +19,7 @@
 package org.ofbiz.service.calendar;
 
 import java.io.Serializable;
-import java.util.Calendar;
+import com.ibm.icu.util.Calendar;
 import java.util.Date;
 import java.util.Set;
 import java.util.TreeSet;
@@ -97,6 +97,19 @@ public abstract class TemporalExpression implements Serializable, Comparable<Tem
      * <code>cal</code>
      */
     public abstract boolean includesDate(Calendar cal);
+
+    /** Returns true if this expression is a candidate for substitution
+     * using the expression <code>expressionToTest</code> for the date
+     * <code>cal</code>. A <code>Substitution</code> object will call this
+     * method when it needs to know if this expression could have produced
+     * the date <code>cal</code> based on the expression
+     * <code>expressionToTest</code>.
+     * @param cal A date to evaluate
+     * @param expressionToTest An expression to evaluate
+     * @return true if this expression could have produced the date
+     * <code>cal</code> using the expression <code>expressionToTest</code>
+     */
+    public abstract boolean isSubstitutionCandidate(Calendar cal, TemporalExpression expressionToTest);
 
     /** Returns a date representing the next occurrence of this expression
      * after a specified date. Returns <code>null</code> if there

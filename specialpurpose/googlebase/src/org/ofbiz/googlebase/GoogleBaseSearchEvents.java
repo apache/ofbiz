@@ -18,7 +18,6 @@
  *******************************************************************************/
 package org.ofbiz.googlebase;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -26,8 +25,11 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import javolution.util.FastList;
+
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.StringUtil;
+import org.ofbiz.base.util.UtilGenerics;
 import org.ofbiz.base.util.UtilHttp;
 import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.base.util.UtilProperties;
@@ -53,8 +55,8 @@ public class GoogleBaseSearchEvents {
         LocalDispatcher dispatcher = (LocalDispatcher) request.getAttribute("dispatcher");
         Locale locale = UtilHttp.getLocale(request);
         GenericValue userLogin = (GenericValue) request.getSession().getAttribute("userLogin");
-        String selectResult = (String) request.getParameter("selectResult");
-        List productExportList = new ArrayList();
+        String selectResult = request.getParameter("selectResult");
+        List<String> productExportList = FastList.newInstance();
         String errMsg = null;
 
         try {
@@ -71,7 +73,7 @@ public class GoogleBaseSearchEvents {
                     }
 
                     GenericValue searchResultView = null;
-                    while ((searchResultView = (GenericValue) eli.next()) != null) {
+                    while ((searchResultView = eli.next()) != null) {
                         productExportList.add(searchResultView.getString("mainProductId"));
                     }
                     eli.close();
@@ -79,21 +81,33 @@ public class GoogleBaseSearchEvents {
                     if (selectResult.startsWith("[")) {
                         productExportList = StringUtil.toList(selectResult);
                     } else {
-                        productExportList.add(selectResult);
+                        if(!selectResult.startsWith("{")){
+                            productExportList.add(selectResult);
+                        }else {
+                            List<String> listTemp = FastList.newInstance();
+                            String temp = selectResult.substring(1, selectResult.length()-1);
+                            String arrayTemp[] = temp.split(",");
+                            for(int i=0; i<arrayTemp.length; i++){
+                                listTemp.add(arrayTemp[i].trim());
+                            }
+                            productExportList = listTemp;
+                        }
                     }
                 }
-                String webSiteUrl = (String) request.getParameter("webSiteUrl");
-                String imageUrl = (String) request.getParameter("imageUrl");
-                String actionType = (String) request.getParameter("actionType");
-                String statusId = (String) request.getParameter("statusId");
-                String testMode = (String) request.getParameter("testMode");
-                String trackingCodeId = (String) request.getParameter("trackingCodeId");
-                String webSiteMountPoint = (String) request.getParameter("webSiteMountPoint");
-                String countryCode = (String) request.getParameter("countryCode");
+                String webSiteUrl = request.getParameter("webSiteUrl");
+                String imageUrl = request.getParameter("imageUrl");
+                String actionType = request.getParameter("actionType");
+                String statusId = request.getParameter("statusId");
+                String testMode = request.getParameter("testMode");
+                String trackingCodeId = request.getParameter("trackingCodeId");
+                String webSiteMountPoint = request.getParameter("webSiteMountPoint");
+                String countryCode = request.getParameter("countryCode");
+                String productStoreId = request.getParameter("productStoreId");
+                String allowRecommended = request.getParameter("allowRecommended");
 
                 // Export all or selected products to Google Base
                 try {
-                    Map inMap = UtilMisc.toMap("selectResult", productExportList,
+                    Map<String, Object> inMap = UtilMisc.toMap("selectResult", productExportList,
                                                "webSiteUrl", webSiteUrl,
                                                "imageUrl", imageUrl,
                                                "actionType", actionType,
@@ -103,9 +117,11 @@ public class GoogleBaseSearchEvents {
                                                "countryCode", countryCode);
                     inMap.put("trackingCodeId", trackingCodeId);
                     inMap.put("userLogin", userLogin);
-                    Map exportResult = dispatcher.runSync("exportToGoogle", inMap);
+                    inMap.put("productStoreId", productStoreId);
+                    inMap.put("allowRecommended", allowRecommended);
+                    Map<String, Object> exportResult = dispatcher.runSync("exportToGoogle", inMap);
                     if (ServiceUtil.isError(exportResult)) {
-                        List errorMessages = (List)exportResult.get(ModelService.ERROR_MESSAGE_LIST);
+                        List<String> errorMessages = UtilGenerics.checkList(exportResult.get(ModelService.ERROR_MESSAGE_LIST), String.class);
                         if (UtilValidate.isNotEmpty(errorMessages)) {
                             request.setAttribute("_ERROR_MESSAGE_LIST_", errorMessages);
                         } else {
@@ -113,14 +129,15 @@ public class GoogleBaseSearchEvents {
                         }
                         return "error";
                     } else if (ServiceUtil.isFailure(exportResult)) {
-                        List eventMessages = (List)exportResult.get(ModelService.ERROR_MESSAGE_LIST);
+                        List<String> eventMessages = UtilGenerics.checkList(exportResult.get(ModelService.ERROR_MESSAGE_LIST), String.class);
                         if (UtilValidate.isNotEmpty(eventMessages)) {
-                            request.setAttribute("_EVENT_MESSAGE_LIST_", eventMessages);
+                            request.setAttribute("_ERROR_MESSAGE_LIST_", eventMessages);
                         } else {
-                            request.setAttribute("_EVENT_MESSAGE_", ServiceUtil.getErrorMessage(exportResult));
+                            request.setAttribute("_ERROR_MESSAGE_", ServiceUtil.getErrorMessage(exportResult));
                         }
+                        return "error";
                     } else {
-                        request.setAttribute("_EVENT_MESSAGE_", exportResult.get("successMessage"));
+                        request.setAttribute("_EVENT_MESSAGE_", exportResult.get("responseMessage"));
                     }
                 } catch (GenericServiceException e) {
                     errMsg = UtilProperties.getMessage(resource, "googlebasesearchevents.exceptionCallingExportToGoogle", locale);

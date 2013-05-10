@@ -17,7 +17,7 @@ specific language governing permissions and limitations
 under the License.
 -->
 <#escape x as x?xml>
-<fo:table space-after="0.3in">
+<fo:table table-layout="fixed" width="100%" space-after="0.3in">
    <fo:table-column column-width="3.5in"/>
     <fo:table-body>
       <fo:table-row >
@@ -36,9 +36,6 @@ under the License.
         <fo:block>${billingAddress.city?if_exists} ${billingAddress.stateProvinceGeoId?if_exists} ${billingAddress.postalCode?if_exists}</fo:block>
     <#else>
         <fo:block>${uiLabelMap.AccountingNoGenBilAddressFound}${billingParty.partyId}</fo:block>
-    </#if>
-    <#if billingPartyTaxId?has_content>
-        <fo:block>Tax ID: ${billingPartyTaxId}</fo:block>
     </#if>
         </fo:table-cell>
     </fo:table-row>

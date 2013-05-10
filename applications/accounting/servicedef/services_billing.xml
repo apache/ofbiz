@@ -83,7 +83,7 @@ under the License.
         <permission-service service-name="acctgBillingAcctCheck" main-action="CREATE"/>
         <attribute name="billingAccountId" type="String" mode="IN" optional="false"/>
         <attribute name="termTypeId" type="String" mode="IN" optional="false"/>
-        <attribute name="termValue" type="Long" mode="IN" optional="false"/>
+        <attribute name="termValue" type="BigDecimal" mode="IN" optional="false"/>
         <attribute name="uomId" type="String" mode="IN" optional="true"/>
         <attribute name="billingAccountTermId" type="String" mode="OUT" optional="false"/>
     </service>
@@ -94,7 +94,7 @@ under the License.
         <attribute name="billingAccountTermId" type="String" mode="IN" optional="false"/>
         <attribute name="billingAccountId" type="String" mode="IN" optional="true"/>
         <attribute name="termTypeId" type="String" mode="IN" optional="true"/>
-        <attribute name="termValue" type="Long" mode="IN" optional="true"/>
+        <attribute name="termValue" type="BigDecimal" mode="IN" optional="true"/>
         <attribute name="uomId" type="String" mode="IN" optional="true"/>
     </service>
     <service name="removeBillingAccountTerm" engine="simple"
@@ -112,10 +112,5 @@ under the License.
         <attribute name="availableBalance" type="BigDecimal" mode="OUT" optional="false"/>
         <attribute name="availableToCapture" type="BigDecimal" mode="OUT" optional="false"/>
         <attribute name="billingAccount" type="org.ofbiz.entity.GenericValue" mode="OUT" optional="false"/>
-    </service>
-    <service name="acctgBillingAcctCheck" engine="simple"
-            location="component://accounting/script/org/ofbiz/accounting/permissions/PermissionServices.xml" invoke="acctgBillingAcctCheck">
-        <description>Basic Billing Account Permission Checking Logic</description>
-        <implements service="permissionInterface"/>
     </service>
 </services>

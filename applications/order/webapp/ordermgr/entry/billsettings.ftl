@@ -17,7 +17,8 @@ specific language governing permissions and limitations
 under the License.
 -->
 
-<script language="JavaScript" type="text/javascript">
+<script type="text/javascript">
+//<![CDATA[
 function shipBillAddr() {
     if (document.checkoutsetupform.useShipAddr.checked) {
         window.location = "<@ofbizUrl>setBilling?createNew=Y&finalizeMode=payment&paymentMethodType=${paymentMethodType?if_exists}&useShipAddr=Y</@ofbizUrl>";
@@ -29,6 +30,7 @@ function shipBillAddr() {
 function makeExpDate() {
     document.checkoutsetupform.expireDate.value = document.checkoutsetupform.expMonth.options[document.checkoutsetupform.expMonth.selectedIndex].value + "/" + document.checkoutsetupform.expYear.options[document.checkoutsetupform.expYear.selectedIndex].value;
 }
+//]]>
 </script>
 
 <#if security.hasEntityPermission("ORDERMGR", "_CREATE", session) || security.hasEntityPermission("ORDERMGR", "_PURCHASE_CREATE", session)>
@@ -44,7 +46,7 @@ function makeExpDate() {
                   <a href="<@ofbizUrl>setBilling?createNew=Y</@ofbizUrl>" class="buttontext">${uiLabelMap.CommonCreateNew}</a>
                 </td>
               </tr>
-              <tr><td colspan="3"><hr/></td></tr>
+              <tr><td colspan="3"><hr /></td></tr>
               <#if billingAccountList?has_content>
                 <tr>
                   <td width="1%">
@@ -52,8 +54,12 @@ function makeExpDate() {
                       <option value=""></option>
                         <#list billingAccountList as billingAccount>
                           <#assign availableAmount = billingAccount.accountBalance?double>
-                          <#assign accountLimit = billingAccount.accountLimit?double>
-                          <option value="${billingAccount.billingAccountId}" <#if billingAccount.billingAccountId == selectedBillingAccountId?default("")>selected</#if>>${billingAccount.description?default("")} [${billingAccount.billingAccountId}] Available: <@ofbizCurrency amount=availableAmount isoCode=billingAccount.accountCurrencyUomId/> Limit: <@ofbizCurrency amount=accountLimit isoCode=billingAccount.accountCurrencyUomId/></option>
+                          <#if (billingAccount.accountLimit)?exists>
+                              <#assign accountLimit = billingAccount.accountLimit?double />
+                          <#else>
+                              <#assign accountLimit = 0.00 />
+                          </#if> 
+                          <option value="${billingAccount.billingAccountId}" <#if billingAccount.billingAccountId == selectedBillingAccountId?default("")>selected="selected"</#if>>${billingAccount.description?default("")} [${billingAccount.billingAccountId}] Available: <@ofbizCurrency amount=availableAmount isoCode=billingAccount.accountCurrencyUomId/> Limit: <@ofbizCurrency amount=accountLimit isoCode=billingAccount.accountCurrencyUomId/></option>
                         </#list>
                     </select>
                   </td>
@@ -71,58 +77,60 @@ function makeExpDate() {
                   </td>
                   <td>&nbsp;</td>
                 </tr>
-                <tr><td colspan="3"><hr/></td></tr>
+                <tr><td colspan="3"><hr /></td></tr>
               </#if>
               <tr>
                 <td width="1%">
-                  <input type="radio" name="checkOutPaymentId" value="EXT_OFFLINE" <#if checkOutPaymentId?exists && checkOutPaymentId == "EXT_OFFLINE">checked="checked"</#if>/>
+                  <input type="radio" id="checkOutPaymentId_EXT_OFFLINE" name="checkOutPaymentId" value="EXT_OFFLINE" <#if checkOutPaymentId?exists && checkOutPaymentId == "EXT_OFFLINE">checked="checked"</#if>/>
                 </td>
                 <td colspan="2" width="50%">
-                  <span>${uiLabelMap.OrderPaymentOfflineCheckMoney}</span>
+                  <label for="checkOutPaymentId_EXT_OFFLINE">${uiLabelMap.OrderPaymentOfflineCheckMoney}</label>
                 </td>
               </tr>
-             <tr><td colspan="3"><hr/></td></tr>
+             <tr><td colspan="3"><hr /></td></tr>
               <tr>
                 <td width="1%">
-                  <input type="radio" name="checkOutPaymentId" value="EXT_COD" <#if checkOutPaymentId?exists && checkOutPaymentId == "EXT_COD">checked="checked"</#if>/>
+                  <input type="radio" id="checkOutPaymentId_EXT_COD" name="checkOutPaymentId" value="EXT_COD" <#if checkOutPaymentId?exists && checkOutPaymentId == "EXT_COD">checked="checked"</#if>/>
                 </td>
                 <td colspan="2" width="50%">
-                  <span>${uiLabelMap.OrderCOD}</span>
+                  <label for="checkOutPaymentId_EXT_COD">${uiLabelMap.OrderCOD}</label>
                 </td>
               </tr>
-             <tr><td colspan="3"><hr/></td></tr>
+             <tr><td colspan="3"><hr /></td></tr>
               <#if paymentMethodList?has_content>
                 <#list paymentMethodList as paymentMethod>
                   <#if paymentMethod.paymentMethodTypeId == "CREDIT_CARD">
-                    <#assign creditCard = paymentMethod.getRelatedOne("CreditCard")>
+                    <#assign creditCard = paymentMethod.getRelatedOne("CreditCard", false)>
                     <tr>
                       <td width="1%">
-                        <input type="radio" name="checkOutPaymentId" value="${paymentMethod.paymentMethodId}" <#if checkOutPaymentId?exists && paymentMethod.paymentMethodId == checkOutPaymentId>checked="checked"</#if>/>
+                        <input type="radio" id="checkOutPaymentId_CREDIT_CARD_${paymentMethod.paymentMethodId}" name="checkOutPaymentId" value="${paymentMethod.paymentMethodId}" <#if checkOutPaymentId?exists && paymentMethod.paymentMethodId == checkOutPaymentId>checked="checked"</#if>/>
                       </td>
                       <td width="50%">
-                        <span>
+                        <label for="checkOutPaymentId_CREDIT_CARD_${paymentMethod.paymentMethodId}">
                           CC:&nbsp;${Static["org.ofbiz.party.contact.ContactHelper"].formatCreditCard(creditCard)}
                           <#if paymentMethod.description?has_content>(${paymentMethod.description})</#if>
-                          &nbsp;${uiLabelMap.OrderCardSecurityCode}&nbsp;<input type="text" size="5" maxlength="10" name="securityCode_${paymentMethod.paymentMethodId}" value=""/>
+                        </label>
+                        <span>
+                          ${uiLabelMap.OrderCardSecurityCode}&nbsp;<input type="text" size="5" maxlength="10" name="securityCode_${paymentMethod.paymentMethodId}" value=""/>
                         </span>
                       </td>
                       <td align="right"><a href="/partymgr/control/editcreditcard?party_id=${orderParty.partyId}&amp;paymentMethodId=${paymentMethod.paymentMethodId}" target="_blank" class="buttontext">${uiLabelMap.CommonUpdate}</a></td>
                     </tr>
                   <#elseif paymentMethod.paymentMethodTypeId == "EFT_ACCOUNT">
-                    <#assign eftAccount = paymentMethod.getRelatedOne("EftAccount")>
+                    <#assign eftAccount = paymentMethod.getRelatedOne("EftAccount", false)>
                     <tr>
                       <td width="1%">
-                        <input type="radio" name="checkOutPaymentId" value="${paymentMethod.paymentMethodId}" <#if checkOutPaymentId?exists && paymentMethod.paymentMethodId == checkOutPaymentId>checked="checked"</#if>/>
+                        <input type="radio" id="checkOutPaymentId_EFT_ACCOUNT_${paymentMethod.paymentMethodId}" name="checkOutPaymentId" value="${paymentMethod.paymentMethodId}" <#if checkOutPaymentId?exists && paymentMethod.paymentMethodId == checkOutPaymentId>checked="checked"</#if>/>
                       </td>
                       <td width="50%">
-                        <span>
+                        <label for="checkOutPaymentId_EFT_ACCOUNT_${paymentMethod.paymentMethodId}">
                           EFT:&nbsp;${eftAccount.bankName?if_exists}: ${eftAccount.accountNumber?if_exists}
                           <#if paymentMethod.description?has_content>(${paymentMethod.description})</#if>
-                        </span>
+                        </label>
                       </td>
-                      <td align="right"><a href="/partymgr/control/editeftaccount?party_id=${orderParty.partyId}&paymentMethodId=${paymentMethod.paymentMethodId}" target="_blank" class="buttontext">${uiLabelMap.CommonUpdate}</a></td>
+                      <td align="right"><a href="/partymgr/control/editeftaccount?party_id=${orderParty.partyId}&amp;paymentMethodId=${paymentMethod.paymentMethodId}" target="_blank" class="buttontext">${uiLabelMap.CommonUpdate}</a></td>
                     </tr>
-                    <tr><td colspan="2"><hr/></td></tr>
+                    <tr><td colspan="2"><hr /></td></tr>
                   </#if>
                 </#list>
               <#else>
@@ -168,14 +176,14 @@ function makeExpDate() {
             <#if cart.getShippingContactMechId()?exists>
             <tr>
               <td width="26%" align="right"= valign="top">
-                <input type="checkbox" name="useShipAddr" value="Y" onClick="javascript:shipBillAddr();" <#if requestParameters.useShipAddr?exists>checked="checked"</#if>/>
+                <input type="checkbox" name="useShipAddr" value="Y" onclick="javascript:shipBillAddr();" <#if requestParameters.useShipAddr?exists>checked="checked"</#if>/>
               </td>
               <td colspan="2" valign="center">
                 <div>${uiLabelMap.FacilityBillingAddressSameShipping}</div>
               </td>
             </tr>
             <tr>
-              <td colspan="3"><hr/></td>
+              <td colspan="3"><hr /></td>
             </tr>
             </#if>
 
@@ -268,7 +276,7 @@ function makeExpDate() {
               </#if>
               <input type="hidden" name="expireDate" value="${creditCard.expireDate?if_exists}"/>
               <tr>
-                <td colspan="3"><hr/></td>
+                <td colspan="3"><hr /></td>
               </tr>
 
                   <tr>
@@ -284,10 +292,10 @@ function makeExpDate() {
                 <td width="74%">
                   <select name="titleOnCard">
                     <option value="">${uiLabelMap.CommonSelectOne}</option>
-                    <option<#if ((creditCard.titleOnCard)?default("") == "Mr.")> checked</#if>>${uiLabelMap.CommonTitleMr}</option>
-                    <option<#if ((creditCard.titleOnCard)?default("") == "Mrs.")> checked</#if>>${uiLabelMap.CommonTitleMrs}</option>
-                    <option<#if ((creditCard.titleOnCard)?default("") == "Ms.")> checked</#if>>${uiLabelMap.CommonTitleMs}</option>
-                    <option<#if ((creditCard.titleOnCard)?default("") == "Dr.")> checked</#if>>${uiLabelMap.CommonTitleDr}</option>
+                    <option<#if ((creditCard.titleOnCard)?default("") == "Mr.")> checked="checked"</#if>>${uiLabelMap.CommonTitleMr}</option>
+                    <option<#if ((creditCard.titleOnCard)?default("") == "Mrs.")> checked="checked"</#if>>${uiLabelMap.CommonTitleMrs}</option>
+                    <option<#if ((creditCard.titleOnCard)?default("") == "Ms.")> checked="checked"</#if>>${uiLabelMap.CommonTitleMs}</option>
+                    <option<#if ((creditCard.titleOnCard)?default("") == "Dr.")> checked="checked"</#if>>${uiLabelMap.CommonTitleDr}</option>
                    </select>
                 </td>
               </tr>
@@ -406,7 +414,7 @@ function makeExpDate() {
                     <#assign eftAccount = requestParameters>
                   </#if>
                   <tr>
-                <td colspan="3"><hr/></td>
+                <td colspan="3"><hr /></td>
               </tr>
               <tr>
                 <td width="26%" align="right" valign="top"><div>${uiLabelMap.AccountingNameAccount}</div></td>
@@ -485,24 +493,24 @@ function makeExpDate() {
             <table width="100%" border="0" cellpadding="1" cellspacing="0">
               <#if !requestParameters.createNew?exists>
               <tr>
-                <td width='1%' nowrap><input type="radio" name="paymentMethodTypeAndId" value="EXT_OFFLINE" <#if checkOutPaymentId?exists && checkOutPaymentId == "EXT_OFFLINE">checked="checked"</#if> onchange="setCheckoutPaymentId(this.value)" onClick="setCheckoutPaymentId(this.value)"/></td>
-                <td width='50%'nowrap><div>${uiLabelMap.OrderPaymentOfflineCheckMoney}</div></td>
+                <td width='1%' nowrap="nowrap"><input type="radio" name="paymentMethodTypeAndId" value="EXT_OFFLINE" <#if checkOutPaymentId?exists && checkOutPaymentId == "EXT_OFFLINE">checked="checked"</#if> onchange="setCheckoutPaymentId(this.value)" onclick="setCheckoutPaymentId(this.value)"/></td>
+                <td width='50%' nowrap="nowrap"><div>${uiLabelMap.OrderPaymentOfflineCheckMoney}</div></td>
               </tr>
-              <tr><td colspan="2"><hr/></td></tr>
+              <tr><td colspan="2"><hr /></td></tr>
               <tr>
-                <td width="1%" nowrap><input type="radio" name="paymentMethodTypeAndId" value="EXT_COD" <#if checkOutPaymentId?exists && checkOutPaymentId == "EXT_COD">checked="checked"</#if> onchange="setCheckoutPaymentId(this.value)" onClick="setCheckoutPaymentId(this.value)"/></td>
-                <td width="50%"nowrap><div>${uiLabelMap.OrderCOD}</div></td>
+                <td width="1%" nowrap="nowrap"><input type="radio" name="paymentMethodTypeAndId" value="EXT_COD" <#if checkOutPaymentId?exists && checkOutPaymentId == "EXT_COD">checked="checked"</#if> onchange="setCheckoutPaymentId(this.value)" onclick="setCheckoutPaymentId(this.value)"/></td>
+                <td width="50%" nowrap="nowrap"><div>${uiLabelMap.OrderCOD}</div></td>
               </tr>
-              <tr><td colspan="2"><hr/></td></tr>
+              <tr><td colspan="2"><hr /></td></tr>
               </#if>
               <tr>
-                <td width='1%' nowrap><input type="radio" name="paymentMethodTypeAndId" value="CC" onchange="setCheckoutPaymentId(this.value)" onClick="setCheckoutPaymentId(this.value)"/>
-                <td width='50%' nowrap><div>${uiLabelMap.AccountingVisaMastercardAmexDiscover}</div></td>
+                <td width='1%' nowrap="nowrap"><input type="radio" name="paymentMethodTypeAndId" value="CC" onchange="setCheckoutPaymentId(this.value)" onclick="setCheckoutPaymentId(this.value)"/>
+                <td width='50%' nowrap="nowrap"><div>${uiLabelMap.AccountingVisaMastercardAmexDiscover}</div></td>
               </tr>
-              <tr><td colspan="2"><hr/></td></tr>
+              <tr><td colspan="2"><hr /></td></tr>
               <tr>
-                <td width='1%' nowrap><input type="radio" name="paymentMethodTypeAndId" value="EFT" onchange="setCheckoutPaymentId(this.value)" onClick="setCheckoutPaymentId(this.value)"/>
-                <td width='50%' nowrap><div>${uiLabelMap.AccountingAHCElectronicCheck}</div></td>
+                <td width='1%' nowrap="nowrap"><input type="radio" name="paymentMethodTypeAndId" value="EFT" onchange="setCheckoutPaymentId(this.value)" onclick="setCheckoutPaymentId(this.value)"/>
+                <td width='50%' nowrap="nowrap"><div>${uiLabelMap.AccountingAHCElectronicCheck}</div></td>
               </tr>
             </table>
           </form>

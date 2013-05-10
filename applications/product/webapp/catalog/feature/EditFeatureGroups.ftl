@@ -21,7 +21,7 @@ under the License.
         <h3>${uiLabelMap.PageTitleEditProductFeatureGroups}</h3>
     </div>
     <div class="screenlet-body">
-        <br/>
+        <br />
         <table cellspacing="0" class="basic-table">
           <tr class="header-row">
             <td><b>${uiLabelMap.CommonId}</b></td>
@@ -32,13 +32,15 @@ under the License.
           <#assign rowClass = "2">
           <#list productFeatureGroups as productFeatureGroup>
             <tr valign="middle"<#if rowClass == "1"> class="alternate-row"</#if>>
-              <form method='POST' action='<@ofbizUrl>UpdateProductFeatureGroup</@ofbizUrl>'>
-                <input type='hidden' name="productFeatureGroupId" value="${productFeatureGroup.productFeatureGroupId}">
                 <td><a href='<@ofbizUrl>EditFeatureGroupAppls?productFeatureGroupId=${productFeatureGroup.productFeatureGroupId}</@ofbizUrl>' class="buttontext">${productFeatureGroup.productFeatureGroupId}</a></td>
-                <td><input type='text' size='30' name="description" value="${productFeatureGroup.description?if_exists}"></td>
-                <td><input type="submit" value="${uiLabelMap.CommonUpdate}"></td>
+                <td>
+                    <form method='post' action='<@ofbizUrl>UpdateProductFeatureGroup</@ofbizUrl>'>
+                    <input type='hidden' name="productFeatureGroupId" value="${productFeatureGroup.productFeatureGroupId}" />
+                    <input type='text' size='30' name="description" value="${productFeatureGroup.description?if_exists}" />
+                    <input type="submit" value="${uiLabelMap.CommonUpdate}" />
+                    </form>
+                </td>
                 <td><a href='<@ofbizUrl>EditFeatureGroupAppls?productFeatureGroupId=${productFeatureGroup.productFeatureGroupId}</@ofbizUrl>' class="buttontext">${uiLabelMap.ProductFeatureGroupAppls}</a></td>
-              </form>
             </tr>
             <#-- toggle the row color -->
             <#if rowClass == "2">
@@ -48,7 +50,7 @@ under the License.
             </#if>
           </#list>
         </table>
-        <br/>
+        <br />
     </div>
 </div>
 <div class="screenlet">
@@ -57,17 +59,17 @@ under the License.
     </div>
     <div class="screenlet-body">
         <form method="post" action="<@ofbizUrl>CreateProductFeatureGroup</@ofbizUrl>">
-          <br/>
+          <br />
           <table cellspacing="0" class="basic-table">
             <tr>
               <td class="label">${uiLabelMap.CommonDescription}:</td>
-              <td><input type="text" size='30' name='description' value=''></td>
+              <td><input type="text" size='30' name='description' value='' /></td>
             </tr>
             <tr>
-              <td colspan='2'><input type="submit" value="${uiLabelMap.CommonCreate}"></td>
+              <td colspan='2'><input type="submit" value="${uiLabelMap.CommonCreate}" /></td>
             </tr>
           </table>
         </form>
-        <br/>
+        <br />
     </div>
 </div>

@@ -19,11 +19,13 @@ under the License.
 -->
 
 <simple-methods xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/simple-methods.xsd">
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/simple-methods-v2.xsd">
 
     <simple-method method-name="updateRateAmount" short-description="update/create a rate amount value">
         <set value="_CREATE" field="securityAction"/>
-        <check-permission permission="ACCOUNTING" action="${securityAction}"><fail-property resource="AccountingUiLabels" property="AccountingPermissionError"/></check-permission>
+        <check-permission permission="ACCOUNTING" action="${securityAction}">
+            <fail-property resource="AccountingUiLabels" property="AccountingPermissionError"/>
+        </check-permission>
         <check-errors/>
 
         <!-- set defaults -->
@@ -65,14 +67,16 @@ under the License.
         <make-value entity-name="RateAmount" value-field="newEntity"/>
         <set-pk-fields map="parameters" value-field="newEntity"/>
         <set-nonpk-fields map="parameters" value-field="newEntity"/>
-        <now-timestamp field="newEntity.fromDate"/>
+        <if-empty field="newEntity.fromDate"><now-timestamp field="newEntity.fromDate"/></if-empty>
         <clear-field field="newEntity.thruDate"/>
         <create-value value-field="newEntity"/>
     </simple-method>
 
     <simple-method method-name="deleteRateAmount" short-description="update/create a rate amount value">
         <set value="_CREATE" field="securityAction"/>
-        <check-permission permission="ACCOUNTING" action="${securityAction}"><fail-property resource="AccountingUiLabels" property="AccountingPermissionError"/></check-permission>
+        <check-permission permission="ACCOUNTING" action="${securityAction}">
+            <fail-property resource="AccountingUiLabels" property="AccountingPermissionError"/>
+        </check-permission>
         <check-errors/>
 
         <!-- set defaults -->
@@ -95,18 +99,24 @@ under the License.
         <entity-one entity-name="RateAmount" value-field="rateAmount"/>
 
         <if-not-empty field="rateAmount">
-            <now-timestamp field="rateAmount.thruDate"/>
+            <now-timestamp field="nowTimestamp"/>
+            <set field ="previousDay" value="${groovy: org.ofbiz.base.util.UtilDateTime.adjustTimestamp(nowTimestamp,5,-1)}" type="Timestamp"/>
+            <set field="rateAmount.thruDate" value="${groovy: org.ofbiz.base.util.UtilDateTime.getDayEnd(previousDay)}" type="Timestamp"/>
             <store-value value-field="rateAmount"/>
-            <else>
-                <add-error><fail-message message="could not find record to be deleted"/></add-error>
-            </else>
+        <else>
+            <add-error>
+                <fail-property resource="AccountingErrorUiLabels" property="AccountingDeleteRateAmount"/>
+            </add-error>
+        </else>
         </if-not-empty>
 
     </simple-method>
 
     <simple-method method-name="getRateAmount" short-description="Get the applicable rate amount value">
         <set value="_READ" field="securityAction"/>
-        <check-permission permission="ACCOUNTING" action="${securityAction}"><fail-property resource="AccountingUiLabels" property="AccountingPermissionError"/></check-permission>
+        <check-permission permission="ACCOUNTING" action="${securityAction}">
+            <fail-property resource="AccountingUiLabels" property="AccountingPermissionError"/>
+        </check-permission>
         <check-errors/>
         <!--
            Search for the applicable rate from most specific to most general in the RateAmount entity
@@ -293,7 +303,9 @@ under the License.
     <!-- party rate services -->
     <simple-method method-name="updatePartyRate" short-description="Update/Create PartyRate">
         <set value="_CREATE" field="securityAction"/>
-        <check-permission permission="ACCOUNTING" action="${securityAction}"><fail-property resource="AccountingUiLabels" property="AccountingPermissionError"/></check-permission>
+        <check-permission permission="ACCOUNTING" action="${securityAction}">
+            <fail-property resource="AccountingUiLabels" property="AccountingPermissionError"/>
+        </check-permission>
         <check-errors/>
 
         <!-- check if already exist is so expire current record -->
@@ -322,7 +334,9 @@ under the License.
 
     <simple-method method-name="checkOtherDefaultRate" short-description="remove an other defaultRate flag">
         <set value="_CREATE" field="securityAction"/>
-        <check-permission permission="ACCOUNTING" action="${securityAction}"><fail-property resource="AccountingUiLabels" property="AccountingPermissionError"/></check-permission>
+        <check-permission permission="ACCOUNTING" action="${securityAction}">
+            <fail-property resource="AccountingUiLabels" property="AccountingPermissionError"/>
+        </check-permission>
         <check-errors/>
         <if-compare field="newEntity.defaultRate" value="Y" operator="equals">
             <entity-and entity-name="PartyRate" list="rates" filter-by-date="true">
@@ -338,7 +352,9 @@ under the License.
     </simple-method>
     <simple-method method-name="deletePartyRate" short-description="Delete PartyRate">
         <set value="_UPDATE" field="securityAction"/>
-        <check-permission permission="ACCOUNTING" action="${securityAction}"><fail-property resource="AccountingUiLabels" property="AccountingPermissionError"/></check-permission>
+        <check-permission permission="ACCOUNTING" action="${securityAction}">
+            <fail-property resource="AccountingUiLabels" property="AccountingPermissionError"/>
+        </check-permission>
         <check-errors/>
 
         <entity-one entity-name="PartyRate" value-field="lookedUpValue"/>

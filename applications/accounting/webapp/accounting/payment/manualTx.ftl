@@ -18,13 +18,13 @@ under the License.
 -->
 
 <h1>${uiLabelMap.AccountingManualTransaction}</h1>
-<br/>
+<br />
 
-<#if security.hasEntityPermission("MANUAL", "_PAYMENT", session)>
+<#if security.hasEntityPermission("MANUAL", "_PAYMENT", session) || security.hasEntityPermission("ACCOUNTING", "_CREATE", session)>
   ${setRequestAttribute("validTx", "false")}
-  <form name="manualTxForm" method="get" action="<@ofbizUrl>manualETx</@ofbizUrl>">
+  <form name="manualTxForm" method="post" action="<@ofbizUrl>manualETx</@ofbizUrl>">
     <#if requestParameters.paymentMethodId?exists>
-      <input type="hidden" name="paymentMethodId" value="${requestParameters.paymentMethodId}">
+      <input type="hidden" name="paymentMethodId" value="${requestParameters.paymentMethodId}" />
     </#if>
 
     <table border='0' cellpadding='2' cellspacing='0'>
@@ -34,7 +34,7 @@ under the License.
         <td width='74%'>
           <#if paymentMethodType?has_content>
             <div>${paymentMethodType.get("description",locale)}</div>
-            <input type="hidden" name="paymentMethodTypeId" value="${paymentMethodType.paymentMethodTypeId}">
+            <input type="hidden" name="paymentMethodTypeId" value="${paymentMethodType.paymentMethodTypeId}" />
           <#else>
             <select name="paymentMethodTypeId">
               <option value="CREDIT_CARD">${uiLabelMap.AccountingCreditCard}</option>
@@ -47,12 +47,12 @@ under the License.
         <td width="5">&nbsp;</td>
         <td width='74%'>
           <#if currentStore?has_content>
-            <div>${currentStore.storeName}</div>
-            <input type="hidden" name="productStoreId" value="${currentStore.productStoreId}">
+            <div><#if currentStore.storeName?exists>${currentStore.storeName}<#else>${currentStore.productStoreId}</#if></div>
+            <input type="hidden" name="productStoreId" value="${currentStore.productStoreId}" />
           <#else>
             <select name="productStoreId">
               <#list productStores as productStore>
-                <option value="${productStore.productStoreId}">${productStore.storeName}</option>
+                <option value="${productStore.productStoreId}"><#if productStore.storeName?exists>${productStore.storeName}<#else>${productStore.productStoreId}</#if></option>
               </#list>
             </select>
           </#if>
@@ -64,7 +64,7 @@ under the License.
         <td width='74%'>
           <#if currentTx?has_content>
             <div>${currentTx.get("description",locale)}</div>
-            <input type="hidden" name="transactionType" value="${currentTx.enumId}">
+            <input type="hidden" name="transactionType" value="${currentTx.enumId}" />
           <#else>
             <select name="transactionType" onchange="javascript:document.manualTxForm.submit();">
             <#-- the select one option is so the list will fire on any seletion -->
@@ -85,33 +85,30 @@ under the License.
       </#if>
 
      <#if requestAttributes.validTx?default("false") == "true">
-        <tr><td colspan="3"><hr></td></tr>
-
+        <tr><td colspan="3"><hr/></td></tr>
         <#-- amount field -->
-        <#if txType != "PRDS_PAY_RELEASE">
-          <tr>
-            <td width="26%" align="right" valign="middle"><b>${uiLabelMap.CommonAmount}</b></td>
-            <td width="5">&nbsp;</td>
-            <td width="74%">
-              <input type="text" size="20" maxlength="30" name="amount">
-            *</td>
-          </tr>
-        </#if>
-
-        <#-- submit button -->
         <tr>
-          <td width="26%" align="right" valign=middle>&nbsp;</td>
+          <td width="26%" align="right" valign="middle"><b>${uiLabelMap.CommonAmount}</b></td>
           <td width="5">&nbsp;</td>
           <td width="74%">
-            <input type="submit" value="${uiLabelMap.CommonSubmit}">
+            <input type="text" size="20" maxlength="30" name="amount" />
+            <span class="tooltip">${uiLabelMap.CommonRequired}</span>
+          </td>
+        </tr>
+        <#-- submit button -->
+        <tr>
+          <td width="26%" align="right" valign="middle">&nbsp;</td>
+          <td width="5">&nbsp;</td>
+          <td width="74%">
+            <input type="submit" value="${uiLabelMap.CommonSubmit}" />
           </td>
         </tr>
       <#elseif txType?has_content>
         <tr>
           <td colspan="3" align="center">
-            <br/>
+            <br />
             <h2>${uiLabelMap.AccountingTransactionTypeNotYetSupported}</h2>
-            <br/>
+            <br />
           </td>
         </tr>
       </#if>

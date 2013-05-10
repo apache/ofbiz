@@ -32,8 +32,8 @@ context.cart = cart;
 request.removeAttribute("_EVENT_MESSAGE_");
 
 if (partyId && !partyId.equals("_NA_")) {
-    party = delegator.findByPrimaryKey("Party", [partyId : partyId]);
-    person = party.getRelatedOne("Person");
+    party = delegator.findOne("Party", [partyId : partyId], false);
+    person = party.getRelatedOne("Person", false);
     context.party = party;
     context.person = person;
 }
@@ -41,7 +41,7 @@ if (partyId && !partyId.equals("_NA_")) {
 if (cart?.getShippingContactMechId()) {
     shippingContactMechId = cart.getShippingContactMechId();
     shippingPartyContactDetail = EntityUtil.getFirst(EntityUtil.filterByDate(delegator.findByAnd("PartyContactDetailByPurpose",
-        [partyId : partyId, contactMechId : shippingContactMechId])));
+        [partyId : partyId, contactMechId : shippingContactMechId], null, false)));
     parameters.shippingContactMechId = shippingPartyContactDetail.contactMechId;
     context.callSubmitForm = true;
 

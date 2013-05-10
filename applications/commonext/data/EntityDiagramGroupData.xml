@@ -197,8 +197,8 @@ under the License.
     <EntityGroup entityGroupId="6440" entityGroupName="Detail Order: Return"/>
     <EntityGroupEntry entityGroupId="6440" entityOrPackage="org.ofbiz.order.return" applEnumId="ESIA_INCLUDE"/>
     <EntityGroupEntry entityGroupId="6440" entityOrPackage="OrderItem" applEnumId="ESIA_INCLUDE"/>
-    <EntityGroup entityGroupId="6450" entityGroupName="Detail Order: Opportunity, Shopping List"/>
-    <EntityGroupEntry entityGroupId="6450" entityOrPackage="org.ofbiz.order.opportunity" applEnumId="ESIA_INCLUDE"/>
+    <EntityGroup entityGroupId="6450" entityGroupName="Detail Order: Opportunity, Shopping List, Shopping Cart"/>
+    <EntityGroupEntry entityGroupId="6450" entityOrPackage="org.ofbiz.marketing.opportunity" applEnumId="ESIA_INCLUDE"/>
     <EntityGroupEntry entityGroupId="6450" entityOrPackage="org.ofbiz.order.shoppinglist" applEnumId="ESIA_INCLUDE"/>
     <EntityGroupEntry entityGroupId="6450" entityOrPackage="org.ofbiz.order.shoppingcart" applEnumId="ESIA_INCLUDE"/>
 
@@ -259,8 +259,6 @@ under the License.
     <EntityGroupEntry entityGroupId="6920" entityOrPackage="org.ofbiz.content.website" applEnumId="ESIA_INCLUDE"/>
     <EntityGroup entityGroupId="6930" entityGroupName="Technical: Login and Security"/>
     <EntityGroupEntry entityGroupId="6930" entityOrPackage="org.ofbiz.security" applEnumId="ESIA_INCLUDE"/>
-    <EntityGroup entityGroupId="6940" entityGroupName="Technical: Workflow"/>
-    <EntityGroupEntry entityGroupId="6940" entityOrPackage="org.ofbiz.workflow" applEnumId="ESIA_INCLUDE"/>
     <EntityGroup entityGroupId="6990" entityGroupName="Technical: POS, OAGIS, Other"/>
     <EntityGroupEntry entityGroupId="6990" entityOrPackage="org.ofbiz.pos.terminal" applEnumId="ESIA_INCLUDE"/>
     <EntityGroupEntry entityGroupId="6990" entityOrPackage="org.ofbiz.specialpurpose.oagis" applEnumId="ESIA_INCLUDE"/>

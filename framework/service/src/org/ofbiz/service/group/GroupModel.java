@@ -18,7 +18,6 @@
  *******************************************************************************/
 package org.ofbiz.service.group;
 
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -31,7 +30,6 @@ import org.ofbiz.base.util.UtilXml;
 import org.ofbiz.service.GenericServiceException;
 import org.ofbiz.service.ServiceDispatcher;
 import org.ofbiz.service.ServiceUtil;
-
 import org.w3c.dom.Element;
 
 /**
@@ -111,6 +109,9 @@ public class GroupModel {
     public List<GroupServiceModel> getServices() {
         return this.services;
     }
+    public boolean isOptional() {
+        return optional;
+    }
 
     /**
      * Invokes the group of services in order defined
@@ -126,7 +127,7 @@ public class GroupModel {
         } else if (this.getSendMode().equals("round-robin")) {
             return runIndex(dispatcher, localName, context, (++lastServiceRan % services.size()));
         } else if (this.getSendMode().equals("random")) {
-            int randomIndex = (int) (Math.random() * (double) (services.size()));
+            int randomIndex = (int) (Math.random() * (services.size()));
             return runIndex(dispatcher, localName, context, randomIndex);
         } else if (this.getSendMode().equals("first-available")) {
             return runOne(dispatcher, localName, context);
@@ -140,6 +141,7 @@ public class GroupModel {
     /**
      * @see java.lang.Object#toString()
      */
+    @Override
     public String toString() {
         StringBuilder str = new StringBuilder();
         str.append(getGroupName());

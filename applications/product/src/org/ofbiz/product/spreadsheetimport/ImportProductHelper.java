@@ -26,7 +26,7 @@ import javolution.util.FastMap;
 
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilMisc;
-import org.ofbiz.entity.GenericDelegator;
+import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
 
@@ -61,14 +61,14 @@ public class ImportProductHelper {
 
     // check if product already exists in database
     public static boolean checkProductExists(String productId,
-            GenericDelegator delegator) {
+            Delegator delegator) {
         GenericValue tmpProductGV;
         boolean productExists = false;
         try {
-            tmpProductGV = delegator.findByPrimaryKey("Product", UtilMisc
-                .toMap("productId", productId));
+            tmpProductGV = delegator.findOne("Product", UtilMisc
+                .toMap("productId", productId), false);
             if (tmpProductGV != null
-                    && tmpProductGV.getString("productId") == productId)
+                    && productId.equals(tmpProductGV.getString("productId")))
                 productExists = true;
         } catch (GenericEntityException e) {
             Debug.logError("Problem in reading data of product", module);

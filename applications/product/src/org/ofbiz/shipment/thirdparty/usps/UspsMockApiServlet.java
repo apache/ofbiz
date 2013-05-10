@@ -30,21 +30,18 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.TransformerException;
 
+import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.base.util.UtilXml;
-import org.ofbiz.base.util.Debug;
-
-import org.apache.xml.serialize.OutputFormat;
-import org.apache.xml.serialize.XMLSerializer;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.xml.sax.SAXException;
 
 /**
  * USPS Webtools API Mock API Servlet
  */
+@SuppressWarnings("serial")
 public class UspsMockApiServlet extends HttpServlet {
 
     public static final String module = UspsMockApiServlet.class.getName();
@@ -54,14 +51,17 @@ public class UspsMockApiServlet extends HttpServlet {
         super();
     }
 
+    @Override
     public void init(ServletConfig config) throws ServletException {
         super.init(config);
     }
 
+    @Override
     public void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         doGet(request, response);
     }
 
+    @Override
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 
         // we're only testing the Rate API right now
@@ -74,14 +74,8 @@ public class UspsMockApiServlet extends HttpServlet {
         Document requestDocument = null;
         try {
             requestDocument = UtilXml.readXmlDocument(xmlValue, false);
-        } catch (SAXException se) {
-            Debug.logError(se, module);
-            return;
-        } catch (ParserConfigurationException pce) {
-            Debug.logError(pce, module);
-            return;
-        } catch (IOException xmlReadException) {
-            Debug.logError(xmlReadException, module);
+        } catch (Exception e) {
+            Debug.logError(e, module);
             return;
         }
 
@@ -123,17 +117,10 @@ public class UspsMockApiServlet extends HttpServlet {
 
             OutputStream os = new ByteArrayOutputStream();
 
-            OutputFormat format = new OutputFormat(responseDocument);
-            format.setOmitDocumentType(true);
-            format.setOmitXMLDeclaration(false);
-            format.setIndenting(false);
-
-            XMLSerializer serializer = new XMLSerializer(os, format);
             try {
-                serializer.asDOMSerializer();
-                serializer.serialize(responseDocument.getDocumentElement());
-            } catch (IOException e) {
-                Debug.log(e, module);
+                UtilXml.writeXmlDocument(responseDocument, os, "UTF-8", true, false, 0);
+            } catch (TransformerException e) {
+                Debug.logInfo(e, module);
                 return;
             }
 
@@ -144,6 +131,7 @@ public class UspsMockApiServlet extends HttpServlet {
         }
     }
 
+    @Override
     public void destroy() {
         super.destroy();
     }

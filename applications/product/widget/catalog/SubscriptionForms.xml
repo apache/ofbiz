@@ -33,7 +33,7 @@ under the License.
                 </entity-options>
             </drop-down>
         </field>
-        <field name="subscriptionTypeId" title="${uiLabelMap.ProductSubscription} ${uiLabelMap.CommonType}">
+        <field name="subscriptionTypeId" title="${uiLabelMap.ProductSubscriptionType}">
             <drop-down allow-empty="true">
                 <entity-options entity-name="SubscriptionType" description="${description}">
                     <entity-order-by field-name="description"/>
@@ -62,6 +62,12 @@ under the License.
         <field name="orderId"><lookup target-form-name="LookupOrderHeader"/></field>
         <field name="productId"><lookup target-form-name="LookupProduct"/></field>
         <field name="productCategoryId"><lookup target-form-name="LookupProductCategory"/></field>
+        <field name="automaticExtend" title="Automatic Extend" ><!-- TODO: ${uiLabelMap.FormFieldTitle_automaticExtend} get overwritten with the description of the field from the entitymodel-->
+            <drop-down allow-empty="true">
+                <option key="Y" description="${uiLabelMap.CommonYes}"/>
+                <option key="N" description="${uiLabelMap.CommonNo}"/>
+            </drop-down>
+        </field>
 
         <field name="roleTypeId"><ignored/></field>
         <field name="canclAutmExtTimeUomId"><ignored/></field>
@@ -94,6 +100,8 @@ under the License.
             <service service-name="performFind" result-map-list="listIt" result-map="performFindResult">
                 <field-map field-name="inputFields" from-field="parameters"/>
                 <field-map field-name="entityName" value="Subscription"/>
+                <field-map field-name="viewIndex" from-field="viewIndex"/>
+                <field-map field-name="viewSize" from-field="viewSize"/>
             </service>
         </actions>
         <auto-fields-entity entity-name="Subscription" default-field-type="display"/>
@@ -105,7 +113,7 @@ under the License.
                 </sub-hyperlink>
             </display-entity>
         </field>
-        <field name="subscriptionTypeId" title="${uiLabelMap.ProductSubscription} ${uiLabelMap.CommonType}">
+        <field name="subscriptionTypeId" title="${uiLabelMap.ProductSubscriptionType}">
             <display-entity entity-name="SubscriptionType" description="${description}"/>
         </field>
 
@@ -191,7 +199,7 @@ under the License.
                 </entity-options>
             </drop-down>
         </field>
-        <field name="subscriptionTypeId" title="${uiLabelMap.ProductSubscription} ${uiLabelMap.CommonType}">
+        <field name="subscriptionTypeId" title="${uiLabelMap.ProductSubscriptionType}">
             <drop-down allow-empty="true">
                 <entity-options entity-name="SubscriptionType" description="${description}">
                     <entity-order-by field-name="description"/>
@@ -273,7 +281,14 @@ under the License.
                 </entity-options>
             </drop-down>
         </field>
-        <field name="canclAutmExtTimeUomId">
+        <field name="automaticExtend" title="Automatic Extend" ><!-- TODO: ${uiLabelMap.FormFieldTitle_automaticExtend} get overwritten with the description of the field from the entitymodel-->
+            <drop-down allow-empty="true">
+                <option key="Y" description="${uiLabelMap.CommonYes}"/>
+                <option key="N" description="${uiLabelMap.CommonNo}"/>
+            </drop-down>
+        </field>
+        <field name="canclAutmExtTime" title="Cancel time"></field>
+        <field name="canclAutmExtTimeUomId" title="Cancel UOM time">
             <drop-down allow-empty="true">
                 <entity-options entity-name="Uom" key-field-name="uomId" description="${description}">
                     <entity-constraint name="uomTypeId" value="TIME_FREQ_MEASURE"/>
@@ -281,8 +296,6 @@ under the License.
                 </entity-options>
             </drop-down>
         </field>
-
-
         <field name="submitButton" title="${uiLabelMap.CommonUpdate}" widget-style="smallSubmit"><submit button-type="button"/></field>
     </form>
 
@@ -374,8 +387,21 @@ under the License.
                 </entity-options>
             </drop-down>
         </field>
-
-        <field name="deleteLink" title="${uiLabelMap.CommonEmptyHeader}" widget-style="buttontext">
+        <field name="automaticExtend">
+            <drop-down allow-empty="true">
+                <option key="Y" description="${uiLabelMap.CommonYes}"/>
+                <option key="N" description="${uiLabelMap.CommonNo}"/>
+            </drop-down>
+        </field>
+        <field name="canclAutmExtTimeUomId">
+            <drop-down allow-empty="true">
+                <entity-options entity-name="Uom" key-field-name="uomId" description="${description}">
+                    <entity-constraint name="uomTypeId" value="TIME_FREQ_MEASURE"/>
+                    <entity-order-by field-name="description"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="deleteLink" title=" " widget-style="buttontext">
             <hyperlink target="deleteProductSubscriptionResourceSr" description="${uiLabelMap.CommonDelete}" also-hidden="false">
                 <parameter param-name="subscriptionResourceId"/>
                 <parameter param-name="productId"/>
@@ -405,7 +431,20 @@ under the License.
                 </entity-options>
             </drop-down>
         </field>
-
+        <field name="automaticExtend">
+            <drop-down allow-empty="true">
+                <option key="Y" description="${uiLabelMap.CommonYes}"/>
+                <option key="N" description="${uiLabelMap.CommonNo}"/>
+            </drop-down>
+        </field>
+        <field name="canclAutmExtTimeUomId">
+            <drop-down allow-empty="true">
+                <entity-options entity-name="Uom" key-field-name="uomId" description="${description}">
+                    <entity-constraint name="uomTypeId" value="TIME_FREQ_MEASURE"/>
+                    <entity-order-by field-name="description"/>
+                </entity-options>
+            </drop-down>
+        </field>
         <field name="submitButton" title="${uiLabelMap.CommonAdd}" widget-style="smallSubmit"><submit button-type="button"/></field>
     </form>
     <form name="EditSubscriptionAttributes" type="list"  list-name="subscriptionAttributes"  target="UpdateSubscriptionAttribute"
@@ -463,7 +502,7 @@ under the License.
         <field name="subscriptionId"><hidden value="${parameters.subscriptionId}"/></field>
         <field name="communicationEventId">
             <lookup target-form-name="LookupCommEvent">
-                <sub-hyperlink target="/partymgr/control/ViewCommunicationEvent" target-type="inter-app" description="${subscription.communicationEventId}" link-style="buttontext">
+                <sub-hyperlink target="/partymgr/control/ViewCommunicationEvent" target-type="inter-app" link-type="hidden-form" description="${subscription.communicationEventId}" link-style="buttontext">
                 <parameter param-name="communicationEventId" from-field="subscription.communicationEventId"/>
             </sub-hyperlink>
             </lookup>

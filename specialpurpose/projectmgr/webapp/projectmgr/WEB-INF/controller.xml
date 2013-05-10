@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <!--
     Licensed to the Apache Software Foundation (ASF) under one
     or more contributor license agreements.  See the NOTICE file
@@ -24,6 +25,7 @@
     <include location="component://accounting/webapp/accounting/WEB-INF/controller.xml"/>
     <include location="component://workeffort/webapp/workeffort/WEB-INF/controller.xml"/>
     <include location="component://humanres/webapp/humanres/WEB-INF/controller.xml"/>
+    <include location="component://content/webapp/content/WEB-INF/controller.xml"/>
 
     <description>Project Management Component Site Configuration File</description>
 
@@ -235,9 +237,9 @@
         <response name="success" type="view" value="Dependencies"/>
         <response name="error" type="view" value="Dependencies"/>
     </request-map>
-    <request-map uri="updateProjectTaskOrPhase">
+    <request-map uri="updateProjectTask">
         <security https="true" auth="true"/>
-        <event type="service" invoke="updateWorkEffort"/>
+        <event type="service" invoke="updateTaskAndRelatedInfo"/>
         <response name="success" type="view" value="EditProjectTasks"/>
         <response name="error" type="view" value="EditProjectTasks"/>
     </request-map>
@@ -272,7 +274,7 @@
     </request-map>
     <request-map uri="MyTasks">
         <security https="true" auth="true"/>
-        <response name="success" type="view" value="MyTasks" save-current-view="true"/>
+        <response name="success" type="view" value="MyTasks" save-home-view="true"/>
     </request-map>
 
     <request-map uri="createTaskListAndAssoc">
@@ -303,6 +305,14 @@
         <event type="service" invoke="updateWorkEffortAndAssoc"/>
         <response name="success" type="view" value="FindPhase"/>
         <response name="error" type="view" value="FindPhase"/>
+    </request-map>
+    <request-map uri="FindMailingList">
+        <security https="true" auth="true"/>
+        <response name="success" type="view" value="FindMailingList"/>
+    </request-map>
+    <request-map uri="ViewMailingList">
+        <security https="true" auth="true"/>
+        <response name="success" type="view" value="ViewMailingList"/>
     </request-map>
     <request-map uri="EditTaskSkills">
         <security https="true" auth="true"/>
@@ -342,7 +352,7 @@
     </request-map>
     <request-map uri="MyTimesheet">
         <security https="true" auth="true"/>
-        <response name="success" type="view" value="MyTimesheet" save-current-view="true"/>
+        <response name="success" type="view" value="MyTimesheet" save-home-view="true"/>
     </request-map>
     <request-map uri="EditTimeEntries">
         <security https="true" auth="true"/>
@@ -380,7 +390,11 @@
     </request-map>
     <request-map uri="FindTimeSheet">
         <security https="true" auth="true"/>
-        <response name="success" type="view" value="FindTimeSheet"/>
+        <response name="success" type="view" value="FindTimeSheet" save-home-view="true"/>
+    </request-map>
+    <request-map uri="ListWorkEffortPartyAssigns">
+        <security https="true" auth="true"/>
+        <response name="success" type="view" value="ListWorkEffortPartyAssigns" save-home-view="true"/>
     </request-map>
     <request-map uri="EditTimeSheet">
         <security https="true" auth="true"/>
@@ -468,7 +482,7 @@
     </request-map>
     <request-map uri="Timesheet">
         <security https="true" auth="true"/>
-        <response name="success" type="view" value="Timesheet"/>
+        <response name="success" type="view" value="Timesheet" save-home-view="true"/>
     </request-map>
     <request-map uri="TimeSheetStatusToComplete">
         <security https="true" auth="true"/>
@@ -487,6 +501,10 @@
         <event type="service" invoke="updateTimesheetToInProcess"/>
         <response name="success" type="view" value="Timesheet"/>
         <response name="error" type="view" value="Timesheet"/>
+    </request-map>
+    <request-map uri="requestlist">
+        <security https="true" auth="true"/>
+        <response name="success" type="view" value="RequestList" save-home-view="true"/>
     </request-map>
     <request-map uri="EditTaskFromRequest">
         <security https="true" auth="true"/>
@@ -511,7 +529,7 @@
     <request-map uri="createrequest">
         <security https="true" auth="true"/>
         <event type="simple" invoke="CreateCustRequestAndAssignTaskToPerson" path="component://projectmgr/script/org/ofbiz/project/ProjectSimpleEvents.xml"/>
-        <response name="success" type="view-home" value="RequestList"/>
+        <response name="success" type="view-last-noparam" value="RequestList"/>
         <response name="error" type="view" value="EditRequest"/>
     </request-map>
     <request-map uri="updaterequest">
@@ -579,13 +597,6 @@
         <response name="success" type="view" value="listResourcesTask"/>
         <response name="error" type="view" value="listResourcesTask"/>
     </request-map>
-    <request-map uri="createnewlogin"><security https="true" auth="true"/><response name="success" type="view" value="createnewlogin"/></request-map>
-    <request-map uri="createUserLogin">
-        <security https="true" auth="true"/>
-        <event type="service" path="" invoke="createUserLogin"/>
-        <response name="success" type="view" value="viewprofile"/>
-        <response name="error" type="view" value="createnewlogin"/>
-    </request-map>
     <request-map uri="EditPartyRates"><security https="true" auth="true"/><response name="success" type="view" value="EditPartyRates"/></request-map>
     <request-map uri="createPartyRate">
         <security https="true" auth="true"/>
@@ -645,13 +656,50 @@
         <event type="service" invoke="deleteWorkEffortContent"/>
         <response name="success" type="view" value="EditTaskContents"/>
     </request-map>
+
+    <!-- Survey Requests -->
+    <request-map uri="testWorkEffortSurvey">
+        <security auth="true" https="true"/>
+        <response name="success" type="view" value="testWorkEffortSurvey"/>
+        <response name="error" type="view" value="testWorkEffortSurvey"/>
+    </request-map>
+    <request-map uri="testWorkEffortSurveyResponse">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="createSurveyResponse"/>
+        <response name="success" type="view" value="testWorkEffortSurveyResponse"/>
+        <response name="error" type="view" value="testWorkEffortSurvey"/>
+    </request-map>
+    <request-map uri="EditWorkEffortSurveyAppls">
+        <security auth="true" https="true"/>
+        <response name="success" type="view" value="EditWorkEffortSurveyAppls"/>
+        <response name="error" type="view" value="EditWorkEffortSurveyAppls"/>
+    </request-map>
+    <request-map uri="createWorkEffortSurveyAppl">
+        <security auth="true" https="true"/>
+        <event type="service" invoke="createWorkEffortSurveyAppl"/>
+        <response name="success" type="view" value="EditWorkEffortSurveyAppls"/>
+        <response name="error" type="view" value="EditWorkEffortSurveyAppls"/>
+    </request-map>
+    <request-map uri="updateWorkEffortSurveyAppl">
+        <security auth="true" https="true"/>
+        <event type="service" invoke="updateWorkEffortSurveyAppl"/>
+        <response name="success" type="view" value="EditWorkEffortSurveyAppls"/>
+        <response name="error" type="view" value="EditWorkEffortSurveyAppls"/>
+    </request-map>
+    <request-map uri="deleteWorkEffortSurveyAppl">
+        <security auth="true" https="true"/>
+        <event type="service" invoke="deleteWorkEffortSurveyAppl"/>
+        <response name="success" type="view" value="EditWorkEffortSurveyAppls"/>
+        <response name="error" type="view" value="EditWorkEffortSurveyAppls"/>
+    </request-map>
+    
     <!-- end of request mappings -->
 
     <!-- View Mappings -->
     <view-map name="viewroles" type="screen" page="component://projectmgr/widget/ResourceScreens.xml#viewroles"/>
     <view-map name="listResourcesTask" type="screen" page="component://projectmgr/widget/ProjectScreens.xml#listResourcesTask"/>
     <view-map name="listResourcesProject" type="screen" page="component://projectmgr/widget/ProjectScreens.xml#listResourcesProject"/>
-    <view-map name="createnewlogin" type="screen" page="component://projectmgr/widget/ProjectScreens.xml#CreateUserLogin"/>
+    <view-map name="createnewlogin" type="screen" page="component://party/widget/partymgr/PartyScreens.xml#CreateUserLogin"/>
     <view-map name="showvisits" type="screen" page="component://projectmgr/widget/ProjectScreens.xml#showvisits"/>
     <view-map name="EditPartyRates" type="screen" page="component://projectmgr/widget/ResourceScreens.xml#EditPartyRates"/>
 
@@ -673,6 +721,8 @@
     <view-map name="EditTaskPartyAssigns" type="screen" page="component://projectmgr/widget/TaskScreens.xml#EditTaskPartyAssigns"/>
     <view-map name="ListWorkEffortPartyAssigns" type="screen" page="component://projectmgr/widget/ProjectScreens.xml#EditProjectParties"/>
     <view-map name="FindPhase" type="screen" page="component://projectmgr/widget/ProjectScreens.xml#FindPhase"/>
+    <view-map name="FindMailingList" type="screen" page="component://projectmgr/widget/ProjectScreens.xml#FindMailingList"/>
+    <view-map name="ViewMailingList" type="screen" page="component://projectmgr/widget/ProjectScreens.xml#ViewMailingList"/>
     <view-map name="EditTaskSkills" type="screen" page="component://projectmgr/widget/TaskScreens.xml#EditTaskSkills"/>
     <view-map name="projectView" type="screen" page="component://projectmgr/widget/ProjectScreens.xml#ProjectView"/>
     <view-map name="EditPartySkills" type="screen" page="component://projectmgr/widget/ProjectScreens.xml#EditPartySkills"/>
@@ -689,10 +739,13 @@
     <view-map name="taskView" type="screen" page="component://projectmgr/widget/TaskScreens.xml#TaskView"/>
     <view-map name="Timesheet" type="screen" page="component://projectmgr/widget/TimeSheetScreens.xml#Timesheet"/>
     <view-map name="EditTaskFromRequest" type="screen" page="component://projectmgr/widget/TaskScreens.xml#EditTaskFromRequest"/>
-    <view-map name="RequestList" type="screen" page="component://projectmgr/widget/RequestScreens.xml#RequestList"/>
-    <view-map name="EditRequest" type="screen" page="component://projectmgr/widget/RequestScreens.xml#EditRequest"/>
-    <view-map name="ViewRequest" type="screen" page="component://projectmgr/widget/RequestScreens.xml#ViewRequest"/>
+    <view-map name="RequestList" type="screen" page="component://projectmgr/widget/CustRequestScreens.xml#RequestList"/>
+    <view-map name="EditRequest" type="screen" page="component://projectmgr/widget/CustRequestScreens.xml#EditRequest"/>
+    <view-map name="ViewRequest" type="screen" page="component://projectmgr/widget/CustRequestScreens.xml#ViewRequest"/>
     <view-map name="EditProjectContents" type="screen" page="component://projectmgr/widget/ProjectScreens.xml#EditProjectContents"/>
     <view-map name="EditTaskContents" type="screen" page="component://projectmgr/widget/TaskScreens.xml#EditTaskContents"/>
+    <view-map name="testWorkEffortSurvey" type="screen" page="component://projectmgr/widget/SurveyScreens.xml#TestWorkEffortSurvey"/>
+    <view-map name="testWorkEffortSurveyResponse" type="screen" page="component://projectmgr/widget/SurveyScreens.xml#TestWorkEffortSurveyResponse"/>
+    <view-map name="EditWorkEffortSurveyAppls" type="screen" page="component://projectmgr/widget/TaskScreens.xml#EditWorkEffortSurveyAppls"/>
     <!-- end of view mappings -->
 </site-conf>

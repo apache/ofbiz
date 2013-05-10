@@ -36,6 +36,7 @@ import org.ofbiz.base.util.UtilJ2eeCompat;
  * A region is content that contains a set of sections that can render in a PageContext
  * <br/>Implements abstract render(PageContext) from Content
  */
+@SuppressWarnings("serial")
 public class Region extends Content {
 
     public static final String module = Region.class.getName();
@@ -75,6 +76,7 @@ public class Region extends Content {
         return sections;
     }
 
+    @Override
     public void render(PageContext pageContext) throws JspException {
         if (Debug.verboseOn()) Debug.logVerbose("Rendering " + this.toString(), module);
 
@@ -98,6 +100,7 @@ public class Region extends Content {
         }
     }
 
+    @Override
     public void render(HttpServletRequest request, HttpServletResponse response) throws java.io.IOException, ServletException {
         if (Debug.verboseOn()) Debug.logVerbose("Rendering " + this.toString(), module);
 
@@ -114,6 +117,7 @@ public class Region extends Content {
         rd.include(request, response);
     }
 
+    @Override
     public String toString() {
         String s = "Region: " + content + ", type=" + type;
 

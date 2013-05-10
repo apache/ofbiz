@@ -17,20 +17,9 @@ specific language governing permissions and limitations
 under the License.
 -->
 
-<#if security.hasEntityPermission("FACILITY", "_VIEW", session)>
-<#if facilityId?has_content>
-  <h1>${uiLabelMap.ProductEditFacility} ${facility.facilityName?if_exists} [${facilityId?if_exists}]</h1>
-  <div class="button-bar">
-    <a href="<@ofbizUrl>EditFacility</@ofbizUrl>" name="EditFacilityForm" class="buttontext">${uiLabelMap.ProductNewFacility}</a>
-      <a href="/workeffort/control/month?facilityId=${facilityId}&externalLoginKey=${requestAttributes.externalLoginKey?if_exists}" class="buttontext">${uiLabelMap.CommonViewCalendar}</a>
-  </div>
-<#else>
-  <h1>${uiLabelMap.ProductNewFacility}</h1>
-</#if>
-
 <#if facility?exists && facilityId?has_content>
-  <form action="<@ofbizUrl>UpdateFacility</@ofbizUrl>" name="EditFacilityForm" method="post">
-  <input type="hidden" name="facilityId" value="${facilityId?if_exists}">
+  <form action="<@ofbizUrl>UpdateFacility</@ofbizUrl>" name="EditFacilityForm" method="post" class="basic-form">
+  <input type="hidden" name="facilityId" value="${facilityId?if_exists}" />
   <table class="basic-table" cellspacing='0'>
   <tr>
     <td class="label">${uiLabelMap.ProductFacilityId}</td>
@@ -39,7 +28,7 @@ under the License.
     </td>
   </tr>
 <#else>
-  <form action="<@ofbizUrl>CreateFacility</@ofbizUrl>" name="EditFacilityForm" method="post" style='margin: 0;'>
+  <form action="<@ofbizUrl>CreateFacility</@ofbizUrl>" name="EditFacilityForm" method="post" class="basic-form">
   <#if facilityId?exists>
     <h3>${uiLabelMap.ProductCouldNotFindFacilityWithId} "${facilityId?if_exists}".</h3>
   </#if>
@@ -49,7 +38,7 @@ under the License.
     <td class="label">${uiLabelMap.ProductFacilityTypeId}</td>
     <td>
       <select name="facilityTypeId">
-        <option selected value='${facilityType.facilityTypeId?if_exists}'>${facilityType.get("description",locale)?if_exists}</option>
+        <option selected="selected" value='${facilityType.facilityTypeId?if_exists}'>${facilityType.get("description",locale)?if_exists}</option>
         <option value='${facilityType.facilityTypeId?if_exists}'>----</option>
         <#list facilityTypes as nextFacilityType>
           <option value='${nextFacilityType.facilityTypeId?if_exists}'>${nextFacilityType.get("description",locale)?if_exists}</option>
@@ -60,19 +49,13 @@ under the License.
   <tr>
     <td class="label">${uiLabelMap.FormFieldTitle_parentFacilityId}</td>
     <td>
-      <input type="text" name="parentFacilityId" value="${facility.parentFacilityId?if_exists}"/>
-      <a href="javascript:call_fieldlookup2(document.EditFacilityForm.parentFacilityId,'LookupFacility');" title="${uiLabelMap.CommonFieldLookup}">
-        <img src="<@ofbizContentUrl>/images/fieldlookup.gif</@ofbizContentUrl>" width="15" height="14" border="0" alt="${uiLabelMap.CommonFieldLookup}"/>
-      </a>
+      <@htmlTemplate.lookupField value="${facility.parentFacilityId?if_exists}" formName="EditFacilityForm" name="parentFacilityId" id="parentFacilityId" fieldFormName="LookupFacility"/>
     </td>
   </tr>
   <tr>
     <td class="label">${uiLabelMap.ProductFacilityOwner}</td>
     <td>
-      <input type="text" class="required" name="ownerPartyId" value="${facility.ownerPartyId?if_exists}"/>
-      <a href="javascript:call_fieldlookup2(document.EditFacilityForm.ownerPartyId,'LookupPartyName');" title="${uiLabelMap.CommonFieldLookup}">
-        <img src="<@ofbizContentUrl>/images/fieldlookup.gif</@ofbizContentUrl>" width="15" height="14" border="0" alt="${uiLabelMap.CommonFieldLookup}"/>
-      </a>
+      <@htmlTemplate.lookupField value="${facility.ownerPartyId?if_exists}" formName="EditFacilityForm" name="ownerPartyId" id="ownerPartyId" fieldFormName="LookupPartyName"/>
       <span class="tooltip">${uiLabelMap.CommonRequired}</span>
     </td>
   </tr>
@@ -84,7 +67,7 @@ under the License.
           <#list weightUomList as uom>
             <option value='${uom.uomId}'
                <#if (facility.defaultWeightUomId?has_content) && (uom.uomId == facility.defaultWeightUomId)>
-               SELECTED
+               selected="selected"
                </#if>
              >${uom.get("description",locale)?default(uom.uomId)}</option>
           </#list>
@@ -98,44 +81,54 @@ under the License.
           <#list inventoryItemTypes as nextInventoryItemType>
             <option value='${nextInventoryItemType.inventoryItemTypeId}'
                <#if (facility.defaultInventoryItemTypeId?has_content) && (nextInventoryItemType.inventoryItemTypeId == facility.defaultInventoryItemTypeId)>
-               SELECTED
+               selected="selected"
                </#if>
              >${nextInventoryItemType.get("description",locale)?default(nextInventoryItemType.inventoryItemTypeId)}</option>
           </#list>
       </select>
     </td>
   </tr>
-
   <tr>
     <td class="label">${uiLabelMap.ProductName}</td>
-    <td><input type="text" name="facilityName" value="${facility.facilityName?if_exists}" size="30" maxlength="60"></td>
+    <td>
+      <input type="text" name="facilityName" value="${facility.facilityName?if_exists}" size="30" maxlength="60" />
+      <span class="tooltip">${uiLabelMap.CommonRequired}</span>
+    </td>
   </tr>
   <tr>
-    <td class="label">${uiLabelMap.ProductSquareFootage}</td>
-    <td><input type="text" name="squareFootage" value="${facility.squareFootage?if_exists}" size="10" maxlength="20"></td>
+    <td class="label">${uiLabelMap.ProductFacilitySize}</td>
+    <td><input type="text" name="facilitySize" value="${facility.facilitySize?if_exists}" size="10" maxlength="20" /></td>
   </tr>
+  <tr>
+   <td class="label">${uiLabelMap.ProductFacilityDefaultAreaUnit}</td>
+    <td>
+      <select name="facilitySizeUomId">
+          <option value=''>${uiLabelMap.CommonNone}</option>
+          <#list areaUomList as uom>
+            <option value='${uom.uomId}'
+               <#if (facility.facilitySizeUomId?has_content) && (uom.uomId == facility.facilitySizeUomId)>
+               selected="selected"
+               </#if>
+             >${uom.get("description",locale)?default(uom.uomId)}</option>
+          </#list>
+      </select>
+    </td>
+  </tr>  
   <tr>
     <td class="label">${uiLabelMap.ProductProductDescription}</td>
-    <td ><input type="text" name="description" value="${facility.description?if_exists}" size="60" maxlength="250"></td>
+    <td ><input type="text" name="description" value="${facility.description?if_exists}" size="60" maxlength="250" /></td>
   </tr>
   <tr>
     <td class="label">${uiLabelMap.ProductDefaultDaysToShip}</td>
-    <td><input type="text" name="defaultDaysToShip" value="${facility.defaultDaysToShip?if_exists}" size="10" maxlength="20"></td>
+    <td><input type="text" name="defaultDaysToShip" value="${facility.defaultDaysToShip?if_exists}" size="10" maxlength="20" /></td>
   </tr>
-
   <tr>
     <td>&nbsp;</td>
     <#if facilityId?has_content>
-      <td><input type="submit" name="Update" value="${uiLabelMap.CommonUpdate}"></td>
+      <td><input type="submit" name="Update" value="${uiLabelMap.CommonUpdate}" /></td>
     <#else>
-      <td><input type="submit" name="Update" value="${uiLabelMap.CommonSave}"></td>
+      <td><input type="submit" name="Update" value="${uiLabelMap.CommonSave}" /></td>
     </#if>
   </tr>
 </table>
 </form>
-
-<#else>
-  <h3>${uiLabelMap.ProductFacilityViewPermissionError}</h3>
-</#if>
-
-

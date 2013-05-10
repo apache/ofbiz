@@ -26,18 +26,16 @@ import java.math.BigDecimal;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
 import java.util.List;
+import java.util.Map;
 
+import javolution.util.FastMap;
 import jpos.JposException;
 import jpos.POSPrinter;
 import jpos.POSPrinterConst;
 
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilFormatOut;
-import org.ofbiz.base.util.UtilProperties;
 import org.ofbiz.base.util.UtilURL;
 import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.base.util.string.FlexibleStringExpander;
@@ -66,7 +64,7 @@ public class Receipt extends GenericDevice implements DialogCallback {
     protected SimpleDateFormat[] dateFormat = null;
     protected String[] storeReceiptTmpl = null;
     protected String[] custReceiptTmpl = null;
-    protected Map reportTmpl = new HashMap();
+    protected Map<String, Object> reportTmpl = FastMap.newInstance();
 
     protected static final String[] dateFmtStr = { "EEE, d MMM yyyy HH:mm:ss z", "EEE, d MMM yyyy HH:mm:ss z", "EEE, d MMM yyyy HH:mm:ss z" };
     protected static final int[] priceLength = { 7, 7, 7 };
@@ -83,6 +81,7 @@ public class Receipt extends GenericDevice implements DialogCallback {
         this.control = new jpos.POSPrinter();
     }
 
+    @Override
     protected void initialize() throws JposException {
         Debug.logInfo("Receipt [" + control.getPhysicalDeviceName() + "] Claimed : " + control.getClaimed(), module);
         // set map mode to metric - all dimensions specified in 1/100mm units
@@ -112,12 +111,14 @@ public class Receipt extends GenericDevice implements DialogCallback {
         }
     }
 
-    public synchronized void printReport(PosTransaction trans, String resource, Map context) {
+    public synchronized void printReport(PosTransaction trans, String resource, Map<String, String> context) {
+        // transaction mode causes all output to be buffered
         try {
             ((POSPrinter) control).transactionPrint(POSPrinterConst.PTR_S_RECEIPT, POSPrinterConst.PTR_TP_TRANSACTION);
-        } catch (Exception e) {
+        } catch (JposException e) {
+            Debug.logError(e, "Exception while setting jpos.POSPrinter.transactionPrint to transaction mode ", module);
         }
-        Debug.log("Print Report Requested", module);
+        Debug.logInfo("Print Report Requested", module);
         String[] report = this.readReportTemplate(resource);
 
         if (report != null) {
@@ -133,7 +134,8 @@ public class Receipt extends GenericDevice implements DialogCallback {
         }
         try {
             ((POSPrinter) control).transactionPrint(POSPrinterConst.PTR_S_RECEIPT, POSPrinterConst.PTR_TP_NORMAL);
-        } catch (Exception e) {
+        } catch (JposException e) {
+            Debug.logError(e, "Exception while setting jpos.POSPrinter.transactionPrint to normal mode ", module);
         }
     }
 
@@ -148,7 +150,7 @@ public class Receipt extends GenericDevice implements DialogCallback {
     }
 
     public void printReceipt(PosTransaction trans, boolean printStoreCopy) {
-        Debug.log("Print Receipt Requested : " + trans.getTransactionId(), module);
+        Debug.logInfo("Print Receipt Requested : " + trans.getTransactionId(), module);
         POSPrinter printer = (POSPrinter) control;
         this.lastTransaction = trans;
 
@@ -164,13 +166,14 @@ public class Receipt extends GenericDevice implements DialogCallback {
             String[] storeReceipt = this.readStoreTemplate();
             int payments = trans.getNumberOfPayments();
             for (int i = 0; i < payments; i++) {
-                Map info = trans.getPaymentInfo(i);
+                Map<String, Object> info = trans.getPaymentInfo(i);
                 if (info.containsKey("cardNumber")) {
                     this.printReceipt(trans, storeReceipt, 1, info);
                 }
                 try {
                     Thread.sleep(3000);
                 } catch (Exception e) {
+                    Debug.logError(e, module);
                 }
             }
         }
@@ -180,10 +183,12 @@ public class Receipt extends GenericDevice implements DialogCallback {
         this.printReceipt(trans, custReceipt, 0, null);
     }
 
-    private void printReceipt(PosTransaction trans, String[] template, int type, Map payInfo) {
+    private void printReceipt(PosTransaction trans, String[] template, int type, Map<String, Object> payInfo) {
+        // transaction mode causes all output to be buffered
         try {
             ((POSPrinter) control).transactionPrint(POSPrinterConst.PTR_S_RECEIPT, POSPrinterConst.PTR_TP_TRANSACTION);
-        } catch (Exception e) {
+        } catch (JposException e) {
+            Debug.logError(e, "Exception while setting jpos.POSPrinter.transactionPrint to transaction mode ", module);
         }
 
         if (template != null) {
@@ -209,7 +214,8 @@ public class Receipt extends GenericDevice implements DialogCallback {
         }
         try {
             ((POSPrinter) control).transactionPrint(POSPrinterConst.PTR_S_RECEIPT, POSPrinterConst.PTR_TP_NORMAL);
-        } catch (Exception e) {
+        } catch (JposException e) {
+            Debug.logError(e, "Exception while setting jpos.POSPrinter.transactionPrint to normal mode ", module);
         }
     }
 
@@ -258,44 +264,44 @@ public class Receipt extends GenericDevice implements DialogCallback {
                     String[] code = line.trim().split("\\=");
                     if ("#description.length".equals(code[0])) {
                         try {
-                            this.descLength[type] = Integer.parseInt(code[1]);
+                            Receipt.descLength[type] = Integer.parseInt(code[1]);
                         } catch (NumberFormatException e) {
                             Debug.logWarning(e, module);
                         }
                     } else if ("#productId.length".equals(code[0])) {
                         try {
-                            this.pridLength[type] = Integer.parseInt(code[1]);
+                            Receipt.pridLength[type] = Integer.parseInt(code[1]);
                         } catch (NumberFormatException e) {
                             Debug.logWarning(e, module);
                         }
                     } else if ("#price.length".equals(code[0])) {
                         try {
-                            this.priceLength[type] = Integer.parseInt(code[1]);
+                            Receipt.priceLength[type] = Integer.parseInt(code[1]);
                         } catch (NumberFormatException e) {
                             Debug.logWarning(e, module);
                         }
                     } else if ("#quantity.length".equals(code[0])) {
                         try {
-                            this.qtyLength[type] = Integer.parseInt(code[1]);
+                            qtyLength[type] = Integer.parseInt(code[1]);
                         } catch (NumberFormatException e) {
                             Debug.logWarning(e, module);
                         }
                     } else if ("#infoString.length".equals(code[0])) {
                         try {
-                            this.infoLength[type] = Integer.parseInt(code[1]);
+                            Receipt.infoLength[type] = Integer.parseInt(code[1]);
                         } catch (NumberFormatException e) {
                             Debug.logWarning(e, module);
                         }
                     } else if ("#dateFormat".equals(code[0])) {
-                        this.dateFmtStr[type] = code[1];
+                        Receipt.dateFmtStr[type] = code[1];
                     } else if ("#configPadding.length".equals(code[0])) {
                         try {
-                            this.configPaddingLength[type] = Integer.parseInt(code[1]);
+                            Receipt.configPaddingLength[type] = Integer.parseInt(code[1]);
                             StringBuffer spaces = new StringBuffer();
-                            for (int i=0; i < this.configPaddingLength[type]; i+=1) {
+                            for (int i=0; i < Receipt.configPaddingLength[type]; i+=1) {
                                 spaces.append(" ");
                             }
-                            this.configPadding[type] = spaces.toString();
+                            Receipt.configPadding[type] = spaces.toString();
                         } catch (NumberFormatException e) {
                             Debug.logWarning(e, module);
                         }
@@ -339,13 +345,13 @@ public class Receipt extends GenericDevice implements DialogCallback {
             dateFormat = new SimpleDateFormat[3];
         }
         if (dateFormat[type] == null) {
-            dateFormat[type] = new SimpleDateFormat(this.dateFmtStr[type]);
+            dateFormat[type] = new SimpleDateFormat(Receipt.dateFmtStr[type]);
         }
         return dateFormat[type];
     }
 
-    private void printInfo(String template, Map context, PosTransaction trans, int type) {
-        Map expandMap = this.makeCodeExpandMap(trans, type);
+    private void printInfo(String template, Map<String, String> context, PosTransaction trans, int type) {
+        Map<String, Object> expandMap = this.makeCodeExpandMap(trans, type);
         if (context != null) {
             expandMap.putAll(context); // context overrides
         }
@@ -356,7 +362,7 @@ public class Receipt extends GenericDevice implements DialogCallback {
         this.printInfo(template, null, trans, type);
     }
 
-    private void printInfo(String template, Map context) {
+    private void printInfo(String template, Map<String, Object> context) {
         String toPrint = FlexibleStringExpander.expandString(template, context);
         if (toPrint.indexOf("\n") > -1) {
             String[] lines = toPrint.split("\\n");
@@ -372,7 +378,7 @@ public class Receipt extends GenericDevice implements DialogCallback {
         String loopStr = loop.substring(7);
         int size = trans.size();
         for (int i = 0; i < size; i++) {
-            Map expandMap = this.makeCodeExpandMap(trans, type);
+            Map<String, Object> expandMap = this.makeCodeExpandMap(trans, type);
             expandMap.putAll(trans.getItemInfo(i));
             // adjust the padding
             expandMap.put("description", UtilFormatOut.padString((String) expandMap.get("description"), descLength[type], true, ' '));
@@ -396,12 +402,12 @@ public class Receipt extends GenericDevice implements DialogCallback {
 
             if (trans.isAggregatedItem(((String)expandMap.get("productId")).trim())) {
                 List<Map<String, Object>> maps = trans.getItemConfigInfo(i);
-                for (Map map: maps) {
+                for (Map<String, Object> map: maps) {
                     expandMap = this.makeCodeExpandMap(trans, type);
                     expandMap.putAll(map);
                     // adjust the padding
                     expandMap.put("configDescription",
-                        UtilFormatOut.padString(this.configPadding[type] + (String) expandMap.get("configDescription"), descLength[type], true, ' '));
+                        UtilFormatOut.padString(Receipt.configPadding[type] + (String) expandMap.get("configDescription"), descLength[type], true, ' '));
                     expandMap.put("productId", UtilFormatOut.padString((String) expandMap.get("productId"), pridLength[type], true, ' '));
                     expandMap.put("configBasePrice", UtilFormatOut.padString((String) expandMap.get("configBasePrice"), priceLength[type], false, ' '));
                     expandMap.put("configQuantity", UtilFormatOut.padString((String) expandMap.get("configQuantity"), qtyLength[type], false, ' '));
@@ -426,13 +432,13 @@ public class Receipt extends GenericDevice implements DialogCallback {
         String loopStr = loop.substring(7);
         int size = trans.getNumberOfPayments();
         for (int i = 0; i < size; i++) {
-            Map payInfoMap = trans.getPaymentInfo(i);
+            Map<String, Object> payInfoMap = trans.getPaymentInfo(i);
             this.printPayInfo(loopStr, trans, type, payInfoMap);
         }
     }
 
-    private void printPayInfo(String template, PosTransaction trans, int type, Map payInfo) {
-        Map expandMap = this.makeCodeExpandMap(trans, type);
+    private void printPayInfo(String template, PosTransaction trans, int type, Map<String, Object> payInfo) {
+        Map<String, Object> expandMap = this.makeCodeExpandMap(trans, type);
         expandMap.putAll(payInfo);
         // adjust the padding
         expandMap.put("authInfoString", UtilFormatOut.padString((String) expandMap.get("authInfoString"), infoLength[type], false, ' '));
@@ -451,8 +457,8 @@ public class Receipt extends GenericDevice implements DialogCallback {
         }
     }
 
-    private Map makeCodeExpandMap(PosTransaction trans, int type) {
-        Map expandMap = new HashMap();
+    private Map<String, Object> makeCodeExpandMap(PosTransaction trans, int type) {
+        Map<String, Object> expandMap = FastMap.newInstance();
         SimpleDateFormat fmt = this.getDateFormat(type);
         String dateString = fmt.format(new Date());
 
@@ -470,11 +476,8 @@ public class Receipt extends GenericDevice implements DialogCallback {
         expandMap.put("taxTotal", UtilFormatOut.padString(UtilFormatOut.formatPrice(trans.getTaxTotal()), priceLength[type], false, ' '));
         expandMap.put("grandTotal", UtilFormatOut.padString(UtilFormatOut.formatPrice(trans.getGrandTotal()), priceLength[type], false, ' '));
         expandMap.put("totalPayments", UtilFormatOut.padString(UtilFormatOut.formatPrice(trans.getPaymentTotal()), priceLength[type], false, ' '));
-        expandMap.put("change", UtilFormatOut.padString((trans.getTotalDue().compareTo(BigDecimal.ZERO) < 0 ?
-                UtilFormatOut.formatPrice(trans.getTotalDue().negate()) : "0.00"), priceLength[type], false, ' '));
-        expandMap.put("saleDiscount", UtilFormatOut.padString((trans.GetTotalDiscount().compareTo(BigDecimal.ZERO) != 0 ?
-                UtilFormatOut.formatPrice(trans.GetTotalDiscount()) : "0.00"), priceLength[type], false, ' '));
-
+        expandMap.put("change", UtilFormatOut.padString(UtilFormatOut.formatPrice(trans.getTotalDue().compareTo(BigDecimal.ZERO) < 0 ? trans.getTotalDue().negate() : BigDecimal.ZERO), priceLength[type], false, ' '));
+        expandMap.put("saleDiscount",  UtilFormatOut.padString(UtilFormatOut.formatPrice(trans.GetTotalDiscount().compareTo(BigDecimal.ZERO) != 0 ? trans.GetTotalDiscount() : BigDecimal.ZERO), priceLength[type], false, ' '));
         return expandMap;
     }
 

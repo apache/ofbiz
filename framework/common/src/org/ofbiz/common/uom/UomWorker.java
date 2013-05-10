@@ -19,10 +19,18 @@
 
 package org.ofbiz.common.uom;
 
-import org.ofbiz.entity.GenericDelegator;
-
-import java.util.Calendar;
+import java.math.BigDecimal;
 import java.sql.Timestamp;
+import java.util.Map;
+
+import javolution.util.FastMap;
+
+import org.ofbiz.base.util.Debug;
+import org.ofbiz.service.GenericServiceException;
+import org.ofbiz.service.LocalDispatcher;
+import org.ofbiz.service.ModelService;
+
+import com.ibm.icu.util.Calendar;
 
 /**
  * UomWorker
@@ -30,6 +38,8 @@ import java.sql.Timestamp;
 public class UomWorker {
 
     public static final String module = UomWorker.class.getName();
+
+    private UomWorker () {}
 
     public static int[] uomTimeToCalTime(String uomId) {
         if ("TF_ms".equals(uomId)) {
@@ -81,5 +91,32 @@ public class UomWorker {
 
     public static Calendar addUomTime(Timestamp startTime, String uomId, int value) {
         return addUomTime(null, startTime, uomId, value);
+    }
+
+    /*
+     * Convenience method to call the convertUom service
+     */
+    public static BigDecimal convertUom(BigDecimal originalValue, String uomId, String uomIdTo, LocalDispatcher dispatcher) {
+        if (originalValue == null || uomId == null || uomIdTo == null) return null;
+        if (uomId.equals(uomIdTo)) return originalValue;
+
+        Map<String, Object> svcInMap = FastMap.newInstance();
+        svcInMap.put("originalValue", originalValue);
+        svcInMap.put("uomId", uomId);
+        svcInMap.put("uomIdTo", uomIdTo);
+
+        Map<String, Object> svcOutMap = FastMap.newInstance();
+        try {
+            svcOutMap = dispatcher.runSync("convertUom", svcInMap);
+        } catch (GenericServiceException ex) {
+            Debug.logError(ex, module);
+            return null;
+        }
+
+        if (svcOutMap.get(ModelService.RESPONSE_MESSAGE).equals(ModelService.RESPOND_SUCCESS) && svcOutMap.get("convertedValue") != null) {
+            return (BigDecimal) svcOutMap.get("convertedValue");
+        }
+        Debug.logError("Failed to perform conversion for value [" + originalValue.toPlainString() + "] from Uom [" + uomId + "] to Uom [" + uomIdTo + "]",module);
+        return null;
     }
 }

@@ -20,29 +20,33 @@ package org.ofbiz.order.shoppingcart;
 
 import java.math.BigDecimal;
 import java.math.MathContext;
-import java.text.NumberFormat;
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import javolution.util.FastMap;
-import java.sql.Timestamp;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import javolution.util.FastList;
+import javolution.util.FastMap;
 
 import org.ofbiz.base.util.Debug;
+import org.ofbiz.base.util.ObjectType;
 import org.ofbiz.base.util.UtilDateTime;
 import org.ofbiz.base.util.UtilFormatOut;
+import org.ofbiz.base.util.UtilGenerics;
 import org.ofbiz.base.util.UtilHttp;
 import org.ofbiz.base.util.UtilMisc;
+import org.ofbiz.base.util.UtilNumber;
 import org.ofbiz.base.util.UtilProperties;
 import org.ofbiz.base.util.UtilValidate;
-import org.ofbiz.entity.GenericDelegator;
+import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericPK;
 import org.ofbiz.entity.GenericValue;
@@ -94,7 +98,7 @@ public class ShoppingCartEvents {
 
     public static String addItemGroup(HttpServletRequest request, HttpServletResponse response) {
         ShoppingCart cart = getCartObject(request);
-        Map parameters = UtilHttp.getParameterMap(request);
+        Map<String, Object> parameters = UtilHttp.getParameterMap(request);
         String groupName = (String) parameters.get("groupName");
         String parentGroupNumber = (String) parameters.get("parentGroupNumber");
         String groupNumber = cart.addItemGroup(groupName, parentGroupNumber);
@@ -104,7 +108,7 @@ public class ShoppingCartEvents {
 
     public static String addCartItemToGroup(HttpServletRequest request, HttpServletResponse response) {
         ShoppingCart cart = getCartObject(request);
-        Map parameters = UtilHttp.getParameterMap(request);
+        Map<String, Object> parameters = UtilHttp.getParameterMap(request);
         String itemGroupNumber = (String) parameters.get("itemGroupNumber");
         String indexStr = (String) parameters.get("lineIndex");
         int index = Integer.parseInt(indexStr);
@@ -115,12 +119,12 @@ public class ShoppingCartEvents {
 
     /** Event to add an item to the shopping cart. */
     public static String addToCart(HttpServletRequest request, HttpServletResponse response) {
-        GenericDelegator delegator = (GenericDelegator) request.getAttribute("delegator");
+        Delegator delegator = (Delegator) request.getAttribute("delegator");
         LocalDispatcher dispatcher = (LocalDispatcher) request.getAttribute("dispatcher");
         ShoppingCart cart = getCartObject(request);
         ShoppingCartHelper cartHelper = new ShoppingCartHelper(delegator, dispatcher, cart);
         String controlDirective = null;
-        Map result = null;
+        Map<String, Object> result = null;
         String productId = null;
         String parentProductId = null;
         String itemType = null;
@@ -132,8 +136,8 @@ public class ShoppingCartEvents {
         BigDecimal quantity = BigDecimal.ZERO;
         String reservStartStr = null;
         String reservEndStr = null;
-        java.sql.Timestamp reservStart = null;
-        java.sql.Timestamp reservEnd = null;
+        Timestamp reservStart = null;
+        Timestamp reservEnd = null;
         String reservLengthStr = null;
         BigDecimal reservLength = null;
         String reservPersonsStr = null;
@@ -142,16 +146,16 @@ public class ShoppingCartEvents {
         String accommodationSpotId = null;
         String shipBeforeDateStr = null;
         String shipAfterDateStr = null;
-        java.sql.Timestamp shipBeforeDate = null;
-        java.sql.Timestamp shipAfterDate = null;
+        Timestamp shipBeforeDate = null;
+        Timestamp shipAfterDate = null;
+        String numberOfDay = null;
 
         // not used right now: Map attributes = null;
         String catalogId = CatalogWorker.getCurrentCatalogId(request);
         Locale locale = UtilHttp.getLocale(request);
-        NumberFormat nf = NumberFormat.getNumberInstance(locale);
-
+       
         // Get the parameters as a MAP, remove the productId and quantity params.
-        Map paramMap = UtilHttp.getCombinedMap(request);
+        Map<String, Object> paramMap = UtilHttp.getCombinedMap(request);
 
         String itemGroupNumber = (String) paramMap.get("itemGroupNumber");
 
@@ -165,7 +169,8 @@ public class ShoppingCartEvents {
             try {
                 productId = (String) object;
             } catch (ClassCastException e) {
-                productId = (String)((List)object).get(0);
+                List<String> productList = UtilGenerics.checkList(object);
+                productId = productList.get(0);
             }
         }
         if (paramMap.containsKey("PRODUCT_ID")) {
@@ -174,8 +179,8 @@ public class ShoppingCartEvents {
             parentProductId = (String) paramMap.remove("product_id");
         }
 
-        Debug.logInfo("adding item product " + productId,module);
-        Debug.logInfo("adding item parent product " + parentProductId,module);
+        Debug.logInfo("adding item product " + productId, module);
+        Debug.logInfo("adding item parent product " + parentProductId, module);
 
         if (paramMap.containsKey("ADD_CATEGORY_ID")) {
             productCategoryId = (String) paramMap.remove("ADD_CATEGORY_ID");
@@ -228,11 +233,11 @@ public class ShoppingCartEvents {
                 try {
                     configWrapper.loadConfig(delegator, (String) paramMap.remove("configId"));
                 } catch (Exception e) {
-                    Debug.logWarning(e,"Could not load configuration", module);
+                    Debug.logWarning(e, "Could not load configuration", module);
                 }
             } else {
-            // The choices selected by the user are taken from request and set in the wrapper
-            ProductConfigWorker.fillProductConfigWrapper(configWrapper, request);
+                // The choices selected by the user are taken from request and set in the wrapper
+                ProductConfigWorker.fillProductConfigWrapper(configWrapper, request);
             }
             if (!configWrapper.isCompleted()) {
                 // The configuration is not valid
@@ -249,12 +254,12 @@ public class ShoppingCartEvents {
         //Check for virtual products
         if (ProductWorker.isVirtual(delegator, productId)) {
 
-            if ("VV_FEATURETREE".equals(ProductWorker.getProductvirtualVariantMethod(delegator, productId))) {
+            if ("VV_FEATURETREE".equals(ProductWorker.getProductVirtualVariantMethod(delegator, productId))) {
                 // get the selected features.
-                List <String> selectedFeatures = new LinkedList<String>();
-                java.util.Enumeration paramNames = request.getParameterNames();
+                List<String> selectedFeatures = new LinkedList<String>();
+                Enumeration<String> paramNames = UtilGenerics.cast(request.getParameterNames());
                 while (paramNames.hasMoreElements()) {
-                    String paramName = (String)paramNames.nextElement();
+                    String paramName = paramNames.nextElement();
                     if (paramName.startsWith("FT")) {
                         selectedFeatures.add(request.getParameterValues(paramName)[0]);
                     }
@@ -262,8 +267,9 @@ public class ShoppingCartEvents {
 
                 // check if features are selected
                 if (UtilValidate.isEmpty(selectedFeatures)) {
+                    request.setAttribute("paramMap", paramMap);
                     request.setAttribute("product_id", productId);
-                    request.setAttribute("_EVENT_MESSAGE_",UtilProperties.getMessage(resource_error,"cart.addToCart.chooseVariationBeforeAddingToCart",locale));
+                    request.setAttribute("_EVENT_MESSAGE_", UtilProperties.getMessage(resource_error, "cart.addToCart.chooseVariationBeforeAddingToCart", locale));
                     return "product";
                 }
 
@@ -271,12 +277,14 @@ public class ShoppingCartEvents {
                 if (UtilValidate.isNotEmpty(variantProductId)) {
                     productId = variantProductId;
                 } else {
+                    request.setAttribute("paramMap", paramMap);
                     request.setAttribute("product_id", productId);
                     request.setAttribute("_EVENT_MESSAGE_", UtilProperties.getMessage(resource_error, "cart.addToCart.incompatibilityVariantFeature", locale));
                     return "product";
                 }
 
             } else {
+                request.setAttribute("paramMap", paramMap);
                 request.setAttribute("product_id", productId);
                 request.setAttribute("_EVENT_MESSAGE_", UtilProperties.getMessage(resource_error, "cart.addToCart.chooseVariationBeforeAddingToCart", locale));
                 return "product";
@@ -292,58 +300,64 @@ public class ShoppingCartEvents {
         if (priceStr == null) {
             priceStr = "0";  // default price is 0
         }
-
+        
+        if ("ASSET_USAGE_OUT_IN".equals(ProductWorker.getProductTypeId(delegator, productId))) {
+            if (paramMap.containsKey("numberOfDay")) {
+                numberOfDay = (String) paramMap.remove("numberOfDay");
+                reservStart = UtilDateTime.addDaysToTimestamp(UtilDateTime.nowTimestamp(), 1);
+                reservEnd = UtilDateTime.addDaysToTimestamp(reservStart, Integer.valueOf(numberOfDay));
+            }
+        }
+        
         // get the renting data
-        if ("ASSET_USAGE".equals(ProductWorker.getProductTypeId(delegator, productId))) {
+        if ("ASSET_USAGE".equals(ProductWorker.getProductTypeId(delegator, productId)) || "ASSET_USAGE_OUT_IN".equals(ProductWorker.getProductTypeId(delegator, productId))) {
             if (paramMap.containsKey("reservStart")) {
                 reservStartStr = (String) paramMap.remove("reservStart");
                 if (reservStartStr.length() == 10) // only date provided, no time string?
-                        reservStartStr += " 00:00:00.000000000"; // should have format: yyyy-mm-dd hh:mm:ss.fffffffff
-                if (reservStartStr.length() >0) {
+                    reservStartStr += " 00:00:00.000000000"; // should have format: yyyy-mm-dd hh:mm:ss.fffffffff
+                if (reservStartStr.length() > 0) {
                     try {
                         reservStart = java.sql.Timestamp.valueOf(reservStartStr);
                     } catch (Exception e) {
-                        Debug.logWarning(e,"Problems parsing Reservation start string: "
-                                    + reservStartStr, module);
+                        Debug.logWarning(e, "Problems parsing Reservation start string: "
+                                + reservStartStr, module);
                         reservStart = null;
-                        request.setAttribute("_ERROR_MESSAGE_", UtilProperties.getMessage(resource_error,"cart.addToCart.rental.startDate", locale));
+                        request.setAttribute("_ERROR_MESSAGE_", UtilProperties.getMessage(resource_error, "cart.addToCart.rental.startDate", locale));
                         return "error";
                     }
-                }
-                else reservStart = null;
+                } else reservStart = null;
             }
 
             if (paramMap.containsKey("reservEnd")) {
                 reservEndStr = (String) paramMap.remove("reservEnd");
                 if (reservEndStr.length() == 10) // only date provided, no time string?
-                        reservEndStr += " 00:00:00.000000000"; // should have format: yyyy-mm-dd hh:mm:ss.fffffffff
+                    reservEndStr += " 00:00:00.000000000"; // should have format: yyyy-mm-dd hh:mm:ss.fffffffff
                 if (reservEndStr.length() > 0) {
                     try {
                         reservEnd = java.sql.Timestamp.valueOf(reservEndStr);
                     } catch (Exception e) {
-                        Debug.logWarning(e,"Problems parsing Reservation end string: " + reservEndStr, module);
+                        Debug.logWarning(e, "Problems parsing Reservation end string: " + reservEndStr, module);
                         reservEnd = null;
-                        request.setAttribute("_ERROR_MESSAGE_", UtilProperties.getMessage(resource_error,"cart.addToCart.rental.endDate", locale));
+                        request.setAttribute("_ERROR_MESSAGE_", UtilProperties.getMessage(resource_error, "cart.addToCart.rental.endDate", locale));
                         return "error";
                     }
-                }
-                else reservEnd = null;
+                } else reservEnd = null;
             }
 
             if (reservStart != null && reservEnd != null) {
-                reservLength = new BigDecimal(UtilDateTime.getInterval(reservStart,reservEnd)).divide(new BigDecimal("86400000"), generalRounding);
+                reservLength = new BigDecimal(UtilDateTime.getInterval(reservStart, reservEnd)).divide(new BigDecimal("86400000"), generalRounding);
             }
 
             if (reservStart != null && paramMap.containsKey("reservLength")) {
                 reservLengthStr = (String) paramMap.remove("reservLength");
                 // parse the reservation Length
                 try {
-                    reservLength = new BigDecimal(nf.parse(reservLengthStr).doubleValue());
+                    reservLength = (BigDecimal) ObjectType.simpleTypeConvert(reservLengthStr, "BigDecimal", null, locale);
                 } catch (Exception e) {
-                    Debug.logWarning(e,"Problems parsing reservation length string: "
-                                    + reservLengthStr, module);
+                    Debug.logWarning(e, "Problems parsing reservation length string: "
+                            + reservLengthStr, module);
                     reservLength = BigDecimal.ONE;
-                    request.setAttribute("_ERROR_MESSAGE_", UtilProperties.getMessage(resource_error,"OrderReservationLengthShouldBeAPositiveNumber", locale));
+                    request.setAttribute("_ERROR_MESSAGE_", UtilProperties.getMessage(resource_error, "OrderReservationLengthShouldBeAPositiveNumber", locale));
                     return "error";
                 }
             }
@@ -352,11 +366,11 @@ public class ShoppingCartEvents {
                 reservPersonsStr = (String) paramMap.remove("reservPersons");
                 // parse the number of persons
                 try {
-                    reservPersons = new BigDecimal(nf.parse(reservPersonsStr).doubleValue());
+                    reservPersons = (BigDecimal) ObjectType.simpleTypeConvert(reservPersonsStr, "BigDecimal", null, locale);
                 } catch (Exception e) {
-                    Debug.logWarning(e,"Problems parsing reservation number of persons string: " + reservPersonsStr, module);
+                    Debug.logWarning(e, "Problems parsing reservation number of persons string: " + reservPersonsStr, module);
                     reservPersons = BigDecimal.ONE;
-                    request.setAttribute("_ERROR_MESSAGE_", UtilProperties.getMessage(resource_error,"OrderNumberOfPersonsShouldBeOneOrLarger", locale));
+                    request.setAttribute("_ERROR_MESSAGE_", UtilProperties.getMessage(resource_error, "OrderNumberOfPersonsShouldBeOneOrLarger", locale));
                     return "error";
                 }
             }
@@ -387,7 +401,7 @@ public class ShoppingCartEvents {
 
         // parse the price
         try {
-            price = new BigDecimal(nf.parse(priceStr).doubleValue());
+            price = (BigDecimal) ObjectType.simpleTypeConvert(priceStr, "BigDecimal", null, locale);
         } catch (Exception e) {
             Debug.logWarning(e, "Problems parsing price string: " + priceStr, module);
             price = null;
@@ -395,14 +409,21 @@ public class ShoppingCartEvents {
 
         // parse the quantity
         try {
-            quantity = new BigDecimal(nf.parse(quantityStr).doubleValue());
+            quantity = (BigDecimal) ObjectType.simpleTypeConvert(quantityStr, "BigDecimal", null, locale);
+            //For quantity we should test if we allow to add decimal quantity for this product an productStore : if not then round to 0
+            if(! ProductWorker.isDecimalQuantityOrderAllowed(delegator, productId, cart.getProductStoreId())){
+                quantity = quantity.setScale(0, UtilNumber.getBigDecimalRoundingMode("order.rounding"));
+            }
+            else {
+                quantity = quantity.setScale(UtilNumber.getBigDecimalScale("order.decimals"), UtilNumber.getBigDecimalRoundingMode("order.rounding"));
+            }
         } catch (Exception e) {
             Debug.logWarning(e, "Problems parsing quantity string: " + quantityStr, module);
             quantity = BigDecimal.ONE;
         }
 
         // get the selected amount
-        String selectedAmountStr = "0.00";
+        String selectedAmountStr = null;
         if (paramMap.containsKey("ADD_AMOUNT")) {
             selectedAmountStr = (String) paramMap.remove("ADD_AMOUNT");
         } else if (paramMap.containsKey("add_amount")) {
@@ -411,25 +432,27 @@ public class ShoppingCartEvents {
 
         // parse the amount
         BigDecimal amount = null;
-        if (selectedAmountStr != null && selectedAmountStr.length() > 0) {
+        if (UtilValidate.isNotEmpty(selectedAmountStr)) {
             try {
-                amount = new BigDecimal(nf.parse(selectedAmountStr).doubleValue());
+                amount = (BigDecimal) ObjectType.simpleTypeConvert(selectedAmountStr, "BigDecimal", null, locale);
             } catch (Exception e) {
                 Debug.logWarning(e, "Problem parsing amount string: " + selectedAmountStr, module);
                 amount = null;
             }
+        } else {
+            amount = BigDecimal.ZERO;
         }
 
         // check for required amount
         if ((ProductWorker.isAmountRequired(delegator, productId)) && (amount == null || amount.doubleValue() == 0.0)) {
             request.setAttribute("product_id", productId);
-            request.setAttribute("_EVENT_MESSAGE_",UtilProperties.getMessage(resource_error,"cart.addToCart.enterAmountBeforeAddingToCart",locale));
+            request.setAttribute("_EVENT_MESSAGE_", UtilProperties.getMessage(resource_error, "cart.addToCart.enterAmountBeforeAddingToCart", locale));
             return "product";
         }
 
         // get the ship before date (handles both yyyy-mm-dd input and full timestamp)
         shipBeforeDateStr = (String) paramMap.remove("shipBeforeDate");
-        if (shipBeforeDateStr != null && shipBeforeDateStr.length() > 0) {
+        if (UtilValidate.isNotEmpty(shipBeforeDateStr)) {
             if (shipBeforeDateStr.length() == 10) shipBeforeDateStr += " 00:00:00.000";
             try {
                 shipBeforeDate = java.sql.Timestamp.valueOf(shipBeforeDateStr);
@@ -441,7 +464,7 @@ public class ShoppingCartEvents {
 
         // get the ship after date (handles both yyyy-mm-dd input and full timestamp)
         shipAfterDateStr = (String) paramMap.remove("shipAfterDate");
-        if (shipAfterDateStr != null && shipAfterDateStr.length() > 0) {
+        if (UtilValidate.isNotEmpty(shipAfterDateStr)) {
             if (shipAfterDateStr.length() == 10) shipAfterDateStr += " 00:00:00.000";
             try {
                 shipAfterDate = java.sql.Timestamp.valueOf(shipAfterDateStr);
@@ -452,10 +475,10 @@ public class ShoppingCartEvents {
         }
 
         // check for an add-to cart survey
-        List surveyResponses = null;
+        List<String> surveyResponses = null;
         if (productId != null) {
             String productStoreId = ProductStoreWorker.getProductStoreId(request);
-            List productSurvey = ProductStoreWorker.getProductSurveys(delegator, productStoreId, productId, "CART_ADD", parentProductId);
+            List<GenericValue> productSurvey = ProductStoreWorker.getProductSurveys(delegator, productStoreId, productId, "CART_ADD", parentProductId);
             if (UtilValidate.isNotEmpty(productSurvey)) {
                 // TODO: implement multiple survey per product
                 GenericValue survey = EntityUtil.getFirst(productSurvey);
@@ -487,51 +510,29 @@ public class ShoppingCartEvents {
         }
 
         GenericValue productStore = ProductStoreWorker.getProductStore(request);
-        String addToCartRemoveIncompat = productStore.getString("addToCartRemoveIncompat");
-        String addToCartReplaceUpsell = productStore.getString("addToCartReplaceUpsell");
-        try {
-            if ("Y".equals(addToCartRemoveIncompat)) {
-                List productAssocs = null;
-                EntityCondition cond = EntityCondition.makeCondition(UtilMisc.toList(
-                        EntityCondition.makeCondition(EntityCondition.makeCondition("productId", EntityOperator.EQUALS, productId), EntityOperator.OR, EntityCondition.makeCondition("productIdTo", EntityOperator.EQUALS, productId)),
-                        EntityCondition.makeCondition("productAssocTypeId", EntityOperator.EQUALS, "PRODUCT_INCOMPATABLE")), EntityOperator.AND);
-                productAssocs = delegator.findList("ProductAssoc", cond, null, null, null, false);
-                productAssocs = EntityUtil.filterByDate(productAssocs);
-                List productList = FastList.newInstance();
-                Iterator iter = productAssocs.iterator();
-                while (iter.hasNext()) {
-                    GenericValue productAssoc = (GenericValue) iter.next();
-                    if (productId.equals(productAssoc.getString("productId"))) {
-                        productList.add(productAssoc.getString("productIdTo"));
-                        continue;
-                    }
-                    if (productId.equals(productAssoc.getString("productIdTo"))) {
-                        productList.add(productAssoc.getString("productId"));
-                        continue;
-                    }
-                }
-                Iterator sciIter = cart.iterator();
-                while (sciIter.hasNext()) {
-                    ShoppingCartItem sci = (ShoppingCartItem) sciIter.next();
-                    if (productList.contains(sci.getProductId())) {
-                        try {
-                            cart.removeCartItem(sci, dispatcher);
-                        } catch (CartItemModifyException e) {
-                            Debug.logError(e.getMessage(), module);
+        if (productStore != null) {
+            String addToCartRemoveIncompat = productStore.getString("addToCartRemoveIncompat");
+            String addToCartReplaceUpsell = productStore.getString("addToCartReplaceUpsell");
+            try {
+                if ("Y".equals(addToCartRemoveIncompat)) {
+                    List<GenericValue> productAssocs = null;
+                    EntityCondition cond = EntityCondition.makeCondition(UtilMisc.toList(
+                            EntityCondition.makeCondition(EntityCondition.makeCondition("productId", EntityOperator.EQUALS, productId), EntityOperator.OR, EntityCondition.makeCondition("productIdTo", EntityOperator.EQUALS, productId)),
+                            EntityCondition.makeCondition("productAssocTypeId", EntityOperator.EQUALS, "PRODUCT_INCOMPATABLE")), EntityOperator.AND);
+                    productAssocs = delegator.findList("ProductAssoc", cond, null, null, null, false);
+                    productAssocs = EntityUtil.filterByDate(productAssocs);
+                    List<String> productList = FastList.newInstance();
+                    for(GenericValue productAssoc : productAssocs) {
+                        if (productId.equals(productAssoc.getString("productId"))) {
+                            productList.add(productAssoc.getString("productIdTo"));
+                            continue;
+                        }
+                        if (productId.equals(productAssoc.getString("productIdTo"))) {
+                            productList.add(productAssoc.getString("productId"));
+                            continue;
                         }
                     }
-                }
-            }
-            if ("Y".equals(addToCartReplaceUpsell)) {
-                List productList = null;
-                EntityCondition cond = EntityCondition.makeCondition(UtilMisc.toList(
-                        EntityCondition.makeCondition("productIdTo", EntityOperator.EQUALS, productId),
-                        EntityCondition.makeCondition("productAssocTypeId", EntityOperator.EQUALS, "PRODUCT_UPGRADE")), EntityOperator.AND);
-                productList = delegator.findList("ProductAssoc", cond, UtilMisc.toSet("productId"), null, null, false);
-                if (productList != null) {
-                    Iterator sciIter = cart.iterator();
-                    while (sciIter.hasNext()) {
-                        ShoppingCartItem sci = (ShoppingCartItem) sciIter.next();
+                    for(ShoppingCartItem sci : cart) {
                         if (productList.contains(sci.getProductId())) {
                             try {
                                 cart.removeCartItem(sci, dispatcher);
@@ -541,9 +542,42 @@ public class ShoppingCartEvents {
                         }
                     }
                 }
+                if ("Y".equals(addToCartReplaceUpsell)) {
+                    List<GenericValue> productList = null;
+                    EntityCondition cond = EntityCondition.makeCondition(UtilMisc.toList(
+                            EntityCondition.makeCondition("productIdTo", EntityOperator.EQUALS, productId),
+                            EntityCondition.makeCondition("productAssocTypeId", EntityOperator.EQUALS, "PRODUCT_UPGRADE")), EntityOperator.AND);
+                    productList = delegator.findList("ProductAssoc", cond, UtilMisc.toSet("productId"), null, null, false);
+                    if (productList != null) {
+                        for(ShoppingCartItem sci : cart) {
+                            if (productList.contains(sci.getProductId())) {
+                                try {
+                                    cart.removeCartItem(sci, dispatcher);
+                                } catch (CartItemModifyException e) {
+                                    Debug.logError(e.getMessage(), module);
+                                }
+                            }
+                        }
+                    }
+                }
+            } catch (GenericEntityException e) {
+                Debug.logError(e.getMessage(), module);
             }
-        } catch (GenericEntityException e) {
-            Debug.logError(e.getMessage(), module);
+        }
+        
+        // check for alternative packing
+        if(ProductWorker.isAlternativePacking(delegator, productId , parentProductId)){
+            GenericValue parentProduct = null;
+            try {
+                parentProduct = delegator.findOne("Product", UtilMisc.toMap("productId", parentProductId), false);
+            } catch (GenericEntityException e) {
+                Debug.logError(e, "Error getting parent product", module);
+            }
+            BigDecimal piecesIncluded = BigDecimal.ZERO;
+            if(parentProduct != null){
+                piecesIncluded = new BigDecimal(parentProduct.getLong("piecesIncluded"));
+                quantity = quantity.multiply(piecesIncluded);
+            }
         }
 
         // Translate the parameters and add to the cart
@@ -552,6 +586,11 @@ public class ShoppingCartEvents {
                 accommodationMapId, accommodationSpotId,
                 shipBeforeDate, shipAfterDate, configWrapper, itemGroupNumber, paramMap, parentProductId);
         controlDirective = processResult(result, request);
+
+        Integer itemId = (Integer)result.get("itemId");
+        if (UtilValidate.isNotEmpty(itemId)) {
+            request.setAttribute("itemId", itemId);
+        }
 
         // Determine where to send the browser
         if (controlDirective.equals(ERROR)) {
@@ -572,11 +611,11 @@ public class ShoppingCartEvents {
         // not used yet: Locale locale = UtilHttp.getLocale(request);
 
         ShoppingCart cart = getCartObject(request);
-        GenericDelegator delegator = (GenericDelegator) request.getAttribute("delegator");
+        Delegator delegator = (Delegator) request.getAttribute("delegator");
         LocalDispatcher dispatcher = (LocalDispatcher) request.getAttribute("dispatcher");
         ShoppingCartHelper cartHelper = new ShoppingCartHelper(delegator, dispatcher, cart);
         String catalogId = CatalogWorker.getCurrentCatalogId(request);
-        Map result;
+        Map<String, Object> result;
         String controlDirective;
 
         boolean addAll = ("true".equals(request.getParameter("add_all")));
@@ -598,15 +637,15 @@ public class ShoppingCartEvents {
     public static String addToCartBulk(HttpServletRequest request, HttpServletResponse response) {
         String categoryId = request.getParameter("category_id");
         ShoppingCart cart = getCartObject(request);
-        GenericDelegator delegator = (GenericDelegator) request.getAttribute("delegator");
+        Delegator delegator = (Delegator) request.getAttribute("delegator");
         LocalDispatcher dispatcher = (LocalDispatcher) request.getAttribute("dispatcher");
         ShoppingCartHelper cartHelper = new ShoppingCartHelper(delegator, dispatcher, cart);
         String controlDirective;
-        Map result;
+        Map<String, Object> result;
         // not used yet: Locale locale = UtilHttp.getLocale(request);
 
         //Convert the params to a map to pass in
-        Map paramMap = UtilHttp.getParameterMap(request);
+        Map<String, Object> paramMap = UtilHttp.getParameterMap(request);
         String catalogId = CatalogWorker.getCurrentCatalogId(request);
         result = cartHelper.addToCartBulk(catalogId, categoryId, paramMap);
         controlDirective = processResult(result, request);
@@ -620,24 +659,53 @@ public class ShoppingCartEvents {
     }
 
     public static String quickInitPurchaseOrder(HttpServletRequest request, HttpServletResponse response) {
-        GenericDelegator delegator = (GenericDelegator) request.getAttribute("delegator");
+        Delegator delegator = (Delegator) request.getAttribute("delegator");
         LocalDispatcher dispatcher = (LocalDispatcher) request.getAttribute("dispatcher");
         HttpSession session = request.getSession();
         Locale locale = UtilHttp.getLocale(request);
-
-        ShoppingCart cart = new WebShoppingCart(request);
+        String supplierPartyId = request.getParameter("supplierPartyId_o_0");
+        
+        // check the preferred currency of the supplier, if set, use that for the cart, otherwise use system defaults.
+        ShoppingCart cart = null;
+        try {
+            GenericValue supplierParty = delegator.findOne("Party", UtilMisc.toMap("partyId", supplierPartyId), false);
+            if (UtilValidate.isNotEmpty(supplierParty.getString("preferredCurrencyUomId"))) {
+                cart = new WebShoppingCart(request, locale, supplierParty.getString("preferredCurrencyUomId"));
+            } else {
+                cart = new WebShoppingCart(request);
+            }
+        } catch (GenericEntityException e) {
+            Debug.logError(e.getMessage(), module);
+        }
+        
         // TODO: the code below here needs some cleanups
         String billToCustomerPartyId = request.getParameter("billToCustomerPartyId_o_0");
-        String supplierPartyId = request.getParameter("supplierPartyId_o_0");
         if (UtilValidate.isEmpty(billToCustomerPartyId) && UtilValidate.isEmpty(supplierPartyId)) {
             request.setAttribute("_ERROR_MESSAGE_", UtilProperties.getMessage(resource_error, "OrderCouldNotInitPurchaseOrder", locale));
             return "error";
         }
+        String orderId = request.getParameter("orderId_o_0");
+        // set the order id if supplied
+        if (UtilValidate.isNotEmpty(orderId)) {
+            GenericValue thisOrder = null;
+            try {
+                thisOrder = delegator.findOne("OrderHeader", UtilMisc.toMap("orderId", orderId), false);
+            } catch (GenericEntityException e) {
+                Debug.logError(e.getMessage(), module);
+            }
+            if (thisOrder == null) {
+                cart.setOrderId(orderId);
+            } else {
+                request.setAttribute("_ERROR_MESSAGE_", UtilProperties.getMessage(resource_error,"OrderIdAlreadyExistsPleaseChooseAnother", locale));
+                return "error";
+            }
+        }
         cart.setBillToCustomerPartyId(billToCustomerPartyId);
         cart.setBillFromVendorPartyId(supplierPartyId);
         cart.setOrderPartyId(supplierPartyId);
+        cart.setOrderId(orderId);
         String agreementId = request.getParameter("agreementId_o_0");
-        if (agreementId != null && agreementId.length() > 0) {
+        if (UtilValidate.isNotEmpty(agreementId)) {
             ShoppingCartHelper sch = new ShoppingCartHelper(delegator, dispatcher, cart);
             sch.selectAgreement(agreementId);
         }
@@ -666,15 +734,15 @@ public class ShoppingCartEvents {
      */
     public static String addToCartBulkRequirements(HttpServletRequest request, HttpServletResponse response) {
         ShoppingCart cart = getCartObject(request);
-        GenericDelegator delegator = (GenericDelegator) request.getAttribute("delegator");
+        Delegator delegator = (Delegator) request.getAttribute("delegator");
         LocalDispatcher dispatcher = (LocalDispatcher) request.getAttribute("dispatcher");
         ShoppingCartHelper cartHelper = new ShoppingCartHelper(delegator, dispatcher, cart);
         String controlDirective;
-        Map result;
+        Map<String, Object> result;
         // not used yet: Locale locale = UtilHttp.getLocale(request);
 
         //Convert the params to a map to pass in
-        Map paramMap = UtilHttp.getParameterMap(request);
+        Map<String, Object> paramMap = UtilHttp.getParameterMap(request);
         String catalogId = CatalogWorker.getCurrentCatalogId(request);
         result = cartHelper.addToCartBulkRequirements(catalogId, paramMap);
         controlDirective = processResult(result, request);
@@ -696,11 +764,11 @@ public class ShoppingCartEvents {
         String categoryId = request.getParameter("category_id");
         String catalogId = CatalogWorker.getCurrentCatalogId(request);
         ShoppingCart cart = getCartObject(request);
-        GenericDelegator delegator = (GenericDelegator) request.getAttribute("delegator");
+        Delegator delegator = (Delegator) request.getAttribute("delegator");
         LocalDispatcher dispatcher = (LocalDispatcher) request.getAttribute("dispatcher");
         ShoppingCartHelper cartHelper = new ShoppingCartHelper(delegator, dispatcher, cart);
         String controlDirective;
-        Map result;
+        Map<String, Object> result;
         BigDecimal totalQuantity;
         Locale locale = UtilHttp.getLocale(request);
 
@@ -712,11 +780,11 @@ public class ShoppingCartEvents {
             return "error";
         } else {
             totalQuantity = (BigDecimal)result.get("totalQuantity");
-            Map messageMap = UtilMisc.toMap("totalQuantity", UtilFormatOut.formatQuantity(totalQuantity.doubleValue()) );
+            Map<String, Object> messageMap = UtilMisc.<String, Object>toMap("totalQuantity", UtilFormatOut.formatQuantity(totalQuantity.doubleValue()));
 
             request.setAttribute("_EVENT_MESSAGE_",
                                   UtilProperties.getMessage(resource_error, "cart.add_category_defaults",
-                                          messageMap, locale ));
+                                          messageMap, locale));
 
             return "success";
         }
@@ -728,8 +796,8 @@ public class ShoppingCartEvents {
         LocalDispatcher dispatcher = (LocalDispatcher) request.getAttribute("dispatcher");
         ShoppingCartHelper cartHelper = new ShoppingCartHelper(null, dispatcher, cart);
         String controlDirective;
-        Map result;
-        Map paramMap = UtilHttp.getParameterMap(request);
+        Map<String, Object> result;
+        Map<String, Object> paramMap = UtilHttp.getParameterMap(request);
         // not used yet: Locale locale = UtilHttp.getLocale(request);
 
         //Delegate the cart helper
@@ -754,10 +822,10 @@ public class ShoppingCartEvents {
         Security security = (Security) request.getAttribute("security");
         ShoppingCartHelper cartHelper = new ShoppingCartHelper(null, dispatcher, cart);
         String controlDirective;
-        Map result;
+        Map<String, Object> result;
         // not used yet: Locale locale = UtilHttp.getLocale(request);
 
-        Map paramMap = UtilHttp.getParameterMap(request);
+        Map<String, Object> paramMap = UtilHttp.getParameterMap(request);
 
         String removeSelectedFlag = request.getParameter("removeSelected");
         String selectedItems[] = request.getParameterValues("selectedItem");
@@ -852,7 +920,7 @@ public class ShoppingCartEvents {
                 Debug.logWarning("Invalid value for cart index =" + cartIndexStr, module);
             }
         }
-        List cartList = (List) session.getAttribute("shoppingCartList");
+        List<ShoppingCart> cartList = UtilGenerics.checkList(session.getAttribute("shoppingCartList"));
         if (UtilValidate.isEmpty(cartList)) {
             cartList = FastList.newInstance();
             session.setAttribute("shoppingCartList", cartList);
@@ -866,7 +934,7 @@ public class ShoppingCartEvents {
         }
         ShoppingCart newCart = null;
         if (cartIndex >= 0 && cartIndex < cartList.size()) {
-            newCart = (ShoppingCart) cartList.remove(cartIndex);
+            newCart = cartList.remove(cartIndex);
         } else {
             String productStoreId = request.getParameter("productStoreId");
             if (UtilValidate.isNotEmpty(productStoreId)) {
@@ -889,7 +957,7 @@ public class ShoppingCartEvents {
                 Debug.logWarning("Invalid value for cart index =" + cartIndexStr, module);
             }
         }
-        List cartList = (List) session.getAttribute("shoppingCartList");
+        List<ShoppingCart> cartList = UtilGenerics.checkList(session.getAttribute("shoppingCartList"));
         if (UtilValidate.isNotEmpty(cartList) && cartIndex >= 0 && cartIndex < cartList.size()) {
             cartList.remove(cartIndex);
         }
@@ -942,7 +1010,7 @@ public class ShoppingCartEvents {
     /** For GWP Promotions with multiple alternatives, selects an alternative to the current GWP */
     public static String setDesiredAlternateGwpProductId(HttpServletRequest request, HttpServletResponse response) {
         ShoppingCart cart = getCartObject(request);
-        GenericDelegator delegator = (GenericDelegator) request.getAttribute("delegator");
+        Delegator delegator = (Delegator) request.getAttribute("delegator");
         LocalDispatcher dispatcher = (LocalDispatcher) request.getAttribute("dispatcher");
         String alternateGwpProductId = request.getParameter("alternateGwpProductId");
         String alternateGwpLineStr = request.getParameter("alternateGwpLine");
@@ -973,9 +1041,9 @@ public class ShoppingCartEvents {
 
         if (cartLine.getIsPromo()) {
             // note that there should just be one promo adjustment, the reversal of the GWP, so use that to get the promo action key
-            Iterator checkOrderAdjustments = UtilMisc.toIterator(cartLine.getAdjustments());
+            Iterator<GenericValue> checkOrderAdjustments = UtilMisc.toIterator(cartLine.getAdjustments());
             while (checkOrderAdjustments != null && checkOrderAdjustments.hasNext()) {
-                GenericValue checkOrderAdjustment = (GenericValue) checkOrderAdjustments.next();
+                GenericValue checkOrderAdjustment = checkOrderAdjustments.next();
                 if (UtilValidate.isNotEmpty(checkOrderAdjustment.getString("productPromoId")) &&
                         UtilValidate.isNotEmpty(checkOrderAdjustment.getString("productPromoRuleId")) &&
                         UtilValidate.isNotEmpty(checkOrderAdjustment.getString("productPromoActionSeqId"))) {
@@ -998,17 +1066,18 @@ public class ShoppingCartEvents {
         ShoppingCart cart = getCartObject(request);
         String partyId = request.getParameter("additionalPartyId");
         String roleTypeId[] = request.getParameterValues("additionalRoleTypeId");
-        List eventList = new LinkedList();
+        List<String> eventList = new LinkedList<String>();
         Locale locale = UtilHttp.getLocale(request);
         int i;
 
-        if (UtilValidate.isEmpty(partyId) || roleTypeId.length < 1) {
+        if (UtilValidate.isEmpty(partyId) || UtilValidate.isEmpty(roleTypeId) || roleTypeId.length < 1) {
             request.setAttribute("_ERROR_MESSAGE_", UtilProperties.getMessage(resource_error,"OrderPartyIdAndOrRoleTypeIdNotDefined", locale));
             return "error";
         }
 
         if (request.getAttribute("_EVENT_MESSAGE_LIST_") != null) {
-            eventList.addAll((List) request.getAttribute("_EVENT_MESSAGE_LIST_"));
+            List<String> msg = UtilGenerics.checkList(request.getAttribute("_EVENT_MESSAGE_LIST_"));
+            eventList.addAll(msg);
         }
 
         for (i = 0; i < roleTypeId.length; i++) {
@@ -1029,7 +1098,7 @@ public class ShoppingCartEvents {
         ShoppingCart cart = getCartObject(request);
         String partyId = request.getParameter("additionalPartyId");
         String roleTypeId[] = request.getParameterValues("additionalRoleTypeId");
-        List eventList = new LinkedList();
+        List<String> eventList = new LinkedList<String>();
         Locale locale = UtilHttp.getLocale(request);
         int i;
 
@@ -1039,7 +1108,8 @@ public class ShoppingCartEvents {
         }
 
         if (request.getAttribute("_EVENT_MESSAGE_LIST_") != null) {
-            eventList.addAll((List) request.getAttribute("_EVENT_MESSAGE_LIST_"));
+            List<String> msg = UtilGenerics.checkList(request.getAttribute("_EVENT_MESSAGE_LIST_"));
+            eventList.addAll(msg);
         }
 
         for (i = 0; i < roleTypeId.length; i++) {
@@ -1069,12 +1139,12 @@ public class ShoppingCartEvents {
      * in
      * @return one of NON_CRITICAL_ERROR, ERROR or NO_ERROR.
      */
-    private static String processResult(Map result, HttpServletRequest request) {
+    private static String processResult(Map<String, Object> result, HttpServletRequest request) {
         //Check for errors
-        StringBuffer errMsg = new StringBuffer();
+        StringBuilder errMsg = new StringBuilder();
         if (result.containsKey(ModelService.ERROR_MESSAGE_LIST)) {
-            List errorMsgs = (List)result.get(ModelService.ERROR_MESSAGE_LIST);
-            Iterator iterator = errorMsgs.iterator();
+            List<String> errorMsgs = UtilGenerics.checkList(result.get(ModelService.ERROR_MESSAGE_LIST));
+            Iterator<String> iterator = errorMsgs.iterator();
             errMsg.append("<ul>");
             while (iterator.hasNext()) {
                 errMsg.append("<li>");
@@ -1102,12 +1172,12 @@ public class ShoppingCartEvents {
 
     /** Assign agreement **/
     public static String selectAgreement(HttpServletRequest request, HttpServletResponse response) {
-        GenericDelegator delegator = (GenericDelegator) request.getAttribute("delegator");
+        Delegator delegator = (Delegator) request.getAttribute("delegator");
         LocalDispatcher dispatcher = (LocalDispatcher) request.getAttribute("dispatcher");
         ShoppingCart cart = getCartObject(request);
         ShoppingCartHelper cartHelper = new ShoppingCartHelper(delegator, dispatcher, cart);
         String agreementId = request.getParameter("agreementId");
-        Map result = cartHelper.selectAgreement(agreementId);
+        Map<String, Object> result = cartHelper.selectAgreement(agreementId);
         if (ServiceUtil.isError(result)) {
            request.setAttribute("_ERROR_MESSAGE_", ServiceUtil.getErrorMessage(result));
            return "error";
@@ -1117,12 +1187,12 @@ public class ShoppingCartEvents {
 
     /** Assign currency **/
     public static String setCurrency(HttpServletRequest request, HttpServletResponse response) {
-        GenericDelegator delegator = (GenericDelegator) request.getAttribute("delegator");
+        Delegator delegator = (Delegator) request.getAttribute("delegator");
         LocalDispatcher dispatcher = (LocalDispatcher) request.getAttribute("dispatcher");
         ShoppingCart cart = getCartObject(request);
         ShoppingCartHelper cartHelper = new ShoppingCartHelper(delegator, dispatcher, cart);
         String currencyUomId = request.getParameter("currencyUomId");
-        Map result = cartHelper.setCurrency(currencyUomId);
+        Map<String, Object> result = cartHelper.setCurrency(currencyUomId);
         if (ServiceUtil.isError(result)) {
            request.setAttribute("_ERROR_MESSAGE_", ServiceUtil.getErrorMessage(result));
            return "error";
@@ -1165,12 +1235,26 @@ public class ShoppingCartEvents {
         String termDaysStr = request.getParameter("termDays");
         String textValue = request.getParameter("textValue");
 
+        GenericValue termType = null;
+        Delegator delegator = (Delegator) request.getAttribute("delegator");
 
         BigDecimal termValue = null;
         Long termDays = null;
 
         if (UtilValidate.isEmpty(termTypeId)) {
             request.setAttribute("_ERROR_MESSAGE_", UtilProperties.getMessage(resource_error, "OrderOrderTermTypeIsRequired", locale));
+            return "error";
+        }
+
+        try {
+            termType = delegator.findOne("TermType", UtilMisc.toMap("termTypeId", termTypeId), false);
+        } catch (GenericEntityException gee) {
+            request.setAttribute("_ERROR_MESSAGE_", gee.getMessage());
+            return "error";
+        }
+
+        if (("FIN_PAYMENT_TERM".equals(termTypeId) && UtilValidate.isEmpty(termDaysStr)) || (UtilValidate.isNotEmpty(termType) && "FIN_PAYMENT_TERM".equals(termType.get("parentTypeId")) && UtilValidate.isEmpty(termDaysStr))) {
+            request.setAttribute("_ERROR_MESSAGE_", UtilProperties.getMessage(resource_error, "OrderOrderTermDaysIsRequired", locale));
             return "error";
         }
 
@@ -1211,7 +1295,7 @@ public class ShoppingCartEvents {
             try {
                 Integer termIndex = Integer.parseInt(termIndexStr);
                 if (termIndex >= 0) {
-                    List orderTerms = cart.getOrderTerms();
+                    List<GenericValue> orderTerms = cart.getOrderTerms();
                     if (orderTerms != null && orderTerms.size() > termIndex) {
                         cart.removeOrderTerm(termIndex);
                     }
@@ -1234,7 +1318,7 @@ public class ShoppingCartEvents {
 
         ShoppingCart cart = null;
         try {
-            Map outMap = dispatcher.runSync("loadCartFromShoppingList",
+            Map<String, Object> outMap = dispatcher.runSync("loadCartFromShoppingList",
                     UtilMisc.<String, Object>toMap("shoppingListId", shoppingListId,
                     "userLogin", userLogin));
             cart = (ShoppingCart)outMap.get("shoppingCart");
@@ -1261,10 +1345,14 @@ public class ShoppingCartEvents {
 
         ShoppingCart cart = null;
         try {
-            Map outMap = dispatcher.runSync("loadCartFromQuote",
+            Map<String, Object> outMap = dispatcher.runSync("loadCartFromQuote",
                     UtilMisc.<String, Object>toMap("quoteId", quoteId,
                             "applyQuoteAdjustments", "true",
                             "userLogin", userLogin));
+            if (!ServiceUtil.isSuccess(outMap)) {
+                request.setAttribute("_ERROR_MESSAGE_", ServiceUtil.getErrorMessage(outMap));
+                return "error";
+            }
             cart = (ShoppingCart) outMap.get("shoppingCart");
         } catch (GenericServiceException exc) {
             request.setAttribute("_ERROR_MESSAGE_", exc.getMessage());
@@ -1289,22 +1377,67 @@ public class ShoppingCartEvents {
         LocalDispatcher dispatcher = (LocalDispatcher) request.getAttribute("dispatcher");
         HttpSession session = request.getSession();
         GenericValue userLogin = (GenericValue)session.getAttribute("userLogin");
+        Delegator delegator = (Delegator) request.getAttribute("delegator");
 
-        String quoteId = request.getParameter("orderId");
+        String orderId = request.getParameter("orderId");
 
         ShoppingCart cart = null;
         try {
             Map<String, Object> outMap = dispatcher.runSync("loadCartFromOrder",
-                                                UtilMisc.<String, Object>toMap("orderId", quoteId,
+                                                UtilMisc.<String, Object>toMap("orderId", orderId,
                                                         "skipProductChecks", Boolean.TRUE, // the products have already been checked in the order, no need to check their validity again
                                                         "userLogin", userLogin));
-            if (ServiceUtil.isError(outMap) || ServiceUtil.isFailure(outMap)) {
+            if (!ServiceUtil.isSuccess(outMap)) {
                 request.setAttribute("_ERROR_MESSAGE_", ServiceUtil.getErrorMessage(outMap));
                 return "error";
              }
 
             cart = (ShoppingCart) outMap.get("shoppingCart");
-            
+
+            cart.removeAdjustmentByType("SALES_TAX");
+            cart.removeAdjustmentByType("VAT_TAX");
+            cart.removeAdjustmentByType("VAT_PRICE_CORRECT");
+            cart.removeAdjustmentByType("PROMOTION_ADJUSTMENT");
+            String shipGroupSeqId = null;
+            long groupIndex = cart.getShipInfoSize();
+            List<GenericValue> orderAdjustmentList = new ArrayList<GenericValue>();
+            List<GenericValue> orderAdjustments = new ArrayList<GenericValue>();
+            orderAdjustments = cart.getAdjustments();
+            try {
+                orderAdjustmentList = delegator.findList("OrderAdjustment", EntityCondition.makeCondition("orderId", EntityOperator.EQUALS, orderId), null, null, null, false);
+            } catch (Exception e) {
+                Debug.logError(e, module);
+            }
+            for (long itr = 1; itr <= groupIndex; itr++) {
+                shipGroupSeqId = UtilFormatOut.formatPaddedNumber(itr, 5);
+                List<GenericValue> duplicateAdjustmentList = new ArrayList<GenericValue>();
+                for (GenericValue adjustment: orderAdjustmentList) {
+                    if ("PROMOTION_ADJUSTMENT".equals(adjustment.get("orderAdjustmentTypeId"))) {
+                        cart.addAdjustment(adjustment);
+                    }
+                    if ("SALES_TAX".equals(adjustment.get("orderAdjustmentTypeId"))) {
+                        if (adjustment.get("description") != null
+                                    && ((String)adjustment.get("description")).startsWith("Tax adjustment due")) {
+                                cart.addAdjustment(adjustment);
+                            }
+                        if ( adjustment.get("comments") != null
+                                && ((String)adjustment.get("comments")).startsWith("Added manually by")) {
+                            cart.addAdjustment(adjustment);
+                        }
+                    }
+                }
+                for (GenericValue orderAdjustment: orderAdjustments) {
+                    if ("OrderAdjustment".equals(orderAdjustment.getEntityName())) {
+                        if (("SHIPPING_CHARGES".equals(orderAdjustment.get("orderAdjustmentTypeId"))) &&
+                                orderAdjustment.get("orderId").equals(orderId) &&
+                                orderAdjustment.get("shipGroupSeqId").equals(shipGroupSeqId) && orderAdjustment.get("comments") == null) {
+                            // Removing objects from list for old Shipping and Handling Charges Adjustment and Sales Tax Adjustment.
+                            duplicateAdjustmentList.add(orderAdjustment);
+                        }
+                    }
+                }
+                orderAdjustments.removeAll(duplicateAdjustmentList);
+            }
         } catch (GenericServiceException exc) {
             request.setAttribute("_ERROR_MESSAGE_", exc.getMessage());
             return "error";
@@ -1315,9 +1448,9 @@ public class ShoppingCartEvents {
         session.setAttribute("productStoreId", cart.getProductStoreId());
         session.setAttribute("orderMode", cart.getOrderType());
         session.setAttribute("orderPartyId", cart.getOrderPartyId());
-        
+
         // Since we only need the cart items, so set the order id as null
-        cart.setOrderId(null); 
+        cart.setOrderId(null);
         return "success";
     }
 
@@ -1328,7 +1461,7 @@ public class ShoppingCartEvents {
         String destroyCart = request.getParameter("destroyCart");
 
         ShoppingCart cart = getCartObject(request);
-        Map result = null;
+        Map<String, Object> result = null;
         String quoteId = null;
         try {
             result = dispatcher.runSync("createQuoteFromCart",
@@ -1358,7 +1491,7 @@ public class ShoppingCartEvents {
         String destroyCart = request.getParameter("destroyCart");
 
         ShoppingCart cart = getCartObject(request);
-        Map result = null;
+        Map<String, Object> result = null;
         String custRequestId = null;
         try {
             result = dispatcher.runSync("createCustRequestFromCart",
@@ -1383,7 +1516,7 @@ public class ShoppingCartEvents {
 
     /** Initialize order entry **/
     public static String initializeOrderEntry(HttpServletRequest request, HttpServletResponse response) {
-        GenericDelegator delegator = (GenericDelegator) request.getAttribute("delegator");
+        Delegator delegator = (Delegator) request.getAttribute("delegator");
         HttpSession session = request.getSession();
         Security security = (Security) request.getAttribute("security");
         GenericValue userLogin = (GenericValue)session.getAttribute("userLogin");
@@ -1421,10 +1554,10 @@ public class ShoppingCartEvents {
                         hasPermission = true;
                     } else {
                         // if the user is a rep of the store, then he also has permission
-                        List storeReps = null;
+                        List<GenericValue> storeReps = null;
                         try {
                             storeReps = delegator.findByAnd("ProductStoreRole", UtilMisc.toMap("productStoreId", productStore.getString("productStoreId"),
-                                                            "partyId", userLogin.getString("partyId"), "roleTypeId", "SALES_REP"));
+                                                            "partyId", userLogin.getString("partyId"), "roleTypeId", "SALES_REP"), null, false);
                         } catch (GenericEntityException gee) {
                             //
                         }
@@ -1464,16 +1597,18 @@ public class ShoppingCartEvents {
         // set party info
         String partyId = request.getParameter("supplierPartyId");
         cart.setAttribute("supplierPartyId", partyId);
+        String originOrderId = request.getParameter("originOrderId");
+        cart.setAttribute("originOrderId", originOrderId);
 
         if (!UtilValidate.isEmpty(request.getParameter("partyId"))) {
             partyId = request.getParameter("partyId");
         }
         String userLoginId = request.getParameter("userLoginId");
         if (partyId != null || userLoginId != null) {
-            if ((partyId == null || partyId.length() == 0) && userLoginId != null && userLoginId.length() > 0) {
+            if (UtilValidate.isEmpty(partyId) && UtilValidate.isNotEmpty(userLoginId)) {
                 GenericValue thisUserLogin = null;
                 try {
-                    thisUserLogin = delegator.findByPrimaryKey("UserLogin", UtilMisc.toMap("userLoginId", userLoginId));
+                    thisUserLogin = delegator.findOne("UserLogin", UtilMisc.toMap("userLoginId", userLoginId), false);
                 } catch (GenericEntityException gee) {
                     //
                 }
@@ -1483,10 +1618,10 @@ public class ShoppingCartEvents {
                     partyId = userLoginId;
                 }
             }
-            if (partyId != null && partyId.length() > 0) {
+            if (UtilValidate.isNotEmpty(partyId)) {
                 GenericValue thisParty = null;
                 try {
-                    thisParty = delegator.findByPrimaryKey("Party", UtilMisc.toMap("partyId", partyId));
+                    thisParty = delegator.findOne("Party", UtilMisc.toMap("partyId", partyId), false);
                 } catch (GenericEntityException gee) {
                     //
                 }
@@ -1531,18 +1666,18 @@ public class ShoppingCartEvents {
 
     public static String doManualPromotions(HttpServletRequest request, HttpServletResponse response) {
         LocalDispatcher dispatcher = (LocalDispatcher) request.getAttribute("dispatcher");
-        GenericDelegator delegator = (GenericDelegator) request.getAttribute("delegator");
+        Delegator delegator = (Delegator) request.getAttribute("delegator");
         ShoppingCart cart = getCartObject(request);
-        List manualPromotions = new LinkedList();
+        List<GenericValue> manualPromotions = new LinkedList<GenericValue>();
 
         // iterate through the context and find all keys that start with "productPromoId_"
-        Map context = UtilHttp.getParameterMap(request);
+        Map<String, Object> context = UtilHttp.getParameterMap(request);
         String keyPrefix = "productPromoId_";
         for (int i = 1; i <= 50; i++) {
             String productPromoId = (String)context.get(keyPrefix + i);
             if (UtilValidate.isNotEmpty(productPromoId)) {
                 try {
-                    GenericValue promo = delegator.findByPrimaryKey("ProductPromo", UtilMisc.toMap("productPromoId", productPromoId));
+                    GenericValue promo = delegator.findOne("ProductPromo", UtilMisc.toMap("productPromoId", productPromoId), false);
                     if (promo != null) {
                         manualPromotions.add(promo);
                     }
@@ -1560,12 +1695,12 @@ public class ShoppingCartEvents {
 
 
     public static String bulkAddProducts(HttpServletRequest request, HttpServletResponse response) {
-        GenericDelegator delegator = (GenericDelegator) request.getAttribute("delegator");
+        Delegator delegator = (Delegator) request.getAttribute("delegator");
         LocalDispatcher dispatcher = (LocalDispatcher) request.getAttribute("dispatcher");
         ShoppingCart cart = ShoppingCartEvents.getCartObject(request);
         ShoppingCartHelper cartHelper = new ShoppingCartHelper(delegator, dispatcher, cart);
         String controlDirective = null;
-        Map result = null;
+        Map<String, Object> result = null;
         String productId = null;
         String productCategoryId = null;
         String quantityStr = null;
@@ -1576,7 +1711,7 @@ public class ShoppingCartEvents {
         String itemDescription = "";
 
         // Get the parameters as a MAP, remove the productId and quantity params.
-        Map paramMap = UtilHttp.getParameterMap(request);
+        Map<String, Object> paramMap = UtilHttp.getParameterMap(request);
 
         String itemGroupNumber = request.getParameter("itemGroupNumber");
 
@@ -1614,20 +1749,22 @@ public class ShoppingCartEvents {
                 }
 
                 // get the selected amount
-                String selectedAmountStr = "0.00";
+                String selectedAmountStr = null;
                 if (paramMap.containsKey("amount" + thisSuffix)) {
                     selectedAmountStr = (String) paramMap.remove("amount" + thisSuffix);
                 }
 
                 // parse the amount
                 BigDecimal amount = null;
-                if (selectedAmountStr != null && selectedAmountStr.length() > 0) {
+                if (UtilValidate.isNotEmpty(selectedAmountStr)) {
                     try {
                         amount = new BigDecimal(selectedAmountStr);
                     } catch (Exception e) {
                         Debug.logWarning(e, "Problem parsing amount string: " + selectedAmountStr, module);
                         amount = null;
                     }
+                } else {
+                    amount = BigDecimal.ZERO;
                 }
 
                 if (paramMap.containsKey("itemDesiredDeliveryDate" + thisSuffix)) {
@@ -1642,7 +1779,7 @@ public class ShoppingCartEvents {
                     itemDescription = (String) paramMap.remove("itemDescription" + thisSuffix);
                 }
 
-                Map itemAttributes = UtilMisc.toMap("itemDesiredDeliveryDate", itemDesiredDeliveryDateStr);
+                Map<String, Object> itemAttributes = UtilMisc.<String, Object>toMap("itemDesiredDeliveryDate", itemDesiredDeliveryDateStr);
 
                 if (quantity.compareTo(BigDecimal.ZERO) > 0) {
                     Debug.logInfo("Attempting to add to cart with productId = " + productId + ", categoryId = " + productCategoryId +
@@ -1667,7 +1804,7 @@ public class ShoppingCartEvents {
     // request method for setting the currency, agreement, OrderId and shipment dates at once
     public static String setOrderCurrencyAgreementShipDates(HttpServletRequest request, HttpServletResponse response) {
         LocalDispatcher dispatcher = (LocalDispatcher) request.getAttribute("dispatcher");
-        GenericDelegator delegator = (GenericDelegator) request.getAttribute("delegator");
+        Delegator delegator = (Delegator) request.getAttribute("delegator");
         ShoppingCart cart = getCartObject(request);
         ShoppingCartHelper cartHelper = new ShoppingCartHelper(delegator, dispatcher, cart);
 
@@ -1681,7 +1818,7 @@ public class ShoppingCartEvents {
         String orderName = request.getParameter("orderName");
         String correspondingPoId = request.getParameter("correspondingPoId");
         Locale locale = UtilHttp.getLocale(request);
-        Map result = null;
+        Map<String, Object> result = null;
 
         // set the agreement if specified otherwise set the currency
         if (UtilValidate.isNotEmpty(agreementId)) {
@@ -1742,7 +1879,7 @@ public class ShoppingCartEvents {
 
     public static String getConfigDetailsEvent(HttpServletRequest request, HttpServletResponse response) {
 
-        GenericDelegator delegator = (GenericDelegator) request.getAttribute("delegator");
+        Delegator delegator = (Delegator) request.getAttribute("delegator");
         String productId = request.getParameter("product_id");
         String currencyUomId = ShoppingCartEvents.getCartObject(request).getCurrency();
         ProductConfigWrapper configWrapper = ProductConfigWorker.getProductConfigWrapper(productId, currencyUomId, request);
@@ -1762,7 +1899,6 @@ public class ShoppingCartEvents {
     }
 
     public static String bulkAddProductsInApprovedOrder(HttpServletRequest request, HttpServletResponse response) {
-        GenericDelegator delegator = (GenericDelegator) request.getAttribute("delegator");
         LocalDispatcher dispatcher = (LocalDispatcher) request.getAttribute("dispatcher");
         Locale locale = UtilHttp.getLocale(request);
         String productId = null;
@@ -1775,8 +1911,9 @@ public class ShoppingCartEvents {
         String orderId = null;
         String shipGroupSeqId = null;
 
-        Map paramMap = UtilHttp.getParameterMap(request);
-        String itemGroupNumber = request.getParameter("itemGroupNumber");
+        Map<String, Object> paramMap = UtilHttp.getParameterMap(request);
+        //FIXME can be removed ?
+        // String itemGroupNumber = request.getParameter("itemGroupNumber");
         int rowCount = UtilHttp.getMultiFormRowCount(paramMap);
         if (rowCount < 1) {
             Debug.logWarning("No rows to process, as rowCount = " + rowCount, module);
@@ -1798,18 +1935,20 @@ public class ShoppingCartEvents {
                     Debug.logWarning(e, "Problems parsing quantity string: " + quantityStr, module);
                     quantity = BigDecimal.ZERO;
                 }
-                String selectedAmountStr = "0.00";
+                String selectedAmountStr = null;
                 if (paramMap.containsKey("amount" + thisSuffix)) {
                     selectedAmountStr = (String) paramMap.remove("amount" + thisSuffix);
                 }
                 BigDecimal amount = null;
-                if (selectedAmountStr != null && selectedAmountStr.length() > 0) {
+                if (UtilValidate.isNotEmpty(selectedAmountStr)) {
                     try {
                         amount = new BigDecimal(selectedAmountStr);
                     } catch (Exception e) {
                         Debug.logWarning(e, "Problem parsing amount string: " + selectedAmountStr, module);
                         amount = null;
                     }
+                } else {
+                    amount = BigDecimal.ZERO;
                 }
                 if (paramMap.containsKey("itemDesiredDeliveryDate" + thisSuffix)) {
                     itemDesiredDeliveryDateStr = (String) paramMap.remove("itemDesiredDeliveryDate" + thisSuffix);
@@ -1841,7 +1980,7 @@ public class ShoppingCartEvents {
                             ", quantity = " + quantity + ", itemType = " + itemType + " and itemDescription = " + itemDescription, module);
                     HttpSession session = request.getSession();
                     GenericValue userLogin = (GenericValue) session.getAttribute("userLogin");
-                    Map appendOrderItemMap = FastMap.newInstance();
+                    Map<String, Object> appendOrderItemMap = FastMap.newInstance();
                     appendOrderItemMap.put("productId", productId);
                     appendOrderItemMap.put("quantity", quantity);
                     appendOrderItemMap.put("orderId", orderId);
@@ -1850,8 +1989,8 @@ public class ShoppingCartEvents {
                     appendOrderItemMap.put("itemDesiredDeliveryDate", itemDesiredDeliveryDate);
                     appendOrderItemMap.put("shipGroupSeqId", shipGroupSeqId);
                     try {
-                        Map result = dispatcher.runSync("appendOrderItem", appendOrderItemMap);
-                        request.setAttribute("shoppingCart", (ShoppingCart) result.get("shoppingCart"));
+                        Map<String, Object> result = dispatcher.runSync("appendOrderItem", appendOrderItemMap);
+                        request.setAttribute("shoppingCart", result.get("shoppingCart"));
                         ShoppingCartEvents.destroyCart(request, response);
                     } catch (GenericServiceException e) {
                         Debug.logError(e, "Failed to execute service appendOrderItem", module);

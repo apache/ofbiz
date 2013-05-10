@@ -46,21 +46,21 @@ by hand from a real template using a ruler.
       </#if>
 
       <#list payments as payment>
-      <#assign paymentApplications = payment.getRelated("PaymentApplication")>
+      <#assign paymentApplications = payment.getRelated("PaymentApplication", null, null, false)>
       <fo:block font-size="10pt" break-before="page"> <#-- this produces a page break if this block cannot fit on the current page -->
 
         <#-- the check: note that the format is fairly precise -->
 
         <#-- this seems to be the only way to force a fixed height in fop -->
-        <fo:table table-layout="fixed">
+        <fo:table table-layout="fixed" width="100%">
           <fo:table-column column-width="100%"/>
           <fo:table-body>
           <fo:table-row height="8.85cm">
           <fo:table-cell>
 
-        <fo:table table-layout="fixed">
+        <fo:table table-layout="fixed" width="100%">
           <fo:table-column column-width="17.7cm"/>
-          <fo:table-column/>
+          <fo:table-column column-width="3cm"/>
           <fo:table-body>
             <fo:table-row>
               <fo:table-cell/>
@@ -96,20 +96,20 @@ by hand from a real template using a ruler.
         <#-- payment applications (twice: both blocks are exactly the same) -->
 
         <#-- this seems to be the only way to force a fixed height in fop -->
-        <fo:table table-layout="fixed">
+        <fo:table table-layout="fixed" width="100%">
           <fo:table-column column-width="100%"/>
           <fo:table-body>
           <fo:table-row height="9.3cm">
           <fo:table-cell>
 
-        <fo:table height="9.3cm" table-layout="fixed" margin-left="5pt" margin-right="5pt">
-          <fo:table-column/>
-          <fo:table-column/>
-          <fo:table-column/>
-          <fo:table-column/>
-          <fo:table-column/>
-          <fo:table-column/>
-          <fo:table-column/>
+        <fo:table table-layout="fixed" margin-left="5pt" margin-right="5pt" width="100%">
+          <fo:table-column column-width="3cm"/>
+          <fo:table-column column-width="3cm"/>
+          <fo:table-column column-width="3cm"/>
+          <fo:table-column column-width="3cm"/>
+          <fo:table-column column-width="3cm"/>
+          <fo:table-column column-width="3cm"/>
+          <fo:table-column column-width="3cm"/>
           <fo:table-header>
             <fo:table-row>
               <fo:table-cell padding="3pt" number-columns-spanned="3" text-align="center">
@@ -149,7 +149,7 @@ by hand from a real template using a ruler.
           <fo:table-body>
 
             <#list paymentApplications as paymentApplication>
-            <#assign invoice = paymentApplication.getRelatedOne("Invoice")?if_exists>
+            <#assign invoice = paymentApplication.getRelatedOne("Invoice", false)?if_exists>
             <fo:table-row>
               <fo:table-cell padding="3pt">
                 <fo:block>${payment.effectiveDate?date?string.short}</fo:block>
@@ -171,31 +171,31 @@ by hand from a real template using a ruler.
               </fo:table-cell>
             </fo:table-row>
             <#if invoice.invoiceTypeId?if_exists == "PAYROL_INVOICE">
-              <#assign InvoiceItems = invoice.getRelated("InvoiceItem")?if_exists>
+              <#assign InvoiceItems = invoice.getRelated("InvoiceItem", null, null, false)?if_exists>
               <#assign PayrolGroups = PayrolGroup?if_exists>
               <#list PayrolGroups as payrolGroup>
-              	<#assign fontSize = "75%">
-              	<#assign lineStyle = "dashed">
+                  <#assign fontSize = "75%">
+                  <#assign lineStyle = "dashed">
 
-              	<#assign sumQuantity = 0>
-              	<#assign sumAmount = 0>
-              	<#assign sumSubTotal = 0>
-              	<#list InvoiceItems as invoiceItem>
-              		<#assign invoiceItemType = invoiceItem.getRelatedOne("InvoiceItemType")?if_exists>
-              		<#assign quantity = 0>
-              		<#assign amount = 0>
-              		<#assign subTotal = 0>
-              		<#if invoiceItemType.parentTypeId == payrolGroup.invoiceItemTypeId>
-              		<#if invoiceItem.quantity?has_content><#assign quantity = invoiceItem.quantity?if_exists><#else><#assign quantity = 0></#if>
-              		<#if invoiceItem.amount?has_content><#assign amount = invoiceItem.amount?if_exists><#else><#assign amount = 0></#if>
-              		<#if amount != 0 && quantity == 0 ><#assign quantity = 1></#if>
-              			<#assign subTotal = quantity * amount>
-              			<#assign sumQuantity = sumQuantity + quantity>
-              			<#assign sumAmount = sumAmount + amount>
-              			<#assign sumSubTotal = sumSubTotal + subTotal>
-              		</#if>
-              	</#list>
-              	<#if sumSubTotal != 0>
+                  <#assign sumQuantity = 0>
+                  <#assign sumAmount = 0>
+                  <#assign sumSubTotal = 0>
+                  <#list InvoiceItems as invoiceItem>
+                      <#assign invoiceItemType = invoiceItem.getRelatedOne("InvoiceItemType", false)?if_exists>
+                      <#assign quantity = 0>
+                      <#assign amount = 0>
+                      <#assign subTotal = 0>
+                      <#if invoiceItemType.parentTypeId == payrolGroup.invoiceItemTypeId>
+                      <#if invoiceItem.quantity?has_content><#assign quantity = invoiceItem.quantity?if_exists><#else><#assign quantity = 0></#if>
+                      <#if invoiceItem.amount?has_content><#assign amount = invoiceItem.amount?if_exists><#else><#assign amount = 0></#if>
+                      <#if amount != 0 && quantity == 0 ><#assign quantity = 1></#if>
+                          <#assign subTotal = quantity * amount>
+                          <#assign sumQuantity = sumQuantity + quantity>
+                          <#assign sumAmount = sumAmount + amount>
+                          <#assign sumSubTotal = sumSubTotal + subTotal>
+                      </#if>
+                  </#list>
+                  <#if sumSubTotal != 0>
               <fo:table-row font-size="${fontSize}">
               <fo:table-cell padding="3pt"><fo:block/></fo:table-cell>
               <fo:table-cell padding="3pt" number-columns-spanned="3" border-bottom-style="${lineStyle}">
@@ -208,25 +208,25 @@ by hand from a real template using a ruler.
               <fo:block font-weight="bold" text-align="center">Amount</fo:block>
               </fo:table-cell>
               <fo:table-cell padding="3pt" border-bottom-style="${lineStyle}" >
-			  <fo:block font-weight="bold" text-align="center">Sum</fo:block>
-			  </fo:table-cell>
+              <fo:block font-weight="bold" text-align="center">Sum</fo:block>
+              </fo:table-cell>
               </fo:table-row>
                 </#if>
 
                 <#assign sumQuantity = 0>
                 <#assign sumAmount = 0>
-              	<#assign sumSubTotal = 0>
-              	<#list InvoiceItems as invoiceItem>
-              		<#assign invoiceItemType = invoiceItem.getRelatedOne("InvoiceItemType")?if_exists>
-              		<#assign subTotal = 0>
-              		<#if invoiceItemType.parentTypeId == payrolGroup.invoiceItemTypeId>
-              		<#if invoiceItem.quantity?has_content><#assign quantity = invoiceItem.quantity?if_exists><#else><#assign quantity = 0></#if>
-              		<#if invoiceItem.amount?has_content><#assign amount = invoiceItem.amount?if_exists><#else><#assign amount = 0></#if>
-              		<#if amount != 0 && quantity == 0 ><#assign quantity = 1></#if>
-              		<#assign subTotal = quantity * amount>
-              		<#assign sumQuantity = sumQuantity + quantity>
-              		<#assign sumAmount = sumAmount + amount>
-              		<#assign sumSubTotal = sumSubTotal + subTotal>
+                  <#assign sumSubTotal = 0>
+                  <#list InvoiceItems as invoiceItem>
+                      <#assign invoiceItemType = invoiceItem.getRelatedOne("InvoiceItemType", false)?if_exists>
+                      <#assign subTotal = 0>
+                      <#if invoiceItemType.parentTypeId == payrolGroup.invoiceItemTypeId>
+                      <#if invoiceItem.quantity?has_content><#assign quantity = invoiceItem.quantity?if_exists><#else><#assign quantity = 0></#if>
+                      <#if invoiceItem.amount?has_content><#assign amount = invoiceItem.amount?if_exists><#else><#assign amount = 0></#if>
+                      <#if amount != 0 && quantity == 0 ><#assign quantity = 1></#if>
+                      <#assign subTotal = quantity * amount>
+                      <#assign sumQuantity = sumQuantity + quantity>
+                      <#assign sumAmount = sumAmount + amount>
+                      <#assign sumSubTotal = sumSubTotal + subTotal>
               <fo:table-row font-size="${fontSize}">
               <fo:table-cell padding="3pt"><fo:block/></fo:table-cell>
               <fo:table-cell padding="3pt" number-columns-spanned="3"><fo:block>${invoiceItemType.description?if_exists}</fo:block></fo:table-cell>
@@ -234,26 +234,26 @@ by hand from a real template using a ruler.
               <fo:table-cell padding="3pt"><fo:block text-align="center">${amount?if_exists}</fo:block></fo:table-cell>
               <fo:table-cell padding="3pt"><fo:block text-align="center">${subTotal?if_exists}</fo:block></fo:table-cell>
               </fo:table-row>
-              		</#if>
-              	</#list>
+                      </#if>
+                  </#list>
 
-              	<#assign sumQuantity = 0>
+                  <#assign sumQuantity = 0>
                 <#assign sumAmount = 0>
-              	<#assign sumSubTotal = 0>
-              	<#list InvoiceItems as invoiceItem>
-              		<#assign invoiceItemType = invoiceItem.getRelatedOne("InvoiceItemType")?if_exists>
-              		<#assign subTotal = 0>
-              		<#if invoiceItemType.parentTypeId == payrolGroup.invoiceItemTypeId>
-              		<#if invoiceItem.quantity?has_content><#assign quantity = invoiceItem.quantity?if_exists><#else><#assign quantity = 0></#if>
-              		<#if invoiceItem.amount?has_content><#assign amount = invoiceItem.amount?if_exists><#else><#assign amount = 0></#if>
-              		<#if amount != 0 && quantity == 0><#assign quantity = 1></#if>
-              			<#assign subTotal = quantity * amount>
-              			<#assign sumQuantity = sumQuantity + quantity>
-              			<#assign sumAmount = sumAmount + amount>
-              			<#assign sumSubTotal = sumSubTotal + subTotal>
-              		</#if>
-              	</#list>
-              	<#if sumSubTotal != 0>
+                  <#assign sumSubTotal = 0>
+                  <#list InvoiceItems as invoiceItem>
+                      <#assign invoiceItemType = invoiceItem.getRelatedOne("InvoiceItemType", false)?if_exists>
+                      <#assign subTotal = 0>
+                      <#if invoiceItemType.parentTypeId == payrolGroup.invoiceItemTypeId>
+                      <#if invoiceItem.quantity?has_content><#assign quantity = invoiceItem.quantity?if_exists><#else><#assign quantity = 0></#if>
+                      <#if invoiceItem.amount?has_content><#assign amount = invoiceItem.amount?if_exists><#else><#assign amount = 0></#if>
+                      <#if amount != 0 && quantity == 0><#assign quantity = 1></#if>
+                          <#assign subTotal = quantity * amount>
+                          <#assign sumQuantity = sumQuantity + quantity>
+                          <#assign sumAmount = sumAmount + amount>
+                          <#assign sumSubTotal = sumSubTotal + subTotal>
+                      </#if>
+                  </#list>
+                  <#if sumSubTotal != 0>
               <fo:table-row font-size="${fontSize}">
               <fo:table-cell padding="3pt"><fo:block/></fo:table-cell>
               <fo:table-cell padding="3pt" number-columns-spanned="3" border-top-style="${lineStyle}"><fo:block/></fo:table-cell>
@@ -264,7 +264,7 @@ by hand from a real template using a ruler.
               <fo:table-row font-size="${fontSize}">
               <fo:table-cell padding="3pt"><fo:block/></fo:table-cell>
               </fo:table-row>
-              	</#if>
+                  </#if>
 
               </#list>
               <fo:table-row font-size="${fontSize}">
@@ -295,20 +295,20 @@ by hand from a real template using a ruler.
         <#-- copy of above -->
 
         <#-- this seems to be the only way to force a fixed height in fop -->
-        <fo:table table-layout="fixed">
+        <fo:table table-layout="fixed" width="100%">
           <fo:table-column column-width="100%"/>
           <fo:table-body>
           <fo:table-row height="9.3cm">
           <fo:table-cell>
 
-        <fo:table height="9.3cm" table-layout="fixed" margin-left="5pt" margin-right="5pt">
-          <fo:table-column/>
-          <fo:table-column/>
-          <fo:table-column/>
-          <fo:table-column/>
-          <fo:table-column/>
-          <fo:table-column/>
-          <fo:table-column/>
+        <fo:table table-layout="fixed" margin-left="5pt" margin-right="5pt" width="100%">
+          <fo:table-column column-width="3cm"/>
+          <fo:table-column column-width="3cm"/>
+          <fo:table-column column-width="3cm"/>
+          <fo:table-column column-width="3cm"/>
+          <fo:table-column column-width="3cm"/>
+          <fo:table-column column-width="3cm"/>
+          <fo:table-column column-width="3cm"/>
           <fo:table-header>
             <fo:table-row>
               <fo:table-cell padding="3pt" number-columns-spanned="3" text-align="center">
@@ -345,7 +345,7 @@ by hand from a real template using a ruler.
           <fo:table-body>
 
             <#list paymentApplications as paymentApplication>
-            <#assign invoice = paymentApplication.getRelatedOne("Invoice")?if_exists>
+            <#assign invoice = paymentApplication.getRelatedOne("Invoice", false)?if_exists>
             <fo:table-row>
               <fo:table-cell padding="3pt">
                 <fo:block>${payment.effectiveDate?date?string.short}</fo:block>
@@ -367,31 +367,31 @@ by hand from a real template using a ruler.
               </fo:table-cell>
             </fo:table-row>
             <#if invoice.invoiceTypeId?if_exists == "PAYROL_INVOICE">
-              <#assign InvoiceItems = invoice.getRelated("InvoiceItem")?if_exists>
+              <#assign InvoiceItems = invoice.getRelated("InvoiceItem", null, null, false)?if_exists>
               <#assign PayrolGroups = PayrolGroup?if_exists>
               <#list PayrolGroups as payrolGroup>
-              	<#assign fontSize = "75%">
-              	<#assign lineStyle = "dashed">
+                  <#assign fontSize = "75%">
+                  <#assign lineStyle = "dashed">
 
-              	<#assign sumQuantity = 0>
-              	<#assign sumAmount = 0>
-              	<#assign sumSubTotal = 0>
-              	<#list InvoiceItems as invoiceItem>
-              		<#assign invoiceItemType = invoiceItem.getRelatedOne("InvoiceItemType")?if_exists>
-              		<#assign quantity = 0>
-              		<#assign amount = 0>
-              		<#assign subTotal = 0>
-              		<#if invoiceItemType.parentTypeId == payrolGroup.invoiceItemTypeId>
-              		<#if invoiceItem.quantity?has_content><#assign quantity = invoiceItem.quantity?if_exists><#else><#assign quantity = 0></#if>
-              		<#if invoiceItem.amount?has_content><#assign amount = invoiceItem.amount?if_exists><#else><#assign amount = 0></#if>
-              		<#if amount != 0 && quantity == 0 ><#assign quantity = 1></#if>
-              			<#assign subTotal = quantity * amount>
-              			<#assign sumQuantity = sumQuantity + quantity>
-              			<#assign sumAmount = sumAmount + amount>
-              			<#assign sumSubTotal = sumSubTotal + subTotal>
-              		</#if>
-              	</#list>
-              	<#if sumSubTotal != 0>
+                  <#assign sumQuantity = 0>
+                  <#assign sumAmount = 0>
+                  <#assign sumSubTotal = 0>
+                  <#list InvoiceItems as invoiceItem>
+                      <#assign invoiceItemType = invoiceItem.getRelatedOne("InvoiceItemType", false)?if_exists>
+                      <#assign quantity = 0>
+                      <#assign amount = 0>
+                      <#assign subTotal = 0>
+                      <#if invoiceItemType.parentTypeId == payrolGroup.invoiceItemTypeId>
+                      <#if invoiceItem.quantity?has_content><#assign quantity = invoiceItem.quantity?if_exists><#else><#assign quantity = 0></#if>
+                      <#if invoiceItem.amount?has_content><#assign amount = invoiceItem.amount?if_exists><#else><#assign amount = 0></#if>
+                      <#if amount != 0 && quantity == 0 ><#assign quantity = 1></#if>
+                          <#assign subTotal = quantity * amount>
+                          <#assign sumQuantity = sumQuantity + quantity>
+                          <#assign sumAmount = sumAmount + amount>
+                          <#assign sumSubTotal = sumSubTotal + subTotal>
+                      </#if>
+                  </#list>
+                  <#if sumSubTotal != 0>
               <fo:table-row font-size="${fontSize}">
               <fo:table-cell padding="3pt"><fo:block/></fo:table-cell>
               <fo:table-cell padding="3pt" number-columns-spanned="3" border-bottom-style="${lineStyle}">
@@ -404,25 +404,25 @@ by hand from a real template using a ruler.
               <fo:block font-weight="bold" text-align="center">Amount</fo:block>
               </fo:table-cell>
               <fo:table-cell padding="3pt" border-bottom-style="${lineStyle}" >
-			  <fo:block font-weight="bold" text-align="center">Sum</fo:block>
-			  </fo:table-cell>
+              <fo:block font-weight="bold" text-align="center">Sum</fo:block>
+              </fo:table-cell>
               </fo:table-row>
                 </#if>
 
                 <#assign sumQuantity = 0>
                 <#assign sumAmount = 0>
-              	<#assign sumSubTotal = 0>
-              	<#list InvoiceItems as invoiceItem>
-              		<#assign invoiceItemType = invoiceItem.getRelatedOne("InvoiceItemType")?if_exists>
-              		<#assign subTotal = 0>
-              		<#if invoiceItemType.parentTypeId == payrolGroup.invoiceItemTypeId>
-              		<#if invoiceItem.quantity?has_content><#assign quantity = invoiceItem.quantity?if_exists><#else><#assign quantity = 0></#if>
-              		<#if invoiceItem.amount?has_content><#assign amount = invoiceItem.amount?if_exists><#else><#assign amount = 0></#if>
-              		<#if amount != 0 && quantity == 0 ><#assign quantity = 1></#if>
-              		<#assign subTotal = quantity * amount>
-              		<#assign sumQuantity = sumQuantity + quantity>
-              		<#assign sumAmount = sumAmount + amount>
-              		<#assign sumSubTotal = sumSubTotal + subTotal>
+                  <#assign sumSubTotal = 0>
+                  <#list InvoiceItems as invoiceItem>
+                      <#assign invoiceItemType = invoiceItem.getRelatedOne("InvoiceItemType", false)?if_exists>
+                      <#assign subTotal = 0>
+                      <#if invoiceItemType.parentTypeId == payrolGroup.invoiceItemTypeId>
+                      <#if invoiceItem.quantity?has_content><#assign quantity = invoiceItem.quantity?if_exists><#else><#assign quantity = 0></#if>
+                      <#if invoiceItem.amount?has_content><#assign amount = invoiceItem.amount?if_exists><#else><#assign amount = 0></#if>
+                      <#if amount != 0 && quantity == 0 ><#assign quantity = 1></#if>
+                      <#assign subTotal = quantity * amount>
+                      <#assign sumQuantity = sumQuantity + quantity>
+                      <#assign sumAmount = sumAmount + amount>
+                      <#assign sumSubTotal = sumSubTotal + subTotal>
               <fo:table-row font-size="${fontSize}">
               <fo:table-cell padding="3pt"><fo:block/></fo:table-cell>
               <fo:table-cell padding="3pt" number-columns-spanned="3"><fo:block>${invoiceItemType.description?if_exists}</fo:block></fo:table-cell>
@@ -430,26 +430,26 @@ by hand from a real template using a ruler.
               <fo:table-cell padding="3pt"><fo:block text-align="center">${amount?if_exists}</fo:block></fo:table-cell>
               <fo:table-cell padding="3pt"><fo:block text-align="center">${subTotal?if_exists}</fo:block></fo:table-cell>
               </fo:table-row>
-              		</#if>
-              	</#list>
+                      </#if>
+                  </#list>
 
-              	<#assign sumQuantity = 0>
+                  <#assign sumQuantity = 0>
                 <#assign sumAmount = 0>
-              	<#assign sumSubTotal = 0>
-              	<#list InvoiceItems as invoiceItem>
-              		<#assign invoiceItemType = invoiceItem.getRelatedOne("InvoiceItemType")?if_exists>
-              		<#assign subTotal = 0>
-              		<#if invoiceItemType.parentTypeId == payrolGroup.invoiceItemTypeId>
-              		<#if invoiceItem.quantity?has_content><#assign quantity = invoiceItem.quantity?if_exists><#else><#assign quantity = 0></#if>
-              		<#if invoiceItem.amount?has_content><#assign amount = invoiceItem.amount?if_exists><#else><#assign amount = 0></#if>
-              		<#if amount != 0 && quantity == 0><#assign quantity = 1></#if>
-              			<#assign subTotal = quantity * amount>
-              			<#assign sumQuantity = sumQuantity + quantity>
-              			<#assign sumAmount = sumAmount + amount>
-              			<#assign sumSubTotal = sumSubTotal + subTotal>
-              		</#if>
-              	</#list>
-              	<#if sumSubTotal != 0>
+                  <#assign sumSubTotal = 0>
+                  <#list InvoiceItems as invoiceItem>
+                      <#assign invoiceItemType = invoiceItem.getRelatedOne("InvoiceItemType", false)?if_exists>
+                      <#assign subTotal = 0>
+                      <#if invoiceItemType.parentTypeId == payrolGroup.invoiceItemTypeId>
+                      <#if invoiceItem.quantity?has_content><#assign quantity = invoiceItem.quantity?if_exists><#else><#assign quantity = 0></#if>
+                      <#if invoiceItem.amount?has_content><#assign amount = invoiceItem.amount?if_exists><#else><#assign amount = 0></#if>
+                      <#if amount != 0 && quantity == 0><#assign quantity = 1></#if>
+                          <#assign subTotal = quantity * amount>
+                          <#assign sumQuantity = sumQuantity + quantity>
+                          <#assign sumAmount = sumAmount + amount>
+                          <#assign sumSubTotal = sumSubTotal + subTotal>
+                      </#if>
+                  </#list>
+                  <#if sumSubTotal != 0>
               <fo:table-row font-size="${fontSize}">
               <fo:table-cell padding="3pt"><fo:block/></fo:table-cell>
               <fo:table-cell padding="3pt" number-columns-spanned="3" border-top-style="${lineStyle}"><fo:block/></fo:table-cell>
@@ -460,7 +460,7 @@ by hand from a real template using a ruler.
               <fo:table-row font-size="${fontSize}">
               <fo:table-cell padding="3pt"><fo:block/></fo:table-cell>
               </fo:table-row>
-              	</#if>
+                  </#if>
 
               </#list>
               <fo:table-row font-size="${fontSize}">

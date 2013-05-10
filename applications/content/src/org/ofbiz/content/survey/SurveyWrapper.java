@@ -25,7 +25,6 @@ import java.io.StringWriter;
 import java.io.Writer;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -40,7 +39,7 @@ import org.ofbiz.base.util.GeneralException;
 import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.base.util.template.FreeMarkerWorker;
-import org.ofbiz.entity.GenericDelegator;
+import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
 import org.ofbiz.entity.condition.EntityCondition;
@@ -61,18 +60,18 @@ public class SurveyWrapper {
 
     public static final String module = SurveyWrapper.class.getName();
 
-    protected GenericDelegator delegator = null;
+    protected Delegator delegator = null;
     protected String responseId = null;
     protected String partyId = null;
     protected String surveyId = null;
-    protected Map templateContext = null;
-    protected Map passThru = null;
-    protected Map defaultValues = null;
+    protected Map<String, Object> templateContext = null;
+    protected Map<String, Object> passThru = null;
+    protected Map<String, Object> defaultValues = null;
     protected boolean edit = false;
 
     protected SurveyWrapper() {}
 
-    public SurveyWrapper(GenericDelegator delegator, String responseId, String partyId, String surveyId, Map passThru, Map defaultValues) {
+    public SurveyWrapper(Delegator delegator, String responseId, String partyId, String surveyId, Map<String, Object> passThru, Map<String, Object> defaultValues) {
         this.delegator = delegator;
         this.responseId = responseId;
         this.partyId = partyId;
@@ -82,11 +81,11 @@ public class SurveyWrapper {
         this.checkParameters();
     }
 
-     public SurveyWrapper(GenericDelegator delegator, String responseId, String partyId, String surveyId, Map passThru) {
+     public SurveyWrapper(Delegator delegator, String responseId, String partyId, String surveyId, Map<String, Object> passThru) {
          this(delegator, responseId, partyId, surveyId, passThru, null);
      }
 
-    public SurveyWrapper(GenericDelegator delegator, String surveyId) {
+    public SurveyWrapper(Delegator delegator, String surveyId) {
         this(delegator, null, null, surveyId, null);
     }
 
@@ -100,7 +99,7 @@ public class SurveyWrapper {
      * Sets the pass-thru values (hidden form fields)
      * @param passThru
      */
-    public void setPassThru(Map passThru) {
+    public void setPassThru(Map<String, Object> passThru) {
         if (passThru != null) {
             this.passThru = FastMap.newInstance();
             this.passThru.putAll(passThru);
@@ -111,7 +110,7 @@ public class SurveyWrapper {
      * Sets the default values
      * @param defaultValues
      */
-    public void setDefaultValues(Map defaultValues) {
+    public void setDefaultValues(Map<String, Object> defaultValues) {
         if (defaultValues != null) {
             this.defaultValues = FastMap.newInstance();
             this.defaultValues.putAll(defaultValues);
@@ -164,25 +163,24 @@ public class SurveyWrapper {
 
     /**
      * Renders the Survey
-     * @return Writer object from the parsed Freemarker Template
+     * @param templateUrl the template URL
+     * @param writer the write
      * @throws SurveyWrapperException
      */
     public void render(URL templateUrl, Writer writer) throws SurveyWrapperException {
         String responseId = this.getThisResponseId();
         GenericValue survey = this.getSurvey();
-        List surveyQuestionAndAppls = this.getSurveyQuestionAndAppls();
-        Map results = this.getResults(surveyQuestionAndAppls);
-        Map currentAnswers = null;
+        List<GenericValue> surveyQuestionAndAppls = this.getSurveyQuestionAndAppls();
+        Map<String, Object> results = this.getResults(surveyQuestionAndAppls);
+        Map<String, Object> currentAnswers = null;
         if (responseId != null && canUpdate()) {
             currentAnswers = this.getResponseAnswers(responseId);
         } else {
             currentAnswers = this.getResponseAnswers(null);
         }
 
-        Map sqaaWithColIdListByMultiRespId = FastMap.newInstance();
-        Iterator surveyQuestionAndApplIter = surveyQuestionAndAppls.iterator();
-        while (surveyQuestionAndApplIter.hasNext()) {
-            GenericValue surveyQuestionAndAppl = (GenericValue) surveyQuestionAndApplIter.next();
+        Map<String, Object> sqaaWithColIdListByMultiRespId = FastMap.newInstance();
+        for(GenericValue surveyQuestionAndAppl : surveyQuestionAndAppls) {
             String surveyMultiRespColId = surveyQuestionAndAppl.getString("surveyMultiRespColId");
             if (UtilValidate.isNotEmpty(surveyMultiRespColId)) {
                 String surveyMultiRespId = surveyQuestionAndAppl.getString("surveyMultiRespId");
@@ -242,7 +240,7 @@ public class SurveyWrapper {
     public GenericValue getSurvey() {
         GenericValue survey = null;
         try {
-            survey = delegator.findByPrimaryKeyCache("Survey", UtilMisc.toMap("surveyId", surveyId));
+            survey = delegator.findOne("Survey", UtilMisc.toMap("surveyId", surveyId), true);
         } catch (GenericEntityException e) {
             Debug.logError(e, "Unable to get Survey : " + surveyId, module);
         }
@@ -264,7 +262,7 @@ public class SurveyWrapper {
         }
 
         GenericValue survey = this.getSurvey();
-        if (!"Y".equals(survey.getString("allowMultiple")) || !"Y".equals(survey.getString("allowUpdate"))) {
+        if (!"Y".equals(survey.getString("allowMultiple")) && !"Y".equals(survey.getString("allowUpdate"))) {
             return false;
         }
         return true;
@@ -284,13 +282,13 @@ public class SurveyWrapper {
     }
 
     // returns a list of SurveyQuestions (in order by sequence number) for the current Survey
-    public List getSurveyQuestionAndAppls() {
-        List questions = FastList.newInstance();
+    public List<GenericValue> getSurveyQuestionAndAppls() {
+        List<GenericValue> questions = FastList.newInstance();
 
         try {
-            Map fields = UtilMisc.toMap("surveyId", surveyId);
-            List order = UtilMisc.toList("sequenceNum", "surveyMultiRespColId");
-            questions = delegator.findByAndCache("SurveyQuestionAndAppl", fields, order);
+            Map<String, Object> fields = UtilMisc.<String, Object>toMap("surveyId", surveyId);
+            List<String> order = UtilMisc.toList("sequenceNum", "surveyMultiRespColId");
+            questions = delegator.findByAnd("SurveyQuestionAndAppl", fields, order, true);
             if (questions != null) {
                 questions = EntityUtil.filterByDate(questions);
             }
@@ -312,9 +310,9 @@ public class SurveyWrapper {
         }
 
         String responseId = null;
-        List responses = null;
+        List<GenericValue> responses = null;
         try {
-            responses = delegator.findByAnd("SurveyResponse", UtilMisc.toMap("surveyId", surveyId, "partyId", partyId), UtilMisc.toList("-lastModifiedDate"));
+            responses = delegator.findByAnd("SurveyResponse", UtilMisc.toMap("surveyId", surveyId, "partyId", partyId), UtilMisc.toList("-lastModifiedDate"), false);
         } catch (GenericEntityException e) {
             Debug.logError(e, module);
         }
@@ -344,10 +342,10 @@ public class SurveyWrapper {
         return responses;
     }
 
-    public List getSurveyResponses(GenericValue question) throws SurveyWrapperException {
-        List responses = null;
+    public List<GenericValue> getSurveyResponses(GenericValue question) throws SurveyWrapperException {
+        List<GenericValue> responses = null;
         try {
-            responses = delegator.findByAnd("SurveyResponse", UtilMisc.toMap("surveyQuestionId", question.getString("surveyQuestionId")));
+            responses = delegator.findByAnd("SurveyResponse", UtilMisc.toMap("surveyQuestionId", question.getString("surveyQuestionId")), null, false);
         } catch (GenericEntityException e) {
             throw new SurveyWrapperException(e);
         }
@@ -355,36 +353,31 @@ public class SurveyWrapper {
     }
 
     // returns a Map of answers keyed on SurveyQuestion ID from the most current SurveyResponse ID
-    public Map getResponseAnswers(String responseId) throws SurveyWrapperException {
-
-        Map answerMap = FastMap.newInstance();
+    public Map<String, Object> getResponseAnswers(String responseId) throws SurveyWrapperException {
+        Map<String, Object> answerMap = FastMap.newInstance();
 
         if (responseId != null) {
-            List answers = null;
+            List<GenericValue> answers = null;
             try {
-                answers = delegator.findByAnd("SurveyResponseAnswer", UtilMisc.toMap("surveyResponseId", responseId));
+                answers = delegator.findByAnd("SurveyResponseAnswer", UtilMisc.toMap("surveyResponseId", responseId), null, false);
             } catch (GenericEntityException e) {
                 Debug.logError(e, module);
             }
 
             if (UtilValidate.isNotEmpty(answers)) {
-                Iterator i = answers.iterator();
-                while (i.hasNext()) {
-                    GenericValue answer = (GenericValue) i.next();
-                    answerMap.put(answer.get("surveyQuestionId"), answer);
+                for(GenericValue answer : answers) {
+                    answerMap.put(answer.getString("surveyQuestionId"), answer);
                 }
             }
         }
 
         // get the pass-thru (posted form data)
         if (UtilValidate.isNotEmpty(passThru)) {
-            Iterator i = passThru.keySet().iterator();
-            while (i.hasNext()) {
-                String key = (String) i.next();
+            for(String key : passThru.keySet()) {
                 if (key.toUpperCase().startsWith("ANSWERS_")) {
                     int splitIndex = key.indexOf('_');
                     String questionId = key.substring(splitIndex+1);
-                    Map thisAnswer = FastMap.newInstance();
+                    Map<String, Object> thisAnswer = FastMap.newInstance();
                     String answer = (String) passThru.remove(key);
                     thisAnswer.put("booleanResponse", answer);
                     thisAnswer.put("currencyResponse", answer);
@@ -401,13 +394,14 @@ public class SurveyWrapper {
         return answerMap;
     }
 
-    public List getQuestionResponses(GenericValue question, int startIndex, int number) throws SurveyWrapperException {
-        List resp = null;
+    public List<GenericValue> getQuestionResponses(GenericValue question, int startIndex, int number) throws SurveyWrapperException {
+        List<GenericValue> resp = null;
         boolean beganTransaction = false;
         try {
             beganTransaction = TransactionUtil.begin();
 
-            EntityListIterator eli = this.getEli(question);
+            int maxRows = startIndex + number;
+            EntityListIterator eli = this.getEli(question, maxRows);
             if (startIndex > 0 && number > 0) {
                 resp = eli.getPartialList(startIndex, number);
             } else {
@@ -436,13 +430,11 @@ public class SurveyWrapper {
         return resp;
     }
 
-    public Map getResults(List questions) throws SurveyWrapperException {
-        Map questionResults = FastMap.newInstance();
+    public Map<String, Object> getResults(List<GenericValue> questions) throws SurveyWrapperException {
+        Map<String, Object> questionResults = FastMap.newInstance();
         if (questions != null) {
-            Iterator i = questions.iterator();
-            while (i.hasNext()) {
-                GenericValue question = (GenericValue) i.next();
-                Map results = getResultInfo(question);
+            for(GenericValue question : questions) {
+                Map<String, Object> results = getResultInfo(question);
                 if (results != null) {
                     questionResults.put(question.getString("surveyQuestionId"), results);
                 }
@@ -452,8 +444,8 @@ public class SurveyWrapper {
     }
 
     // returns a map of question reqsults
-    public Map getResultInfo(GenericValue question) throws SurveyWrapperException {
-        Map resultMap = FastMap.newInstance();
+    public Map<String, Object> getResultInfo(GenericValue question) throws SurveyWrapperException {
+        Map<String, Object> resultMap = FastMap.newInstance();
 
         // special keys in the result:
         // "_q_type"      - question type (SurveyQuestionTypeId)
@@ -473,20 +465,22 @@ public class SurveyWrapper {
         // call the proper method based on the question type
         // note this will need to be updated as new types are added
         if ("OPTION".equals(questionType)) {
-            Map thisResult = getOptionResult(question);
+            Map<String, Object> thisResult = getOptionResult(question);
             if (thisResult != null) {
                 Long questionTotal = (Long) thisResult.remove("_total");
-                if (questionTotal == null) questionTotal = Long.valueOf(0);
+                if (questionTotal == null) {
+                    questionTotal = Long.valueOf(0);
+                }
                 // set the total responses
                 resultMap.put("_total", questionTotal);
 
                 // create the map of option info ("_total", "_percent")
-                Iterator i = thisResult.keySet().iterator();
-                while (i.hasNext()) {
-                    Map optMap = FastMap.newInstance();
-                    String optId = (String) i.next();
+                for(String optId : thisResult.keySet()) {
+                    Map<String, Object> optMap = FastMap.newInstance();
                     Long optTotal = (Long) thisResult.get(optId);
-                    if (optTotal == null) optTotal = Long.valueOf(0);
+                    if (optTotal == null) {
+                        optTotal = Long.valueOf(0);
+                    }
                     Long percent = Long.valueOf((long)(((double)optTotal.longValue() / (double)questionTotal.longValue()) * 100));
                     optMap.put("_total", optTotal);
                     optMap.put("_percent", percent);
@@ -545,11 +539,11 @@ public class SurveyWrapper {
             // index 1 = total yes
             // index 2 = total no
 
-            EntityListIterator eli = this.getEli(question);
+            EntityListIterator eli = this.getEli(question, -1);
 
             if (eli != null) {
                 GenericValue value;
-                while (((value = (GenericValue) eli.next()) != null)) {
+                while (((value = eli.next()) != null)) {
                     if ("Y".equalsIgnoreCase(value.getString("booleanResponse"))) {
                         result[1]++;
                     } else {
@@ -592,11 +586,11 @@ public class SurveyWrapper {
         try {
             beganTransaction = TransactionUtil.begin();
 
-            EntityListIterator eli = this.getEli(question);
+            EntityListIterator eli = this.getEli(question, -1);
 
             if (eli != null) {
                 GenericValue value;
-                while (((value = (GenericValue) eli.next()) != null)) {
+                while (((value = eli.next()) != null)) {
                     switch (type) {
                         case 1:
                             Long n = value.getLong("numericResponse");
@@ -673,18 +667,18 @@ public class SurveyWrapper {
         return result;
     }
 
-    private Map getOptionResult(GenericValue question) throws SurveyWrapperException {
-        Map result = FastMap.newInstance();
+    private Map<String, Object> getOptionResult(GenericValue question) throws SurveyWrapperException {
+        Map<String, Object> result = FastMap.newInstance();
         long total = 0;
 
         boolean beganTransaction = false;
         try {
             beganTransaction = TransactionUtil.begin();
 
-            EntityListIterator eli = this.getEli(question);
+            EntityListIterator eli = this.getEli(question, -1);
             if (eli != null) {
                 GenericValue value;
-                while (((value = (GenericValue) eli.next()) != null)) {
+                while (((value = eli.next()) != null)) {
                     String optionId = value.getString("surveyOptionSeqId");
                     if (UtilValidate.isNotEmpty(optionId)) {
                         Long optCount = (Long) result.remove(optionId);
@@ -729,12 +723,15 @@ public class SurveyWrapper {
                 EntityCondition.makeCondition("surveyId", EntityOperator.EQUALS, surveyId)), EntityOperator.AND);
     }
 
-    private EntityListIterator getEli(GenericValue question) throws GenericEntityException {
+    private EntityListIterator getEli(GenericValue question, int maxRows) throws GenericEntityException {
         EntityFindOptions efo = new EntityFindOptions();
         efo.setResultSetType(EntityFindOptions.TYPE_SCROLL_INSENSITIVE);
         efo.setResultSetConcurrency(EntityFindOptions.CONCUR_READ_ONLY);
         efo.setSpecifyTypeAndConcur(true);
         efo.setDistinct(false);
+        if (maxRows > 0) {
+            efo.setMaxRows(maxRows);
+        }
 
         EntityListIterator eli = null;
         eli = delegator.find("SurveyResponseAndAnswer", makeEliCondition(question), null, null, null, efo);
@@ -742,6 +739,7 @@ public class SurveyWrapper {
         return eli;
     }
 
+    @SuppressWarnings("serial")
     protected class SurveyWrapperException extends GeneralException {
 
         public SurveyWrapperException() {

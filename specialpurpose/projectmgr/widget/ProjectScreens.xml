@@ -65,7 +65,7 @@ under the License.
                 </section>
                 <decorator-screen name="CommonProjectDecorator" location="${parameters.mainDecoratorLocation}">
                     <decorator-section name="body">
-                        <include-menu name="ProjectSubTabBar" location="component://projectmgr/widget/Menus.xml"/>
+                        <include-menu name="ProjectButtonBar" location="component://projectmgr/widget/ProjectMenus.xml"/>
                         <container style="clear"/>
                         <screenlet name="findProject" collapsible="true" title="${uiLabelMap.PageTitleFindProject}">
                             <include-form name="FindProject" location="component://projectmgr/widget/forms/ProjectForms.xml"/>
@@ -89,14 +89,15 @@ under the License.
                 <service service-name="getProject" result-map="result">
                     <field-map field-name="projectId" from-field="projectId"/>
                 </service>
-                <set field="project" from-field="result.projectInfo"/>
+                <set field="projectInfo" from-field="result.projectInfo"/>
+                <set field="projectId" from-field="projectInfo.projectId"/>
             </actions>
             <widgets>
                 <decorator-screen name="CommonProjectDecorator" location="${parameters.mainDecoratorLocation}">
                     <decorator-section name="body">
-                    <screenlet title="${uiLabelMap.PageTitleEditProject} ${uiLabelMap.CommonInformation}" >
-                        <include-form name="EditProject" location="component://projectmgr/widget/forms/ProjectForms.xml"/>
-                    </screenlet>
+                        <screenlet title="${uiLabelMap.PageTitleEditProject} ${uiLabelMap.CommonInformation}" >
+                            <include-form name="EditProject" location="component://projectmgr/widget/forms/ProjectForms.xml"/>
+                        </screenlet>
                     </decorator-section>
                 </decorator-screen>
             </widgets>
@@ -135,68 +136,42 @@ under the License.
                 <set field="projectId" from-field="parameters.projectId"/>
                 <entity-and entity-name="ProjectAndPhaseAndTask" list="tasks">
                     <field-map field-name="projectId" from-field="parameters.projectId"/>
+                    <order-by field-name="phaseSeqNum"/>
                     <order-by field-name="phaseName"/>
+                    <order-by field-name="sequenceNum"/>
                     <order-by field-name="workEffortName"/>
                 </entity-and>
                 <entity-and entity-name="WorkEffort" list="phases">
                     <field-map field-name="workEffortParentId" from-field="parameters.projectId"/>
                     <field-map field-name="workEffortTypeId" value="PHASE"/>
                 </entity-and>
+                <set field="viewIndex" from-field="parameters.VIEW_INDEX" type="Integer" default-value="0"/>
             </actions>
             <widgets>
                 <decorator-screen name="CommonProjectDecorator" location="${parameters.mainDecoratorLocation}">
                     <decorator-section name="body">
-                        <container style="screenlet">
-                            <container style="screenlet-title-bar">
-                                <container style="h3">
-                                    <label text="${uiLabelMap.${titleProperty}}"/>
-                                </container>
-                            </container>
-                            <container style="screenlet-body">
-                                <section>
-                                    <widgets>
-                                        <include-form name="EditProjectTasks" location="component://projectmgr/widget/forms/ProjectForms.xml"/>
-                                    </widgets>
-                                </section>
-                            </container>
-                        </container>
+                        <screenlet title="${uiLabelMap.${titleProperty}}">
+                            <include-form name="EditProjectTasks" location="component://projectmgr/widget/forms/ProjectForms.xml"/>
+                        </screenlet>
                         <container style="lefthalf">
-                            <container style="screenlet">
-                                <container style="screenlet-title-bar">
-                                    <container style="h3">
-                                        <label text="${uiLabelMap.PageTitleAddTask}"/>
-                                    </container>
-                                </container>
-                                <container style="screenlet-body">
-                                    <section>
-                                        <condition>
-                                            <if-empty field="phases"/>
-                                        </condition>
-                                        <widgets>
-                                            <label style="h3" text="${uiLabelMap.ProjectMgrNoPhasesYet}"/>
-                                        </widgets>
-                                        <fail-widgets>
-                                            <include-form name="EditTask" location="component://projectmgr/widget/forms/TaskForms.xml"/>
-                                        </fail-widgets>
-                                    </section>
-                                </container>
-                            </container>
+                            <screenlet title="${uiLabelMap.PageTitleAddTask}">
+                                <section>
+                                    <condition>
+                                        <if-empty field="phases"/>
+                                    </condition>
+                                    <widgets>
+                                        <label style="h3" text="${uiLabelMap.ProjectMgrNoPhasesYet}"/>
+                                    </widgets>
+                                    <fail-widgets>
+                                        <include-form name="EditTask" location="component://projectmgr/widget/forms/TaskForms.xml"/>
+                                    </fail-widgets>
+                                </section>
+                            </screenlet>
                         </container>
                         <container style="righthalf">
-                            <container style="screenlet">
-                                <container style="screenlet-title-bar">
-                                    <container style="h3">
-                                        <label text="${uiLabelMap.PageTitleAddPhase}"/>
-                                    </container>
-                                </container>
-                                <container style="screenlet-body">
-                                    <section>
-                                        <widgets>
-                                            <include-form name="AddProjectPhase" location="component://projectmgr/widget/forms/TaskForms.xml"/>
-                                        </widgets>
-                                    </section>
-                                </container>
-                            </container>
+                            <screenlet title="${uiLabelMap.PageTitleAddPhase}">
+                                <include-form name="AddProjectPhase" location="component://projectmgr/widget/forms/TaskForms.xml"/>
+                            </screenlet>
                         </container>
                     </decorator-section>
                 </decorator-screen>
@@ -368,13 +343,10 @@ under the License.
                         <container>
                              <link target="EditPartySkill" text="${uiLabelMap.HumanResNewPartySkill}" style="buttontext"/>
                         </container>
-                        <container style="boxoutside">
-                            <container style="screenlet-header">
-                                <label style="boxhead">${uiLabelMap.HumanResEditPartySkill}</label>
-                            </container>
+                        <screenlet title="${uiLabelMap.HumanResEditPartySkill}">
                             <include-form name="ListPartySkills" location="component://humanres/widget/forms/PartySkillForms.xml"/>
                             <include-form name="AddPartySkills" location="component://humanres/widget/forms/PartySkillForms.xml"/>
-                        </container>
+                        </screenlet>
                     </decorator-section>
                 </decorator-screen>
             </widgets>
@@ -420,16 +392,17 @@ under the License.
                             <screenlet title="${uiLabelMap.PageTitleProjectInformation}">
                                 <include-form name="ProjectInfo" location="component://projectmgr/widget/forms/ProjectForms.xml"/>
                             </screenlet>
+                            <include-screen name="SubProjectsInfo"/>
                             <include-screen name="PhasesInfo"/>
-                            <include-screen name="TasksInfo"/>
                         </container>
                         <container style="righthalf">
-                           <include-screen name="SubProjectsInfo"/>
-                           <include-screen name="PartiesInfo"/>
-                           <include-screen name="NoteInfo"/>
-                           <include-screen name="ListProjectContent"/>
+                            <include-screen name="PartiesInfo"/>
+                            <include-screen name="NoteInfo"/>
+                            <include-screen name="ListProjectContent"/>
                             <include-screen name="OrderInfo"/>
                         </container>
+                        <container style="clear"/>
+                        <include-screen name="TasksInfo"/>
                     </decorator-section>
                 </decorator-screen>
             </widgets>
@@ -445,12 +418,12 @@ under the License.
                 <script location="component://projectmgr/webapp/projectmgr/WEB-INF/actions/GanttChart.groovy"/>
             </actions>
             <widgets>
-                <label text="${project}"></label>
+                <label text="${project}"/>
                 <decorator-screen name="CommonProjectDecorator" location="${parameters.mainDecoratorLocation}">
                     <decorator-section name="body">
                         <screenlet title="${uiLabelMap.PageTitleProjectGanttChart}">
                             <platform-specific>
-                                <html><html-template location="component://projectmgr/webapp/projectmgr/project/gantChart.ftl"/></html>
+                                <html><html-template location="component://projectmgr/webapp/projectmgr/project/ganttChart.ftl"/></html>
                             </platform-specific>
                         </screenlet>
                     </decorator-section>
@@ -465,20 +438,9 @@ under the License.
                 <set field="parameters.workEffortParentId" from-field="projectId"/>
             </actions>
             <widgets>
-                <container style="screenlet">
-                    <container style="screenlet-title-bar">
-                        <container style="h3">
-                            <label text="${uiLabelMap.ProjectMgrSubProjects}"/>
-                        </container>
-                    </container>
-                    <container style="screenlet-body">
-                        <section>
-                            <widgets>
-                                <include-form name="ListProjects" location="component://projectmgr/widget/forms/ProjectForms.xml"/>
-                            </widgets>
-                        </section>
-                    </container>
-                </container>
+                <screenlet title="${uiLabelMap.ProjectMgrSubProjects}">
+                    <include-form name="ListProjects" location="component://projectmgr/widget/forms/ProjectForms.xml"/>
+                </screenlet>
             </widgets>
         </section>
     </screen>
@@ -491,11 +453,9 @@ under the License.
                 <set field="phases" from-field="result.phaseList"/>
             </actions>
             <widgets>
-                <container style="screenlet">
-                    <screenlet title="${uiLabelMap.ProjectMgrPhases}">
-                        <include-form name="ListPhaseInfo" location="component://projectmgr/widget/forms/ProjectForms.xml"/>
-                    </screenlet>
-                </container>
+                <screenlet title="${uiLabelMap.ProjectMgrPhases}">
+                    <include-form name="ListPhaseInfo" location="component://projectmgr/widget/forms/ProjectForms.xml"/>
+                </screenlet>
             </widgets>
         </section>
     </screen>
@@ -577,7 +537,7 @@ under the License.
                             <not><if-empty field="clientAssigns"/></not>
                         </condition>
                         <widgets>
-                            <label style="h3" text="${uiLabelMap.ProjectMgrClientContacts}"></label>
+                            <label style="h3" text="${uiLabelMap.ProjectMgrClientContacts}"/>
                             <include-form name="ListProjectClientParties" location="component://projectmgr/widget/forms/ProjectForms.xml"/>
                         </widgets>
                     </section>
@@ -586,7 +546,7 @@ under the License.
                             <not><if-empty field="companyAssigns"/></not>
                         </condition>
                         <widgets>
-                            <label style="h3" text="${uiLabelMap.ProjectMgrCompanies}"></label>
+                            <label style="h3" text="${uiLabelMap.ProjectMgrCompanies}"/>
                             <include-form name="ListProjectCompanyParties" location="component://projectmgr/widget/forms/ProjectForms.xml"/>
                         </widgets>
                     </section>
@@ -620,7 +580,7 @@ under the License.
                 <entity-and entity-name="WorkEffortAndPartyAssign" list="parties">
                     <field-map field-name="workEffortTypeId" value="PROJECT"/>
                     <field-map field-name="partyId" from-field="parameters.partyId"/>
-                    <order-by field-name="workEffortId"/>
+                    <order-by field-name="workEffortName"/>
                 </entity-and>
                 <set field="projectId" from-field="parameters.projectId" default-value="${parameters.workEffortId}"/>
                 <service service-name="getProject" result-map="result">
@@ -650,12 +610,17 @@ under the License.
                 <set field="tabButtonItem" value="listResourcesTask"/>
                 <set field="titleProperty" value="PageTitleListTaskByParty"/>
                 <set field="workEffortId" from-field="parameters.projectId"/>
-                <entity-and entity-name="WorkEffortAndPartyAssign" list="tasks">
-                    <field-map field-name="partyId" from-field="parameters.partyId"/>
-                    <field-map field-name="workEffortTypeId" value="TASK"/>
-                    <field-map field-name="statusId" value="PRTYASGN_ASSIGNED"/>
+                <entity-condition entity-name="WorkEffortAndPartyAssign" list="tasks">
+                    <condition-list combine="and">
+                        <condition-expr field-name="partyId" from-field="parameters.partyId"/>
+                        <condition-expr field-name="workEffortTypeId" value="TASK"/>
+                        <condition-list combine="or">
+                            <condition-expr field-name="statusId" value="PRTYASGN_ASSIGNED"/>
+                            <condition-expr field-name="statusId" value="PAS_ASSIGNED"/>
+                        </condition-list>
+                    </condition-list>
                     <order-by field-name="workEffortId"/>
-                </entity-and>
+                </entity-condition>
                 <set field="projectId" from-field="parameters.projectId" default-value="${parameters.workEffortId}"/>
                 <set field="partyId" from-field="parameters.partyId"/>
             </actions>
@@ -687,7 +652,7 @@ under the License.
             <widgets>
                 <decorator-screen name="CommonPartyDecorator" location="${parameters.mainDecoratorLocation}">
                     <decorator-section name="body">
-                        <include-form name="EditPerson" location="component://party/webapp/partymgr/party/PartyForms.xml"/>
+                        <include-form name="EditPerson" location="component://party/widget/partymgr/PartyForms.xml"/>
                     </decorator-section>
                 </decorator-screen>
             </widgets>
@@ -708,7 +673,7 @@ under the License.
                 <decorator-screen name="CommonPartyDecorator" location="${parameters.mainDecoratorLocation}">
                     <decorator-section name="body">
                         <container><label text="${uiLabelMap.PageTitleNewPartyNote}" style="h2"/></container>
-                        <include-form name="AddPartyNote" location="component://party/webapp/partymgr/party/PartyForms.xml"/>
+                        <include-form name="AddPartyNote" location="component://party/widget/partymgr/PartyForms.xml"/>
                     </decorator-section>
                 </decorator-screen>
             </widgets>
@@ -828,44 +793,23 @@ under the License.
                                     </condition>
                                     <widgets>
                                         <container style="widget-container">
-                                            <include-form location="component://party/webapp/partymgr/communication/CommForms.xml" name="EditCommEvent"/>
+                                            <include-form location="component://party/widget/partymgr/CommunicationEventForms.xml" name="EditCommEvent"/>
                                         </container>
                                         <container style="widget-container">
-                                            <include-form location="component://party/webapp/partymgr/communication/CommForms.xml" name="ListChildCommEvents"/>
+                                            <include-form location="component://party/widget/partymgr/CommunicationEventForms.xml" name="ListChildCommEvents"/>
                                         </container>
                                     </widgets>
                                     <fail-widgets>
                                         <container style="widget-container">
-                                            <include-form location="component://party/webapp/partymgr/communication/CommForms.xml" name="ViewCommEvent"/>
+                                            <include-form location="component://party/widget/partymgr/CommunicationEventForms.xml" name="ViewCommEvent"/>
                                         </container>
                                         <container style="widget-container">
-                                            <include-form location="component://party/webapp/partymgr/communication/CommForms.xml" name="ListChildCommEvents"/>
+                                            <include-form location="component://party/widget/partymgr/CommunicationEventForms.xml" name="ListChildCommEvents"/>
                                         </container>
                                     </fail-widgets>
                                 </section>
                             </widgets>
                         </section>
-                    </decorator-section>
-                </decorator-screen>
-            </widgets>
-        </section>
-    </screen>
-
-    <screen name="CreateUserLogin">
-        <section>
-            <actions>
-                <set field="titleProperty" value="PartyCreateUserLogin"/>
-                <set field="tabButtonItem" value="viewprofile"/>
-                <set field="labelTitleProperty" value="PartyCreateUserLogin"/>
-
-                <set field="donePage" from-field="parameters.DONE_PAGE" default-value="viewprofile"/>
-                <set field="partyId" from-field="parameters.partyId"/>
-            </actions>
-            <widgets>
-                <decorator-screen name="CommonPartyDecorator" location="${parameters.mainDecoratorLocation}">
-                    <decorator-section name="body">
-                        <container><label text="${uiLabelMap.PartyCreateUserLogin}" style="h2"/></container>
-                        <include-form name="AddUserLogin" location="component://party/webapp/partymgr/party/PartyForms.xml"/>
                     </decorator-section>
                 </decorator-screen>
             </widgets>
@@ -887,7 +831,7 @@ under the License.
                         <section>
                             <!-- do check for PARTYMGR, _VIEW permission -->
                             <condition>
-                                <if-has-permission permission="PARTYMGR" action="_VIEW"/>
+                                <if-service-permission service-name="partyBasePermissionCheck" main-action="VIEW"/>
                             </condition>
                             <widgets>
                                 <platform-specific>
@@ -918,7 +862,7 @@ under the License.
                         <section>
                             <!-- do check for PARTYMGR, _VIEW permission -->
                             <condition>
-                                <if-has-permission permission="PARTYMGR" action="_VIEW"/>
+                                <if-service-permission service-name="partyBasePermissionCheck" main-action="VIEW"/>
                             </condition>
                             <widgets>
                                 <platform-specific>
@@ -929,55 +873,6 @@ under the License.
                                 <label style="h3">${uiLabelMap.PartyMgrViewPermissionError}</label>
                             </fail-widgets>
                         </section>
-                    </decorator-section>
-                </decorator-screen>
-            </widgets>
-        </section>
-    </screen>
-
-    <screen name="EditUserLogin">
-        <section>
-            <actions>
-                <set field="titleProperty" value="PageTitleEditGroupInformation"/>
-                <set field="tabButtonItem" value="viewprofile"/>
-                <set field="labelTitleProperty" value="PageTitleEditGroupInformation"/>
-
-                <set field="donePage" from-field="parameters.DONE_PAGE" default-value="viewprofile"/>
-                <set field="partyId" from-field="parameters.partyId"/>
-                <set field="userLoginId" from-field="parameters.userLoginId"/>
-                <entity-one entity-name="UserLogin" value-field="editUserLogin"/>
-            </actions>
-            <widgets>
-                <decorator-screen name="CommonPartyDecorator" location="${parameters.mainDecoratorLocation}">
-                    <decorator-section name="body">
-                        <container><label text="${uiLabelMap.PartyUserLoginChangePassword}" style="h2"/></container>
-                        <include-form name="updatePassword" location="component://party/webapp/partymgr/party/PartyForms.xml"/>
-                        <container><label text="${uiLabelMap.PartyUserLoginUpdateSecuritySettings}" style="h2"/></container>
-                        <include-form name="updateUserLoginSecurity" location="component://party/webapp/partymgr/party/PartyForms.xml"/>
-                    </decorator-section>
-                </decorator-screen>
-            </widgets>
-        </section>
-    </screen>
-
-    <screen name="EditUserLoginSecurityGroups">
-        <section>
-            <actions>
-                <set field="titleProperty" value="PageTitleEditUserLoginSecurityGroups"/>
-                <set field="tabButtonItem" value="viewprofile"/>
-                <set field="labelTitleProperty" value="PageTitleEditUserLoginSecurityGroups"/>
-
-                <set field="userLoginId" from-field="parameters.userLoginId"/>
-                <entity-one entity-name="UserLogin" value-field="editUserLogin"/>
-                <set field="partyId" from-field="parameters.partyId" default-value="${editUserLogin.partyId}"/>
-            </actions>
-            <widgets>
-                <decorator-screen name="CommonPartyDecorator" location="${parameters.mainDecoratorLocation}">
-                    <decorator-section name="body">
-                        <container><label style="h2" text="${uiLabelMap.PageTitleEditUserLoginSecurityGroups}"/></container>
-                        <include-form name="ListUserLoginSecurityGroups" location="component://party/widget/partymgr/SecurityForms.xml"/>
-                        <container><label style="h2" text="${uiLabelMap.PartyAddUserLoginToSecurityGroup}"/></container>
-                        <include-form name="AddUserLoginSecurityGroup" location="component://party/widget/partymgr/SecurityForms.xml"/>
                     </decorator-section>
                 </decorator-screen>
             </widgets>
@@ -999,7 +894,7 @@ under the License.
             <widgets>
                 <decorator-screen name="CommonPartyDecorator" location="${parameters.mainDecoratorLocation}">
                     <decorator-section name="body">
-                        <include-form name="EditPartyGroup" location="component://party/webapp/partymgr/party/PartyForms.xml"/>
+                        <include-form name="EditPartyGroup" location="component://party/widget/partymgr/PartyForms.xml"/>
                     </decorator-section>
                 </decorator-screen>
             </widgets>
@@ -1026,6 +921,7 @@ under the License.
                             <section>
                                 <condition>
                                     <or>
+                                        <if-has-permission permission="PROJECTMGR_ADMIN"/>
                                         <if-has-permission permission="PROJECTMGR_ROLE_ADMIN"/>
                                         <if-has-permission permission="PROJECTMGR_ROLE_TASK_CREATE"/>
                                         <if-has-permission permission="PROJECTMGR_ROLE_UPDATE"/>
@@ -1033,11 +929,6 @@ under the License.
                                 </condition>
                                 <widgets>
                                     <screenlet title="${uiLabelMap.ProjectMgrContentList}">
-                                        <container>
-                                            <link target="EditProjectContents" text="${uiLabelMap.CommonCreateNew}" style="smallSubmit">
-                                                <parameter param-name="projectId"/>
-                                            </link>
-                                        </container>
                                         <include-form name="ListContents" location="component://projectmgr/widget/forms/ProjectForms.xml"/>
                                     </screenlet>
                                     <screenlet title="${uiLabelMap.PageTitleAddProjectContent}">
@@ -1057,7 +948,7 @@ under the License.
         <section>
             <actions>
                 <property-map resource="ContentUiLabels" map-name="uiLabelMap"/>
-                <set field="parameters.workEffortId" from-field="parameters.projectId"/>
+                <set field="workEffortId" from-field="parameters.projectId"/>
             </actions>
             <widgets>
                 <screenlet title="${uiLabelMap.ProjectMgrContentList}">
@@ -1070,6 +961,7 @@ under the License.
     <screen name="ListCustomerProjects">
         <section>
             <actions>
+                <property-map resource="ProjectMgrUiLabels" map-name="uiLabelMap" global="true"/>
                 <set field="layoutSettings.javaScripts[]" value="/images/jsgantt.js" global="true"/>
                 <set field="layoutSettings.styleSheets[]" value="/images/jsgantt.css" global="true"/>
                 <entity-condition list="projects" entity-name="WorkEffortPartyAssignByGroup" filter-by-date="true">
@@ -1109,11 +1001,11 @@ under the License.
                                         <set field="phases" from-field="result.phaseList"/>
                                     </actions>
                                     <widgets>
-                                        <container style="screenlet">
+                                        <screenlet>
                                             <screenlet title="${uiLabelMap.ProjectMgrPhases}">
                                                 <include-form name="ListPhaseInfo" location="component://projectmgr/widget/forms/ProjectForms.xml"/>
                                             </screenlet>
-                                        </container>
+                                        </screenlet>
                                     </widgets>
                                 </section>
                             </container>
@@ -1135,7 +1027,7 @@ under the License.
                             <container style="clear"/>
                             <screenlet title="${uiLabelMap.PageTitleProjectGanttChart}">
                                 <platform-specific>
-                                    <html><html-template location="component://projectmgr/webapp/projectmgr/project/gantChart.ftl"/></html>
+                                    <html><html-template location="component://projectmgr/webapp/projectmgr/project/ganttChart.ftl"/></html>
                                 </platform-specific>
                             </screenlet>
                         </widgets>
@@ -1146,9 +1038,70 @@ under the License.
                         <if-empty field="projects"/>
                     </condition>
                     <widgets>
-                        <label style="h2" text="${uiLabelMap.ProjectMgrNoProjectsFound}"></label>
+                        <label style="h2" text="${uiLabelMap.ProjectMgrNoProjectsFound}"/>
                     </widgets>
                 </section>
+            </widgets>
+        </section>
+    </screen>
+    
+    <screen name="FindMailingList">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleFindMailingList"/>
+                <set field="tabButtonItem" value="mailing"/>
+                <set field="labelTitleProperty" value="ProjectMgrListMailingList"/>
+                <set field="parameters.workEffortId" from-field="parameters.projectId"/>
+                <set field="initially-collapsed" value="true" global="true"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonProjectDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <section>
+                            <condition>
+                                <or>
+                                    <if-has-permission permission="PROJECTMGR_ADMIN"/>
+                                    <if-has-permission permission="PROJECTMGR_VIEW"/>
+                                </or>
+                            </condition>
+                            <widgets>
+                                <screenlet id="searchOptions" name="findScreenlet" collapsible="true" title="${uiLabelMap.CommonSearchOptions}" initially-collapsed="true">
+                                    <include-form location="component://projectmgr/widget/forms/ProjectForms.xml" name="FindMailingList"/>
+                                </screenlet>
+                                <screenlet padded="false" title="${uiLabelMap.CommonSearchResults}">
+                                    <include-form location="component://projectmgr/widget/forms/ProjectForms.xml" name="ListMailingLists"/>
+                                </screenlet>
+                            </widgets>
+                        </section>                                
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="ViewMailingList">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleViewMailingList"/>
+                <set field="tabButtonItem" value="mailing"/>
+                <entity-one entity-name="CommunicationEvent" value-field="communicationEvent"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonProjectDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <label  style="h1" text="${uiLabelMap[titleProperty]}"/>
+                        <section>
+                            <condition>
+                                <or>
+                                    <if-has-permission permission="PROJECTMGR_ADMIN"/>
+                                    <if-has-permission permission="PROJECTMGR_VIEW"/>
+                                </or>
+                            </condition>
+                            <widgets>
+                                <include-screen location="component://party/widget/partymgr/CommunicationEventScreens.xml" name="commOverview"/>
+                            </widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
             </widgets>
         </section>
     </screen>

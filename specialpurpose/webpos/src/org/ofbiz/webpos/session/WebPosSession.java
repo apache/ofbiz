@@ -28,7 +28,8 @@ import org.ofbiz.base.util.GeneralException;
 import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.base.util.UtilProperties;
 import org.ofbiz.base.util.UtilValidate;
-import org.ofbiz.entity.GenericDelegator;
+import org.ofbiz.entity.Delegator;
+import org.ofbiz.entity.DelegatorFactory;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
 import org.ofbiz.order.shoppingcart.ShoppingCart;
@@ -49,14 +50,14 @@ public class WebPosSession {
     private String productStoreId = null;
     private String facilityId = null;
     private String currencyUomId = null;
-    private transient GenericDelegator delegator = null;
+    private transient Delegator delegator = null;
     private String delegatorName = null;
     private LocalDispatcher dispatcher = null;
     private Boolean mgrLoggedIn = null;
     private WebPosTransaction webPosTransaction = null;
     private ShoppingCart cart = null;
 
-    public WebPosSession(String id, Map<String, Object> attributes, GenericValue userLogin, Locale locale, String productStoreId, String facilityId, String currencyUomId, GenericDelegator delegator, LocalDispatcher dispatcher, ShoppingCart cart) {
+    public WebPosSession(String id, Map<String, Object> attributes, GenericValue userLogin, Locale locale, String productStoreId, String facilityId, String currencyUomId, Delegator delegator, LocalDispatcher dispatcher, ShoppingCart cart) {
         this.id = id;
         this.attributes = attributes;
         this.userLogin = userLogin;
@@ -65,8 +66,7 @@ public class WebPosSession {
         this.facilityId = facilityId;
         this.currencyUomId = currencyUomId;
 
-        if (UtilValidate.isNotEmpty(delegator))
-        {
+        if (UtilValidate.isNotEmpty(delegator)) {
             this.delegator = delegator;
             this.delegatorName = delegator.getDelegatorName();
         } else {
@@ -81,6 +81,10 @@ public class WebPosSession {
 
     public GenericValue getUserLogin() {
         return this.userLogin;
+    }
+    
+    public void setUserLogin(GenericValue userLogin) {
+        this.userLogin = userLogin;
     }
 
     public void setAttribute(String name, Object value) {
@@ -112,7 +116,7 @@ public class WebPosSession {
     }
 
     public Locale getLocale() {
-        return (Locale) this.locale;
+        return this.locale;
     }
 
     public void setLocale(Locale locale) {
@@ -143,9 +147,9 @@ public class WebPosSession {
         this.currencyUomId = currencyUomId;
     }
 
-    public GenericDelegator getDelegator() {
+    public Delegator getDelegator() {
         if (UtilValidate.isEmpty(delegator)) {
-            delegator = GenericDelegator.getGenericDelegator(delegatorName);
+            delegator = DelegatorFactory.getDelegator(delegatorName);
         }
         return delegator;
     }
@@ -230,7 +234,7 @@ public class WebPosSession {
 
     public boolean isManagerLoggedIn() {
         if (UtilValidate.isEmpty(mgrLoggedIn)) {
-            mgrLoggedIn = new Boolean(hasRole(getUserLogin(), "MANAGER"));
+            mgrLoggedIn = hasRole(getUserLogin(), "MANAGER");
         }
         return mgrLoggedIn.booleanValue();
     }
@@ -246,6 +250,7 @@ public class WebPosSession {
         this.webPosTransaction = webPosTransaction;
     }
 
+    @SuppressWarnings("serial")
     public class UserLoginFailure extends GeneralException {
         public UserLoginFailure() {
             super();

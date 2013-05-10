@@ -19,14 +19,16 @@ under the License.
 -->
 
 <simple-methods xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/simple-methods.xsd">
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/simple-methods-v2.xsd">
     <simple-method method-name="commonGenericPermission" short-description="Main permission logic">
         <set field="primaryPermission" value="COMMON"/>
         <call-simple-method method-name="genericBasePermissionCheck" xml-resource="component://common/script/org/ofbiz/common/permission/CommonPermissionServices.xml"/>
     </simple-method>
 
     <simple-method method-name="createKeywordThesaurus" short-description="Create a KeywordThesaurus">
-        <check-permission permission="CATALOG" action="_CREATE"><fail-message message="Security Error: to run createKeywordThesaurus you must have the CATALOG_CREATE or CATALOG_ADMIN permission"/></check-permission>
+        <check-permission permission="CATALOG" action="_CREATE">
+            <fail-property resource="CommonUiLabels" property="CommonGenericPermissionError"/>
+        </check-permission>
         <check-errors/>
         <make-value value-field="newEntity" entity-name="KeywordThesaurus"/>
         <set-pk-fields map="parameters" value-field="newEntity"/>
@@ -36,7 +38,9 @@ under the License.
         <create-value value-field="newEntity"/>
     </simple-method>
     <simple-method method-name="updateKeywordThesaurus" short-description="Update a KeywordThesaurus">
-        <check-permission permission="CATALOG" action="_UPDATE"><fail-message message="Security Error: to run updateKeywordThesaurus you must have the CATALOG_UPDATE or CATALOG_ADMIN permission"/></check-permission>
+        <check-permission permission="CATALOG" action="_UPDATE">
+            <fail-property resource="CommonUiLabels" property="CommonGenericPermissionError"/>
+        </check-permission>
         <check-errors/>
         <make-value value-field="newEntity" entity-name="KeywordThesaurus"/>
         <set-pk-fields map="parameters" value-field="newEntity"/>
@@ -44,7 +48,9 @@ under the License.
         <store-value value-field="newEntity"/>
     </simple-method>
     <simple-method method-name="deleteKeywordThesaurus" short-description="Delete a KeywordThesaurus">
-        <check-permission permission="CATALOG" action="_DELETE"><fail-message message="Security Error: to run deleteKeywordThesaurus you must have the CATALOG_DELETE or CATALOG_ADMIN permission"/></check-permission>
+        <check-permission permission="CATALOG" action="_DELETE">
+            <fail-property resource="CommonUiLabels" property="CommonGenericPermissionError"/>
+        </check-permission>
         <check-errors/>
         <make-value value-field="newEntity" entity-name="KeywordThesaurus"/>
         <set-pk-fields map="parameters" value-field="newEntity"/>
@@ -142,9 +148,10 @@ under the License.
             </if-not-empty>  <!-- custom conversion? -->
 
             <!-- round result, if UomConversion[Dated] so specifies -->
-            <set field="roundingMode" from-field="uomConversion.roundingMode"/>
-            <if-not-empty field="uomConversion.roundingMode">
-                <calculate field="roundedValue" type="BigDecimal" decimal-scale="${uomConversion.decimalScale}" rounding-mode="${roundingMode}">
+            <set field="roundingMode" from-field="uomConversion.roundingMode" default-value="${parameters.defaultRoundingMode}"/>
+            <set field="decimalScale" from-field="uomConversion.decimalScale" default-value="${parameters.defaultDecimalScale}"/>
+            <if-not-empty field="roundingMode">
+                <calculate field="roundedValue" type="BigDecimal" decimal-scale="${decimalScale}" rounding-mode="${roundingMode}">
                     <calcop operator="get" field="convertedValue"/>
                 </calculate>
                 <set field="convertedValue" from-field="roundedValue"/>
@@ -197,16 +204,21 @@ under the License.
 
     <simple-method method-name="getVisualThemeResources" short-description="Get visual theme resources" login-required="false">
         <set field="visualThemeId" from-field="parameters.visualThemeId"/>
-        <if-empty field="visualThemeId">
-            <add-error><fail-property property="CommonVisualThemeIdNotFound" resource="CommonUiLabels"/></add-error>
-            <check-errors/>
-        </if-empty>
         <set field="themeResources" from-field="parameters.themeResources"/>
         <entity-condition list="resourceList" entity-name="VisualThemeResource" use-cache="true">
             <condition-expr field-name="visualThemeId" from-field="visualThemeId"/>
             <order-by field-name="resourceTypeEnumId"/>
             <order-by field-name="sequenceId"/>
         </entity-condition>
+        <if-empty field="resourceList">
+            <!-- if not found use the good old initial ofbiz theme so the system will at least start up and will be usable -->
+            <log level="error" message="Could not find the '${visualThemeId}' theme, reverting back to the good old OFBiz theme..."></log>
+            <entity-condition list="resourceList" entity-name="VisualThemeResource" use-cache="true">
+                <condition-expr field-name="visualThemeId" value="FLAT_GREY"/>
+                <order-by field-name="resourceTypeEnumId"/>
+                <order-by field-name="sequenceId"/>
+            </entity-condition>
+        </if-empty>
         <if-empty field="resourceList">
             <add-error><fail-property property="CommonVisualThemeResourcesNotFound" resource="CommonUiLabels"/></add-error>
             <check-errors/>
@@ -224,4 +236,130 @@ under the License.
         </iterate>
         <field-to-result field="themeResources"/>
     </simple-method>
+
+    <simple-method method-name="updateNote" short-description="Update a note">
+        <entity-one entity-name="NoteData" value-field="noteData">
+            <field-map field-name="noteId" from-field="parameters.noteId"/>
+        </entity-one>
+        <set-nonpk-fields map="parameters" value-field="noteData"/>
+        <store-value value-field="noteData"/>
+        <field-to-result field="noteData.noteId" result-name="noteId"/>
+    </simple-method>
+
+    <simple-method method-name="getCountryList" short-description="Returns a list of country" login-required="false">
+        <call-class-method method-name="getCountryList" class-name="org.ofbiz.common.CommonWorkers" ret-field="geoList">
+            <field field="delegator" type="org.ofbiz.entity.Delegator"/>
+        </call-class-method>
+        <iterate list="geoList" entry="countryGeo">
+            <set field="countryName" value="${countryGeo.geoName}: ${countryGeo.geoId}"/>
+            <field-to-list list="countryList" field="countryName"/>
+        </iterate>
+        <field-to-result field="countryList"/>
+    </simple-method>
+    
+    <simple-method method-name="getAssociatedStateList" short-description="set the state options for selected country" login-required="false">
+        <set field="countryGeoId" from-field="parameters.countryGeoId"/>
+        <set field="listOrderBy" from-field="parameters.listOrderBy"/>
+        <call-class-method method-name="getAssociatedStateList" class-name="org.ofbiz.common.CommonWorkers" ret-field="geoList">
+            <field field="delegator" type="org.ofbiz.entity.Delegator"/>
+            <field field="countryGeoId" type="String"/>
+            <field field="listOrderBy" type="String"/>
+        </call-class-method>
+        <iterate list="geoList" entry="stateGeo">
+            <set field="stateName" value="${stateGeo.geoName}: ${stateGeo.geoId}"/>
+            <field-to-list list="stateList" field="stateName"/>
+        </iterate>
+        <if-empty field="stateList">
+            <property-to-field resource="CommonUiLabels" property="CommonNoStatesProvinces" field="noOptions"/>
+            <field-to-list list="stateList" field="noOptions"/>
+        </if-empty>
+        <field-to-result field="stateList"/>
+    </simple-method>
+
+    <simple-method method-name="linkGeos" short-description="Link Geos to another Geo">
+        <entity-and entity-name="GeoAssoc" list="geoAssocs">
+            <field-map field-name="geoId" from-field="parameters.geoId"/>
+        </entity-and>
+        <!-- Current list contains old values? -->
+        <iterate list="geoAssocs" entry="geoAssoc">
+            <if-compare-field field="parameters.geoIds" operator="contains" to-field="geoAssoc.geoIdTo">
+                <!-- Yes, nothing to do, it already exists and we keep it -->
+                <else><!-- Remove -->
+                    <entity-one entity-name="GeoAssoc" value-field="oldGeoAssoc">
+                        <field-map field-name="geoId" from-field="parameters.geoId"/>
+                        <field-map field-name="geoIdTo" from-field="geoAssoc.geoIdTo"/>
+                    </entity-one>
+                    <remove-value value-field="oldGeoAssoc"/>
+                </else>                
+            </if-compare-field>
+        </iterate>
+        <!-- Old list contains current values -->
+        <iterate list="parameters.geoIds" entry="geoIdTo">            
+            <if-compare-field field="oldGeoIds" operator="contains" to-field="geoIdTo">
+                <!-- Yes, nothing to do, it already exists and we keep it -->
+                <else> 
+                    <entity-one entity-name="GeoAssoc" value-field="oldGeoAssoc">
+                        <field-map field-name="geoId" from-field="parameters.geoId"/>
+                        <field-map field-name="geoIdTo" from-field="geoIdTo"/>
+                    </entity-one>
+                    <if-empty field="oldGeoAssoc">                    
+                        <!-- Add as it does not exist -->
+                        <make-value value-field="newGeoAssoc" entity-name="GeoAssoc"/>
+                        <set field="newGeoAssoc.geoId" from-field="parameters.geoId"/>
+                        <set field="newGeoAssoc.geoIdTo" from-field="geoIdTo"/>
+                        <set field="newGeoAssoc.geoAssocTypeId" from-field="parameters.geoAssocTypeId"/>
+                        <create-value value-field="newGeoAssoc"/>
+                    </if-empty>
+                </else>
+            </if-compare-field>
+        </iterate>
+        <check-errors/>
+    </simple-method>
+
+    <simple-method method-name="getRelatedGeos" short-description="get related geos to a geo through a geoAssoc" login-required="false">      
+        <entity-and entity-name="GeoAssoc" list="geoAssoc">
+            <field-map field-name="geoId" from-field="parameters.geoId"/>
+            <field-map field-name="geoAssocTypeId" from-field="parameters.geoAssocTypeId"/>
+        </entity-and>
+        <if-empty field="geoAssoc">
+            <set field="noOptions" value="____"/>
+            <field-to-list list="geoList" field="noOptions"/>
+            <else>
+                <iterate list="geoAssoc" entry="geo">
+                    <field-to-list list="geoList" field="geo.geoIdTo"/>
+                </iterate>
+            </else>
+        </if-empty>
+        <field-to-result field="geoList"/>
+    </simple-method>    
+    
+    <simple-method method-name="checkUomConversion" short-description="Returns true if an UomConversion exists">
+        <entity-one entity-name="UomConversion" value-field="uomConversion">
+            <field-map field-name="uomId" from-field="parameters.uomId"/>
+            <field-map field-name="uomIdTo" from-field="parameters.uomIdTo"/>
+        </entity-one>
+        <if-not-empty field="uomConversion">
+            <set field="exist" value="true" type="Boolean"/>
+            <else>
+                <set field="exist" value="false" type="Boolean"/>                
+            </else>
+        </if-not-empty>
+        <field-to-result field="exist"/>
+    </simple-method>
+
+    <simple-method method-name="getServerTimestamp" login-required="false">      
+        <now field="serverTimestamp" type="java.sql.Timestamp"/>
+        <field-to-result field="serverTimestamp"/>
+    </simple-method>            
+    
+    <simple-method method-name="getServerTimeZone" login-required="false">      
+        <set field="serverTimeZone" value="${util:defaultTimeZone()}" type="String"/>
+        <field-to-result field="serverTimeZone"/>
+    </simple-method>            
+    
+    <simple-method method-name="getServerTimestampAsLong" login-required="false">      
+        <now field="serverTimestamp" type="java.lang.Long"/>
+        <field-to-result field="serverTimestamp"/>
+    </simple-method>        
+    
 </simple-methods>

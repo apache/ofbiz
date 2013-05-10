@@ -23,14 +23,16 @@ under the License.
         xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/ofbiz-component.xsd">
     <resource-loader name="main" type="component"/>
     <classpath type="jar" location="build/lib/*"/>
-    <classpath type="jar" location="lib/*"/>
-    <classpath type="dir" location="script"/>
     <classpath type="dir" location="config"/>
     <entity-resource type="model" reader-name="main" loader="main" location="entitydef/entitymodel.xml"/>
     <entity-resource type="data" reader-name="seed" loader="main" location="data/MarketingTypeData.xml"/>
-    <entity-resource type="data" reader-name="seed" loader="main" location="data/MarketingSecurityData.xml"/>
+    <entity-resource type="data" reader-name="seed" loader="main" location="data/MarketingSecurityPermissionSeedData.xml"/>
+    <entity-resource type="data" reader-name="demo" loader="main" location="data/MarketingSecurityGroupDemoData.xml"/>
+    <entity-resource type="data" reader-name="seed" loader="main" location="data/MarketingHelpData.xml"/>
+    <entity-resource type="data" reader-name="seed" loader="main" location="data/SfaPortletData.xml"/>
     <entity-resource type="data" reader-name="demo" loader="main" location="data/sfaDemoData.xml"/>
     <service-resource type="model" loader="main" location="servicedef/services.xml"/>
+    <service-resource type="model" loader="main" location="servicedef/services_opportunity.xml"/>
     <service-resource type="eca" loader="main" location="servicedef/secas.xml"/>
 
     <!-- test suite -->
@@ -46,7 +48,7 @@ under the License.
         title="SFA"
         server="default-server"
         location="webapp/sfa"
-        base-permission="OFBTOOLS,MARKETING"
+        base-permission="OFBTOOLS,SFA"
         mount-point="/sfa"/>
 </ofbiz-component>
 

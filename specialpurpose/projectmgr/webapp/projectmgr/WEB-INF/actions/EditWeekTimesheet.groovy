@@ -1,5 +1,4 @@
 /*
-/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -29,6 +28,8 @@ import org.ofbiz.entity.util.*;
 import org.ofbiz.entity.condition.*;
 import java.sql.Timestamp;
 
+uiLabelMap = UtilProperties.getResourceBundleMap("ProjectMgrUiLabels", locale);
+
 partyId = parameters.partyId;
 if (!partyId) {
     partyId = parameters.userLogin.partyId;
@@ -38,17 +39,23 @@ if (!partyId) {
 timesheet = null;
 timesheetId = parameters.timesheetId;
 if (timesheetId) {
-    timesheet = delegator.findByPrimaryKey("Timesheet", ["timesheetId" : timesheetId]);
+    timesheet = delegator.findOne("Timesheet", ["timesheetId" : timesheetId], false);
     partyId = timesheet.partyId; // use the party from this timesheet
 } else {
-    start = UtilDateTime.getWeekStart(UtilDateTime.nowTimestamp());
-    timesheets = delegator.findByAnd("Timesheet", ["partyId" : partyId, "fromDate" : start]);
-    if (timesheets) {
-        timesheet = timesheets[0];
-    } else {
-    	result = dispatcher.runSync("createProjectTimesheet", ["userLogin" : parameters.userLogin, "partyId" : partyId]);
+    // make sure because of timezone changes, not a duplicate timesheet is created
+    midweek = UtilDateTime.addDaysToTimestamp(UtilDateTime.getWeekStart(UtilDateTime.nowTimestamp()),3);
+    entryExprs = EntityCondition.makeCondition([
+        EntityCondition.makeCondition("fromDate", EntityComparisonOperator.LESS_THAN, midweek),
+        EntityCondition.makeCondition("thruDate", EntityComparisonOperator.GREATER_THAN, midweek),
+        EntityCondition.makeCondition("partyId", EntityComparisonOperator.EQUALS, partyId)
+        ], EntityOperator.AND);
+    entryIterator = delegator.find("Timesheet", entryExprs, null, null, null, null);
+    timesheet = entryIterator.next();
+    entryIterator.close();
+    if (timesheet == null) {
+        result = dispatcher.runSync("createProjectTimesheet", ["userLogin" : parameters.userLogin, "partyId" : partyId]);
         if (result && result.timesheetId) {
-            timesheet = delegator.findByPrimaryKey("Timesheet", ["timesheetId" : result.timesheetId]);
+            timesheet = delegator.findOne("Timesheet", ["timesheetId" : result.timesheetId], false);
         }
     }
 }
@@ -57,9 +64,9 @@ context.timesheet = timesheet;
 context.weekNumber = UtilDateTime.weekNumber(timesheet.fromDate);
 
 // get the user names
-context.partyNameView = delegator.findByPrimaryKey("PartyNameView",["partyId" : partyId]);
+context.partyNameView = delegator.findOne("PartyNameView",["partyId" : partyId], false);
 // get the default rate for this person
-rateTypes = EntityUtil.filterByDate(delegator.findByAnd("PartyRate", ["partyId" : partyId, "defaultRate" : "Y"]));
+rateTypes = EntityUtil.filterByDate(delegator.findByAnd("PartyRate", ["partyId" : partyId, "defaultRate" : "Y"], null, false));
 if (rateTypes) {
     context.defaultRateTypeId = rateTypes[0].rateTypeId;
 }
@@ -75,9 +82,9 @@ lastTimeEntry = null;
 // retrieve work effort data when the workeffortId has changed.
 void retrieveWorkEffortData() {
         // get the planned number of hours
-        entryWorkEffort = lastTimeEntry.getRelatedOne("WorkEffort");
+        entryWorkEffort = lastTimeEntry.getRelatedOne("WorkEffort", false);
         if (entryWorkEffort) {
-            plannedHours = entryWorkEffort.getRelated("WorkEffortSkillStandard");
+            plannedHours = entryWorkEffort.getRelated("WorkEffortSkillStandard", null, null, false);
             pHours = 0.00;
             plannedHours.each { plannedHour ->
                 if (plannedHour.estimatedDuration) {
@@ -85,7 +92,7 @@ void retrieveWorkEffortData() {
                 }
             }
             entry.plannedHours = pHours;
-            actualHours = entryWorkEffort.getRelated("TimeEntry");
+            actualHours = entryWorkEffort.getRelated("TimeEntry", null, null, false);
             aHours = 0.00;
             actualHours.each { actualHour ->
                 if (actualHour.hours) {
@@ -94,7 +101,7 @@ void retrieveWorkEffortData() {
             }
             entry.actualHours = aHours;
             // get party assignment data to be able to set the task to complete
-            workEffortPartyAssigns = EntityUtil.filterByDate(entryWorkEffort.getRelatedByAnd("WorkEffortPartyAssignment", ["partyId" : partyId]));
+            workEffortPartyAssigns = EntityUtil.filterByDate(entryWorkEffort.getRelated("WorkEffortPartyAssignment", ["partyId" : partyId], null, false));
             if (workEffortPartyAssigns) {
                 workEffortPartyAssign = workEffortPartyAssigns[0];
                 entry.fromDate = workEffortPartyAssign.getTimestamp("fromDate");
@@ -112,6 +119,7 @@ void retrieveWorkEffortData() {
                 entry.phaseName = result.phaseName;
                 entry.projectId = result.projectId;
                 entry.projectName = result.projectName;
+                entry.taskWbsId = result.taskWbsId;
 
         }
         entry.total = taskTotal;
@@ -122,7 +130,7 @@ void retrieveWorkEffortData() {
         entry = ["timesheetId" : timesheet.timesheetId];
 }
 
-timeEntries = timesheet.getRelated("TimeEntry", ["workEffortId", "rateTypeId", "fromDate"]);
+timeEntries = timesheet.getRelated("TimeEntry", null, ["workEffortId", "rateTypeId", "fromDate"], false);
 te = timeEntries.iterator();
 while (te.hasNext()) {
     // only fill lastTimeEntry when not the first time
@@ -174,19 +182,19 @@ if (timeEntry) {
     entry.d4 = day4Total;
     entry.d5 = day5Total;
     entry.d6 = day6Total;
-    entry.phaseName = "Totals";
+    entry.phaseName = uiLabelMap.ProjectMgrTotals;
     entry.workEffortId = "Totals";
     entry.total = day0Total + day1Total + day2Total + day3Total + day4Total + day5Total + day6Total;
     entries.add(entry);
 }
 context.timeEntries = entries;
 // get all timesheets of this user, including the planned hours
-timesheetsDb = delegator.findByAnd("Timesheet", ["partyId" : partyId], ["fromDate DESC"]);
+timesheetsDb = delegator.findByAnd("Timesheet", ["partyId" : partyId], ["fromDate DESC"], false);
 timesheets = new LinkedList();
 timesheetsDb.each { timesheetDb ->
     timesheet = [:];
     timesheet.putAll(timesheetDb);
-    entries = timesheetDb.getRelated("TimeEntry");
+    entries = timesheetDb.getRelated("TimeEntry", null, null, false);
     hours = 0.00;
     entries.each { timeEntry ->
         if (timeEntry.hours) {

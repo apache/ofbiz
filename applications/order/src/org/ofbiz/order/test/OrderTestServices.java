@@ -19,7 +19,6 @@
 package org.ofbiz.order.test;
 
 import java.math.BigDecimal;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -28,9 +27,11 @@ import java.util.Random;
 import javolution.util.FastList;
 
 import org.ofbiz.base.util.Debug;
+import org.ofbiz.base.util.UtilGenerics;
 import org.ofbiz.base.util.UtilMisc;
+import org.ofbiz.base.util.UtilProperties;
 import org.ofbiz.base.util.UtilValidate;
-import org.ofbiz.entity.GenericDelegator;
+import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericValue;
 import org.ofbiz.order.order.OrderChangeHelper;
 import org.ofbiz.order.shoppingcart.CheckOutHelper;
@@ -49,7 +50,7 @@ public class OrderTestServices {
 
     public static final String module = OrderTestServices.class.getName();
 
-    public static Map createTestSalesOrders(DispatchContext dctx, Map context) {
+    public static Map<String, Object> createTestSalesOrders(DispatchContext dctx, Map<String, ? extends Object> context) {
         LocalDispatcher dispatcher = dctx.getDispatcher();
         Integer numberOfOrders = (Integer) context.get("numberOfOrders");
 
@@ -57,7 +58,9 @@ public class OrderTestServices {
         for (int i = 1; i <= numberOfOrdersInt; i++) {
             try {
                 ModelService modelService = dctx.getModelService("createTestSalesOrderSingle");
-                dispatcher.runSync("createTestSalesOrderSingle", modelService.makeValid(context, ModelService.IN_PARAM));
+                Map<String, Object> outputMap = dispatcher.runSync("createTestSalesOrderSingle", modelService.makeValid(context, ModelService.IN_PARAM));
+                String orderId = (String)outputMap.get("orderId");
+                Debug.logInfo("Test sales order with id [" + orderId + "] has been processed.", module);
             } catch (GenericServiceException e) {
                 String errMsg = "Error calling createTestSalesOrderSingle: " + e.toString();
                 Debug.logError(e, errMsg, module);
@@ -66,45 +69,47 @@ public class OrderTestServices {
         return ServiceUtil.returnSuccess();
     }
 
-    public static Map createTestSalesOrderSingle(DispatchContext dctx, Map context) {
+    public static Map<String, Object> createTestSalesOrderSingle(DispatchContext dctx, Map<String, ? extends Object> context) {
         LocalDispatcher dispatcher = dctx.getDispatcher();
-        GenericDelegator delegator = dctx.getDelegator();
+        Delegator delegator = dctx.getDelegator();
         Locale locale = (Locale) context.get("locale");
         GenericValue userLogin = (GenericValue) context.get("userLogin");
-
         String productCategoryId = (String) context.get("productCategoryId");
         String productStoreId = (String) context.get("productStoreId");
         String currencyUomId = (String) context.get("currencyUomId");
         String partyId = (String) context.get("partyId");
-        Integer numberOfOrders = (Integer) context.get("numberOfOrders");
+        String productId = (String) context.get("productId");
         Integer numberOfProductsPerOrder = (Integer) context.get("numberOfProductsPerOrder");
         String salesChannel = (String) context.get("salesChannel");
         if (UtilValidate.isEmpty(salesChannel)) {
             salesChannel = "WEB_SALES_CHANNEL";
         }
 
-        int numberOfProductsPerOrderInt = numberOfProductsPerOrder.intValue();
-
-        List productsList = FastList.newInstance();
+        List<String> productsList = FastList.newInstance();
         try {
-            Map result = dispatcher.runSync("getProductCategoryMembers", UtilMisc.toMap("categoryId", productCategoryId));
-            if (result.get("categoryMembers") != null) {
-                List productCategoryMembers = (List)result.get("categoryMembers");
-                if (productCategoryMembers != null) {
-                    Iterator i = productCategoryMembers.iterator();
-                    while (i.hasNext()) {
-                        GenericValue prodCatMemb = (GenericValue) i.next();
-                        if (prodCatMemb != null) {
-                            productsList.add(prodCatMemb.getString("productId"));
+            if (UtilValidate.isNotEmpty(productId)) {
+                productsList.add(productId);
+                numberOfProductsPerOrder = Integer.valueOf(1);
+            } else {
+                Map<String, Object> result = dispatcher.runSync("getProductCategoryMembers", UtilMisc.toMap("categoryId", productCategoryId));
+                if (result.get("categoryMembers") != null) {
+                    List<GenericValue> productCategoryMembers = UtilGenerics.checkList(result.get("categoryMembers"));
+                    if (productCategoryMembers != null) {
+                        for(GenericValue prodCatMemb : productCategoryMembers) {
+                            if (prodCatMemb != null) {
+                                productsList.add(prodCatMemb.getString("productId"));
+                            }
                         }
                     }
                 }
             }
         } catch (Exception e) {
-            return ServiceUtil.returnError("The following error occurred: " + e.getMessage());
+            return ServiceUtil.returnError(e.getMessage());
         }
         if (productsList.size() == 0) {
-            return ServiceUtil.returnError("No products found in category [" + productCategoryId + "]; no orders will be created");
+            return ServiceUtil.returnError(UtilProperties.getMessage("OrderUiLabels",
+                    "OrderCreateTestSalesOrderSingleError", 
+                    UtilMisc.toMap("productCategoryId", productCategoryId), locale));
         }
 
         Random r = new Random();
@@ -123,29 +128,41 @@ public class OrderTestServices {
         } catch (Exception exc) {
             Debug.logWarning("Error setting userLogin in the cart: " + exc.getMessage(), module);
         }
+        int numberOfProductsPerOrderInt = numberOfProductsPerOrder.intValue();
         for (int j = 1; j <= numberOfProductsPerOrderInt; j++) {
             // get a product
             int k = r.nextInt(productsList.size());
             try {
-                cart.addOrIncreaseItem((String) productsList.get(k), null, BigDecimal.ONE, null, null, null,
+                cart.addOrIncreaseItem(productsList.get(k), null, BigDecimal.ONE, null, null, null,
                                        null, null, null, null,
                                        null /*catalogId*/, null, null/*itemType*/, null/*itemGroupNumber*/, null, dispatcher);
             } catch (Exception exc) {
-                Debug.logWarning("Error adding product with id " + (String) productsList.get(k) + " to the cart: " + exc.getMessage(), module);
+                Debug.logWarning("Error adding product with id " + productsList.get(k) + " to the cart: " + exc.getMessage(), module);
             }
         }
         cart.setDefaultCheckoutOptions(dispatcher);
         CheckOutHelper checkout = new CheckOutHelper(dispatcher, delegator, cart);
-        Map orderCreateResult = checkout.createOrder(userLogin);
+        Map<String, Object> orderCreateResult = checkout.createOrder(userLogin);
         String orderId = (String) orderCreateResult.get("orderId");
 
+        Map<String, Object> resultMap = ServiceUtil.returnSuccess();
         // approve the order
         if (UtilValidate.isNotEmpty(orderId)) {
             Debug.logInfo("Created test order with id: " + orderId, module);
             boolean approved = OrderChangeHelper.approveOrder(dispatcher, userLogin, orderId);
             Debug.logInfo("Test order with id: " + orderId + " has been approved: " + approved, module);
+            resultMap.put("orderId", orderId);
+        }
+        Boolean shipOrder = (Boolean) context.get("shipOrder");
+        if (shipOrder.booleanValue() && UtilValidate.isNotEmpty(orderId)) {
+            try {
+                dispatcher.runSync("quickShipEntireOrder", UtilMisc.toMap("orderId", orderId, "userLogin", userLogin));
+                Debug.logInfo("Test sales order with id [" + orderId + "] has been shipped", module);
+            } catch (Exception exc) {
+                Debug.logWarning("Unable to quick ship test sales order with id [" + orderId + "] with error: " + exc.getMessage(), module);
+            }
         }
 
-        return ServiceUtil.returnSuccess();
+        return resultMap;
     }
 }

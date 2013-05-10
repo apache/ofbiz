@@ -19,7 +19,11 @@ under the License.
 
 <script language="JavaScript" type="text/javascript">
     function exportToEbay() {
-        document.products.action="<@ofbizUrl>ProductsExportToEbay</@ofbizUrl>";
+        <#if toEbayStore?exists>
+            document.products.action="<@ofbizUrl>prepareProductListing</@ofbizUrl>";
+        <#else>
+            document.products.action="<@ofbizUrl>ProductsExportToEbay</@ofbizUrl>";
+        </#if>
         document.products.submit();
     }
 </script>
@@ -28,7 +32,6 @@ under the License.
     <table cellspacing="0" class="basic-table">
         <tr>
             <td align="center" colspan="2">
-                <hr/>
                 <a href="javascript:exportToEbay();" class="buttontext">${uiLabelMap.EbayExportToEbay}</a>
             </td>
         </tr>

@@ -16,186 +16,321 @@
   specific language governing permissions and limitations
   under the License.
   -->
+<script language="javascript" type="text/javascript" src="<@ofbizContentUrl>/images/jquery/plugins/jsTree/jquery.jstree.js</@ofbizContentUrl>"></script>
+<script language="javascript" type="text/javascript" src="<@ofbizContentUrl>/images/jquery/plugins/elrte-1.3/js/elrte.min.js</@ofbizContentUrl>"></script>
+<#if language?has_content && language != "en">
+<script language="javascript" src="<@ofbizContentUrl>/images/jquery/plugins/elrte-1.3/js/i18n/elrte.${language!"en"}.js</@ofbizContentUrl>" type="text/javascript"></script><#rt/>
+</#if>
+
+<link href="/images/jquery/plugins/elrte-1.3/css/elrte.min.css" rel="stylesheet" type="text/css">
 
 <script type="text/javascript">
-    //var djConfig = {
-    //    isDebug: false
-    //};
+    jQuery(document).ready(loadTrees);
+    jQuery(document).ready(createEditor);
 
-    dojo.require("dojo.widget.*");
-    dojo.require("dojo.event.*");
-    dojo.require("dojo.io.*");
-
-    var treeSelected = false;
     var contentRoot = '${contentRoot?if_exists}';
     var webSiteId = '${webSiteId?if_exists}';
     var editorUrl = '<@ofbizUrl>/views/WebSiteCMSContent</@ofbizUrl>';
     var aliasUrl = '<@ofbizUrl>/views/WebSiteCMSPathAlias</@ofbizUrl>';
     var metaUrl = '<@ofbizUrl>/views/WebSiteCMSMetaInfo</@ofbizUrl>';
 
-    dojo.addOnLoad(function() {
-        dojo.event.topic.subscribe("webCmsNodeSelected",
-             function(message) {
-                treeSelected = true;
-                callEditor(false, message.node.widgetId, message.node.object);
-             }
-        );
-        dojo.event.topic.subscribe("newLong/engage",
-            function (menuItem) {
-                var node = menuItem.getTreeNode();
-                callEditor(true, node.widgetId, '', 'ELECTRONIC_TEXT');
-            }
-        );
-        dojo.event.topic.subscribe("newShort/engage",
-            function (menuItem) {
-                var node = menuItem.getTreeNode();
-                callEditor(true, node.widgetId, '', 'SHORT_TEXT');
-            }
-        );
-        dojo.event.topic.subscribe("newUrl/engage",
-            function (menuItem) {
-                var node = menuItem.getTreeNode();
-                callEditor(true, node.widgetId, '', 'URL_RESOURCE');
-            }
-        );
-        dojo.event.topic.subscribe("newImage/engage",
-            function (menuItem) {
-                var node = menuItem.getTreeNode();
-                callEditor(true, node.widgetId, '', 'IMAGE_OBJECT');
-            }
-        );
-        dojo.event.topic.subscribe("newVideo/engage",
-            function (menuItem) {
-                var node = menuItem.getTreeNode();
-                callEditor(true, node.widgetId, '', 'VIDEO_OBJECT');
-            }
-        );
-        dojo.event.topic.subscribe("newAudio/engage",
-            function (menuItem) {
-                var node = menuItem.getTreeNode();
-                callEditor(true, node.widgetId, '', 'AUDIO_OBJECT');
-            }
-        );
-        dojo.event.topic.subscribe("newObject/engage",
-            function (menuItem) {
-                var node = menuItem.getTreeNode();
-                callEditor(true, node.widgetId, '', 'OTHER_OBJECT');
-            }
-        );
+    function loadTrees() {
+        createSubsitesTree();
+        createMenusTree();
+        createErrorTree();
+    }
 
-        var cmsdata = dojo.byId("cmsdata");
-        if (cmsdata) {
-            createEditor(cmsdata.value);
-        } else {
-            createEditor();
-        }
-        //alert("On load called!");
+    function cutNameLength(name) {
+        var leng = 27;
+        return name.substring(0, leng);
+    }
+
+<#-- creating the JSON Data -->
+<#macro fillTreeSubsites assocList>
+      <#if (assocList?has_content)>
+        <#list assocList as assoc>
+            <#assign content = assoc.getRelatedOne("ToContent", false)/>
+            {
+            "data": {"title" : cutNameLength("${content.contentName!assoc.contentIdTo}"), "attr": {"href": "javascript:void(0);", "onClick" : "callDocument('', '${assoc.contentIdTo}', jQuery('#${assoc.contentIdTo}'), '');"}},
+           
+            <#assign assocChilds  = content.getRelated("FromContentAssoc", null, null, false)?if_exists/>
+                "attr": {"id" : "${assoc.contentIdTo}", "contentId" : "${assoc.contentId}", "fromDate" : "${assoc.fromDate}", "contentAssocTypeId" : "${assoc.contentAssocTypeId}"}
+            <#if assocChilds?has_content>
+                ,"children": [
+                    <@fillTreeSubsites assocList = assocChilds/>
+                ]
+            </#if>
+            <#if assoc_has_next>
+            },
+            <#else>
+            }
+            </#if>
+        </#list>
+      </#if>
+</#macro>
+<#macro fillTreeMenus assocList>
+      <#if (assocList?has_content)>
+        <#list assocList as assoc>
+            <#assign content = assoc.getRelatedOne("ToContent", false)/>
+            {
+            "data": {"title" : cutNameLength("${content.contentName!assoc.contentIdTo}"), "attr": {"href": "javascript:void(0);", "onClick" : "callDocument('${assoc.contentIdTo}');"}},
+            <#assign assocChilds  = content.getRelated("FromContentAssoc", null, null, false)?if_exists/>
+                "attr": {"id" : "${assoc.contentIdTo}", "contentId" : "${assoc.contentId}", "fromDate" : "${assoc.fromDate}"}
+            <#if assocChilds?has_content>
+                ,"children": [
+                    <@fillTreeMenus assocList = assocChilds/>
+                ]
+            </#if>
+            <#if assoc_has_next>
+            },
+            <#else>
+            }
+            </#if>
+        </#list>
+      </#if>
+</#macro>
+
+<#macro fillTreeError assocList>
+      <#if (assocList?has_content)>
+        <#list assocList as assoc>
+            <#assign content = assoc.getRelatedOne("ToContent", false)/>
+            {
+            "data": {"title" : cutNameLength("${content.contentName!assoc.contentIdTo}"), "attr": {"href": "javascript:void(0);", "onClick" : "callDocument('', '${assoc.contentIdTo}', '', '');"}},
+            <#assign assocChilds  = content.getRelated("FromContentAssoc", null, null, false)?if_exists/>
+                "attr": {"id" : "${assoc.contentIdTo}", "contentId" : "${assoc.contentId}", "fromDate" : "${assoc.fromDate}"}
+            <#if assocChilds?has_content>
+                ,"children": [
+                    <@fillTreeError assocList = assocChilds/>
+                ]
+            </#if>
+            <#if assoc_has_next>
+            },
+            <#else>
+            }
+            </#if>
+        </#list>
+      </#if>
+</#macro>
+
+var rawdata_subsites = [
+    <#if (subsites?has_content)>
+        <@fillTreeSubsites assocList = subsites/>
+    </#if>
+];
+
+var rawdata_menus = [
+    <#if (menus?has_content)>
+        <@fillTreeMenus assocList = menus/>
+    </#if>
+];
+
+var rawdata_errors = [
+    <#if (errors?has_content)>
+        <@fillTreeError assocList = errors/>
+    </#if>
+];
+
+<#-------------------------------------------------------------------------------------create Tree-->
+  function createSubsitesTree() {
+    jQuery(function () {
+        jQuery("#subsites").jstree({
+            "plugins" : [ "themes", "json_data", "ui", "contextmenu", "crrm"],
+            "core" : {
+                "html_titles" : true
+            },
+            "ui" : {
+                "initially_select" : ["${parameters.contentId!}"]
+            },
+            "json_data" : {
+                "data" : rawdata_subsites,
+                "progressive_render" : false
+            },
+            'contextmenu': {
+                'items': {
+                    'ccp' : false,
+                    'create' : false,
+                    'rename' : false,
+                    'remove' : false,
+                    'create1' : {
+                        'label' : "${uiLabelMap.CommonNew} ${uiLabelMap.ContentResourceLongText}",
+                        'action' : function(obj) {
+                            callDocument(true, obj.attr('id'), '', 'ELECTRONIC_TEXT');
+                        }
+                    },
+                    'create2' : {
+                        'label' : "${uiLabelMap.CommonNew} ${uiLabelMap.ContentResourceShortText}",
+                        'action' : function(obj) {
+                            callDocument(true, obj.attr('id'), '', 'SHORT_TEXT');
+                        }
+                    },
+                    'create3' : {
+                        'label' : "${uiLabelMap.CommonNew} ${uiLabelMap.ContentResourceUrlResource}",
+                        'action' : function(obj) {
+                            callDocument(true, obj.attr('id'), '', 'URL_RESOURCE');
+                        }
+                    },
+                    'create4' : {
+                        'label' : "${uiLabelMap.CommonNew} ${uiLabelMap.ContentDataResourceImage}",
+                        'action' : function(obj) {
+                            callDocument(true, obj.attr('id'), '', 'IMAGE_OBJECT');
+                        }
+                    },
+                    'create5' : {
+                        'label' : "${uiLabelMap.CommonNew} ${uiLabelMap.ContentResourceVideo}",
+                        'action' : function(obj) {
+                            callDocument(true, obj.attr('id'), '', 'VIDEO_OBJECT');
+                        }
+                    },
+                    'create6' : {
+                        'label' : "${uiLabelMap.CommonNew} ${uiLabelMap.ContentResourceAudio}",
+                        'action' : function(obj) {
+                            callDocument(true, obj.attr('id'), '', 'AUDIO_OBJECT');
+                        }
+                    },
+                    'create7' : {
+                        'label' : "${uiLabelMap.CommonNew} ${uiLabelMap.ContentResourceOther}",
+                        'action' : function(obj) {
+                            callDocument(true, obj.attr('id'), '', 'OTHER_OBJECT');
+                        }
+                    }
+                }
+            }
+        });
     });
+  }
 
-    function createEditor(text) {
-        var currentEditor = dojo.widget.byId("w_editor");
-        if (currentEditor) {
-            currentEditor.destroy(true);
-        }
-
-        // display parent div
-        dojo.html.show("editorcontainer");
-
-        // get the editor tag
-        var editorNode = dojo.byId("cmseditor");
-
-        if (editorNode) {
-            if (text) {
-                editorNode.innerHTML = text;
-            }
-
-            // create the widget
-            dojo.widget.createWidget("Editor2", { id: 'w_editor', minHeight: '300px',
-                    htmlEditing: true }, editorNode);
-        }
-    }
-
-    function callMetaInfo(contentId) {
-        var ctx = new Array();
-        ctx['contentId'] = contentId;
-        ctx['webSiteId'] = webSiteId;
-
-        // deselect the tree
-        var tree = dojo.widget.byId("webCmsTreeSelector");
-        if (tree && treeSelected) {
-            tree.deselect();
-            treeSelected = false;
-        }
-
-        // destroy the editor
-        var editor = dojo.widget.byId("w_editor");
-        if (editor) {
-            editor.destroy(true);
-        }
-        //dojo.html.hide("editorcontainer");
-
-        // get the meta-info screen
-        var bindArgs = {
-            url: metaUrl,
-            method: 'POST',
-            mimetype: 'text/html',
-            content: ctx,
-            error: function(type, data, evt) {
-                alert("An error occured loading content! : " + data);
+  function createMenusTree() {
+    jQuery(function () {
+        jQuery("#menus").jstree({
+            "plugins" : [ "themes", "json_data", "ui", "contextmenu", "crrm"],
+            "core" : {
+                "html_titles" : true
             },
-            load: function(type, data, evt) {
-                var innerPage = dojo.byId('cmscontent');
-                innerPage.innerHTML = data;
-            }
-        };
-        dojo.io.bind(bindArgs);
-    }
-
-    function callPathAlias(contentId) {
-        var ctx = new Array();
-        ctx['contentId'] = contentId;
-        ctx['webSiteId'] = webSiteId;
-
-        // deselect the tree
-        var tree = dojo.widget.byId("webCmsTreeSelector");
-        if (tree && treeSelected) {
-            tree.deselect();
-            treeSelected = false;
-        }
-
-        // destroy the editor
-        var editor = dojo.widget.byId("w_editor");
-        if (editor) {
-            editor.destroy(true);
-        }
-        //dojo.html.hide("editorcontainer");
-
-        // get the alias screen
-        var bindArgs = {
-            url: aliasUrl,
-            method: 'POST',
-            mimetype: 'text/html',
-            content: ctx,
-            error: function(type, data, evt) {
-                alert("An error occured loading content! : " + data);
+            "json_data" : {
+                "data" : rawdata_menus,
+                "progressive_render" : false
             },
-            load: function(type, data, evt) {
-                var innerPage = dojo.byId('cmscontent');
-                innerPage.innerHTML = data;
+            'contextmenu': {
+                'items': {
+                    'ccp' : false,
+                    'create' : false,
+                    'rename' : false,
+                    'remove' : false,
+                    'create1' : {
+                        'label' : "${uiLabelMap.CommonNew} ${uiLabelMap.ContentResourceLongText}",
+                        'action' : function(obj) {
+                            callDocument(true, obj.attr('id'), '', 'ELECTRONIC_TEXT');
+                        }
+                    },
+                    'create2' : {
+                        'label' : "${uiLabelMap.CommonNew} ${uiLabelMap.ContentResourceShortText}",
+                        'action' : function(obj) {
+                            callDocument(true, obj.attr('id'), '', 'SHORT_TEXT');
+                        }
+                    },
+                    'create3' : {
+                        'label' : "${uiLabelMap.CommonNew} ${uiLabelMap.ContentResourceUrlResource}",
+                        'action' : function(obj) {
+                            callDocument(true, obj.attr('id'), '', 'URL_RESOURCE');
+                        }
+                    },
+                    'create4' : {
+                        'label' : "${uiLabelMap.CommonNew} ${uiLabelMap.ContentDataResourceImage}",
+                        'action' : function(obj) {
+                            callDocument(true, obj.attr('id'), '', 'IMAGE_OBJECT');
+                        }
+                    },
+                    'create5' : {
+                        'label' : "${uiLabelMap.CommonNew} ${uiLabelMap.ContentResourceVideo}",
+                        'action' : function(obj) {
+                            callDocument(true, obj.attr('id'), '', 'VIDEO_OBJECT');
+                        }
+                    },
+                    'create6' : {
+                        'label' : "${uiLabelMap.CommonNew} ${uiLabelMap.ContentResourceAudio}",
+                        'action' : function(obj) {
+                            callDocument(true, obj.attr('id'), '', 'AUDIO_OBJECT');
+                        }
+                    },
+                    'create7' : {
+                        'label' : "${uiLabelMap.CommonNew} ${uiLabelMap.ContentResourceOther}",
+                        'action' : function(obj) {
+                            callDocument(true, obj.attr('id'), '', 'OTHER_OBJECT');
+                        }
+                    }
+                }
             }
-        };
-        dojo.io.bind(bindArgs);
-    }
+        });
+    });
+  }
 
-    function callEditor(sub, contentId, objstr, dataResourceTypeId) {
-        var ctx = new Array();
-        if (objstr != null && objstr.length > 0) {
-            var obj = objstr.split("|");
-            ctx['contentIdFrom'] = obj[0];
-            ctx['contentAssocTypeId'] = obj[1];
-            ctx['fromDate'] = obj[2];
-        }
-
+  function createErrorTree() {
+    jQuery(function () {
+        jQuery("#errors").jstree({
+            "plugins" : [ "themes", "json_data", "ui", "contextmenu", "crrm"],
+            "core" : {
+                "html_titles" : true
+            },
+            "json_data" : {
+                "data" : rawdata_errors,
+                "progressive_render" : false
+            },
+            'contextmenu': {
+                'items': {
+                    'ccp' : false,
+                    'create' : false,
+                    'rename' : false,
+                    'remove' : false,
+                    'create1' : {
+                        'label' : "${uiLabelMap.CommonNew} ${uiLabelMap.ContentResourceLongText}",
+                        'action' : function(obj) {
+                            callDocument(true, obj.attr('id'), '', 'ELECTRONIC_TEXT');
+                        }
+                    },
+                    'create2' : {
+                        'label' : "${uiLabelMap.CommonNew} ${uiLabelMap.ContentResourceShortText}",
+                        'action' : function(obj) {
+                            callDocument(true, obj.attr('id'), '', 'SHORT_TEXT');
+                        }
+                    },
+                    'create3' : {
+                        'label' : "${uiLabelMap.CommonNew} ${uiLabelMap.ContentResourceUrlResource}",
+                        'action' : function(obj) {
+                            callDocument(true, obj.attr('id'), '', 'URL_RESOURCE');
+                        }
+                    },
+                    'create4' : {
+                        'label' : "${uiLabelMap.CommonNew} ${uiLabelMap.ContentDataResourceImage}",
+                        'action' : function(obj) {
+                            callDocument(true, obj.attr('id'), '', 'IMAGE_OBJECT');
+                        }
+                    },
+                    'create5' : {
+                        'label' : "${uiLabelMap.CommonNew} ${uiLabelMap.ContentResourceVideo}",
+                        'action' : function(obj) {
+                            callDocument(true, obj.attr('id'), '', 'VIDEO_OBJECT');
+                        }
+                    },
+                    'create6' : {
+                        'label' : "${uiLabelMap.CommonNew} ${uiLabelMap.ContentResourceAudio}",
+                        'action' : function(obj) {
+                            callDocument(true, obj.attr('id'), '', 'AUDIO_OBJECT');
+                        }
+                    },
+                    'create7' : {
+                        'label' : "${uiLabelMap.CommonNew} ${uiLabelMap.ContentResourceOther}",
+                        'action' : function(obj) {
+                            callDocument(true, obj.attr('id'), '', 'OTHER_OBJECT');
+                        }
+                    }
+                }
+            }
+        });
+    });
+  }
+<#-------------------------------------------------------------------------------------callDocument function-->
+    function callDocument(sub, contentId, objstr, dataResourceTypeId) {
+        var ctx = {};
         ctx['contentRoot'] = contentRoot;
         ctx['webSiteId'] = webSiteId;
 
@@ -207,51 +342,84 @@
             ctx['contentIdFrom'] = contentId;
             ctx['contentAssocTypeId'] = 'SUB_CONTENT';
 
-            // deselect the tree
-            var tree = dojo.widget.byId("webCmsTreeSelector");
-            if (tree && treeSelected) {
-                tree.deselect();
-                treeSelected = false;
-            }
         } else {
-            if (contentId != null && contentId.length > 0) {
+            if (contentId != null && contentId.length) {
                 ctx['contentId'] = contentId;
-            } else {
-                // deselect the tree
-                var tree = dojo.widget.byId("webCmsTreeSelector");
-                if (tree && treeSelected) {
-                    tree.deselect();
-                    treeSelected = false;
-                }
+            }
+            if (objstr) {
+                ctx['contentIdFrom'] = objstr.attr('contentid');
+                ctx['fromDate'] = objstr.attr('fromdate');
+                ctx['contentAssocTypeId'] = objstr.attr('contentassoctypeid');
             }
         }
 
-        var bindArgs = {
+        //jQuerry Ajax Request
+        jQuery.ajax({
             url: editorUrl,
-            method: 'POST',
-            mimetype: 'text/html',
-            content: ctx,
-            error: function(type, data, evt) {
-                alert("An error occured loading editor! : " + data.message);
+            type: 'POST',
+            data: ctx,
+            error: function(msg) {
+                showErrorAlert("${uiLabelMap.CommonErrorMessage2}","${uiLabelMap.ErrorLoadingContent} : " + msg);
             },
-            load: function(type, data, evt) {
-                var editPage = dojo.byId('cmscontent');
-                editPage.innerHTML = data;
+            success: function(msg) {
+                jQuery('#cmscontent').html(msg);
 
-                // load the data
-                var cmsdata = dojo.byId("cmsdata");
-
-                // create the editor
-                if (cmsdata) {
-                    createEditor(cmsdata.value);
-                } else {
-                    createEditor();
-                }
+                // CREATE / LOAD Editor
+                createEditor();
             }
-        };
-        dojo.io.bind(bindArgs);
+        });
+     }
+
+<#-------------------------------------------------------------------------------------createEditor function-->
+    function createEditor() {
+        if($('#cmseditor').length) {
+            var opts = {
+                cssClass : 'el-rte',
+                lang     : '${language}',
+                height   : 350,
+                toolbar  : 'maxi',
+                doctype  : '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">', //'<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN">',
+                cssfiles : ['/images/jquery/plugins/elrte-1.3/css/elrte-inner.css']
+            }
+            jQuery('#cmseditor').elrte(opts);
+        }
+    }
+<#-------------------------------------------------------------------------------------callMetaInfo function-->
+function callMetaInfo(contentId) {
+        var ctx = {"contentId" : contentId, "webSiteId" : webSiteId};
+
+        jQuery.ajax({
+            url: metaUrl,
+            type: 'POST',
+            data: ctx,
+            error: function(msg) {
+                showErrorAlert("${uiLabelMap.CommonErrorMessage2}","${uiLabelMap.ErrorLoadingContent} : " + msg);
+            },
+            success: function(msg) {
+                jQuery('#cmscontent').html(msg);
+            }
+        });
     }
 
+<#-------------------------------------------------------------------------------------callPathAlias function-->
+    function callPathAlias(contentId) {
+        var ctx = {"contentId" : contentId, "webSiteId" : webSiteId};
+
+        // get the alias screen
+        jQuery.ajax({
+            url: aliasUrl,
+            type: 'POST',
+            data: ctx,
+            error: function(msg) {
+                showErrorAlert("${uiLabelMap.CommonErrorMessage2}","${uiLabelMap.ErrorLoadingContent} : " + msg);
+            },
+            success: function(msg) {
+                jQuery('#cmscontent').html(msg);
+            }
+        });
+    }
+
+<#-------------------------------------------------------------------------------------saveMetaInfo function-->
     function saveMetaInfo(form) {
         // save title
         document.cmsmeta_title.objectInfo.value = form.title.value;
@@ -270,102 +438,66 @@
         ajaxSubmitForm(document.cmsmeta_metaKeywords);
     }
 
+<#-------------------------------------------------------------------------------------pathSave function-->
     function pathSave(contentId) {
-        //dojo.html.hide("submit");
-
         var form = document.cmspathform;
         if (form != null) {
             var url = form.action;
-            var bindArgs = {
+            jQuery.ajax({
                 url: url,
-                method: "POST",
-                mimetype: "text/json",
-                formNode: form,
-                error: function(type, data, evt) {
-                    alert("An error occurred.");
+                type: 'POST',
+                data: jQuery(form).serialize(),
+                error: function(msg) {
+                    showErrorAlert("${uiLabelMap.CommonErrorMessage2}","${uiLabelMap.CommonUnspecifiedErrorOccurred}");
                 },
-                load: function(type, data, evt) {
+                success: function(msg) {
                     callPathAlias(contentId);
                 }
-            };
-            dojo.io.bind(bindArgs);
+            });
         }
     }
 
+<#-------------------------------------------------------------------------------------pathRemove function-->
     function pathRemove(websiteId, pathAlias, contentId) {
         var remAliasUrl = '<@ofbizUrl>/removeWebSitePathAliasJson</@ofbizUrl>';
-        var ctx = new Array();
 
-        ctx['pathAlias'] = pathAlias;
-        ctx['webSiteId'] = webSiteId;
-
-        // get the alias screen
-        var bindArgs = {
-            url: remAliasUrl,
-            method: 'POST',
-            mimetype: 'text/html',
-            content: ctx,
-            error: function(type, data, evt) {
-                alert("An error occured! : " + data);
-            },
-            load: function(type, data, evt) {
-                callPathAlias(contentId);
-            }
-        };
-        dojo.io.bind(bindArgs);
+        jQuery.ajax({
+                url: remAliasUrl,
+                type: 'POST',
+                data: {"pathAlias" : pathAlias, "webSiteId" : webSiteId},
+                error: function(msg) {
+                    showErrorAlert("${uiLabelMap.CommonErrorMessage2}","${uiLabelMap.CommonUnspecifiedErrorOccurred} : " + msg);
+                },
+                success: function(msg) {
+                    callPathAlias(contentId);
+                }
+        });
     }
 
-    function ajaxSubmitForm(form) {
+<#-------------------------------------------------------------------------------------ajaxSubmitForm function-->
+    function ajaxSubmitForm(form, contentId) {
         if (form != null) {
             var url = form.action;
-            var bindArgs = {
+            jQuery.ajax({
                 url: url,
-                method: "POST",
-                mimetype: "text/json",
-                formNode: form,
-                error: function(type, data, evt) {
-                    alert("An error occurred submitting form.");
+                type: 'POST',
+                async: false,
+                data: jQuery(form).serialize(),
+                success: function(data) {
+                    // if the content id is set reload the contentScreen
+                    if (contentId && contentId.length) {
+                        callDocument('', contentId, '', '');
+                    }
                 },
-                load: function(type, data, evt) {
+                error: function(msg) {
+                    showErrorAlert("${uiLabelMap.CommonErrorMessage2}","${uiLabelMap.CommonErrorSubmittingForm} : " + msg);
                 }
-            };
-            dojo.io.bind(bindArgs);
+            });
         }
     }
+
 </script>
 
-<style>
-.dojoContextMenu {
-    background-color: #ccc;
-    font-size: 10px;
-}
-</style>
-
-<#-- looping macro -->
-<#macro fillTree assocList>
-  <#if (assocList?has_content)>
-    <#list assocList as assoc>
-        <#assign thisContent = assoc.getRelatedOne("ToContent")/>
-        <div dojoType="TreeNode" title="${thisContent.contentName?default(assoc.contentIdTo)}" widgetId="${assoc.contentIdTo}"
-                object="${assoc.contentId}|${assoc.contentAssocTypeId}|${assoc.fromDate}">
-            <#assign assocs = thisContent.getRelated("FromContentAssoc")?if_exists/>
-            <#if (assocs?has_content)>
-                <@fillTree assocList = assocs/>
-            </#if>
-        </div>
-    </#list>
-  </#if>
-</#macro>
-
-<dl dojoType="TreeContextMenu" id="webCmsContextMenu" style="font-size: 1em; color: #ccc;">
-    <dt dojoType="TreeMenuItem" id="newLong" caption="New Long Text"/>
-    <dt dojoType="TreeMenuItem" id="newShort" caption="New Short Text"/>
-    <dt dojoType="TreeMenuItem" id="newUrl" caption="New URL"/>
-    <dt dojoType="TreeMenuItem" id="newImage" caption="New Image"/>
-    <dt dojoType="TreeMenuItem" id="newVideo" caption="New Video"/>
-    <dt dojoType="TreeMenuItem" id="newAudio" caption="New Audio"/>
-    <dt dojoType="TreeMenuItem" id="newObject" caption="New Object"/>
-</dl>
 
 <div class="label">
     ${uiLabelMap.ContentWebSiteContent}
@@ -375,24 +507,10 @@
 </div>
 <div>&nbsp;</div>
 
-<dojo:TreeSelector widgetId="webCmsTreeSelector" eventNames="select:webCmsNodeSelected"></dojo:TreeSelector>
-<div dojoType="Tree" menu="webCmsContextMenu" widgetId="webCmsTree" selector="webCmsTreeSelector" toggler="fade" toggleDuration="500">
-    <#if (subsites?has_content)>
-        <@fillTree assocList = subsites/>
-    </#if>
-</div>
+<div id="subsites"></div>
 <#if (!subsites?has_content)>
     <a href="javascript:void(0);" class="buttontext">${uiLabelMap.ContentWebSiteAddTree}</a>
 </#if>
-
-<div>&nbsp;</div>
-<div>&nbsp;</div>
-
-<dl dojoType="TreeContextMenu" id="webMenuContextMenu" style="font-size: 1em; color: #ccc;">
-    <dt dojoType="TreeMenuItem" id="newItem" caption="New Menu Item"/>
-    <dt dojoType="TreeMenuItem" id="newMenu" caption="New Menu"/>
-</dl>
-
 <div class="label">
     ${uiLabelMap.ContentWebSiteMenus}
 </div>
@@ -401,13 +519,22 @@
 </div>
 <div>&nbsp;</div>
 
-<dojo:TreeSelector widgetId="webMenuTreeSelector" eventNames="select:webMenuNodeSelected"></dojo:TreeSelector>
-<div dojoType="Tree" menu="webMenuContextMenu" widgetId="webMenuTree" selector="webMenuTreeSelector" toggler="fade" toggleDuration="500">
-    <#if (menus?has_content)>
-        ${menus}
-        <@fillTree assocList = menus/>
-    </#if>
-</div>
+<div id="menus"></div>
 <#if (!menus?has_content)>
     <a href="javascript:void(0);" class="buttontext">${uiLabelMap.ContentWebSiteAddMenu}</a>
+</#if>
+
+<div>&nbsp;</div>
+<div>&nbsp;</div>
+
+<div class="label">
+    ${uiLabelMap.ContentWebSiteErrors}
+</div>
+<div>
+    ${uiLabelMap.ContentWebSiteAddNewErrors}
+</div>
+<div>&nbsp;</div>
+<div id="errors"></div>
+<#if (!errors?has_content)>
+    <a href="javascript:void(0);" class="buttontext">${uiLabelMap.ContentWebSiteAddError}</a>
 </#if>

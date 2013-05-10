@@ -17,24 +17,7 @@ specific language governing permissions and limitations
 under the License.
 -->
 
-<#if webSiteId?exists && requestAttributes._CURRENT_VIEW_?exists>
-  <#assign helpTopic = webSiteId + "_" + requestAttributes._CURRENT_VIEW_ />
-  <#assign helpUrlTopic = helpUrlsMap["HelpNotFound"]/>
-  <#assign helpUrlPrefix = "" />
-  <#assign helpUrlSuffix = "" />
-
-<#-- uncomment this to show the current screen help topic key (this is usefull to cut and paste in the help link resources files
-${helpTopic}
+<#-- uncomment this to show the current screen help topic key (this is useful to cut and paste in the help link resources files
+${helpTopic?if_exists}
 -->
-
-  <#if helpUrlsMap["Prefix"] != "Prefix">
-    <#assign helpUrlPrefix = helpUrlsMap["Prefix"] />
-  </#if>
-  <#if helpUrlsMap["Suffix"] != "Suffix">
-    <#assign helpUrlSuffix = helpUrlsMap["Suffix"] />
-  </#if>
-  <#if helpUrlsMap[helpTopic] != helpTopic >
-    <#assign helpUrlTopic = helpUrlsMap[helpTopic] />
-  </#if>
-  <li><a href="${helpUrlPrefix}${helpUrlTopic}${helpUrlSuffix}" target="_blank">${uiLabelMap.CommonHelp}</a></li>
-</#if>
+ 

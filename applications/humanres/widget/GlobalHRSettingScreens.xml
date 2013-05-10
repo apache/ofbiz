@@ -95,7 +95,7 @@
                         <decorator-screen name="FindScreenDecorator" location="component://common/widget/CommonScreens.xml">
                             <decorator-section name="menu-bar">
                                 <container style="button-bar">
-                                    <link target="EditEmplPositionTypes" text="${uiLabelMap.HumanResNewEmplPositionType}" style="buttontext"/>
+                                    <link target="EditEmplPositionTypes" text="${uiLabelMap.HumanResNewEmplPositionType}" style="buttontext create"/>
                                 </container>
                             </decorator-section>
                             <decorator-section name="search-options">
@@ -130,7 +130,7 @@
                                 </not>
                             </condition>
                             <widgets>
-                                <include-menu location="component://humanres/widget/Menus.xml" name="EmplPositionTypeTabBar"/>
+                                <include-menu location="component://humanres/widget/HumanresMenus.xml" name="EmplPositionTypeTabBar"/>
                             </widgets>
                         </section>
                         <screenlet title="${uiLabelMap.HumanResEditEmplPositionType}">
@@ -158,7 +158,7 @@
             <widgets>
                 <decorator-screen name="GlobalHRSettingsDecorator" location="${parameters.mainDecoratorLocation}">
                     <decorator-section name="body">
-                        <include-menu location="component://humanres/widget/Menus.xml" name="EmplPositionTypeTabBar"/>
+                        <include-menu location="component://humanres/widget/HumanresMenus.xml" name="EmplPositionTypeTabBar"/>
                         <screenlet id="AddEmplPositionTypeRatePanel" title="${uiLabelMap.CommonAdd} ${uiLabelMap.HumanResEmplPositionType} ${uiLabelMap.CommonRate}" collapsible="true">
                             <include-form name="AddEmplPositionTypeRate" location="component://humanres/widget/forms/GlobalHRSettingForms.xml"/>
                         </screenlet>
@@ -183,6 +183,114 @@
                             <include-form name="AddTerminationReason" location="component://humanres/widget/forms/GlobalHRSettingForms.xml"/>
                         </screenlet>
                         <include-form name="ListTerminationReasons" location="component://humanres/widget/forms/GlobalHRSettingForms.xml"/>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="EditJobInterviewType">
+        <section>                        
+            <actions>
+                <set field="tabButtonItem" value="JobInterviewType"/>
+                <set field="titleProperty" value="PageTitleEditJobInterviewType"/>
+                <set field="jobInterviewTypeId" from-field="parameters.jobInterviewTypeId"/>
+                <entity-one entity-name="JobInterviewType" value-field="interviewType" />
+            </actions>            
+            <widgets>
+                <decorator-screen name="GlobalHRSettingsDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">                                                                                       
+                        <screenlet id="AddJobInterviewTypePanel" title="${uiLabelMap.HumanResAddJobInterviewType}" collapsible="true">
+                            <include-form name="AddJobInterviewType" location="component://humanres/widget/forms/GlobalHRSettingForms.xml"/>
+                        </screenlet> 
+                        <include-form name="ListJobInterviewType" location="component://humanres/widget/forms/GlobalHRSettingForms.xml"/>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>            
+        </section>
+    </screen>
+    <screen name="EditTrainingTypes">
+        <section>                        
+            <actions>
+                <set field="tabButtonItem" value="EditTrainingTypes"/>
+                <set field="titleProperty" value="PageTitleEditTrainingTypes"/>
+            </actions>            
+            <widgets>
+                <decorator-screen name="GlobalHRSettingsDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">                                                                                       
+                        <screenlet id="AddTrainingTypePanel" title="${uiLabelMap.CommonAdd} ${uiLabelMap.HumanResTrainingTypes}" collapsible="true">
+                            <include-form name="AddTrainingTypes" location="component://humanres/widget/forms/GlobalHRSettingForms.xml"/>
+                        </screenlet>
+                            <include-form name="ListTrainingTypes" location="component://humanres/widget/forms/GlobalHRSettingForms.xml"/>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>            
+        </section>
+    </screen>
+    <screen name="EditEmplLeaveTypes">
+        <section>
+            <actions>
+                <set field="titleProperty" value="HumanResEditEmplLeaveType"/>
+                <set field="headerItem" value="GlobalHRSettings"/>
+                <set field="tabButtonItem" value="EmplLeaveType"/>
+                <set field="leaveTypeId" from-field="parameters.leaveTypeId"/>
+                <entity-one entity-name="EmplLeaveType" value-field="emplLeaveType"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="GlobalHRSettingsDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <include-menu name="EmplLeaveReasonTypeTabBar" location="component://humanres/widget/HumanresMenus.xml"/>
+                        <screenlet id="AddEmplLeaveTypePanel" title="${uiLabelMap.HumanResAddEmplLeaveType}" collapsible="true">
+                            <include-form name="AddEmplLeaveType" location="component://humanres/widget/forms/GlobalHRSettingForms.xml"/>
+                        </screenlet>
+                        <include-form name="ListEmplLeaveTypes" location="component://humanres/widget/forms/GlobalHRSettingForms.xml"/>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="EditEmplLeaveReasonTypes">
+        <section>
+            <actions>
+                <set field="titleProperty" value="HumanResEditEmplReasonype"/>
+                <set field="headerItem" value="GlobalHRSettings"/>
+                <set field="tabButtonItem" value="EmplLeaveReasonType"/>
+                <set field="emplLeaveReasonTypeId" from-field="parameters.emplLeaveReasonTypeId"/>
+                <entity-one entity-name="EmplLeaveReasonType" value-field="emplreasonType"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="GlobalHRSettingsDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <include-menu name="EmplLeaveReasonTypeTabBar" location="component://humanres/widget/HumanresMenus.xml"/>
+                        <screenlet id="AddEmplReasonTypePanel" title="${uiLabelMap.HumanResAddEmplLeaveReasonType}" collapsible="true">
+                            <include-form name="AddEmplLeaveReasonType" location="component://humanres/widget/forms/GlobalHRSettingForms.xml"/>
+                        </screenlet>
+                        <include-form name="ListEmplLeaveReasonTypes" location="component://humanres/widget/forms/GlobalHRSettingForms.xml"/>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="PublicHoliday">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitlePublicHoliday"/>
+                <set field="headerItem" value="GlobalHRSettings"/>
+                <set field="tabButtonItem" value="publicHoliday"/>
+                <entity-one entity-name="WorkEffort" value-field="workEffort"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="GlobalHRSettingsDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <section>
+                            <widgets>
+                                <screenlet id="addPublicHoliday" title="${uiLabelMap.PageTitleAddPublicHoliday}" collapsible="true">
+                                    <include-form name="AddPublicHoliday" location="component://humanres/widget/forms/GlobalHRSettingForms.xml"/>
+                                </screenlet>
+                                <screenlet id="listPublicHoliday" title="${uiLabelMap.PageTitlePublicHolidayList}" collapsible="true">
+                                    <include-form name="ListPublicHoliday" location="component://humanres/widget/forms/GlobalHRSettingForms.xml"/>
+                                </screenlet>
+                            </widgets>
+                        </section>
                     </decorator-section>
                 </decorator-screen>
             </widgets>

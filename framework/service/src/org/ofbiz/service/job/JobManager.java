@@ -20,214 +20,273 @@ package org.ofbiz.service.job;
 
 import java.io.IOException;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.RejectedExecutionException;
 
-import javolution.util.FastList;
-import javolution.util.FastMap;
-
+import org.ofbiz.base.util.Assert;
 import org.ofbiz.base.util.Debug;
-import org.ofbiz.base.util.GeneralRuntimeException;
 import org.ofbiz.base.util.UtilDateTime;
 import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.base.util.UtilProperties;
 import org.ofbiz.base.util.UtilValidate;
-import org.ofbiz.entity.GenericDelegator;
+import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
 import org.ofbiz.entity.condition.EntityCondition;
-import org.ofbiz.entity.condition.EntityConditionList;
 import org.ofbiz.entity.condition.EntityExpr;
 import org.ofbiz.entity.condition.EntityOperator;
 import org.ofbiz.entity.serialize.SerializeException;
 import org.ofbiz.entity.serialize.XmlSerializer;
 import org.ofbiz.entity.transaction.GenericTransactionException;
 import org.ofbiz.entity.transaction.TransactionUtil;
+import org.ofbiz.entity.util.EntityListIterator;
 import org.ofbiz.service.DispatchContext;
-import org.ofbiz.service.GenericDispatcher;
 import org.ofbiz.service.LocalDispatcher;
+import org.ofbiz.service.ServiceContainer;
 import org.ofbiz.service.calendar.RecurrenceInfo;
 import org.ofbiz.service.calendar.RecurrenceInfoException;
 import org.ofbiz.service.config.ServiceConfigUtil;
 
+import com.ibm.icu.util.Calendar;
+
 /**
- * JobManager
+ * Job manager. The job manager queues and manages jobs. Client code can queue a job to be run immediately
+ * by calling the {@link #runJob(Job)} method, or schedule a job to be run later by calling the
+ * {@link #schedule(String, String, String, Map, long, int, int, int, long, int)} method.
+ * Scheduled jobs are persisted in the JobSandbox entity.
+ * <p>A scheduled job's start time is an approximation - the actual start time will depend
+ * on the job manager/job poller configuration (poll interval) and the load on the server.
+ * Scheduled jobs might be rescheduled if the server is busy. Therefore, applications
+ * requiring a precise job start time should use a different mechanism to schedule the job.</p>
  */
-public class JobManager {
+public final class JobManager {
 
-    public static final String instanceId = UtilProperties.getPropertyValue("general.properties", "unique.instanceId", "ofbiz0");
-    public static final Map<String, Object> updateFields = UtilMisc.<String, Object>toMap("runByInstanceId", instanceId, "statusId", "SERVICE_QUEUED");
     public static final String module = JobManager.class.getName();
-    public static final String dispatcherName = "JobDispatcher";
-    public static Map<String, JobManager> registeredManagers = FastMap.newInstance();
+    public static final String instanceId = UtilProperties.getPropertyValue("general.properties", "unique.instanceId", "ofbiz0");
+    private static final ConcurrentHashMap<String, JobManager> registeredManagers = new ConcurrentHashMap<String, JobManager>();
+    private static boolean isShutDown = false;
 
-    protected GenericDelegator delegator;
-    protected JobPoller jp;
-
-    /** Creates a new JobManager object. */
-    public JobManager(GenericDelegator delegator) {
-        this(delegator, true);
+    private static void assertIsRunning() {
+        if (isShutDown) {
+            throw new IllegalStateException("OFBiz shutting down");
+        }
     }
 
-    public JobManager(GenericDelegator delegator, boolean enabled) {
-        if (delegator == null) {
-            throw new GeneralRuntimeException("ERROR: null delegator passed, cannot create JobManager");
-        }
-        if (JobManager.registeredManagers.get(delegator.getDelegatorName()) != null) {
-            throw new GeneralRuntimeException("JobManager for [" + delegator.getDelegatorName() + "] already running");
-        }
-
-        this.delegator = delegator;
-        jp = new JobPoller(this, enabled);
-        JobManager.registeredManagers.put(delegator.getDelegatorName(), this);
-    }
-    
-    public static JobManager getInstance(GenericDelegator delegator, boolean enabled)
-    {
-        JobManager jm = JobManager.registeredManagers.get(delegator.getDelegatorName());
+    /**
+     * Returns a <code>JobManager</code> instance.
+     * @param delegator
+     * @param enablePoller Enables polling of the JobSandbox entity.
+     * @throws IllegalStateException if the Job Manager is shut down.
+     */
+    public static JobManager getInstance(Delegator delegator, boolean enablePoller) {
+        assertIsRunning();
+        Assert.notNull("delegator", delegator);
+        JobManager jm = registeredManagers.get(delegator.getDelegatorName());
         if (jm == null) {
-            jm = new JobManager(delegator, enabled);
+            jm = new JobManager(delegator);
+            registeredManagers.putIfAbsent(delegator.getDelegatorName(), jm);
+            jm = registeredManagers.get(delegator.getDelegatorName());
+            if (enablePoller) {
+                jm.reloadCrashedJobs();
+                JobPoller.registerJobManager(jm);
+            }
         }
         return jm;
     }
 
-    /** Queues a Job to run now. */
-    public void runJob(Job job) throws JobManagerException {
-        if (job.isValid()) {
-            jp.queueNow(job);
-        }
+    /**
+     * Shuts down all job managers. This method is called when OFBiz shuts down.
+     */
+    public static void shutDown() {
+        isShutDown = true;
+        JobPoller.getInstance().stop();
     }
 
-    /** Returns the ServiceDispatcher. */
-    public LocalDispatcher getDispatcher() {
-        LocalDispatcher thisDispatcher = GenericDispatcher.getLocalDispatcher(dispatcherName, delegator);
-        return thisDispatcher;
+    private final Delegator delegator;
+    private boolean crashedJobsReloaded = false;
+
+    private JobManager(Delegator delegator) {
+        this.delegator = delegator;
     }
 
-    /** Returns the GenericDelegator. */
-    public GenericDelegator getDelegator() {
+    /** Returns the Delegator. */
+    public Delegator getDelegator() {
         return this.delegator;
     }
 
-    public synchronized List<Job> poll() {
-        List<Job> poll = FastList.newInstance();
+    /** Returns the LocalDispatcher. */
+    public LocalDispatcher getDispatcher() {
+        LocalDispatcher thisDispatcher = ServiceContainer.getLocalDispatcher(delegator.getDelegatorName(), delegator);
+        return thisDispatcher;
+    }
 
-        // sort the results by time
-        List<String> order = UtilMisc.toList("runTime");
+    /**
+     * Get a List of each threads current state.
+     * 
+     * @return List containing a Map of each thread's state.
+     */
+    public Map<String, Object> getPoolState() {
+        return JobPoller.getInstance().getPoolState();
+    }
 
+    /**
+     * Scans the JobSandbox entity and returns a list of jobs that are due to run.
+     * Returns an empty list if there are no jobs due to run.
+     * This method is called by the {@link JobPoller} polling thread.
+     */
+    protected List<Job> poll(int limit) {
+        assertIsRunning();
+        // The rest of this method logs exceptions and does not throw them.
+        // The idea is to keep the JobPoller working even when a database
+        // connection is not available (possible on a saturated server).
+        List<Job> poll = new ArrayList<Job>(limit);
+        DispatchContext dctx = getDispatcher().getDispatchContext();
+        if (dctx == null) {
+            Debug.logWarning("Unable to locate DispatchContext object; not running job!", module);
+            return poll;
+        }
         // basic query
-        List<EntityExpr> expressions = UtilMisc.toList(EntityCondition.makeCondition("runTime", EntityOperator.LESS_THAN_EQUAL_TO,
-                UtilDateTime.nowTimestamp()), EntityCondition.makeCondition("startDateTime", EntityOperator.EQUALS, null),
+        List<EntityExpr> expressions = UtilMisc.toList(EntityCondition.makeCondition("runTime", EntityOperator.LESS_THAN_EQUAL_TO, UtilDateTime.nowTimestamp()),
+                EntityCondition.makeCondition("startDateTime", EntityOperator.EQUALS, null),
                 EntityCondition.makeCondition("cancelDateTime", EntityOperator.EQUALS, null),
                 EntityCondition.makeCondition("runByInstanceId", EntityOperator.EQUALS, null));
-
         // limit to just defined pools
         List<String> pools = ServiceConfigUtil.getRunPools();
         List<EntityExpr> poolsExpr = UtilMisc.toList(EntityCondition.makeCondition("poolId", EntityOperator.EQUALS, null));
         if (pools != null) {
-            for (String poolName: pools) {
+            for (String poolName : pools) {
                 poolsExpr.add(EntityCondition.makeCondition("poolId", EntityOperator.EQUALS, poolName));
             }
         }
-
         // make the conditions
         EntityCondition baseCondition = EntityCondition.makeCondition(expressions);
         EntityCondition poolCondition = EntityCondition.makeCondition(poolsExpr, EntityOperator.OR);
         EntityCondition mainCondition = EntityCondition.makeCondition(UtilMisc.toList(baseCondition, poolCondition));
-
-        // we will loop until we have no more to do
-        boolean pollDone = false;
-
-        while (!pollDone) {
-            // an extra protection for synchronization, help make sure we don't get in here more than once
-            synchronized (this) {
-                boolean beganTransaction = false;
-
+        EntityListIterator jobsIterator = null;
+        boolean beganTransaction = false;
+        try {
+            beganTransaction = TransactionUtil.begin();
+            if (!beganTransaction) {
+                Debug.logWarning("Unable to poll JobSandbox for jobs; transaction was not started by this process", module);
+                return poll;
+            }
+            jobsIterator = delegator.find("JobSandbox", mainCondition, null, null, UtilMisc.toList("runTime"), null);
+            GenericValue jobValue = jobsIterator.next();
+            while (jobValue != null) {
+                // Claim ownership of this value. Using storeByCondition to avoid a race condition.
+                List<EntityExpr> updateExpression = UtilMisc.toList(EntityCondition.makeCondition("jobId", EntityOperator.EQUALS, jobValue.get("jobId")), EntityCondition.makeCondition("runByInstanceId", EntityOperator.EQUALS, null));
+                int rowsUpdated = delegator.storeByCondition("JobSandbox", UtilMisc.toMap("runByInstanceId", instanceId), EntityCondition.makeCondition(updateExpression));
+                if (rowsUpdated == 1) {
+                    poll.add(new PersistedServiceJob(dctx, jobValue, null));
+                    if (poll.size() == limit) {
+                        break;
+                    }
+                }
+                jobValue = jobsIterator.next();
+            }
+        } catch (Throwable t) {
+            poll.clear();
+            String errMsg =  "Exception thrown while polling JobSandbox: ";
+            Debug.logWarning(t, errMsg, module);
+            try {
+                TransactionUtil.rollback(beganTransaction, errMsg + t.getMessage(), t);
+            } catch (GenericEntityException e) {
+                Debug.logWarning(e, "Exception thrown while rolling back transaction: ", module);
+            }
+        } finally {
+            if (jobsIterator != null) {
                 try {
-                    beganTransaction = TransactionUtil.begin();
-                    if (!beganTransaction) {
-                        Debug.logError("Unable to poll for jobs; transaction was not started by this process", module);
-                        return null;
+                    jobsIterator.close();
+                } catch (GenericEntityException e) {
+                    Debug.logWarning(e, module);
+                }
+            }
+            try {
+                TransactionUtil.commit(beganTransaction);
+            } catch (GenericTransactionException e) {
+                Debug.logWarning(e, "Transaction error trying to commit when polling and updating the JobSandbox: ", module);
+            }
+        }
+        if (poll.isEmpty()) {
+            // No jobs to run, see if there are any jobs to purge
+            int daysToKeep = ServiceConfigUtil.getPurgeJobDays();
+            Calendar cal = Calendar.getInstance();
+            cal.add(Calendar.DAY_OF_YEAR, -daysToKeep);
+            Timestamp purgeTime = new Timestamp(cal.getTimeInMillis());
+            List<EntityExpr> finExp = UtilMisc.toList(EntityCondition.makeCondition("finishDateTime", EntityOperator.NOT_EQUAL, null), EntityCondition.makeCondition("finishDateTime", EntityOperator.LESS_THAN, purgeTime));
+            List<EntityExpr> canExp = UtilMisc.toList(EntityCondition.makeCondition("cancelDateTime", EntityOperator.NOT_EQUAL, null), EntityCondition.makeCondition("cancelDateTime", EntityOperator.LESS_THAN, purgeTime));
+            EntityCondition doneCond = EntityCondition.makeCondition(UtilMisc.toList(EntityCondition.makeCondition(canExp), EntityCondition.makeCondition(finExp)), EntityOperator.OR);
+            mainCondition = EntityCondition.makeCondition(UtilMisc.toList(EntityCondition.makeCondition("runByInstanceId", instanceId), doneCond));
+            beganTransaction = false;
+            jobsIterator = null;
+            try {
+                beganTransaction = TransactionUtil.begin();
+                if (!beganTransaction) {
+                    Debug.logWarning("Unable to poll JobSandbox for jobs; transaction was not started by this process", module);
+                    return poll;
+                }
+                jobsIterator = delegator.find("JobSandbox", mainCondition, null, null, UtilMisc.toList("jobId"), null);
+                GenericValue jobValue = jobsIterator.next();
+                while (jobValue != null) {
+                    poll.add(new PurgeJob(jobValue));
+                    if (poll.size() == limit) {
+                        break;
                     }
-
-                    List<Job> localPoll = FastList.newInstance();
-
-                    // first update the jobs w/ this instance running information
-                    delegator.storeByCondition("JobSandbox", updateFields, mainCondition);
-
-                    // now query all the 'queued' jobs for this instance
-                    List<GenericValue> jobEnt = delegator.findByAnd("JobSandbox", updateFields, order);
-                    //jobEnt = delegator.findByCondition("JobSandbox", mainCondition, null, order);
-
-                    if (UtilValidate.isNotEmpty(jobEnt)) {
-                        for (GenericValue v: jobEnt) {
-                            DispatchContext dctx = getDispatcher().getDispatchContext();
-                            if (dctx == null) {
-                                Debug.logError("Unable to locate DispatchContext object; not running job!", module);
-                                continue;
-                            }
-                            Job job = new PersistedServiceJob(dctx, v, null); // TODO fix the requester
-                            try {
-                                job.queue();
-                                localPoll.add(job);
-                            } catch (InvalidJobException e) {
-                                Debug.logError(e, module);
-                            }
-                        }
-                    } else {
-                        pollDone = true;
-                    }
-
-                    // nothing should go wrong at this point, so add to the general list
-                    poll.addAll(localPoll);
-                } catch (Throwable t) {
-                    // catch Throwable so nothing slips through the cracks... this is a fairly sensitive operation
-                    String errMsg = "Error in polling JobSandbox: [" + t.toString() + "]. Rolling back transaction.";
-                    Debug.logError(t, errMsg, module);
+                    jobValue = jobsIterator.next();
+                }
+            } catch (Throwable t) {
+                poll.clear();
+                String errMsg =  "Exception thrown while polling JobSandbox: ";
+                Debug.logWarning(t, errMsg, module);
+                try {
+                    TransactionUtil.rollback(beganTransaction, errMsg + t.getMessage(), t);
+                } catch (GenericEntityException e) {
+                    Debug.logWarning(e, "Exception thrown while rolling back transaction: ", module);
+                }
+            } finally {
+                if (jobsIterator != null) {
                     try {
-                        // only rollback the transaction if we started one...
-                        TransactionUtil.rollback(beganTransaction, errMsg, t);
-                    } catch (GenericEntityException e2) {
-                        Debug.logError(e2, "[GenericDelegator] Could not rollback transaction: " + e2.toString(), module);
+                        jobsIterator.close();
+                    } catch (GenericEntityException e) {
+                        Debug.logWarning(e, module);
                     }
-                } finally {
-                    try {
-                        // only commit the transaction if we started one... but make sure we try
-                        TransactionUtil.commit(beganTransaction);
-                    } catch (GenericTransactionException e) {
-                        String errMsg = "Transaction error trying to commit when polling and updating the JobSandbox: " + e.toString();
-                        // we don't really want to do anything different, so just log and move on
-                        Debug.logError(e, errMsg, module);
-                    }
+                }
+                try {
+                    TransactionUtil.commit(beganTransaction);
+                } catch (GenericTransactionException e) {
+                    Debug.logWarning(e, "Transaction error trying to commit when polling the JobSandbox: ", module);
                 }
             }
         }
         return poll;
     }
 
-    public synchronized void reloadCrashedJobs() {
-        String instanceId = UtilProperties.getPropertyValue("general.properties", "unique.instanceId", "ofbiz0");
-        List<GenericValue> crashed = null;
-
-        List<EntityExpr> exprs = UtilMisc.toList(EntityCondition.makeCondition("finishDateTime", null));
-        exprs.add(EntityCondition.makeCondition("cancelDateTime", null));
-        exprs.add(EntityCondition.makeCondition("runByInstanceId", instanceId));
-        EntityConditionList<EntityExpr> ecl = EntityCondition.makeCondition(exprs);
-
-        try {
-            crashed = delegator.findList("JobSandbox", ecl, null, UtilMisc.toList("startDateTime"), null, false);
-        } catch (GenericEntityException e) {
-            Debug.logError(e, "Unable to load crashed jobs", module);
+    private synchronized void reloadCrashedJobs() {
+        assertIsRunning();
+        if (crashedJobsReloaded) {
+            return;
         }
-
+        List<GenericValue> crashed = null;
+        List<EntityExpr> statusExprList = UtilMisc.toList(EntityCondition.makeCondition("statusId", EntityOperator.EQUALS, "SERVICE_PENDING"),
+                EntityCondition.makeCondition("statusId", EntityOperator.EQUALS, "SERVICE_QUEUED"),
+                EntityCondition.makeCondition("statusId", EntityOperator.EQUALS, "SERVICE_RUNNING"));
+        EntityCondition statusCondition = EntityCondition.makeCondition(statusExprList, EntityOperator.OR);
+        EntityCondition mainCondition = EntityCondition.makeCondition(UtilMisc.toList(EntityCondition.makeCondition("runByInstanceId", instanceId), statusCondition));
+        try {
+            crashed = delegator.findList("JobSandbox", mainCondition, null, UtilMisc.toList("startDateTime"), null, false);
+        } catch (GenericEntityException e) {
+            Debug.logWarning(e, "Unable to load crashed jobs", module);
+        }
         if (UtilValidate.isNotEmpty(crashed)) {
-            try {
-                int rescheduled = 0;
-                for (GenericValue job: crashed) {
-                    Timestamp now = UtilDateTime.nowTimestamp();
-                    Debug.log("Scheduling Job : " + job, module);
-
+            int rescheduled = 0;
+            Timestamp now = UtilDateTime.nowTimestamp();
+            for (GenericValue job : crashed) {
+                try {
+                    Debug.logInfo("Scheduling Job : " + job, module);
                     String pJobId = job.getString("parentJobId");
                     if (pJobId == null) {
                         pJobId = job.getString("jobId");
@@ -240,33 +299,50 @@ public class JobManager {
                     newJob.set("startDateTime", null);
                     newJob.set("runByInstanceId", null);
                     delegator.createSetNextSeqId(newJob);
-
                     // set the cancel time on the old job to the same as the re-schedule time
                     job.set("statusId", "SERVICE_CRASHED");
                     job.set("cancelDateTime", now);
                     delegator.store(job);
-
                     rescheduled++;
+                } catch (GenericEntityException e) {
+                    Debug.logWarning(e, module);
                 }
-
-                if (Debug.infoOn()) Debug.logInfo("-- " + rescheduled + " jobs re-scheduled", module);
-            } catch (GenericEntityException e) {
-                Debug.logError(e, module);
             }
-
+            if (Debug.infoOn())
+                Debug.logInfo("-- " + rescheduled + " jobs re-scheduled", module);
         } else {
-            if (Debug.infoOn()) Debug.logInfo("No crashed jobs to re-schedule", module);
+            if (Debug.infoOn())
+                Debug.logInfo("No crashed jobs to re-schedule", module);
+        }
+        crashedJobsReloaded = true;
+    }
+
+    /** Queues a Job to run now.
+     * @throws IllegalStateException if the Job Manager is shut down.
+     * @throws RejectedExecutionException if the poller is stopped.
+     */
+    public void runJob(Job job) throws JobManagerException {
+        assertIsRunning();
+        if (job.isValid()) {
+            JobPoller.getInstance().queueNow(job);
         }
     }
 
     /**
      * Schedule a job to start at a specific time with specific recurrence info
-     *@param serviceName The name of the service to invoke
-     *@param context The context for the service
-     *@param startTime The time in milliseconds the service should run
-     *@param frequency The frequency of the recurrence (HOURLY,DAILY,MONTHLY,etc)
-     *@param interval The interval of the frequency recurrence
-     *@param count The number of times to repeat
+     * 
+     * @param serviceName
+     *            The name of the service to invoke
+     *@param context
+     *            The context for the service
+     *@param startTime
+     *            The time in milliseconds the service should run
+     *@param frequency
+     *            The frequency of the recurrence (HOURLY,DAILY,MONTHLY,etc)
+     *@param interval
+     *            The interval of the frequency recurrence
+     *@param count
+     *            The number of times to repeat
      */
     public void schedule(String serviceName, Map<String, ? extends Object> context, long startTime, int frequency, int interval, int count) throws JobManagerException {
         schedule(serviceName, context, startTime, frequency, interval, count, 0);
@@ -274,26 +350,21 @@ public class JobManager {
 
     /**
      * Schedule a job to start at a specific time with specific recurrence info
-     *@param serviceName The name of the service to invoke
-     *@param context The context for the service
-     *@param startTime The time in milliseconds the service should run
-     *@param frequency The frequency of the recurrence (HOURLY,DAILY,MONTHLY,etc)
-     *@param interval The interval of the frequency recurrence
-     *@param endTime The time in milliseconds the service should expire
-     */
-    public void schedule(String serviceName, Map<String, ? extends Object> context, long startTime, int frequency, int interval, long endTime) throws JobManagerException {
-        schedule(serviceName, context, startTime, frequency, interval, -1, endTime);
-    }
-
-    /**
-     * Schedule a job to start at a specific time with specific recurrence info
-     *@param serviceName The name of the service to invoke
-     *@param context The context for the service
-     *@param startTime The time in milliseconds the service should run
-     *@param frequency The frequency of the recurrence (HOURLY,DAILY,MONTHLY,etc)
-     *@param interval The interval of the frequency recurrence
-     *@param count The number of times to repeat
-     *@param endTime The time in milliseconds the service should expire
+     * 
+     * @param serviceName
+     *            The name of the service to invoke
+     *@param context
+     *            The context for the service
+     *@param startTime
+     *            The time in milliseconds the service should run
+     *@param frequency
+     *            The frequency of the recurrence (HOURLY,DAILY,MONTHLY,etc)
+     *@param interval
+     *            The interval of the frequency recurrence
+     *@param count
+     *            The number of times to repeat
+     *@param endTime
+     *            The time in milliseconds the service should expire
      */
     public void schedule(String serviceName, Map<String, ? extends Object> context, long startTime, int frequency, int interval, int count, long endTime) throws JobManagerException {
         schedule(null, serviceName, context, startTime, frequency, interval, count, endTime);
@@ -301,38 +372,91 @@ public class JobManager {
 
     /**
      * Schedule a job to start at a specific time with specific recurrence info
-     *@param poolName The name of the pool to run the service from
-     *@param serviceName The name of the service to invoke
-     *@param context The context for the service
-     *@param startTime The time in milliseconds the service should run
-     *@param frequency The frequency of the recurrence (HOURLY,DAILY,MONTHLY,etc)
-     *@param interval The interval of the frequency recurrence
-     *@param count The number of times to repeat
-     *@param endTime The time in milliseconds the service should expire
+     * 
+     * @param serviceName
+     *            The name of the service to invoke
+     *@param context
+     *            The context for the service
+     *@param startTime
+     *            The time in milliseconds the service should run
+     *@param frequency
+     *            The frequency of the recurrence (HOURLY,DAILY,MONTHLY,etc)
+     *@param interval
+     *            The interval of the frequency recurrence
+     *@param endTime
+     *            The time in milliseconds the service should expire
      */
-    public void schedule(String poolName, String serviceName, Map<String, ? extends Object> context, long startTime, int frequency, int interval, int count, long endTime) throws JobManagerException {
+    public void schedule(String serviceName, Map<String, ? extends Object> context, long startTime, int frequency, int interval, long endTime) throws JobManagerException {
+        schedule(serviceName, context, startTime, frequency, interval, -1, endTime);
+    }
+
+    /**
+     * Schedule a job to start at a specific time with specific recurrence info
+     * 
+     * @param poolName
+     *            The name of the pool to run the service from
+     *@param serviceName
+     *            The name of the service to invoke
+     *@param context
+     *            The context for the service
+     *@param startTime
+     *            The time in milliseconds the service should run
+     *@param frequency
+     *            The frequency of the recurrence (HOURLY,DAILY,MONTHLY,etc)
+     *@param interval
+     *            The interval of the frequency recurrence
+     *@param count
+     *            The number of times to repeat
+     *@param endTime
+     *            The time in milliseconds the service should expire
+     */
+    public void schedule(String poolName, String serviceName, Map<String, ? extends Object> context, long startTime, int frequency,
+            int interval, int count, long endTime) throws JobManagerException {
         schedule(null, null, serviceName, context, startTime, frequency, interval, count, endTime, -1);
     }
 
     /**
      * Schedule a job to start at a specific time with specific recurrence info
-     *@param jobName The name of the job
-     *@param poolName The name of the pool to run the service from
-     *@param serviceName The name of the service to invoke
-     *@param context The context for the service
-     *@param startTime The time in milliseconds the service should run
-     *@param frequency The frequency of the recurrence (HOURLY,DAILY,MONTHLY,etc)
-     *@param interval The interval of the frequency recurrence
-     *@param count The number of times to repeat
-     *@param endTime The time in milliseconds the service should expire
-     *@param maxRetry The max number of retries on failure (-1 for no max)
+     * 
+     * @param poolName
+     *            The name of the pool to run the service from
+     *@param serviceName
+     *            The name of the service to invoke
+     *@param dataId
+     *            The persisted context (RuntimeData.runtimeDataId)
+     *@param startTime
+     *            The time in milliseconds the service should run
      */
-    public void schedule(String jobName, String poolName, String serviceName, Map<String, ? extends Object> context, long startTime, int frequency, int interval, int count, long endTime, int maxRetry) throws JobManagerException {
-        if (delegator == null) {
-            Debug.logWarning("No delegator referenced; cannot schedule job.", module);
-            return;
-        }
+    public void schedule(String poolName, String serviceName, String dataId, long startTime) throws JobManagerException {
+        schedule(null, poolName, serviceName, dataId, startTime, -1, 0, 1, 0, -1);
+    }
 
+    /**
+     * Schedule a job to start at a specific time with specific recurrence info
+     * 
+     * @param jobName
+     *            The name of the job
+     *@param poolName
+     *            The name of the pool to run the service from
+     *@param serviceName
+     *            The name of the service to invoke
+     *@param context
+     *            The context for the service
+     *@param startTime
+     *            The time in milliseconds the service should run
+     *@param frequency
+     *            The frequency of the recurrence (HOURLY,DAILY,MONTHLY,etc)
+     *@param interval
+     *            The interval of the frequency recurrence
+     *@param count
+     *            The number of times to repeat
+     *@param endTime
+     *            The time in milliseconds the service should expire
+     *@param maxRetry
+     *            The max number of retries on failure (-1 for no max)
+     */
+    public void schedule(String jobName, String poolName, String serviceName, Map<String, ? extends Object> context, long startTime,
+            int frequency, int interval, int count, long endTime, int maxRetry) throws JobManagerException {
         // persist the context
         String dataId = null;
         try {
@@ -347,41 +471,38 @@ public class JobManager {
         } catch (IOException ioe) {
             throw new JobManagerException(ioe.getMessage(), ioe);
         }
-
         // schedule the job
         schedule(jobName, poolName, serviceName, dataId, startTime, frequency, interval, count, endTime, maxRetry);
     }
 
     /**
      * Schedule a job to start at a specific time with specific recurrence info
-     *@param poolName The name of the pool to run the service from
-     *@param serviceName The name of the service to invoke
-     *@param dataId The persisted context (RuntimeData.runtimeDataId)
-     *@param startTime The time in milliseconds the service should run
+     * 
+     * @param jobName
+     *            The name of the job
+     *@param poolName
+     *            The name of the pool to run the service from
+     *@param serviceName
+     *            The name of the service to invoke
+     *@param dataId
+     *            The persisted context (RuntimeData.runtimeDataId)
+     *@param startTime
+     *            The time in milliseconds the service should run
+     *@param frequency
+     *            The frequency of the recurrence (HOURLY,DAILY,MONTHLY,etc)
+     *@param interval
+     *            The interval of the frequency recurrence
+     *@param count
+     *            The number of times to repeat
+     *@param endTime
+     *            The time in milliseconds the service should expire
+     *@param maxRetry
+     *            The max number of retries on failure (-1 for no max)
+     * @throws IllegalStateException if the Job Manager is shut down.
      */
-    public void schedule(String poolName, String serviceName, String dataId, long startTime) throws JobManagerException {
-        schedule(null, poolName, serviceName, dataId, startTime, -1, 0, 1, 0, -1);
-    }
-
-    /**
-     * Schedule a job to start at a specific time with specific recurrence info
-     *@param jobName The name of the job
-     *@param poolName The name of the pool to run the service from
-     *@param serviceName The name of the service to invoke
-     *@param dataId The persisted context (RuntimeData.runtimeDataId)
-     *@param startTime The time in milliseconds the service should run
-     *@param frequency The frequency of the recurrence (HOURLY,DAILY,MONTHLY,etc)
-     *@param interval The interval of the frequency recurrence
-     *@param count The number of times to repeat
-     *@param endTime The time in milliseconds the service should expire
-     *@param maxRetry The max number of retries on failure (-1 for no max)
-     */
-    public void schedule(String jobName, String poolName, String serviceName, String dataId, long startTime, int frequency, int interval, int count, long endTime, int maxRetry) throws JobManagerException {
-        if (delegator == null) {
-            Debug.logWarning("No delegator referenced; cannot schedule job.", module);
-            return;
-        }
-
+    public void schedule(String jobName, String poolName, String serviceName, String dataId, long startTime, int frequency, int interval,
+            int count, long endTime, int maxRetry) throws JobManagerException {
+        assertIsRunning();
         // create the recurrence
         String infoId = null;
         if (frequency > -1 && count != 0) {
@@ -392,27 +513,23 @@ public class JobManager {
                 throw new JobManagerException(e.getMessage(), e);
             }
         }
-
         // set the persisted fields
         if (UtilValidate.isEmpty(jobName)) {
             jobName = Long.toString((new Date().getTime()));
         }
-        Map<String, Object> jFields = UtilMisc.<String, Object>toMap("jobName", jobName, "runTime", new java.sql.Timestamp(startTime),
+        Map<String, Object> jFields = UtilMisc.<String, Object> toMap("jobName", jobName, "runTime", new java.sql.Timestamp(startTime),
                 "serviceName", serviceName, "statusId", "SERVICE_PENDING", "recurrenceInfoId", infoId, "runtimeDataId", dataId);
-
         // set the pool ID
-        if (poolName != null && poolName.length() > 0) {
+        if (UtilValidate.isNotEmpty(poolName)) {
             jFields.put("poolId", poolName);
         } else {
             jFields.put("poolId", ServiceConfigUtil.getSendPool());
         }
-
         // set the loader name
-        jFields.put("loaderName", dispatcherName);
-
+        jFields.put("loaderName", delegator.getDelegatorName());
         // set the max retry
         jFields.put("maxRetry", Long.valueOf(maxRetry));
-
+        jFields.put("currentRetryCount", new Long(0));
         // create the value and store
         GenericValue jobV;
         try {
@@ -422,63 +539,4 @@ public class JobManager {
             throw new JobManagerException(e.getMessage(), e);
         }
     }
-
-    /**
-     * Kill a JobInvoker Thread.
-     * @param threadName Name of the JobInvoker Thread to kill.
-     */
-    public void killThread(String threadName) {
-        jp.killThread(threadName);
-    }
-
-    /**
-     * Get a List of each threads current state.
-     * @return List containing a Map of each thread's state.
-     */
-    public List<Map<String, Object>> processList() {
-        return jp.getPoolState();
-    }
-
-    /** Close out the scheduler thread. */
-    public void shutdown() {
-        if (jp != null) {
-            jp.stop();
-            jp = null;
-            Debug.logInfo("JobManager: Stopped Scheduler Thread.", module);
-        }
-    }
-
-    public void finalize() throws Throwable {
-        this.shutdown();
-        super.finalize();
-    }
-
-    /** gets the recurrence info object for a job. */
-    public static RecurrenceInfo getRecurrenceInfo(GenericValue job) {
-        try {
-            if (job != null && !UtilValidate.isEmpty(job.getString("recurrenceInfoId"))) {
-                if (job.get("cancelDateTime") != null) {
-                    // cancel has been flagged, no more recurrence
-                    return null;
-                }
-                GenericValue ri = job.getRelatedOne("RecurrenceInfo");
-
-                if (ri != null) {
-                    return new RecurrenceInfo(ri);
-                } else {
-                    return null;
-                }
-            } else {
-                return null;
-            }
-        } catch (GenericEntityException e) {
-            e.printStackTrace();
-            Debug.logError(e, "Problem getting RecurrenceInfo entity from JobSandbox", module);
-        } catch (RecurrenceInfoException re) {
-            re.printStackTrace();
-            Debug.logError(re, "Problem creating RecurrenceInfo instance: " + re.getMessage(), module);
-        }
-        return null;
-    }
-
 }

@@ -46,9 +46,9 @@ under the License.
     <tr>
       <#-- standard question options -->
       <td align='left'>
-        <div class="tabletext">${surveyQuestionAndAppl.question?if_exists}</div>
+        <div>${surveyQuestionAndAppl.question?if_exists}</div>
         <#if surveyQuestionAndAppl.hint?has_content>
-          <div class="tabletext">${surveyQuestionAndAppl.hint}</div>
+          <div>${surveyQuestionAndAppl.hint}</div>
         </#if>
       </td>
     </tr>
@@ -61,8 +61,8 @@ under the License.
               <#if surveyQuestionAndAppl.requiredField?default("N") != "Y">
                 <option value=""></option>
               </#if>
-              <option <#if "Y" == selectedOption>SELECTED</#if>>Y</option>
-              <option <#if "N" == selectedOption>SELECTED</#if>>N</option>
+              <option <#if "Y" == selectedOption>selected="selected"</#if>>Y</option>
+              <option <#if "N" == selectedOption>selected="selected"</#if>>N</option>
             </select>
           <#elseif surveyQuestionAndAppl.surveyQuestionTypeId == "TEXTAREA">
             <textarea class="textAreaBox" cols="40" rows="5" name="answers_${surveyQuestionAndAppl.surveyQuestionId}">${(answer.textResponse)?if_exists}</textarea>
@@ -89,7 +89,7 @@ under the License.
           <#elseif surveyQuestionAndAppl.surveyQuestionTypeId == "PASSWORD">
             <input type="password" size="30" class="textBox" name="answers_${surveyQuestionAndAppl.surveyQuestionId}" value="${(answer.textResponse)?if_exists}"/>
           <#elseif surveyQuestionAndAppl.surveyQuestionTypeId == "OPTION">
-            <#assign options = surveyQuestionAndAppl.getRelated("SurveyQuestionOption", sequenceSort)?if_exists>
+            <#assign options = surveyQuestionAndAppl.getRelated("SurveyQuestionOption", null, sequenceSort, false)?if_exists>
             <#assign selectedOption = (answer.surveyOptionSeqId)?default("_NA_")>
             <select class="selectBox" name="answers_${surveyQuestionAndAppl.surveyQuestionId}">
               <#if surveyQuestionAndAppl.requiredField?default("N") != "Y">
@@ -97,19 +97,19 @@ under the License.
               </#if>
               <#if options?has_content>
                 <#list options as option>
-                  <option value="${option.surveyOptionSeqId}" <#if option.surveyOptionSeqId == selectedOption>SELECTED</#if>>${option.description?if_exists}</option>
+                  <option value="${option.surveyOptionSeqId}" <#if option.surveyOptionSeqId == selectedOption>selected="selected"</#if>>${option.description?if_exists}</option>
                 </#list>
               <#else>
                 <option value="">Nothing to choose</option>
               </#if>
             </select>
           <#else>
-            <div class="tabletext">Unsupported question type : ${surveyQuestionAndAppl.surveyQuestionTypeId}</div>
+            <div>Unsupported question type : ${surveyQuestionAndAppl.surveyQuestionTypeId}</div>
           </#if>
           <#if surveyQuestionAndAppl.requiredField?default("N") == "Y">
-            <span class="tabletext">*</span>
+            <span>*</span>
           <#else>
-            <span class="tabletext">[optional]</span>
+            <span>[optional]</span>
           </#if>
         </td>
 

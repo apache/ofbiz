@@ -150,13 +150,9 @@ public class Base64 {
      * @return the decoded str.
      */
     public final static String base64Decode(String str) {
-        if (str == null) {
-            return null;
-        }
-
-        byte data[] = new byte[str.length()];
-        data = str.getBytes();
-        return new String(base64Decode(data));
+        if (str == null) return null;
+        
+        return new String(base64Decode(str.getBytes()));
     }
 
     /**
@@ -209,9 +205,6 @@ public class Base64 {
         if (str == null) {
             return null;
         }
-        byte data[] = new byte[str.length()];
-
-        data = str.getBytes();
-        return new String(base64Encode(data));
+        return new String(base64Encode(str.getBytes()));
     }
 }

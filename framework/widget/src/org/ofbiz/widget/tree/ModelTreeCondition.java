@@ -27,14 +27,11 @@ import java.util.TimeZone;
 import javolution.util.FastList;
 
 import org.apache.oro.text.regex.MalformedPatternException;
-import org.apache.oro.text.regex.Pattern;
-import org.apache.oro.text.regex.PatternCompiler;
-import org.apache.oro.text.regex.PatternMatcher;
-import org.apache.oro.text.regex.Perl5Compiler;
-import org.apache.oro.text.regex.Perl5Matcher;
+import org.ofbiz.base.util.CompilerMatcher;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.GeneralException;
 import org.ofbiz.base.util.ObjectType;
+import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.base.util.UtilXml;
 import org.ofbiz.base.util.collections.FlexibleMapAccessor;
 import org.ofbiz.base.util.string.FlexibleStringExpander;
@@ -59,7 +56,7 @@ public class ModelTreeCondition {
         this.rootCondition = readCondition(modelTree, firstChildElement);
     }
 
-    public boolean eval(Map<String, Object> context) {
+    public boolean eval(Map<String, ? extends Object> context) {
         if (rootCondition == null) {
             return true;
         }
@@ -73,7 +70,7 @@ public class ModelTreeCondition {
             this.modelTree = modelTree;
         }
 
-        public abstract boolean eval(Map<String, Object> context);
+        public abstract boolean eval(Map<String, ? extends Object> context);
     }
 
     public static List<TreeCondition> readSubConditions(ModelTree modelTree, Element conditionElement) {
@@ -116,14 +113,15 @@ public class ModelTreeCondition {
     }
 
     public static class And extends TreeCondition {
-        protected List<TreeCondition> subConditions;
+        protected List<? extends TreeCondition> subConditions;
 
         public And(ModelTree modelTree, Element condElement) {
             super (modelTree, condElement);
             this.subConditions = readSubConditions(modelTree, condElement);
         }
 
-        public boolean eval(Map<String, Object> context) {
+        @Override
+        public boolean eval(Map<String, ? extends Object> context) {
             // return false for the first one in the list that is false, basic and algo
             for (TreeCondition subCondition: subConditions) {
                 if (!subCondition.eval(context)) {
@@ -135,14 +133,15 @@ public class ModelTreeCondition {
     }
 
     public static class Xor extends TreeCondition {
-        protected List<TreeCondition> subConditions;
+        protected List<? extends TreeCondition> subConditions;
 
         public Xor(ModelTree modelTree, Element condElement) {
             super (modelTree, condElement);
             this.subConditions = readSubConditions(modelTree, condElement);
         }
 
-        public boolean eval(Map<String, Object> context) {
+        @Override
+        public boolean eval(Map<String, ? extends Object> context) {
             // if more than one is true stop immediately and return false; if all are false return false; if only one is true return true
             boolean foundOneTrue = false;
             for (TreeCondition subCondition: subConditions) {
@@ -160,14 +159,15 @@ public class ModelTreeCondition {
     }
 
     public static class Or extends TreeCondition {
-        protected List<TreeCondition> subConditions;
+        protected List<? extends TreeCondition> subConditions;
 
         public Or(ModelTree modelTree, Element condElement) {
             super (modelTree, condElement);
             this.subConditions = readSubConditions(modelTree, condElement);
         }
 
-        public boolean eval(Map<String, Object> context) {
+        @Override
+        public boolean eval(Map<String, ? extends Object> context) {
             // return true for the first one in the list that is true, basic or algo
             for (TreeCondition subCondition: subConditions) {
                 if (subCondition.eval(context)) {
@@ -187,7 +187,8 @@ public class ModelTreeCondition {
             this.subCondition = readCondition(modelTree, firstChildElement);
         }
 
-        public boolean eval(Map<String, Object> context) {
+        @Override
+        public boolean eval(Map<String, ? extends Object> context) {
             return !this.subCondition.eval(context);
         }
     }
@@ -202,15 +203,15 @@ public class ModelTreeCondition {
             this.actionExdr = FlexibleStringExpander.getInstance(condElement.getAttribute("action"));
         }
 
-        public boolean eval(Map<String, Object> context) {
+        @Override
+        public boolean eval(Map<String, ? extends Object> context) {
             // if no user is logged in, treat as if the user does not have permission
             GenericValue userLogin = (GenericValue) context.get("userLogin");
             if (userLogin != null) {
                 String permission = permissionExdr.expandString(context);
                 String action = actionExdr.expandString(context);
-
                 Security security = (Security) context.get("security");
-                if (action != null && action.length() > 0) {
+                if (UtilValidate.isNotEmpty(action)) {
                     // run hasEntityPermission
                     if (security.hasEntityPermission(permission, action, userLogin)) {
                         return true;
@@ -239,7 +240,8 @@ public class ModelTreeCondition {
             this.classExdr = FlexibleStringExpander.getInstance(condElement.getAttribute("class"));
         }
 
-        public boolean eval(Map<String, Object> context) {
+        @Override
+        public boolean eval(Map<String, ? extends Object> context) {
             String methodName = this.methodExdr.expandString(context);
             String className = this.classExdr.expandString(context);
 
@@ -256,7 +258,7 @@ public class ModelTreeCondition {
             // always use an empty string by default
             if (fieldString == null) fieldString = "";
 
-            Class[] paramTypes = new Class[] {String.class};
+            Class<?>[] paramTypes = new Class[] {String.class};
             Object[] params = new Object[] {fieldString};
 
             Class<?> valClass;
@@ -306,7 +308,8 @@ public class ModelTreeCondition {
             this.formatExdr = FlexibleStringExpander.getInstance(condElement.getAttribute("format"));
         }
 
-        public boolean eval(Map<String, Object> context) {
+        @Override
+        public boolean eval(Map<String, ? extends Object> context) {
             String value = this.valueExdr.expandString(context);
             String format = this.formatExdr.expandString(context);
 
@@ -322,7 +325,7 @@ public class ModelTreeCondition {
             if (messages.size() > 0) {
                 messages.add(0, "Error with comparison in if-compare between field [" + fieldAcsr.toString() + "] with value [" + fieldVal + "] and value [" + value + "] with operator [" + operator + "] and type [" + type + "]: ");
 
-                StringBuffer fullString = new StringBuffer();
+                StringBuilder fullString = new StringBuilder();
                 for (Object message: messages) {
                     fullString.append((String) message);
                 }
@@ -356,7 +359,8 @@ public class ModelTreeCondition {
             this.formatExdr = FlexibleStringExpander.getInstance(condElement.getAttribute("format"));
         }
 
-        public boolean eval(Map<String, Object> context) {
+        @Override
+        public boolean eval(Map<String, ? extends Object> context) {
             String format = this.formatExdr.expandString(context);
 
             Object fieldVal = this.fieldAcsr.get(context);
@@ -372,7 +376,7 @@ public class ModelTreeCondition {
             if (messages.size() > 0) {
                 messages.add(0, "Error with comparison in if-compare-field between field [" + fieldAcsr.toString() + "] with value [" + fieldVal + "] and to-field [" + toFieldVal.toString() + "] with value [" + toFieldVal + "] with operator [" + operator + "] and type [" + type + "]: ");
 
-                StringBuffer fullString = new StringBuffer();
+                StringBuilder fullString = new StringBuilder();
                 for (Object message: messages) {
                     fullString.append((String) message);
                 }
@@ -386,8 +390,7 @@ public class ModelTreeCondition {
     }
 
     public static class IfRegexp extends TreeCondition {
-        static PatternMatcher matcher = new Perl5Matcher();
-        static PatternCompiler compiler = new Perl5Compiler();
+        private transient static ThreadLocal<CompilerMatcher> compilerMatcher = CompilerMatcher.getThreadLocal();
 
         protected FlexibleMapAccessor<Object> fieldAcsr;
         protected FlexibleStringExpander exprExdr;
@@ -399,17 +402,9 @@ public class ModelTreeCondition {
             this.exprExdr = FlexibleStringExpander.getInstance(condElement.getAttribute("expr"));
         }
 
-        public boolean eval(Map<String, Object> context) {
+        @Override
+        public boolean eval(Map<String, ? extends Object> context) {
             Object fieldVal = this.fieldAcsr.get(context);
-            String expr = this.exprExdr.expandString(context);
-            Pattern pattern = null;
-            try {
-                pattern = compiler.compile(expr);
-            } catch (MalformedPatternException e) {
-                String errMsg = "Error in evaluation in if-regexp in screen: " + e.toString();
-                Debug.logError(e, errMsg, module);
-                throw new IllegalArgumentException(errMsg);
-            }
 
             String fieldString = null;
             try {
@@ -420,7 +415,13 @@ public class ModelTreeCondition {
             // always use an empty string by default
             if (fieldString == null) fieldString = "";
 
-            return matcher.matches(fieldString, pattern);
+            try {
+                return compilerMatcher.get().matches(fieldString, this.exprExdr.expandString(context));
+            } catch (MalformedPatternException e) {
+                String errMsg = "Error in evaluation in if-regexp in screen: " + e.toString();
+                Debug.logError(e, errMsg, module);
+                throw new IllegalArgumentException(errMsg);
+            }
         }
     }
 
@@ -433,7 +434,8 @@ public class ModelTreeCondition {
             if (this.fieldAcsr.isEmpty()) this.fieldAcsr = FlexibleMapAccessor.getInstance(condElement.getAttribute("field-name"));
         }
 
-        public boolean eval(Map<String, Object> context) {
+        @Override
+        public boolean eval(Map<String, ? extends Object> context) {
             Object fieldVal = this.fieldAcsr.get(context);
             return ObjectType.isEmpty(fieldVal);
         }
@@ -446,7 +448,8 @@ public class ModelTreeCondition {
             this.permissionChecker = new EntityPermissionChecker(condElement);
         }
 
-        public boolean eval(Map<String, Object> context) {
+        @Override
+        public boolean eval(Map<String, ? extends Object> context) {
 
             boolean passed = permissionChecker.runPermissionCheck(context);
             return passed;

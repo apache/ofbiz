@@ -19,22 +19,29 @@
 package org.ofbiz.accounting.payment;
 
 import java.sql.Timestamp;
-import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+
+import javolution.util.FastList;
+import javolution.util.FastMap;
 
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.StringUtil;
 import org.ofbiz.base.util.UtilDateTime;
 import org.ofbiz.base.util.UtilMisc;
+import org.ofbiz.base.util.UtilProperties;
 import org.ofbiz.base.util.UtilValidate;
-import org.ofbiz.entity.GenericDelegator;
+import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
 import org.ofbiz.entity.util.EntityUtil;
 import org.ofbiz.security.Security;
-import org.ofbiz.service.*;
+import org.ofbiz.service.DispatchContext;
+import org.ofbiz.service.GenericServiceException;
+import org.ofbiz.service.LocalDispatcher;
+import org.ofbiz.service.ModelService;
+import org.ofbiz.service.ServiceUtil;
 
 /**
  * Services for Payment maintenance
@@ -42,6 +49,8 @@ import org.ofbiz.service.*;
 public class PaymentMethodServices {
 
     public final static String module = PaymentMethodServices.class.getName();
+    public final static String resource = "AccountingUiLabels";
+    public static final String resourceError = "AccountingUiLabels";
 
     /**
      * Deletes a PaymentMethod entity according to the parameters passed in the context
@@ -50,11 +59,12 @@ public class PaymentMethodServices {
      * @param context Map containing the input parameters
      * @return Map with the result of the service, the output parameters
      */
-    public static Map deletePaymentMethod(DispatchContext ctx, Map context) {
-        Map result = new HashMap();
-        GenericDelegator delegator = ctx.getDelegator();
+    public static Map<String, Object> deletePaymentMethod(DispatchContext ctx, Map<String, ? extends Object> context) {
+        Map<String, Object> result = FastMap.newInstance();
+        Delegator delegator = ctx.getDelegator();
         Security security = ctx.getSecurity();
         GenericValue userLogin = (GenericValue) context.get("userLogin");
+        Locale locale = (Locale) context.get("locale");
 
         Timestamp now = UtilDateTime.nowTimestamp();
 
@@ -63,20 +73,25 @@ public class PaymentMethodServices {
         GenericValue paymentMethod = null;
 
         try {
-            paymentMethod = delegator.findByPrimaryKey("PaymentMethod", UtilMisc.toMap("paymentMethodId", paymentMethodId));
+            paymentMethod = delegator.findOne("PaymentMethod", UtilMisc.toMap("paymentMethodId", paymentMethodId), false);
         } catch (GenericEntityException e) {
             Debug.logWarning(e.toString(), module);
-            return ServiceUtil.returnError("ERROR: Could not find Payment Method to delete (read failure: " + e.getMessage() + ")");
+            return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, 
+                    "AccountingPaymentMethodCannotBeDeleted",
+                    UtilMisc.toMap("errorString", e.getMessage()), locale));
         }
 
         if (paymentMethod == null) {
-            return ServiceUtil.returnError("ERROR: Could not find Payment Method to delete (read failure)");
+            return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, 
+                    "AccountingPaymentMethodCannotBeDeleted",
+                    UtilMisc.toMap("errorString", ""), locale));
         }
 
         // <b>security check</b>: userLogin partyId must equal paymentMethod partyId, or must have PAY_INFO_DELETE permission
         if (paymentMethod.get("partyId") == null || !paymentMethod.getString("partyId").equals(userLogin.getString("partyId"))) {
-            if (!security.hasEntityPermission("PAY_INFO", "_DELETE", userLogin)) {
-                return ServiceUtil.returnError("You do not have permission to delete Payment Method for this partyId");
+            if (!security.hasEntityPermission("PAY_INFO", "_DELETE", userLogin) && !security.hasEntityPermission("ACCOUNTING", "_DELETE", userLogin)) {
+                return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, 
+                        "AccountingPaymentMethodNoPermissionToDelete", locale));
             }
         }
 
@@ -85,19 +100,21 @@ public class PaymentMethodServices {
             paymentMethod.store();
         } catch (GenericEntityException e) {
             Debug.logWarning(e.toString(), module);
-            return ServiceUtil.returnError("ERROR: Could not delete Payment Method (write failure): " + e.getMessage());
+            return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, 
+                    "AccountingPaymentMethodCannotBeDeletedWriteFailure", 
+                    UtilMisc.toMap("errorString", e.getMessage()), locale));
         }
 
         result.put(ModelService.RESPONSE_MESSAGE, ModelService.RESPOND_SUCCESS);
         return result;
     }
 
-    public static Map makeExpireDate(DispatchContext ctx, Map context) {
-        Map result = new HashMap();
+    public static Map<String, Object> makeExpireDate(DispatchContext ctx, Map<String, ? extends Object> context) {
+        Map<String, Object> result = FastMap.newInstance();
         String expMonth = (String) context.get("expMonth");
         String expYear = (String) context.get("expYear");
 
-        StringBuffer expDate = new StringBuffer();
+        StringBuilder expDate = new StringBuilder();
         expDate.append(expMonth);
         expDate.append("/");
         expDate.append(expYear);
@@ -113,39 +130,42 @@ public class PaymentMethodServices {
      * @param context Map containing the input parameters
      * @return Map with the result of the service, the output parameters
      */
-    public static Map createCreditCard(DispatchContext ctx, Map context) {
-        Map result = new HashMap();
-        GenericDelegator delegator = ctx.getDelegator();
+    public static Map<String, Object> createCreditCard(DispatchContext ctx, Map<String, Object> context) {
+        Map<String, Object> result = FastMap.newInstance();
+        Delegator delegator = ctx.getDelegator();
         Security security = ctx.getSecurity();
         GenericValue userLogin = (GenericValue) context.get("userLogin");
+        Locale locale = (Locale) context.get("locale");
 
         Timestamp now = UtilDateTime.nowTimestamp();
 
-        String partyId = ServiceUtil.getPartyIdCheckSecurity(userLogin, security, context, result, "PAY_INFO", "_CREATE");
+        String partyId = ServiceUtil.getPartyIdCheckSecurity(userLogin, security, context, result, "PAY_INFO", "_CREATE", "ACCOUNTING", "_CREATE");
 
         if (result.size() > 0) return result;
 
         // do some more complicated/critical validation...
-        List messages = new LinkedList();
+        List<String> messages = FastList.newInstance();
 
         // first remove all spaces from the credit card number
         context.put("cardNumber", StringUtil.removeSpaces((String) context.get("cardNumber")));
-        if (!UtilValidate.isCardMatch((String) context.get("cardType"), (String) context.get("cardNumber")))
+        if (!UtilValidate.isCardMatch((String) context.get("cardType"), (String) context.get("cardNumber"))) {
             messages.add(
-                (String) context.get("cardNumber")
-                    + UtilValidate.isCreditCardPrefixMsg
-                    + (String) context.get("cardType")
-                    + UtilValidate.isCreditCardSuffixMsg
-                    + " (It appears to be a "
-                    + UtilValidate.getCardType((String) context.get("cardNumber"))
-                    + " credit card number)");
-        if (!UtilValidate.isDateAfterToday((String) context.get("expireDate")))
-            messages.add("The expiration date " + (String) context.get("expireDate") + " is before today.");
+                UtilProperties.getMessage(resource, "AccountingCreditCardNumberInvalid",
+                    UtilMisc.toMap("cardType", (String) context.get("cardType"),
+                                   "validCardType", UtilValidate.getCardType((String) context.get("cardNumber"))), locale));
+        }
+
+        if (!UtilValidate.isDateAfterToday((String) context.get("expireDate"))) {
+            messages.add(
+                UtilProperties.getMessage(resource, "AccountingCreditCardExpireDateBeforeToday",
+                    UtilMisc.toMap("expireDate", (String) context.get("expireDate")), locale));
+        }
+
         if (messages.size() > 0) {
             return ServiceUtil.returnError(messages);
         }
 
-        List toBeStored = new LinkedList();
+        List<GenericValue> toBeStored = FastList.newInstance();
         GenericValue newPm = delegator.makeValue("PaymentMethod");
 
         toBeStored.add(newPm);
@@ -158,7 +178,8 @@ public class PaymentMethodServices {
             try {
                 newPmId = delegator.getNextSeqId("PaymentMethod");
             } catch (IllegalArgumentException e) {
-                return ServiceUtil.returnError("ERROR: Could not create credit card (id generation failure)");
+                return ServiceUtil.returnError(UtilProperties.getMessage(resource,
+                        "AccountingCreditCardCreateIdGenerationFailure", locale));
             }
         }
 
@@ -183,7 +204,7 @@ public class PaymentMethodServices {
         GenericValue newPartyContactMechPurpose = null;
         String contactMechId = (String) context.get("contactMechId");
 
-        if (contactMechId != null && contactMechId.length() > 0 && !contactMechId.equals("_NEW_")) {
+        if (UtilValidate.isNotEmpty(contactMechId) && !contactMechId.equals("_NEW_")) {
             // set the contactMechId on the credit card
             newCc.set("contactMechId", context.get("contactMechId"));
             // add a PartyContactMechPurpose of BILLING_LOCATION if necessary
@@ -192,8 +213,8 @@ public class PaymentMethodServices {
             GenericValue tempVal = null;
 
             try {
-                List allPCMPs = EntityUtil.filterByDate(delegator.findByAnd("PartyContactMechPurpose",
-                        UtilMisc.toMap("partyId", partyId, "contactMechId", contactMechId, "contactMechPurposeTypeId", contactMechPurposeTypeId), null), true);
+                List<GenericValue> allPCMPs = EntityUtil.filterByDate(delegator.findByAnd("PartyContactMechPurpose",
+                        UtilMisc.toMap("partyId", partyId, "contactMechId", contactMechId, "contactMechPurposeTypeId", contactMechPurposeTypeId), null, false), true);
 
                 tempVal = EntityUtil.getFirst(allPCMPs);
             } catch (GenericEntityException e) {
@@ -214,7 +235,8 @@ public class PaymentMethodServices {
             delegator.storeAll(toBeStored);
         } catch (GenericEntityException e) {
             Debug.logWarning(e.getMessage(), module);
-            return ServiceUtil.returnError("ERROR: Could not create credit card (write failure): " + e.getMessage());
+            return ServiceUtil.returnError(UtilProperties.getMessage(resource,
+                    "AccountingCreditCardCreateWriteFailure", locale) + e.getMessage());
         }
 
         result.put("paymentMethodId", newCc.getString("paymentMethodId"));
@@ -229,19 +251,20 @@ public class PaymentMethodServices {
      * @param context Map containing the input parameters
      * @return Map with the result of the service, the output parameters
      */
-    public static Map updateCreditCard(DispatchContext ctx, Map context) {
-        Map result = new HashMap();
-        GenericDelegator delegator = ctx.getDelegator();
+    public static Map<String, Object> updateCreditCard(DispatchContext ctx, Map<String, Object> context) {
+        Map<String, Object> result = FastMap.newInstance();
+        Delegator delegator = ctx.getDelegator();
         Security security = ctx.getSecurity();
         GenericValue userLogin = (GenericValue) context.get("userLogin");
+        Locale locale = (Locale) context.get("locale");
 
         Timestamp now = UtilDateTime.nowTimestamp();
 
-        String partyId = ServiceUtil.getPartyIdCheckSecurity(userLogin, security, context, result, "PAY_INFO", "_UPDATE");
+        String partyId = ServiceUtil.getPartyIdCheckSecurity(userLogin, security, context, result, "PAY_INFO", "_UPDATE", "ACCOUNTING", "_UPDATE");
 
         if (result.size() > 0) return result;
 
-        List toBeStored = new LinkedList();
+        List<GenericValue> toBeStored = FastList.newInstance();
         boolean isModified = false;
 
         GenericValue paymentMethod = null;
@@ -251,37 +274,38 @@ public class PaymentMethodServices {
         String paymentMethodId = (String) context.get("paymentMethodId");
 
         try {
-            creditCard = delegator.findByPrimaryKey("CreditCard", UtilMisc.toMap("paymentMethodId", paymentMethodId));
-            paymentMethod = delegator.findByPrimaryKey("PaymentMethod", UtilMisc.toMap("paymentMethodId", paymentMethodId));
+            creditCard = delegator.findOne("CreditCard", UtilMisc.toMap("paymentMethodId", paymentMethodId), false);
+            paymentMethod = delegator.findOne("PaymentMethod", UtilMisc.toMap("paymentMethodId", paymentMethodId), false);
         } catch (GenericEntityException e) {
             Debug.logWarning(e.getMessage(), module);
-            return ServiceUtil.returnError(
-                "ERROR: Could not get credit card to update (read error): " + e.getMessage());
+            return ServiceUtil.returnError(UtilProperties.getMessage(resource, 
+                    "AccountingCreditCardUpdateReadFailure", locale) + e.getMessage());
         }
 
         if (creditCard == null || paymentMethod == null) {
-            return ServiceUtil.returnError("ERROR: Could not find credit card to update with payment method id " + paymentMethodId);
+            return ServiceUtil.returnError(UtilProperties.getMessage(resource, 
+                    "AccountingCreditCardUpdateWithPaymentMethodId", locale) + paymentMethodId);
         }
-        if (!paymentMethod.getString("partyId").equals(partyId) && !security.hasEntityPermission("PAY_INFO", "_UPDATE", userLogin)) {
-            return ServiceUtil.returnError("Party Id [" + partyId + "] is not the owner of payment method [" + paymentMethodId + "] and does not have permission to change it.");
+        if (!paymentMethod.getString("partyId").equals(partyId) && !security.hasEntityPermission("PAY_INFO", "_UPDATE", userLogin) && !security.hasEntityPermission("ACCOUNTING", "_UPDATE", userLogin)) {
+            return ServiceUtil.returnError(UtilProperties.getMessage(resource, 
+                    "AccountingCreditCardUpdateWithoutPermission", UtilMisc.toMap("partyId", partyId, 
+                            "paymentMethodId", paymentMethodId), locale));
         }
 
         // do some more complicated/critical validation...
-        List messages = new LinkedList();
+        List<String> messages = FastList.newInstance();
 
         // first remove all spaces from the credit card number
         String updatedCardNumber = StringUtil.removeSpaces((String) context.get("cardNumber"));
         if (updatedCardNumber.startsWith("*")) {
             // get the masked card number from the db
             String origCardNumber = creditCard.getString("cardNumber");
-            Debug.log("CCInfo: " + creditCard.toString(), module);
             String origMaskedNumber = "";
             int cardLength = origCardNumber.length() - 4;
             for (int i = 0; i < cardLength; i++) {
                 origMaskedNumber = origMaskedNumber + "*";
             }
             origMaskedNumber = origMaskedNumber + origCardNumber.substring(cardLength);
-            Debug.log(origMaskedNumber);
 
             // compare the two masked numbers
             if (updatedCardNumber.equals(origMaskedNumber)) {
@@ -290,12 +314,19 @@ public class PaymentMethodServices {
         }
         context.put("cardNumber", updatedCardNumber);
 
-        if (!UtilValidate.isCardMatch((String) context.get("cardType"), (String) context.get("cardNumber")))
-            messages.add((String) context.get("cardNumber")
-                    + UtilValidate.isCreditCardPrefixMsg + (String) context.get("cardType") + UtilValidate.isCreditCardSuffixMsg
-                    + " (It appears to be a " + UtilValidate.getCardType((String) context.get("cardNumber")) + " credit card number)");
-        if (!UtilValidate.isDateAfterToday((String) context.get("expireDate")))
-            messages.add("The expiration date " + (String) context.get("expireDate") + " is before today.");
+        if (!UtilValidate.isCardMatch((String) context.get("cardType"), (String) context.get("cardNumber"))) {
+            messages.add(
+                UtilProperties.getMessage(resource, "AccountingCreditCardNumberInvalid",
+                    UtilMisc.toMap("cardType", (String) context.get("cardType"),
+                                   "validCardType", UtilValidate.getCardType((String) context.get("cardNumber"))), locale));
+        }
+
+        if (!UtilValidate.isDateAfterToday((String) context.get("expireDate"))) {
+            messages.add(
+                UtilProperties.getMessage(resource, "AccountingCreditCardExpireDateBeforeToday",
+                    UtilMisc.toMap("expireDate", (String) context.get("expireDate")), locale));
+        }
+
         if (messages.size() > 0) {
             return ServiceUtil.returnError(messages);
         }
@@ -309,7 +340,8 @@ public class PaymentMethodServices {
         try {
             newPmId = delegator.getNextSeqId("PaymentMethod");
         } catch (IllegalArgumentException e) {
-            return ServiceUtil.returnError("ERROR: Could not update credit card info (id generation failure)");
+            return ServiceUtil.returnError(UtilProperties.getMessage(resource, 
+                    "AccountingCreditCardUpdateIdGenerationFailure", locale));
 
         }
 
@@ -334,7 +366,7 @@ public class PaymentMethodServices {
         GenericValue newPartyContactMechPurpose = null;
         String contactMechId = (String) context.get("contactMechId");
 
-        if (contactMechId != null && contactMechId.length() > 0 && !contactMechId.equals("_NEW_")) {
+        if (UtilValidate.isNotEmpty(contactMechId) && !contactMechId.equals("_NEW_")) {
             // set the contactMechId on the credit card
             newCc.set("contactMechId", contactMechId);
         }
@@ -347,7 +379,7 @@ public class PaymentMethodServices {
             isModified = true;
         }
 
-        if (contactMechId != null && contactMechId.length() > 0 && !contactMechId.equals("_NEW_")) {
+        if (UtilValidate.isNotEmpty(contactMechId) && !contactMechId.equals("_NEW_")) {
 
             // add a PartyContactMechPurpose of BILLING_LOCATION if necessary
             String contactMechPurposeTypeId = "BILLING_LOCATION";
@@ -355,8 +387,8 @@ public class PaymentMethodServices {
             GenericValue tempVal = null;
 
             try {
-                List allPCMPs = EntityUtil.filterByDate(delegator.findByAnd("PartyContactMechPurpose",
-                        UtilMisc.toMap("partyId", partyId, "contactMechId", contactMechId, "contactMechPurposeTypeId", contactMechPurposeTypeId), null), true);
+                List<GenericValue> allPCMPs = EntityUtil.filterByDate(delegator.findByAnd("PartyContactMechPurpose",
+                        UtilMisc.toMap("partyId", partyId, "contactMechId", contactMechId, "contactMechPurposeTypeId", contactMechPurposeTypeId), null, false), true);
 
                 tempVal = EntityUtil.getFirst(allPCMPs);
             } catch (GenericEntityException e) {
@@ -383,14 +415,16 @@ public class PaymentMethodServices {
                 delegator.storeAll(toBeStored);
             } catch (GenericEntityException e) {
                 Debug.logWarning(e.getMessage(), module);
-                return ServiceUtil.returnError("ERROR: Could not update credit card (write failure): " + e.getMessage());
+                return ServiceUtil.returnError(UtilProperties.getMessage(resource, 
+                        "AccountingCreditCardUpdateWriteFailure", locale) + e.getMessage());
             }
         } else {
             result.put("paymentMethodId", paymentMethodId);
             result.put("oldPaymentMethodId", paymentMethodId);
             result.put(ModelService.RESPONSE_MESSAGE, ModelService.RESPOND_SUCCESS);
             if (contactMechId == null || !contactMechId.equals("_NEW_")) {
-                result.put(ModelService.SUCCESS_MESSAGE, "No changes made, not updating credit card");
+                result.put(ModelService.SUCCESS_MESSAGE, UtilProperties.getMessage(resource, 
+                        "AccountingNoChangesMadeNotUpdatingCreditCard", locale));
             }
 
             return result;
@@ -403,15 +437,15 @@ public class PaymentMethodServices {
         return result;
     }
 
-    public static Map clearCreditCardData(DispatchContext dctx, Map context) {
+    public static Map<String, Object> clearCreditCardData(DispatchContext dctx, Map<String, ? extends Object> context) {
         GenericValue userLogin = (GenericValue) context.get("userLogin");
         String paymentMethodId = (String) context.get("paymentMethodId");
 
         // get the cc object
-        GenericDelegator delegator = dctx.getDelegator();
+        Delegator delegator = dctx.getDelegator();
         GenericValue creditCard;
         try {
-            creditCard = delegator.findByPrimaryKey("CreditCard", UtilMisc.toMap("paymentMethodId", paymentMethodId));
+            creditCard = delegator.findOne("CreditCard", UtilMisc.toMap("paymentMethodId", paymentMethodId), false);
         } catch (GenericEntityException e) {
             Debug.logError(e, module);
             return ServiceUtil.returnError(e.getMessage());
@@ -429,8 +463,9 @@ public class PaymentMethodServices {
 
         // expire the payment method
         LocalDispatcher dispatcher = dctx.getDispatcher();
-        Map expireCtx = UtilMisc.toMap("userLogin", userLogin, "paymentMethodId", paymentMethodId);
-        Map expireResp;
+        Map<String, Object> expireCtx = UtilMisc.<String, Object>toMap("userLogin", userLogin, 
+                "paymentMethodId", paymentMethodId);
+        Map<String, Object> expireResp;
         try {
             expireResp = dispatcher.runSync("deletePaymentMethod", expireCtx);
         } catch (GenericServiceException e) {
@@ -444,20 +479,21 @@ public class PaymentMethodServices {
         return ServiceUtil.returnSuccess();
     }
 
-    public static Map createGiftCard(DispatchContext ctx, Map context) {
-        Map result = new HashMap();
-        GenericDelegator delegator = ctx.getDelegator();
+    public static Map<String, Object> createGiftCard(DispatchContext ctx, Map<String, ? extends Object> context) {
+        Map<String, Object> result = FastMap.newInstance();
+        Delegator delegator = ctx.getDelegator();
         Security security = ctx.getSecurity();
         GenericValue userLogin = (GenericValue) context.get("userLogin");
+        Locale locale = (Locale) context.get("locale");
 
         Timestamp now = UtilDateTime.nowTimestamp();
 
-        String partyId = ServiceUtil.getPartyIdCheckSecurity(userLogin, security, context, result, "PAY_INFO", "_CREATE");
+        String partyId = ServiceUtil.getPartyIdCheckSecurity(userLogin, security, context, result, "PAY_INFO", "_CREATE", "ACCOUNTING", "_CREATE");
 
         if (result.size() > 0)
             return result;
 
-        List toBeStored = new LinkedList();
+        List<GenericValue> toBeStored = FastList.newInstance();
         GenericValue newPm = delegator.makeValue("PaymentMethod");
         toBeStored.add(newPm);
         GenericValue newGc = delegator.makeValue("GiftCard");
@@ -468,7 +504,8 @@ public class PaymentMethodServices {
             try {
                 newPmId = delegator.getNextSeqId("PaymentMethod");
             } catch (IllegalArgumentException e) {
-                return ServiceUtil.returnError("ERROR: Could not create GiftCard (id generation failure)");
+                return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, 
+                        "AccountingGiftCardCannotBeCreated", locale));
             }
         }
 
@@ -489,7 +526,9 @@ public class PaymentMethodServices {
             delegator.storeAll(toBeStored);
         } catch (GenericEntityException e) {
             Debug.logWarning(e.getMessage(), module);
-            return ServiceUtil.returnError("ERROR: Could not create GiftCard (write failure): " + e.getMessage());
+            return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, 
+                    "AccountingGiftCardCannotBeCreatedWriteFailure",
+                    UtilMisc.toMap("errorString", e.getMessage()), locale));
         }
 
         result.put("paymentMethodId", newGc.getString("paymentMethodId"));
@@ -497,21 +536,21 @@ public class PaymentMethodServices {
         return result;
     }
 
-    public static Map updateGiftCard(DispatchContext ctx, Map context) {
-        Map result = new HashMap();
-        GenericDelegator delegator = ctx.getDelegator();
+    public static Map<String, Object> updateGiftCard(DispatchContext ctx, Map<String, Object> context) {
+        Map<String, Object> result = FastMap.newInstance();
+        Delegator delegator = ctx.getDelegator();
         Security security = ctx.getSecurity();
         GenericValue userLogin = (GenericValue) context.get("userLogin");
+        Locale locale = (Locale) context.get("locale");
 
         Timestamp now = UtilDateTime.nowTimestamp();
 
-        String partyId =
-            ServiceUtil.getPartyIdCheckSecurity(userLogin, security, context, result, "PAY_INFO", "_UPDATE");
+        String partyId = ServiceUtil.getPartyIdCheckSecurity(userLogin, security, context, result, "PAY_INFO", "_UPDATE", "ACCOUNTING", "_UPDATE");
 
         if (result.size() > 0)
             return result;
 
-        List toBeStored = new LinkedList();
+        List<GenericValue> toBeStored = FastList.newInstance();
         boolean isModified = false;
 
         GenericValue paymentMethod = null;
@@ -521,18 +560,24 @@ public class PaymentMethodServices {
         String paymentMethodId = (String) context.get("paymentMethodId");
 
         try {
-            giftCard = delegator.findByPrimaryKey("GiftCard", UtilMisc.toMap("paymentMethodId", paymentMethodId));
-            paymentMethod = delegator.findByPrimaryKey("PaymentMethod", UtilMisc.toMap("paymentMethodId", paymentMethodId));
+            giftCard = delegator.findOne("GiftCard", UtilMisc.toMap("paymentMethodId", paymentMethodId), false);
+            paymentMethod = delegator.findOne("PaymentMethod", UtilMisc.toMap("paymentMethodId", paymentMethodId), false);
         } catch (GenericEntityException e) {
             Debug.logWarning(e.getMessage(), module);
-            return ServiceUtil.returnError("ERROR: Could not get GiftCard to update (read error): " + e.getMessage());
+            return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, 
+                    "AccountingGiftCardCannotBeUpdated",
+                    UtilMisc.toMap("errorString", e.getMessage()), locale));
         }
 
         if (giftCard == null || paymentMethod == null) {
-            return ServiceUtil.returnError("ERROR: Could not find GiftCard to update with id " + paymentMethodId);
+            return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, 
+                    "AccountingGiftCardCannotBeUpdated",
+                    UtilMisc.toMap("errorString", paymentMethodId), locale));
         }
-        if (!paymentMethod.getString("partyId").equals(partyId) && !security.hasEntityPermission("PAY_INFO", "_UPDATE", userLogin)) {
-            return ServiceUtil.returnError("Party Id [" + partyId + "] is not the owner of payment method [" + paymentMethodId + "] and does not have permission to change it.");
+        if (!paymentMethod.getString("partyId").equals(partyId) && !security.hasEntityPermission("PAY_INFO", "_UPDATE", userLogin) && !security.hasEntityPermission("ACCOUNTING", "_UPDATE", userLogin)) {
+            return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, 
+                    "AccountingGiftCardPartyNotAuthorized",
+                    UtilMisc.toMap("partyId", partyId, "paymentMethodId", paymentMethodId), locale));
         }
 
 
@@ -541,20 +586,19 @@ public class PaymentMethodServices {
         if (cardNumber.startsWith("*")) {
             // get the masked card number from the db
             String origCardNumber = giftCard.getString("cardNumber");
-            //Debug.log(origCardNumber);
-            String origMaskedNumber = "";
+            StringBuilder origMaskedNumber = new StringBuilder("");
             int cardLength = origCardNumber.length() - 4;
             if (cardLength > 0) {
                 for (int i = 0; i < cardLength; i++) {
-                    origMaskedNumber = origMaskedNumber + "*";
+                    origMaskedNumber.append("*");
                 }
-                origMaskedNumber = origMaskedNumber + origCardNumber.substring(cardLength);
+                origMaskedNumber.append(origCardNumber.substring(cardLength));
             } else {
-                origMaskedNumber = origCardNumber;
+                origMaskedNumber.append(origCardNumber);
             }
 
             // compare the two masked numbers
-            if (cardNumber.equals(origMaskedNumber)) {
+            if (cardNumber.equals(origMaskedNumber.toString())) {
                 cardNumber = origCardNumber;
             }
         }
@@ -569,7 +613,8 @@ public class PaymentMethodServices {
         try {
             newPmId = delegator.getNextSeqId("PaymentMethod");
         } catch (IllegalArgumentException e) {
-            return ServiceUtil.returnError("ERROR: Could not update GiftCard info (id generation failure)");
+            return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, 
+                    "AccountingGiftCardCannotBeCreated", locale));
         }
 
         newPm.set("partyId", partyId);
@@ -598,14 +643,16 @@ public class PaymentMethodServices {
                 delegator.storeAll(toBeStored);
             } catch (GenericEntityException e) {
                 Debug.logWarning(e.getMessage(), module);
-                return ServiceUtil.returnError(
-                    "ERROR: Could not update EFT Account (write failure): " + e.getMessage());
+                return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, 
+                        "AccountingEftAccountCannotBeUpdated",
+                        UtilMisc.toMap("errorString", e.getMessage()), locale));
             }
         } else {
             result.put("paymentMethodId", paymentMethodId);
             result.put("oldPaymentMethodId", paymentMethodId);
             result.put(ModelService.RESPONSE_MESSAGE, ModelService.RESPOND_SUCCESS);
-            result.put(ModelService.SUCCESS_MESSAGE, "No changes made, not updating EFT Account");
+            result.put(ModelService.SUCCESS_MESSAGE, UtilProperties.getMessage(resource, 
+                    "AccountingNoChangesMadeNotUpdatingEftAccount", locale));
 
             return result;
         }
@@ -623,19 +670,20 @@ public class PaymentMethodServices {
      * @param context Map containing the input parameters
      * @return Map with the result of the service, the output parameters
      */
-    public static Map createEftAccount(DispatchContext ctx, Map context) {
-        Map result = new HashMap();
-        GenericDelegator delegator = ctx.getDelegator();
+    public static Map<String, Object> createEftAccount(DispatchContext ctx, Map<String, ? extends Object> context) {
+        Map<String, Object> result = FastMap.newInstance();
+        Delegator delegator = ctx.getDelegator();
         Security security = ctx.getSecurity();
         GenericValue userLogin = (GenericValue) context.get("userLogin");
+        Locale locale = (Locale) context.get("locale");
 
         Timestamp now = UtilDateTime.nowTimestamp();
 
-        String partyId = ServiceUtil.getPartyIdCheckSecurity(userLogin, security, context, result, "PAY_INFO", "_CREATE");
+        String partyId = ServiceUtil.getPartyIdCheckSecurity(userLogin, security, context, result, "PAY_INFO", "_CREATE", "ACCOUNTING", "_CREATE");
 
         if (result.size() > 0) return result;
 
-        List toBeStored = new LinkedList();
+        List<GenericValue> toBeStored = FastList.newInstance();
         GenericValue newPm = delegator.makeValue("PaymentMethod");
 
         toBeStored.add(newPm);
@@ -648,7 +696,8 @@ public class PaymentMethodServices {
             try {
                 newPmId = delegator.getNextSeqId("PaymentMethod");
             } catch (IllegalArgumentException e) {
-                return ServiceUtil.returnError("ERROR: Could not create payment method Id (id generation failure)");
+                return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, 
+                        "AccountingEftAccountCannotBeCreated", locale));
             }
         }
 
@@ -671,14 +720,15 @@ public class PaymentMethodServices {
         GenericValue newPartyContactMechPurpose = null;
         String contactMechId = (String) context.get("contactMechId");
 
-        if (contactMechId != null && contactMechId.length() > 0) {
+        if (UtilValidate.isNotEmpty(contactMechId)) {
             // add a PartyContactMechPurpose of BILLING_LOCATION if necessary
             String contactMechPurposeTypeId = "BILLING_LOCATION";
 
             GenericValue tempVal = null;
             try {
-                List allPCMPs = EntityUtil.filterByDate(delegator.findByAnd("PartyContactMechPurpose",
-                        UtilMisc.toMap("partyId", partyId, "contactMechId", contactMechId, "contactMechPurposeTypeId", contactMechPurposeTypeId), null), true);
+                List<GenericValue> allPCMPs = EntityUtil.filterByDate(delegator.findByAnd("PartyContactMechPurpose", 
+                        UtilMisc.toMap("partyId", partyId, "contactMechId", contactMechId, 
+                                "contactMechPurposeTypeId", contactMechPurposeTypeId), null, false), true);
 
                 tempVal = EntityUtil.getFirst(allPCMPs);
             } catch (GenericEntityException e) {
@@ -689,7 +739,8 @@ public class PaymentMethodServices {
             if (tempVal == null) {
                 // no value found, create a new one
                 newPartyContactMechPurpose = delegator.makeValue("PartyContactMechPurpose",
-                    UtilMisc.toMap("partyId", partyId, "contactMechId", contactMechId, "contactMechPurposeTypeId", contactMechPurposeTypeId, "fromDate", now));
+                    UtilMisc.toMap("partyId", partyId, "contactMechId", contactMechId, 
+                            "contactMechPurposeTypeId", contactMechPurposeTypeId, "fromDate", now));
             }
         }
 
@@ -700,7 +751,9 @@ public class PaymentMethodServices {
             delegator.storeAll(toBeStored);
         } catch (GenericEntityException e) {
             Debug.logWarning(e.getMessage(), module);
-            return ServiceUtil.returnError("ERROR: Could not create credit card (write failure): " + e.getMessage());
+            return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, 
+                    "AccountingEftAccountCannotBeCreatedWriteFailure",
+                    UtilMisc.toMap("errorString", e.getMessage()), locale));
         }
 
         result.put("paymentMethodId", newEa.getString("paymentMethodId"));
@@ -715,19 +768,20 @@ public class PaymentMethodServices {
      * @param context Map containing the input parameters
      * @return Map with the result of the service, the output parameters
      */
-    public static Map updateEftAccount(DispatchContext ctx, Map context) {
-        Map result = new HashMap();
-        GenericDelegator delegator = ctx.getDelegator();
+    public static Map<String, Object> updateEftAccount(DispatchContext ctx, Map<String, ? extends Object> context) {
+        Map<String, Object> result = FastMap.newInstance();
+        Delegator delegator = ctx.getDelegator();
         Security security = ctx.getSecurity();
         GenericValue userLogin = (GenericValue) context.get("userLogin");
+        Locale locale = (Locale) context.get("locale");
 
         Timestamp now = UtilDateTime.nowTimestamp();
 
-        String partyId = ServiceUtil.getPartyIdCheckSecurity(userLogin, security, context, result, "PAY_INFO", "_UPDATE");
+        String partyId = ServiceUtil.getPartyIdCheckSecurity(userLogin, security, context, result, "PAY_INFO", "_UPDATE", "ACCOUNTING", "_UPDATE");
 
         if (result.size() > 0) return result;
 
-        List toBeStored = new LinkedList();
+        List<GenericValue> toBeStored = FastList.newInstance();
         boolean isModified = false;
 
         GenericValue paymentMethod = null;
@@ -737,20 +791,25 @@ public class PaymentMethodServices {
         String paymentMethodId = (String) context.get("paymentMethodId");
 
         try {
-            eftAccount = delegator.findByPrimaryKey("EftAccount", UtilMisc.toMap("paymentMethodId", paymentMethodId));
+            eftAccount = delegator.findOne("EftAccount", UtilMisc.toMap("paymentMethodId", paymentMethodId), false);
             paymentMethod =
-                delegator.findByPrimaryKey("PaymentMethod", UtilMisc.toMap("paymentMethodId", paymentMethodId));
+                delegator.findOne("PaymentMethod", UtilMisc.toMap("paymentMethodId", paymentMethodId), false);
         } catch (GenericEntityException e) {
             Debug.logWarning(e.getMessage(), module);
-            return ServiceUtil.returnError(
-                "ERROR: Could not get EFT Account to update (read error): " + e.getMessage());
+            return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, 
+                    "AccountingEftAccountCannotBeUpdatedReadFailure",
+                    UtilMisc.toMap("errorString", e.getMessage()), locale));
         }
 
         if (eftAccount == null || paymentMethod == null) {
-            return ServiceUtil.returnError("ERROR: Could not find EFT Account to update with id " + paymentMethodId);
+            return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, 
+                    "AccountingEftAccountCannotBeUpdated",
+                    UtilMisc.toMap("errorString", paymentMethodId), locale));
         }
-        if (!paymentMethod.getString("partyId").equals(partyId) && !security.hasEntityPermission("PAY_INFO", "_UPDATE", userLogin)) {
-            return ServiceUtil.returnError("Party Id [" + partyId + "] is not the owner of payment method [" + paymentMethodId + "] and does not have permission to change it.");
+        if (!paymentMethod.getString("partyId").equals(partyId) && !security.hasEntityPermission("PAY_INFO", "_UPDATE", userLogin) && !security.hasEntityPermission("ACCOUNTING", "_UPDATE", userLogin)) {
+            return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, 
+                    "AccountingEftAccountCannotBeUpdated",
+                    UtilMisc.toMap("partyId", partyId, "paymentMethodId", paymentMethodId), locale));
         }
 
         newPm = GenericValue.create(paymentMethod);
@@ -762,7 +821,8 @@ public class PaymentMethodServices {
         try {
             newPmId = delegator.getNextSeqId("PaymentMethod");
         } catch (IllegalArgumentException e) {
-            return ServiceUtil.returnError("ERROR: Could not update EFT Account info (id generation failure)");
+            return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, 
+                    "AccountingEftAccountCannotBeCreated", locale));
         }
 
         newPm.set("partyId", partyId);
@@ -787,15 +847,16 @@ public class PaymentMethodServices {
         GenericValue newPartyContactMechPurpose = null;
         String contactMechId = (String) context.get("contactMechId");
 
-        if (contactMechId != null && contactMechId.length() > 0) {
+        if (UtilValidate.isNotEmpty(contactMechId)) {
             // add a PartyContactMechPurpose of BILLING_LOCATION if necessary
             String contactMechPurposeTypeId = "BILLING_LOCATION";
 
             GenericValue tempVal = null;
 
             try {
-                List allPCMPs = EntityUtil.filterByDate(delegator.findByAnd("PartyContactMechPurpose",
-                            UtilMisc.toMap("partyId", partyId, "contactMechId", contactMechId, "contactMechPurposeTypeId",contactMechPurposeTypeId), null), true);
+                List<GenericValue> allPCMPs = EntityUtil.filterByDate(delegator.findByAnd("PartyContactMechPurpose",
+                        UtilMisc.toMap("partyId", partyId, "contactMechId", contactMechId, 
+                                "contactMechPurposeTypeId",contactMechPurposeTypeId), null, false), true);
                 tempVal = EntityUtil.getFirst(allPCMPs);
             } catch (GenericEntityException e) {
                 Debug.logWarning(e.getMessage(), module);
@@ -805,7 +866,8 @@ public class PaymentMethodServices {
             if (tempVal == null) {
                 // no value found, create a new one
                 newPartyContactMechPurpose = delegator.makeValue("PartyContactMechPurpose",
-                        UtilMisc.toMap("partyId", partyId, "contactMechId", contactMechId, "contactMechPurposeTypeId", contactMechPurposeTypeId, "fromDate", now));
+                        UtilMisc.toMap("partyId", partyId, "contactMechId", contactMechId, 
+                                "contactMechPurposeTypeId", contactMechPurposeTypeId, "fromDate", now));
             }
         }
 
@@ -822,14 +884,16 @@ public class PaymentMethodServices {
                 delegator.storeAll(toBeStored);
             } catch (GenericEntityException e) {
                 Debug.logWarning(e.getMessage(), module);
-                return ServiceUtil.returnError(
-                    "ERROR: Could not update EFT Account (write failure): " + e.getMessage());
+                return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, 
+                        "AccountingEftAccountCannotBeUpdated",
+                        UtilMisc.toMap("errorString", e.getMessage()), locale));
             }
         } else {
             result.put("paymentMethodId", paymentMethodId);
             result.put("oldPaymentMethodId", paymentMethodId);
             result.put(ModelService.RESPONSE_MESSAGE, ModelService.RESPOND_SUCCESS);
-            result.put(ModelService.SUCCESS_MESSAGE, "No changes made, not updating EFT Account");
+            result.put(ModelService.SUCCESS_MESSAGE, UtilProperties.getMessage(resource,
+                    "AccountingNoChangesMadeNotUpdatingEftAccount", locale));
 
             return result;
         }

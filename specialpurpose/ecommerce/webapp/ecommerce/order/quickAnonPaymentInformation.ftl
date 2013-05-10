@@ -21,14 +21,10 @@ under the License.
 </#if>
 <script language="JavaScript" type="text/javascript">
 
-dojo.require("dojo.event.*");
-dojo.require("dojo.io.*");
-
-dojo.addOnLoad(init);
+jQuery(document).ready(init);
 
 function init() {
     getPaymentInformation();
-    dojo.event.connect("around", "processOrder", "aroundSubmitOrder");
     var paymentForm = document.setPaymentInformation;
 }
 
@@ -39,35 +35,31 @@ function aroundSubmitOrder(invocation) {
         document.setPaymentInformation.action = "<@ofbizUrl>quickAnonAddGiftCardToCart</@ofbizUrl>";
     }
 
-    dojo.io.bind({ url: formToSubmit.action, load: function(type, evaldObj){
-       if(type == "load"){
-           if(paymentMethodTypeOption == "EXT_OFFLINE"){
-               var result = invocation.proceed();
-               return result;
-           }else {
-               if(paymentMethodTypeOption == "none"){
-                   document.getElementById("noPaymentMethodSelectedError").innerHTML = "${uiLabelMap.EcommerceMessagePleaseSelectPaymentMethod}";
-                   return result;
-               } else {
-                   document.getElementById("paymentInfoSection").innerHTML = evaldObj;
-               }
-               if(formToSubmit.paymentMethodTypeId.value != "") {
-                   var result = invocation.proceed();
-                   return result;
-               }
-           }
-       }
-    },formNode: document.setPaymentInformation});
+    jQuery.ajax({
+        url: formToSubmit.action,
+        type: "POST",
+        data: jQuery("#setPaymentInformation").serialize(),
+        success: function(data) {
+            if (paymentMethodTypeOption != "EXT_OFFLINE"){
+                   if(paymentMethodTypeOption == "none"){
+                       document.getElementById("noPaymentMethodSelectedError").innerHTML = "${uiLabelMap.EcommerceMessagePleaseSelectPaymentMethod}";
+                   } else {
+                       document.getElementById("paymentInfoSection").innerHTML = data;
+                   }
+            }
+        }
+    });
 }
 
 function getGCInfo() {
     if (document.setPaymentInformation.addGiftCard.checked) {
-      dojo.io.bind({url: "<@ofbizUrl>quickAnonGcInfo</@ofbizUrl>",
-        load: function(type, data, evt){
-          if(type == "load"){
-            document.getElementById("giftCardSection").innerHTML = data;
+      jQuery.ajax({
+          url: "<@ofbizUrl>quickAnonGcInfo</@ofbizUrl>",
+          type: "POST",
+          success: function(data) {
+              document.getElementById("giftCardSection").innerHTML = data;
           }
-        },mimetype: "text/html"});
+      });
     } else {
         document.getElementById("giftCardSection").innerHTML = "";
     }
@@ -77,22 +69,32 @@ function getPaymentInformation() {
   document.getElementById("noPaymentMethodSelectedError").innerHTML = "";
   var paymentMethodTypeOption = document.setPaymentInformation.paymentMethodTypeOptionList.options[document.setPaymentInformation.paymentMethodTypeOptionList.selectedIndex].value;
   var connectionObject;
-   if(paymentMethodTypeOption.length > 0){
+   if (paymentMethodTypeOption.length > 0){
       if(paymentMethodTypeOption == "CREDIT_CARD"){
-        dojo.io.bind({url: "<@ofbizUrl>quickAnonCcInfo</@ofbizUrl>",
-          load: function(type, data, evt){
-            if(type == "load"){document.getElementById("paymentInfoSection").innerHTML = data;}
-          },mimetype: "text/html"});
+
+        jQuery.ajax({
+            url: "<@ofbizUrl>quickAnonCcInfo</@ofbizUrl>",
+            type: "POST",
+            success: function(data) {
+                document.getElementById("paymentInfoSection").innerHTML = data;
+            }
+        });
+
         document.setPaymentInformation.paymentMethodTypeId.value = "CREDIT_CARD";
         document.setPaymentInformation.action = "<@ofbizUrl>quickAnonEnterCreditCard</@ofbizUrl>";
-      } else if(paymentMethodTypeOption == "EFT_ACCOUNT"){
-        dojo.io.bind({url: "<@ofbizUrl>quickAnonEftInfo</@ofbizUrl>",
-          load: function(type, data, evt){
-            if(type == "load"){document.getElementById("paymentInfoSection").innerHTML = data;}
-          },mimetype: "text/html"});
-         document.setPaymentInformation.paymentMethodTypeId.value = "EFT_ACCOUNT";
+      } else if (paymentMethodTypeOption == "EFT_ACCOUNT"){
+
+       jQuery.ajax({
+            url: "<@ofbizUrl>quickAnonEftInfo</@ofbizUrl>",
+            type: "POST",
+            success: function(data) {
+                document.getElementById("paymentInfoSection").innerHTML = data;
+            }
+        });
+
+        document.setPaymentInformation.paymentMethodTypeId.value = "EFT_ACCOUNT";
         document.setPaymentInformation.action = "<@ofbizUrl>quickAnonEnterEftAccount</@ofbizUrl>";
-      } else if(paymentMethodTypeOption == "EXT_OFFLINE"){
+      } else if (paymentMethodTypeOption == "EXT_OFFLINE"){
         document.setPaymentInformation.paymentMethodTypeId.value = "EXT_OFFLINE";
         document.getElementById("paymentInfoSection").innerHTML = "";
         document.setPaymentInformation.action = "<@ofbizUrl>quickAnonEnterExtOffline</@ofbizUrl>";
@@ -105,8 +107,8 @@ function getPaymentInformation() {
 </script>
 <form id="setPaymentInformation" method="post" action="<@ofbizUrl>quickAnonAddGiftCardToCart</@ofbizUrl>" name="setPaymentInformation">
 <div class="screenlet">
-    <div class="screenlet-header">
-        <div class='boxhead'>&nbsp;${uiLabelMap.AccountingPaymentInformation}</div>
+    <div class="screenlet-title-bar">
+        <div class='h3'>${uiLabelMap.AccountingPaymentInformation}</div>
     </div>
     <div class="screenlet-body">
           <#if requestParameters.singleUsePayment?default("N") == "Y">
@@ -126,29 +128,29 @@ function getPaymentInformation() {
               <tr>
                  <td width="26%" align="right" valign="top"><div class="tableheadtext">${uiLabelMap.OrderSelectPaymentMethod}</div></td>
                  <td colspan="2">
-                   <select name="paymentMethodTypeOptionList" class="selectBox"  onChange="javascript:getPaymentInformation();">
+                   <select name="paymentMethodTypeOptionList" class="selectBox"  onchange="javascript:getPaymentInformation();">
                        <option value="none">Select One</option>
                      <#if productStorePaymentMethodTypeIdMap.CREDIT_CARD?exists>
-                       <option value="CREDIT_CARD" <#if (parameters.paymentMethodTypeId?default("") == "CREDIT_CARD")> selected</#if>>${uiLabelMap.AccountingVisaMastercardAmexDiscover}</option>
+                       <option value="CREDIT_CARD" <#if (parameters.paymentMethodTypeId?default("") == "CREDIT_CARD")> selected="selected"</#if>>${uiLabelMap.AccountingVisaMastercardAmexDiscover}</option>
                      </#if>
                      <#if productStorePaymentMethodTypeIdMap.EFT_ACCOUNT?exists>
-                       <option value="EFT_ACCOUNT" <#if (parameters.paymentMethodTypeId?default("") == "EFT_ACCOUNT")> selected</#if>>${uiLabelMap.AccountingAHCElectronicCheck}</option>
+                       <option value="EFT_ACCOUNT" <#if (parameters.paymentMethodTypeId?default("") == "EFT_ACCOUNT")> selected="selected"</#if>>${uiLabelMap.AccountingAHCElectronicCheck}</option>
                      </#if>
                      <#if productStorePaymentMethodTypeIdMap.EXT_OFFLINE?exists>
-                       <option value="EXT_OFFLINE" <#if (parameters.paymentMethodTypeId?default("") == "EXT_OFFLINE")> selected</#if>>${uiLabelMap.OrderPaymentOfflineCheckMoney}</option>
+                       <option value="EXT_OFFLINE" <#if (parameters.paymentMethodTypeId?default("") == "EXT_OFFLINE")> selected="selected"</#if>>${uiLabelMap.OrderPaymentOfflineCheckMoney}</option>
                      </#if>
                    </select>
                  </td>
               </tr>
-              <tr><td nowrap colspan="3"><div id="paymentInfoSection"></div></td></tr>
-              <tr><td colspan="3"><hr/></td></tr>
+              <tr><td nowrap="nowrap" colspan="3"><div id="paymentInfoSection"></div></td></tr>
+              <tr><td colspan="3"><hr /></td></tr>
               <#-- gift card fields -->
               <#if productStorePaymentMethodTypeIdMap.GIFT_CARD?exists>
               <tr>
-                <td width='26%' nowrap align="right">
-                  <input type="checkbox" id="addGiftCard" name="addGiftCard" value="Y" onClick="javascript:getGCInfo();"/>
+                <td width='26%' nowrap="nowrap" align="right">
+                  <input type="checkbox" id="addGiftCard" name="addGiftCard" value="Y" onclick="javascript:getGCInfo();"/>
                 </td>
-                <td colspan="2" nowrap><div class="tabletext">${uiLabelMap.AccountingCheckGiftCard}</div></td>
+                <td colspan="2" nowrap="nowrap"><div>${uiLabelMap.AccountingCheckGiftCard}</div></td>
               </tr>
               <tr><td colspan="3"><div id="giftCardSection"></div></td></tr>
               </#if>

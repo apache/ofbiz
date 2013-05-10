@@ -33,16 +33,16 @@ context.imageServerPath = imageServerPath;
 context.imageUrlPrefix = imageUrlPrefix;
 
 filenameExpander = FlexibleStringExpander.getInstance(imageFilenameFormat);
-context.imageNameSmall  = imageUrlPrefix + "/" + filenameExpander.expandString([location : 'products', type : 'small' , id : productId]);
-context.imageNameMedium = imageUrlPrefix + "/" + filenameExpander.expandString([location : 'products', type : 'medium', id : productId]);
-context.imageNameLarge  = imageUrlPrefix + "/" + filenameExpander.expandString([location : 'products', type : 'large' , id : productId]);
-context.imageNameDetail = imageUrlPrefix + "/" + filenameExpander.expandString([location : 'products', type : 'detail', id : productId]);
-context.imageNameOriginal = imageUrlPrefix + "/" + filenameExpander.expandString([location : 'products', type : 'original', id : productId]);
+context.imageNameSmall  = imageUrlPrefix + "/" + filenameExpander.expandString([location : 'products', id : productId, type : 'small']);
+context.imageNameMedium = imageUrlPrefix + "/" + filenameExpander.expandString([location : 'products', id : productId, type : 'medium']);
+context.imageNameLarge  = imageUrlPrefix + "/" + filenameExpander.expandString([location : 'products', id : productId, type : 'large']);
+context.imageNameDetail = imageUrlPrefix + "/" + filenameExpander.expandString([location : 'products', id : productId, type : 'detail']);
+context.imageNameOriginal = imageUrlPrefix + "/" + filenameExpander.expandString([location : 'products', id : productId, type : 'original']);
 
 // Start ProductContent stuff
 productContent = null;
 if (product) {
-    productContent = product.getRelated('ProductContent', null, ['productContentTypeId']);
+    productContent = product.getRelated('ProductContent', null, ['productContentTypeId'], false);
 }
 context.productContent = productContent;
 // End ProductContent stuff
@@ -68,7 +68,7 @@ if (fileType) {
 
     context.fileType = fileType;
 
-    fileLocation = filenameExpander.expandString([location : 'products', type : fileType, id : productId]);
+    fileLocation = filenameExpander.expandString([location : 'products', id : productId, type : fileType]);
     filePathPrefix = "";
     filenameToUse = fileLocation;
     if (fileLocation.lastIndexOf("/") != -1) {
@@ -110,7 +110,25 @@ if (fileType) {
             file = new File(imageServerPath + "/" + filePathPrefix, defaultFileName);
             file1 = new File(imageServerPath + "/" + filePathPrefix, filenameToUse);
             try {
-                file1.delete();
+                // Delete existing image files
+                File targetDir = new File(imageServerPath + "/" + filePathPrefix);
+                // Images are ordered by productId (${location}/${id}/${viewtype}/${sizetype})
+                if (!filenameToUse.startsWith(productId + ".")) {
+                    File[] files = targetDir.listFiles(); 
+                    for(File file : files) {
+                        if (file.isFile() && file.getName().contains(filenameToUse.substring(0, filenameToUse.indexOf(".")+1)) && !fileType.equals("original")) {
+                            file.delete();
+                        } else if(file.isFile() && fileType.equals("original") && !file.getName().equals(defaultFileName)) {
+                            file.delete();
+                        }
+                    } 
+                // Images aren't ordered by productId (${location}/${viewtype}/${sizetype}/${id}) !!! BE CAREFUL !!!
+                } else {
+                    File[] files = targetDir.listFiles(); 
+                    for(File file : files) {
+                        if (file.isFile() && !file.getName().equals(defaultFileName) && file.getName().startsWith(productId + ".")) file.delete();
+                    }
+                }
             } catch (Exception e) {
                 System.out.println("error deleting existing file (not neccessarily a problem)");
             }

@@ -31,6 +31,8 @@ under the License.
     <eca service="createItemIssuance" event="commit">
         <condition field-name="orderId" operator="is-not-empty"/>
         <condition field-name="inventoryItemId" operator="is-not-empty"/>
+        <!-- Ignore the inventory shipment if affectAccounting set as false -->
+        <condition field-name="affectAccounting" operator="equals" value="true" type="Boolean"/>
         <action service="createAcctgTransForSalesShipmentIssuance" mode="sync"/>
     </eca>
 
@@ -42,13 +44,18 @@ under the License.
 
     <!-- create the accounting transactions for a shipment receipt every time the inventory is received -->
     <eca service="createShipmentReceipt" event="commit">
+        <!-- Ignore the inventory shipment if affectAccounting set as false -->
+        <condition field-name="affectAccounting" operator="equals" value="true" type="Boolean"/>
         <action service="createAcctgTransForShipmentReceipt" mode="sync"/>
     </eca>
 
+    <!-- work effort related transactions -->
+    <eca service="assignInventoryToWorkEffort" event="commit">
+        <action service="createAcctgTransForWorkEffortIssuance" mode="sync"/>
+    </eca>
     <eca service="createWorkEffortInventoryProduced" event="commit">
         <action service="createAcctgTransForWorkEffortInventoryProduced" mode="sync"/>
     </eca>
-
     <eca service="createCostComponent" event="commit">
         <condition field-name="workEffortId" operator="is-not-empty"/>
         <condition field-name="costComponentTypeId" operator="not-equals" value="ACTUAL_MAT_COST"/>
@@ -61,11 +68,7 @@ under the License.
         <action service="createAcctgTransForInventoryItemOwnerChange" mode="sync"/>
     </eca>
 
-    <eca service="assignInventoryToWorkEffort" event="commit">
-        <action service="createAcctgTransForWorkEffortIssuance" mode="sync"/>
-    </eca>
-
-    <!--creating inventory item detail when unitCost is not empty and recieptId is  empty-->
+    <!-- creating inventory item detail when unitCost is not empty and receiptId is empty -->
     <eca service="createInventoryItemDetail" event="commit">
         <condition field-name="unitCost" operator="is-not-empty"/>
         <condition field-name="receiptId" operator="is-empty"/>
@@ -83,47 +86,76 @@ under the License.
         <condition field-name="fixedAssetId" operator="is-not-empty"/>
         <action service="createAcctgTransForFixedAssetMaintIssuance" mode="sync"/>
     </eca>
-    <!--attempt to create AcctgTrans and Entries for Incoming Payment -->
-    <eca service="createPayment" event="commit">
-        <condition field-name="statusId" operator="equals" value="PMNT_RECEIVED"/>
-        <action service="createAcctgTransAndEntriesForIncomingPayment" mode="sync"/>
-    </eca>
-    <!--attempt to create AcctgTrans and Entries for Incoming when set PaymentStatus -->
-    <eca service="setPaymentStatus" event="commit">
-        <condition field-name="statusId" operator="equals" value="PMNT_RECEIVED"/>
-        <condition field-name="oldStatusId" operator="not-equals" value="PMNT_RECEIVED"/>
-        <action service="createAcctgTransAndEntriesForIncomingPayment" mode="sync"/>
-    </eca>
 
-    <!-- attemp to create AcctgTrans for Purchase Invoice -->
+    <!-- accounting transactions for Purchase (AP) and Sales Invoices (AR) -->
     <eca service="setInvoiceStatus" event="commit">
         <condition field-name="invoiceId" operator="is-not-empty"/>
+        <condition field-name="invoiceTypeId" operator="not-equals" value="CUST_RTN_INVOICE"/>
         <condition field-name="statusId" operator="equals" value="INVOICE_READY"/>
         <condition field-name="oldStatusId" operator="not-equals" value="INVOICE_READY"/>
         <condition field-name="oldStatusId" operator="not-equals" value="INVOICE_PAID"/>
         <action service="createAcctgTransForPurchaseInvoice" mode="sync"/>
+        <action service="createAcctgTransForSalesInvoice" mode="sync"/>
     </eca>
-
-    <!-- attemp to create AcctgTrans for Sales Invoice -->
     <eca service="setInvoiceStatus" event="commit">
         <condition field-name="invoiceId" operator="is-not-empty"/>
+        <condition field-name="invoiceTypeId" operator="equals" value="CUST_RTN_INVOICE"/>
         <condition field-name="statusId" operator="equals" value="INVOICE_READY"/>
         <condition field-name="oldStatusId" operator="not-equals" value="INVOICE_READY"/>
         <condition field-name="oldStatusId" operator="not-equals" value="INVOICE_PAID"/>
-        <action service="createAcctgTransForSalesInvoice" mode="sync"/>
+        <action service="createAcctgTransForCustomerReturnInvoice" mode="sync"/>
+    </eca>
+    <eca service="setInvoiceStatus" event="commit">
+        <condition field-name="invoiceId" operator="is-not-empty"/>
+        <condition field-name="statusId" operator="equals" value="INVOICE_CANCELLED"/>
+        <action service="cancelInvoice" mode="sync"/>
     </eca>
 
-    <!--attempt to create AcctgTrans and Entries for Outgoing Payment -->
+    <!-- accounting transactions for Incoming Payment (AR) -->
+    <eca service="createPayment" event="commit">
+        <condition field-name="statusId" operator="equals" value="PMNT_RECEIVED"/>
+        <action service="createAcctgTransAndEntriesForIncomingPayment" mode="sync"/>
+    </eca>
+    <eca service="setPaymentStatus" event="commit">
+        <condition field-name="statusId" operator="equals" value="PMNT_RECEIVED"/>
+        <condition field-name="oldStatusId" operator="not-equals" value="PMNT_RECEIVED"/>
+        <condition field-name="oldStatusId" operator="not-equals" value="PMNT_CONFIRMED"/>
+        <action service="createAcctgTransAndEntriesForIncomingPayment" mode="sync"/>
+    </eca>
+
+    <!-- accounting transactions for Outgoing Payment (AP) -->
     <eca service="createPayment" event="commit">
         <condition field-name="statusId" operator="equals" value="PMNT_SENT"/>
         <action service="createAcctgTransAndEntriesForOutgoingPayment" mode="sync"/>
     </eca>
-
-    <!--attempt to create AcctgTrans and Entries for Outgoing when set PaymentStatus -->
     <eca service="setPaymentStatus" event="commit">
         <condition field-name="statusId" operator="equals" value="PMNT_SENT"/>
         <condition field-name="oldStatusId" operator="not-equals" value="PMNT_SENT"/>
+        <condition field-name="oldStatusId" operator="not-equals" value="PMNT_CONFIRMED"/>
         <action service="createAcctgTransAndEntriesForOutgoingPayment" mode="sync"/>
+    </eca>
+
+    <eca service="createPaymentApplication" event="commit">
+        <condition field-name="invoiceId" operator="is-not-empty"/>
+        <condition field-name="paymentTypeId" operator="not-equals" value="CUSTOMER_REFUND"/>
+        <action service="createAcctgTransAndEntriesForPaymentApplication" mode="sync"/>
+    </eca>
+    <eca service="createPaymentApplication" event="commit">
+        <condition field-name="invoiceId" operator="is-not-empty"/>
+        <condition field-name="paymentTypeId" operator="equals" value="CUSTOMER_REFUND"/>
+        <action service="createAcctgTransAndEntriesForCustomerRefundPaymentApplication" mode="sync"/>
+    </eca>
+
+    <!-- set GlReconciliation status after creating GlReconciliation Entries -->
+    <eca service="createGlReconciliationEntry" event="commit">
+        <condition field-name="statusId" operator="is-not-empty"/>
+        <action service="setGlReconciliationStatus" mode="sync"/>
+    </eca>
+
+    <!-- If the accounting transaction that is posted is a depreciation transaction for a fixed asset, update the depreciation amount in the FixedAsset entity -->
+    <eca service="postAcctgTrans" event="commit">
+        <condition field-name="verifyOnly" operator="not-equals" value="true"/>
+        <action service="checkUpdateFixedAssetDepreciation" mode="sync"/>
     </eca>
 
 </service-eca>

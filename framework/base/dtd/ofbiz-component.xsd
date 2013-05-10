@@ -29,6 +29,7 @@ under the License.
                 <xs:element minOccurs="0" maxOccurs="unbounded" ref="test-suite"/>
                 <xs:element minOccurs="0" maxOccurs="unbounded" ref="keystore"/>
                 <xs:element minOccurs="0" maxOccurs="unbounded" ref="webapp"/>
+                <xs:element minOccurs="0" maxOccurs="unbounded" ref="container"/>
             </xs:sequence>
             <xs:attributeGroup ref="attlist.ofbiz-component"/>
         </xs:complexType>
@@ -39,7 +40,16 @@ under the License.
     </xs:attributeGroup>
     <xs:element name="depends-on">
         <xs:complexType>
-            <xs:attributeGroup ref="attlist.depends-on"/>
+            <xs:attributeGroup ref="attlist.depends-on">
+                <xs:annotation>
+                    <xs:documentation>
+                        This is yet unimplemented. It's not a trivial implementation because at the moment components are loaded
+                        in the order they are found (i.e. alphabetic or creation date).
+                        While this feature would require them all to be located first and then reordered and loaded.
+                        So, for now, simply follow the README file in hot-deploy root folder.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:attributeGroup>
         </xs:complexType>
     </xs:element>
     <xs:attributeGroup name="attlist.depends-on">
@@ -191,6 +201,14 @@ under the License.
         <xs:attribute type="xs:string" name="base-permission">
             <xs:annotation><xs:documentation>A user must have ALL of the permissions in the list to access the application</xs:documentation></xs:annotation>
         </xs:attribute>
+        <xs:attribute name="privileged" default="false">
+            <xs:simpleType>
+                <xs:restriction base="xs:token">
+                    <xs:enumeration value="true"/>
+                    <xs:enumeration value="false"/>
+                </xs:restriction>
+            </xs:simpleType>
+        </xs:attribute>
         <xs:attribute name="app-bar-display" default="true">
             <xs:simpleType>
                 <xs:restriction base="xs:token">
@@ -225,6 +243,39 @@ under the License.
         <xs:attribute type="xs:string" name="name" use="required"/>
         <xs:attribute type="xs:string" name="value" use="required"/>
     </xs:attributeGroup>
+
+    <xs:element name="container">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element minOccurs="0" maxOccurs="unbounded" ref="property"/>
+            </xs:sequence>
+            <xs:attributeGroup ref="attlist.container"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:attributeGroup name="attlist.container">
+        <xs:attribute type="xs:string" name="name" use="required"/>
+        <xs:attribute type="xs:string" name="class" use="required"/>
+        <xs:attribute type="xs:string" name="loaders"/>
+    </xs:attributeGroup>
+    <xs:element name="property">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element minOccurs="0" maxOccurs="unbounded" ref="property"/>
+                <xs:element minOccurs="0" ref="property-value"/>
+            </xs:sequence>
+            <xs:attributeGroup ref="attlist.property"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:attributeGroup name="attlist.property">
+        <xs:attribute type="xs:string" name="name" use="required"/>
+        <xs:attribute type="xs:string" name="value"/>
+    </xs:attributeGroup>
+    <xs:element name="property-value" type="any"/>
+    <xs:complexType name="any" mixed="true">
+        <xs:sequence>
+            <xs:any minOccurs="0" maxOccurs="unbounded" processContents="skip"/>
+        </xs:sequence>
+    </xs:complexType>
 </xs:schema>
 <!--
     <ofbiz-component name="core">
@@ -244,6 +295,6 @@ under the License.
         <service-resource type="group" loader="maincomponent" location="service/groups_test.xml"/>
         <service-resource type="eca" loader="maincomponent" location="service/secas_test.xml"/>
 
-    	<webapp name="webtools" title="WebTools" server="default" location="webtools" mount-point="/webtools"/>
+        <webapp name="webtools" title="WebTools" server="default" location="webtools" mount-point="/webtools"/>
     </ofbiz-component>
 -->

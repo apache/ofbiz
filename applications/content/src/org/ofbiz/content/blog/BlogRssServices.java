@@ -20,7 +20,6 @@
 package org.ofbiz.content.blog;
 
 import java.io.IOException;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -31,8 +30,9 @@ import javolution.util.FastMap;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.GeneralException;
 import org.ofbiz.base.util.UtilMisc;
+import org.ofbiz.base.util.UtilProperties;
 import org.ofbiz.content.content.ContentWorker;
-import org.ofbiz.entity.GenericDelegator;
+import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
 import org.ofbiz.entity.condition.EntityCondition;
@@ -53,6 +53,7 @@ import com.sun.syndication.feed.synd.SyndFeedImpl;
 public class BlogRssServices {
 
     public static final String module = BlogRssServices.class.getName();
+    public static final String resource = "ContentUiLabels";
     public static final String mimeTypeId = "text/html";
     public static final String mapKey = "SUMMARY";
 
@@ -68,18 +69,20 @@ public class BlogRssServices {
         mainLink = mainLink + "?blogContentId=" + contentId;
 
         LocalDispatcher dispatcher = dctx.getDispatcher();
-        GenericDelegator delegator = dctx.getDelegator();
+        Delegator delegator = dctx.getDelegator();
 
         // get the main blog content
         GenericValue content = null;
         try {
-            content = delegator.findByPrimaryKey("Content", UtilMisc.toMap("contentId", contentId));
+            content = delegator.findOne("Content", UtilMisc.toMap("contentId", contentId), false);
         } catch (GenericEntityException e) {
             Debug.logError(e, module);
         }
 
         if (content == null) {
-            return ServiceUtil.returnError("Not able to generate RSS feed for content: " + contentId);
+            return ServiceUtil.returnError(UtilProperties.getMessage(resource,
+                    "ContentCannotGenerateBlogRssFeed", 
+                    UtilMisc.toMap("contentId", contentId), locale));
         }
 
         // create the feed
@@ -91,19 +94,19 @@ public class BlogRssServices {
         feed.setDescription(content.getString("description"));
         feed.setEntries(generateEntryList(dispatcher, delegator, contentId, entryLink, locale, userLogin));
 
-        Map resp = ServiceUtil.returnSuccess();
+        Map<String, Object> resp = ServiceUtil.returnSuccess();
         resp.put("wireFeed", feed.createWireFeed());
         return resp;
     }
 
-    public static List generateEntryList(LocalDispatcher dispatcher, GenericDelegator delegator, String contentId, String entryLink, Locale locale, GenericValue userLogin) {
-        List entries = FastList.newInstance();
-        List exprs = FastList.newInstance();
+    public static List<SyndEntry> generateEntryList(LocalDispatcher dispatcher, Delegator delegator, String contentId, String entryLink, Locale locale, GenericValue userLogin) {
+        List<SyndEntry> entries = FastList.newInstance();
+        List<EntityCondition> exprs = FastList.newInstance();
         exprs.add(EntityCondition.makeCondition("contentIdStart", contentId));
         exprs.add(EntityCondition.makeCondition("caContentAssocTypeId", "PUBLISH_LINK"));
         exprs.add(EntityCondition.makeCondition("statusId", "CTNT_PUBLISHED"));
 
-        List contentRecs = null;
+        List<GenericValue> contentRecs = null;
         try {
             contentRecs = delegator.findList("ContentAssocViewTo", EntityCondition.makeCondition(exprs), null, UtilMisc.toList("-caFromDate"), null, false);
         } catch (GenericEntityException e) {
@@ -111,12 +114,11 @@ public class BlogRssServices {
         }
 
         if (contentRecs != null) {
-            Iterator i = contentRecs.iterator();
-            while (i.hasNext()) {
-                GenericValue v = (GenericValue) i.next();
+            for(GenericValue v : contentRecs) {
                 String sub = null;
                 try {
-                    sub = ContentWorker.renderSubContentAsText(dispatcher, delegator, v.getString("contentId"), mapKey, FastMap.newInstance(), locale, mimeTypeId, true);
+                    Map<String, Object> dummy = FastMap.newInstance();
+                    sub = ContentWorker.renderSubContentAsText(dispatcher, delegator, v.getString("contentId"), mapKey, dummy, locale, mimeTypeId, true);
                 } catch (GeneralException e) {
                     Debug.logError(e, module);
                 } catch (IOException e) {

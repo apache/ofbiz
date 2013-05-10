@@ -22,17 +22,18 @@ package org.ofbiz.entity.util;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
 
-import javolution.util.FastList;
-
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.GeneralRuntimeException;
-import org.ofbiz.entity.GenericDelegator;
+import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericResultSetClosedException;
 import org.ofbiz.entity.GenericValue;
+import org.ofbiz.entity.condition.EntityCondition;
+import org.ofbiz.entity.datasource.GenericDAO;
 import org.ofbiz.entity.jdbc.SQLProcessor;
 import org.ofbiz.entity.jdbc.SqlJdbcUtil;
 import org.ofbiz.entity.model.ModelEntity;
@@ -55,16 +56,29 @@ public class EntityListIterator implements ListIterator<GenericValue> {
     protected ModelFieldTypeReader modelFieldTypeReader;
     protected boolean closed = false;
     protected boolean haveMadeValue = false;
-    protected GenericDelegator delegator = null;
+    protected Delegator delegator = null;
+    protected GenericDAO genericDAO = null;
+    protected EntityCondition whereCondition = null;
+    protected EntityCondition havingCondition = null;
+    protected boolean distinctQuery = false;
 
     private boolean haveShowHasNextWarning = false;
+    private Integer resultSize = null;
 
     public EntityListIterator(SQLProcessor sqlp, ModelEntity modelEntity, List<ModelField> selectFields, ModelFieldTypeReader modelFieldTypeReader) {
+        this(sqlp, modelEntity, selectFields, modelFieldTypeReader, null, null, null, false);
+    }
+
+    public EntityListIterator(SQLProcessor sqlp, ModelEntity modelEntity, List<ModelField> selectFields, ModelFieldTypeReader modelFieldTypeReader, GenericDAO genericDAO, EntityCondition whereCondition, EntityCondition havingCondition, boolean distinctQuery) {
         this.sqlp = sqlp;
         this.resultSet = sqlp.getResultSet();
         this.modelEntity = modelEntity;
         this.selectFields = selectFields;
         this.modelFieldTypeReader = modelFieldTypeReader;
+        this.genericDAO = genericDAO;
+        this.whereCondition = whereCondition;
+        this.havingCondition = havingCondition;
+        this.distinctQuery = distinctQuery;
     }
 
     public EntityListIterator(ResultSet resultSet, ModelEntity modelEntity, List<ModelField> selectFields, ModelFieldTypeReader modelFieldTypeReader) {
@@ -75,7 +89,7 @@ public class EntityListIterator implements ListIterator<GenericValue> {
         this.modelFieldTypeReader = modelFieldTypeReader;
     }
 
-    public void setDelegator(GenericDelegator delegator) {
+    public void setDelegator(Delegator delegator) {
         this.delegator = delegator;
     }
 
@@ -118,7 +132,7 @@ public class EntityListIterator implements ListIterator<GenericValue> {
         }
     }
 
-    /** Sets the cursor position to last result; if result set is empty returns false */
+    /** Sets the cursor position to first result; if result set is empty returns false */
     public boolean first() throws GenericEntityException {
         try {
             return resultSet.first();
@@ -196,7 +210,12 @@ public class EntityListIterator implements ListIterator<GenericValue> {
         if (closed) throw new GenericResultSetClosedException("This EntityListIterator has been closed, this operation cannot be performed");
 
         try {
-            return resultSet.absolute(rowNum);
+            if (rowNum == 0) {
+                resultSet.beforeFirst();
+                return true;
+            } else {
+                return resultSet.absolute(rowNum);
+            }
         } catch (SQLException e) {
             if (!closed) {
                 this.close();
@@ -414,7 +433,7 @@ public class EntityListIterator implements ListIterator<GenericValue> {
                 // do a quick check to see if the ResultSet is empty
                 resultSet.beforeFirst();
             }
-            List<GenericValue> list = FastList.newInstance();
+            List<GenericValue> list = new LinkedList<GenericValue>();
             GenericValue nextValue = null;
 
             while ((nextValue = this.next()) != null) {
@@ -441,45 +460,27 @@ public class EntityListIterator implements ListIterator<GenericValue> {
      */
     public List<GenericValue> getPartialList(int start, int number) throws GenericEntityException {
         try {
-            if (number == 0) return FastList.newInstance();
-            List<GenericValue> list = FastList.newInstance();
+            if (number == 0) return new LinkedList<GenericValue>();
+            List<GenericValue> list = new LinkedList<GenericValue>();
 
             // just in case the caller missed the 1 based thingy
             if (start == 0) start = 1;
 
-            // if starting on result 1 just call next() to avoid scrollable issues in some databases
-            if (start == 1) {
-                if (!resultSet.next()) {
-                    return list;
-                }
-            } else {
-                // if can't reposition to desired index, throw exception
-                if (!resultSet.absolute(start)) {
-                    // maybe better to just return an empty list here...
-                    return list;
-                    //throw new GenericEntityException("Could not move to the start position of " + start + ", there are probably not that many results for this find.");
-                }
+            // if can't reposition to desired index, throw exception
+            if (!this.absolute(start - 1)) {
+                // maybe better to just return an empty list here...
+                return list;
+                //throw new GenericEntityException("Could not move to the start position of " + start + ", there are probably not that many results for this find.");
             }
-
-            // get the first as the current one
-            list.add(this.currentGenericValue());
 
             GenericValue nextValue = null;
-            // init numRetreived to one since we have already grabbed the initial one
-            int numRetreived = 1;
 
-            //number > numRetreived comparison goes first to avoid the unwanted call to next
-            while (number > numRetreived && (nextValue = this.next()) != null) {
+            //number > 0 comparison goes first to avoid the unwanted call to next
+            while (number > 0 && (nextValue = this.next()) != null) {
                 list.add(nextValue);
-                numRetreived++;
+                number--;
             }
             return list;
-        } catch (SQLException e) {
-            if (!closed) {
-                this.close();
-                Debug.logWarning("Warning: auto-closed EntityListIterator because of exception: " + e.toString(), module);
-            }
-            throw new GeneralRuntimeException("Error getting results", e);
         } catch (GeneralRuntimeException e) {
             if (!closed) {
                 this.close();
@@ -490,7 +491,17 @@ public class EntityListIterator implements ListIterator<GenericValue> {
     }
 
     public int getResultsSizeAfterPartialList() throws GenericEntityException {
-        if (this.last()) {
+        if (genericDAO != null) {
+            if (resultSize == null) {
+                EntityFindOptions efo = null;
+                if (distinctQuery) {
+                    efo = new EntityFindOptions();
+                    efo.setDistinct(distinctQuery);
+                }
+                resultSize = (int) genericDAO.selectCountByCondition(modelEntity, whereCondition, havingCondition, selectFields, efo);
+            }
+            return resultSize;
+        } else if (this.last()) {
             return this.currentIndex();
         } else {
             // evidently no valid rows in the ResultSet, so return 0
@@ -510,6 +521,7 @@ public class EntityListIterator implements ListIterator<GenericValue> {
         throw new GeneralRuntimeException("CursorListIterator currently only supports read-only access");
     }
 
+    @Override
     protected void finalize() throws Throwable {
         try {
             if (!closed) {

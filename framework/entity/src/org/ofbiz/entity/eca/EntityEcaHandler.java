@@ -18,8 +18,12 @@
  *******************************************************************************/
 package org.ofbiz.entity.eca;
 
-import java.util.*;
-import org.ofbiz.entity.*;
+import java.util.List;
+import java.util.Map;
+
+import org.ofbiz.entity.Delegator;
+import org.ofbiz.entity.GenericEntity;
+import org.ofbiz.entity.GenericEntityException;
 
 /**
  * EntityEcaHandler interface
@@ -30,6 +34,9 @@ public interface EntityEcaHandler<T> {
     public static final String EV_VALIDATE = "validate";
     public static final String EV_RUN = "run";
     public static final String EV_RETURN = "return";
+    /**
+     * Invoked after the entity operation, but before the cache is cleared.
+     */
     public static final String EV_CACHE_CLEAR = "cache-clear";
     public static final String EV_CACHE_CHECK = "cache-check";
     public static final String EV_CACHE_PUT = "cache-put";
@@ -40,7 +47,7 @@ public interface EntityEcaHandler<T> {
     public static final String OP_FIND = "find";
 
 
-    public void setDelegator(GenericDelegator delegator);
+    public void setDelegator(Delegator delegator);
 
     public Map<String, List<T>> getEntityEventMap(String entityName);
 

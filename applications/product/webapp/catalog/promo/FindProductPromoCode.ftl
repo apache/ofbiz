@@ -35,16 +35,16 @@ under the License.
                         <option value="Y">${uiLabelMap.CommonY}</option>
                     </select>
                 <span class="label">${uiLabelMap.ProductPromotionUseLimits}:
-                ${uiLabelMap.ProductPromotionPerCode}</span><input type="text" size="5" name="useLimitPerCode">
-                <span class="label">${uiLabelMap.ProductPromotionPerCustomer}</span><input type="text" size="5" name="useLimitPerCustomer">
+                ${uiLabelMap.ProductPromotionPerCode}</span><input type="text" size="5" name="useLimitPerCode" />
+                <span class="label">${uiLabelMap.ProductPromotionPerCustomer}</span><input type="text" size="5" name="useLimitPerCustomer" />
                 <div>
-                  <input type="file" size="40" name="uploadedFile">
-                  <input type="submit" value="${uiLabelMap.CommonUpload}">
+                  <input type="file" size="40" name="uploadedFile" />
+                  <input type="submit" value="${uiLabelMap.CommonUpload}" />
                 </div>
             </form>
         </div>
     </div>
-    <br/>
+    <br />
     <div class="screenlet">
         <div class="screenlet-title-bar">
             <h3>${uiLabelMap.ProductPromotionAddSetOfPromotionCodes}</h3>
@@ -52,7 +52,16 @@ under the License.
         <div class="screenlet-body">
             <form method="post" action="<@ofbizUrl>createProductPromoCodeSet</@ofbizUrl>">
                 <input type="hidden" name="productPromoId" value="${productPromoId}"/>
-                <span class="label">${uiLabelMap.CommonQuantity}:</span><input type="text" size="5" name="quantity">
+                <span class="label">${uiLabelMap.CommonQuantity}:</span><input type="text" size="5" name="quantity" />
+                <span class="label">${uiLabelMap.ProductPromoCodeLength}:</span><input type="text" size="12" name="codeLength" />
+                <span class="label">${uiLabelMap.ProductPromoCodeLayout}:</span>
+                    <select name="promoCodeLayout">
+                        <option value="smart">${uiLabelMap.ProductPromoLayoutSmart}</option>
+                        <option value="normal">${uiLabelMap.ProductPromoLayoutNormal}</option>
+                        <option value="sequence">${uiLabelMap.ProductPromoLayoutSeqNum}</option>
+                    </select>
+                <span class="tooltip">${uiLabelMap.ProductPromoCodeLayoutTooltip}</span>
+                <br />
                 <span class="label">${uiLabelMap.ProductPromoUserEntered}:</span>
                     <select name="userEntered">
                         <option value="Y">${uiLabelMap.CommonY}</option>
@@ -64,9 +73,9 @@ under the License.
                         <option value="Y">${uiLabelMap.CommonY}</option>
                     </select>
                 <span class="label">${uiLabelMap.ProductPromotionUseLimits}:
-                ${uiLabelMap.ProductPromotionPerCode}</span><input type="text" size="5" name="useLimitPerCode">
-                <span class="label">${uiLabelMap.ProductPromotionPerCustomer}</span><input type="text" size="5" name="useLimitPerCustomer">
-                <input type="submit" value="${uiLabelMap.CommonAdd}">
+                ${uiLabelMap.ProductPromotionPerCode}</span><input type="text" size="5" name="useLimitPerCode" />
+                <span class="label">${uiLabelMap.ProductPromotionPerCustomer}</span><input type="text" size="5" name="useLimitPerCustomer" />
+                <input type="submit" value="${uiLabelMap.CommonAdd}" />
             </form>
         </div>
     </div>

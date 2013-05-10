@@ -20,6 +20,7 @@ package org.ofbiz.product.feature;
 
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
@@ -30,9 +31,9 @@ import javolution.util.FastSet;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilGenerics;
 import org.ofbiz.base.util.UtilMisc;
+import org.ofbiz.base.util.UtilProperties;
 import org.ofbiz.base.util.UtilValidate;
-import org.ofbiz.entity.GenericDelegator;
-import org.ofbiz.entity.GenericEntity;
+import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
 import org.ofbiz.entity.util.EntityUtil;
@@ -61,7 +62,8 @@ public class ProductFeatureServices {
      */
     public static Map<String, Object> getProductFeaturesByType(DispatchContext dctx, Map<String, ? extends Object> context) {
         Map<String, Object> results = FastMap.newInstance();
-        GenericDelegator delegator = dctx.getDelegator();
+        Delegator delegator = dctx.getDelegator();
+        Locale locale = (Locale) context.get("locale");
 
         /* because we might need to search either for product features or for product features of a product, the search code has to be generic.
          * we will determine which entity and field to search on based on what the user has supplied us with.
@@ -86,12 +88,12 @@ public class ProductFeatureServices {
         }
 
         if (valueToSearch == null) {
-            return ServiceUtil.returnError("This service requires a productId, a productFeatureGroupId, or a productFeatureCategoryId to run.");
+            return ServiceUtil.returnError(UtilProperties.getMessage(resource, "ProductFeatureByType", locale));
         }
 
         try {
             // get all product features in this feature category
-            List<GenericValue> allFeatures = delegator.findByAnd(entityToSearch, UtilMisc.toMap(fieldToSearch, valueToSearch), orderBy);
+            List<GenericValue> allFeatures = delegator.findByAnd(entityToSearch, UtilMisc.toMap(fieldToSearch, valueToSearch), orderBy, false);
 
             if (entityToSearch.equals("ProductFeatureAndAppl") && productFeatureApplTypeId != null)
                 allFeatures = EntityUtil.filterByAnd(allFeatures, UtilMisc.toMap("productFeatureApplTypeId", productFeatureApplTypeId));
@@ -127,7 +129,7 @@ public class ProductFeatureServices {
      */
     public static Map<String, Object> getAllExistingVariants(DispatchContext dctx, Map<String, ? extends Object> context) {
         Map<String, Object> results = FastMap.newInstance();
-        GenericDelegator delegator = dctx.getDelegator();
+        Delegator delegator = dctx.getDelegator();
 
         String productId = (String) context.get("productId");
         List<String> curProductFeatureAndAppls = UtilGenerics.checkList(context.get("productFeatureAppls"));
@@ -139,7 +141,7 @@ public class ProductFeatureServices {
              * see if it has every single feature in the list of productFeatureAppls as a STANDARD_FEATURE.  If so, then
              * it qualifies and add it to the list of existingVariantProductIds.
              */
-            List<GenericValue> productAssocs = EntityUtil.filterByDate(delegator.findByAnd("ProductAssoc", UtilMisc.toMap("productId", productId, "productAssocTypeId", "PRODUCT_VARIANT")));
+            List<GenericValue> productAssocs = EntityUtil.filterByDate(delegator.findByAnd("ProductAssoc", UtilMisc.toMap("productId", productId, "productAssocTypeId", "PRODUCT_VARIANT"), null, false));
             for (GenericValue productAssoc: productAssocs) {
 
                 //for each associated product, if it has all standard features, display it's productId
@@ -149,15 +151,15 @@ public class ProductFeatureServices {
                             "productFeatureId", productFeatureAndAppl,
                             "productFeatureApplTypeId", "STANDARD_FEATURE");
 
-                    //Debug.log("Using findByMap: " + findByMap);
+                    //Debug.logInfo("Using findByMap: " + findByMap);
 
-                    List<GenericValue> standardProductFeatureAndAppls = EntityUtil.filterByDate(delegator.findByAnd("ProductFeatureAppl", findByMap));
+                    List<GenericValue> standardProductFeatureAndAppls = EntityUtil.filterByDate(delegator.findByAnd("ProductFeatureAppl", findByMap, null, false));
                     if (UtilValidate.isEmpty(standardProductFeatureAndAppls)) {
-                        // Debug.log("Does NOT have this standard feature");
+                        // Debug.logInfo("Does NOT have this standard feature");
                         hasAllFeatures = false;
                         break;
                     } else {
-                        // Debug.log("DOES have this standard feature");
+                        // Debug.logInfo("DOES have this standard feature");
                     }
                 }
 
@@ -202,7 +204,6 @@ public class ProductFeatureServices {
 
             // loop through each feature type
             for (Map.Entry<String, List<GenericValue>> entry: features.entrySet()) {
-                String currentFeatureType = entry.getKey();
                 List<GenericValue> currentFeatures = entry.getValue();
 
                 List<Map<String, Object>> newCombinations = FastList.newInstance();
@@ -272,7 +273,7 @@ public class ProductFeatureServices {
             // now figure out which of these combinations already have productIds associated with them
             for (Map<String, Object> combination: oldCombinations) {
                 // Verify if the default code is already used, if so add a numeric suffix
-                if (defaultVariantProductIds.contains((String) combination.get("defaultVariantProductId"))) {
+                if (defaultVariantProductIds.contains(combination.get("defaultVariantProductId"))) {
                     combination.put("defaultVariantProductId", combination.get("defaultVariantProductId") + "-" + (defaultCodeCounter < 10? "0" + defaultCodeCounter: "" + defaultCodeCounter));
                     defaultCodeCounter++;
                 }
@@ -301,9 +302,10 @@ public class ProductFeatureServices {
 
         List<GenericValue> productFeatures = UtilGenerics.checkList(context.get("productFeatures"));
         String productCategoryId = (String) context.get("productCategoryId");
+        Locale locale = (Locale) context.get("locale");
 
         // get all the product members of the product category
-        Map result;
+        Map<String, Object> result;
         try {
             result = dispatcher.runSync("getProductCategoryMembers", UtilMisc.toMap("categoryId", productCategoryId));
         } catch (GenericServiceException ex) {
@@ -339,7 +341,7 @@ public class ProductFeatureServices {
             }
 
             if (products.size() == 0) {
-                return ServiceUtil.returnError("No products which fit your requirements were found.");
+                return ServiceUtil.returnError(UtilProperties.getMessage(resource, "ProductCategoryNoVariants", locale));
             } else {
                 results = ServiceUtil.returnSuccess();
                 results.put("products", products);

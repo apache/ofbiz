@@ -21,6 +21,7 @@ package org.ofbiz.base.test;
 import junit.framework.TestCase;
 
 import org.ofbiz.base.util.Debug;
+import org.ofbiz.base.util.StringUtil;
 import org.ofbiz.base.util.UtilFormatOut;
 import org.ofbiz.base.util.UtilValidate;
 
@@ -31,14 +32,19 @@ public class BaseUnitTests extends TestCase {
     }
 
     public void testDebug() {
-        Debug.set(Debug.VERBOSE, true);
-        assertTrue(Debug.verboseOn());
-
-        Debug.set(Debug.VERBOSE, false);
-        assertTrue(!Debug.verboseOn());
-
-        Debug.set(Debug.INFO, true);
-        assertTrue(Debug.infoOn());
+        boolean debugVerbose = Debug.get(Debug.VERBOSE);
+        boolean debugInfo = Debug.get(Debug.INFO);
+        try {
+            Debug.set(Debug.VERBOSE, true);
+            assertTrue(Debug.verboseOn());
+            Debug.set(Debug.VERBOSE, false);
+            assertFalse(Debug.verboseOn());
+            Debug.set(Debug.INFO, true);
+            assertTrue(Debug.infoOn());
+        } finally {
+            Debug.set(Debug.VERBOSE, debugVerbose);
+            Debug.set(Debug.INFO, debugInfo);
+        }
     }
 
     public void testFormatPrintableCreditCard_1() {
@@ -70,4 +76,11 @@ public class BaseUnitTests extends TestCase {
     public void testIsFloat_2() {
         assertTrue(UtilValidate.isFloat("10.000", true, true, 3, 3));
     }
+
+    public void testStringUtil() {
+        byte[] testArray = {-1};
+        byte[] result = StringUtil.fromHexString(StringUtil.toHexString(testArray));
+        assertEquals("Hex conversions", testArray[0], result[0]);
+    }
+
 }

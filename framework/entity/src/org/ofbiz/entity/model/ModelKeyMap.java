@@ -23,24 +23,30 @@ import java.util.List;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import org.ofbiz.base.lang.ThreadSafe;
 import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.base.util.UtilXml;
 
 
 /**
- * Generic Entity - KeyMap model class
+ * An object that models the <code>&lt;key-map&gt;</code> element.
  *
  */
-public class ModelKeyMap implements java.io.Serializable {
+@ThreadSafe
+@SuppressWarnings("serial")
+public final class ModelKeyMap implements java.io.Serializable {
+
+    /*
+     * Developers - this is an immutable class. Once constructed, the object should not change state.
+     * Therefore, 'setter' methods are not allowed. If client code needs to modify the object's
+     * state, then it can create a new copy with the changed values.
+     */
 
     /** name of the field in this entity */
-    protected String fieldName = "";
+    private final String fieldName;
 
     /** name of the field in related entity */
-    protected String relFieldName = "";
-
-    /** Default Constructor */
-    public ModelKeyMap() {}
+    private final String relFieldName;
 
     /** Data Constructor, if relFieldName is null defaults to fieldName */
     public ModelKeyMap(String fieldName, String relFieldName) {
@@ -55,22 +61,14 @@ public class ModelKeyMap implements java.io.Serializable {
         this.relFieldName = UtilXml.checkEmpty(keyMapElement.getAttribute("rel-field-name"), this.fieldName).intern();
     }
 
-    /** name of the field in this entity */
+    /** Returns the field name. */
     public String getFieldName() {
         return this.fieldName;
     }
 
-    public void setFieldName(String fieldName) {
-        this.fieldName = fieldName;
-    }
-
-    /** name of the field in related entity */
+    /** Returns the related entity field name. */
     public String getRelFieldName() {
         return this.relFieldName;
-    }
-
-    public void setRelFieldName(String relFieldName) {
-        this.relFieldName = relFieldName;
     }
 
     // ======= Some Convenience Oriented Factory Methods =======
@@ -87,10 +85,12 @@ public class ModelKeyMap implements java.io.Serializable {
         return UtilMisc.toList(new ModelKeyMap(fieldName1, relFieldName1), new ModelKeyMap(fieldName2, relFieldName2), new ModelKeyMap(fieldName3, relFieldName3));
     }
 
+    @Override
     public int hashCode() {
         return this.fieldName.hashCode() + this.relFieldName.hashCode();
     }
 
+    @Override
     public boolean equals(Object other) {
         if (!(other instanceof ModelKeyMap)) return false;
         ModelKeyMap otherKeyMap = (ModelKeyMap) other;
@@ -101,13 +101,13 @@ public class ModelKeyMap implements java.io.Serializable {
         return true;
     }
 
+    // TODO: Externalize this.
     public Element toXmlElement(Document document) {
         Element root = document.createElement("key-map");
         root.setAttribute("field-name", this.getFieldName());
         if (!this.getFieldName().equals(this.getRelFieldName())) {
             root.setAttribute("rel-field-name", this.getRelFieldName());
         }
-
         return root;
     }
 }

@@ -26,9 +26,12 @@ import javax.servlet.jsp.JspWriter;
 import javax.servlet.jsp.tagext.BodyContent;
 import javax.servlet.jsp.tagext.BodyTagSupport;
 
+import org.ofbiz.base.util.UtilGenerics;
+
 /**
  * IterateNextTag - JSP Tag to get the next element of the IteratorTag.
  */
+@SuppressWarnings("serial")
 public class IterateNextTag extends BodyTagSupport {
 
     protected String name = null;
@@ -62,6 +65,7 @@ public class IterateNextTag extends BodyTagSupport {
         return element;
     }
 
+    @Override
     public int doStartTag() throws JspTagException {
         IteratorTag iteratorTag =
             (IteratorTag) findAncestorWithClass(this, IteratorTag.class);
@@ -84,15 +88,15 @@ public class IterateNextTag extends BodyTagSupport {
 
         // expand a map element here if requested
         if (expandMap) {
-            Map tempMap = (Map) element;
-            Iterator mapEntries = tempMap.entrySet().iterator();
+            Map<String, ?> tempMap = UtilGenerics.cast(element);
+            Iterator<Map.Entry<String, ?>> mapEntries = UtilGenerics.cast(tempMap.entrySet().iterator());
 
             while (mapEntries.hasNext()) {
-                Map.Entry entry = (Map.Entry) mapEntries.next();
+                Map.Entry<String, ?> entry = mapEntries.next();
                 Object value = entry.getValue();
 
                 if (value == null) value = "";
-                pageContext.setAttribute((String) entry.getKey(), value);
+                pageContext.setAttribute(entry.getKey(), value);
             }
         }
 
@@ -102,10 +106,12 @@ public class IterateNextTag extends BodyTagSupport {
         return EVAL_BODY_AGAIN;
     }
 
+    @Override
     public int doAfterBody() {
         return SKIP_BODY;
     }
 
+    @Override
     public int doEndTag() {
         try {
             BodyContent body = getBodyContent();

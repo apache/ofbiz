@@ -42,12 +42,15 @@ import org.ofbiz.base.util.UtilDateTime;
 import org.ofbiz.base.util.UtilGenerics;
 import org.ofbiz.base.util.UtilHttp;
 import org.ofbiz.base.util.UtilMisc;
+import org.ofbiz.base.util.UtilProperties;
 import org.ofbiz.base.util.UtilValidate;
-import org.ofbiz.entity.GenericDelegator;
+import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
 import org.ofbiz.entity.condition.EntityCondition;
 import org.ofbiz.entity.condition.EntityOperator;
+import org.ofbiz.entity.model.DynamicViewEntity;
+import org.ofbiz.entity.model.ModelKeyMap;
 import org.ofbiz.entity.util.EntityFindOptions;
 import org.ofbiz.entity.util.EntityListIterator;
 import org.ofbiz.entity.util.EntityUtil;
@@ -72,6 +75,7 @@ public class ProductSearchSession {
 
     public static final String module = ProductSearchSession.class.getName();
 
+    @SuppressWarnings("serial")
     public static class ProductSearchOptions implements java.io.Serializable {
         protected List<ProductSearchConstraint> constraintList = null;
         protected String topProductCategoryId = null;
@@ -87,7 +91,9 @@ public class ProductSearchSession {
         /** Basic copy constructor */
         public ProductSearchOptions(ProductSearchOptions productSearchOptions) {
             this.constraintList = FastList.newInstance();
-            this.constraintList.addAll(productSearchOptions.constraintList);
+            if (UtilValidate.isNotEmpty(productSearchOptions.constraintList)) {
+                this.constraintList.addAll(productSearchOptions.constraintList);
+            }
             this.topProductCategoryId = productSearchOptions.topProductCategoryId;
             this.resultSortOrder = productSearchOptions.resultSortOrder;
             this.viewIndex = productSearchOptions.viewIndex;
@@ -146,19 +152,22 @@ public class ProductSearchSession {
         }
 
         /**
-         * @return Returns the viewIndex.
+         * Get the view size
+         * @return returns the viewIndex.
          */
         public Integer getViewIndex() {
             return viewIndex;
         }
         /**
-         * @param viewIndex The viewIndex to set.
+         * Set the view index
+         * @param viewIndex the viewIndex to set.
          */
         public void setViewIndex(Integer viewIndex) {
             this.viewIndex = viewIndex;
         }
         /**
-         * @param viewIndex The viewIndex to set.
+         * Set the view index
+         * @param viewIndexStr the viewIndex to set.
          */
         public void setViewIndex(String viewIndexStr) {
             if (UtilValidate.isEmpty(viewIndexStr)) {
@@ -175,14 +184,16 @@ public class ProductSearchSession {
         }
 
         /**
-         * @return Returns the viewSize.
+         * Get the view size
+         * @return returns the view size.
          */
         public Integer getViewSize() {
             return viewSize;
         }
 
         /**
-         * @param viewSize The viewSize to set.
+         * Set the view size
+         * @param viewSize the view size to set.
          */
         public void setViewSize(Integer viewSize) {
             setPreviousViewSize(getViewSize());
@@ -190,7 +201,8 @@ public class ProductSearchSession {
         }
 
         /**
-         * @param viewSize The viewSize to set.
+         * Set the view size
+         * @param viewSizeStr the view size to set.
          */
         public void setViewSize(String viewSizeStr) {
             if (UtilValidate.isEmpty(viewSizeStr)) {
@@ -207,14 +219,16 @@ public class ProductSearchSession {
         }
 
         /**
-         * @return Returns the paging.
+         * Get the paging
+         * @return Returns the paging
          */
         public String getPaging() {
             return paging;
         }
 
         /**
-         * @param paging The paging to set.
+         * Set the paging
+         * @param paging the paging to set
          */
         public void setPaging(String paging) {
             if (paging == null) {
@@ -224,13 +238,15 @@ public class ProductSearchSession {
         }
 
         /**
-         * @return Returns the previousViewSize.
+         * Get the previous view size
+         * @return returns the previous view size
          */
         public Integer getPreviousViewSize() {
             return previousViewSize;
         }
         /**
-         * @param previousViewSize The previousViewSize to set.
+         * Set the previous view size
+         * @param previousViewSize the previousViewSize to set.
          */
         public void setPreviousViewSize(Integer previousViewSize) {
             if (previousViewSize == null) {
@@ -263,7 +279,7 @@ public class ProductSearchSession {
             }
         }
 
-        public List<String> searchGetConstraintStrings(boolean detailed, GenericDelegator delegator, Locale locale) {
+        public List<String> searchGetConstraintStrings(boolean detailed, Delegator delegator, Locale locale) {
             List<ProductSearchConstraint> productSearchConstraintList = this.getConstraintList();
             List<String> constraintStrings = FastList.newInstance();
             if (productSearchConstraintList == null) {
@@ -361,7 +377,7 @@ public class ProductSearchSession {
     /** A ControlServlet event method used to check to see if there is an override for any of the current keywords in the search */
     public static final String checkDoKeywordOverride(HttpServletRequest request, HttpServletResponse response) {
         HttpSession session = request.getSession();
-        GenericDelegator delegator = (GenericDelegator) request.getAttribute("delegator");
+        Delegator delegator = (Delegator) request.getAttribute("delegator");
         Map<String, Object> requestParams = UtilHttp.getParameterMap(request);
         ProductSearchSession.processSearchParameters(requestParams, request);
 
@@ -384,7 +400,7 @@ public class ProductSearchSession {
             if (keywords.size() > 0) {
                 List<GenericValue> productStoreKeywordOvrdList = null;
                 try {
-                    productStoreKeywordOvrdList = delegator.findByAndCache("ProductStoreKeywordOvrd", UtilMisc.toMap("productStoreId", productStoreId), UtilMisc.toList("-fromDate"));
+                    productStoreKeywordOvrdList = delegator.findByAnd("ProductStoreKeywordOvrd", UtilMisc.toMap("productStoreId", productStoreId), UtilMisc.toList("-fromDate"), true);
                     productStoreKeywordOvrdList = EntityUtil.filterByDate(productStoreKeywordOvrdList, true);
                 } catch (GenericEntityException e) {
                     Debug.logError(e, "Error reading ProductStoreKeywordOvrd list, not doing keyword override", module);
@@ -429,11 +445,11 @@ public class ProductSearchSession {
         return "success";
     }
 
-    public static ArrayList<String> searchDo(HttpSession session, GenericDelegator delegator, String prodCatalogId) {
+    public static ArrayList<String> searchDo(HttpSession session, Delegator delegator, String prodCatalogId) {
         String visitId = VisitHandler.getVisitId(session);
         ProductSearchOptions productSearchOptions = getProductSearchOptions(session);
         List<ProductSearchConstraint> productSearchConstraintList = productSearchOptions.getConstraintList();
-        if (productSearchConstraintList == null || productSearchConstraintList.size() == 0) {
+        if (UtilValidate.isEmpty(productSearchConstraintList)) {
             // no constraints, don't do a search...
             return new ArrayList<String>();
         }
@@ -450,7 +466,7 @@ public class ProductSearchSession {
         ProductSearchOptions.clearSearchOptions(session);
     }
 
-    public static List<String> searchGetConstraintStrings(boolean detailed, HttpSession session, GenericDelegator delegator) {
+    public static List<String> searchGetConstraintStrings(boolean detailed, HttpSession session, Delegator delegator) {
         Locale locale = UtilHttp.getLocale(session);
         ProductSearchOptions productSearchOptions = getProductSearchOptions(session);
         return productSearchOptions.searchGetConstraintStrings(detailed, delegator, locale);
@@ -469,7 +485,7 @@ public class ProductSearchSession {
 
     public static void searchAddFeatureIdConstraints(Collection<String> featureIds, Boolean exclude, HttpServletRequest request) {
         HttpSession session = request.getSession();
-        if (featureIds == null || featureIds.size() == 0) {
+        if (UtilValidate.isEmpty(featureIds)) {
             return;
         }
         for (String productFeatureId: featureIds) {
@@ -493,7 +509,7 @@ public class ProductSearchSession {
     }
 
     public static void processSearchParameters(Map<String, Object> parameters, HttpServletRequest request) {
-        GenericDelegator delegator = (GenericDelegator) request.getAttribute("delegator");
+        Delegator delegator = (Delegator) request.getAttribute("delegator");
         Boolean alreadyRun = (Boolean) request.getAttribute("processSearchParametersAlreadyRun");
         if (Boolean.TRUE.equals(alreadyRun)) {
             // even if already run, check the VIEW_SIZE and VIEW_INDEX again, just for kicks
@@ -530,9 +546,9 @@ public class ProductSearchSession {
         }
 
         String prioritizeCategoryId = null;
-        if (UtilValidate.isNotEmpty((String) parameters.get("PRIORITIZE_CATEGORY_ID"))) {
+        if (UtilValidate.isNotEmpty(parameters.get("PRIORITIZE_CATEGORY_ID"))) {
             prioritizeCategoryId = (String) parameters.get("PRIORITIZE_CATEGORY_ID");
-        } else if (UtilValidate.isNotEmpty((String) parameters.get("S_TPC"))) {
+        } else if (UtilValidate.isNotEmpty(parameters.get("S_TPC"))) {
             prioritizeCategoryId = (String) parameters.get("S_TPC");
         }
         if (UtilValidate.isNotEmpty(prioritizeCategoryId)) {
@@ -541,7 +557,7 @@ public class ProductSearchSession {
         }
 
         // if there is another category, add a constraint for it
-        if (UtilValidate.isNotEmpty((String) parameters.get("SEARCH_CATEGORY_ID"))) {
+        if (UtilValidate.isNotEmpty(parameters.get("SEARCH_CATEGORY_ID"))) {
             String searchCategoryId = (String) parameters.get("SEARCH_CATEGORY_ID");
             String searchSubCategories = (String) parameters.get("SEARCH_SUB_CATEGORIES");
             String searchCategoryExc = (String) parameters.get("SEARCH_CATEGORY_EXC");
@@ -551,7 +567,7 @@ public class ProductSearchSession {
         }
 
         for (int catNum = 1; catNum < 10; catNum++) {
-            if (UtilValidate.isNotEmpty((String) parameters.get("SEARCH_CATEGORY_ID" + catNum))) {
+            if (UtilValidate.isNotEmpty(parameters.get("SEARCH_CATEGORY_ID" + catNum))) {
                 String searchCategoryId = (String) parameters.get("SEARCH_CATEGORY_ID" + catNum);
                 String searchSubCategories = (String) parameters.get("SEARCH_SUB_CATEGORIES" + catNum);
                 String searchCategoryExc = (String) parameters.get("SEARCH_CATEGORY_EXC" + catNum);
@@ -563,7 +579,7 @@ public class ProductSearchSession {
 
         // a shorter variation for categories
         for (int catNum = 1; catNum < 10; catNum++) {
-            if (UtilValidate.isNotEmpty((String) parameters.get("S_CAT" + catNum))) {
+            if (UtilValidate.isNotEmpty(parameters.get("S_CAT" + catNum))) {
                 String searchCategoryId = (String) parameters.get("S_CAT" + catNum);
                 String searchSubCategories = (String) parameters.get("S_CSB" + catNum);
                 String searchCategoryExc = (String) parameters.get("S_CEX" + catNum);
@@ -574,31 +590,49 @@ public class ProductSearchSession {
         }
 
         // if there is any category selected try to use catalog and add a constraint for it
-        if (UtilValidate.isNotEmpty((String) parameters.get("SEARCH_CATALOG_ID"))) {
+        if (UtilValidate.isNotEmpty(parameters.get("SEARCH_CATALOG_ID"))) {
             String searchCatalogId = (String) parameters.get("SEARCH_CATALOG_ID");
             if (searchCatalogId != null && !searchCatalogId.equalsIgnoreCase("")) {
-                List<GenericValue> categories = CategoryWorker.getRelatedCategoriesRet(request, "topLevelList", CatalogWorker.getCatalogTopCategoryId(request, searchCatalogId), true, false, true);
+                String topCategory = CatalogWorker.getCatalogTopCategoryId(request, searchCatalogId);
+                if (UtilValidate.isEmpty(topCategory)) {
+                    topCategory = CatalogWorker.getCatalogTopEbayCategoryId(request, searchCatalogId);
+                }
+                List<GenericValue> categories = CategoryWorker.getRelatedCategoriesRet(request, "topLevelList", topCategory, true, false, true);
                 searchAddConstraint(new ProductSearch.CatalogConstraint(searchCatalogId, categories), session);
                 constraintsChanged = true;
             }
         }
 
         // if keywords were specified, add a constraint for them
-        if (UtilValidate.isNotEmpty((String) parameters.get("SEARCH_STRING"))) {
+        if (UtilValidate.isNotEmpty(parameters.get("SEARCH_STRING"))) {
             String keywordString = (String) parameters.get("SEARCH_STRING");
             String searchOperator = (String) parameters.get("SEARCH_OPERATOR");
             // defaults to true/Y, ie anything but N is true/Y
-            boolean anyPrefixSuffix = !"N".equals((String) parameters.get("SEARCH_ANYPRESUF"));
+            boolean anyPrefixSuffix = !"N".equals(parameters.get("SEARCH_ANYPRESUF"));
             searchAddConstraint(new ProductSearch.KeywordConstraint(keywordString, anyPrefixSuffix, anyPrefixSuffix, null, "AND".equals(searchOperator)), session);
             constraintsChanged = true;
         }
 
+        // if productName were specified, add a constraint for them
+        if (UtilValidate.isNotEmpty(parameters.get("SEARCH_PRODUCT_NAME"))) {
+            String productName = (String) parameters.get("SEARCH_PRODUCT_NAME");
+            searchAddConstraint(new ProductSearch.ProductFieldConstraint(productName, "productName"), session);
+            constraintsChanged = true;
+        }
+
+        // if internalName were specified, add a constraint for them
+        if (UtilValidate.isNotEmpty(parameters.get("SEARCH_INTERNAL_PROD_NAME"))) {
+            String internalName = (String) parameters.get("SEARCH_INTERNAL_PROD_NAME");
+            searchAddConstraint(new ProductSearch.ProductFieldConstraint(internalName, "internalName"), session);
+            constraintsChanged = true;
+        }
+
         for (int kwNum = 1; kwNum < 10; kwNum++) {
-            if (UtilValidate.isNotEmpty((String) parameters.get("SEARCH_STRING" + kwNum))) {
+            if (UtilValidate.isNotEmpty(parameters.get("SEARCH_STRING" + kwNum))) {
                 String keywordString = (String) parameters.get("SEARCH_STRING" + kwNum);
                 String searchOperator = (String) parameters.get("SEARCH_OPERATOR" + kwNum);
                 // defaults to true/Y, ie anything but N is true/Y
-                boolean anyPrefixSuffix = !"N".equals((String) parameters.get("SEARCH_ANYPRESUF" + kwNum));
+                boolean anyPrefixSuffix = !"N".equals(parameters.get("SEARCH_ANYPRESUF" + kwNum));
                 searchAddConstraint(new ProductSearch.KeywordConstraint(keywordString, anyPrefixSuffix, anyPrefixSuffix, null, "AND".equals(searchOperator)), session);
                 constraintsChanged = true;
             }
@@ -607,7 +641,7 @@ public class ProductSearchSession {
         for (String parameterName: parameters.keySet()) {
             if (parameterName.startsWith("SEARCH_FEAT") && !parameterName.startsWith("SEARCH_FEAT_EXC")) {
                 String productFeatureId = (String) parameters.get(parameterName);
-                if (productFeatureId != null && productFeatureId.length() > 0) {
+                if (UtilValidate.isNotEmpty(productFeatureId)) {
                     String paramNameExt = parameterName.substring("SEARCH_FEAT".length());
                     String searchCategoryExc = (String) parameters.get("SEARCH_FEAT_EXC" + paramNameExt);
                     Boolean exclude = UtilValidate.isEmpty(searchCategoryExc) ? null : Boolean.valueOf(!"N".equals(searchCategoryExc));
@@ -619,7 +653,7 @@ public class ProductSearchSession {
             // a shorter feature variation
             if (parameterName.startsWith("S_PFI")) {
                 String productFeatureId = (String) parameters.get(parameterName);
-                if (productFeatureId != null && productFeatureId.length() > 0) {
+                if (UtilValidate.isNotEmpty(productFeatureId)) {
                     String paramNameExt = parameterName.substring("S_PFI".length());
                     String searchCategoryExc = (String) parameters.get("S_PFX" + paramNameExt);
                     Boolean exclude = UtilValidate.isEmpty(searchCategoryExc) ? null : Boolean.valueOf(!"N".equals(searchCategoryExc));
@@ -632,7 +666,7 @@ public class ProductSearchSession {
             //if product features category were selected add a constraint for each
             if (parameterName.startsWith("SEARCH_PROD_FEAT_CAT") && !parameterName.startsWith("SEARCH_PROD_FEAT_CAT_EXC")) {
                 String productFeatureCategoryId = (String) parameters.get(parameterName);
-                if (productFeatureCategoryId != null && productFeatureCategoryId.length() > 0) {
+                if (UtilValidate.isNotEmpty(productFeatureCategoryId)) {
                     String paramNameExt = parameterName.substring("SEARCH_PROD_FEAT_CAT".length());
                     String searchProdFeatureCategoryExc = (String) parameters.get("SEARCH_PROD_FEAT_CAT_EXC" + paramNameExt);
                     Boolean exclude = UtilValidate.isEmpty(searchProdFeatureCategoryExc) ? null : Boolean.valueOf(!"N".equals(searchProdFeatureCategoryExc));
@@ -643,7 +677,7 @@ public class ProductSearchSession {
             // a shorter variation for feature category
             if (parameterName.startsWith("S_FCI")) {
                 String productFeatureCategoryId = (String) parameters.get(parameterName);
-                if (productFeatureCategoryId != null && productFeatureCategoryId.length() > 0) {
+                if (UtilValidate.isNotEmpty(productFeatureCategoryId)) {
                     String paramNameExt = parameterName.substring("S_FCI".length());
                     String searchProdFeatureCategoryExc = (String) parameters.get("S_FCX" + paramNameExt);
                     Boolean exclude = UtilValidate.isEmpty(searchProdFeatureCategoryExc) ? null : Boolean.valueOf(!"N".equals(searchProdFeatureCategoryExc));
@@ -655,7 +689,7 @@ public class ProductSearchSession {
             //if product features group were selected add a constraint for each
             if (parameterName.startsWith("SEARCH_PROD_FEAT_GRP") && !parameterName.startsWith("SEARCH_PROD_FEAT_GRP_EXC")) {
                 String productFeatureGroupId = (String) parameters.get(parameterName);
-                if (productFeatureGroupId != null && productFeatureGroupId.length() > 0) {
+                if (UtilValidate.isNotEmpty(productFeatureGroupId)) {
                     String paramNameExt = parameterName.substring("SEARCH_PROD_FEAT_GRP".length());
                     String searchProdFeatureGroupExc = (String) parameters.get("SEARCH_PROD_FEAT_GRP_EXC" + paramNameExt);
                     Boolean exclude = UtilValidate.isEmpty(searchProdFeatureGroupExc) ? null : Boolean.valueOf(!"N".equals(searchProdFeatureGroupExc));
@@ -666,7 +700,7 @@ public class ProductSearchSession {
             // a shorter variation for feature group
             if (parameterName.startsWith("S_FGI")) {
                 String productFeatureGroupId = (String) parameters.get(parameterName);
-                if (productFeatureGroupId != null && productFeatureGroupId.length() > 0) {
+                if (UtilValidate.isNotEmpty(productFeatureGroupId)) {
                     String paramNameExt = parameterName.substring("S_FGI".length());
                     String searchProdFeatureGroupExc = (String) parameters.get("S_FGX" + paramNameExt);
                     Boolean exclude = UtilValidate.isEmpty(searchProdFeatureGroupExc) ? null : Boolean.valueOf(!"N".equals(searchProdFeatureGroupExc));
@@ -684,7 +718,7 @@ public class ProductSearchSession {
         }
 
         // add a supplier to the search
-        if (UtilValidate.isNotEmpty((String) parameters.get("SEARCH_SUPPLIER_ID")) || UtilValidate.isNotEmpty((String) parameters.get("S_SUP"))) {
+        if (UtilValidate.isNotEmpty(parameters.get("SEARCH_SUPPLIER_ID")) || UtilValidate.isNotEmpty(parameters.get("S_SUP"))) {
             String supplierPartyId = (String) parameters.get("SEARCH_SUPPLIER_ID");
             if (UtilValidate.isEmpty(supplierPartyId)) supplierPartyId = (String) parameters.get("S_SUP");
             searchAddConstraint(new ProductSearch.SupplierConstraint(supplierPartyId), session);
@@ -692,18 +726,18 @@ public class ProductSearchSession {
         }
 
         // add a list price range to the search
-        if (UtilValidate.isNotEmpty((String) parameters.get("LIST_PRICE_LOW")) || UtilValidate.isNotEmpty((String) parameters.get("LIST_PRICE_HIGH"))) {
+        if (UtilValidate.isNotEmpty(parameters.get("LIST_PRICE_LOW")) || UtilValidate.isNotEmpty(parameters.get("LIST_PRICE_HIGH"))) {
             BigDecimal listPriceLow = null;
             BigDecimal listPriceHigh = null;
             String listPriceCurrency = UtilHttp.getCurrencyUom(request);
-            if (UtilValidate.isNotEmpty((String) parameters.get("LIST_PRICE_LOW"))) {
+            if (UtilValidate.isNotEmpty(parameters.get("LIST_PRICE_LOW"))) {
                 try {
                     listPriceLow = new BigDecimal((String) parameters.get("LIST_PRICE_LOW"));
                 } catch (NumberFormatException e) {
                     Debug.logError("Error parsing LIST_PRICE_LOW parameter [" + (String) parameters.get("LIST_PRICE_LOW") + "]: " + e.toString(), module);
                 }
             }
-            if (UtilValidate.isNotEmpty((String) parameters.get("LIST_PRICE_HIGH"))) {
+            if (UtilValidate.isNotEmpty(parameters.get("LIST_PRICE_HIGH"))) {
                 try {
                     listPriceHigh = new BigDecimal((String) parameters.get("LIST_PRICE_HIGH"));
                 } catch (NumberFormatException e) {
@@ -713,7 +747,7 @@ public class ProductSearchSession {
             searchAddConstraint(new ProductSearch.ListPriceRangeConstraint(listPriceLow, listPriceHigh, listPriceCurrency), session);
             constraintsChanged = true;
         }
-        if (UtilValidate.isNotEmpty((String) parameters.get("LIST_PRICE_RANGE")) || UtilValidate.isNotEmpty((String) parameters.get("S_LPR"))) {
+        if (UtilValidate.isNotEmpty(parameters.get("LIST_PRICE_RANGE")) || UtilValidate.isNotEmpty(parameters.get("S_LPR"))) {
             String listPriceRangeStr = (String) parameters.get("LIST_PRICE_RANGE");
             if (UtilValidate.isEmpty(listPriceRangeStr)) listPriceRangeStr = (String) parameters.get("S_LPR");
             int underscoreIndex = listPriceRangeStr.indexOf("_");
@@ -760,8 +794,8 @@ public class ProductSearchSession {
             constraintsChanged = true;
         }
 
-        if (UtilValidate.isNotEmpty((String) parameters.get("SEARCH_GOOD_IDENTIFICATION_TYPE")) ||
-            UtilValidate.isNotEmpty((String) parameters.get("SEARCH_GOOD_IDENTIFICATION_VALUE"))) {
+        if (UtilValidate.isNotEmpty(parameters.get("SEARCH_GOOD_IDENTIFICATION_TYPE")) ||
+            UtilValidate.isNotEmpty(parameters.get("SEARCH_GOOD_IDENTIFICATION_VALUE"))) {
             String include = (String) parameters.get("SEARCH_GOOD_IDENTIFICATION_INCL");
             if (UtilValidate.isEmpty(include)) {
                 include = "Y";
@@ -805,6 +839,12 @@ public class ProductSearchSession {
             } else if (sortOrder.startsWith("SPP:")) {
                 String priceTypeId = sortOrder.substring("SPP:".length());
                 searchSetSortOrder(new ProductSearch.SortProductPrice(priceTypeId, ascending), session);
+            } else if (sortOrder.startsWith("SortProductFeature:")) {
+                String featureId = sortOrder.substring("SortProductFeature:".length());
+                searchSetSortOrder(new ProductSearch.SortProductFeature(featureId, ascending), session);
+            } else if (sortOrder.startsWith("SPFT:")) {
+                String priceTypeId = sortOrder.substring("SPFT:".length());
+                searchSetSortOrder(new ProductSearch.SortProductPrice(priceTypeId, ascending), session);
             }
         }
 
@@ -819,7 +859,8 @@ public class ProductSearchSession {
         productSearchOptions.setPaging((String) parameters.get("PAGING"));
     }
 
-    public static Map getProductSearchResult(HttpServletRequest request, GenericDelegator delegator, String prodCatalogId) {
+    @SuppressWarnings("unchecked")
+    public static Map<String, Object> getProductSearchResult(HttpServletRequest request, Delegator delegator, String prodCatalogId) {
 
         // ========== Create View Indexes
         int viewIndex = 0;
@@ -829,6 +870,14 @@ public class ProductSearchSession {
         int listSize = 0;
         String paging = "Y";
         int previousViewSize = 20;
+        Map<String, Object> requestParams = UtilHttp.getCombinedMap(request);
+        List<String> keywordTypeIds = FastList.newInstance();
+        if (requestParams.get("keywordTypeId") instanceof String) {
+            keywordTypeIds.add((String) requestParams.get("keywordTypeId"));
+        } else if (requestParams.get("keywordTypeId") instanceof List){
+            keywordTypeIds = (List<String>) requestParams.get("keywordTypeId");
+        }
+        String statusId = (String) requestParams.get("statusId");
 
         HttpSession session = request.getSession();
         ProductSearchOptions productSearchOptions = getProductSearchOptions(session);
@@ -862,8 +911,12 @@ public class ProductSearchSession {
         List<String> productIds = FastList.newInstance();
         String visitId = VisitHandler.getVisitId(session);
         List<ProductSearchConstraint> productSearchConstraintList = ProductSearchOptions.getConstraintList(session);
-        // if no constraints, don't do a search...
-        if (UtilValidate.isNotEmpty(productSearchConstraintList)) {
+        String noConditionFind = (String) requestParams.get("noConditionFind");
+        if (UtilValidate.isEmpty(noConditionFind)) {
+            noConditionFind = UtilProperties.getPropertyValue("widget", "widget.defaultNoConditionFind");
+        }
+        // if noConditionFind to Y then find without conditions otherwise search according to constraints.
+        if ("Y".equals(noConditionFind) || UtilValidate.isNotEmpty(productSearchConstraintList)) {
             // if the search options have changed since the last search, put at the beginning of the options history list
             checkSaveSearchOptionsHistory(session);
 
@@ -878,6 +931,7 @@ public class ProductSearchSession {
                 addOnTopProdCondList.add(EntityCondition.makeCondition("fromDate", EntityOperator.LESS_THAN, now));
                 addOnTopProdCondList.add(EntityCondition.makeCondition("productCategoryId", EntityOperator.EQUALS, addOnTopProdCategoryId));
                 EntityFindOptions findOpts = new EntityFindOptions(true, EntityFindOptions.TYPE_SCROLL_INSENSITIVE, EntityFindOptions.CONCUR_READ_ONLY, true);
+                findOpts.setMaxRows(highIndex);
                 EntityListIterator pli = null;
                 try {
                     pli = delegator.find("ProductCategoryMember", EntityCondition.makeCondition(addOnTopProdCondList, EntityOperator.AND), null, UtilMisc.toSet("productId", "sequenceNum"), UtilMisc.toList("sequenceNum"), findOpts);
@@ -886,9 +940,7 @@ public class ProductSearchSession {
                     for (GenericValue alwaysAddProductCategoryMember: addOnTopProductCategoryMembers) {
                         productIds.add(alwaysAddProductCategoryMember.getString("productId"));
                     }
-                    // attempt to get the full size
-                    pli.last();
-                    addOnTopTotalListSize = pli.currentIndex();
+                    addOnTopTotalListSize = pli.getResultsSizeAfterPartialList();
                     listSize = listSize + addOnTopTotalListSize;
                 } catch (GenericEntityException e) {
                     Debug.logError(e, module);
@@ -915,11 +967,23 @@ public class ProductSearchSession {
             ResultSortOrder resultSortOrder = ProductSearchOptions.getResultSortOrder(request);
 
             ProductSearchContext productSearchContext = new ProductSearchContext(delegator, visitId);
-            productSearchContext.addProductSearchConstraints(productSearchConstraintList);
+            if (UtilValidate.isNotEmpty(productSearchConstraintList)) {
+                productSearchContext.addProductSearchConstraints(productSearchConstraintList);
+            }
             productSearchContext.setResultSortOrder(resultSortOrder);
             productSearchContext.setResultOffset(resultOffset);
             productSearchContext.setMaxResults(maxResults);
-
+            
+            if (UtilValidate.isNotEmpty(keywordTypeIds)) {
+                productSearchContext.keywordTypeIds = keywordTypeIds;
+            } else {
+                 productSearchContext.keywordTypeIds = UtilMisc.toList("KWT_KEYWORD");
+            }
+            
+            if (UtilValidate.isNotEmpty(statusId)) {
+                productSearchContext.statusId = statusId;
+            }
+            
             List<String> foundProductIds = productSearchContext.doSearch();
             if (maxResultsInt > 0) {
                 productIds.addAll(foundProductIds);
@@ -952,6 +1016,7 @@ public class ProductSearchSession {
         result.put("previousViewSize", previousViewSize);
         result.put("searchConstraintStrings", searchConstraintStrings);
         result.put("searchSortOrderString", searchSortOrderString);
+        result.put("noConditionFind", noConditionFind);
 
         return result;
     }
@@ -963,6 +1028,9 @@ public class ProductSearchSession {
         StringBuilder searchParamString = new StringBuilder();
 
         List<ProductSearchConstraint> constraintList = productSearchOptions.getConstraintList();
+        if (UtilValidate.isEmpty(constraintList)) {
+            constraintList = new ArrayList<ProductSearchConstraint>();
+        }
         int categoriesCount = 0;
         int featuresCount = 0;
         int featureCategoriesCount = 0;
@@ -1118,11 +1186,230 @@ public class ProductSearchSession {
                 ProductSearch.SortProductPrice spp = (ProductSearch.SortProductPrice) resultSortOrder;
                 searchParamString.append("&amp;S_O=SPP:");
                 searchParamString.append(spp.productPriceTypeId);
+            } else if (resultSortOrder instanceof ProductSearch.SortProductFeature) {
+                ProductSearch.SortProductFeature spf = (ProductSearch.SortProductFeature) resultSortOrder;
+                searchParamString.append("&amp;S_O=SPFT:");
+                searchParamString.append(spf.productFeatureTypeId);
             }
             searchParamString.append("&amp;S_A=");
             searchParamString.append(resultSortOrder.isAscending() ? "Y" : "N");
         }
 
         return searchParamString.toString();
+    }
+
+    /**
+     * This method returns a list of productId counts grouped by productFeatureId's of input productFeatureTypeId,
+     * the constraint being applied on current ProductSearchConstraint list in session.
+     * @param productFeatureTypeId The productFeatureTypeId, productFeatureId's of which should be considered.
+     * @param session Current session.
+     * @param delegator The delegator object.
+     * @return List of Maps containing productFeatureId, productFeatureTypeId, description, featureCount.
+     */
+    public static List<Map<String, String>> listCountByFeatureForType(String productFeatureTypeId, HttpSession session, Delegator delegator) {
+        String visitId = VisitHandler.getVisitId(session);
+
+        ProductSearchContext productSearchContext = new ProductSearchContext(delegator, visitId);
+        List<ProductSearchConstraint> productSearchConstraintList = ProductSearchOptions.getConstraintList(session);
+        if (UtilValidate.isNotEmpty(productSearchConstraintList)) {
+            productSearchContext.addProductSearchConstraints(productSearchConstraintList);
+        }
+        productSearchContext.finishKeywordConstraints();
+        productSearchContext.finishCategoryAndFeatureConstraints();
+
+        DynamicViewEntity dynamicViewEntity = productSearchContext.dynamicViewEntity;
+        List<EntityCondition> entityConditionList = productSearchContext.entityConditionList;
+        List<String> fieldsToSelect = FastList.newInstance();
+
+        dynamicViewEntity.addMemberEntity("PFAC", "ProductFeatureAppl");
+        dynamicViewEntity.addAlias("PFAC", "pfacProductFeatureId", "productFeatureId", null, null, Boolean.TRUE, null);
+        dynamicViewEntity.addAlias("PFAC", "pfacFromDate", "fromDate", null, null, null, null);
+        dynamicViewEntity.addAlias("PFAC", "pfacThruDate", "thruDate", null, null, null, null);
+        dynamicViewEntity.addAlias("PFAC", "featureCount", "productId", null, null, null, "count-distinct");
+        dynamicViewEntity.addViewLink("PROD", "PFAC", Boolean.FALSE, ModelKeyMap.makeKeyMapList("productId"));
+        fieldsToSelect.add("pfacProductFeatureId");
+        fieldsToSelect.add("featureCount");
+        entityConditionList.add(EntityCondition.makeCondition(EntityCondition.makeCondition("pfacThruDate", EntityOperator.EQUALS, null), EntityOperator.OR, EntityCondition.makeCondition("pfacThruDate", EntityOperator.GREATER_THAN, UtilDateTime.nowTimestamp())));
+        entityConditionList.add(EntityCondition.makeCondition("pfacFromDate", EntityOperator.LESS_THAN, UtilDateTime.nowTimestamp()));
+
+        dynamicViewEntity.addMemberEntity("PFC", "ProductFeature");
+        dynamicViewEntity.addAlias("PFC", "pfcProductFeatureTypeId", "productFeatureTypeId", null, null, Boolean.TRUE, null);
+        dynamicViewEntity.addAlias("PFC", "pfcDescription", "description", null, null, Boolean.TRUE, null);
+        dynamicViewEntity.addViewLink("PFAC", "PFC", Boolean.FALSE, ModelKeyMap.makeKeyMapList("productFeatureId"));
+        fieldsToSelect.add("pfcDescription");
+        fieldsToSelect.add("pfcProductFeatureTypeId");
+        entityConditionList.add(EntityCondition.makeCondition("pfcProductFeatureTypeId", EntityOperator.EQUALS, productFeatureTypeId));
+
+        EntityCondition whereCondition = EntityCondition.makeCondition(entityConditionList, EntityOperator.AND);
+
+        EntityFindOptions efo = new EntityFindOptions();
+        efo.setResultSetType(EntityFindOptions.TYPE_SCROLL_INSENSITIVE);
+
+        EntityListIterator eli = null;
+        try {
+            eli = delegator.findListIteratorByCondition(dynamicViewEntity, whereCondition, null, fieldsToSelect, productSearchContext.orderByList, efo);
+        } catch (GenericEntityException e) {
+            Debug.logError(e, "Error in product search", module);
+            return null;
+        }
+
+        List<Map<String, String>> featureCountList = FastList.newInstance();
+        GenericValue searchResult = null;
+        while ((searchResult = eli.next()) != null) {
+            featureCountList.add(UtilMisc.<String, String>toMap("productFeatureId", (String) searchResult.get("pfacProductFeatureId"), "productFeatureTypeId", (String) searchResult.get("pfcProductFeatureTypeId"), "description", (String) searchResult.get("pfcDescription"), "featureCount", Long.toString((Long) searchResult.get("featureCount"))));
+        }
+
+        if (eli != null) {
+            try {
+                eli.close();
+            } catch (GenericEntityException e) {
+                Debug.logError(e, "Error closing ProductSearch EntityListIterator");
+            }
+        }
+        return featureCountList;
+    }
+
+    public static int getCategoryCostraintIndex(HttpSession session) {
+        int index = 0;
+        List<ProductSearchConstraint> productSearchConstraintList = ProductSearchOptions.getConstraintList(session);
+        for (ProductSearchConstraint constraint: productSearchConstraintList) {
+            if (constraint instanceof CategoryConstraint) {
+                index++;
+            }
+        }
+        return index;
+    }
+
+    /**
+     * This method returns count of products within a given price range, the constraint being
+     * applied on current ProductSearchConstraint list in session.
+     * @param priceLow The low price.
+     * @param priceHigh The high price.
+     * @param session Current session.
+     * @param delegator The delegator object.
+     * @return The long value of count of products.
+     */
+    public static long getCountForListPriceRange(BigDecimal priceLow, BigDecimal priceHigh, HttpSession session, Delegator delegator) {
+        String visitId = VisitHandler.getVisitId(session);
+
+        ProductSearchContext productSearchContext = new ProductSearchContext(delegator, visitId);
+        List<ProductSearchConstraint> productSearchConstraintList = ProductSearchOptions.getConstraintList(session);
+        if (UtilValidate.isNotEmpty(productSearchConstraintList)) {
+            productSearchContext.addProductSearchConstraints(productSearchConstraintList);
+        }
+        productSearchContext.finishKeywordConstraints();
+        productSearchContext.finishCategoryAndFeatureConstraints();
+
+        DynamicViewEntity dynamicViewEntity = productSearchContext.dynamicViewEntity;
+        List<EntityCondition> entityConditionList = productSearchContext.entityConditionList;
+        List<String> fieldsToSelect = FastList.newInstance();
+
+        dynamicViewEntity.addMemberEntity("PPC", "ProductPrice");
+        dynamicViewEntity.addAlias("PPC", "ppcProductPriceTypeId", "productPriceTypeId", null, null, null, null);
+        dynamicViewEntity.addAlias("PPC", "ppcFromDate", "fromDate", null, null, null, null);
+        dynamicViewEntity.addAlias("PPC", "ppcThruDate", "thruDate", null, null, null, null);
+        dynamicViewEntity.addAlias("PPC", "ppcPrice", "price", null, null, null, null);
+        dynamicViewEntity.addAlias("PPC", "priceRangeCount", "productId", null, null, null, "count-distinct");
+        dynamicViewEntity.addViewLink("PROD", "PPC", Boolean.FALSE, ModelKeyMap.makeKeyMapList("productId"));
+        fieldsToSelect.add("priceRangeCount");
+        entityConditionList.add(EntityCondition.makeCondition(EntityCondition.makeCondition("ppcThruDate", EntityOperator.EQUALS, null), EntityOperator.OR, EntityCondition.makeCondition("ppcThruDate", EntityOperator.GREATER_THAN, UtilDateTime.nowTimestamp())));
+        entityConditionList.add(EntityCondition.makeCondition("ppcFromDate", EntityOperator.LESS_THAN, UtilDateTime.nowTimestamp()));
+        entityConditionList.add(EntityCondition.makeCondition("ppcPrice", EntityOperator.GREATER_THAN_EQUAL_TO, priceLow));
+        entityConditionList.add(EntityCondition.makeCondition("ppcPrice", EntityOperator.LESS_THAN_EQUAL_TO, priceHigh));
+        entityConditionList.add(EntityCondition.makeCondition("ppcProductPriceTypeId", EntityOperator.EQUALS, "LIST_PRICE"));
+
+        EntityCondition whereCondition = EntityCondition.makeCondition(entityConditionList, EntityOperator.AND);
+
+        EntityFindOptions efo = new EntityFindOptions();
+        efo.setResultSetType(EntityFindOptions.TYPE_SCROLL_INSENSITIVE);
+
+        EntityListIterator eli = null;
+        try {
+            eli = delegator.findListIteratorByCondition(dynamicViewEntity, whereCondition, null, fieldsToSelect, productSearchContext.orderByList, efo);
+        } catch (GenericEntityException e) {
+            Debug.logError(e, "Error in product search", module);
+            return 0;
+        }
+
+        GenericValue searchResult = null;
+        Long priceRangeCount = Long.valueOf(0);
+        while ((searchResult = eli.next()) != null) {
+            priceRangeCount = searchResult.getLong("priceRangeCount");
+        }
+
+        if (eli != null) {
+            try {
+                eli.close();
+            } catch (GenericEntityException e) {
+                Debug.logError(e, "Error closing ProductSearch EntityListIterator");
+            }
+        }
+        return priceRangeCount;
+    }
+
+    /**
+     * This method returns count of products in a given category (including all sub categories), the constraint being
+     * applied on current ProductSearchConstraint list in session.
+     * @param productCategoryId productCategoryId for which the count should be returned.
+     * @param session Current session.
+     * @param delegator The delegator object.
+     * @return The long value of count of products.
+     */
+    public static long getCountForProductCategory(String productCategoryId, HttpSession session, Delegator delegator) {
+        String visitId = VisitHandler.getVisitId(session);
+
+        ProductSearchContext productSearchContext = new ProductSearchContext(delegator, visitId);
+        List<ProductSearchConstraint> productSearchConstraintList = ProductSearchOptions.getConstraintList(session);
+        if (UtilValidate.isNotEmpty(productSearchConstraintList)) {
+            productSearchContext.addProductSearchConstraints(productSearchConstraintList);
+        }
+        productSearchContext.finishKeywordConstraints();
+        productSearchContext.finishCategoryAndFeatureConstraints();
+
+        DynamicViewEntity dynamicViewEntity = productSearchContext.dynamicViewEntity;
+        List<EntityCondition> entityConditionList = productSearchContext.entityConditionList;
+        List<String> fieldsToSelect = FastList.newInstance();
+
+        dynamicViewEntity.addMemberEntity("PCMC", "ProductCategoryMember");
+        dynamicViewEntity.addAlias("PCMC", "pcmcProductCategoryId", "productCategoryId", null, null, null, null);
+        dynamicViewEntity.addAlias("PCMC", "pcmcFromDate", "fromDate", null, null, null, null);
+        dynamicViewEntity.addAlias("PCMC", "pcmcThruDate", "thruDate", null, null, null, null);
+        dynamicViewEntity.addAlias("PCMC", "categoryCount", "productId", null, null, null, "count-distinct");
+        dynamicViewEntity.addViewLink("PROD", "PCMC", Boolean.FALSE, ModelKeyMap.makeKeyMapList("productId"));
+        fieldsToSelect.add("categoryCount");
+        entityConditionList.add(EntityCondition.makeCondition(EntityCondition.makeCondition("pcmcThruDate", EntityOperator.EQUALS, null), EntityOperator.OR, EntityCondition.makeCondition("pcmcThruDate", EntityOperator.GREATER_THAN, productSearchContext.nowTimestamp)));
+        entityConditionList.add(EntityCondition.makeCondition("pcmcFromDate", EntityOperator.LESS_THAN, productSearchContext.nowTimestamp));
+
+        Set<String> productCategoryIdSet = FastSet.newInstance();
+        ProductSearch.getAllSubCategoryIds(productCategoryId, productCategoryIdSet, delegator, productSearchContext.nowTimestamp);
+        entityConditionList.add(EntityCondition.makeCondition("pcmcProductCategoryId", EntityOperator.IN, productCategoryIdSet));
+
+        EntityCondition whereCondition = EntityCondition.makeCondition(entityConditionList, EntityOperator.AND);
+
+        EntityFindOptions efo = new EntityFindOptions();
+        efo.setResultSetType(EntityFindOptions.TYPE_SCROLL_INSENSITIVE);
+
+        EntityListIterator eli = null;
+        try {
+            eli = delegator.findListIteratorByCondition(dynamicViewEntity, whereCondition, null, fieldsToSelect, productSearchContext.orderByList, efo);
+        } catch (GenericEntityException e) {
+            Debug.logError(e, "Error in product search", module);
+            return 0;
+        }
+
+        GenericValue searchResult = null;
+        Long categoryCount = Long.valueOf(0);
+        while ((searchResult = eli.next()) != null) {
+            categoryCount = searchResult.getLong("categoryCount");
+        }
+
+        if (eli != null) {
+            try {
+                eli.close();
+            } catch (GenericEntityException e) {
+                Debug.logError(e, "Error closing ProductSearch EntityListIterator");
+            }
+        }
+        return categoryCount;
     }
 }

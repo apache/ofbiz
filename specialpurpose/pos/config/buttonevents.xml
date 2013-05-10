@@ -64,7 +64,8 @@ under the License.
     <event button-name="charY" class-name="org.ofbiz.pos.event.CharacterEvents" method-name="triggerY" disable-lock="false"/>
     <event button-name="charZ" class-name="org.ofbiz.pos.event.CharacterEvents" method-name="triggerZ" disable-lock="false"/>
     <event button-name="charDel" class-name="org.ofbiz.pos.event.CharacterEvents" method-name="triggerDel" disable-lock="false"/>
-
+    <event button-name="char@" class-name="org.ofbiz.pos.event.CharacterEvents" method-name="triggerAt" disable-lock="false"/>
+    
     <!-- base menu events -->
     <event button-name="menuClear" class-name="org.ofbiz.pos.event.MenuEvents" method-name="triggerClear" disable-lock="true"/>
     <event button-name="menuQty" class-name="org.ofbiz.pos.event.MenuEvents" method-name="triggerQty" disable-lock="false"/>
@@ -103,6 +104,7 @@ under the License.
 
     <!-- pos promo menu events -->
     <event button-name="promoCode" class-name="org.ofbiz.pos.event.PromoEvents" method-name="addPromoCode" disable-lock="false"/>
+    <event button-name="clientProfile" class-name="org.ofbiz.pos.event.PromoEvents" method-name="clientProfile" disable-lock="false"/>
 
     <!-- pos mgr menu events -->
     <event button-name="mgrOpenTerm" class-name="org.ofbiz.pos.event.ManagerEvents" method-name="openTerminal" disable-lock="false"/>
@@ -113,6 +115,7 @@ under the License.
     <event button-name="mgrReprintTx" class-name="org.ofbiz.pos.event.ManagerEvents" method-name="reprintLastTx" disable-lock="false"/>
     <event button-name="mgrTotals" class-name="org.ofbiz.pos.event.ManagerEvents" method-name="totalsReport" disable-lock="false"/>
     <event button-name="mgrCacheClear" class-name="org.ofbiz.pos.event.ManagerEvents" method-name="clearCache" disable-lock="false"/>
+    <event button-name="mgrSwapKeyboard" class-name="org.ofbiz.pos.event.ManagerEvents" method-name="SwapKeyboard" disable-lock="false"/>    
     <event button-name="mgrResetXui" class-name="org.ofbiz.pos.event.ManagerEvents" method-name="resetXui" disable-lock="false"/>
     <event button-name="mgrPaidOut" class-name="org.ofbiz.pos.event.ManagerEvents" method-name="paidOut" disable-lock="false"/>
     <event button-name="mgrPaidIn" class-name="org.ofbiz.pos.event.ManagerEvents" method-name="paidIn" disable-lock="false"/>

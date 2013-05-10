@@ -22,10 +22,6 @@ under the License.
         xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/widget-screen.xsd">
     <screen name="CommonJobshopDecorator">
         <section>
-            <actions>
-                <!-- <set field="leftbarScreenName" value="leftbar"/> -->
-                <!-- <set field="leftbarScreenLocation" value=""/> -->
-            </actions>
             <widgets>
                 <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
                     <decorator-section name="body">
@@ -40,13 +36,13 @@ under the License.
                                         <not><if-empty field="productionRun"/></not>
                                     </condition>
                                     <widgets>
-                                        <include-menu name="ProductionRunTabBar" location="component://manufacturing/widget/manufacturing/Menus.xml"/>
+                                        <include-menu name="ProductionRunTabBar" location="component://manufacturing/widget/manufacturing/ManufacturingMenus.xml"/>
                                     </widgets>
                                 </section>
                                 <container>
                                     <label style="h1">[${uiLabelMap.CommonId} ${productionRunId}]</label>
                                 </container>
-                                <container>
+                                <container style="button-bar">
                                     <link target="CreateProductionRun" text="${uiLabelMap.ManufacturingCreateProductionRun}" style="buttontext"/>
                                 </container>
                                 <decorator-section-include name="body"/>
@@ -69,20 +65,9 @@ under the License.
             <widgets>
                 <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
                     <decorator-section name="body">
-                        <container style="screenlet">
-                            <container style="screenlet-title-bar">
-                                <container style="h3">
-                                    <label text="${uiLabelMap.ManufacturingCreateProductionRun}"/>
-                                </container>
-                            </container>
-                            <container style="screenlet-body">
-                                <section>
-                                    <widgets>
-                                        <include-form name="CreateProductionRun" location="component://manufacturing/webapp/manufacturing/jobshopmgt/ProductionRunForms.xml"></include-form>
-                                    </widgets>
-                                </section>
-                            </container>
-                        </container>
+                        <screenlet title="${uiLabelMap.ManufacturingCreateProductionRun}">
+                            <include-form name="CreateProductionRun" location="component://manufacturing/widget/manufacturing/ProductionRunForms.xml"/>
+                        </screenlet>
                     </decorator-section>
                 </decorator-screen>
             </widgets>
@@ -98,124 +83,68 @@ under the License.
                 <set field="viewSize" from-field="parameters.VIEW_SIZE" type="Integer" default-value="500"/>
                 <script location="component://manufacturing/webapp/manufacturing/WEB-INF/actions/jobshopmgt/ViewProductionRun.groovy"/>
                 <script location="component://manufacturing/webapp/manufacturing/WEB-INF/actions/jobshopmgt/productionRunAllFixedAssets.groovy"/>
+
+                <set field="productionRunId" from-field="parameters.productionRunId"/>
+                <entity-one entity-name="WorkEffort" value-field="productionRun">
+                    <field-map field-name="workEffortId" from-field="productionRunId"/>
+                </entity-one>
+                <!-- Find all the work efforts that must be completed before this one. -->
+                <entity-condition entity-name="WorkEffortAssoc" list="mandatoryWorkEfforts">
+                    <condition-list>
+                        <condition-expr field-name="workEffortIdTo" from-field="productionRunId"/>
+                        <condition-expr field-name="workEffortAssocTypeId" value="WORK_EFF_PRECEDENCY"/>
+                    </condition-list>
+                </entity-condition>
+                <!-- Find all the work efforts that are dependent from this one. -->
+                <entity-condition entity-name="WorkEffortAssoc" list="dependentWorkEfforts">
+                    <condition-list>
+                        <condition-expr field-name="workEffortIdFrom" from-field="productionRunId"/>
+                        <condition-expr field-name="workEffortAssocTypeId" value="WORK_EFF_PRECEDENCY"/>
+                    </condition-list>
+                </entity-condition>
             </actions>
             <widgets>
                 <decorator-screen name="CommonJobshopDecorator" location="${parameters.commonJobshopDecorator}">
                     <decorator-section name="body">
+                        <screenlet title="${uiLabelMap.ManufacturingProductionRunId} ${productionRunId}"  navigation-menu-name="ProductionRunStatusAction">
+                            <include-menu name="ProductionRunStatusTabBar" location="component://manufacturing/widget/manufacturing/ManufacturingMenus.xml"/>
+                            <include-form name="UpdateProductionRun" location="component://manufacturing/widget/manufacturing/ProductionRunForms.xml"/>
+                        </screenlet>
                         <section>
+                            <condition>
+                                <not><if-empty field="mandatoryWorkEfforts"/></not>
+                            </condition>
                             <widgets>
-                                <container>
-                                    <link target="PrintProductionRun" style="buttontext" text="${uiLabelMap.CommonPrint}">
-                                        <parameter param-name = "productionRunId" from-field = "productionRunId"/>
-                                    </link>
-                                    <link target="scheduleProductionRun" style="buttontext" text="${uiLabelMap.ManufacturingSchedule}">
-                                        <parameter param-name="productionRunId" from-field="parameters.productionRunId"/>
-                                        <parameter param-name="statusId" value="PRUN_SCHEDULED"/>
-                                    </link>
-                                    <link target="changeProductionRunStatusToPrinted" style="buttontext" text="${uiLabelMap.ManufacturingConfirmProductionRun}">
-                                        <parameter param-name="productionRunId" from-field="parameters.productionRunId"/>
-                                    </link>
-                                    <link target="quickChangeProductionRunStatus" style="buttontext" text="${uiLabelMap.ManufacturingQuickComplete}">
-                                        <parameter param-name="productionRunId" from-field="parameters.productionRunId"/>
-                                        <parameter param-name="statusId" value="PRUN_COMPLETED"/>
-                                    </link>
-                                    <link target="quickChangeProductionRunStatus" style="buttontext" text="${uiLabelMap.ManufacturingQuickClose}">
-                                        <parameter param-name="productionRunId" from-field="parameters.productionRunId"/>
-                                        <parameter param-name="statusId" value="PRUN_CLOSED"/>
-                                    </link>
-                                    <link target="cancelProductionRun" style="buttontext" text="${uiLabelMap.ManufacturingCancel}">
-                                        <parameter param-name="productionRunId" from-field="parameters.productionRunId"/>
-                                    </link>
-                                </container>
+                                <screenlet title="${uiLabelMap.ManufacturingMandatoryWorkEfforts}">
+                                    <include-form name="mandatoryWorkEfforts" location="component://manufacturing/widget/manufacturing/ProductionRunForms.xml"/>
+                                </screenlet>
                             </widgets>
                         </section>
-                        <container style="screenlet">
-                            <container style="screenlet-title-bar">
-                                <container style="h3">
-                                    <label text="${uiLabelMap.ManufacturingProductionRunId} ${productionRunId}"/>
-                                </container>
-                            </container>
-                            <container style="screenlet-body">
-                                <section>
-                                    <widgets>
-                                        <include-form name="UpdateProductionRun" location="component://manufacturing/webapp/manufacturing/jobshopmgt/ProductionRunForms.xml"/>
-                                        <platform-specific>
-                                            <html><html-template location="component://manufacturing/webapp/manufacturing/jobshopmgt/associatedProductionRuns.ftl"/></html>
-                                        </platform-specific>
-                                    </widgets>
-                                </section>
-                            </container>
-                        </container>
-                        <container style="screenlet">
-                            <container style="screenlet-title-bar">
-                                <container style="h3">
-                                    <label text="${uiLabelMap.ManufacturingOrderItems}"/>
-                                </container>
-                            </container>
-                            <container style="screenlet-body">
-                                <section>
-                                    <widgets>
-                                        <include-form name="ListProductionRunOrderItems" location="component://manufacturing/webapp/manufacturing/jobshopmgt/ProductionRunForms.xml"/>
-                                    </widgets>
-                                </section>
-                            </container>
-                        </container>
-                        <container style="screenlet">
-                            <container style="screenlet-title-bar">
-                                <container style="h3">
-                                    <label text="${uiLabelMap.ManufacturingListOfProductionRunRoutingTasks}"/>
-                                </container>
-                            </container>
-                            <container style="screenlet-body">
-                                <section>
-                                    <widgets>
-                                        <include-form name="ViewListProductionRunRoutingTasks" location="component://manufacturing/webapp/manufacturing/jobshopmgt/ProductionRunForms.xml"/>
-                                    </widgets>
-                                </section>
-                            </container>
-                        </container>
-                        <container style="screenlet">
-                            <container style="screenlet-title-bar">
-                                <container style="h3">
-                                    <label text="${uiLabelMap.ManufacturingMaterials}"/>
-                                </container>
-                            </container>
-                            <container style="screenlet-body">
-                                <section>
-                                    <widgets>
-                                        <include-form name="ListProductionRunComponents" location="component://manufacturing/webapp/manufacturing/jobshopmgt/ProductionRunForms.xml"/>
-                                    </widgets>
-                                </section>
-                            </container>
-                        </container>
-                        <container style="screenlet">
-                            <container style="screenlet-title-bar">
-                                <container style="h3">
-                                    <label text="${uiLabelMap.ManufacturingListOfProductionRunFixedAssets}"/>
-                                </container>
-                            </container>
-                            <container style="screenlet-body">
-                                <section>
-                                    <widgets>
-                                        <include-form name="ListProductionRunTaskFixedAssets" location="component://manufacturing/webapp/manufacturing/jobshopmgt/ProductionRunForms.xml"/>
-                                    </widgets>
-                                </section>
-                            </container>
-                        </container>
-                        <container style="screenlet">
-                            <container style="screenlet-title-bar">
-                                <container style="h3">
-                                    <label text="${uiLabelMap.ManufacturingListOfProductionRunNotes}"/>
-                                </container>
-                            </container>
-                            <container style="screenlet-body">
-                                <section>
-                                    <widgets>
-                                        <include-form name="ListProductionRunNotes" location="component://manufacturing/webapp/manufacturing/jobshopmgt/ProductionRunForms.xml"/>
-                                    </widgets>
-                                </section>
-                            </container>
-                        </container>
+                        <section>
+                            <condition>
+                                <not><if-empty field="dependentWorkEfforts"/></not>
+                            </condition>
+                            <widgets>
+                                <screenlet title="${uiLabelMap.ManufacturingDependentWorkEfforts}">
+                                    <include-form name="dependentWorkEfforts" location="component://manufacturing/widget/manufacturing/ProductionRunForms.xml"/>
+                                </screenlet>
+                            </widgets>
+                        </section>
+                        <screenlet title="${uiLabelMap.ManufacturingOrderItems}">
+                            <include-form name="ListProductionRunOrderItems" location="component://manufacturing/widget/manufacturing/ProductionRunForms.xml"/>
+                        </screenlet>
+                        <screenlet title="${uiLabelMap.ManufacturingListOfProductionRunRoutingTasks}">
+                            <include-form name="ViewListProductionRunRoutingTasks" location="component://manufacturing/widget/manufacturing/ProductionRunForms.xml"/>
+                        </screenlet>
+                        <screenlet title="${uiLabelMap.ManufacturingMaterials}">
+                            <include-form name="ListProductionRunComponents" location="component://manufacturing/widget/manufacturing/ProductionRunForms.xml"/>
+                        </screenlet>
+                        <screenlet title="${uiLabelMap.ManufacturingListOfProductionRunFixedAssets}">
+                            <include-form name="ListProductionRunTaskFixedAssets" location="component://manufacturing/widget/manufacturing/ProductionRunForms.xml"/>
+                        </screenlet>
+                        <screenlet title="${uiLabelMap.ManufacturingListOfProductionRunNotes}">
+                            <include-form name="ListProductionRunNotes" location="component://manufacturing/widget/manufacturing/ProductionRunForms.xml"/>
+                        </screenlet>
                     </decorator-section>
                 </decorator-screen>
             </widgets>
@@ -233,86 +162,41 @@ under the License.
 
                 <script location="component://manufacturing/webapp/manufacturing/WEB-INF/actions/jobshopmgt/ProductionRunDeclaration.groovy"/>
                 <script location="component://manufacturing/webapp/manufacturing/WEB-INF/actions/jobshopmgt/productionRunAllFixedAssets.groovy"/>
+
+                <set field="productionRunId" from-field="parameters.productionRunId" default-value="${parameters.workEffortId}"/>
+                <entity-one entity-name="WorkEffort" value-field="productionRun">
+                    <field-map field-name="workEffortId" from-field="productionRunId"/>
+                </entity-one>
+                <!-- Find all the work efforts that must be completed before this one. -->
+                <entity-condition entity-name="WorkEffortAssoc" list="mandatoryWorkEfforts">
+                    <condition-list>
+                        <condition-expr field-name="workEffortIdTo" from-field="productionRunId"/>
+                        <condition-expr field-name="workEffortAssocTypeId" value="WORK_EFF_PRECEDENCY"/>
+                    </condition-list>
+                </entity-condition>
+                <!-- Find all the work efforts that are dependent from this one. -->
+                <entity-condition entity-name="WorkEffortAssoc" list="dependentWorkEfforts">
+                    <condition-list>
+                        <condition-expr field-name="workEffortIdFrom" from-field="productionRunId"/>
+                        <condition-expr field-name="workEffortAssocTypeId" value="WORK_EFF_PRECEDENCY"/>
+                    </condition-list>
+                </entity-condition>
             </actions>
             <widgets>
                 <decorator-screen name="CommonJobshopDecorator" location="${parameters.commonJobshopDecorator}">
                     <decorator-section name="body">
-                        <container>
-                            <link target="PrintProductionRun" text="${uiLabelMap.CommonPrint}" style="buttontext">
-                                <parameter param-name="productionRunId"/>
-                            </link>
-                            <section>
-                                <condition>
-                                    <if-compare field="productionRun.currentStatusId" operator="equals" value="PRUN_COMPLETED"/>
-                                </condition>
-                                <widgets>
-                                    <link target="changeProductionRunStatusToClosed" text="${uiLabelMap.ManufacturingProductionRunClose}" style="buttontext">
-                                        <parameter param-name="productionRunId"/>
-                                    </link>
-                                </widgets>
-                            </section>
-                            <section>
-                                <condition>
-                                    <and>
-                                        <if-compare field="productionRun.currentStatusId" operator="not-equals" value="PRUN_CANCELLED"/>
-                                        <if-compare field="productionRun.currentStatusId" operator="not-equals" value="PRUN_COMPLETED"/>
-                                        <if-compare field="productionRun.currentStatusId" operator="not-equals" value="PRUN_CLOSED"/>
-                                    </and>
-                                </condition>
-                                <widgets>
-                                    <link target="quickStartAllProductionRunTasks" text="${uiLabelMap.ManufacturingQuickStartAllTasks}" style="buttontext">
-                                        <parameter param-name="productionRunId"/>
-                                    </link>
-                                    <link target="quickRunAllProductionRunTasks" text="${uiLabelMap.ManufacturingQuickRunAllTasks}" style="buttontext">
-                                        <parameter param-name="productionRunId"/>
-                                    </link>
-                                    <link target="quickChangeProductionRunStatus" text="${uiLabelMap.ManufacturingQuickComplete}" style="buttontext">
-                                        <parameter param-name="productionRunId"/>
-                                        <parameter param-name="statusId" value="PRUN_COMPLETED"/>
-                                    </link>
-                                    <link target="quickChangeProductionRunStatus" text="${uiLabelMap.ManufacturingQuickClose}" style="buttontext">
-                                        <parameter param-name="productionRunId"/>
-                                        <parameter param-name="statusId" value="PRUN_CLOSED"/>
-                                    </link>
-                                    <link target="cancelProductionRun" text="${uiLabelMap.ManufacturingCancel}" style="buttontext">
-                                <parameter param-name="productionRunId"/>
-                            </link>
-                                </widgets>
-                            </section>
-                        </container>
-                        <container style="screenlet">
-                            <container style="screenlet-title-bar">
-                                <container style="h3">
-                                    <label text="${uiLabelMap.ManufacturingProductionRunId} ${productionRunId}"/>
-                                </container>
-                            </container>
-                            <container style="screenlet-body">
-                                <section>
-                                    <widgets>
-                                        <include-form name="ShowProductionRun" location="component://manufacturing/webapp/manufacturing/jobshopmgt/ProductionRunForms.xml"/>
-                                    </widgets>
-                                </section>
-                            </container>
-                           </container>
+                        <screenlet title="${uiLabelMap.ManufacturingProductionRunId} ${productionRunId}" navigation-menu-name="ProductionRunStatusAction">
+                            <include-menu name="ProductionRunStatusTabBar" location="component://manufacturing/widget/manufacturing/ManufacturingMenus.xml"/>
+                            <include-form name="ShowProductionRun" location="component://manufacturing/widget/manufacturing/ProductionRunForms.xml"/>
+                        </screenlet>
                         <section>
                             <condition>
                                 <if-compare field="canProduce" operator="equals" value="Y"/>
                             </condition>
                             <widgets>
-                                <container style="screenlet">
-                                    <container style="screenlet-title-bar">
-                                        <container style="h3">
-                                            <label text="${uiLabelMap.ManufacturingProductionRunProduce}"/>
-                                        </container>
-                                    </container>
-                                    <container style="screenlet-body">
-                                        <section>
-                                            <widgets>
-                                                <include-form name="ProductionRunProduce" location="component://manufacturing/webapp/manufacturing/jobshopmgt/ProductionRunForms.xml"/>
-                                            </widgets>
-                                        </section>
-                                    </container>
-                                   </container>
+                                <screenlet title="${uiLabelMap.ManufacturingProductionRunProduce}">
+                                    <include-form name="ProductionRunProduce" location="component://manufacturing/widget/manufacturing/ProductionRunForms.xml"/>
+                                </screenlet>
                             </widgets>
                         </section>
                         <section>
@@ -320,139 +204,71 @@ under the License.
                                 <if-compare field="canDeclareAndProduce" operator="equals" value="Y"/>
                             </condition>
                             <widgets>
-                                <container style="screenlet">
-                                    <container style="screenlet-title-bar">
-                                        <container style="h3">
-                                            <label text="${uiLabelMap.ManufacturingProductionRunDeclareAndProduce}"/>
-                                        </container>
-                                    </container>
-                                    <container style="screenlet-body">
-                                        <section>
-                                            <widgets>
-                                                <include-form name="ProductionRunDeclareAndProduceTop" location="component://manufacturing/webapp/manufacturing/jobshopmgt/ProductionRunForms.xml"/>
-                                                <include-form name="ProductionRunDeclareAndProduceBottom" location="component://manufacturing/webapp/manufacturing/jobshopmgt/ProductionRunForms.xml"/>
-                                            </widgets>
-                                        </section>
-                                    </container>
-                                   </container>
+                                <screenlet title="${uiLabelMap.ManufacturingProductionRunDeclareAndProduce}">
+                                    <include-form name="ProductionRunDeclareAndProduceTop" location="component://manufacturing/widget/manufacturing/ProductionRunForms.xml"/>
+                                    <include-form name="ProductionRunDeclareAndProduceBottom" location="component://manufacturing/widget/manufacturing/ProductionRunForms.xml"/>
+                                </screenlet>
                             </widgets>
                         </section>
-                        <container style="screenlet">
-                            <container style="screenlet-title-bar">
-                                <container style="h3">
-                                    <label text="${uiLabelMap.ManufacturingAssociatedProductionRuns}"/>
-                                </container>
-                            </container>
-                            <container style="screenlet-body">
+                        <screenlet title="${uiLabelMap.ManufacturingInventoryItemsProduced}">
+                            <include-form name="ListProductionRunInventoryItems" location="component://manufacturing/widget/manufacturing/ProductionRunForms.xml"/>
+                        </screenlet>
+                        <section>
+                            <condition>
+                                <not><if-empty field="mandatoryWorkEfforts"/></not>
+                            </condition>
+                            <widgets>
+                                <screenlet title="${uiLabelMap.ManufacturingMandatoryWorkEfforts}">
+                                    <include-form name="mandatoryWorkEfforts" location="component://manufacturing/widget/manufacturing/ProductionRunForms.xml"/>
+                                </screenlet>
+                            </widgets>
+                        </section>
+                        <section>
+                            <condition>
+                                <not><if-empty field="dependentWorkEfforts"/></not>
+                            </condition>
+                            <widgets>
+                                <screenlet title="${uiLabelMap.ManufacturingDependentWorkEfforts}">
+                                    <include-form name="dependentWorkEfforts" location="component://manufacturing/widget/manufacturing/ProductionRunForms.xml"/>
+                                </screenlet>
+                            </widgets>
+                        </section>
+                        <screenlet title="${uiLabelMap.ManufacturingOrderItems}">
+                            <include-form name="ListProductionRunOrderItems" location="component://manufacturing/widget/manufacturing/ProductionRunForms.xml"/>
+                        </screenlet>
+                        <screenlet title="${uiLabelMap.ManufacturingListOfProductionRunRoutingTasks}">
+                            <include-form name="ListProductionRunDeclRoutingTasks" location="component://manufacturing/widget/manufacturing/ProductionRunForms.xml"/>
+                        </screenlet>
+                        <screenlet title="${uiLabelMap.ManufacturingProductionRunDeclaration}">
+                          <section>
+                            <condition>
+                              <not><if-empty field="parameters.routingTaskId"/></not>
+                            </condition>
+                            <widgets>
+                              <container style="lefthalf">
+                                <include-form name="EditProductionRunDeclRoutingTask" location="component://manufacturing/widget/manufacturing/ProductionRunForms.xml"/>
+                              </container>
+                              <container style="righthalf">
+                                <include-form name="CreateRoutingTaskDelivProduct" location="component://manufacturing/widget/manufacturing/ProductionRunForms.xml"/>
                                 <section>
-                                    <widgets>
-                                        <platform-specific>
-                                            <html><html-template location="component://manufacturing/webapp/manufacturing/jobshopmgt/associatedProductionRuns.ftl"/></html>
-                                        </platform-specific>
-                                    </widgets>
+                                  <condition><not><if-empty field="prunInventoryProduced"/></not></condition>
+                                  <widgets>
+                                    <include-form name="ProductionRunTaskInventoryProducedList" location="component://manufacturing/widget/manufacturing/ProductionRunForms.xml"/>
+                                  </widgets>
                                 </section>
-                            </container>
-                        </container>
-                        <container style="screenlet">
-                            <container style="screenlet-title-bar">
-                                <container style="h3">
-                                    <label text="${uiLabelMap.ManufacturingInventoryItemsProduced}"/>
-                                </container>
-                            </container>
-                            <container style="screenlet-body">
-                                <section>
-                                    <widgets>
-                                        <include-form name="ListProductionRunInventoryItems" location="component://manufacturing/webapp/manufacturing/jobshopmgt/ProductionRunForms.xml"/>
-                                    </widgets>
-                                </section>
-                            </container>
-                        </container>
-                        <container style="screenlet">
-                            <container style="screenlet-title-bar">
-                                <container style="h3">
-                                    <label text="${uiLabelMap.ManufacturingOrderItems}"/>
-                                </container>
-                            </container>
-                            <container style="screenlet-body">
-                                <section>
-                                    <widgets>
-                                        <include-form name="ListProductionRunOrderItems" location="component://manufacturing/webapp/manufacturing/jobshopmgt/ProductionRunForms.xml"/>
-                                    </widgets>
-                                </section>
-                            </container>
-                        </container>
-                        <container style="screenlet">
-                            <container style="screenlet-title-bar">
-                                <container style="h3">
-                                    <label text="${uiLabelMap.ManufacturingListOfProductionRunRoutingTasks}"/>
-                                </container>
-                            </container>
-                            <container style="screenlet-body">
-                                <section>
-                                    <widgets>
-                                        <include-form name="ListProductionRunDeclRoutingTasks" location="component://manufacturing/webapp/manufacturing/jobshopmgt/ProductionRunForms.xml"/>
-                                    </widgets>
-                                </section>
-                            </container>
-                        </container>
-                        <container style="screenlet">
-                            <container style="screenlet-title-bar">
-                                <container style="h3">
-                                    <label text="${uiLabelMap.ManufacturingProductionRunDeclaration}"/>
-                                </container>
-                            </container>
-                            <container style="screenlet-body">
-                                <section>
-                                    <widgets>
-                                        <platform-specific>
-                                            <html><html-template location="component://manufacturing/webapp/manufacturing/jobshopmgt/ProductionRunDeclaration.ftl"/></html>
-                                        </platform-specific>
-                                    </widgets>
-                                </section>
-                            </container>
-                        </container>
-                        <container style="screenlet">
-                            <container style="screenlet-title-bar">
-                                <container style="h3">
-                                    <label text="${uiLabelMap.ManufacturingMaterialsRequiredByRunningTask}"/>
-                                </container>
-                            </container>
-                            <container style="screenlet-body">
-                                <section>
-                                    <widgets>
-                                        <include-form name="ListIssueProductionRunDeclComponents" location="component://manufacturing/webapp/manufacturing/jobshopmgt/ProductionRunForms.xml"/>
-                                    </widgets>
-                                </section>
-                            </container>
-                        </container>
-                        <container style="screenlet">
-                            <container style="screenlet-title-bar">
-                                <container style="h3">
-                                    <label text="${uiLabelMap.ManufacturingReturnMaterials}"/>
-                                </container>
-                            </container>
-                            <container style="screenlet-body">
-                                <section>
-                                    <widgets>
-                                        <include-form name="ListReturnProductionRunDeclComponents" location="component://manufacturing/webapp/manufacturing/jobshopmgt/ProductionRunForms.xml"/>
-                                    </widgets>
-                                </section>
-                            </container>
-                        </container>
-                        <container style="screenlet">
-                            <container style="screenlet-title-bar">
-                                <container style="h3">
-                                    <label text="${uiLabelMap.ManufacturingListOfProductionRunFixedAssets}"/>
-                                </container>
-                            </container>
-                            <container style="screenlet-body">
-                                <section>
-                                    <widgets>
-                                        <include-form name="ListProductionRunTaskFixedAssets" location="component://manufacturing/webapp/manufacturing/jobshopmgt/ProductionRunForms.xml"/>
-                                    </widgets>
-                                </section>
-                            </container>
-                        </container>
+                              </container>
+                            </widgets>
+                          </section>
+                        </screenlet>
+                        <screenlet title="${uiLabelMap.ManufacturingMaterialsRequiredByRunningTask}">
+                            <include-form name="ListIssueProductionRunDeclComponents" location="component://manufacturing/widget/manufacturing/ProductionRunForms.xml"/>
+                        </screenlet>
+                        <screenlet title="${uiLabelMap.ManufacturingReturnMaterials}">
+                            <include-form name="ListReturnProductionRunDeclComponents" location="component://manufacturing/widget/manufacturing/ProductionRunForms.xml"/>
+                        </screenlet>
+                        <screenlet title="${uiLabelMap.ManufacturingListOfProductionRunFixedAssets}">
+                            <include-form name="ListProductionRunTaskFixedAssets" location="component://manufacturing/widget/manufacturing/ProductionRunForms.xml"/>
+                        </screenlet>
                     </decorator-section>
                 </decorator-screen>
             </widgets>
@@ -465,13 +281,18 @@ under the License.
                 <property-map resource="ManufacturingUiLabels" map-name="uiLabelMap" global="true"/>
                 <property-map resource="ProductUiLabels" map-name="uiLabelMap" global="true"/>
                 <property-map resource="CommonUiLabels" map-name="uiLabelMap" global="true"/>
-                <set field="titleProperty" value="ManufacturingReports"/>
+                <set field="titleProperty" value="ManufacturingProductionRun"/>
+                <set field="bodyFontSize" value="10pt"/>
                 <script location="component://manufacturing/webapp/manufacturing/WEB-INF/actions/jobshopmgt/ProductionRunDeclaration.groovy"/>
             </actions>
             <widgets>
-                <platform-specific>
-                    <xsl-fo><html-template location="component://manufacturing/webapp/manufacturing/jobshopmgt/ProductionRun.fo.ftl"/></xsl-fo>
-                </platform-specific>
+                <decorator-screen name="SimpleDecorator" location="component://common/widget/CommonScreens.xml">
+                    <decorator-section name="body">
+                        <platform-specific>
+                            <xsl-fo><html-template location="component://manufacturing/webapp/manufacturing/jobshopmgt/ProductionRun.fo.ftl"/></xsl-fo>
+                        </platform-specific>
+                    </decorator-section>
+                </decorator-screen>
             </widgets>
         </section>
     </screen>
@@ -505,34 +326,12 @@ under the License.
             <widgets>
                 <decorator-screen name="CommonJobshopDecorator" location="${parameters.commonJobshopDecorator}">
                     <decorator-section name="body">
-                        <container style="screenlet">
-                            <container style="screenlet-title-bar">
-                                <container style="h3">
-                                    <label text="${uiLabelMap.ManufacturingMandatoryWorkEfforts}"/>
-                                </container>
-                            </container>
-                            <container style="screenlet-body">
-                                <section>
-                                    <widgets>
-                                        <include-form name="mandatoryWorkEfforts" location="component://manufacturing/webapp/manufacturing/jobshopmgt/ProductionRunForms.xml"/>
-                                    </widgets>
-                                </section>
-                            </container>
-                        </container>
-                        <container style="screenlet">
-                            <container style="screenlet-title-bar">
-                                <container style="h3">
-                                    <label text="${uiLabelMap.ManufacturingDependentWorkEfforts}"/>
-                                </container>
-                            </container>
-                            <container style="screenlet-body">
-                                <section>
-                                    <widgets>
-                                        <include-form name="dependentWorkEfforts" location="component://manufacturing/webapp/manufacturing/jobshopmgt/ProductionRunForms.xml"/>
-                                    </widgets>
-                                </section>
-                            </container>
-                        </container>
+                        <screenlet title="${uiLabelMap.ManufacturingMandatoryWorkEfforts}">
+                            <include-form name="mandatoryWorkEfforts" location="component://manufacturing/widget/manufacturing/ProductionRunForms.xml"/>
+                        </screenlet>
+                        <screenlet title="${uiLabelMap.ManufacturingDependentWorkEfforts}">
+                            <include-form name="dependentWorkEfforts" location="component://manufacturing/widget/manufacturing/ProductionRunForms.xml"/>
+                        </screenlet>
                     </decorator-section>
                 </decorator-screen>
             </widgets>
@@ -561,9 +360,9 @@ under the License.
                 <decorator-screen name="CommonJobshopDecorator" location="${parameters.commonJobshopDecorator}">
                     <decorator-section name="body">
                         <screenlet id="EditProductionRunRoutingTaskPanel" title="${uiLabelMap.ManufacturingProductionRunTasks}" collapsible="true">
-                            <include-form name="EditProductionRunRoutingTask" location="component://manufacturing/webapp/manufacturing/jobshopmgt/ProductionRunForms.xml"/>
+                            <include-form name="EditProductionRunRoutingTask" location="component://manufacturing/widget/manufacturing/ProductionRunForms.xml"/>
                         </screenlet>
-                        <include-form name="ListProductionRunRoutingTasks" location="component://manufacturing/webapp/manufacturing/jobshopmgt/ProductionRunForms.xml"/>
+                        <include-form name="ListProductionRunRoutingTasks" location="component://manufacturing/widget/manufacturing/ProductionRunForms.xml"/>
                     </decorator-section>
                 </decorator-screen>
             </widgets>
@@ -587,20 +386,9 @@ under the License.
             <widgets>
                 <decorator-screen name="CommonJobshopDecorator" location="${parameters.commonJobshopDecorator}">
                     <decorator-section name="body">
-                        <container style="screenlet">
-                            <container style="screenlet-title-bar">
-                                <container style="h3">
-                                    <label text="${uiLabelMap.ManufacturingProductionRunComponents}"/>
-                                </container>
-                            </container>
-                            <container style="screenlet-body">
-                                <section>
-                                    <widgets>
-                                        <include-form name="AddProductionRunComponent" location="component://manufacturing/webapp/manufacturing/jobshopmgt/ProductionRunForms.xml"/>
-                                    </widgets>
-                                </section>
-                            </container>
-                        </container>
+                        <screenlet title="${uiLabelMap.ManufacturingProductionRunComponents}">
+                            <include-form name="AddProductionRunComponent" location="component://manufacturing/widget/manufacturing/ProductionRunForms.xml"/>
+                        </screenlet>
                         <section>
                             <widgets>
                                 <platform-specific>
@@ -631,20 +419,9 @@ under the License.
             <widgets>
                 <decorator-screen name="CommonJobshopDecorator" location="${parameters.commonJobshopDecorator}">
                     <decorator-section name="body">
-                        <container style="screenlet">
-                            <container style="screenlet-title-bar">
-                                <container style="h3">
-                                    <label text="${uiLabelMap.ManufacturingActualMaterials}"/>
-                                </container>
-                            </container>
-                            <container style="screenlet-body">
-                                <section>
-                                    <widgets>
-                                        <include-form name="IssueProductionRunComponent" location="component://manufacturing/webapp/manufacturing/jobshopmgt/ProductionRunForms.xml"/>
-                                    </widgets>
-                                </section>
-                            </container>
-                        </container>
+                        <screenlet title="${uiLabelMap.ManufacturingActualMaterials}">
+                            <include-form name="IssueProductionRunComponent" location="component://manufacturing/widget/manufacturing/ProductionRunForms.xml"/>
+                        </screenlet>
                         <platform-specific>
                             <html><html-template location="component://manufacturing/webapp/manufacturing/jobshopmgt/ProductionRunTasksInfo.ftl"/></html>
                         </platform-specific>
@@ -671,20 +448,9 @@ under the License.
             <widgets>
                 <decorator-screen name="CommonJobshopDecorator" location="${parameters.commonJobshopDecorator}">
                     <decorator-section name="body">
-                        <container style="screenlet">
-                            <container style="screenlet-title-bar">
-                                <container style="h3">
-                                    <label text="${uiLabelMap.ManufacturingTaskFixedAssets}"/>
-                                </container>
-                            </container>
-                            <container style="screenlet-body">
-                                <section>
-                                    <widgets>
-                                        <include-form name="AddProductionRunTaskFixedAsset" location="component://manufacturing/webapp/manufacturing/jobshopmgt/ProductionRunForms.xml"/>
-                                    </widgets>
-                                </section>
-                            </container>
-                        </container>
+                        <screenlet title="${uiLabelMap.ManufacturingTaskFixedAssets}">
+                            <include-form name="AddProductionRunTaskFixedAsset" location="component://manufacturing/widget/manufacturing/ProductionRunForms.xml"/>
+                        </screenlet>
                         <section>
                             <widgets>
                                 <platform-specific>
@@ -725,6 +491,36 @@ under the License.
             </widgets>
         </section>
     </screen>
+    <screen name="ProductionRunContent">
+        <section>
+            <actions>
+                <set field="titleProperty" value="ManufacturingProductionRunContent"/>
+                <set field="tabButtonItem" value="content"/>
+                <set field="headerItem" value="jobshop"/>
+
+                <set field="productionRunId" from-field="parameters.productionRunId"/>
+                <entity-one entity-name="WorkEffort" value-field="productionRun">
+                    <field-map field-name="workEffortId" from-field="productionRunId"/>
+                </entity-one>
+                <script location="component://manufacturing/webapp/manufacturing/WEB-INF/actions/jobshopmgt/ProductionRunContent.groovy"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonJobshopDecorator" location="${parameters.commonJobshopDecorator}">
+                    <decorator-section name="body">
+                        <section>
+                            <widgets>
+                                <include-form name="ListProductionRunContent" location="component://manufacturing/widget/manufacturing/ProductionRunForms.xml"/>
+                                <screenlet title="Import Content From Product ${delivProductId}">
+                                    <include-form name="FindDelivProductContent" location="component://manufacturing/widget/manufacturing/ProductionRunForms.xml"/>
+                                    <include-form name="ListDelivProductContent" location="component://manufacturing/widget/manufacturing/ProductionRunForms.xml"/>
+                                </screenlet>
+                            </widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
     <screen name="FindProductionRun">
         <section>
             <actions>
@@ -740,15 +536,15 @@ under the License.
                             <widgets>
                                 <decorator-screen name="FindScreenDecorator" location="component://common/widget/CommonScreens.xml">
                                     <decorator-section name="menu-bar">
-                                        <container>
-                                            <link target="CreateProductionRun" text="${uiLabelMap.ManufacturingCreateProductionRun}" style="buttontext"/>
+                                        <container style="button-bar">
+                                            <link target="CreateProductionRun" text="${uiLabelMap.ManufacturingCreateProductionRun}" style="buttontext create"/>
                                         </container>
                                     </decorator-section>
                                     <decorator-section name="search-options">
-                                        <include-form name="findProductionRun" location="component://manufacturing/webapp/manufacturing/jobshopmgt/ProductionRunForms.xml"/>
+                                        <include-form name="findProductionRun" location="component://manufacturing/widget/manufacturing/ProductionRunForms.xml"/>
                                     </decorator-section>
                                     <decorator-section name="search-results">
-                                        <include-form name="listFindProductionRun" location="component://manufacturing/webapp/manufacturing/jobshopmgt/ProductionRunForms.xml"/>
+                                        <include-form name="listFindProductionRun" location="component://manufacturing/widget/manufacturing/ProductionRunForms.xml"/>
                                     </decorator-section>
                                 </decorator-screen>
                             </widgets>
@@ -763,15 +559,58 @@ under the License.
             <actions>
                 <set field="titleProperty" value="ManufacturingWorkWithShipmentPlans"/>
                 <set field="headerItem" value="ShipmentPlans"/>
-
+                <set field="shipmentId" from-field="parameters.shipmentId"/>
+                <set field="sortField" from-field="parameters.sortField" default-value="estimatedShipDate"/>
+                <entity-one entity-name="Shipment" value-field="shipment"/>
+                <entity-condition entity-name="Shipment" list="shipmentPlans">
+                    <condition-list>
+                        <condition-expr field-name="shipmentTypeId" value="SALES_SHIPMENT"/>
+                        <condition-expr field-name="statusId" value="SHIPMENT_SCHEDULED"/>
+                    </condition-list>
+                    <order-by field-name="${sortField}"/>
+                </entity-condition>
                 <script location="component://manufacturing/webapp/manufacturing/WEB-INF/actions/jobshopmgt/WorkWithShipmentPlans.groovy"/>
             </actions>
             <widgets>
                 <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
                     <decorator-section name="body">
-                        <platform-specific>
-                            <html><html-template location="component://manufacturing/webapp/manufacturing/jobshopmgt/WorkWithShipmentPlans.ftl"/></html>
-                        </platform-specific>
+                        <screenlet title="${uiLabelMap.ManufacturingWorkWithShipmentPlans}">
+                            <include-form name="listShipmentPlans" location="component://manufacturing/widget/manufacturing/ProductionRunForms.xml"/>
+                        </screenlet>
+                        <section>
+                            <condition>
+                                <not><if-empty field="shipment"/></not>
+                            </condition>
+                            <widgets>
+                                <screenlet title="${uiLabelMap.FormFieldTitle_shipmentId} ${shipment.shipmentId}">
+                                    <include-form name="listShipmentPlan" location="component://manufacturing/widget/manufacturing/ProductionRunForms.xml"/>
+                                </screenlet>
+                                <section>
+                                    <condition>
+                                        <if-compare field="workInProgress" operator="equals" value="true"/>
+                                    </condition>
+                                    <widgets>
+                                        <link text="${uiLabelMap.ManufacturingTasksReport}" style="buttontext" target="ShipmentWorkEffortTasks.pdf" target-window="_BLANK">
+                                            <parameter param-name="shipmentId" from-field="shipment.shipmentId"/>
+                                        </link>
+                                        <link text="${uiLabelMap.ManufacturingCuttingListReport}" style="buttontext" target="CuttingListReport.pdf" target-window="_BLANK">
+                                            <parameter param-name="shipmentId" from-field="shipment.shipmentId"/>
+                                        </link>
+                                    </widgets>
+                                    <fail-widgets>
+                                        <link text="${uiLabelMap.ManufacturingGenerateProductionRuns}" style="buttontext" target="createProductionRunsForShipment">
+                                            <parameter param-name="shipmentId" from-field="shipment.shipmentId"/>
+                                        </link>
+                                        <link text="${uiLabelMap.ManufacturingShipmentPlanStockReport}" style="buttontext" target="ShipmentPlanStockReport.pdf" target-window="_BLANK">
+                                            <parameter param-name="shipmentId" from-field="shipment.shipmentId"/>
+                                        </link>
+                                    </fail-widgets>
+                                </section>
+                                <link text="${uiLabelMap.ManufacturingPackageLabelsReport}" style="buttontext" target="ShipmentLabel.pdf" target-window="_BLANK">
+                                    <parameter param-name="shipmentId" from-field="shipment.shipmentId"/>
+                                </link>
+                            </widgets>
+                        </section>
                     </decorator-section>
                 </decorator-screen>
             </widgets>

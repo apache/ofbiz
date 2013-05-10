@@ -23,7 +23,6 @@ import java.util.Map;
 import javolution.util.FastMap;
 
 import org.ofbiz.base.util.Debug;
-import org.ofbiz.base.util.GeneralException;
 import org.ofbiz.base.util.UtilValidate;
 
 public class LabelInfo {
@@ -33,14 +32,12 @@ public class LabelInfo {
     protected String labelKey = "";
     protected String labelKeyComment = "";
     protected String fileName = "";
-    protected String componentName = "";
     protected Map<String, LabelValue> labelValues = FastMap.newInstance();
 
-    public LabelInfo(String labelKey, String labelKeyComment, String fileName, String componentName, String localeStr, String labelValue, String labelComment) throws GeneralException {
+    public LabelInfo(String labelKey, String labelKeyComment, String fileName, String localeStr, String labelValue, String labelComment) {
         this.labelKey = labelKey;
         this.labelKeyComment = labelKeyComment;
         this.fileName = fileName;
-        this.componentName = componentName;
         setLabelValue(localeStr, labelValue, labelComment, false);
     }
 
@@ -60,12 +57,8 @@ public class LabelInfo {
         return fileName;
     }
 
-    public String getComponentName() {
-        return componentName;
-    }
-
     public LabelValue getLabelValue(String localeStr) {
-       return (LabelValue)labelValues.get(localeStr);
+       return labelValues.get(localeStr);
     }
 
     public int getLabelValueSize() {
@@ -91,7 +84,9 @@ public class LabelInfo {
                     labelValues.remove(localeStr);
                 }
             } else {
-                Debug.logWarning("Already found locale " + localeStr + " for label " + labelKey + " into the file " + fileName, module);
+                if (Debug.warningOn()) {
+                    Debug.logWarning("Already found locale " + localeStr + " for label " + labelKey + " into the file " + fileName, module);
+                }
                 isDuplicatedLocales = true;
             }
         }

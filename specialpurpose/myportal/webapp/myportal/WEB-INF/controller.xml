@@ -24,11 +24,12 @@
     <!-- so the order should be from most common to most specific-->
     <include location="component://common/webcommon/WEB-INF/common-controller.xml"/>
     <include location="component://common/webcommon/WEB-INF/portal-controller.xml"/>
+    <include location="component://commonext/webapp/WEB-INF/controller.xml"/>
     <include location="component://party/webapp/partymgr/WEB-INF/controller.xml"/>
     <include location="component://order/webapp/ordermgr/WEB-INF/controller.xml"/>
-    <include location="component://projectmgr/webapp/projectmgr/WEB-INF/controller.xml"/>
     <include location="component://workeffort/webapp/workeffort/WEB-INF/controller.xml"/>
-
+    <include location="component://projectmgr/webapp/projectmgr/WEB-INF/controller.xml"/>
+    
     <description>Show personal information in the system</description>
 
     <request-map uri="main">
@@ -37,7 +38,6 @@
     </request-map>
     <request-map uri="newRegisterLogin">
         <security https="true" auth="false"/>
-        <event type="java" invoke="getCodeCaptcha" path="org.ofbiz.common.Captcha"/>
         <response name="success" type="view" value="newRegisterLogin"/>
     </request-map>
     <request-map uri="createRegister">
@@ -46,17 +46,16 @@
         <response name="error" type="view" value="newRegisterLogin"/>
         <response name="resultPage" type="view" value="newRegisterLogin"/>
     </request-map>
-    <request-map uri="reloadCaptchaImage">
-        <security https="true" auth="false"/>        
-        <response name="success" type="view" value="reloadCaptchaImage"/>
+
+    <request-map uri="LookupUserLoginAndPartyDetails">
+        <security https="true" auth="true"/>
+        <response name="success" type="view" value="LookupUserLoginAndPartyDetails"/>
     </request-map>
-    <request-map uri="reloadCaptchaCode">
-        <security https="true" auth="false"/>
-        <response name="success" type="view" value="reloadCaptchaCode"/>
-    </request-map>   
+    
     <view-map name="main" type="screen" page="component://common/widget/PortalPageScreens.xml#showPortalPage"/>
     <view-map name="login" type="screen" page="component://myportal/widget/CommonScreens.xml#login"/>
     <view-map name="newRegisterLogin" type="screen" page="component://myportal/widget/CommonScreens.xml#newRegisterLogin"/>  
-    <view-map name="reloadCaptchaImage" type="screen" page="component://myportal/widget/CommonScreens.xml#reloadCaptchaImage"/>    
-    <view-map name="reloadCaptchaCode" type="screen" page="component://myportal/widget/CommonScreens.xml#reloadCaptchaCode"/>        
+
+    <view-map name="LookupUserLoginAndPartyDetails" type="screen" page="component://party/widget/partymgr/LookupScreens.xml#LookupUserLoginAndPartyDetails"/>
+
 </site-conf>

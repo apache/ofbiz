@@ -23,13 +23,13 @@ import org.ofbiz.widget.html.*;
 
 orderId = request.getParameter("orderId");
 orderTypeId = null;
-orderHeader = delegator.findByPrimaryKey("OrderHeader", [orderId : orderId]);
+orderHeader = delegator.findOne("OrderHeader", [orderId : orderId], false);
 if (orderHeader) {
     orderTypeId = orderHeader.orderTypeId;
 }
 
 //Determine whether a schedule has already been defined for this PO
-schedule = delegator.findByPrimaryKey("OrderDeliverySchedule", [orderId : orderId, orderItemSeqId : "_NA_"]);
+schedule = delegator.findOne("OrderDeliverySchedule", [orderId : orderId, orderItemSeqId : "_NA_"], false);
 
 // Determine whether the current user can VIEW the order
 checkMap = [orderId : orderId, userLogin : session.getAttribute("userLogin"), checkAction : "VIEW"];
@@ -40,7 +40,7 @@ hasSupplierRelatedPermissionStr = checkResult.hasSupplierRelatedPermission;
 hasSupplierRelatedPermission = "true".equals(hasSupplierRelatedPermissionStr);
 
 // Initialize the PO Delivery Schedule form
-updatePODeliveryInfoWrapper = new HtmlFormWrapper("component://order/webapp/ordermgr/order/OrderDeliveryScheduleForms.xml", "UpdateDeliveryScheduleInformation", request, response);
+updatePODeliveryInfoWrapper = new HtmlFormWrapper("component://order/widget/ordermgr/OrderDeliveryScheduleForms.xml", "UpdateDeliveryScheduleInformation", request, response);
 updatePODeliveryInfoWrapper.putInContext("orderId", orderId);
 updatePODeliveryInfoWrapper.putInContext("orderItemSeqId", "_NA_");
 updatePODeliveryInfoWrapper.putInContext("schedule", schedule);

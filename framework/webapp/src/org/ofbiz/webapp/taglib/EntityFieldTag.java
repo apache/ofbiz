@@ -30,6 +30,7 @@ import org.ofbiz.entity.GenericEntityException;
 /**
  * EntityFieldTag - Tag to Print Localized Entity Fields.
  */
+@SuppressWarnings("serial")
 public class EntityFieldTag extends TagSupport {
 
     public static final String module = EntityFieldTag.class.getName();
@@ -89,6 +90,7 @@ public class EntityFieldTag extends TagSupport {
         this.defaultObj = defaultObj;
     }
 
+    @Override
     public int doStartTag() throws JspException {
         try {
             EntityField.run(attribute, field, prefix, suffix, defaultObj.toString(), type, pageContext);

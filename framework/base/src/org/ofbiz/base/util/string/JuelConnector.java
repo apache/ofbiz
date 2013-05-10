@@ -23,14 +23,27 @@ import static de.odysseus.el.tree.impl.Scanner.Symbol.FLOAT;
 import static de.odysseus.el.tree.impl.Scanner.Symbol.START_EVAL_DEFERRED;
 import static de.odysseus.el.tree.impl.Scanner.Symbol.START_EVAL_DYNAMIC;
 
-import javax.el.*;
+import javax.el.ELContext;
+import javax.el.ELException;
+import javax.el.ExpressionFactory;
+import javax.el.PropertyNotFoundException;
 
+import de.odysseus.el.ExpressionFactoryImpl;
 import de.odysseus.el.misc.LocalMessages;
-import de.odysseus.el.tree.*;
-import de.odysseus.el.tree.impl.ast.*;
-import de.odysseus.el.tree.impl.*;
-import de.odysseus.el.tree.impl.Parser.*;
-import de.odysseus.el.tree.impl.Scanner.*;
+import de.odysseus.el.tree.Bindings;
+import de.odysseus.el.tree.Tree;
+import de.odysseus.el.tree.TreeStore;
+import de.odysseus.el.tree.impl.Builder;
+import de.odysseus.el.tree.impl.Cache;
+import de.odysseus.el.tree.impl.Parser;
+import de.odysseus.el.tree.impl.Parser.ParseException;
+import de.odysseus.el.tree.impl.Scanner.ScanException;
+import de.odysseus.el.tree.impl.Scanner.Symbol;
+import de.odysseus.el.tree.impl.ast.AstBracket;
+import de.odysseus.el.tree.impl.ast.AstDot;
+import de.odysseus.el.tree.impl.ast.AstEval;
+import de.odysseus.el.tree.impl.ast.AstIdentifier;
+import de.odysseus.el.tree.impl.ast.AstNode;
 
 import org.ofbiz.base.util.Debug;
 
@@ -47,7 +60,7 @@ public class JuelConnector {
      * @return A customized <code>ExpressionFactory</code> instance
      */
     public static ExpressionFactory newExpressionFactory() {
-        return new de.odysseus.el.ExpressionFactoryImpl(new TreeStore(new ExtendedBuilder(), new Cache(1000)));
+        return new ExpressionFactoryImpl(new TreeStore(new ExtendedBuilder(), new Cache(1000)));
     }
 
     /** Custom <code>AstBracket</code> class that implements
@@ -57,6 +70,7 @@ public class JuelConnector {
         public ExtendedAstBracket(AstNode base, AstNode property, boolean lvalue, boolean strict) {
             super(base, property, lvalue, strict);
         }
+        @Override
         public void setValue(Bindings bindings, ELContext context, Object value) throws ELException {
             if (!lvalue) {
                 throw new ELException(LocalMessages.get("error.value.set.rvalue"));
@@ -90,6 +104,7 @@ public class JuelConnector {
         public ExtendedAstDot(AstNode base, String property, boolean lvalue) {
             super(base, property, lvalue);
         }
+        @Override
         public void setValue(Bindings bindings, ELContext context, Object value) throws ELException {
             if (!lvalue) {
                 throw new ELException(LocalMessages.get("error.value.set.rvalue"));
@@ -121,12 +136,13 @@ public class JuelConnector {
         public ExtendedParser(Builder context, String input) {
             super(context, input);
         }
+        @Override
         protected AstEval eval(boolean required, boolean deferred) throws ScanException, ParseException {
             AstEval v = null;
             Symbol start_eval = deferred ? START_EVAL_DEFERRED : START_EVAL_DYNAMIC;
             if (this.getToken().getSymbol() == start_eval) {
                 consumeToken();
-                AstNode node = expr(true); 
+                AstNode node = expr(true);
                 try {
                     consumeToken(END_EVAL);
                 } catch (ParseException e) {
@@ -146,9 +162,11 @@ public class JuelConnector {
             }
             return v;
         }
+        @Override
         protected AstBracket createAstBracket(AstNode base, AstNode property, boolean lvalue, boolean strict) {
             return new ExtendedAstBracket(base, property, lvalue, strict);
         }
+        @Override
         protected AstDot createAstDot(AstNode base, String property, boolean lvalue) {
             return new ExtendedAstDot(base, property, lvalue);
         }
@@ -157,6 +175,7 @@ public class JuelConnector {
     /** Custom <code>Builder</code> class needed to implement a custom parser. */
     @SuppressWarnings("serial")
     protected static class ExtendedBuilder extends Builder {
+        @Override
         public Tree build(String expression) throws ELException {
             try {
                 return new ExtendedParser(this, expression).tree();

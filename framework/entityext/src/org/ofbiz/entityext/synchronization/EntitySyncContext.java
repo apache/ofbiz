@@ -25,6 +25,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 import javax.xml.parsers.ParserConfigurationException;
 
 import javolution.util.FastList;
@@ -35,16 +36,14 @@ import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilDateTime;
 import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.base.util.UtilValidate;
-import org.ofbiz.entity.GenericDelegator;
+import org.ofbiz.entity.Delegator;
+import org.ofbiz.entity.DelegatorFactory;
 import org.ofbiz.entity.GenericEntity;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
 import org.ofbiz.entity.condition.EntityCondition;
-import org.ofbiz.entity.condition.EntityConditionList;
-import org.ofbiz.entity.condition.EntityExpr;
 import org.ofbiz.entity.condition.EntityOperator;
 import org.ofbiz.entity.model.ModelEntity;
-import org.ofbiz.entity.model.ModelViewEntity;
 import org.ofbiz.entity.serialize.SerializeException;
 import org.ofbiz.entity.serialize.XmlSerializer;
 import org.ofbiz.entity.transaction.GenericTransactionException;
@@ -57,7 +56,6 @@ import org.ofbiz.service.GenericServiceException;
 import org.ofbiz.service.LocalDispatcher;
 import org.ofbiz.service.ModelService;
 import org.ofbiz.service.ServiceUtil;
-
 import org.xml.sax.SAXException;
 
 /**
@@ -79,7 +77,7 @@ public class EntitySyncContext {
     // default to 2 hours, 120m, 7200s
     public static final long defaultMaxRunningNoUpdateMillis = 7200000;
 
-    public GenericDelegator delegator;
+    public Delegator delegator;
     public LocalDispatcher dispatcher;
     public Map<String, ? extends Object> context;
 
@@ -148,7 +146,7 @@ public class EntitySyncContext {
         // what to do with the delegatorName? this is the delegatorName to use in this service...
         String delegatorName = (String) context.get("delegatorName");
         if (UtilValidate.isNotEmpty(delegatorName)) {
-            this.delegator = GenericDelegator.getGenericDelegator(delegatorName);
+            this.delegator = DelegatorFactory.getDelegator(delegatorName);
         }
 
 
@@ -813,7 +811,7 @@ public class EntitySyncContext {
         // if nothing moved over, remove the history record, otherwise store status
         long totalRows = totalRowsToCreate + totalRowsToStore + totalRowsToRemove;
         if (totalRows == 0) {
-            String eshRemoveErrMsg = "Could not remove Entity Sync History (done becuase nothing was synced in this call), but all synchronization was successful";
+            String eshRemoveErrMsg = "Could not remove Entity Sync History (done because nothing was synced in this call), but all synchronization was successful";
             try {
                 Map<String, Object> deleteEntitySyncHistRes = dispatcher.runSync("deleteEntitySyncHistory", UtilMisc.toMap("entitySyncId", entitySyncId, "startDate", startDate, "userLogin", userLogin));
                 if (ServiceUtil.isError(deleteEntitySyncHistRes)) {
@@ -849,9 +847,9 @@ public class EntitySyncContext {
 
     /** prepare a list of all entities we want to synchronize: remove all view-entities and all entities that don't match the patterns attached to this EntitySync */
     protected List<ModelEntity> makeEntityModelToUseList() throws GenericEntityException {
-        List<GenericValue> entitySyncIncludes = entitySync.getRelated("EntitySyncInclude");
+        List<GenericValue> entitySyncIncludes = entitySync.getRelated("EntitySyncInclude", null, null, false);
         // get these ones as well, and just add them to the main list, it will have an extra field but that shouldn't hurt anything in the code below
-        List<GenericValue> entitySyncGroupIncludes = entitySync.getRelated("EntitySyncInclGrpDetailView");
+        List<GenericValue> entitySyncGroupIncludes = entitySync.getRelated("EntitySyncInclGrpDetailView", null, null, false);
         entitySyncIncludes.addAll(entitySyncGroupIncludes);
 
         List<ModelEntity> entityModelToUseList = EntityGroupUtil.getModelEntitiesFromRecords(entitySyncIncludes, delegator, true);
@@ -860,7 +858,7 @@ public class EntitySyncContext {
         return entityModelToUseList;
     }
 
-    protected static Timestamp getCurrentRunStartTime(Timestamp lastSuccessfulSynchTime, List<ModelEntity> entityModelToUseList, GenericDelegator delegator) throws GenericEntityException {
+    protected static Timestamp getCurrentRunStartTime(Timestamp lastSuccessfulSynchTime, List<ModelEntity> entityModelToUseList, Delegator delegator) throws GenericEntityException {
         // if currentRunStartTime is null, what to do? I guess iterate through all entities and find earliest tx stamp
         if (lastSuccessfulSynchTime == null) {
             Timestamp currentRunStartTime = null;
@@ -1090,13 +1088,14 @@ public class EntitySyncContext {
     /**
      * Static method to obtain a list of entity names which will be synchronized
      */
-    public static Set getEntitySyncModelNamesToUse(LocalDispatcher dispatcher, String entitySyncId) throws SyncDataErrorException, SyncAbortException {
+    public static Set<String> getEntitySyncModelNamesToUse(LocalDispatcher dispatcher, String entitySyncId) throws SyncDataErrorException, SyncAbortException {
         DispatchContext dctx = dispatcher.getDispatchContext();
         EntitySyncContext ctx = new EntitySyncContext(dctx, UtilMisc.toMap("entitySyncId", entitySyncId));
         return ctx.makeEntityNameToUseSet();
     }
 
     /** This class signifies an abort condition, so the state and such of the EntitySync value in the datasource should not be changed */
+    @SuppressWarnings("serial")
     public static class SyncAbortException extends GeneralServiceException {
         public SyncAbortException() {
             super();
@@ -1119,6 +1118,7 @@ public class EntitySyncContext {
         }
     }
 
+    @SuppressWarnings("serial")
     public static abstract class SyncErrorException extends GeneralServiceException {
         public SyncErrorException() { super(); }
         public SyncErrorException(String str) { super(str); }
@@ -1129,12 +1129,14 @@ public class EntitySyncContext {
     }
 
     /** This class signifies an error condition, so the state of the EntitySync value and the EntitySyncHistory value in the datasource should be changed to reflect the error */
+    @SuppressWarnings("serial")
     public static class SyncOtherErrorException extends SyncErrorException {
         public SyncOtherErrorException() { super(); }
         public SyncOtherErrorException(String str) { super(str); }
         public SyncOtherErrorException(String str, Throwable nested) { super(str, nested); }
         public SyncOtherErrorException(Throwable nested) { super(nested); }
         public SyncOtherErrorException(String str, List<Object> errorMsgList, Map<String, Object> errorMsgMap, Map<String, Object> nestedServiceResult, Throwable nested) { super(str, errorMsgList, errorMsgMap, nestedServiceResult, nested); }
+        @Override
         public void saveSyncErrorInfo(EntitySyncContext esc) {
             if (esc != null) {
                 List<Object> errorList = FastList.newInstance();
@@ -1145,12 +1147,14 @@ public class EntitySyncContext {
     }
 
     /** This class signifies an error condition, so the state of the EntitySync value and the EntitySyncHistory value in the datasource should be changed to reflect the error */
+    @SuppressWarnings("serial")
     public static class SyncDataErrorException extends SyncErrorException {
         public SyncDataErrorException() { super(); }
         public SyncDataErrorException(String str) { super(str); }
         public SyncDataErrorException(String str, Throwable nested) { super(str, nested); }
         public SyncDataErrorException(Throwable nested) { super(nested); }
         public SyncDataErrorException(String str, List<Object> errorMsgList, Map<String, Object> errorMsgMap, Map<String, Object> nestedServiceResult, Throwable nested) { super(str, errorMsgList, errorMsgMap, nestedServiceResult, nested); }
+        @Override
         public void saveSyncErrorInfo(EntitySyncContext esc) {
             if (esc != null) {
                 List<Object> errorList = FastList.newInstance();
@@ -1161,12 +1165,14 @@ public class EntitySyncContext {
     }
 
     /** This class signifies an error condition, so the state of the EntitySync value and the EntitySyncHistory value in the datasource should be changed to reflect the error */
+    @SuppressWarnings("serial")
     public static class SyncServiceErrorException extends SyncErrorException {
         public SyncServiceErrorException() { super(); }
         public SyncServiceErrorException(String str) { super(str); }
         public SyncServiceErrorException(String str, Throwable nested) { super(str, nested); }
         public SyncServiceErrorException(Throwable nested) { super(nested); }
         public SyncServiceErrorException(String str, List<Object> errorMsgList, Map<String, Object> errorMsgMap, Map<String, Object> nestedServiceResult, Throwable nested) { super(str, errorMsgList, errorMsgMap, nestedServiceResult, nested); }
+        @Override
         public void saveSyncErrorInfo(EntitySyncContext esc) {
             if (esc != null) {
                 List<Object> errorList = FastList.newInstance();

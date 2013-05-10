@@ -65,7 +65,6 @@ public class PaidInOut extends XPage {
     protected static PosTransaction m_trans = null;
     protected String m_type = null;
     protected boolean cancelled = false;
-    private static boolean ShowKeyboardInSaveSale = UtilProperties.propertyValueEqualsIgnoreCase("parameters", "ShowKeyboardInSaveSale", "Y");
 
     //TODO : make getter and setter for members (ie m_*) if needed (extern calls). For that in Eclipse use Source/Generate Getters and setters
 
@@ -99,14 +98,14 @@ public class PaidInOut extends XPage {
         if (m_type.equals("IN")) {
             m_dialog.setCaption(UtilProperties.getMessage(PosTransaction.resource, "PosPaidInTitle", locale));
             try {
-                posPaidReasons = m_trans.getSession().getDelegator().findByAndCache("Enumeration", UtilMisc.toMap("enumTypeId", "POS_PAID_REASON_IN"));
+                posPaidReasons = m_trans.getSession().getDelegator().findByAnd("Enumeration", UtilMisc.toMap("enumTypeId", "POS_PAID_REASON_IN"), null, true);
             } catch (GenericEntityException e) {
                 Debug.logError(e, module);
             }
         } else { // OUT
             m_dialog.setCaption(UtilProperties.getMessage(PosTransaction.resource, "PosPaidOutTitle", locale));
             try {
-                posPaidReasons = m_trans.getSession().getDelegator().findByAndCache("Enumeration", UtilMisc.toMap("enumTypeId", "POS_PAID_REASON_OUT"));
+                posPaidReasons = m_trans.getSession().getDelegator().findByAnd("Enumeration", UtilMisc.toMap("enumTypeId", "POS_PAID_REASON_OUT"), null, true);
             } catch (GenericEntityException e) {
                 Debug.logError(e, module);            }
         }
@@ -124,7 +123,7 @@ public class PaidInOut extends XPage {
         } else {
             return UtilMisc.toMap("amount", m_amountEdit.getText(),
                     "reason", (String)(posPaidReasons.get(m_reasonCombo.getSelectedIndex())).get("enumId"),
-                    "reasonComment", (String) m_reasonCommentEdit.getText());
+                    "reasonComment", m_reasonCommentEdit.getText());
             }
     }
 
@@ -146,11 +145,12 @@ public class PaidInOut extends XPage {
     }
 
     public synchronized void editAmount() {
-        if (wasMouseClicked() && ShowKeyboardInSaveSale) {
+        if (wasMouseClicked() && UtilProperties.propertyValueEqualsIgnoreCase("parameters", "ShowKeyboardInSaveSale", "Y")) {
             try {
                 NumericKeypad numericKeypad = new NumericKeypad(m_pos);
-                numericKeypad.setMinus(true);
-                numericKeypad.setPercent(false);
+                numericKeypad.setMinus(true); // this order must be respected
+                numericKeypad.setPercent(true);
+                numericKeypad.setText(m_amountEdit.getText());
                 m_amountEdit.setText(numericKeypad.openDlg());
             } catch (Exception e) {
                 Debug.logError(e, module);

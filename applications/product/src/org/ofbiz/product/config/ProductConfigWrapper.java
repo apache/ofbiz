@@ -34,27 +34,31 @@ import javolution.util.FastSet;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.base.util.UtilValidate;
-import org.ofbiz.entity.GenericDelegator;
+import org.ofbiz.entity.Delegator;
+import org.ofbiz.entity.DelegatorFactory;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
 import org.ofbiz.entity.util.EntityUtil;
 import org.ofbiz.service.LocalDispatcher;
+import org.ofbiz.service.ServiceContainer;
 
 
 /**
  * Product Config Wrapper: gets product config to display
  */
-
+@SuppressWarnings("serial")
 public class ProductConfigWrapper implements Serializable {
 
     public static final String module = ProductConfigWrapper.class.getName();
 
-    protected LocalDispatcher dispatcher;
+    protected transient LocalDispatcher dispatcher;
+    protected String dispatcherName;
     protected String productStoreId;
     protected String catalogId;
     protected String webSiteId;
     protected String currencyUomId;
-    protected GenericDelegator delegator;
+    protected transient Delegator delegator;
+    protected String delegatorName = null;
     protected GenericValue product = null; // the aggregated product
     protected GenericValue autoUserLogin = null;
     protected BigDecimal listPrice = BigDecimal.ZERO;
@@ -67,7 +71,7 @@ public class ProductConfigWrapper implements Serializable {
     public ProductConfigWrapper() {
     }
 
-    public ProductConfigWrapper(GenericDelegator delegator, LocalDispatcher dispatcher, String productId, String productStoreId, String catalogId, String webSiteId, String currencyUomId, Locale locale, GenericValue autoUserLogin) throws Exception {
+    public ProductConfigWrapper(Delegator delegator, LocalDispatcher dispatcher, String productId, String productStoreId, String catalogId, String webSiteId, String currencyUomId, Locale locale, GenericValue autoUserLogin) throws Exception {
         init(delegator, dispatcher, productId, productStoreId, catalogId, webSiteId, currencyUomId, locale, autoUserLogin);
     }
 
@@ -77,29 +81,33 @@ public class ProductConfigWrapper implements Serializable {
         basePrice = pcw.basePrice;
         defaultPrice = pcw.defaultPrice;
         questions = FastList.newInstance();
-        dispatcher = pcw.dispatcher;
+        delegator = pcw.getDelegator();
+        delegatorName = delegator.getDelegatorName();
+        dispatcher = pcw.getDispatcher();
+        dispatcherName = dispatcher.getName();
         productStoreId = pcw.productStoreId;
         catalogId = pcw.catalogId;
         webSiteId = pcw.webSiteId;
         currencyUomId = pcw.currencyUomId;
-        delegator = pcw.delegator;
         autoUserLogin = pcw.autoUserLogin;
         for (ConfigItem ci: pcw.questions) {
             questions.add(new ConfigItem(ci));
         }
     }
 
-    private void init(GenericDelegator delegator, LocalDispatcher dispatcher, String productId, String productStoreId, String catalogId, String webSiteId, String currencyUomId, Locale locale, GenericValue autoUserLogin) throws Exception {
-        product = delegator.findByPrimaryKey("Product", UtilMisc.toMap("productId", productId));
-        if (product == null || !product.getString("productTypeId").equals("AGGREGATED")) {
+    private void init(Delegator delegator, LocalDispatcher dispatcher, String productId, String productStoreId, String catalogId, String webSiteId, String currencyUomId, Locale locale, GenericValue autoUserLogin) throws Exception {
+        product = delegator.findOne("Product", UtilMisc.toMap("productId", productId), false);
+        if (product == null || !product.getString("productTypeId").equals("AGGREGATED") && !product.getString("productTypeId").equals("AGGREGATED_SERVICE")) {
             throw new ProductConfigWrapperException("Product " + productId + " is not an AGGREGATED product.");
         }
         this.dispatcher = dispatcher;
+        this.dispatcherName = dispatcher.getName();
         this.productStoreId = productStoreId;
         this.catalogId = catalogId;
         this.webSiteId = webSiteId;
         this.currencyUomId = currencyUomId;
         this.delegator = delegator;
+        this.delegatorName = delegator.getDelegatorName();
         this.autoUserLogin = autoUserLogin;
 
         // get the list Price, the base Price
@@ -115,8 +123,8 @@ public class ProductConfigWrapper implements Serializable {
             basePrice = price;
         }
         questions = FastList.newInstance();
-        if (product.getString("productTypeId") != null && product.getString("productTypeId").equals("AGGREGATED")) {
-            List<GenericValue> questionsValues = delegator.findByAnd("ProductConfig", UtilMisc.toMap("productId", productId), UtilMisc.toList("sequenceNum"));
+        if ("AGGREGATED".equals(product.getString("productTypeId")) || "AGGREGATED_SERVICE".equals(product.getString("productTypeId"))) {
+            List<GenericValue> questionsValues = delegator.findByAnd("ProductConfig", UtilMisc.toMap("productId", productId), UtilMisc.toList("sequenceNum"), false);
             questionsValues = EntityUtil.filterByDate(questionsValues);
             Set<String> itemIds = FastSet.newInstance();
             for (GenericValue questionsValue: questionsValues) {
@@ -128,7 +136,7 @@ public class ProductConfigWrapper implements Serializable {
                     itemIds.add(oneQuestion.getConfigItem().getString("configItemId"));
                 }
                 questions.add(oneQuestion);
-                List<GenericValue> configOptions = delegator.findByAnd("ProductConfigOption", UtilMisc.toMap("configItemId", oneQuestion.getConfigItemAssoc().getString("configItemId")), UtilMisc.toList("sequenceNum"));
+                List<GenericValue> configOptions = delegator.findByAnd("ProductConfigOption", UtilMisc.toMap("configItemId", oneQuestion.getConfigItemAssoc().getString("configItemId")), UtilMisc.toList("sequenceNum"), false);
                 for (GenericValue configOption: configOptions) {
                     ConfigOption option = new ConfigOption(delegator, dispatcher, configOption, oneQuestion, catalogId, webSiteId, currencyUomId, autoUserLogin);
                     oneQuestion.addOption(option);
@@ -138,11 +146,11 @@ public class ProductConfigWrapper implements Serializable {
         }
     }
 
-    public void loadConfig(GenericDelegator delegator, String configId) throws Exception {
+    public void loadConfig(Delegator delegator, String configId) throws Exception {
         //configure ProductConfigWrapper according to ProductConfigConfig entity
         if (UtilValidate.isNotEmpty(configId)) {
             this.configId = configId;
-            List<GenericValue> productConfigConfig = delegator.findByAnd("ProductConfigConfig", UtilMisc.toMap("configId", configId));
+            List<GenericValue> productConfigConfig = delegator.findByAnd("ProductConfigConfig", UtilMisc.toMap("configId", configId), null, false);
             if (UtilValidate.isNotEmpty(productConfigConfig)) {
                 for (GenericValue pcc: productConfigConfig) {
                     String configItemId = pcc.getString("configItemId");
@@ -202,6 +210,21 @@ public class ProductConfigWrapper implements Serializable {
         return configId;
     }
 
+    public Delegator getDelegator() {
+        if (delegator == null) {
+            delegator = DelegatorFactory.getDelegator(delegatorName);
+        }
+        return delegator;
+    }
+
+    public LocalDispatcher getDispatcher() {
+        if (dispatcher == null) {
+            dispatcher = ServiceContainer.getLocalDispatcher(dispatcherName, this.getDelegator());
+        }
+        return dispatcher;
+    }
+
+    @Override
     public boolean equals(Object obj) {
         if (!(obj instanceof ProductConfigWrapper)) {
             return false;
@@ -223,6 +246,7 @@ public class ProductConfigWrapper implements Serializable {
         return true;
     }
 
+    @Override
     public String toString() {
         return questions.toString();
     }
@@ -240,7 +264,7 @@ public class ProductConfigWrapper implements Serializable {
         List<ConfigOption> avalOptions = ci.getOptions();
         if (ci.isSingleChoice()) {
             for (int j = 0; j < avalOptions.size(); j++) {
-                ConfigOption oneOption = (ConfigOption)avalOptions.get(j);
+                ConfigOption oneOption = avalOptions.get(j);
                 oneOption.setSelected(false);
                 oneOption.setComments(null);
             }
@@ -373,7 +397,7 @@ public class ProductConfigWrapper implements Serializable {
 
         public ConfigItem(GenericValue questionAssoc) throws Exception {
             configItemAssoc = questionAssoc;
-            configItem = configItemAssoc.getRelatedOne("ConfigItemProductConfigItem");
+            configItem = configItemAssoc.getRelatedOne("ConfigItemProductConfigItem", false);
             options = FastList.newInstance();
         }
 
@@ -484,7 +508,7 @@ public class ProductConfigWrapper implements Serializable {
             if (UtilValidate.isNotEmpty(defaultConfigOptionId)) {
                 for(ConfigOption oneOption : getOptions()) {
                     String currentConfigOptionId = oneOption.getId();
-                    if (defaultConfigOptionId.compareToIgnoreCase(currentConfigOptionId) == 0  ) {
+                    if (defaultConfigOptionId.compareToIgnoreCase(currentConfigOptionId) == 0 ) {
                         return oneOption;
                     }
                 }
@@ -492,6 +516,7 @@ public class ProductConfigWrapper implements Serializable {
             return null;
         }
 
+        @Override
         public boolean equals(Object obj) {
             if (obj == null || !(obj instanceof ConfigItem)) {
                 return false;
@@ -513,6 +538,7 @@ public class ProductConfigWrapper implements Serializable {
             return true;
         }
 
+        @Override
         public String toString() {
             return configItem.getString("configItemId");
         }
@@ -530,15 +556,15 @@ public class ProductConfigWrapper implements Serializable {
         ConfigItem parentConfigItem = null;
         String comments = null;  //  comments for production run entered during ordering
 
-        public ConfigOption(GenericDelegator delegator, LocalDispatcher dispatcher, GenericValue option, ConfigItem configItem, String catalogId, String webSiteId, String currencyUomId, GenericValue autoUserLogin) throws Exception {
+        public ConfigOption(Delegator delegator, LocalDispatcher dispatcher, GenericValue option, ConfigItem configItem, String catalogId, String webSiteId, String currencyUomId, GenericValue autoUserLogin) throws Exception {
             configOption = option;
             parentConfigItem = configItem;
-            componentList = option.getRelated("ConfigOptionProductConfigProduct");
+            componentList = option.getRelated("ConfigOptionProductConfigProduct", null, null, false);
             for (GenericValue oneComponent: componentList) {
                 BigDecimal listPrice = BigDecimal.ZERO;
                 BigDecimal price = BigDecimal.ZERO;
                 // Get the component's price
-                Map<String, Object> fieldMap = UtilMisc.toMap("product", oneComponent.getRelatedOne("ProductProduct"), "prodCatalogId", catalogId, "webSiteId", webSiteId, "currencyUomId", currencyUomId, "productPricePurposeId", "COMPONENT_PRICE", "autoUserLogin", autoUserLogin, "productStoreId",productStoreId);
+                Map<String, Object> fieldMap = UtilMisc.toMap("product", oneComponent.getRelatedOne("ProductProduct", false), "prodCatalogId", catalogId, "webSiteId", webSiteId, "currencyUomId", currencyUomId, "productPricePurposeId", "COMPONENT_PRICE", "autoUserLogin", autoUserLogin, "productStoreId",productStoreId);
                 Map<String, Object> priceMap = dispatcher.runSync("calculateProductPrice", fieldMap);
                 BigDecimal componentListPrice = (BigDecimal) priceMap.get("listPrice");
                 BigDecimal componentPrice = (BigDecimal) priceMap.get("price");
@@ -594,16 +620,16 @@ public class ProductConfigWrapper implements Serializable {
             for (GenericValue oneComponent: componentList) {
                 BigDecimal listPrice = BigDecimal.ZERO;
                 BigDecimal price = BigDecimal.ZERO;
-                GenericValue oneComponentProduct = oneComponent.getRelatedOne("ProductProduct");
+                GenericValue oneComponentProduct = oneComponent.getRelatedOne("ProductProduct", false);
                 String variantProductId = componentOptions.get(oneComponent.getString("productId"));
 
                 if (UtilValidate.isNotEmpty(variantProductId)) {
-                    oneComponentProduct = pcw.delegator.findByPrimaryKey("Product", UtilMisc.toMap("productId", variantProductId));
+                    oneComponentProduct = pcw.delegator.findOne("Product", UtilMisc.toMap("productId", variantProductId), false);
                 }
 
                 // Get the component's price
                 Map<String, Object> fieldMap = UtilMisc.toMap("product", oneComponentProduct, "prodCatalogId", pcw.catalogId, "webSiteId", pcw.webSiteId, "currencyUomId", pcw.currencyUomId, "productPricePurposeId", "COMPONENT_PRICE", "autoUserLogin", pcw.autoUserLogin, "productStoreId",productStoreId);
-                Map<String, Object> priceMap = dispatcher.runSync("calculateProductPrice", fieldMap);
+                Map<String, Object> priceMap = pcw.getDispatcher().runSync("calculateProductPrice", fieldMap);
                 BigDecimal componentListPrice = (BigDecimal) priceMap.get("listPrice");
                 BigDecimal componentPrice = (BigDecimal) priceMap.get("price");
                 Boolean validPriceFound = (Boolean)priceMap.get("validPriceFound");
@@ -623,7 +649,7 @@ public class ProductConfigWrapper implements Serializable {
                     }
                 } else {
                     fieldMap.put("productPricePurposeId", "PURCHASE");
-                    Map<String, Object> purchasePriceResultMap = dispatcher.runSync("calculateProductPrice", fieldMap);
+                    Map<String, Object> purchasePriceResultMap = pcw.getDispatcher().runSync("calculateProductPrice", fieldMap);
                     BigDecimal purchaseListPrice = (BigDecimal) purchasePriceResultMap.get("listPrice");
                     BigDecimal purchasePrice = (BigDecimal) purchasePriceResultMap.get("price");
                     if (purchaseListPrice != null) {
@@ -638,13 +664,22 @@ public class ProductConfigWrapper implements Serializable {
             }
         }
 
+        public String getOptionName() {
+            return (configOption.getString("configOptionName") != null? configOption.getString("configOptionName"): "no option name");
+        }
+
+        public String getOptionName(Locale locale) {
+        	
+            return (configOption.getString("configOptionName") != null? (String) configOption.get("configOptionName", locale): "no option name");
+        }
+
         public String getDescription() {
             return (configOption.getString("description") != null? configOption.getString("description"): "no description");
         }
-        
+
         public String getDescription(Locale locale) {
             return (configOption.getString("description") != null? (String) configOption.get("description", locale): "no description");
-        }        
+        }
 
         public String getId() {
             return configOption.getString("configOptionId");
@@ -709,7 +744,7 @@ public class ProductConfigWrapper implements Serializable {
             int index = getComponents().indexOf(component);
             if (index != -1) {
                 try {
-                    GenericValue product = component.getRelatedOne("ProductProduct");
+                    GenericValue product = component.getRelatedOne("ProductProduct", false);
                     return "Y".equals(product.getString("isVirtual"));
                 } catch (GenericEntityException e) {
                     Debug.logWarning(e.getMessage(), module);
@@ -742,6 +777,7 @@ public class ProductConfigWrapper implements Serializable {
             return componentOptions;
         }
 
+        @Override
         public boolean equals(Object obj) {
             if (obj == null || !(obj instanceof ConfigOption)) {
                 return false;
@@ -754,6 +790,7 @@ public class ProductConfigWrapper implements Serializable {
             return isSelected() == co.isSelected();
         }
 
+        @Override
         public String toString() {
             return configOption.getString("configItemId") + "/" + configOption.getString("configOptionId") + (isSelected()? "*": "");
         }

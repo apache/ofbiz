@@ -20,8 +20,6 @@
 package org.ofbiz.workeffort.workeffort;
 
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -36,7 +34,7 @@ import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.base.util.UtilProperties;
 import org.ofbiz.common.KeywordSearchUtil;
 import org.ofbiz.content.data.DataResourceWorker;
-import org.ofbiz.entity.GenericDelegator;
+import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
 import org.ofbiz.entity.util.EntityUtil;
@@ -46,7 +44,7 @@ public class WorkEffortKeywordIndex {
     public static void indexKeywords(GenericValue workEffort) throws GenericEntityException {
         if (workEffort == null) return;
 
-        GenericDelegator delegator = workEffort.getDelegator();
+        Delegator delegator = workEffort.getDelegator();
         if (delegator == null) return;
         String workEffortId = workEffort.getString("workEffortId");
         String separators = KeywordSearchUtil.getSeparators();
@@ -70,18 +68,16 @@ public class WorkEffortKeywordIndex {
         addWeightedKeywordSourceString(workEffort, "currentStatusId", strings);
 
         if (!"0".equals(UtilProperties.getPropertyValue("workeffortsearch", "index.weight.WorkEffortNoteAndData.noteInfo", "1"))) {
-            Iterator workEffortNotes = UtilMisc.toIterator(delegator.findByAnd("WorkEffortNoteAndData", UtilMisc.toMap("workEffortId", workEffortId)));
-            while (workEffortNotes != null && workEffortNotes.hasNext()) {
-                GenericValue workEffortNote = (GenericValue) workEffortNotes.next();
+            List<GenericValue> workEffortNotes = delegator.findByAnd("WorkEffortNoteAndData", UtilMisc.toMap("workEffortId", workEffortId), null, false);
+            for (GenericValue workEffortNote : workEffortNotes) {
                 addWeightedKeywordSourceString(workEffortNote, "noteInfo", strings);
                 }
         }
         //WorkEffortAttribute
         if (!"0".equals(UtilProperties.getPropertyValue("workeffortsearch", "index.weight.WorkEffortAttribute.attrName", "1")) ||
                 !"0".equals(UtilProperties.getPropertyValue("workeffortsearch", "index.weight.WorkEffortAttribute.attrValue", "1"))) {
-            Iterator workEffortAttributes = UtilMisc.toIterator(delegator.findByAnd("WorkEffortAttribute", UtilMisc.toMap("workEffortId", workEffortId)));
-            while (workEffortAttributes != null && workEffortAttributes.hasNext()) {
-                GenericValue workEffortAttribute = (GenericValue) workEffortAttributes.next();
+            List<GenericValue> workEffortAttributes = delegator.findByAnd("WorkEffortAttribute", UtilMisc.toMap("workEffortId", workEffortId), null, false);
+            for (GenericValue workEffortAttribute : workEffortAttributes) {
                 addWeightedKeywordSourceString(workEffortAttribute, "attrName", strings);
                 addWeightedKeywordSourceString(workEffortAttribute, "attrValue", strings);
             }
@@ -96,10 +92,10 @@ public class WorkEffortKeywordIndex {
                 Debug.logWarning("Could not parse weight number: " + e.toString(), module);
             }
 
-            List<GenericValue> workEffortContentAndInfos = delegator.findByAnd("WorkEffortContentAndInfo", UtilMisc.toMap("workEffortId", workEffortId, "workEffortContentTypeId", workEffortContentTypeId), null);
+            List<GenericValue> workEffortContentAndInfos = delegator.findByAnd("WorkEffortContentAndInfo", UtilMisc.toMap("workEffortId", workEffortId, "workEffortContentTypeId", workEffortContentTypeId), null, false);
             for (GenericValue workEffortContentAndInfo: workEffortContentAndInfos) {
                 addWeightedDataResourceString(workEffortContentAndInfo, weight, strings, delegator, workEffort);
-                List<GenericValue> alternateViews = workEffortContentAndInfo.getRelated("ContentAssocDataResourceViewTo", UtilMisc.toMap("caContentAssocTypeId", "ALTERNATE_LOCALE"), UtilMisc.toList("-caFromDate"));
+                List<GenericValue> alternateViews = workEffortContentAndInfo.getRelated("ContentAssocDataResourceViewTo", UtilMisc.toMap("caContentAssocTypeId", "ALTERNATE_LOCALE"), UtilMisc.toList("-caFromDate"), false);
                 alternateViews = EntityUtil.filterByDate(alternateViews, UtilDateTime.nowTimestamp(), "caFromDate", "caThruDate", true);
                 for (GenericValue thisView: alternateViews) {
                     addWeightedDataResourceString(thisView, weight, strings, delegator, workEffort);
@@ -113,10 +109,10 @@ public class WorkEffortKeywordIndex {
 
         List<GenericValue> toBeStored = FastList.newInstance();
         for (Map.Entry<String, Long> entry: keywords.entrySet()) {
-        	if (entry.getKey().length() < 60) { // ignore very long strings, cannot be stored anyway
-        		GenericValue workEffortKeyword = delegator.makeValue("WorkEffortKeyword", UtilMisc.toMap("workEffortId", workEffort.getString("workEffortId"), "keyword", entry.getKey(), "relevancyWeight", entry.getValue()));
+            if (entry.getKey().length() < 60) { // ignore very long strings, cannot be stored anyway
+                GenericValue workEffortKeyword = delegator.makeValue("WorkEffortKeyword", UtilMisc.toMap("workEffortId", workEffort.getString("workEffortId"), "keyword", entry.getKey(), "relevancyWeight", entry.getValue()));
                 toBeStored.add(workEffortKeyword);
-        	}
+            }
         }
         if (toBeStored.size() > 0) {
             if (Debug.verboseOn()) Debug.logVerbose("WorkEffortKeywordIndex indexKeywords Storing " + toBeStored.size() + " keywords for workEffortId " + workEffort.getString("workEffortId"), module);
@@ -125,7 +121,7 @@ public class WorkEffortKeywordIndex {
 
     }
 
-    public static void addWeightedDataResourceString(GenericValue dataResource, int weight, List<String> strings, GenericDelegator delegator, GenericValue workEffort) {
+    public static void addWeightedDataResourceString(GenericValue dataResource, int weight, List<String> strings, Delegator delegator, GenericValue workEffort) {
         Map<String, Object> workEffortCtx = UtilMisc.<String, Object>toMap("workEffort", workEffort);
         try {
             String contentText = DataResourceWorker.renderDataResourceAsText(delegator, dataResource.getString("dataResourceId"), workEffortCtx, null, null, false);

@@ -89,13 +89,13 @@ public class SecurityEvents {
             if (UtilValidate.isEmpty(func[1]) && UtilValidate.isEmpty(text)) {
                 output.print(UtilProperties.getMessage(PosTransaction.resource,"PosULogin",Locale.getDefault()));
                 input.setFunction(loginFunc);
-                input.setPasswordInput( false);
+                input.setPasswordInput(false);
             } else if (UtilValidate.isEmpty(func[1])) {
                 output.print(UtilProperties.getMessage(PosTransaction.resource,"PosUPassw",Locale.getDefault()));
                 input.setFunction(loginFunc);
-                input.setPasswordInput( true);
+                input.setPasswordInput(true);
             } else {
-                input.setPasswordInput( false);
+                input.setPasswordInput(false);
                 String username = func[1];
                 String password = text;
                 if (!mgr) {
@@ -135,7 +135,7 @@ public class SecurityEvents {
                 }
             }
         } else {
-            Debug.log("Login function called but not prepared as a function!", module);
+            Debug.logInfo("Login function called but not prepared as a function!", module);
         }
     }
 }

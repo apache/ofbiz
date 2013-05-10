@@ -22,10 +22,10 @@ import org.ofbiz.widget.html.HtmlFormWrapper;
 productionRunId = parameters.productionRunId ?: parameters.workEffortId;
 
 taskInfos = [];
-tasks = delegator.findByAnd("WorkEffort", [workEffortParentId : productionRunId, workEffortTypeId : "PROD_ORDER_TASK"], ["workEffortId"]);
+tasks = delegator.findByAnd("WorkEffort", [workEffortParentId : productionRunId, workEffortTypeId : "PROD_ORDER_TASK"], ["workEffortId"], false);
 tasks.each { task ->
-    records = delegator.findByAnd("WorkEffortGoodStandard", [workEffortId : task.workEffortId]);
-    HtmlFormWrapper taskForm = new HtmlFormWrapper("component://manufacturing/webapp/manufacturing/jobshopmgt/ProductionRunForms.xml", "ProductionRunTaskComponents", request, response);
+    records = delegator.findByAnd("WorkEffortGoodStandard", [workEffortId : task.workEffortId], null, false);
+    HtmlFormWrapper taskForm = new HtmlFormWrapper("component://manufacturing/widget/manufacturing/ProductionRunForms.xml", "ProductionRunTaskComponents", request, response);
     taskForm.putInContext("records", records);
     taskInfos.add([task : task, taskForm : taskForm]);
 }

@@ -32,7 +32,8 @@ import javolution.util.FastSet;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilHttp;
 import org.ofbiz.base.util.UtilMisc;
-import org.ofbiz.entity.GenericDelegator;
+import org.ofbiz.base.util.UtilValidate;
+import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
 import org.ofbiz.entity.util.EntityListIterator;
@@ -48,25 +49,25 @@ public class ParametricSearch {
     public static final int DEFAULT_PER_TYPE_MAX_SIZE = 1000;
 
     // DEJ20060427 not used right now, could be removed if that circumstance persists
-    //public static UtilCache featureAllCache = new UtilCache("custom.FeaturePerTypeAll", 0, 600000, true);
-    //public static UtilCache featureByCategoryCache = new UtilCache("custom.FeaturePerTypeByCategory", 0, 600000, true);
+    //public static UtilCache featureAllCache = UtilCache.createUtilCache("custom.FeaturePerTypeAll", 0, 600000, true);
+    //public static UtilCache featureByCategoryCache = UtilCache.createUtilCache("custom.FeaturePerTypeByCategory", 0, 600000, true);
 
     /** Gets all features associated with the specified category through:
      * ProductCategory -> ProductFeatureCategoryAppl -> ProductFeatureCategory -> ProductFeature.
      * Returns a Map of Lists of ProductFeature GenericValue objects organized by productFeatureTypeId.
      */
-    public static Map<String, List<GenericValue>> makeCategoryFeatureLists(String productCategoryId, GenericDelegator delegator) {
+    public static Map<String, List<GenericValue>> makeCategoryFeatureLists(String productCategoryId, Delegator delegator) {
         return makeCategoryFeatureLists(productCategoryId, delegator, DEFAULT_PER_TYPE_MAX_SIZE);
     }
 
-    public static Map<String, List<GenericValue>> makeCategoryFeatureLists(String productCategoryId, GenericDelegator delegator, int perTypeMaxSize) {
+    public static Map<String, List<GenericValue>> makeCategoryFeatureLists(String productCategoryId, Delegator delegator, int perTypeMaxSize) {
         Map<String, Map<String, GenericValue>> productFeaturesByTypeMap = FastMap.newInstance();
         try {
-            List<GenericValue> productFeatureCategoryAppls = delegator.findByAndCache("ProductFeatureCategoryAppl", UtilMisc.toMap("productCategoryId", productCategoryId));
+            List<GenericValue> productFeatureCategoryAppls = delegator.findByAnd("ProductFeatureCategoryAppl", UtilMisc.toMap("productCategoryId", productCategoryId), null, true);
             productFeatureCategoryAppls = EntityUtil.filterByDate(productFeatureCategoryAppls, true);
             if (productFeatureCategoryAppls != null) {
                 for (GenericValue productFeatureCategoryAppl: productFeatureCategoryAppls) {
-                    List<GenericValue> productFeatures = delegator.findByAndCache("ProductFeature", UtilMisc.toMap("productFeatureCategoryId", productFeatureCategoryAppl.get("productFeatureCategoryId")));
+                    List<GenericValue> productFeatures = delegator.findByAnd("ProductFeature", UtilMisc.toMap("productFeatureCategoryId", productFeatureCategoryAppl.get("productFeatureCategoryId")), null, true);
                     for (GenericValue productFeature: productFeatures) {
                         String productFeatureTypeId = productFeature.getString("productFeatureTypeId");
                         Map<String, GenericValue> featuresByType = productFeaturesByTypeMap.get(productFeatureTypeId);
@@ -85,13 +86,13 @@ public class ParametricSearch {
         }
 
         try {
-            List<GenericValue> productFeatureCatGrpAppls = delegator.findByAndCache("ProductFeatureCatGrpAppl", UtilMisc.toMap("productCategoryId", productCategoryId));
+            List<GenericValue> productFeatureCatGrpAppls = delegator.findByAnd("ProductFeatureCatGrpAppl", UtilMisc.toMap("productCategoryId", productCategoryId), null, true);
             productFeatureCatGrpAppls = EntityUtil.filterByDate(productFeatureCatGrpAppls, true);
             if (productFeatureCatGrpAppls != null) {
                 for (GenericValue productFeatureCatGrpAppl: productFeatureCatGrpAppls) {
-                    List<GenericValue> productFeatureGroupAppls = delegator.findByAndCache("ProductFeatureGroupAppl", UtilMisc.toMap("productFeatureGroupId", productFeatureCatGrpAppl.get("productFeatureGroupId")));
+                    List<GenericValue> productFeatureGroupAppls = delegator.findByAnd("ProductFeatureGroupAppl", UtilMisc.toMap("productFeatureGroupId", productFeatureCatGrpAppl.get("productFeatureGroupId")), null, true);
                     for (GenericValue productFeatureGroupAppl: productFeatureGroupAppls) {
-                        GenericValue productFeature = delegator.findByPrimaryKeyCache("ProductFeature", UtilMisc.toMap("productFeatureId", productFeatureGroupAppl.get("productFeatureId")));
+                        GenericValue productFeature = delegator.findOne("ProductFeature", UtilMisc.toMap("productFeatureId", productFeatureGroupAppl.get("productFeatureId")), true);
 
                         String productFeatureTypeId = productFeature.getString("productFeatureTypeId");
                         Map<String, GenericValue> featuresByType = productFeaturesByTypeMap.get(productFeatureTypeId);
@@ -112,17 +113,17 @@ public class ParametricSearch {
         // now before returning, order the features in each list by description
         Map<String, List<GenericValue>> productFeaturesByTypeMapSorted = FastMap.newInstance();
         for (Map.Entry<String, Map<String, GenericValue>> entry: productFeaturesByTypeMap.entrySet()) {
-            List<GenericValue> sortedFeatures = EntityUtil.orderBy(entry.getValue().values(), UtilMisc.toList("description"));
+            List<GenericValue> sortedFeatures = EntityUtil.orderBy(entry.getValue().values(), UtilMisc.toList("description","defaultSequenceNum"));
             productFeaturesByTypeMapSorted.put(entry.getKey(), sortedFeatures);
         }
 
         return productFeaturesByTypeMapSorted;
     }
 
-    public static Map<String, List<GenericValue>> getAllFeaturesByType(GenericDelegator delegator) {
+    public static Map<String, List<GenericValue>> getAllFeaturesByType(Delegator delegator) {
         return getAllFeaturesByType(delegator, DEFAULT_PER_TYPE_MAX_SIZE);
     }
-    public static Map<String, List<GenericValue>> getAllFeaturesByType(GenericDelegator delegator, int perTypeMaxSize) {
+    public static Map<String, List<GenericValue>> getAllFeaturesByType(Delegator delegator, int perTypeMaxSize) {
         Map<String, List<GenericValue>> productFeaturesByTypeMap = FastMap.newInstance();
         try {
             Set<String> typesWithOverflowMessages = FastSet.newInstance();
@@ -167,7 +168,7 @@ public class ParametricSearch {
             if (parameterName.startsWith("pft_")) {
                 String productFeatureTypeId = parameterName.substring(4);
                 String productFeatureId = (String) entry.getValue();
-                if (productFeatureId != null && productFeatureId.length() > 0) {
+                if (UtilValidate.isNotEmpty(productFeatureId)) {
                     featureIdByType.put(productFeatureTypeId, productFeatureId);
                 }
             }
@@ -185,7 +186,7 @@ public class ParametricSearch {
             String parameterName = entry.getKey();
             if (parameterName.startsWith("SEARCH_FEAT")) {
                 String productFeatureId = (String) entry.getValue();
-                if (productFeatureId != null && productFeatureId.length() > 0) {
+                if (UtilValidate.isNotEmpty(productFeatureId)) {
                     featureIdList.add(productFeatureId);
                 }
             }
@@ -195,7 +196,7 @@ public class ParametricSearch {
     }
 
     public static String makeFeatureIdByTypeString(Map<String, String> featureIdByType) {
-        if (featureIdByType == null || featureIdByType.size() == 0) {
+        if (UtilValidate.isEmpty(featureIdByType)) {
             return "";
         }
 
@@ -227,7 +228,7 @@ public class ParametricSearch {
             String parameterName = entry.getKey();
             if (parameterName.startsWith("SEARCH_PROD_FEAT_CAT")) {
                 String productFeatureCategoryId = (String) entry.getValue();
-                if (productFeatureCategoryId != null && productFeatureCategoryId.length() > 0) {
+                if (UtilValidate.isNotEmpty(productFeatureCategoryId)) {
                    prodFeatureCategoryIdList.add(productFeatureCategoryId);
                 }
             }

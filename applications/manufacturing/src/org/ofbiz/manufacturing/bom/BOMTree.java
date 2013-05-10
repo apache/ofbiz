@@ -20,27 +20,25 @@
 package org.ofbiz.manufacturing.bom;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javolution.util.FastList;
+
 import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.base.util.UtilValidate;
-import org.ofbiz.entity.GenericDelegator;
+import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
 import org.ofbiz.entity.util.EntityUtil;
+import org.ofbiz.product.store.ProductStoreWorker;
 import org.ofbiz.service.LocalDispatcher;
 
-import org.ofbiz.product.store.ProductStoreWorker;
-
-    /** It represents an (in-memory) bill of materials (in which each
-     * component is an BOMNode)
-     * Useful for tree traversal (breakdown, explosion, implosion).
-     */
-
+/** It represents an (in-memory) bill of materials (in which each
+  * component is an BOMNode)
+  * Useful for tree traversal (breakdown, explosion, implosion).
+  */
 public class BOMTree {
     public static final int EXPLOSION = 0;
     public static final int EXPLOSION_SINGLE_LEVEL = 1;
@@ -48,7 +46,7 @@ public class BOMTree {
     public static final int IMPLOSION = 3;
 
     protected LocalDispatcher dispatcher = null;
-    protected GenericDelegator delegator = null;
+    protected Delegator delegator = null;
 
     BOMNode root;
     BigDecimal rootQuantity;
@@ -69,7 +67,7 @@ public class BOMTree {
      * @throws GenericEntityException If a db problem occurs.
      *
      */
-    public BOMTree(String productId, String bomTypeId, Date inDate, GenericDelegator delegator, LocalDispatcher dispatcher, GenericValue userLogin) throws GenericEntityException {
+    public BOMTree(String productId, String bomTypeId, Date inDate, Delegator delegator, LocalDispatcher dispatcher, GenericValue userLogin) throws GenericEntityException {
         this(productId, bomTypeId, inDate, EXPLOSION, delegator, dispatcher, userLogin);
     }
 
@@ -90,7 +88,7 @@ public class BOMTree {
      * @throws GenericEntityException If a db problem occurs.
      *
      */
-    public BOMTree(String productId, String bomTypeId, Date inDate, int type, GenericDelegator delegator, LocalDispatcher dispatcher, GenericValue userLogin) throws GenericEntityException {
+    public BOMTree(String productId, String bomTypeId, Date inDate, int type, Delegator delegator, LocalDispatcher dispatcher, GenericValue userLogin) throws GenericEntityException {
         // If the parameters are not valid, return.
         if (productId == null || bomTypeId == null || delegator == null || dispatcher == null) return;
         // If the date is null, set it to today.
@@ -99,19 +97,18 @@ public class BOMTree {
         this.delegator = delegator;
         this.dispatcher = dispatcher;
 
-        inputProduct = delegator.findByPrimaryKey("Product", UtilMisc.toMap("productId", productId));
+        inputProduct = delegator.findOne("Product", UtilMisc.toMap("productId", productId), false);
 
         String productIdForRules = productId;
         // The selected product features are loaded
-        List productFeaturesAppl = delegator.findByAnd("ProductFeatureAppl",
-                                              UtilMisc.toMap("productId", productId,
-                                              "productFeatureApplTypeId", "STANDARD_FEATURE"));
-        List productFeatures = new ArrayList();
+        List<GenericValue> productFeaturesAppl = delegator.findByAnd("ProductFeatureAppl", 
+                UtilMisc.toMap("productId", productId, "productFeatureApplTypeId", "STANDARD_FEATURE"), null, false);
+        List<GenericValue> productFeatures = FastList.newInstance();
         GenericValue oneProductFeatureAppl = null;
         for (int i = 0; i < productFeaturesAppl.size(); i++) {
-            oneProductFeatureAppl = (GenericValue)productFeaturesAppl.get(i);
-            productFeatures.add(delegator.findByPrimaryKey("ProductFeature",
-                                       UtilMisc.toMap("productFeatureId", oneProductFeatureAppl.getString("productFeatureId"))));
+            oneProductFeatureAppl = productFeaturesAppl.get(i);
+            productFeatures.add(delegator.findOne("ProductFeature",
+                    UtilMisc.toMap("productFeatureId", oneProductFeatureAppl.getString("productFeatureId")), false));
 
         }
         // If the product is manufactured as a different product,
@@ -119,9 +116,8 @@ public class BOMTree {
         GenericValue manufacturedAsProduct = manufacturedAsProduct(productId, inDate);
         // We load the information about the product that needs to be manufactured
         // from Product entity
-        GenericValue product = delegator.findByPrimaryKey("Product",
-                                            UtilMisc.toMap("productId",
-                                            (manufacturedAsProduct != null? manufacturedAsProduct.getString("productIdTo"): productId)));
+        GenericValue product = delegator.findOne("Product", 
+                UtilMisc.toMap("productId", (manufacturedAsProduct != null? manufacturedAsProduct.getString("productIdTo"): productId)), false);
         if (product == null) return;
         BOMNode originalNode = new BOMNode(product, dispatcher, userLogin);
         originalNode.setTree(this);
@@ -129,7 +125,7 @@ public class BOMTree {
         // the bill of materials of its virtual product (if the current
         // product is variant).
         if (!hasBom(product, inDate)) {
-            List virtualProducts = product.getRelatedByAnd("AssocProductAssoc", UtilMisc.toMap("productAssocTypeId", "PRODUCT_VARIANT"));
+            List<GenericValue> virtualProducts = product.getRelated("AssocProductAssoc", UtilMisc.toMap("productAssocTypeId", "PRODUCT_VARIANT"), null, false);
             virtualProducts = EntityUtil.filterByDate(virtualProducts, inDate);
             GenericValue virtualProduct = EntityUtil.getFirst(virtualProducts);
             if (virtualProduct != null) {
@@ -137,9 +133,8 @@ public class BOMTree {
                 // load the new product
                 productIdForRules = virtualProduct.getString("productId");
                 manufacturedAsProduct = manufacturedAsProduct(virtualProduct.getString("productId"), inDate);
-                product = delegator.findByPrimaryKey("Product",
-                        UtilMisc.toMap("productId",
-                                (manufacturedAsProduct != null? manufacturedAsProduct.getString("productIdTo"): virtualProduct.get("productId"))));
+                product = delegator.findOne("Product", 
+                        UtilMisc.toMap("productId", (manufacturedAsProduct != null? manufacturedAsProduct.getString("productIdTo"): virtualProduct.get("productId"))), false);
             }
         }
         if (product == null) return;
@@ -167,9 +162,9 @@ public class BOMTree {
     }
 
     private GenericValue manufacturedAsProduct(String productId, Date inDate) throws GenericEntityException {
-        List manufacturedAsProducts = delegator.findByAnd("ProductAssoc",
+        List<GenericValue> manufacturedAsProducts = delegator.findByAnd("ProductAssoc",
                                          UtilMisc.toMap("productId", productId,
-                                         "productAssocTypeId", "PRODUCT_MANUFACTURED"));
+                                         "productAssocTypeId", "PRODUCT_MANUFACTURED"), null, false);
         manufacturedAsProducts = EntityUtil.filterByDate(manufacturedAsProducts, inDate);
         GenericValue manufacturedAsProduct = null;
         if (UtilValidate.isNotEmpty(manufacturedAsProducts)) {
@@ -179,7 +174,7 @@ public class BOMTree {
     }
 
     private boolean hasBom(GenericValue product, Date inDate) throws GenericEntityException {
-        List children = product.getRelatedByAnd("MainProductAssoc", UtilMisc.toMap("productAssocTypeId", bomTypeId));
+        List<GenericValue> children = product.getRelated("MainProductAssoc", UtilMisc.toMap("productAssocTypeId", bomTypeId), null, false);
         children = EntityUtil.filterByDate(children, inDate);
         return UtilValidate.isNotEmpty(children);
     }
@@ -191,7 +186,7 @@ public class BOMTree {
      *
      */
     public boolean isConfigured() {
-        ArrayList notConfiguredParts = new ArrayList();
+        List<BOMNode> notConfiguredParts = FastList.newInstance();
         root.isConfigured(notConfiguredParts);
         return (notConfiguredParts.size() == 0);
     }
@@ -264,40 +259,40 @@ public class BOMTree {
     }
 
     /** It visits the in-memory tree that represents a bill of materials
-     * and it collects info of its nodes in the ArrayList.
+     * and it collects info of its nodes in the List.
      * Method used for bom breakdown (explosion/implosion).
-     * @param arr The ArrayList used to collect tree info.
+     * @param arr The List used to collect tree info.
      * @param initialDepth The depth of the root node.
      */
-    public void print(ArrayList arr, int initialDepth) {
+    public void print(List<BOMNode> arr, int initialDepth) {
         print(arr, initialDepth, true);
     }
 
-    public void print(ArrayList arr, int initialDepth, boolean excludeWIPs) {
+    public void print(List<BOMNode> arr, int initialDepth, boolean excludeWIPs) {
         if (root != null) {
             root.print(arr, getRootQuantity(), initialDepth, excludeWIPs);
         }
     }
 
     /** It visits the in-memory tree that represents a bill of materials
-     * and it collects info of its nodes in the ArrayList.
+     * and it collects info of its nodes in the List.
      * Method used for bom breakdown (explosion/implosion).
-     * @param arr The ArrayList used to collect tree info.
+     * @param arr The List used to collect tree info.
      */
-    public void print(ArrayList arr) {
+    public void print(List<BOMNode> arr) {
         print(arr, 0, false);
     }
 
-    public void print(ArrayList arr, boolean excludeWIPs) {
+    public void print(List<BOMNode> arr, boolean excludeWIPs) {
         print(arr, 0, excludeWIPs);
     }
 
     /** It visits the in-memory tree that represents a bill of materials
-     * and it collects info of its nodes in the HashMap.
+     * and it collects info of its nodes in the Map.
      * Method used for bom summarized explosion.
-     * @param quantityPerNode The HashMap that will contain the summarized quantities per productId.
+     * @param quantityPerNode The Map that will contain the summarized quantities per productId.
      */
-    public void sumQuantities(HashMap quantityPerNode) {
+    public void sumQuantities(Map<String, BOMNode> quantityPerNode) {
         if (root != null) {
             root.sumQuantity(quantityPerNode);
         }
@@ -305,14 +300,14 @@ public class BOMTree {
 
     /** It visits the in-memory tree that represents a bill of materials
      * and it collects all the productId it contains.
-     * @return ArrayLsit conatining all the tree's productId.
+     * @return List containing all the tree's productId.
      */
-    public ArrayList getAllProductsId() {
-        ArrayList nodeArr = new ArrayList();
-        ArrayList productsId = new ArrayList();
+    public List<String> getAllProductsId() {
+        List<BOMNode> nodeArr = FastList.newInstance();
+        List<String> productsId = FastList.newInstance();
         print(nodeArr);
         for (int i = 0; i < nodeArr.size(); i++) {
-            productsId.add(((BOMNode)nodeArr.get(i)).getProduct().getString("productId"));
+            productsId.add((nodeArr.get(i)).getProduct().getString("productId"));
         }
         return productsId;
     }
@@ -320,17 +315,25 @@ public class BOMTree {
     /** It visits the in-memory tree that represents a bill of materials
      * and it creates a manufacturing order for each of the nodes that needs
      * to be manufactured.
-     * @param orderId The (sales) order id for which the manufacturing orders are created. If specified (together with orderItemSeqId) a link between the two order lines is created. If null, no link is created.
-     * @param orderItemSeqId
-     * @param delegator The delegator used.
+     * @param facilityId the facility id
+     * @param date the context date
+     * @param workEffortName the work effort name
+     * @param description the description
+     * @param routingId the routing id
+     * @param orderId the order id
+     * @param orderItemSeqId the order item id
+     * @param shipGroupSeqId the shipment group item id
+     * @param shipmentId the shipment id delegator used
+     * @param userLogin the GenericValue object of userLogin
+     * @return returns the work effort id
      * @throws GenericEntityException If a db problem occurs.
      */
-    public String createManufacturingOrders(String facilityId, Date date, String workEffortName, String description, String routingId, String orderId, String orderItemSeqId, String shipmentId, GenericValue userLogin)  throws GenericEntityException {
+    public String createManufacturingOrders(String facilityId, Date date, String workEffortName, String description, String routingId, String orderId, String orderItemSeqId, String shipGroupSeqId, String shipmentId, GenericValue userLogin)  throws GenericEntityException {
         String workEffortId = null;
         if (root != null) {
             if (UtilValidate.isEmpty(facilityId)) {
                 if (orderId != null) {
-                    GenericValue order = delegator.findByPrimaryKey("OrderHeader", UtilMisc.toMap("orderId", orderId));
+                    GenericValue order = delegator.findOne("OrderHeader", UtilMisc.toMap("orderId", orderId), false);
                     String productStoreId = order.getString("productStoreId");
                     if (productStoreId != null) {
                         GenericValue productStore = ProductStoreWorker.getProductStore(productStoreId, delegator);
@@ -341,17 +344,17 @@ public class BOMTree {
 
                 }
                 if (facilityId == null && shipmentId != null) {
-                    GenericValue shipment = delegator.findByPrimaryKey("Shipment", UtilMisc.toMap("shipmentId", shipmentId));
+                    GenericValue shipment = delegator.findOne("Shipment", UtilMisc.toMap("shipmentId", shipmentId), false);
                     facilityId = shipment.getString("originFacilityId");
                 }
             }
-            Map tmpMap = root.createManufacturingOrder(facilityId, date, workEffortName, description, routingId, orderId, orderItemSeqId, shipmentId, true, true);
+            Map<String, Object> tmpMap = root.createManufacturingOrder(facilityId, date, workEffortName, description, routingId, orderId, orderItemSeqId, shipGroupSeqId, shipmentId, true, true);
             workEffortId = (String)tmpMap.get("productionRunId");
         }
         return workEffortId;
     }
 
-    public void getProductsInPackages(ArrayList arr) {
+    public void getProductsInPackages(List<BOMNode> arr) {
         if (root != null) {
             root.getProductsInPackages(arr, getRootQuantity(), 0, false);
         }

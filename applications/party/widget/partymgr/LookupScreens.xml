@@ -31,14 +31,29 @@ under the License.
                 <set field="queryString" from-field="result.queryString"/>
                 <set field="viewIndex" from-field="parameters.VIEW_INDEX" type="Integer" default-value="0"/>
                 <set field="viewSize" from-field="parameters.VIEW_SIZE" type="Integer" default-value="20"/>
+                
+                <!-- entries needed for lookup ajax auto completer -->
+                <!-- required: entity to search in -->
+                <set field="entityName" value="PartyNameView"/>
+                
+                <!-- required: fields to search a match -->
+                <!-- the first element from searchFields is returned after user selection --> 
+                <!-- it might be hidden based on widget.autocompleter.displayReturnField property in widget.properties -->                
+                <set field="searchFields" value="[partyId, firstName, middleName, lastName, groupName]"/>
+ 
+                <!-- optional: fields to display in the given order, default is searchFields -->
+                <set field="displayFields" value="[firstName, lastName, groupName]"/>
+                
+                <!-- optional: additional entity condition (named andCondition) added to search query -->
+                <script location="component://party/webapp/partymgr/WEB-INF/actions/party/StatusCondition.groovy"/>
             </actions>
             <widgets>
                 <decorator-screen name="LookupDecorator" location="component://common/widget/CommonScreens.xml">
                     <decorator-section name="search-options">
-                        <include-form name="lookupPartyName" location="component://party/webapp/partymgr/lookup/LookupForms.xml"/>
+                        <include-form name="lookupPartyName" location="component://party/widget/partymgr/LookupForms.xml"/>
                     </decorator-section>
                     <decorator-section name="search-results">
-                        <include-form name="listLookupPartyName" location="component://party/webapp/partymgr/lookup/LookupForms.xml"/>
+                        <include-form name="listLookupPartyName" location="component://party/widget/partymgr/LookupForms.xml"/>
                     </decorator-section>
                 </decorator-screen>
             </widgets>
@@ -55,14 +70,16 @@ under the License.
                 <set field="queryString" from-field="result.queryString"/>
                 <set field="viewIndex" from-field="parameters.VIEW_INDEX" type="Integer" default-value="0"/>
                 <set field="viewSize" from-field="parameters.VIEW_SIZE" type="Integer" default-value="20"/>
+                <set field="entityName" value="PartyNameContactMechView"/>
+                <set field="searchFields" value="[contactMechId, partyId, firstName, middleName, lastName, groupName]"/>  
             </actions>
             <widgets>
                 <decorator-screen name="LookupDecorator" location="component://common/widget/CommonScreens.xml">
                     <decorator-section name="search-options">
-                        <include-form name="lookupPartyEmail" location="component://party/webapp/partymgr/lookup/LookupForms.xml"/>
+                        <include-form name="lookupPartyEmail" location="component://party/widget/partymgr/LookupForms.xml"/>
                     </decorator-section>
                     <decorator-section name="search-results">
-                        <include-form name="listLookupPartyEmail" location="component://party/webapp/partymgr/lookup/LookupForms.xml"/>
+                        <include-form name="listLookupPartyEmail" location="component://party/widget/partymgr/LookupForms.xml"/>
                     </decorator-section>
                 </decorator-screen>
             </widgets>
@@ -79,14 +96,17 @@ under the License.
                 <set field="queryString" from-field="result.queryString"/>
                 <set field="viewIndex" from-field="parameters.VIEW_INDEX" type="Integer" default-value="0"/>
                 <set field="viewSize" from-field="parameters.VIEW_SIZE" type="Integer" default-value="20"/>
+                <set field="entityName" value="PartyRoleNameDetail"/>
+                <set field="searchFields" value="[partyId, firstName, middleName, lastName, groupName]"/>
+                <set field="andCondition" value="${groovy: return org.ofbiz.entity.condition.EntityCondition.makeCondition(&quot;roleTypeId&quot;, &quot;CUSTOMER&quot;)}"/>        
             </actions>
             <widgets>
                 <decorator-screen name="LookupDecorator" location="component://common/widget/CommonScreens.xml">
                     <decorator-section name="search-options">
-                        <include-form name="lookupCustomerName" location="component://party/webapp/partymgr/lookup/LookupForms.xml"/>
+                        <include-form name="lookupCustomerName" location="component://party/widget/partymgr/LookupForms.xml"/>
                     </decorator-section>
                     <decorator-section name="search-results">
-                        <include-form name="listLookupCustomerName" location="component://party/webapp/partymgr/lookup/LookupForms.xml"/>
+                        <include-form name="listLookupCustomerName" location="component://party/widget/partymgr/LookupForms.xml"/>
                     </decorator-section>
                 </decorator-screen>
             </widgets>
@@ -108,10 +128,10 @@ under the License.
             <widgets>
                 <decorator-screen name="LookupDecorator" location="component://common/widget/CommonScreens.xml">
                     <decorator-section name="search-options">
-                        <include-form name="lookupCustomerNameForSalesRep" location="component://party/webapp/partymgr/lookup/LookupForms.xml"/>
+                        <include-form name="lookupCustomerNameForSalesRep" location="component://party/widget/partymgr/LookupForms.xml"/>
                     </decorator-section>
                     <decorator-section name="search-results">
-                        <include-form name="listLookupCustomerNameForSalesRep" location="component://party/webapp/partymgr/lookup/LookupForms.xml"/>
+                        <include-form name="listLookupCustomerNameForSalesRep" location="component://party/widget/partymgr/LookupForms.xml"/>
                     </decorator-section>
                 </decorator-screen>
             </widgets>
@@ -126,16 +146,18 @@ under the License.
             <actions>
                 <property-map resource="PartyUiLabels" map-name="uiLabelMap" global="true"/>
                 <set field="title" value="${uiLabelMap.PartyLookupPartyPerson}"/>
-                <set field="entityName" value="Person"/>
-                <set field="queryString" from-field="result.queryString"/>
+                <set field="queryString" from-field="result.queryString"/>                
+                <set field="entityName" value="PartyAndPerson"/>
+                <set field="searchFields" value="[partyId, firstName, middleName, lastName]"/>
+                <script location="component://party/webapp/partymgr/WEB-INF/actions/party/StatusCondition.groovy"/>                
             </actions>
             <widgets>
                 <decorator-screen name="LookupDecorator" location="component://common/widget/CommonScreens.xml">
                     <decorator-section name="search-options">
-                        <include-form name="lookupPerson" location="component://party/webapp/partymgr/lookup/LookupForms.xml"/>
+                        <include-form name="lookupPerson" location="component://party/widget/partymgr/LookupForms.xml"/>
                     </decorator-section>
                     <decorator-section name="search-results">
-                        <include-form name="listLookupPerson" location="component://party/webapp/partymgr/lookup/LookupForms.xml"/>
+                        <include-form name="listLookupPerson" location="component://party/widget/partymgr/LookupForms.xml"/>
                     </decorator-section>
                 </decorator-screen>
             </widgets>
@@ -156,10 +178,33 @@ under the License.
             <widgets>
                 <decorator-screen name="LookupDecorator" location="component://common/widget/CommonScreens.xml">
                     <decorator-section name="search-options">
-                        <include-form name="lookupPerson" location="component://party/webapp/partymgr/lookup/LookupForms.xml"/>
+                        <include-form name="lookupPerson" location="component://party/widget/partymgr/LookupForms.xml"/>
                     </decorator-section>
                     <decorator-section name="search-results">
-                        <include-form name="listLookupPerson" location="component://party/webapp/partymgr/lookup/LookupForms.xml"/>
+                        <include-form name="listLookupPerson" location="component://party/widget/partymgr/LookupForms.xml"/>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="LookupLead">
+        <section>
+            <condition>
+                <if-service-permission service-name="partyBasePermissionCheck" main-action="VIEW"/>
+            </condition>
+            <actions>
+                <property-map resource="PartyUiLabels" map-name="uiLabelMap" global="true"/>
+                <set field="title" value="${uiLabelMap.PartyLookupLead}"/>
+                <set field="entityName" value="PartyRoleAndPartyDetail"/>
+                <set field="parameters.roleTypeId" value="LEAD"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="LookupDecorator" location="component://common/widget/CommonScreens.xml">
+                    <decorator-section name="search-options">
+                        <include-form name="lookupPerson" location="component://party/widget/partymgr/LookupForms.xml"/>
+                    </decorator-section>
+                    <decorator-section name="search-results">
+                        <include-form name="listLookupPerson" location="component://party/widget/partymgr/LookupForms.xml"/>
                     </decorator-section>
                 </decorator-screen>
             </widgets>
@@ -173,20 +218,21 @@ under the License.
             </condition>
             <actions>
                 <property-map resource="PartyUiLabels" map-name="uiLabelMap" global="true"/>
-
                 <set field="title" value="${uiLabelMap.PartyLookupPartyAndUserLoginAndPerson}"/>
                 <set field="entityName" value="PartyAndUserLoginAndPerson"/>
                 <set field="queryString" from-field="result.queryString"/>
                 <set field="viewIndex" from-field="parameters.VIEW_INDEX" type="Integer" default-value="0"/>
                 <set field="viewSize" from-field="parameters.VIEW_SIZE" type="Integer" default-value="20"/>
+                <set field="searchFields" value="[userLoginId, partyId, firstName, lastName]"/>
+                <script location="component://party/webapp/partymgr/WEB-INF/actions/party/StatusCondition.groovy"/>                 
             </actions>
             <widgets>
                 <decorator-screen name="LookupDecorator" location="component://common/widget/CommonScreens.xml">
                     <decorator-section name="search-options">
-                        <include-form name="lookupPartyAndUserLoginAndPerson" location="component://party/webapp/partymgr/lookup/LookupForms.xml"/>
+                        <include-form name="lookupPartyAndUserLoginAndPerson" location="component://party/widget/partymgr/LookupForms.xml"/>
                     </decorator-section>
                     <decorator-section name="search-results">
-                        <include-form name="listLookupPartyAndUserLoginAndPerson" location="component://party/webapp/partymgr/lookup/LookupForms.xml"/>
+                        <include-form name="listLookupPartyAndUserLoginAndPerson" location="component://party/widget/partymgr/LookupForms.xml"/>
                     </decorator-section>
                 </decorator-screen>
             </widgets>
@@ -205,14 +251,16 @@ under the License.
                 <set field="queryString" from-field="result.queryString"/>
                 <set field="viewIndex" from-field="parameters.VIEW_INDEX" type="Integer" default-value="0"/>
                 <set field="viewSize" from-field="parameters.VIEW_SIZE" type="Integer" default-value="20"/>
+                <set field="searchFields" value="[userLoginId, partyId, firstName, lastName, groupName]"/>
+                <script location="component://party/webapp/partymgr/WEB-INF/actions/party/StatusCondition.groovy"/>                
             </actions>
             <widgets>
                 <decorator-screen name="LookupDecorator" location="component://common/widget/CommonScreens.xml">
                     <decorator-section name="search-options">
-                        <include-form name="lookupUserLoginAndPartyDetails" location="component://party/webapp/partymgr/lookup/LookupForms.xml"/>
+                        <include-form name="lookupUserLoginAndPartyDetails" location="component://party/widget/partymgr/LookupForms.xml"/>
                     </decorator-section>
                     <decorator-section name="search-results">
-                        <include-form name="listLookupUserLoginAndPartyDetails" location="component://party/webapp/partymgr/lookup/LookupForms.xml"/>
+                        <include-form name="listLookupUserLoginAndPartyDetails" location="component://party/widget/partymgr/LookupForms.xml"/>
                     </decorator-section>
                 </decorator-screen>
             </widgets>
@@ -226,15 +274,17 @@ under the License.
             <actions>
                 <property-map resource="PartyUiLabels" map-name="uiLabelMap" global="true"/>
                 <set field="title" value="${uiLabelMap.PartyLookupPartyGroup}"/>
-                <set field="entityName" value="PartyGroup"/>
+                <set field="entityName" value="PartyAndGroup"/>
+                <set field="searchFields" value="[partyId, groupName, comments]"/>
+                <script location="component://party/webapp/partymgr/WEB-INF/actions/party/StatusCondition.groovy"/>                
             </actions>
             <widgets>
                 <decorator-screen name="LookupDecorator" location="component://common/widget/CommonScreens.xml">
                     <decorator-section name="search-options">
-                        <include-form name="lookupPartyGroup" location="component://party/webapp/partymgr/lookup/LookupForms.xml"/>
+                        <include-form name="lookupPartyGroup" location="component://party/widget/partymgr/LookupForms.xml"/>
                     </decorator-section>
                     <decorator-section name="search-results">
-                        <include-form name="listLookupPartyGroup" location="component://party/webapp/partymgr/lookup/LookupForms.xml"/>
+                        <include-form name="listLookupPartyGroup" location="component://party/widget/partymgr/LookupForms.xml"/>
                     </decorator-section>
                 </decorator-screen>
             </widgets>
@@ -254,10 +304,10 @@ under the License.
             <widgets>
                 <decorator-screen name="LookupDecorator" location="component://common/widget/CommonScreens.xml">
                     <decorator-section name="search-options">
-                        <include-form name="lookupPartyGroup" location="component://party/webapp/partymgr/lookup/LookupForms.xml"/>
+                        <include-form name="lookupPartyGroup" location="component://party/widget/partymgr/LookupForms.xml"/>
                     </decorator-section>
                     <decorator-section name="search-results">
-                        <include-form name="listLookupPartyGroup" location="component://party/webapp/partymgr/lookup/LookupForms.xml"/>
+                        <include-form name="listLookupPartyGroup" location="component://party/widget/partymgr/LookupForms.xml"/>
                     </decorator-section>
                 </decorator-screen>
             </widgets>
@@ -272,8 +322,9 @@ under the License.
             </condition>
             <actions>
                 <property-map resource="PartyUiLabels" map-name="uiLabelMap" global="true"/>
-
                 <set field="title" value="${uiLabelMap.PartyLookupPartyClassificationGroup}"/>
+                <set field="entityName" value="PartyClassificationGroup"/>
+                <set field="searchFields" value="[partyClassificationGroupId, parentGroupId, description]"/>                                
                 <set field="queryString" from-field="result.queryString"/>
                 <set field="viewIndex" from-field="parameters.VIEW_INDEX" type="Integer" default-value="0"/>
                 <set field="viewSize" from-field="parameters.VIEW_SIZE" type="Integer" default-value="20"/>
@@ -281,10 +332,10 @@ under the License.
             <widgets>
                 <decorator-screen name="LookupDecorator" location="component://common/widget/CommonScreens.xml">
                     <decorator-section name="search-options">
-                        <include-form name="LookupPartyClassificationGroup" location="component://party/webapp/partymgr/lookup/LookupForms.xml"/>
+                        <include-form name="LookupPartyClassificationGroup" location="component://party/widget/partymgr/LookupForms.xml"/>
                     </decorator-section>
                     <decorator-section name="search-results">
-                        <include-form name="listLookupPartyClassificationGroup" location="component://party/webapp/partymgr/lookup/LookupForms.xml"/>
+                        <include-form name="listLookupPartyClassificationGroup" location="component://party/widget/partymgr/LookupForms.xml"/>
                     </decorator-section>
                 </decorator-screen>
             </widgets>
@@ -296,17 +347,18 @@ under the License.
             <actions>
                 <property-map resource="PartyUiLabels" map-name="uiLabelMap" global="true"/>
                 <property-map resource="MarketingUiLabels" map-name="uiLabelMap" global="true"/>
-
+                <set field="entityName" value="CommunicationEvent"/>
+                <set field="searchFields" value="[communicationEventId, subject]"/> 
                 <set field="title" value="${uiLabelMap.PartyLookupPartyCommEvent}"/>
                 <set field="tabButtonItem" value="ContactList"/>
             </actions>
             <widgets>
                 <decorator-screen name="LookupDecorator" location="component://common/widget/CommonScreens.xml">
                     <decorator-section name="search-options">
-                        <include-form name="LookupCommEvent" location="component://party/webapp/partymgr/lookup/LookupForms.xml"/>
+                        <include-form name="LookupCommEvent" location="component://party/widget/partymgr/LookupForms.xml"/>
                     </decorator-section>
                     <decorator-section name="search-results">
-                        <include-form name="ListLookupCommEvent" location="component://party/webapp/partymgr/lookup/LookupForms.xml"/>
+                        <include-form name="ListLookupCommEvent" location="component://party/widget/partymgr/LookupForms.xml"/>
                     </decorator-section>
                 </decorator-screen>
             </widgets>
@@ -320,16 +372,46 @@ under the License.
 
                 <set field="title" value="${uiLabelMap.PartyLookupContactMech}"/>
                 <set field="entityName" value="PartyAndContactMech"/>
+                <set field="searchFields" value="[contactMechId, partyId, contactMechTypeId, infoString, paToName]"/> 
+                <script location="component://party/webapp/partymgr/WEB-INF/actions/party/StatusCondition.groovy"/>
                 <set field="viewIndex" from-field="parameters.VIEW_INDEX" type="Integer" default-value="0"/>
                 <set field="viewSize" from-field="parameters.VIEW_SIZE" type="Integer" default-value="20"/>
             </actions>
             <widgets>
                 <decorator-screen name="LookupDecorator" location="component://common/widget/CommonScreens.xml">
                     <decorator-section name="search-options">
-                        <include-form name="lookupContactMech" location="component://party/webapp/partymgr/lookup/LookupForms.xml"/>
+                        <include-form name="lookupContactMech" location="component://party/widget/partymgr/LookupForms.xml"/>
                     </decorator-section>
                     <decorator-section name="search-results">
-                        <include-form name="listLookupContactMech" location="component://party/webapp/partymgr/lookup/LookupForms.xml"/>
+                        <include-form name="listLookupContactMech" location="component://party/widget/partymgr/LookupForms.xml"/>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    
+    <screen name="LookupInternalOrganization">
+        <section>
+            <condition>
+                <if-service-permission service-name="partyBasePermissionCheck" main-action="VIEW"/>
+            </condition>
+            <actions>
+                <property-map resource="PartyUiLabels" map-name="uiLabelMap" global="true"/>
+                <set field="title" value="${uiLabelMap.PartyLookupInternalOrganization}"/>
+                <set field="entityName" value="PartyRoleAndPartyDetail"/>
+                <set field="roleTypeId" value="INTERNAL_ORGANIZATIO"/>
+                <set field="searchFields" value="[partyId, groupName, partyGroupComments]"/>
+                <script location="component://party/webapp/partymgr/WEB-INF/actions/party/StatusCondition.groovy"/>      
+                <set field="andCondition" value="${groovy: return org.ofbiz.entity.condition.EntityCondition.makeCondition([context.andCondition, 
+                    org.ofbiz.entity.condition.EntityCondition.makeCondition(&quot;roleTypeId&quot;, &quot;INTERNAL_ORGANIZATIO&quot;)])}"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="LookupDecorator" location="component://common/widget/CommonScreens.xml">
+                    <decorator-section name="search-options">
+                        <include-form name="LookupInternalOrganization" location="component://party/widget/partymgr/LookupForms.xml"/>
+                    </decorator-section>
+                    <decorator-section name="search-results">
+                        <include-form name="listLookupPartyGroup" location="component://party/widget/partymgr/LookupForms.xml"/>
                     </decorator-section>
                 </decorator-screen>
             </widgets>

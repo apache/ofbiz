@@ -37,7 +37,7 @@ import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.base.util.collections.MapStack;
 import org.ofbiz.base.util.template.FreeMarkerWorker;
 import org.ofbiz.content.content.ContentWorker;
-import org.ofbiz.entity.GenericDelegator;
+import org.ofbiz.entity.Delegator;
 import org.ofbiz.service.LocalDispatcher;
 import org.ofbiz.webapp.control.RequestHandler;
 
@@ -52,27 +52,31 @@ public class RenderContentTransform implements TemplateTransformModel {
 
     public static final String module = RenderContentTransform.class.getName();
 
+    @SuppressWarnings("unchecked")
     public Writer getWriter(final Writer out, Map args) {
         final Environment env = Environment.getCurrentEnvironment();
-        final GenericDelegator delegator = (GenericDelegator) FreeMarkerWorker.getWrappedObject("delegator", env);
-        final LocalDispatcher dispatcher = (LocalDispatcher) FreeMarkerWorker.getWrappedObject("dispatcher", env);
-        final HttpServletRequest request = (HttpServletRequest) FreeMarkerWorker.getWrappedObject("request", env);
-        final HttpServletResponse response = (HttpServletResponse) FreeMarkerWorker.getWrappedObject("response", env);
+        final Delegator delegator = FreeMarkerWorker.getWrappedObject("delegator", env);
+        final LocalDispatcher dispatcher = FreeMarkerWorker.getWrappedObject("dispatcher", env);
+        final HttpServletRequest request = FreeMarkerWorker.getWrappedObject("request", env);
+        final HttpServletResponse response = FreeMarkerWorker.getWrappedObject("response", env);
 
-        final Map templateRoot = MapStack.create(FreeMarkerWorker.createEnvironmentMap(env));
+        final Map<String, Object> templateRoot = MapStack.create(FreeMarkerWorker.createEnvironmentMap(env));
         ((MapStack)templateRoot).push(args);
         final String xmlEscape =  (String)templateRoot.get("xmlEscape");
         final String thisContentId = (String)templateRoot.get("contentId");
 
         return new Writer(out) {
 
+            @Override
             public void write(char cbuf[], int off, int len) {
             }
 
+            @Override
             public void flush() throws IOException {
                 out.flush();
             }
 
+            @Override
             public void close() throws IOException {
                 renderSubContent();
             }
@@ -98,7 +102,7 @@ public class RenderContentTransform implements TemplateTransformModel {
                     String txt = null;
 
                     String mapKey = (String)templateRoot.get("mapKey");
-                    if ( UtilValidate.isEmpty(mapKey)) {
+                    if (UtilValidate.isEmpty(mapKey)) {
                         txt = ContentWorker.renderContentAsText(dispatcher, delegator, thisContentId, templateRoot, locale, mimeTypeId, true);
                     } else {
                         txt = ContentWorker.renderSubContentAsText(dispatcher, delegator, thisContentId, mapKey, templateRoot, locale, mimeTypeId, true);
@@ -126,7 +130,7 @@ public class RenderContentTransform implements TemplateTransformModel {
             }
 
             public void closeEditWrap(Writer out, String editRequestName) throws IOException {
-                StringBuilder sb = new StringBuilder();
+                // StringBuilder sb = new StringBuilder();
                 String fullRequest = editRequestName;
                 String delim = "?";
                 if (UtilValidate.isNotEmpty(thisContentId)) {
@@ -135,7 +139,7 @@ public class RenderContentTransform implements TemplateTransformModel {
                 }
 
                 out.write("<a href=\"");
-                ServletContext servletContext = (ServletContext) request.getSession().getServletContext();
+                ServletContext servletContext = request.getSession().getServletContext();
                 RequestHandler rh = (RequestHandler) servletContext.getAttribute("_REQUEST_HANDLER_");
                 out.append(rh.makeLink(request, response, "/" + fullRequest, false, false, true));
                 out.write("\">Edit</a>");

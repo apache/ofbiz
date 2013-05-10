@@ -19,7 +19,8 @@
 package org.ofbiz.entity.cache;
 
 import org.ofbiz.base.util.cache.UtilCache;
-import org.ofbiz.entity.GenericDelegator;
+import org.ofbiz.entity.Delegator;
+import org.ofbiz.entity.DelegatorFactory;
 
 public abstract class AbstractCache<K, V> {
 
@@ -30,8 +31,8 @@ public abstract class AbstractCache<K, V> {
         this.id = id;
     }
 
-    public GenericDelegator getDelegator() {
-        return GenericDelegator.getGenericDelegator(delegatorName);
+    public Delegator getDelegator() {
+        return DelegatorFactory.getDelegator(this.delegatorName);
     }
 
     public void remove(String entityName) {
@@ -74,15 +75,7 @@ public abstract class AbstractCache<K, V> {
     }
 
     protected UtilCache<K, V> getOrCreateCache(String entityName) {
-        synchronized (UtilCache.utilCacheTable) {
-            String name = getCacheName(entityName);
-            UtilCache<K, V> cache = UtilCache.findCache(name);
-            if (cache == null) {
-                cache = new UtilCache<K, V>(name, 0, 0, true);
-                String[] names = getCacheNames(entityName);
-                cache.setPropertiesParams(names);
-            }
-            return cache;
-        }
+        String name = getCacheName(entityName);
+        return UtilCache.getOrCreateUtilCache(name, 0, 0, 0, true, false, getCacheNames(entityName));
     }
 }

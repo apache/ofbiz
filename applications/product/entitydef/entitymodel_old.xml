@@ -25,8 +25,6 @@ under the License.
     <!-- ========================================================= -->
     <title>Entity of an Open For Business Project Component</title>
     <description>None</description>
-    <copyright>Copyright 2001-2008 The Apache Software Foundation</copyright>
-    <author>None</author>
     <version>1.0</version>
     <!-- ========================================================= -->
     <!-- ======================== Data Model ===================== -->
@@ -56,6 +54,42 @@ under the License.
       </relation>
       <relation type="one-nofk" fk-name="FACILITY_RLE_ROLE"  rel-entity-name="RoleType">
         <key-map field-name="roleTypeId"/>
+      </relation>
+    </entity>
+    <entity entity-name="OldProductKeyword" table-name="PRODUCT_KEYWORD"
+            package-name="org.ofbiz.product.facility"
+            title="Old Product Keyword Entity">
+      <field name="productId" type="id-ne"></field>
+      <field name="keyword" type="short-varchar"></field>
+      <field name="relevancyWeight" type="numeric"></field>
+      <prim-key field="productId"/>
+      <prim-key field="keyword"/>
+      <relation type="one" fk-name="PROD_KWD_PROD" rel-entity-name="Product">
+        <key-map field-name="productId"/>
+      </relation>
+      <index name="PROD_KWD_KWD">
+        <index-field name="keyword"/>
+      </index>
+    </entity>
+    <entity entity-name="OldProductKeywordResult" table-name="PRODUCT_KEYWORD_RESULT"
+            package-name="org.ofbiz.product.product"
+            never-cache="true"
+            title="Product Keyword Result Entity">
+      <field name="productKeywordResultId" type="id-ne"></field>
+      <field name="visitId" type="id"></field>
+      <field name="productCategoryId" type="id"></field>
+      <field name="searchString" type="short-varchar"></field>
+      <field name="intraKeywordOperator" type="very-short"></field>
+      <field name="anyPrefix" type="indicator"></field>
+      <field name="anySuffix" type="indicator"></field>
+      <field name="removeStems" type="indicator"></field>
+      <field name="numResults" type="numeric"></field>
+      <prim-key field="productKeywordResultId"/>
+      <relation type="one" fk-name="PROD_KWDRES_VST" rel-entity-name="Visit">
+        <key-map field-name="visitId"/>
+      </relation>
+      <relation type="one-nofk" rel-entity-name="ProductCategory">
+        <key-map field-name="productCategoryId"/>
       </relation>
     </entity>
 

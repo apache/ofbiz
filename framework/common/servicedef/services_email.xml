@@ -33,33 +33,64 @@ under the License.
         <attribute name="sendFrom" type="String" mode="IN" optional="true"/>
         <attribute name="authUser" type="String" mode="IN" optional="true"/>
         <attribute name="authPass" type="String" mode="IN" optional="true"/>
+        <attribute name="port" type="String" mode="IN" optional="true"/>
         <attribute name="sendVia" type="String" mode="IN" optional="true"/>
-        <attribute name="sendType" type="String" mode="IN" optional="true"/>
+        <attribute name="sendType" type="String" mode="IN" optional="true"/>        
+        <attribute name="socketFactoryClass" type="String" mode="IN" optional="true"/>
+        <attribute name="socketFactoryPort" type="String" mode="IN" optional="true"/>
+        <attribute name="socketFactoryFallback" type="String" mode="IN" optional="true"/>        
+        <attribute name="sendFailureNotification" mode="IN" type="Boolean" optional="true"/>
+        <attribute name="sendPartial" mode="IN" type="Boolean" optional="true"/>
+        <attribute name="startTLSEnabled" mode="IN" type="Boolean" optional="true"/>
         <attribute name="subject" type="String" mode="INOUT" optional="true" allow-html="safe"/>
         <attribute name="contentType" type="String" mode="INOUT" optional="true"/>
         <attribute name="partyId" type="String" mode="INOUT" optional="true"/>
         <attribute name="messageId" type="String" mode="INOUT" optional="true"/>
         <attribute name="emailType" type="String" mode="INOUT" optional="true"/>
+        <attribute name="orderId" type="String" mode="INOUT" optional="true"/>
+        <attribute name="custRequestId" type="String" mode="INOUT" optional="true"/>
+        <attribute name="messageWrapper" type="org.ofbiz.service.mail.MimeMessageWrapper" mode="OUT" optional="true"/><!-- mail can be disabled in general.properties so no output -->
+        <!--  used for parsing and ECAs -->
+        <attribute name="communicationEventId" type="String" mode="INOUT" optional="true"/>        
     </service>
-    <service name="sendMail" engine="java"
-            location="org.ofbiz.common.email.EmailServices" invoke="sendMail">
-        <description>Send E-Mail Service.  partyId and communicationEventId aren't used by sendMail
-            but are passed down to storeEmailAsCommunication during the SECA chain.  See sendMailInterface for more comments.</description>
+    <service name="sendMailOnePartInterface"  engine="interface" location="" invoke="">
+        <description>Interface service for sendMail* services.</description>
         <implements service="sendMailInterface"/>
-        <attribute name="body" type="String" mode="INOUT" optional="false" allow-html="safe"/>
-        <attribute name="communicationEventId" type="String" mode="INOUT" optional="true"/>
+        <attribute name="body" type="String" mode="INOUT" optional="false" allow-html="safe"/>        
         <override name="contentType" mode="INOUT"/>
         <override name="subject" mode="INOUT" optional="false"/>
         <override name="emailType" type="String" mode="INOUT" optional="true"/>
         <override name="sendTo" optional="false"/><!-- service will give an NPE when not provided -->
     </service>
-    <service name="sendMailMultiPart" engine="java"
-            location="org.ofbiz.common.email.EmailServices" invoke="sendMail">
-        <description>Send Multi-Part E-Mail Service</description>
+    <service name="sendMailMultiPartInterface"  engine="interface" location="" invoke="">
+        <description>Interface service for sendMailMultiPart* services</description>
         <implements service="sendMailInterface"/>
         <attribute name="bodyParts" type="java.util.List" mode="INOUT" optional="false"/>
         <attribute name="subject" type="String" mode="INOUT" optional="false"/>
         <override name="contentType" mode="INOUT"/>
+    </service>
+    <service name="sendMail" engine="java"
+        location="org.ofbiz.common.email.EmailServices" invoke="sendMail">
+        <description>Send E-Mail Service.  partyId and communicationEventId aren't used by sendMail
+            but are passed down to storeEmailAsCommunication during the SECA chain.  See sendMailInterface for more comments.</description>
+        <implements service="sendMailOnePartInterface"/>
+    </service>
+    <service name="sendMailHiddenInLog" engine="java" hideResultInLog="true"
+        location="org.ofbiz.common.email.EmailServices" invoke="sendMail">
+        <description>Send E-Mail Service.  partyId and communicationEventId aren't used by sendMail
+            but are passed down to storeEmailAsCommunication during the SECA chain.  See sendMailInterface for more comments.</description>
+        <implements service="sendMailOnePartInterface"/>
+        <attribute name="hideInLog" type="Boolean" mode="IN" optional="true"/>                
+    </service>
+    <service name="sendMailMultiPart" engine="java"
+        location="org.ofbiz.common.email.EmailServices" invoke="sendMail">
+        <description>Send Multi-Part E-Mail Service</description>
+        <implements service="sendMailMultiPartInterface"/>
+    </service>
+    <service name="sendMailMultiPartHiddenInLog" engine="java" hideResultInLog="true"
+        location="org.ofbiz.common.email.EmailServices" invoke="sendMail">
+        <description>Send Multi-Part E-Mail Service</description>
+        <implements service="sendMailMultiPartInterface"/>
     </service>
     <service name="sendMailFromUrl" engine="java"
             location="org.ofbiz.common.email.EmailServices" invoke="sendMailFromUrl">
@@ -69,17 +100,30 @@ under the License.
         <attribute name="bodyUrlParameters" type="Map" mode="IN" optional="true"/>
         <attribute name="body" type="String" mode="OUT" optional="false" allow-html="safe"/>
     </service>
-    <service name="sendMailFromScreen" max-retry="3" engine="java"
-        location="org.ofbiz.common.email.EmailServices" invoke="sendMailFromScreen">
-        <description>Send E-Mail From Screen Widget Service</description>
+    <service name="sendMailFromScreenInterface"  engine="interface" location="" invoke="">
+        <description>Interface service for E-Mail sent From Screen Widget</description>
         <implements service="sendMailInterface"/>
         <attribute name="bodyText" type="String" mode="IN" optional="true" allow-html="safe"/>
         <attribute name="bodyScreenUri" type="String" mode="IN" optional="true"/>
         <attribute name="xslfoAttachScreenLocation" type="String" mode="IN" optional="true"/>
         <attribute name="attachmentName" type="String" mode="IN" optional="true"/>
+        <attribute name="xslfoAttachScreenLocationList" type="List" mode="IN" optional="true"/>
+        <attribute name="attachmentNameList" type="List" mode="IN" optional="true"/>
         <attribute name="bodyParameters" type="Map" mode="IN" optional="true"/>
         <attribute name="webSiteId" type="String" mode="IN" optional="true"/>
+        <attribute name="subject" type="String" mode="OUT" optional="true"/>
         <attribute name="body" type="String" mode="OUT" optional="false"/>
+    </service>
+    <service name="sendMailFromScreen" max-retry="3" engine="java"
+        location="org.ofbiz.common.email.EmailServices" invoke="sendMailFromScreen">
+        <description>Send E-Mail From Screen Widget Service</description>
+        <implements service="sendMailFromScreenInterface"/>
+        <attribute name="hideInLog" type="Boolean" mode="IN" optional="true"/>                        
+    </service>
+    <service name="sendMailHiddenInLogFromScreen" max-retry="3" engine="java" hideResultInLog="true"
+        location="org.ofbiz.common.email.EmailServices" invoke="sendMailHiddenInLogFromScreen">
+        <description>Send E-Mail hidden in log (password, etc.) From Screen Widget Service</description>
+        <implements service="sendMailFromScreenInterface"/>
     </service>
     <service name="sendMailFromTemplateSetting" engine="simple"
         location="component://common/script/org/ofbiz/common/email/EmailServices.xml" invoke="sendMailFromTemplateSetting">

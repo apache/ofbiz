@@ -33,7 +33,7 @@ under the License.
             <entity-one entity-name="GlAccount" value-field="glAccount"></entity-one>
             <link target="GlAccountNavigate" text="${glAccountId} ${glAccount.accountName} ${postedBalance}">
                 <parameter param-name="glAccountId"/>
-                <parameter param-name="trail" from-field="currentNodeTrailPiped"/>
+                <parameter param-name="trail"/>
             </link>
             <sub-node node-name="node-body">
                 <entity-and entity-name="GlAccount">
@@ -77,8 +77,8 @@ under the License.
             </sub-node>
         </node>
         <node name="node-body">
-            <link target="EditFixedAsset" text="${fixedAssetId} ${fixedAssetName ${instanceOfProductId} ${fixedAssetTypeId} ">
-                <parameter param-name="fixedAssetId" from-field="fixedAssetId}"/>
+            <link target="EditFixedAsset" text="${fixedAssetId} ${fixedAssetName} ${instanceOfProductId} ${fixedAssetTypeId} ">
+                <parameter param-name="fixedAssetId" from-field="fixedAssetId"/>
             </link>
             <sub-node node-name="node-body">
                 <entity-and entity-name="FixedAsset">

@@ -49,10 +49,11 @@ under the License.
         <section>
             <actions>
                 <set field="headerItem" value="orderentry"/>
-                <set field="title-property" value="PageTitleCheckoutOptions"/>
+                <set field="titleProperty" value="PageTitleCheckoutOptions"/>
                 <script location="component://order/webapp/ordermgr/WEB-INF/actions/entry/CheckoutPayment.groovy"/>
                 <script location="component://order/webapp/ordermgr/WEB-INF/actions/entry/CheckoutOptions.groovy"/>
                 <script location="component://order/webapp/ordermgr/WEB-INF/actions/entry/StorePaymentOptions.groovy"/>
+                <property-to-field resource="order" property="orderPreference.giftEnable" field="giftEnable" default="Y"/>
             </actions>
             <widgets>
                 <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
@@ -144,6 +145,7 @@ under the License.
                 <set field="stepTitleId" value="OrderOrderOptionSettings"/>
                 <set field="stepLabelId" value="CommonOptions"/>
                 <script location="component://order/webapp/ordermgr/WEB-INF/actions/entry/OptionSettings.groovy"/>
+                <property-to-field resource="order" property="orderPreference.giftEnable" field="giftEnable" default="Y"/>
             </actions>
             <widgets>
                 <decorator-screen name="CommonOrderCheckoutDecorator">
@@ -181,10 +183,20 @@ under the License.
                 <set field="stepLabelId" value="PartyParties"/>
                 <script location="component://order/webapp/ordermgr/WEB-INF/actions/entry/SetAdditionalParty.groovy"/>
                 <script location="component://order/webapp/ordermgr/WEB-INF/actions/entry/AdditionalPartyListing.groovy"/>
+                
+                <!-- asmslect parameters, must be prefixed by asm_ for setMultipleSelectJs.ftl -->
+                <!--set field="asm_multipleSelectForm"  value="addAdditionalPartyForm"/>
+                <set field="asm_multipleSelect"  value="additionalRoleTypeId"/>
+                <set field="asm_formSize" value="700"/>
+                <set field="asm_asmListItemPercentOfForm" value="95"/>
+                <set field="asm_sortable" value="false"/>
+                <property-map resource="OrderUiLabels" map-name="uiLabelMap" global="true"/>
+                <set field="asm_title" value="${uiLabelMap.OrderPartySelectRoleForParty}"/-->                
             </actions>
             <widgets>
                 <decorator-screen name="CommonOrderCheckoutDecorator">
                     <decorator-section name="body">
+                        <platform-specific><html><html-template location="component://common/webcommon/includes/setMultipleSelectJs.ftl"/></html></platform-specific>
                         <platform-specific>
                             <html><html-template location="component://order/webapp/ordermgr/entry/setAdditionalParty.ftl"/></html>
                         </platform-specific>
@@ -219,7 +231,7 @@ under the License.
             <actions>
                 <set field="stepTitleId" value="OrderOrderConfirmation"/>
                 <set field="stepLabelId" value="OrderReviewOrder"/>
-
+                <property-to-field resource="order" property="orderPreference.giftEnable" field="giftEnable" default="Y"/>
                 <script location="component://order/webapp/ordermgr/WEB-INF/actions/entry/CheckoutReview.groovy"/>
             </actions>
             <widgets>
@@ -296,11 +308,26 @@ under the License.
                                         <html><html-template location="component://order/webapp/ordermgr/entry/OrderEntryCatalogTabBar.ftl"/></html>
                                     </platform-specific>
                                     <container style="screenlet-body">
-                                        <include-form location="component://order/webapp/ordermgr/order/OrderForms.xml" name="LookupBulkAddSupplierProductsInApprovedOrder"></include-form>
+                                        <include-form location="component://order/widget/ordermgr/OrderForms.xml" name="LookupBulkAddSupplierProductsInApprovedOrder"></include-form>
                                     </container>
                                 </container>
                             </widgets>
                         </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="splitship">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleSplitItemsForShipping"/>
+                <script location="component://order/webapp/ordermgr/WEB-INF/actions/entry/SplitShip.groovy"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <platform-specific><html><html-template location="component://order/webapp/ordermgr/entry/SplitShip.ftl"/></html></platform-specific>
                     </decorator-section>
                 </decorator-screen>
             </widgets>

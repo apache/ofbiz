@@ -56,22 +56,14 @@ under the License.
     <!-- ================================================================== -->
 
     <target name="classes" depends="prepare">
-        <javac15>
+        <javac16>
             <!-- exclude the payment processor packages; comment if you have libs -->
             <exclude name="org/ofbiz/order/thirdparty/taxware/**"/>
-        </javac15>
+        </javac16>
     </target>
 
-    <!-- ================================================================== -->
-    <!-- Build JavaDoc                                                      -->
-    <!-- ================================================================== -->
-
-    <target name="docs" depends="prepare-docs">
-        <javadoc packagenames="org.ofbiz.order.*"
-                 classpathref="local.class.path"
-                 destdir="${build.dir}/javadocs"
-                 Windowtitle="Open for Business - ${desc}">
-            <sourcepath path="${src.dir}"/>
-        </javadoc>
+    <target name="jar" depends="classes">
+        <main-jar/>
+        <test-jar/>
     </target>
 </project>

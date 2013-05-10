@@ -25,6 +25,7 @@ import java.io.PrintWriter;
  * StartupException
  *
  */
+@SuppressWarnings("serial")
 public class StartupException extends Exception {
 
     Throwable nested = null;
@@ -64,6 +65,7 @@ public class StartupException extends Exception {
     }
 
     /** Returns the detail message, including the message from the nested exception if there is one. */
+    @Override
     public String getMessage() {
         if (nested != null) {
             return super.getMessage() + " (" + nested.getMessage() + ")";
@@ -86,6 +88,7 @@ public class StartupException extends Exception {
     }
 
     /** Prints the composite message to System.err. */
+    @Override
     public void printStackTrace() {
         super.printStackTrace();
         if (nested != null) {
@@ -94,6 +97,7 @@ public class StartupException extends Exception {
     }
 
     /** Prints the composite message and the embedded stack trace to the specified stream ps. */
+    @Override
     public void printStackTrace(PrintStream ps) {
         super.printStackTrace(ps);
         if (nested != null) {
@@ -102,6 +106,7 @@ public class StartupException extends Exception {
     }
 
     /** Prints the composite message and the embedded stack trace to the specified print writer pw. */
+    @Override
     public void printStackTrace(PrintWriter pw) {
         super.printStackTrace(pw);
         if (nested != null) {

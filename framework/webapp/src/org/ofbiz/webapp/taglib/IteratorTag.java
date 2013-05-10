@@ -33,11 +33,13 @@ import javax.servlet.jsp.tagext.BodyTagSupport;
 
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.ObjectType;
+import org.ofbiz.base.util.UtilGenerics;
 
 
 /**
  * IterateTag - JSP Tag to iterate over a Collection or any object with an iterator() method.
  */
+@SuppressWarnings("serial")
 public class IteratorTag extends BodyTagSupport {
 
     public static final String module = IteratorTag.class.getName();
@@ -46,7 +48,7 @@ public class IteratorTag extends BodyTagSupport {
     protected String name = null;
     protected String property = null;
     protected Object element = null;
-    protected Class type = null;
+    protected Class<?> type = null;
     protected int limit = 0;
     protected int offset = 0;
     protected boolean expandMap = false;
@@ -112,6 +114,7 @@ public class IteratorTag extends BodyTagSupport {
         return expandMap ? "true" : "false";
     }
 
+    @Override
     public int doStartTag() throws JspTagException {
         Debug.logVerbose("Starting Iterator Tag...", module);
 
@@ -126,6 +129,7 @@ public class IteratorTag extends BodyTagSupport {
             return SKIP_BODY;
     }
 
+    @Override
     public int doAfterBody() {
         if (defineElement()) {
             return EVAL_BODY_AGAIN;
@@ -134,6 +138,7 @@ public class IteratorTag extends BodyTagSupport {
         }
     }
 
+    @Override
     public int doEndTag() {
         try {
             BodyContent body = getBodyContent();
@@ -153,18 +158,18 @@ public class IteratorTag extends BodyTagSupport {
 
     private boolean defineIterator() {
         // clear the iterator, after this it may be set directly
-        Iterator<? extends Object> newIterator = null;
-        Collection<? extends Object> thisCollection = null;
+        Iterator<?> newIterator = null;
+        Collection<?> thisCollection = null;
 
         if (property != null) {
             if (Debug.verboseOn()) Debug.logVerbose("Getting iterator from property: " + property, module);
             Object propertyObject = pageContext.findAttribute(property);
 
-            if (propertyObject instanceof Iterator) {
-                newIterator = (Iterator<? extends Object>) propertyObject;
+            if (propertyObject instanceof Iterator<?>) {
+                newIterator = UtilGenerics.cast(propertyObject);
             } else {
                 // if ClassCastException, it should indicate looking for a Collection
-                thisCollection = (Collection<? extends Object>) propertyObject;
+                thisCollection = UtilGenerics.cast(propertyObject);
             }
         } else {
             // Debug.logInfo("No property, check for Object Tag.", module);
@@ -174,7 +179,7 @@ public class IteratorTag extends BodyTagSupport {
             if (objectTag == null)
                 return false;
             if (objectTag.getType().equals("java.util.Collection")) {
-                thisCollection = (Collection<? extends Object>) objectTag.getObject();
+                thisCollection = UtilGenerics.cast(objectTag.getObject());
             } else {
                 try {
                     ClassLoader loader = Thread.currentThread().getContextClassLoader();
@@ -183,8 +188,8 @@ public class IteratorTag extends BodyTagSupport {
                     for (int i = 0; i < m.length; i++) {
                         if (m[i].getName().equals("iterator")) {
                             Debug.logVerbose("Found iterator method. Using it.", module);
-                            newIterator = (Iterator<? extends Object>) m[i].invoke(
-                                        objectTag.getObject(), (Object[]) null);
+                            newIterator = UtilGenerics.cast( m[i].invoke(
+                                        objectTag.getObject(), (Object[]) null));
                             break;
                         }
                     }
@@ -236,15 +241,15 @@ public class IteratorTag extends BodyTagSupport {
 
             // expand a map element here if requested
             if (expandMap) {
-                Map tempMap = (Map) element;
-                Iterator mapEntries = tempMap.entrySet().iterator();
+                Map<String, ?> tempMap = UtilGenerics.cast(element);
+                Iterator<Map.Entry<String, ?>> mapEntries = UtilGenerics.cast(tempMap.entrySet().iterator());
 
                 while (mapEntries.hasNext()) {
-                    Map.Entry entry = (Map.Entry) mapEntries.next();
+                    Map.Entry<String, ?> entry = mapEntries.next();
                     Object value = entry.getValue();
 
-                    if (value == null) value = new String();
-                    pageContext.setAttribute((String) entry.getKey(), value);
+                    if (value == null) value = "";
+                    pageContext.setAttribute(entry.getKey(), value);
                 }
             }
 

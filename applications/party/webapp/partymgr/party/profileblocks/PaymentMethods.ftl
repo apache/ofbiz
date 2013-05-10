@@ -17,40 +17,59 @@ specific language governing permissions and limitations
 under the License.
 -->
 
+<#macro maskSensitiveNumber cardNumber>
+  <#assign cardNumberDisplay = "">
+  <#if cardNumber?has_content>
+    <#assign size = cardNumber?length - 4>
+    <#if (size > 0)>
+      <#list 0 .. size-1 as foo>
+        <#assign cardNumberDisplay = cardNumberDisplay + "*">
+      </#list>
+      <#assign cardNumberDisplay = cardNumberDisplay + cardNumber[size .. size + 3]>
+    <#else>
+      <#-- but if the card number has less than four digits (ie, it was entered incorrectly), display it in full -->
+      <#assign cardNumberDisplay = cardNumber>
+    </#if>
+  </#if>
+  ${cardNumberDisplay?if_exists}
+</#macro>
+
   <div id="partyPaymentMethod" class="screenlet">
     <div class="screenlet-title-bar">
       <ul>
         <li class="h3">${uiLabelMap.PartyPaymentMethodInformation}</li>
-        <#if security.hasEntityPermission("PAY_INFO", "_CREATE", session)>
+        <#if security.hasEntityPermission("PAY_INFO", "_CREATE", session) || security.hasEntityPermission("ACCOUNTING", "_CREATE", session)>
           <li><a href="<@ofbizUrl>editeftaccount?partyId=${partyId}</@ofbizUrl>">${uiLabelMap.AccountingCreateNewEftAccount}</a></li>
           <li><a href="<@ofbizUrl>editgiftcard?partyId=${partyId}</@ofbizUrl>">${uiLabelMap.AccountingCreateNewGiftCard}</a></li>
           <li><a href="<@ofbizUrl>editcreditcard?partyId=${partyId}</@ofbizUrl>">${uiLabelMap.AccountingCreateNewCreditCard}</a></li>
+          <li><a href="<@ofbizUrl>EditBillingAccount?partyId=${partyId}</@ofbizUrl>">${uiLabelMap.AccountingCreateBillingAccount}</a></li>
         </#if>
       </ul>
       <br class="clear" />
     </div>
     <div class="screenlet-body">
-      <#if paymentMethodValueMaps?has_content>
+      <#if paymentMethodValueMaps?has_content || billingAccounts?has_content>
         <table class="basic-table" cellspacing="0">
+        <#if paymentMethodValueMaps?has_content>
           <#list paymentMethodValueMaps as paymentMethodValueMap>
             <#assign paymentMethod = paymentMethodValueMap.paymentMethod/>
             <tr>
-              <#if "CREDIT_CARD" == paymentMethod.paymentMethodTypeId>
+              <#if "CREDIT_CARD" == paymentMethod.paymentMethodTypeId && paymentMethodValueMap.creditCard?has_content>
                 <#assign creditCard = paymentMethodValueMap.creditCard/>
                 <td class="label">
                   ${uiLabelMap.AccountingCreditCard}
                 </td>
                 <td>
                   <#if creditCard.companyNameOnCard?has_content>${creditCard.companyNameOnCard}&nbsp;</#if>
-                  <#if creditCard.titleOnCard?has_content>${creditCard.titleOnCard}&nbsp</#if>
+                  <#if creditCard.titleOnCard?has_content>${creditCard.titleOnCard}&nbsp;</#if>
                   ${creditCard.firstNameOnCard}&nbsp;
-                  <#if creditCard.middleNameOnCard?has_content>${creditCard.middleNameOnCard}&nbsp</#if>
+                  <#if creditCard.middleNameOnCard?has_content>${creditCard.middleNameOnCard}&nbsp;</#if>
                   ${creditCard.lastNameOnCard}
                   <#if creditCard.suffixOnCard?has_content>&nbsp;${creditCard.suffixOnCard}</#if>
                   &nbsp;-&nbsp;
-                  <#if security.hasEntityPermission("PAY_INFO", "_VIEW", session)>
+                  <#if security.hasEntityPermission("PAY_INFO", "_VIEW", session) || security.hasEntityPermission("ACCOUNTING", "_VIEW", session)>
                     ${creditCard.cardType}
-                    ${creditCard.cardNumber}
+                    <@maskSensitiveNumber cardNumber=creditCard.cardNumber?if_exists/>
                     ${creditCard.expireDate}
                   <#else>
                     ${Static["org.ofbiz.party.contact.ContactHelper"].formatCreditCard(creditCard)}
@@ -64,8 +83,8 @@ under the License.
                   <#if security.hasEntityPermission("MANUAL", "_PAYMENT", session)>
                     <a href="/accounting/control/manualETx?paymentMethodId=${paymentMethod.paymentMethodId}${externalKeyParam}">${uiLabelMap.PartyManualTx}</a>
                   </#if>
-                  <#if security.hasEntityPermission("PAY_INFO", "_UPDATE", session)>
-                    <a href="<@ofbizUrl>editcreditcard?partyId=${partyId}&paymentMethodId=${paymentMethod.paymentMethodId}</@ofbizUrl>">${uiLabelMap.CommonUpdate}</a>
+                  <#if security.hasEntityPermission("PAY_INFO", "_UPDATE", session) || security.hasEntityPermission("ACCOUNTING", "_UPDATE", session)>
+                    <a href="<@ofbizUrl>editcreditcard?partyId=${partyId}&amp;paymentMethodId=${paymentMethod.paymentMethodId}</@ofbizUrl>">${uiLabelMap.CommonUpdate}</a>
                   </#if>
                 <#-- </td> -->
               <#elseif "GIFT_CARD" == paymentMethod.paymentMethodTypeId>
@@ -74,25 +93,11 @@ under the License.
                   ${uiLabelMap.AccountingGiftCard}
                 </td>
                 <td>
-                  <#if security.hasEntityPermission("PAY_INFO", "_VIEW", session)>
+                  <#if security.hasEntityPermission("PAY_INFO", "_VIEW", session) || security.hasEntityPermission("ACCOUNTING", "_VIEW", session)>
                     ${giftCard.cardNumber?default("N/A")} [${giftCard.pinNumber?default("N/A")}]
                   <#else>
-                    <#if giftCard?has_content && giftCard.cardNumber?has_content>
-                      <#assign giftCardNumber = "">
-                      <#assign pcardNumber = giftCard.cardNumber>
-                      <#if pcardNumber?has_content>
-                        <#assign psize = pcardNumber?length - 4>
-                        <#if 0 < psize>
-                          <#list 0 .. psize-1 as foo>
-                            <#assign giftCardNumber = giftCardNumber + "*">
-                          </#list>
-                          <#assign giftCardNumber = giftCardNumber + pcardNumber[psize .. psize + 3]>
-                        <#else>
-                          <#assign giftCardNumber = pcardNumber>
-                        </#if>
-                      </#if>
-                    </#if>
-                    ${giftCardNumber?default("N/A")}
+                    <@maskSensitiveNumber cardNumber=giftCard.cardNumber?if_exists/>
+                    <#if !cardNumberDisplay?has_content>N/A</#if>
                   </#if>
                   <#if paymentMethod.description?has_content>(${paymentMethod.description})</#if>
                   <#if paymentMethod.glAccountId?has_content>(for GL Account ${paymentMethod.glAccountId})</#if>
@@ -100,8 +105,8 @@ under the License.
                   <#if paymentMethod.thruDate?has_content><b>(${uiLabelMap.PartyContactEffectiveThru}:&nbsp;${paymentMethod.thruDate.toString()}</b></#if>
                 </td>
                 <td class="button-col">
-                  <#if security.hasEntityPermission("PAY_INFO", "_UPDATE", session)>
-                    <a href="<@ofbizUrl>editgiftcard?partyId=${partyId}&paymentMethodId=${paymentMethod.paymentMethodId}</@ofbizUrl>">${uiLabelMap.CommonUpdate}</a>
+                  <#if security.hasEntityPermission("PAY_INFO", "_UPDATE", session) || security.hasEntityPermission("ACCOUNTING", "_UPDATE", session)>
+                    <a href="<@ofbizUrl>editgiftcard?partyId=${partyId}&amp;paymentMethodId=${paymentMethod.paymentMethodId}</@ofbizUrl>">${uiLabelMap.CommonUpdate}</a>
                   </#if>
                 <#-- </td> -->
               <#elseif "EFT_ACCOUNT" == paymentMethod.paymentMethodTypeId>
@@ -116,8 +121,8 @@ under the License.
                   <#if paymentMethod.thruDate?has_content><b>(${uiLabelMap.PartyContactEffectiveThru}:&nbsp;${paymentMethod.thruDate.toString()}</#if>
                 </td>
                 <td class="button-col">
-                  <#if security.hasEntityPermission("PAY_INFO", "_UPDATE", session)>
-                    <a href="<@ofbizUrl>editeftaccount?partyId=${partyId}&paymentMethodId=${paymentMethod.paymentMethodId}</@ofbizUrl>">${uiLabelMap.CommonUpdate}</a>
+                  <#if security.hasEntityPermission("PAY_INFO", "_UPDATE", session) || security.hasEntityPermission("ACCOUNTING", "_UPDATE", session)>
+                    <a href="<@ofbizUrl>editeftaccount?partyId=${partyId}&amp;paymentMethodId=${paymentMethod.paymentMethodId}</@ofbizUrl>">${uiLabelMap.CommonUpdate}</a>
                   </#if>
                 <#-- </td> -->
               <#elseif "COMPANY_CHECK" == paymentMethod.paymentMethodTypeId>
@@ -134,15 +139,39 @@ under the License.
                 <td class="button-col">
                   &nbsp;
                 <#-- </td> -->
+              <#else>
+                <td class="button-col">
+                  &nbsp;
               </#if>
-              <#if security.hasEntityPermission("PAY_INFO", "_DELETE", session)>
-                <a href="<@ofbizUrl>deletePaymentMethod/viewprofile?partyId=${partyId}&paymentMethodId=${paymentMethod.paymentMethodId}</@ofbizUrl>">${uiLabelMap.CommonExpire}</a>
+              <#if security.hasEntityPermission("PAY_INFO", "_DELETE", session) || security.hasEntityPermission("ACCOUNTING", "_DELETE", session)>
+                <a href="<@ofbizUrl>deletePaymentMethod/viewprofile?partyId=${partyId}&amp;paymentMethodId=${paymentMethod.paymentMethodId}</@ofbizUrl>">${uiLabelMap.CommonExpire}</a>
               <#else>
                 &nbsp;
               </#if>
               </td> <#-- closes out orphaned <td> elements inside conditionals -->
             </tr>
           </#list>
+        </#if>
+        <#-- Billing list-->
+        <#if billingAccounts?has_content>
+            <#list billingAccounts as billing>
+            <tr>
+              <td class="label" valign="top">${uiLabelMap.AccountingBilling}</td>
+              <td>
+                  <#if billing.billingAccountId?has_content>${billing.billingAccountId}</#if>
+                  <#if billing.description?has_content>(${billing.description})</#if>
+                  <#if billing.accountLimit?has_content>(${uiLabelMap.AccountingAccountLimit} $${billing.accountLimit})</#if>
+                  <#if billing.accountBalance?has_content>(${uiLabelMap.AccountingBillingAvailableBalance} $${billing.accountBalance})</#if>
+                  <#if billing.fromDate?has_content>(${uiLabelMap.CommonUpdated}:&nbsp;${billing.fromDate?if_exists})</#if>
+                  <#if billing.thruDate?has_content><b>(${uiLabelMap.PartyContactEffectiveThru}:&nbsp;${billing.thruDate.toString()}</b></#if>
+              </td>
+              <td class="button-col">
+                <a href="<@ofbizUrl>EditBillingAccount?billingAccountId=${billing.billingAccountId}&amp;partyId=${partyId}</@ofbizUrl>">${uiLabelMap.CommonUpdate}</a>
+                <a href="<@ofbizUrl>deleteBillingAccount?partyId=${partyId}&amp;billingAccountId=${billing.billingAccountId}</@ofbizUrl>">${uiLabelMap.CommonExpire}</a>
+              </td>
+          </tr>
+          </#list>
+        </#if>
         </table>
       <#else>
         ${uiLabelMap.PartyNoPaymentMethodInformation}

@@ -18,22 +18,18 @@
  *******************************************************************************/
 package org.ofbiz.service.semaphore;
 
+import java.sql.Timestamp;
+
+import javax.transaction.Transaction;
+
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilDateTime;
-import org.ofbiz.base.util.UtilMisc;
-import org.ofbiz.entity.GenericDelegator;
+import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
 import org.ofbiz.entity.transaction.GenericTransactionException;
-import org.ofbiz.entity.transaction.GenericXaResource;
 import org.ofbiz.entity.transaction.TransactionUtil;
 import org.ofbiz.service.ModelService;
-
-import javax.transaction.Transaction;
-import javax.transaction.xa.Xid;
-import javax.transaction.xa.XAException;
-import java.sql.Timestamp;
-import java.util.Map;
 
 /**
  * ServiceSemaphore
@@ -47,7 +43,7 @@ public class ServiceSemaphore {
     public static final int SEMAPHORE_MODE_WAIT = 1;
     public static final int SEMAPHORE_MODE_NONE = 2;
 
-    protected GenericDelegator delegator;
+    protected Delegator delegator;
     protected GenericValue lock;
     protected ModelService model;
 
@@ -55,7 +51,7 @@ public class ServiceSemaphore {
     protected int mode = SEMAPHORE_MODE_NONE;
     protected Timestamp lockTime = null;
 
-    public ServiceSemaphore(GenericDelegator delegator, ModelService model) {
+    public ServiceSemaphore(Delegator delegator, ModelService model) {
         this.delegator = delegator;
         this.mode = "wait".equals(model.semaphore) ? SEMAPHORE_MODE_WAIT : ("fail".equals(model.semaphore) ? SEMAPHORE_MODE_FAIL : SEMAPHORE_MODE_NONE);
         this.model = model;
@@ -104,7 +100,7 @@ public class ServiceSemaphore {
                 }
             }
             if (timedOut) {
-                double waitTimeSec = ((double) (System.currentTimeMillis() - lockTime.getTime()) / 1000.0);
+                double waitTimeSec = ((System.currentTimeMillis() - lockTime.getTime()) / 1000.0);
                 String errMsg = "Service [" + model.name + "] with wait semaphore exceeded wait timeout, waited [" + waitTimeSec + "], wait started at " + lockTime;
                 Debug.logWarning(errMsg, module);
                 throw new SemaphoreWaitException(errMsg);

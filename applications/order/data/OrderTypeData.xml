@@ -38,9 +38,12 @@ under the License.
     <OrderAdjustmentType description="Promotion" hasTable="N" orderAdjustmentTypeId="PROMOTION_ADJUSTMENT" parentTypeId=""/>
     <OrderAdjustmentType description="Replacement" hasTable="N" orderAdjustmentTypeId="REPLACE_ADJUSTMENT" parentTypeId=""/>
     <OrderAdjustmentType description="Discount" hasTable="N" orderAdjustmentTypeId="DISCOUNT_ADJUSTMENT" parentTypeId=""/>
+    <OrderAdjustmentType description="Donation" hasTable="N" orderAdjustmentTypeId="DONATION_ADJUSTMENT" parentTypeId=""/>
     <OrderAdjustmentType description="Fee" hasTable="N" orderAdjustmentTypeId="FEE" parentTypeId=""/>
     <OrderAdjustmentType description="Miscellaneous Charges" hasTable="N" orderAdjustmentTypeId="MISCELLANEOUS_CHARGE" parentTypeId=""/>
     <OrderAdjustmentType description="Sales Tax" hasTable="N" orderAdjustmentTypeId="SALES_TAX" parentTypeId=""/>
+    <OrderAdjustmentType description="VAT Tax (not added to totals)" hasTable="N" orderAdjustmentTypeId="VAT_TAX" parentTypeId=""/>
+    <OrderAdjustmentType description="VAT Price Correction" hasTable="N" orderAdjustmentTypeId="VAT_PRICE_CORRECT" parentTypeId=""/>
     <OrderAdjustmentType description="Shipping and Handling" hasTable="N" orderAdjustmentTypeId="SHIPPING_CHARGES" parentTypeId=""/>
     <OrderAdjustmentType description="Surcharge" hasTable="N" orderAdjustmentTypeId="SURCHARGE_ADJUSTMENT" parentTypeId=""/>
     <OrderAdjustmentType description="Additional Feature" hasTable="N" orderAdjustmentTypeId="ADDITIONAL_FEATURE" parentTypeId=""/>
@@ -68,6 +71,7 @@ under the License.
     <OrderItemAssocType description="Drop Shipment" hasTable="N" orderItemAssocTypeId="DROP_SHIPMENT" parentTypeId=""/>
     <OrderItemAssocType description="Return Replacement" hasTable="N" orderItemAssocTypeId="REPLACEMENT" parentTypeId=""/>
     <OrderItemAssocType description="New Version" hasTable="N" orderItemAssocTypeId="NEW_VERSION" parentTypeId=""/>
+    <OrderItemAssocType description="Exchange Order" hasTable="N" orderItemAssocTypeId="EXCHANGE" parentTypeId=""/>
 
     <EnumerationType description="Order Sales Channel" enumTypeId="ORDER_SALES_CHANNEL" hasTable="N" parentTypeId=""/>
     <Enumeration description="Web Channel" enumCode="WEB_CHANNEL" enumId="WEB_SALES_CHANNEL" sequenceId="01" enumTypeId="ORDER_SALES_CHANNEL"/>
@@ -140,11 +144,13 @@ under the License.
     <StatusValidChange condition="" statusId="ORDER_HOLD" statusIdTo="ORDER_CANCELLED" transitionName="Cancel Order"/>
     <StatusValidChange condition="" statusId="ORDER_SENT" statusIdTo="ORDER_COMPLETED" transitionName="Order Completed"/>
     <StatusValidChange condition="" statusId="ORDER_SENT" statusIdTo="ORDER_CANCELLED" transitionName="Order Cancelled"/>
+    <StatusValidChange condition="" statusId="ORDER_COMPLETED" statusIdTo="ORDER_APPROVED" transitionName="Approve Order"/>
     <StatusValidChange condition="" statusId="ITEM_CREATED" statusIdTo="ITEM_APPROVED" transitionName="Approve Item"/>
     <StatusValidChange condition="" statusId="ITEM_CREATED" statusIdTo="ITEM_REJECTED" transitionName="Reject Item"/>
     <StatusValidChange condition="" statusId="ITEM_CREATED" statusIdTo="ITEM_CANCELLED" transitionName="Cancel Item"/>
     <StatusValidChange condition="" statusId="ITEM_APPROVED" statusIdTo="ITEM_COMPLETED" transitionName="Complete Item"/>
     <StatusValidChange condition="" statusId="ITEM_APPROVED" statusIdTo="ITEM_CANCELLED" transitionName="Cancel Item"/>
+    <StatusValidChange condition="" statusId="ITEM_COMPLETED" statusIdTo="ITEM_APPROVED" transitionName="Approve Item"/>
 
     <!-- order payment pref status -->
     <StatusType description="Payment Preference" hasTable="N" parentTypeId="" statusTypeId="PAYMENT_PREF_STATUS"/>
@@ -210,19 +216,34 @@ under the License.
 
     <!-- CustRequest statuses -->
     <StatusType description="Custom Request Status" hasTable="N" parentTypeId="" statusTypeId="CUSTREQ_STTS"/>
+    <StatusItem description="Draft" sequenceId="00" statusCode="DRAFT" statusId="CRQ_DRAFT" statusTypeId="CUSTREQ_STTS"/>
     <StatusItem description="Submitted" sequenceId="01" statusCode="SUBMITTED" statusId="CRQ_SUBMITTED" statusTypeId="CUSTREQ_STTS"/>
     <StatusItem description="Accepted" sequenceId="02" statusCode="ACCEPTED" statusId="CRQ_ACCEPTED" statusTypeId="CUSTREQ_STTS"/>
     <StatusItem description="Reviewed" sequenceId="03" statusCode="REVIEWED" statusId="CRQ_REVIEWED" statusTypeId="CUSTREQ_STTS"/>
+    <StatusItem description="Pending Cust." sequenceId="09" statusCode="PENDING" statusId="CRQ_PENDING" statusTypeId="CUSTREQ_STTS"/>
     <StatusItem description="Completed" sequenceId="04" statusCode="COMPLETED" statusId="CRQ_COMPLETED" statusTypeId="CUSTREQ_STTS"/>
     <StatusItem description="Rejected" sequenceId="98" statusCode="REJECTED" statusId="CRQ_REJECTED" statusTypeId="CUSTREQ_STTS"/>
     <StatusItem description="Cancelled" sequenceId="99" statusCode="CANCELLED" statusId="CRQ_CANCELLED" statusTypeId="CUSTREQ_STTS"/>
+    <StatusValidChange condition="" statusId="CRQ_DRAFT" statusIdTo="CRQ_ACCEPTED" transitionName="Accept Request"/>
+    <StatusValidChange condition="" statusId="CRQ_DRAFT" statusIdTo="CRQ_SUBMITTED" transitionName="Submit Request"/>
+    <StatusValidChange condition="" statusId="CRQ_DRAFT" statusIdTo="CRQ_CANCELLED" transitionName="Cancel Request"/>
     <StatusValidChange condition="" statusId="CRQ_SUBMITTED" statusIdTo="CRQ_ACCEPTED" transitionName="Accept Request"/>
+    <StatusValidChange condition="" statusId="CRQ_SUBMITTED" statusIdTo="CRQ_COMPLETED" transitionName="Complete Request"/>
     <StatusValidChange condition="" statusId="CRQ_SUBMITTED" statusIdTo="CRQ_REJECTED" transitionName="Reject Request"/>
     <StatusValidChange condition="" statusId="CRQ_SUBMITTED" statusIdTo="CRQ_CANCELLED" transitionName="Cancel Request"/>
+    <StatusValidChange condition="" statusId="CRQ_SUBMITTED" statusIdTo="CRQ_PENDING" transitionName="Pending customer"/>
+    <StatusValidChange condition="" statusId="CRQ_PENDING" statusIdTo="CRQ_SUBMITTED" transitionName="Submit Request"/>
+    <StatusValidChange condition="" statusId="CRQ_PENDING" statusIdTo="CRQ_ACCEPTED" transitionName="Accept Request"/>
+    <StatusValidChange condition="" statusId="CRQ_PENDING" statusIdTo="CRQ_REVIEWED" transitionName="Review Request"/>
+    <StatusValidChange condition="" statusId="CRQ_PENDING" statusIdTo="CRQ_CANCELLED" transitionName="Cancel Request"/>
     <StatusValidChange condition="" statusId="CRQ_ACCEPTED" statusIdTo="CRQ_REVIEWED" transitionName="Review Request"/>
+    <StatusValidChange condition="" statusId="CRQ_ACCEPTED" statusIdTo="CRQ_COMPLETED" transitionName="Complete Request"/>
     <StatusValidChange condition="" statusId="CRQ_ACCEPTED" statusIdTo="CRQ_CANCELLED" transitionName="Cancel Request"/>
+    <StatusValidChange condition="" statusId="CRQ_ACCEPTED" statusIdTo="CRQ_PENDING" transitionName="Pending Customer"/>
     <StatusValidChange condition="" statusId="CRQ_REVIEWED" statusIdTo="CRQ_COMPLETED" transitionName="Complete Request"/>
     <StatusValidChange condition="" statusId="CRQ_REVIEWED" statusIdTo="CRQ_CANCELLED" transitionName="Cancel Request"/>
+    <StatusValidChange condition="" statusId="CRQ_REVIEWED" statusIdTo="CRQ_PENDING" transitionName="Pending Customer"/>
+    <StatusValidChange condition="" statusId="CRQ_COMPLETED" statusIdTo="CRQ_REVIEWED" transitionName="Re-open Request"/>
 
     <!-- Requirement statuses -->
     <StatusType description="Requirement Status" hasTable="N" parentTypeId="" statusTypeId="REQUIREMENT_STATUS"/>
@@ -256,6 +277,8 @@ under the License.
     <ReturnAdjustmentType description="Return Fee" hasTable="N" returnAdjustmentTypeId="RET_FEE_ADJ" parentTypeId=""/>
     <ReturnAdjustmentType description="Return Miscellaneous Charges" hasTable="N" returnAdjustmentTypeId="RET_MISC_ADJ" parentTypeId=""/>
     <ReturnAdjustmentType description="Return Sales Tax" hasTable="N" returnAdjustmentTypeId="RET_SALES_TAX_ADJ" parentTypeId=""/>
+    <ReturnAdjustmentType description="Return VAT Tax" hasTable="N" returnAdjustmentTypeId="RET_VAT_TAX_ADJ" parentTypeId=""/>
+    <ReturnAdjustmentType description="Return VAT Price Correction" hasTable="N" returnAdjustmentTypeId="RET_VAT_PC_ADJ" parentTypeId=""/>
     <ReturnAdjustmentType description="Return Shipping and Handling" hasTable="N" returnAdjustmentTypeId="RET_SHIPPING_ADJ" parentTypeId=""/>
     <ReturnAdjustmentType description="Return Surcharge" hasTable="N" returnAdjustmentTypeId="RET_SURCHARGE_ADJ" parentTypeId=""/>
     <ReturnAdjustmentType description="Return Additional Feature" hasTable="N" returnAdjustmentTypeId="RET_ADD_FEATURE_ADJ" parentTypeId=""/>
@@ -265,7 +288,7 @@ under the License.
 
     <!-- Return Header Types -->
     <ReturnHeaderType description="Return from Customer" returnHeaderTypeId="CUSTOMER_RETURN"/>
-    <ReturnHeaderType description="Return to Vendor" returnHeaderTypeId="VENDOR_RETURN"/>  <!-- not supported yet -->
+    <ReturnHeaderType description="Return to Vendor" returnHeaderTypeId="VENDOR_RETURN"/>
 
     <!-- return item types for returns -->
     <ReturnItemType description="Return Non-Product Item" returnItemTypeId="RET_NPROD_ITEM" parentTypeId=""/>
@@ -293,10 +316,15 @@ under the License.
     <ReturnItemTypeMap returnHeaderTypeId="CUSTOMER_RETURN" returnItemMapKey="FEE" returnItemTypeId="RET_FEE_ADJ"/>
     <ReturnItemTypeMap returnHeaderTypeId="CUSTOMER_RETURN" returnItemMapKey="MISCELLANEOUS_CHARGE" returnItemTypeId="RET_MISC_CHARGE_ADJ"/>
     <ReturnItemTypeMap returnHeaderTypeId="CUSTOMER_RETURN" returnItemMapKey="SALES_TAX" returnItemTypeId="RET_SALES_TAX_ADJ"/>
+    <ReturnItemTypeMap returnHeaderTypeId="CUSTOMER_RETURN" returnItemMapKey="VAT_TAX" returnItemTypeId="RET_VAT_TAX_ADJ"/>
+    <ReturnItemTypeMap returnHeaderTypeId="CUSTOMER_RETURN" returnItemMapKey="VAT_PRICE_CORRECT" returnItemTypeId="RET_VAT_PC_ADJ"/>
     <ReturnItemTypeMap returnHeaderTypeId="CUSTOMER_RETURN" returnItemMapKey="SHIPPING_CHARGES" returnItemTypeId="RET_SHIPPING_ADJ"/>
     <ReturnItemTypeMap returnHeaderTypeId="CUSTOMER_RETURN" returnItemMapKey="SURCHARGE_ADJUSTMENT" returnItemTypeId="RET_SURCHARGE_ADJ"/>
     <ReturnItemTypeMap returnHeaderTypeId="CUSTOMER_RETURN" returnItemMapKey="ADDITIONAL_FEATURE" returnItemTypeId="RET_ADD_FEATURE_ADJ"/>
     <ReturnItemTypeMap returnHeaderTypeId="CUSTOMER_RETURN" returnItemMapKey="WARRANTY_ADJUSTMENT" returnItemTypeId="RET_WARRANTY_ADJ"/>
+    <ReturnItemTypeMap returnHeaderTypeId="CUSTOMER_RETURN" returnItemMapKey="RENTAL_ORDER_ITEM" returnItemTypeId="RET_FPROD_ITEM" />
+    <ReturnItemTypeMap returnHeaderTypeId="CUSTOMER_RETURN" returnItemMapKey="ASSET_USAGE_OUT_IN" returnItemTypeId="RET_FPROD_ITEM" />
+    <ReturnItemTypeMap returnHeaderTypeId="CUSTOMER_RETURN" returnItemMapKey="SERVICE_PRODUCT" returnItemTypeId="RET_SPROD_ITEM"/>
     <ReturnItemTypeMap returnHeaderTypeId="VENDOR_RETURN" returnItemMapKey="FINISHED_GOOD" returnItemTypeId="RET_FPROD_ITEM"/>
     <ReturnItemTypeMap returnHeaderTypeId="VENDOR_RETURN" returnItemMapKey="MARKETING_PKG_AUTO" returnItemTypeId="RET_FPROD_ITEM"/>
     <ReturnItemTypeMap returnHeaderTypeId="VENDOR_RETURN" returnItemMapKey="MARKETING_PKG_PICK" returnItemTypeId="RET_FPROD_ITEM"/>
@@ -309,6 +337,8 @@ under the License.
     <ReturnItemTypeMap returnHeaderTypeId="VENDOR_RETURN" returnItemMapKey="FEE" returnItemTypeId="RET_FEE_ADJ"/>
     <ReturnItemTypeMap returnHeaderTypeId="VENDOR_RETURN" returnItemMapKey="MISCELLANEOUS_CHARGE" returnItemTypeId="RET_MISC_CHARGE_ADJ"/>
     <ReturnItemTypeMap returnHeaderTypeId="VENDOR_RETURN" returnItemMapKey="SALES_TAX" returnItemTypeId="RET_SALES_TAX_ADJ"/>
+    <ReturnItemTypeMap returnHeaderTypeId="VENDOR_RETURN" returnItemMapKey="VAT_TAX" returnItemTypeId="RET_VAT_TAX_ADJ"/>
+    <ReturnItemTypeMap returnHeaderTypeId="VENDOR_RETURN" returnItemMapKey="VAT_PRICE_CORRECT" returnItemTypeId="RET_VAT_PC_ADJ"/>
     <ReturnItemTypeMap returnHeaderTypeId="VENDOR_RETURN" returnItemMapKey="SHIPPING_CHARGES" returnItemTypeId="RET_SHIPPING_ADJ"/>
     <ReturnItemTypeMap returnHeaderTypeId="VENDOR_RETURN" returnItemMapKey="SURCHARGE_ADJUSTMENT" returnItemTypeId="RET_SURCHARGE_ADJ"/>
     <ReturnItemTypeMap returnHeaderTypeId="VENDOR_RETURN" returnItemMapKey="ADDITIONAL_FEATURE" returnItemTypeId="RET_ADD_FEATURE_ADJ"/>
@@ -320,13 +350,18 @@ under the License.
     <ReturnReason sequenceId="03" returnReasonId="RTN_MISSHIP_ITEM" description="Mis-Shipped Item"/>
     <ReturnReason sequenceId="04" returnReasonId="RTN_DIG_FILL_FAIL" description="Digital Fulfillment Failed"/>
     <ReturnReason sequenceId="05" returnReasonId="RTN_COD_REJECT" description="COD Payment Rejected"/>
-
+    <ReturnReason sequenceId="06" returnReasonId="RTN_SIZE_EXCHANGE" description="Size Exchange"/>
+    <ReturnReason sequenceId="07" returnReasonId="RTN_NORMAL_RETURN" description="Normal Return"/>
     <!-- Return Types -->
     <ReturnType sequenceId="01" returnTypeId="RTN_CREDIT" description="Store Credit"/>
     <ReturnType sequenceId="02" returnTypeId="RTN_REFUND" description="Refund"/>
     <ReturnType sequenceId="03" returnTypeId="RTN_REPLACE" description="Wait Replacement"/>
     <ReturnType sequenceId="04" returnTypeId="RTN_CSREPLACE" description="Cross-Ship Replacement"/>
     <ReturnType sequenceId="05" returnTypeId="RTN_REPAIR_REPLACE" description="Repair Replacement"/>
+    <ReturnType sequenceId="06" returnTypeId="RTN_WAIT_REPLACE_RES" description="Wait Replacement Reserved"/>
+    <ReturnType sequenceId="07" returnTypeId="RTN_REPLACE_IMMEDIAT" description="Replace Immediately"/>
+    <ReturnType sequenceId="08" returnTypeId="RTN_REFUND_IMMEDIATE" description="Refund immediately"/>
+    <ReturnType sequenceId="09" returnTypeId="RTN_RENTAL" description="Rental"/>
 
     <WorkReqFulfType description="Implements" workReqFulfTypeId="WRF_IMPLEMENTS"/>
     <WorkReqFulfType description="Fixes" workReqFulfTypeId="WRF_FIXES"/>
@@ -337,5 +372,15 @@ under the License.
     <!-- Content Types -->
     <OrderContentType description="Image" hasTable="N" parentTypeId="" orderContentTypeId="IMAGE_URL"/>
 
-    <WebSite webSiteId="OrderEntry" siteName="Order Entry Web Site" visualThemeSetId="BACKOFFICE"/>
+    <EmailTemplateSetting
+        emailTemplateSettingId="CUST_REQ_ACCEPTED"
+        bodyScreenLocation="component://order/widget/ordermgr/CustRequestScreens.xml#CreateCustRequestNotification"
+        subject="OFBiz - Your Request is received: '${custRequestName}' #CR${custRequestId}"/>
+    <EmailTemplateSetting emailTemplateSettingId="CUST_REQ_COMPLETED"
+        bodyScreenLocation="component://order/widget/ordermgr/CustRequestScreens.xml#CompletedCustRequestNotification"
+        subject="OFBiz - Your Request is complete: '${custRequestName}' #CR${custRequestId}"/>
+    <EmailTemplateSetting emailTemplateSettingId="CUST_REQ_NOTE_ADDED"
+        bodyScreenLocation="component://order/widget/ordermgr/CustRequestScreens.xml#AddNoteCustRequestNotification"
+        subject="OFBiz - A Note has been added to your request: '${custRequestName}' #CR${custRequestId}"/>
+    
 </entity-engine-xml>

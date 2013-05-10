@@ -25,11 +25,6 @@ under the License.
   <description>Common Application Components of the Open For Business Project</description>
 
   <context-param>
-    <param-name>webSiteId</param-name>
-    <param-value>WEBTOOLS</param-value>
-    <description>A unique ID used to look up the WebSite entity</description>
-  </context-param>
-  <context-param>
     <param-name>entityDelegatorName</param-name>
     <param-value>default</param-value>
     <!--<description>The Name of the Entity Delegator to use, defined in entityengine.xml</description>-->
@@ -40,16 +35,6 @@ under the License.
     <!--<description>A unique name used to identify/recognize the local dispatcher for the Service Engine</description>-->
   </context-param>
   <context-param>
-    <param-name>serviceReaderUrls</param-name>
-    <param-value>/WEB-INF/services.xml</param-value>
-    <!--<description>Configuration File(s) For The Service Dispatcher</description>-->
-  </context-param>
-  <context-param>
-    <param-name>scriptLocationPath</param-name>
-    <param-value>/WEB-INF/bsh</param-value>
-    <!--<description>BeanShell Script Location</description>-->
-  </context-param>
-  <context-param>
     <param-name>xmlrpc.enabledForExtensions</param-name>
     <param-value>true</param-value>
   </context-param>
@@ -57,6 +42,12 @@ under the License.
     <param-name>mainDecoratorLocation</param-name>
     <param-value>component://webtools/widget/CommonScreens.xml</param-value>
     <description>The location of the main-decorator screen to use for this webapp; referred to as a context variable in screen def XML files.</description>
+  </context-param>
+
+  <context-param>
+    <param-name>GeronimoMultiOfbizInstances</param-name>
+    <param-value>true</param-value>
+    <description>This is only used in case of Geronimo or WASCE using OFBiz multi-instances. It allows to retrieve ofbiz.home value set in JVM env</description>
   </context-param>
 
     <filter>
@@ -69,7 +60,7 @@ under the License.
         </init-param>
         <init-param>
             <param-name>allowedPaths</param-name>
-            <param-value>/error:/control:/select:/index.html:/index.jsp:/default.html:/default.jsp:/applet:/includes/maincss.css</param-value>
+            <param-value>/ping.txt:/error:/control:/select:/index.html:/index.jsp:/default.html:/default.jsp:/applet:/includes/maincss.css</param-value>
         </init-param>
         <init-param>
             <param-name>errorCode</param-name>
@@ -159,11 +150,5 @@ under the License.
     </user-data-constraint>
   </security-constraint>
 -->
-
-  <context-param>
-    <param-name>GeronimoMultiOfbizInstances</param-name>
-    <param-value>true</param-value>
-    <description>This is only used in case of Geronimo or WASCE using OFBiz multi-instances. It allows to retrieve ofbiz.home value set in JVM env</description>
-  </context-param>
 
 </web-app>

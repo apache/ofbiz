@@ -20,7 +20,8 @@ under the License.
 <#if stepTitleId?exists>
     <#assign stepTitle = uiLabelMap.get(stepTitleId)>
 </#if>
-<div class="screenlet-title-bar">
+<div class="screenlet">
+  <div class="screenlet-title-bar">
     <ul>
       <li class="h3">
         <#if shoppingCart.getOrderType() == "PURCHASE_ORDER">
@@ -46,5 +47,6 @@ under the License.
         </#if>
       </#list>
     </ul>
-	<br class="clear" />
+    <br class="clear" />
+  </div>
 </div>

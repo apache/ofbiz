@@ -67,7 +67,7 @@ under the License.
         </tr>
         <tr>
             <td></td>
-            <td><input type="submit" value="${uiLabelMap.PageTitleFindMatches}"></td>
+            <td><input type="submit" value="${uiLabelMap.PageTitleFindMatches}" /></td>
         </tr>
       </form>
       <#if match?has_content>
@@ -89,8 +89,8 @@ under the License.
                   <td>${uiLabelMap.PartyPartyId}</td>
                 </tr>
                 <#list matches as match>
-                  <#assign person = match.getRelatedOne("Party").getRelatedOne("Person")?if_exists>
-                  <#assign group = match.getRelatedOne("Party").getRelatedOne("PartyGroup")?if_exists>
+                  <#assign person = match.getRelatedOne("Party", false).getRelatedOne("Person", false)?if_exists>
+                  <#assign group = match.getRelatedOne("Party", false).getRelatedOne("PartyGroup", false)?if_exists>
                   <tr>
                     <#if person?has_content>
                       <td>${person.lastName}</td>

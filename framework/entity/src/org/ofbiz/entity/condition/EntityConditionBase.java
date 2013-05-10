@@ -19,13 +19,11 @@
 package org.ofbiz.entity.condition;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import javolution.lang.Reusable;
-import javolution.util.FastList;
-import javolution.util.FastMap;
 
 import org.ofbiz.entity.config.DatasourceInfo;
 import org.ofbiz.entity.jdbc.SqlJdbcUtil;
@@ -45,11 +43,12 @@ import org.ofbiz.entity.model.ModelViewEntity.ModelAlias;
  * These can be used in various combinations using the EntityConditionList and EntityExpr objects.
  *
  */
+@SuppressWarnings({ "serial", "unchecked" })
 public abstract class EntityConditionBase implements Serializable {
 
-    public static final List emptyList = Collections.unmodifiableList(FastList.newInstance());
-    public static final Map _emptyMap = Collections.unmodifiableMap(FastMap.newInstance());
-    public static final Map<String, String> emptyAliases = Collections.unmodifiableMap(FastMap.<String, String>newInstance());
+    public static final List<?> emptyList = Collections.unmodifiableList(new ArrayList(0));
+    public static final Map<?,?> _emptyMap = Collections.unmodifiableMap(new HashMap());
+    public static final Map<String, String> emptyAliases = Collections.unmodifiableMap(new HashMap<String, String>());
 
     protected ModelField getField(ModelEntity modelEntity, String fieldName) {
         ModelField modelField = null;
@@ -67,7 +66,7 @@ public abstract class EntityConditionBase implements Serializable {
     protected String getColName(ModelField modelField, String fieldName) {
         String colName = null;
         if (modelField != null) {
-            colName = modelField.getColName();
+            colName = modelField.getColValue();
         } else {
             colName = fieldName;
         }
@@ -101,10 +100,12 @@ public abstract class EntityConditionBase implements Serializable {
         SqlJdbcUtil.addValue(buffer, params == null ? null : field, value, params);
     }
 
+    @Override
     public boolean equals(Object obj) {
         throw new UnsupportedOperationException("equals:" + getClass().getName());
     }
 
+    @Override
     public int hashCode() {
         throw new UnsupportedOperationException("hashCode: " + getClass().getName());
     }

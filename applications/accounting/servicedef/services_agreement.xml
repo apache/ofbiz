@@ -53,6 +53,7 @@ under the License.
         <attribute name="copyAgreementTerms" type="String" mode="IN" optional="true"/>
         <attribute name="copyAgreementProducts" type="String" mode="IN" optional="true"/>
         <attribute name="copyAgreementParties" type="String" mode="IN" optional="true"/>
+        <attribute name="copyAgreementFacilities" type="String" mode="IN" optional="true"/>
     </service>
 
     <!-- AgreementItem  -->
@@ -147,6 +148,26 @@ under the License.
         <auto-attributes include="nonpk" mode="IN" optional="true"/>
     </service>
 
+    <!-- AgreementFacilityAppl  -->
+    <service name="createAgreementFacilityAppl" default-entity-name="AgreementFacilityAppl" engine="entity-auto" invoke="create" auth="true">
+        <description>Create an AgreementFacilityAppl</description>
+        <permission-service service-name="acctgAgreementPermissionCheck" main-action="CREATE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="updateAgreementFacilityAppl" default-entity-name="AgreementFacilityAppl" engine="entity-auto" invoke="update" auth="true">
+        <description>Update an AgreementFacilityAppl</description>
+        <permission-service service-name="acctgAgreementPermissionCheck" main-action="UPDATE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="removeAgreementFacilityAppl" default-entity-name="AgreementFacilityAppl" engine="entity-auto" invoke="delete" auth="true">
+        <description>Remove an AgreementFacilityAppl</description>
+        <permission-service service-name="acctgAgreementPermissionCheck" main-action="UPDATE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+
     <!-- AgreementPartyApplic  -->
     <service name="createAgreementPartyApplic" default-entity-name="AgreementPartyApplic" engine="simple"
                 location="component://accounting/script/org/ofbiz/accounting/agreement/AgreementServices.xml" invoke="createAgreementPartyApplic" auth="true">
@@ -227,33 +248,24 @@ under the License.
         </description>
         <permission-service service-name="acctgCommissionPermissionCheck" main-action="VIEW"/>
         <attribute name="productId" type="String" mode="IN" optional="false"/>
+        <attribute name="invoiceId" type="String" mode="IN" optional="true"/>
+        <attribute name="invoiceItemSeqId" type="String" mode="IN" optional="true"/>
         <attribute name="invoiceItemTypeId" type="String" mode="IN" optional="false"/>
         <attribute name="amount" type="BigDecimal" mode="IN" optional="false"/>
         <attribute name="quantity" type="BigDecimal" mode="IN" optional="true"/>
         <attribute name="commissions" type="List" mode="OUT" optional="false"/>
     </service>
 
-    <!--AgrementWorkEffortAppl-->
-    <service name="createAgreementWorkEffortAppl" engine="simple" default-entity-name="AgreementWorkEffortAppl"
-            location="component://accounting/script/org/ofbiz/accounting/agreement/AgreementServices.xml" invoke="createAgreementWorkEffortAppl">
-        <description> Create AgreementWorkEffortAppl </description>
+    <!--AgrementWorkEffortApplic-->
+    <service name="createAgreementWorkEffortApplic" engine="simple" default-entity-name="AgreementWorkEffortApplic"
+            location="component://accounting/script/org/ofbiz/accounting/agreement/AgreementServices.xml" invoke="createAgreementWorkEffortApplic">
+        <description> Create AgreementWorkEffortApplic </description>
         <auto-attributes include="pk" mode="IN" optional="false"/>
+        <override name="agreementItemSeqId" default-value="_NA_"></override>
     </service>
-    <service name="deleteAgreementWorkEffortAppl" engine="simple" default-entity-name="AgreementWorkEffortAppl"
-            location="component://accounting/script/org/ofbiz/accounting/agreement/AgreementServices.xml" invoke="deleteAgreementWorkEffortAppl">
-        <description>Delete AgreementWorkEffortAppl</description>
+    <service name="deleteAgreementWorkEffortApplic" engine="simple" default-entity-name="AgreementWorkEffortApplic"
+            location="component://accounting/script/org/ofbiz/accounting/agreement/AgreementServices.xml" invoke="deleteAgreementWorkEffortApplic">
+        <description>Delete AgreementWorkEffortApplic</description>
         <auto-attributes mode="IN" include="pk" optional="false"/>
-    </service>
-
-    <!-- Permission services -->
-    <service name="acctgAgreementPermissionCheck" engine="simple"
-            location="component://accounting/script/org/ofbiz/accounting/permissions/PermissionServices.xml" invoke="acctgAgreementPermissionCheck">
-        <description>Accounting Agreement Permission Checking Logic</description>
-        <implements service="permissionInterface"/>
-    </service>
-    <service name="acctgCommissionPermissionCheck" engine="simple"
-            location="component://accounting/script/org/ofbiz/accounting/permissions/PermissionServices.xml" invoke="commissionPermissionCheck">
-        <description>Accounting Commission Permission Checking Logic</description>
-        <implements service="permissionInterface"/>
     </service>
 </services>

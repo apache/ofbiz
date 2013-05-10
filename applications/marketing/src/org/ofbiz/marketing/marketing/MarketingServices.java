@@ -19,6 +19,7 @@
 package org.ofbiz.marketing.marketing;
 
 import java.sql.Timestamp;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
@@ -27,9 +28,12 @@ import org.ofbiz.base.util.UtilDateTime;
 import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.base.util.UtilProperties;
 import org.ofbiz.base.util.UtilValidate;
-import org.ofbiz.entity.GenericDelegator;
+import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
+import org.ofbiz.entity.condition.EntityCondition;
+import org.ofbiz.entity.condition.EntityOperator;
+import org.ofbiz.entity.util.EntityUtil;
 import org.ofbiz.service.DispatchContext;
 import org.ofbiz.service.GenericServiceException;
 import org.ofbiz.service.LocalDispatcher;
@@ -48,12 +52,13 @@ public class MarketingServices {
 
     public static Map<String, Object> signUpForContactList(DispatchContext dctx, Map<String, ? extends Object> context) {
         LocalDispatcher dispatcher = dctx.getDispatcher();
-        GenericDelegator delegator = dctx.getDelegator();
+        Delegator delegator = dctx.getDelegator();
         Locale locale = (Locale) context.get("locale");
 
         Timestamp fromDate = UtilDateTime.nowTimestamp();
         String contactListId = (String) context.get("contactListId");
         String email = (String) context.get("email");
+        String partyId = (String) context.get("partyId");
 
         if (!UtilValidate.isEmail(email)) {
             String error = UtilProperties.getMessage(resourceMarketing, "MarketingCampaignInvalidEmailInput", locale);
@@ -63,37 +68,51 @@ public class MarketingServices {
         try {
             // locate the contact list
             Map<String, Object> input = UtilMisc.<String, Object>toMap("contactListId", contactListId);
-            GenericValue contactList = delegator.findByPrimaryKey("ContactList", input);
+            GenericValue contactList = delegator.findOne("ContactList", input, false);
             if (contactList == null) {
                 String error = UtilProperties.getMessage(resourceMarketing, "MarketingContactListNotFound", input, locale);
                 return ServiceUtil.returnError(error);
             }
 
             // perform actions as the system user
-            GenericValue userLogin = delegator.findByPrimaryKeyCache("UserLogin", UtilMisc.toMap("userLoginId", "system"));
+            GenericValue userLogin = delegator.findOne("UserLogin", UtilMisc.toMap("userLoginId", "system"), true);
 
             // associate the email with anonymous user TODO: do we need a custom contact mech purpose type, say MARKETING_EMAIL?
-            input = UtilMisc.toMap("userLogin", userLogin, "emailAddress", email, "partyId", "_NA_", "fromDate", fromDate, "contactMechPurposeTypeId", "OTHER_EMAIL");
+            if (partyId == null) {
+                // Check existing email
+                List<EntityCondition> conds = UtilMisc.<EntityCondition>toList(EntityCondition.makeCondition("infoString", EntityOperator.EQUALS, email));
+                conds.add(EntityCondition.makeCondition("contactMechTypeId", EntityOperator.EQUALS, "EMAIL_ADDRESS"));
+                conds.add(EntityCondition.makeCondition("contactMechPurposeTypeId", EntityOperator.EQUALS, "PRIMARY_EMAIL"));
+                conds.add(EntityUtil.getFilterByDateExpr("purposeFromDate", "purposeThruDate"));
+                conds.add(EntityUtil.getFilterByDateExpr());
+                List<GenericValue> contacts = delegator.findList("PartyContactDetailByPurpose", EntityCondition.makeCondition(conds), null, UtilMisc.toList("-fromDate"), null, false);
+                if (UtilValidate.isNotEmpty(contacts)) {
+                    GenericValue contact = EntityUtil.getFirst(contacts);
+                    partyId = contact.getString("partyId");
+                } else {
+                    partyId = "_NA_";
+                }
+            }
+            input = UtilMisc.toMap("userLogin", userLogin, "emailAddress", email, "partyId", partyId, "fromDate", fromDate, "contactMechPurposeTypeId", "OTHER_EMAIL");
             Map<String, Object> serviceResults = dispatcher.runSync("createPartyEmailAddress", input);
             if (ServiceUtil.isError(serviceResults)) {
                 throw new GenericServiceException(ServiceUtil.getErrorMessage(serviceResults));
             }
             String contactMechId = (String) serviceResults.get("contactMechId");
-
             // create a new association at this fromDate to the anonymous party with status accepted
             input = UtilMisc.toMap("userLogin", userLogin, "contactListId", contactList.get("contactListId"),
-                    "partyId", "_NA_", "fromDate", fromDate, "statusId", "CLPT_ACCEPTED", "preferredContactMechId", contactMechId);
+                    "partyId", partyId, "fromDate", fromDate, "statusId", "CLPT_PENDING", "preferredContactMechId", contactMechId, "baseLocation", context.get("baseLocation"));
             serviceResults = dispatcher.runSync("createContactListParty", input);
             if (ServiceUtil.isError(serviceResults)) {
                 throw new GenericServiceException(ServiceUtil.getErrorMessage(serviceResults));
             }
         } catch (GenericEntityException e) {
             String error = UtilProperties.getMessage(resourceOrder, "checkhelper.problems_reading_database", locale);
-            Debug.log(e, error + e.getMessage(), module);
+            Debug.logInfo(e, error + e.getMessage(), module);
             return ServiceUtil.returnError(error);
         } catch (GenericServiceException e) {
             String error = UtilProperties.getMessage(resourceMarketing, "MarketingServiceError", locale);
-            Debug.log(e, error + e.getMessage(), module);
+            Debug.logInfo(e, error + e.getMessage(), module);
             return ServiceUtil.returnError(error);
         }
         return ServiceUtil.returnSuccess();

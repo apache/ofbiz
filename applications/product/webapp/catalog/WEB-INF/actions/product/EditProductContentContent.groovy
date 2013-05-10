@@ -17,30 +17,29 @@
  * under the License.
  */
 
-
 import org.ofbiz.entity.*;
 import org.ofbiz.entity.util.*;
 import org.ofbiz.base.util.*;
 import java.sql.Timestamp;
 import org.ofbiz.base.util.ObjectType
 
-contentId = request.getParameter("contentId");
-if ("".equals(contentId)) {
+contentId = parameters.contentId;
+if (!contentId) {
     contentId = null;
 }
 
-productContentTypeId = request.getParameter("productContentTypeId");
+productContentTypeId = parameters.productContentTypeId;
 
-fromDate = request.getParameter("fromDate");
-if ("".equals(fromDate)) {
+fromDate = parameters.fromDate;
+if (!fromDate) {
     fromDate = null;
 } else {
     fromDate = ObjectType.simpleTypeConvert(fromDate, "Timestamp", null, null, false)
 }
 
 
-description = request.getParameter("description");
-if ("".equals(description)) {
+description = parameters.description;
+if (!description) {
     description = null;
 }
 
@@ -51,13 +50,13 @@ if (!productContent) {
     productContent.contentId = contentId;
     productContent.productContentTypeId = productContentTypeId;
     productContent.fromDate = fromDate;
-    productContent.thruDate = request.getParameter("thruDate");
-    productContent.purchaseFromDate = request.getParameter("purchaseFromDate");
-    productContent.purchaseThruDate = request.getParameter("purchaseThruDate");
-    productContent.useCountLimit = request.getParameter("useCountLimit");
-    productContent.useTime = request.getParameter("useTime");
-    productContent.useTimeUomId = request.getParameter("useTimeUomId");
-    productContent.useRoleTypeId = request.getParameter("useRoleTypeId");
+    productContent.thruDate = parameters.thruDate;
+    productContent.purchaseFromDate = parameters.purchaseFromDate;
+    productContent.purchaseThruDate = parameters.purchaseThruDate;
+    productContent.useCountLimit = parameters.useCountLimit;
+    productContent.useTime = parameters.useTime;
+    productContent.useTimeUomId = parameters.useTimeUomId;
+    productContent.useRoleTypeId = parameters.useRoleTypeId;
 }
 context.productContent = productContent;
 
@@ -70,7 +69,6 @@ if (contentId) {
     content = delegator.findOne("Content", [contentId : contentId], false);
     context.content = content;
 } else {
-    content = [:];
     if (description) {
         content.description = description;
     }
@@ -80,9 +78,9 @@ if (contentId) {
 if ("FULFILLMENT_EMAIL".equals(productContentTypeId)) {
     emailData = [:];
     if (contentId && content) {
-        subjectDr = content.getRelatedOne("DataResource");
+        subjectDr = content.getRelatedOne("DataResource", false);
         if (subjectDr) {
-            subject = subjectDr.getRelatedOne("ElectronicText");
+            subject = subjectDr.getRelatedOne("ElectronicText", false);
             emailData.subject = subject.textData;
             emailData.subjectDataResourceId = subject.dataResourceId;
         }
@@ -90,11 +88,10 @@ if ("FULFILLMENT_EMAIL".equals(productContentTypeId)) {
         result = dispatcher.runSync("findAssocContent", serviceCtx);
         contentAssocs = result.get("contentAssocs");
         if (contentAssocs) {
-            for (contentAssocIter = contentAssocs.iterator(); contentAssocIter;) {
-                contentAssoc  = contentAssocIter.next();
-                bodyContent = contentAssoc.getRelatedOne("ToContent");
-                bodyDr = bodyContent.getRelatedOne("DataResource");
-                body = bodyDr.getRelatedOne("ElectronicText");
+            contentAssocs.each { contentAssoc ->
+                bodyContent = contentAssoc.getRelatedOne("ToContent", false);
+                bodyDr = bodyContent.getRelatedOne("DataResource", false);
+                body = bodyDr.getRelatedOne("ElectronicText", false);
                 emailData.put(contentAssoc.mapKey, body.textData);
                 emailData.put(contentAssoc.get("mapKey")+"DataResourceId", body.dataResourceId);
             }
@@ -106,9 +103,9 @@ if ("FULFILLMENT_EMAIL".equals(productContentTypeId)) {
 } else if ("DIGITAL_DOWNLOAD".equals(productContentTypeId)) {
     downloadData = [:];
     if (contentId && content) {
-        downloadDr = content.getRelatedOne("DataResource");
+        downloadDr = content.getRelatedOne("DataResource", false);
         if (downloadDr) {
-            download = downloadDr.getRelatedOne("OtherDataResource");
+            download = downloadDr.getRelatedOne("OtherDataResource", false);
             if (download) {
                 downloadData.file = download.dataResourceContent;
                 downloadData.fileDataResourceId = download.dataResourceId;
@@ -119,15 +116,15 @@ if ("FULFILLMENT_EMAIL".equals(productContentTypeId)) {
     context.downloadData = downloadData;
 } else if ("FULFILLMENT_EXTERNAL".equals(productContentTypeId)) {
     context.contentFormName = "EditProductContentExternal";
-} else if (productContentTypeId && productContentTypeId.indexOf("ADDITIONAL_IMAGE") > -1) {
-    context.contentFormName = "EditProductAdditionalImageContent";
+} else if (productContentTypeId && productContentTypeId.indexOf("_IMAGE") > -1) {
+    context.contentFormName = "EditProductContentImage";
 } else {
     //Assume it is a generic simple text content
     textData = [:];
     if (contentId && content) {
-        textDr = content.getRelatedOne("DataResource");
+        textDr = content.getRelatedOne("DataResource", false);
         if (textDr) {
-            text = textDr.getRelatedOne("ElectronicText");
+            text = textDr.getRelatedOne("ElectronicText", false);
             if (text) {
                 textData.text = text.textData;
                 textData.textDataResourceId = text.dataResourceId;
@@ -136,6 +133,15 @@ if ("FULFILLMENT_EMAIL".equals(productContentTypeId)) {
     }
     context.contentFormName = "EditProductContentSimpleText";
     context.textData = textData;
+}
+if (productContentTypeId) {
+    productContentType = delegator.findOne("ProductContentType", [productContentTypeId : productContentTypeId], false);
+    if (productContentType && "DIGITAL_DOWNLOAD".equals(productContentType.parentTypeId)) {
+        context.contentFormName = "EditProductContentDownload";
+    }
+}
+if (("PAGE_TITLE".equals(productContentTypeId))||("META_KEYWORD".equals(productContentTypeId))||("META_DESCRIPTION".equals(productContentTypeId))) {
+    context.contentFormName = "EditProductContentSEO";
 }
 
 context.productContentData = productContentData;

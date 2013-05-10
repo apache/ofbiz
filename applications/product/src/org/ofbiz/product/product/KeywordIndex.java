@@ -20,7 +20,6 @@ package org.ofbiz.product.product;
 
 import java.io.IOException;
 import java.sql.Timestamp;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -33,9 +32,10 @@ import org.ofbiz.base.util.GeneralException;
 import org.ofbiz.base.util.UtilDateTime;
 import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.base.util.UtilProperties;
+import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.common.KeywordSearchUtil;
 import org.ofbiz.content.data.DataResourceWorker;
-import org.ofbiz.entity.GenericDelegator;
+import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
 import org.ofbiz.entity.util.EntityUtil;
@@ -73,7 +73,7 @@ public class KeywordIndex {
             }
         }
 
-        GenericDelegator delegator = product.getDelegator();
+        Delegator delegator = product.getDelegator();
         if (delegator == null) return;
         String productId = product.getString("productId");
 
@@ -117,7 +117,7 @@ public class KeywordIndex {
             !"0".equals(UtilProperties.getPropertyValue("prodsearch", "index.weight.ProductFeatureAndAppl.abbrev", "0")) ||
             !"0".equals(UtilProperties.getPropertyValue("prodsearch", "index.weight.ProductFeatureAndAppl.idCode", "0"))) {
             // get strings from attributes and features
-            List<GenericValue> productFeatureAndAppls = delegator.findByAnd("ProductFeatureAndAppl", UtilMisc.toMap("productId", productId));
+            List<GenericValue> productFeatureAndAppls = delegator.findByAnd("ProductFeatureAndAppl", UtilMisc.toMap("productId", productId), null, false);
             for (GenericValue productFeatureAndAppl: productFeatureAndAppls) {
                 addWeightedKeywordSourceString(productFeatureAndAppl, "description", strings);
                 addWeightedKeywordSourceString(productFeatureAndAppl, "abbrev", strings);
@@ -128,7 +128,7 @@ public class KeywordIndex {
         // ProductAttribute
         if (!"0".equals(UtilProperties.getPropertyValue("prodsearch", "index.weight.ProductAttribute.attrName", "0")) ||
                 !"0".equals(UtilProperties.getPropertyValue("prodsearch", "index.weight.ProductAttribute.attrValue", "0"))) {
-            List<GenericValue> productAttributes = delegator.findByAnd("ProductAttribute", UtilMisc.toMap("productId", productId));
+            List<GenericValue> productAttributes = delegator.findByAnd("ProductAttribute", UtilMisc.toMap("productId", productId), null, false);
             for (GenericValue productAttribute: productAttributes) {
                 addWeightedKeywordSourceString(productAttribute, "attrName", strings);
                 addWeightedKeywordSourceString(productAttribute, "attrValue", strings);
@@ -137,7 +137,7 @@ public class KeywordIndex {
 
         // GoodIdentification
         if (!"0".equals(UtilProperties.getPropertyValue("prodsearch", "index.weight.GoodIdentification.idValue", "0"))) {
-            List<GenericValue> goodIdentifications = delegator.findByAnd("GoodIdentification", UtilMisc.toMap("productId", productId));
+            List<GenericValue> goodIdentifications = delegator.findByAnd("GoodIdentification", UtilMisc.toMap("productId", productId), null, false);
             for (GenericValue goodIdentification: goodIdentifications) {
                 addWeightedKeywordSourceString(goodIdentification, "idValue", strings);
             }
@@ -146,7 +146,7 @@ public class KeywordIndex {
         // Variant Product IDs
         if ("Y".equals(product.getString("isVirtual"))) {
             if (!"0".equals(UtilProperties.getPropertyValue("prodsearch", "index.weight.Variant.Product.productId", "0"))) {
-                List<GenericValue> variantProductAssocs = delegator.findByAnd("ProductAssoc", UtilMisc.toMap("productId", productId, "productAssocTypeId", "PRODUCT_VARIANT"));
+                List<GenericValue> variantProductAssocs = delegator.findByAnd("ProductAssoc", UtilMisc.toMap("productId", productId, "productAssocTypeId", "PRODUCT_VARIANT"), null, false);
                 variantProductAssocs = EntityUtil.filterByDate(variantProductAssocs);
                 for (GenericValue variantProductAssoc: variantProductAssocs) {
                     int weight = 1;
@@ -172,27 +172,31 @@ public class KeywordIndex {
                 Debug.logWarning("Could not parse weight number: " + e.toString(), module);
             }
 
-            List<GenericValue> productContentAndInfos = delegator.findByAnd("ProductContentAndInfo", UtilMisc.toMap("productId", productId, "productContentTypeId", productContentTypeId), null);
+            List<GenericValue> productContentAndInfos = delegator.findByAnd("ProductContentAndInfo", UtilMisc.toMap("productId", productId, "productContentTypeId", productContentTypeId), null, false);
             for (GenericValue productContentAndInfo: productContentAndInfos) {
                 addWeightedDataResourceString(productContentAndInfo, weight, strings, delegator, product);
 
-                List<GenericValue> alternateViews = productContentAndInfo.getRelated("ContentAssocDataResourceViewTo", UtilMisc.toMap("caContentAssocTypeId", "ALTERNATE_LOCALE"), UtilMisc.toList("-caFromDate"));
+                List<GenericValue> alternateViews = productContentAndInfo.getRelated("ContentAssocDataResourceViewTo", UtilMisc.toMap("caContentAssocTypeId", "ALTERNATE_LOCALE"), UtilMisc.toList("-caFromDate"), false);
                 alternateViews = EntityUtil.filterByDate(alternateViews, UtilDateTime.nowTimestamp(), "caFromDate", "caThruDate", true);
                 for (GenericValue thisView: alternateViews) {
                     addWeightedDataResourceString(thisView, weight, strings, delegator, product);
                 }
             }
         }
-
-        for (String str: strings) {
-            // call process keywords method here
-            KeywordSearchUtil.processKeywordsForIndex(str, keywords, separators, stopWordBagAnd, stopWordBagOr, removeStems, stemSet);
+        if (UtilValidate.isNotEmpty(strings)) {
+            for (String str: strings) {
+                // call process keywords method here
+                KeywordSearchUtil.processKeywordsForIndex(str, keywords, separators, stopWordBagAnd, stopWordBagOr, removeStems, stemSet);
+            }
         }
 
         List<GenericValue> toBeStored = FastList.newInstance();
+        int keywordMaxLength = Integer.parseInt(UtilProperties.getPropertyValue("prodsearch", "product.keyword.max.length"));
         for (Map.Entry<String, Long> entry: keywords.entrySet()) {
-            GenericValue productKeyword = delegator.makeValue("ProductKeyword", UtilMisc.toMap("productId", product.getString("productId"), "keyword", entry.getKey(), "relevancyWeight", entry.getValue()));
-            toBeStored.add(productKeyword);
+            if (entry.getKey().length() <= keywordMaxLength) {
+                GenericValue productKeyword = delegator.makeValue("ProductKeyword", UtilMisc.toMap("productId", product.getString("productId"), "keyword", entry.getKey(), "keywordTypeId", "KWT_KEYWORD", "relevancyWeight", entry.getValue()));
+                toBeStored.add(productKeyword);
+            }
         }
         if (toBeStored.size() > 0) {
             if (Debug.verboseOn()) Debug.logVerbose("[KeywordIndex.indexKeywords] Storing " + toBeStored.size() + " keywords for productId " + product.getString("productId"), module);
@@ -206,8 +210,8 @@ public class KeywordIndex {
         }
     }
 
-    public static void addWeightedDataResourceString(GenericValue drView, int weight, List<String> strings, GenericDelegator delegator, GenericValue product) {
-        Map<String, GenericValue> drContext = UtilMisc.toMap("product", product);
+    public static void addWeightedDataResourceString(GenericValue drView, int weight, List<String> strings, Delegator delegator, GenericValue product) {
+        Map<String, Object> drContext = UtilMisc.<String, Object>toMap("product", product);
         try {
             String contentText = DataResourceWorker.renderDataResourceAsText(delegator, drView.getString("dataResourceId"), drContext, null, null, false);
             for (int i = 0; i < weight; i++) {

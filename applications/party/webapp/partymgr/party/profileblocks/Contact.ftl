@@ -39,12 +39,12 @@ under the License.
           <#list contactMeches as contactMechMap>
             <#assign contactMech = contactMechMap.contactMech>
             <#assign partyContactMech = contactMechMap.partyContactMech>
-            <tr><td colspan="4"><hr/></td></tr>
+            <tr><td colspan="4"><hr /></td></tr>
             <tr>
               <td class="label align-top">${contactMechMap.contactMechType.get("description",locale)}</td>
               <td>
                 <#list contactMechMap.partyContactMechPurposes as partyContactMechPurpose>
-                  <#assign contactMechPurposeType = partyContactMechPurpose.getRelatedOneCache("ContactMechPurposeType")>
+                  <#assign contactMechPurposeType = partyContactMechPurpose.getRelatedOne("ContactMechPurposeType", true)>
                   <div>
                     <#if contactMechPurposeType?has_content>
                       <b>${contactMechPurposeType.get("description",locale)}</b>
@@ -57,54 +57,43 @@ under the License.
                   </div>
                 </#list>
                 <#if "POSTAL_ADDRESS" = contactMech.contactMechTypeId>
-                  <#assign postalAddress = contactMechMap.postalAddress>
-                  <#if postalAddress?has_content>
-                  <div>
-                    <#if postalAddress.toName?has_content><b>${uiLabelMap.PartyAddrToName}:</b> ${postalAddress.toName}<br /></#if>
-                    <#if postalAddress.attnName?has_content><b>${uiLabelMap.PartyAddrAttnName}:</b> ${postalAddress.attnName}<br /></#if>
-                    ${postalAddress.address1?if_exists}<br />
-                    <#if postalAddress.address2?has_content>${postalAddress.address2}<br /></#if>
-                    ${postalAddress.city?if_exists},
-                    <#if postalAddress.stateProvinceGeoId?has_content>
-                      <#assign stateProvince = postalAddress.getRelatedOneCache("StateProvinceGeo")>
-                      ${stateProvince.abbreviation?default(stateProvince.geoId)}
+                  <#if contactMechMap.postalAddress?has_content>
+                    <#assign postalAddress = contactMechMap.postalAddress>
+                    ${setContextField("postalAddress", postalAddress)}
+                    ${screens.render("component://party/widget/partymgr/PartyScreens.xml#postalAddressHtmlFormatter")}
+                    <#if postalAddress.geoPointId?has_content>
+                      <#if contactMechPurposeType?has_content>
+                        <#assign popUptitle = contactMechPurposeType.get("description", locale) + uiLabelMap.CommonGeoLocation>
+                      </#if>
+                      <a href="javascript:popUp('<@ofbizUrl>PartyGeoLocation?geoPointId=${postalAddress.geoPointId}&partyId=${partyId}</@ofbizUrl>', '${popUptitle?if_exists}', '450', '550')" class="buttontext">${uiLabelMap.CommonGeoLocation}</a>
                     </#if>
-                    ${postalAddress.postalCode?if_exists}
-                    <#if postalAddress.countryGeoId?has_content><br />
-                      <#assign country = postalAddress.getRelatedOneCache("CountryGeo")>
-                      ${country.geoName?default(country.geoId)}
-                    </#if>
-                  </div>
-                  </#if>
-                  <#if (postalAddress?has_content && !postalAddress.countryGeoId?has_content) || postalAddress.countryGeoId = "USA">
-                    <#assign addr1 = postalAddress.address1?if_exists>
-                    <#if addr1?has_content && (addr1.indexOf(" ") > 0)>
-                      <#assign addressNum = addr1.substring(0, addr1.indexOf(" "))>
-                      <#assign addressOther = addr1.substring(addr1.indexOf(" ")+1)>
-                      <a target="_blank" href="${uiLabelMap.CommonLookupWhitepagesAddressLink}" class="buttontext">${uiLabelMap.CommonLookupWhitepages}</a>
-                    </#if>
-                  </#if>
-                  <#if postalAddress.geoPointId?has_content>
-                    <#if contactMechPurposeType?has_content>
-                      <#assign popUptitle = contactMechPurposeType.get("description",locale) + uiLabelMap.CommonGeoLocation>
-                    </#if>
-                    <a href="javascript:popUp('<@ofbizUrl>geoLocation?geoPointId=${postalAddress.geoPointId}</@ofbizUrl>', '${popUptitle?if_exists}', '450', '550')" class="buttontext">${uiLabelMap.CommonGeoLocation}</a>
                   </#if>
                 <#elseif "TELECOM_NUMBER" = contactMech.contactMechTypeId>
-                  <#assign telecomNumber = contactMechMap.telecomNumber>
-                  <div>
-                    ${telecomNumber.countryCode?if_exists}
-                    <#if telecomNumber.areaCode?has_content>${telecomNumber.areaCode?default("000")}-</#if>${telecomNumber.contactNumber?default("000-0000")}
-                    <#if partyContactMech.extension?has_content>${uiLabelMap.PartyContactExt}&nbsp;${partyContactMech.extension}</#if>
-                    <#if (telecomNumber?has_content && !telecomNumber.countryCode?has_content) || telecomNumber.countryCode = "011">
-                      <a target="_blank" href="${uiLabelMap.CommonLookupAnywhoLink}" class="buttontext">${uiLabelMap.CommonLookupAnywho}</a>
-                      <a target="_blank" href="${uiLabelMap.CommonLookupWhitepagesTelNumberLink}" class="buttontext">${uiLabelMap.CommonLookupWhitepages}</a>
-                    </#if>
-                  </div>
+                  <#if contactMechMap.telecomNumber?has_content>
+                    <#assign telecomNumber = contactMechMap.telecomNumber>
+                    <div>
+                      ${telecomNumber.countryCode?if_exists}
+                      <#if telecomNumber.areaCode?has_content>${telecomNumber.areaCode?default("000")}-</#if><#if telecomNumber.contactNumber?has_content>${telecomNumber.contactNumber?default("000-0000")}</#if>
+                      <#if partyContactMech.extension?has_content>${uiLabelMap.PartyContactExt}&nbsp;${partyContactMech.extension}</#if>
+                        <#if !telecomNumber.countryCode?has_content || telecomNumber.countryCode = "011">
+                          <a target="_blank" href="${uiLabelMap.CommonLookupAnywhoLink}" class="buttontext">${uiLabelMap.CommonLookupAnywho}</a>
+                          <a target="_blank" href="${uiLabelMap.CommonLookupWhitepagesTelNumberLink}" class="buttontext">${uiLabelMap.CommonLookupWhitepages}</a>
+                        </#if>
+                    </div>
+                  </#if>
                 <#elseif "EMAIL_ADDRESS" = contactMech.contactMechTypeId>
                   <div>
                     ${contactMech.infoString?if_exists}
-                    <a href="<@ofbizUrl>EditCommunicationEvent?<#if userLogin.partyId?has_content>partyIdFrom=${userLogin.partyId}&</#if>partyIdTo=${partyId}&communicationEventTypeId=EMAIL_COMMUNICATION&contactMechIdTo=${contactMech.contactMechId}&contactMechTypeId=EMAIL_ADDRESS<#if thisUserPrimaryEmail?has_content>&contactMechIdFrom=${thisUserPrimaryEmail.contactMechId}</#if></@ofbizUrl>" class="buttontext">${uiLabelMap.CommonSendEmail}</a>
+                    <form method="post" action="<@ofbizUrl>NewDraftCommunicationEvent</@ofbizUrl>" onsubmit="javascript:submitFormDisableSubmits(this)" name="createEmail${contactMech.infoString?replace("&#64;","")?replace(".","")}">
+                      <#if userLogin.partyId?has_content>
+                      <input name="partyIdFrom" value="${userLogin.partyId}" type="hidden"/>
+                      </#if>
+                      <input name="partyIdTo" value="${partyId}" type="hidden"/>
+                      <input name="contactMechIdTo" value="${contactMech.contactMechId}" type="hidden"/>
+                      <input name="my" value="My" type="hidden"/>
+                      <input name="statusId" value="COM_PENDING" type="hidden"/>
+                      <input name="communicationEventTypeId" value="EMAIL_COMMUNICATION" type="hidden"/>
+                    </form><a class="buttontext" href="javascript:document.createEmail${contactMech.infoString?replace("&#64;","")?replace(".","")}.submit()">${uiLabelMap.CommonSendEmail}</a>
                   </div>
                 <#elseif "WEB_ADDRESS" = contactMech.contactMechTypeId>
                   <div>
@@ -120,7 +109,7 @@ under the License.
                 <#if partyContactMech.thruDate?has_content><div><b>${uiLabelMap.PartyContactEffectiveThru}:&nbsp;${partyContactMech.thruDate}</b></div></#if>
                 <#-- create cust request -->
                 <#if custRequestTypes?exists>
-                  <form name="createCustRequestForm" action="<@ofbizUrl>createCustRequest</@ofbizUrl>" method="POST" onSubmit="javascript:submitFormDisableSubmits(this)">
+                  <form name="createCustRequestForm" action="<@ofbizUrl>createCustRequest</@ofbizUrl>" method="post" onsubmit="javascript:submitFormDisableSubmits(this)">
                     <input type="hidden" name="partyId" value="${partyId}"/>
                     <input type="hidden" name="fromPartyId" value="${partyId}"/>
                     <input type="hidden" name="fulfillContactMechId" value="${contactMech.contactMechId}"/>
@@ -136,10 +125,10 @@ under the License.
               <td valign="top"><b>(${partyContactMech.allowSolicitation?if_exists})</b></td>
               <td class="button-col">
                 <#if security.hasEntityPermission("PARTYMGR", "_UPDATE", session) || userLogin.partyId == partyId>
-                  <a href="<@ofbizUrl>editcontactmech?partyId=${partyId}&contactMechId=${contactMech.contactMechId}</@ofbizUrl>">${uiLabelMap.CommonUpdate}</a>
+                  <a href="<@ofbizUrl>editcontactmech?partyId=${partyId}&amp;contactMechId=${contactMech.contactMechId}</@ofbizUrl>">${uiLabelMap.CommonUpdate}</a>
                 </#if>
                 <#if security.hasEntityPermission("PARTYMGR", "_DELETE", session) || userLogin.partyId == partyId>
-                  <form name="partyDeleteContact" method="post" action="<@ofbizUrl>deleteContactMech</@ofbizUrl>" onSubmit="javascript:submitFormDisableSubmits(this)">
+                  <form name="partyDeleteContact" method="post" action="<@ofbizUrl>deleteContactMech</@ofbizUrl>" onsubmit="javascript:submitFormDisableSubmits(this)">
                     <input name="partyId" value="${partyId}" type="hidden"/>
                     <input name="contactMechId" value="${contactMech.contactMechId}" type="hidden"/>
                     <input type="submit" class="smallSubmit" value="${uiLabelMap.CommonExpire}"/>

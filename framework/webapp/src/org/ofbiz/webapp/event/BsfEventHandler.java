@@ -33,6 +33,7 @@ import org.apache.bsf.BSFManager;
 import org.apache.bsf.util.IOUtils;
 import org.ofbiz.base.location.FlexibleLocation;
 import org.ofbiz.base.util.Debug;
+import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.base.util.cache.UtilCache;
 import org.ofbiz.webapp.control.ConfigXMLReader;
 
@@ -42,7 +43,7 @@ import org.ofbiz.webapp.control.ConfigXMLReader;
 public class BsfEventHandler implements EventHandler {
 
     public static final String module = BsfEventHandler.class.getName();
-    public static UtilCache<String, String> eventCache = new UtilCache<String, String>("webapp.BsfEvents");
+    private static final UtilCache<String, String> eventCache = UtilCache.createUtilCache("webapp.BsfEvents");
 
     /**
      * @see org.ofbiz.webapp.event.EventHandler#init(javax.servlet.ServletContext)
@@ -51,7 +52,7 @@ public class BsfEventHandler implements EventHandler {
     }
 
     /**
-     * @see org.ofbiz.webapp.event.EventHandler#invoke(java.lang.String, java.lang.String, javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
+     * @see org.ofbiz.webapp.event.EventHandler#invoke(ConfigXMLReader.Event, ConfigXMLReader.RequestMap, javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
      */
     public String invoke(ConfigXMLReader.Event event, ConfigXMLReader.RequestMap requestMap, HttpServletRequest request, HttpServletResponse response) throws EventHandlerException {
         ServletContext context = (ServletContext) request.getAttribute("servletContext");
@@ -79,43 +80,35 @@ public class BsfEventHandler implements EventHandler {
             InputStream scriptStream = null;
             String scriptString = null;
             String cacheName = null;
-            if (event.path == null || event.path.length() == 0) {
+            if (UtilValidate.isEmpty(event.path)) {
                 // we are a resource to be loaded off the classpath
                 cacheName = event.invoke;
                 scriptString = eventCache.get(cacheName);
                 if (scriptString == null) {
-                    synchronized(eventCache) {
-                        if (scriptString == null) {
-                            if (Debug.verboseOn()) {
-                                Debug.logVerbose("Loading BSF Script at location: " + cacheName, module);
-                            }
-                            URL scriptUrl = FlexibleLocation.resolveLocation(cacheName);
-							if (scriptUrl == null) {
-								throw new EventHandlerException("BSF script not found at location [" + cacheName + "]");
-							}
-                            scriptStream = scriptUrl.openStream();
-							scriptString = IOUtils.getStringFromReader(new InputStreamReader(scriptStream));
-                            scriptStream.close();
-							eventCache.put(cacheName, scriptString);
-                        }
+                    if (Debug.verboseOn()) {
+                        Debug.logVerbose("Loading BSF Script at location: " + cacheName, module);
                     }
+                    URL scriptUrl = FlexibleLocation.resolveLocation(cacheName);
+                    if (scriptUrl == null) {
+                        throw new EventHandlerException("BSF script not found at location [" + cacheName + "]");
+                    }
+                    scriptStream = scriptUrl.openStream();
+                    scriptString = IOUtils.getStringFromReader(new InputStreamReader(scriptStream));
+                    scriptStream.close();
+                    scriptString = eventCache.putIfAbsentAndGet(cacheName, scriptString);
                 }
             } else {
                 // we are a script in the webapp - load by resource
                 cacheName = context.getServletContextName() + ":" + event.path + event.invoke;
                 scriptString = eventCache.get(cacheName);
                 if (scriptString == null) {
-                    synchronized(eventCache) {
-                        if (scriptString == null) {
-                            scriptStream = context.getResourceAsStream(event.path + event.invoke);
-                            if (scriptStream == null) {
-                                throw new EventHandlerException("Could not find BSF script file in webapp context: " + event.path + event.invoke);
-                            }
-                            scriptString = IOUtils.getStringFromReader(new InputStreamReader(scriptStream));
-                            scriptStream.close();
-                            eventCache.put(cacheName, scriptString);
-                        }
+                    scriptStream = context.getResourceAsStream(event.path + event.invoke);
+                    if (scriptStream == null) {
+                        throw new EventHandlerException("Could not find BSF script file in webapp context: " + event.path + event.invoke);
                     }
+                    scriptString = IOUtils.getStringFromReader(new InputStreamReader(scriptStream));
+                    scriptStream.close();
+                    scriptString = eventCache.putIfAbsentAndGet(cacheName, scriptString);
                 }
             }
 

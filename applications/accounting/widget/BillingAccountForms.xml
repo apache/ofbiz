@@ -21,8 +21,17 @@ under the License.
 <forms xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
         xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/widget-form.xsd">
 
-    <form name="ListBillingAccounts" type="list" list-name="billingAccounts" paginate-target="FindBillingAccount" default-entity-name="BillingAccount"
+    <form name="ListBillingAccounts" type="list" list-name="listIt" paginate-target="FindBillingAccount" default-entity-name="BillingAccount"
         odd-row-style="alternate-row" default-table-style="basic-table hover-bar">
+        <actions>
+            <service service-name="performFind" result-map="result" result-map-list="listIt">
+                <field-map field-name="inputFields" from-field="parameters"/>
+                <field-map field-name="entityName" value="BillingAccount"/>
+                <field-map field-name="orderBy" value="billingAccountId"/>
+                <field-map field-name="viewIndex" from-field="viewIndex"/>
+                <field-map field-name="viewSize" from-field="viewSize"/>
+            </service>
+        </actions>
         <field name="billingAccountId" widget-style="buttontext">
             <hyperlink description="${billingAccountId}" target="EditBillingAccount">
                 <parameter param-name="billingAccountId"/>
@@ -36,7 +45,7 @@ under the License.
         <field name="thruDate"><display/></field>
     </form>
 
-    <form name="ListBillingAccountsByParty" type="list" list-name="billingAccounts" paginate-target="FindBillingAccount" default-entity-name="BillingAccountAndRole"
+    <form name="ListBillingAccountsByParty" type="list" list-name="billingAccounts" paginate-target="FindBillingAccount"
         odd-row-style="alternate-row" default-table-style="basic-table hover-bar">
         <field name="billingAccountId" widget-style="buttontext">
             <hyperlink description="${billingAccountId}" target="EditBillingAccount">
@@ -46,10 +55,11 @@ under the License.
         <field name="accountLimit">
             <display type="currency" currency="${billingAccount.accountCurrencyUomId}"/>
         </field>
+        <field name="accountBalance"><display type="currency"/></field>
         <field name="description"><display/></field>
         <field name="fromDate"><display/></field>
         <field name="thruDate"><display/></field>
-        <field name="partyId"><display/></field>
+        <field name="partyId" title="${uiLabelMap.PartyPartyId}"><display description="${parameters.partyId}"/></field>
         <field name="roleTypeId" title="${uiLabelMap.AccountingRoleType}"><display-entity entity-name="RoleType"/></field>
     </form>
 
@@ -88,9 +98,9 @@ under the License.
                 <parameter param-name="invoiceId"/>
             </hyperlink>
         </field>
-        <field name="invoiceTypeId"><display-entity entity-name="InvoiceType" description="${description}"/></field>
+        <field name="invoiceTypeId"><display-entity entity-name="InvoiceType"/></field>
         <field name="invoiceDate"><display/></field>
-        <field name="statusId"><display-entity entity-name="StatusItem" description="${description}"/></field>
+        <field name="statusId" title="${uiLabelMap.CommonStatus}"><display-entity entity-name="StatusItem"/></field>
         <field name="description"><display/></field>
         <field name="partyIdFrom"><display description="${partyNameResultFrom.fullName} [${partyIdFrom}]"/></field>
         <field name="partyIdTo" parameter-name="partyId"><display description="${partyNameResultTo.fullName} [${partyId}]"/></field>
@@ -124,10 +134,10 @@ under the License.
         <field use-when="roleTypeId == null" name="roleTypeId"><hidden value="BILL_TO_CUSTOMER"/></field>
 
         <field name="accountCurrencyUomId">
-            <drop-down allow-empty="false" no-current-selected-key="${defaultCurrencyUomId}">
-                <entity-options key-field-name="uomId" description="${abbreviation} - ${description}" entity-name="Uom">
+            <drop-down allow-empty="false" no-current-selected-key="${defaultOrganizationPartyCurrencyUomId}">
+                <entity-options key-field-name="uomId" description="${description} - ${abbreviation}" entity-name="Uom">
                     <entity-constraint name="uomTypeId" operator="equals" value="CURRENCY_MEASURE"/>
-                    <entity-order-by field-name="abbreviation"/>
+                    <entity-order-by field-name="description"/>
                 </entity-options>
             </drop-down>
         </field>
@@ -177,7 +187,7 @@ under the License.
         <field name="fromDate" title="${uiLabelMap.CommonFromDate}"><display/></field>
 
         <field name="submitButton" title="${uiLabelMap.CommonUpdate}" widget-style="smallSubmit"><submit button-type="button"/></field>
-        <field name="deleteLink" title="${uiLabelMap.CommonEmptyHeader}" widget-style="buttontext">
+        <field name="deleteLink" title=" " widget-style="buttontext">
             <hyperlink target="deleteBillingAccountRole" description="${uiLabelMap.CommonDelete}" also-hidden="false">
                 <parameter param-name="billingAccountId"/>
                 <parameter param-name="roleTypeId"/>
@@ -216,13 +226,13 @@ under the License.
         <field name="uomId" title="${uiLabelMap.CommonUom}">
             <display-entity entity-name="Uom" description="${description}"/>
         </field>
-        <field name="billingAccountTermId" title="${uiLabelMap.CommonEmptyHeader}" widget-style="buttontext">
+        <field name="billingAccountTermId" title=" " widget-style="buttontext">
             <hyperlink description="${uiLabelMap.CommonEdit}" target="EditBillingAccountTerms">
                 <parameter param-name="billingAccountId"/>
                 <parameter param-name="billingAccountTermId"/>
             </hyperlink>
         </field>
-        <field name="deleteLink" title="${uiLabelMap.CommonEmptyHeader}" widget-style="buttontext">
+        <field name="deleteLink" title=" " widget-style="buttontext">
             <hyperlink description="${uiLabelMap.CommonDelete}" target="removeBillingAccountTerm">
                 <parameter param-name="billingAccountId"/>
                 <parameter param-name="billingAccountTermId"/>
@@ -294,7 +304,7 @@ under the License.
                 </entity-options>
             </drop-down>
         </field>
-        <field name="paymentTypeId">
+        <field name="paymentTypeId" title="${uiLabelMap.AccountingPaymentType}">
             <drop-down allow-empty="false" no-current-selected-key="CUSTOMER_DEPOSIT">
                 <entity-options description="${description}" entity-name="PaymentType">
                     <entity-order-by field-name="description"/>
@@ -322,14 +332,23 @@ under the License.
             </hyperlink>
         </field>
         <field name="orderDate"><display/></field>
-        <field name="paymentMethodTypeId" title="${uiLabelMap.CommonType}">
-            <display-entity entity-name="PaymentMethodType" key-field-name="paymentMethodTypeId" description="${description}"/>
+        <field name="paymentMethodTypeId">
+            <display-entity entity-name="PaymentMethodType" key-field-name="paymentMethodTypeId"/>
         </field>
         <field name="paymentStatusId" title="${uiLabelMap.CommonStatus}">
-            <display-entity entity-name="StatusItem" key-field-name="statusId" description="${description}"/>
+            <display-entity entity-name="StatusItem" key-field-name="statusId"/>
         </field>
         <field name="maxAmount">
             <display type="currency" currency="${currencyUomId}"/>
         </field>
+    </form>
+    <form name="FindBillingAccounts" type="single" target="FindBillingAccount" header-row-style="header-row" default-table-style="basic-table">
+        <field name="billingAccountId"><text-find ignore-case="true"/></field>
+        <field name="description"><text-find ignore-case="true"/></field>
+        <field name="accountLimit"><text/></field>
+        <field name="fromDate"><date-time/></field>
+        <field name="thruDate"><date-time/></field>
+        <field name="noConditionFind"><hidden value="Y"/><!-- if this isn't there then with all fields empty no query will be done --></field>
+        <field name="searchButton" title="${uiLabelMap.CommonFind}" widget-style="smallSubmit"><submit button-type="button"/></field>
     </form>
 </forms>

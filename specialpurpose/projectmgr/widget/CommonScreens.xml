@@ -27,10 +27,10 @@ under the License.
                 <property-map resource="PartyUiLabels" map-name="uiLabelMap" global="true"/>
                 <property-map resource="OrderUiLabels" map-name="uiLabelMap" global="true"/>
                 <property-map resource="WorkEffortUiLabels" map-name="uiLabelMap" global="true"/>
+                <property-map resource="ContentUiLabels" map-name="uiLabelMap" global="true"/>
                 <property-map resource="HumanResUiLabels" map-name="uiLabelMap" global="true"/>
                 <property-map resource="CommonUiLabels" map-name="uiLabelMap" global="true"/>
-
-                <property-map resource="ProjectMgrHelpUrls" map-name="helpUrlsMap" global="true"/>
+                <property-map resource="EcommerceUiLabels" map-name="uiLabelMap" global="true"/>
 
                 <!-- The two default (global) stylesheets are added to the list
                      of stylesheets to the first and second position -->
@@ -40,10 +40,10 @@ under the License.
                 <!-- layoutSettings.headerImageUrl can be used to specify an application specific logo; if not set,
                      then the global layoutSettings.commonHeaderImageUrl (specified in GlobalDecorator) will be used. -->
                 <!--<set field="layoutSettings.headerImageUrl" value="/images/ofbiz_logo.gif" global="true"/>-->
-
+                <set field="layoutSettings.styleSheets[]" value="/projectmgr/static/projectmgr.css" global="true"/>
                 <set field="activeApp" value="projectmgr" global="true"/>
                 <set field="applicationMenuName" value="ProjectMgrAppBar" global="true"/>
-                <set field="applicationMenuLocation" value="component://projectmgr/widget/Menus.xml" global="true"/>
+                <set field="applicationMenuLocation" value="component://projectmgr/widget/ProjectMenus.xml" global="true"/>
                 <set field="applicationTitle" value="${uiLabelMap.ProjectMgrApplication}" global="true"/>
                 <set field="my" value="My" global="true"/>
             </actions>
@@ -64,6 +64,19 @@ under the License.
             </actions>
             <widgets>
                 <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="pre-body">
+                        <section>
+                            <condition>
+                                <and>
+                                    <if-has-permission permission="PROJECTMGR" action="_VIEW"/>
+                                    <not><if-empty field="project"/></not>
+                                </and>
+                            </condition>
+                            <widgets>
+                                <include-menu name="ProjectTabBar" location="component://projectmgr/widget/ProjectMenus.xml"/>
+                            </widgets>
+                        </section>
+                    </decorator-section>
                     <decorator-section name="body">
                         <section>
                             <condition>
@@ -77,8 +90,7 @@ under the License.
                                         </not>
                                     </condition>
                                     <widgets>
-                                        <include-menu name="ProjectTabBar" location="component://projectmgr/widget/Menus.xml"/>
-                                        <include-menu name="ProjectSubTabBar" location="component://projectmgr/widget/Menus.xml"/>
+                                        <include-menu name="ProjectButtonBar" location="component://projectmgr/widget/ProjectMenus.xml"/>
                                         <container style="clear"/>
                                         <label style="h1" text="${uiLabelMap.ProjectMgrProjectCurrent}: ${project.workEffortName}[${project.workEffortId}]"/>
                                     </widgets>
@@ -104,6 +116,19 @@ under the License.
             </actions>
             <widgets>
                 <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="pre-body">
+                        <section>
+                            <condition>
+                                <and>
+                                    <if-has-permission permission="PROJECTMGR" action="_VIEW"/>
+                                    <not><if-empty field="workEffort"/></not>
+                                </and>
+                            </condition>
+                            <widgets>
+                                <include-menu name="TaskTabBar" location="component://projectmgr/widget/ProjectMenus.xml"/>
+                            </widgets>
+                        </section>
+                    </decorator-section>
                     <decorator-section name="body">
                         <section>
                             <condition>
@@ -115,13 +140,14 @@ under the License.
                                         <not><if-empty field="workEffort"/></not>
                                     </condition>
                                     <widgets>
-                                        <include-menu name="TaskTabBar" location="component://projectmgr/widget/Menus.xml"/>
-                                        <include-menu name="TaskSubTabBar" location="component://projectmgr/widget/Menus.xml"/>
+                                        <include-menu name="TaskSubTabBar" location="component://projectmgr/widget/ProjectMenus.xml"/>
                                         <container style="clear"/>
-                                        <label style="h1" text="${uiLabelMap.ProjectMgrTaskCurrent}: ${workEffort.workEffortName}[${workEffort.workEffortId}] ${uiLabelMap.ProjectMgrPhaseName}: ${phaseName} ${uiLabelMap.ProjectMgrProjectName}: ${projectName}"/>
-                                        <link style="h1" text="[${projectId}]" target="projectView">
-                                            <parameter param-name="projectId"/>
-                                        </link>
+                                        <label style="h1" text="${uiLabelMap.ProjectMgrTaskCurrent}: ${workEffort.workEffortName} [${workEffort.workEffortId}]"/>
+                                        <label style="h1" text="${uiLabelMap.ProjectMgrPhaseName}: ${phaseName}"/>
+                                        <container style="h1">
+                                            <label text="${uiLabelMap.ProjectMgrProjectName}: ${projectName}"/>
+                                            <link text="[${projectId}]" target="projectView"><parameter param-name="projectId"/></link>
+                                        </container>
                                     </widgets>
                                 </section>
                                 <decorator-section-include name="body"/>
@@ -203,8 +229,8 @@ under the License.
                                 <if-has-permission permission="PROJECTMGR" action="_VIEW"/>
                             </condition>
                             <widgets>
-                                <!--include-menu name="TimesheetTabBar" location="component://projectmgr/widget/Menus.xml"/-->
-                                <include-menu name="TimesheetSubTabBar" location="component://projectmgr/widget/Menus.xml"/>
+                                <!--include-menu name="TimesheetTabBar" location="component://projectmgr/widget/ProjectMenus.xml"/-->
+                                <include-menu name="TimesheetSubTabBar" location="component://projectmgr/widget/ProjectMenus.xml"/>
                                 <section>
                                     <condition>
                                         <not>
@@ -239,7 +265,7 @@ under the License.
                                     <if-has-permission permission="PROJECTMGR" action="_VIEW"/>
                             </condition>
                             <widgets>
-                                <include-menu name="MyTimeSubTabBar" location="component://projectmgr/widget/Menus.xml"/>
+                                <include-menu name="MyTimeSubTabBar" location="component://projectmgr/widget/ProjectMenus.xml"/>
                                 <decorator-section-include name="body"/>
                             </widgets>
                             <fail-widgets>
@@ -251,45 +277,6 @@ under the License.
             </widgets>
         </section>
     </screen>
-
-    <screen name="CommonCalendarDecorator">
-        <section>
-            <actions>
-            </actions>
-            <widgets>
-                <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
-                    <decorator-section name="body">
-                        <section>
-                            <condition>
-                                <if-has-permission permission="PROJECTMGR" action="_VIEW"/>
-                            </condition>
-                            <actions>
-                                <entity-condition entity-name="Facility" list="allFacilities">
-                                    <order-by field-name="facilityName"/>
-                                </entity-condition>
-                                <entity-condition entity-name="FixedAsset" list="allFixedAssets">
-                                    <order-by field-name="fixedAssetId"/>
-                                </entity-condition>
-                            </actions>
-                            <widgets>
-                                <platform-specific>
-                                    <html><html-template location="component://workeffort/webapp/workeffort/calendar/eventsByForms.ftl"/></html>
-                                </platform-specific>
-                                <platform-specific>
-                                    <html><html-template location="component://workeffort/webapp/workeffort/calendar/CalendarTabBar.ftl"/></html>
-                                </platform-specific>
-                                <decorator-section-include name="body"/>
-                            </widgets>
-                            <fail-widgets>
-                                <label style="h3">${uiLabelMap.ProjectMgrViewPermissionError}</label>
-                            </fail-widgets>
-                        </section>
-                    </decorator-section>
-                </decorator-screen>
-            </widgets>
-        </section>
-    </screen>
-
     <screen name="Main">
         <section>
             <actions>
@@ -310,6 +297,7 @@ under the License.
     <screen name="CommonPartyDecorator">
         <section>
             <actions>
+                <property-map resource="SecurityUiLabels" map-name="uiLabelMap" global="true"/>
                 <set field="headerItem" value="resources"/>
                 <set field="partyId" from-field="parameters.partyId"/>
                 <entity-one entity-name="Party" value-field="party"/>
@@ -350,7 +338,7 @@ under the License.
                                 <section>
                                     <condition><not><if-empty field="partyId"/></not></condition>
                                     <widgets>
-                                        <include-menu location="component://projectmgr/widget/Menus.xml" name="ResourceTabBar"/>
+                                        <include-menu location="component://projectmgr/widget/ProjectMenus.xml" name="ResourceTabBar"/>
                                         <container>
                                             <section>
                                                 <widgets>

@@ -31,14 +31,16 @@ under the License.
                 <set field="queryString" from-field="result.queryString"/>
                 <set field="viewIndex" from-field="parameters.VIEW_INDEX" type="Integer"/>
                 <set field="viewSize" from-field="parameters.VIEW_SIZE" type="Integer" default-value="20"/>
+                <set field="entityName" value="Facility"/>
+                <set field="searchFields" value="[facilityId, facilityName, description]"/>                 
             </actions>
             <widgets>
                 <decorator-screen name="LookupDecorator" location="component://common/widget/CommonScreens.xml">
                     <decorator-section name="search-options">
-                        <include-form name="lookupFacility" location="component://product/webapp/facility/lookup/FieldLookupForms.xml"/>
+                        <include-form name="lookupFacility" location="component://product/widget/facility/FieldLookupForms.xml"/>
                     </decorator-section>
                     <decorator-section name="search-results">
-                        <include-form name="listLookupFacility" location="component://product/webapp/facility/lookup/FieldLookupForms.xml"/>
+                        <include-form name="listLookupFacility" location="component://product/widget/facility/FieldLookupForms.xml"/>
                     </decorator-section>
                 </decorator-screen>
             </widgets>
@@ -55,14 +57,16 @@ under the License.
                 <set field="queryString" from-field="result.queryString"/>
                 <set field="viewIndex" from-field="parameters.VIEW_INDEX" type="Integer"/>
                 <set field="viewSize" from-field="parameters.VIEW_SIZE" type="Integer" default-value="20"/>
+                <set field="entityName" value="FacilityLocation"/>
+                <set field="searchFields" value="[locationSeqId, facilityId, locationTypeEnumId]"/>                 
             </actions>
             <widgets>
                 <decorator-screen name="LookupDecorator" location="component://common/widget/CommonScreens.xml">
                     <decorator-section name="search-options">
-                        <include-form name="lookupFacilityLocation" location="component://product/webapp/facility/lookup/FieldLookupForms.xml"/>
+                        <include-form name="lookupFacilityLocation" location="component://product/widget/facility/FieldLookupForms.xml"/>
                     </decorator-section>
                     <decorator-section name="search-results">
-                        <include-form name="listLookupFacilityLocation" location="component://product/webapp/facility/lookup/FieldLookupForms.xml"/>
+                        <include-form name="listLookupFacilityLocation" location="component://product/widget/facility/FieldLookupForms.xml"/>
                     </decorator-section>
                 </decorator-screen>
             </widgets>
@@ -78,14 +82,16 @@ under the License.
                 <set field="queryString" from-field="result.queryString"/>
                 <set field="viewIndex" from-field="parameters.VIEW_INDEX" type="Integer" default-value="0"/>
                 <set field="viewSize" from-field="parameters.VIEW_SIZE" type="Integer" default-value="20"/>
+                <set field="entityName" value="Shipment"/>
+                <set field="searchFields" value="[shipmentId, shipmentTypeId]"/>
             </actions>
             <widgets>
                 <decorator-screen name="LookupDecorator" location="component://common/widget/CommonScreens.xml">
                     <decorator-section name="search-options">
-                        <include-form name="lookupShipment" location="component://product/webapp/facility/lookup/FieldLookupForms.xml"/>
+                        <include-form name="lookupShipment" location="component://product/widget/facility/FieldLookupForms.xml"/>
                     </decorator-section>
                     <decorator-section name="search-results">
-                        <include-form name="listShipment" location="component://product/webapp/facility/lookup/FieldLookupForms.xml"/>
+                        <include-form name="listShipment" location="component://product/widget/facility/FieldLookupForms.xml"/>
                     </decorator-section>
                 </decorator-screen>
             </widgets>
@@ -133,7 +139,7 @@ under the License.
                     <widgets>
                         <decorator-screen name="LookupDecorator" location="component://common/widget/CommonScreens.xml">
                             <decorator-section name="search-results">
-                                <include-form name="ListProductInventoryLocation" location="component://product/webapp/facility/lookup/FieldLookupForms.xml"/>
+                                <include-form name="ListProductInventoryLocation" location="component://product/widget/facility/FieldLookupForms.xml"/>
                             </decorator-section>
                         </decorator-screen>
                     </widgets>

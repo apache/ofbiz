@@ -19,11 +19,12 @@
 package org.ofbiz.entity.datasource;
 
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.concurrent.Future;
 
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.entity.GenericEntityException;
@@ -44,15 +45,19 @@ public class GenericHelperDAO implements GenericHelper {
     public static final String module = GenericHelperDAO.class.getName();
 
     protected GenericDAO genericDAO;
-    protected String helperName;
+    protected GenericHelperInfo helperInfo;
 
-    public GenericHelperDAO(String helperName) {
-        this.helperName = helperName;
-        genericDAO = GenericDAO.getGenericDAO(helperName);
+    public GenericHelperDAO(GenericHelperInfo helperInfo) {
+        this.helperInfo = helperInfo;
+        genericDAO = GenericDAO.getGenericDAO(helperInfo);
     }
 
     public String getHelperName() {
-        return helperName;
+        return this.helperInfo.getHelperFullName();
+    }
+
+    public <T> Future<T> submitWork(Callable<T> callable) throws GenericEntityException {
+        return genericDAO.submitWork(callable);
     }
 
     /** Creates a Entity in the form of a GenericValue and write it to the database

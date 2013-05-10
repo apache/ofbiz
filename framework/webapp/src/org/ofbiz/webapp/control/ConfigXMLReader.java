@@ -33,6 +33,8 @@ import javolution.util.FastMap;
 import javolution.util.FastSet;
 
 import org.ofbiz.base.location.FlexibleLocation;
+import org.ofbiz.base.metrics.Metrics;
+import org.ofbiz.base.metrics.MetricsFactory;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.FileUtil;
 import org.ofbiz.base.util.GeneralException;
@@ -40,6 +42,7 @@ import org.ofbiz.base.util.UtilHttp;
 import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.base.util.UtilXml;
 import org.ofbiz.base.util.cache.UtilCache;
+import org.ofbiz.base.util.collections.MapContext;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -51,8 +54,8 @@ public class ConfigXMLReader {
     public static final String module = ConfigXMLReader.class.getName();
     public static final String controllerXmlFileName = "/WEB-INF/controller.xml";
 
-    public static UtilCache<URL, ControllerConfig> controllerCache = new UtilCache<URL, ControllerConfig>("webapp.ControllerConfig");
-    public static UtilCache<String, List<ControllerConfig>> controllerSearchResultsCache = new UtilCache<String, List<ControllerConfig>>("webapp.ControllerSearchResults");
+    private static final UtilCache<URL, ControllerConfig> controllerCache = UtilCache.createUtilCache("webapp.ControllerConfig");
+    private static final UtilCache<String, List<ControllerConfig>> controllerSearchResultsCache = UtilCache.createUtilCache("webapp.ControllerSearchResults");
 
     public static URL getControllerConfigURL(ServletContext context) {
         try {
@@ -65,15 +68,8 @@ public class ConfigXMLReader {
 
     public static ControllerConfig getControllerConfig(URL url) {
         ControllerConfig controllerConfig = controllerCache.get(url);
-        if (controllerConfig == null) { // don't want to block here
-            synchronized (ConfigXMLReader.class) {
-                // must check if null again as one of the blocked threads can still enter
-                controllerConfig = controllerCache.get(url);
-                if (controllerConfig == null) {
-                    controllerConfig = new ControllerConfig(url);
-                    controllerCache.put(url, controllerConfig);
-                }
-            }
+        if (controllerConfig == null) {
+            controllerConfig = controllerCache.putIfAbsentAndGet(url, new ControllerConfig(url));
         }
         return controllerConfig;
     }
@@ -81,23 +77,25 @@ public class ConfigXMLReader {
     public static class ControllerConfig {
         public URL url;
 
-        public String errorpage;
-        public String protectView;
-        public String owner;
-        public String securityClass;
-        public String defaultRequest;
+        private String errorpage;
+        private String protectView;
+        private String owner;
+        private String securityClass;
+        private String defaultRequest;
+        private String statusCode;
 
-        public Map<String, Event> firstVisitEventList = FastMap.newInstance();
-        public Map<String, Event> preprocessorEventList = FastMap.newInstance();
-        public Map<String, Event> postprocessorEventList = FastMap.newInstance();
-        public Map<String, Event> afterLoginEventList = FastMap.newInstance();
-        public Map<String, Event> beforeLogoutEventList = FastMap.newInstance();
+        private List<URL> includes = FastList.newInstance();
+        private Map<String, Event> firstVisitEventList = FastMap.newInstance();
+        private Map<String, Event> preprocessorEventList = FastMap.newInstance();
+        private Map<String, Event> postprocessorEventList = FastMap.newInstance();
+        private Map<String, Event> afterLoginEventList = FastMap.newInstance();
+        private Map<String, Event> beforeLogoutEventList = FastMap.newInstance();
 
-        public Map<String, String> eventHandlerMap = FastMap.newInstance();
-        public Map<String, String> viewHandlerMap = FastMap.newInstance();
+        private Map<String, String> eventHandlerMap = FastMap.newInstance();
+        private Map<String, String> viewHandlerMap = FastMap.newInstance();
 
-        public Map<String, RequestMap> requestMapMap = FastMap.newInstance();
-        public Map<String, ViewMap> viewMapMap = FastMap.newInstance();
+        private Map<String, RequestMap> requestMapMap = FastMap.newInstance();
+        private Map<String, ViewMap> viewMapMap = FastMap.newInstance();
 
         public ControllerConfig(URL url) {
             this.url = url;
@@ -120,26 +118,178 @@ public class ConfigXMLReader {
             }
         }
 
-        protected void absorbControllerConfig(ControllerConfig controllerConfig) {
-            // copy/add all data except the url
+        public String getErrorpage() {
+            if (errorpage != null) {
+                return errorpage;
+            }
+            for (URL includeLocation: includes) {
+                ControllerConfig controllerConfig = getControllerConfig(includeLocation);
+                String errorpage = controllerConfig.getErrorpage();
+                if (errorpage != null) {
+                    return errorpage;
+                }
+            }
+            return null;
+        }
 
-            this.errorpage = controllerConfig.errorpage;
-            this.protectView = controllerConfig.protectView;
-            this.owner = controllerConfig.owner;
-            this.securityClass = controllerConfig.securityClass;
-            this.defaultRequest = controllerConfig.defaultRequest;
+        public String getProtectView() {
+            if (protectView != null) {
+                return protectView;
+            }
+            for (URL includeLocation: includes) {
+                ControllerConfig controllerConfig = getControllerConfig(includeLocation);
+                String protectView = controllerConfig.getProtectView();
+                if (protectView != null) {
+                    return protectView;
+                }
+            }
+            return null;
+        }
 
-            this.firstVisitEventList.putAll(controllerConfig.firstVisitEventList);
-            this.preprocessorEventList.putAll(controllerConfig.preprocessorEventList);
-            this.postprocessorEventList.putAll(controllerConfig.postprocessorEventList);
-            this.afterLoginEventList.putAll(controllerConfig.afterLoginEventList);
-            this.beforeLogoutEventList.putAll(controllerConfig.beforeLogoutEventList);
+        public String getStatusCode() {
+            if (statusCode != null) {
+                return statusCode;
+            }
+            for (URL includeLocation: includes) {
+                ControllerConfig controllerConfig = getControllerConfig(includeLocation);
+                String statusCode = controllerConfig.getStatusCode();
+                if (statusCode != null) {
+                    return statusCode;
+                }
+            }
+            return null;
+        }
 
-            this.eventHandlerMap.putAll(controllerConfig.eventHandlerMap);
-            this.viewHandlerMap.putAll(controllerConfig.viewHandlerMap);
+        public String getOwner() {
+            if (owner != null) {
+                return owner;
+            }
+            for (URL includeLocation: includes) {
+                ControllerConfig controllerConfig = getControllerConfig(includeLocation);
+                String owner = controllerConfig.getOwner();
+                if (owner != null) {
+                    return owner;
+                }
+            }
+            return null;
+        }
 
-            this.requestMapMap.putAll(controllerConfig.requestMapMap);
-            this.viewMapMap.putAll(controllerConfig.viewMapMap);
+        public String getSecurityClass() {
+            if (securityClass != null) {
+                return securityClass;
+            }
+            for (URL includeLocation: includes) {
+                ControllerConfig controllerConfig = getControllerConfig(includeLocation);
+                String securityClass = controllerConfig.getSecurityClass();
+                if (securityClass != null) {
+                    return securityClass;
+                }
+            }
+            return null;
+        }
+
+        public String getDefaultRequest() {
+            if (defaultRequest != null) {
+                return defaultRequest;
+            }
+            for (URL includeLocation: includes) {
+                ControllerConfig controllerConfig = getControllerConfig(includeLocation);
+                String defaultRequest = controllerConfig.getDefaultRequest();
+                if (defaultRequest != null) {
+                    return defaultRequest;
+                }
+            }
+            return null;
+        }
+
+        public Map<String, Event> getFirstVisitEventList() {
+            MapContext<String, Event> result = MapContext.getMapContext();
+            for (URL includeLocation: includes) {
+                ControllerConfig controllerConfig = getControllerConfig(includeLocation);
+                result.push(controllerConfig.getFirstVisitEventList());
+            }
+            result.push(firstVisitEventList);
+            return result;
+        }
+
+        public Map<String, Event> getPreprocessorEventList() {
+            MapContext<String, Event> result = MapContext.getMapContext();
+            for (URL includeLocation: includes) {
+                ControllerConfig controllerConfig = getControllerConfig(includeLocation);
+                result.push(controllerConfig.getPreprocessorEventList());
+            }
+            result.push(preprocessorEventList);
+            return result;
+        }
+
+        public Map<String, Event> getPostprocessorEventList() {
+            MapContext<String, Event> result = MapContext.getMapContext();
+            for (URL includeLocation: includes) {
+                ControllerConfig controllerConfig = getControllerConfig(includeLocation);
+                result.push(controllerConfig.getPostprocessorEventList());
+            }
+            result.push(postprocessorEventList);
+            return result;
+        }
+
+        public Map<String, Event> getAfterLoginEventList() {
+            MapContext<String, Event> result = MapContext.getMapContext();
+            for (URL includeLocation: includes) {
+                ControllerConfig controllerConfig = getControllerConfig(includeLocation);
+                result.push(controllerConfig.getAfterLoginEventList());
+            }
+            result.push(afterLoginEventList);
+            return result;
+        }
+
+        public Map<String, Event> getBeforeLogoutEventList() {
+            MapContext<String, Event> result = MapContext.getMapContext();
+            for (URL includeLocation: includes) {
+                ControllerConfig controllerConfig = getControllerConfig(includeLocation);
+                result.push(controllerConfig.getBeforeLogoutEventList());
+            }
+            result.push(beforeLogoutEventList);
+            return result;
+        }
+
+        public Map<String, String> getEventHandlerMap() {
+            MapContext<String, String> result = MapContext.getMapContext();
+            for (URL includeLocation: includes) {
+                ControllerConfig controllerConfig = getControllerConfig(includeLocation);
+                result.push(controllerConfig.getEventHandlerMap());
+            }
+            result.push(eventHandlerMap);
+            return result;
+        }
+
+        public Map<String, String> getViewHandlerMap() {
+            MapContext<String, String> result = MapContext.getMapContext();
+            for (URL includeLocation: includes) {
+                ControllerConfig controllerConfig = getControllerConfig(includeLocation);
+                result.push(controllerConfig.getViewHandlerMap());
+            }
+            result.push(viewHandlerMap);
+            return result;
+        }
+
+        public Map<String, RequestMap> getRequestMapMap() {
+            MapContext<String, RequestMap> result = MapContext.getMapContext();
+            for (URL includeLocation: includes) {
+                ControllerConfig controllerConfig = getControllerConfig(includeLocation);
+                result.push(controllerConfig.getRequestMapMap());
+            }
+            result.push(requestMapMap);
+            return result;
+        }
+
+        public Map<String, ViewMap> getViewMapMap() {
+            MapContext<String, ViewMap> result = MapContext.getMapContext();
+            for (URL includeLocation: includes) {
+                ControllerConfig controllerConfig = getControllerConfig(includeLocation);
+                result.push(controllerConfig.getViewMapMap());
+            }
+            result.push(viewMapMap);
+            return result;
         }
 
         protected void loadIncludes(Element rootElement) {
@@ -147,8 +297,8 @@ public class ConfigXMLReader {
                 String includeLocation = includeElement.getAttribute("location");
                 if (UtilValidate.isNotEmpty(includeLocation)) {
                     try {
-                        ControllerConfig controllerConfig = getControllerConfig(FlexibleLocation.resolveLocation(includeLocation));
-                        this.absorbControllerConfig(controllerConfig);
+                        URL urlLocation = FlexibleLocation.resolveLocation(includeLocation);
+                        includes.add(urlLocation);
                     } catch (MalformedURLException mue) {
                         Debug.logError(mue, "Error processing include at [" + includeLocation + "]:" + mue.toString(), module);
                     }
@@ -162,6 +312,7 @@ public class ConfigXMLReader {
             }
 
             this.errorpage = UtilXml.childElementValue(rootElement, "errorpage");
+            this.statusCode = UtilXml.childElementValue(rootElement, "status-code");
             Element protectElement = UtilXml.firstChildElement(rootElement, "protect");
             if (protectElement != null) {
                 this.protectView = protectElement.getAttribute("view");
@@ -288,7 +439,7 @@ public class ConfigXMLReader {
         }
 
         String cacheId = controllerPartialPath != null ? controllerPartialPath : "NOPARTIALPATH";
-        List<ControllerConfig> controllerConfigs = (List<ControllerConfig>) controllerSearchResultsCache.get(cacheId);
+        List<ControllerConfig> controllerConfigs = controllerSearchResultsCache.get(cacheId);
 
         if (controllerConfigs == null) {
             try {
@@ -299,7 +450,7 @@ public class ConfigXMLReader {
                 for (File controllerFile: controllerFiles) {
                     URL controllerUrl = null;
                     try {
-                        controllerUrl = controllerFile.toURL();
+                        controllerUrl = controllerFile.toURI().toURL();
                     } catch (MalformedURLException mue) {
                         throw new GeneralException(mue);
                     }
@@ -307,7 +458,7 @@ public class ConfigXMLReader {
                     controllerConfigs.add(cc);
                 }
 
-                controllerSearchResultsCache.put(cacheId, controllerConfigs);
+                controllerConfigs = controllerSearchResultsCache.putIfAbsentAndGet(cacheId, controllerConfigs);
             } catch (IOException e) {
                 throw new GeneralException("Error finding controller XML files to lookup request references: " + e.toString(), e);
             }
@@ -390,6 +541,7 @@ public class ConfigXMLReader {
         public boolean securityDirectRequest = true;
 
         public Map<String, RequestResponse> requestResponseMap = FastMap.newInstance();
+        public Metrics metrics = null;
 
         public RequestMap(Element requestMapElement) {
 
@@ -423,6 +575,11 @@ public class ConfigXMLReader {
                 RequestResponse response = new RequestResponse(responseElement);
                 requestResponseMap.put(response.name, response);
             }
+            // Get metrics.
+            Element metricsElement = UtilXml.firstChildElement(requestMapElement, "metric");
+            if (metricsElement != null) {
+                this.metrics = MetricsFactory.getInstance(metricsElement);
+            }
         }
     }
 
@@ -452,22 +609,29 @@ public class ConfigXMLReader {
         public String name;
         public String type;
         public String value;
+        public String statusCode;
         public boolean saveLastView = false;
         public boolean saveCurrentView = false;
         public boolean saveHomeView = false;
         public Map<String, String> redirectParameterMap = FastMap.newInstance();
+        public Map<String, String> redirectParameterValueMap = FastMap.newInstance();
 
         public RequestResponse(Element responseElement) {
             this.name = responseElement.getAttribute("name");
             this.type = responseElement.getAttribute("type");
             this.value = responseElement.getAttribute("value");
+            this.statusCode = responseElement.getAttribute("status-code");
             this.saveLastView = "true".equals(responseElement.getAttribute("save-last-view"));
             this.saveCurrentView = "true".equals(responseElement.getAttribute("save-current-view"));
             this.saveHomeView = "true".equals(responseElement.getAttribute("save-home-view"));
             for (Element redirectParameterElement: UtilXml.childElementList(responseElement, "redirect-parameter")) {
-                String from = redirectParameterElement.getAttribute("from");
-                if (UtilValidate.isEmpty(from)) from = redirectParameterElement.getAttribute("name");
-                this.redirectParameterMap.put(redirectParameterElement.getAttribute("name"), from);
+                if (UtilValidate.isNotEmpty(redirectParameterElement.getAttribute("value"))) {
+                    this.redirectParameterValueMap.put(redirectParameterElement.getAttribute("name"), redirectParameterElement.getAttribute("value"));
+                } else {
+                    String from = redirectParameterElement.getAttribute("from");
+                    if (UtilValidate.isEmpty(from)) from = redirectParameterElement.getAttribute("name");
+                    this.redirectParameterMap.put(redirectParameterElement.getAttribute("name"), from);
+                }
             }
         }
 
@@ -491,6 +655,7 @@ public class ConfigXMLReader {
         public String contentType;
         public String encoding;
         public String description;
+        public boolean noCache = false;
 
         public ViewMap(Element viewMapElement) {
             this.name = viewMapElement.getAttribute("name");
@@ -498,6 +663,7 @@ public class ConfigXMLReader {
             this.type = viewMapElement.getAttribute("type");
             this.info = viewMapElement.getAttribute("info");
             this.contentType = viewMapElement.getAttribute("content-type");
+            this.noCache = "true".equals(viewMapElement.getAttribute("no-cache"));
             this.encoding = viewMapElement.getAttribute("encoding");
             this.description = UtilXml.childElementValue(viewMapElement, "description");
             if (UtilValidate.isEmpty(this.page)) {

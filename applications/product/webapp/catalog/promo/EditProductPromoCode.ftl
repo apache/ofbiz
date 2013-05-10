@@ -23,14 +23,21 @@ under the License.
         </div>
         <div class="screenlet-body">
             <#list productPromoCodeEmails as productPromoCodeEmail>
-                <div><a href="<@ofbizUrl>deleteProductPromoCodeEmail?productPromoCodeId=${productPromoCodeEmail.productPromoCodeId}&emailAddress=${productPromoCodeEmail.emailAddress}&productPromoId=${productPromoId}</@ofbizUrl>" class="buttontext">X</a>&nbsp;${productPromoCodeEmail.emailAddress}</div>
+              <div>
+                <form name="deleteProductPromoCodeEmail_${productPromoCodeEmail_index}" method="post" action="<@ofbizUrl>deleteProductPromoCodeEmail</@ofbizUrl>">
+                  <input type="hidden" name="productPromoCodeId" value="${productPromoCodeEmail.productPromoCodeId}"/>                
+                  <input type="hidden" name="emailAddress" value="${productPromoCodeEmail.emailAddress}"/>                
+                  <input type="hidden" name="productPromoId" value="${productPromoId}"/>                
+                  <a href='javascript:document.deleteProductPromoCodeEmail_${productPromoCodeEmail_index}.submit()' class='buttontext'>${uiLabelMap.CommonRemove}</a>&nbsp;${productPromoCodeEmail.emailAddress}
+                </form>
+              </div>                
             </#list>
             <div>
                 <form method="post" action="<@ofbizUrl>createProductPromoCodeEmail</@ofbizUrl>" style="margin: 0;">
                     <input type="hidden" name="productPromoCodeId" value="${productPromoCodeId?if_exists}"/>
                     <input type="hidden" name="productPromoId" value="${productPromoId}"/>
-                    <span class="label">${uiLabelMap.ProductAddEmail}:</span><input type="text" size="40" name="emailAddress">
-                    <input type="submit" value="${uiLabelMap.CommonAdd}">
+                    <span class="label">${uiLabelMap.ProductAddEmail}:</span><input type="text" size="40" name="emailAddress" />
+                    <input type="submit" value="${uiLabelMap.CommonAdd}" />
                 </form>
                 <#if productPromoCode.requireEmailOrParty?if_exists == "N">
                     <div class="tooltip">${uiLabelMap.ProductNoteRequireEmailParty}</div>
@@ -38,8 +45,8 @@ under the License.
                 <form method="post" action="<@ofbizUrl>createBulkProductPromoCodeEmail?productPromoCodeId=${productPromoCodeId?if_exists}</@ofbizUrl>" enctype="multipart/form-data" style="margin: 0;">
                     <input type="hidden" name="productPromoCodeId" value="${productPromoCodeId?if_exists}"/>
                     <input type="hidden" name="productPromoId" value="${productPromoId}"/>
-                    <input type="file" size="40" name="uploadedFile">
-                    <input type="submit" value="${uiLabelMap.CommonUpload}">
+                    <input type="file" size="40" name="uploadedFile" />
+                    <input type="submit" value="${uiLabelMap.CommonUpload}" />
                 </form>
             </div>
         </div>
@@ -50,14 +57,14 @@ under the License.
         </div>
         <div class="screenlet-body">
             <#list productPromoCodeParties as productPromoCodeParty>
-                <div><a href="<@ofbizUrl>deleteProductPromoCodeParty?productPromoCodeId=${productPromoCodeParty.productPromoCodeId}&partyId=${productPromoCodeParty.partyId}&productPromoId=${productPromoId}</@ofbizUrl>" class="buttontext">X</a>&nbsp;${productPromoCodeParty.partyId}</div>
+                <div><a href="<@ofbizUrl>deleteProductPromoCodeParty?productPromoCodeId=${productPromoCodeParty.productPromoCodeId}&amp;partyId=${productPromoCodeParty.partyId}&amp;productPromoId=${productPromoId}</@ofbizUrl>" class="buttontext">X</a>&nbsp;${productPromoCodeParty.partyId}</div>
             </#list>
             <div>
                 <form method="post" action="<@ofbizUrl>createProductPromoCodeParty</@ofbizUrl>">
                     <input type="hidden" name="productPromoCodeId" value="${productPromoCodeId?if_exists}"/>
                     <input type="hidden" name="productPromoId" value="${productPromoId}"/>
-                    <span class="label">${uiLabelMap.ProductAddPartyId}:</span><input type="text" size="10" name="partyId">
-                    <input type="submit" value="${uiLabelMap.CommonAdd}">
+                    <span class="label">${uiLabelMap.ProductAddPartyId}:</span><input type="text" size="10" name="partyId" />
+                    <input type="submit" value="${uiLabelMap.CommonAdd}" />
                 </form>
             </div>
         </div>

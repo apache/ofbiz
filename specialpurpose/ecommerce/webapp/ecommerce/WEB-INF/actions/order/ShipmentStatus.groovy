@@ -18,15 +18,15 @@
  */
 
 import org.ofbiz.base.util.UtilMisc;
-import org.ofbiz.entity.GenericDelegator;
+import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.*;
 import org.ofbiz.entity.condition.*;
 import org.ofbiz.entity.util.*;
 
 shipmentId = parameters.shipmentId;
 if (shipmentId) {
-    shipment = delegator.findByPrimaryKey("Shipment", [shipmentId : shipmentId]);
-    shipmentItems = delegator.findByAnd("ShipmentItem", [shipmentId : shipmentId]);
+    shipment = delegator.findOne("Shipment", [shipmentId : shipmentId], false);
+    shipmentItems = delegator.findByAnd("ShipmentItem", [shipmentId : shipmentId], null, false);
 
     // get Shipment tracking info
     osisCond = EntityCondition.makeCondition([shipmentId : shipmentId], EntityOperator.AND);

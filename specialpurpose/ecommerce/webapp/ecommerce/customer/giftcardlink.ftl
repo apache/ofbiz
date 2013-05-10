@@ -18,14 +18,14 @@ under the License.
 -->
 
 <h1>${uiLabelMap.AccountingGiftCardLink}</h1>
-<br/>
-<div class="tabletext">${uiLabelMap.AccountingEnterGiftCardLink}.</div>
-<br/>
+<br />
+<div>${uiLabelMap.AccountingEnterGiftCardLink}.</div>
+<br />
 
 <form name="gclink" method="post" action="<@ofbizUrl>linkgiftcard</@ofbizUrl>">
-  <input type="hidden" name="paymentConfig" value="${paymentProperties?default("payment.properties")}">
+  <input type="hidden" name="paymentConfig" value="${paymentProperties?default("payment.properties")}" />
   <#if userLogin?has_content>
-    <input type="hidden" name="partyId" value="${userLogin.partyId}">
+    <input type="hidden" name="partyId" value="${userLogin.partyId}" />
   </#if>
   <table align="center">
     <tr>
@@ -34,12 +34,12 @@ under the License.
       </td>
     </tr>
     <tr>
-      <td><div class="tabletext">${uiLabelMap.AccountingCardNumber}</div></td>
-      <td><input type="text" class="inputBox" name="physicalCard" size="20"></td>
+      <td><div>${uiLabelMap.AccountingCardNumber}</div></td>
+      <td><input type="text" class="inputBox" name="physicalCard" size="20" /></td>
     </tr>
     <tr>
-      <td><div class="tabletext">${uiLabelMap.AccountingPINNumber}</div></td>
-      <td><input type="text" class="inputBox" name="physicalPin" size="20"></td>
+      <td><div>${uiLabelMap.AccountingPINNumber}</div></td>
+      <td><input type="text" class="inputBox" name="physicalPin" size="20" /></td>
     </tr>
     <tr>
       <td colspan="2">&nbsp;</td>
@@ -50,19 +50,19 @@ under the License.
       </td>
     </tr>
     <tr>
-      <td><div class="tabletext">${uiLabelMap.AccountingCardNumber}</div></td>
-      <td><input type="text" class="inputBox" name="virtualCard" size="20"></td>
+      <td><div>${uiLabelMap.AccountingCardNumber}</div></td>
+      <td><input type="text" class="inputBox" name="virtualCard" size="20" /></td>
     </tr>
     <tr>
-      <td><div class="tabletext">${uiLabelMap.AccountingPINNumber}</div></td>
-      <td><input type="text" class="inputBox" name="virtualPin" size="20"></td>
+      <td><div>${uiLabelMap.AccountingPINNumber}</div></td>
+      <td><input type="text" class="inputBox" name="virtualPin" size="20" /></td>
     </tr>
     <tr>
       <td colspan="2">&nbsp;</td>
     </tr>
     <tr>
-      <td colspan="2" align="center"><input type="submit" class="smallSubmit" value="${uiLabelMap.EcommerceLinkCards}"></td>
+      <td colspan="2" align="center"><input type="submit" class="smallSubmit" value="${uiLabelMap.EcommerceLinkCards}" /></td>
     </tr>
   </table>
 </form>
-<br/>
+<br />

@@ -1,5 +1,3 @@
-package org.ofbiz.assetmaint;
-
 /**
 Licensed to the Apache Software Foundation (ASF) under one
 or more contributor license agreements.  See the NOTICE file
@@ -18,17 +16,19 @@ KIND, either express or implied.  See the License for the
 specific language governing permissions and limitations
 under the License.
 **/
+package org.ofbiz.assetmaint;
 
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import javolution.util.FastMap;
+
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.base.util.UtilProperties;
-import org.ofbiz.entity.GenericDelegator;
+import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
 import org.ofbiz.entity.condition.EntityCondition;
@@ -44,10 +44,11 @@ import org.ofbiz.service.ServiceUtil;
 public class FixedAssetMaintServices {
 
     public static final String module = FixedAssetMaintServices.class.getName();
+    public static final String resource = "AssetMaintUiLabels";
 
-    public static Map addPartFixedAssetMaint(DispatchContext ctx, Map context) {
+    public static Map<String, Object> addPartFixedAssetMaint(DispatchContext ctx, Map<String, Object> context) {
         LocalDispatcher dispatcher = ctx.getDispatcher();
-        GenericDelegator delegator = ctx.getDelegator();
+        Delegator delegator = ctx.getDelegator();
         Locale locale = (Locale) context.get("locale");
         String fixedAssetId = (String)context.get("fixedAssetId");
         String maintHistSeqId = (String)context.get("maintHistSeqId");
@@ -59,15 +60,14 @@ public class FixedAssetMaintServices {
         try {
             GenericValue product = ProductWorker.findProduct(delegator, productId);
             if (product == null) {
-                return ServiceUtil.returnError
-                (UtilProperties.getMessage("AssetMaintUiLabels","AssetMaintInvalidPartProductIdError", UtilMisc.toMap("productId", productId), locale));
+                return ServiceUtil.returnError(UtilProperties.getMessage(resource, "AssetMaintInvalidPartProductIdError", UtilMisc.toMap("productId", productId), locale));
             }
-            Map findCurrInventoryParams =  UtilMisc.toMap("productId", productId, "facilityId", facilityId);
+            Map<String, ? extends Object> findCurrInventoryParams =  UtilMisc.toMap("productId", productId, "facilityId", facilityId);
             GenericValue userLogin = (GenericValue) context.get("userLogin");
             // Call issuance service
-            Map result = dispatcher.runSync("getInventoryAvailableByFacility", findCurrInventoryParams);
+            Map<String, Object> result = dispatcher.runSync("getInventoryAvailableByFacility", findCurrInventoryParams);
             if (ServiceUtil.isError(result)) {
-                return ServiceUtil.returnError("Problem in getting Inventory level for " + productId , null, null, result);
+                return ServiceUtil.returnError(UtilProperties.getMessage(resource, "AssetMaintProblemGettingInventoryLevel", locale) + productId , null, null, result);
             }
             Object atpObj = result.get("availableToPromiseTotal");
             double atp = 0.0;
@@ -75,28 +75,27 @@ public class FixedAssetMaintServices {
                 atp = Double.parseDouble(atpObj.toString());
             }
             if (requestedQty > atp) {
-                return ServiceUtil.returnError
-                (UtilProperties.getMessage("AssetMaintUiLabels","AssetMaintLowPartInventoryError",UtilMisc.toMap("productId", productId , "quantity", Double.toString(atp)), locale));
+                return ServiceUtil.returnError(UtilProperties.getMessage(resource, "AssetMaintLowPartInventoryError", UtilMisc.toMap("productId", productId , "quantity", Double.toString(atp)), locale));
             }
             EntityConditionList<EntityExpr> ecl = EntityCondition.makeCondition(UtilMisc.toList(
                     EntityCondition.makeCondition("productId", EntityOperator.EQUALS, productId),
                     EntityCondition.makeCondition("facilityId", EntityOperator.EQUALS, facilityId),
                     EntityCondition.makeCondition("availableToPromiseTotal", EntityOperator.GREATER_THAN, "0")),
                     EntityOperator.AND);
-            List inventoryItems = delegator.findList("InventoryItem", ecl, null, null, null, false);   //&& inventoryItems.size() > 0
-            Iterator itr = inventoryItems.iterator();
+            List<GenericValue> inventoryItems = delegator.findList("InventoryItem", ecl, null, null, null, false);   //&& inventoryItems.size() > 0
+            Iterator<GenericValue> itr = inventoryItems.iterator();
             while (requestedQty > 0 && itr.hasNext()) {
-                GenericValue inventoryItem = (GenericValue)itr.next();
+                GenericValue inventoryItem = itr.next();
                 String inventoryItemId = inventoryItem.getString("inventoryItemId");
                 atp = inventoryItem.getDouble("availableToPromiseTotal").doubleValue();
-                findCurrInventoryParams =  UtilMisc.toMap("inventoryItemId",inventoryItemId);
+                findCurrInventoryParams = UtilMisc.toMap("inventoryItemId", inventoryItemId);
                 Double issueQuantity = null;
                 if (requestedQty > atp) {
                     issueQuantity = new Double(atp);
                 } else {
                     issueQuantity = new Double(requestedQty);
                 }
-                Map itemIssuanceCtx = new HashMap();
+                Map<String, Object> itemIssuanceCtx = FastMap.newInstance();
                 itemIssuanceCtx.put("userLogin", userLogin);
                 itemIssuanceCtx.put("inventoryItemId", inventoryItemId);
                 itemIssuanceCtx.put("fixedAssetId", fixedAssetId);
@@ -105,16 +104,15 @@ public class FixedAssetMaintServices {
                 // Call issuance service
                 result = dispatcher.runSync("issueInventoryItemToFixedAssetMaint",itemIssuanceCtx);
                 if (ServiceUtil.isError(result)) {
-                    return ServiceUtil.returnError("Problem in calling service issueInventoryItemToFixedAssetMaint", null, null, result);
+                    return ServiceUtil.returnError(UtilProperties.getMessage(resource, "AssetMaintProblemCallingService", locale), null, null, result);
                 }
                 requestedQty = requestedQty - issueQuantity.doubleValue();
             }
         } catch (GenericEntityException e) {
             Debug.logError("Problem in retriving data from database", module);
         } catch (GenericServiceException e) {
-            String msg = "Problem in calling service issueInventoryItemToFixedAssetMaint";
-            Debug.logError(msg, module);
-            return ServiceUtil.returnError(msg);
+            Debug.logError("Problem in calling service issueInventoryItemToFixedAssetMaint", module);
+            return ServiceUtil.returnError(UtilProperties.getMessage(resource, "AssetMaintProblemCallingService", locale));
         }
         return ServiceUtil.returnSuccess();
     }

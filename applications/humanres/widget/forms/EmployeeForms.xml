@@ -18,7 +18,7 @@
     under the License.
 -->
 
-<forms xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+<forms xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/widget-form.xsd">
     <form name="AddEmployee" type="single" target="createEmployee"
         header-row-style="header-row" default-table-style="basic-table">
@@ -58,7 +58,7 @@
             </drop-down>
         </field>
         <field name="phoneTitle" title="${uiLabelMap.PartyPrimaryPhone}" title-area-style="group-label"><display/></field>
-        <field name="countryCode" title="${uiLabelMap.PartyCountryCode}"><text size="4" maxlength="10"/></field>
+        <field name="countryCode" title="${uiLabelMap.CommonCountryCode}"><text size="4" maxlength="10"/></field>
         <field name="areaCode" title="${uiLabelMap.PartyAreaCode}"><text size="4" maxlength="10"/></field>
         <field name="contactNumber" title="${uiLabelMap.PartyPhoneNumber}" tooltip="${uiLabelMap.CommonRequired}" widget-style="required"><text size="15" maxlength="15"/></field>
         <field name="extension" title="${uiLabelMap.PartyContactExt}"><text size="6" maxlength="10"/></field>
@@ -184,35 +184,23 @@
         <field name="thruDate"><date-time type="timestamp"/></field>
         <field name="submitButton" title="${uiLabelMap.CommonCreate}" widget-style="smallSubmit"><submit button-type="button"/></field>
     </form>
-    <form name="ListEmployeeTrainings" type="list" list-name="listIt" separate-columns="true" target="updateEmployeeTraining" paginate-target="FindPersonTrainings"
-        odd-row-style="alternate-row" header-row-style="header-row-2" default-table-style="basic-table hover-bar">
-        <actions>
-            <entity-condition entity-name="PersonTraining">
-                <condition-expr field-name="partyId" from-field="partyId"/>
-                <order-by field-name="fromDate"/>
-            </entity-condition>
-        </actions>
-        <auto-fields-service default-field-type="display" service-name="updatePersonTraining"/>
-        <field name="partyId"><hidden/></field>
-        <field name="trainingClassTypeId"><display-entity description="${description}" entity-name="TrainingClassType"/></field>
-        <field name="thruDate"><date-time type="timestamp"/></field>
-        <field name="submitButton" title="${uiLabelMap.CommonSubmit}" widget-style="smallSubmit"><submit/></field>
-        <field name="deleteLink" title="${uiLabelMap.CommonDelete}" widget-style="buttontext">
-            <hyperlink target="deleteEmployeeTraining" also-hidden="false" description="${uiLabelMap.CommonDelete}">
-                <parameter param-name="partyId"/>
-                <parameter param-name="trainingClassTypeId"/>
-                <parameter param-name="fromDate"/>
-            </hyperlink>
-        </field>
-    </form>
     <form name="AddEmplLeave" type="single" target="createEmplLeave">
-        <auto-fields-service service-name="createEmplLeave"/>
+        <auto-fields-service service-name="updateEmplLeave" map-name="leaveApp"/>
         <field name="partyId"><hidden/></field>
-        <field name="leaveTypeId">
+        <field name="leaveTypeId" tooltip="${uiLabelMap.CommonRequired}">
             <drop-down allow-empty="true">
                 <entity-options description="${description}" key-field-name="leaveTypeId" entity-name="EmplLeaveType"/>
             </drop-down>
         </field>
+        <field name="emplLeaveReasonTypeId">
+            <drop-down allow-empty="true">
+                <entity-options description="${description}" key-field-name="emplLeaveReasonTypeId" entity-name="EmplLeaveReasonType"/>
+            </drop-down>
+        </field>
+        <field name="fromDate" tooltip="${uiLabelMap.CommonRequired}"><date-time type="timestamp"></date-time></field>
+        <field name="thruDate" tooltip="${uiLabelMap.CommonRequired}"><date-time type="timestamp"></date-time></field>
+        <field name="leaveStatus"><hidden value="LEAVE_CREATED"/></field>
+        <field name="approverPartyId" tooltip="${uiLabelMap.CommonRequired}"><lookup target-form-name="LookupPartyName"/></field>
         <field name="submitButton" title="${uiLabelMap.CommonCreate}" widget-style="smallSubmit"><submit button-type="button"/></field>
     </form>
     <form name="ListEmplLeaves" type="list" list-name="listIt" separate-columns="true" target="updateEmplLeave" paginate-target="FindEmplLeaves"
@@ -225,9 +213,12 @@
         </actions>
         <auto-fields-service service-name="updateEmplLeave"/>
         <field name="partyId"><hidden/></field>
+        <field name="approverPartyId"><lookup target-form-name="LookupPartyName"/></field>
+        <field name="leaveStatus"><display-entity entity-name="StatusItem" key-field-name="statusId"/></field>
+        <field name="emplLeaveReasonTypeId"><display/></field>
         <field name="leaveTypeId"><display-entity description="${description}" entity-name="EmplLeaveType"/></field>
-        <field name="fromDate"><display/></field>
-        <field name="submitButton" title="${uiLabelMap.CommonSubmit}" widget-style="smallSubmit"><submit/></field>
+        <field name="fromDate"></field>
+        <field name="submitButton" title="${uiLabelMap.CommonUpdate}"><submit button-type="button"/></field>
     </form>
     <form name="CurrentEmploymentData" default-map-name="employmentData" type="single">
         <field name="company" entry-name="employment.partyIdFrom">
@@ -244,6 +235,13 @@
         </field>
         <field name="salary" entry-name="emplPositionRateAmount.rateAmount">
             <display type="currency" currency="${employmentData.emplPositionRateAmount.rateCurrencyUomId}"/>
+        </field>
+    </form>
+    <form name="PayrollHistoryList" type="list" list-name="payroll" extends="ListInvoices" extends-resource="component://accounting/widget/InvoiceForms.xml" paginate-target="PayrollHistory">
+        <field name="invoiceId" widget-style="buttontext" sort-field="true">
+            <hyperlink description="${invoiceId}" target="/accounting/control/invoiceOverview" target-type="inter-app">
+                <parameter param-name="invoiceId"/>
+            </hyperlink>
         </field>
     </form>
 </forms>

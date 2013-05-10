@@ -24,11 +24,6 @@ under the License.
     <description>Google Base component of the Open For Business Project</description>
 
     <context-param>
-        <param-name>webSiteId</param-name>
-        <param-value>GOOGLEBASE</param-value>
-        <description>A unique ID used to look up the WebSite entity</description>
-    </context-param>
-    <context-param>
         <param-name>entityDelegatorName</param-name>
         <param-value>default</param-value>
         <description>The Name of the Entity Delegator to use, defined in entityengine.xml</description>
@@ -40,7 +35,7 @@ under the License.
     </context-param>
     <context-param>
         <param-name>mainDecoratorLocation</param-name>
-        <param-value>component://googlebase/widget/GoogleBaseScreens.xml</param-value>
+        <param-value>component://googlebase/widget/CommonScreens.xml</param-value>
         <description>The location of the main-decorator screen to use for this webapp; referred to as a context variable in screen def XML files.</description>
     </context-param>
 

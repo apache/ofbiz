@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.ofbiz.base.util.Debug;
-import org.ofbiz.entity.GenericDelegator;
+import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericModelException;
 import org.ofbiz.entity.config.DatasourceInfo;
@@ -31,6 +31,11 @@ import org.ofbiz.entity.model.ModelEntity;
 import org.ofbiz.entity.model.ModelField;
 import org.ofbiz.entity.model.ModelViewEntity;
 
+/**
+ * Sub-query action.
+ *
+ */
+@SuppressWarnings("serial")
 public class EntityConditionSubSelect extends EntityConditionValue {
     public static final String module = EntityConditionSubSelect.class.getName();
 
@@ -41,7 +46,7 @@ public class EntityConditionSubSelect extends EntityConditionValue {
 
     protected EntityConditionSubSelect() { }
 
-    public EntityConditionSubSelect(String entityName, String keyFieldName, EntityCondition whereCond, boolean requireAll, GenericDelegator delegator) {
+    public EntityConditionSubSelect(String entityName, String keyFieldName, EntityCondition whereCond, boolean requireAll, Delegator delegator) {
         this(delegator.getModelEntity(entityName), keyFieldName, whereCond, requireAll);
     }
     public EntityConditionSubSelect(ModelEntity localModelEntity, String keyFieldName, EntityCondition whereCond, boolean requireAll) {
@@ -51,6 +56,7 @@ public class EntityConditionSubSelect extends EntityConditionValue {
         this.requireAll = requireAll;
     }
 
+    @Override
     public void addSqlValue(StringBuilder sql, Map<String, String> tableAliases, ModelEntity parentModelEntity, List<EntityConditionParam> entityConditionParams,
             boolean includeTableNamePrefix, DatasourceInfo datasourceInfo) {
         if (localModelEntity instanceof ModelViewEntity && datasourceInfo == null) {
@@ -70,7 +76,7 @@ public class EntityConditionSubSelect extends EntityConditionValue {
             sql.append(localModelField.getColName());
 
             // FROM clause and when necessary the JOIN or LEFT JOIN clause(s) as well
-            sql.append(SqlJdbcUtil.makeFromClause(localModelEntity, datasourceInfo));
+            sql.append(SqlJdbcUtil.makeFromClause(localModelEntity, null, datasourceInfo));
 
             // WHERE clause
             StringBuilder whereString = new StringBuilder();
@@ -105,32 +111,38 @@ public class EntityConditionSubSelect extends EntityConditionValue {
         }
     }
 
+
+    @Override
     public EntityConditionValue freeze() {
         return new EntityConditionSubSelect(localModelEntity, keyFieldName, (whereCond != null ? whereCond.freeze() : null), requireAll);
     }
-    
+
     public String getKeyFieldName() {
         return this.keyFieldName;
     }
-    
+
     public ModelEntity getModelEntity() {
         return this.localModelEntity;
     }
-    
+
+    @Override
     public ModelField getModelField(ModelEntity modelEntity) {
         // do nothing for now
         return null;
     }
-   
-    public Comparable getValue(GenericDelegator delegator, Map<String, ? extends Object> map) {
+
+    @Override
+    public Comparable<?> getValue(Delegator delegator, Map<String, ? extends Object> map) {
         // do nothing for now
         return null;
     }
 
+    @Override
     public void validateSql(ModelEntity modelEntity) throws GenericModelException {
         // do nothing for now
     }
 
+    @Override
     public void visit(EntityConditionVisitor visitor) {
         if (whereCond != null) whereCond.visit(visitor);
     }

@@ -25,8 +25,6 @@ under the License.
   <!-- ========================================================= -->
     <title>Entity of the Open For Business Manufacturing Component</title>
     <description>None</description>
-    <copyright>Copyright 2001-2008 The Apache Software Foundation</copyright>
-    <author>none</author>
     <version>1.0</version>
 
   <!-- ========================================================= -->
@@ -101,8 +99,8 @@ under the License.
       </description>
       <field name="calendarId" type="id-ne"></field>
       <field name="exceptionDateStartTime" type="date-time"></field>
-      <field name="exceptionCapacity" type="floating-point"></field>
-      <field name="usedCapacity" type="floating-point"></field>
+      <field name="exceptionCapacity" type="fixed-point"></field>
+      <field name="usedCapacity" type="fixed-point"></field>
       <field name="description" type="description"></field>
       <prim-key field="calendarId"/>
       <prim-key field="exceptionDateStartTime"/>

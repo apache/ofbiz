@@ -37,6 +37,11 @@ under the License.
     <Enumeration description="Restricted, private access" enumCode="PRIVATE" enumId="WES_PRIVATE" sequenceId="02" enumTypeId="WORK_EFF_SCOPE"/>
     <Enumeration description="Very restricted, confidential access" enumCode="CONFIDENTIAL" enumId="WES_CONFIDENTIAL" sequenceId="03" enumTypeId="WORK_EFF_SCOPE"/>
 
+    <EnumerationType description="Calendar Type" enumTypeId="CALENDAR_TYPE" hasTable="N" parentTypeId=""/>
+    <Enumeration description="Personal Calendar" enumCode="PERSONAL" enumId="CAL_PERSONAL" sequenceId="01" enumTypeId="CALENDAR_TYPE"/>
+    <Enumeration description="Manufacturing Calendar" enumCode="MANUFACTURING" enumId="CAL_MANUFACTURING" sequenceId="02" enumTypeId="CALENDAR_TYPE"/>
+    <Enumeration description="None" enumId="CAL_NONE" sequenceId="03" enumTypeId="CALENDAR_TYPE"/>
+
     <!-- workeffort status -->
     <StatusType description="WorkEffort Asset" hasTable="N" parentTypeId="" statusTypeId="WORK_EFF_ASSET_STTS"/>
     <StatusType description="WorkEffort Assignment" hasTable="N" parentTypeId="" statusTypeId="WORK_EFFORT_ASSIGN"/>
@@ -158,6 +163,7 @@ under the License.
     <WorkEffortType description="Workflow Process" hasTable="N" parentTypeId="" workEffortTypeId="WORK_FLOW"/>
     <WorkEffortType description="Workflow Activity" hasTable="N" parentTypeId="" workEffortTypeId="ACTIVITY"/>
     <WorkEffortType description="Task" hasTable="N" parentTypeId="" workEffortTypeId="TASK"/>
+    <WorkEffortType description="Milestone" hasTable="N" parentTypeId="" workEffortTypeId="MILESTONE"/>
     <WorkEffortType description="Event" hasTable="N" parentTypeId="" workEffortTypeId="EVENT"/>
     <WorkEffortType description="Available" hasTable="N" parentTypeId="" workEffortTypeId="AVAILABLE"/>
     <WorkEffortType description="Program" hasTable="N" parentTypeId="" workEffortTypeId="PROGRAM"/>
@@ -172,6 +178,7 @@ under the License.
 
     <WorkEffortType description="Business Travel" hasTable="N" parentTypeId="EVENT" workEffortTypeId="BUSINESS_TRAVEL"/>
     <WorkEffortType description="Meeting" hasTable="N" parentTypeId="EVENT" workEffortTypeId="MEETING"/>
+    <WorkEffortType description="Training" hasTable="N" parentTypeId="EVENT" workEffortTypeId="TRAINING"/>
     <WorkEffortType description="Personal Time Off" hasTable="N" parentTypeId="EVENT" workEffortTypeId="PERSONAL_TIMEOFF"/>
     <WorkEffortType description="Publish Properties" hasTable="N" workEffortTypeId="PUBLISH_PROPS"/>
 
@@ -224,6 +231,15 @@ under the License.
     <StatusValidChange condition="" statusId="WERV_PENDING" statusIdTo="WERV_DELETED" transitionName="Review Deleted"/>
     <StatusValidChange condition="" statusId="WERV_APPROVED" statusIdTo="WERV_DELETED" transitionName="Review Deleted"/>
 
-    <WebSite webSiteId="WORKEFFORT" siteName="Work Effort Manager" visualThemeSetId="BACKOFFICE"/>
+    <!-- iCalendar Data -->
+    <RoleType description="Calendar Member" hasTable="N" parentTypeId="CALENDAR_ROLE" roleTypeId="ICAL_MEMBER"/>
+    <ContactMechType contactMechTypeId="LDAP_ADDRESS" parentTypeId="ELECTRONIC_ADDRESS" hasTable="N" description="LDAP URL"/>
+    <ContactMechPurposeType contactMechPurposeTypeId="ICAL_URL" description="iCalendar URL"/>
+    <ContactMechTypePurpose contactMechPurposeTypeId="ICAL_URL" contactMechTypeId="EMAIL_ADDRESS"/>
+    <ContactMechTypePurpose contactMechPurposeTypeId="ICAL_URL" contactMechTypeId="LDAP_ADDRESS"/>
+    <ContactMechTypePurpose contactMechPurposeTypeId="ICAL_URL" contactMechTypeId="WEB_ADDRESS"/>
 
+    <!-- WorkEffort Email Template Settings -->
+    <EmailTemplateSetting emailTemplateSettingId="WEFF_EVENT_REMINDER" description="" fromAddress="ofbiztest@example.com" subject="Event Reminder"
+            bodyScreenLocation="component://workeffort/widget/WorkEffortScreens.xml#WorkEffortEventReminderEmail"/>
 </entity-engine-xml>

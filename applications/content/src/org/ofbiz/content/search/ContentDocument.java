@@ -20,7 +20,6 @@ package org.ofbiz.content.search;
 
 import java.io.IOException;
 import java.sql.Timestamp;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -31,19 +30,20 @@ import javolution.util.FastMap;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.GeneralException;
 import org.ofbiz.base.util.StringUtil;
+import org.ofbiz.base.util.UtilGenerics;
 import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.content.content.ContentWorker;
-import org.ofbiz.entity.GenericDelegator;
+import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
 import org.ofbiz.service.LocalDispatcher;
 
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
-import org.apache.lucene.document.Field.Index;
 import org.apache.lucene.document.Field.Store;
-import org.apache.lucene.document.Field.TermVector;
+import org.apache.lucene.document.StringField;
+import org.apache.lucene.document.TextField;
 
 /**
  * ContentDocument Class
@@ -54,55 +54,53 @@ public class ContentDocument {
     static char dirSep = System.getProperty("file.separator").charAt(0);
     public static final String module = ContentDocument.class.getName();
 
-    public static Document Document(String id, GenericDelegator delegator, LocalDispatcher dispatcher) throws InterruptedException  {
+    public static Document Document(String id, Delegator delegator, LocalDispatcher dispatcher) throws InterruptedException  {
 
         Document doc = null;
         GenericValue content;
           try {
-              content = delegator.findByPrimaryKeyCache("Content", UtilMisc.toMap("contentId",id));
+              content = delegator.findOne("Content", UtilMisc.toMap("contentId",id), true);
           } catch (GenericEntityException e) {
               Debug.logError(e, module);
               return doc;
           }
 
-        Map map = FastMap.newInstance();
+        Map<String, Object> map = FastMap.newInstance();
           doc = Document(content, map, dispatcher);
         return doc;
     }
 
-    public static Document Document(GenericValue content, Map context, LocalDispatcher dispatcher) throws InterruptedException {
+    public static Document Document(GenericValue content, Map<String, Object> context, LocalDispatcher dispatcher) throws InterruptedException {
 
         Document doc;
         // make a new, empty document
         doc = new Document();
         String contentId = content.getString("contentId");
-        doc.add(new Field("contentId", contentId, Store.YES, Index.UN_TOKENIZED, TermVector.NO));
-        // Add the last modified date of the file a field named "modified". Use
-        // a
+        doc.add(new StringField("contentId", contentId, Store.YES));
+        // Add the last modified date of the file a field named "modified". Use a
         // Keyword field, so that it's searchable, but so that no attempt is
-        // made
-        // to tokenize the field into words.
+        // made to tokenize the field into words.
         Timestamp modDate = (Timestamp) content.get("lastModifiedDate");
         if (modDate == null) {
             modDate = (Timestamp) content.get("createdDate");
         }
         if (modDate != null) {
-            doc.add(new Field("modified", modDate.toString(), Store.YES, Index.UN_TOKENIZED, TermVector.NO));
+            doc.add(new StringField("modified", modDate.toString(), Store.YES));
         }
         String contentName = content.getString("contentName");
         if (UtilValidate.isNotEmpty(contentName))
-            doc.add(new Field("title", contentName, Store.YES, Index.TOKENIZED, TermVector.NO));
+            doc.add(new TextField("title", contentName, Store.YES));
         String description = content.getString("description");
         if (UtilValidate.isNotEmpty(description))
-            doc.add(new Field("description", description, Store.YES, Index.TOKENIZED, TermVector.NO));
-        List ancestorList = FastList.newInstance();
-        GenericDelegator delegator = content.getDelegator();
+            doc.add(new TextField("description", description, Store.YES));
+        List<String> ancestorList = FastList.newInstance();
+        Delegator delegator = content.getDelegator();
         ContentWorker.getContentAncestryAll(delegator, contentId, "WEB_SITE_PUB_PT", "TO", ancestorList);
         String ancestorString = StringUtil.join(ancestorList, " ");
         //Debug.logInfo("in ContentDocument, ancestorString:" + ancestorString,
         // module);
         if (UtilValidate.isNotEmpty(ancestorString)) {
-            Field field = new Field("site", ancestorString, Store.NO, Index.TOKENIZED, TermVector.NO);
+            Field field = new StringField("site", ancestorString, Store.NO);
             //Debug.logInfo("in ContentDocument, field:" + field.stringValue(),
             // module);
             doc.add(field);
@@ -115,8 +113,8 @@ public class ContentDocument {
         return doc;
     }
 
-    public static boolean indexDataResource(GenericValue content, Document doc, Map context, LocalDispatcher dispatcher) {
-        GenericDelegator delegator = content.getDelegator();
+    public static boolean indexDataResource(GenericValue content, Document doc, Map<String, Object> context, LocalDispatcher dispatcher) {
+        Delegator delegator = content.getDelegator();
         String contentId = content.getString("contentId");
         //Debug.logInfo("in ContentDocument, contentId:" + contentId,
         // module);
@@ -124,16 +122,16 @@ public class ContentDocument {
         //Debug.logInfo("in ContentDocument, dataResourceId:" + dataResourceId, module);
         GenericValue dataResource;
         try {
-            dataResource = delegator.findByPrimaryKeyCache("DataResource", UtilMisc.toMap("dataResourceId", dataResourceId));
+            dataResource = delegator.findOne("DataResource", UtilMisc.toMap("dataResourceId", dataResourceId), true);
         } catch (GenericEntityException e) {
             Debug.logError(e, module);
-            List badIndexList = (List) context.get("badIndexList");
+            List<String> badIndexList = UtilGenerics.checkList(context.get("badIndexList"));
             badIndexList.add(contentId + " - " + e.getMessage());
             //Debug.logInfo("in DataResourceDocument, badIndexList:" + badIndexList, module);
             return false;
         }
         if (dataResource == null) {
-            List badIndexList = (List) context.get("badIndexList");
+            List<String> badIndexList = UtilGenerics.checkList(context.get("badIndexList"));
             badIndexList.add(contentId + " - dataResource is null.");
             //Debug.logInfo("in DataResourceDocument, badIndexList:" + badIndexList, module);
             return false;
@@ -152,43 +150,41 @@ public class ContentDocument {
             text = ContentWorker.renderContentAsText(dispatcher, delegator, contentId, context, locale, mimeTypeId, true);
         } catch (GeneralException e) {
             Debug.logError(e, module);
-            List badIndexList = (List) context.get("badIndexList");
+            List<String> badIndexList = UtilGenerics.checkList(context.get("badIndexList"));
             badIndexList.add(contentId + " - " + e.getMessage());
             //Debug.logInfo("in DataResourceDocument, badIndexList:" + badIndexList, module);
             return false;
         } catch (IOException e2) {
             Debug.logError(e2, module);
-            List badIndexList = (List) context.get("badIndexList");
+            List<String> badIndexList = UtilGenerics.checkList(context.get("badIndexList"));
             badIndexList.add(contentId + " - " + e2.getMessage());
             //Debug.logInfo("in DataResourceDocument, badIndexList:" + badIndexList, module);
             return false;
         }
         //Debug.logInfo("in DataResourceDocument, text:" + text, module);
         if (UtilValidate.isNotEmpty(text)) {
-            Field field = new Field("content", text, Store.NO, Index.TOKENIZED, TermVector.NO);
+            Field field = new TextField("content", text, Store.NO);
             //Debug.logInfo("in ContentDocument, field:" + field.stringValue(), module);
             doc.add(field);
         }
-        List featureDataResourceList;
+        List<GenericValue> featureDataResourceList;
         try {
-            featureDataResourceList = content.getRelatedCache("ProductFeatureDataResource");
+            featureDataResourceList = content.getRelated("ProductFeatureDataResource", null, null, true);
         } catch (GenericEntityException e) {
             Debug.logError(e, module);
-            List badIndexList = (List) context.get("badIndexList");
+            List<String> badIndexList = UtilGenerics.checkList(context.get("badIndexList"));
             badIndexList.add(contentId + " - " + e.getMessage());
             return false;
         }
-        List featureList = FastList.newInstance();
-        Iterator iter = featureDataResourceList.iterator();
-        while (iter.hasNext()) {
-            GenericValue productFeatureDataResource = (GenericValue) iter .next();
+        List<String> featureList = FastList.newInstance();
+        for (GenericValue productFeatureDataResource : featureDataResourceList) {
             String feature = productFeatureDataResource.getString("productFeatureId");
             featureList.add(feature);
         }
         String featureString = StringUtil.join(featureList, " ");
         //Debug.logInfo("in ContentDocument, featureString:" + featureString, module);
         if (UtilValidate.isNotEmpty(featureString)) {
-            Field field = new Field("feature", featureString, Store.NO, Index.TOKENIZED, TermVector.NO);
+            Field field = new TextField("feature", featureString, Store.NO);
             doc.add(field);
         }
         return true;

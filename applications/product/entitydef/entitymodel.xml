@@ -24,9 +24,8 @@ under the License.
     <!-- ========================================================= -->
     <title>Entity of an Open For Business Project Component</title>
     <description>None</description>
-    <copyright>Copyright 2001-2008 The Apache Software Foundation</copyright>
-    <author>None</author>
     <version>1.0</version>
+    <default-resource-name>ProductEntityLabels</default-resource-name>
 
     <!-- ========================================================= -->
     <!-- ======================== Data Model ===================== -->
@@ -53,7 +52,7 @@ under the License.
 
     <entity entity-name="ProdCatalog"
             package-name="org.ofbiz.product.catalog"
-            title="Catalog Entity">
+            title="Catalog Entity" default-resource-name="ProductEntityLabels">
       <field name="prodCatalogId" type="id-ne"></field>
       <field name="catalogName" type="name"></field>
       <field name="useQuickAdd" type="indicator"></field>
@@ -94,8 +93,12 @@ under the License.
             default-resource-name="ProductEntityLabels"
             title="Catalog Category Association Type Entity">
       <field name="prodCatalogCategoryTypeId" type="id-ne"></field>
+      <field name="parentTypeId" type="id"></field>
       <field name="description" type="description"></field>
       <prim-key field="prodCatalogCategoryTypeId"/>
+      <relation type="one" fk-name="PROD_PCCT_TYPEPAR" title="Parent" rel-entity-name="ProdCatalogCategoryType">
+        <key-map field-name="parentTypeId" rel-field-name="prodCatalogCategoryTypeId"/>
+      </relation>
     </entity>
     <entity entity-name="ProdCatalogInvFacility"
             package-name="org.ofbiz.product.catalog"
@@ -162,6 +165,7 @@ under the License.
         <alias-all entity-alias="PCM">
             <exclude field="comments"/>
         </alias-all>
+        <alias name="memberComments" entity-alias="PCM" field="comments"/>
         <view-link entity-alias="PROD" rel-entity-alias="PCM">
             <key-map field-name="productId"/>
         </view-link>
@@ -485,6 +489,7 @@ under the License.
         <alias entity-alias="PCR" name="parentProductCategoryId"/>
         <alias entity-alias="PCR" name="fromDate"/>
         <alias entity-alias="PCR" name="thruDate"/>
+        <alias entity-alias="PCR" name="sequenceNum"/>
         <view-link entity-alias="PCR" rel-entity-alias="CPC">
             <key-map field-name="productCategoryId"/>
         </view-link>
@@ -585,6 +590,20 @@ under the License.
             <key-map field-name="configItemId"/>
         </relation>
     </entity>
+    <view-entity entity-name="ProductConfigAndProduct"
+      package-name="org.ofbiz.product.config"
+      title="Product Config And Product  View Entity, to be able to see which products use a certain configuration item">
+      <member-entity entity-alias="PDC" entity-name="ProductConfig"/>
+      <member-entity entity-alias="PD" entity-name="Product"/>
+      <alias-all entity-alias="PDC">
+        <exclude field="description"/>
+        <exclude field="longDescription"/>
+      </alias-all>
+      <alias-all entity-alias="PD"/>
+      <view-link entity-alias="PDC" rel-entity-alias="PD">
+        <key-map field-name="productId"/>
+      </view-link>
+    </view-entity>
     <entity entity-name="ProductConfigItem"
             package-name="org.ofbiz.product.config"
             title="Product Configuration Question Entity">
@@ -773,6 +792,7 @@ under the License.
       <field name="partyId" type="id"></field>
       <field name="geoId" type="id"></field>
       <field name="workEffortId" type="id"></field>
+      <field name="fixedAssetId" type="id"></field>
       <field name="costComponentCalcId" type="id"></field>
       <field name="fromDate" type="date-time"></field>
       <field name="thruDate" type="date-time"></field>
@@ -799,6 +819,9 @@ under the License.
       </relation>
       <relation type="one" fk-name="COST_COMP_WEFF" rel-entity-name="WorkEffort">
         <key-map field-name="workEffortId"/>
+      </relation>
+      <relation type="one" fk-name="COST_COMP_FXADSST" rel-entity-name="FixedAsset">
+        <key-map field-name="fixedAssetId"/>
       </relation>
       <relation type="one" fk-name="COST_COMP_CALC" rel-entity-name="CostComponentCalc">
         <key-map field-name="costComponentCalcId"/>
@@ -878,6 +901,28 @@ under the License.
             <key-map field-name="costCustomMethodId" rel-field-name="customMethodId"/>
         </relation>
     </entity>
+    <entity entity-name="ProductCostComponentCalc"
+            package-name="org.ofbiz.product.cost"
+            title="Product Cost Calculation Entity">
+        <field name="productId" type="id-ne"></field>
+        <field name="costComponentTypeId" type="id-ne"></field>
+        <field name="costComponentCalcId" type="id-ne"></field>
+        <field name="fromDate" type="date-time"></field>
+        <field name="sequenceNum" type="numeric"></field>
+        <field name="thruDate" type="date-time"></field>
+        <prim-key field="productId"/>
+        <prim-key field="costComponentTypeId"/>
+        <prim-key field="fromDate"/>
+        <relation type="one" fk-name="PR_COS_COMPCALC" rel-entity-name="Product">
+            <key-map field-name="productId"/>
+        </relation>
+        <relation type="one" fk-name="PR_COS_CCT" rel-entity-name="CostComponentType">
+            <key-map field-name="costComponentTypeId"/>
+        </relation>
+        <relation type="one" fk-name="PR_COS_CCC" rel-entity-name="CostComponentCalc">
+            <key-map field-name="costComponentCalcId"/>
+        </relation>
+    </entity>
 
     <!-- ========================================================= -->
     <!-- org.ofbiz.product.facility -->
@@ -950,12 +995,15 @@ under the License.
         <field name="defaultInventoryItemTypeId" type="id"></field>
         <field name="facilityName" type="name"></field>
         <field name="primaryFacilityGroupId" type="id"></field>
-        <field name="squareFootage" type="numeric"></field>
+        <field name="oldSquareFootage" type="numeric" col-name="SQUARE_FOOTAGE"></field>
+        <field name="facilitySize" type="fixed-point"></field>
+        <field name="facilitySizeUomId" type="id"></field>
         <field name="productStoreId" type="id"></field>
         <field name="defaultDaysToShip" type="numeric"><description>In the absence of a product specific days to ship in ProductFacility, this will be used</description></field>
         <field name="openedDate" type="date-time"></field>
         <field name="closedDate" type="date-time"></field>
         <field name="description" type="description"></field>
+        <field name="defaultDimensionUomId" type="id"><description>This field store the unit of measurement of dimension (length, width and height)</description></field>
         <field name="defaultWeightUomId" type="id"></field>
         <field name="geoPointId" type="id"></field>
         <prim-key field="facilityId"/>
@@ -974,7 +1022,10 @@ under the License.
         <relation type="one" fk-name="FAC_INVITM_TYPE" title="Default" rel-entity-name="InventoryItemType">
             <key-map field-name="defaultInventoryItemTypeId" rel-field-name="inventoryItemTypeId"/>
         </relation>
-        <relation type="one" fk-name="FAC_DEF_UOM" rel-entity-name="Uom">
+        <relation type="one" fk-name="FAC_DEF_DUOM" title="Dimension" rel-entity-name="Uom">
+            <key-map field-name="defaultDimensionUomId" rel-field-name="uomId"/>
+        </relation>
+        <relation type="one" fk-name="FAC_DEF_WUOM" title="Weight" rel-entity-name="Uom">
             <key-map field-name="defaultWeightUomId" rel-field-name="uomId"/>
         </relation>
         <relation type="one-nofk" rel-entity-name="ProductStore">
@@ -987,14 +1038,22 @@ under the License.
         <relation type="one" fk-name="FACILITY_GEOPT" rel-entity-name="GeoPoint">
           <key-map field-name="geoPointId"/>
         </relation>
+      <relation type="one" fk-name="FACILITY_SUOM" title="FacilitySize" rel-entity-name="Uom">
+        <key-map field-name="facilitySizeUomId" rel-field-name="uomId"/>
+      </relation>      
     </entity>
     <view-entity entity-name="FacilityAndContactMech" package-name="org.ofbiz.product.facility" title="Facility and Contact Mech View Entity">
         <member-entity entity-alias="FA" entity-name="Facility"/>
         <member-entity entity-alias="CM" entity-name="FacilityContactMech"/>
+        <member-entity entity-alias="MC" entity-name="ContactMech"/>
         <alias-all entity-alias="FA"/>
         <alias-all entity-alias="CM"/>
+        <alias-all entity-alias="MC"/>
         <view-link entity-alias="FA" rel-entity-alias="CM">
             <key-map field-name="facilityId"/>
+        </view-link>
+        <view-link entity-alias="CM" rel-entity-alias="MC">
+            <key-map field-name="contactMechId"/>
         </view-link>
     </view-entity>
     <entity entity-name="FacilityAttribute" package-name="org.ofbiz.product.facility" title="Facility Attribute Entity">
@@ -1253,6 +1312,36 @@ under the License.
             <key-map field-name="roleTypeId"/>
         </relation>
     </entity>
+    <entity entity-name="FacilityContent" package-name="org.ofbiz.product.facility" title="Facility Content Entity">
+        <field name="facilityId" type="id-ne"></field>
+        <field name="contentId" type="id-ne"></field>
+        <field name="fromDate" type="date-time"></field>
+        <field name="thruDate" type="date-time"></field>
+        <prim-key field="facilityId"/>
+        <prim-key field="contentId"/>
+        <prim-key field="fromDate"/>
+        <relation type="one" fk-name="FAC_CNT_FAC" rel-entity-name="Facility">
+            <key-map field-name="facilityId"/>
+        </relation>
+        <relation type="one" fk-name="FAC_CNT_CNT" rel-entity-name="Content">
+            <key-map field-name="contentId"/>
+        </relation>
+    </entity>      
+    <view-entity entity-name="FacilityContentDetail" package-name="org.ofbiz.product.facility" title="Facility Content Detail View Entity">
+        <member-entity entity-alias="FCT" entity-name="FacilityContent"/>
+        <member-entity entity-alias="CNT" entity-name="Content"/>
+        <alias-all entity-alias="FCT"/>
+        <alias-all entity-alias="CNT"/>
+        <view-link entity-alias="FCT" rel-entity-alias="CNT">
+            <key-map field-name="contentId"/>
+        </view-link>
+        <relation type="one-nofk" rel-entity-name="DataResource">
+            <key-map field-name="dataResourceId"/>
+        </relation>
+        <relation type="one-nofk" rel-entity-name="ContentType">
+            <key-map field-name="contentTypeId"/>
+        </relation>
+    </view-entity>
     <entity entity-name="FacilityType" package-name="org.ofbiz.product.facility" default-resource-name="ProductEntityLabels"
         title="Facility Type Entity">
         <field name="facilityTypeId" type="id-ne"></field>
@@ -1285,6 +1374,7 @@ under the License.
         <field name="minimumStock" type="fixed-point"></field>
         <field name="reorderQuantity" type="fixed-point"></field>
         <field name="daysToShip" type="numeric"></field>
+        <field name="lastInventoryCount" type="fixed-point"><description>This field represents availableToPromiseTotal of a product at a certain point of time and is being updated regularly by a schedule service every hour</description></field>
         <prim-key field="productId"/>
         <prim-key field="facilityId"/>
         <relation type="one" fk-name="PROD_FAC_PROD" rel-entity-name="Product">
@@ -1294,6 +1384,27 @@ under the License.
             <key-map field-name="facilityId"/>
         </relation>
     </entity>
+  <view-entity entity-name="ProductFacilityAndPostalAddress"
+        package-name="org.ofbiz.product.facility"
+        title="Product Facility And Contactmech And Postal Address View Entity, to be able to list products by geographic location">
+    <member-entity entity-alias="PDFT" entity-name="ProductFacility"/>
+    <member-entity entity-alias="FTCT" entity-name="FacilityContactMech"/>
+    <member-entity entity-alias="CT" entity-name="ContactMech"/>
+    <member-entity entity-alias="PTA" entity-name="PostalAddress"/>
+    <alias-all entity-alias="PDFT"/>
+    <alias-all entity-alias="FTCT"/>
+    <alias-all entity-alias="CT"/>
+    <alias-all entity-alias="PTA"/>
+    <view-link entity-alias="PDFT" rel-entity-alias="FTCT">
+      <key-map field-name="facilityId"/>
+    </view-link>
+    <view-link entity-alias="FTCT" rel-entity-alias="CT">
+      <key-map field-name="contactMechId"/>
+    </view-link>
+    <view-link entity-alias="CT" rel-entity-alias="PTA">
+      <key-map field-name="contactMechId"/>
+    </view-link>
+  </view-entity>
     <entity entity-name="ProductFacilityLocation" package-name="org.ofbiz.product.facility" title="Product Facility Entity">
         <field name="productId" type="id-ne"></field>
         <field name="facilityId" type="id-ne"></field>
@@ -1379,6 +1490,7 @@ under the License.
 
     <entity entity-name="ProductFeature"
             package-name="org.ofbiz.product.feature"
+            default-resource-name="ProductEntityLabels"
             title="Product Feature Entity">
       <field name="productFeatureId" type="id-ne"></field>
       <field name="productFeatureTypeId" type="id-ne"></field>
@@ -1389,13 +1501,16 @@ under the License.
       <field name="defaultAmount" type="currency-amount"></field>
       <field name="defaultSequenceNum" type="numeric"></field>
       <field name="abbrev" type="id"></field>
-      <field name="idCode" type="id"></field>
+      <field name="idCode" type="id-long"></field>
       <prim-key field="productFeatureId"/>
       <relation type="one" fk-name="PROD_FEAT_CATEGORY" rel-entity-name="ProductFeatureCategory">
         <key-map field-name="productFeatureCategoryId"/>
       </relation>
       <relation type="one" fk-name="PROD_FEAT_TYPE" rel-entity-name="ProductFeatureType">
         <key-map field-name="productFeatureTypeId"/>
+      </relation>
+      <relation type="one" fk-name="PROD_FEAT_UOM" rel-entity-name="Uom">
+          <key-map field-name="uomId"/>
       </relation>
     </entity>
     <view-entity entity-name="ProductFeatureAndAppl"
@@ -1423,6 +1538,14 @@ under the License.
       <view-link entity-alias="PF" rel-entity-alias="PFA">
         <key-map field-name="productFeatureId"/>
       </view-link>
+      <relation type="one-nofk" rel-entity-name="ProductFeature">
+        <key-map field-name="productFeatureId"/>
+      </relation>
+      <relation type="one-nofk" rel-entity-name="ProductFeatureAppl">
+        <key-map field-name="productId"/>
+        <key-map field-name="productFeatureId"/>
+        <key-map field-name="fromDate"/>
+      </relation>
       <relation type="one-nofk" rel-entity-name="ProductFeatureType">
         <key-map field-name="productFeatureTypeId"/>
       </relation>
@@ -1741,6 +1864,7 @@ under the License.
       <field name="comments" type="comment"></field>
       <field name="quantityOnHandTotal" type="fixed-point"></field>
       <field name="availableToPromiseTotal" type="fixed-point"></field>
+      <field name="accountingQuantityTotal" type="fixed-point"></field>
       <field name="oldQuantityOnHand" col-name="QUANTITY_ON_HAND" type="fixed-point"></field>
       <field name="oldAvailableToPromise" col-name="AVAILABLE_TO_PROMISE" type="fixed-point"></field>
       <field name="serialNumber" type="value"></field>
@@ -1857,10 +1981,34 @@ under the License.
     <view-entity entity-name="InventoryItemAndDetail" package-name="org.ofbiz.product.inventory">
         <member-entity entity-alias="II" entity-name="InventoryItem"/>
         <member-entity entity-alias="IID" entity-name="InventoryItemDetail"/>
-        <alias-all entity-alias="II"/>
-        <alias-all entity-alias="IID">
-            <exclude field="unitCost"/>
-        </alias-all>
+        <alias-all entity-alias="IID"/>
+        <alias entity-alias="II" name="inventoryItemId"/>
+        <alias entity-alias="II" name="inventoryItemTypeId"/>
+        <alias entity-alias="II" name="productId"/>
+        <alias entity-alias="II" name="partyId"/>
+        <alias entity-alias="II" name="ownerPartyId"/>
+        <alias entity-alias="II" name="statusId"/>
+        <alias entity-alias="II" name="datetimeReceived"/>
+        <alias entity-alias="II" name="datetimeManufactured"/>
+        <alias entity-alias="II" name="expireDate"/>
+        <alias entity-alias="II" name="facilityId"/>
+        <alias entity-alias="II" name="containerId"/>
+        <alias entity-alias="II" name="lotId"/>
+        <alias entity-alias="II" name="uomId"/>
+        <alias entity-alias="II" name="binNumber"/>
+        <alias entity-alias="II" name="locationSeqId"/>
+        <alias entity-alias="II" name="comments"/>
+        <alias entity-alias="II" name="quantityOnHandTotal"/>
+        <alias entity-alias="II" name="availableToPromiseTotal"/>
+        <alias entity-alias="II" name="accountingQuantityTotal"/>
+        <alias entity-alias="II" name="oldQuantityOnHand"/>
+        <alias entity-alias="II" name="oldAvailableToPromise"/>
+        <alias entity-alias="II" name="serialNumber"/>
+        <alias entity-alias="II" name="softIdentifier"/>
+        <alias entity-alias="II" name="activationNumber"/>
+        <alias entity-alias="II" name="activationValidThru"/>
+        <alias entity-alias="II" name="currencyUomId"/>
+        <alias entity-alias="II" name="inventoryItemFixedAssetId" field="fixedAssetId"/>
         <view-link entity-alias="II" rel-entity-alias="IID">
             <key-map field-name="inventoryItemId"/>
         </view-link>
@@ -1873,6 +2021,7 @@ under the License.
       <field name="effectiveDate" type="date-time"></field>
       <field name="quantityOnHandDiff" type="fixed-point"></field>
       <field name="availableToPromiseDiff" type="fixed-point"></field>
+      <field name="accountingQuantityDiff" type="fixed-point"></field>
       <field name="unitCost" type="fixed-point"></field>
       <field name="orderId" type="id"></field>
       <field name="orderItemSeqId" type="id"></field>
@@ -1939,16 +2088,24 @@ under the License.
       <alias entity-alias="IID" name="inventoryItemId" group-by="true"/>
       <alias entity-alias="IID" name="availableToPromiseTotal" field="availableToPromiseDiff" function="sum"/>
       <alias entity-alias="IID" name="quantityOnHandTotal" field="quantityOnHandDiff" function="sum"/>
+      <alias entity-alias="IID" name="accountingQuantityTotal" field="accountingQuantityDiff" function="sum"/>
     </view-entity>
     <view-entity entity-name="InventoryItemDetailForSum" package-name="org.ofbiz.product.inventory"
-        title="Inventory Item  And Inventory Item Detail for Summation View Entity">
+        title="Inventory Item And Inventory Item Detail for Summation View Entity">
         <member-entity entity-alias="II" entity-name="InventoryItem"/>
         <member-entity entity-alias="IID" entity-name="InventoryItemDetail"/>
         <alias entity-alias="IID" name="quantityOnHandSum" field="quantityOnHandDiff" function="sum"/>
+        <alias entity-alias="IID" name="accountingQuantitySum" field="accountingQuantityDiff" function="sum"/>
         <alias entity-alias="II" name="inventoryItemTypeId" group-by="true"></alias>
         <alias entity-alias="II" name="facilityId" group-by="true"></alias>
         <alias entity-alias="II" name="productId" group-by="true"></alias>
+        <alias entity-alias="II" name="unitCost" group-by="true"></alias>
+        <alias entity-alias="II" name="currencyUomId" group-by="true"></alias>
         <alias entity-alias="IID" name="effectiveDate"><description>For query only, not in fields to select.</description></alias>
+        <alias entity-alias="IID" name="orderId"><description>For query only, not in fields to select.</description></alias>
+        <alias entity-alias="II" name="ownerPartyId"><description>For query only, not in fields to select.</description></alias>
+        <alias entity-alias="IID" name="quantityOnHandDiff"><description>For query only, not in fields to select.</description></alias>
+        <alias entity-alias="IID" name="accountingQuantityDiff"><description>For query only, not in fields to select.</description></alias>
         <view-link entity-alias="II" rel-entity-alias="IID">
             <key-map field-name="inventoryItemId"/>
         </view-link>
@@ -2248,6 +2405,13 @@ under the License.
       <field name="price" type="currency-precise"></field>
       <field name="termUomId" type="id"><description>Mainly used for recurring and usage prices to specify a time/freq measure, or a usage unit measure (bits, minutes, etc)</description></field>
       <field name="customPriceCalcService" type="id"><description>Points to a CustomMethod used to specify a service for the calculation of the unit price of the product (NOTE: a better name for this field might be priceCalcCustomMethodId)</description></field>
+      <field name="priceWithoutTax" type="currency-precise"><description>Always without tax if populated, regardless of if price does or does not include tax.</description></field>
+      <field name="priceWithTax" type="currency-precise"><description>Always with tax if populated, regardless of if price does or does not include tax.</description></field>
+      <field name="taxAmount" type="currency-precise"/>
+      <field name="taxPercentage" type="fixed-point"/>
+      <field name="taxAuthPartyId" type="id-ne"/>
+      <field name="taxAuthGeoId" type="id-ne"/>
+      <field name="taxInPrice" type="indicator"><description>If Y the price field has tax included for the given taxAuthPartyId/taxAuthGeoId at the taxPercentage.</description></field>
       <field name="createdDate" type="date-time"></field>
       <field name="createdByUserLogin" type="id-vlong"></field>
       <field name="lastModifiedDate" type="date-time"></field>
@@ -2278,6 +2442,12 @@ under the License.
       </relation>
       <relation type="one" fk-name="PROD_PRICE_CMET" rel-entity-name="CustomMethod">
         <key-map field-name="customPriceCalcService" rel-field-name="customMethodId"/>
+      </relation>
+      <relation type="one" fk-name="PROD_PRC_TAXPTY" title="TaxAuthority" rel-entity-name="Party">
+        <key-map field-name="taxAuthPartyId" rel-field-name="partyId"/>
+      </relation>
+      <relation type="one" fk-name="PROD_PRC_TAXGEO" title="TaxAuthority" rel-entity-name="Geo">
+        <key-map field-name="taxAuthGeoId" rel-field-name="geoId"/>
       </relation>
       <relation type="one" fk-name="PROD_PRICE_CBUL" title="CreatedBy" rel-entity-name="UserLogin">
         <key-map field-name="createdByUserLogin" rel-field-name="userLoginId"/>
@@ -2527,6 +2697,7 @@ under the License.
       <field name="manufacturerPartyId" type="id"></field>
       <field name="facilityId" type="id"></field>
       <field name="introductionDate" type="date-time"></field>
+      <field name="releaseDate" type="date-time"></field>
       <field name="supportDiscontinuationDate" type="date-time"></field>
       <field name="salesDiscontinuationDate" type="date-time"></field>
       <field name="salesDiscWhenNotAvail" type="indicator"></field>
@@ -2546,13 +2717,14 @@ under the License.
       <field name="inventoryMessage" type="description"></field>
       <field name="requireInventory" type="indicator"></field>
       <field name="quantityUomId" type="id"></field>
-      <field name="quantityIncluded" type="fixed-point"></field>
+      <field name="quantityIncluded" type="fixed-point"><description>If you have a six-pack of 12oz soda cans you would have quantityIncluded=12, quantityUomId=oz, piecesIncluded=6.</description></field> 
       <field name="piecesIncluded" type="numeric"></field>
       <field name="requireAmount" type="indicator"></field>
       <field name="fixedAmount" type="currency-amount"><description>Use this for products which are sold in fixed denominations, such as gift certificates or calling cards.</description></field>
       <field name="amountUomTypeId" type="id"></field>
       <field name="weightUomId" type="id"></field>
-      <field name="weight" type="fixed-point"></field>
+      <field name="weight" type="fixed-point"><description>The shipping weight of the product.</description></field>
+      <field name="productWeight" type="fixed-point"></field>
       <field name="heightUomId" type="id"></field>
       <field name="productHeight" type="fixed-point"></field>
       <field name="shippingHeight" type="fixed-point"></field>
@@ -2562,6 +2734,8 @@ under the License.
       <field name="depthUomId" type="id"></field>
       <field name="productDepth" type="fixed-point"></field>
       <field name="shippingDepth" type="fixed-point"></field>
+      <field name="diameterUomId" type="id"></field>
+      <field name="productDiameter" type="fixed-point"></field>
       <field name="productRating" type="fixed-point"></field>
       <field name="ratingTypeEnum" type="id"></field>
       <field name="returnable" type="indicator"></field>
@@ -2585,6 +2759,8 @@ under the License.
       <field name="lastModifiedByUserLogin" type="id-vlong"></field>
       <field name="inShippingBox" type="indicator"></field>
       <field name="defaultShipmentBoxTypeId" type="id"></field>
+      <field name="lotIdFilledIn" type="long-varchar"><description>Indicate if the lotId must be informed</description></field>
+      <field name="orderDecimalQuantity" type="indicator"><description>use to indicate if decimal quantity can be ordered for this product. Default value is Y</description></field>
       <prim-key field="productId"/>
       <relation type="one" fk-name="PROD_TYPE" rel-entity-name="ProductType">
         <key-map field-name="productTypeId"/>
@@ -2619,7 +2795,10 @@ under the License.
       <relation type="one" fk-name="PROD_DEPTH_UOM" title="Depth" rel-entity-name="Uom">
         <key-map field-name="depthUomId" rel-field-name="uomId"/>
       </relation>
-      <relation type="one" fk-name="PROD_VVMETHOD_ENUM" title="VitualVariant Method" rel-entity-name="Enumeration">
+      <relation type="one" fk-name="PROD_DIAMTR_UOM" title="Diameter" rel-entity-name="Uom">
+        <key-map field-name="diameterUomId" rel-field-name="uomId"/>
+      </relation>
+      <relation type="one" fk-name="PROD_VVMETHOD_ENUM" title="VirtualVariantMethod" rel-entity-name="Enumeration">
         <key-map field-name="virtualVariantMethodEnum" rel-field-name="enumId"/>
       </relation>
       <relation type="one" fk-name="PROD_RATE_ENUM" title="Rating" rel-entity-name="Enumeration">
@@ -2719,6 +2898,7 @@ under the License.
       <field name="roleTypeId" type="id-ne"></field>
       <field name="fromDate" type="date-time"></field>
       <field name="thruDate" type="date-time"></field>
+      <field name="sequenceNum" type="numeric"><description>a product may have several parties associated to it with the same role; this field can be used to define the order of parties associated to the product in that role</description></field>
       <field name="comments" type="comment"></field>
       <prim-key field="productId"/>
       <prim-key field="partyId"/>
@@ -2780,6 +2960,7 @@ under the License.
       <field name="useTime" type="numeric"></field>
       <field name="useTimeUomId" type="id"></field>
       <field name="useRoleTypeId" type="id"></field>
+      <field name="sequenceNum" type="numeric"></field>
       <prim-key field="productId"/>
       <prim-key field="contentId"/>
       <prim-key field="productContentTypeId"/>
@@ -2904,39 +3085,28 @@ under the License.
             <key-map field-name="productId"/>
         </view-link>
     </view-entity>
-    <entity entity-name="ProductKeyword" package-name="org.ofbiz.product.product" title="Product Keyword Entity" never-cache="true">
+    <entity entity-name="ProductKeyword" table-name="PRODUCT_KEYWORD_NEW"
+            package-name="org.ofbiz.product.product" title="Product Keyword Entity" never-cache="true">
       <field name="productId" type="id-ne"></field>
       <field name="keyword" type="short-varchar"></field>
+      <field name="keywordTypeId" type="id-ne"></field>
       <field name="relevancyWeight" type="numeric"></field>
+      <field name="statusId" type="id-ne"></field>
       <prim-key field="productId"/>
       <prim-key field="keyword"/>
-      <relation type="one" fk-name="PROD_KWD_PROD" rel-entity-name="Product">
+      <prim-key field="keywordTypeId"/>
+      <relation type="one" fk-name="PROD_KWD_PROD_NEW" rel-entity-name="Product">
         <key-map field-name="productId"/>
       </relation>
-      <index name="PROD_KWD_KWD">
+      <relation type="one" fk-name="PROD_KWD_TYPE" rel-entity-name="Enumeration">
+        <key-map field-name="keywordTypeId" rel-field-name="enumId"/>
+      </relation>
+      <relation type="one" fk-name="PROD_KWD_STTS" rel-entity-name="StatusItem">
+        <key-map field-name="statusId"/>
+      </relation>
+      <index name="PROD_KWD_KWD_NEW">
         <index-field name="keyword"/>
       </index>
-    </entity>
-    <entity entity-name="OldProductKeywordResult" table-name="PRODUCT_KEYWORD_RESULT"
-            package-name="org.ofbiz.product.product"
-            never-cache="true"
-            title="Product Keyword Result Entity">
-      <field name="productKeywordResultId" type="id-ne"></field>
-      <field name="visitId" type="id"></field>
-      <field name="productCategoryId" type="id"></field>
-      <field name="searchString" type="short-varchar"></field>
-      <field name="intraKeywordOperator" type="very-short"></field>
-      <field name="anyPrefix" type="indicator"></field>
-      <field name="anySuffix" type="indicator"></field>
-      <field name="removeStems" type="indicator"></field>
-      <field name="numResults" type="numeric"></field>
-      <prim-key field="productKeywordResultId"/>
-      <relation type="one" fk-name="PROD_KWDRES_VST" rel-entity-name="Visit">
-        <key-map field-name="visitId"/>
-      </relation>
-      <relation type="one-nofk" rel-entity-name="ProductCategory">
-        <key-map field-name="productCategoryId"/>
-      </relation>
     </entity>
     <entity entity-name="ProductMeter" package-name="org.ofbiz.product.product" title="Product Meter Entity">
         <field name="productId" type="id-ne"></field>
@@ -3266,10 +3436,12 @@ under the License.
       <field name="productPromoActionSeqId" type="id-ne"></field>
       <field name="productPromoActionEnumId" type="id-ne"></field>
       <field name="orderAdjustmentTypeId" type="id"></field>
+      <field name="serviceName" type="long-varchar"></field>
       <field name="quantity" type="fixed-point"></field>
       <field name="amount" type="fixed-point"></field>
       <field name="productId" type="id"></field>
       <field name="partyId" type="id"></field>
+      <field name="useCartQuantity" type="indicator"></field>
       <prim-key field="productPromoId"/>
       <prim-key field="productPromoRuleId"/>
       <prim-key field="productPromoActionSeqId"/>
@@ -3517,7 +3689,8 @@ under the License.
 
     <entity entity-name="ProductStore"
             package-name="org.ofbiz.product.store"
-            title="Product Store Entity">
+            title="Product Store Entity"
+            default-resource-name="ProductEntityLabels">
       <field name="productStoreId" type="id-ne"></field>
       <field name="primaryStoreGroupId" type="id"></field>
       <field name="storeName" type="name"></field>
@@ -3568,12 +3741,12 @@ under the License.
       <field name="authFraudMessage" type="long-varchar"></field>
       <field name="authErrorMessage" type="long-varchar"></field>
       <field name="visualThemeId" type="id"></field>
-
-      <!-- old fields, deprecated -->
-      <field name="oldStyleSheet" col-name="STYLE_SHEET" type="url"></field>
-      <field name="oldHeaderLogo" col-name="HEADER_LOGO" type="url"></field>
-      <field name="oldHeaderMiddleBackground" col-name="HEADER_MIDDLE_BACKGROUND" type="url"></field>
-      <field name="oldHeaderRightBackground" col-name="HEADER_RIGHT_BACKGROUND" type="url"></field>
+      <field name="storeCreditAccountEnumId" type="id">
+          <description>Specify the type (Billing Account or Financial Account) of Store Credit Account used for refund return. Default to Financial Account. 
+              This field is override by ReturnHeader.billingAccountId or ReturnHeader.finAccountId, whichever is specified but if only finAccountId is specified explicitly then system will first
+              try to locate any billing account with -ve amount. If found, then amount is credit to this billing account else the amount will be credit to the financial account of the user.
+          </description>
+      </field>
 
       <field name="usePrimaryEmailUsername" type="indicator"></field>
       <field name="requireCustomerRole" type="indicator"></field>
@@ -3602,6 +3775,15 @@ under the License.
       <field name="addToCartRemoveIncompat" type="indicator"><description>Default N. If Y then on add to cart remove all products in cart with a ProductAssoc record related to or from the product and with the PRODUCT_INCOMPATABLE type.</description></field>
       <field name="addToCartReplaceUpsell" type="indicator"><description>Default N. If Y then on add to cart remove all products in cart with a ProductAssoc record related from the product and with the PRODUCT_UPGRADE type.</description></field>
       <field name="splitPayPrefPerShpGrp" type="indicator"><description>Default N. If Y then before the order is stored the OrderPaymentPreference record will be split, one for each OrderItemShipGroup.</description></field>
+      <field name="managedByLot" type="indicator"><description>If Y, the preparator can choose the InventoryItem by this lotId when he makes the picklist.</description></field>
+      <field name="showOutOfStockProducts" type="indicator"><description>Default Y. If N then out of stock products will not be displayed on site</description></field>
+      <field name="orderDecimalQuantity" type="indicator"><description>use to indicate if decimal quantity can be ordered for this producStore. Default value is Y</description></field>
+        
+        <!-- old fields, deprecated -->
+        <field name="oldStyleSheet" col-name="STYLE_SHEET" type="url"></field>
+        <field name="oldHeaderLogo" col-name="HEADER_LOGO" type="url"></field>
+        <field name="oldHeaderMiddleBackground" col-name="HEADER_MIDDLE_BACKGROUND" type="url"></field>
+        <field name="oldHeaderRightBackground" col-name="HEADER_RIGHT_BACKGROUND" type="url"></field>
       <prim-key field="productStoreId"/>
       <relation type="one" fk-name="PROD_STR_PRSTRGP" title="Primary" rel-entity-name="ProductStoreGroup">
         <key-map field-name="primaryStoreGroupId" rel-field-name="productStoreGroupId"/>
@@ -3648,6 +3830,9 @@ under the License.
       <relation type="one" fk-name="PROD_STR_VATTXA" title="Vat" rel-entity-name="TaxAuthority">
         <key-map field-name="vatTaxAuthGeoId" rel-field-name="taxAuthGeoId"/>
         <key-map field-name="vatTaxAuthPartyId" rel-field-name="taxAuthPartyId"/>
+      </relation>
+      <relation type="one" fk-name="PROD_STR_STRCRDACT" title="StoreCreditAccount" rel-entity-name="Enumeration">
+        <key-map field-name="storeCreditAccountEnumId" rel-field-name="enumId"/>
       </relation>
     </entity>
     <entity entity-name="ProductStoreCatalog"
@@ -4021,16 +4206,27 @@ under the License.
       <field name="excludeGeoId" type="id"></field>
       <field name="serviceName" type="long-varchar"></field>
       <field name="configProps" type="long-varchar"></field>
+      <field name="shipmentCustomMethodId" type="id"></field>
+      <field name="shipmentGatewayConfigId" type="id"></field>
       <field name="sequenceNumber" type="numeric"></field>
       <prim-key field="productStoreShipMethId"/>
       <relation type="one-nofk" rel-entity-name="Party">
         <key-map field-name="companyPartyId" rel-field-name="partyId"/>
+      </relation>
+      <relation type="one" rel-entity-name="ShipmentMethodType">
+        <key-map field-name="shipmentMethodTypeId"/>
       </relation>
       <relation type="one-nofk" title="Include"  rel-entity-name="Geo">
         <key-map field-name="includeGeoId" rel-field-name="geoId"/>
       </relation>
       <relation type="one-nofk" title="Exclude" rel-entity-name="Geo">
         <key-map field-name="excludeGeoId" rel-field-name="geoId"/>
+      </relation>
+      <relation type="one" fk-name="PRDS_SM_SGC" rel-entity-name="ShipmentGatewayConfig">
+        <key-map field-name="shipmentGatewayConfigId"/>
+      </relation>
+      <relation type="one" fk-name="PRDS_SM_CUS_MET" rel-entity-name="CustomMethod">
+        <key-map field-name="shipmentCustomMethodId" rel-field-name="customMethodId"/>
       </relation>
     </entity>
     <view-entity entity-name="ProductStoreShipmentMethView"
@@ -4059,6 +4255,10 @@ under the License.
       <alias entity-alias="PSSM" name="excludeGeoId"/>
       <alias entity-alias="PSSM" name="includeFeatureGroup"/>
       <alias entity-alias="PSSM" name="excludeFeatureGroup"/>
+      <alias entity-alias="PSSM" name="serviceName"/>
+      <alias entity-alias="PSSM" name="configProps"/>
+      <alias entity-alias="PSSM" name="shipmentCustomMethodId"/>
+      <alias entity-alias="PSSM" name="shipmentGatewayConfigId"/>
       <alias entity-alias="PSSM" name="sequenceNumber"/>
       <alias entity-alias="SM" name="description"/>
       <view-link entity-alias="PSSM" rel-entity-alias="SM">
@@ -4187,10 +4387,10 @@ under the License.
         <field name="useTime" type="numeric"><description>The length of time this subscription can be used</description></field>
         <field name="useTimeUomId" type="id"></field>
         <field name="useRoleTypeId" type="id"></field>
-      <field name="automaticExtend" type="indicator"><description>If this subscription is automatically extended with the same period as the initial period.</description></field>
-      <field name="canclAutmExtTime" type="numeric"><description>The time period (before the end of the thruedate) after which the automatic extension of the subscription will be executed.</description></field>
-      <field name="canclAutmExtTimeUomId" type="id"><description>If this flag is set to 'Y' the subscription will be extended at the end of the subscription period with a new order.</description></field>
-      <prim-key field="productId"/>
+        <field name="automaticExtend" type="indicator"><description>If this subscription is automatically extended with the same period as the initial period.</description></field>
+        <field name="canclAutmExtTime" type="numeric"><description>The time period (before the end of the thruDate) after which the automatic extension of the subscription will be executed.</description></field>
+        <field name="canclAutmExtTimeUomId" type="id"><description>Unit Of Measure used for the automatic extension of the subscription.</description></field>
+        <prim-key field="productId"/>
         <prim-key field="subscriptionResourceId"/>
         <prim-key field="fromDate"/>
         <relation type="one" fk-name="PROD_SBRS_PROD" rel-entity-name="Product">
@@ -4205,9 +4405,9 @@ under the License.
         <relation type="one" fk-name="PROD_SBRS_UTU" title="UseTime" rel-entity-name="Uom">
             <key-map field-name="useTimeUomId" rel-field-name="uomId"/>
         </relation>
-      <relation type="one" fk-name="PROD_SBRS_CTU" title="CancelTime" rel-entity-name="Uom">
-        <key-map field-name="canclAutmExtTimeUomId" rel-field-name="uomId"/>
-      </relation>
+        <relation type="one" fk-name="PROD_SBRS_CTU" title="CancelTime" rel-entity-name="Uom">
+            <key-map field-name="canclAutmExtTimeUomId" rel-field-name="uomId"/>
+        </relation>
         <relation type="one" fk-name="PROD_SBRS_ATU" title="AvailableTime" rel-entity-name="Uom">
             <key-map field-name="availableTimeUomId" rel-field-name="uomId"/>
         </relation>
@@ -4221,7 +4421,7 @@ under the License.
         <field name="subscriptionId" type="id-ne"></field>
         <field name="description" type="description"></field>
         <field name="subscriptionResourceId" type="id"></field>
-      <field name="communicationEventId" type="id"><description>now replaced by entity: SubscriptionCommEvent</description></field>
+        <field name="communicationEventId" type="id"><description>now replaced by entity: SubscriptionCommEvent</description></field>
         <field name="contactMechId" type="id"></field>
         <field name="originatedFromPartyId" type="id"></field>
         <field name="originatedFromRoleTypeId" type="id"></field>
@@ -4248,10 +4448,10 @@ under the License.
         <field name="useCountLimit" type="numeric"></field>
         <field name="useTime" type="numeric"></field>
         <field name="useTimeUomId" type="id"></field>
-      <field name="automaticExtend" type="indicator"><description>If this subscription is automatically extended with the same period as the initial period.</description></field>
-      <field name="canclAutmExtTime" type="numeric"><description>The time period (before the end of the thruedate) after which the automatic extension of the subscription will be executed.</description></field>
-      <field name="canclAutmExtTimeUomId" type="id"><description>If this flag is set to 'Y' the subscription will be extended at the end of the subscription period with a new order.</description></field>
-      <prim-key field="subscriptionId"/>
+        <field name="automaticExtend" type="indicator"><description>If this subscription is automatically extended with the same period as the initial period.</description></field>
+        <field name="canclAutmExtTime" type="numeric"><description>The time period (before the end of the thruDate) after which the automatic extension of the subscription will be executed.</description></field>
+        <field name="canclAutmExtTimeUomId" type="id"><description>Unit Of Measure used for the automatic extension of the subscription.</description></field>
+        <prim-key field="subscriptionId"/>
         <relation type="one" fk-name="SUBSC_SRESRC" rel-entity-name="SubscriptionResource">
             <key-map field-name="subscriptionResourceId"/>
         </relation>
@@ -4261,13 +4461,13 @@ under the License.
         <relation type="one" fk-name="SUBSC_PARTY" rel-entity-name="Party">
             <key-map field-name="partyId"/>
         </relation>
-      <relation type="one" fk-name="SUBSC_UTU" title="UseTime" rel-entity-name="Uom">
-        <key-map field-name="useTimeUomId" rel-field-name="uomId"/>
-      </relation>
-      <relation type="one" fk-name="SUBSC_CTU" title="CancelTime" rel-entity-name="Uom">
-        <key-map field-name="canclAutmExtTimeUomId" rel-field-name="uomId"/>
-      </relation>
-      <relation type="one" fk-name="SUBSC_ATU" title="AvailableTime" rel-entity-name="Uom">
+        <relation type="one" fk-name="SUBSC_UTU" title="UseTime" rel-entity-name="Uom">
+            <key-map field-name="useTimeUomId" rel-field-name="uomId"/>
+        </relation>
+        <relation type="one" fk-name="SUBSC_CTU" title="CancelTime" rel-entity-name="Uom">
+            <key-map field-name="canclAutmExtTimeUomId" rel-field-name="uomId"/>
+        </relation>
+        <relation type="one" fk-name="SUBSC_ATU" title="AvailableTime" rel-entity-name="Uom">
             <key-map field-name="availableTimeUomId" rel-field-name="uomId"/>
         </relation>
         <relation type="one" fk-name="SUBSC_MTU" title="MaxLifeTime" rel-entity-name="Uom">
@@ -4422,7 +4622,7 @@ under the License.
     </entity>
     <view-entity entity-name="SubscriptionAndCommEvent"
                  package-name="org.ofbiz.product.subscription"
-                 title="Subscription And Communication Event   View Entity">
+                 title="Subscription And Communication Event View Entity">
       <member-entity entity-alias="SC" entity-name="SubscriptionCommEvent"/>
       <member-entity entity-alias="CE" entity-name="CommunicationEvent"/>
       <alias-all entity-alias="SC"/>
@@ -4504,11 +4704,12 @@ under the License.
       <field name="agreementId" type="id"></field>
       <field name="agreementItemSeqId" type="id"></field>
       <field name="lastPrice" type="currency-precise"></field>
+      <field name="shippingPrice" type="currency-precise"></field>
       <field name="currencyUomId" type="id"></field>
       <field name="supplierProductName" type="name"></field>
       <field name="supplierProductId" type="id"></field>
       <field name="canDropShip" type="indicator"></field>
-      <field name="supplierCommissionPerc" type="fixed-point"></field>
+      <!-- field name="supplierCommissionPerc" type="fixed-point"><description>Unused field, better use commission run using agreements in accounting</description></field-->
       <field name="comments" type="comment"></field>
       <prim-key field="productId"/>
       <prim-key field="partyId"/>
@@ -4580,76 +4781,50 @@ under the License.
       <field name="description" type="description"></field>
       <prim-key field="supplierRatingTypeId"/>
     </entity>
+    
+    <entity entity-name="ProductPromoContent"
+            package-name="org.ofbiz.product.promo"
+            title="Product Promo Content Entity">
+      <field name="productPromoId" type="id-ne"/>
+      <field name="contentId" type="id-ne"/>
+      <field name="productPromoContentTypeId" type="id-ne"/>
+      <field name="fromDate" type="date-time"/>
+      <field name="thruDate" type="date-time"/>
+      <prim-key field="productPromoId"/>
+      <prim-key field="contentId"/>
+      <prim-key field="productPromoContentTypeId"/>
+      <prim-key field="fromDate"/>
+      <relation type="one" fk-name="PRODPR_CNT_PROD_PR" rel-entity-name="ProductPromo">
+        <key-map field-name="productPromoId"/>
+      </relation>
+      <relation type="one" fk-name="PRODPR_CNT_CNT" rel-entity-name="Content">
+        <key-map field-name="contentId"/>
+      </relation>
+      <relation type="one" fk-name="PRODPR_CNT_TYPE" rel-entity-name="ProductContentType">
+        <key-map field-name="productPromoContentTypeId" rel-field-name="productContentTypeId"/>
+      </relation>
+    </entity>
 
-  <view-entity entity-name="ProductFacilityAndPostalAddress"
-        package-name="org.ofbiz.product.product"
-        title="Product Facility And Contactmech And Postal Address View Entity, to be able to list products by geographic location">
-    <member-entity entity-alias="PDFT" entity-name="ProductFacility"/>
-    <member-entity entity-alias="FTCT" entity-name="FacilityContactMech"/>
-    <member-entity entity-alias="CT" entity-name="ContactMech"/>
-    <member-entity entity-alias="PTA" entity-name="PostalAddress"/>
-    <alias-all entity-alias="PDFT"/>
-    <alias-all entity-alias="FTCT"/>
-    <alias-all entity-alias="CT"/>
-    <alias-all entity-alias="PTA"/>
-    <view-link entity-alias="PDFT" rel-entity-alias="FTCT">
-      <key-map field-name="facilityId"/>
-    </view-link>
-    <view-link entity-alias="FTCT" rel-entity-alias="CT">
-      <key-map field-name="contactMechId"/>
-    </view-link>
-    <view-link entity-alias="CT" rel-entity-alias="PTA">
-      <key-map field-name="contactMechId"/>
-    </view-link>
-  </view-entity>
-
-  <view-entity entity-name="ProductConfigAndProduct"
-    package-name="org.ofbiz.product.product"
-    title="Product Config And Product  View Entity, to be able to see which products use a certain configuration item">
-    <member-entity entity-alias="PDC" entity-name="ProductConfig"/>
-    <member-entity entity-alias="PD" entity-name="Product"/>
-    <alias-all entity-alias="PDC">
-      <exclude field="description"/>
-      <exclude field="longDescription"/>
-    </alias-all>
-    <alias-all entity-alias="PD"/>
-    <view-link entity-alias="PDC" rel-entity-alias="PD">
-      <key-map field-name="productId"/>
-    </view-link>
-  </view-entity>
-
-  <view-entity entity-name="OrderItemAndFacilityLocationView" package-name="org.ofbiz.product.facility" title="Order Item And Facility Location View Entity">
-    <member-entity entity-alias="SMT" entity-name="ShipmentMethodType"/>
-    <member-entity entity-alias="OISG" entity-name="OrderItemShipGroup"/>
-    <member-entity entity-alias="OI" entity-name="OrderItem"/>
-    <member-entity entity-alias="PFL" entity-name="ProductFacilityLocation"/>
-    <member-entity entity-alias="FL" entity-name="FacilityLocation"/>
-    <alias entity-alias="OISG" name="orderId"/>
-    <alias entity-alias="OISG" name="shipGroupSeqId"/>
-    <alias entity-alias="OISG" name="shipmentMethodTypeId"/>
-    <alias entity-alias="OISG" name="carrierPartyId"/>
-    <alias entity-alias="OI" name="productId"/>
-    <alias entity-alias="OI" name="orderItemSeqId"/>
-    <alias entity-alias="PFL" name="locationSeqId"/>
-    <alias entity-alias="PFL" name="facilityId"/>
-    <alias entity-alias="FL" name="locationTypeEnumId"/>
-    <alias entity-alias="FL" name="areaId"/>
-    <view-link entity-alias="OI" rel-entity-alias="OISG">
-      <key-map field-name="orderId"/>
-    </view-link>
-    <view-link entity-alias="OISG" rel-entity-alias="SMT">
-      <key-map field-name="shipmentMethodTypeId"/>
-    </view-link>
-    <view-link entity-alias="OI" rel-entity-alias="PFL">
-      <key-map field-name="productId"/>
-    </view-link>
-    <view-link entity-alias="PFL" rel-entity-alias="FL">
-      <key-map field-name="facilityId"/>
-      <key-map field-name="locationSeqId"/>
-    </view-link>
-    <relation type="one-nofk" rel-entity-name="ShipmentMethodType">
-      <key-map field-name="shipmentMethodTypeId"/>
-    </relation>
-  </view-entity>
-
+    <entity entity-name="ProductGroupOrder"
+            package-name="org.ofbiz.product.product"
+            title="Product Group Order Entity">
+      <field name="groupOrderId" type="id-ne"></field>
+      <field name="productId" type="id-ne"></field>
+      <field name="fromDate" type="date-time"></field>
+      <field name="thruDate" type="date-time"></field>
+      <field name="statusId" type="id-ne"></field>
+      <field name="reqOrderQty" type="fixed-point"></field>
+      <field name="soldOrderQty" type="fixed-point"></field>
+      <field name="jobId" type="id-ne"></field>
+      <prim-key field="groupOrderId"/>
+      <relation type="one" fk-name="PROD_GROUP_ORDER" rel-entity-name="Product">
+        <key-map field-name="productId"/>
+      </relation>
+      <relation type="one" fk-name="GROUP_ORDER_STATUS" rel-entity-name="StatusItem">
+        <key-map field-name="statusId"/>
+      </relation>
+      <relation type="one" fk-name="GROUP_ORDER_JOB" rel-entity-name="JobSandbox">
+        <key-map field-name="jobId"/>
+      </relation>
+    </entity>
 </entitymodel>

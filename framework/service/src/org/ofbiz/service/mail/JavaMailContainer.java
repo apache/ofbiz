@@ -22,10 +22,20 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.Timer;
-import java.util.TimerTask;
-import javax.mail.*;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+import javax.mail.FetchProfile;
+import javax.mail.Flags;
+import javax.mail.Folder;
+import javax.mail.Message;
+import javax.mail.MessagingException;
+import javax.mail.NoSuchProviderException;
+import javax.mail.Session;
+import javax.mail.Store;
+import javax.mail.URLName;
 import javax.mail.internet.MimeMessage;
+import javax.mail.search.FlagTerm;
 import javax.mail.event.StoreEvent;
 import javax.mail.event.StoreListener;
 
@@ -35,29 +45,30 @@ import org.ofbiz.base.container.ContainerException;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.base.util.UtilMisc;
-import org.ofbiz.entity.GenericDelegator;
+import org.ofbiz.entity.Delegator;
+import org.ofbiz.entity.DelegatorFactory;
 import org.ofbiz.entity.GenericValue;
 import org.ofbiz.entity.GenericEntityException;
-import org.ofbiz.service.GenericDispatcher;
 import org.ofbiz.service.LocalDispatcher;
 import org.ofbiz.service.GenericServiceException;
+import org.ofbiz.service.ServiceContainer;
 
 public class JavaMailContainer implements Container {
 
     public static final String module = JavaMailContainer.class.getName();
     public static final String INBOX = "INBOX";
 
-    protected GenericDelegator delegator = null;
+    protected Delegator delegator = null;
     protected LocalDispatcher dispatcher = null;
     protected GenericValue userLogin = null;
     protected long timerDelay = 300000;
     protected long maxSize = 1000000;
-    protected Timer pollTimer = null;
+    protected ScheduledExecutorService pollTimer = null;
     protected boolean deleteMail = false;    // whether to delete emails after fetching them.
 
     protected String configFile = null;
     protected Map<Store, Session> stores = null;
-
+    private String name;
     /**
      * Initialize the container
      *
@@ -66,10 +77,11 @@ public class JavaMailContainer implements Container {
      * @throws org.ofbiz.base.container.ContainerException
      *
      */
-    public void init(String[] args, String configFile) throws ContainerException {
+    public void init(String[] args, String name, String configFile) throws ContainerException {
+        this.name = name;
         this.configFile = configFile;
         this.stores = new LinkedHashMap<Store, Session>();
-        this.pollTimer = new Timer();
+        this.pollTimer = Executors.newScheduledThreadPool(1);
     }
 
     /**
@@ -80,15 +92,15 @@ public class JavaMailContainer implements Container {
      *
      */
     public boolean start() throws ContainerException {
-        ContainerConfig.Container cfg = ContainerConfig.getContainer("javamail-container", configFile);
+        ContainerConfig.Container cfg = ContainerConfig.getContainer(name, configFile);
         String dispatcherName = ContainerConfig.getPropertyValue(cfg, "dispatcher-name", "JavaMailDispatcher");
         String delegatorName = ContainerConfig.getPropertyValue(cfg, "delegator-name", "default");
         this.deleteMail = "true".equals(ContainerConfig.getPropertyValue(cfg, "delete-mail", "false"));
 
-        this.delegator = GenericDelegator.getGenericDelegator(delegatorName);
-        this.dispatcher = GenericDispatcher.getLocalDispatcher(dispatcherName, delegator);
-        this.timerDelay = (long) ContainerConfig.getPropertyValue(cfg, "poll-delay", 300000);
-        this.maxSize = (long) ContainerConfig.getPropertyValue(cfg, "maxSize", 1000000); // maximum size in bytes
+        this.delegator = DelegatorFactory.getDelegator(delegatorName);
+        this.dispatcher = ServiceContainer.getLocalDispatcher(dispatcherName, delegator);
+        this.timerDelay = ContainerConfig.getPropertyValue(cfg, "poll-delay", 300000);
+        this.maxSize = ContainerConfig.getPropertyValue(cfg, "maxSize", 1000000); // maximum size in bytes
 
         // load the userLogin object
         String runAsUser = ContainerConfig.getPropertyValue(cfg, "run-as-user", "system");
@@ -115,7 +127,7 @@ public class JavaMailContainer implements Container {
 
         // start the polling timer
         if (UtilValidate.isNotEmpty(stores)) {
-            pollTimer.schedule(new PollerTask(dispatcher, userLogin), timerDelay, timerDelay);
+            pollTimer.scheduleAtFixedRate(new PollerTask(dispatcher, userLogin), timerDelay, timerDelay, TimeUnit.MILLISECONDS);
         } else {
             Debug.logWarning("No JavaMail Store(s) configured; poller disabled.", module);
         }
@@ -131,8 +143,12 @@ public class JavaMailContainer implements Container {
      */
     public void stop() throws ContainerException {
         // stop the poller
-        this.pollTimer.cancel();
+        this.pollTimer.shutdown();
         Debug.logWarning("stop JavaMail poller", module);
+    }
+
+    public String getName() {
+        return name;
     }
 
     // java-mail methods
@@ -235,7 +251,7 @@ public class JavaMailContainer implements Container {
         }
     }
 
-    class PollerTask extends TimerTask {
+    class PollerTask implements Runnable {
 
         LocalDispatcher dispatcher;
         GenericValue userLogin;
@@ -291,7 +307,7 @@ public class JavaMailContainer implements Container {
             }
 
             // get all messages
-            Message[] messages = folder.getMessages();
+            Message[] messages = folder.search(new FlagTerm(new Flags(Flags.Flag.SEEN), false));
             FetchProfile profile = new FetchProfile();
             profile.add(FetchProfile.Item.ENVELOPE);
             profile.add(FetchProfile.Item.FLAGS);
@@ -305,16 +321,21 @@ public class JavaMailContainer implements Container {
                     long messageSize = message.getSize();
                     if (message instanceof MimeMessage && messageSize >= maxSize) {
                         Debug.logWarning("Message from: " + message.getFrom()[0] + "not received, too big, size:" + messageSize + " cannot be more than " + maxSize + " bytes", module);
+
+                        // set the message as read so it doesn't continue to try to process; but don't delete it
+                        message.setFlag(Flags.Flag.SEEN, true);
                     } else {
                         this.processMessage(message, session);
                         if (Debug.verboseOn()) Debug.logVerbose("Message from " + UtilMisc.toListArray(message.getFrom()) + " with subject [" + message.getSubject() + "]  has been processed." , module);
                         message.setFlag(Flags.Flag.SEEN, true);
                         if (Debug.verboseOn()) Debug.logVerbose("Message [" + message.getSubject() + "] is marked seen", module);
+
+                        // delete the message after processing
+                        if (deleteMail) {
+                            if (Debug.verboseOn()) Debug.logVerbose("Message [" + message.getSubject() + "] is being deleted", module);
+                            message.setFlag(Flags.Flag.DELETED, true);
+                        }
                     }
-                }
-                if (deleteMail) {
-                    if (Debug.verboseOn()) Debug.logVerbose("Message [" + message.getSubject() + "] is being deleted", module);
-                    message.setFlag(Flags.Flag.DELETED, true);
                 }
             }
 

@@ -29,12 +29,11 @@ under the License.
                 <property-map resource="AccountingUiLabels" map-name="uiLabelMap" global="true"/>
                 <property-map resource="WorkEffortUiLabels" map-name="uiLabelMap" global="true"/>
                 <property-map resource="ContentUiLabels" map-name="uiLabelMap" global="true"/>
+                <property-map resource="SecurityUiLabels" map-name="uiLabelMap" global="true"/>
                 <property-map resource="CommonUiLabels" map-name="uiLabelMap" global="true"/>
                 <property-map resource="OrderUiLabels" map-name="uiLabelMap" global="true"/>
                 <property-map resource="ProductUiLabels" map-name="uiLabelMap" global="true"/>
-                <property-map resource="ProjectMgrUiLabels" map-name="uiLabelMap" global="true"/>
                 <property-map resource="HumanResUiLabels" map-name="uiLabelMap" global="true"/>
-                <property-map resource="PartyHelpUrls" map-name="helpUrlsMap" global="true"/>
 
                 <set field="layoutSettings.companyName" from-field="uiLabelMap.PartyCompanyName" global="true"/>
                 <set field="layoutSettings.companySubtitle" from-field="uiLabelMap.PartyCompanySubtitle" global="true"/>
@@ -60,7 +59,6 @@ under the License.
     <screen name="CommonPartyDecorator">
         <section>
             <actions>
-
                 <set field="partyId" from-field="parameters.partyId"/>
                 <entity-one entity-name="Party" value-field="party"/>
                 <entity-one entity-name="Person" value-field="lookupPerson"/>
@@ -72,7 +70,7 @@ under the License.
                         <section>
                             <condition>
                                 <and>
-                                    <if-has-permission permission="PARTYMGR" action="_VIEW"/>
+                                    <if-service-permission service-name="partyBasePermissionCheck" main-action="VIEW"/>
                                     <not><if-empty field="party"/></not>
                                 </and>
                             </condition>
@@ -85,7 +83,7 @@ under the License.
                         <section>
                             <!-- do check for PARTYMGR, _VIEW permission -->
                             <condition>
-                                <if-has-permission permission="PARTYMGR" action="_VIEW"/>
+                                <if-service-permission service-name="partyBasePermissionCheck" main-action="VIEW"/>
                             </condition>
                             <widgets>
                                 <section>
@@ -93,7 +91,7 @@ under the License.
                                     <widgets>
                                         <include-menu location="component://party/widget/partymgr/PartyMenus.xml" name="ProfileSubTabBar"/>
                                         <container style="clear"/>
-                                        <container style="h1">
+                                        <container style="page-title">
                                             <section>
                                                 <condition>
                                                     <or>
@@ -123,51 +121,6 @@ under the License.
             </widgets>
         </section>
     </screen>
-    <screen name="SecurityGroupDecorator">
-        <section>
-            <actions>
-                <set field="headerItem" value="security"/>
-            </actions>
-            <widgets>
-                <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
-                    <decorator-section name="pre-body">
-                        <section>
-                            <condition>
-                                <and>
-                                    <if-has-permission permission="SECURITY" action="_VIEW"/>
-                                    <not><if-empty field="groupId"/></not>
-                                </and>
-                            </condition>
-                            <widgets>
-                                <include-menu name="SecurityGroupTabBar" location="component://party/widget/partymgr/PartyMenus.xml"/>
-                            </widgets>
-                        </section>
-                    </decorator-section>
-                    <decorator-section name="body">
-                        <section>
-                            <condition>
-                                <if-has-permission permission="SECURITY" action="_VIEW"/>
-                            </condition>
-                            <widgets>
-                                <container>
-                                    <label style="h1" text="${uiLabelMap[labelTitleProperty]} [${groupId}]"/>
-                                </container>
-                                <container style="button-bar">
-                                    <link target="EditSecurityGroup" style="smallSubmit" text="${uiLabelMap.PartyNewSecurityGroup}"/>
-                                    <link target="EditCertIssuerProvisions" style="smallSubmit" text="${uiLabelMap.PartyCertIssuers}"/>
-                                </container>
-
-                                <decorator-section-include name="body"/>
-                            </widgets>
-                            <fail-widgets>
-                                <label style="h3">${uiLabelMap.PartySecurityViewPermissionError}</label>
-                            </fail-widgets>
-                        </section>
-                    </decorator-section>
-                </decorator-screen>
-            </widgets>
-        </section>
-    </screen>
     <screen name="CommonRequestDecorator">
         <section>
             <actions/>
@@ -180,12 +133,16 @@ under the License.
             </widgets>
         </section>
     </screen>
+    <screen name="CommonOpportunityDecorator">
+        <section>
+            <actions/>
+            <widgets>
+                <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <decorator-section-include name="body"/>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
 </screens>
-
-
-
-
-
-
-
-

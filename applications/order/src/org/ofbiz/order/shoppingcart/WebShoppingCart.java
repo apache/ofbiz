@@ -24,7 +24,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
 import org.ofbiz.base.util.UtilHttp;
-import org.ofbiz.entity.GenericDelegator;
+import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericValue;
 import org.ofbiz.product.store.ProductStoreWorker;
 import org.ofbiz.webapp.website.WebSiteWorker;
@@ -36,12 +36,13 @@ import org.ofbiz.webapp.website.WebSiteWorker;
  * class which provides web presentation layer specific functionality
  * related specifically to user session information.
  */
+@SuppressWarnings("serial")
 public class WebShoppingCart extends ShoppingCart {
     public WebShoppingCart(HttpServletRequest request, Locale locale, String currencyUom) {
         // for purchase orders, bill to customer partyId must be set - otherwise, no way to know who we're purchasing for.  supplierPartyId is furnished
         // by order manager for PO entry.
         // TODO: refactor constructor and the getCartObject method which calls them to multiple constructors for different types of orders
-        super((GenericDelegator)request.getAttribute("delegator"), ProductStoreWorker.getProductStoreId(request),
+        super((Delegator)request.getAttribute("delegator"), ProductStoreWorker.getProductStoreId(request),
                 WebSiteWorker.getWebSiteId(request), (locale != null ? locale : ProductStoreWorker.getStoreLocale(request)),
                 (currencyUom != null ? currencyUom : ProductStoreWorker.getStoreCurrencyUomId(request)),
                 request.getParameter("billToCustomerPartyId"),

@@ -28,13 +28,17 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
+
+import javolution.util.FastMap;
+
+import org.ofbiz.base.util.UtilValidate;
 
 /**
  * Control Applet - Client applet for page pushing and (future) chat
  */
+@SuppressWarnings("serial")
 public class ControlApplet extends Applet implements Runnable {
 
     private static String pushUrl = "/commonapp/control/pushapplet";
@@ -57,6 +61,7 @@ public class ControlApplet extends Applet implements Runnable {
 
     protected Thread thread = null;
 
+    @Override
     public void init() {
         ctx = this.getAppletContext();
         this.sessionId = this.getParameter("sessionId");
@@ -85,11 +90,11 @@ public class ControlApplet extends Applet implements Runnable {
             boolean visitOkay = false;
             boolean pageOkay = false;
 
-            if (sessionId != null && sessionId.length() > 0)
+            if (UtilValidate.isNotEmpty(sessionId))
                 sessionOkay = true;
-            if (visitId != null && visitId.length() > 0)
+            if (UtilValidate.isNotEmpty(visitId))
                 visitOkay = true;
-            if (currentPage != null && currentPage.length() > 0)
+            if (UtilValidate.isNotEmpty(currentPage))
                 pageOkay = true;
 
             if (sessionOkay && visitOkay && pageOkay) {
@@ -106,6 +111,7 @@ public class ControlApplet extends Applet implements Runnable {
         }
     }
 
+    @Override
     public void destroy() {
         this.stopped = true;
     }
@@ -126,7 +132,7 @@ public class ControlApplet extends Applet implements Runnable {
     }
 
     protected void pull() {
-        Map params = new HashMap();
+        Map<String, Object> params = FastMap.newInstance();
         params.put("sessionId", this.sessionId.trim());
         params.put("visitId", this.visitId.trim());
 
@@ -144,7 +150,7 @@ public class ControlApplet extends Applet implements Runnable {
             }
         }
 
-        if (pullResp != null && pullResp.length() > 0) {
+        if (UtilValidate.isNotEmpty(pullResp)) {
             URL docUrl = null;
             try {
                 docUrl = new URL(pullResp);
@@ -156,12 +162,11 @@ public class ControlApplet extends Applet implements Runnable {
     }
 
     protected void push() {
-        Map params = new HashMap();
+        Map<String, Object> params = FastMap.newInstance();
         params.put("sessionId", this.sessionId.trim());
         params.put("visitId", this.visitId.trim());
         params.put("currentPage", this.currentPage.trim());
 
-        String pushResp = null;
         URL callPushUrl = null;
         try {
             callPushUrl = new URL(serverUrl + pushUrl);
@@ -170,17 +175,18 @@ public class ControlApplet extends Applet implements Runnable {
 
         if (callPushUrl != null) {
             try {
-                pushResp = callServer(callPushUrl, params);
+                callServer(callPushUrl, params);
             } catch (IOException e) {
             }
         }
     }
 
-    private String callServer(URL serverUrl, Map parms) throws IOException {
+    private String callServer(URL serverUrl, Map<String, Object> parms) throws IOException {
         // send the request
         String parameters = this.encodeArgs(parms);
-        if (debug != null && debug.equalsIgnoreCase("true"))
+        if (debug != null && debug.equalsIgnoreCase("true")) {
             System.out.println("Sending parameters: " + parameters);
+        }
         URLConnection uc = serverUrl.openConnection();
         uc.setDoOutput(true);
         uc.setRequestProperty("Content-Type","application/x-www-form-urlencoded");
@@ -192,20 +198,21 @@ public class ControlApplet extends Applet implements Runnable {
         BufferedReader in = new BufferedReader(new InputStreamReader(uc.getInputStream()));
         String responseStr = in.readLine();
         in.close();
-        if (responseStr != null)
+        if (responseStr != null) {
             responseStr = responseStr.trim();
-        if (debug != null && debug.equalsIgnoreCase("true"))
+        }
+        if (debug != null && debug.equalsIgnoreCase("true")) {
             System.out.println("Receive response: " + responseStr);
+        }
         return responseStr;
     }
 
-    public String encodeArgs(Map args) {
+    public String encodeArgs(Map<String, Object> args) {
         StringBuffer buf = new StringBuffer();
         if (args != null) {
-            Iterator i = args.entrySet().iterator();
-            while (i.hasNext()) {
-                Map.Entry entry = (Map.Entry) i.next();
-                String name = (String) entry.getKey();
+            Set<Map.Entry<String, Object>> entrySet = args.entrySet();
+            for (Map.Entry<String, Object> entry : entrySet) {
+                String name = entry.getKey();
                 Object value = entry.getValue();
                 String valueStr = null;
                 if (name != null && value != null) {
@@ -215,7 +222,7 @@ public class ControlApplet extends Applet implements Runnable {
                         valueStr = value.toString();
                     }
 
-                    if (valueStr != null && valueStr.length() > 0) {
+                    if (UtilValidate.isNotEmpty(valueStr)) {
                         if (buf.length() > 0) buf.append('&');
                         try {
                             buf.append(URLEncoder.encode(name, "UTF-8"));

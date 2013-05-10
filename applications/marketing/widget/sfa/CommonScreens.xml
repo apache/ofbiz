@@ -29,6 +29,7 @@ under the License.
                 <property-map resource="PartyUiLabels" map-name="uiLabelMap" global="true"/>
                 <property-map resource="ProductUiLabels" map-name="uiLabelMap" global="true"/>
                 <property-map resource="OrderUiLabels" map-name="uiLabelMap" global="true"/>
+                <property-map resource="WorkEffortUiLabels" map-name="uiLabelMap" global="true"/>
                 <property-map resource="MarketingUiLabels" map-name="uiLabelMap" global="true"/>
                 <set field="layoutSettings.javaScripts[]" value="/partymgr/static/partymgr.js" global="true"/>
                 <set field="layoutSettings.styleSheets[]" value="/partymgr/static/partymgr.css" global="true"/>
@@ -37,9 +38,8 @@ under the License.
                 <set field="applicationMenuName" value="SfaAppBar" global="true"/>
                 <set field="applicationMenuLocation" value="component://marketing/widget/sfa/SfaMenus.xml" global="true"/>
                 <set field="applicationTitle" value="${uiLabelMap.SfaManagerApplication}" global="true"/>
-                <set field="leftbarScreenName" value="leftbar"/>
-                <set field="leftbarScreenLocation" value="component://marketing/widget/sfa/CommonScreens.xml"/>
-                <set field="MainColumnStyle" value="leftonly-larger"/>
+                <set field="parameters.parentPortalPageId" from-field="parameters.parentPortalPageId" default-value="SFA" global="true"/>
+                <script location="component://common/webcommon/WEB-INF/actions/includes/GetParentPortalPageId.groovy"/>
             </actions>
             <widgets>
                 <include-screen name="ApplicationDecorator" location="component://commonext/widget/CommonScreens.xml"/>
@@ -50,19 +50,18 @@ under the License.
     <screen name="main">
         <section>
             <actions>
-                <set field="headerItem" value="Main"/>
+                <set field="headerItem" from-field="parameters.headerItem" default-value="main"/>
+                <set field="removeAccountDescription" value="${groovy:session.removeAttribute(&quot;accountDescription&quot;)}"/>
+                <set field="removeContactDescription" value="${groovy:session.removeAttribute(&quot;contactDescription&quot;)}"/>
+                <set field="removeLeadDescription" value="${groovy:session.removeAttribute(&quot;leadDescription&quot;)}"/>
             </actions>
             <widgets>
                 <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="left-column">
+                        <include-screen name="leftbar"/>
+                    </decorator-section>                    
                     <decorator-section name="body">
-                        <container style="screenlet">
-                            <container style="screenlet-header">
-                                <label style="boxhead" text="${uiLabelMap.SfaManagerApplication}"/>
-                            </container>
-                            <container style="screenlet-body">
-                                <container><label style="label" text="${uiLabelMap.SfaManagerWelcome}"/></container>
-                            </container>
-                        </container>
+                        <include-portal-page id="${parameters.portalPageId}"/>
                     </decorator-section>
                 </decorator-screen>
             </widgets>
@@ -73,14 +72,12 @@ under the License.
         <section>
             <condition><not><if-empty field="userLogin"/></not></condition>
             <widgets>
-                <container style="left-larger">
-                    <screenlet id ="SfaQuickAddContactPanel" title="${uiLabelMap.SfaQuickAddContact}" collapsible="true">
-                        <include-form name="QuickAddContact" location="component://marketing/widget/sfa/forms/ContactForms.xml"/>
-                    </screenlet>
-                    <screenlet id= "SfaQuickAddLeadPanel" title="${uiLabelMap.SfaQuickAddLead}" collapsible="true">
-                        <include-form name="QuickAddLead" location="component://marketing/widget/sfa/forms/LeadForms.xml"/>
-                    </screenlet>
-                </container>
+                <screenlet id ="SfaQuickAddContactPanel" title="${uiLabelMap.SfaQuickAddContact}" collapsible="true">
+                    <include-form name="QuickAddContact" location="component://marketing/widget/sfa/forms/ContactForms.xml"/>
+                </screenlet>
+                <screenlet id= "SfaQuickAddLeadPanel" title="${uiLabelMap.SfaQuickAddLead}" collapsible="true">
+                    <include-form name="QuickAddLead" location="component://marketing/widget/sfa/forms/LeadForms.xml"/>
+                </screenlet>
             </widgets>
         </section>
     </screen>
@@ -89,23 +86,18 @@ under the License.
             <actions>
                 <!-- Do action here -->
                 <set field="salesOpportunityId" from-field="parameters.salesOpportunityId"/>
+                <set field="headerItem" value="Opportunities"/>
             </actions>
             <widgets>
                 <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="pre-body">
+                        <include-menu name="OpportunityTabBar" location="component://marketing/widget/sfa/SfaMenus.xml"/>
+                    </decorator-section>
+                    <decorator-section name="left-column">
+                        <include-screen name="leftbar"/>
+                    </decorator-section>                    
                     <decorator-section name="body">
-                        <section>
-                            <widgets>
-                                <section>
-                                    <widgets>
-                                        <include-menu name="OpportunityTabBar" location="component://marketing/widget/sfa/SfaMenus.xml"/>
-                                    </widgets>
-                                </section>
-                                <decorator-section-include name="body"/>
-                            </widgets>
-                            <fail-widgets>
-                                <label style="h3">${uiLabelMap.ProjectMgrViewPermissionError}</label>
-                            </fail-widgets>
-                        </section>
+                        <decorator-section-include name="body"/>
                     </decorator-section>
                 </decorator-screen>
             </widgets>
@@ -119,71 +111,61 @@ under the License.
                 <entity-one entity-name="Party" value-field="party"/>
                 <entity-one entity-name="Person" value-field="lookupPerson"/>
                 <entity-one entity-name="PartyGroup" value-field="lookupGroup"/>
+                <set field="accountDescription" value="${groovy:session.getAttribute(&quot;accountDescription&quot;)}"/>
+                <set field="contactDescription" value="${groovy:session.getAttribute(&quot;contactDescription&quot;)}"/>
+                <set field="leadDescription" value="${groovy:session.getAttribute(&quot;leadDescription&quot;)}"/>
             </actions>
             <widgets>
-                <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                <section>
+                    <condition>
+                        <or>
+                            <not><if-empty field="leadDescription"/></not>
+                            <not><if-empty field="accountLeadDescription"/></not>
+                        </or>
+                    </condition>
+                    <actions>
+                        <set field="headerItem" value="Leads"/>
+                        <set field="currentCommonDecorator" value="CommonLeadDecorator"/>
+                    </actions>
+                    <widgets/>
+                </section>
+                <section>
+                    <condition>
+                        <not><if-empty field="contactDescription"/></not>
+                    </condition>
+                    <actions>
+                        <set field="headerItem" value="Contacts"/>
+                        <set field="currentCommonDecorator" value="CommonContactDecorator"/>
+                    </actions>
+                    <widgets/>
+                </section>
+                <section>
+                    <condition>
+                        <not><if-empty field="accountDescription"/></not>
+                    </condition>
+                    <actions>
+                        <set field="headerItem" value="Accounts"/>
+                        <set field="currentCommonDecorator" value="CommonAccountDecorator"/>
+                    </actions>
+                    <widgets/>
+                </section>
+                <section>
+                    <condition>
+                        <if-empty field="currentCommonDecorator"/>
+                    </condition>
+                    <actions>
+                        <set field="currentCommonDecorator" value="main-decorator"/>
+                    </actions>
+                    <widgets/>
+                </section>
+                <decorator-screen name="${currentCommonDecorator}" location="${parameters.mainDecoratorLocation}">
                     <decorator-section name="body">
                         <section>
                             <!-- do check for PARTYMGR, _VIEW permission -->
                             <condition>
-                                <if-has-permission permission="PARTYMGR" action="_VIEW"/>
+                                <if-service-permission service-name="partyBasePermissionCheck" main-action="VIEW"/>
                             </condition>
                             <widgets>
-                                <section>
-                                    <condition>
-                                        <not><if-empty field="party"/></not>
-                                    </condition>
-                                    <widgets>
-                                        <section>
-                                            <condition>
-                                                <if-compare field="headerItem" operator="equals" value="Accounts"/>
-                                            </condition>
-                                            <widgets>
-                                                <include-menu name="AccountTabBar" location="component://marketing/widget/sfa/SfaMenus.xml"/>
-                                            </widgets>
-                                        </section>
-                                        <section>
-                                            <condition>
-                                                <if-compare field="headerItem" operator="equals" value="Leads"/>
-                                            </condition>
-                                            <widgets>
-                                                <include-menu name="LeadTabBar" location="component://marketing/widget/sfa/SfaMenus.xml"/>
-                                            </widgets>
-                                        </section>
-                                        <section>
-                                            <condition>
-                                                <if-compare field="headerItem" operator="equals" value="Contacts"/>
-                                            </condition>
-                                            <widgets>
-                                                <include-menu name="ContactTabBar" location="component://marketing/widget/sfa/SfaMenus.xml"/>
-                                            </widgets>
-                                        </section>
-                                    </widgets>
-                                </section>
-                                <section>
-                                    <condition>
-                                        <if-compare field="headerItem" operator="equals" value="Contacts"/>
-                                    </condition>
-                                    <widgets>
-                                        <include-menu name="ContactSubTabBar" location="component://marketing/widget/sfa/SfaMenus.xml"/>
-                                    </widgets>
-                                </section>
-                                <section>
-                                    <condition>
-                                        <if-compare field="headerItem" operator="equals" value="Accounts"/>
-                                    </condition>
-                                    <widgets>
-                                        <include-menu name="AccountSubTabBar" location="component://marketing/widget/sfa/SfaMenus.xml"/>
-                                    </widgets>
-                                </section>
-                                <section>
-                                    <condition>
-                                        <if-compare field="headerItem" operator="equals" value="Leads"/>
-                                    </condition>
-                                    <widgets>
-                                        <include-menu name="LeadSubTabBar" location="component://marketing/widget/sfa/SfaMenus.xml"/>
-                                    </widgets>
-                                </section>
                                 <section>
                                     <condition>
                                         <and>
@@ -216,48 +198,14 @@ under the License.
                 <set field="tabButtonItem" value="profile"/>
                 <set field="labelTitleProperty" value="PartyTaxAuthInfos"/>
 
-                <set field="layoutSettings.javaScripts[]" value="/images/prototypejs/prototype.js" global="true"/>
-                <set field="layoutSettings.javaScripts[]" value="/images/prototypejs/control.progress_bar.js" global="true"/>
-                <set field="layoutSettings.styleSheets[]" value="/images/prototypejs/progress_bar.css" global="true"/>
                 <set field="layoutSettings.javaScripts[]" value="/partymgr/js/PartyProfileContent.js" global="true"/>
 
                 <script location="component://party/webapp/partymgr/WEB-INF/actions/party/ViewProfile.groovy"/>
-                <script location="component://party/webapp/partymgr/WEB-INF/actions/party/GetUserLoginPrimaryEmail.groovy"/>
                 <script location="component://party/webapp/partymgr/WEB-INF/actions/party/SetRoleVars.groovy"/>
                 <set field="parameters.partyId" from-field="partyId"/>
                 <set field="parameters.partyGroupId" from-field="partyGroupId"/>
             </actions>
             <widgets>
-                <section>
-                    <condition>
-                        <or>
-                            <not><if-empty field="leadDescription"/></not>
-                            <not><if-empty field="accountLeadDescription"/></not>
-                        </or>
-                    </condition>
-                    <actions>
-                        <set field="headerItem" value="Leads"/>
-                    </actions>
-                    <widgets/>
-                </section>
-                <section>
-                    <condition>
-                        <not><if-empty field="contactDescription"/></not>
-                    </condition>
-                    <actions>
-                        <set field="headerItem" value="Contacts"/>
-                    </actions>
-                    <widgets/>
-                </section>
-                <section>
-                    <condition>
-                        <not><if-empty field="accountDescription"/></not>
-                    </condition>
-                    <actions>
-                        <set field="headerItem" value="Accounts"/>
-                    </actions>
-                    <widgets/>
-                </section>
                 <decorator-screen name="CommonPartyDecorator" location="${parameters.mainDecoratorLocation}">
                     <decorator-section name="body">
                         <section>
@@ -292,25 +240,29 @@ under the License.
                                     <widgets>
                                         <container style="profile-left">
                                             <include-screen name="Party" location="component://party/widget/partymgr/ProfileScreens.xml"/>
+                                            <include-screen name="partyRelContacts" location="component://party/widget/partymgr/ProfileScreens.xml"/>
                                             <include-screen name="Contact" location="component://party/widget/partymgr/ProfileScreens.xml"/>
-                                            <include-screen name="PaymentMethods" location="component://party/widget/partymgr/ProfileScreens.xml"/>
                                         </container>
                                         <container style="profile-right">
                                             <include-screen name="FinAccounts" location="component://party/widget/partymgr/ProfileScreens.xml"/>
                                             <include-screen name="Attributes" location="component://party/widget/partymgr/ProfileScreens.xml"/>
-                                            <include-screen name="Content" location="component://party/widget/partymgr/ProfileScreens.xml"/>
+                                            <include-screen name="PaymentMethods" location="component://party/widget/partymgr/ProfileScreens.xml"/>
+                                            <include-screen name="LeadPartyDataSource" location="component://marketing/widget/sfa/LeadScreens.xml"/>
+                                        </container>
+                                        <container style="profile-bottom">
+                                            <include-screen name="PartySalesOpportunities" location="component://party/widget/partymgr/ProfileScreens.xml"/>
                                             <include-screen name="Notes" location="component://party/widget/partymgr/ProfileScreens.xml"/>
+                                            <include-screen name="Content" location="component://party/widget/partymgr/ProfileScreens.xml"/>
                                         </container>
                                     </widgets>
                                 </section>
                                 <section>
                                     <condition>
                                         <and>
-                                        <or>
-                                            <not><if-empty field="leadDescription"/></not>
-                                            <not><if-empty field="accountLeadDescription"/></not>
-                                        </or>
-                                            <if-compare field="headerItem" operator="equals" value="Leads"/>
+                                            <or>
+                                                <not><if-empty field="leadDescription"/></not>
+                                                <not><if-empty field="accountLeadDescription"/></not>
+                                            </or>
                                         </and>
                                     </condition>
                                     <widgets>
@@ -332,6 +284,7 @@ under the License.
                                                 </actions>
                                                 <widgets>
                                                     <include-screen name="Party" location="component://party/widget/partymgr/ProfileScreens.xml"/>
+                                                    <include-screen name="partyRelContacts" location="component://party/widget/partymgr/ProfileScreens.xml"/>
                                                 </widgets>
                                             </section>
                                             <section>
@@ -340,6 +293,7 @@ under the License.
                                                 </actions>
                                                 <widgets>
                                                     <include-screen name="Contact" location="component://party/widget/partymgr/ProfileScreens.xml"/>
+                                                    <include-screen name="LeadPartyDataSource" location="component://marketing/widget/sfa/LeadScreens.xml"/>
                                                 </widgets>
                                             </section>
                                         </container>
@@ -349,10 +303,9 @@ under the License.
                                                     <set field="parameters.partyId" from-field="partyId"/>
                                                 </actions>
                                                 <widgets>
-                                                    <include-screen name="Content"
-                                                        location="component://party/widget/partymgr/ProfileScreens.xml"/>
-                                                    <include-screen name="Notes"
-                                                        location="component://party/widget/partymgr/ProfileScreens.xml"/>
+                                                    <include-screen name="Content" location="component://party/widget/partymgr/ProfileScreens.xml"/>
+                                                    <include-screen name="Notes" location="component://party/widget/partymgr/ProfileScreens.xml"/>
+                                                    <include-screen name="PartySalesOpportunities" location="component://party/widget/partymgr/ProfileScreens.xml"/>
                                                 </widgets>
                                             </section>
                                         </container>
@@ -365,6 +318,7 @@ under the License.
                                     <widgets>
                                         <container style="profile-left">
                                             <include-screen name="Party" location="component://party/widget/partymgr/ProfileScreens.xml"/>
+                                            <include-screen name="partyRelAccounts" location="component://party/widget/partymgr/ProfileScreens.xml"/>
                                             <include-screen name="Contact" location="component://party/widget/partymgr/ProfileScreens.xml"/>
                                         </container>
                                         <container style="profile-right">
@@ -384,6 +338,145 @@ under the License.
                                 </container>
                             </fail-widgets>
                         </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="CommonCommunicationEventDecorator">
+        <section>
+            <actions>
+                <set field="headerItem" from-field="parameters.headerItem"/>
+                <entity-one entity-name="CommunicationEvent" value-field="communicationEvent"/>
+            </actions>
+            <widgets>
+                <section>
+                    <condition>
+                        <if-empty field="parameters.partyId"/>
+                    </condition>
+                    <actions>
+                        <set field="parameters.partyId" from-field="parameters.partyIdFrom"/>
+                    </actions>
+                    <widgets/>
+                </section>
+                <section>
+                    <condition>
+                        <not><if-empty field="parameters.partyId"/></not>
+                    </condition>
+                    <widgets>
+                        <decorator-screen name="CommonPartyDecorator" location="${parameters.mainDecoratorLocation}">
+                            <decorator-section name="body">
+                                <include-menu name="OpportunitySubTabBar" location="component://marketing/widget/sfa/SfaMenus.xml"/>
+                                <screenlet title="${uiLabelMap.PageTitleListCommunications}">
+                                    <decorator-section-include name="body"/>
+                                </screenlet>
+                            </decorator-section>
+                        </decorator-screen>
+                    </widgets>
+                    <fail-widgets>
+                        <decorator-screen name="main-decorator">
+                            <decorator-section name="pre-body">
+                                <include-menu name="OpportunityTabBar" location="component://marketing/widget/sfa/SfaMenus.xml"/>
+                            </decorator-section>
+                            <decorator-section name="left-column">
+                                <include-screen name="leftbar"/>
+                            </decorator-section>                    
+                            <decorator-section name="body">
+                                <include-menu name="OpportunitySubTabBar" location="component://marketing/widget/sfa/SfaMenus.xml"/>
+                                <decorator-section-include name="body"/>
+                            </decorator-section>
+                        </decorator-screen>
+                    </fail-widgets>
+                </section>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="CommonAccountDecorator">
+        <section>
+            <widgets>
+                <decorator-screen name="main-decorator">
+                    <decorator-section name="pre-body">
+                        <include-menu name="AccountTabBar" location="component://marketing/widget/sfa/SfaMenus.xml"/>
+                    </decorator-section>
+                    <decorator-section name="left-column">
+                        <include-screen name="leftbar"/>
+                    </decorator-section>                    
+                    <decorator-section name="body">
+                        <include-menu name="AccountSubTabBar" location="component://marketing/widget/sfa/SfaMenus.xml"/>
+                        <decorator-section-include name="body"/>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="CommonContactDecorator">
+        <section>
+            <widgets>
+                <decorator-screen name="main-decorator">
+                    <decorator-section name="pre-body">
+                        <include-menu name="ContactTabBar" location="component://marketing/widget/sfa/SfaMenus.xml"/>
+                    </decorator-section>
+                    <decorator-section name="left-column">
+                        <include-screen name="leftbar"/>
+                    </decorator-section>                    
+                    <decorator-section name="body">
+                        <include-menu name="ContactSubTabBar" location="component://marketing/widget/sfa/SfaMenus.xml"/>
+                        <decorator-section-include name="body"/>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="CommonLeadDecorator">
+        <section>
+            <actions>
+                 <entity-and entity-name="PartyRelationship" list="relatedCompanies" filter-by-date="true">
+                     <field-map field-name="partyIdTo" from-field="partyId"/>
+                     <field-map field-name="roleTypeIdFrom" value="ACCOUNT_LEAD"/>
+                     <field-map field-name="roleTypeIdTo" value="LEAD"/>
+                     <field-map field-name="partyRelationshipTypeId" value="EMPLOYMENT"/>
+                 </entity-and>
+            </actions>
+            <widgets>
+                <decorator-screen name="main-decorator">
+                    <decorator-section name="pre-body">
+                        <include-menu name="LeadTabBar" location="component://marketing/widget/sfa/SfaMenus.xml"/>
+                    </decorator-section>
+                    <decorator-section name="body">
+                        <include-menu name="LeadSubTabBar" location="component://marketing/widget/sfa/SfaMenus.xml"/>
+                        <decorator-section-include name="body"/>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="CommonEventDecorator">
+        <section>
+            <actions>
+                <set field="headerItem" value="Events"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="main-decorator">
+                    <decorator-section name="pre-body">
+                        <include-menu name="EventTabBar" location="component://marketing/widget/sfa/SfaMenus.xml"/>
+                    </decorator-section>
+                    <decorator-section name="left-column">
+                        <include-screen name="leftbar"/>
+                    </decorator-section>                    
+                    <decorator-section name="body">
+                        <include-menu name="EventSubTabBar" location="component://marketing/widget/sfa/SfaMenus.xml"/>
+                        <decorator-section-include name="body"/>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="CommonWorkEffortDecorator">
+        <section>
+            <widgets>
+                <decorator-screen name="CommonEventDecorator">
+                    <decorator-section name="body">
+                        <decorator-section-include name="body"/>
                     </decorator-section>
                 </decorator-screen>
             </widgets>

@@ -18,51 +18,37 @@ under the License.
 */
 package org.ofbiz.bi.util;
 
-import java.sql.Timestamp;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-
-import javolution.util.FastList;
 import javolution.util.FastMap;
 
-import org.ofbiz.base.util.Debug;
-import org.ofbiz.base.util.GeneralException;
-import org.ofbiz.base.util.UtilDateTime;
 import org.ofbiz.base.util.UtilGenerics;
 import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.base.util.UtilProperties;
 import org.ofbiz.base.util.UtilValidate;
-import org.ofbiz.entity.GenericDelegator;
-import org.ofbiz.entity.util.EntityUtil;
-
+import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
+import org.ofbiz.entity.util.EntityUtil;
 import org.ofbiz.service.DispatchContext;
-import org.ofbiz.service.GenericServiceException;
-import org.ofbiz.service.LocalDispatcher;
 import org.ofbiz.service.ServiceUtil;
 
 public class DimensionServices {
 
     public static final String module = DimensionServices.class.getName();
+    public static final String resource = "BiUiLabels";
 
     public static Map<String, Object> getDimensionIdFromNaturalKey(DispatchContext ctx, Map<String, ? extends Object> context) {
         Map<String, Object> resultMap = ServiceUtil.returnSuccess();
-        GenericDelegator delegator = ctx.getDelegator();
-        LocalDispatcher dispatcher = ctx.getDispatcher();
-
+        Delegator delegator = ctx.getDelegator();
         String dimensionEntityName = (String) context.get("dimensionEntityName");
         Map<String, ? extends Object> naturalKeyFields = UtilGenerics.cast(context.get("naturalKeyFields"));
         GenericValue lastDimensionValue = null;
         try {
             // TODO: improve performance
-            lastDimensionValue = EntityUtil.getFirst(delegator.findByAnd(dimensionEntityName, naturalKeyFields, UtilMisc.toList("-createdTxStamp")));
+            lastDimensionValue = EntityUtil.getFirst(delegator.findByAnd(dimensionEntityName, UtilMisc.toMap(naturalKeyFields), UtilMisc.toList("-createdTxStamp"), false));
         } catch (GenericEntityException gee) {
             return ServiceUtil.returnError(gee.getMessage());
         }
@@ -73,12 +59,11 @@ public class DimensionServices {
     }
 
     public static Map<String, Object> storeGenericDimension(DispatchContext ctx, Map<String, ? extends Object> context) {
-        GenericDelegator delegator = ctx.getDelegator();
-        LocalDispatcher dispatcher = ctx.getDispatcher();
-
+        Delegator delegator = ctx.getDelegator();
         GenericValue dimensionValue = (GenericValue) context.get("dimensionValue");
         List<String> naturalKeyFields = UtilGenerics.checkList(context.get("naturalKeyFields"), String.class);
         String updateMode = (String) context.get("updateMode");
+        Locale locale = (Locale) context.get("locale");
 
         try {
             Map<String, Object> andCondition = FastMap.newInstance();
@@ -86,11 +71,11 @@ public class DimensionServices {
                 andCondition.put(naturalKeyField, dimensionValue.get(naturalKeyField));
             }
             if (andCondition.isEmpty()) {
-                return ServiceUtil.returnError("The natural key: " + naturalKeyFields + " is empty in value: " + dimensionValue);
+                return ServiceUtil.returnError(UtilProperties.getMessage(resource, "BusinessIntelligenceNaturalKeyWithourDimension", UtilMisc.toMap("naturalKeyFields", naturalKeyFields, "dimensionValue", dimensionValue), locale));
             }
             List<GenericValue> existingDimensionValues = null;
             try {
-                existingDimensionValues = delegator.findByAnd(dimensionValue.getEntityName(), andCondition);
+                existingDimensionValues = delegator.findByAnd(dimensionValue.getEntityName(), UtilMisc.toMap(andCondition), null, false);
             } catch (GenericEntityException gee) {
                 return ServiceUtil.returnError(gee.getMessage());
             }
@@ -110,7 +95,7 @@ public class DimensionServices {
                     dimensionValue.set("dimensionId", delegator.getNextSeqId(dimensionValue.getEntityName()));
                     dimensionValue.create();
                 } else {
-                    return ServiceUtil.returnError("The update mode: " + updateMode + " is still not supported.");
+                    return ServiceUtil.returnError(UtilProperties.getMessage(resource, "BusinessIntelligenceUpdateModeStillNotSupported", UtilMisc.toMap("updateMode", updateMode), locale));
                 }
             }
         } catch (GenericEntityException gee) {

@@ -18,18 +18,14 @@
  */
 import org.ofbiz.base.util.cache.UtilCache;
 import org.ofbiz.base.util.UtilFormatOut;
+import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.security.Security;
 
 context.hasUtilCacheEdit = security.hasEntityPermission("UTIL_CACHE", "_EDIT", session);
 
-rt = Runtime.getRuntime();
-context.memory = UtilFormatOut.formatQuantity(rt.totalMemory());
-context.freeMemory = UtilFormatOut.formatQuantity(rt.freeMemory());
-context.usedMemory = UtilFormatOut.formatQuantity((rt.totalMemory() - rt.freeMemory()));
-context.maxMemory = UtilFormatOut.formatQuantity(rt.maxMemory());
-
 cacheList = [];
-names = new TreeSet(UtilCache.utilCacheTable.keySet());
+totalCacheMemory = 0.0;
+names = new TreeSet(UtilCache.getUtilCacheTableKeySet());
 names.each { cacheName ->
         utilCache = UtilCache.findCache(cacheName);
         cache = [:];
@@ -43,11 +39,28 @@ names.each { cacheName ->
         cache.missCountSoftRef = UtilFormatOut.formatQuantity(utilCache.getMissCountSoftRef());
         cache.removeHitCount = UtilFormatOut.formatQuantity(utilCache.getRemoveHitCount());
         cache.removeMissCount = UtilFormatOut.formatQuantity(utilCache.getRemoveMissCount());
-        cache.maxSize = UtilFormatOut.formatQuantity(utilCache.getMaxSize());
+        cache.maxInMemory = UtilFormatOut.formatQuantity(utilCache.getMaxInMemory());
         cache.expireTime = UtilFormatOut.formatQuantity(utilCache.getExpireTime());
         cache.useSoftReference = utilCache.getUseSoftReference().toString();
         cache.useFileSystemStore = utilCache.getUseFileSystemStore().toString();
-
+        cache.useFileSystemStore = utilCache.getUseFileSystemStore().toString();
+        cache.cacheMemory = utilCache.getSizeInBytes();
+        totalCacheMemory += cache.cacheMemory;
         cacheList.add(cache);
 }
-context.cacheList = cacheList;
+sortField = parameters.sortField;
+if (sortField) { 
+    context.cacheList = UtilMisc.sortMaps(cacheList, UtilMisc.toList(sortField));
+} else {
+    context.cacheList = cacheList;
+}
+context.totalCacheMemory = totalCacheMemory;
+
+rt = Runtime.getRuntime();
+memoryInfo = [:];
+memoryInfo.memory = UtilFormatOut.formatQuantity(rt.totalMemory());
+memoryInfo.freeMemory = UtilFormatOut.formatQuantity(rt.freeMemory());
+memoryInfo.usedMemory = UtilFormatOut.formatQuantity((rt.totalMemory() - rt.freeMemory()));
+memoryInfo.maxMemory = UtilFormatOut.formatQuantity(rt.maxMemory());
+memoryInfo.totalCacheMemory = totalCacheMemory;
+context.memoryInfo = memoryInfo;

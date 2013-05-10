@@ -20,7 +20,7 @@
 <#-- cms menu bar -->
 <div id="cmsmenu" style="margin-bottom: 8px;">
     <#if (content?has_content)>
-        <a href="javascript:void(0);" onclick="javascript:callEditor(true, '${content.contentId}', '', 'ELECTRONIC_TEXT');" class="tabButton">Quick Sub-Content</a>
+        <a href="javascript:void(0);" onclick="javascript:callDocument(true, '${content.contentId}', '', 'ELECTRONIC_TEXT');" class="tabButton">Quick Sub-Content</a>
         <a href="javascript:void(0);" onclick="javascript:callPathAlias('${content.contentId}');" class="selected">Path Alias</a>
         <a href="javascript:void(0);" onclick="javascript:callMetaInfo('${content.contentId}');" class="tabButton">Meta Tags</a>
     </#if>
@@ -79,11 +79,11 @@
             <tr><td colspan="2">&nbsp;</td></tr>
             <tr>
                 <td class="label">Path Alias</td>
-                <td><input type="text" name="pathAlias" value=""></td>
+                <td><input type="text" name="pathAlias" value="" /></td>
             </tr>
             <tr>
                 <td class="label">Map Key</td>
-                <td><input type="text" name="mapKey" value=""></td>
+                <td><input type="text" name="mapKey" value="" /></td>
             </tr>
             <tr>
                 <td colspan="2" align="center"><input id="submit" type="button" onclick="javascript:pathSave('${contentId}');" class="smallSubmit" value="Create"/></td>

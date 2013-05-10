@@ -32,10 +32,9 @@ import org.ofbiz.base.util.UtilHttp;
 import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.base.util.UtilProperties;
 import org.ofbiz.base.util.UtilValidate;
-import org.ofbiz.entity.GenericDelegator;
+import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
-import org.ofbiz.service.ServiceUtil;
 
 /**
  * Common Workers
@@ -60,21 +59,21 @@ public class ProtectViewWorker {
         HttpSession session = request.getSession();
         String viewNameId = RequestHandler.getRequestUri(request.getPathInfo());
         GenericValue userLogin = (GenericValue) session.getAttribute("userLogin");
-        GenericDelegator delegator = (GenericDelegator) request.getAttribute("delegator");
+        Delegator delegator = (Delegator) request.getAttribute("delegator");
         String  returnValue = "success";
 
         if (userLogin != null) {
             String userLoginId = userLogin.getString("userLoginId");
             try {
                 List<GenericValue> protectedViews = delegator.findByAnd("UserLoginAndProtectedView",
-                        UtilMisc.toMap("userLoginId", userLoginId, "viewNameId", viewNameId));
+                        UtilMisc.toMap("userLoginId", userLoginId, "viewNameId", viewNameId), null, true);
                 // Any views to deal with ?
                 if (UtilValidate.isNotEmpty(protectedViews)) {
                     Long now = System.currentTimeMillis(); // we are not in a margin of some milliseconds
 
                     // Is this login/view couple already tarpitted ? (ie denied access to view for login for a period of time)
                     List<GenericValue> tarpittedLoginViews = delegator.findByAnd("TarpittedLoginView",
-                            UtilMisc.toMap("userLoginId", userLoginId, "viewNameId", viewNameId));
+                            UtilMisc.toMap("userLoginId", userLoginId, "viewNameId", viewNameId), null, true);
                     String  viewNameUserLoginId = viewNameId + userLoginId;
                     if (UtilValidate.isNotEmpty(tarpittedLoginViews)) {
                         GenericValue tarpittedLoginView = tarpittedLoginViews.get(0);
@@ -88,14 +87,14 @@ public class ProtectViewWorker {
                     }
                     GenericValue protectedView = protectedViews.get(0);
                     // 1st hit ?
-                    Long curMaxHits = (Long) hitsByViewAccessed.get(viewNameUserLoginId);
+                    Long curMaxHits = hitsByViewAccessed.get(viewNameUserLoginId);
                     if (UtilValidate.isEmpty(curMaxHits)) {
                         hitsByViewAccessed.put(viewNameUserLoginId, one);
-                        Long maxHitsDuration = (Long) protectedView.get("maxHitsDuration") * 1000; 
+                        Long maxHitsDuration = (Long) protectedView.get("maxHitsDuration") * 1000;
                         durationByViewAccessed.put(viewNameUserLoginId, now + maxHitsDuration);
                     } else {
-                        Long maxDuration = (Long) durationByViewAccessed.get(viewNameUserLoginId);
-                        Long newMaxHits = (Long) curMaxHits + one;
+                        Long maxDuration = durationByViewAccessed.get(viewNameUserLoginId);
+                        Long newMaxHits = curMaxHits + one;
                         hitsByViewAccessed.put(viewNameUserLoginId, newMaxHits);
                         // Are we in a period of time where we need to check if there was too much hits ?
                         if (now < maxDuration) {

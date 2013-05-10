@@ -18,21 +18,20 @@
  *******************************************************************************/
 package org.ofbiz.entity.config;
 
-import java.util.LinkedList;
 import java.util.List;
 
 import org.ofbiz.base.util.Debug;
+import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.base.util.UtilXml;
 import org.w3c.dom.Element;
 
 /**
- * Misc. utility method for dealing with the entityengine.xml file
+ * A model for the &lt;datasource&gt; element.
  *
  */
-public class DatasourceInfo {
+public class DatasourceInfo extends NamedInfo {
     public static final String module = DatasourceInfo.class.getName();
 
-    public String name;
     public String helperClass;
     public String fieldTypeName;
     public List<? extends Element> sqlLoadPaths;
@@ -72,12 +71,15 @@ public class DatasourceInfo {
     public boolean alwaysUseConstraintKeyword = false;
     public boolean dropFkUseForeignKeyKeyword = false;
     public boolean useBinaryTypeForBlob = false;
+    public boolean useOrderByNulls = false;
+    public String offsetStyle = null;
     public String tableType = null;
     public String characterSet = null;
     public String collate = null;
+    public int maxWorkerPoolSize = 1;
 
     public DatasourceInfo(Element element) {
-        this.name = element.getAttribute("name");
+        super(element);
         this.helperClass = element.getAttribute("helper-class");
         this.fieldTypeName = element.getAttribute("field-type-name");
 
@@ -109,6 +111,7 @@ public class DatasourceInfo {
             Debug.logWarning("datasource def not found with name " + this.name + ", using default for table-type (none)", module);
             Debug.logWarning("datasource def not found with name " + this.name + ", using default for character-set (none)", module);
             Debug.logWarning("datasource def not found with name " + this.name + ", using default for collate (none)", module);
+            Debug.logWarning("datasource def not found with name " + this.name + ", using default for max-worker-pool-size (1)", module);
         } else {
             this.schemaName = datasourceElement.getAttribute("schema-name");
             // anything but false is true
@@ -155,13 +158,25 @@ public class DatasourceInfo {
             this.alwaysUseConstraintKeyword = "true".equals(datasourceElement.getAttribute("always-use-constraint-keyword"));
             this.dropFkUseForeignKeyKeyword = "true".equals(datasourceElement.getAttribute("drop-fk-use-foreign-key-keyword"));
             this.useBinaryTypeForBlob = "true".equals(datasourceElement.getAttribute("use-binary-type-for-blob"));
-
+            this.useOrderByNulls = "true".equals(datasourceElement.getAttribute("use-order-by-nulls"));
+            
+            this.offsetStyle = datasourceElement.getAttribute("offset-style");
             this.tableType = datasourceElement.getAttribute("table-type");
             this.characterSet = datasourceElement.getAttribute("character-set");
             this.collate = datasourceElement.getAttribute("collate");
+            try {
+                this.maxWorkerPoolSize = Integer.parseInt(datasourceElement.getAttribute("max-worker-pool-size"));
+                if (this.maxWorkerPoolSize == 0) {
+                    this.maxWorkerPoolSize = 1;
+                } else if (this.maxWorkerPoolSize < -2) {
+                    this.maxWorkerPoolSize = -1;
+                }
+            } catch (Exception e) {
+                Debug.logWarning("Could not parse result-fetch-size value for datasource with name " + this.name + ", using JDBC driver default value", module);
+            }
         }
-        if (this.fkStyle == null || this.fkStyle.length() == 0) this.fkStyle = "name_constraint";
-        if (this.joinStyle == null || this.joinStyle.length() == 0) this.joinStyle = "ansi";
+        if (UtilValidate.isEmpty(this.fkStyle)) this.fkStyle = "name_constraint";
+        if (UtilValidate.isEmpty(this.joinStyle)) this.joinStyle = "ansi";
 
         this.jndiJdbcElement = UtilXml.firstChildElement(datasourceElement, "jndi-jdbc");
         this.tyrexDataSourceElement = UtilXml.firstChildElement(datasourceElement, "tyrex-dataSource");

@@ -31,7 +31,7 @@ import org.ofbiz.base.location.FlexibleLocation;
 import org.ofbiz.base.util.UtilHttp;
 import org.ofbiz.base.util.UtilXml;
 import org.ofbiz.base.util.cache.UtilCache;
-import org.ofbiz.entity.GenericDelegator;
+import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.model.ModelReader;
 import org.ofbiz.service.DispatchContext;
 import org.ofbiz.service.LocalDispatcher;
@@ -47,8 +47,8 @@ import org.xml.sax.SAXException;
 public class FormFactory {
 
     public static final String module = FormFactory.class.getName();
-    public static final UtilCache<String, ModelForm> formLocationCache = new UtilCache<String, ModelForm>("widget.form.locationResource", 0, 0, false);
-    public static final UtilCache<String, ModelForm> formWebappCache = new UtilCache<String, ModelForm>("widget.form.webappResource", 0, 0, false);
+    private static final UtilCache<String, ModelForm> formLocationCache = UtilCache.createUtilCache("widget.form.locationResource", 0, 0, false);
+    private static final UtilCache<String, ModelForm> formWebappCache = UtilCache.createUtilCache("widget.form.webappResource", 0, 0, false);
 
     public static Map<String, ModelForm> getFormsFromLocation(String resourceName, ModelReader entityModelReader, DispatchContext dispatchContext)
             throws IOException, SAXException, ParserConfigurationException {
@@ -59,7 +59,7 @@ public class FormFactory {
         }
         */
         URL formFileUrl = FlexibleLocation.resolveLocation(resourceName); //, loader);
-        Document formFileDoc = UtilXml.readXmlDocument(formFileUrl, true);
+        Document formFileDoc = UtilXml.readXmlDocument(formFileUrl, true, true);
         return readFormDocument(formFileDoc, entityModelReader, dispatchContext, resourceName);
     }
 
@@ -68,24 +68,19 @@ public class FormFactory {
         String cacheKey = resourceName + "#" + formName;
         ModelForm modelForm = formLocationCache.get(cacheKey);
         if (modelForm == null) {
-            synchronized (formLocationCache) {
-                modelForm = formLocationCache.get(cacheKey);
-                if (modelForm == null) {
-                    /*
-                    ClassLoader loader = Thread.currentThread().getContextClassLoader();
-                    if (loader == null) {
-                        loader = FormFactory.class.getClassLoader();
-                    }
-                    */
-                    URL formFileUrl = FlexibleLocation.resolveLocation(resourceName); //, loader);
-                    Document formFileDoc = UtilXml.readXmlDocument(formFileUrl, true);
-                    if (formFileDoc == null) {
-                        throw new IllegalArgumentException("Could not find resource [" + resourceName + "]");
-                    }
-                    modelForm = createModelForm(formFileDoc, entityModelReader, dispatchContext, resourceName, formName);
-                    formLocationCache.put(cacheKey, modelForm);
-                }
+            /*
+            ClassLoader loader = Thread.currentThread().getContextClassLoader();
+            if (loader == null) {
+                loader = FormFactory.class.getClassLoader();
             }
+            */
+            URL formFileUrl = FlexibleLocation.resolveLocation(resourceName); //, loader);
+            Document formFileDoc = UtilXml.readXmlDocument(formFileUrl, true, true);
+            if (formFileDoc == null) {
+                throw new IllegalArgumentException("Could not find resource [" + resourceName + "]");
+            }
+            modelForm = createModelForm(formFileDoc, entityModelReader, dispatchContext, resourceName, formName);
+            modelForm = formLocationCache.putIfAbsentAndGet(cacheKey, modelForm);
         }
         if (modelForm == null) {
             throw new IllegalArgumentException("Could not find form with name [" + formName + "] in class resource [" + resourceName + "]");
@@ -99,20 +94,15 @@ public class FormFactory {
         String cacheKey = webappName + "::" + resourceName + "::" + formName;
         ModelForm modelForm = formWebappCache.get(cacheKey);
         if (modelForm == null) {
-            synchronized (formWebappCache) {
-                modelForm = formWebappCache.get(cacheKey);
-                if (modelForm == null) {
-                    ServletContext servletContext = (ServletContext) request.getAttribute("servletContext");
-                    GenericDelegator delegator = (GenericDelegator) request.getAttribute("delegator");
-                    LocalDispatcher dispatcher = (LocalDispatcher) request.getAttribute("dispatcher");
-                    URL formFileUrl = servletContext.getResource(resourceName);
-                    Document formFileDoc = UtilXml.readXmlDocument(formFileUrl, true);
-                    Element formElement = UtilXml.firstChildElement(formFileDoc.getDocumentElement(), "form", "name", formName);
-                    modelForm = new ModelForm(formElement, delegator.getModelReader(), dispatcher.getDispatchContext());
-                    modelForm.setFormLocation(resourceName);
-                    formWebappCache.put(cacheKey, modelForm);
-                }
-            }
+            ServletContext servletContext = (ServletContext) request.getAttribute("servletContext");
+            Delegator delegator = (Delegator) request.getAttribute("delegator");
+            LocalDispatcher dispatcher = (LocalDispatcher) request.getAttribute("dispatcher");
+            URL formFileUrl = servletContext.getResource(resourceName);
+            Document formFileDoc = UtilXml.readXmlDocument(formFileUrl, true, true);
+            Element formElement = UtilXml.firstChildElement(formFileDoc.getDocumentElement(), "form", "name", formName);
+            modelForm = new ModelForm(formElement, delegator.getModelReader(), dispatcher.getDispatchContext());
+            modelForm.setFormLocation(resourceName);
+            modelForm = formWebappCache.putIfAbsentAndGet(cacheKey, modelForm);
         }
         if (modelForm == null) {
             throw new IllegalArgumentException("Could not find form with name [" + formName + "] in webapp resource [" + resourceName + "] in the webapp [" + webappName + "]");
@@ -131,13 +121,8 @@ public class FormFactory {
                 String cacheKey = formLocation + "#" + formName;
                 ModelForm modelForm = formLocationCache.get(cacheKey);
                 if (modelForm == null) {
-                    synchronized (formLocationCache) {
-                        modelForm = formLocationCache.get(cacheKey);
-                        if (modelForm == null) {
-                            modelForm = createModelForm(formElement, entityModelReader, dispatchContext, formLocation, formName);
-                            formLocationCache.put(cacheKey, modelForm);
-                        }
-                    }
+                    modelForm = createModelForm(formElement, entityModelReader, dispatchContext, formLocation, formName);
+                    modelForm = formLocationCache.putIfAbsentAndGet(cacheKey, modelForm);
                 }
                 modelFormMap.put(formName, modelForm);
             }

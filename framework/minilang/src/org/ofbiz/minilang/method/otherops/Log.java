@@ -18,106 +18,94 @@
  *******************************************************************************/
 package org.ofbiz.minilang.method.otherops;
 
-import java.util.*;
-
-import org.w3c.dom.*;
-import javolution.util.FastList;
-import org.ofbiz.base.util.*;
-import org.ofbiz.minilang.*;
-import org.ofbiz.minilang.method.*;
+import org.ofbiz.base.util.Debug;
+import org.ofbiz.base.util.string.FlexibleStringExpander;
+import org.ofbiz.minilang.MiniLangException;
+import org.ofbiz.minilang.MiniLangValidate;
+import org.ofbiz.minilang.SimpleMethod;
+import org.ofbiz.minilang.method.MethodContext;
+import org.ofbiz.minilang.method.MethodOperation;
+import org.w3c.dom.Element;
 
 /**
- * Calculates a result based on nested calcops.
+ * Implements the &lt;log&gt; element.
+ * 
+ * @see <a href="https://cwiki.apache.org/OFBADMIN/mini-language-reference.html#Mini-languageReference-{{%3Clog%3E}}">Mini-language Reference</a>
  */
-public class Log extends MethodOperation {
-    public static final class LogFactory implements Factory<Log> {
-        public Log createMethodOperation(Element element, SimpleMethod simpleMethod) {
-            return new Log(element, simpleMethod);
-        }
-
-        public String getName() {
-            return "log";
-        }
-    }
+public final class Log extends MethodOperation {
 
     public static final String module = Log.class.getName();
+    public static final String[] LEVEL_ARRAY = {"always", "verbose", "timing", "info", "important", "warning", "error", "fatal", "notify"};
 
-    String levelStr;
-    String message;
-    List<MethodString> methodStrings = null;
+    private final int level;
+    private final FlexibleStringExpander messageFse;
 
-    public Log(Element element, SimpleMethod simpleMethod) {
+    public Log(Element element, SimpleMethod simpleMethod) throws MiniLangException {
         super(element, simpleMethod);
-        this.message = element.getAttribute("message");
-        this.levelStr = element.getAttribute("level");
-
-        List<? extends Element> methodStringElements = UtilXml.childElementList(element);
-        if (methodStringElements.size() > 0) {
-            methodStrings = FastList.newInstance();
-
-            for (Element methodStringElement: methodStringElements) {
-                if ("string".equals(methodStringElement.getNodeName())) {
-                    methodStrings.add(new StringString(methodStringElement, simpleMethod));
-                } else if ("field".equals(methodStringElement.getNodeName())) {
-                    methodStrings.add(new FieldString(methodStringElement, simpleMethod));
-                } else {
-                    //whoops, invalid tag here, print warning
-                    Debug.logWarning("Found an unsupported tag under the log tag: " + methodStringElement.getNodeName() + "; ignoring", module);
-                }
-            }
+        if (MiniLangValidate.validationOn()) {
+            MiniLangValidate.attributeNames(simpleMethod, element, "level", "message");
+            MiniLangValidate.requiredAttributes(simpleMethod, element, "level", "message");
+            MiniLangValidate.constantAttributes(simpleMethod, element, "level");
+            MiniLangValidate.constantPlusExpressionAttributes(simpleMethod, element, "message");
+            MiniLangValidate.noChildElements(simpleMethod, element);
+        }
+        this.messageFse = FlexibleStringExpander.getInstance(element.getAttribute("message"));
+        String levelAttribute = element.getAttribute("level");
+        if (levelAttribute.length() == 0) {
+            levelAttribute = "info";
+        }
+        Integer levelInt = Debug.getLevelFromString(levelAttribute);
+        if (levelInt == null) {
+            MiniLangValidate.handleError("Invalid level attribute", simpleMethod, element);
+            this.level = Debug.INFO;
+        } else {
+            this.level = levelInt.intValue();
         }
     }
 
-    public boolean exec(MethodContext methodContext) {
-        String levelStr = methodContext.expandString(this.levelStr);
-        String message = methodContext.expandString(this.message);
-
-        int level;
-        Integer levelInt = Debug.getLevelFromString(levelStr);
-        if (levelInt == null) {
-            Debug.logWarning("Specified level [" + levelStr + "] was not valid, using INFO", module);
-            level = Debug.INFO;
-        } else {
-            level = levelInt.intValue();
-        }
-
-        //bail out quick if the logging level isn't on, ie don't even create string
-        if (!Debug.isOn(level)) {
-            return true;
-        }
-
-        StringBuilder buf = new StringBuilder();
-        buf.append("[");
-        String methodLocation = this.simpleMethod.getFromLocation();
-        int pos = methodLocation.lastIndexOf("/");
-        if (pos != -1) {
-            methodLocation = methodLocation.substring(pos + 1);
-        }
-        buf.append(methodLocation);
-        buf.append("#");
-        buf.append(this.simpleMethod.getMethodName());
-        buf.append("] ");
-
-        if (message != null) buf.append(message);
-
-        if (methodStrings != null) {
-            for (MethodString methodString: methodStrings) {
-                String strValue = methodString.getString(methodContext);
-                if (strValue != null) buf.append(strValue);
+    @Override
+    public boolean exec(MethodContext methodContext) throws MiniLangException {
+        if (Debug.isOn(level)) {
+            String message = this.messageFse.expandString(methodContext.getEnvMap());
+            StringBuilder buf = new StringBuilder("[");
+            String methodLocation = this.simpleMethod.getFromLocation();
+            int pos = methodLocation.lastIndexOf("/");
+            if (pos != -1) {
+                methodLocation = methodLocation.substring(pos + 1);
             }
+            buf.append(methodLocation);
+            buf.append("#");
+            buf.append(this.simpleMethod.getMethodName());
+            buf.append(" line ");
+            buf.append(getLineNumber());
+            buf.append("] ");
+            buf.append(message);
+            Debug.log(this.level, null, buf.toString(), module);
         }
-
-        Debug.log(level, null, buf.toString(), module);
-
         return true;
     }
 
-    public String rawString() {
-        // TODO: add all attributes and other info
-        return "<log level=\"" + this.levelStr + "\" message=\"" + this.message + "\"/>";
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder("<log ");
+        sb.append("level=\"").append(LEVEL_ARRAY[this.level]).append("\" ");
+        sb.append("message=\"").append(this.messageFse).append("\" ");
+        sb.append("/>");
+        return sb.toString();
     }
-    public String expandedString(MethodContext methodContext) {
-        // TODO: something more than a stub/dummy
-        return this.rawString();
+
+    /**
+     * A factory for the &lt;log&gt; element.
+     */
+    public static final class LogFactory implements Factory<Log> {
+        @Override
+        public Log createMethodOperation(Element element, SimpleMethod simpleMethod) throws MiniLangException {
+            return new Log(element, simpleMethod);
+        }
+
+        @Override
+        public String getName() {
+            return "log";
+        }
     }
 }

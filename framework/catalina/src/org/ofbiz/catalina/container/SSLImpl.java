@@ -19,19 +19,18 @@
 
 package org.ofbiz.catalina.container;
 
-import org.apache.tomcat.util.net.ServerSocketFactory;
-import org.apache.tomcat.util.net.jsse.JSSEFactory;
-import org.apache.tomcat.util.net.jsse.JSSEImplementation;
-import org.ofbiz.base.util.Debug;
-import org.ofbiz.base.util.SSLUtil;
-import org.ofbiz.base.config.GenericConfigException;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
-import java.security.cert.X509Certificate;
-import java.security.cert.CertificateException;
-import java.security.GeneralSecurityException;
-import java.io.IOException;
+
+import org.apache.tomcat.util.net.AbstractEndpoint;
+import org.apache.tomcat.util.net.ServerSocketFactory;
+import org.apache.tomcat.util.net.jsse.JSSEImplementation;
+import org.ofbiz.base.util.Debug;
+import org.ofbiz.base.util.SSLUtil;
+import org.ofbiz.base.util.UtilValidate;
 
 /**
  * SSLImpl
@@ -44,12 +43,15 @@ public class SSLImpl extends JSSEImplementation {
 
     public SSLImpl() throws ClassNotFoundException {
         super();
-        this.ssFactory = (new JSSEFactory()).getSocketFactory();
         this.allow =  new TrustManager[] { new AllowTrustManager() };
-        Debug.log("SSLImpl loaded; using custom ServerSocketFactory", module);
+        Debug.logInfo("SSLImpl loaded; using custom ServerSocketFactory", module);
     }
 
-    public ServerSocketFactory getServerSocketFactory() {
+    @Override
+    public ServerSocketFactory getServerSocketFactory(AbstractEndpoint endpoint) {
+        if (UtilValidate.isEmpty(this.ssFactory)) {
+            this.ssFactory = (new JSSEImplementation()).getServerSocketFactory(endpoint);
+        }
         return ssFactory;
     }
 

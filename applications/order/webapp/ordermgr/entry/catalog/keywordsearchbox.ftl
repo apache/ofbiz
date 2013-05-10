@@ -18,54 +18,60 @@ under the License.
 -->
 
 <div id="keywordsearchbox" class="screenlet">
-    <div class="screenlet-header">
-        <div class="boxhead">${uiLabelMap.ProductSearchCatalog}</div>
-    </div>
-    <div class="screenlet-body" style="text-align: center;">
-        <form name="keywordsearchform" method="post" action="<@ofbizUrl>keywordsearch</@ofbizUrl>">
-          <input type="hidden" name="VIEW_SIZE" value="10"/>
-          <input type="hidden" name="PAGING" value="Y"/>
+  <div class="screenlet-title-bar">
+    <ul>
+      <li class="h3">${uiLabelMap.ProductSearchCatalog}</li>
+    </ul>
+    <br class="clear"/>
+  </div>
+  <div class="screenlet-body">
+    <form name="keywordsearchform" id="keywordsearchbox_keywordsearchform" method="post" action="<@ofbizUrl>keywordsearch</@ofbizUrl>">
+      <fieldset class="inline">
+        <input type="hidden" name="VIEW_SIZE" value="10" />
+        <input type="hidden" name="PAGING" value="Y" />
+        <div>
+          <input type="text" name="SEARCH_STRING" size="14" maxlength="50" value="${requestParameters.SEARCH_STRING?if_exists}" />
+        </div>
+        <#if 0 &lt; otherSearchProdCatalogCategories?size>
           <div>
-            <input type="text" name="SEARCH_STRING" size="14" maxlength="50" value="${requestParameters.SEARCH_STRING?if_exists}"/>
+            <select name="SEARCH_CATEGORY_ID" size="1">
+              <option value="${searchCategoryId?if_exists}">${uiLabelMap.ProductEntireCatalog}</option>
+              <#list otherSearchProdCatalogCategories as otherSearchProdCatalogCategory>
+                <#assign searchProductCategory = otherSearchProdCatalogCategory.getRelatedOne("ProductCategory", true)>
+                <#if searchProductCategory?exists>
+                  <option value="${searchProductCategory.productCategoryId}">${searchProductCategory.description?default("No Description " + searchProductCategory.productCategoryId)}</option>
+                </#if>
+              </#list>
+            </select>
           </div>
-          <#if 0 < otherSearchProdCatalogCategories?size>
-            <div>
-              <select name="SEARCH_CATEGORY_ID" size="1">
-                <option value="${searchCategoryId?if_exists}">${uiLabelMap.ProductEntireCatalog}</option>
-                <#list otherSearchProdCatalogCategories as otherSearchProdCatalogCategory>
-                  <#assign searchProductCategory = otherSearchProdCatalogCategory.getRelatedOneCache("ProductCategory")>
-                  <#if searchProductCategory?exists>
-                    <option value="${searchProductCategory.productCategoryId}">${searchProductCategory.description?default("No Description " + searchProductCategory.productCategoryId)}</option>
-                  </#if>
-                </#list>
-              </select>
-            </div>
-          <#else>
-            <input type="hidden" name="SEARCH_CATEGORY_ID" value="${searchCategoryId?if_exists}"/>
-          </#if>
-          <div><input type="radio" name="SEARCH_OPERATOR" value="OR" <#if searchOperator == "OR">checked="checked"</#if>/>${uiLabelMap.CommonAny}<input type="radio" name="SEARCH_OPERATOR" value="AND" <#if searchOperator == "AND">checked="checked"</#if>/>${uiLabelMap.CommonAll}&nbsp;<a href="javascript:document.keywordsearchform.submit()" class="buttontext">${uiLabelMap.CommonFind}</a></div>
-        </form>
-        <form name="advancedsearchform" method="post" action="<@ofbizUrl>advancedsearch</@ofbizUrl>">
-          <#if 0 < otherSearchProdCatalogCategories?size>
-            <div>${uiLabelMap.ProductAdvancedSearchIn}: </div>
-            <div>
-              <select name="SEARCH_CATEGORY_ID" size="1">
-                <option value="${searchCategoryId?if_exists}">${uiLabelMap.ProductEntireCatalog}</option>
-                <#list otherSearchProdCatalogCategories as otherSearchProdCatalogCategory>
-                  <#assign searchProductCategory = otherSearchProdCatalogCategory.getRelatedOneCache("ProductCategory")>
-                  <#if searchProductCategory?exists>
-                    <option value="${searchProductCategory.productCategoryId}">${searchProductCategory.description?default("No Description " + searchProductCategory.productCategoryId)}</option>
-                  </#if>
-                </#list>
-              </select>
-            </div>
-          <#else>
-            <input type="hidden" name="SEARCH_CATEGORY_ID" value="${searchCategoryId?if_exists}"/>
-          </#if>
-          <br/>
-          <div>
-            <a href="javascript:document.advancedsearchform.submit()" class="buttontext">${uiLabelMap.ProductAdvancedSearch}</a>
-          </div>
-        </form>
-    </div>
+        <#else>
+          <input type="hidden" name="SEARCH_CATEGORY_ID" value="${searchCategoryId?if_exists}" />
+        </#if>
+        <div>
+          <input type="radio" name="SEARCH_OPERATOR" id="SEARCH_OPERATOR_OR" value="OR" <#if searchOperator == "OR">checked="checked"</#if> /><label for="SEARCH_OPERATOR_OR">${uiLabelMap.CommonAny}</label>
+          <input type="radio" name="SEARCH_OPERATOR" id="SEARCH_OPERATOR_AND" value="AND" <#if searchOperator == "AND">checked="checked"</#if> /><label for="SEARCH_OPERATOR_AND">${uiLabelMap.CommonAll}</label>
+          <input type="submit" value="${uiLabelMap.CommonFind}" class="button" />
+        </div>
+      </fieldset>
+    </form>
+    <form name="advancedsearchform" id="keywordsearchbox_advancedsearchform" method="post" action="<@ofbizUrl>advancedsearch</@ofbizUrl>">
+      <fieldset>
+        <#if 0 &lt; otherSearchProdCatalogCategories?size>
+            <label for="SEARCH_CATEGORY_ID">${uiLabelMap.ProductAdvancedSearchIn}: </label>
+            <select name="SEARCH_CATEGORY_ID" id="SEARCH_CATEGORY_ID" size="1">
+              <option value="${searchCategoryId?if_exists}">${uiLabelMap.ProductEntireCatalog}</option>
+              <#list otherSearchProdCatalogCategories as otherSearchProdCatalogCategory>
+                <#assign searchProductCategory = otherSearchProdCatalogCategory.getRelatedOne("ProductCategory", true)>
+                <#if searchProductCategory?exists>
+                  <option value="${searchProductCategory.productCategoryId}">${searchProductCategory.description?default("No Description " + searchProductCategory.productCategoryId)}</option>
+                </#if>
+              </#list>
+            </select>
+        <#else>
+          <input type="hidden" name="SEARCH_CATEGORY_ID" value="${searchCategoryId?if_exists}" />
+        </#if>
+          <input type="submit" value="${uiLabelMap.ProductAdvancedSearch}" class="button" />
+      </fieldset>
+    </form>
+  </div>
 </div>

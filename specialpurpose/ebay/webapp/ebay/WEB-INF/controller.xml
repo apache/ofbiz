@@ -42,6 +42,7 @@ under the License.
     </request-map>
 
     <request-map uri="ManageOrdersFromEbay">
+        <security https="true" auth="true"/>
         <response name="success" type="view" value="ManageOrdersFromEbay"/>
         <response name="failure" type="view" value="ManageOrdersFromEbay"/>
     </request-map>
@@ -67,6 +68,91 @@ under the License.
         <response name="success" type="view" value="ManageOrdersFromEbay"/>
         <response name="failure" type="view" value="ManageOrdersFromEbay"/>
     </request-map>
+    
+    <!-- Ebay configuration setting request -->
+    
+    <request-map uri="FindEbayConfigurations">
+        <security https="true" auth="true"/>
+        <response name="success" type="view" value="FindEbayConfigurations"/>
+        <response name="error" type="view" value="FindEbayConfigurations"/>
+    </request-map>
+    <request-map uri="createEbayConfiguration">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="createEbayConfiguration"/>
+        <response name="success" type="view" value="EditEbayConfiguration"/>
+        <response name="error" type="view" value="EditEbayConfiguration"/>
+    </request-map>
+    <request-map uri="updateEbayConfiguration">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="updateEbayConfiguration"/>
+        <response name="success" type="view" value="EditEbayConfiguration"/>
+        <response name="error" type="view" value="EditEbayConfiguration"/>
+    </request-map>
+    <request-map uri="deleteEbayConfiguration">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="deleteEbayConfiguration"/>
+        <response name="success" type="view" value="FindEbayConfigurations"/>
+        <response name="error" type="view" value="FindEbayConfigurations"/>
+    </request-map>
+    
+    <request-map uri="EbayShippingMethods">
+        <security https="true" auth="true"/>
+        <response name="success" type="view" value="EbayShippingMethods"/>
+    </request-map>
+    <request-map uri="createEbayShippingMethod">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="createEbayShippingMethod"/>
+        <response name="success" type="view" value="EbayShippingMethods"/>
+        <response name="error" type="view" value="EbayShippingMethods"/>
+    </request-map>
+    <request-map uri="updateEbayShippingMethod">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="updateEbayShippingMethod"/>
+        <response name="success" type="view" value="EbayShippingMethods"/>
+        <response name="error" type="view" value="EbayShippingMethods"/>
+    </request-map>
+    <request-map uri="deleteEbayShippingMethod">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="deleteEbayShippingMethod"/>
+        <response name="success" type="view" value="EbayShippingMethods"/>
+        <response name="error" type="view" value="EbayShippingMethods"/>
+    </request-map>
+    
+    <!-- New Import Order entries -->
+    <request-map uri="eBayOrders">
+        <security https="true" auth="true"/>
+        <response name="success" type="view" value="FindEbayOrders"/>
+        <response name="failure" type="view" value="FindEbayOrders"/>
+    </request-map>
+
+    <request-map uri="GetEbayOrders">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="getEbayOrders"/>
+        <response name="success" type="view" value="EbayOrders"/>
+        <response name="failure" type="view" value="EbayOrders"/>
+    </request-map>
+
+    <request-map uri="importEbayOrders">
+        <security https="true" auth="true"/>
+        <event type="service-multi" invoke="importEbayOrders"/>
+        <response name="success" type="request" value="updatedEbayOrders"/>
+        <response name="failure" type="view" value="FindEbayOrders"/>
+        <response name="error" type="view" value="FindEbayOrders"/>
+    </request-map>
+
+    <request-map uri="updatedEbayOrders">
+        <security https="true" auth="true"/>
+        <event type="groovy" path="component://ebay/webapp/ebay/WEB-INF/actions/find/updatedEbayOrders.groovy"/>
+        <response name="success" type="view" value="FindEbayOrders"/>
+        <response name="failure" type="view" value="FindEbayOrders"/>
+        <response name="error" type="view" value="FindEbayOrders"/>
+    </request-map>
+
+    <request-map uri="EditEbayConfiguration">
+        <security https="true" auth="true"/>
+        <response name="success" type="view" value="EditEbayConfiguration"/>
+        <response name="error" type="view" value="EditEbayConfiguration"/>
+    </request-map>
     <!-- end of request mappings -->
 
     <!-- View Mappings -->
@@ -75,5 +161,10 @@ under the License.
     <view-map name="keywordsearch" type="screen" page="component://ebay/widget/EbayScreens.xml#keywordsearch"/>
     <view-map name="ProductsExportToEbay" type="screen" page="component://ebay/widget/EbayScreens.xml#ProductsExportToEbay"/>
     <view-map name="ManageOrdersFromEbay" type="screen" page="component://ebay/widget/EbayScreens.xml#ManageOrdersFromEbay"/>
+    <view-map name="EbayOrders" type="screen" page="component://ebay/widget/EbayScreens.xml#EbayOrders"/>
+    <view-map name="FindEbayOrders" type="screen" page="component://ebay/widget/EbayScreens.xml#FindEbayOrders"/>
+    <view-map name="FindEbayConfigurations" type="screen" page="component://ebay/widget/EbayScreens.xml#FindEbayConfigurations"/>
+    <view-map name="EbayShippingMethods" type="screen" page="component://ebay/widget/EbayScreens.xml#EbayShippingMethods"/>
+    <view-map name="EditEbayConfiguration" type="screen" page="component://ebay/widget/EbayScreens.xml#EditEbayConfiguration"/>
     <!-- end of view mappings -->
 </site-conf>

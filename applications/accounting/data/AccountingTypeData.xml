@@ -45,6 +45,7 @@ under the License.
 
     <AcctgTransType acctgTransTypeId="SALES_INVOICE" description="Sales Invoice" hasTable="N" parentTypeId="OBLIGATION_ACCTG_TRA"/><!-- FIXME: replace with "SALES" -->
     <AcctgTransType acctgTransTypeId="PURCHASE_INVOICE" description="Purchase Invoice" hasTable="N" parentTypeId="OBLIGATION_ACCTG_TRA"/><!-- FIXME: replace with "SALES" -->
+    <AcctgTransType acctgTransTypeId="CUST_RTN_INVOICE" description="Customer Return" hasTable="N" parentTypeId="OBLIGATION_ACCTG_TRA"/><!-- FIXME: replace with "SALES" -->
     <AcctgTransType acctgTransTypeId="SALES_SHIPMENT" description="Sales Shipment" hasTable="N" parentTypeId="EXTERNAL_ACCTG_TRANS"/>
     <AcctgTransType acctgTransTypeId="SHIPMENT_RECEIPT" description="Shipment Receipt" hasTable="N" parentTypeId="EXTERNAL_ACCTG_TRANS"/>
     <AcctgTransType acctgTransTypeId="MANUFACTURING" description="Manufacturing" hasTable="N" parentTypeId=""/>
@@ -93,9 +94,13 @@ under the License.
     <FinAccountType description="Gift Certificate" finAccountTypeId="GIFTCERT_ACCOUNT" hasTable="N" replenishEnumId="FARP_MANUAL" isRefundable="N" parentTypeId=""/>
     <FinAccountType description="Deposit Account" finAccountTypeId="DEPOSIT_ACCOUNT" replenishEnumId="FARP_MANUAL" hasTable="N" isRefundable="Y" parentTypeId=""/>
     <FinAccountType description="Bank Account" finAccountTypeId="BANK_ACCOUNT" hasTable="N" replenishEnumId="FARP_MANUAL" isRefundable="Y" parentTypeId="DEPOSIT_ACCOUNT"/>
+    <FinAccountType description="Store Credit Account" finAccountTypeId="STORE_CREDIT_ACCT" hasTable="N" replenishEnumId="FARP_MANUAL" isRefundable="Y" parentTypeId="DEPOSIT_ACCOUNT"/>
     <FinAccountType description="Investment Account" finAccountTypeId="INVESTMENT_ACCOUNT" hasTable="N" replenishEnumId="FARP_MANUAL" isRefundable="Y" parentTypeId="DEPOSIT_ACCOUNT"/>
     <FinAccountType description="Replenish Account" finAccountTypeId="REPLENISH_ACCOUNT" hasTable="N" replenishEnumId="FARP_AUTOMATIC" isRefundable="Y" parentTypeId="DEPOSIT_ACCOUNT"/>
     <FinAccountType description="Service Credit Account" finAccountTypeId="SVCCRED_ACCOUNT" hasTable="N" replenishEnumId="FARP_MANUAL" isRefundable="N" parentTypeId=""/>
+    <FinAccountType description="Loan Account" finAccountTypeId="LOAN_ACCOUNT" hasTable="N" replenishEnumId="FARP_MANUAL" isRefundable="Y" parentTypeId=""/>
+    <FinAccountType description="Credit Card Account" finAccountTypeId="CREDIT_CARD_ACCOUNT" hasTable="N" replenishEnumId="FARP_MANUAL" isRefundable="Y" parentTypeId="LOAN_ACCOUNT"/>
+    <FinAccountType description="Equity Line Account" finAccountTypeId="EQUITY_LINE_ACCOUNT" hasTable="N" replenishEnumId="FARP_MANUAL" isRefundable="Y" parentTypeId="LOAN_ACCOUNT"/>
 
     <StatusType description="Financial Account Status" hasTable="N" parentTypeId="" statusTypeId="FINACCT_STATUS"/>
     <StatusItem description="Active" sequenceId="01" statusCode="ACTIVE" statusId="FNACT_ACTIVE" statusTypeId="FINACCT_STATUS"/>
@@ -112,6 +117,13 @@ under the License.
     <StatusValidChange condition="" statusId="FNACT_NEGPENDREPL" statusIdTo="FNACT_CANCELLED" transitionName="Cancel"/>
     <StatusValidChange condition="" statusId="FNACT_MANFROZEN" statusIdTo="FNACT_ACTIVE" transitionName="Re-activate"/>
     <StatusValidChange condition="" statusId="FNACT_MANFROZEN" statusIdTo="FNACT_CANCELLED" transitionName="Cancel"/>
+    <StatusType statusTypeId="FINACT_TRNS_STATUS" description="Financial Account Trans Status" hasTable="N" parentTypeId=""/>
+    <StatusItem statusId="FINACT_TRNS_APPROVED" statusTypeId="FINACT_TRNS_STATUS" statusCode="APPROVED" sequenceId="11" description="Approved"/>
+    <StatusItem statusId="FINACT_TRNS_CREATED" statusTypeId="FINACT_TRNS_STATUS" statusCode="CREATED" sequenceId="12" description="Created"/>
+    <StatusItem statusId="FINACT_TRNS_CANCELED" statusTypeId="FINACT_TRNS_STATUS" statusCode="CANCELED" sequenceId="13" description="Canceled"/>
+    <StatusValidChange condition="" statusId="FINACT_TRNS_CREATED" statusIdTo="FINACT_TRNS_APPROVED" transitionName="Set Created to Approved"/>
+    <StatusValidChange condition="" statusId="FINACT_TRNS_CREATED" statusIdTo="FINACT_TRNS_CANCELED" transitionName="Set Created to Canceled"/>
+    <StatusValidChange condition="" statusId="FINACT_TRNS_APPROVED" statusIdTo="FINACT_TRNS_CANCELED" transitionName="Set Approved to Canceled"/>
 
     <!-- FinAccount Reasons for Purchase & Replenish -->
     <EnumerationType description="Service Debit Reasons" enumTypeId="FINACCT_TRANS_REASON" parentTypeId="" hasTable="N"/>
@@ -170,12 +182,13 @@ under the License.
     <StatusItem description="In Process" sequenceId="05" statusCode="IN_PROCESS" statusId="FAM_IN_PROCESS" statusTypeId="FIXEDAST_MNT_STATUS"/>
     <StatusItem description="Completed" sequenceId="10" statusCode="COMPLETED" statusId="FAM_COMPLETED" statusTypeId="FIXEDAST_MNT_STATUS"/>
     <StatusItem description="Cancelled" sequenceId="99" statusCode="CANCELLED" statusId="FAM_CANCELLED" statusTypeId="FIXEDAST_MNT_STATUS"/>
-
-    <!-- The following three elements set up a regularly scheduled job that will automatically create
-        fixed asset maintenances from ProductMaint time intervals. -->
-    <TemporalExpression tempExprId="FAM_AUTO_CREATE" tempExprTypeId="FREQUENCY" integer1="12" integer2="5"/>
-    <JobSandbox jobId="FAM_AUTO_CREATE" jobName="Auto-create Fixed Asset Maintenances" runTime="2000-01-01 00:00:00.000" serviceName="createMaintsFromTimeInterval" poolId="pool" runAsUser="system" tempExprId="FAM_AUTO_CREATE" maxRecurrenceCount="-1"/>
-
+    <StatusValidChange condition="" statusId="FAM_CREATED" statusIdTo="FAM_SCHEDULED" transitionName="Created Maintenance Scheduled"/>
+    <StatusValidChange condition="" statusId="FAM_CREATED" statusIdTo="FAM_IN_PROCESS" transitionName="Created Maintenance In-Process"/>
+    <StatusValidChange condition="" statusId="FAM_CREATED" statusIdTo="FAM_CANCELLED" transitionName="Created Maintenace Cancelled"/>
+    <StatusValidChange condition="" statusId="FAM_SCHEDULED" statusIdTo="FAM_IN_PROCESS" transitionName="Scheduled Maintenace In-Process"/>
+    <StatusValidChange condition="" statusId="FAM_SCHEDULED" statusIdTo="FAM_CANCELLED" transitionName="Scheduled Maintenace Cancelled"/>
+    <StatusValidChange condition="" statusId="FAM_IN_PROCESS" statusIdTo="FAM_COMPLETED" transitionName="In-Process Maintenance Completed"/>
+    
     <!-- Fixed Asset Maintenance party roles -->
     <RoleType description="Fixed Asset Maint Assignee" hasTable="N" roleTypeId="FAM_ASSIGNEE"/>
     <RoleType description="Maintenance Supplier or Service" hasTable="N" parentTypeId="FAM_ASSIGNEE" roleTypeId="FAM_SUPPLIER"/>
@@ -193,21 +206,20 @@ under the License.
         DEBIT
             |___> NON_POSTING
             |
-            |___> DISTRIBUTION
-            |               |___> RETURN_OF_CAPITAL
-            |               |
-            |               |___> DIVIDEND
+            |___> CONTRA_REVENUE
             |
             |___> ASSET
             |         |_________> LONGTERM_ASSET
-            |         |                       |____> ACCUM_DEPRECIATION
-            |         |                       |
-            |         |                       |____> ACCUM_AMORTIZATION
             |         |
             |         |_________> CURRENT_ASSET
             |                                 |____> CASH_EQUIVALENT
             |                                 |
             |                                 |____> INVENTORY_ASSET
+            |
+            |___> DISTRIBUTION
+            |               |___> RETURN_OF_CAPITAL
+            |               |
+            |               |___> DIVIDEND
             |
             |___> EXPENSE
                       |_________> CASH_EXPENSE
@@ -225,22 +237,27 @@ under the License.
                                               |____> INVENTORY_ADJUST
 
         CREDIT
-            |___> REVENUE
+            |___> CONTRA_ASSET
+            |              |___> ACCUM_DEPRECIATION
+            |              |
+            |              |___> ACCUM_AMORTIZATION
             |
-            |___> INCOME
-            |          |_______> CASH_INCOME
-            |          |
-            |          |_______> NON_CASH_INCOME
+            |___> LIABILITY
+            |         |_________> CURRENT_LIABILITY
+            |         |
+            |         |_________> LONGTERM_LIABILITY
             |
             |___> EQUITY
             |         |_________> OWNERS_EQUITY
             |         |
             |         |_________> RETAINED_EARNINGS
             |
-            |___> LIABILITY
-                      |_________> CURRENT_LIABILITY
-                      |
-                      |_________> LONGTERM_LIABILITY
+            |___> REVENUE
+            |
+            |___> INCOME
+                       |________> CASH_INCOME
+                       |
+                       |________> NON_CASH_INCOME
 
         RESOURCE
 
@@ -263,6 +280,7 @@ under the License.
     <GlAccountClass description="Return of Capital" glAccountClassId="RETURN_OF_CAPITAL" parentClassId="DISTRIBUTION"/>
     <GlAccountClass description="Dividends" glAccountClassId="DIVIDEND" parentClassId="DISTRIBUTION"/>
     <GlAccountClass description="Revenue" glAccountClassId="REVENUE" parentClassId="CREDIT"/>
+    <GlAccountClass description="Contra Revenue" glAccountClassId="CONTRA_REVENUE" parentClassId="DEBIT"/>     
     <GlAccountClass description="Income" glAccountClassId="INCOME" parentClassId="CREDIT"/>
     <GlAccountClass description="Cash Income" glAccountClassId="CASH_INCOME" parentClassId="INCOME"/>
     <GlAccountClass description="Non-Cash Income" glAccountClassId="NON_CASH_INCOME" parentClassId="INCOME"/>
@@ -274,12 +292,13 @@ under the License.
     <GlAccountClass description="Non-Cash Expense" glAccountClassId="NON_CASH_EXPENSE" parentClassId="EXPENSE"/>
     <GlAccountClass description="Depreciation" glAccountClassId="DEPRECIATION" parentClassId="NON_CASH_EXPENSE"/>
     <GlAccountClass description="Amortization" glAccountClassId="AMORTIZATION" parentClassId="NON_CASH_EXPENSE"/>
-    <!-- a special class for non-cash inventory adjustment expenses to avoid duplicating opearting cash flow adjustments for inventory
+    <!-- a special class for non-cash inventory adjustment expenses to avoid duplicating operating cash flow adjustments for inventory
          account transactions, which adjust operating cash flows -->
     <GlAccountClass description="Inventory Adjustment" glAccountClassId="INVENTORY_ADJUST" parentClassId="NON_CASH_EXPENSE"/>
-    <!-- same idea: these avoid double counting of depreciaton & amortization -->
-    <GlAccountClass description="Accumulated Depreciation" glAccountClassId="ACCUM_DEPRECIATION" parentClassId="LONGTERM_ASSET"/>
-    <GlAccountClass description="Accumulated Amortization" glAccountClassId="ACCUM_AMORTIZATION" parentClassId="LONGTERM_ASSET"/>
+    <!-- same idea: these avoid double counting of depreciation & amortization -->
+    <GlAccountClass description="Contra Asset" glAccountClassId="CONTRA_ASSET" parentClassId="CREDIT"/>
+    <GlAccountClass description="Accumulated Depreciation" glAccountClassId="ACCUM_DEPRECIATION" parentClassId="CONTRA_ASSET"/>
+    <GlAccountClass description="Accumulated Amortization" glAccountClassId="ACCUM_AMORTIZATION" parentClassId="CONTRA_ASSET"/>
     <GlAccountClass description="Non-Posting" glAccountClassId="NON_POSTING" parentClassId="DEBIT"/>
 
     <GlAccountType description="Accounts Receivable" glAccountTypeId="ACCOUNTS_RECEIVABLE" hasTable="N" parentTypeId=""/>
@@ -324,7 +343,6 @@ under the License.
     <GlAccountType description="Customer Gift Certificate Balances" glAccountTypeId="CUSTOMER_GC_DEPOSIT" hasTable="N" parentTypeId="CURRENT_LIABILITY"/>
     <GlAccountType description="Uninvoiced Shipment Receipts" glAccountTypeId="UNINVOICED_SHIP_RCPT" hasTable="N" parentTypeId="CURRENT_LIABILITY"/>
     <GlAccountType description="Purchase Price Variance" glAccountTypeId="PURCHASE_PRICE_VAR" hasTable="N" parentTypeId="OTHER_EXPENSE"/>
-    <GlAccountType description="Prepaid Expenses" glAccountTypeId="PREPAID_EXPENSES" hasTable="N" parentTypeId="CURRENT_ASSET"/>
 
     <GlAccountType description="Income" glAccountTypeId="INCOME" hasTable="N" parentTypeId=""/>
     <GlAccountType description="Other Income" glAccountTypeId="OTHER_INCOME" hasTable="N" parentTypeId="INCOME"/>
@@ -335,6 +353,8 @@ under the License.
 
     <GlAccountType description="Receivable from Inventory Transferred Out" glAccountTypeId="INVENTORY_XFER_OUT" hasTable="N" parentTypeId="CURRENT_ASSET"/>
     <GlAccountType description="Payable from Inventory Transferred In" glAccountTypeId="INVENTORY_XFER_IN" hasTable="N" parentTypeId="CURRENT_LIABILITY"/>
+    <GlAccountType description="Accounts Payable - Unapplied Payments" glAccountTypeId="ACCPAYABLE_UNAPPLIED" hasTable="N" parentTypeId="ACCOUNTS_PAYABLE"/>
+    <GlAccountType description="Accounts Receivable - Unapplied Payments" glAccountTypeId="ACCREC_UNAPPLIED" hasTable="N" parentTypeId="ACCOUNTS_RECEIVABLE"/>
 
     <GlAccountType description="Commission Expense" glAccountTypeId="COMMISSION_EXPENSE" hasTable="N" parentTypeId="OPERATING_EXPENSE"/>
     <GlAccountType description="Commissions Payables" glAccountTypeId="COMMISSIONS_PAYABLE" hasTable="N" parentTypeId="CURRENT_LIABILITY"/>
@@ -364,30 +384,44 @@ under the License.
     <GlFiscalType description="Plan" glFiscalTypeId="PLAN"/>
     <GlFiscalType description="Scenario" glFiscalTypeId="SCENARIO"/>
 
-    <!-- invoice item types for sales (AR) invoices -->
-    <InvoiceItemType description="Invoice Adjustment" hasTable="N" invoiceItemTypeId="INVOICE_ADJ" parentTypeId=""/>
-    <InvoiceItemType description="Invoice Promotion" hasTable="N" invoiceItemTypeId="INV_PROMOTION_ADJ" parentTypeId="INVOICE_ADJ"/>
-    <InvoiceItemType description="Invoice Discount" hasTable="N" invoiceItemTypeId="INV_DISCOUNT_ADJ" parentTypeId="INVOICE_ADJ"/>
-    <InvoiceItemType description="Invoice Fee" hasTable="N" invoiceItemTypeId="FEE" parentTypeId="INVOICE_ADJ"/>
-    <InvoiceItemType description="Invoice Miscellaneous Charges" hasTable="N" invoiceItemTypeId="INV_MISC_CHARGE" parentTypeId="INVOICE_ADJ"/>
-    <InvoiceItemType description="Invoice Sales Tax" hasTable="N" invoiceItemTypeId="INV_SALES_TAX" parentTypeId="INVOICE_ADJ"/>
-    <InvoiceItemType description="Invoice Shipping and Handling" hasTable="N" invoiceItemTypeId="INV_SHIPPING_CHARGES" parentTypeId="INVOICE_ADJ"/>
-    <InvoiceItemType description="Invoice Surcharge" hasTable="N" invoiceItemTypeId="INV_SURCHARGE_ADJ" parentTypeId="INVOICE_ADJ"/>
-    <InvoiceItemType description="Invoice Additional Feature" hasTable="N" invoiceItemTypeId="INV_ADD_FEATURE" parentTypeId="INVOICE_ADJ"/>
-    <InvoiceItemType description="Invoice Warranty" hasTable="N" invoiceItemTypeId="INV_WARRANTY_ADJ" parentTypeId="INVOICE_ADJ"/>
-    <InvoiceItemType description="Invoice Interest Charge" hasTable="N" invoiceItemTypeId="INV_INTRST_CHRG" parentTypeId="INVOICE_ADJ"/>
+    <GlAccountCategoryType glAccountCategoryTypeId="COST_CENTER" description="Cost Center Category"/>
 
-    <InvoiceItemType description="Invoice Item Adjustment" hasTable="N" invoiceItemTypeId="INVOICE_ITM_ADJ" parentTypeId=""/>
-    <InvoiceItemType description="Invoice Item Promotion" hasTable="N" invoiceItemTypeId="ITM_PROMOTION_ADJ" parentTypeId="INVOICE_ITM_ADJ"/>
-    <InvoiceItemType description="Invoice Item Replacement" hasTable="N" invoiceItemTypeId="ITM_REPLACE_ADJ" parentTypeId="INVOICE_ITM_ADJ"/>
-    <InvoiceItemType description="Invoice Item Discount" hasTable="N" invoiceItemTypeId="ITM_DISCOUNT_ADJ" parentTypeId="INVOICE_ITM_ADJ"/>
-    <InvoiceItemType description="Invoice Item Fee" hasTable="N" invoiceItemTypeId="ITM_FEE" parentTypeId="INVOICE_ITM_ADJ"/>
-    <InvoiceItemType description="Invoice Item Miscellaneous Charges" hasTable="N" invoiceItemTypeId="ITM_MISC_CHARGE" parentTypeId="INVOICE_ITM_ADJ"/>
-    <InvoiceItemType description="Invoice Item Sales Tax" hasTable="N" invoiceItemTypeId="ITM_SALES_TAX" parentTypeId="INVOICE_ITM_ADJ"/>
-    <InvoiceItemType description="Invoice Item Shipping and Handling" hasTable="N" invoiceItemTypeId="ITM_SHIPPING_CHARGES" parentTypeId="INVOICE_ITM_ADJ"/>
-    <InvoiceItemType description="Invoice Item Surcharge" hasTable="N" invoiceItemTypeId="ITM_SURCHARGE_ADJ" parentTypeId="INVOICE_ITM_ADJ"/>
-    <InvoiceItemType description="Invoice Item Additional Feature" hasTable="N" invoiceItemTypeId="ITM_ADD_FEATURE" parentTypeId="INVOICE_ITM_ADJ"/>
-    <InvoiceItemType description="Invoice Item Warranty" hasTable="N" invoiceItemTypeId="ITM_WARRANTY_ADJ" parentTypeId="INVOICE_ITM_ADJ"/>
+    <!-- Invoice content type-->
+    <InvoiceContentType invoiceContentTypeId="COMMENTS" description="comments" hasTable="N" parentTypeId=""/>
+    
+    <!-- invoice item types tree for adjustments -->
+    <InvoiceItemType description="Invoice Adjustment" hasTable="N" invoiceItemTypeId="INVOICE_ADJ" parentTypeId=""/>
+    <InvoiceItemType description="Invoice Header Adjustment" hasTable="N" invoiceItemTypeId="INVOICE_HEAD_ADJ" parentTypeId="INVOICE_ADJ"/>
+    <InvoiceItemType description="Invoice Item Adjustment" hasTable="N" invoiceItemTypeId="INVOICE_ITM_ADJ" parentTypeId="INVOICE_ADJ"/>
+    <InvoiceItemType description="Sales Invoice Header Adjustment" hasTable="N" invoiceItemTypeId="SINVOICE_HEAD_ADJ" parentTypeId="INVOICE_HEAD_ADJ"/>
+    <InvoiceItemType description="Sales Invoice Item Adjustment" hasTable="N" invoiceItemTypeId="SINVOICE_ITM_ADJ" parentTypeId="INVOICE_ITM_ADJ"/>
+    <InvoiceItemType description="Purchase Invoice Header Adjustment" hasTable="N" invoiceItemTypeId="PINVOICE_ADJ" parentTypeId="INVOICE_HEAD_ADJ"/>
+    <InvoiceItemType description="Purchase Invoice Item Adjustment" hasTable="N" invoiceItemTypeId="PINVOICE_ITM_ADJ" parentTypeId="INVOICE_ITM_ADJ"/>
+    <InvoiceItemType description="Customer Return Adjustment" hasTable="N" invoiceItemTypeId="CRETURN_ADJ" parentTypeId="INVOICE_ADJ"/>
+    <InvoiceItemType description="Supplier Return Adjustment" hasTable="N" invoiceItemTypeId="SRETURN_ADJ" parentTypeId="INVOICE_ADJ"/>
+
+    <!-- invoice item types for sales (AR) invoices -->
+    <InvoiceItemType description="Invoice Promotion" hasTable="N" invoiceItemTypeId="INV_PROMOTION_ADJ" parentTypeId="SINVOICE_HEAD_ADJ"/>
+    <InvoiceItemType description="Invoice Discount" hasTable="N" invoiceItemTypeId="INV_DISCOUNT_ADJ" parentTypeId="SINVOICE_HEAD_ADJ"/>
+    <InvoiceItemType description="Invoice Fee" hasTable="N" invoiceItemTypeId="FEE" parentTypeId="SINVOICE_HEAD_ADJ"/>
+    <InvoiceItemType description="Invoice Miscellaneous Charges" hasTable="N" invoiceItemTypeId="INV_MISC_CHARGE" parentTypeId="SINVOICE_HEAD_ADJ"/>
+    <InvoiceItemType description="Invoice Sales Tax" hasTable="N" invoiceItemTypeId="INV_SALES_TAX" parentTypeId="SINVOICE_HEAD_ADJ"/>
+    <InvoiceItemType description="Invoice Shipping and Handling" hasTable="N" invoiceItemTypeId="INV_SHIPPING_CHARGES" parentTypeId="SINVOICE_HEAD_ADJ"/>
+    <InvoiceItemType description="Invoice Surcharge" hasTable="N" invoiceItemTypeId="INV_SURCHARGE_ADJ" parentTypeId="SINVOICE_HEAD_ADJ"/>
+    <InvoiceItemType description="Invoice Additional Feature" hasTable="N" invoiceItemTypeId="INV_ADD_FEATURE" parentTypeId="SINVOICE_HEAD_ADJ"/>
+    <InvoiceItemType description="Invoice Warranty" hasTable="N" invoiceItemTypeId="INV_WARRANTY_ADJ" parentTypeId="SINVOICE_HEAD_ADJ"/>
+    <InvoiceItemType description="Invoice Interest Charge" hasTable="N" invoiceItemTypeId="INV_INTRST_CHRG" parentTypeId="SINVOICE_HEAD_ADJ"/>
+
+    <InvoiceItemType description="Invoice Item Promotion" hasTable="N" invoiceItemTypeId="ITM_PROMOTION_ADJ" parentTypeId="SINVOICE_ITM_ADJ"/>
+    <InvoiceItemType description="Invoice Item Replacement" hasTable="N" invoiceItemTypeId="ITM_REPLACE_ADJ" parentTypeId="SINVOICE_ITM_ADJ"/>
+    <InvoiceItemType description="Invoice Item Discount" hasTable="N" invoiceItemTypeId="ITM_DISCOUNT_ADJ" parentTypeId="SINVOICE_ITM_ADJ"/>
+    <InvoiceItemType description="Invoice Item Fee" hasTable="N" invoiceItemTypeId="ITM_FEE" parentTypeId="SINVOICE_ITM_ADJ"/>
+    <InvoiceItemType description="Invoice Item Miscellaneous Charges" hasTable="N" invoiceItemTypeId="ITM_MISC_CHARGE" parentTypeId="SINVOICE_ITM_ADJ"/>
+    <InvoiceItemType description="Invoice Item Sales Tax" hasTable="N" invoiceItemTypeId="ITM_SALES_TAX" parentTypeId="SINVOICE_ITM_ADJ"/>
+    <InvoiceItemType description="Invoice Item Shipping and Handling" hasTable="N" invoiceItemTypeId="ITM_SHIPPING_CHARGES" parentTypeId="SINVOICE_ITM_ADJ"/>
+    <InvoiceItemType description="Invoice Item Surcharge" hasTable="N" invoiceItemTypeId="ITM_SURCHARGE_ADJ" parentTypeId="SINVOICE_ITM_ADJ"/>
+    <InvoiceItemType description="Invoice Item Additional Feature" hasTable="N" invoiceItemTypeId="ITM_ADD_FEATURE" parentTypeId="SINVOICE_ITM_ADJ"/>
+    <InvoiceItemType description="Invoice Item Warranty" hasTable="N" invoiceItemTypeId="ITM_WARRANTY_ADJ" parentTypeId="SINVOICE_ITM_ADJ"/>
 
     <InvoiceItemType description="Invoice Product Item" hasTable="N" invoiceItemTypeId="INV_PROD_ITEM" parentTypeId=""/>
     <InvoiceItemType description="Invoice Finished Good Item" hasTable="N" invoiceItemTypeId="INV_FPROD_ITEM" parentTypeId="INV_PROD_ITEM"/>
@@ -400,7 +434,6 @@ under the License.
     <InvoiceItemType description="Invoice Time-Entry Item" hasTable="N" invoiceItemTypeId="INV_TE_ITEM" parentTypeId=""/>
 
     <!-- invoice item types for purchase (AP) invoices -->
-    <InvoiceItemType description="Invoice Adjustment" hasTable="N" invoiceItemTypeId="PINVOICE_ADJ" parentTypeId=""/>
     <InvoiceItemType description="Invoice Promotion" hasTable="N" invoiceItemTypeId="PINV_PROMOTION_ADJ" parentTypeId="PINVOICE_ADJ"/>
     <InvoiceItemType description="Invoice Discount" hasTable="N" invoiceItemTypeId="PINV_DISCOUNT_ADJ" parentTypeId="PINVOICE_ADJ"/>
     <InvoiceItemType description="Invoice Fee" hasTable="N" invoiceItemTypeId="P_FEE" parentTypeId="PINVOICE_ADJ"/>
@@ -411,7 +444,6 @@ under the License.
     <InvoiceItemType description="Invoice Additional Feature" hasTable="N" invoiceItemTypeId="PINV_ADD_FEATURE" parentTypeId="PINVOICE_ADJ"/>
     <InvoiceItemType description="Invoice Warranty" hasTable="N" invoiceItemTypeId="PINV_WARRANTY_ADJ" parentTypeId="PINVOICE_ADJ"/>
 
-    <InvoiceItemType description="Invoice Item Adjustment" hasTable="N" invoiceItemTypeId="PINVOICE_ITM_ADJ" parentTypeId=""/>
     <InvoiceItemType description="Invoice Item Promotion" hasTable="N" invoiceItemTypeId="PITM_PROMOTION_ADJ" parentTypeId="PINVOICE_ITM_ADJ"/>
     <InvoiceItemType description="Invoice Item Replacement" hasTable="N" invoiceItemTypeId="PITM_REPLACE_ADJ" parentTypeId="PINVOICE_ITM_ADJ"/>
     <InvoiceItemType description="Invoice Item Discount" hasTable="N" invoiceItemTypeId="PITM_DISCOUNT_ADJ" parentTypeId="PINVOICE_ITM_ADJ"/>
@@ -448,18 +480,20 @@ under the License.
     <InvoiceItemType description="Return Work-Effort Item" hasTable="N" invoiceItemTypeId="CRT_WE_ITEM" parentTypeId=""/>
     <InvoiceItemType description="Return Time-Entry Item" hasTable="N" invoiceItemTypeId="CRT_TE_ITEM" parentTypeId=""/>
 
-    <InvoiceItemType description="Return Promotion" hasTable="N" invoiceItemTypeId="CRT_PROMOTION_ADJ" parentTypeId=""/>
-    <InvoiceItemType description="Return Replacement" hasTable="N" invoiceItemTypeId="CRT_REPLACE_ADJ" parentTypeId=""/>
-    <InvoiceItemType description="Return Discount" hasTable="N" invoiceItemTypeId="CRT_DISCOUNT_ADJ" parentTypeId=""/>
-    <InvoiceItemType description="Return Fee" hasTable="N" invoiceItemTypeId="CRT_FEE_ADJ" parentTypeId=""/>
-    <InvoiceItemType description="Return Miscellaneous Charges" hasTable="N" invoiceItemTypeId="CRT_MISC_ADJ" parentTypeId=""/>
-    <InvoiceItemType description="Return Sales Tax" hasTable="N" invoiceItemTypeId="CRT_SALES_TAX_ADJ" parentTypeId=""/>
-    <InvoiceItemType description="Return Shipping and Handling" hasTable="N" invoiceItemTypeId="CRT_SHIPPING_ADJ" parentTypeId=""/>
-    <InvoiceItemType description="Return Surcharge" hasTable="N" invoiceItemTypeId="CRT_SURCHARGE_ADJ" parentTypeId=""/>
-    <InvoiceItemType description="Return Additional Feature" hasTable="N" invoiceItemTypeId="CRT_ADD_FEATURE_ADJ" parentTypeId=""/>
-    <InvoiceItemType description="Return Warranty" hasTable="N" invoiceItemTypeId="CRT_WARRANTY_ADJ" parentTypeId=""/>
-    <InvoiceItemType description="Return Marketing Package Adjustment" hasTable="N" invoiceItemTypeId="CRT_MKTG_PKG_ADJ" parentTypeId=""/>
-    <InvoiceItemType description="Return Manual Adjustment" hasTable="N" invoiceItemTypeId="CRT_MAN_ADJ" parentTypeId=""/>
+    <InvoiceItemType description="Return Promotion" hasTable="N" invoiceItemTypeId="CRT_PROMOTION_ADJ" parentTypeId="CRETURN_ADJ"/>
+    <InvoiceItemType description="Return Replacement" hasTable="N" invoiceItemTypeId="CRT_REPLACE_ADJ" parentTypeId="CRETURN_ADJ"/>
+    <InvoiceItemType description="Return Discount" hasTable="N" invoiceItemTypeId="CRT_DISCOUNT_ADJ" parentTypeId="CRETURN_ADJ"/>
+    <InvoiceItemType description="Return Fee" hasTable="N" invoiceItemTypeId="CRT_FEE_ADJ" parentTypeId="CRETURN_ADJ"/>
+    <InvoiceItemType description="Return Miscellaneous Charges" hasTable="N" invoiceItemTypeId="CRT_MISC_ADJ" parentTypeId="CRETURN_ADJ"/>
+    <InvoiceItemType description="Return Sales Tax" hasTable="N" invoiceItemTypeId="CRT_SALES_TAX_ADJ" parentTypeId="CRETURN_ADJ"/>
+    <InvoiceItemType description="Return VAT Tax" hasTable="N" invoiceItemTypeId="CRT_VAT_TAX_ADJ" parentTypeId="CRETURN_ADJ"/>
+    <InvoiceItemType description="Return VAT Price Correct" hasTable="N" invoiceItemTypeId="CRT_VAT_PC_ADJ" parentTypeId="CRETURN_ADJ"/>
+    <InvoiceItemType description="Return Shipping and Handling" hasTable="N" invoiceItemTypeId="CRT_SHIPPING_ADJ" parentTypeId="CRETURN_ADJ"/>
+    <InvoiceItemType description="Return Surcharge" hasTable="N" invoiceItemTypeId="CRT_SURCHARGE_ADJ" parentTypeId="CRETURN_ADJ"/>
+    <InvoiceItemType description="Return Additional Feature" hasTable="N" invoiceItemTypeId="CRT_ADD_FEATURE_ADJ" parentTypeId="CRETURN_ADJ"/>
+    <InvoiceItemType description="Return Warranty" hasTable="N" invoiceItemTypeId="CRT_WARRANTY_ADJ" parentTypeId="CRETURN_ADJ"/>
+    <InvoiceItemType description="Return Marketing Package Adjustment" hasTable="N" invoiceItemTypeId="CRT_MKTG_PKG_ADJ" parentTypeId="CRETURN_ADJ"/>
+    <InvoiceItemType description="Return Manual Adjustment" hasTable="N" invoiceItemTypeId="CRT_MAN_ADJ" parentTypeId="CRETURN_ADJ"/>
 
     <!-- invoice items for returns to suppliers -->
     <InvoiceItemType description="Return Product Item" hasTable="N" invoiceItemTypeId="SRT_PROD_ITEM" parentTypeId=""/>
@@ -472,22 +506,24 @@ under the License.
     <InvoiceItemType description="Return Work-Effort Item" hasTable="N" invoiceItemTypeId="SRT_WE_ITEM" parentTypeId=""/>
     <InvoiceItemType description="Return Time-Entry Item" hasTable="N" invoiceItemTypeId="SRT_TE_ITEM" parentTypeId=""/>
 
-    <InvoiceItemType description="Return Promotion" hasTable="N" invoiceItemTypeId="SRT_PROMOTION_ADJ" parentTypeId=""/>
-    <InvoiceItemType description="Return Replacement" hasTable="N" invoiceItemTypeId="SRT_REPLACE_ADJ" parentTypeId=""/>
-    <InvoiceItemType description="Return Discount" hasTable="N" invoiceItemTypeId="SRT_DISCOUNT_ADJ" parentTypeId=""/>
-    <InvoiceItemType description="Return Fee" hasTable="N" invoiceItemTypeId="SRT_FEE_ADJ" parentTypeId=""/>
-    <InvoiceItemType description="Return Miscellaneous Charges" hasTable="N" invoiceItemTypeId="SRT_MISC_ADJ" parentTypeId=""/>
-    <InvoiceItemType description="Return Sales Tax" hasTable="N" invoiceItemTypeId="SRT_SALES_TAX_ADJ" parentTypeId=""/>
-    <InvoiceItemType description="Return Shipping and Handling" hasTable="N" invoiceItemTypeId="SRT_SHIPPING_ADJ" parentTypeId=""/>
-    <InvoiceItemType description="Return Surcharge" hasTable="N" invoiceItemTypeId="SRT_SURCHARGE_ADJ" parentTypeId=""/>
-    <InvoiceItemType description="Return Additional Feature" hasTable="N" invoiceItemTypeId="SRT_ADD_FEATURE_ADJ" parentTypeId=""/>
-    <InvoiceItemType description="Return Warranty" hasTable="N" invoiceItemTypeId="SRT_WARRANTY_ADJ" parentTypeId=""/>
-    <InvoiceItemType description="Return Marketing Package Adjustment" hasTable="N" invoiceItemTypeId="SRT_MKTG_PKG_ADJ" parentTypeId=""/>
-    <InvoiceItemType description="Return Manual Adjustment" hasTable="N" invoiceItemTypeId="SRT_MAN_ADJ" parentTypeId=""/>
+    <InvoiceItemType description="Return Promotion" hasTable="N" invoiceItemTypeId="SRT_PROMOTION_ADJ" parentTypeId="SRETURN_ADJ"/>
+    <InvoiceItemType description="Return Replacement" hasTable="N" invoiceItemTypeId="SRT_REPLACE_ADJ" parentTypeId="SRETURN_ADJ"/>
+    <InvoiceItemType description="Return Discount" hasTable="N" invoiceItemTypeId="SRT_DISCOUNT_ADJ" parentTypeId="SRETURN_ADJ"/>
+    <InvoiceItemType description="Return Fee" hasTable="N" invoiceItemTypeId="SRT_FEE_ADJ" parentTypeId="SRETURN_ADJ"/>
+    <InvoiceItemType description="Return Miscellaneous Charges" hasTable="N" invoiceItemTypeId="SRT_MISC_ADJ" parentTypeId="SRETURN_ADJ"/>
+    <InvoiceItemType description="Return Sales Tax" hasTable="N" invoiceItemTypeId="SRT_SALES_TAX_ADJ" parentTypeId="SRETURN_ADJ"/>
+    <InvoiceItemType description="Return VAT Tax" hasTable="N" invoiceItemTypeId="SRT_VAT_TAX_ADJ" parentTypeId="SRETURN_ADJ"/>
+    <InvoiceItemType description="Return VAT Price Correct" hasTable="N" invoiceItemTypeId="SRT_VAT_PC_ADJ" parentTypeId="SRETURN_ADJ"/>
+    <InvoiceItemType description="Return Shipping and Handling" hasTable="N" invoiceItemTypeId="SRT_SHIPPING_ADJ" parentTypeId="SRETURN_ADJ"/>
+    <InvoiceItemType description="Return Surcharge" hasTable="N" invoiceItemTypeId="SRT_SURCHARGE_ADJ" parentTypeId="SRETURN_ADJ"/>
+    <InvoiceItemType description="Return Additional Feature" hasTable="N" invoiceItemTypeId="SRT_ADD_FEATURE_ADJ" parentTypeId="SRETURN_ADJ"/>
+    <InvoiceItemType description="Return Warranty" hasTable="N" invoiceItemTypeId="SRT_WARRANTY_ADJ" parentTypeId="SRETURN_ADJ"/>
+    <InvoiceItemType description="Return Marketing Package Adjustment" hasTable="N" invoiceItemTypeId="SRT_MKTG_PKG_ADJ" parentTypeId="SRETURN_ADJ"/>
+    <InvoiceItemType description="Return Manual Adjustment" hasTable="N" invoiceItemTypeId="SRT_MAN_ADJ" parentTypeId="SRETURN_ADJ"/>
 
     <!-- invoice item types for commission invoices -->
     <InvoiceItemType description="Commission Invoice Line Item" hasTable="N" invoiceItemTypeId="COMM_INV_ITEM" parentTypeId=""/>
-    <InvoiceItemType description="Commission Invoice Adjustment" hasTable="N" invoiceItemTypeId="COMM_INV_ADJ" parentTypeId=""/>
+    <InvoiceItemType description="Commission Invoice Adjustment" hasTable="N" invoiceItemTypeId="COMM_INV_ADJ" parentTypeId="INVOICE_ADJ"/>
 
     <InvoiceType description="Purchase Invoice" hasTable="N" invoiceTypeId="PURCHASE_INVOICE" parentTypeId="PURCHASE_INVOICE"/>
     <InvoiceType description="Sales Invoice" hasTable="N" invoiceTypeId="SALES_INVOICE" parentTypeId="SALES_INVOICE"/>
@@ -498,6 +534,10 @@ under the License.
     <InvoiceType description="Invoice Template" hasTable="N" invoiceTypeId="TEMPLATE"/>
     <InvoiceType description="Sales Invoice Template" hasTable="N" invoiceTypeId="SALES_INV_TEMPLATE" parentTypeId="TEMPLATE"/>
     <InvoiceType description="Purchase Invoice Template" hasTable="N" invoiceTypeId="PUR_INV_TEMPLATE" parentTypeId="TEMPLATE"/>
+
+    <!-- InvoiceItemAssocType records can be used in InvoiceItemAssoc entity. This will help to distinguish the record in searching for the commission invoice or withdraw invoice. More assoc types can be added later on.  -->
+    <InvoiceItemAssocType description="Commission" hasTable="N" invoiceItemAssocTypeId="COMMISSION_INVOICE" parentTypeId=""/>
+    <InvoiceItemAssocType description="Withdraw" hasTable="N" invoiceItemAssocTypeId="WITHDRAW_INVOICE" parentTypeId=""/>
 
     <!-- maps line items such as order items to invoice item types.  separate mapping for sales and purchase invoices -->
     <InvoiceItemTypeMap invoiceTypeId="SALES_INVOICE" invoiceItemMapKey="FINISHED_GOOD" invoiceItemTypeId="INV_FPROD_ITEM"/>
@@ -547,6 +587,8 @@ under the License.
     <InvoiceItemTypeMap invoiceTypeId="CUST_RTN_INVOICE" invoiceItemMapKey="RET_FEE_ADJ" invoiceItemTypeId="CRT_FEE_ADJ"/>
     <InvoiceItemTypeMap invoiceTypeId="CUST_RTN_INVOICE" invoiceItemMapKey="RET_MISC_CHARGE_ADJ" invoiceItemTypeId="CRT_MISC_ADJ"/>
     <InvoiceItemTypeMap invoiceTypeId="CUST_RTN_INVOICE" invoiceItemMapKey="RET_SALES_TAX_ADJ" invoiceItemTypeId="CRT_SALES_TAX_ADJ"/>
+    <InvoiceItemTypeMap invoiceTypeId="CUST_RTN_INVOICE" invoiceItemMapKey="RET_VAT_TAX_ADJ" invoiceItemTypeId="CRT_VAT_TAX_ADJ"/>
+    <InvoiceItemTypeMap invoiceTypeId="CUST_RTN_INVOICE" invoiceItemMapKey="RET_VAT_PC_ADJ" invoiceItemTypeId="CRT_VAT_PC_ADJ"/>
     <InvoiceItemTypeMap invoiceTypeId="CUST_RTN_INVOICE" invoiceItemMapKey="RET_SHIPPING_ADJ" invoiceItemTypeId="CRT_SHIPPING_ADJ"/>
     <InvoiceItemTypeMap invoiceTypeId="CUST_RTN_INVOICE" invoiceItemMapKey="RET_SURCHARGE_ADJ" invoiceItemTypeId="CRT_SURCHARGE_ADJ"/>
     <InvoiceItemTypeMap invoiceTypeId="CUST_RTN_INVOICE" invoiceItemMapKey="RET_ADD_FEATURE_ADJ" invoiceItemTypeId="CRT_ADD_FEATURE_ADJ"/>
@@ -563,6 +605,8 @@ under the License.
     <InvoiceItemTypeMap invoiceTypeId="PURC_RTN_INVOICE" invoiceItemMapKey="RET_FEE_ADJ" invoiceItemTypeId="SRT_FEE_ADJ"/>
     <InvoiceItemTypeMap invoiceTypeId="PURC_RTN_INVOICE" invoiceItemMapKey="RET_MISC_CHARGE_ADJ" invoiceItemTypeId="SRT_MISC_ADJ"/>
     <InvoiceItemTypeMap invoiceTypeId="PURC_RTN_INVOICE" invoiceItemMapKey="RET_SALES_TAX_ADJ" invoiceItemTypeId="SRT_SALES_TAX_ADJ"/>
+    <InvoiceItemTypeMap invoiceTypeId="PURC_RTN_INVOICE" invoiceItemMapKey="RET_VAT_TAX_ADJ" invoiceItemTypeId="SRT_VAT_TAX_ADJ"/>
+    <InvoiceItemTypeMap invoiceTypeId="PURC_RTN_INVOICE" invoiceItemMapKey="RET_VAT_PC_ADJ" invoiceItemTypeId="SRT_VAT_PC_ADJ"/>
     <InvoiceItemTypeMap invoiceTypeId="PURC_RTN_INVOICE" invoiceItemMapKey="RET_SHIPPING_ADJ" invoiceItemTypeId="SRT_SHIPPING_ADJ"/>
     <InvoiceItemTypeMap invoiceTypeId="PURC_RTN_INVOICE" invoiceItemMapKey="RET_SURCHARGE_ADJ" invoiceItemTypeId="SRT_SURCHARGE_ADJ"/>
     <InvoiceItemTypeMap invoiceTypeId="PURC_RTN_INVOICE" invoiceItemMapKey="RET_ADD_FEATURE_ADJ" invoiceItemTypeId="SRT_ADD_FEATURE_ADJ"/>
@@ -580,7 +624,7 @@ under the License.
     <InvoiceType description="Payrol" hasTable="N" invoiceTypeId="PAYROL_INVOICE" parentTypeId="PURCHASE_INVOICE"/>
 <!--    invoiceItem Types:-->
     <InvoiceItemType description="Payrol" hasTable="N" invoiceItemTypeId="PAYROL" parentTypeId=""/><!-- to group the itemType parentId's -->
-
+    <!-- earnings and Hours -->
     <InvoiceItemType description="Earnings and Hours" hasTable="N" invoiceItemTypeId="PAYROL_EARN_HOURS" parentTypeId="PAYROL"/>
     <InvoiceItemType description="Hourly Rate" hasTable="N" invoiceItemTypeId="PAYROL_HRLY_RATE" parentTypeId="PAYROL_EARN_HOURS"/>
     <InvoiceItemType description="Sick Hourly Rate" hasTable="N" invoiceItemTypeId="PAYROL_HRLY_RATE_SIC" parentTypeId="PAYROL_EARN_HOURS"/>
@@ -594,9 +638,9 @@ under the License.
     <InvoiceItemType description="Office Exp. reimboursement" hasTable="N" invoiceItemTypeId="PAYROL_OFF_EXP_REIMB" parentTypeId="PAYROL_EARN_HOURS"/>
     <InvoiceItemType description="Pay Period adj(over pay)" hasTable="N" invoiceItemTypeId="PAYROL_PAYPER_OVRPAY" parentTypeId="PAYROL_EARN_HOURS"/>
     <InvoiceItemType description="Pay Period adj pay" hasTable="N" invoiceItemTypeId="PAYROL_PAYPER_PAY" parentTypeId="PAYROL_EARN_HOURS"/>
-
+    <!-- Deductions -->
     <InvoiceItemType description="Deductions from Gross" hasTable="N" invoiceItemTypeId="PAYROL_DD_FROM_GROSS" parentTypeId="PAYROL"/>
-    <InvoiceItemType description="125*Compy. Contr Other Prem." hasTable="N" invoiceItemTypeId="PAYROL_DD_125COMPY" parentTypeId="PAYROL_DD_FROM_GROSS" defaultGlAccountId=""/>/>
+    <InvoiceItemType description="125*Compy. Contr Other Prem." hasTable="N" invoiceItemTypeId="PAYROL_DD_125COMPY" parentTypeId="PAYROL_DD_FROM_GROSS" defaultGlAccountId=""/>
     <InvoiceItemType description="125*PPO (pre tax)" hasTable="N" invoiceItemTypeId="PAYROL_DD_125PPO" parentTypeId="PAYROL_DD_FROM_GROSS" defaultGlAccountId=""/>
     <InvoiceItemType description="125*HSA Contribution (pre tax)" hasTable="N" invoiceItemTypeId="PAYROL_DD_125HSA" parentTypeId="PAYROL_DD_FROM_GROSS" defaultGlAccountId=""/>
     <InvoiceItemType description="401K Emp." hasTable="N" invoiceItemTypeId="PAYROL_DD_401K" parentTypeId="PAYROL_DD_FROM_GROSS" defaultGlAccountId=""/>
@@ -609,7 +653,7 @@ under the License.
     <InvoiceItemType description="Union Dues" hasTable="N" invoiceItemTypeId="PAYROL_DD_UNION" parentTypeId="PAYROL_DD_FROM_GROSS" defaultGlAccountId=""/>
     <InvoiceItemType description="Unpaid Salary Time off." hasTable="N" invoiceItemTypeId="PAYROL_DD_SAL_TIMOFF" parentTypeId="PAYROL_DD_FROM_GROSS" defaultGlAccountId=""/>
     <InvoiceItemType description="Wage Garnishment" hasTable="N" invoiceItemTypeId="PAYROL_DD_WAG_GARN" parentTypeId="PAYROL_DD_FROM_GROSS" defaultGlAccountId=""/>
-
+    <!-- taxes -->
     <InvoiceItemType description="Taxes" hasTable="N" invoiceItemTypeId="PAYROL_TAXES" parentTypeId="PAYROL"/>
     <InvoiceItemType description="Federal Witholding" hasTable="N" invoiceItemTypeId="PAYROL_TAX_FEDERAL" parentTypeId="PAYROL_TAXES" defaultGlAccountId=""/>
     <InvoiceItemType description="Social Security Employee" hasTable="N" invoiceItemTypeId="PAYROL_SOC_SEC_EMPL" parentTypeId="PAYROL_TAXES" defaultGlAccountId=""/>
@@ -640,7 +684,8 @@ under the License.
     <PaymentMethodType description="eBay" paymentMethodTypeId="EXT_EBAY"/>
     <PaymentMethodType description="Offline Payment" paymentMethodTypeId="EXT_OFFLINE"/>
     <PaymentMethodType description="PayPal" paymentMethodTypeId="EXT_PAYPAL"/>
-    <PaymentMethodType description="WorldPay" paymentMethodTypeId="EXT_WORLDPAY"/>
+    <PaymentMethodType description="RBS WorldPay" paymentMethodTypeId="EXT_WORLDPAY"/>
+    <PaymentMethodType description="iDEAL" paymentMethodTypeId="EXT_IDEAL"/>
 
     <PaymentType description="Disbursement" hasTable="N" parentTypeId="" paymentTypeId="DISBURSEMENT"/>
     <PaymentType description="Customer Refund" hasTable="N" parentTypeId="DISBURSEMENT" paymentTypeId="CUSTOMER_REFUND"/> <!-- a refund TO the customer -->
@@ -665,18 +710,9 @@ under the License.
     <PaymentType description="POS Paid Out" hasTable="N" parentTypeId="DISBURSEMENT" paymentTypeId="POS_PAID_OUT"/>
     <PaymentType description="POS Paid In" hasTable="N" parentTypeId="RECEIPT" paymentTypeId="POS_PAID_IN"/>
 
-    <!-- Payment Gateway Configuration -->
-    <PaymentGatewayConfigType paymentGatewayConfigTypeId="PAYFLOWPRO" hasTable="N" description="Payment Gateway Payflow Pro"/>
-    <PaymentGatewayConfig paymentGatewayConfigId="PAYFLOWPRO_CONFIG" paymentGatewayConfigTypeId="PAYFLOWPRO" description="Configuration of Payflow Pro"/>
-    <PaymentGatewayPayflowPro paymentGatewayConfigId="PAYFLOWPRO_CONFIG" certsPath="${sys:getProperty('ofbiz.home')}/applications/accounting/pfcerts" hostAddress="test-payflow.verisign.com" hostPort="443" timeout="80" proxyAddress="" proxyPort="80" proxyLogon="" proxyPassword="" vendor="[Vendor]" userId="[PayFlow UserID]" pwd="[PayFlow Password]" partner="[PayFlow Partner]" checkAvs="Y" checkCvv2="Y" preAuth="Y" enableTransmit="true" logFileName="${sys:getProperty('ofbiz.home')}/runtime/logs/payflow_java.log" loggingLevel="6" maxLogFileSize="1000000" stackTraceOn="N"/>
-    
-    <PaymentGatewayConfigType paymentGatewayConfigTypeId="PAYPAL" hasTable="N" description="Payment Gateway PayPal"/>
-    <PaymentGatewayConfig paymentGatewayConfigId="PAYPAL_CONFIG" paymentGatewayConfigTypeId="PAYPAL" description="Configuration of PayPal"/>
-    <PaymentGatewayPayPal paymentGatewayConfigId="PAYPAL_CONFIG" businessEmail="" notifyUrl="" returnUrl="" cancelReturnUrl="" imageUrl="" confirmTemplate="/order/emailconfirmation.ftl" redirectUrl="https://www.sandbox.paypal.com/us/cgi-bin/webscr" confirmUrl="https://www.sandbox.paypal.com/us/cgi-bin/webscr"/>
-    
-    <PaymentGatewayConfigType paymentGatewayConfigTypeId="CLEARCOMMERCE" hasTable="N" description="Payment Gateway Clear Commerce"/>
-    <PaymentGatewayConfig paymentGatewayConfigId="CLEARCOMMERCE_CONFIG" paymentGatewayConfigTypeId="CLEARCOMMERCE" description="Configuration of Clear Commerce"/>
-    <PaymentGatewayClearCommerce paymentGatewayConfigId="CLEARCOMMERCE_CONFIG" sourceId="mySource" groupId="myGroup" clientId="[ClearCommerce clientId]" username="[ClearCommerce username]" pwd="[ClearCommerce password]" userAlias="[ClearCommerce alias]" effectiveAlias="" processMode="P" serverURL="https://test5x.clearcommerce.com:11500" enableCVM="N"/>
+    <!-- Payment Group Type -->
+    <PaymentGroupType paymentGroupTypeId="CHECK_RUN" parentTypeId="" hasTable="N" description="Check Run"/>
+    <PaymentGroupType paymentGroupTypeId="BATCH_PAYMENT" parentTypeId="" hasTable="N" description="Batch of Payments"/>
     
     <!--  Credit Card methods by type -->
     <CustomMethodType customMethodTypeId="CC_AUTH" parentTypeId="" hasTable="N" description="Credit Card authorize methods"/>
@@ -684,25 +720,32 @@ under the License.
     <CustomMethodType customMethodTypeId="CC_REFUND" parentTypeId="" hasTable="N" description="Credit Card refund methods"/>
     <CustomMethodType customMethodTypeId="CC_RELEASE" parentTypeId="" hasTable="N" description="Credit Card release methods"/>
     <CustomMethodType customMethodTypeId="CC_CREDIT" parentTypeId="" hasTable="N" description="Credit Card credit methods"/>
-    
+
     <CustomMethodType customMethodTypeId="EFT_AUTH" parentTypeId="" hasTable="N" description="EFT authorize methods"/>
     <CustomMethodType customMethodTypeId="EFT_RELEASE" parentTypeId="" hasTable="N" description="EFT release methods"/>
-    
+
     <CustomMethodType customMethodTypeId="FIN_AUTH" parentTypeId="" hasTable="N" description="FIN account authorize methods"/>
     <CustomMethodType customMethodTypeId="FIN_CAPTURE" parentTypeId="" hasTable="N" description="FIN account capture methods"/>
     <CustomMethodType customMethodTypeId="FIN_REFUND" parentTypeId="" hasTable="N" description="FIN account refund methods"/>
     <CustomMethodType customMethodTypeId="FIN_RELEASE" parentTypeId="" hasTable="N" description="FIN account release methods"/>
-    
+    <CustomMethodType customMethodTypeId="FIN_PURCHASE" parentTypeId="" hasTable="N" description="FIN account purchase methods"/>
+
     <CustomMethodType customMethodTypeId="GIFT_AUTH" parentTypeId="" hasTable="N" description="GIFT card authorize methods"/>
     <CustomMethodType customMethodTypeId="GIFT_CAPTURE" parentTypeId="" hasTable="N" description="GIFT card capture methods"/>
     <CustomMethodType customMethodTypeId="GIFT_REFUND" parentTypeId="" hasTable="N" description="GIFT card refund methods"/>
     <CustomMethodType customMethodTypeId="GIFT_RELEASE" parentTypeId="" hasTable="N" description="GIFT card release methods"/>
-    
+    <CustomMethodType customMethodTypeId="GIFT_PURCHASE" parentTypeId="" hasTable="N" description="GIFT card purchase methods"/>
+
+    <CustomMethodType customMethodTypeId="PAYPAL_AUTH" parentTypeId="" hasTable="N" description="PayPal authorize methods"/>
+    <CustomMethodType customMethodTypeId="PAYPAL_CAPTURE" parentTypeId="" hasTable="N" description="PayPal capture methods"/>
+    <CustomMethodType customMethodTypeId="PAYPAL_REFUND" parentTypeId="" hasTable="N" description="PayPal refund methods"/>
+    <CustomMethodType customMethodTypeId="PAYPAL_RELEASE" parentTypeId="" hasTable="N" description="PayPal release methods"/>
+
     <CustomMethod customMethodId="CC_AUTH_TEST" customMethodTypeId="CC_AUTH" customMethodName="testCCProcessor" description="CC Test authorize"/>
     <CustomMethod customMethodId="CC_AUTH_CAPTURE_TST" customMethodTypeId="CC_AUTH" customMethodName="testCCProcessorWithCapture" description="CC Test authorize and capture"/>
     <CustomMethod customMethodId="CC_AUTH_RANDOM_TEST" customMethodTypeId="CC_AUTH" customMethodName="testRandomAuthorize" description="CC Test random authorize"/>
-    <CustomMethod customMethodId="CC_AUTH_AIM" customMethodTypeId="CC_AUTH" customMethodName="AIMCCAuth" description="CC Authorize dot net authorize"/>
-    <CustomMethod customMethodId="CC_AUTH_CAPTURE_AIM" customMethodTypeId="CC_AUTH" customMethodName="AIMCCAuthCapture" description="CC Authorize dot net authorize and capture"/>
+    <CustomMethod customMethodId="CC_AUTH_AIM" customMethodTypeId="CC_AUTH" customMethodName="aimCCAuth" description="CC Authorize dot net authorize"/>
+    <CustomMethod customMethodId="CC_AUTH_CAPTURE_AIM" customMethodTypeId="CC_AUTH" customMethodName="aimCCAuthCapture" description="CC Authorize dot net authorize and capture"/>
     <CustomMethod customMethodId="CC_AUTH_CLEARCOMMERC" customMethodTypeId="CC_AUTH" customMethodName="clearCommerceCCAuth" description="CC Clear Commerce authorize"/>
     <CustomMethod customMethodId="CC_AUTH_CLEARCOM_REP" customMethodTypeId="CC_AUTH" customMethodName="clearCommerceCCReport" description="CC Clear Commerce authorize reporting facility"/>
     <CustomMethod customMethodId="CC_AUTH_CYBERSOURCE" customMethodTypeId="CC_AUTH" customMethodName="cyberSourceCCAuth" description="CC CyberSource authorize"/>
@@ -718,52 +761,58 @@ under the License.
     <CustomMethod customMethodId="CC_AUTH_ALWAYSBADNUM" customMethodTypeId="CC_AUTH" customMethodName="alwaysBadCardNumberCCProcessor" description="CC Always decline for bad card number"/>
     <CustomMethod customMethodId="CC_AUTH_ALWAYSFAIL" customMethodTypeId="CC_AUTH" customMethodName="alwaysBadCardNumberCCProcessor" description="CC Always fail"/>
     <CustomMethod customMethodId="CC_AUTH_CAPTURE_ALWA" customMethodTypeId="CC_AUTH" customMethodName="alwaysApproveWithCaptureCCProcessor" description="CC Always authorize and capture"/>
-    
+    <CustomMethod customMethodId="CC_AUTH_ORBITAL" customMethodTypeId="CC_AUTH" customMethodName="orbitalCCAuth" description="CC Orbital authorize"/>
+    <CustomMethod customMethodId="CC_AUTH_CAPTR_ORBTL" customMethodTypeId="CC_AUTH" customMethodName="orbitalCCAuthCapture" description="CC Orbital authorize and capture"/>
+
     <CustomMethod customMethodId="CC_CAPTURE_TEST" customMethodTypeId="CC_CAPTURE" customMethodName="testCCCapture" description="CC Test capture"/>
     <CustomMethod customMethodId="CC_CAPTURE_REAUTH" customMethodTypeId="CC_CAPTURE" customMethodName="testCCCaptureWithReAuth" description="CC Test reauth capture"/>
     <CustomMethod customMethodId="CC_CAPTURE_ALWAYSDEC" customMethodTypeId="CC_CAPTURE" customMethodName="testCCProcessorCaptureAlwaysDecline" description="CC Always decline capture"/>
-    <CustomMethod customMethodId="CC_CAPTURE_AIM" customMethodTypeId="CC_CAPTURE" customMethodName="AIMCCCapture" description="CC Authorize dot net capture"/>
+    <CustomMethod customMethodId="CC_CAPTURE_AIM" customMethodTypeId="CC_CAPTURE" customMethodName="aimCCCapture" description="CC Authorize dot net capture"/>
     <CustomMethod customMethodId="CC_CAPTURE_CLEARCOMM" customMethodTypeId="CC_CAPTURE" customMethodName="clearCommerceCCCapture" description="CC Clear Commerce capture"/>
     <CustomMethod customMethodId="CC_CAPTURE_CYBERSOUR" customMethodTypeId="CC_CAPTURE" customMethodName="cyberSourceCCCapture" description="CC CyberSource capture"/>
     <CustomMethod customMethodId="CC_CAPTURE_PAYFLOW" customMethodTypeId="CC_CAPTURE" customMethodName="payflowCCCapture" description="CC Payflow Pro capture"/>
     <CustomMethod customMethodId="CC_CAPTURE_PCCHARGE" customMethodTypeId="CC_CAPTURE" customMethodName="pcChargeCCCapture" description="CC PCCharge capture"/>
     <CustomMethod customMethodId="CC_CAPTURE_RITA" customMethodTypeId="CC_CAPTURE" customMethodName="ritaCCCapture" description="CC RiTA capture"/>
     <CustomMethod customMethodId="CC_CAPTURE_RITA_REMO" customMethodTypeId="CC_CAPTURE" customMethodName="ritaCCCaptureRemote" description="CC RiTA remote capture"/>
-    
+    <CustomMethod customMethodId="CC_CAPTURE_ORBITAL" customMethodTypeId="CC_CAPTURE" customMethodName="orbitalCCCapture" description="CC Orbital capture"/>
+
     <CustomMethod customMethodId="CC_REFUND_TEST" customMethodTypeId="CC_REFUND" customMethodName="testCCRefund" description="CC Test refund"/>
     <CustomMethod customMethodId="CC_REFUND_TEST_FAIL" customMethodTypeId="CC_REFUND" customMethodName="testCCRefundFailure" description="CC Test refund failure"/>
-    <CustomMethod customMethodId="CC_REFUND_AIM" customMethodTypeId="CC_REFUND" customMethodName="AIMCCRefund" description="CC Authorize dot net refund"/>
+    <CustomMethod customMethodId="CC_REFUND_AIM" customMethodTypeId="CC_REFUND" customMethodName="aimCCRefund" description="CC Authorize dot net refund"/>
     <CustomMethod customMethodId="CC_REFUND_CLEARCOMME" customMethodTypeId="CC_REFUND" customMethodName="clearCommerceCCRefund" description="CC Clear Commerce refund"/>
     <CustomMethod customMethodId="CC_REFUND_CYBERSOURC" customMethodTypeId="CC_REFUND" customMethodName="cyberSourceCCRefund" description="CC CyberSource refund"/>
     <CustomMethod customMethodId="CC_REFUND_PAYFLOW" customMethodTypeId="CC_REFUND" customMethodName="payflowCCRefund" description="CC Payflow Pro refund"/>
     <CustomMethod customMethodId="CC_REFUND_PCCHARGE" customMethodTypeId="CC_REFUND" customMethodName="pcChargeCCRefund" description="CC PCCharge refund"/>
     <CustomMethod customMethodId="CC_REFUND_RITA" customMethodTypeId="CC_REFUND" customMethodName="ritaCCRefund" description="CC RiTA refund"/>
     <CustomMethod customMethodId="CC_REFUND_RITA_REMOT" customMethodTypeId="CC_REFUND" customMethodName="ritaCCRefundRemote" description="CC RiTA remote refund"/>
-    
+    <CustomMethod customMethodId="CC_REFUND_ORBITAL" customMethodTypeId="CC_REFUND" customMethodName="orbitalCCRefund" description="CC Orbital refund"/>
+
     <CustomMethod customMethodId="CC_RELEASE_TEST" customMethodTypeId="CC_RELEASE" customMethodName="testCCRelease" description="CC Test release"/>
-    <CustomMethod customMethodId="CC_RELEASE_AIM" customMethodTypeId="CC_RELEASE" customMethodName="AIMCCRelease" description="CC Authorize dot net release"/>
+    <CustomMethod customMethodId="CC_RELEASE_AIM" customMethodTypeId="CC_RELEASE" customMethodName="aimCCRelease" description="CC Authorize dot net release"/>
     <CustomMethod customMethodId="CC_RELEASE_CLEARCOMM" customMethodTypeId="CC_RELEASE" customMethodName="clearCommerceCCRelease" description="CC Clear Commerce release"/>
     <CustomMethod customMethodId="CC_RELEASE_CYBERSOUR" customMethodTypeId="CC_RELEASE" customMethodName="cyberSourceCCRelease" description="CC CyberSource release"/>
     <CustomMethod customMethodId="CC_RELEASE_PAYFLOW" customMethodTypeId="CC_RELEASE" customMethodName="payflowCCVoid" description="CC Payflow Pro release"/>
     <CustomMethod customMethodId="CC_RELEASE_PCCHARGE" customMethodTypeId="CC_RELEASE" customMethodName="pcChargeCCRelease" description="CC PCCharge release"/>
     <CustomMethod customMethodId="CC_RELEASE_RITA" customMethodTypeId="CC_RELEASE" customMethodName="ritaCCRelease" description="CC RiTA release"/>
     <CustomMethod customMethodId="CC_RELEASE_RITA_REMO" customMethodTypeId="CC_RELEASE" customMethodName="ritaCCReleaseRemote" description="CC RiTA remote release"/>
-    
-    <CustomMethod customMethodId="CC_CREDIT_AIM" customMethodTypeId="CC_CREDIT" customMethodName="AIMCCCredit" description="CC Authorize dot net credit"/>
+    <CustomMethod customMethodId="CC_RELEASE_ORBITAL" customMethodTypeId="CC_RELEASE" customMethodName="orbitalCCRelease" description="CC Orbital release"/>
+
+    <CustomMethod customMethodId="CC_CREDIT_AIM" customMethodTypeId="CC_CREDIT" customMethodName="aimCCCredit" description="CC Authorize dot net credit"/>
     <CustomMethod customMethodId="CC_CREDIT_CLEARCOMME" customMethodTypeId="CC_CREDIT" customMethodName="clearCommerceCCCredit" description="CC Clear Commerce credit"/>
     <CustomMethod customMethodId="CC_CREDIT_CYBERSOURC" customMethodTypeId="CC_CREDIT" customMethodName="cyberSourceCCCredit" description="CC CyberSource credit"/>
     <CustomMethod customMethodId="CC_CREDIT_RITA" customMethodTypeId="CC_CREDIT" customMethodName="ritaCCCreditRefund" description="CC RiTA credit"/>
-    
+
     <CustomMethod customMethodId="EFT_AUTH_TEST" customMethodTypeId="EFT_AUTH" customMethodName="testEFTProcessor" description="EFT test authorize"/>
     <CustomMethod customMethodId="EFT_AUTH_ALWAYSAPPRO" customMethodTypeId="EFT_AUTH" customMethodName="alwaysApproveEFTProcessor" description="EFT always authorize"/>
     <CustomMethod customMethodId="EFT_AUTH_ALWAYSDECLI" customMethodTypeId="EFT_AUTH" customMethodName="alwaysDeclineEFTProcessor" description="EFT always decline"/>
     <CustomMethod customMethodId="EFT_RELEASE_TEST" customMethodTypeId="EFT_RELEASE" customMethodName="testEFTRelease" description="EFT test release"/>
-    
+
     <CustomMethod customMethodId="FIN_AUTH_OFBIZ" customMethodTypeId="FIN_AUTH" customMethodName="ofbFaAuthorize" description="FIN account authorize"/>
     <CustomMethod customMethodId="FIN_CAPTURE_OFBIZ" customMethodTypeId="FIN_CAPTURE" customMethodName="ofbFaCapture" description="FIN account capture"/>
     <CustomMethod customMethodId="FIN_REFUND_OFBIZ" customMethodTypeId="FIN_REFUND" customMethodName="ofbFaRefund" description="FIN account refund"/>
     <CustomMethod customMethodId="FIN_RELEASE_OFBIZ" customMethodTypeId="FIN_RELEASE" customMethodName="ofbFaRelease" description="FIN account release"/>
-    
+    <CustomMethod customMethodId="FIN_PURCH_OFBIZ" customMethodTypeId="FIN_PURCHASE" customMethodName="createPartyFinAccountFromPurchase" description="FIN account purchase"/>
+
     <CustomMethod customMethodId="GIFT_AUTH_OFBIZ" customMethodTypeId="GIFT_AUTH" customMethodName="ofbGcAuthorize" description="GIFT card authorize"/>
     <CustomMethod customMethodId="GIFT_AUTH_ALWAYSAPPR" customMethodTypeId="GIFT_AUTH" customMethodName="alwaysApproveGCProcessor" description="GIFT card always authorize"/>
     <CustomMethod customMethodId="GIFT_AUTH_ALWAYSDECL" customMethodTypeId="GIFT_AUTH" customMethodName="alwaysDeclineGCProcessor" description="GIFT card always decline"/>
@@ -774,7 +823,30 @@ under the License.
     <CustomMethod customMethodId="GIFT_RELEASE_OFBIZ" customMethodTypeId="GIFT_RELEASE" customMethodName="ofbGcRelease" description="GIFT card release"/>
     <CustomMethod customMethodId="GIFT_RELEASE_TEST" customMethodTypeId="GIFT_RELEASE" customMethodName="testGCRelease" description="GIFT card test release"/>
     <CustomMethod customMethodId="GIFT_RELEASE_VALUEL" customMethodTypeId="GIFT_RELEASE" customMethodName="valueLinkRelease" description="GIFT card ValueLink release"/>
-    
+    <CustomMethod customMethodId="GIFT_PURCH_OFBIZ" customMethodTypeId="GIFT_PURCHASE" customMethodName="ofbGcPurchase" description="GIFT card Purchase Fulfillment Service"/>
+
+    <CustomMethod customMethodId="PAYPAL_AUTH_PFP" customMethodTypeId="PAYPAL_AUTH" customMethodName="payflowPayPalProcessor" description="Payflow PayPal payment authorize"/>
+    <CustomMethod customMethodId="PAYPAL_AUTH" customMethodTypeId="PAYPAL_AUTH" customMethodName="payPalProcessor" description="PayPal payment authorize"/>
+
+    <CustomMethod customMethodId="PAYPAL_CAPTURE_PFP" customMethodTypeId="PAYPAL_CAPTURE" customMethodName="payflowPayPalCapture" description="Payflow PayPal payment capture"/>
+    <CustomMethod customMethodId="PAYPAL_CAPTURE" customMethodTypeId="PAYPAL_CAPTURE" customMethodName="payPalCapture" description="PayPal payment capture"/>
+
+    <CustomMethod customMethodId="PAYPAL_REFUND_PFP" customMethodTypeId="PAYPAL_REFUND" customMethodName="payflowPayPalRefund" description="Payflow PayPal payment refund"/>
+    <CustomMethod customMethodId="PAYPAL_REFUND" customMethodTypeId="PAYPAL_REFUND" customMethodName="payPalRefund" description="PayPal payment refund"/>
+
+    <CustomMethod customMethodId="PAYPAL_RELEASE_PFP" customMethodTypeId="PAYPAL_RELEASE" customMethodName="payflowPayPalVoid" description="Payflow PayPal Order release"/>
+    <CustomMethod customMethodId="PAYPAL_RELEASE" customMethodTypeId="PAYPAL_RELEASE" customMethodName="payPalVoid" description="PayPal Order Release"/>
+
+    <CustomMethod customMethodId="CC_CHARGE_EWAY" customMethodTypeId="CC_AUTH" customMethodName="ewayCharge" description="eWay CC Charge"/>
+    <CustomMethod customMethodId="CC_REFUND_EWAY" customMethodTypeId="CC_REFUND" customMethodName="ewayRefund" description="eWay CC Refund"/>
+    <CustomMethod customMethodId="CC_RELEASE_EWAY" customMethodTypeId="CC_RELEASE" customMethodName="ewayRelease" description="eWay CC Release"/>
+
+    <CustomMethod customMethodId="SECURE_AUTH_OFBIZ" customMethodTypeId="CC_AUTH" customMethodName="ofbScAuthorize" description="SecurePay payment authorize"/>
+    <CustomMethod customMethodId="SECURE_CAPTURE_OFBIZ" customMethodTypeId="CC_CAPTURE" customMethodName="ofbScCapture" description="SecurePay payment capture"/>
+    <CustomMethod customMethodId="SECURE_REFUND_OFBIZ" customMethodTypeId="CC_REFUND" customMethodName="ofbScRefund" description="SecurePay payment refund"/>
+    <CustomMethod customMethodId="SECURE_RELEASE_OFBIZ" customMethodTypeId="CC_RELEASE" customMethodName="ofbScRelease" description="SecurePay payment release"/>
+    <CustomMethod customMethodId="SECURE_CREDIT_OFBIZ" customMethodTypeId="CC_CREDIT" customMethodName="ofbScCCCredit" description="SecurePay Credit Card"/>
+
     <!-- Credit Cart Types -->
     <EnumerationType description="Credit Card Type" enumTypeId="CREDIT_CARD_TYPE" hasTable="N" parentTypeId=""/>
     <Enumeration description="Visa" enumCode="Visa" enumId="CCT_VISA" sequenceId="01" enumTypeId="CREDIT_CARD_TYPE"/>
@@ -810,6 +882,7 @@ under the License.
     <!-- this is a more complicated process: IN_PROCESS -> SENT -> (optionally RECEIVED) -> READY or CANCELLED -->
     <StatusValidChange condition="" statusId="INVOICE_IN_PROCESS" statusIdTo="INVOICE_SENT" transitionName="Send"/>
     <StatusValidChange condition="" statusId="INVOICE_IN_PROCESS" statusIdTo="INVOICE_RECEIVED" transitionName="Receive"/>
+    <StatusValidChange condition="" statusId="INVOICE_SENT" statusIdTo="INVOICE_APPROVED" transitionName="Mark Approved"/>
     <StatusValidChange condition="" statusId="INVOICE_SENT" statusIdTo="INVOICE_READY" transitionName="Mark Ready"/>
     <StatusValidChange condition="" statusId="INVOICE_SENT" statusIdTo="INVOICE_RECEIVED" transitionName="Receive"/>
     <StatusValidChange condition="" statusId="INVOICE_RECEIVED" statusIdTo="INVOICE_READY" transitionName="Mark Receive"/>
@@ -828,7 +901,8 @@ under the License.
     <StatusValidChange condition="" statusId="INVOICE_READY" statusIdTo="INVOICE_PAID" transitionName="Pay"/>
     <StatusValidChange condition="" statusId="INVOICE_READY" statusIdTo="INVOICE_WRITEOFF" transitionName="Write Off"/>
     <StatusValidChange condition="" statusId="INVOICE_PAID" statusIdTo="INVOICE_READY" transitionName="Unpay"/>
-
+    <StatusValidChange condition="" statusId="INVOICE_READY" statusIdTo="INVOICE_CANCELLED" transitionName="Cancel"/>
+    <StatusValidChange condition="" statusId="INVOICE_PAID" statusIdTo="INVOICE_CANCELLED" transitionName="Cancel"/>
 
     <!-- payment status -->
     <StatusType description="Payment Status" hasTable="N" parentTypeId="" statusTypeId="PMNT_STATUS"/>
@@ -837,11 +911,19 @@ under the License.
     <StatusItem description="Received" sequenceId="04" statusCode="RECEIVED" statusId="PMNT_RECEIVED" statusTypeId="PMNT_STATUS"/>
     <StatusItem description="Confirmed" sequenceId="05" statusCode="CONFIRMED" statusId="PMNT_CONFIRMED" statusTypeId="PMNT_STATUS"/>
     <StatusItem description="Cancelled" sequenceId="10" statusCode="CANCELLED" statusId="PMNT_CANCELLED" statusTypeId="PMNT_STATUS"/>
+    <StatusItem description="Voided" sequenceId="11" statusCode="VOID" statusId="PMNT_VOID" statusTypeId="PMNT_STATUS"/>
     <StatusValidChange condition="" statusId="PMNT_NOT_PAID" statusIdTo="PMNT_SENT" transitionName="Payment Send"/>
     <StatusValidChange condition="" statusId="PMNT_NOT_PAID" statusIdTo="PMNT_RECEIVED" transitionName="Payment Received"/>
     <StatusValidChange condition="" statusId="PMNT_NOT_PAID" statusIdTo="PMNT_CANCELLED" transitionName="Payment Cancelled"/>
     <StatusValidChange condition="" statusId="PMNT_SENT" statusIdTo="PMNT_CONFIRMED" transitionName="Payment Confirmed"/>
     <StatusValidChange condition="" statusId="PMNT_RECEIVED" statusIdTo="PMNT_CONFIRMED" transitionName="Payment Confirmed"/>
+    <StatusValidChange condition="" statusId="PMNT_SENT" statusIdTo="PMNT_VOID" transitionName="Payment Voided"/>
+    <StatusValidChange condition="" statusId="PMNT_RECEIVED" statusIdTo="PMNT_VOID" transitionName="Payment Voided"/>
+    <StatusValidChange condition="" statusId="PMNT_NOT_PAID" statusIdTo="PMNT_VOID" transitionName="Payment Voided"/>
+    <StatusValidChange condition="" statusId="PMNT_SENT" statusIdTo="PMNT_NOT_PAID" transitionName="Payment Not Paid"/>
+    <StatusValidChange condition="" statusId="PMNT_RECEIVED" statusIdTo="PMNT_NOT_PAID" transitionName="Payment Not Paid"/>
+    <StatusValidChange condition="" statusId="PMNT_CONFIRMED" statusIdTo="PMNT_SENT" transitionName="Payment Confirmed to Sent"/>
+    <StatusValidChange condition="" statusId="PMNT_CONFIRMED" statusIdTo="PMNT_RECEIVED" transitionName="Payment Confirmed to Received"/>
 
     <SettlementTerm settlementTermId="COD" termName="Cash Due on Delivery" termValue="0" uomId="TF_day"/>
     <SettlementTerm settlementTermId="NET_15" termName="Net Due in 15 Days" termValue="15" uomId="TF_day"/>
@@ -864,17 +946,27 @@ under the License.
     <Enumeration description="LIFO" enumCode="LIFO" enumId="COGS_LIFO" sequenceId="01" enumTypeId="COGS_METHODS"/>
     <Enumeration description="FIFO" enumCode="FIFO" enumId="COGS_FIFO" sequenceId="02" enumTypeId="COGS_METHODS"/>
     <Enumeration description="Average Cost" enumCode="AVG_COST" enumId="COGS_AVG_COST" sequenceId="03" enumTypeId="COGS_METHODS"/>
+    <Enumeration description="Inventory Item Cost" enumCode="INV_COST" enumId="COGS_INV_COST" sequenceId="04" enumTypeId="COGS_METHODS"/>
 
     <!-- inventory sequencing mode for accounting preferences -->
+    <CustomMethodType customMethodTypeId="HOOK" parentTypeId="HOOK" hasTable="N" description="Custom Methode Type define HOOK method to resolve specific sequence"/>
+    <CustomMethodType customMethodTypeId="INVOICE_HOOK" parentTypeId="HOOK" hasTable="N" description="Invoice Sequence methods"/>
+    <CustomMethod customMethodId="INV_HOOK_ENF_SEQ" customMethodTypeId="INVOICE_HOOK" customMethodName="invoiceSequenceEnforced" description="Enforced Sequence (no gaps, per organization)"/>
+    <CustomMethod customMethodId="INV_HOOK_RES_YR" customMethodTypeId="INVOICE_HOOK" customMethodName="invoiceSequenceRestart" description="Restart on Fiscal Year (no gaps, per org, reset to 1 each year)"/>
+    <!-- quote sequencing mode for accounting preferences -->
+    <CustomMethodType customMethodTypeId="QUOTE_HOOK" parentTypeId="HOOK" hasTable="N" description="Quote Sequence methods"/>
+    <CustomMethod customMethodId="QUOTE_HOOK_ENF_SEQ" customMethodTypeId="QUOTE_HOOK" customMethodName="quoteSequenceEnforced" description="Enforced Sequence (no gaps, per organization)"/>
+    <!-- order sequencing mode for accounting preferences -->
+    <CustomMethodType customMethodTypeId="ORDER_HOOK" parentTypeId="HOOK" hasTable="N" description="Order Sequence methods"/>
+    <CustomMethod customMethodId="ORDER_HOOK_ENF_SEQ" customMethodTypeId="ORDER_HOOK" customMethodName="orderSequence_enforced" description="Enforced Sequence (no gaps, per organization)"/>
+    <!-- Deprecated sequencing mode by enumeration -->
     <EnumerationType description="Invoice Sequence Mode" enumTypeId="INVOICE_SEQMD" hasTable="N" parentTypeId=""/>
     <Enumeration description="Standard (faster, may have gaps, per system)" enumCode="STANDARD" enumId="INVSQ_STANDARD" sequenceId="01" enumTypeId="INVOICE_SEQMD"/>
     <Enumeration description="Enforced Sequence (no gaps, per organization)" enumCode="ENF_SEQ" enumId="INVSQ_ENF_SEQ" sequenceId="02" enumTypeId="INVOICE_SEQMD"/>
     <Enumeration description="Restart on Fiscal Year (no gaps, per org, reset to 1 each year)" enumCode="RESTARTYR" enumId="INVSQ_RESTARTYR" sequenceId="03" enumTypeId="INVOICE_SEQMD"/>
-    <!-- quote sequencing mode for accounting preferences -->
     <EnumerationType description="Quote Sequence Mode" enumTypeId="QUOTE_SEQMD" hasTable="N" parentTypeId=""/>
     <Enumeration description="Standard (faster, may have gaps, per system)" enumCode="STANDARD" enumId="QTESQ_STANDARD" sequenceId="01" enumTypeId="QUOTE_SEQMD"/>
     <Enumeration description="Enforced Sequence (no gaps, per organization)" enumCode="ENF_SEQ" enumId="QTESQ_ENF_SEQ" sequenceId="02" enumTypeId="QUOTE_SEQMD"/>
-    <!-- order sequencing mode for accounting preferences -->
     <EnumerationType description="Order Sequence Mode" enumTypeId="ORDER_SEQMD" hasTable="N" parentTypeId=""/>
     <Enumeration description="Standard (faster, may have gaps, per system)" enumCode="STANDARD" enumId="ODRSQ_STANDARD" sequenceId="01" enumTypeId="ORDER_SEQMD"/>
     <Enumeration description="Enforced Sequence (no gaps, per organization)" enumCode="ENF_SEQ" enumId="ODRSQ_ENF_SEQ" sequenceId="02" enumTypeId="ORDER_SEQMD"/>
@@ -892,6 +984,7 @@ under the License.
     <TaxAuthorityRateType taxAuthorityRateTypeId="INCOME_TAX" description="Income Tax"/>
     <TaxAuthorityRateType taxAuthorityRateTypeId="EXPORT_TAX" description="Export Tax"/>
     <TaxAuthorityRateType taxAuthorityRateTypeId="IMPORT_TAX" description="Import Tax"/>
+    <TaxAuthorityRateType taxAuthorityRateTypeId="VAT_TAX" description="Value Added Tax"/>
 
     <!-- Rate Types -->
     <RateType rateTypeId="STANDARD" description="Standard Rate"/>
@@ -909,10 +1002,6 @@ under the License.
     <!-- create 'Not Applicable'  records-->
     <WorkEffort workEffortId="_NA_"/>
     <EmplPositionType emplPositionTypeId="_NA_"/>
-
-    <WebSite webSiteId="ACCOUNTING" siteName="Accounting Manager" visualThemeSetId="BACKOFFICE"/>
-    <WebSite webSiteId="ACCOUNTING_P" siteName="Account Payable Manager" visualThemeSetId="BACKOFFICE"/>
-    <WebSite webSiteId="ACCOUNTING_R" siteName="Account Receivable Manager" visualThemeSetId="BACKOFFICE"/>
 
     <!-- Points of Title Transfer -->
     <EnumerationType description="Points of Title Transfer" enumTypeId="PTSOFTTFR" hasTable="N" parentTypeId=""/>
@@ -980,4 +1069,21 @@ under the License.
         DDQ (Delivered Duty Unpaid)
         This arrangement is basically the same as with DDP, except for the fact that the buyer is responsible for the duty, fees and taxes.
     -->
+
+    <!-- Store Credit Account Type Data, to be set in Product Store -->
+    <EnumerationType description="Store Credit Account" enumTypeId="STR_CRDT_ACT" hasTable="N" parentTypeId=""/>
+    <Enumeration description="Financial Account" enumCode="FINACCOUNT" enumId="FIN_ACCOUNT" sequenceId="01" enumTypeId="STR_CRDT_ACT"/>
+    <Enumeration description="Billing Account" enumCode="BILLACCOUNT" enumId="BILLING_ACCOUNT" sequenceId="02" enumTypeId="STR_CRDT_ACT"/>
+
+    <!--GlReconciliation Status-->
+    <StatusType statusTypeId="GLREC_STATUS" description="Gl Reconciliation Status" hasTable="N" parentTypeId=""/>
+    <StatusItem statusId="GLREC_CREATED" statusTypeId="GLREC_STATUS" statusCode="CREATED" sequenceId="11" description="Created"/>
+    <StatusItem statusId="GLREC_RECONCILED" statusTypeId="GLREC_STATUS" statusCode="RECONCILED" sequenceId="12" description="Reconciled"/>
+    <StatusValidChange condition="" statusId="GLREC_CREATED" statusIdTo="GLREC_RECONCILED" transitionName="Set Created to Reconciled"/>
+
+    <!--Depreciation Formulae-->
+    <CustomMethodType customMethodTypeId="DEPRECIATION_FORMULA" description="Formula for calculating depreciation for fixed asset"/>
+    <CustomMethod customMethodId="STR_LINE_DEP_FORMULA" customMethodTypeId="DEPRECIATION_FORMULA" customMethodName="straightLineDepreciation" description="Straight Line depreciatiion algorithm for fixed asset((purchaseCost - salvageCost)/expectedLifeInYears)"/>
+    <CustomMethod customMethodId="DBL_DECL_DEP_FORMULA" customMethodTypeId="DEPRECIATION_FORMULA" customMethodName="doubleDecliningBalanceDepreciation" description="Double decline depreciatiion algorithm for fixed asset((NetBookValue - salvageCost)*2/remainingLifeInYears)"/>
+
 </entity-engine-xml>

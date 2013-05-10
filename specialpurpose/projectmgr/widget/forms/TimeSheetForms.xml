@@ -30,13 +30,16 @@
         <field name="roleTypeId"><hidden/></field>
         <field name="fromDate"><hidden/></field>
         <field name="workEffortId" title="${uiLabelMap.ProjectMgrTaskName}">
-            <drop-down allow-empty="true" current-description="${result.projectName} -- ${result.phaseName} -- ${result.taskName} ${phaseName}">
-                <entity-options entity-name="ProjectPartyAndPhaseAndTask" description="${projectName} -- ${phaseName} -- ${workEffortName}">
+            <drop-down allow-empty="true" current-description="${result.taskWbsId} ${result.projectName} -- ${result.phaseName} -- ${result.taskName} ${phaseName}">
+                <entity-options entity-name="ProjectPartyAndPhaseAndTask" description="${projectId}.${phaseSeqNum}.${sequenceNum} ${projectName} -- ${phaseName} -- ${workEffortName}">
+                    <entity-constraint name="projectStatusId" operator="not-equals" value="PRJ_CLOSED"/>
                     <entity-constraint name="workEffortTypeId" operator="equals" value="TASK"/>
                     <entity-constraint name="partyId" env-name="timesheet.partyId"/>
                     <entity-constraint name="currentStatusId" value="PTS_CREATED"/>
                     <entity-order-by field-name="projectName"/>
+                    <entity-order-by field-name="phaseSeqNum"/>
                     <entity-order-by field-name="phaseName"/>
+                    <entity-order-by field-name="sequenceNum"/>
                     <entity-order-by field-name="workEffortName"/>
                 </entity-options>
                 <sub-hyperlink target="taskView" description="${bsh:workEffortId!=void&amp;&amp;!&quot;Totals&quot;.equals(workEffortId)?workEffortId:&quot;&quot;}">
@@ -51,13 +54,13 @@
                 <entity-options entity-name="RateType" description="${description}"/>
             </drop-down>
         </field>
-        <field name="d0" parameter-name="hoursDay0" title="${uiLabelMap.ProjectMgrSun}"><text size="5"/></field>
-        <field name="d1" parameter-name="hoursDay1" title="${uiLabelMap.ProjectMgrMon}"><text size="5"/></field>
-        <field name="d2" parameter-name="hoursDay2" title="${uiLabelMap.ProjectMgrTue}"><text size="5"/></field>
-        <field name="d3" parameter-name="hoursDay3" title="${uiLabelMap.ProjectMgrWen}"><text size="5"/></field>
-        <field name="d4" parameter-name="hoursDay4" title="${uiLabelMap.ProjectMgrThu}"><text size="5"/></field>
-        <field name="d5" parameter-name="hoursDay5" title="${uiLabelMap.ProjectMgrFri}"><text size="5"/></field>
-        <field name="d6" parameter-name="hoursDay6" title="${uiLabelMap.ProjectMgrSat}"><text size="5"/></field>
+        <field name="d0" parameter-name="hoursDay0" title="${uiLabelMap.ProjectMgrMon}"><text size="2"/></field>
+        <field name="d1" parameter-name="hoursDay1" title="${uiLabelMap.ProjectMgrTue}"><text size="2"/></field>
+        <field name="d2" parameter-name="hoursDay2" title="${uiLabelMap.ProjectMgrWen}"><text size="2"/></field>
+        <field name="d3" parameter-name="hoursDay3" title="${uiLabelMap.ProjectMgrThu}"><text size="2"/></field>
+        <field name="d4" parameter-name="hoursDay4" title="${uiLabelMap.ProjectMgrFri}"><text size="2"/></field>
+        <field name="d5" parameter-name="hoursDay5" title="${uiLabelMap.ProjectMgrSat}"><text size="2"/></field>
+        <field name="d6" parameter-name="hoursDay6" title="${uiLabelMap.ProjectMgrSun}"><text size="2"/></field>
         <field name="total" title="${uiLabelMap.ProjectMgrActualHours}"><display/></field>
         <field name="actualHours" title="${uiLabelMap.ProjectMgrActualTotal}"><display/></field>
         <field name="plannedHours" title="${uiLabelMap.ProjectMgrPlanHours}"><display/></field>
@@ -91,8 +94,8 @@
     <form name="FindTimeSheet" target="FindTimeSheet" title="" type="single"
         header-row-style="header-row" default-table-style="basic-table">
         <field name="noConditionFind"><hidden value="Y"/><!-- if this isn't there then with all fields empty no query will be done --></field>
-        <field name="timesheetId"><text-find default-option="contains" ignore-case="true"/></field>
-        <field name="comments"><text-find default-option="contains" ignore-case="true"/></field>
+        <field name="timesheetId"><text-find ignore-case="true"/></field>
+        <field name="comments"><text-find ignore-case="true"/></field>
         <field name="partyId" title="${uiLabelMap.PartyParty}">
             <drop-down allow-empty="true">
                 <entity-options entity-name="PartyRoleAndPartyDetail" description="${firstName} ${lastName}">
@@ -121,6 +124,8 @@
                 <field-map field-name="inputFields" from-field="parameters"/>
                 <field-map field-name="entityName" value="Timesheet"/>
                 <field-map field-name="orderBy" value="fromDate DESC"/>
+                <field-map field-name="viewIndex" from-field="viewIndex"/>
+                <field-map field-name="viewSize" from-field="viewSize"/>
             </service>
             <set field="complete" value="${uiLabelMap.ProjectMgrToComplete}"/>
         </actions>
@@ -158,8 +163,8 @@
         header-row-style="header-row" default-table-style="basic-table">
         <field name="partyId" title="${uiLabelMap.PartyParty}">
             <drop-down allow-empty="true" no-current-selected-key="${timesheet.partyId}">
-                <entity-options entity-name="PartyRoleAndPartyDetail" description="${firstName} ${lastName}">
-                    <entity-constraint name="roleTypeId" value="PROJECT_TEAM"/>
+                <entity-options entity-name="PartyRoleDetailAndPartyDetail" description="${firstName} ${lastName}">
+                    <entity-constraint name="parentTypeId" value="PROJECT_TEAM"/>
                     <entity-order-by field-name="lastName"/>
                     <entity-order-by field-name="groupName"/>
                 </entity-options>
@@ -216,6 +221,7 @@
         </field>
         <field name="workEffortId"><drop-down allow-empty="false">
             <entity-options entity-name="ProjectPartyAndPhaseAndTask" description="${projectName}--${phaseName}--${workEffortName}">
+                <entity-constraint name="projectStatusId" operator="not-equals" value="PRJ_CLOSED"/>
                 <entity-constraint name="partyId" env-name="userLogin.partyId"/>
                 <entity-order-by field-name="projectName"/>
                 <entity-order-by field-name="phaseName"/>
@@ -267,7 +273,7 @@
 
         <field name="submitButton" title="${uiLabelMap.CommonUpdate}" widget-style="smallSubmit"><submit button-type="button"/></field>
 
-        <field name="deleteLink" title="${uiLabelMap.CommonEmptyHeader}" widget-style="buttontext">
+        <field name="deleteLink" title=" " widget-style="buttontext">
             <hyperlink target="deleteTimesheetEntry" description="${uiLabelMap.CommonDelete}" also-hidden="false">
                 <parameter param-name="timesheetId"/>
                 <parameter param-name="timeEntryId"/>
@@ -277,6 +283,7 @@
     <form name="WeekTimesheet" type="list" list-name="timeEntries" separate-columns="true"
         odd-row-style="alternate-row" default-table-style="basic-table hover-bar">
         <field name="timesheetId"><hidden/></field>
+        <field name="taskWbsId"><display/></field>
         <field name="workEffortName" title="${uiLabelMap.ProjectMgrTaskName}">
             <hyperlink target="taskView" description="${workEffortName}">
                 <parameter param-name="workEffortId"/>
@@ -290,13 +297,13 @@
         </field>
         <field name="checkComplete" title="${uiLabelMap.ProjectMgrCheckComplete}"><display/></field>
         <field name="rateTypeId" title="${uiLabelMap.ProjectMgrRateTypeId}"><display-entity entity-name="RateType" description="${description}"/></field>
-        <field name="d0" parameter-name="hoursDay0" title="${uiLabelMap.ProjectMgrSun}"><display/></field>
-        <field name="d1" parameter-name="hoursDay1" title="${uiLabelMap.ProjectMgrMon}"><display/></field>
-        <field name="d2" parameter-name="hoursDay2" title="${uiLabelMap.ProjectMgrTue}"><display/></field>
-        <field name="d3" parameter-name="hoursDay3" title="${uiLabelMap.ProjectMgrWen}"><display/></field>
-        <field name="d4" parameter-name="hoursDay4" title="${uiLabelMap.ProjectMgrThu}"><display/></field>
-        <field name="d5" parameter-name="hoursDay5" title="${uiLabelMap.ProjectMgrFri}"><display/></field>
-        <field name="d6" parameter-name="hoursDay6" title="${uiLabelMap.ProjectMgrSat}"><display/></field>
+        <field name="d0" parameter-name="hoursDay0" title="${uiLabelMap.ProjectMgrMon}"><display/></field>
+        <field name="d1" parameter-name="hoursDay1" title="${uiLabelMap.ProjectMgrTue}"><display/></field>
+        <field name="d2" parameter-name="hoursDay2" title="${uiLabelMap.ProjectMgrWen}"><display/></field>
+        <field name="d3" parameter-name="hoursDay3" title="${uiLabelMap.ProjectMgrThu}"><display/></field>
+        <field name="d4" parameter-name="hoursDay4" title="${uiLabelMap.ProjectMgrFri}"><display/></field>
+        <field name="d5" parameter-name="hoursDay5" title="${uiLabelMap.ProjectMgrSat}"><display/></field>
+        <field name="d6" parameter-name="hoursDay6" title="${uiLabelMap.ProjectMgrSun}"><display/></field>
         <field name="total" title="${uiLabelMap.ProjectMgrActualHours}"><display/></field>
         <field name="actualHours" title="${uiLabelMap.ProjectMgrActualTotal}"><display/></field>
         <field name="plannedHours" title="${uiLabelMap.ProjectMgrPlanHours}"><display/></field>

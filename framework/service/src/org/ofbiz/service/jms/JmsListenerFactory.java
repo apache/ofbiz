@@ -19,19 +19,18 @@
 package org.ofbiz.service.jms;
 
 import java.lang.reflect.Constructor;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import javolution.util.FastMap;
 
-import org.ofbiz.service.GenericServiceException;
-import org.ofbiz.service.ServiceDispatcher;
-import org.ofbiz.service.config.ServiceConfigUtil;
 import org.ofbiz.base.util.Debug;
+import org.ofbiz.base.util.UtilGenerics;
 import org.ofbiz.base.util.UtilMisc;
+import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.base.util.UtilXml;
+import org.ofbiz.entity.Delegator;
+import org.ofbiz.service.GenericServiceException;
+import org.ofbiz.service.config.ServiceConfigUtil;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
@@ -48,14 +47,29 @@ public class JmsListenerFactory implements Runnable {
     protected static Map<String, GenericMessageListener> listeners = FastMap.newInstance();
     protected static Map<String, Element> servers = FastMap.newInstance();
 
-    protected ServiceDispatcher dispatcher;
+    protected static JmsListenerFactory jlf = null;
+
+    protected Delegator delegator;
     protected boolean firstPass = true;
     protected int  loadable = 0;
     protected int connected = 0;
     protected Thread thread;
 
-    public JmsListenerFactory(ServiceDispatcher dispatcher) {
-        this.dispatcher = dispatcher;
+
+    public static JmsListenerFactory getInstance(Delegator delegator){
+        if (jlf == null) {
+            synchronized (JmsListenerFactory.class) {
+                if (jlf == null) {
+                    jlf = new JmsListenerFactory(delegator);
+                }
+            }
+        }
+
+        return jlf;
+    }
+
+    public JmsListenerFactory(Delegator delegator) {
+        this.delegator = delegator;
         thread = new Thread(this, this.toString());
         thread.setDaemon(false);
         thread.start();
@@ -66,6 +80,10 @@ public class JmsListenerFactory implements Runnable {
         while (firstPass || connected < loadable) {
             if (Debug.verboseOn()) Debug.logVerbose("First Pass: " + firstPass + " Connected: " + connected + " Available: " + loadable, module);
             this.loadListeners();
+            if (loadable == 0) {
+                // if there is nothing to do then we can break without sleeping
+                break;
+            }
             firstPass = false;
             try {
                 Thread.sleep(20000);
@@ -81,16 +99,16 @@ public class JmsListenerFactory implements Runnable {
             Element rootElement = ServiceConfigUtil.getXmlRootElement();
             NodeList nodeList = rootElement.getElementsByTagName("jms-service");
 
-            if (Debug.verboseOn()) Debug.logVerbose("[ServiceDispatcher] : Loading JMS Listeners.", module);
+            if (Debug.verboseOn()) Debug.logVerbose("Loading JMS Listeners.", module);
             for (int i = 0; i < nodeList.getLength(); i++) {
                 Element element = (Element) nodeList.item(i);
+                StringBuilder serverKey = new StringBuilder();
                 for (Element server: UtilXml.childElementList(element, "server")) {
                     try {
                         String listenerEnabled = server.getAttribute("listen");
 
                         if (listenerEnabled.equalsIgnoreCase("true")) {
                             // create a server key
-                            StringBuilder serverKey = new StringBuilder();
 
                             serverKey.append(server.getAttribute("jndi-server-name") + ":");
                             serverKey.append(server.getAttribute("jndi-name") + ":");
@@ -105,7 +123,7 @@ public class JmsListenerFactory implements Runnable {
                                 listeners.put(serverKey.toString(), listener);
                         }
                     } catch (GenericServiceException gse) {
-                        Debug.logVerbose("Cannot load message listener (" + gse.toString() + ").", module);
+                        Debug.logInfo("Cannot load message listener " + serverKey + " error: (" + gse.toString() + ").", module);
                     } catch (Exception e) {
                         Debug.logError(e, "Uncaught exception.", module);
                     }
@@ -127,7 +145,7 @@ public class JmsListenerFactory implements Runnable {
         String password = server.getAttribute("password");
         String className = server.getAttribute("listener-class");
 
-        if (className == null || className.length() == 0) {
+        if (UtilValidate.isEmpty(className)) {
             if (type.equals("topic"))
                 className = JmsListenerFactory.TOPIC_LISTENER_CLASS;
             else if (type.equals("queue"))
@@ -144,9 +162,9 @@ public class JmsListenerFactory implements Runnable {
 
                     try {
                         Class<?> c = cl.loadClass(className);
-                        Constructor cn = c.getConstructor(ServiceDispatcher.class, String.class, String.class, String.class, String.class, String.class);
+                        Constructor<GenericMessageListener> cn = UtilGenerics.cast(c.getConstructor(Delegator.class, String.class, String.class, String.class, String.class, String.class));
 
-                        listener = (GenericMessageListener) cn.newInstance(dispatcher, serverName, jndiName, queueName, userName, password);
+                        listener = cn.newInstance(delegator, serverName, jndiName, queueName, userName, password);
                     } catch (Exception e) {
                         throw new GenericServiceException(e.getMessage(), e);
                     }

@@ -25,8 +25,6 @@ under the License.
   <!-- ========================================================= -->
     <title>Entity of an Open For Business Project Component</title>
     <description>None</description>
-    <copyright>Copyright 2001-2008 The Apache Software Foundation</copyright>
-    <author>None</author>
     <version>1.0</version>
 
     <!-- ========================================================= -->
@@ -61,6 +59,7 @@ under the License.
       <field name="description" type="description"></field>
       <field name="amount" type="currency-precise"></field>
       <field name="recurringAmount" type="currency-precise"></field>
+      <field name="amountAlreadyIncluded" type="currency-precise"><description>The amount here is already represented in the price, such as VAT taxes.</description></field>
       <field name="productPromoId" type="id"></field>
       <field name="productPromoRuleId" type="id"></field>
       <field name="productPromoActionSeqId" type="id"></field>
@@ -94,6 +93,8 @@ under the License.
       <field name="includeInShipping" type="indicator"></field>
       <field name="createdDate" type="date-time"></field>
       <field name="createdByUserLogin" type="id-vlong"></field>
+      <field name="lastModifiedDate" type="date-time"></field>
+      <field name="lastModifiedByUserLogin" type="id-vlong"></field>
       <field name="originalAdjustmentId" type="id">
           <description>specifies relation to source OrderAdjustment - eg. for tax on shipping charges</description>
       </field>
@@ -372,6 +373,7 @@ under the License.
       <field name="orderDate" type="date-time"></field>
       <field name="priority" type="indicator"><description>Sets priority for Inventory Reservation</description></field>
       <field name="entryDate" type="date-time"></field>
+      <field name="pickSheetPrintedDate" type="date-time"><description>This will be set to a date when pick sheet of the order is printed</description></field>
       <field name="visitId" type="id"></field>
       <field name="statusId" type="id"></field>
       <field name="createdBy" type="id-vlong"></field>
@@ -390,6 +392,8 @@ under the License.
       <field name="internalCode" type="id-long"></field>
       <field name="remainingSubTotal" type="currency-amount"></field>
       <field name="grandTotal" type="currency-amount"></field>
+      <field name="isViewed" type="indicator"></field>
+      <field name="invoicePerShipment" type="indicator"></field>
       <prim-key field="orderId"/>
       <relation type="one" fk-name="ORDER_HDR_TYPE" rel-entity-name="OrderType">
         <key-map field-name="orderTypeId"/>
@@ -478,6 +482,7 @@ under the License.
       <field name="budgetId" type="id"></field>
       <field name="budgetItemSeqId" type="id"></field>
       <field name="productId" type="id"></field>
+      <field name="supplierProductId" type="id-long"></field>
       <field name="productFeatureId" type="id"></field>
       <field name="prodCatalogId" type="id"></field>
       <field name="productCategoryId" type="id"></field>
@@ -488,11 +493,11 @@ under the License.
       <field name="shoppingListItemSeqId" type="id"></field>
       <field name="subscriptionId" type="id"></field>
       <field name="deploymentId" type="id"></field>
-      <field name="quantity" type="fixed-point"></field>
+      <field name="quantity" type="fixed-point" enable-audit-log="true"></field>
       <field name="cancelQuantity" type="fixed-point"></field>
       <field name="selectedAmount" type="fixed-point"></field>
-      <field name="unitPrice" type="currency-amount"></field>
-      <field name="unitListPrice" type="currency-amount"></field>
+      <field name="unitPrice" type="currency-precise" enable-audit-log="true"></field>
+      <field name="unitListPrice" type="currency-precise"></field>
       <field name="unitAverageCost" type="currency-amount"></field>
       <field name="unitRecurringPrice" type="currency-amount"></field>
       <field name="isModifiedPrice" type="indicator"></field>
@@ -512,6 +517,7 @@ under the License.
       <field name="cancelBackOrderDate" type="date-time"><description>Used to cancel all orders from suppliers when its in past</description></field>
       <field name="overrideGlAccountId" type="id"><description>Used to specify the override or actual glAccountId used for the adjustment, avoids problems if configuration changes after initial posting, etc.</description></field>
       <field name="salesOpportunityId" type="id-ne"></field>
+      <field name="changeByUserLoginId" type="id-vlong" enable-audit-log="true"></field>
       <prim-key field="orderId"/>
       <prim-key field="orderItemSeqId"/>
       <relation type="one" fk-name="ORDER_ITEM_HDR" rel-entity-name="OrderHeader">
@@ -561,6 +567,9 @@ under the License.
       <relation type="one" fk-name="ORDER_ITEM_SLSOPP" rel-entity-name="SalesOpportunity" >
             <key-map field-name="salesOpportunityId"/>
       </relation>
+        <relation type="one" fk-name="ORDER_ITEM_USRLGN" title="ChangeBy" rel-entity-name="UserLogin">
+            <key-map field-name="changeByUserLoginId" rel-field-name="userLoginId"/>
+        </relation>      
       <index name="ORDITMEXT_ID_IDX">
         <index-field name="externalId"/>
       </index>
@@ -762,6 +771,23 @@ under the License.
             <key-map field-name="parentGroupSeqId" rel-field-name="orderItemGroupSeqId"/>
         </relation>
     </entity>
+    <entity entity-name="OrderItemGroupOrder"
+            package-name="org.ofbiz.order.order"
+            title="Order Item Group Order Entity">
+      <field name="orderId" type="id-ne"></field>
+      <field name="orderItemSeqId" type="id-ne"></field>
+      <field name="groupOrderId" type="id-ne"></field>
+      <prim-key field="orderId"/>
+      <prim-key field="orderItemSeqId"/>
+      <prim-key field="groupOrderId"/>
+      <relation type="one" fk-name="OIGO_ORDER_ITEM" rel-entity-name="OrderItem">
+        <key-map field-name="orderId"/>
+        <key-map field-name="orderItemSeqId"/>
+      </relation>
+      <relation type="one" fk-name="OIGO_GROUP_ORDER" rel-entity-name="ProductGroupOrder">
+        <key-map field-name="groupOrderId"/>
+      </relation>
+    </entity>
     <entity entity-name="OrderItemPriceInfo"
             package-name="org.ofbiz.order.order"
             never-cache="true"
@@ -825,10 +851,10 @@ under the License.
             title="Order Item Ship Group">
       <field name="orderId" type="id-ne"></field>
       <field name="shipGroupSeqId" type="id-ne"></field>
-      <field name="shipmentMethodTypeId" type="id"></field>
+      <field name="shipmentMethodTypeId" type="id" enable-audit-log="true"></field>
       <field name="supplierPartyId" type="id"></field>
       <field name="vendorPartyId" type="id"><description>For use with multi-vendor stores, order will be split so that each ship group is associated with only one vendor (only if applicable)</description></field>
-      <field name="carrierPartyId" type="id"></field>
+      <field name="carrierPartyId" type="id" enable-audit-log="true"></field>
       <field name="carrierRoleTypeId" type="id"></field>
       <field name="facilityId" type="id"></field>
       <field name="contactMechId" type="id"></field>
@@ -1037,6 +1063,8 @@ under the License.
       <field name="needsNsfRetry" type="indicator"></field>
       <field name="createdDate" type="date-time"></field>
       <field name="createdByUserLogin" type="id-vlong"></field>
+      <field name="lastModifiedDate" type="date-time"></field>
+      <field name="lastModifiedByUserLogin" type="id-vlong"></field>
       <prim-key field="orderPaymentPreferenceId"/>
       <relation type="one" fk-name="ORDER_PMPRF_OHDR" rel-entity-name="OrderHeader">
         <key-map field-name="orderId"/>
@@ -1125,11 +1153,13 @@ under the License.
             title="Order Shipment Entity">
       <field name="orderId" type="id-ne"></field>
       <field name="orderItemSeqId" type="id-ne"></field>
+      <field name="shipGroupSeqId" type="id-ne"></field>
       <field name="shipmentId" type="id-ne"></field>
       <field name="shipmentItemSeqId" type="id-ne"></field>
       <field name="quantity" type="fixed-point"></field>
       <prim-key field="orderId"/>
       <prim-key field="orderItemSeqId"/>
+      <prim-key field="shipGroupSeqId"/>
       <prim-key field="shipmentId"/>
       <prim-key field="shipmentItemSeqId"/>
       <relation type="one" fk-name="ORDER_SHPMT_OHDR" rel-entity-name="OrderHeader">
@@ -1145,6 +1175,11 @@ under the License.
       <relation type="one-nofk" rel-entity-name="ShipmentItem">
         <key-map field-name="shipmentId"/>
         <key-map field-name="shipmentItemSeqId"/>
+      </relation>
+      <relation type="one-nofk" rel-entity-name="OrderItemShipGroupAssoc">
+        <key-map field-name="orderId"/>
+        <key-map field-name="orderItemSeqId"/>
+        <key-map field-name="shipGroupSeqId"/>
       </relation>
     </entity>
     <entity entity-name="OrderStatus"
@@ -1308,6 +1343,7 @@ under the License.
       <field name="workEffortId" type="id-ne"></field>
       <field name="orderId" type="id-ne"></field>
       <field name="orderItemSeqId" type="id-ne"></field>
+      <field name="shipGroupSeqId" type="id"></field>
       <prim-key field="workEffortId"/>
       <prim-key field="orderId"/>
       <prim-key field="orderItemSeqId"/>
@@ -1320,6 +1356,11 @@ under the License.
       </relation>
       <relation type="one" fk-name="WORDER_ITFMT_WEFRT" rel-entity-name="WorkEffort">
         <key-map field-name="workEffortId"/>
+      </relation>
+      <relation type="one-nofk" rel-entity-name="OrderItemShipGroupAssoc">
+        <key-map field-name="orderId"/>
+        <key-map field-name="orderItemSeqId"/>
+        <key-map field-name="shipGroupSeqId"/>
       </relation>
     </entity>
 
@@ -1363,6 +1404,9 @@ under the License.
       </relation>
       <relation type="one" fk-name="QUOTE_CHANNEL" title="SalesChannel" rel-entity-name="Enumeration">
         <key-map field-name="salesChannelEnumId" rel-field-name="enumId"/>
+      </relation>
+      <relation type="many" rel-entity-name="QuoteNoteView">
+        <key-map field-name="quoteId"/>
       </relation>
     </entity>
     <entity entity-name="QuoteAttribute"
@@ -1446,6 +1490,21 @@ under the License.
         <key-map field-name="custRequestItemSeqId"/>
       </relation>
     </entity>
+    <entity entity-name="QuoteNote"
+            package-name="org.ofbiz.order.quote"
+            never-cache="true"
+            title="Quote Note Entity">
+      <field name="quoteId" type="id-ne"></field>
+      <field name="noteId" type="id-ne"></field>
+      <prim-key field="quoteId"/>
+      <prim-key field="noteId"/>
+      <relation type="one" fk-name="QUOTE_NT_QTE" rel-entity-name="Quote">
+        <key-map field-name="quoteId"/>
+      </relation>
+      <relation type="one" fk-name="QUOTE_NT_NOTE" rel-entity-name="NoteData">
+        <key-map field-name="noteId"/>
+      </relation>
+    </entity>
     <entity entity-name="QuoteRole"
             package-name="org.ofbiz.order.quote"
             title="Quote Role Entity">
@@ -1477,6 +1536,9 @@ under the License.
       <field name="quoteItemSeqId" type="id-ne"></field>
       <field name="termValue" type="numeric"></field>
       <field name="uomId" type="id"></field>
+      <field name="termDays" type="numeric"></field>
+      <field name="textValue" type="description"></field>
+      <field name="description" type="description"></field>
       <prim-key field="termTypeId"/>
       <prim-key field="quoteId"/>
       <prim-key field="quoteItemSeqId"/>
@@ -1583,6 +1645,8 @@ under the License.
       <field name="includeInShipping" type="indicator"></field>
       <field name="createdDate" type="date-time"></field>
       <field name="createdByUserLogin" type="id-vlong"></field>
+      <field name="lastModifiedDate" type="date-time"></field>
+      <field name="lastModifiedByUserLogin" type="id-vlong"></field>
       <prim-key field="quoteAdjustmentId"/>
       <relation type="one" fk-name="QUOTE_ADJ_TYPE" rel-entity-name="OrderAdjustmentType">
         <key-map field-name="quoteAdjustmentTypeId" rel-field-name="orderAdjustmentTypeId"/>
@@ -1814,6 +1878,9 @@ under the License.
       <field name="noteId" type="id-ne"></field>
       <prim-key field="custRequestId"/>
       <prim-key field="noteId"/>
+      <relation type="one" fk-name="CRQ_CR" rel-entity-name="CustRequest">
+        <key-map field-name="custRequestId"/>
+      </relation>
       <relation type="one" fk-name="CRQ_NOTE" rel-entity-name="NoteData">
         <key-map field-name="noteId"/>
       </relation>
@@ -2277,6 +2344,8 @@ under the License.
       <field name="includeInShipping" type="indicator"></field>
       <field name="createdDate" type="date-time"></field>
       <field name="createdByUserLogin" type="id-vlong"></field>
+      <field name="lastModifiedDate" type="date-time"></field>
+      <field name="lastModifiedByUserLogin" type="id-vlong"></field>
       <prim-key field="returnAdjustmentId"/>
       <relation type="one" fk-name="RETURN_ADJ_TYPE" rel-entity-name="ReturnAdjustmentType">
         <key-map field-name="returnAdjustmentTypeId"/>
@@ -2356,6 +2425,7 @@ under the License.
         <field name="destinationFacilityId" type="id"></field>
         <field name="needsInventoryReceive" type="indicator"></field>
         <field name="currencyUomId" type="id-ne"></field>
+        <field name="supplierRmaId" type="id"></field>
         <prim-key field="returnId"/>
         <relation type="one" fk-name="RTN_HEAD_TYPE" rel-entity-name="ReturnHeaderType">
             <key-map field-name="returnHeaderTypeId"/>
@@ -2410,10 +2480,10 @@ under the License.
             title="Return Item Entity">
         <field name="returnId" type="id-ne"></field>
         <field name="returnItemSeqId" type="id-ne"></field>
-        <field name="returnReasonId" type="id">
+        <field name="returnReasonId" type="id" enable-audit-log="true">
             <description>why item is returned: did not like, wrong item, damaged, etc. etc.</description>
         </field>
-        <field name="returnTypeId" type="id">
+        <field name="returnTypeId" type="id" enable-audit-log="true">
             <description>actually used for disbursement type: store credit, cash refund, exchange</description>
         </field>
         <field name="returnItemTypeId" type="id">
@@ -2427,9 +2497,9 @@ under the License.
         <field name="orderItemSeqId" type="id"></field>
         <field name="statusId" type="id"></field>
         <field name="expectedItemStatus" type="id"></field>
-        <field name="returnQuantity" type="fixed-point"><description>promised by the customer</description></field>
-        <field name="receivedQuantity" type="fixed-point"><description>actually received from the customer</description></field>
-        <field name="returnPrice" type="currency-amount"></field>
+        <field name="returnQuantity" type="fixed-point" enable-audit-log="true"><description>promised by the customer</description></field>
+        <field name="receivedQuantity" type="fixed-point" enable-audit-log="true"><description>actually received from the customer</description></field>
+        <field name="returnPrice" type="currency-amount" enable-audit-log="true"></field>
         <field name="returnItemResponseId" type="id"></field>
         <prim-key field="returnId"/>
         <prim-key field="returnItemSeqId"/>
@@ -2483,6 +2553,7 @@ under the License.
         <field name="replacementOrderId" type="id"></field>
         <field name="paymentId" type="id"></field>
         <field name="billingAccountId" type="id"></field>
+        <field name="finAccountTransId" type="id"></field>
         <field name="responseAmount" type="currency-amount"></field>
         <field name="responseDate" type="date-time"></field>
         <prim-key field="returnItemResponseId"/>
@@ -2497,6 +2568,9 @@ under the License.
         </relation>
         <relation type="one" fk-name="RTN_PAY_BACT" rel-entity-name="BillingAccount">
             <key-map field-name="billingAccountId"/>
+        </relation>
+        <relation type="one" fk-name="RTN_PAY_FINACTTX" rel-entity-name="FinAccountTrans">
+            <key-map field-name="finAccountTransId"/>
         </relation>
     </entity>
     <entity entity-name="ReturnItemType"
@@ -2547,6 +2621,7 @@ under the License.
         <field name="statusId" type="id"></field>
         <field name="returnId" type="id"></field>
         <field name="returnItemSeqId" type="id"></field>
+        <field name="changeByUserLoginId" type="id-vlong"></field>
         <field name="statusDatetime" type="date-time"></field>
         <prim-key field="returnStatusId"/>
         <relation type="one" fk-name="RTN_STTS_STTS" rel-entity-name="StatusItem">
@@ -2558,6 +2633,9 @@ under the License.
         <relation type="one-nofk" rel-entity-name="ReturnItem">
             <key-map field-name="returnId"/>
             <key-map field-name="returnItemSeqId"/>
+        </relation>
+        <relation type="one" fk-name="RTN_STTS_USRLGN" title="ChangeBy" rel-entity-name="UserLogin">
+            <key-map field-name="changeByUserLoginId" rel-field-name="userLoginId"/>
         </relation>
     </entity>
     <entity entity-name="ReturnType"
@@ -2628,6 +2706,27 @@ under the License.
         <key-map field-name="shipmentId"/>
         <key-map field-name="shipmentItemSeqId"/>
       </relation>
+    </entity>
+
+    <entity entity-name="ReturnContactMech"
+            package-name="org.ofbiz.order.return"
+            never-cache="true"
+            title="Retrun Contact Mechanism Entity">
+        <field name="returnId" type="id-ne"></field>
+        <field name="contactMechPurposeTypeId" type="id-ne"></field>
+        <field name="contactMechId" type="id-ne"></field>
+        <prim-key field="returnId"/>
+        <prim-key field="contactMechPurposeTypeId"/>
+        <prim-key field="contactMechId"/>
+        <relation type="one" fk-name="RETURN_CMECH_HDR" rel-entity-name="ReturnHeader">
+            <key-map field-name="returnId"/>
+        </relation>
+        <relation type="one" fk-name="RETURN_CMECH_CM" rel-entity-name="ContactMech">
+            <key-map field-name="contactMechId"/>
+        </relation>
+        <relation type="one" fk-name="RETURN_CMECH_CMPT" rel-entity-name="ContactMechPurposeType">
+            <key-map field-name="contactMechPurposeTypeId"/>
+        </relation>
     </entity>
 
   <!-- ========================================================= -->
@@ -2745,6 +2844,7 @@ under the License.
       <field name="shoppingListItemSeqId" type="id-ne"></field>
       <field name="productId" type="id"></field>
       <field name="quantity" type="fixed-point"></field>
+      <field name="modifiedPrice" type="currency-precise"/>
       <field name="reservStart" type="date-time"></field>
       <field name="reservLength" type="fixed-point"></field>
       <field name="reservPersons" type="fixed-point"></field>
@@ -2802,274 +2902,5 @@ under the License.
         </relation>
     </entity>
 
-  <!-- ========================================================= -->
-  <!-- org.ofbiz.order.opportunity -->
-  <!-- ========================================================= -->
-
-    <entity entity-name="SalesOpportunity"
-            package-name="org.ofbiz.order.opportunity"
-            title="Main entity of information about sales opportunities">
-        <field name="salesOpportunityId" type="id-ne"></field>
-        <field name="opportunityName" type="name"></field>
-        <field name="description" type="very-long"/>
-        <field name="nextStep" type="very-long"/>
-        <field name="estimatedAmount" type="currency-amount"/>
-        <field name="estimatedProbability" type="fixed-point"/>
-        <field name="currencyUomId" type="id-ne"/>
-        <field name="marketingCampaignId" type="id-ne"/>
-        <field name="dataSourceId" type="id-ne"/>
-        <field name="estimatedCloseDate" type="date-time"/>
-        <field name="opportunityStageId" type="id-ne"/>
-        <field name="typeEnumId" type="id-ne"/>
-        <field name="createdByUserLogin" type="id-vlong"/>
-        <prim-key field="salesOpportunityId"/>
-        <relation fk-name="SLSOPP_CRNCY_UOM" rel-entity-name="Uom" type="one">
-            <key-map field-name="currencyUomId" rel-field-name="uomId"/>
-        </relation>
-        <relation fk-name="SLSOPP_STAGE" rel-entity-name="SalesOpportunityStage" type="one">
-            <key-map field-name="opportunityStageId"/>
-        </relation>
-        <relation title="Type" fk-name="SLSOPP_TYP_ENUM" rel-entity-name="Enumeration" type="one">
-            <key-map field-name="typeEnumId" rel-field-name="enumId"/>
-        </relation>
-        <relation fk-name="SLSOPP_MKTGCMPG" rel-entity-name="MarketingCampaign" type="one">
-            <key-map field-name="marketingCampaignId"/>
-        </relation>
-        <relation fk-name="SLSOPP_USRLGN" rel-entity-name="UserLogin" type="one">
-            <key-map field-name="createdByUserLogin" rel-field-name="userLoginId"/>
-        </relation>
-    </entity>
-
-    <entity entity-name="SalesOpportunityHistory"
-            package-name="org.ofbiz.order.opportunity"
-            title="Tracks a history of sales opportunity information">
-        <field name="salesOpportunityHistoryId" type="id-ne"></field>
-        <field name="salesOpportunityId" type="id-ne"></field>
-        <field name="description" type="very-long"/>
-        <field name="nextStep" type="very-long"/>
-        <field name="estimatedAmount" type="currency-amount"/>
-        <field name="estimatedProbability" type="fixed-point"/>
-        <field name="currencyUomId" type="id-ne"/>
-        <field name="estimatedCloseDate" type="date-time"/>
-        <field name="opportunityStageId" type="id-ne"/>
-        <field name="changeNote" type="very-long">
-            <description>Used to track a reason for this change</description> <!-- maybe one day this should be a link to NoteData -->
-        </field>
-        <field name="modifiedByUserLogin" type="id-vlong"/>
-        <field name="modifiedTimestamp" type="date-time"/>
-        <prim-key field="salesOpportunityHistoryId"/>
-        <relation fk-name="SLOPHI_CRNCY_UOM" rel-entity-name="Uom" type="one">
-            <key-map field-name="currencyUomId" rel-field-name="uomId"/>
-        </relation>
-        <relation fk-name="SLOPHI_STAGE" rel-entity-name="SalesOpportunityStage" type="one">
-            <key-map field-name="opportunityStageId"/>
-        </relation>
-        <relation fk-name="SLOPHI_SLSOPP" rel-entity-name="SalesOpportunity" type="one">
-            <key-map field-name="salesOpportunityId"/>
-        </relation>
-        <relation fk-name="SLOPHI_USRLGN" rel-entity-name="UserLogin" type="one">
-            <key-map field-name="modifiedByUserLogin" rel-field-name="userLoginId"/>
-        </relation>
-    </entity>
-
-    <entity entity-name="SalesOpportunityRole"
-            package-name="org.ofbiz.order.opportunity"
-            title="Describes roles of different parties involved in a sales opportunity">
-        <field name="salesOpportunityId" type="id-ne"></field>
-        <field name="partyId" type="id-ne"></field>
-        <field name="roleTypeId" type="id-ne"/>
-        <!-- it may be nice to add fromDate and thruDate at some point to track changing roles if that's ever important -->
-        <prim-key field="salesOpportunityId"/>
-        <prim-key field="partyId"/>
-        <prim-key field="roleTypeId"/>
-        <relation fk-name="SLSOPPRL_SLSOPP" rel-entity-name="SalesOpportunity" type="one">
-            <key-map field-name="salesOpportunityId"/>
-        </relation>
-        <relation fk-name="SLSOPPRL_PARTY" rel-entity-name="Party" type="one">
-            <key-map field-name="partyId"/>
-        </relation>
-        <relation fk-name="SLSOPPRL_ROLETYPE" rel-entity-name="RoleType" type="one">
-            <key-map field-name="roleTypeId"/>
-        </relation>
-        <relation fk-name="SLSOPPRL_PTYROLE" rel-entity-name="PartyRole" type="one"> <!-- make sure the party actually is in the role specified -->
-            <key-map field-name="partyId"/>
-            <key-map field-name="roleTypeId"/>
-        </relation>
-    </entity>
-
-    <entity entity-name="SalesOpportunityStage"
-            package-name="org.ofbiz.order.opportunity"
-            title="Describes stages of a sales opportunity with associated probability factors.">
-        <field name="opportunityStageId" type="id-ne"></field>
-        <field name="description" type="description"/>
-        <field name="defaultProbability" type="fixed-point"/>
-        <field name="sequenceNum" type="numeric"/>
-        <prim-key field="opportunityStageId"/>
-    </entity>
-
-    <entity entity-name="SalesOpportunityWorkEffort"
-            package-name="org.ofbiz.order.opportunity"
-            title="Relates sales opportunities to their work efforts.">
-        <field name="salesOpportunityId" type="id-ne"></field>
-        <field name="workEffortId" type="id-ne"></field>
-        <prim-key field="salesOpportunityId"/>
-        <prim-key field="workEffortId"/>
-        <relation type="one" fk-name="SOPPWEFF_SOPP" rel-entity-name="SalesOpportunity">
-            <key-map field-name="salesOpportunityId"/>
-        </relation>
-        <relation type="one" fk-name="SOPPWEFF_WEFF" rel-entity-name="WorkEffort">
-            <key-map field-name="workEffortId"/>
-        </relation>
-    </entity>
-
-    <entity entity-name="SalesOpportunityQuote"
-            package-name="org.ofbiz.order.opportunity"
-            title="Relates sales opportunities to their quotes.">
-        <field name="salesOpportunityId" type="id-ne"></field>
-        <field name="quoteId" type="id-ne"></field>
-        <prim-key field="salesOpportunityId"/>
-        <prim-key field="quoteId"/>
-        <relation type="one" fk-name="SOPPQTE_SOPP" rel-entity-name="SalesOpportunity">
-            <key-map field-name="salesOpportunityId"/>
-        </relation>
-        <relation type="one" fk-name="SOPPQTE_QTE" rel-entity-name="Quote">
-            <key-map field-name="quoteId"/>
-        </relation>
-    </entity>
-
-    <entity entity-name="SalesForecast"
-            package-name="org.ofbiz.order.opportunity"
-            title="Stores sales forecast data for sales opportunities.">
-        <field name="salesForecastId" type="id-ne"></field>
-        <field name="parentSalesForecastId" type="id"></field>
-        <field name="organizationPartyId" type="id"></field>
-        <field name="internalPartyId" type="id"></field>
-        <field name="customTimePeriodId" type="id"></field>
-        <field name="currencyUomId" type="id"></field>
-        <field name="quotaAmount" type="currency-amount"></field>
-        <field name="forecastAmount" type="currency-amount"></field>
-        <field name="bestCaseAmount" type="currency-amount"></field>
-        <field name="closedAmount" type="currency-amount"/>
-        <field name="percentOfQuotaForecast" type="fixed-point"/>
-        <field name="percentOfQuotaClosed" type="fixed-point"/>
-        <field name="pipelineAmount" type="currency-amount"></field>
-        <field name="createdByUserLoginId" type="id-vlong"></field>
-        <field name="modifiedByUserLoginId" type="id-vlong"></field>
-        <prim-key field="salesForecastId"/>
-        <relation type="one" fk-name="SALES4C_PARENT" title="Parent" rel-entity-name="SalesForecast">
-            <key-map field-name="parentSalesForecastId" rel-field-name="salesForecastId"/>
-        </relation>
-        <relation type="one" fk-name="SALES4C_ORG_PARTY" title="Organization" rel-entity-name="Party">
-            <key-map field-name="organizationPartyId" rel-field-name="partyId"/>
-        </relation>
-        <relation type="one" fk-name="SALES4C_INT_PARTY" title="Internal" rel-entity-name="Party">
-            <key-map field-name="internalPartyId" rel-field-name="partyId"/>
-        </relation>
-        <relation type="one" fk-name="SALES4C_TIME_PER" rel-entity-name="CustomTimePeriod">
-            <key-map field-name="customTimePeriodId"/>
-        </relation>
-        <relation type="one" fk-name="SALES4C_CUR_UOM" rel-entity-name="Uom">
-            <key-map field-name="currencyUomId" rel-field-name="uomId"/>
-        </relation>
-        <relation type="one" fk-name="SALES4C_CRT_USER" title="CreatedBy" rel-entity-name="UserLogin">
-            <key-map field-name="createdByUserLoginId" rel-field-name="userLoginId"/>
-        </relation>
-        <relation type="one" fk-name="SALES4C_MOD_USER" title="ModifiedBy" rel-entity-name="UserLogin">
-            <key-map field-name="modifiedByUserLoginId" rel-field-name="userLoginId"/>
-        </relation>
-    </entity>
-
-    <entity entity-name="SalesForecastDetail"
-            package-name="org.ofbiz.order.opportunity"
-            title="Stores Details of Resourses of Sales Forecast for simulation of MRP">
-        <field name="salesForecastId" type="id-ne"/>
-        <field name="salesForecastDetailId" type="id-ne"/>
-        <field name="amount" type="currency-amount"/>
-        <field name="quantityUomId" type="id"/>
-        <field name="quantity" type="fixed-point"/>
-        <field name="productId" type="id"/>
-        <field name="productCategoryId" type="id"/>
-        <prim-key field="salesForecastId"/>
-        <prim-key field="salesForecastDetailId"/>
-        <relation type="one" fk-name="SALES4CDTL_SALES4C" rel-entity-name="SalesForecast">
-            <key-map field-name="salesForecastId"/>
-        </relation>
-        <relation type="one" fk-name="SALES4CDTL_QTY_UOM" title="Quantity" rel-entity-name="Uom">
-            <key-map field-name="quantityUomId" rel-field-name="uomId"/>
-        </relation>
-        <relation type="one" fk-name="SALES4CDTL_PROD" rel-entity-name="Product">
-            <key-map field-name="productId"/>
-        </relation>
-        <relation type="one" fk-name="SALES4CDTL_PCTGRY" rel-entity-name="ProductCategory">
-            <key-map field-name="productCategoryId"/>
-        </relation>
-    </entity>
-
-    <entity entity-name="SalesForecastHistory"
-            package-name="org.ofbiz.order.opportunity"
-            title="Keeps a record of changes to a sales forecast.">
-        <field name="salesForecastHistoryId" type="id-ne"></field>
-        <field name="salesForecastId" type="id-ne"></field>
-        <field name="parentSalesForecastId" type="id"></field>
-        <field name="organizationPartyId" type="id"></field>
-        <field name="internalPartyId" type="id"></field>
-        <field name="customTimePeriodId" type="id"></field>
-        <field name="currencyUomId" type="id"></field>
-        <field name="quotaAmount" type="currency-amount"></field>
-        <field name="forecastAmount" type="currency-amount"></field>
-        <field name="bestCaseAmount" type="currency-amount"></field>
-        <field name="closedAmount" type="currency-amount"/>
-        <field name="percentOfQuotaForecast" type="fixed-point"/>
-        <field name="percentOfQuotaClosed" type="fixed-point"/>
-        <field name="changeNote" type="very-long">
-            <description>Used to track a reason for this change</description> <!-- maybe one day this should be a link to NoteData -->
-        </field>
-        <field name="modifiedByUserLoginId" type="id-vlong"></field>
-        <field name="modifiedTimestamp" type="date-time"/>
-        <prim-key field="salesForecastHistoryId"/>
-        <relation type="one" fk-name="SALES4CH_SALES4C" rel-entity-name="SalesForecast">
-            <key-map field-name="salesForecastId"/>
-        </relation>
-        <relation type="one" fk-name="SALES4CH_ORG_PARTY" title="Organization" rel-entity-name="Party">
-            <key-map field-name="organizationPartyId" rel-field-name="partyId"/>
-        </relation>
-        <relation type="one" fk-name="SALES4CH_INT_PARTY" title="Internal" rel-entity-name="Party">
-            <key-map field-name="internalPartyId" rel-field-name="partyId"/>
-        </relation>
-        <relation type="one" fk-name="SALES4CH_TIME_PER" rel-entity-name="CustomTimePeriod">
-            <key-map field-name="customTimePeriodId"/>
-        </relation>
-        <relation type="one" fk-name="SALES4CH_CUR_UOM" rel-entity-name="Uom">
-            <key-map field-name="currencyUomId" rel-field-name="uomId"/>
-        </relation>
-        <relation type="one" fk-name="SALES4CH_MOD_USER" title="ModifiedBy" rel-entity-name="UserLogin">
-            <key-map field-name="modifiedByUserLoginId" rel-field-name="userLoginId"/>
-        </relation>
-    </entity>
-    <entity entity-name="SalesOpportunityCompetitor"
-            package-name="org.ofbiz.order.opportunity"
-            title="Sales opportunity competitors record">
-        <field name="salesOpportunityId" type="id-ne"></field>
-        <field name="competitorPartyId" type="id-ne"></field>
-        <field name="positionEnumId" type="id-ne"></field>
-        <field name="strengths" type="very-long"></field>
-        <field name="weaknesses" type="very-long"></field>
-        <prim-key field="salesOpportunityId"/>
-        <prim-key field="competitorPartyId"/>
-        <relation type="one" fk-name="SOPPCOMP_SOPP" rel-entity-name="SalesOpportunity">
-            <key-map field-name="salesOpportunityId"/>
-        </relation>
-    </entity>
-    <entity entity-name="SalesOpportunityTrckCode"
-            package-name="org.ofbiz.order.opportunity"
-            title="Sales opportunity traking code">
-        <field name="salesOpportunityId" type="id-ne"></field>
-        <field name="trackingCodeId" type="id-ne"></field>
-        <field name="receivedDate" type="date-time"></field>
-        <prim-key field="salesOpportunityId"/>
-        <prim-key field="trackingCodeId"/>
-        <relation type="one" fk-name="SOPPTRKCD_SOPP" rel-entity-name="SalesOpportunity">
-            <key-map field-name="salesOpportunityId"/>
-        </relation>
-    </entity>
-</entitymodel>
+ </entitymodel>
+ 

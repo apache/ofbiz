@@ -18,16 +18,19 @@ under the License.
 -->
 
 <div id="browse-blogs" class="screenlet">
-    <div class="screenlet-header">
-        <div class="boxhead">${uiLabelMap.ProductBrowseBlogs}</div>
-    </div>
-    <div class="screenlet-body">
-      <div class="browsecategorylist">
-        <#list blogs as blog>
-            <div class="browsecategorytext">
-                <a href="<@ofbizUrl>MainBlog?blogContentId=${blog.contentId}</@ofbizUrl>" class="browsecategorybutton">${blog.contentName}</a>
-            </div>
-        </#list>
-      </div>
-    </div>
+  <div class="screenlet-title-bar">
+    <ul>
+      <li class="h3">${uiLabelMap.ProductBrowseBlogs}</li>
+    </ul>
+    <br class="clear"/>
+  </div>
+  <div class="screenlet-body">
+    <ul class="browsecategorylist">
+      <#list blogs as blog>
+        <li class="browsecategorytext">
+          <a href="<@ofbizUrl>MainBlog?blogContentId=${blog.contentId}</@ofbizUrl>" class="browsecategorybutton">${blog.contentName}</a>
+        </li>
+      </#list>
+    </ul>
+  </div>
 </div>

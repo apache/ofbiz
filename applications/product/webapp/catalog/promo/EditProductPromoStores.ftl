@@ -33,7 +33,7 @@ under the License.
                 <#assign rowClass = "2">
                 <#list productStorePromoAppls as productStorePromoAppl>
                 <#assign line = line + 1>
-                <#assign productStore = productStorePromoAppl.getRelatedOne("ProductStore")>
+                <#assign productStore = productStorePromoAppl.getRelatedOne("ProductStore", false)>
                 <tr valign="middle"<#if rowClass == "1"> class="alternate-row"</#if>>
                     <td><a href="<@ofbizUrl>EditProductStore?productStoreId=${productStorePromoAppl.productStoreId}</@ofbizUrl>" class="buttontext"><#if productStore?exists>${(productStore.storeName)?if_exists}</#if>[${productStorePromoAppl.productStoreId}]</a></td>
                     <#assign hasntStarted = false>
@@ -43,21 +43,21 @@ under the License.
                         <#assign hasExpired = false>
                         <#if (productStorePromoAppl.getTimestamp("thruDate"))?exists && nowTimestamp.after(productStorePromoAppl.getTimestamp("thruDate"))> <#assign hasExpired = true></#if>
                         <form method="post" action="<@ofbizUrl>promo_updateProductStorePromoAppl</@ofbizUrl>" name="lineForm${line}">
-                            <input type="hidden" name="productStoreId" value="${productStorePromoAppl.productStoreId}">
-                            <input type="hidden" name="productPromoId" value="${productStorePromoAppl.productPromoId}">
-                            <input type="hidden" name="fromDate" value="${productStorePromoAppl.fromDate}">
-                            <input type="text" size="20" name="thruDate" value="${(productStorePromoAppl.thruDate)?if_exists}" <#if hasExpired>style="color: red;"</#if>>
-                            <a href="javascript:call_cal(document.lineForm${line}.thruDate, '${nowTimestamp}');"><img src="<@ofbizContentUrl>/images/cal.gif</@ofbizContentUrl>" width="16" height="16" border="0" alt="Calendar"></a>
-                            <input type="text" size="5" name="sequenceNum" value="${(productStorePromoAppl.sequenceNum)?if_exists}">
-                            <input type="submit" value="${uiLabelMap.CommonUpdate}">
+                            <input type="hidden" name="productStoreId" value="${productStorePromoAppl.productStoreId}" />
+                            <input type="hidden" name="productPromoId" value="${productStorePromoAppl.productPromoId}" />
+                            <input type="hidden" name="fromDate" value="${productStorePromoAppl.fromDate}" />
+                            <#if hasExpired><#assign class="alert"></#if>
+                            <@htmlTemplate.renderDateTimeField name="thruDate" event="" action="" className="${class!''}" alert="" title="Format: yyyy-MM-dd HH:mm:ss.SSS" value="${(productStorePromoAppl.thruDate)?if_exists}" size="25" maxlength="30" id="thruDate1" dateType="date" shortDateInput=false timeDropdownParamName="" defaultDateTimeString="" localizedIconTitle="" timeDropdown="" timeHourName="" classString="" hour1="" hour2="" timeMinutesName="" minutes="" isTwelveHour="" ampmName="" amSelected="" pmSelected="" compositeType="" formName=""/>
+                            <input type="text" size="5" name="sequenceNum" value="${(productStorePromoAppl.sequenceNum)?if_exists}" />
+                            <input type="submit" value="${uiLabelMap.CommonUpdate}" />
                         </form>
                     </td>
                     <td align="center">
                        <form method="post" action="<@ofbizUrl>promo_deleteProductStorePromoAppl</@ofbizUrl>">
-                           <input type="hidden" name="productStoreId" value="${productStorePromoAppl.productStoreId}">
-                           <input type="hidden" name="productPromoId" value="${productStorePromoAppl.productPromoId}">
-                           <input type="hidden" name="fromDate" value="${productStorePromoAppl.fromDate}">
-                           <input type="submit" value="${uiLabelMap.CommonDelete}">
+                           <input type="hidden" name="productStoreId" value="${productStorePromoAppl.productStoreId}" />
+                           <input type="hidden" name="productPromoId" value="${productStorePromoAppl.productPromoId}" />
+                           <input type="hidden" name="fromDate" value="${productStorePromoAppl.fromDate}" />
+                           <input type="submit" value="${uiLabelMap.CommonDelete}" />
                        </form>
                     </td>
                 </tr>
@@ -84,8 +84,7 @@ under the License.
                     <option value="${(productStore.productStoreId)?if_exists}">${(productStore.storeName)?if_exists} [${(productStore.productStoreId)?if_exists}]</option>
                 </#list>
                 </select>
-                <input type="text" size="20" name="fromDate"/>
-                <a href="javascript:call_cal(document.addProductPromoToCatalog.fromDate, '${nowTimestamp}');"><img src="<@ofbizContentUrl>/images/cal.gif</@ofbizContentUrl>" width="16" height="16" border="0" alt="Calendar"></a>
+                <@htmlTemplate.renderDateTimeField name="fromDate" event="" action="" className="" alert="" title="Format: yyyy-MM-dd HH:mm:ss.SSS" value="" size="25" maxlength="30" id="fromDate1" dateType="date" shortDateInput=false timeDropdownParamName="" defaultDateTimeString="" localizedIconTitle="" timeDropdown="" timeHourName="" classString="" hour1="" hour2="" timeMinutesName="" minutes="" isTwelveHour="" ampmName="" amSelected="" pmSelected="" compositeType="" formName=""/>
                 <input type="submit" value="${uiLabelMap.CommonAdd}"/>
             </form>
         </div>

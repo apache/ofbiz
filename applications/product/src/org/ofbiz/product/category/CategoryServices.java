@@ -18,24 +18,32 @@
  *******************************************************************************/
 package org.ofbiz.product.category;
 
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.io.Writer;
 import java.sql.Timestamp;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import javolution.util.FastList;
 import javolution.util.FastMap;
+
+import net.sf.json.JSONObject;
 
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilDateTime;
 import org.ofbiz.base.util.UtilGenerics;
 import org.ofbiz.base.util.UtilMisc;
+import org.ofbiz.base.util.UtilProperties;
 import org.ofbiz.base.util.UtilValidate;
-import org.ofbiz.entity.GenericDelegator;
+import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
 import org.ofbiz.entity.condition.EntityCondition;
-import org.ofbiz.entity.condition.EntityConditionList;
-import org.ofbiz.entity.condition.EntityExpr;
 import org.ofbiz.entity.condition.EntityOperator;
 import org.ofbiz.entity.model.ModelEntity;
 import org.ofbiz.entity.util.EntityFindOptions;
@@ -51,21 +59,24 @@ import org.ofbiz.service.ServiceUtil;
 public class CategoryServices {
 
     public static final String module = CategoryServices.class.getName();
+    public static final String resourceError = "ProductErrorUiLabels";
 
     public static Map<String, Object> getCategoryMembers(DispatchContext dctx, Map<String, ? extends Object> context) {
-        GenericDelegator delegator = dctx.getDelegator();
+        Delegator delegator = dctx.getDelegator();
         String categoryId = (String) context.get("categoryId");
+        Locale locale = (Locale) context.get("locale");
         GenericValue productCategory = null;
         List<GenericValue> members = null;
 
         try {
-            productCategory = delegator.findByPrimaryKeyCache("ProductCategory", UtilMisc.toMap("productCategoryId", categoryId));
-            members = EntityUtil.filterByDate(productCategory.getRelatedCache("ProductCategoryMember", null, UtilMisc.toList("sequenceNum")), true);
+            productCategory = delegator.findOne("ProductCategory", UtilMisc.toMap("productCategoryId", categoryId), true);
+            members = EntityUtil.filterByDate(productCategory.getRelated("ProductCategoryMember", null, UtilMisc.toList("sequenceNum"), true), true);
             if (Debug.verboseOn()) Debug.logVerbose("Category: " + productCategory + " Member Size: " + members.size() + " Members: " + members, module);
         } catch (GenericEntityException e) {
-            String errMsg = "Problem reading product categories: " + e.getMessage();
-            Debug.logError(e, errMsg, module);
-            return ServiceUtil.returnError(errMsg);
+            Debug.logError(e, "Problem reading product categories: " + e.getMessage(), module);
+            return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, 
+                    "categoryservices.problems_reading_category_entity", 
+                    UtilMisc.toMap("errMessage", e.getMessage()), locale));
         }
         Map<String, Object> result = ServiceUtil.returnSuccess();
         result.put("category", productCategory);
@@ -74,34 +85,47 @@ public class CategoryServices {
     }
 
     public static Map<String, Object> getPreviousNextProducts(DispatchContext dctx, Map<String, ? extends Object> context) {
-        GenericDelegator delegator = dctx.getDelegator();
+        Delegator delegator = dctx.getDelegator();
         String categoryId = (String) context.get("categoryId");
         String productId = (String) context.get("productId");
         boolean activeOnly = (context.get("activeOnly") != null ? ((Boolean) context.get("activeOnly")).booleanValue() : true);
         Integer index = (Integer) context.get("index");
-
+        Timestamp introductionDateLimit = (Timestamp) context.get("introductionDateLimit");
+        Timestamp releaseDateLimit = (Timestamp) context.get("releaseDateLimit");
+        Locale locale = (Locale) context.get("locale");
+        
         if (index == null && productId == null) {
-            return ServiceUtil.returnError("Both Index and ProductID cannot be null.");
+            return ServiceUtil.returnFailure(UtilProperties.getMessage(resourceError, "categoryservices.problems_getting_next_products", locale));
         }
 
         List<String> orderByFields = UtilGenerics.checkList(context.get("orderByFields"));
         if (orderByFields == null) orderByFields = FastList.newInstance();
-        String entityName = getCategoryFindEntityName(delegator, orderByFields);
+        String entityName = getCategoryFindEntityName(delegator, orderByFields, introductionDateLimit, releaseDateLimit);
 
         GenericValue productCategory;
         List<GenericValue> productCategoryMembers;
         try {
-            productCategory = delegator.findByPrimaryKeyCache("ProductCategory", UtilMisc.toMap("productCategoryId", categoryId));
-            productCategoryMembers = delegator.findByAndCache(entityName, UtilMisc.toMap("productCategoryId", categoryId), orderByFields);
+            productCategory = delegator.findOne("ProductCategory", UtilMisc.toMap("productCategoryId", categoryId), true);
+            productCategoryMembers = delegator.findByAnd(entityName, UtilMisc.toMap("productCategoryId", categoryId), orderByFields, true);
         } catch (GenericEntityException e) {
-            String errMsg = "Error finding previous/next product info: " + e.toString();
-            Debug.logInfo(e, errMsg, module);
-            return ServiceUtil.returnError(errMsg);
+            Debug.logInfo(e, "Error finding previous/next product info: " + e.toString(), module);
+            return ServiceUtil.returnFailure(UtilProperties.getMessage(resourceError, "categoryservices.error_find_next_products", UtilMisc.toMap("errMessage", e.getMessage()), locale));
         }
         if (activeOnly) {
             productCategoryMembers = EntityUtil.filterByDate(productCategoryMembers, true);
         }
-
+        List<EntityCondition> filterConditions = FastList.newInstance();
+        if (introductionDateLimit != null) {
+            EntityCondition condition = EntityCondition.makeCondition(EntityCondition.makeCondition("introductionDate", EntityOperator.EQUALS, null), EntityOperator.OR, EntityCondition.makeCondition("introductionDate", EntityOperator.LESS_THAN_EQUAL_TO, introductionDateLimit));
+            filterConditions.add(condition);
+        }
+        if (releaseDateLimit != null) {
+            EntityCondition condition = EntityCondition.makeCondition(EntityCondition.makeCondition("releaseDate", EntityOperator.EQUALS, null), EntityOperator.OR, EntityCondition.makeCondition("releaseDate", EntityOperator.LESS_THAN_EQUAL_TO, releaseDateLimit));
+            filterConditions.add(condition);
+        }
+        if (!filterConditions.isEmpty()) {
+            productCategoryMembers = EntityUtil.filterByCondition(productCategoryMembers, EntityCondition.makeCondition(filterConditions, EntityOperator.AND));
+        }
 
         if (productId != null && index == null) {
             for (GenericValue v: productCategoryMembers) {
@@ -113,7 +137,7 @@ public class CategoryServices {
 
         if (index == null) {
             // this is not going to be an error condition because we don't want it to be so critical, ie rolling back the transaction and such
-            return ServiceUtil.returnSuccess("Product not found in the current category.");
+            return ServiceUtil.returnFailure(UtilProperties.getMessage(resourceError, "categoryservices.product_not_found", locale));
         }
 
         Map<String, Object> result = ServiceUtil.returnSuccess();
@@ -140,9 +164,9 @@ public class CategoryServices {
         return result;
     }
 
-    private static String getCategoryFindEntityName(GenericDelegator delegator, List<String> orderByFields) {
+    private static String getCategoryFindEntityName(Delegator delegator, List<String> orderByFields, Timestamp introductionDateLimit, Timestamp releaseDateLimit) {
         // allow orderByFields to contain fields from the Product entity, if there are such fields
-        String entityName = "ProductCategoryMember";
+        String entityName = introductionDateLimit == null && releaseDateLimit == null ? "ProductCategoryMember" : "ProductAndCategoryMember";
         if (orderByFields == null) {
             return entityName;
         }
@@ -187,14 +211,16 @@ public class CategoryServices {
     }
 
     public static Map<String, Object> getProductCategoryAndLimitedMembers(DispatchContext dctx, Map<String, ? extends Object> context) {
-        GenericDelegator delegator = dctx.getDelegator();
+        Delegator delegator = dctx.getDelegator();
         String productCategoryId = (String) context.get("productCategoryId");
         boolean limitView = ((Boolean) context.get("limitView")).booleanValue();
         int defaultViewSize = ((Integer) context.get("defaultViewSize")).intValue();
+        Timestamp introductionDateLimit = (Timestamp) context.get("introductionDateLimit");
+        Timestamp releaseDateLimit = (Timestamp) context.get("releaseDateLimit");
 
         List<String> orderByFields = UtilGenerics.checkList(context.get("orderByFields"));
         if (orderByFields == null) orderByFields = FastList.newInstance();
-        String entityName = getCategoryFindEntityName(delegator, orderByFields);
+        String entityName = getCategoryFindEntityName(delegator, orderByFields, introductionDateLimit, releaseDateLimit);
 
         String prodCatalogId = (String) context.get("prodCatalogId");
 
@@ -212,11 +238,11 @@ public class CategoryServices {
 
         Timestamp nowTimestamp = UtilDateTime.nowTimestamp();
 
-        int viewIndex = 1;
+        int viewIndex = 0;
         try {
             viewIndex = Integer.valueOf((String) context.get("viewIndexString")).intValue();
         } catch (Exception e) {
-            viewIndex = 1;
+            viewIndex = 0;
         }
 
         int viewSize = defaultViewSize;
@@ -228,7 +254,7 @@ public class CategoryServices {
 
         GenericValue productCategory = null;
         try {
-            productCategory = delegator.findByPrimaryKeyCache("ProductCategory", UtilMisc.toMap("productCategoryId", productCategoryId));
+            productCategory = delegator.findOne("ProductCategory", UtilMisc.toMap("productCategoryId", productCategoryId), true);
         } catch (GenericEntityException e) {
             Debug.logWarning(e.getMessage(), module);
             productCategory = null;
@@ -240,8 +266,8 @@ public class CategoryServices {
 
         if (limitView) {
             // get the indexes for the partial list
-            lowIndex = (((viewIndex - 1) * viewSize) + 1);
-            highIndex = viewIndex * viewSize;
+            lowIndex = ((viewIndex * viewSize) + 1);
+            highIndex = (viewIndex + 1) * viewSize;
         } else {
             lowIndex = 0;
             highIndex = 0;
@@ -251,9 +277,21 @@ public class CategoryServices {
         if (productCategory != null) {
             try {
                 if (useCacheForMembers) {
-                    productCategoryMembers = delegator.findByAndCache(entityName, UtilMisc.toMap("productCategoryId", productCategoryId), orderByFields);
+                    productCategoryMembers = delegator.findByAnd(entityName, UtilMisc.toMap("productCategoryId", productCategoryId), orderByFields, true);
                     if (activeOnly) {
                         productCategoryMembers = EntityUtil.filterByDate(productCategoryMembers, true);
+                    }
+                    List<EntityCondition> filterConditions = FastList.newInstance();
+                    if (introductionDateLimit != null) {
+                        EntityCondition condition = EntityCondition.makeCondition(EntityCondition.makeCondition("introductionDate", EntityOperator.EQUALS, null), EntityOperator.OR, EntityCondition.makeCondition("introductionDate", EntityOperator.LESS_THAN_EQUAL_TO, introductionDateLimit));
+                        filterConditions.add(condition);
+                    }
+                    if (releaseDateLimit != null) {
+                        EntityCondition condition = EntityCondition.makeCondition(EntityCondition.makeCondition("releaseDate", EntityOperator.EQUALS, null), EntityOperator.OR, EntityCondition.makeCondition("releaseDate", EntityOperator.LESS_THAN_EQUAL_TO, releaseDateLimit));
+                        filterConditions.add(condition);
+                    }
+                    if (!filterConditions.isEmpty()) {
+                        productCategoryMembers = EntityUtil.filterByCondition(productCategoryMembers, EntityCondition.makeCondition(filterConditions, EntityOperator.AND));
                     }
 
                     // filter out the view allow before getting the sublist
@@ -270,7 +308,9 @@ public class CategoryServices {
 
                     // get only between low and high indexes
                     if (limitView) {
-                        productCategoryMembers = productCategoryMembers.subList(lowIndex-1, highIndex);
+                        if (UtilValidate.isNotEmpty(productCategoryMembers)) {
+                            productCategoryMembers = productCategoryMembers.subList(lowIndex-1, highIndex);
+                        }
                     } else {
                         lowIndex = 1;
                         highIndex = listSize;
@@ -282,10 +322,17 @@ public class CategoryServices {
                         mainCondList.add(EntityCondition.makeCondition("fromDate", EntityOperator.LESS_THAN_EQUAL_TO, nowTimestamp));
                         mainCondList.add(EntityCondition.makeCondition(EntityCondition.makeCondition("thruDate", EntityOperator.EQUALS, null), EntityOperator.OR, EntityCondition.makeCondition("thruDate", EntityOperator.GREATER_THAN, nowTimestamp)));
                     }
+                    if (introductionDateLimit != null) {
+                        mainCondList.add(EntityCondition.makeCondition(EntityCondition.makeCondition("introductionDate", EntityOperator.EQUALS, null), EntityOperator.OR, EntityCondition.makeCondition("introductionDate", EntityOperator.LESS_THAN_EQUAL_TO, introductionDateLimit)));
+                    }
+                    if (releaseDateLimit != null) {
+                        mainCondList.add(EntityCondition.makeCondition(EntityCondition.makeCondition("releaseDate", EntityOperator.EQUALS, null), EntityOperator.OR, EntityCondition.makeCondition("releaseDate", EntityOperator.LESS_THAN_EQUAL_TO, releaseDateLimit)));
+                    }
                     EntityCondition mainCond = EntityCondition.makeCondition(mainCondList, EntityOperator.AND);
 
                     // set distinct on
-                    EntityFindOptions findOpts = new EntityFindOptions(true, EntityFindOptions.TYPE_SCROLL_INSENSITIVE, EntityFindOptions.CONCUR_READ_ONLY, true);
+                    EntityFindOptions findOpts = new EntityFindOptions(true, EntityFindOptions.TYPE_SCROLL_INSENSITIVE, EntityFindOptions.CONCUR_READ_ONLY, false);
+                    findOpts.setMaxRows(highIndex);
                     // using list iterator
                     EntityListIterator pli = delegator.find(entityName, mainCond, null, null, orderByFields, findOpts);
 
@@ -311,9 +358,7 @@ public class CategoryServices {
                         } else {
                             productCategoryMembers = pli.getPartialList(lowIndex, viewSize);
 
-                            // attempt to get the full size
-                            pli.last();
-                            listSize = pli.currentIndex();
+                            listSize = pli.getResultsSizeAfterPartialList();
                         }
                     } else {
                         productCategoryMembers = pli.getCompleteList();
@@ -353,5 +398,141 @@ public class CategoryServices {
         if (productCategory != null) result.put("productCategory", productCategory);
         if (productCategoryMembers != null) result.put("productCategoryMembers", productCategoryMembers);
         return result;
+    }
+    
+    // Please note : the structure of map in this function is according to the JSON data map of the jsTree
+    @SuppressWarnings("unchecked")
+    public static void getChildCategoryTree(HttpServletRequest request, HttpServletResponse response){
+        Delegator delegator = (Delegator) request.getAttribute("delegator");
+        String productCategoryId = request.getParameter("productCategoryId");
+        String isCatalog = request.getParameter("isCatalog");
+        String isCategoryType = request.getParameter("isCategoryType");
+        String onclickFunction = request.getParameter("onclickFunction");
+        String additionParam = request.getParameter("additionParam");
+        String hrefString = request.getParameter("hrefString");
+        String hrefString2 = request.getParameter("hrefString2");
+        String entityName = null;
+        String primaryKeyName = null;
+        
+        if (isCatalog.equals("true")) {
+            entityName = "ProdCatalog";
+            primaryKeyName = "prodCatalogId";
+        } else {
+            entityName = "ProductCategory";
+            primaryKeyName = "productCategoryId";
+        }
+        
+        List categoryList = FastList.newInstance();
+        List<GenericValue> childOfCats;
+        List<String> sortList = org.ofbiz.base.util.UtilMisc.toList("sequenceNum", "title");
+        
+        try {
+            GenericValue category = delegator.findOne(entityName ,UtilMisc.toMap(primaryKeyName, productCategoryId), false);
+            if (UtilValidate.isNotEmpty(category)) {
+                if (isCatalog.equals("true") && isCategoryType.equals("false")) {
+                    CategoryWorker.getRelatedCategories(request, "ChildCatalogList", CatalogWorker.getCatalogTopCategoryId(request, productCategoryId), true);
+                    childOfCats = EntityUtil.filterByDate((List<GenericValue>) request.getAttribute("ChildCatalogList"));
+                    
+                } else if(isCatalog.equals("false") && isCategoryType.equals("false")){
+                    childOfCats = EntityUtil.filterByDate(delegator.findByAnd("ProductCategoryRollupAndChild", UtilMisc.toMap(
+                            "parentProductCategoryId", productCategoryId ), null, false));
+                } else {
+                    childOfCats = EntityUtil.filterByDate(delegator.findByAnd("ProdCatalogCategory", UtilMisc.toMap("prodCatalogId", productCategoryId), null, false));
+                }
+                if (UtilValidate.isNotEmpty(childOfCats)) {
+                        
+                    for (GenericValue childOfCat : childOfCats ) {
+                        
+                        Object catId = null;
+                        String catNameField = null;
+                        
+                        catId = childOfCat.get("productCategoryId");
+                        catNameField = "CATEGORY_NAME";
+                        
+                        Map josonMap = FastMap.newInstance();
+                        List<GenericValue> childList = null;
+                        
+                        // Get the child list of chosen category
+                        childList = EntityUtil.filterByDate(delegator.findByAnd("ProductCategoryRollup", UtilMisc.toMap(
+                                    "parentProductCategoryId", catId), null, false));
+                        
+                        // Get the chosen category information for the categoryContentWrapper
+                        GenericValue cate = delegator.findOne("ProductCategory" ,UtilMisc.toMap("productCategoryId",catId), false);
+                        
+                        // If chosen category's child exists, then put the arrow before category icon
+                        if (UtilValidate.isNotEmpty(childList)) {
+                            josonMap.put("state", "closed");
+                        }
+                        Map dataMap = FastMap.newInstance();
+                        Map dataAttrMap = FastMap.newInstance();
+                        CategoryContentWrapper categoryContentWrapper = new CategoryContentWrapper(cate, request);
+                        
+                        String title = null;
+                        if (UtilValidate.isNotEmpty(categoryContentWrapper.get(catNameField))) {
+                            title = categoryContentWrapper.get(catNameField)+" "+"["+catId+"]";
+                            dataMap.put("title", title);
+                        } else {
+                            title = catId.toString();
+                            dataMap.put("title", catId);
+                        }
+                        dataAttrMap.put("onClick", onclickFunction + "('" + catId + additionParam + "')");
+                        
+                        String hrefStr = hrefString + catId;
+                        if (UtilValidate.isNotEmpty(hrefString2)) {
+                            hrefStr = hrefStr + hrefString2;
+                        }
+                        dataAttrMap.put("href", hrefStr);
+                        
+                        dataMap.put("attr", dataAttrMap);
+                        josonMap.put("data", dataMap);
+                        Map attrMap = FastMap.newInstance();
+                        attrMap.put("id", catId);
+                        attrMap.put("isCatalog", false);
+                        attrMap.put("rel", "CATEGORY");
+                        josonMap.put("attr",attrMap);
+                        josonMap.put("sequenceNum",childOfCat.get("sequenceNum"));
+                        josonMap.put("title",title);
+                        
+                        categoryList.add(josonMap);
+                    }
+                    List<Map<Object, Object>> sortedCategoryList = UtilMisc.sortMaps(categoryList, sortList);
+                    toJsonObjectList(sortedCategoryList,response);
+                }
+            }
+        } catch (GenericEntityException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    public static void toJsonObjectList(List attrList, HttpServletResponse response){
+        StringBuilder jsonBuilder = new StringBuilder("[");
+        for (Object attrMap : attrList) {
+            JSONObject json = JSONObject.fromObject(attrMap);
+            jsonBuilder.append(json.toString());
+            jsonBuilder.append(',');
+        }
+        jsonBuilder.append("{ } ]");
+        String jsonStr = jsonBuilder.toString();
+        if (UtilValidate.isEmpty(jsonStr)) {
+            Debug.logError("JSON Object was empty; fatal error!",module);
+        }
+        // set the X-JSON content type
+        response.setContentType("application/json");
+        // jsonStr.length is not reliable for unicode characters
+        try {
+            response.setContentLength(jsonStr.getBytes("UTF8").length);
+        } catch (UnsupportedEncodingException e) {
+            Debug.logError("Problems with Json encoding",module);
+        }
+        // return the JSON String
+        Writer out;
+        try {
+            out = response.getWriter();
+            out.write(jsonStr);
+            out.flush();
+        } catch (IOException e) {
+            Debug.logError("Unable to get response writer",module);
+        }
     }
 }

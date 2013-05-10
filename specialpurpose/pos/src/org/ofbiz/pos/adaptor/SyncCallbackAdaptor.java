@@ -48,12 +48,12 @@ public class SyncCallbackAdaptor implements GenericServiceCallback {
         this.enabled = enabled;
     }
 
-    protected void internalReceiveEvent(Map context, Object obj) {
+    protected void internalReceiveEvent(Map<String, Object> context, Object obj) {
         String ctxSyncId = (String) context.get("entitySyncId");
         if (ctxSyncId != null && entitySyncId.equals(ctxSyncId)) {
             GenericValue entitySync = null;
             try {
-                entitySync = screen.getSession().getDelegator().findByPrimaryKey("EntitySync", UtilMisc.toMap("entitySyncId", entitySyncId));
+                entitySync = screen.getSession().getDelegator().findOne("EntitySync", UtilMisc.toMap("entitySyncId", entitySyncId), false);
             } catch (GenericEntityException e) {
                 Debug.logError(e, module);
             }
@@ -69,15 +69,15 @@ public class SyncCallbackAdaptor implements GenericServiceCallback {
         }
     }
 
-    public void receiveEvent(Map context) {
+    public void receiveEvent(Map<String, Object> context) {
         this.internalReceiveEvent(context, null);
     }
 
-    public void receiveEvent(Map context, Map result) {
+    public void receiveEvent(Map<String, Object> context, Map<String, Object> result) {
         this.internalReceiveEvent(context, result);
     }
 
-    public void receiveEvent(Map context, Throwable error) {
+    public void receiveEvent(Map<String, Object> context, Throwable error) {
         this.internalReceiveEvent(context, error);
     }
 

@@ -18,22 +18,34 @@
  *******************************************************************************/
 package org.ofbiz.base.util.string;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.net.URL;
+import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.util.Collection;
 import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
-import java.sql.Timestamp;
-import javax.el.*;
+
+import javax.el.FunctionMapper;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.stream.StreamSource;
 
 import javolution.util.FastMap;
 
+import org.cyberneko.html.parsers.DOMParser;
 import org.ofbiz.base.location.FlexibleLocation;
 import org.ofbiz.base.util.Debug;
+import org.ofbiz.base.util.FileUtil;
 import org.ofbiz.base.util.UtilDateTime;
+import org.ofbiz.base.util.UtilXml;
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
 
 /** Implements Unified Expression Language functions.
  * <p>Built-in functions are divided into a number of
@@ -58,7 +70,9 @@ import org.ofbiz.base.util.UtilDateTime;
  * <tr><td><code>date:yearStart(Timestamp, TimeZone, Locale)</code></td><td>Returns <code>Timestamp</code> set to start of year.</td></tr>
  * <tr><td><code>date:yearEnd(Timestamp, TimeZone, Locale)</code></td><td>Returns <code>Timestamp</code> set to end of year.</td></tr>
  * <tr><td><code>date:dateStr(Timestamp, TimeZone, Locale)</code></td><td>Returns <code>Timestamp</code> as a date <code>String</code> (yyyy-mm-dd).</td></tr>
+ * <tr><td><code>date:localizedDateStr(Timestamp, TimeZone, Locale)</code></td><td>Returns <code>Timestamp</code> as a date <code>String</code> formatted according to the supplied locale.</td></tr>
  * <tr><td><code>date:dateTimeStr(Timestamp, TimeZone, Locale)</code></td><td>Returns <code>Timestamp</code> as a date-time <code>String</code> (yyyy-mm-dd hh:mm).</td></tr>
+ * <tr><td><code>date:localizedDateTimeStr(Timestamp, TimeZone, Locale)</code></td><td>Returns <code>Timestamp</code> as a date-time <code>String</code> formatted according to the supplied locale.</td></tr>
  * <tr><td><code>date:timeStr(Timestamp, TimeZone, Locale)</code></td><td>Returns <code>Timestamp</code> as a time <code>String</code> (hh:mm).</td></tr>
  * <tr><td><code>date:nowTimestamp()</code></td><td>Returns <code>Timestamp </code> for right now.</td></tr>
  * <tr><td colspan="2"><b><code>math:</code> maps to <code>java.lang.Math</code></b></td></tr>
@@ -117,7 +131,9 @@ import org.ofbiz.base.util.UtilDateTime;
  * <tr><td><code>str:startsWith(String, String)</code></td><td>Returns <code>true</code> if this string starts with the specified prefix.</td></tr>
  * <tr><td><code>str:endstring(String, int)</code></td><td>Returns a new string that is a substring of this string. The substring begins with the character at the specified index and extends to the end of this string.</td></tr>
  * <tr><td><code>str:substring(String, int, int)</code></td><td>Returns a new string that is a substring of this string. The substring begins at the specified beginIndex and extends to the character at index endIndex - 1. Thus the length of the substring is endIndex-beginIndex.</td></tr>
+ * <tr><td><code>str:toLowerCase(String)</code></td><td>Converts all of the characters in this String to lower case using the rules of the default locale.</td></tr>
  * <tr><td><code>str:toString(Object)</code></td><td>Converts <code>Object</code> to a <code>String</code> - bypassing localization.</td></tr>
+ * <tr><td><code>str:toUpperCase(String)</code></td><td>Converts all of the characters in this String to upper case using the rules of the default locale.</td></tr>
  * <tr><td><code>str:trim(String)</code></td><td>Returns a copy of the string, with leading and trailing whitespace omitted.</td></tr>
  * <tr><td colspan="2"><b><code>sys:</code> maps to <code>java.lang.System</code></b></td></tr>
  * <tr><td><code>sys:getenv(String)</code></td><td>Gets the value of the specified environment variable.</td></tr>
@@ -128,12 +144,18 @@ import org.ofbiz.base.util.UtilDateTime;
  * <tr><td><code>util:size(Object)</code></td><td>Returns the size of <code>Maps</code>,
  * <code>Collections</code>, and <code>Strings</code>. Invalid <code>Object</code> types return -1.</td></tr>
  * <tr><td><code>util:urlExists(String)</code></td><td>Returns <code>true</code> if the specified URL exists.</td></tr>
+ * <tr><td colspan="2"><b><code>dom:</code> contains <code>org.w3c.dom.*</code> functions</b></td></tr>
+ * <tr><td><code>dom:readHtmlDocument(String)</code></td><td>Reads an HTML file and returns a <code>org.w3c.dom.Document</code> instance.</td></tr>
+ * <tr><td><code>dom:readXmlDocument(String)</code></td><td>Reads an XML file and returns a <code>org.w3c.dom.Document</code> instance.</td></tr>
+ * <tr><td><code>dom:toHtmlString(Node, String encoding, boolean indent, int indentAmount)</code></td><td>Returns a <code>org.w3c.dom.Node</code> as an HTML <code>String</code>.</td></tr>
+ * <tr><td><code>dom:toXmlString(Node, String encoding, boolean omitXmlDeclaration, boolean indent, int indentAmount)</code></td><td>Returns a <code>org.w3c.dom.Node</code> as an XML <code>String</code>.</td></tr>
+ * <tr><td><code>dom:writeXmlDocument(String, Node, String encoding, boolean omitXmlDeclaration, boolean indent, int indentAmount)</code></td><td>Writes a <code>org.w3c.dom.Node</code> to an XML file and returns <code>true</code> if successful.</td></tr>
  * </table>
  */
 public class UelFunctions {
 
     public static final String module = UelFunctions.class.getName();
-    protected static final FunctionMapper functionMapper = new Functions();
+    protected static final Functions functionMapper = new Functions();
 
     /** Returns a <code>FunctionMapper</code> instance.
      * @return <code>FunctionMapper</code> instance
@@ -164,7 +186,8 @@ public class UelFunctions {
                 this.functionMap.put("date:yearStart", UtilDateTime.class.getMethod("getYearStart", Timestamp.class, TimeZone.class, Locale.class));
                 this.functionMap.put("date:yearEnd", UtilDateTime.class.getMethod("getYearEnd", Timestamp.class, TimeZone.class, Locale.class));
                 this.functionMap.put("date:dateStr", UelFunctions.class.getMethod("dateString", Timestamp.class, TimeZone.class, Locale.class));
-                this.functionMap.put("date:dateTimeStr", UelFunctions.class.getMethod("dateTimeString", Timestamp.class, TimeZone.class, Locale.class));
+                this.functionMap.put("date:localizedDateStr", UelFunctions.class.getMethod("localizedDateString", Timestamp.class, TimeZone.class, Locale.class));
+                this.functionMap.put("date:localizedDateTimeStr", UelFunctions.class.getMethod("localizedDateTimeString", Timestamp.class, TimeZone.class, Locale.class));
                 this.functionMap.put("date:timeStr", UelFunctions.class.getMethod("timeString", Timestamp.class, TimeZone.class, Locale.class));
                 this.functionMap.put("date:nowTimestamp", UtilDateTime.class.getMethod("nowTimestamp"));
                 this.functionMap.put("math:absDouble", Math.class.getMethod("abs", double.class));
@@ -222,6 +245,8 @@ public class UelFunctions {
                 this.functionMap.put("str:endstring", UelFunctions.class.getMethod("endString", String.class, int.class));
                 this.functionMap.put("str:substring", UelFunctions.class.getMethod("subString", String.class, int.class, int.class));
                 this.functionMap.put("str:toString", UelFunctions.class.getMethod("toString", Object.class));
+                this.functionMap.put("str:toLowerCase", UelFunctions.class.getMethod("toLowerCase", String.class));
+                this.functionMap.put("str:toUpperCase", UelFunctions.class.getMethod("toUpperCase", String.class));
                 this.functionMap.put("str:trim", UelFunctions.class.getMethod("trim", String.class));
                 this.functionMap.put("sys:getenv", UelFunctions.class.getMethod("sysGetEnv", String.class));
                 this.functionMap.put("sys:getProperty", UelFunctions.class.getMethod("sysGetProp", String.class));
@@ -229,19 +254,25 @@ public class UelFunctions {
                 this.functionMap.put("util:defaultLocale", Locale.class.getMethod("getDefault"));
                 this.functionMap.put("util:defaultTimeZone", TimeZone.class.getMethod("getDefault"));
                 this.functionMap.put("util:urlExists", UelFunctions.class.getMethod("urlExists", String.class));
+                this.functionMap.put("dom:readHtmlDocument", UelFunctions.class.getMethod("readHtmlDocument", String.class));
+                this.functionMap.put("dom:readXmlDocument", UelFunctions.class.getMethod("readXmlDocument", String.class));
+                this.functionMap.put("dom:toHtmlString", UelFunctions.class.getMethod("toHtmlString", Node.class, String.class, boolean.class, int.class));
+                this.functionMap.put("dom:toXmlString", UelFunctions.class.getMethod("toXmlString", Node.class, String.class, boolean.class, boolean.class, int.class));
+                this.functionMap.put("dom:writeXmlDocument", UelFunctions.class.getMethod("writeXmlDocument", String.class, Node.class, String.class, boolean.class, boolean.class, int.class));
             } catch (Exception e) {
-                Debug.logWarning("Error while initializing UelFunctions.Functions instance: " + e, module);
+                Debug.logError(e, "Error while initializing UelFunctions.Functions instance", module);
             }
             Debug.logVerbose("UelFunctions.Functions loaded " + this.functionMap.size() + " functions", module);
         }
-        public void setFunction(String prefix, String localName, Method method) {
-            synchronized(this) {
-                functionMap.put(prefix + ":" + localName, method);
-            }
-        }
+        @Override
         public Method resolveFunction(String prefix, String localName) {
             return functionMap.get(prefix + ":" + localName);
         }
+    }
+
+    /** Add a function to OFBiz's built-in UEL functions. */
+    public static synchronized void setFunction(String prefix, String localName, Method method) {
+        functionMapper.functionMap.put(prefix + ":" + localName, method);
     }
 
     public static String dateString(Timestamp stamp, TimeZone timeZone, Locale locale) {
@@ -250,8 +281,20 @@ public class UelFunctions {
         return dateFormat.format(stamp);
     }
 
+    public static String localizedDateString(Timestamp stamp, TimeZone timeZone, Locale locale) {
+        DateFormat dateFormat = UtilDateTime.toDateFormat(null, timeZone, locale);
+        dateFormat.setTimeZone(timeZone);
+        return dateFormat.format(stamp);
+    }
+
     public static String dateTimeString(Timestamp stamp, TimeZone timeZone, Locale locale) {
         DateFormat dateFormat = UtilDateTime.toDateTimeFormat("yyyy-MM-dd HH:mm", timeZone, locale);
+        dateFormat.setTimeZone(timeZone);
+        return dateFormat.format(stamp);
+    }
+
+    public static String localizedDateTimeString(Timestamp stamp, TimeZone timeZone, Locale locale) {
+        DateFormat dateFormat = UtilDateTime.toDateTimeFormat(null, timeZone, locale);
         dateFormat.setTimeZone(timeZone);
         return dateFormat.format(stamp);
     }
@@ -356,6 +399,20 @@ public class UelFunctions {
         return null;
     }
 
+    public static String toLowerCase(String str) {
+        try {
+            return str.toLowerCase();
+        } catch (Exception e) {}
+        return null;
+    }
+
+    public static String toUpperCase(String str) {
+        try {
+            return str.toUpperCase();
+        } catch (Exception e) {}
+        return null;
+    }
+
     public static String toString(Object obj) {
         return obj.toString();
     }
@@ -385,5 +442,100 @@ public class UelFunctions {
             }
         } catch (Exception e) {}
         return result;
+    }
+
+    public static Document readHtmlDocument(String str) {
+        Document document = null;
+        try {
+            URL url = FlexibleLocation.resolveLocation(str);
+            if (url != null) {
+                DOMParser parser = new DOMParser();
+                parser.setFeature("http://xml.org/sax/features/namespaces", false);
+                parser.parse(url.toExternalForm());
+                document = parser.getDocument();
+            } else {
+                Debug.logError("Unable to locate HTML document " + str, module);
+            }
+        } catch (Exception e) {
+            Debug.logError(e, "Error while reading HTML document " + str, module);
+        }
+        return document;
+    }
+
+    public static Document readXmlDocument(String str) {
+        Document document = null;
+        try {
+            URL url = FlexibleLocation.resolveLocation(str);
+            if (url != null) {
+                InputStream is = url.openStream();
+                document = UtilXml.readXmlDocument(is, str);
+                is.close();
+            } else {
+                Debug.logError("Unable to locate XML document " + str, module);
+            }
+        } catch (Exception e) {
+            Debug.logError(e, "Error while reading XML document " + str, module);
+        }
+        return document;
+    }
+
+    public static boolean writeXmlDocument(String str, Node node, String encoding, boolean omitXmlDeclaration, boolean indent, int indentAmount) {
+        try {
+            File file = FileUtil.getFile(str);
+            if (file != null) {
+                FileOutputStream os = new FileOutputStream(file);
+                UtilXml.writeXmlDocument(node, os, encoding, omitXmlDeclaration, indent, indentAmount);
+                os.close();
+                return true;
+            } else {
+                Debug.logError("Unable to create XML document " + str, module);
+            }
+        } catch (Exception e) {
+            Debug.logError(e, "Error while writing XML document " + str, module);
+        }
+        return false;
+    }
+
+    public static String toHtmlString(Node node, String encoding, boolean indent, int indentAmount) {
+        try {
+            StringBuilder sb = new StringBuilder();
+            sb.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
+            sb.append("<xsl:stylesheet xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\" xmlns:xalan=\"http://xml.apache.org/xslt\" version=\"1.0\">\n");
+            sb.append("<xsl:output method=\"html\" encoding=\"");
+            sb.append(encoding == null ? "UTF-8" : encoding);
+            sb.append("\"");
+            sb.append(" indent=\"");
+            sb.append(indent ? "yes" : "no");
+            sb.append("\"");
+            if (indent) {
+                sb.append(" xalan:indent-amount=\"");
+                sb.append(indentAmount <= 0 ? 4 : indentAmount);
+                sb.append("\"");
+            }
+            sb.append("/>\n<xsl:template match=\"@*|node()\">\n");
+            sb.append("<xsl:copy><xsl:apply-templates select=\"@*|node()\"/></xsl:copy>\n");
+            sb.append("</xsl:template>\n</xsl:stylesheet>\n");
+            ByteArrayInputStream bis = new ByteArrayInputStream(sb.toString().getBytes());
+            TransformerFactory transformerFactory = TransformerFactory.newInstance();
+            ByteArrayOutputStream os = new ByteArrayOutputStream();
+            UtilXml.transformDomDocument(transformerFactory.newTransformer(new StreamSource(bis)), node, os);
+            os.close();
+            return os.toString();
+        } catch (Exception e) {
+            Debug.logError(e, "Error while creating HTML String ", module);
+        }
+        return null;
+    }
+
+    public static String toXmlString(Node node, String encoding, boolean omitXmlDeclaration, boolean indent, int indentAmount) {
+        try {
+            ByteArrayOutputStream os = new ByteArrayOutputStream();
+            UtilXml.writeXmlDocument(node, os, encoding, omitXmlDeclaration, indent, indentAmount);
+            os.close();
+            return os.toString();
+        } catch (Exception e) {
+            Debug.logError(e, "Error while creating XML String ", module);
+        }
+        return null;
     }
 }

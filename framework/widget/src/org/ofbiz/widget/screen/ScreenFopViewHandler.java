@@ -18,7 +18,12 @@
  *******************************************************************************/
 package org.ofbiz.widget.screen;
 
-import java.io.*;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.Reader;
+import java.io.StringReader;
+import java.io.StringWriter;
+import java.io.Writer;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
@@ -26,7 +31,6 @@ import javax.servlet.http.HttpServletResponse;
 import javax.xml.transform.stream.StreamSource;
 
 import org.apache.fop.apps.Fop;
-
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.StringUtil;
 import org.ofbiz.base.util.UtilProperties;
@@ -34,8 +38,6 @@ import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.webapp.view.AbstractViewHandler;
 import org.ofbiz.webapp.view.ApacheFopWorker;
 import org.ofbiz.webapp.view.ViewHandlerException;
-import org.ofbiz.widget.fo.FoFormRenderer;
-import org.ofbiz.widget.fo.FoScreenRenderer;
 import org.ofbiz.widget.form.FormStringRenderer;
 import org.ofbiz.widget.form.MacroFormRenderer;
 import org.ofbiz.widget.html.HtmlScreenRenderer;
@@ -58,15 +60,15 @@ public class ScreenFopViewHandler extends AbstractViewHandler {
     }
 
     /**
-     * @see org.ofbiz.content.webapp.view.ViewHandler#render(java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
+     * @see org.ofbiz.webapp.view.ViewHandler#render(java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
      */
     public void render(String name, String page, String info, String contentType, String encoding, HttpServletRequest request, HttpServletResponse response) throws ViewHandlerException {
 
         // render and obtain the XSL-FO
         Writer writer = new StringWriter();
         try {
-            ScreenStringRenderer screenStringRenderer = new MacroScreenRenderer(UtilProperties.getPropertyValue("widget", getName() + ".name"), UtilProperties.getPropertyValue("widget", getName() + ".screenrenderer"), writer);
-            FormStringRenderer formStringRenderer = new MacroFormRenderer(UtilProperties.getPropertyValue("widget", getName() + ".formrenderer"), writer, request, response);
+            ScreenStringRenderer screenStringRenderer = new MacroScreenRenderer(UtilProperties.getPropertyValue("widget", getName() + ".name"), UtilProperties.getPropertyValue("widget", getName() + ".screenrenderer"));
+            FormStringRenderer formStringRenderer = new MacroFormRenderer(UtilProperties.getPropertyValue("widget", getName() + ".formrenderer"), request, response);
             // TODO: uncomment these lines when the renderers are implemented
             //TreeStringRenderer treeStringRenderer = new MacroTreeRenderer(UtilProperties.getPropertyValue("widget", getName() + ".treerenderer"), writer);
             //MenuStringRenderer menuStringRenderer = new MacroMenuRenderer(UtilProperties.getPropertyValue("widget", getName() + ".menurenderer"), writer);
@@ -78,7 +80,7 @@ public class ScreenFopViewHandler extends AbstractViewHandler {
             screens.getContext().put("simpleEncoder", StringUtil.getEncoder(UtilProperties.getPropertyValue("widget", getName() + ".encoder")));
             screens.render(page);
         } catch (Exception e) {
-            renderError("Problems with the response writer/output stream", e, request, response);
+            renderError("Problems with the response writer/output stream", e, "[Not Yet Rendered]", request, response);
             return;
         }
 
@@ -99,7 +101,7 @@ public class ScreenFopViewHandler extends AbstractViewHandler {
             Fop fop = ApacheFopWorker.createFopInstance(out, contentType);
             ApacheFopWorker.transform(src, null, fop);
         } catch (Exception e) {
-            renderError("Unable to transform FO file", e, request, response);
+            renderError("Unable to transform FO file", e, screenOutString, request, response);
             return;
         }
         // set the content type and length
@@ -111,12 +113,12 @@ public class ScreenFopViewHandler extends AbstractViewHandler {
             out.writeTo(response.getOutputStream());
             response.getOutputStream().flush();
         } catch (IOException e) {
-            renderError("Unable to write to OutputStream", e, request, response);
+            renderError("Unable to write to OutputStream", e, screenOutString, request, response);
         }
     }
 
-    protected void renderError(String msg, Exception e, HttpServletRequest request, HttpServletResponse response) throws ViewHandlerException {
-        Debug.logError(msg + ": " + e, module);
+    protected void renderError(String msg, Exception e, String screenOutString, HttpServletRequest request, HttpServletResponse response) throws ViewHandlerException {
+        Debug.logError(msg + ": " + e + "; Screen XSL:FO text was:\n" + screenOutString, module);
         try {
             Writer writer = new StringWriter();
             ScreenRenderer screens = new ScreenRenderer(writer, null, new HtmlScreenRenderer());

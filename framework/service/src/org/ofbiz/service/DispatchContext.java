@@ -19,84 +19,82 @@
 package org.ofbiz.service;
 
 import java.io.Serializable;
-import java.net.URL;
-import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.concurrent.Callable;
+import java.util.concurrent.Future;
+
 import javax.wsdl.WSDLException;
 
+import javolution.util.FastList;
 import javolution.util.FastMap;
 
 import org.ofbiz.base.component.ComponentConfig;
+import org.ofbiz.base.concurrent.ExecutionPool;
 import org.ofbiz.base.config.GenericConfigException;
 import org.ofbiz.base.config.MainResourceHandler;
 import org.ofbiz.base.config.ResourceHandler;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilXml;
 import org.ofbiz.base.util.cache.UtilCache;
-import org.ofbiz.entity.GenericDelegator;
+import org.ofbiz.entity.Delegator;
+import org.ofbiz.entity.config.DelegatorInfo;
+import org.ofbiz.entity.config.EntityConfigUtil;
 import org.ofbiz.security.Security;
 import org.ofbiz.service.config.ServiceConfigUtil;
 import org.ofbiz.service.eca.ServiceEcaUtil;
-
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 /**
  * Dispatcher Context
  */
+@SuppressWarnings("serial")
 public class DispatchContext implements Serializable {
 
     public static final String module = DispatchContext.class.getName();
 
-    protected static final String GLOBAL_KEY = "global.services";
-    public static UtilCache<String, Map<String, ModelService>> modelServiceMapByDispatcher = new UtilCache<String, Map<String, ModelService>>("service.ModelServiceMapByDispatcher", 0, 0, false);
+    private static final UtilCache<String, Map<String, ModelService>> modelServiceMapByModel = UtilCache.createUtilCache("service.ModelServiceMapByModel", 0, 0, false);
 
-    protected transient LocalDispatcher dispatcher;
-    protected transient ClassLoader loader;
-    protected Collection<URL> localReaders;
-    protected Map<String, Object> attributes;
-    protected String name;
+    // these four fields represent the immutable state of a DispatchContext object
+    private final String name;
+    private final transient ClassLoader loader;
+    private final transient LocalDispatcher dispatcher;
+    private final String model;
 
     /**
-     * Creates new DispatchContext
-     * @param localReaders a collection of reader URLs
-     * @param loader the classloader to use for dispatched services
+     * Creates new DispatchContext as an immutable object.
+     * The "dispatcher" argument can be null if the "name" argument matches the name of a valid entity model reader.
+     * The thread safety of a DispatchContext object is a consequence of its immutability.
+     *
+     * @param name The immutable name of the DispatchContext
+     * @param loader The immutable class loader
+     * @param dispatcher The immutable dispatcher associated to the DispatchContext
+     *
      */
-    public DispatchContext(String name, Collection<URL> localReaders, ClassLoader loader, LocalDispatcher dispatcher) {
+    public DispatchContext(String name, ClassLoader loader, LocalDispatcher dispatcher) {
         this.name = name;
-        this.localReaders = localReaders;
         this.loader = loader;
         this.dispatcher = dispatcher;
-        this.attributes = FastMap.newInstance();
-    }
-
-    public void loadReaders() {
-        this.getLocalServiceMap();
-        this.getGlobalServiceMap();
-    }
-
-    /**
-     * Returns the service attribute for the given name, or null if there is no attribute by that name.
-     * @param name a String specifying the name of the attribute
-     * @return an Object containing the value of the attribute, or null if there is no attribute by that name.
-     */
-    public Object getAttribute(String name) {
-        if (attributes.containsKey(name))
-            return attributes.get(name);
-        return null;
-    }
-
-    /**
-     * Binds an object to a given attribute name in this context.
-     * @param name a String specifying the name of the attribute
-     * @param object an Object representing the attribute to be bound.
-     */
-    public void setAttribute(String name, Object object) {
-        attributes.put(name, object);
+        String modelName = null;
+        if (this.dispatcher != null) {
+            Delegator delegator = dispatcher.getDelegator();
+            if (delegator != null) {
+                DelegatorInfo delegatorInfo = EntityConfigUtil.getDelegatorInfo(delegator.getDelegatorBaseName());
+                if (delegatorInfo != null) {
+                    modelName = delegatorInfo.entityModelReader;
+                }
+            }
+        }
+        if (modelName == null) {
+            // if a modelName is not associated to the dispatcher (e.g. dispatcher is null) then use the name
+            // of the DispatchContext as the model reader name
+            modelName = name;
+        }
+        this.model = modelName;
+        getGlobalServiceMap();
     }
 
     /**
@@ -108,20 +106,43 @@ public class DispatchContext implements Serializable {
     }
 
     /**
-     * Gets the collection of readers associated with this context
-     * @return Collection of reader URLs
-     */
-    public Collection<URL> getReaders() {
-        return localReaders;
-    }
-
-    /**
      * Gets the name of the local dispatcher
      * @return String name of the LocalDispatcher object
      */
     public String getName() {
         return name;
     }
+
+    /**
+     * Gets the LocalDispatcher used with this context
+     * @return LocalDispatcher that was used to create this context
+     */
+    public LocalDispatcher getDispatcher() {
+        return this.dispatcher;
+    }
+
+    /**
+     * Gets the Delegator associated with this context/dispatcher
+     * @return Delegator associated with this context
+     */
+    public Delegator getDelegator() {
+        return dispatcher.getDelegator();
+    }
+
+    /**
+     * Gets the Security object associated with this dispatcher
+     * @return Security object associated with this dispatcher
+     */
+    public Security getSecurity() {
+        return dispatcher.getSecurity();
+    }
+
+    // All the methods that follow are helper methods to retrieve service model information from cache (and manage the cache)
+    // The cache object is static but most of these methods are not because the same service definition, is used with different
+    // DispatchContext objects may result in different in/out attributes: this happens because the DispatchContext is associated to
+    // a LocalDispatcher that is associated to a Delegator that is associated to a ModelReader; different ModelReaders could load the
+    // same entity name from different files with different fields, and the service definition could automatically get the input/output
+    // attributes from an entity.
 
     /**
      * Uses an existing map of name value pairs and extracts the keys which are used in serviceName
@@ -133,9 +154,8 @@ public class DispatchContext implements Serializable {
      * @throws GenericServiceException
      */
     public Map<String, Object> makeValidContext(String serviceName, String mode, Map<String, ? extends Object> context) throws GenericServiceException {
-        ModelService model = this.getModelService(serviceName);
+        ModelService model = getModelService(serviceName);
         return makeValidContext(model, mode, context);
-
     }
 
     /**
@@ -147,7 +167,7 @@ public class DispatchContext implements Serializable {
      * @return Map contains any valid values
      * @throws GenericServiceException
      */
-    public Map<String, Object> makeValidContext(ModelService model, String mode, Map<String, ? extends Object> context) throws GenericServiceException {
+    public static Map<String, Object> makeValidContext(ModelService model, String mode, Map<String, ? extends Object> context) throws GenericServiceException {
         Map<String, Object> newContext;
 
         int modeInt = 0;
@@ -180,162 +200,26 @@ public class DispatchContext implements Serializable {
      * @return GenericServiceModel that corresponds to the serviceName
      */
     public ModelService getModelService(String serviceName) throws GenericServiceException {
-        //long timeStart = System.currentTimeMillis();
-        ModelService retVal = getLocalModelService(serviceName);
-        if (retVal == null) {
-            retVal = getGlobalModelService(serviceName);
+        Map<String, ModelService> serviceMap = getGlobalServiceMap();
+        ModelService retVal = null;
+        if (serviceMap != null) {
+            retVal = serviceMap.get(serviceName);
+            if (retVal != null && !retVal.inheritedParameters()) {
+                retVal.interfaceUpdate(this);
+            }
         }
-
         if (retVal == null) {
             throw new GenericServiceException("Cannot locate service by name (" + serviceName + ")");
         }
-
-        //Debug.logTiming("Got ModelService for name [" + serviceName + "] in [" + (System.currentTimeMillis() - timeStart) + "] milliseconds", module);
         return retVal;
-    }
-
-    private ModelService getLocalModelService(String serviceName) throws GenericServiceException {
-        Map<String, ModelService> serviceMap = this.getLocalServiceMap();
-
-        ModelService retVal = null;
-        if (serviceMap != null) {
-            retVal = serviceMap.get(serviceName);
-            if (retVal != null && !retVal.inheritedParameters()) {
-                retVal.interfaceUpdate(this);
-            }
-        }
-
-        return retVal;
-    }
-
-    private ModelService getGlobalModelService(String serviceName) throws GenericServiceException {
-        Map<String, ModelService> serviceMap = this.getGlobalServiceMap();
-
-        ModelService retVal = null;
-        if (serviceMap != null) {
-            retVal = serviceMap.get(serviceName);
-            if (retVal != null && !retVal.inheritedParameters()) {
-                retVal.interfaceUpdate(this);
-            }
-        }
-
-        return retVal;
-    }
-
-    /**
-     * Gets the LocalDispatcher used with this context
-     * @return LocalDispatcher that was used to create this context
-     */
-    public LocalDispatcher getDispatcher() {
-        return this.dispatcher;
-    }
-
-    /**
-     * Sets the LocalDispatcher used with this context
-     * @param dispatcher The LocalDispatcher to re-assign to this context
-     */
-    public void setDispatcher(LocalDispatcher dispatcher) {
-        this.dispatcher = dispatcher;
-    }
-
-    /**
-     * Gets the GenericDelegator associated with this context/dispatcher
-     * @return GenericDelegator associated with this context
-     */
-    public GenericDelegator getDelegator() {
-        return dispatcher.getDelegator();
-    }
-
-    /**
-     * Gets the Security object associated with this dispatcher
-     * @return Security object associated with this dispatcher
-     */
-    public Security getSecurity() {
-        return dispatcher.getSecurity();
-    }
-
-    private Map<String, ModelService> getLocalServiceMap() {
-        Map<String, ModelService> serviceMap = modelServiceMapByDispatcher.get(name);
-        if (serviceMap == null) {
-            synchronized (this) {
-                serviceMap = modelServiceMapByDispatcher.get(name);
-                if (serviceMap == null) {
-                    if (this.localReaders != null) {
-                        serviceMap = FastMap.newInstance();
-                        for (URL readerURL: this.localReaders) {
-                            Map<String, ModelService> readerServiceMap = ModelServiceReader.getModelServiceMap(readerURL, this);
-                            if (readerServiceMap != null) {
-                                serviceMap.putAll(readerServiceMap);
-                            }
-                        }
-                    }
-                    if (serviceMap != null) {
-                        modelServiceMapByDispatcher.put(name, serviceMap);
-                        // NOTE: the current ECA per dispatcher for local services stuff is a bit broken, so now just doing this on the global def load: ServiceEcaUtil.reloadConfig();
-                    }
-                }
-            }
-        }
-
-        return serviceMap;
-    }
-
-    private Map<String, ModelService> getGlobalServiceMap() {
-        Map<String, ModelService> serviceMap = modelServiceMapByDispatcher.get(GLOBAL_KEY);
-        if (serviceMap == null) {
-            synchronized (this) {
-                serviceMap = modelServiceMapByDispatcher.get(GLOBAL_KEY);
-                if (serviceMap == null) {
-                    serviceMap = FastMap.newInstance();
-
-                    Element rootElement;
-
-                    try {
-                        rootElement = ServiceConfigUtil.getXmlRootElement();
-                    } catch (GenericConfigException e) {
-                        Debug.logError(e, "Error getting Service Engine XML root element", module);
-                        return null;
-                    }
-
-                    for (Element globalServicesElement: UtilXml.childElementList(rootElement, "global-services")) {
-                        ResourceHandler handler = new MainResourceHandler(
-                                ServiceConfigUtil.SERVICE_ENGINE_XML_FILENAME, globalServicesElement);
-
-                        Map<String, ModelService> servicesMap = ModelServiceReader.getModelServiceMap(handler, this);
-                        if (servicesMap != null) {
-                            serviceMap.putAll(servicesMap);
-                        }
-                    }
-
-                    // get all of the component resource model stuff, ie specified in each ofbiz-component.xml file
-                    for (ComponentConfig.ServiceResourceInfo componentResourceInfo: ComponentConfig.getAllServiceResourceInfos("model")) {
-                        Map<String, ModelService> servicesMap = ModelServiceReader.getModelServiceMap(componentResourceInfo.createResourceHandler(), this);
-                        if (servicesMap != null) {
-                            serviceMap.putAll(servicesMap);
-                        }
-                    }
-
-                    if (serviceMap != null) {
-                        modelServiceMapByDispatcher.put(GLOBAL_KEY, serviceMap);
-                        ServiceEcaUtil.reloadConfig();
-                    }
-                }
-            }
-        }
-
-        return serviceMap;
     }
 
     public Set<String> getAllServiceNames() {
         Set<String> serviceNames = new TreeSet<String>();
 
-        Map<String, ModelService> globalServices = modelServiceMapByDispatcher.get(GLOBAL_KEY);
-        Map<String, ModelService> localServices = modelServiceMapByDispatcher.get(name);
+        Map<String, ModelService> globalServices = modelServiceMapByModel.get(this.model);
         if (globalServices != null) {
             serviceNames.addAll(globalServices.keySet());
-        }
-        if (localServices != null) {
-            serviceNames.addAll(localServices.keySet());
         }
         return serviceNames;
     }
@@ -343,5 +227,55 @@ public class DispatchContext implements Serializable {
     public Document getWSDL(String serviceName, String locationURI) throws GenericServiceException, WSDLException {
         ModelService model = this.getModelService(serviceName);
         return model.toWSDL(locationURI);
+    }
+
+    private Callable<Map<String, ModelService>> createServiceReaderCallable(final ResourceHandler handler) {
+        return new Callable<Map<String, ModelService>>() {
+            public Map<String, ModelService> call() throws Exception {
+                return ModelServiceReader.getModelServiceMap(handler, DispatchContext.this);
+            }
+        };
+    }
+
+    private Map<String, ModelService> getGlobalServiceMap() {
+        Map<String, ModelService> serviceMap = modelServiceMapByModel.get(this.model);
+        if (serviceMap == null) {
+            serviceMap = FastMap.newInstance();
+
+            Element rootElement;
+
+            try {
+                rootElement = ServiceConfigUtil.getXmlRootElement();
+            } catch (GenericConfigException e) {
+                Debug.logError(e, "Error getting Service Engine XML root element", module);
+                return null;
+            }
+
+            List<Future<Map<String, ModelService>>> futures = FastList.newInstance();
+            for (Element globalServicesElement: UtilXml.childElementList(rootElement, "global-services")) {
+                ResourceHandler handler = new MainResourceHandler(
+                        ServiceConfigUtil.SERVICE_ENGINE_XML_FILENAME, globalServicesElement);
+
+                futures.add(ExecutionPool.GLOBAL_EXECUTOR.submit(createServiceReaderCallable(handler)));
+            }
+
+            // get all of the component resource model stuff, ie specified in each ofbiz-component.xml file
+            for (ComponentConfig.ServiceResourceInfo componentResourceInfo: ComponentConfig.getAllServiceResourceInfos("model")) {
+                futures.add(ExecutionPool.GLOBAL_EXECUTOR.submit(createServiceReaderCallable(componentResourceInfo.createResourceHandler())));
+            }
+            for (Map<String, ModelService> servicesMap: ExecutionPool.getAllFutures(futures)) {
+                if (servicesMap != null) {
+                    serviceMap.putAll(servicesMap);
+                }
+            }
+
+            if (serviceMap != null) {
+                Map<String, ModelService> cachedServiceMap = modelServiceMapByModel.putIfAbsentAndGet(this.model, serviceMap);
+                if (cachedServiceMap == serviceMap) { // same object: this means that the object created by this thread was actually added to the cache
+                    ServiceEcaUtil.reloadConfig();
+                }
+            }
+        }
+        return serviceMap;
     }
 }

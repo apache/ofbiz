@@ -18,13 +18,13 @@
  */
 
 import org.ofbiz.base.util.*
+import org.ofbiz.base.util.template.FreeMarkerWorker
 import org.ofbiz.entity.*
 import org.ofbiz.entity.model.*
 import org.ofbiz.content.data.DataResourceWorker
 import org.ofbiz.webapp.ftl.FreeMarkerViewHandler
 
 import java.io.StringWriter
-import freemarker.ext.beans.BeansWrapper
 import freemarker.template.WrappingTemplateModel
 
 import javax.servlet.*
@@ -37,7 +37,7 @@ if (currentValue) {
     if (dataResourceTypeId) {
         mimeTypeId = currentValue.drMimeTypeId;
         rootDir = request.getSession().getServletContext().getRealPath("/");
-        wrapper = BeansWrapper.getDefaultInstance();
+        wrapper = FreeMarkerWorker.getDefaultOfbizWrapper();
         WrappingTemplateModel.setDefaultObjectWrapper(wrapper);
         templateRoot = [:];
         FreeMarkerViewHandler.prepOfbizRoot(templateRoot, request, response);
@@ -47,7 +47,7 @@ if (currentValue) {
         templateRoot.context = ctx;
         out = new StringWriter();
         currentValue.drDataTemplateTypeId = "NONE";
-        DataResourceWorker.renderDataResourceAsText(delegator, dataResourceId, out, templateRoot, currentValue, locale, mimeTypeId);
+        DataResourceWorker.renderDataResourceAsText(delegator, dataResourceId, out, templateRoot, locale, mimeTypeId, false);
         textData = out.toString();
         context.textData = textData;
     }

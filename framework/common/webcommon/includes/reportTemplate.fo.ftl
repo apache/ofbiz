@@ -27,7 +27,7 @@ under the License.
               margin-top="0.4in" margin-bottom="0.4in"
               margin-left="0.6in" margin-right="0.4in">
             <#-- main body -->
-            <fo:region-body margin-top="1.2in" margin-bottom="0.4in"/>
+            <fo:region-body margin-top="1.5in" margin-bottom="0.4in"/>
             <#-- the header -->
             <fo:region-before extent="1.2in"/>
             <#-- the footer -->
@@ -55,7 +55,7 @@ under the License.
              in the right side cell the "topRight" template is included
         -->
         <fo:static-content flow-name="xsl-region-before">
-            <fo:table>
+            <fo:table table-layout="fixed" width="100%">
                 <fo:table-column column-number="1" column-width="proportional-column-width(50)"/>
                 <fo:table-column column-number="2" column-width="proportional-column-width(50)"/>
                 <fo:table-body>

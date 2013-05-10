@@ -26,7 +26,7 @@ under the License.
 
 <#if userLogin?has_content>
   <ul>
-  <h4>${uiLabelMap.CommonSecondaryApps}</h4>
+    <li><h4>${uiLabelMap.CommonSecondaryApps}</h4></li>
     <#list displayApps as display>
       <#assign thisApp = display.getContextRoot()>
       <#assign permission = true>
@@ -42,6 +42,7 @@ under the License.
         <#if thisApp == contextPath || contextPath + "/" == thisApp>
           <#assign selected = true>
         </#if>
+        <#assign thisApp = StringUtil.wrapString(thisApp)>
         <#assign thisURL = thisApp>
         <#if thisApp != "/">
           <#assign thisURL = thisURL + "/control/main">

@@ -23,7 +23,7 @@ under the License.
                     <fo:table-body>
                     <fo:table-row>
                       <fo:table-cell>
-                         <fo:block number-columns-spanned="2" font-weight="bold">${orderHeader.getRelatedOne("OrderType").get("description",locale)}</fo:block>
+                         <fo:block number-columns-spanned="2" font-weight="bold">${orderHeader.getRelatedOne("OrderType", false).get("description",locale)}</fo:block>
                       </fo:table-cell>
                     </fo:table-row>
 
@@ -35,7 +35,7 @@ under the License.
                     </fo:table-row>
 
                     <fo:table-row>
-                      <fo:table-cell><fo:block>${uiLabelMap.OrderOrder} #</fo:block></fo:table-cell>
+                      <fo:table-cell><fo:block>${uiLabelMap.OrderOrder} ${uiLabelMap.CommonNbr}</fo:block></fo:table-cell>
                       <fo:table-cell><fo:block>${orderId}</fo:block></fo:table-cell>
                     </fo:table-row>
 

@@ -36,7 +36,17 @@
         <attribute name="partyId" type="String" mode="IN" optional="true"/>
         <attribute name="dataResourceId" type="String" mode="OUT" optional="false"/>
         <attribute name="dataResource" type="org.ofbiz.entity.GenericValue" mode="OUT" optional="true"/>
+        <attribute name="uploadedFile" type="java.nio.ByteBuffer" mode="IN" optional="true"/>
         <override name="objectInfo" allow-html="safe"/>
+        <override name="dataResourceName" allow-html="safe"/>
+    </service>
+    <service name="createDataResourceAndAssocToContent" default-entity-name="DataResource" engine="simple"
+            location="component://content/script/org/ofbiz/content/data/DataServices.xml" invoke="createDataResourceAndAssocToContent" auth="true">
+        <description>Create a DataResource and link this data to the content present</description>
+        <permission-service service-name="genericDataResourcePermission" main-action="CREATE"/>
+        <implements service="createDataResource" optional="true"/>
+        <attribute name="contentId" type="String" mode="INOUT" optional="false"/>
+        <attribute name="templateDataResource" type="String" mode="IN" optional="true"/>
     </service>
     <service name="updateDataResource" engine="simple" default-entity-name="DataResource" auth="true"
             location="component://content/script/org/ofbiz/content/data/DataServices.xml" invoke="updateDataResource">
@@ -50,6 +60,7 @@
         <attribute name="dataResourceId" type="String" mode="OUT" optional="false"/>
         <attribute name="dataResource" type="org.ofbiz.entity.GenericValue" mode="OUT" optional="true"/>
         <override name="objectInfo" allow-html="safe"/>
+        <override name="dataResourceName" allow-html="safe"/>
     </service>
     <service name="removeDataResource" engine="simple" default-entity-name="DataResource" auth="true"
             location="component://content/script/org/ofbiz/content/data/DataServices.xml" invoke="deleteDataResource">
@@ -79,7 +90,7 @@
         <description>Create a DataResource and, possibly, ElectronicText or ImageDataResource</description>
         <auto-attributes include="pk" mode="INOUT" optional="true"/>
         <auto-attributes include="nonpk" mode="IN" optional="true"/>
-        <attribute name="textData" mode="IN" optional="true" type="String"/>
+        <attribute name="textData" mode="IN" optional="true" type="String" allow-html="safe"/>
         <attribute name="targetOperationList" type="List" mode="IN" optional="true"/>
         <attribute name="contentPurposeList" type="List" mode="IN" optional="true"/>
         <attribute name="skipPermissionCheck" type="String" mode="IN" optional="true"/>
@@ -89,7 +100,7 @@
         <description>Create a DataResource and, possibly, ElectronicText or ImageDataResource</description>
         <auto-attributes include="pk" mode="IN" optional="true"/>
         <auto-attributes include="nonpk" mode="IN" optional="true"/>
-        <attribute name="textData" mode="IN" type="String" optional="true"/>
+        <attribute name="textData" mode="IN" type="String" optional="true"  allow-html="safe"/>
         <attribute name="targetOperationList" type="List" mode="IN" optional="true"/>
         <attribute name="contentPurposeList" type="List" mode="IN" optional="true"/>
         <attribute name="skipPermissionCheck" type="String" mode="IN" optional="true"/>
@@ -252,11 +263,11 @@
         <attribute mode="IN" name="rootDir" optional="true" type="String"/>
     </service>
     -->
-    
+
     <!-- Cleared associated DataResource rendered cache from UtilCache. -->
     <service name="clearAssociatedRenderCache" engine="java" auth="true" default-entity-name="DataResource"
             location="org.ofbiz.content.data.DataServices" invoke="clearAssociatedRenderCache">
         <auto-attributes include="pk" mode="IN" />
     </service>
-    
+
 </services>

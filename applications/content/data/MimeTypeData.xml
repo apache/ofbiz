@@ -34,6 +34,7 @@ under the License.
 
     <!-- application mime types -->
     <MimeType mimeTypeId="application/octet-stream" description="Arbitrary Binary Data"/>
+    <MimeType mimeTypeId="application/pkcs7-signature" description="PKCS7 Signature"/>
     <MimeType mimeTypeId="application/postscript" description="Postsctipt Application/Script"/>
     <MimeType mimeTypeId="application/zip" description="ZIP Data"/>
     <MimeType mimeTypeId="application/pdf" description="Adobe Portable Document Format (PDF)"/>
@@ -1252,7 +1253,7 @@ under the License.
 
 [Van Nostern] Gene C. Van Nostern <gene@wri.com>, February 1995.
 
-[Yellow] Mr. Yellow <yellowriversw@yahoo.com>, March 1998.
+[Yellow] Mr. Yellow <yellowriversw@example.com>, March 1998.
 
 [Yoshitake] Jun Yoshitake, <yositake@iss.isl.melco.co.jp>, February 1997.
 

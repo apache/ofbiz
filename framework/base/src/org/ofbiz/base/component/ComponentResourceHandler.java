@@ -33,6 +33,7 @@ import org.w3c.dom.Element;
  * Contains resource information and provides for loading data
  *
  */
+@SuppressWarnings("serial")
 public class ComponentResourceHandler implements ResourceHandler {
 
     public static final String module = ComponentResourceHandler.class.getName();
@@ -63,7 +64,7 @@ public class ComponentResourceHandler implements ResourceHandler {
 
     public Document getDocument() throws GenericConfigException {
         try {
-            return UtilXml.readXmlDocument(this.getStream(), this.getFullLocation());
+            return UtilXml.readXmlDocument(this.getStream(), this.getFullLocation(), true);
         } catch (org.xml.sax.SAXException e) {
             throw new GenericConfigException("Error reading " + this.toString(), e);
         } catch (javax.xml.parsers.ParserConfigurationException e) {
@@ -89,6 +90,7 @@ public class ComponentResourceHandler implements ResourceHandler {
         return ComponentConfig.getFullLocation(componentName, loaderName, location);
     }
 
+    @Override
     public boolean equals(Object obj) {
         if (obj instanceof ComponentResourceHandler) {
             ComponentResourceHandler other = (ComponentResourceHandler) obj;
@@ -102,11 +104,13 @@ public class ComponentResourceHandler implements ResourceHandler {
         return false;
     }
 
+    @Override
     public int hashCode() {
         // the hashCode will weight by a combination componentName and the combination of loaderName and location
         return (this.componentName.hashCode() + ((this.loaderName.hashCode() + this.location.hashCode()) >> 1)) >> 1;
     }
 
+    @Override
     public String toString() {
         return "ComponentResourceHandler from XML file [" + this.componentName + "] with loaderName [" + loaderName + "] and location [" + location + "]";
     }

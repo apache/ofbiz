@@ -25,13 +25,13 @@ under the License.
   </div>
   <div class="screenlet-body">
     <#if hasViewPermission>
-        <br/>
+        <br />
         <h2>${uiLabelMap.WebtoolsForEntity}: ${entityName}</h2>
-        <br/>
+        <br />
         <div class="button-bar">
             <a href="<@ofbizUrl>FindGeneric?entityName=${entityName}&amp;find=true&amp;VIEW_SIZE=50&amp;VIEW_INDEX=0</@ofbizUrl>" class="smallSubmit">${uiLabelMap.WebtoolsBackToFindScreen}</a>
         </div>
-        <br/>
+        <br />
         <table class="basic-table hover-bar" cellspacing="0">
             <tr class="header-row">
                 <td>${uiLabelMap.WebtoolsTitle}</td>
@@ -44,12 +44,12 @@ under the License.
             <#list relations as relation>
                 <tr<#if alt_row> class="alternate-row"</#if>>
                     <td>${relation.title}</td>
-                    <td class="button-col"><a href='<@ofbizUrl>FindGeneric?entityName=${relation.relEntityName}&find=true&VIEW_SIZE=50&VIEW_INDEX=0</@ofbizUrl>'>${relation.relEntityName}</a></td>
+                    <td class="button-col"><a href='<@ofbizUrl>FindGeneric?entityName=${relation.relEntityName}&amp;find=true&amp;VIEW_SIZE=50&amp;VIEW_INDEX=0</@ofbizUrl>'>${relation.relEntityName}</a></td>
                     <td>${relation.type}</td>
                     <td>${relation.fkName}</td>
                     <td>
                         <#list relation.relFields as field>
-                            ${field.fieldName} -> ${field.relFieldName}<br/>
+                            ${field.fieldName} -> ${field.relFieldName}<br />
                         </#list>
                     </td>
                 </tr>

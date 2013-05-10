@@ -18,10 +18,10 @@
  *******************************************************************************/
 package org.ofbiz.common.preferences;
 
-import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Properties;
 
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.GeneralException;
@@ -30,7 +30,7 @@ import static org.ofbiz.base.util.UtilGenerics.checkMap;
 import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.base.util.UtilProperties;
 import org.ofbiz.base.util.UtilValidate;
-import org.ofbiz.entity.GenericDelegator;
+import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
 import org.ofbiz.entity.util.EntityUtil;
@@ -65,7 +65,7 @@ public class PreferenceServices {
         if (!PreferenceWorker.isValidGetId(ctx, context)) {
             return ServiceUtil.returnError(UtilProperties.getMessage(resource, "getPreference.permissionError", locale));
         }
-        GenericDelegator delegator = ctx.getDelegator();
+        Delegator delegator = ctx.getDelegator();
 
         String userPrefTypeId = (String) context.get("userPrefTypeId");
         if (UtilValidate.isEmpty(userPrefTypeId)) {
@@ -80,7 +80,7 @@ public class PreferenceServices {
 
         Map<String, Object> userPrefMap = null;
         try {
-            GenericValue preference = EntityUtil.getFirst(delegator.findByAnd("UserPreference", fieldMap));
+            GenericValue preference = EntityUtil.getFirst(delegator.findByAnd("UserPreference", fieldMap, null, true));
             if (preference != null) {
                 userPrefMap = PreferenceWorker.createUserPrefMap(preference);
             }
@@ -118,26 +118,37 @@ public class PreferenceServices {
         if (!PreferenceWorker.isValidGetId(ctx, context)) {
             return ServiceUtil.returnError(UtilProperties.getMessage(resource, "getPreference.permissionError", locale));
         }
-        GenericDelegator delegator = ctx.getDelegator();
+        Delegator delegator = ctx.getDelegator();
 
         String userPrefGroupTypeId = (String) context.get("userPrefGroupTypeId");
         if (UtilValidate.isEmpty(userPrefGroupTypeId)) {
             return ServiceUtil.returnError(UtilProperties.getMessage(resource, "getPreference.invalidArgument", locale));
         }
-        String userLoginId = PreferenceWorker.getUserLoginId(context, true);
+        String userLoginId = PreferenceWorker.getUserLoginId(context, false);
 
         Map<String, Object> userPrefMap = null;
         try {
             Map<String, String> fieldMap = UtilMisc.toMap("userLoginId", "_NA_", "userPrefGroupTypeId", userPrefGroupTypeId);
-            userPrefMap = PreferenceWorker.createUserPrefMap(delegator.findByAnd("UserPreference", fieldMap));
-            fieldMap.put("userLoginId", userLoginId);
-            userPrefMap.putAll(PreferenceWorker.createUserPrefMap(delegator.findByAnd("UserPreference", fieldMap)));
+            userPrefMap = PreferenceWorker.createUserPrefMap(delegator.findByAnd("UserPreference", fieldMap, null, true));
+            if (userLoginId != null) {
+                fieldMap.put("userLoginId", userLoginId);
+                userPrefMap.putAll(PreferenceWorker.createUserPrefMap(delegator.findByAnd("UserPreference", fieldMap, null, true)));
+            }
         } catch (GenericEntityException e) {
             Debug.logWarning(e.getMessage(), module);
             return ServiceUtil.returnError(UtilProperties.getMessage(resource, "getPreference.readFailure", new Object[] { e.getMessage() }, locale));
         } catch (GeneralException e) {
             Debug.logWarning(e.getMessage(), module);
             return ServiceUtil.returnError(UtilProperties.getMessage(resource, "getPreference.readFailure", new Object[] { e.getMessage() }, locale));
+        }
+        // for the 'DEFAULT' values find the related values in general properties and if found use those.
+        Properties generalProperties = UtilProperties.getProperties("general");
+        for (Map.Entry<String, Object> pairs: userPrefMap.entrySet()) {
+            if ("DEFAULT".equals(pairs.getValue())) {
+                if (UtilValidate.isNotEmpty(generalProperties.get(pairs.getKey()))) {
+                    userPrefMap.put(pairs.getKey(), generalProperties.get(pairs.getKey()));
+                }
+            }
         }
 
         Map<String, Object> result = ServiceUtil.returnSuccess();
@@ -155,12 +166,12 @@ public class PreferenceServices {
      * @return Map with the result of the service, the output parameters.
      */
     public static Map<String, Object> setUserPreference(DispatchContext ctx, Map<String, ?> context) {
-        GenericDelegator delegator = ctx.getDelegator();
+        Delegator delegator = ctx.getDelegator();
         Locale locale = (Locale) context.get("locale");
 
         String userLoginId = PreferenceWorker.getUserLoginId(context, false);
         String userPrefTypeId = (String) context.get("userPrefTypeId");
-        Object userPrefValue = (String) context.get("userPrefValue");
+        Object userPrefValue = context.get("userPrefValue");
         if (UtilValidate.isEmpty(userLoginId) || UtilValidate.isEmpty(userPrefTypeId) || userPrefValue == null) {
             return ServiceUtil.returnError(UtilProperties.getMessage(resource, "setPreference.invalidArgument", locale));
         }
@@ -184,6 +195,31 @@ public class PreferenceServices {
         return ServiceUtil.returnSuccess();
     }
 
+    public static Map<String, Object> removeUserPreference(DispatchContext ctx, Map<String, ?> context) {
+        Delegator delegator = ctx.getDelegator();
+        Locale locale = (Locale) context.get("locale");
+
+        String userLoginId = PreferenceWorker.getUserLoginId(context, false);
+        String userPrefTypeId = (String) context.get("userPrefTypeId");
+        //Debug.logError("In removeUserPreference userLoginId=" + userLoginId + ", userPrefTypeId=" + userPrefTypeId, module);
+        if (UtilValidate.isEmpty(userLoginId) || UtilValidate.isEmpty(userPrefTypeId)) {
+            return ServiceUtil.returnError(UtilProperties.getMessage(resource, "setPreference.invalidArgument", locale));
+        }
+
+        try {
+            GenericValue rec = delegator.findOne("UserPreference", 
+                    UtilMisc.toMap("userLoginId", userLoginId, "userPrefTypeId", userPrefTypeId), false);
+            if (rec != null) {
+                rec.remove();
+            }
+        } catch (GenericEntityException e) {
+            Debug.logWarning(e.getMessage(), module);
+            return ServiceUtil.returnError(UtilProperties.getMessage(resource, "setPreference.writeFailure", new Object[] { e.getMessage() }, locale));
+        }
+
+        return ServiceUtil.returnSuccess();
+    }
+
     /**
      * Stores a user preference group in persistent storage. Call with
      * userPrefMap, userPrefGroupTypeId and optional userPrefLoginId. If userPrefLoginId
@@ -194,7 +230,7 @@ public class PreferenceServices {
      * @return Map with the result of the service, the output parameters.
      */
     public static Map<String, Object> setUserPreferenceGroup(DispatchContext ctx, Map<String, ?> context) {
-        GenericDelegator delegator = ctx.getDelegator();
+        Delegator delegator = ctx.getDelegator();
         Locale locale = (Locale) context.get("locale");
 
         String userLoginId = PreferenceWorker.getUserLoginId(context, false);
@@ -205,9 +241,8 @@ public class PreferenceServices {
         }
 
         try {
-            for (Iterator i = userPrefMap.entrySet().iterator(); i.hasNext();) {
-                Map.Entry mapEntry = (Map.Entry) i.next();
-                GenericValue rec = delegator.makeValidValue("UserPreference", PreferenceWorker.toFieldMap(userLoginId, (String) mapEntry.getKey(), userPrefGroupTypeId, (String) mapEntry.getValue()));
+            for (Map.Entry<String, Object> mapEntry: userPrefMap.entrySet()) {
+                GenericValue rec = delegator.makeValidValue("UserPreference", PreferenceWorker.toFieldMap(userLoginId, mapEntry.getKey(), userPrefGroupTypeId, mapEntry.getValue()));
                 delegator.createOrStore(rec);
             }
         } catch (GenericEntityException e) {
@@ -231,7 +266,7 @@ public class PreferenceServices {
      * @return Map with the result of the service, the output parameters.
      */
     public static Map<String, Object> copyUserPreferenceGroup(DispatchContext ctx, Map<String, ?> context) {
-        GenericDelegator delegator = ctx.getDelegator();
+        Delegator delegator = ctx.getDelegator();
         Locale locale = (Locale) context.get("locale");
 
         String userLoginId = PreferenceWorker.getUserLoginId(context, false);
@@ -243,7 +278,7 @@ public class PreferenceServices {
 
         try {
             Map<String, String> fieldMap = UtilMisc.toMap("userLoginId", fromUserLoginId, "userPrefGroupTypeId", userPrefGroupTypeId);
-            List<GenericValue> resultList = delegator.findByAnd("UserPreference", fieldMap);
+            List<GenericValue> resultList = delegator.findByAnd("UserPreference", fieldMap, null, false);
             if (resultList != null) {
                 for (GenericValue preference: resultList) {
                     preference.set("userLoginId", userLoginId);

@@ -30,7 +30,7 @@ under the License.
         <field name="managerPartyId"><lookup target-form-name="LookupPartyName"/></field>
         <field name="paymentId" title="${uiLabelMap.FormFieldTitle_paymentId}"><lookup target-form-name="LookupPayment"/></field>
         <field name="emplPositionId" title="${uiLabelMap.FormFieldTitle_emplPositionId}"><lookup target-form-name="LookupEmplPosition"/></field>
-        <field name="searchButton" widget-style="smallSubmit"><submit button-type="button"/></field>
+        <field name="searchButton" title="${uiLabelMap.CommonFind}" widget-style="smallSubmit"><submit button-type="button"/></field>
     </form>
     <form name="ListPerfReviews" type="list" title="" separate-columns="true" default-entity-name="PerfReview" list-name="listIt" paginate-target="FindPerfReviews" paginate="true"
         odd-row-style="alternate-row" header-row-style="header-row-2" default-table-style="basic-table hover-bar">
@@ -39,9 +39,23 @@ under the License.
                 <field-map field-name="inputFields" from-field="parameters"/>
                 <field-map field-name="entityName" value="PerfReview"/>
                 <field-map field-name="orderBy" value="perfReviewId"/>
+                <field-map field-name="viewIndex" from-field="viewIndex"/>
+                <field-map field-name="viewSize" from-field="viewSize"/>
             </service>
         </actions>
         <auto-fields-entity entity-name="PerfReview" default-field-type="display"/>
+        <field name="employeePartyId">
+            <display-entity entity-name="PartyNameView" key-field-name="partyId" description="${lastName} ${firstName} ${middleName}">
+                <sub-hyperlink target="EmployeeProfile?partyId=${employeePartyId}" description="[${employeePartyId}]"/>
+            </display-entity>
+        </field>
+        <field name="employeeRoleTypeId"><ignored/></field>
+        <field name="managerPartyId">
+            <display-entity entity-name="PartyNameView" key-field-name="partyId" description="${lastName} ${firstName} ${middleName}">
+                <sub-hyperlink target="EmployeeProfile?partyId=${managerPartyId}" description="[${managerPartyId}]"/>
+            </display-entity>
+        </field>
+        <field name="managerRoleTypeId"><ignored/></field>
         <field name="perfReviewId">
            <hyperlink also-hidden="false" description="${perfReviewId}" target="EditPerfReview">
                 <parameter param-name="perfReviewId"/>
@@ -49,15 +63,17 @@ under the License.
                 <parameter param-name="employeeRoleTypeId"/>
             </hyperlink>
         </field>
+        <field name="fromDate"><display type="date"/></field>
+        <field name="thruDate"><display type="date"/></field>
     </form>
     <form name="EditPerfReview" type="single" target="updatePerfReview" title="" default-map-name="perfReview"
         header-row-style="header-row" default-table-style="basic-table">
         <alt-target use-when="perfReview==null" target="createPerfReview"/>
         <auto-fields-service service-name="updatePerfReview" map-name="perfReview"/>
-        <field name="perfReviewId" use-when="perfReview==null" tooltip="${uiLabelMap.CommonRequired}" widget-style="required"><lookup target-form-name="LookupPerfReview"/></field>
-        <field name="perfReviewId" use-when="perfReview!=null" tooltip="${uiLabelMap.CommonNotModifRecreat}"><display/></field>
+        <field name="perfReviewId" use-when="perfReview==null"><text/></field>
+        <field name="perfReviewId" use-when="perfReview!=null"><ignored/></field>
         <field name="employeePartyId" use-when="perfReview==null" tooltip="${uiLabelMap.CommonRequired}" widget-style="required"><lookup target-form-name="LookupPartyName"/></field>
-        <field name="employeePartyId" use-when="perfReview!=null" tooltip="${uiLabelMap.CommonNotModifRecreat}"><display/></field>
+        <field name="employeePartyId" use-when="perfReview!=null"><ignored/></field>
         <field name="employeeRoleTypeId"><hidden value="EMPLOYEE"/></field>
         <field name="managerPartyId"><lookup target-form-name="LookupPartyName"/></field>
         <field name="managerRoleTypeId">
@@ -79,14 +95,11 @@ under the License.
             </entity-condition>
         </actions>
         <auto-fields-service default-field-type="display" service-name="updatePerfReviewItem"/>
-        <field name="perfReviewItemSeqId" widget-style="linktext">
-            <hyperlink also-hidden="false" description="${perfReviewItemSeqId}" target="EditPerfReviewItem">
-                <parameter param-name="perfReviewItemSeqId"/>
-                <parameter param-name="employeePartyId"/>
-                <parameter param-name="employeeRoleTypeId"/>
-                <parameter param-name="perfReviewId"/>
-            </hyperlink>
-        </field>
+        <field name="employeePartyId"><ignored/></field>
+        <field name="employeeRoleTypeId"><ignored/></field>
+        <field name="perfReviewId"><ignored/></field>
+        <field name="perfReviewItemTypeId"><display-entity entity-name="PerfReviewItemType"></display-entity></field>
+        <field name="perfRatingTypeId"><display-entity entity-name="PerfRatingType"/></field>
         <field name="deleteLink" title="${uiLabelMap.CommonDelete}" widget-style="buttontext">
             <hyperlink target="deletePerfReviewItem" description="${uiLabelMap.CommonDelete}" also-hidden="false">
                 <parameter param-name="perfReviewId"/>
@@ -113,7 +126,7 @@ under the License.
         <field name="perfRatingTypeId">
             <drop-down allow-empty="false">
                 <entity-options description="${description}" key-field-name="perfRatingTypeId" entity-name="PerfRatingType">
-                    <entity-order-by field-name="description"/>
+                    <entity-order-by field-name="-perfRatingTypeId"/><!-- order from good to bad -->
                 </entity-options>
             </drop-down>
         </field>

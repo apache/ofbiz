@@ -33,62 +33,22 @@ under the License.
             <widgets>
                 <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
                     <decorator-section name="body">
-                        <container><label style="h1" text="${uiLabelMap.PageTitleFinancialSummaryReportOptions}"/></container>
-
-                        <container style="screenlet">
-                            <container style="screenlet-title-bar">
-                                <container style="h3">
-                                    <label text="${uiLabelMap.PageTitleSalesInvoiceByProductCategorySummary}"/>
-                                </container>
-                            </container>
-                            <container style="screenlet-body">
-                                <include-form name="SalesInvoiceByProductCategorySummaryOptions" location="component://accounting/widget/ReportFinancialSummaryForms.xml"/>
-                            </container>
-                        </container>
-
-                        <container style="screenlet">
-                            <container style="screenlet-title-bar">
-                                <container style="h3">
-                                    <label text="${uiLabelMap.PageTitleSalesInvoiceByProductGlAccountSummary}"/>
-                                </container>
-                            </container>
-                            <container style="screenlet-body">
-                                <include-form name="SalesInvoiceByProductGlAccountSummaryOptions" location="component://accounting/widget/ReportFinancialSummaryForms.xml"/>
-                            </container>
-                        </container>
-
-                        <container style="screenlet">
-                            <container style="screenlet-title-bar">
-                                <container style="h3">
-                                    <label text="${uiLabelMap.PageTitlePaymentByMethodSummary}"/>
-                                </container>
-                            </container>
-                            <container style="screenlet-body">
-                                <include-form name="PaymentByMethodSummaryOptions" location="component://accounting/widget/ReportFinancialSummaryForms.xml"/>
-                            </container>
-                        </container>
-
-                        <container style="screenlet">
-                            <container style="screenlet-title-bar">
-                                <container style="h3">
-                                    <label text="${uiLabelMap.PageTitleInventoryIssueSummary}"/>
-                                </container>
-                            </container>
-                            <container style="screenlet-body">
-                                <include-form name="InventoryIssueSummaryOptions" location="component://accounting/widget/ReportFinancialSummaryForms.xml"/>
-                            </container>
-                        </container>
-
-                        <container style="screenlet">
-                            <container style="screenlet-title-bar">
-                                <container style="h3">
-                                    <label text="${uiLabelMap.PageTitleFinancialAccountSummary}"/>
-                                </container>
-                            </container>
-                            <container style="screenlet-body">
-                                <include-form name="FinancialAccountSummaryOptions" location="component://accounting/widget/ReportFinancialSummaryForms.xml"/>
-                            </container>
-                        </container>
+                        <label style="h1" text="${uiLabelMap.PageTitleFinancialSummaryReportOptions}"/>
+                        <screenlet title="${uiLabelMap.PageTitleSalesInvoiceByProductCategorySummary}">
+                            <include-form name="SalesInvoiceByProductCategorySummaryOptions" location="component://accounting/widget/ReportFinancialSummaryForms.xml"/>
+                        </screenlet>
+                        <screenlet title="${uiLabelMap.PageTitleSalesInvoiceByProductGlAccountSummary}">
+                            <include-form name="SalesInvoiceByProductGlAccountSummaryOptions" location="component://accounting/widget/ReportFinancialSummaryForms.xml"/>
+                        </screenlet>
+                        <screenlet title="${uiLabelMap.PageTitlePaymentByMethodSummary}">
+                            <include-form name="PaymentByMethodSummaryOptions" location="component://accounting/widget/ReportFinancialSummaryForms.xml"/>
+                        </screenlet>
+                        <screenlet title="${uiLabelMap.PageTitleInventoryIssueSummary}">
+                            <include-form name="InventoryIssueSummaryOptions" location="component://accounting/widget/ReportFinancialSummaryForms.xml"/>
+                        </screenlet>
+                        <screenlet title="${uiLabelMap.PageTitleFinancialAccountSummary}">
+                            <include-form name="FinancialAccountSummaryOptions" location="component://accounting/widget/ReportFinancialSummaryForms.xml"/>
+                        </screenlet>
                     </decorator-section>
                 </decorator-screen>
             </widgets>
@@ -134,16 +94,11 @@ under the License.
                     <widgets>
                         <decorator-screen name="CommonFinAccountDecorator" location="${parameters.mainDecoratorLocation}">
                             <decorator-section name="body">
-                                <container style="screenlet">
-                                    <container style="screenlet-title-bar">
-                                        <container style="h3">
-                                            <label text="${uiLabelMap.PageTitleSalesInvoiceByProductCategorySummary}"/>
-                                        </container>
-                                    </container>
-                                    <container style="screenlet-body">
-                                        <platform-specific><html><html-template location="component://accounting/webapp/accounting/reports/SalesInvoiceByProductCategorySummary.ftl"/></html></platform-specific>
-                                    </container>
-                                </container>
+                                <screenlet title="${uiLabelMap.PageTitleSalesInvoiceByProductCategorySummary}">
+                                    <platform-specific>
+                                        <html><html-template location="component://accounting/webapp/accounting/reports/SalesInvoiceByProductCategorySummary.ftl"/></html>
+                                    </platform-specific>
+                                </screenlet>
                             </decorator-section>
                         </decorator-screen>
                     </widgets>
@@ -164,16 +119,11 @@ under the License.
                     <widgets>
                         <decorator-screen name="CommonFinAccountDecorator" location="${parameters.mainDecoratorLocation}">
                             <decorator-section name="body">
-                                <container style="screenlet">
-                                    <container style="screenlet-title-bar">
-                                        <container style="h3">
-                                            <label text="${uiLabelMap.PageTitleSalesInvoiceByProductGlAccountSummary}"/>
-                                        </container>
-                                    </container>
-                                    <container style="screenlet-body">
-                                        <platform-specific><html><html-template location="component://accounting/webapp/accounting/reports/SalesInvoiceByProductGlAccountSummary.ftl"/></html></platform-specific>
-                                    </container>
-                                </container>
+                                <screenlet title="${uiLabelMap.PageTitleSalesInvoiceByProductGlAccountSummary}">
+                                    <platform-specific>
+                                        <html><html-template location="component://accounting/webapp/accounting/reports/SalesInvoiceByProductGlAccountSummary.ftl"/></html>
+                                    </platform-specific>
+                                </screenlet>
                             </decorator-section>
                         </decorator-screen>
                     </widgets>
@@ -195,16 +145,11 @@ under the License.
                     <widgets>
                         <decorator-screen name="CommonFinAccountDecorator" location="${parameters.mainDecoratorLocation}">
                             <decorator-section name="body">
-                                <container style="screenlet">
-                                    <container style="screenlet-title-bar">
-                                        <container style="h3">
-                                            <label text="${uiLabelMap.PageTitlePaymentByMethodSummary}"/>
-                                        </container>
-                                    </container>
-                                    <container style="screenlet-body">
-                                        <platform-specific><html><html-template location="component://accounting/webapp/accounting/reports/PaymentByMethodSummary.ftl"/></html></platform-specific>
-                                    </container>
-                                </container>
+                                <screenlet title="${uiLabelMap.PageTitlePaymentByMethodSummary}">
+                                    <platform-specific>
+                                        <html><html-template location="component://accounting/webapp/accounting/reports/PaymentByMethodSummary.ftl"/></html>
+                                    </platform-specific>
+                                </screenlet>
                             </decorator-section>
                         </decorator-screen>
                     </widgets>
@@ -225,16 +170,11 @@ under the License.
                     <widgets>
                         <decorator-screen name="CommonFinAccountDecorator" location="${parameters.mainDecoratorLocation}">
                             <decorator-section name="body">
-                                <container style="screenlet">
-                                    <container style="screenlet-title-bar">
-                                        <container style="h3">
-                                            <label text="${uiLabelMap.PageTitleInventoryIssueSummary}"/>
-                                        </container>
-                                    </container>
-                                    <container style="screenlet-body">
-                                        <platform-specific><html><html-template location="component://accounting/webapp/accounting/reports/InventoryIssueSummary.ftl"/></html></platform-specific>
-                                    </container>
-                                </container>
+                                <screenlet title="${uiLabelMap.PageTitleInventoryIssueSummary}">
+                                    <platform-specific>
+                                        <html><html-template location="component://accounting/webapp/accounting/reports/InventoryIssueSummary.ftl"/></html>
+                                    </platform-specific>
+                                </screenlet>
                             </decorator-section>
                         </decorator-screen>
                     </widgets>
@@ -255,16 +195,11 @@ under the License.
                     <widgets>
                         <decorator-screen name="CommonFinAccountDecorator" location="${parameters.mainDecoratorLocation}">
                             <decorator-section name="body">
-                                <container style="screenlet">
-                                    <container style="screenlet-title-bar">
-                                        <container style="h3">
-                                            <label text="${uiLabelMap.PageTitleFinancialAccountSummary}"/>
-                                        </container>
-                                    </container>
-                                    <container style="screenlet-body">
-                                        <platform-specific><html><html-template location="component://accounting/webapp/accounting/reports/FinancialAccountSummary.ftl"/></html></platform-specific>
-                                    </container>
-                                </container>
+                                <screenlet title="${uiLabelMap.PageTitleFinancialAccountSummary}">
+                                    <platform-specific>
+                                        <html><html-template location="component://accounting/webapp/accounting/reports/FinancialAccountSummary.ftl"/></html>
+                                    </platform-specific>
+                                </screenlet>
                             </decorator-section>
                         </decorator-screen>
                     </widgets>
@@ -276,6 +211,7 @@ under the License.
     <screen name="TrialBalance">
         <section>
             <actions>
+                <set field="viewSize" value="99999"/>
                 <set field="titleProperty" value="AccountingTrialBalance"/>
                 <set field="tabButtonItem" value="OrganizationAccountingReports"/>
                 <set field="tabButtonItem2" value="TrialBalance"/>
@@ -285,85 +221,138 @@ under the License.
                 </service>
                 <set field="partyAcctgPreference" from-field="result.partyAccountingPreference"/>
                 <set field="currencyUomId" from-field="partyAcctgPreference.baseCurrencyUomId"/>
-                <entity-condition entity-name="GlAccountOrganization" list="trialBalances" filter-by-date="true">
-                    <condition-list>
-                        <condition-expr field-name="organizationPartyId" operator="equals" from-field="organizationPartyId"/>
-                        <condition-expr field-name="postedBalance" operator="not-equals" from-field="null"/>
-                    </condition-list>
-                    <order-by field-name="glAccountId"/>
+                <set field="partyIds" value="${groovy:org.ofbiz.party.party.PartyWorker.getAssociatedPartyIdsByRelationshipType(delegator, organizationPartyId, 'GROUP_ROLLUP')}" type="List"/>
+                <entity-condition entity-name="Party" list="parties">
+                    <condition-expr field-name="partyId" operator="in" from-field="partyIds"/>
                 </entity-condition>
-                <set field="totalsRow.isLastRow" value="true" type="Boolean"/>
-                <set field="totalsRow.postedBalance" value="0" type="BigDecimal"/>
-                <set field="trialBalances[]" from-field="totalsRow" type="Object"/>
-                <set field="parameters.debitTotal" value="0" type="BigDecimal"/>
-                <set field="parameters.creditTotal" value="0" type="BigDecimal"/>
+                <set field="partyIds[]" from-field="organizationPartyId"/>
+                <script location="component://accounting/webapp/accounting/WEB-INF/actions/reports/TrialBalance.groovy"/>
+                <entity-condition entity-name="GlAccountAndHistoryTotals" filter-by-date="false" list="grandTotalPosted">
+                    <condition-list>
+                        <condition-expr field-name="organizationPartyId" operator="in" from-field="partyIds"/>
+                        <condition-expr field-name="customTimePeriodId" operator="equals" from-field="parameters.customTimePeriodId"/>
+                    </condition-list>
+                    <select-field field-name="totalPostedDebits"/>
+                    <select-field field-name="totalPostedCredits"/>
+                </entity-condition>
+                <set field="grandTotalPostedRecord" from-field="grandTotalPosted[0]"/>
             </actions>
             <widgets>
                 <decorator-screen name="CommonOrganizationAccountingReportsDecorator" location="${parameters.mainDecoratorLocation}">
                     <decorator-section name="body">
-                        <container style="screenlet">
-                            <container style="screenlet-title-bar">
-                                <container style="h3">
-                                    <label text="${uiLabelMap.AccountingTrialBalance}"/>
-                                </container>
-                            </container>
-                            <container style="screenlet-body">
-                                 <include-form name="TrialBalanceList" location="component://accounting/widget/ReportFinancialSummaryForms.xml"/>
-                            </container>
+                        <container style="h3">
+                            <label text="${uiLabelMap.AccountingConsolidatedDataFromDivisions}"/>
                         </container>
+                        <include-form name="TrialBalanceFinancialTimePeriodSelection" location="component://accounting/widget/ReportFinancialSummaryForms.xml"/>
+                        <section>
+                            <condition>
+                                <not><if-empty field="parameters.customTimePeriodId"/></not>
+                            </condition>
+                            <widgets>
+                                <screenlet title="${uiLabelMap.AccountingTrialBalance}">
+                                    <link text="${uiLabelMap.AccountingExportAsCsv}" style="buttontext" target="TrialBalanceSearchResultsCsv.csv">
+                                        <parameter param-name="organizationPartyId" from-field="organizationPartyId"/>
+                                        <parameter param-name="customTimePeriodId" from-field="parameters.customTimePeriodId"/>
+                                    </link>
+                                    <link text="${uiLabelMap.AccountingExportAsPdf}" style="buttontext" target="TrialBalanceSearchResultsPdf.pdf" target-window="_BLANK">
+                                        <parameter param-name="organizationPartyId" from-field="organizationPartyId"/>
+                                        <parameter param-name="customTimePeriodId" from-field="parameters.customTimePeriodId"/>
+                                    </link>
+                                    <include-form name="TrialBalanceReport" location="component://accounting/widget/ReportFinancialSummaryForms.xml"/>
+                                    <container style="h3">
+                                        <label text="${uiLabelMap.AccountingDebitFlag}: ${grandTotalPostedRecord.totalPostedDebits}"/>
+                                    </container>
+                                    <container style="h3">
+                                        <label text="${uiLabelMap.AccountingCreditFlag}: ${grandTotalPostedRecord.totalPostedCredits}"/>
+                                    </container>
+                                </screenlet>
+                            </widgets>
+                        </section>
                     </decorator-section>
                 </decorator-screen>
             </widgets>
         </section>
     </screen>
 
-    <screen name="IncomeStatement">
+    <screen name="TrialBalanceSearchResultsCsv">
         <section>
             <actions>
-                <set field="titleProperty" value="AccountingIncomeStatement"/>
-                <set field="tabButtonItem" value="OrganizationAccountingReports"/>
-                <set field="tabButtonItem2" value="IncomeStatement"/>
+                <set field="viewSize" value="99999"/>
+                <property-map resource="AccountingUiLabels" map-name="uiLabelMap" global="true"/>
                 <set field="organizationPartyId" from-field="parameters.organizationPartyId"/>
                 <service service-name="getPartyAccountingPreferences" result-map="result">
                     <field-map field-name="organizationPartyId"/>
                 </service>
                 <set field="partyAcctgPreference" from-field="result.partyAccountingPreference"/>
                 <set field="currencyUomId" from-field="partyAcctgPreference.baseCurrencyUomId"/>
-                <set field="glAccountTotalsList" from-field="parameters.glAccountTotalsList"/>
+                <set field="partyIds" value="${groovy:org.ofbiz.party.party.PartyWorker.getAssociatedPartyIdsByRelationshipType(delegator, organizationPartyId, 'GROUP_ROLLUP')}" type="List"/>
+                <entity-condition entity-name="Party" list="parties">
+                    <condition-expr field-name="partyId" operator="in" from-field="partyIds"/>
+                </entity-condition>
+                <set field="partyIds[]" from-field="organizationPartyId"/>
+                <script location="component://accounting/webapp/accounting/WEB-INF/actions/reports/TrialBalance.groovy"/>
+                <entity-condition entity-name="GlAccountAndHistoryTotals" filter-by-date="false" list="grandTotalPosted">
+                    <condition-list>
+                        <condition-expr field-name="organizationPartyId" operator="in" from-field="partyIds"/>
+                        <condition-expr field-name="customTimePeriodId" operator="equals" from-field="parameters.customTimePeriodId"/>
+                    </condition-list>
+                    <select-field field-name="totalPostedDebits"/>
+                    <select-field field-name="totalPostedCredits"/>
+                </entity-condition>
+                <set field="grandTotalPostedRecord" from-field="grandTotalPosted[0]"/>
             </actions>
             <widgets>
-                <decorator-screen name="CommonOrganizationAccountingReportsDecorator" location="${parameters.mainDecoratorLocation}">
+                <container>
+                    <include-form name="TrialBalanceReport" location="component://accounting/widget/ReportFinancialSummaryForms.xml"/>
+                </container>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="TrialBalanceSearchResultsPdf">
+        <section>
+            <actions>
+                <set field="viewSize" value="99999"/>
+                <property-map resource="AccountingUiLabels" map-name="uiLabelMap" global="true"/>
+                <set field="organizationPartyId" from-field="parameters.organizationPartyId"/>
+                <service service-name="getPartyAccountingPreferences" result-map="result">
+                    <field-map field-name="organizationPartyId"/>
+                </service>
+                <set field="partyAcctgPreference" from-field="result.partyAccountingPreference"/>
+                <set field="currencyUomId" from-field="partyAcctgPreference.baseCurrencyUomId"/>
+                <set field="partyIds" value="${groovy:org.ofbiz.party.party.PartyWorker.getAssociatedPartyIdsByRelationshipType(delegator, organizationPartyId, 'GROUP_ROLLUP')}" type="List"/>
+                <entity-condition entity-name="Party" list="parties">
+                    <condition-expr field-name="partyId" operator="in" from-field="partyIds"/>
+                </entity-condition>
+                <set field="partyIds[]" from-field="organizationPartyId"/>
+                <script location="component://accounting/webapp/accounting/WEB-INF/actions/reports/TrialBalance.groovy"/>
+                <entity-condition entity-name="GlAccountAndHistoryTotals" filter-by-date="false" list="grandTotalPosted">
+                    <condition-list>
+                        <condition-expr field-name="organizationPartyId" operator="in" from-field="partyIds"/>
+                        <condition-expr field-name="customTimePeriodId" operator="equals" from-field="parameters.customTimePeriodId"/>
+                    </condition-list>
+                    <select-field field-name="totalPostedDebits"/>
+                    <select-field field-name="totalPostedCredits"/>
+                </entity-condition>
+                <set field="grandTotalPostedRecord" from-field="grandTotalPosted[0]"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="SimpleDecorator" location="component://common/widget/CommonScreens.xml">
                     <decorator-section name="body">
-                        <container style="screenlet">
-                            <container style="screenlet-title-bar">
-                                <container style="h3">
-                                    <label text="${uiLabelMap.AccountingIncomeStatement}"/>
-                                </container>
-                            </container>
-                            <container style="screenlet-body">
-                                 <include-form name="IncomeStatementParameters" location="component://accounting/widget/ReportFinancialSummaryForms.xml"/>
-                            </container>
+                        <container style="h3">
+                            <label text="${uiLabelMap.AccountingTrialBalance}"/>
                         </container>
-                        <section>
-                            <condition>
-                                <not><if-empty field="parameters.totalNetIncome"/></not>
-                            </condition>
-                            <widgets>
-                                <container style="screenlet">
-                                    <container style="screenlet-title-bar">
-                                        <container style="h3">
-                                            <label text="${uiLabelMap.AccountingIncomeStatement}"/>
-                                        </container>
-                                    </container>
-                                    <container style="screenlet-body">
-                                        <include-form name="IncomeStatementList" location="component://accounting/widget/ReportFinancialSummaryForms.xml"/>
-                                        <container>
-                                            <label style="h3" text="${uiLabelMap.AccountingNetIncome}: ${parameters.totalNetIncome}"/>
-                                        </container>
-                                    </container>
-                                </container>
-                            </widgets>
-                        </section>
+                        <container style="h3">
+                            <label text="${uiLabelMap.AccountingConsolidatedDataFromDivisions}"/>
+                        </container>
+                        <include-form name="TrialBalanceFinancialTimePeriodSelection" location="component://accounting/widget/ReportFinancialSummaryForms.xml"/>
+                        <include-form name="TrialBalanceReport" location="component://accounting/widget/ReportFinancialSummaryForms.xml"/>
+                        <container style="h3">
+                            <label text="${uiLabelMap.AccountingDebitFlag}: ${grandTotalPostedRecord.totalPostedDebits}"/>
+                        </container>
+                        <container style="h3">
+                            <label text="${uiLabelMap.AccountingCreditFlag}: ${grandTotalPostedRecord.totalPostedCredits}"/>
+                        </container>
                     </decorator-section>
                 </decorator-screen>
             </widgets>
@@ -373,6 +362,7 @@ under the License.
     <screen name="BalanceSheet">
         <section>
             <actions>
+                <set field="viewSize" value="99999"/>
                 <set field="titleProperty" value="AccountingBalanceSheet"/>
                 <set field="tabButtonItem" value="OrganizationAccountingReports"/>
                 <set field="tabButtonItem2" value="BalanceSheet"/>
@@ -382,66 +372,98 @@ under the License.
                 </service>
                 <set field="partyAcctgPreference" from-field="result.partyAccountingPreference"/>
                 <set field="currencyUomId" from-field="partyAcctgPreference.baseCurrencyUomId"/>
-                <set field="assetBalancesList" from-field="parameters.assetBalancesList"/>
-                <set field="liabilityBalancesList" from-field="parameters.liabilityBalancesList"/>
-                <set field="equityBalancesList" from-field="parameters.equityBalancesList"/>
+                <set field="thruDate" from-field="parameters.thruDate" type="Timestamp" default-value="${nowTimestamp}"/>
+                <set field="glFiscalTypeId" from-field="parameters.glFiscalTypeId" default-value="ACTUAL"/>
+                <script location="component://accounting/webapp/accounting/WEB-INF/actions/reports/BalanceSheet.groovy"/>
             </actions>
             <widgets>
                 <decorator-screen name="CommonOrganizationAccountingReportsDecorator" location="${parameters.mainDecoratorLocation}">
                     <decorator-section name="body">
-                        <container style="screenlet">
-                            <container style="screenlet-title-bar">
-                                <container style="h3">
-                                    <label text="${uiLabelMap.AccountingBalanceSheet}"/>
-                                </container>
-                            </container>
-                            <container style="screenlet-body">
-                                <include-form name="BalanceSheetParameters" location="component://accounting/widget/ReportFinancialSummaryForms.xml"/>
-                            </container>
-                        </container>
-                        <section>
-                            <condition>
-                                <or>
-                                    <not><if-empty field="assetBalancesList"/></not>
-                                    <not><if-empty field="liabilityBalancesList"/></not>
-                                    <not><if-empty field="equityBalancesList"/></not>
-                                </or>
-                            </condition>
-                            <widgets>
-                                <container style="screenlet">
-                                    <container style="screenlet-title-bar">
-                                        <container style="h3">
-                                            <label text="${uiLabelMap.AccountingAssets}"/>
-                                        </container>
-                                    </container>
-                                    <container style="screenlet-body">
-                                        <include-form name="BalanceSheetAssetList" location="component://accounting/widget/ReportFinancialSummaryForms.xml"/>
-                                    </container>
-                                </container>
-                                <container style="screenlet">
-                                    <container style="screenlet-title-bar">
-                                        <container style="h3">
-                                            <label text="${uiLabelMap.AccountingLiabilities}"/>
-                                        </container>
-                                    </container>
-                                    <container style="screenlet-body">
-                                        <include-form name="BalanceSheetLiabilityList" location="component://accounting/widget/ReportFinancialSummaryForms.xml"/>
-                                    </container>
-                                </container>
-                                <container style="screenlet">
-                                    <container style="screenlet-title-bar">
-                                        <container style="h3">
-                                            <label text="${uiLabelMap.AccountingEquities}"/>
-                                        </container>
-                                    </container>
-                                    <container style="screenlet-body">
-                                        <include-form name="BalanceSheetEquityList" location="component://accounting/widget/ReportFinancialSummaryForms.xml"/>
-                                    </container>
-                                </container>
-                            </widgets>
-                        </section>
+                        <screenlet title="${uiLabelMap.AccountingBalanceSheet}">
+                            <include-form name="BalanceSheetParameters" location="component://accounting/widget/ReportFinancialSummaryForms.xml"/>
+                        </screenlet>
+                        <link text="${uiLabelMap.AccountingExportAsCsv}" style="button" target="BalanceSheet.csv">
+                            <parameter param-name="organizationPartyId"/>
+                            <parameter param-name="thruDate" from-field="parameters.thruDate"/>
+                            <parameter param-name="glFiscalTypeId" from-field="glFiscalTypeId"/>
+                        </link>
+                        <link text="${uiLabelMap.AccountingExportAsPdf}" style="button" target="BalanceSheet.pdf" target-window="_BLANK">
+                            <parameter param-name="organizationPartyId"/>
+                            <parameter param-name="thruDate" from-field="parameters.thruDate"/>
+                            <parameter param-name="glFiscalTypeId" from-field="glFiscalTypeId"/>
+                        </link>
+                        <screenlet title="${uiLabelMap.AccountingBalanceSheet}">
+                            <label style="h3" text="${uiLabelMap.AccountingAssets}"/>
+                            <include-form name="BalanceSheetAssets" location="component://accounting/widget/ReportFinancialSummaryForms.xml"/>
+                            <label style="h3" text="${uiLabelMap.AccountingLiabilities}"/>
+                            <include-form name="BalanceSheetLiabilities" location="component://accounting/widget/ReportFinancialSummaryForms.xml"/>
+                            <label style="h3" text="${uiLabelMap.AccountingEquities}"/>
+                            <include-form name="BalanceSheetEquities" location="component://accounting/widget/ReportFinancialSummaryForms.xml"/>
+                            <label style="h3" text="${uiLabelMap.CommonTotal}"/>
+                            <include-form name="BalanceTotals" location="component://accounting/widget/ReportFinancialSummaryForms.xml"/>                            
+                        </screenlet>
                     </decorator-section>
                 </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="BalanceSheetPdf">
+        <section>
+            <actions>
+                <set field="viewSize" value="99999"/>
+                <property-map resource="AccountingUiLabels" map-name="uiLabelMap" global="true"/>
+                <set field="organizationPartyId" from-field="parameters.organizationPartyId"/>
+                <service service-name="getPartyAccountingPreferences" result-map="result">
+                    <field-map field-name="organizationPartyId"/>
+                </service>
+                <set field="partyAcctgPreference" from-field="result.partyAccountingPreference"/>
+                <set field="currencyUomId" from-field="partyAcctgPreference.baseCurrencyUomId"/>
+                <set field="thruDate" from-field="parameters.thruDate" type="Timestamp" default-value="${nowTimestamp}"/>
+                <set field="glFiscalTypeId" from-field="parameters.glFiscalTypeId" default-value="ACTUAL"/>
+                <script location="component://accounting/webapp/accounting/WEB-INF/actions/reports/BalanceSheet.groovy"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="SimpleDecorator" location="component://common/widget/CommonScreens.xml">
+                    <decorator-section name="body">
+                        <container>
+                            <label style="h1" text="${uiLabelMap.AccountingBalanceSheet}"/>
+                            <include-form name="BalanceSheetParameters" location="component://accounting/widget/ReportFinancialSummaryForms.xml"/>
+                            <label style="h3" text="${uiLabelMap.AccountingAssets}"/>
+                            <include-form name="BalanceSheetAssets" location="component://accounting/widget/ReportFinancialSummaryForms.xml"/>
+                            <label style="h3" text="${uiLabelMap.AccountingLiabilities}"/>
+                            <include-form name="BalanceSheetLiabilities" location="component://accounting/widget/ReportFinancialSummaryForms.xml"/>
+                            <label style="h3" text="${uiLabelMap.AccountingEquities}"/>
+                            <include-form name="BalanceSheetEquities" location="component://accounting/widget/ReportFinancialSummaryForms.xml"/>
+                            <label style="h3" text="${uiLabelMap.CommonTotal}"/>
+                            <include-form name="BalanceTotals" location="component://accounting/widget/ReportFinancialSummaryForms.xml"/>
+                        </container>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="BalanceSheetCsv">
+        <section>
+            <actions>
+                <set field="viewSize" value="99999"/>
+                <property-map resource="AccountingUiLabels" map-name="uiLabelMap" global="true"/>
+                <set field="organizationPartyId" from-field="parameters.organizationPartyId"/>
+                <service service-name="getPartyAccountingPreferences" result-map="result">
+                    <field-map field-name="organizationPartyId"/>
+                </service>
+                <set field="partyAcctgPreference" from-field="result.partyAccountingPreference"/>
+                <set field="currencyUomId" from-field="partyAcctgPreference.baseCurrencyUomId"/>
+                <set field="thruDate" from-field="parameters.thruDate" type="Timestamp" default-value="${nowTimestamp}"/>
+                <set field="glFiscalTypeId" from-field="parameters.glFiscalTypeId" default-value="ACTUAL"/>
+                <script location="component://accounting/webapp/accounting/WEB-INF/actions/reports/BalanceSheet.groovy"/>
+            </actions>
+            <widgets>
+                <label style="h3" text="${uiLabelMap.AccountingAssets}"/>
+                <include-form name="BalanceSheetAssets" location="component://accounting/widget/ReportFinancialSummaryForms.xml"/>
+                <label style="h3" text="${uiLabelMap.AccountingLiabilities}"/>
+                <include-form name="BalanceSheetLiabilities" location="component://accounting/widget/ReportFinancialSummaryForms.xml"/>
+                <label style="h3" text="${uiLabelMap.AccountingEquities}"/>
+                <include-form name="BalanceSheetEquities" location="component://accounting/widget/ReportFinancialSummaryForms.xml"/>
             </widgets>
         </section>
     </screen>
@@ -449,6 +471,7 @@ under the License.
     <screen name="ComparativeBalanceSheet">
         <section>
             <actions>
+                <set field="viewSize" value="99999"/>
                 <set field="titleProperty" value="AccountingComparativeBalanceSheet"/>
                 <set field="tabButtonItem" value="OrganizationAccountingReports"/>
                 <set field="tabButtonItem2" value="ComparativeBalanceSheet"/>
@@ -458,62 +481,277 @@ under the License.
                 </service>
                 <set field="partyAcctgPreference" from-field="result.partyAccountingPreference"/>
                 <set field="currencyUomId" from-field="partyAcctgPreference.baseCurrencyUomId"/>
-                <set field="assetBalancesList" from-field="parameters.assetBalancesList"/>
-                <set field="liabilityBalancesList" from-field="parameters.liabilityBalancesList"/>
-                <set field="equityBalancesList" from-field="parameters.equityBalancesList"/>
+                
+                <set field="period1ThruDate" from-field="parameters.period1ThruDate" type="Timestamp" default-value="${nowTimestamp}"/>
+                <set field="period1GlFiscalTypeId" from-field="parameters.period1GlFiscalTypeId" default-value="ACTUAL"/>
+                <set field="thruDate" from-field="period1ThruDate" type="Timestamp"/>
+                <set field="glFiscalTypeId" from-field="period1GlFiscalTypeId"/>
+                <script location="component://accounting/webapp/accounting/WEB-INF/actions/reports/BalanceSheet.groovy"/>
+                <set field="assetAccountBalanceList1" from-field="assetAccountBalanceList"/>
+                <set field="liabilityAccountBalanceList1" from-field="liabilityAccountBalanceList"/>
+                <set field="equityAccountBalanceList1" from-field="equityAccountBalanceList"/>
+                <set field="assetBalanceTotal1" from-field="assetBalanceTotal"/>
+                <set field="currentAssetBalanceTotal1" from-field="currentAssetBalanceTotal"/>
+                <set field="longtermAssetBalanceTotal1" from-field="longtermAssetBalanceTotal"/>
+                <set field="liabilityBalanceTotal1" from-field="liabilityBalanceTotal"/>
+                <set field="currentLiabilityBalanceTotal1" from-field="currentLiabilityBalanceTotal"/>
+                <set field="equityBalanceTotal1" from-field="equityBalanceTotal"/>
+                <set field="liabilityEquityBalanceTotal1" from-field="liabilityEquityBalanceTotal"/>
+                <set field="balanceTotalList1" from-field="balanceTotalList"/>
+
+                <set field="period2ThruDate" from-field="parameters.period2ThruDate" type="Timestamp" default-value="${nowTimestamp}"/>
+                <set field="period2GlFiscalTypeId" from-field="parameters.period2GlFiscalTypeId" default-value="ACTUAL"/>
+                <set field="thruDate" from-field="period2ThruDate" type="Timestamp"/>
+                <set field="glFiscalTypeId" from-field="period2GlFiscalTypeId"/>
+                <script location="component://accounting/webapp/accounting/WEB-INF/actions/reports/BalanceSheet.groovy"/>
+                <set field="assetAccountBalanceList2" from-field="assetAccountBalanceList"/>
+                <set field="liabilityAccountBalanceList2" from-field="liabilityAccountBalanceList"/>
+                <set field="equityAccountBalanceList2" from-field="equityAccountBalanceList"/>
+                <set field="assetBalanceTotal2" from-field="assetBalanceTotal"/>
+                <set field="currentAssetBalanceTotal2" from-field="currentAssetBalanceTotal"/>
+                <set field="longtermAssetBalanceTotal2" from-field="longtermAssetBalanceTotal"/>
+                <set field="liabilityBalanceTotal2" from-field="liabilityBalanceTotal"/>
+                <set field="currentLiabilityBalanceTotal2" from-field="currentLiabilityBalanceTotal"/>
+                <set field="equityBalanceTotal2" from-field="equityBalanceTotal"/>
+                <set field="liabilityEquityBalanceTotal2" from-field="liabilityEquityBalanceTotal"/>
+                <set field="balanceTotalList2" from-field="balanceTotalList"/>
+
+                <script location="component://accounting/webapp/accounting/WEB-INF/actions/reports/ComparativeBalanceSheet.groovy"/>
+
             </actions>
             <widgets>
                 <decorator-screen name="CommonOrganizationAccountingReportsDecorator" location="${parameters.mainDecoratorLocation}">
                     <decorator-section name="body">
-                        <container style="screenlet">
-                            <container style="screenlet-title-bar">
-                                <container style="h3">
-                                    <label text="${uiLabelMap.AccountingComparativeBalanceSheet}"/>
-                                </container>
-                            </container>
-                            <container style="screenlet-body">
-                                <include-form name="ComparativeBalanceSheetParameters" location="component://accounting/widget/ReportFinancialSummaryForms.xml"/>
-                            </container>
+                        <screenlet title="${uiLabelMap.AccountingComparativeBalanceSheet}">
+                            <include-form name="ComparativeBalanceSheetParameters" location="component://accounting/widget/ReportFinancialSummaryForms.xml"/>
+                        </screenlet>
+                        <link text="${uiLabelMap.AccountingExportAsCsv}" style="button" target="ComparativeBalanceSheet.csv">
+                            <parameter param-name="organizationPartyId"/>
+                            <parameter param-name="period1ThruDate"/>
+                            <parameter param-name="period1GlFiscalTypeId"/>
+                            <parameter param-name="period2ThruDate"/>
+                            <parameter param-name="period2GlFiscalTypeId"/>
+                        </link>
+                        <link text="${uiLabelMap.AccountingExportAsPdf}" style="button" target="ComparativeBalanceSheet.pdf" target-window="_BLANK">
+                            <parameter param-name="organizationPartyId"/>
+                            <parameter param-name="period1ThruDate"/>
+                            <parameter param-name="period1GlFiscalTypeId"/>
+                            <parameter param-name="period2ThruDate"/>
+                            <parameter param-name="period2GlFiscalTypeId" from-field="period2GlFiscalTypeId"/>
+                        </link>
+                        <screenlet title="${uiLabelMap.AccountingComparativeBalanceSheet}">
+                            <label style="h3" text="${uiLabelMap.AccountingAssets}"/>
+                            <include-form name="ComparativeBalanceSheetAssets" location="component://accounting/widget/ReportFinancialSummaryForms.xml"/>
+                            <label style="h3" text="${uiLabelMap.AccountingLiabilities}"/>
+                            <include-form name="ComparativeBalanceSheetLiabilities" location="component://accounting/widget/ReportFinancialSummaryForms.xml"/>
+                            <label style="h3" text="${uiLabelMap.AccountingEquities}"/>
+                            <include-form name="ComparativeBalanceSheetEquities" location="component://accounting/widget/ReportFinancialSummaryForms.xml"/>
+                            <label style="h3" text="${uiLabelMap.CommonTotal}"/>
+                            <include-form name="ComparativeBalanceTotals" location="component://accounting/widget/ReportFinancialSummaryForms.xml"/>
+                        </screenlet>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="ComparativeBalanceSheetPdf">
+        <section>
+            <actions>
+                <set field="viewSize" value="99999"/>
+                <property-map resource="AccountingUiLabels" map-name="uiLabelMap" global="true"/>
+                <set field="titleProperty" value="AccountingComparativeBalanceSheet"/>
+                <set field="tabButtonItem" value="OrganizationAccountingReports"/>
+                <set field="tabButtonItem2" value="ComparativeBalanceSheet"/>
+                <set field="organizationPartyId" from-field="parameters.organizationPartyId"/>
+                <service service-name="getPartyAccountingPreferences" result-map="result">
+                    <field-map field-name="organizationPartyId"/>
+                </service>
+                <set field="partyAcctgPreference" from-field="result.partyAccountingPreference"/>
+                <set field="currencyUomId" from-field="partyAcctgPreference.baseCurrencyUomId"/>
+
+                <set field="period1ThruDate" from-field="parameters.period1ThruDate" type="Timestamp" default-value="${nowTimestamp}"/>
+                <set field="period1GlFiscalTypeId" from-field="parameters.period1GlFiscalTypeId" default-value="ACTUAL"/>
+                <set field="thruDate" from-field="period1ThruDate" type="Timestamp"/>
+                <set field="glFiscalTypeId" from-field="period1GlFiscalTypeId"/>
+                <script location="component://accounting/webapp/accounting/WEB-INF/actions/reports/BalanceSheet.groovy"/>
+                <set field="assetAccountBalanceList1" from-field="assetAccountBalanceList"/>
+                <set field="liabilityAccountBalanceList1" from-field="liabilityAccountBalanceList"/>
+                <set field="equityAccountBalanceList1" from-field="equityAccountBalanceList"/>
+                <set field="assetBalanceTotal1" from-field="assetBalanceTotal"/>
+                <set field="currentAssetBalanceTotal1" from-field="currentAssetBalanceTotal"/>
+                <set field="longtermAssetBalanceTotal1" from-field="longtermAssetBalanceTotal"/>
+                <set field="liabilityBalanceTotal1" from-field="liabilityBalanceTotal"/>
+                <set field="currentLiabilityBalanceTotal1" from-field="currentLiabilityBalanceTotal"/>
+                <set field="equityBalanceTotal1" from-field="equityBalanceTotal"/>
+                <set field="liabilityEquityBalanceTotal1" from-field="liabilityEquityBalanceTotal"/>
+                <set field="balanceTotalList1" from-field="balanceTotalList"/>
+
+                <set field="period2ThruDate" from-field="parameters.period2ThruDate" type="Timestamp" default-value="${nowTimestamp}"/>
+                <set field="period2GlFiscalTypeId" from-field="parameters.period2GlFiscalTypeId" default-value="ACTUAL"/>
+                <set field="thruDate" from-field="period2ThruDate" type="Timestamp"/>
+                <set field="glFiscalTypeId" from-field="period2GlFiscalTypeId"/>
+                <script location="component://accounting/webapp/accounting/WEB-INF/actions/reports/BalanceSheet.groovy"/>
+                <set field="assetAccountBalanceList2" from-field="assetAccountBalanceList"/>
+                <set field="liabilityAccountBalanceList2" from-field="liabilityAccountBalanceList"/>
+                <set field="equityAccountBalanceList2" from-field="equityAccountBalanceList"/>
+                <set field="assetBalanceTotal2" from-field="assetBalanceTotal"/>
+                <set field="currentAssetBalanceTotal2" from-field="currentAssetBalanceTotal"/>
+                <set field="longtermAssetBalanceTotal2" from-field="longtermAssetBalanceTotal"/>
+                <set field="liabilityBalanceTotal2" from-field="liabilityBalanceTotal"/>
+                <set field="currentLiabilityBalanceTotal2" from-field="currentLiabilityBalanceTotal"/>
+                <set field="equityBalanceTotal2" from-field="equityBalanceTotal"/>
+                <set field="liabilityEquityBalanceTotal2" from-field="liabilityEquityBalanceTotal"/>
+                <set field="balanceTotalList2" from-field="balanceTotalList"/>
+
+                <script location="component://accounting/webapp/accounting/WEB-INF/actions/reports/ComparativeBalanceSheet.groovy"/>
+
+            </actions>
+            <widgets>
+                <decorator-screen name="SimpleDecorator" location="component://common/widget/CommonScreens.xml">
+                    <decorator-section name="body">
+                        <container>
+                            <label style="h1" text="${uiLabelMap.AccountingComparativeBalanceSheet}"/>
+                            <include-form name="ComparativeBalanceSheetParametersOneColumn" location="component://accounting/widget/ReportFinancialSummaryForms.xml"/>
+                            <label style="h3" text="${uiLabelMap.AccountingAssets}"/>
+                            <include-form name="ComparativeBalanceSheetAssets" location="component://accounting/widget/ReportFinancialSummaryForms.xml"/>
+                            <label style="h3" text="${uiLabelMap.AccountingLiabilities}"/>
+                            <include-form name="ComparativeBalanceSheetLiabilities" location="component://accounting/widget/ReportFinancialSummaryForms.xml"/>
+                            <label style="h3" text="${uiLabelMap.AccountingEquities}"/>
+                            <include-form name="ComparativeBalanceSheetEquities" location="component://accounting/widget/ReportFinancialSummaryForms.xml"/>
+                            <label style="h3" text="${uiLabelMap.CommonTotal}"/>
+                            <include-form name="ComparativeBalanceTotals" location="component://accounting/widget/ReportFinancialSummaryForms.xml"/>
                         </container>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="ComparativeBalanceSheetCsv">
+        <section>
+            <actions>
+                <set field="viewSize" value="99999"/>
+                <property-map resource="AccountingUiLabels" map-name="uiLabelMap" global="true"/>
+                <set field="titleProperty" value="AccountingComparativeBalanceSheet"/>
+                <set field="tabButtonItem" value="OrganizationAccountingReports"/>
+                <set field="tabButtonItem2" value="ComparativeBalanceSheet"/>
+                <set field="organizationPartyId" from-field="parameters.organizationPartyId"/>
+                <service service-name="getPartyAccountingPreferences" result-map="result">
+                    <field-map field-name="organizationPartyId"/>
+                </service>
+                <set field="partyAcctgPreference" from-field="result.partyAccountingPreference"/>
+                <set field="currencyUomId" from-field="partyAcctgPreference.baseCurrencyUomId"/>
+
+                <set field="period1ThruDate" from-field="parameters.period1ThruDate" type="Timestamp" default-value="${nowTimestamp}"/>
+                <set field="period1GlFiscalTypeId" from-field="parameters.period1GlFiscalTypeId" default-value="ACTUAL"/>
+                <set field="thruDate" from-field="period1ThruDate" type="Timestamp"/>
+                <set field="glFiscalTypeId" from-field="period1GlFiscalTypeId"/>
+                <script location="component://accounting/webapp/accounting/WEB-INF/actions/reports/BalanceSheet.groovy"/>
+                <set field="assetAccountBalanceList1" from-field="assetAccountBalanceList"/>
+                <set field="liabilityAccountBalanceList1" from-field="liabilityAccountBalanceList"/>
+                <set field="equityAccountBalanceList1" from-field="equityAccountBalanceList"/>
+                <set field="assetBalanceTotal1" from-field="assetBalanceTotal"/>
+                <set field="currentAssetBalanceTotal1" from-field="currentAssetBalanceTotal"/>
+                <set field="longtermAssetBalanceTotal1" from-field="longtermAssetBalanceTotal"/>
+                <set field="liabilityBalanceTotal1" from-field="liabilityBalanceTotal"/>
+                <set field="currentLiabilityBalanceTotal1" from-field="currentLiabilityBalanceTotal"/>
+                <set field="equityBalanceTotal1" from-field="equityBalanceTotal"/>
+                <set field="liabilityEquityBalanceTotal1" from-field="liabilityEquityBalanceTotal"/>
+                <set field="balanceTotalList1" from-field="balanceTotalList"/>
+
+                <set field="period2ThruDate" from-field="parameters.period2ThruDate" type="Timestamp" default-value="${nowTimestamp}"/>
+                <set field="period2GlFiscalTypeId" from-field="parameters.period2GlFiscalTypeId" default-value="ACTUAL"/>
+                <set field="thruDate" from-field="period2ThruDate" type="Timestamp"/>
+                <set field="glFiscalTypeId" from-field="period2GlFiscalTypeId"/>
+                <script location="component://accounting/webapp/accounting/WEB-INF/actions/reports/BalanceSheet.groovy"/>
+                <set field="assetAccountBalanceList2" from-field="assetAccountBalanceList"/>
+                <set field="liabilityAccountBalanceList2" from-field="liabilityAccountBalanceList"/>
+                <set field="equityAccountBalanceList2" from-field="equityAccountBalanceList"/>
+                <set field="assetBalanceTotal2" from-field="assetBalanceTotal"/>
+                <set field="currentAssetBalanceTotal2" from-field="currentAssetBalanceTotal"/>
+                <set field="longtermAssetBalanceTotal2" from-field="longtermAssetBalanceTotal"/>
+                <set field="liabilityBalanceTotal2" from-field="liabilityBalanceTotal"/>
+                <set field="currentLiabilityBalanceTotal2" from-field="currentLiabilityBalanceTotal"/>
+                <set field="equityBalanceTotal2" from-field="equityBalanceTotal"/>
+                <set field="liabilityEquityBalanceTotal2" from-field="liabilityEquityBalanceTotal"/>
+                <set field="balanceTotalList2" from-field="balanceTotalList"/>
+
+                <script location="component://accounting/webapp/accounting/WEB-INF/actions/reports/ComparativeBalanceSheet.groovy"/>
+
+            </actions>
+            <widgets>
+                <label style="h3" text="${uiLabelMap.AccountingAssets}"/>
+                <include-form name="ComparativeBalanceSheetAssets" location="component://accounting/widget/ReportFinancialSummaryForms.xml"/>
+                <label style="h3" text="${uiLabelMap.AccountingLiabilities}"/>
+                <include-form name="ComparativeBalanceSheetLiabilities" location="component://accounting/widget/ReportFinancialSummaryForms.xml"/>
+                <label style="h3" text="${uiLabelMap.AccountingEquities}"/>
+                <include-form name="ComparativeBalanceSheetEquities" location="component://accounting/widget/ReportFinancialSummaryForms.xml"/>
+                <label style="h3" text="${uiLabelMap.CommonTotal}"/>
+                <include-form name="ComparativeBalanceTotals" location="component://accounting/widget/ReportFinancialSummaryForms.xml"/>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="TransactionTotals">
+        <section>
+            <actions>
+                <set field="viewSize" value="99999"/>
+                <set field="titleProperty" value="AccountingTransactionTotals"/>
+                <set field="labelTitleProperty" value="AccountingTransactionTotals"/>
+                <set field="tabButtonItem" value="OrganizationAccountingReports"/>
+                <set field="tabButtonItem2" value="TransactionTotals"/>
+                <set field="organizationPartyId" from-field="parameters.organizationPartyId"/>
+                <set field="partyIds" value="${groovy:org.ofbiz.party.party.PartyWorker.getAssociatedPartyIdsByRelationshipType(delegator, organizationPartyId, 'GROUP_ROLLUP')}" type="List"/>
+                <set field="partyIds[]" from-field="organizationPartyId"/>
+                <service service-name="getPartyAccountingPreferences" result-map="result" auto-field-map="true"/>
+                <set field="partyAcctgPreference" from-field="result.partyAccountingPreference"/>
+                <set field="currencyUomId" from-field="partyAcctgPreference.baseCurrencyUomId"/>
+                <!-- Get a default fromDate -->
+                <service service-name="findLastClosedDate" result-map="findLastClosedDateOutMap">
+                    <field-map field-name="organizationPartyId" from-field="organizationPartyId"/>
+                </service>
+                <set field="fromDate" from-field="parameters.fromDate" type="Timestamp" default-value="${findLastClosedDateOutMap.lastClosedDate}"/>
+                <set field="thruDate" from-field="parameters.thruDate" type="Timestamp" default-value="${nowTimestamp}"/>
+                <set field="glFiscalTypeId" from-field="parameters.glFiscalTypeId" default-value="ACTUAL"/>
+                <script location="component://accounting/webapp/accounting/WEB-INF/actions/reports/MonthSelection.groovy"/>
+                <script location="component://accounting/webapp/accounting/WEB-INF/actions/reports/TransactionTotals.groovy"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonOrganizationAccountingReportsDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <screenlet title="${uiLabelMap.AccountingTransactionTotals}">
+                            <include-form name="TransactionSelectionForm" location="component://accounting/widget/ReportFinancialSummaryForms.xml"/>
+                        </screenlet>
                         <section>
                             <condition>
-                                <or>
-                                    <not><if-empty field="assetBalancesList"/></not>
-                                    <not><if-empty field="liabilityBalancesList"/></not>
-                                    <not><if-empty field="equityBalancesList"/></not>
-                                </or>
+                                <and>
+                                    <not><if-empty field="fromDate"/></not>
+                                    <not><if-empty field="thruDate"/></not>
+                                    <not><if-empty field="organizationPartyId"/></not>
+                                </and>
                             </condition>
                             <widgets>
-                                <container style="screenlet">
-                                    <container style="screenlet-title-bar">
-                                        <container style="h3">
-                                            <label text="${uiLabelMap.AccountingAssets}"/>
-                                        </container>
-                                    </container>
-                                    <container style="screenlet-body">
-                                        <include-form name="BalanceSheetAssetList" location="component://accounting/widget/ReportFinancialSummaryForms.xml"/>
-                                    </container>
-                                </container>
-                                <container style="screenlet">
-                                    <container style="screenlet-title-bar">
-                                        <container style="h3">
-                                            <label text="${uiLabelMap.AccountingLiabilities}"/>
-                                        </container>
-                                    </container>
-                                    <container style="screenlet-body">
-                                        <include-form name="BalanceSheetLiabilityList" location="component://accounting/widget/ReportFinancialSummaryForms.xml"/>
-                                    </container>
-                                </container>
-                                <container style="screenlet">
-                                    <container style="screenlet-title-bar">
-                                        <container style="h3">
-                                            <label text="${uiLabelMap.AccountingEquities}"/>
-                                        </container>
-                                    </container>
-                                    <container style="screenlet-body">
-                                        <include-form name="BalanceSheetEquityList" location="component://accounting/widget/ReportFinancialSummaryForms.xml"/>
-                                    </container>
-                                </container>
+                                <link text="${uiLabelMap.AccountingExportAsCsv}" style="button" target="TransactionTotalsCsv.csv">
+                                    <parameter param-name="fromDate"/>
+                                    <parameter param-name="thruDate"/>
+                                    <parameter param-name="glFiscalTypeId"/>
+                                    <parameter param-name="organizationPartyId"/>
+                                </link>
+                                <link text="${uiLabelMap.AccountingExportAsPdf}" style="button" target="TransactionTotalsPdf.pdf" target-window="_BLANK">
+                                    <parameter param-name="fromDate"/>
+                                    <parameter param-name="thruDate"/>
+                                    <parameter param-name="glFiscalTypeId"/>
+                                    <parameter param-name="organizationPartyId"/>
+                                </link>
+                                <screenlet title="${uiLabelMap.AccountingPostedTransactionTotals}">
+                                    <include-form name="PostedTransactionTotalList" location="component://accounting/widget/ReportFinancialSummaryForms.xml"/>
+                                </screenlet>
+                                <screenlet title="${uiLabelMap.AccountingUnPostedTransactionTotals}">
+                                    <include-form name="UnpostedTransactionTotalList" location="component://accounting/widget/ReportFinancialSummaryForms.xml"/>
+                                </screenlet>
+                                <screenlet title="${uiLabelMap.AccountingPostedAndUnpostedTransactionTotals}">
+                                    <include-form name="PostedAndUnpostedTransactionTotalList" location="component://accounting/widget/ReportFinancialSummaryForms.xml"/>
+                                </screenlet>
                             </widgets>
                         </section>
                     </decorator-section>
@@ -522,55 +760,990 @@ under the License.
         </section>
     </screen>
 
-    <!-- TODO: this is just a placeholder: the report is not still implemented -->
-    <screen name="TransactionTotals">
+    <screen name="TransactionTotalsPdf">
         <section>
             <actions>
+                <set field="viewSize" value="99999"/>
+                <property-map resource="AccountingUiLabels" map-name="uiLabelMap" global="true"/>
                 <set field="titleProperty" value="AccountingTransactionTotals"/>
                 <set field="labelTitleProperty" value="AccountingTransactionTotals"/>
                 <set field="tabButtonItem" value="OrganizationAccountingReports"/>
                 <set field="tabButtonItem2" value="TransactionTotals"/>
                 <set field="organizationPartyId" from-field="parameters.organizationPartyId"/>
-                <set field="fromDate" from-field="parameters.fromDate" type="Timestamp"/>
-                <set field="thruDate" from-field="parameters.thruDate" type="Timestamp"/>
+                <set field="partyIds" value="${groovy:org.ofbiz.party.party.PartyWorker.getAssociatedPartyIdsByRelationshipType(delegator, organizationPartyId, 'GROUP_ROLLUP')}" type="List"/>
+                <set field="partyIds[]" from-field="organizationPartyId"/>
+                <service service-name="getPartyAccountingPreferences" result-map="result" auto-field-map="true"/>
+                <set field="partyAcctgPreference" from-field="result.partyAccountingPreference"/>
+                <set field="currencyUomId" from-field="partyAcctgPreference.baseCurrencyUomId"/>
+                <set field="fromDate" from-field="parameters.fromDate" type="Timestamp" default-value="${nowTimestamp}"/>
+                <set field="thruDate" from-field="parameters.thruDate" type="Timestamp" default-value="${nowTimestamp}"/>
+                <set field="glFiscalTypeId" from-field="parameters.glFiscalTypeId" default-value="ACTUAL"/>
                 <script location="component://accounting/webapp/accounting/WEB-INF/actions/reports/TransactionTotals.groovy"/>
             </actions>
             <widgets>
-                <decorator-screen name="CommonOrganizationAccountingReportsDecorator" location="${parameters.mainDecoratorLocation}">
+                <decorator-screen name="SimpleDecorator" location="component://common/widget/CommonScreens.xml">
                     <decorator-section name="body">
-                        <container style="screenlet">
-                            <container style="screenlet-title-bar">
-                                <container style="h3">
-                                    <label text="${uiLabelMap.AccountingTransactionTotals}"/>
-                                </container>
-                                <container style="screenlet-body">
-                                    <include-form name="FindTransactionTotals" location="component://accounting/widget/ReportFinancialSummaryForms.xml"/>
-                                </container>
-                            </container>
-                         </container>
-                         <container style="screenlet">
-                            <container style="screenlet-title-bar">
-                                <container style="h3">
-                                    <label text="${uiLabelMap.AccountingPostedTransactionTotals}"/>
-                                </container>
-                                <container style="screenlet-body">
-                                    <include-form name="PostedTransactionTotalList" location="component://accounting/widget/ReportFinancialSummaryForms.xml"/>
-                                </container>
-                            </container>
-                         </container>
-                         <container style="screenlet">
-                            <container style="screenlet-title-bar">
-                                <container style="h3">
-                                    <label text="${uiLabelMap.AccountingUnPostedTransactionTotals}"/>
-                                </container>
-                                <container style="screenlet-body">
-                                    <include-form name="UnpostedTransactionTotalList" location="component://accounting/widget/ReportFinancialSummaryForms.xml"/>
-                                </container>
-                            </container>
+                        <container>
+                            <include-form name="FindTransactionTotals" location="component://accounting/widget/ReportFinancialSummaryForms.xml"/>
+                            <label text="${uiLabelMap.AccountingPostedTransactionTotals}"/>
+                            <include-form name="PostedTransactionTotalList" location="component://accounting/widget/ReportFinancialSummaryForms.xml"/>
+                            <label text="${uiLabelMap.AccountingUnPostedTransactionTotals}"/>
+                            <include-form name="UnpostedTransactionTotalList" location="component://accounting/widget/ReportFinancialSummaryForms.xml"/>
+                            <label text="${uiLabelMap.AccountingPostedAndUnpostedTransactionTotals}"/>
+                            <include-form name="PostedAndUnpostedTransactionTotalList" location="component://accounting/widget/ReportFinancialSummaryForms.xml"/>
                         </container>
                     </decorator-section>
                 </decorator-screen>
             </widgets>
         </section>
     </screen>
+
+    <screen name="TransactionTotalsCsv">
+        <section>
+            <actions>
+                <set field="viewSize" value="99999"/>
+                <property-map resource="AccountingUiLabels" map-name="uiLabelMap" global="true"/>
+                <set field="titleProperty" value="AccountingTransactionTotals"/>
+                <set field="labelTitleProperty" value="AccountingTransactionTotals"/>
+                <set field="tabButtonItem" value="OrganizationAccountingReports"/>
+                <set field="tabButtonItem2" value="TransactionTotals"/>
+                <set field="organizationPartyId" from-field="parameters.organizationPartyId"/>
+                <set field="partyIds" value="${groovy:org.ofbiz.party.party.PartyWorker.getAssociatedPartyIdsByRelationshipType(delegator, organizationPartyId, 'GROUP_ROLLUP')}" type="List"/>
+                <set field="partyIds[]" from-field="organizationPartyId"/>
+                <service service-name="getPartyAccountingPreferences" result-map="result" auto-field-map="true"/>
+                <set field="partyAcctgPreference" from-field="result.partyAccountingPreference"/>
+                <set field="currencyUomId" from-field="partyAcctgPreference.baseCurrencyUomId"/>
+                <set field="fromDate" from-field="parameters.fromDate" type="Timestamp" default-value="${nowTimestamp}"/>
+                <set field="thruDate" from-field="parameters.thruDate" type="Timestamp" default-value="${nowTimestamp}"/>
+                <set field="glFiscalTypeId" from-field="parameters.glFiscalTypeId" default-value="ACTUAL"/>
+                <script location="component://accounting/webapp/accounting/WEB-INF/actions/reports/TransactionTotals.groovy"/>
+            </actions>
+            <widgets>
+                <label text="${uiLabelMap.AccountingPostedTransactionTotals}"/>
+                <include-form name="PostedTransactionTotalList" location="component://accounting/widget/ReportFinancialSummaryForms.xml"/>
+                <label text="${uiLabelMap.AccountingPostedTransactionTotals}"/>
+                <include-form name="UnpostedTransactionTotalList" location="component://accounting/widget/ReportFinancialSummaryForms.xml"/>
+                <label text="${uiLabelMap.AccountingPostedTransactionTotals}"/>
+                <include-form name="PostedAndUnpostedTransactionTotalList" location="component://accounting/widget/ReportFinancialSummaryForms.xml"/>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="IncomeStatement">
+        <section>
+            <actions>
+                <set field="viewSize" value="99999"/>
+                <set field="titleProperty" value="AccountingIncomeStatement"/>
+                <set field="tabButtonItem" value="OrganizationAccountingReports"/>
+                <set field="tabButtonItem2" value="IncomeStatement"/>
+                <set field="organizationPartyId" from-field="parameters.organizationPartyId"/>
+                <service service-name="getPartyAccountingPreferences" result-map="result">
+                    <field-map field-name="organizationPartyId"/>
+                </service>
+                <set field="partyAcctgPreference" from-field="result.partyAccountingPreference"/>
+                <set field="currencyUomId" from-field="partyAcctgPreference.baseCurrencyUomId"/>
+                <!-- Get a default fromDate -->
+                <service service-name="findLastClosedDate" result-map="findLastClosedDateOutMap">
+                    <field-map field-name="organizationPartyId" from-field="organizationPartyId"/>
+                </service>
+                <set field="fromDate" from-field="parameters.fromDate" type="Timestamp" default-value="${findLastClosedDateOutMap.lastClosedDate}"/>
+                <set field="thruDate" from-field="parameters.thruDate" type="Timestamp" default-value="${nowTimestamp}"/>
+                <set field="glFiscalTypeId" from-field="parameters.glFiscalTypeId" default-value="ACTUAL"/>                
+                <script location="component://accounting/webapp/accounting/WEB-INF/actions/reports/MonthSelection.groovy"/>
+                <script location="component://accounting/webapp/accounting/WEB-INF/actions/reports/IncomeStatement.groovy"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonOrganizationAccountingReportsDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <screenlet title="${uiLabelMap.AccountingIncomeStatement}">
+                            <include-form name="TransactionSelectionForm" location="component://accounting/widget/ReportFinancialSummaryForms.xml"/>
+                        </screenlet>
+                        <screenlet title="${uiLabelMap.AccountingIncomeStatement}">
+                            <link text="${uiLabelMap.AccountingExportAsCsv}" style="button" target="IncomeStatementListCsv.csv">
+                                <parameter param-name="fromDate" from-field="fromDate"/>
+                                <parameter param-name="thruDate" from-field="thruDate"/>
+                                <parameter param-name="organizationPartyId" from-field="parameters.organizationPartyId"/>
+                                <parameter param-name="glFiscalTypeId" from-field="glFiscalTypeId"/>
+                            </link>
+                            <link text="${uiLabelMap.AccountingExportAsPdf}" style="button" target="IncomeStatementListPdf.pdf" target-window="_BLANK">
+                                <parameter param-name="fromDate" from-field="fromDate"/>
+                                <parameter param-name="thruDate" from-field="thruDate"/>
+                                <parameter param-name="organizationPartyId" from-field="parameters.organizationPartyId"/>
+                                <parameter param-name="glFiscalTypeId" from-field="glFiscalTypeId"/>
+                            </link>
+                            <label style="h3" text="${uiLabelMap.AccountingRevenues}"/>
+                            <include-form name="IncomeStatementRevenues" location="component://accounting/widget/ReportFinancialSummaryForms.xml"/>
+                            <label style="h3" text="${uiLabelMap.AccountingExpenses}"/>
+                            <include-form name="IncomeStatementExpenses" location="component://accounting/widget/ReportFinancialSummaryForms.xml"/>
+                            <label style="h3" text="${uiLabelMap.AccountingIncome}"/>
+                            <include-form name="IncomeStatementIncome" location="component://accounting/widget/ReportFinancialSummaryForms.xml"/>
+                            <label style="h3" text="${uiLabelMap.CommonTotal}"/>
+                            <include-form name="BalanceTotals" location="component://accounting/widget/ReportFinancialSummaryForms.xml"/>
+                        </screenlet>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="IncomeStatementListPdf">
+        <section>
+            <actions>
+                <set field="viewSize" value="99999"/>
+                <property-map resource="AccountingUiLabels" map-name="uiLabelMap" global="true"/>
+                <set field="organizationPartyId" from-field="parameters.organizationPartyId"/>
+                <set field="fromDate" from-field="parameters.fromDate" type="Timestamp"/>
+                <set field="thruDate" from-field="parameters.thruDate" type="Timestamp"/>
+                <set field="glFiscalTypeId" from-field="parameters.glFiscalTypeId" default-value="ACTUAL"/>
+                <script location="component://accounting/webapp/accounting/WEB-INF/actions/reports/IncomeStatement.groovy"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="SimpleDecorator" location="component://common/widget/CommonScreens.xml">
+                    <decorator-section name="body">
+                        <container>
+                            <label style="h1" text="${uiLabelMap.AccountingIncomeStatement}"/>
+                            <include-form name="FindTransactionTotals" location="component://accounting/widget/ReportFinancialSummaryForms.xml"/>
+                            <label style="h3" text="${uiLabelMap.AccountingRevenues}"/>
+                            <include-form name="IncomeStatementRevenues" location="component://accounting/widget/ReportFinancialSummaryForms.xml"/>
+                            <label style="h3" text="${uiLabelMap.AccountingExpenses}"/>
+                            <include-form name="IncomeStatementExpenses" location="component://accounting/widget/ReportFinancialSummaryForms.xml"/>
+                            <label style="h3" text="${uiLabelMap.AccountingIncome}"/>
+                            <include-form name="IncomeStatementIncome" location="component://accounting/widget/ReportFinancialSummaryForms.xml"/>
+                            <label style="h3" text="${uiLabelMap.CommonTotal}"/>
+                            <include-form name="BalanceTotals" location="component://accounting/widget/ReportFinancialSummaryForms.xml"/>
+                        </container>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="IncomeStatementListCsv">
+        <section>
+            <actions>
+                <set field="viewSize" value="99999"/>
+                <property-map resource="AccountingUiLabels" map-name="uiLabelMap" global="true"/>
+                <set field="organizationPartyId" from-field="parameters.organizationPartyId"/>
+                <set field="fromDate" from-field="parameters.fromDate" type="Timestamp"/>
+                <set field="thruDate" from-field="parameters.thruDate" type="Timestamp"/>
+                <set field="glFiscalTypeId" from-field="parameters.glFiscalTypeId" default-value="ACTUAL"/>
+                <script location="component://accounting/webapp/accounting/WEB-INF/actions/reports/IncomeStatement.groovy"/>
+            </actions>
+            <widgets>
+                <label style="h3" text="${uiLabelMap.AccountingRevenues}"/>
+                <include-form name="IncomeStatementRevenues" location="component://accounting/widget/ReportFinancialSummaryForms.xml"/>
+                <label style="h3" text="${uiLabelMap.AccountingExpenses}"/>
+                <include-form name="IncomeStatementExpenses" location="component://accounting/widget/ReportFinancialSummaryForms.xml"/>
+                <label style="h3" text="${uiLabelMap.AccountingIncome}"/>
+                <include-form name="IncomeStatementIncome" location="component://accounting/widget/ReportFinancialSummaryForms.xml"/>
+                <label style="h3" text="${uiLabelMap.CommonTotal}"/>
+                <include-form name="BalanceTotals" location="component://accounting/widget/ReportFinancialSummaryForms.xml"/>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="ComparativeIncomeStatement">
+        <section>
+            <actions>
+                <set field="viewSize" value="99999"/>
+                <set field="titleProperty" value="AccountingComparativeIncomeStatement"/>
+                <set field="tabButtonItem" value="OrganizationAccountingReports"/>
+                <set field="tabButtonItem2" value="ComparativeIncomeStatement"/>
+                <set field="organizationPartyId" from-field="parameters.organizationPartyId" type="String"/>
+                <service service-name="getPartyAccountingPreferences" result-map="result">
+                    <field-map field-name="organizationPartyId"/>
+                </service>
+                <set field="partyAcctgPreference" from-field="result.partyAccountingPreference"/>
+                <set field="currencyUomId" from-field="partyAcctgPreference.baseCurrencyUomId"/>
+
+                <!-- Get a default fromDate -->
+                <service service-name="findLastClosedDate" result-map="findLastClosedDateOutMap">
+                    <field-map field-name="organizationPartyId" from-field="organizationPartyId"/>
+                </service>
+
+                <set field="period1FromDate" from-field="parameters.period1FromDate" type="Timestamp" default-value="${findLastClosedDateOutMap.lastClosedDate}"/>
+                <set field="period1ThruDate" from-field="parameters.period1ThruDate" type="Timestamp" default-value="${nowTimestamp}"/>
+                <set field="period1GlFiscalTypeId" from-field="parameters.period1GlFiscalTypeId" default-value="ACTUAL"/>
+                <set field="fromDate" from-field="period1FromDate"/>
+                <set field="thruDate" from-field="period1ThruDate"/>
+                <set field="glFiscalTypeId" from-field="period1GlFiscalTypeId"/>
+                <script location="component://accounting/webapp/accounting/WEB-INF/actions/reports/IncomeStatement.groovy"/>
+                <set field="revenueAccountBalanceList1" from-field="revenueAccountBalanceList"/>
+                <set field="revenueAccountBalanceTotal1" from-field="revenueAccountBalanceTotal"/>
+                <set field="expenseAccountBalanceList1" from-field="expenseAccountBalanceList"/>
+                <set field="expenseAccountBalanceTotal1" from-field="expenseAccountBalanceTotal"/>
+                <set field="cogsExpense1" from-field="cogsExpense"/>
+                <set field="incomeAccountBalanceList1" from-field="incomeAccountBalanceList"/>
+                <set field="incomeAccountBalanceTotal1" from-field="incomeAccountBalanceTotal"/>
+                <set field="grossMargin1" from-field="grossMargin"/>
+                <set field="sgaExpense1" from-field="sgaExpense"/>
+                <set field="incomeFromOperations1" from-field="incomeFromOperations"/>
+                <set field="netIncome1" from-field="netIncome"/>
+                <set field="balanceTotalList1" from-field="balanceTotalList"/>
+
+                <set field="period2FromDate" from-field="parameters.period2FromDate" type="Timestamp" default-value="${findLastClosedDateOutMap.lastClosedDate}"/>
+                <set field="period2ThruDate" from-field="parameters.period2ThruDate" type="Timestamp" default-value="${nowTimestamp}"/>
+                <set field="period2GlFiscalTypeId" from-field="parameters.period2GlFiscalTypeId" default-value="ACTUAL"/>                
+                <set field="fromDate" from-field="period2FromDate"/>
+                <set field="thruDate" from-field="period2ThruDate"/>
+                <set field="glFiscalTypeId" from-field="period2GlFiscalTypeId"/>
+                <script location="component://accounting/webapp/accounting/WEB-INF/actions/reports/IncomeStatement.groovy"/>
+                <set field="revenueAccountBalanceList2" from-field="revenueAccountBalanceList"/>
+                <set field="revenueAccountBalanceTotal2" from-field="revenueAccountBalanceTotal"/>
+                <set field="expenseAccountBalanceList2" from-field="expenseAccountBalanceList"/>
+                <set field="expenseAccountBalanceTotal2" from-field="expenseAccountBalanceTotal"/>
+                <set field="cogsExpense2" from-field="cogsExpense"/>
+                <set field="incomeAccountBalanceList2" from-field="incomeAccountBalanceList"/>
+                <set field="incomeAccountBalanceTotal2" from-field="incomeAccountBalanceTotal"/>
+                <set field="grossMargin2" from-field="grossMargin"/>
+                <set field="sgaExpense2" from-field="sgaExpense"/>
+                <set field="incomeFromOperations2" from-field="incomeFromOperations"/>
+                <set field="netIncome2" from-field="netIncome"/>
+                <set field="balanceTotalList2" from-field="balanceTotalList"/>
+                <script location="component://accounting/webapp/accounting/WEB-INF/actions/reports/ComparativeIncomeStatement.groovy"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonOrganizationAccountingReportsDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <screenlet title="${uiLabelMap.AccountingComparativeIncomeStatement}">
+                            <include-form name="ComparativeIncomeStatementParameters" location="component://accounting/widget/ReportFinancialSummaryForms.xml"/>
+                        </screenlet>
+                        <screenlet title="${uiLabelMap.AccountingComparativeIncomeStatement}">
+                            <link text="${uiLabelMap.AccountingExportAsCsv}" style="button" target="ComparativeIncomeStatements.csv">
+                                <parameter param-name="period1FromDate" from-field="period1FromDate"/>
+                                <parameter param-name="period1ThruDate" from-field="period1ThruDate"/>
+                                <parameter param-name="period1GlFiscalTypeId" from-field="period1GlFiscalTypeId"/>
+                                <parameter param-name="period2FromDate" from-field="period2FromDate"/>
+                                <parameter param-name="period2ThruDate" from-field="period2ThruDate"/>
+                                <parameter param-name="period2GlFiscalTypeId" from-field="period2GlFiscalTypeId"/>
+                                <parameter param-name="organizationPartyId"/>
+                                <parameter param-name="currencyUomId"/>
+                            </link>
+                            <link text="${uiLabelMap.AccountingExportAsPdf}" style="button" target="ComparativeIncomeStatements.pdf" target-window="_BLANK">
+                                <parameter param-name="period1FromDate" from-field="period1FromDate"/>
+                                <parameter param-name="period1ThruDate" from-field="period1ThruDate"/>
+                                <parameter param-name="period1GlFiscalTypeId" from-field="period1GlFiscalTypeId"/>
+                                <parameter param-name="period2FromDate" from-field="period2FromDate"/>
+                                <parameter param-name="period2ThruDate" from-field="period2ThruDate"/>
+                                <parameter param-name="period2GlFiscalTypeId" from-field="period2GlFiscalTypeId"/>
+                                <parameter param-name="organizationPartyId"/>
+                                <parameter param-name="currencyUomId"/>
+                            </link>
+                            <label style="h3" text="${uiLabelMap.AccountingRevenues}"/>
+                            <include-form name="ComparativeIncomeStatementRevenues" location="component://accounting/widget/ReportFinancialSummaryForms.xml"/>
+                            <label style="h3" text="${uiLabelMap.AccountingExpenses}"/>
+                            <include-form name="ComparativeIncomeStatementExpenses" location="component://accounting/widget/ReportFinancialSummaryForms.xml"/>
+                            <label style="h3" text="${uiLabelMap.AccountingIncome}"/>
+                            <include-form name="ComparativeIncomeStatementIncome" location="component://accounting/widget/ReportFinancialSummaryForms.xml"/>
+                            <label style="h3" text="${uiLabelMap.CommonTotal}"/>
+                            <include-form name="ComparativeBalanceTotals" location="component://accounting/widget/ReportFinancialSummaryForms.xml"/>
+                        </screenlet>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="ComparativeIncomeStatementsPdf">
+        <section>
+            <actions>
+                <property-map resource="AccountingUiLabels" map-name="uiLabelMap" global="true"/>
+                <set field="viewSize" value="99999"/>
+                <set field="titleProperty" value="AccountingComparativeIncomeStatement"/>
+                <set field="tabButtonItem" value="OrganizationAccountingReports"/>
+                <set field="tabButtonItem2" value="ComparativeIncomeStatement"/>
+                <set field="organizationPartyId" from-field="parameters.organizationPartyId" type="String"/>
+                <service service-name="getPartyAccountingPreferences" result-map="result">
+                    <field-map field-name="organizationPartyId"/>
+                </service>
+                <set field="partyAcctgPreference" from-field="result.partyAccountingPreference"/>
+                <set field="currencyUomId" from-field="partyAcctgPreference.baseCurrencyUomId"/>
+
+                <!-- Get a default fromDate -->
+                <service service-name="findLastClosedDate" result-map="findLastClosedDateOutMap">
+                    <field-map field-name="organizationPartyId" from-field="organizationPartyId"/>
+                </service>
+
+                <set field="period1FromDate" from-field="parameters.period1FromDate" type="Timestamp" default-value="${findLastClosedDateOutMap.lastClosedDate}"/>
+                <set field="period1ThruDate" from-field="parameters.period1ThruDate" type="Timestamp" default-value="${nowTimestamp}"/>
+                <set field="period1GlFiscalTypeId" from-field="parameters.period1GlFiscalTypeId" default-value="ACTUAL"/>
+                <set field="fromDate" from-field="period1FromDate"/>
+                <set field="thruDate" from-field="period1ThruDate"/>
+                <set field="glFiscalTypeId" from-field="period1GlFiscalTypeId"/>
+                <script location="component://accounting/webapp/accounting/WEB-INF/actions/reports/IncomeStatement.groovy"/>
+                <set field="revenueAccountBalanceList1" from-field="revenueAccountBalanceList"/>
+                <set field="revenueAccountBalanceTotal1" from-field="revenueAccountBalanceTotal"/>
+                <set field="expenseAccountBalanceList1" from-field="expenseAccountBalanceList"/>
+                <set field="expenseAccountBalanceTotal1" from-field="expenseAccountBalanceTotal"/>
+                <set field="cogsExpense1" from-field="cogsExpense"/>
+                <set field="incomeAccountBalanceList1" from-field="incomeAccountBalanceList"/>
+                <set field="incomeAccountBalanceTotal1" from-field="incomeAccountBalanceTotal"/>
+                <set field="grossMargin1" from-field="grossMargin"/>
+                <set field="sgaExpense1" from-field="sgaExpense"/>
+                <set field="incomeFromOperations1" from-field="incomeFromOperations"/>
+                <set field="netIncome1" from-field="netIncome"/>
+                <set field="balanceTotalList1" from-field="balanceTotalList"/>
+
+                <set field="period2FromDate" from-field="parameters.period2FromDate" type="Timestamp" default-value="${findLastClosedDateOutMap.lastClosedDate}"/>
+                <set field="period2ThruDate" from-field="parameters.period2ThruDate" type="Timestamp" default-value="${nowTimestamp}"/>
+                <set field="period2GlFiscalTypeId" from-field="parameters.period2GlFiscalTypeId" default-value="ACTUAL"/>
+                <set field="fromDate" from-field="period2FromDate"/>
+                <set field="thruDate" from-field="period2ThruDate"/>
+                <set field="glFiscalTypeId" from-field="period2GlFiscalTypeId"/>
+                <script location="component://accounting/webapp/accounting/WEB-INF/actions/reports/IncomeStatement.groovy"/>
+                <set field="revenueAccountBalanceList2" from-field="revenueAccountBalanceList"/>
+                <set field="revenueAccountBalanceTotal2" from-field="revenueAccountBalanceTotal"/>
+                <set field="expenseAccountBalanceList2" from-field="expenseAccountBalanceList"/>
+                <set field="expenseAccountBalanceTotal2" from-field="expenseAccountBalanceTotal"/>
+                <set field="cogsExpense2" from-field="cogsExpense"/>
+                <set field="incomeAccountBalanceList2" from-field="incomeAccountBalanceList"/>
+                <set field="incomeAccountBalanceTotal2" from-field="incomeAccountBalanceTotal"/>
+                <set field="grossMargin2" from-field="grossMargin"/>
+                <set field="sgaExpense2" from-field="sgaExpense"/>
+                <set field="incomeFromOperations2" from-field="incomeFromOperations"/>
+                <set field="netIncome2" from-field="netIncome"/>
+                <set field="balanceTotalList2" from-field="balanceTotalList"/>
+                <script location="component://accounting/webapp/accounting/WEB-INF/actions/reports/ComparativeIncomeStatement.groovy"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="SimpleDecorator" location="component://common/widget/CommonScreens.xml">
+                    <decorator-section name="body">
+                        <container>
+                            <label style="h1" text="${uiLabelMap.AccountingComparativeIncomeStatement}"/>
+                            <include-form name="ComparativeIncomeStatementParametersOneColumn" location="component://accounting/widget/ReportFinancialSummaryForms.xml"/>
+                            <label style="h3" text="${uiLabelMap.AccountingRevenues}"/>
+                            <include-form name="ComparativeIncomeStatementRevenues" location="component://accounting/widget/ReportFinancialSummaryForms.xml"/>
+                            <label style="h3" text="${uiLabelMap.AccountingExpenses}"/>
+                            <include-form name="ComparativeIncomeStatementExpenses" location="component://accounting/widget/ReportFinancialSummaryForms.xml"/>
+                            <label style="h3" text="${uiLabelMap.AccountingIncome}"/>
+                            <include-form name="ComparativeIncomeStatementIncome" location="component://accounting/widget/ReportFinancialSummaryForms.xml"/>
+                            <label style="h3" text="${uiLabelMap.CommonTotal}"/>
+                            <include-form name="ComparativeBalanceTotals" location="component://accounting/widget/ReportFinancialSummaryForms.xml"/>
+                        </container>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="ComparativeIncomeStatementsCsv">
+        <section>
+            <actions>
+                <property-map resource="AccountingUiLabels" map-name="uiLabelMap" global="true"/>
+                <set field="viewSize" value="99999"/>
+                <set field="titleProperty" value="AccountingComparativeIncomeStatement"/>
+                <set field="tabButtonItem" value="OrganizationAccountingReports"/>
+                <set field="tabButtonItem2" value="ComparativeIncomeStatement"/>
+                <set field="organizationPartyId" from-field="parameters.organizationPartyId" type="String"/>
+                <service service-name="getPartyAccountingPreferences" result-map="result">
+                    <field-map field-name="organizationPartyId"/>
+                </service>
+                <set field="partyAcctgPreference" from-field="result.partyAccountingPreference"/>
+                <set field="currencyUomId" from-field="partyAcctgPreference.baseCurrencyUomId"/>
+
+                <!-- Get a default fromDate -->
+                <service service-name="findLastClosedDate" result-map="findLastClosedDateOutMap">
+                    <field-map field-name="organizationPartyId" from-field="organizationPartyId"/>
+                </service>
+
+                <set field="period1FromDate" from-field="parameters.period1FromDate" type="Timestamp" default-value="${findLastClosedDateOutMap.lastClosedDate}"/>
+                <set field="period1ThruDate" from-field="parameters.period1ThruDate" type="Timestamp" default-value="${nowTimestamp}"/>
+                <set field="period1GlFiscalTypeId" from-field="parameters.period1GlFiscalTypeId" default-value="ACTUAL"/>
+                <set field="fromDate" from-field="period1FromDate"/>
+                <set field="thruDate" from-field="period1ThruDate"/>
+                <set field="glFiscalTypeId" from-field="period1GlFiscalTypeId"/>
+                <script location="component://accounting/webapp/accounting/WEB-INF/actions/reports/IncomeStatement.groovy"/>
+                <set field="revenueAccountBalanceList1" from-field="revenueAccountBalanceList"/>
+                <set field="revenueAccountBalanceTotal1" from-field="revenueAccountBalanceTotal"/>
+                <set field="expenseAccountBalanceList1" from-field="expenseAccountBalanceList"/>
+                <set field="expenseAccountBalanceTotal1" from-field="expenseAccountBalanceTotal"/>
+                <set field="cogsExpense1" from-field="cogsExpense"/>
+                <set field="incomeAccountBalanceList1" from-field="incomeAccountBalanceList"/>
+                <set field="incomeAccountBalanceTotal1" from-field="incomeAccountBalanceTotal"/>
+                <set field="grossMargin1" from-field="grossMargin"/>
+                <set field="sgaExpense1" from-field="sgaExpense"/>
+                <set field="incomeFromOperations1" from-field="incomeFromOperations"/>
+                <set field="netIncome1" from-field="netIncome"/>
+                <set field="balanceTotalList1" from-field="balanceTotalList"/>
+
+                <set field="period2FromDate" from-field="parameters.period2FromDate" type="Timestamp" default-value="${findLastClosedDateOutMap.lastClosedDate}"/>
+                <set field="period2ThruDate" from-field="parameters.period2ThruDate" type="Timestamp" default-value="${nowTimestamp}"/>
+                <set field="period2GlFiscalTypeId" from-field="parameters.period2GlFiscalTypeId" default-value="ACTUAL"/>
+                <set field="fromDate" from-field="period2FromDate"/>
+                <set field="thruDate" from-field="period2ThruDate"/>
+                <set field="glFiscalTypeId" from-field="period2GlFiscalTypeId"/>
+                <script location="component://accounting/webapp/accounting/WEB-INF/actions/reports/IncomeStatement.groovy"/>
+                <set field="revenueAccountBalanceList2" from-field="revenueAccountBalanceList"/>
+                <set field="revenueAccountBalanceTotal2" from-field="revenueAccountBalanceTotal"/>
+                <set field="expenseAccountBalanceList2" from-field="expenseAccountBalanceList"/>
+                <set field="expenseAccountBalanceTotal2" from-field="expenseAccountBalanceTotal"/>
+                <set field="cogsExpense2" from-field="cogsExpense"/>
+                <set field="incomeAccountBalanceList2" from-field="incomeAccountBalanceList"/>
+                <set field="incomeAccountBalanceTotal2" from-field="incomeAccountBalanceTotal"/>
+                <set field="grossMargin2" from-field="grossMargin"/>
+                <set field="sgaExpense2" from-field="sgaExpense"/>
+                <set field="incomeFromOperations2" from-field="incomeFromOperations"/>
+                <set field="netIncome2" from-field="netIncome"/>
+                <set field="balanceTotalList2" from-field="balanceTotalList"/>
+                <script location="component://accounting/webapp/accounting/WEB-INF/actions/reports/ComparativeIncomeStatement.groovy"/>
+            </actions>
+            <widgets>
+                <label style="h3" text="${uiLabelMap.AccountingRevenues}"/>
+                <include-form name="ComparativeIncomeStatementRevenues" location="component://accounting/widget/ReportFinancialSummaryForms.xml"/>
+                <label style="h3" text="${uiLabelMap.AccountingExpenses}"/>
+                <include-form name="ComparativeIncomeStatementExpenses" location="component://accounting/widget/ReportFinancialSummaryForms.xml"/>
+                <label style="h3" text="${uiLabelMap.AccountingIncome}"/>
+                <include-form name="ComparativeIncomeStatementIncome" location="component://accounting/widget/ReportFinancialSummaryForms.xml"/>
+                <label style="h3" text="${uiLabelMap.CommonTotal}"/>
+                <include-form name="ComparativeBalanceTotals" location="component://accounting/widget/ReportFinancialSummaryForms.xml"/>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="GlAccountTrialBalance">
+        <section>
+            <actions>
+                <set field="titleProperty" value="AccountingGlAccountTrialBalance"/>
+                <set field="labelTitleProperty" value="AccountingGlAccountTrialBalance"/>
+                <set field="tabButtonItem" value="OrganizationAccountingReports"/>
+                <set field="tabButtonItem2" value="GlAccountTrialBalance"/>
+                <set field="organizationPartyId" from-field="parameters.organizationPartyId"/>
+                <script location="component://accounting/webapp/accounting/WEB-INF/actions/reports/GlAccountTrialBalance.groovy"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonOrganizationAccountingReportsDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <screenlet title="${uiLabelMap.AccountingGlAccountTrialBalance}">
+                            <include-form name="GlAccountTrialBalance"  location="component://accounting/widget/ReportFinancialSummaryForms.xml"/>
+                        </screenlet>
+                        <section>
+                            <condition>
+                               <or>
+                                <not><if-empty field="parameters.glAccountId"/></not>
+                                <not><if-empty field="parameters.timePeriod"/></not>
+                                <not><if-empty field="parameters.isPosted"/></not>
+                                </or>
+                            </condition>
+                            <widgets>
+                                <screenlet title="${uiLabelMap.AccountingGlAccountTrialBalance}">
+                                   <platform-specific>
+                                       <html>
+                                           <html-template location="component://accounting/webapp/accounting/reports/GlAccountTrialBalanceReport.ftl"/>
+                                       </html>
+                                   </platform-specific>
+                                </screenlet>
+                            </widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="GlAccountTrialBalanceReportPdf">
+        <section>
+            <actions>
+                <property-map resource="CommonUiLabels" map-name="uiLabelMap" global="true"/>
+                <property-map resource="AccountingUiLabels" map-name="uiLabelMap" global="true"/>
+                <property-map resource="ProductUiLabels" map-name="uiLabelMap" global="true"/>
+                <set field="organizationPartyId" from-field="parameters.organizationPartyId"/>
+                <script location="component://accounting/webapp/accounting/WEB-INF/actions/reports/GlAccountTrialBalance.groovy"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="SimpleDecorator" location="component://common/widget/CommonScreens.xml">
+                    <decorator-section name="body">
+                        <platform-specific>
+                            <xsl-fo>
+                                <html-template location="component://accounting/webapp/accounting/reports/GlAccountTrialBalanceReport.fo.ftl"/>
+                            </xsl-fo>
+                        </platform-specific>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="GlAccountBalanceByCostCenter">
+        <section>
+            <actions>
+                <set field="viewSize" value="99999"/>
+                <set field="titleProperty" value="FormFieldTitle_costCenters"/>
+                <set field="labelTitleProperty" value="FormFieldTitle_costCenters"/>
+                <set field="tabButtonItem" value="OrganizationAccountingReports"/>
+                <set field="tabButtonItem2" value="GlAccountBalanceByCostCenter"/>
+                <set field="organizationPartyId" from-field="parameters.organizationPartyId"/>
+                <set field="partyIds" value="${groovy:org.ofbiz.party.party.PartyWorker.getAssociatedPartyIdsByRelationshipType(delegator, organizationPartyId, 'GROUP_ROLLUP')}" type="List"/>
+                <set field="partyIds[]" from-field="organizationPartyId"/>
+                <service service-name="getPartyAccountingPreferences" result-map="result" auto-field-map="true"/>
+                <set field="partyAcctgPreference" from-field="result.partyAccountingPreference"/>
+                <set field="currencyUomId" from-field="partyAcctgPreference.baseCurrencyUomId"/>
+                <!-- Get a default fromDate -->
+                <service service-name="findLastClosedDate" result-map="findLastClosedDateOutMap">
+                    <field-map field-name="organizationPartyId" from-field="organizationPartyId"/>
+                </service>
+                <set field="fromDate" from-field="parameters.fromDate" type="Timestamp" default-value="${findLastClosedDateOutMap.lastClosedDate}"/>
+                <set field="thruDate" from-field="parameters.thruDate" type="Timestamp" default-value="${nowTimestamp}"/>
+                <script location="component://accounting/webapp/accounting/WEB-INF/actions/reports/CostCenters.groovy"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonOrganizationAccountingReportsDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <screenlet title="${uiLabelMap.FormFieldTitle_costCenters}">
+                            <include-form name="SelectAcctReportPeriod" location="component://accounting/widget/ReportFinancialSummaryForms.xml"/>
+                        </screenlet>
+                        <section>
+                            <condition>
+                                <and>
+                                    <not><if-empty field="fromDate"/></not>
+                                    <not><if-empty field="thruDate"/></not>
+                                    <not><if-empty field="organizationPartyId"/></not>
+                                </and>
+                            </condition>
+                            <widgets>
+                                <link text="${uiLabelMap.AccountingExportAsPdf}" style="button" target="GlAccountBalanceByCostCenter.pdf" target-window="_BLANK">
+                                    <parameter param-name="organizationPartyId" from-field="parameters.organizationPartyId"/>
+                                    <parameter param-name="fromDate" from-field="parameters.fromDate"/>
+                                    <parameter param-name="thruDate" from-field="parameters.thruDate"/>
+                                </link>
+                                <screenlet title="${uiLabelMap.FormFieldTitle_costCenters}">
+                                    <platform-specific>
+                                        <html>
+                                            <html-template location="component://accounting/webapp/accounting/reports/CostCentersReport.ftl"/>
+                                        </html>
+                                    </platform-specific>
+                                </screenlet>
+                            </widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="GlAccountBalanceByCostCenterPdf">
+        <section>
+            <actions>
+                <property-map resource="CommonUiLabels" map-name="uiLabelMap" global="true"/>
+                <property-map resource="AccountingUiLabels" map-name="uiLabelMap" global="true"/>
+                <service service-name="getPartyAccountingPreferences" result-map="result" auto-field-map="true"/>
+                <set field="partyAcctgPreference" from-field="result.partyAccountingPreference"/>
+                <set field="currencyUomId" from-field="partyAcctgPreference.baseCurrencyUomId"/>
+                <set field="organizationPartyId" from-field="parameters.organizationPartyId"/>
+                <set field="partyIds" value="${groovy:org.ofbiz.party.party.PartyWorker.getAssociatedPartyIdsByRelationshipType(delegator, organizationPartyId, 'GROUP_ROLLUP')}" type="List"/>
+                <set field="partyIds[]" from-field="organizationPartyId"/>
+                <set field="fromDate" from-field="parameters.fromDate" type="Timestamp" default-value="${findLastClosedDateOutMap.lastClosedDate}"/>
+                <set field="thruDate" from-field="parameters.thruDate" type="Timestamp" default-value="${nowTimestamp}"/>
+                <script location="component://accounting/webapp/accounting/WEB-INF/actions/reports/CostCenters.groovy"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="SimpleDecorator" location="component://common/widget/CommonScreens.xml">
+                    <decorator-section name="body">
+                        <platform-specific>
+                            <xsl-fo>
+                                <html-template location="component://accounting/webapp/accounting/reports/CostCentersReport.fo.ftl"/>
+                            </xsl-fo>
+                        </platform-specific>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    
+    <screen name="InventoryValuation">
+        <section>
+            <actions>
+                <set field="labelTitleProperty" value="AccountingInventoryValuation"/>
+                <set field="tabButtonItem" value="OrganizationAccountingReports"/>
+                <set field="tabButtonItem2" value="InventoryValuation"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonOrganizationAccountingReportsDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <decorator-screen name="FindScreenDecorator" location="component://common/widget/CommonScreens.xml">
+                            <decorator-section name="search-options">
+                                <include-form name="InventoryValuation" location="component://accounting/widget/ReportFinancialSummaryForms.xml"/>
+                            </decorator-section>
+                            <decorator-section name="search-results">
+                                <section>
+                                    <condition>
+                                        <if-compare field="parameters.showSearchResults" operator="equals" value="Y"/>
+                                    </condition>
+                                    <widgets>
+                                        <link text="${uiLabelMap.AccountingExportAsPdf}" style="button" target="InventoryValuation.pdf" target-window="_BLANK">
+                                            <parameter param-name="organizationPartyId" from-field="parameters.organizationPartyId"/>
+                                            <parameter param-name="facilityId" from-field="parameters.facilityId"/>
+                                            <parameter param-name="productId" from-field="parameters.productId"/>
+                                            <parameter param-name="thruDate" from-field="parameters.thruDate"/>
+                                        </link>
+                                        <link text="${uiLabelMap.AccountingExportAsCsv}" style="button" target="InventoryValuation.csv">
+                                            <parameter param-name="organizationPartyId" from-field="parameters.organizationPartyId"/>
+                                            <parameter param-name="facilityId" from-field="parameters.facilityId"/>
+                                            <parameter param-name="productId" from-field="parameters.productId"/>
+                                            <parameter param-name="thruDate" from-field="parameters.thruDate"/>
+                                        </link>
+                                        <screenlet title="${uiLabelMap.AccountingInventoryValuationList}">
+                                            <include-form name="InventoryValuationList" location="component://accounting/widget/ReportFinancialSummaryForms.xml"/>
+                                        </screenlet>
+                                    </widgets>
+                                </section>
+                            </decorator-section>
+                        </decorator-screen>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="InventoryValuationPdf">
+        <section>
+            <actions>
+                <property-map resource="CommonUiLabels" map-name="uiLabelMap" global="true"/>
+                <property-map resource="AccountingUiLabels" map-name="uiLabelMap" global="true"/>
+                <property-map resource="ProductUiLabels" map-name="uiLabelMap" global="true"/>
+                <set field="viewSize" value="99999"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="SimpleDecorator" location="component://common/widget/CommonScreens.xml">
+                    <decorator-section name="body">
+                        <container>
+                            <label style="h1" text="${uiLabelMap.AccountingInventoryValuation}"/>
+                            <include-form name="InventoryValuationList" location="component://accounting/widget/ReportFinancialSummaryForms.xml"/>
+                        </container>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="InventoryValuationCsv">
+        <section>
+            <actions>
+                <property-map resource="CommonUiLabels" map-name="uiLabelMap" global="true"/>
+                <property-map resource="AccountingUiLabels" map-name="uiLabelMap" global="true"/>
+                <property-map resource="ProductUiLabels" map-name="uiLabelMap" global="true"/>
+                <set field="viewSize" value="99999"/>
+            </actions>
+            <widgets>
+                <container>
+                    <include-form name="InventoryValuationList" location="component://accounting/widget/ReportFinancialSummaryForms.xml"/>
+                </container>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="CashFlowStatement">
+        <section>
+            <actions>
+                <set field="viewSize" value="99999"/>
+                <set field="titleProperty" value="AccountingCashFlowStatement"/>
+                <set field="tabButtonItem" value="OrganizationAccountingReports"/>
+                <set field="tabButtonItem2" value="CashFlowStatement"/>
+                <set field="organizationPartyId" from-field="parameters.organizationPartyId"/>
+                <service service-name="getPartyAccountingPreferences" result-map="result">
+                    <field-map field-name="organizationPartyId"/>
+                </service>
+                <set field="partyAcctgPreference" from-field="result.partyAccountingPreference"/>
+                <set field="currencyUomId" from-field="partyAcctgPreference.baseCurrencyUomId"/>
+                <!-- Get a default fromDate -->
+                <service service-name="findLastClosedDate" result-map="findLastClosedDateOutMap">
+                    <field-map field-name="organizationPartyId" from-field="organizationPartyId"/>
+                </service>
+                <set field="fromDate" from-field="parameters.fromDate" type="Timestamp" default-value="${findLastClosedDateOutMap.lastClosedDate}"/>
+                <set field="thruDate" from-field="parameters.thruDate" type="Timestamp" default-value="${nowTimestamp}"/>
+                <set field="glFiscalTypeId" from-field="parameters.glFiscalTypeId" default-value="ACTUAL"/>                                
+                <script location="component://accounting/webapp/accounting/WEB-INF/actions/reports/MonthSelection.groovy"/>
+                <script location="component://accounting/webapp/accounting/WEB-INF/actions/reports/CashFlowStatement.groovy"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonOrganizationAccountingReportsDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <screenlet title="${uiLabelMap.AccountingCashFlowStatement}">
+                            <include-form name="CashFlowStatementParameters" location="component://accounting/widget/ReportFinancialSummaryForms.xml"/>
+                        </screenlet>
+                        <screenlet title="${uiLabelMap.AccountingCashFlowStatement}">
+                            <link text="${uiLabelMap.AccountingExportAsCsv}" style="button" target="CashFlowStatementListCsv.csv">
+                                <parameter param-name="fromDate" from-field="fromDate"/>
+                                <parameter param-name="thruDate" from-field="thruDate"/>
+                                <parameter param-name="organizationPartyId" from-field="organizationPartyId"/>
+                                <parameter param-name="glFiscalTypeId" from-field="glFiscalTypeId"/>
+                            </link>
+                            <link text="${uiLabelMap.AccountingExportAsPdf}" style="button" target="CashFlowStatementListPdf.pdf" target-window="_BLANK">
+                                <parameter param-name="fromDate" from-field="fromDate"/>
+                                <parameter param-name="thruDate" from-field="thruDate"/>
+                                <parameter param-name="organizationPartyId" from-field="organizationPartyId"/>
+                                <parameter param-name="glFiscalTypeId" from-field="glFiscalTypeId"/>
+                            </link>
+                            <label style="h3" text="${uiLabelMap.AccountingOpeningCashBalance}"/>
+                            <include-form name="CashFlowStatementOpeningCashBalance" location="component://accounting/widget/ReportFinancialSummaryForms.xml"/>
+                            <label style="h3" text="${uiLabelMap.AccountingPeriodCashBalance}"/>
+                            <include-form name="CashFlowStatementPeriodCashBalance" location="component://accounting/widget/ReportFinancialSummaryForms.xml"/>
+                            <label style="h3" text="${uiLabelMap.AccountingClosingCashBalance}"/>
+                            <include-form name="CashFlowStatementClosingCashBalance" location="component://accounting/widget/ReportFinancialSummaryForms.xml"/>
+                            <label style="h3" text="${uiLabelMap.CommonTotal}"/>
+                            <include-form name="CashFlowBalanceTotals" location="component://accounting/widget/ReportFinancialSummaryForms.xml"/>
+                        </screenlet>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="CashFlowStatementListPdf">
+        <section>
+            <actions>
+                <set field="viewSize" value="99999"/>
+                <property-map resource="AccountingUiLabels" map-name="uiLabelMap" global="true"/>
+                <set field="organizationPartyId" from-field="parameters.organizationPartyId"/>
+                <set field="fromDate" from-field="parameters.fromDate" type="Timestamp"/>
+                <set field="thruDate" from-field="parameters.thruDate" type="Timestamp"/>
+                <set field="glFiscalTypeId" from-field="parameters.glFiscalTypeId" default-value="ACTUAL"/>
+                <script location="component://accounting/webapp/accounting/WEB-INF/actions/reports/CashFlowStatement.groovy"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="SimpleDecorator" location="component://common/widget/CommonScreens.xml">
+                    <decorator-section name="body">
+                        <container>
+                            <label style="h1" text="${uiLabelMap.AccountingCashFlowStatement}"/>
+                            <include-form name="FindCashFlowTotals" location="component://accounting/widget/ReportFinancialSummaryForms.xml"/>
+                            <label style="h3" text="${uiLabelMap.AccountingOpeningCashBalance}"/>
+                            <include-form name="CashFlowStatementOpeningCashBalance" location="component://accounting/widget/ReportFinancialSummaryForms.xml"/>
+                            <label style="h3" text="${uiLabelMap.AccountingPeriodCashBalance}"/>
+                            <include-form name="CashFlowStatementPeriodCashBalance" location="component://accounting/widget/ReportFinancialSummaryForms.xml"/>
+                            <label style="h3" text="${uiLabelMap.AccountingClosingCashBalance}"/>
+                            <include-form name="CashFlowStatementClosingCashBalance" location="component://accounting/widget/ReportFinancialSummaryForms.xml"/>
+                            <label style="h3" text="${uiLabelMap.CommonTotal}"/>
+                            <include-form name="CashFlowBalanceTotals" location="component://accounting/widget/ReportFinancialSummaryForms.xml"/>
+                        </container>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="CashFlowStatementListCsv">
+        <section>
+            <actions>
+                <set field="viewSize" value="99999"/>
+                <property-map resource="AccountingUiLabels" map-name="uiLabelMap" global="true"/>
+                <set field="organizationPartyId" from-field="parameters.organizationPartyId"/>
+                <set field="fromDate" from-field="parameters.fromDate" type="Timestamp"/>
+                <set field="thruDate" from-field="parameters.thruDate" type="Timestamp"/>
+                <set field="glFiscalTypeId" from-field="parameters.glFiscalTypeId" default-value="ACTUAL"/>
+                <script location="component://accounting/webapp/accounting/WEB-INF/actions/reports/CashFlowStatement.groovy"/>
+            </actions>
+            <widgets>
+                <label style="h3" text="${uiLabelMap.AccountingOpeningCashBalance}"/>
+                <include-form name="CashFlowStatementOpeningCashBalance" location="component://accounting/widget/ReportFinancialSummaryForms.xml"/>
+                <label style="h3" text="${uiLabelMap.AccountingPeriodCashBalance}"/>
+                <include-form name="CashFlowStatementPeriodCashBalance" location="component://accounting/widget/ReportFinancialSummaryForms.xml"/>
+                <label style="h3" text="${uiLabelMap.AccountingClosingCashBalance}"/>
+                <include-form name="CashFlowStatementClosingCashBalance" location="component://accounting/widget/ReportFinancialSummaryForms.xml"/>
+                <label style="h3" text="${uiLabelMap.CommonTotal}"/>
+                <include-form name="CashFlowBalanceTotals" location="component://accounting/widget/ReportFinancialSummaryForms.xml"/>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="ComparativeCashFlowStatement">
+        <section>
+            <actions>
+                <set field="viewSize" value="99999"/>
+                <set field="titleProperty" value="AccountingComparativeCashFlowStatement"/>
+                <set field="tabButtonItem" value="OrganizationAccountingReports"/>
+                <set field="tabButtonItem2" value="ComparativeCashFlowStatement"/>
+                <set field="organizationPartyId" from-field="parameters.organizationPartyId" type="String"/>
+                <service service-name="getPartyAccountingPreferences" result-map="result">
+                    <field-map field-name="organizationPartyId"/>
+                </service>
+                <set field="partyAcctgPreference" from-field="result.partyAccountingPreference"/>
+                <set field="currencyUomId" from-field="partyAcctgPreference.baseCurrencyUomId"/>
+
+                <!-- Get a default fromDate -->
+                <service service-name="findLastClosedDate" result-map="findLastClosedDateOutMap">
+                    <field-map field-name="organizationPartyId" from-field="organizationPartyId"/>
+                </service>
+
+                <set field="period1FromDate" from-field="parameters.period1FromDate" type="Timestamp" default-value="${findLastClosedDateOutMap.lastClosedDate}"/>
+                <set field="period1ThruDate" from-field="parameters.period1ThruDate" type="Timestamp" default-value="${nowTimestamp}"/>
+                <set field="period1GlFiscalTypeId" from-field="parameters.period1GlFiscalTypeId" default-value="ACTUAL"/>
+                <set field="fromDate" from-field="period1FromDate"/>
+                <set field="thruDate" from-field="period1ThruDate"/>
+                <set field="glFiscalTypeId" from-field="period1GlFiscalTypeId"/>
+                <script location="component://accounting/webapp/accounting/WEB-INF/actions/reports/CashFlowStatement.groovy"/>
+                <set field="openingCashBalanceList1" from-field="openingCashBalanceList"/>
+                <set field="periodCashBalanceList1" from-field="periodCashBalanceList"/>
+                <set field="closingCashBalanceList1" from-field="closingCashBalanceList"/>
+                <set field="cashFlowBalanceTotalList1" from-field="cashFlowBalanceTotalList"/>
+
+                <set field="period2FromDate" from-field="parameters.period2FromDate" type="Timestamp" default-value="${findLastClosedDateOutMap.lastClosedDate}"/>
+                <set field="period2ThruDate" from-field="parameters.period2ThruDate" type="Timestamp" default-value="${nowTimestamp}"/>
+                <set field="period2GlFiscalTypeId" from-field="parameters.period2GlFiscalTypeId" default-value="ACTUAL"/>                
+                <set field="fromDate" from-field="period2FromDate"/>
+                <set field="thruDate" from-field="period2ThruDate"/>
+                <set field="glFiscalTypeId" from-field="period2GlFiscalTypeId"/>
+                <script location="component://accounting/webapp/accounting/WEB-INF/actions/reports/CashFlowStatement.groovy"/>
+                <set field="openingCashBalanceList2" from-field="openingCashBalanceList"/>
+                <set field="periodCashBalanceList2" from-field="periodCashBalanceList"/>
+                <set field="closingCashBalanceList2" from-field="closingCashBalanceList"/>
+                <set field="cashFlowBalanceTotalList2" from-field="cashFlowBalanceTotalList"/>
+                <script location="component://accounting/webapp/accounting/WEB-INF/actions/reports/ComparativeCashFlowStatement.groovy"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonOrganizationAccountingReportsDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <screenlet title="${uiLabelMap.AccountingComparativeCashFlowStatement}">
+                            <include-form name="ComparativeCashFlowStatementParameters" location="component://accounting/widget/ReportFinancialSummaryForms.xml"/>
+                        </screenlet>
+                        <screenlet title="${uiLabelMap.AccountingComparativeCashFlowStatement}">
+                            <link text="${uiLabelMap.AccountingExportAsCsv}" style="button" target="ComparativeCashFlowStatement.csv">
+                                <parameter param-name="period1FromDate" from-field="period1FromDate"/>
+                                <parameter param-name="period1ThruDate" from-field="period1ThruDate"/>
+                                <parameter param-name="period1GlFiscalTypeId" from-field="period1GlFiscalTypeId"/>
+                                <parameter param-name="period2FromDate" from-field="period2FromDate"/>
+                                <parameter param-name="period2ThruDate" from-field="period2ThruDate"/>
+                                <parameter param-name="period2GlFiscalTypeId" from-field="period2GlFiscalTypeId"/>
+                                <parameter param-name="organizationPartyId"/>
+                                <parameter param-name="currencyUomId"/>
+                            </link>
+                            <link text="${uiLabelMap.AccountingExportAsPdf}" style="button" target="ComparativeCashFlowStatement.pdf" target-window="_BLANK">
+                                <parameter param-name="period1FromDate" from-field="period1FromDate"/>
+                                <parameter param-name="period1ThruDate" from-field="period1ThruDate"/>
+                                <parameter param-name="period1GlFiscalTypeId" from-field="period1GlFiscalTypeId"/>
+                                <parameter param-name="period2FromDate" from-field="period2FromDate"/>
+                                <parameter param-name="period2ThruDate" from-field="period2ThruDate"/>
+                                <parameter param-name="period2GlFiscalTypeId" from-field="period2GlFiscalTypeId"/>
+                                <parameter param-name="organizationPartyId"/>
+                                <parameter param-name="currencyUomId"/>
+                            </link>
+                            <label style="h3" text="${uiLabelMap.AccountingOpeningCashBalance}"/>
+                            <include-form name="ComparativeCashFlowStatementOpeningCashBalance" location="component://accounting/widget/ReportFinancialSummaryForms.xml"/>
+                            <label style="h3" text="${uiLabelMap.AccountingPeriodCashBalance}"/>
+                            <include-form name="ComparativeCashFlowStatementPeriodCashBalance" location="component://accounting/widget/ReportFinancialSummaryForms.xml"/>
+                            <label style="h3" text="${uiLabelMap.AccountingClosingCashBalance}"/>
+                            <include-form name="ComparativeCashFlowStatementClosingCashBalance" location="component://accounting/widget/ReportFinancialSummaryForms.xml"/>
+                            <label style="h3" text="${uiLabelMap.CommonTotal}"/>
+                            <include-form name="ComparativeCashFlowBalanceTotals" location="component://accounting/widget/ReportFinancialSummaryForms.xml"/>
+                        </screenlet>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="ComparativeCashFlowStatementPdf">
+        <section>
+            <actions>
+                <property-map resource="AccountingUiLabels" map-name="uiLabelMap" global="true"/>
+                <set field="viewSize" value="99999"/>
+                <set field="titleProperty" value="AccountingComparativeCashFlowStatement"/>
+                <set field="tabButtonItem" value="OrganizationAccountingReports"/>
+                <set field="tabButtonItem2" value="ComparativeCashFlowStatement"/>
+                <set field="organizationPartyId" from-field="parameters.organizationPartyId" type="String"/>
+                <service service-name="getPartyAccountingPreferences" result-map="result">
+                    <field-map field-name="organizationPartyId"/>
+                </service>
+                <set field="partyAcctgPreference" from-field="result.partyAccountingPreference"/>
+                <set field="currencyUomId" from-field="partyAcctgPreference.baseCurrencyUomId"/>
+
+                <!-- Get a default fromDate -->
+                <service service-name="findLastClosedDate" result-map="findLastClosedDateOutMap">
+                    <field-map field-name="organizationPartyId" from-field="organizationPartyId"/>
+                </service>
+
+                <set field="period1FromDate" from-field="parameters.period1FromDate" type="Timestamp" default-value="${findLastClosedDateOutMap.lastClosedDate}"/>
+                <set field="period1ThruDate" from-field="parameters.period1ThruDate" type="Timestamp" default-value="${nowTimestamp}"/>
+                <set field="period1GlFiscalTypeId" from-field="parameters.period1GlFiscalTypeId" default-value="ACTUAL"/>
+                <set field="fromDate" from-field="period1FromDate"/>
+                <set field="thruDate" from-field="period1ThruDate"/>
+                <set field="glFiscalTypeId" from-field="period1GlFiscalTypeId"/>
+                <script location="component://accounting/webapp/accounting/WEB-INF/actions/reports/CashFlowStatement.groovy"/>
+                <set field="openingCashBalanceList1" from-field="openingCashBalanceList"/>
+                <set field="periodCashBalanceList1" from-field="periodCashBalanceList"/>
+                <set field="closingCashBalanceList1" from-field="closingCashBalanceList"/>
+                <set field="cashFlowBalanceTotalList1" from-field="cashFlowBalanceTotalList"/>
+                
+                <set field="period2FromDate" from-field="parameters.period2FromDate" type="Timestamp" default-value="${findLastClosedDateOutMap.lastClosedDate}"/>
+                <set field="period2ThruDate" from-field="parameters.period2ThruDate" type="Timestamp" default-value="${nowTimestamp}"/>
+                <set field="period2GlFiscalTypeId" from-field="parameters.period2GlFiscalTypeId" default-value="ACTUAL"/>
+                <set field="fromDate" from-field="period2FromDate"/>
+                <set field="thruDate" from-field="period2ThruDate"/>
+                <set field="glFiscalTypeId" from-field="period2GlFiscalTypeId"/>
+                <script location="component://accounting/webapp/accounting/WEB-INF/actions/reports/CashFlowStatement.groovy"/>
+                <set field="openingCashBalanceList2" from-field="openingCashBalanceList"/>
+                <set field="periodCashBalanceList2" from-field="periodCashBalanceList"/>
+                <set field="closingCashBalanceList2" from-field="closingCashBalanceList"/>
+                <set field="cashFlowBalanceTotalList2" from-field="cashFlowBalanceTotalList"/>
+                <script location="component://accounting/webapp/accounting/WEB-INF/actions/reports/ComparativeCashFlowStatement.groovy"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="SimpleDecorator" location="component://common/widget/CommonScreens.xml">
+                    <decorator-section name="body">
+                        <container>
+                            <label style="h1" text="${uiLabelMap.AccountingComparativeCashFlowStatement}"/>
+                            <include-form name="ComparativeCashFlowStatementParametersOneColumn" location="component://accounting/widget/ReportFinancialSummaryForms.xml"/>
+                            <label style="h3" text="${uiLabelMap.AccountingOpeningCashBalance}"/>
+                            <include-form name="ComparativeCashFlowStatementOpeningCashBalance" location="component://accounting/widget/ReportFinancialSummaryForms.xml"/>
+                            <label style="h3" text="${uiLabelMap.AccountingPeriodCashBalance}"/>
+                            <include-form name="ComparativeCashFlowStatementPeriodCashBalance" location="component://accounting/widget/ReportFinancialSummaryForms.xml"/>
+                            <label style="h3" text="${uiLabelMap.AccountingClosingCashBalance}"/>
+                            <include-form name="ComparativeCashFlowStatementClosingCashBalance" location="component://accounting/widget/ReportFinancialSummaryForms.xml"/>
+                            <label style="h3" text="${uiLabelMap.CommonTotal}"/>
+                            <include-form name="ComparativeCashFlowBalanceTotals" location="component://accounting/widget/ReportFinancialSummaryForms.xml"/>
+                        </container>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="ComparativeCashFlowStatementCsv">
+        <section>
+            <actions>
+                <property-map resource="AccountingUiLabels" map-name="uiLabelMap" global="true"/>
+                <set field="viewSize" value="99999"/>
+                <set field="titleProperty" value="AccountingComparativeCashFlowStatement"/>
+                <set field="tabButtonItem" value="OrganizationAccountingReports"/>
+                <set field="tabButtonItem2" value="ComparativeCashFlowStatement"/>
+                <set field="organizationPartyId" from-field="parameters.organizationPartyId" type="String"/>
+                <service service-name="getPartyAccountingPreferences" result-map="result">
+                    <field-map field-name="organizationPartyId"/>
+                </service>
+                <set field="partyAcctgPreference" from-field="result.partyAccountingPreference"/>
+                <set field="currencyUomId" from-field="partyAcctgPreference.baseCurrencyUomId"/>
+
+                <!-- Get a default fromDate -->
+                <service service-name="findLastClosedDate" result-map="findLastClosedDateOutMap">
+                    <field-map field-name="organizationPartyId" from-field="organizationPartyId"/>
+                </service>
+
+                <set field="period1FromDate" from-field="parameters.period1FromDate" type="Timestamp" default-value="${findLastClosedDateOutMap.lastClosedDate}"/>
+                <set field="period1ThruDate" from-field="parameters.period1ThruDate" type="Timestamp" default-value="${nowTimestamp}"/>
+                <set field="period1GlFiscalTypeId" from-field="parameters.period1GlFiscalTypeId" default-value="ACTUAL"/>
+                <set field="fromDate" from-field="period1FromDate"/>
+                <set field="thruDate" from-field="period1ThruDate"/>
+                <set field="glFiscalTypeId" from-field="period1GlFiscalTypeId"/>
+                <script location="component://accounting/webapp/accounting/WEB-INF/actions/reports/CashFlowStatement.groovy"/>
+                <set field="openingCashBalanceList1" from-field="openingCashBalanceList"/>
+                <set field="periodCashBalanceList1" from-field="periodCashBalanceList"/>
+                <set field="closingCashBalanceList1" from-field="closingCashBalanceList"/>
+                <set field="cashFlowBalanceTotalList1" from-field="cashFlowBalanceTotalList"/>
+
+                <set field="period2FromDate" from-field="parameters.period2FromDate" type="Timestamp" default-value="${findLastClosedDateOutMap.lastClosedDate}"/>
+                <set field="period2ThruDate" from-field="parameters.period2ThruDate" type="Timestamp" default-value="${nowTimestamp}"/>
+                <set field="period2GlFiscalTypeId" from-field="parameters.period2GlFiscalTypeId" default-value="ACTUAL"/>
+                <set field="fromDate" from-field="period2FromDate"/>
+                <set field="thruDate" from-field="period2ThruDate"/>
+                <set field="glFiscalTypeId" from-field="period2GlFiscalTypeId"/>
+                <script location="component://accounting/webapp/accounting/WEB-INF/actions/reports/CashFlowStatement.groovy"/>
+                <set field="openingCashBalanceList2" from-field="openingCashBalanceList"/>
+                <set field="periodCashBalanceList2" from-field="periodCashBalanceList"/>
+                <set field="closingCashBalanceList2" from-field="closingCashBalanceList"/>
+                <set field="cashFlowBalanceTotalList2" from-field="cashFlowBalanceTotalList"/>
+                <script location="component://accounting/webapp/accounting/WEB-INF/actions/reports/ComparativeCashFlowStatement.groovy"/>
+            </actions>
+            <widgets>
+                <label style="h3" text="${uiLabelMap.AccountingOpeningCashBalance}"/>
+                <include-form name="ComparativeCashFlowStatementOpeningCashBalance" location="component://accounting/widget/ReportFinancialSummaryForms.xml"/>
+                <label style="h3" text="${uiLabelMap.AccountingPeriodCashBalance}"/>
+                <include-form name="ComparativeCashFlowStatementPeriodCashBalance" location="component://accounting/widget/ReportFinancialSummaryForms.xml"/>
+                <label style="h3" text="${uiLabelMap.AccountingClosingCashBalance}"/>
+                <include-form name="ComparativeCashFlowStatementClosingCashBalance" location="component://accounting/widget/ReportFinancialSummaryForms.xml"/>
+                <label style="h3" text="${uiLabelMap.CommonTotal}"/>
+                <include-form name="ComparativeCashFlowBalanceTotals" location="component://accounting/widget/ReportFinancialSummaryForms.xml"/>
+            </widgets>
+        </section>
+    </screen>
+
 </screens>

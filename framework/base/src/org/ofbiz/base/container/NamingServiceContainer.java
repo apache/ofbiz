@@ -18,11 +18,14 @@
  *******************************************************************************/
 package org.ofbiz.base.container;
 
+import java.net.UnknownHostException;
 import java.rmi.registry.Registry;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.RemoteException;
 import java.rmi.NoSuchObjectException;
 import java.rmi.server.UnicastRemoteObject;
+
+import org.ofbiz.base.util.RMIExtendedSocketFactory;
 
 /**
  * NamingServiceContainer
@@ -37,11 +40,17 @@ public class NamingServiceContainer implements Container {
     protected boolean isRunning = false;
     protected Registry registry = null;
     protected int namingPort = 1099;
+    protected String namingHost = null;
 
-    public void init(String[] args, String configFile) throws ContainerException {
+    protected RMIExtendedSocketFactory rmiSocketFactory;
+
+    private String name;
+
+    public void init(String[] args, String name, String configFile) throws ContainerException {
+        this.name =name;
         this.configFileLocation = configFile;
 
-        ContainerConfig.Container cfg = ContainerConfig.getContainer("naming-container", configFileLocation);
+        ContainerConfig.Container cfg = ContainerConfig.getContainer(name, configFileLocation);
 
         // get the telnet-port
         ContainerConfig.Container.Property port = cfg.getProperty("port");
@@ -53,11 +62,23 @@ public class NamingServiceContainer implements Container {
             }
         }
 
+        // get the telnet-host
+        ContainerConfig.Container.Property host = cfg.getProperty("host");
+        if (host != null && host.value != null) {
+            this.namingHost =  host.value ;
+        }
+
+        try {
+            rmiSocketFactory = new RMIExtendedSocketFactory( namingHost );
+        } catch ( UnknownHostException uhEx ) {
+            throw new ContainerException("Invalid host defined in container [naming-container] configuration; not a valid IP address", uhEx);
+        }
+
     }
 
     public boolean start() throws ContainerException {
         try {
-            registry = LocateRegistry.createRegistry(namingPort);
+            registry = LocateRegistry.createRegistry(namingPort, rmiSocketFactory, rmiSocketFactory);
         } catch (RemoteException e) {
             throw new ContainerException("Unable to locate naming service", e);
         }
@@ -74,5 +95,9 @@ public class NamingServiceContainer implements Container {
                 throw new ContainerException("Unable to shutdown naming registry");
             }
         }
+    }
+
+    public String getName() {
+        return name;
     }
 }

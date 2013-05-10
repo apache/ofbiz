@@ -1,48 +1,60 @@
 
-Welcome to Apache OFBiz 09.04!
+Welcome to Apache OFBiz!
 
-This release requires the 1.5 series (or later) JDK
-(not just the JRE, the full J2SDK) to run.
+All you need to run OFBiz is a 1.6 (version 6) JDK
+(not just the JRE, the full JDK).
+http://java.sun.com/javase/downloads/index.jsp
 
-Before you can use OFBiz, it must be built and the demonstration
-data must be loaded. To do that, type the following command
-on the command line:
+You can load the demo data (strongly advised if you are new to
+OFBiz) with the following command on the command line
+from the OFBiz home folder (in Unix-like operating systems
+type "./ant" rather than "ant"):
 
-ant run-install
+ant load-demo
 
-Once that is done, run the executable jar file
-that comes with OFBiz, which is ofbiz.jar. To do this on the
-command line you would type:
+Then start OFBiz:
 
-java -Xms128M -Xmx512M -jar ofbiz.jar
+ant start
 
-There are also start scripts for Windows and Unix-based
-operating systems, namely startofbiz.bat and startofbiz.sh.
+(or "java -Xms128M -Xmx512M -XX:MaxPermSize=128m -jar ofbiz.jar")
 
 Once OFBiz starts, you can look at the demo storefront at:
-http://localhost:8080/ecommerce/
+http://localhost:8080/ecommerce
 
 and the administration interface at:
-http://localhost:8080/webtools/
+https://localhost:8443/webtools
 
 You can log in with the user "admin" and password "ofbiz".
 
-For more details about running a build, or for information on
-getting, building, and running the source please see the
-Apache OFBiz Setup Guide:
+To stop OFBiz:
 
-https://cwiki.apache.org/confluence/display/OFBENDUSER/Apache+OFBiz+Business+Setup+Guide
+ant stop
 
-Note that running with the default configuration uses an
-embedded Java database (Apache Derby), and embedded application
-server components such as Tomcat, Geronimo (transaction manager), etc.
+To get the list of available commands:
 
-To prepare OFBiz for production use the Basic Production Setup Guide
-is a great place to start. It is available here:
+ant -p
 
-https://cwiki.apache.org/confluence/display/OFBTECH/Apache+OFBiz+Technical+Production+Setup+Guide
+You will also find several platform dependent scripts in the
+"tools" folder (for example for Windows and Unix-like operating
+systems, the startup scripts are startofbiz.bat and startofbiz.sh).
 
-For additional resources please see the OFBiz web site.
+Note that the default configuration uses an embedded Java database
+(Apache Derby) and embedded application server components such as
+Tomcat, Geronimo (transaction manager), etc.
+
+For more details about OFBiz please visit the OFBiz Documentation page:
+
+http://ofbiz.apache.org/documentation.html
+
+In this page you will find links to useful guides such as:
+* "Demo and Test Setup Guide"
+* "Basic Production Setup Guide"
+* "A Beginners Development Guide"
+
+If you would like to get in touch with the OFBiz community of users and
+developers, the following page will help to get started:
+
+http://ofbiz.apache.org/community.html
 
 Enjoy!
 

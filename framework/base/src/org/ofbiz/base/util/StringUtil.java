@@ -39,13 +39,13 @@ import javolution.util.FastSet;
 
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Hex;
-import org.owasp.esapi.Encoder;
+import org.ofbiz.base.lang.Appender;
 import org.owasp.esapi.ValidationErrorList;
 import org.owasp.esapi.Validator;
 import org.owasp.esapi.codecs.Codec;
 import org.owasp.esapi.codecs.HTMLEntityCodec;
 import org.owasp.esapi.codecs.PercentCodec;
-import org.owasp.esapi.errors.EncodingException;
+import org.owasp.esapi.errors.IntrusionException;
 import org.owasp.esapi.reference.DefaultEncoder;
 import org.owasp.esapi.reference.DefaultValidator;
 
@@ -55,21 +55,34 @@ import org.owasp.esapi.reference.DefaultValidator;
  */
 public class StringUtil {
 
+    public static final StringUtil INSTANCE = new StringUtil();
     public static final String module = StringUtil.class.getName();
+    protected static final Map<String, Pattern> substitutionPatternMap;
 
     /** OWASP ESAPI canonicalize strict flag; setting false so we only get warnings about double encoding, etc; can be set to true for exceptions and more security */
     public static final boolean esapiCanonicalizeStrict = false;
-    public static final Encoder defaultWebEncoder;
+    public static final DefaultEncoder defaultWebEncoder;
     public static final Validator defaultWebValidator;
     static {
         // possible codecs: CSSCodec, HTMLEntityCodec, JavaScriptCodec, MySQLCodec, OracleCodec, PercentCodec, UnixCodec, VBScriptCodec, WindowsCodec
         List<Codec> codecList = Arrays.asList(new HTMLEntityCodec(), new PercentCodec());
         defaultWebEncoder = new DefaultEncoder(codecList);
         defaultWebValidator = new DefaultValidator();
+        substitutionPatternMap = FastMap.newInstance();
+        substitutionPatternMap.put("&&", Pattern.compile("@and", Pattern.LITERAL));
+        substitutionPatternMap.put("||", Pattern.compile("@or", Pattern.LITERAL));
+        substitutionPatternMap.put("<=", Pattern.compile("@lteq", Pattern.LITERAL));
+        substitutionPatternMap.put(">=", Pattern.compile("@gteq", Pattern.LITERAL));
+        substitutionPatternMap.put("<", Pattern.compile("@lt", Pattern.LITERAL));
+        substitutionPatternMap.put(">", Pattern.compile("@gt", Pattern.LITERAL));
     }
 
     public static final SimpleEncoder htmlEncoder = new HtmlEncoder();
     public static final SimpleEncoder xmlEncoder = new XmlEncoder();
+    public static final SimpleEncoder stringEncoder = new StringEncoder();
+
+    private StringUtil() {
+    }
 
     public static interface SimpleEncoder {
         public String encode(String original);
@@ -87,6 +100,15 @@ public class StringUtil {
         }
     }
 
+    public static class StringEncoder implements SimpleEncoder {
+        public String encode(String original) {
+            if (original != null) {
+                original = original.replace("\"", "\\\"");
+            }
+            return original;
+        }
+    }
+
     // ================== Begin General Functions ==================
 
     public static SimpleEncoder getEncoder(String type) {
@@ -94,6 +116,8 @@ public class StringUtil {
             return StringUtil.xmlEncoder;
         } else if ("html".equals(type)) {
             return StringUtil.htmlEncoder;
+        } else if ("string".equals(type)) {
+            return StringUtil.stringEncoder;
         } else {
             return null;
         }
@@ -114,7 +138,7 @@ public class StringUtil {
         if (mainString == null) {
             return null;
         }
-        if (oldString == null || oldString.length() == 0) {
+        if (UtilValidate.isEmpty(oldString)) {
             return mainString;
         }
         if (newString == null) {
@@ -164,13 +188,10 @@ public class StringUtil {
         List<String> splitList = null;
         StringTokenizer st = null;
 
-        if (str == null)
-            return splitList;
+        if (str == null) return splitList;
 
-        if (delim != null)
-            st = new StringTokenizer(str, delim);
-        else
-            st = new StringTokenizer(str);
+        if (delim != null) st = new StringTokenizer(str, delim);
+        else               st = new StringTokenizer(str);
 
         if (st != null && st.hasMoreTokens()) {
             splitList = FastList.newInstance();
@@ -181,6 +202,31 @@ public class StringUtil {
         return splitList;
     }
 
+    /**
+     * Splits a String on a delimiter into a List of Strings.
+     * @param str the String to split
+     * @param delim the delimiter character(s) to join on (null will split on whitespace)
+     * @param limit see String.split() method
+     * @return a list of Strings
+     */
+    public static List<String> split(String str, String delim, int limit) {
+        List<String> splitList = null;
+        String[] st = null;
+
+        if (str == null) return splitList;
+
+        if (delim != null) st = Pattern.compile(delim).split(str, limit);
+        else               st = str.split("\\s");
+
+        
+        if (st != null && st.length > 0) {
+            splitList = FastList.newInstance();
+            for (int i=0; i < st.length; i++) splitList.add(st[i]);
+        }
+        
+        return splitList;
+    }
+    
     /**
      * Encloses each of a List of Strings in quotes.
      * @param list List of String(s) to quote.
@@ -199,17 +245,33 @@ public class StringUtil {
     /**
      * Creates a Map from an encoded name/value pair string
      * @param str The string to decode and format
+     * @param delim the delimiter character(s) to join on (null will split on whitespace)
      * @param trim Trim whitespace off fields
      * @return a Map of name/value pairs
      */
-    public static Map<String, String> strToMap(String str, boolean trim) {
+    public static Map<String, String> strToMap(String str, String delim, boolean trim) {
+        return strToMap(str, delim, trim, null);
+        
+    }
+
+    /**
+     * Creates a Map from a name/value pair string
+     * @param str The string to decode and format
+     * @param delim the delimiter character(s) to join on (null will split on whitespace)
+     * @param trim Trim whitespace off fields
+     * @param pairsSeparator in case you use not encoded name/value pairs strings 
+     *        and want to replace "=" to avoid clashes with parameters values in a not encoded URL, default to "="
+     * @return a Map of name/value pairs
+     */
+    public static Map<String, String> strToMap(String str, String delim, boolean trim, String pairsSeparator) {
         if (str == null) return null;
         Map<String, String> decodedMap = FastMap.newInstance();
-        List<String> elements = split(str, "|");
+        List<String> elements = split(str, delim);
+        pairsSeparator = pairsSeparator == null ? "=" : pairsSeparator;
 
         for (String s: elements) {
-            List<String> e = split(s, "=");
 
+            List<String> e = split(s, pairsSeparator);
             if (e.size() != 2) {
                 continue;
             }
@@ -236,12 +298,33 @@ public class StringUtil {
     /**
      * Creates a Map from an encoded name/value pair string
      * @param str The string to decode and format
+     * @param trim Trim whitespace off fields
+     * @return a Map of name/value pairs
+     */
+    public static Map<String, String> strToMap(String str, boolean trim) {
+        return strToMap(str, null, trim);
+    }
+
+    /**
+     * Creates a Map from an encoded name/value pair string
+     * @param str The string to decode and format
+     * @param delim the delimiter character(s) to join on (null will split on whitespace)
+     * @return a Map of name/value pairs
+     */
+    public static Map<String, String> strToMap(String str, String delim) {
+        return strToMap(str, delim, false);
+    }
+
+    /**
+     * Creates a Map from an encoded name/value pair string
+     * @param str The string to decode and format
      * @return a Map of name/value pairs
      */
     public static Map<String, String> strToMap(String str) {
-        return strToMap(str, false);
+        return strToMap(str, null, false);
     }
 
+    
     /**
      * Creates an encoded String from a Map of name/value pairs (MUST BE STRINGS!)
      * @param map The Map of name/value pairs
@@ -282,7 +365,7 @@ public class StringUtil {
         }
         return buf.toString();
     }
-
+    
     /**
      * Reads a String version of a Map (should contain only strings) and creates a new Map
      *
@@ -367,7 +450,7 @@ public class StringUtil {
 
     /** Make sure the string starts with a forward slash but does not end with one; converts back-slashes to forward-slashes; if in String is null or empty, returns zero length string. */
     public static String cleanUpPathPrefix(String prefix) {
-        if (prefix == null || prefix.length() == 0) return "";
+        if (UtilValidate.isEmpty(prefix)) return "";
 
         StringBuilder cppBuff = new StringBuilder(prefix.replace('\\', '/'));
 
@@ -410,11 +493,11 @@ public class StringUtil {
 
     private static char[] hexChar = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f' };
     public static int convertChar(char c) {
-        if ( '0' <= c && c <= '9' ) {
+        if ('0' <= c && c <= '9') {
             return c - '0' ;
-        } else if ( 'a' <= c && c <= 'f' ) {
+        } else if ('a' <= c && c <= 'f') {
             return c - 'a' + 0xa ;
-        } else if ( 'A' <= c && c <= 'F' ) {
+        } else if ('A' <= c && c <= 'F') {
             return c - 'A' + 0xa ;
         } else {
             throw new IllegalArgumentException("Invalid hex character: [" + c + "]");
@@ -474,6 +557,34 @@ public class StringUtil {
         return outStrBfr.toString();
     }
 
+    /** Converts operator substitutions (@and, @or, etc) back to their original form.
+     * <p>OFBiz script syntax provides special forms of common operators to make
+     * it easier to embed logical expressions in XML:
+     * <table border="1" cellpadding="2">
+     * <tr><td><strong>@and</strong></td><td>&amp;&amp;</td></tr>
+     * <tr><td><strong>@or</strong></td><td>||</td></tr>
+     * <tr><td><strong>@gt</strong></td><td>&gt;</td></tr>
+     * <tr><td><strong>@gteq</strong></td><td>&gt;=</td></tr>
+     * <tr><td><strong>@lt</strong></td><td>&lt;</td></tr>
+     * <tr><td><strong>@lteq</strong></td><td>&lt;=</td></tr>
+     * </table></p>
+     * @param expression The <code>String</code> to convert
+     * @return The converted <code>String</code>
+     */
+    public static String convertOperatorSubstitutions(String expression) {
+        String result = expression;
+        if (result != null && (result.contains("@") || result.contains("'"))) {
+            for (Map.Entry<String, Pattern> entry: substitutionPatternMap.entrySet()) {
+                Pattern pattern = entry.getValue();
+                result = pattern.matcher(result).replaceAll(entry.getKey());
+            }
+            if (Debug.verboseOn()) {
+                Debug.logVerbose("Converted " + expression + " to " + result, module);
+            }
+        }
+        return result;
+    }
+
     /**
      * Uses a black-list approach for necessary characters for HTML.
      * Does not allow various characters (after canonicalization), including "<", ">", "&" (if not followed by a space), and "%" (if not followed by a space).
@@ -487,10 +598,10 @@ public class StringUtil {
         // canonicalize, strict (error on double-encoding)
         try {
             value = defaultWebEncoder.canonicalize(value, true);
-        } catch (EncodingException e) {
+        } catch (IntrusionException e) {
             // NOTE: using different log and user targeted error messages to allow the end-user message to be less technical
             Debug.logError("Canonicalization (format consistency, character escaping that is mixed or double, etc) error for attribute named [" + valueName + "], String [" + value + "]: " + e.toString(), module);
-            errorMessageList.add("In field [" + valueName + "] found character espacing (mixed or double) that is not allowed or other format consistency error: " + e.toString());
+            errorMessageList.add("In field [" + valueName + "] found character escaping (mixed or double) that is not allowed or other format consistency error: " + e.toString());
         }
 
         // check for "<", ">"
@@ -547,62 +658,6 @@ public class StringUtil {
     }
 
     /**
-     * Translates various HTML characters in a string so that the string can be displayed in a browser safely
-     * <p>
-     * This function is useful in preventing user-supplied text from containing HTML markup, such as in a message board or
-     * guest book application. The optional arguments doubleQuotes and singleQuotes allow the control of the substitution of
-     * the quote characters.  The default is to translate them with the HTML equivalent.
-     * </p>
-     * The translations performed are: <ol>
-     *    <li>'&' (ampersand) becomes '&amp;'
-     *    <li>'"' (double quote) becomes '&quot;' when doubleQuotes is true.
-     *    <li>''' (single quote) becomes '&#039;' when singleQuotes is true.
-     *    <li>'<' (less than) becomes '&lt;'
-     *    <li>'>' (greater than) becomes '&gt;'
-     *    <li>\n (Carriage Return) becomes '&lt;br&gt;gt;'
-     * </ol>
-     *
-     * @deprecated Use StringUtil.htmlEncoder instead.
-     */
-    public static String htmlSpecialChars(String html, boolean doubleQuotes, boolean singleQuotes, boolean insertBR) {
-        html = StringUtil.replaceString(html, "&", "&amp;");
-        html = StringUtil.replaceString(html, "<", "&lt;");
-        html = StringUtil.replaceString(html, ">", "&gt;");
-        if (doubleQuotes) {
-            html = StringUtil.replaceString(html, "\"", "&quot;");
-        }
-        if (singleQuotes) {
-            html = StringUtil.replaceString(html, "'", "&#039");
-        }
-        if (insertBR) {
-            html = StringUtil.replaceString(html, "\n", "<br>");
-        }
-
-        return html;
-    }
-
-    public static String htmlSpecialChars(String html) {
-        return htmlSpecialChars(html, true, true, true);
-    }
-
-    public static String fromHtmlToSpecialChars(String html, boolean doubleQuotes, boolean singleQuotes, boolean insertBR) {
-        html = StringUtil.replaceString(html, "&amp;", "&");
-        html = StringUtil.replaceString(html, "&lt;", "<");
-        html = StringUtil.replaceString(html, "&gt;", ">");
-        if (doubleQuotes) {
-            html = StringUtil.replaceString(html, "&quot;", "\"");
-        }
-        if (singleQuotes) {
-            html = StringUtil.replaceString(html, "&#039", "'");
-        }
-        if (insertBR) {
-            html = StringUtil.replaceString(html, "<br>", "\n");
-        }
-        html = html.replace("&nbsp;", " ");
-        return html;
-    }
-
-    /**
      * Remove/collapse multiple newline characters
      *
      * @param str string to collapse newlines in
@@ -630,7 +685,7 @@ public class StringUtil {
      * @return the converted string
      */
     public static String collapseCharacter(String str, char c) {
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         char last = str.charAt(0);
 
         for (int i = 0; i < str.length(); i++) {
@@ -653,6 +708,44 @@ public class StringUtil {
         return new StringWrapper(theString);
     }
 
+    public static StringBuilder appendTo(StringBuilder sb, Iterable<? extends Appender<StringBuilder>> iterable, String prefix, String suffix, String sep) {
+        return appendTo(sb, iterable, prefix, suffix, null, sep, null);
+    }
+
+    public static StringBuilder appendTo(StringBuilder sb, Iterable<? extends Appender<StringBuilder>> iterable, String prefix, String suffix, String sepPrefix, String sep, String sepSuffix) {
+        Iterator<? extends Appender<StringBuilder>> it = iterable.iterator();
+        while (it.hasNext()) {
+            if (prefix != null) sb.append(prefix);
+            it.next().appendTo(sb);
+            if (suffix != null) sb.append(suffix);
+            if (it.hasNext() && sep != null) {
+                if (sepPrefix != null) sb.append(sepPrefix);
+                sb.append(sep);
+                if (sepSuffix != null) sb.append(sepSuffix);
+            }
+        }
+        return sb;
+    }
+
+    public static StringBuilder append(StringBuilder sb, Iterable<? extends Object> iterable, String prefix, String suffix, String sep) {
+        return append(sb, iterable, prefix, suffix, null, sep, null);
+    }
+
+    public static StringBuilder append(StringBuilder sb, Iterable<? extends Object> iterable, String prefix, String suffix, String sepPrefix, String sep, String sepSuffix) {
+        Iterator<? extends Object> it = iterable.iterator();
+        while (it.hasNext()) {
+            if (prefix != null) sb.append(prefix);
+            sb.append(it.next());
+            if (suffix != null) sb.append(suffix);
+            if (it.hasNext() && sep != null) {
+                if (sepPrefix != null) sb.append(sepPrefix);
+                sb.append(sep);
+                if (sepSuffix != null) sb.append(sepSuffix);
+            }
+        }
+        return sb;
+    }
+
     /**
      * A super-lightweight object to wrap a String object. Mainly used with FTL templates
      * to avoid the general HTML auto-encoding that is now done through the Screen Widget.
@@ -670,7 +763,7 @@ public class StringUtil {
          * Fairly simple method used for the plus (+) base concatenation in Groovy.
          *
          * @param value
-         * @return
+         * @return the wrapped string, plus the value
          */
         public String plus(Object value) {
             return this.theString + value;
@@ -679,6 +772,7 @@ public class StringUtil {
         /**
          * @return The String this object wraps.
          */
+        @Override
         public String toString() {
             return this.theString;
         }
@@ -690,8 +784,9 @@ public class StringUtil {
      */
     public static class HtmlEncodingMapWrapper<K> implements Map<K, Object>, Reusable {
         protected static final ObjectFactory<HtmlEncodingMapWrapper<?>> mapStackFactory = new ObjectFactory<HtmlEncodingMapWrapper<?>>() {
+            @Override
             protected HtmlEncodingMapWrapper<?> create() {
-                return new HtmlEncodingMapWrapper();
+                return new HtmlEncodingMapWrapper<Object>();
             }
         };
         public static <K> HtmlEncodingMapWrapper<K> getHtmlEncodingMapWrapper(Map<K, Object> mapToWrap, SimpleEncoder encoder) {
@@ -727,7 +822,7 @@ public class StringUtil {
                 } else {
                     return StringUtil.defaultWebEncoder.encodeForHTML((String) theObject);
                 }
-            } else if (theObject instanceof Map) {
+            } else if (theObject instanceof Map<?, ?>) {
                 return HtmlEncodingMapWrapper.getHtmlEncodingMapWrapper(UtilGenerics.<K, Object>checkMap(theObject), this.encoder);
             }
             return theObject;
@@ -739,6 +834,7 @@ public class StringUtil {
         public Set<K> keySet() { return this.internalMap.keySet(); }
         public Collection<Object> values() { return this.internalMap.values(); }
         public Set<Map.Entry<K, Object>> entrySet() { return this.internalMap.entrySet(); }
+        @Override
         public String toString() { return this.internalMap.toString(); }
     }
 }

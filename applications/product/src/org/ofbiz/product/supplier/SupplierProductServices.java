@@ -24,7 +24,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-import javolution.util.FastList;
 import javolution.util.FastMap;
 
 import org.ofbiz.base.util.Debug;
@@ -32,7 +31,7 @@ import org.ofbiz.base.util.UtilDateTime;
 import org.ofbiz.base.util.UtilGenerics;
 import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.base.util.UtilValidate;
-import org.ofbiz.entity.GenericDelegator;
+import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
 import org.ofbiz.entity.condition.EntityCondition;
@@ -57,7 +56,7 @@ public class SupplierProductServices {
      */
     public static Map<String, Object> getSuppliersForProduct(DispatchContext dctx, Map<String, ? extends Object> context) {
         Map<String, Object> results = FastMap.newInstance();
-        GenericDelegator delegator = dctx.getDelegator();
+        Delegator delegator = dctx.getDelegator();
 
         GenericValue product = null;
         String productId = (String) context.get("productId");
@@ -66,20 +65,20 @@ public class SupplierProductServices {
         BigDecimal quantity =(BigDecimal) context.get("quantity");
         String canDropShip = (String) context.get("canDropShip");
         try {
-            product = delegator.findByPrimaryKeyCache("Product", UtilMisc.toMap("productId", productId));
+            product = delegator.findOne("Product", UtilMisc.toMap("productId", productId), true);
             if (product == null) {
                 results = ServiceUtil.returnSuccess();
                 results.put("supplierProducts",null);
                 return results;
             }
-            List<GenericValue> supplierProducts = product.getRelatedCache("SupplierProduct");
+            List<GenericValue> supplierProducts = product.getRelated("SupplierProduct", null, null, true);
 
             // if there were no related SupplierProduct entities and the item is a variant, then get the SupplierProducts of the virtual parent product
             if (supplierProducts.size() == 0 && product.getString("isVariant") != null && product.getString("isVariant").equals("Y")) {
                 String virtualProductId = ProductWorker.getVariantVirtualId(product);
-                GenericValue virtualProduct = delegator.findByPrimaryKeyCache("Product", UtilMisc.toMap("productId", virtualProductId));
+                GenericValue virtualProduct = delegator.findOne("Product", UtilMisc.toMap("productId", virtualProductId), true);
                 if (virtualProduct != null) {
-                    supplierProducts = virtualProduct.getRelatedCache("SupplierProduct");
+                    supplierProducts = virtualProduct.getRelated("SupplierProduct", null, null, true);
                 }
             }
 
@@ -137,7 +136,7 @@ public class SupplierProductServices {
                 // loop through all the features, find the related SupplierProductFeature for the given partyId, and
                 // substitue description and idCode
                 for (GenericValue nextFeature: features) {
-                    List<GenericValue> supplierFeatures = EntityUtil.filterByAnd(nextFeature.getRelated("SupplierProductFeature"),
+                    List<GenericValue> supplierFeatures = EntityUtil.filterByAnd(nextFeature.getRelated("SupplierProductFeature", null, null, false),
                                                                    UtilMisc.toMap("partyId", partyId));
                     GenericValue supplierFeature = null;
 

@@ -26,8 +26,8 @@ import java.io.StringWriter;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.Map;
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
@@ -37,12 +37,11 @@ import javolution.util.FastMap;
 
 import org.ofbiz.base.location.FlexibleLocation;
 import org.ofbiz.base.util.Debug;
-import org.ofbiz.base.util.HttpClient;
-import org.ofbiz.base.util.HttpClientException;
-import org.ofbiz.webapp.view.ViewHandler;
-import org.ofbiz.webapp.view.ViewHandlerException;
+import org.ofbiz.base.util.UtilGenerics;
+import org.ofbiz.base.util.UtilValidate;
+import org.ofbiz.base.util.template.FreeMarkerWorker;
+import org.ofbiz.entity.GenericValue;
 
-import freemarker.ext.beans.BeansWrapper;
 import freemarker.template.Configuration;
 import freemarker.template.SimpleSequence;
 import freemarker.template.Template;
@@ -68,14 +67,14 @@ public class WfsViewHandler extends AbstractViewHandler {
 
         if (request == null)
             throw new ViewHandlerException("Null HttpServletRequest object");
-        if (page == null || page.length() == 0)
+        if (UtilValidate.isEmpty(page))
             throw new ViewHandlerException("Null or empty source");
 
         if (Debug.infoOn()) Debug.logInfo("Retreiving HTTP resource at: " + page, module);
         try {
             String result = null;
 
-            List entityList = (List)request.getAttribute("entityList");
+            List<GenericValue> entityList = UtilGenerics.cast(request.getAttribute("entityList"));
             SimpleSequence simpleList = new SimpleSequence(entityList);
             Map<String, Object> ctx = FastMap.newInstance();
             ctx.put("entityList", simpleList);
@@ -111,7 +110,7 @@ public class WfsViewHandler extends AbstractViewHandler {
 
     public static Configuration makeDefaultOfbizConfig() throws TemplateException, IOException {
         Configuration config = new Configuration();
-        config.setObjectWrapper(BeansWrapper.getDefaultInstance());
+        config.setObjectWrapper(FreeMarkerWorker.getDefaultOfbizWrapper());
         config.setSetting("datetime_format", "yyyy-MM-dd HH:mm:ss.SSS");
         Configuration defaultOfbizConfig = config;
         return defaultOfbizConfig;

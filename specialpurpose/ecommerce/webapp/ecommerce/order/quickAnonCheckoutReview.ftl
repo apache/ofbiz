@@ -28,18 +28,19 @@ under the License.
             document.${parameters.formNameValue}.processButton.disabled=true;
             document.${parameters.formNameValue}.submit();
         } else {
-            alert("You order is being processed, this may take a moment.");
+            showErrorAlert("${uiLabelMap.CommonErrorMessage2}","${uiLabelMap.YoureOrderIsBeingProcessed}");
         }
     }
 
     function shippingMethodChanged(shippingMethod) {
         var submitToUri = "<@ofbizUrl>quickAnonProcessShipOptionsUpdateOrderItems</@ofbizUrl>?shipping_method=" + shippingMethod;
-        dojo.io.bind({url: submitToUri,
-            load: function(type, data, evt){
-            if(type == "load"){
+        jQuery.ajax({
+            url: submitToUri,
+            type: "POST",
+            success: function(data) {
                 document.getElementById("orderItemsSection").innerHTML = data;
             }
-          },mimetype: "text/html"});
+        });
     }
 
 // -->
@@ -50,9 +51,9 @@ under the License.
 
 <#if cart?exists && 0 < cart.size()>
   ${screens.render("component://ecommerce/widget/OrderScreens.xml#quickAnonOrderHeader")}
-  <br/>
+  <br />
   <div id="orderItemsSection">${screens.render("component://ecommerce/widget/OrderScreens.xml#orderitems")}</div>
-<form type="POST" action="<@ofbizUrl>processorder</@ofbizUrl>" name="${parameters.formNameValue}">
+<form type="post" action="<@ofbizUrl>processorder</@ofbizUrl>" name="${parameters.formNameValue}">
   <table border="0" cellpadding="1" width="100%">
    <tr>
       <td colspan="4">
@@ -60,9 +61,9 @@ under the License.
       </td>
       <td align="right">
           <#if (requestParameters.checkoutpage)?has_content>
-            <input type="hidden" name="checkoutpage" value="${requestParameters.checkoutpage}">
+            <input type="hidden" name="checkoutpage" value="${requestParameters.checkoutpage}" />
           </#if>
-          <input type="button" id="submitOrderReview" name="processButton" value="${uiLabelMap.OrderSubmitOrder}" onClick="processOrder();" class="mediumSubmit">
+          <input type="button" id="submitOrderReview" name="processButton" value="${uiLabelMap.OrderSubmitOrder}" onclick="processOrder();" class="mediumSubmit" />
         <#-- doesn't work with Safari, seems to work with IE, Mozilla <a href="#" onclick="processOrder();" class="buttontextbig">[${uiLabelMap.OrderSubmitOrder}]&nbsp;</a> -->
       </td>
     </tr>

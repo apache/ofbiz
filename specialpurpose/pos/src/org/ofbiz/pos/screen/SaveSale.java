@@ -53,7 +53,6 @@ public class SaveSale extends XPage {
     //protected XButton m_saveAndPrint = null; //FIXME : button does not exist yet
     protected static PosTransaction m_trans = null;
     public static SimpleDateFormat sdf = new SimpleDateFormat(UtilProperties.getMessage(PosTransaction.resource,"PosDateTimeFormat",Locale.getDefault()));
-    private static boolean ShowKeyboardInSaveSale = UtilProperties.propertyValueEqualsIgnoreCase("parameters", "ShowKeyboardInSaveSale", "Y");
 
     //TODO : make getter and setter for members (ie m_*) if needed (extern calls).  For that in Eclipse use Source/Generate Getters and setters
 
@@ -107,7 +106,7 @@ public class SaveSale extends XPage {
             String sale = m_saleName.getText();
             if (null != sale) {
                 saveSale(sale);
-                m_trans.voidSale();
+                m_trans.voidSale(m_pos);
                 m_pos.refresh();
             }
         }
@@ -121,14 +120,14 @@ public class SaveSale extends XPage {
                 saveSale(sale);
                 //DO PRINT HERE
                 DeviceLoader.receipt.printReceipt(m_trans, true);
-                m_trans.voidSale();
+                m_trans.voidSale(m_pos);
                 m_pos.refresh();
             }
         }
     }
 
     public synchronized void editSaleName() {
-        if (wasMouseClicked() && ShowKeyboardInSaveSale) {
+        if (wasMouseClicked() && UtilProperties.propertyValueEqualsIgnoreCase("parameters", "ShowKeyboardInSaveSale", "Y")) {
             try {
                 Keyboard keyboard = new Keyboard(m_pos);
                 keyboard.setText(m_saleName.getText());
@@ -157,7 +156,7 @@ public class SaveSale extends XPage {
             } catch (Throwable t) {
             }
             if (cl == null) {
-                Debug.log("No context classloader available; using class classloader", module);
+                Debug.logInfo("No context classloader available; using class classloader", module);
                 try {
                     cl = this.getClass().getClassLoader();
                 } catch (Throwable t) {

@@ -18,17 +18,21 @@ specific language governing permissions and limitations
 under the License.
 -->
 
-<ofbiz-component name="webpos"
+<ofbiz-component name="webpos" enabled="true"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/ofbiz-component.xsd">
     <resource-loader name="main" type="component"/>
-    <classpath type="dir" location="script"/>
     <classpath type="dir" location="config"/>
     <classpath type="jar" location="build/lib/*"/>
 
     <entity-resource type="data" reader-name="demo" loader="main" location="data/DemoPosData.xml"/>
-
+    <entity-resource type="data" reader-name="seed" loader="main" location="data/WebPosSecurityPermissionSeedData.xml"/>
+    <entity-resource type="data" reader-name="demo" loader="main" location="data/WebPosSecurityGroupDemoData.xml"/>
+    
     <service-resource type="model" loader="main" location="servicedef/services.xml"/>
+    <service-resource type="model" loader="main" location="servicedef/services_cart.xml"/>
+    <service-resource type="model" loader="main" location="servicedef/services_customer.xml"/>
+    <service-resource type="model" loader="main" location="servicedef/services_search.xml"/>
     <service-resource type="model" loader="main" location="servicedef/services_manager.xml"/>
     <service-resource type="model" loader="main" location="servicedef/services_payment.xml"/>
     <service-resource type="model" loader="main" location="servicedef/services_promo.xml"/>
@@ -38,6 +42,7 @@ under the License.
         server="default-server"
         menu-name="secondary"
         location="webapp/webpos"
+        base-permission="WEBPOS"
         mount-point="/webpos"
         app-bar-display="true"/>
 </ofbiz-component>

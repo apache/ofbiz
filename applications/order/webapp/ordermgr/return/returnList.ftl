@@ -18,21 +18,21 @@ under the License.
 -->
 
 <h1>${uiLabelMap.OrderReturnsCurrent}</h1>
-<div><a href="<@ofbizUrl>returnMain</@ofbizUrl>" class="buttontext">${uiLabelMap.OrderReturnCreate}</a></div>
+<div><a href="<@ofbizUrl>returnMain</@ofbizUrl>" class="buttontext">${uiLabelMap.OrderCreateReturn}</a></div>
 
-<br/>
+<br />
 <table cellspacing="0" class="basic-table">
   <tr class="header-row">
-    <td>${uiLabelMap.OrderReturnId} #</td>
+    <td>${uiLabelMap.OrderReturnId} ${uiLabelMap.CommonNbr}</td>
     <td>${uiLabelMap.FormFieldTitle_entryDate}</td>
     <td>${uiLabelMap.PartyParty}</td>
     <td>${uiLabelMap.FacilityFacility}</td>
     <td>${uiLabelMap.CommonStatus}</td>
   </tr>
   <#list returnList as returnHeader>
-  <#assign statusItem = returnHeader.getRelatedOne("StatusItem")>
+  <#assign statusItem = returnHeader.getRelatedOne("StatusItem", false)>
   <#if returnHeader.destinationFacilityId?exists>
-    <#assign facility = returnHeader.getRelatedOne("Facility")>
+    <#assign facility = returnHeader.getRelatedOne("Facility", false)>
   </#if>
   <tr>
     <td><a href="<@ofbizUrl>returnMain?returnId=${returnHeader.returnId}</@ofbizUrl>" class="buttontext">${returnHeader.returnId}</a></td>

@@ -21,109 +21,6 @@ under the License.
 <screens xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/widget-screen.xsd">
 
-    <screen name="main-decorator">
-        <section>
-            <actions>
-                <property-map resource="GoogleBaseUiLabels" map-name="uiLabelMap" global="true"/>
-                <property-map resource="ProductUiLabels" map-name="uiLabelMap" global="true"/>
-                <property-map resource="CommonUiLabels" map-name="uiLabelMap" global="true"/>
-                <property-map resource="WorkEffortUiLabels" map-name="uiLabelMap" global="true"/>
-                <set field="activeApp" value="googlebase" global="true"/>
-
-                <set field="layoutSettings.companyName" from-field="uiLabelMap.GoogleBaseCompanyName" global="true"/>
-                <set field="layoutSettings.companySubtitle" from-field="uiLabelMap.GoogleBaseApplication" global="true"/>
-                <set field="applicationMenuName" value="GoogleBaseAppBar" global="true"/>
-                <set field="applicationMenuLocation" value="component://googlebase/widget/GoogleBaseMenus.xml" global="true"/>
-                <set field="applicationTitle" value="${uiLabelMap.GoogleBaseApplication}" global="true"/>
-            </actions>
-            <widgets>
-                <include-screen name="ApplicationDecorator" location="component://commonext/widget/CommonScreens.xml"/>
-            </widgets>
-        </section>
-    </screen>
-
-    <screen name="CommonFindDecorator">
-        <section>
-            <actions>
-                <set field="headerItem" value="googlebase"/>
-            </actions>
-            <widgets>
-                <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
-                    <decorator-section name="body">
-                        <section>
-                            <condition>
-                                <if-has-permission permission="GOOGLEBASE" action="_VIEW"/>
-                            </condition>
-                            <widgets>
-                                <decorator-section-include name="body"/>
-                            </widgets>
-                            <fail-widgets>
-                                <label style="h3">${uiLabelMap.GoogleBaseViewPermissionError}</label>
-                            </fail-widgets>
-                        </section>
-                    </decorator-section>
-                </decorator-screen>
-            </widgets>
-        </section>
-    </screen>
-
-    <screen name="CommonProductDecorator">
-        <section>
-            <actions>
-                <property-map resource="PartyUiLabels" map-name="uiLabelMap" global="true"/>
-
-                <set field="productId" from-field="parameters.productId"/>
-                <entity-one entity-name="Product" value-field="product"/>
-                <set field="productName" from-field="product.productName"/>
-            </actions>
-            <widgets>
-                <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
-                    <decorator-section name="body">
-                        <section>
-                            <!-- do check for GOOGLEBASE, _VIEW permission -->
-                            <condition>
-                                <if-has-permission permission="GOOGLEBASE" action="_VIEW"/>
-                            </condition>
-                            <widgets>
-                                <section>
-                                    <condition><not><if-empty field="product"/></not></condition>
-                                    <widgets>
-                                        <include-menu name="ProductTabBar" location="component://product/widget/catalog/Menus.xml"/>
-                                        <platform-specific>
-                                            <html><html-template location="component://product/webapp/catalog/product/ProductTabBar.ftl"/></html>
-                                        </platform-specific>
-                                        <container>
-                                            <label style="h1">${uiLabelMap.${labelTitleProperty}} ${uiLabelMap.CommonFor}: ${product.internalName} [${uiLabelMap.CommonId}:${productId}]  ${${extraFunctionName}}</label>
-                                            <image src="${product.smallImageUrl}" height="40" width="40" url-mode="content"/>
-                                        </container>
-
-                                        <!-- add Create Product and View Product (in ecommerce) links -->
-                                        <container style="button-bar">
-                                            <link target="EditProduct" text="${uiLabelMap.ProductNewProduct}" style="buttontext"/>
-                                            <link target="CreateVirtualWithVariantsForm" text="${uiLabelMap.ProductNewVirtualProduct}" style="buttontext"/>
-                                            <link target="/ecommerce/control/product" url-mode="inter-app" text="${uiLabelMap.ProductProductPage}" style="buttontext">
-                                                <parameter param-name="product_id" from-field="productId"/>
-                                            </link>
-                                            <link target="ProductBarCode.pdf" target-window="_blank" text="${uiLabelMap.ProductBarcode}" style="buttontext">
-                                                <parameter param-name="productId"/>
-                                                <parameter param-name="productName"/>
-                                            </link>
-                                        </container>
-                                    </widgets>
-                                </section>
-
-                                <decorator-section-include name="body"/>
-                            </widgets>
-                            <fail-widgets>
-                                <label style="h3">${uiLabelMap.ProductCatalogViewPermissionError}</label>
-                            </fail-widgets>
-                        </section>
-                    </decorator-section>
-                </decorator-screen>
-            </widgets>
-        </section>
-    </screen>
-
     <screen name="advancedsearch">
         <section>
             <actions>
@@ -132,16 +29,14 @@ under the License.
                     <condition-expr field-name="showInSelect" operator="not-equals" value="N"/>
                     <order-by field-name="description"/>
                 </entity-condition>
-                <entity-condition entity-name="ProdCatalog" list="prodCatalogs">
-                    <order-by field-name="catalogName"/>
-                </entity-condition>
                 <script location="component://product/webapp/catalog/WEB-INF/actions/find/advancedsearchoptions.groovy"/>
+                <script location="component://googlebase/webapp/googlebase/WEB-INF/actions/GoogleBaseAdvancedSearch.groovy"/>
             </actions>
             <widgets>
-                <decorator-screen name="CommonFindDecorator">
+                <decorator-screen name="CommonFindDecorator" location="${parameters.mainDecoratorLocation}">
                     <decorator-section name="body">
                         <platform-specific>
-                            <html><html-template location="component://product/webapp/catalog/find/advancedsearch.ftl"/></html>
+                            <html><html-template location="component://googlebase/webapp/googlebase/find/GoogleBaseAdvancedSearch.ftl"/></html>
                         </platform-specific>
                     </decorator-section>
                 </decorator-screen>
@@ -152,11 +47,13 @@ under the License.
     <screen name="keywordsearch">
         <section>
             <actions>
+                <property-map resource="GoogleBaseUiLabels" map-name="uiLabelMap" global="true"/>
                 <set field="titleProperty" value="PageTitleSearchResults"/>
                 <script location="component://product/webapp/catalog/WEB-INF/actions/find/keywordsearch.groovy"/>
+                <script location="component://googlebase/webapp/googlebase/WEB-INF/actions/FilterProducts.groovy"/>
             </actions>
             <widgets>
-                <decorator-screen name="CommonFindDecorator">
+                <decorator-screen name="CommonFindDecorator" location="${parameters.mainDecoratorLocation}">
                     <decorator-section name="body">
                         <platform-specific>
                             <html><html-template location="component://product/webapp/catalog/find/keywordsearch.ftl"/></html>
@@ -175,24 +72,14 @@ under the License.
             <actions>
                 <set field="headerItem" value="googlebase"/>
                 <set field="titleProperty" value="PageTitleGoogleBaseProductsExportToGoogle"/>
+                <script location="component://googlebase/webapp/googlebase/WEB-INF/actions/productsExportToGoogle.groovy"/>
             </actions>
             <widgets>
                 <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
                     <decorator-section name="body">
-                        <container style="screenlet">
-                            <container style="screenlet-title-bar">
-                                <container style="h3">
-                                    <label text="${uiLabelMap.PageTitleGoogleBaseProductsExportToGoogle}"></label>
-                                </container>
-                            </container>
-                            <container style="screenlet-body">
-                                <section>
-                                    <widgets>
-                                        <include-form name="ProductsExportToGoogle" location="component://googlebase/widget/GoogleBaseForms.xml"/>
-                                    </widgets>
-                                </section>
-                            </container>
-                        </container>
+                        <screenlet title="${uiLabelMap.PageTitleGoogleBaseProductsExportToGoogle}">
+                            <include-form name="ProductsExportToGoogle" location="component://googlebase/widget/GoogleBaseForms.xml"/>
+                        </screenlet>
                     </decorator-section>
                 </decorator-screen>
             </widgets>
@@ -211,31 +98,58 @@ under the License.
             <widgets>
                 <decorator-screen name="CommonProductDecorator" location="${parameters.mainDecoratorLocation}">
                     <decorator-section name="body">
-                        <container style="screenlet">
-                            <container style="screenlet-title-bar">
-                                <container style="h3">
-                                    <label text="${uiLabelMap.PageTitleEditProduct}"/>
-                                </container>
-                            </container>
-                            <container style="screenlet-body">
-                                <section>
-                                    <widgets>
-                                        <include-form name="EditProduct" location="component://product/webapp/catalog/product/ProductForms.xml"/>
-                                    </widgets>
-                                </section>
-                            </container>
-                        </container>
+                        <screenlet title="${uiLabelMap.PageTitleEditProduct}">
+                            <include-form name="EditProduct" location="component://product/widget/catalog/ProductForms.xml"/>
+                        </screenlet>
                         <!-- include the duplicate product form template -->
-                        <container style="screenlet">
-                            <container style="screenlet-title-bar">
-                                <container style="h3">
-                                    <label text="${uiLabelMap.ProductDuplicateProduct}"/>
-                                </container>
-                            </container>
-                            <container style="screenlet-body">
-                                <include-form name="EditProductDup" location="component://product/webapp/catalog/product/ProductForms.xml"/>
-                            </container>
-                        </container>
+                        <screenlet title="${uiLabelMap.ProductDuplicateProduct}">
+                            <include-form name="EditProductDup" location="component://product/widget/catalog/ProductForms.xml"/>
+                        </screenlet>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="EditGoogleBaseConfigs">
+        <section>
+            <actions>
+                <set field="titleProperty" value="GoogleBaseConfiguration"/>
+                <set field="headerItem" value="GoogleBaseConfigs"/>
+                <set field="productStoreId" from-field="parameters.productStoreId"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <include-form name="ListGoogleBaseConfigs" location="component://googlebase/widget/GoogleBaseForms.xml"/>
+                        <screenlet id="add-gbs-configuration" title="${uiLabelMap.GoogleBaseAddGoogleBaseConfiguration}" collapsible="true">
+                            <include-form name="AddGoogleBaseConfig" location="component://googlebase/widget/GoogleBaseForms.xml"/>
+                        </screenlet>     
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="GooglebaseAutoUpdate">
+        <section>
+            <actions>
+                <set field="titleProperty" value="GooglebaseAutoUpdate"/>
+                <set field="headerItem" value="GooglebaseAutoUpdate"/>
+                <entity-condition entity-name="GoogleBaseConfig" list="googleBaseConfigList"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <section>
+                            <widgets>
+                                <screenlet title="Start/Stop Auto Update to Google Base Scheduled">
+                                    <include-form name="StartStopScheduled" location="component://googlebase/widget/GoogleBaseForms.xml"/>
+                                </screenlet>
+                                <screenlet title="Google Base Auto Update Config - setup at [autoUpdateToGoogleBase.properties]">
+                                    <include-form name="GooglebaseAutoUpdateConfig" location="component://googlebase/widget/GoogleBaseForms.xml"/>
+                                </screenlet>
+                            </widgets>
+                        </section>
                     </decorator-section>
                 </decorator-screen>
             </widgets>

@@ -18,10 +18,9 @@
  *******************************************************************************/
 package org.ofbiz.service.group;
 
-import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 
+import freemarker.template.utility.StringUtil;
 import javolution.util.FastMap;
 
 import org.ofbiz.base.component.ComponentConfig;
@@ -87,7 +86,7 @@ public class ServiceGroupReader {
             } catch (GenericConfigException e) {
                 Debug.logError(e, "Could not get resource URL", module);
             }
-            Debug.logImportant("Loaded [" + numDefs + "] Group definitions from " + resourceLocation, module);
+            Debug.logImportant("Loaded [" + StringUtil.leftPad(Integer.toString(numDefs), 3) + "] Group definitions from " + resourceLocation, module);
         }
     }
 

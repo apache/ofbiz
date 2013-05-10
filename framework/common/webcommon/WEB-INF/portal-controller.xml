@@ -21,51 +21,85 @@ under the License.
 <site-conf xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/site-conf.xsd">
     <description>Portal ControlServlet Configuration File</description>
-    <owner>Copyright 2001-2008 The Apache Software Foundation</owner>
-
-    <!-- Portal requests -->
+    
+    <!-- Portlet show requests -->
+    <request-map uri="showPortlet">
+        <security https="true" auth="true"/>
+        <response name="success" type="view" value="showPortlet"/>
+    </request-map>
+    <request-map uri="showPortletMainDecorator">
+        <security https="true" auth="true"/>
+        <response name="success" type="view" value="showPortletMainDecorator"/>
+    </request-map>
+    <request-map uri="showPortletSimpleDecorator">
+        <security https="true" auth="true"/>
+        <response name="success" type="view" value="showPortletSimpleDecorator"/>
+    </request-map>
+    <!-- Portlet editing requests -->
+    <request-map uri="editPortalPortletAttributes">
+        <security https="true" auth="true"/>
+        <response name="success" type="view" value="editPortalPortletAttributes" save-last-view="true"/>
+    </request-map>
+    <request-map uri="setPortalPortletAttributes">
+        <security https="true" auth="true"/>
+        <event type="simple" invoke="setPortalPortletAttributes" path="component://common/script/org/ofbiz/common/PortalPageMethods.xml"/>
+        <response name="success" type="view-last" value="main"/>
+        <response name="error" type="request" value="main"/>
+    </request-map>
+    <!-- Portal page show requests -->
     <request-map uri="showPortalPage">
         <security https="true" auth="true"/>
         <response name="success" type="view" value="showPortalPage" save-home-view="true"/>
     </request-map>
+    <!-- Portal page update requests -->
     <request-map uri="ManagePortalPages">
         <security https="true" auth="true"/>
         <event  type="simple" invoke="copyIfRequiredSystemPage" path="component://common/script/org/ofbiz/common/PortalPageMethods.xml"/>
         <response name="success" type="view" value="ManagePortalPages"/>
     </request-map>
-    <request-map uri="AddPortlet">
+    <request-map uri="NewPortalPage">
         <security https="true" auth="true"/>
-        <response name="success" type="view" value="AddPortlet"/>
+        <response name="success" type="view" value="NewPortalPage"/>
+        <response name="error" type="request" value="main"/>
+    </request-map>
+    <request-map uri="addPortlet">
+        <security https="true" auth="true"/>
+        <response name="success" type="view" value="addPortlet" save-last-view="true"/>
     </request-map>
     <request-map uri="createPortalPagePortlet">
         <security https="true" auth="true"/>
         <event type="service" invoke="createPortalPagePortlet"/>
-        <response name="success" type="request" value="ManagePortalPages"/>
-        <response name="error" type="request" value="ManagePortalPages"/>
+        <response name="success" type="view-last" value="main"/>
+        <response name="error" type="request" value="main"/>
     </request-map>
     <request-map uri="updatePortalPagePortlet">
         <security https="true" auth="true"/>
         <event type="service" invoke="updatePortalPagePortlet"/>
-        <response name="success" type="request" value="ManagePortalPages"/>
-        <response name="error" type="request" value="ManagePortalPages"/>
+        <response name="success" type="view-last" value="main" save-last-view="true"/>
+        <response name="error" type="request" value="main"/>
     </request-map>
-    <request-map uri="updatePortalPagePortletSeq">
+    <request-map uri="updatePortletSeqDragDrop">
         <security https="true" auth="true"/>
-        <event type="service" invoke="updatePortalPagePortletSeq"/>
-        <response name="success" type="request" value="ManagePortalPages"/>
-        <response name="error" type="request" value="ManagePortalPages"/>
+        <event type="service" invoke="updatePortletSeqDragDrop"/>
+        <response name="success" type="view-last" value="main" save-last-view="true"/>
+        <response name="error" type="request" value="main"/>
     </request-map>
     <request-map uri="deletePortalPagePortlet">
         <security https="true" auth="true"/>
         <event type="service" invoke="deletePortalPagePortlet"/>
-        <response name="success" type="request" value="ManagePortalPages"/>
-        <response name="error" type="request" value="ManagePortalPages"/>
+        <response name="success" type="view-last" value="main" save-last-view="true"/>
+        <response name="error" type="request" value="main"/>
     </request-map>
     <request-map uri="movePortletToPortalPage">
         <security https="true" auth="true"/>
         <event type="service" invoke="movePortletToPortalPage"/>
-        <response name="success" type="request" value="ManagePortalPages"/>
-        <response name="error" type="request" value="ManagePortalPages"/>
+        <response name="success" type="view-last" value="main" save-last-view="true"/>
+        <response name="error" type="request" value="main"/>
+    </request-map>
+    <request-map uri="updatePortalPagePortletSeqAjax">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="updatePortletSeqDragDrop"/>
+        <response name="success" type="none" />
     </request-map>
     <request-map uri="createPortalPage">
         <security https="true" auth="true"/>
@@ -85,29 +119,32 @@ under the License.
         <response name="success" type="request" value="ManagePortalPages"/>
         <response name="error" type="request" value="ManagePortalPages"/>
     </request-map>
-    <request-map uri="setPortalPortletAttributes">
-        <security https="true" auth="true"/>
-        <event type="simple" invoke="setPortalPortletAttributes" path="component://common/script/org/ofbiz/common/PortalPageMethods.xml"/>
-        <response name="success" type="request" value="ManagePortalPages"/>
-        <response name="error" type="request" value="ManagePortalPages"/>
-    </request-map>
     <request-map uri="addPortalPageColumn">
         <security https="true" auth="true"/>
         <event type="service" invoke="addPortalPageColumn"/>
-        <response name="success" type="request" value="ManagePortalPages"/>
-        <response name="error" type="request" value="ManagePortalPages"/>
+        <response name="success" type="view-last" value="main" save-last-view="true"/>
+        <response name="error" type="request" value="main"/>
     </request-map>
     <request-map uri="updatePortalPageColumn">
         <security https="true" auth="true"/>
         <event type="service" invoke="updatePortalPageColumn"/>
-        <response name="success" type="request" value="ManagePortalPages"/>
-        <response name="error" type="request" value="ManagePortalPages"/>
+        <response name="success" type="view-last" value="main" save-last-view="true"/>
+        <response name="error" type="request" value="main"/>
+    </request-map>
+    <!-- This request is the same as the above. It only does not save the last view.
+         This is necessary because in the new PortalPage widget the column size is set with a dedicated sceen and not with a combo.
+         When all PortalPages will be using the widget we could remove the above request. -->
+    <request-map uri="updatePortalPageColumnWidth">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="updatePortalPageColumn"/>
+        <response name="success" type="view-last" value="main"/>
+        <response name="error" type="request" value="main"/>
     </request-map>
     <request-map uri="deletePortalPageColumn">
-        <security https="true" auth="true"/>
+        <security https="true" auth="false"/>
         <event type="service" invoke="deletePortalPageColumn"/>
-        <response name="success" type="request" value="ManagePortalPages"/>
-        <response name="error" type="request" value="ManagePortalPages"/>
+        <response name="success" type="view-last" value="main" save-last-view="true"/>
+        <response name="error" type="request" value="main"/>
     </request-map>
     <request-map uri="updatePortalPageSeq">
         <security https="true" auth="true"/>
@@ -115,9 +152,20 @@ under the License.
         <response name="success" type="request" value="ManagePortalPages"/>
         <response name="error" type="request" value="ManagePortalPages"/>
     </request-map>
-
+    <request-map uri="editPortalPageColumnWidth">
+        <security https="true" auth="false"/>
+        <response name="success" type="view" value="editPortalPageColumnWidth" save-last-view="true"/>
+    </request-map>
+    <request-map uri="LookupPortalPage"><security https="true" auth="true"/><response name="success" type="view" value="LookupPortalPage"/></request-map>
     <!-- View Mappings -->
     <view-map name="showPortalPage" type="screen" page="component://common/widget/PortalPageScreens.xml#showPortalPage"/>
+    <view-map name="showPortlet" type="screen" page="component://common/widget/PortalPageScreens.xml#showPortlet"/>
+    <view-map name="showPortletMainDecorator" type="screen" page="component://common/widget/PortalPageScreens.xml#showPortletMainDecorator"/>
+    <view-map name="showPortletSimpleDecorator" type="screen" page="component://common/widget/PortalPageScreens.xml#showPortletSimpleDecorator"/>
     <view-map name="ManagePortalPages" type="screen" page="component://common/widget/PortalPageScreens.xml#ManagePortalPages"/>
-    <view-map name="AddPortlet" type="screen" page="component://common/widget/PortalPageScreens.xml#AddPortlet"/>
+    <view-map name="NewPortalPage" type="screen" page="component://common/widget/PortalPageScreens.xml#NewPortalPage"/>
+    <view-map name="addPortlet" type="screen" page="component://common/widget/PortalPageScreens.xml#AddPortlet"/>
+    <view-map name="editPortalPortletAttributes" type="screen" page="component://common/widget/PortalPageScreens.xml#EditPortalPortletAttributes"/>
+    <view-map name="editPortalPageColumnWidth" type="screen" page="component://common/widget/PortalPageScreens.xml#EditPortalPageColumnWidth"/>
+    <view-map name="LookupPortalPage" type="screen" page="component://common/widget/LookupScreens.xml#LookupPortalPage"/>
 </site-conf>

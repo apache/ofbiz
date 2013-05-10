@@ -19,11 +19,13 @@ under the License.
 -->
 
 <simple-methods xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/simple-methods.xsd">
-    <simple-method method-name="createShoppingList" short-description="Create a ShoppingList">
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/simple-methods-v2.xsd">
+    <simple-method method-name="createShoppingList" short-description="Create a ShoppingList" login-required="false">
         <if>
             <condition>
                   <and>
+                    <not><if-empty field="userLogin"/></not>
+                    <not><if-compare field="userLogin.userLoginId" operator="equals" value="anonymous"/></not>
                     <not><if-empty field="parameters.partyId"/></not>
                     <not><if-compare-field to-field="userLogin.partyId" field="parameters.partyId" operator="equals"/></not>
                     <not><if-has-permission permission="PARTYMGR" action="_CREATE"/></not>
@@ -111,31 +113,59 @@ under the License.
         <remove-value value-field="shoppingList"/>
     </simple-method>
 
-    <simple-method method-name="createShoppingListItem" short-description="Create a ShoppingList Item">
-        <set field="parentMethodName" value="createShoppingListItem"/>
-        <set field="permissionAction" value="CREATE"/>
-        <call-simple-method method-name="checkShoppingListItemSecurity"/>
-        <check-errors/>
-
-        <entity-one entity-name="ShoppingList" value-field="shoppingList"/>
-        <entity-one entity-name="Product" value-field="product"/>
-        <if-empty field="product">
-            <add-error> <fail-property property="ProductErrorProductNotFound" resource="ProductUiLabels"/> </add-error>
+    <simple-method method-name="createShoppingListItem" short-description="Create a ShoppingList Item" login-required="false">
+        <entity-and list="shoppingListItems" entity-name="ShoppingListItem">
+            <field-map field-name="productId" from-field="parameters.productId"></field-map>
+            <field-map field-name="shoppingListId" from-field="parameters.shoppingListId"></field-map>
+        </entity-and>
+        <if-empty field="shoppingListItems">
+            <set field="parentMethodName" value="createShoppingListItem"/>
+            <set field="permissionAction" value="CREATE"/>
+            <entity-one entity-name="ShoppingList" value-field="shoppingList"/>
+            <if>
+                <condition>
+                    <and>
+                        <not><if-empty field="shoppingList.partyId"/></not>
+                        <not><if-compare-field field="userLogin.partyId" to-field="shoppingList.partyId" operator="equals"/></not>
+                        <not><if-has-permission permission="PARTYMGR" action="_${permissionAction}"/></not>
+                    </and>
+                </condition>
+                <then>
+                    <add-error><fail-property resource="OrderErrorUiLabels" property="OrderSecurityErrorToRunForAnotherParty"/></add-error>
+                </then>
+            </if>
             <check-errors/>
+
+            <entity-one entity-name="Product" value-field="product"/>
+            <if-empty field="product">
+                <add-error> <fail-property property="ProductErrorProductNotFound" resource="ProductUiLabels"/> </add-error>
+                <check-errors/>
+            </if-empty>
+            <make-value value-field="newEntity" entity-name="ShoppingListItem"/>
+            <set from-field="parameters.shoppingListId" field="newEntity.shoppingListId"/>
+            <make-next-seq-id value-field="newEntity" seq-field-name="shoppingListItemSeqId" numeric-padding="5"/>
+
+            <set-nonpk-fields map="parameters" value-field="newEntity"/>
+            <field-to-result field="newEntity.shoppingListItemSeqId" result-name="shoppingListItemSeqId"/>
+            <create-value value-field="newEntity"/>
+
+            <if-compare-field field="shoppingList.partyId" to-field="userLogin.partyId" operator="not-equals">
+                <now-timestamp field="shoppingList.lastAdminModified"/>
+                <store-value value-field="shoppingList"/>
+            </if-compare-field>
+        <else>
+            <first-from-list entry="shoppingListItem" list="shoppingListItems"/>
+            <calculate field="totalquantity" >
+                <calcop operator="add" field="shoppingListItem.quantity">
+                    <calcop operator="get" field="parameters.quantity"/>
+                </calcop>
+            </calculate>
+            <field-to-result field="shoppingListItem.shoppingListItemSeqId" result-name="shoppingListItemSeqId"/>
+            <set-service-fields service-name="updateShoppingListItem" map="shoppingListItem" to-map="shoppingListItemParameters"/>
+            <set field="shoppingListItemParameters.quantity" from-field="totalquantity"/>
+            <call-service service-name="updateShoppingListItem" in-map-name="shoppingListItemParameters"/>
+        </else>
         </if-empty>
-        <make-value value-field="newEntity" entity-name="ShoppingListItem"/>
-        <set from-field="parameters.shoppingListId" field="newEntity.shoppingListId"/>
-        <make-next-seq-id value-field="newEntity" seq-field-name="shoppingListItemSeqId" numeric-padding="5"/>
-
-        <set-nonpk-fields map="parameters" value-field="newEntity"/>
-        <field-to-result field="newEntity.shoppingListItemSeqId" result-name="shoppingListItemSeqId"/>
-        <field-to-result field="newEntity.shoppingListId" result-name="shoppingListId"/>
-        <create-value value-field="newEntity"/>
-
-        <if-compare-field field="shoppingList.partyId" to-field="userLogin.partyId" operator="not-equals">
-            <now-timestamp field="shoppingList.lastAdminModified"/>
-            <store-value value-field="shoppingList"/>
-        </if-compare-field>
     </simple-method>
 
     <simple-method method-name="updateShoppingListItem" short-description="Update a ShoppingListItem">
@@ -146,17 +176,8 @@ under the License.
 
         <entity-one entity-name="ShoppingList" value-field="shoppingList"/>
         <entity-one entity-name="ShoppingListItem" value-field="shoppingListItem"/>
-
-        <if-compare field="parameters.quantity" operator="equals" value="0" type="BigDecimal">
-          <!-- if we're setting quantity to 0.0 then remove the item -->
-            <set-service-fields service-name="removeShoppingListItem" map="parameters" to-map="removeParams"/>
-            <call-service service-name="removeShoppingListItem" in-map-name="removeParams"/>
-        <else>
-          <!-- otherwise, just update shopping list item in place -->
-            <set-nonpk-fields map="parameters" value-field="shoppingListItem"/>
-            <store-value value-field="shoppingListItem"/>
-        </else>
-        </if-compare>
+        <set-nonpk-fields map="parameters" value-field="shoppingListItem"/>
+        <store-value value-field="shoppingListItem"/>
 
         <if-compare-field field="shoppingList.partyId" to-field="userLogin.partyId" operator="not-equals">
             <now-timestamp field="shoppingList.lastAdminModified"/>
@@ -224,13 +245,16 @@ under the License.
             <map-to-map map="calcPriceInBaseMap" to-map="calcPriceInMap"/>
             <set field="calcPriceInMap.product" from-field="product"/>
             <set field="calcPriceInMap.quantity" from-field="shoppingListItem.quantity"/>
-            <call-service service-name="calculateProductPrice" in-map-name="calcPriceInMap">
-                <result-to-field result-name="price" field="calcPriceOutMap.price"/>
-            </call-service>
+            <if-not-empty field="shoppingListItem.modifiedPrice">
+                <call-service service-name="calculateProductPrice" in-map-name="calcPriceInMap">
+                    <result-to-field result-name="price" field="calcPriceOutMap.price"/>
+                </call-service>
+            </if-not-empty>
+            <set field="itemPrice" from-field="shoppingListItem.modifiedPrice" default-value="${calcPriceOutMap.price}"/>
             <calculate field="totalPrice">
                 <calcop field="totalPrice" operator="add"/>
                 <calcop operator="multiply">
-                    <calcop operator="get" field="calcPriceOutMap.price"/>
+                    <calcop operator="get" field="itemPrice"/>
                     <calcop operator="get" field="shoppingListItem.quantity"/>
                 </calcop>
             </calculate>
@@ -313,6 +337,7 @@ under the License.
             <set field="createShoppingListInMap.partyId" from-field="orderRole.partyId"/>
             <set field="createShoppingListInMap.listName" value="Auto Suggestions"/>
             <set field="createShoppingListInMap.shoppingListTypeId" value="SLT_WISH_LIST"/>
+            <set field="createShoppingListInMap.productStoreId" from-field="parameters.productStoreId"/>
             <call-service service-name="createShoppingList" in-map-name="createShoppingListInMap">
                 <result-to-field result-name="shoppingListId"/>
             </call-service>

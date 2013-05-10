@@ -39,12 +39,13 @@ under the License.
               <a href="<@ofbizUrl>editKeywordThesaurus?firstLetter=${letter}</@ofbizUrl>" class="buttontext"><#if highlight>[</#if>${letter}<#if highlight>]</#if></a>
             </#list>
         </div>
-        <br/>
+        <br />
         <#assign lastkeyword = "">
+        <#if keywordThesauruses?has_content>
         <table cellspacing="0" class="basic-table">
             <#assign rowClass = "2">
             <#list keywordThesauruses as keyword>
-              <#assign relationship = keyword.getRelatedOneCache("RelationshipEnumeration")>
+              <#assign relationship = keyword.getRelatedOne("RelationshipEnumeration", true)>
               <#if keyword.enteredKeyword == lastkeyword><#assign sameRow=true><#else><#assign lastkeyword=keyword.enteredKeyword><#assign sameRow=false></#if>
               <#if sameRow == false>
                 <#if (keyword_index > 0)>
@@ -56,20 +57,28 @@ under the License.
                     <form method="post" action="<@ofbizUrl>createKeywordThesaurus</@ofbizUrl>">
                       <div>
                         ${keyword.enteredKeyword}
-                        <a href="<@ofbizUrl>deleteKeywordThesaurus?enteredKeyword=${keyword.enteredKeyword}</@ofbizUrl>" class="buttontext">${uiLabelMap.CommonDeleteAll}</a>
+                        <form method="post" action="<@ofbizUrl>deleteKeywordThesaurus</@ofbizUrl>" name="deleteKeywordThesaurus">
+                          <input type="hidden" name="enteredKeyword" value="${keyword.enteredKeyword}" />
+                          <input type="hidden" name="alternateKeyword" value="${keyword.alternateKeyword}" />
+                          <input type="submit" value="${uiLabelMap.CommonDeleteAll}" />
+                        </form>
                       </div>
                       <div>
-                        <input type="hidden" name="enteredKeyword" value=${keyword.enteredKeyword}>
-                        <span class="label">${uiLabelMap.ProductAlternate}</span><input type="text" name="alternateKeyword" size="10">
+                        <input type="hidden" name="enteredKeyword" value="${keyword.enteredKeyword}" />
+                        <span class="label">${uiLabelMap.ProductAlternate}</span><input type="text" name="alternateKeyword" size="10" />
                         <span class="label">${uiLabelMap.ProductRelationship}</span><select name="relationshipEnumId"><#list relationshipEnums as relationshipEnum><option value="${relationshipEnum.enumId}">${relationshipEnum.get("description",locale)}</option></#list></select>
-                        <input type="submit" value="${uiLabelMap.CommonAdd}">
+                        <input type="submit" value="${uiLabelMap.CommonAdd}" />
                       </div>
                     </form>
                   </td>
                   <td>
               </#if>
               <div>
-                <a href="<@ofbizUrl>deleteKeywordThesaurus?enteredKeyword=${keyword.enteredKeyword}&alternateKeyword=${keyword.alternateKeyword}</@ofbizUrl>" class="buttontext">X</a>
+                <form method="post" action="<@ofbizUrl>deleteKeywordThesaurus</@ofbizUrl>" name="deleteKeywordThesaurus">
+                  <input type="hidden" name="enteredKeyword" value="${keyword.enteredKeyword}" />
+                  <input type="hidden" name="alternateKeyword" value="${keyword.alternateKeyword}" />
+                  <input type="submit" value="X" />
+                </form>
                 ${keyword.alternateKeyword}&nbsp;(${uiLabelMap.ProductRelationship}:${(relationship.get("description",locale))?default(keyword.relationshipEnumId?if_exists)})
               </div>
               <#-- toggle the row color -->
@@ -82,5 +91,6 @@ under the License.
               </td>
             </tr>
         </table>
+        </#if>
     </div>
 </div>

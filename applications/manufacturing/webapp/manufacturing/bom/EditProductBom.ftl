@@ -35,10 +35,10 @@ function lookupBom() {
   </div>
   <div class="screenlet-body">
     <#if product?has_content>
-        <a href="<@ofbizUrl>BomSimulation</@ofbizUrl>?productId=${productId}&bomType=${productAssocTypeId}" class="buttontext">${uiLabelMap.ManufacturingBillOfMaterials}</a>
+        <a href="<@ofbizUrl>BomSimulation</@ofbizUrl>?productId=${productId}&amp;bomType=${productAssocTypeId}" class="buttontext">${uiLabelMap.ManufacturingBomSimulation}</a>
     </#if>
-    <br/>
-    <br/>
+    <br />
+    <br />
     <form name="searchform" action="<@ofbizUrl>UpdateProductBom</@ofbizUrl>#topform" method="post">
     <input type="hidden" name="UPDATE_MODE" value=""/>
 
@@ -49,9 +49,9 @@ function lookupBom() {
             <td>
                 <select name="productAssocTypeId" size="1">
                 <#if productAssocTypeId?has_content>
-                    <#assign curAssocType = delegator.findByPrimaryKey("ProductAssocType", Static["org.ofbiz.base.util.UtilMisc"].toMap("productAssocTypeId", productAssocTypeId))>
+                    <#assign curAssocType = delegator.findOne("ProductAssocType", Static["org.ofbiz.base.util.UtilMisc"].toMap("productAssocTypeId", productAssocTypeId), false)>
                     <#if curAssocType?exists>
-                        <option selected value="${(curAssocType.productAssocTypeId)?if_exists}">${(curAssocType.get("description",locale))?if_exists}</option>
+                        <option selected="selected" value="${(curAssocType.productAssocTypeId)?if_exists}">${(curAssocType.get("description",locale))?if_exists}</option>
                         <option value="${(curAssocType.productAssocTypeId)?if_exists}"></option>
                     </#if>
                 </#if>
@@ -63,8 +63,7 @@ function lookupBom() {
             <td align="right">${uiLabelMap.ProductProductId}</td>
             <td>&nbsp;</td>
             <td>
-                <input type="text" name="productId" size="20" maxlength="40" value="${productId?if_exists}"/>
-                <a href="javascript:call_fieldlookup2(document.searchform.productId,'LookupProduct');"><img src="<@ofbizContentUrl>/images/fieldlookup.gif"</@ofbizContentUrl>" width="16" height="16" border="0" alt="${uiLabelMap.CommonClickHereForFieldLookup}"/></a>
+                <@htmlTemplate.lookupField value="${productId?if_exists}" formName="searchform" name="productId" id="productId" fieldFormName="LookupProduct"/>
                 <span><a href="javascript:document.searchform.submit();" class="buttontext">${uiLabelMap.ManufacturingShowBOMAssocs}</a></span>
             </td>
         </tr>
@@ -75,14 +74,13 @@ function lookupBom() {
             <td align="right">${uiLabelMap.ManufacturingCopyToProductId}</td>
             <td>&nbsp;</td>
             <td>
-                <input type="text" name="copyToProductId" size="20" maxlength="40" value=""/>
-                <a href="javascript:call_fieldlookup2(document.searchform.copyToProductId,'LookupProduct');"><img src="<@ofbizContentUrl>/images/fieldlookup.gif"</@ofbizContentUrl>" width="16" height="16" border="0" alt="${uiLabelMap.CommonClickHereForFieldLookup}"/></a>
+                <@htmlTemplate.lookupField formName="searchform" name="copyToProductId" id="copyToProductId" fieldFormName="LookupProduct"/>
                 <span><a href="javascript:document.searchform.UPDATE_MODE.value='COPY';document.searchform.submit();" class="buttontext">${uiLabelMap.ManufacturingCopyBOMAssocs}</a></span>
             </td>
         </tr>
     </table>
     </form>
-    <hr/>
+    <hr />
     <form action="<@ofbizUrl>UpdateProductBom</@ofbizUrl>" method="post" name="editProductAssocForm">
     <#if !(productAssoc?exists)>
         <input type="hidden" name="UPDATE_MODE" value="CREATE"/>
@@ -93,9 +91,9 @@ function lookupBom() {
             <td>
                 <select name="productAssocTypeId" size="1">
                 <#if productAssocTypeId?has_content>
-                    <#assign curAssocType = delegator.findByPrimaryKey("ProductAssocType", Static["org.ofbiz.base.util.UtilMisc"].toMap("productAssocTypeId", productAssocTypeId))>
+                    <#assign curAssocType = delegator.findOne("ProductAssocType", Static["org.ofbiz.base.util.UtilMisc"].toMap("productAssocTypeId", productAssocTypeId), false)>
                     <#if curAssocType?exists>
-                        <option selected value="${(curAssocType.productAssocTypeId)?if_exists}">${(curAssocType.get("description",locale))?if_exists}</option>
+                        <option selected="selected" value="${(curAssocType.productAssocTypeId)?if_exists}">${(curAssocType.get("description",locale))?if_exists}</option>
                         <option value="${(curAssocType.productAssocTypeId)?if_exists}"></option>
                     </#if>
                 </#if>
@@ -109,29 +107,26 @@ function lookupBom() {
             <td align="right">${uiLabelMap.ProductProductId}</td>
             <td>&nbsp;</td>
             <td>
-                <input type="text" name="productId" size="20" maxlength="40" value="${productId?if_exists}"/>
-                <a href="javascript:call_fieldlookup2(document.editProductAssocForm.productId,'LookupProduct');"><img src="<@ofbizContentUrl>/images/fieldlookup.gif"</@ofbizContentUrl>" width="16" height="16" border="0" alt="${uiLabelMap.CommonClickHereForFieldLookup}"/></a>
+                <@htmlTemplate.lookupField value="${productId?if_exists}" formName="editProductAssocForm" name="productId" id="productId2" fieldFormName="LookupProduct"/>
             </td>
           </tr>
           <tr>
             <td align="right">${uiLabelMap.ManufacturingProductIdTo}</td>
             <td>&nbsp;</td>
             <td>
-                <input type="text" name="productIdTo" size="20" maxlength="40" value="${productIdTo?if_exists}"/>
-                <a href="javascript:call_fieldlookup2(document.editProductAssocForm.productIdTo,'LookupProduct');"><img src="<@ofbizContentUrl>/images/fieldlookup.gif"</@ofbizContentUrl>" width="16" height="16" border="0" alt="${uiLabelMap.CommonClickHereForFieldLookup}"/></a>
+                <@htmlTemplate.lookupField value="${productIdTo?if_exists}" formName="editProductAssocForm" name="productIdTo" id="productIdTo" fieldFormName="LookupProduct"/>
             </td>
           </tr>
           <tr>
             <td align="right">${uiLabelMap.CommonFromDate}</td>
             <td>&nbsp;</td>
             <td>
-                <input type="text" name="fromDate" size="25" maxlength="40" value=""/>
-                <a href="javascript:call_cal(document.editProductAssocForm.fromDate,'${nowTimestampString}');"><img src="<@ofbizContentUrl>/images/cal.gif</@ofbizContentUrl>" width="16" height="16" border="0" alt="Calendar"/></a>
+                <@htmlTemplate.renderDateTimeField name="fromDate" event="" action="" className="" alert="" title="Format: yyyy-MM-dd HH:mm:ss.SSS" value="" size="25" maxlength="50" id="fromDate_1" dateType="date" shortDateInput=false timeDropdownParamName="" defaultDateTimeString="" localizedIconTitle="" timeDropdown="" timeHourName="" classString="" hour1="" hour2="" timeMinutesName="" minutes="" isTwelveHour="" ampmName="" amSelected="" pmSelected="" compositeType="" formName=""/>
                 <span class="tooltip">(${uiLabelMap.ManufacturingWillBeSetToNow})</span>
             </td>
           </tr>
     <#else>
-        <#assign curProductAssocType = productAssoc.getRelatedOneCache("ProductAssocType")>
+        <#assign curProductAssocType = productAssoc.getRelatedOne("ProductAssocType", true)>
         <input type="hidden" name="UPDATE_MODE" value="UPDATE"/>
         <input type="hidden" name="productId" value="${productId?if_exists}"/>
         <input type="hidden" name="productIdTo" value="${productIdTo?if_exists}"/>
@@ -163,8 +158,12 @@ function lookupBom() {
         <td width="26%" align="right">${uiLabelMap.CommonThruDate}</td>
         <td>&nbsp;</td>
         <td width="74%">
-            <input type="text" name="thruDate" <#if useValues> value="${productAssoc.thruDate?if_exists}"<#else>value="${(request.getParameter("thruDate"))?if_exists}"</#if> size="30" maxlength="30"/>
-            <a href="javascript:call_cal(document.editProductAssocForm.thruDate,<#if useValues>'${productAssoc.thruDate?if_exists}'<#elseif (request.getParameter("thruDate"))?exists>'${request.getParameter("thruDate")}'<#else>'${nowTimestampString}'</#if>);"><img src="<@ofbizContentUrl>/images/cal.gif</@ofbizContentUrl>" width="16" height="16" border="0" alt="Calendar"/></a>
+            <#if useValues> 
+              <#assign value= productAssoc.thruDate?if_exists>
+            <#else>
+              <#assign value= request.getParameter("thruDate")?if_exists>
+            </#if>
+            <@htmlTemplate.renderDateTimeField value="${value!''}" name="thruDate" className="" event="" action="" alert="" title="Format: yyyy-MM-dd HH:mm:ss.SSS" size="30" maxlength="30" id="fromDate_2" dateType="date" shortDateInput=false timeDropdownParamName="" defaultDateTimeString="" localizedIconTitle="" timeDropdown="" timeHourName="" classString="" hour1="" hour2="" timeMinutesName="" minutes="" isTwelveHour="" ampmName="" amSelected="" pmSelected="" compositeType="" formName=""/>
         </td>
     </tr>
     <tr>
@@ -205,7 +204,7 @@ function lookupBom() {
                 <#assign selectedFormula = (request.getParameter("estimateCalcMethod"))?if_exists>
             </#if>
             <#list formulae as formula>
-                <option value="${formula.customMethodId}" <#if selectedFormula = formula.customMethodId>selected</#if>>${formula.get("description",locale)?if_exists}</option>
+                <option value="${formula.customMethodId}" <#if selectedFormula = formula.customMethodId>selected="selected"</#if>>${formula.get("description",locale)?if_exists}</option>
             </#list>
             </select>
         </td>
@@ -214,8 +213,16 @@ function lookupBom() {
         <td width="26%" align="right">${uiLabelMap.ManufacturingRoutingTask}</td>
         <td>&nbsp;</td>
         <td width="74%">
-            <input type="text" name="routingWorkEffortId" <#if useValues>value="${(productAssoc.routingWorkEffortId)?if_exists}"<#else>value="${(request.getParameter("routingWorkEffortId"))?if_exists}"</#if> size="10" maxlength="15"/>
-            <a href="javascript:call_fieldlookup(document.editProductAssocForm.routingWorkEffortId,'<@ofbizUrl>LookupRoutingTask</@ofbizUrl>','none',640,460);"><img src='/images/fieldlookup.gif' width='15' height='14' border='0' alt="${uiLabelMap.CommonClickHereForFieldLookup}"/></a>
+          <#if useValues>
+            <#assign value = productAssoc.routingWorkEffortId?if_exists>
+          <#else>
+            <#assign value = request.getParameter("routingWorkEffortId")?if_exists>
+          </#if>
+          <#if value?has_content>
+            <@htmlTemplate.lookupField value="${value}" formName="editProductAssocForm" name="routingWorkEffortId" id="routingWorkEffortId" fieldFormName="LookupRoutingTask"/>
+          <#else>
+            <@htmlTemplate.lookupField formName="editProductAssocForm" name="routingWorkEffortId" id="routingWorkEffortId" fieldFormName="LookupRoutingTask"/>
+          </#if>
         </td>
     </tr>
     <tr>
@@ -252,11 +259,11 @@ function lookupBom() {
       </tr>
     <#assign alt_row = false>
     <#list assocFromProducts?if_exists as assocFromProduct>
-    <#assign listToProduct = assocFromProduct.getRelatedOneCache("AssocProduct")>
-    <#assign curProductAssocType = assocFromProduct.getRelatedOneCache("ProductAssocType")>
+    <#assign listToProduct = assocFromProduct.getRelatedOne("AssocProduct", true)>
+    <#assign curProductAssocType = assocFromProduct.getRelatedOne("ProductAssocType", true)>
       <tr valign="middle"<#if alt_row> class="alternate-row"</#if>>
-        <td><a href="<@ofbizUrl>EditProductBom?productId=${(assocFromProduct.productIdTo)?if_exists}&productAssocTypeId=${(assocFromProduct.productAssocTypeId)?if_exists}#components</@ofbizUrl>" class="buttontext">${(assocFromProduct.productIdTo)?if_exists}</a></td>
-        <td><#if listToProduct?exists><a href="<@ofbizUrl>EditProductBom?productId=${(assocFromProduct.productIdTo)?if_exists}&productAssocTypeId=${(assocFromProduct.productAssocTypeId)?if_exists}#components</@ofbizUrl>" class="buttontext">${(listToProduct.internalName)?if_exists}</a></#if>&nbsp;</td>
+        <td><a href="<@ofbizUrl>EditProductBom?productId=${(assocFromProduct.productIdTo)?if_exists}&amp;productAssocTypeId=${(assocFromProduct.productAssocTypeId)?if_exists}#components</@ofbizUrl>" class="buttontext">${(assocFromProduct.productIdTo)?if_exists}</a></td>
+        <td><#if listToProduct?exists><a href="<@ofbizUrl>EditProductBom?productId=${(assocFromProduct.productIdTo)?if_exists}&amp;productAssocTypeId=${(assocFromProduct.productAssocTypeId)?if_exists}#components</@ofbizUrl>" class="buttontext">${(listToProduct.internalName)?if_exists}</a></#if>&nbsp;</td>
         <td<#if (assocFromProduct.getTimestamp("fromDate"))?exists && nowDate.before(assocFromProduct.getTimestamp("fromDate"))> class="alert"</#if>>
         ${(assocFromProduct.fromDate)?if_exists}&nbsp;</td>
         <td<#if (assocFromProduct.getTimestamp("thruDate"))?exists && nowDate.after(assocFromProduct.getTimestamp("thruDate"))> class="alert"</#if>>
@@ -267,10 +274,10 @@ function lookupBom() {
         <td>&nbsp;${(assocFromProduct.estimateCalcMethod)?if_exists}</td>
         <td>&nbsp;${(assocFromProduct.routingWorkEffortId)?if_exists}</td>
         <td>
-        <a href="<@ofbizUrl>UpdateProductBom?UPDATE_MODE=DELETE&productId=${productId}&productIdTo=${(assocFromProduct.productIdTo)?if_exists}&productAssocTypeId=${(assocFromProduct.productAssocTypeId)?if_exists}&fromDate=${assocFromProduct.getString("fromDate")}&useValues=true</@ofbizUrl>" class="buttontext">${uiLabelMap.CommonDelete}</a>
+        <a href="<@ofbizUrl>UpdateProductBom?UPDATE_MODE=DELETE&amp;productId=${productId}&amp;productIdTo=${(assocFromProduct.productIdTo)?if_exists}&amp;productAssocTypeId=${(assocFromProduct.productAssocTypeId)?if_exists}&amp;fromDate=${(assocFromProduct.fromDate)?if_exists}&amp;useValues=true</@ofbizUrl>" class="buttontext">${uiLabelMap.CommonDelete}</a>
         </td>
         <td>
-        <a href="<@ofbizUrl>EditProductBom?productId=${productId}&productIdTo=${(assocFromProduct.productIdTo)?if_exists}&productAssocTypeId=${(assocFromProduct.productAssocTypeId)?if_exists}&fromDate=${assocFromProduct.getString("fromDate")}&useValues=true</@ofbizUrl>" class="buttontext">${uiLabelMap.CommonEdit}</a>
+        <a href="<@ofbizUrl>EditProductBom?productId=${productId}&amp;productIdTo=${(assocFromProduct.productIdTo)?if_exists}&amp;productAssocTypeId=${(assocFromProduct.productAssocTypeId)?if_exists}&amp;fromDate=${(assocFromProduct.fromDate)?if_exists}&amp;useValues=true</@ofbizUrl>" class="buttontext">${uiLabelMap.CommonEdit}</a>
         </td>
       </tr>
       <#-- toggle the row color -->
@@ -298,17 +305,17 @@ function lookupBom() {
         </tr>
         <#assign alt_row = false>
         <#list assocToProducts?if_exists as assocToProduct>
-        <#assign listToProduct = assocToProduct.getRelatedOneCache("MainProduct")>
-        <#assign curProductAssocType = assocToProduct.getRelatedOneCache("ProductAssocType")>
+        <#assign listToProduct = assocToProduct.getRelatedOne("MainProduct", true)>
+        <#assign curProductAssocType = assocToProduct.getRelatedOne("ProductAssocType", true)>
         <tr valign="middle"<#if alt_row> class="alternate-row"</#if>>
-            <td><a href="<@ofbizUrl>EditProductBom?productId=${(assocToProduct.productId)?if_exists}&productAssocTypeId=${(assocToProduct.productAssocTypeId)?if_exists}#components</@ofbizUrl>" class="buttontext">${(assocToProduct.productId)?if_exists}</a></td>
+            <td><a href="<@ofbizUrl>EditProductBom?productId=${(assocToProduct.productId)?if_exists}&amp;productAssocTypeId=${(assocToProduct.productAssocTypeId)?if_exists}#components</@ofbizUrl>" class="buttontext">${(assocToProduct.productId)?if_exists}</a></td>
 <!--                <td><#if listToProduct?exists><a href="<@ofbizUrl>EditProduct?productId=${(assocToProduct.productId)?if_exists}</@ofbizUrl>" class="buttontext">${(listToProduct.internalName)?if_exists}</a></#if></td> -->
-            <td><#if listToProduct?exists><a href="<@ofbizUrl>EditProductBom?productId=${(assocToProduct.productId)?if_exists}&productAssocTypeId=${(assocToProduct.productAssocTypeId)?if_exists}#components</@ofbizUrl>" class="buttontext">${(listToProduct.internalName)?if_exists}</a></#if></td>
+            <td><#if listToProduct?exists><a href="<@ofbizUrl>EditProductBom?productId=${(assocToProduct.productId)?if_exists}&amp;productAssocTypeId=${(assocToProduct.productAssocTypeId)?if_exists}#components</@ofbizUrl>" class="buttontext">${(listToProduct.internalName)?if_exists}</a></#if></td>
             <td>${(assocToProduct.getTimestamp("fromDate"))?if_exists}&nbsp;</td>
             <td>${(assocToProduct.getTimestamp("thruDate"))?if_exists}&nbsp;</td>
             <td>${(assocToProduct.quantity)?if_exists}&nbsp;</td>
             <td>
-                <a href="<@ofbizUrl>UpdateProductBom?UPDATE_MODE=DELETE&productId=${(assocToProduct.productId)?if_exists}&productIdTo=${(assocToProduct.productIdTo)?if_exists}&productAssocTypeId=${(assocToProduct.productAssocTypeId)?if_exists}&fromDate=${Static["org.ofbiz.base.util.UtilFormatOut"].encodeQueryValue(assocToProduct.getTimestamp("fromDate").toString())}&useValues=true</@ofbizUrl>" class="buttontext">
+                <a href="<@ofbizUrl>UpdateProductBom?UPDATE_MODE=DELETE&amp;productId=${(assocToProduct.productId)?if_exists}&amp;productIdTo=${(assocToProduct.productIdTo)?if_exists}&amp;productAssocTypeId=${(assocToProduct.productAssocTypeId)?if_exists}&amp;fromDate=${Static["org.ofbiz.base.util.UtilFormatOut"].encodeQueryValue(assocToProduct.getTimestamp("fromDate").toString())}&amp;useValues=true</@ofbizUrl>" class="buttontext">
                 ${uiLabelMap.CommonDelete}</a>
             </td>
         </tr>
@@ -316,7 +323,7 @@ function lookupBom() {
         <#assign alt_row = !alt_row>
         </#list>
       </table>
-      <br/>
+      <br />
       ${uiLabelMap.CommonNote}: <b class="alert">${uiLabelMap.CommonRed}</b> ${uiLabelMap.ManufacturingNote1} <b style="color: red;">${uiLabelMap.CommonRed}</b>${uiLabelMap.ManufacturingNote2} <b style="color: red;">${uiLabelMap.CommonRed}</b>${uiLabelMap.ManufacturingNote3}
   </div>
 </div>

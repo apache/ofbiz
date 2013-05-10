@@ -31,11 +31,10 @@ import java.util.regex.PatternSyntaxException;
 import javolution.util.FastList;
 import javolution.util.FastMap;
 
-import org.ofbiz.base.util.BshUtil;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.GeneralException;
-import org.ofbiz.base.util.GroovyUtil;
 import org.ofbiz.base.util.ObjectType;
+import org.ofbiz.base.util.ScriptUtil;
 import org.ofbiz.base.util.UtilGenerics;
 import org.ofbiz.base.util.UtilProperties;
 import org.ofbiz.base.util.UtilValidate;
@@ -46,9 +45,14 @@ import org.ofbiz.entity.finder.ByAndFinder;
 import org.ofbiz.entity.finder.ByConditionFinder;
 import org.ofbiz.entity.finder.EntityFinderUtil;
 import org.ofbiz.entity.finder.PrimaryKeyFinder;
-import org.ofbiz.entity.util.EntityListIterator;
+import org.ofbiz.entity.util.EntityUtilProperties;
+import org.ofbiz.minilang.MiniLangException;
+import org.ofbiz.minilang.SimpleMethod;
+import org.ofbiz.minilang.method.MethodContext;
+import org.ofbiz.service.DispatchContext;
 import org.ofbiz.service.GenericServiceException;
 import org.ofbiz.service.ModelService;
+import org.ofbiz.widget.WidgetWorker;
 import org.w3c.dom.Element;
 
 
@@ -87,6 +91,8 @@ public abstract class ModelFormAction {
                 actions.add(new EntityAnd(modelForm, actionElement));
             } else if ("entity-condition".equals(actionElement.getNodeName())) {
                 actions.add(new EntityCondition(modelForm, actionElement));
+            } else if ("call-parent-actions".equals(actionElement.getNodeName())) {
+                actions.add(new CallParentActions(modelForm, actionElement));
             } else {
                 throw new IllegalArgumentException("Action element not supported with name: " + actionElement.getNodeName());
             }
@@ -125,6 +131,7 @@ public abstract class ModelFormAction {
             }
         }
 
+        @Override
         public void runAction(Map<String, Object> context) {
             String globalStr = this.globalExdr.expandString(context);
             // default to false
@@ -135,12 +142,12 @@ public abstract class ModelFormAction {
                 newValue = this.fromField.get(context);
                 if (Debug.verboseOn()) Debug.logVerbose("In screen getting value for field from [" + this.fromField.getOriginalName() + "]: " + newValue, module);
             } else if (!this.valueExdr.isEmpty()) {
-                newValue = this.valueExdr.expandString(context);
+                newValue = this.valueExdr.expand(context);
             }
 
             // If newValue is still empty, use the default value
             if (ObjectType.isEmpty(newValue) && !this.defaultExdr.isEmpty()) {
-                newValue = this.defaultExdr.expandString(context);
+                newValue = this.defaultExdr.expand(context);
             }
 
             if (UtilValidate.isNotEmpty(this.type)) {
@@ -188,6 +195,7 @@ public abstract class ModelFormAction {
             this.globalExdr = FlexibleStringExpander.getInstance(setElement.getAttribute("global"));
         }
 
+        @Override
         public void runAction(Map<String, Object> context) {
             String globalStr = this.globalExdr.expandString(context);
             // default to false
@@ -228,6 +236,7 @@ public abstract class ModelFormAction {
             this.globalExdr = FlexibleStringExpander.getInstance(setElement.getAttribute("global"));
         }
 
+        @Override
         public void runAction(Map<String, Object> context) {
             //String globalStr = this.globalExdr.expandString(context);
             // default to false
@@ -239,11 +248,11 @@ public abstract class ModelFormAction {
 
             String value = null;
             if (noLocale) {
-                value = UtilProperties.getPropertyValue(resource, property);
+                value = EntityUtilProperties.getPropertyValue(resource, property, WidgetWorker.getDelegator(context));
             } else {
-                value = UtilProperties.getMessage(resource, property, locale);
+                value = EntityUtilProperties.getMessage(resource, property, locale, WidgetWorker.getDelegator(context));
             }
-            if (value == null || value.length() == 0) {
+            if (UtilValidate.isEmpty(value)) {
                 value = this.defaultExdr.expandString(context);
             }
 
@@ -265,31 +274,30 @@ public abstract class ModelFormAction {
 
     public static class Script extends ModelFormAction {
         protected String location;
+        protected String method;
 
         public Script(ModelForm modelForm, Element scriptElement) {
             super (modelForm, scriptElement);
-            this.location = scriptElement.getAttribute("location");
+            String scriptLocation = scriptElement.getAttribute("location");
+            this.location = WidgetWorker.getScriptLocation(scriptLocation);
+            this.method = WidgetWorker.getScriptMethodName(scriptLocation);
         }
 
+        @Override
         public void runAction(Map<String, Object> context) {
-            if (location.endsWith(".bsh")) {
+            if (location.endsWith(".xml")) {
+                Map<String, Object> localContext = FastMap.newInstance();
+                localContext.putAll(context);
+                DispatchContext ctx = this.modelForm.dispatchContext;
+                MethodContext methodContext = new MethodContext(ctx, localContext, null);
                 try {
-                    BshUtil.runBshAtLocation(location, context);
-                } catch (GeneralException e) {
-                    String errMsg = "Error running BSH script at location [" + location + "]: " + e.toString();
-                    Debug.logError(e, errMsg, module);
-                    throw new IllegalArgumentException(errMsg);
-                }
-            } else if (location.endsWith(".groovy")) {
-                try {
-                    GroovyUtil.runScriptAtLocation(location, context);
-                } catch (GeneralException e) {
-                    String errMsg = "Error running Groovy script at location [" + location + "]: " + e.toString();
-                    Debug.logError(e, errMsg, module);
-                    throw new IllegalArgumentException(errMsg);
+                    SimpleMethod.runSimpleMethod(location, method, methodContext);
+                    context.putAll(methodContext.getResults());
+                } catch (MiniLangException e) {
+                    throw new IllegalArgumentException("Error running simple method at location [" + location + "]", e);
                 }
             } else {
-                throw new IllegalArgumentException("For screen script actions the script type is not yet support for location:" + location);
+                ScriptUtil.executeScript(this.location, this.method, context);
             }
         }
     }
@@ -300,6 +308,7 @@ public abstract class ModelFormAction {
         protected FlexibleStringExpander autoFieldMapExdr;
         protected FlexibleStringExpander resultMapListNameExdr;
         protected Map<FlexibleMapAccessor<Object>, Object> fieldMap;
+        protected boolean ignoreError = false;
 
         public Service(ModelForm modelForm, Element serviceElement) {
             super (modelForm, serviceElement);
@@ -325,8 +334,10 @@ public abstract class ModelFormAction {
             }
 
             this.fieldMap = EntityFinderUtil.makeFieldMap(serviceElement);
+            this.ignoreError = "true".equals(serviceElement.getAttribute("ignore-error"));
         }
 
+        @Override
         public void runAction(Map<String, Object> context) {
             String serviceNameExpanded = this.serviceNameExdr.expandString(context);
             if (UtilValidate.isEmpty(serviceNameExpanded)) {
@@ -339,7 +350,12 @@ public abstract class ModelFormAction {
             try {
                 Map<String, Object> serviceContext = null;
                 if (autoFieldMapBool) {
-                    serviceContext = this.modelForm.getDispatcher(context).getDispatchContext().makeValidContext(serviceNameExpanded, ModelService.IN_PARAM, context);
+                    if (! "true".equals(autoFieldMapString)) {
+                        Map<String, Object> autoFieldMap = UtilGenerics.checkMap(context.get(autoFieldMapString));
+                        serviceContext = WidgetWorker.getDispatcher(context).getDispatchContext().makeValidContext(serviceNameExpanded, ModelService.IN_PARAM, autoFieldMap);
+                    } else {
+                        serviceContext = WidgetWorker.getDispatcher(context).getDispatchContext().makeValidContext(serviceNameExpanded, ModelService.IN_PARAM, context);
+                    }
                 } else {
                     serviceContext = new HashMap<String, Object>();
                 }
@@ -348,7 +364,12 @@ public abstract class ModelFormAction {
                     EntityFinderUtil.expandFieldMapToContext(this.fieldMap, context, serviceContext);
                 }
 
-                Map<String, Object> result = this.modelForm.getDispatcher(context).runSync(serviceNameExpanded, serviceContext);
+                Map<String, Object> result = null;
+                if (this.ignoreError) {
+                    result = WidgetWorker.getDispatcher(context).runSync(serviceNameExpanded, serviceContext, -1, true);
+                } else {
+                    result = WidgetWorker.getDispatcher(context).runSync(serviceNameExpanded, serviceContext);
+                }
 
                 if (!this.resultMapNameAcsr.isEmpty()) {
                     this.resultMapNameAcsr.put(context, result);
@@ -369,7 +390,7 @@ public abstract class ModelFormAction {
                 String listName = resultMapListNameExdr.expandString(context);
                 Object listObj = result.get(listName);
                 if (listObj != null) {
-                    if (!(listObj instanceof List) && !(listObj instanceof ListIterator)) {
+                    if (!(listObj instanceof List<?>) && !(listObj instanceof ListIterator<?>)) {
                         throw new IllegalArgumentException("Error in form [" + this.modelForm.getName() + "] calling service with name [" + serviceNameExpanded + "]: the result that is supposed to be a List or ListIterator and is not.");
                     }
                     context.put("listName", listName);
@@ -378,7 +399,9 @@ public abstract class ModelFormAction {
             } catch (GenericServiceException e) {
                 String errMsg = "Error in form [" + this.modelForm.getName() + "] calling service with name [" + serviceNameExpanded + "]: " + e.toString();
                 Debug.logError(e, errMsg, module);
-                throw new IllegalArgumentException(errMsg);
+                if (!this.ignoreError) {
+                    throw new IllegalArgumentException(errMsg);
+                }
             }
         }
     }
@@ -391,9 +414,10 @@ public abstract class ModelFormAction {
             finder = new PrimaryKeyFinder(entityOneElement);
         }
 
+        @Override
         public void runAction(Map<String, Object> context) {
             try {
-                finder.runFind(context, this.modelForm.getDelegator(context));
+                finder.runFind(context, WidgetWorker.getDelegator(context));
             } catch (GeneralException e) {
                 String errMsg = "Error doing entity query by condition: " + e.toString();
                 Debug.logError(e, errMsg, module);
@@ -427,15 +451,22 @@ public abstract class ModelFormAction {
             finder = new ByAndFinder(entityAndElement);
         }
 
+        @Override
         public void runAction(Map<String, Object> context) {
             try {
                 // don't want to do this: context.put("defaultFormResultList", null);
-                finder.runFind(context, this.modelForm.getDelegator(context));
+                finder.runFind(context, WidgetWorker.getDelegator(context));
+                
+                /* NOTE DEJ20100925: this should not be running any more as it causes actions in a list or multi 
+                 * form definition to overwrite the desired list elsewhere, this was the really old way of doing 
+                 * it that was removed a long time ago and needs to stay gone to avoid issues; the form's list 
+                 * should be found by explicitly matching the name:
                 Object obj = context.get(this.actualListName);
                 if (obj != null && ((obj instanceof List) || (obj instanceof EntityListIterator))) {
                     String modelFormListName = modelForm.getListName();
                     context.put(modelFormListName, obj);
                 }
+                 */
             } catch (GeneralException e) {
                 String errMsg = "Error doing entity query by condition: " + e.toString();
                 Debug.logError(e, errMsg, module);
@@ -470,15 +501,22 @@ public abstract class ModelFormAction {
             finder = new ByConditionFinder(entityConditionElement);
         }
 
+        @Override
         public void runAction(Map<String, Object> context) {
             try {
                 // don't want to do this: context.put("defaultFormResultList", null);
-                finder.runFind(context, this.modelForm.getDelegator(context));
+                finder.runFind(context, WidgetWorker.getDelegator(context));
+                
+                /* NOTE DEJ20100925: this should not be running any more as it causes actions in a list or multi 
+                 * form definition to overwrite the desired list elsewhere, this was the really old way of doing 
+                 * it that was removed a long time ago and needs to stay gone to avoid issues; the form's list 
+                 * should be found by explicitly matching the name:
                 Object obj = context.get(this.actualListName);
                 if (obj != null && ((obj instanceof List) || (obj instanceof EntityListIterator))) {
                     String modelFormListName = modelForm.getListName();
                     context.put(modelFormListName, obj);
                 }
+                 */
             } catch (GeneralException e) {
                 String errMsg = "Error doing entity query by condition: " + e.toString();
                 Debug.logError(e, errMsg, module);
@@ -486,8 +524,43 @@ public abstract class ModelFormAction {
             }
         }
     }
+
+    public static class CallParentActions extends ModelFormAction {
+        protected static enum ActionsKind {
+            ACTIONS,
+            ROW_ACTIONS
+        };
+
+        protected ActionsKind kind;
+
+        public CallParentActions(ModelForm modelForm, Element callParentActionsElement) {
+            super(modelForm, callParentActionsElement);
+            String parentName = callParentActionsElement.getParentNode().getNodeName();
+            if ("actions".equals(parentName)) {
+                kind = ActionsKind.ACTIONS;
+            } else if ("row-actions".equals(parentName)) {
+                kind = ActionsKind.ROW_ACTIONS;
+            } else {
+                throw new IllegalArgumentException("Action element not supported for call-parent-actions : " + parentName);
+            }
+
+            ModelForm parentModel = modelForm.getParentModelForm();
+            if (parentModel == null) {
+                throw new IllegalArgumentException("call-parent-actions can only be used with form extending another form");
+            }
+        }
+
+        @Override
+        public void runAction(Map<String, Object> context) {
+            ModelForm parentModel = modelForm.getParentModelForm();
+            switch (kind) {
+                case ACTIONS:
+                    parentModel.runFormActions(context);
+                    break;
+                case ROW_ACTIONS:
+                    ModelFormAction.runSubActions(parentModel.rowActions, context);
+                    break;
+            }
+        }
+    }
 }
-
-
-
-

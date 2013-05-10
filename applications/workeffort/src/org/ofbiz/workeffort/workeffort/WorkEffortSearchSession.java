@@ -19,7 +19,6 @@
 package org.ofbiz.workeffort.workeffort;
 
 import java.sql.Timestamp;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -34,14 +33,16 @@ import org.ofbiz.base.util.UtilGenerics;
 import org.ofbiz.base.util.UtilHttp;
 import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.base.util.UtilValidate;
-import org.ofbiz.entity.GenericDelegator;
+import org.ofbiz.entity.Delegator;
 import org.ofbiz.workeffort.workeffort.WorkEffortSearch.ResultSortOrder;
-import org.ofbiz.workeffort.workeffort.WorkEffortSearch.WorkEffortSearchConstraint;
 import org.ofbiz.workeffort.workeffort.WorkEffortSearch.SortKeywordRelevancy;
+import org.ofbiz.workeffort.workeffort.WorkEffortSearch.WorkEffortSearchConstraint;
 
 public class WorkEffortSearchSession {
 
     public static final String module = WorkEffortSearchSession.class.getName();
+    
+    @SuppressWarnings("serial")
     public static class WorkEffortSearchOptions implements java.io.Serializable {
         protected List<WorkEffortSearchConstraint> constraintList = null;
         protected ResultSortOrder resultSortOrder = null;
@@ -129,7 +130,7 @@ public class WorkEffortSearchSession {
             this.viewSize = viewSize;
         }
 
-        public List<String> searchGetConstraintStrings(boolean detailed, GenericDelegator delegator, Locale locale) {
+        public List<String> searchGetConstraintStrings(boolean detailed, Delegator delegator, Locale locale) {
             List<WorkEffortSearchConstraint> workEffortSearchConstraintList = this.getConstraintList();
             List<String> constraintStrings = FastList.newInstance();
             if (workEffortSearchConstraintList == null) {
@@ -185,13 +186,13 @@ public class WorkEffortSearchSession {
         }
 
 //      add a Work Effort Review to the search
-        if (UtilValidate.isNotEmpty((String) parameters.get("SEARCH_STRING_REVIEW_TEXT"))) {
+        if (UtilValidate.isNotEmpty(parameters.get("SEARCH_STRING_REVIEW_TEXT"))) {
             String reviewText = (String) parameters.get("SEARCH_STRING_REVIEW_TEXT");
             searchAddConstraint(new WorkEffortSearch.WorkEffortReviewConstraint(reviewText), session);
             constraintsChanged = true;
         }
 //      add a Work Effort Assoc Type to the search
-        if (UtilValidate.isNotEmpty((String) parameters.get("SEARCH_WORK_EFFORT_ID"))) {
+        if (UtilValidate.isNotEmpty(parameters.get("SEARCH_WORK_EFFORT_ID"))) {
             String workEffortId=(String) parameters.get("SEARCH_WORK_EFFORT_ID");
             String workEffortAssocTypeId=(String) parameters.get("workEffortAssocTypeId");
             boolean includeAllSubWorkEfforts =!"N".equalsIgnoreCase((String) parameters.get("SEARCH_SUB_WORK_EFFORTS"));
@@ -199,7 +200,7 @@ public class WorkEffortSearchSession {
             constraintsChanged = true;
         }
 //      add a Work Effort Party Assignment to the search
-        if (UtilValidate.isNotEmpty((String) parameters.get("partyId"))) {
+        if (UtilValidate.isNotEmpty(parameters.get("partyId"))) {
             String partyId=(String) parameters.get("partyId");
             String roleTypeId=(String) parameters.get("roleTypeId");
             searchAddConstraint(new WorkEffortSearch.PartyAssignmentConstraint(partyId,roleTypeId), session);
@@ -207,10 +208,10 @@ public class WorkEffortSearchSession {
         }
 
 //      add a Product Set to the search
-        if (UtilValidate.isNotEmpty((String) parameters.get("productId_1"))) {
+        if (UtilValidate.isNotEmpty(parameters.get("productId_1"))) {
             List<String> productSet = FastList.newInstance();
             productSet.add((String) parameters.get("productId_1"));
-            if (UtilValidate.isNotEmpty((String) parameters.get("productId_2"))) {
+            if (UtilValidate.isNotEmpty(parameters.get("productId_2"))) {
                 productSet.add((String) parameters.get("productId_2"));
             }
             searchAddConstraint(new WorkEffortSearch.ProductSetConstraint(productSet), session);
@@ -218,14 +219,14 @@ public class WorkEffortSearchSession {
         }
 
 //      add a WorkEfort fromDate thruDate  to the search
-        if (UtilValidate.isNotEmpty((String) parameters.get("fromDate")) || UtilValidate.isNotEmpty((String) parameters.get("thruDate")) ) {
+        if (UtilValidate.isNotEmpty(parameters.get("fromDate")) || UtilValidate.isNotEmpty(parameters.get("thruDate"))) {
             Timestamp fromDate =null;
-            if (UtilValidate.isNotEmpty((String) parameters.get("fromDate"))) {
+            if (UtilValidate.isNotEmpty(parameters.get("fromDate"))) {
                 fromDate=Timestamp.valueOf((String) parameters.get("fromDate"));
             }
 
             Timestamp thruDate = null;
-            if (UtilValidate.isNotEmpty((String) parameters.get("thruDate"))) {
+            if (UtilValidate.isNotEmpty(parameters.get("thruDate"))) {
                 thruDate = Timestamp.valueOf((String) parameters.get("thruDate"));
             }
             searchAddConstraint(new WorkEffortSearch.LastUpdatedRangeConstraint(fromDate,thruDate), session);
@@ -233,11 +234,11 @@ public class WorkEffortSearchSession {
         }
 
         // if keywords were specified, add a constraint for them
-        if (UtilValidate.isNotEmpty((String) parameters.get("SEARCH_STRING"))) {
+        if (UtilValidate.isNotEmpty(parameters.get("SEARCH_STRING"))) {
             String keywordString = (String) parameters.get("SEARCH_STRING");
             String searchOperator = (String) parameters.get("SEARCH_OPERATOR");
             // defaults to true/Y, ie anything but N is true/Y
-            boolean anyPrefixSuffix = !"N".equals((String) parameters.get("SEARCH_ANYPRESUF"));
+            boolean anyPrefixSuffix = !"N".equals(parameters.get("SEARCH_ANYPRESUF"));
             searchAddConstraint(new WorkEffortSearch.KeywordConstraint(keywordString, anyPrefixSuffix, anyPrefixSuffix, null, "AND".equals(searchOperator)), session);
             constraintsChanged = true;
         }
@@ -297,7 +298,7 @@ public class WorkEffortSearchSession {
         return optionsHistoryList;
     }
 
-    public static List<String> searchGetConstraintStrings(boolean detailed, HttpSession session, GenericDelegator delegator) {
+    public static List<String> searchGetConstraintStrings(boolean detailed, HttpSession session, Delegator delegator) {
         Locale locale = UtilHttp.getLocale(session);
         WorkEffortSearchOptions workEffortSearchOptions = getWorkEffortSearchOptions(session);
         return workEffortSearchOptions.searchGetConstraintStrings(detailed, delegator, locale);

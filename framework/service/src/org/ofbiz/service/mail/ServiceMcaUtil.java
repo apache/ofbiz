@@ -18,10 +18,10 @@
  *******************************************************************************/
 package org.ofbiz.service.mail;
 
-import java.util.Iterator;
-import java.util.List;
+import java.util.Collection;
 import java.util.Set;
 import java.util.TreeSet;
+
 import org.ofbiz.base.component.ComponentConfig;
 import org.ofbiz.base.config.GenericConfigException;
 import org.ofbiz.base.config.MainResourceHandler;
@@ -29,17 +29,16 @@ import org.ofbiz.base.config.ResourceHandler;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilXml;
 import org.ofbiz.base.util.cache.UtilCache;
-import org.ofbiz.service.config.ServiceConfigUtil;
-import org.ofbiz.service.LocalDispatcher;
-import org.ofbiz.service.GenericServiceException;
 import org.ofbiz.entity.GenericValue;
-
+import org.ofbiz.service.GenericServiceException;
+import org.ofbiz.service.LocalDispatcher;
+import org.ofbiz.service.config.ServiceConfigUtil;
 import org.w3c.dom.Element;
 
 public class ServiceMcaUtil {
 
     public static final String module = ServiceMcaUtil.class.getName();
-    public static UtilCache<String, ServiceMcaRule> mcaCache = new UtilCache<String, ServiceMcaRule>("service.ServiceMCAs", 0, 0, false);
+    private static final UtilCache<String, ServiceMcaRule> mcaCache = UtilCache.createUtilCache("service.ServiceMCAs", 0, 0, false);
 
     public static void reloadConfig() {
         mcaCache.clear();
@@ -93,7 +92,7 @@ public class ServiceMcaUtil {
         }
     }
 
-    public static List<ServiceMcaRule> getServiceMcaRules() {
+    public static Collection<ServiceMcaRule> getServiceMcaRules() {
     if (mcaCache.size() == 0) {
         readConfig();
     }

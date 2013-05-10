@@ -22,13 +22,13 @@ under the License.
       <ul>
         <li class="h3">${uiLabelMap.PartyUserName}</li>
         <#if security.hasEntityPermission("PARTYMGR", "_CREATE", session)>
-          <li><a href="<@ofbizUrl>createnewlogin?partyId=${party.partyId}</@ofbizUrl>">${uiLabelMap.CommonCreateNew}</a></li>
+          <li><a href="<@ofbizUrl>ProfileCreateNewLogin?partyId=${party.partyId}</@ofbizUrl>">${uiLabelMap.CommonCreateNew}</a></li>
         </#if>
       </ul>
       <br class="clear" />
     </div>
     <div class="screenlet-body">
-      <#if userLogins?exists>
+      <#if userLogins?has_content>
         <table class="basic-table" cellspacing="0">
           <#list userLogins as userUserLogin>
             <tr>
@@ -48,10 +48,10 @@ under the License.
               </td>
               <td class="button-col">
                 <#if security.hasEntityPermission("PARTYMGR", "_CREATE", session)>
-                  <a href="<@ofbizUrl>editlogin?partyId=${party.partyId}&userLoginId=${userUserLogin.userLoginId}</@ofbizUrl>">${uiLabelMap.CommonEdit}</a>
+                  <a href="<@ofbizUrl>ProfileEditUserLogin?partyId=${party.partyId}&amp;userLoginId=${userUserLogin.userLoginId}</@ofbizUrl>">${uiLabelMap.CommonEdit}</a>
                 </#if>
                 <#if security.hasEntityPermission("SECURITY", "_VIEW", session)>
-                  <a href="<@ofbizUrl>EditUserLoginSecurityGroups?partyId=${party.partyId}&userLoginId=${userUserLogin.userLoginId}</@ofbizUrl>">${uiLabelMap.PartySecurityGroups}</a>
+                  <a href="<@ofbizUrl>ProfileEditUserLoginSecurityGroups?partyId=${party.partyId}&amp;userLoginId=${userUserLogin.userLoginId}</@ofbizUrl>">${uiLabelMap.SecurityGroups}</a>
                 </#if>
               </td>
             </tr>

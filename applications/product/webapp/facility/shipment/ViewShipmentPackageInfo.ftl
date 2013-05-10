@@ -18,12 +18,6 @@ under the License.
 -->
 <#if shipmentPackageDatas?has_content>
 <div class="screenlet">
-    <div class="screenlet-title-bar">
-        <ul>
-            <li class="h3">${uiLabelMap.PageTitleViewShipmentPackageInfo}</li>
-        </ul>
-        <br class="clear"/>
-    </div>
     <div class="screenlet-body">
       <table cellspacing="0" cellpadding="2" class="basic-table">
         <tr class="header-row">
@@ -48,16 +42,16 @@ under the License.
             <tr valign="middle"<#if alt_row> class="alternate-row"</#if>>
               <td>&nbsp;</td>
               <td><span class="label">${uiLabelMap.ProductItem}</span> ${shipmentPackageContent.shipmentItemSeqId}</td>
-              <td><span class="label">${uiLabelMap.ProductQuantity}</span> ${shipmentPackageContent.quantity?if_exists}</div></td>
+              <td><span class="label">${uiLabelMap.ProductQuantity}</span> ${shipmentPackageContent.quantity?if_exists}</td>
               <td>&nbsp;</td>
             </tr>
           </#list>
           <#list shipmentPackageRouteSegs as shipmentPackageRouteSeg>
             <tr valign="middle"<#if alt_row> class="alternate-row"</#if>>
               <td>&nbsp;</td>
-              <td><span class="label">${uiLabelMap.ProductRouteSegment}</span> ${shipmentPackageRouteSeg.shipmentRouteSegmentId}</div></td>
-              <td><span class="label">${uiLabelMap.ProductTracking}</span> ${shipmentPackageRouteSeg.trackingCode?if_exists}</span></td>
-              <td><span class="label">${uiLabelMap.ProductBox}</span> ${shipmentPackageRouteSeg.boxNumber?if_exists}</span></td>
+              <td><span class="label">${uiLabelMap.ProductRouteSegment}</span> ${shipmentPackageRouteSeg.shipmentRouteSegmentId}</td>
+              <td><span class="label">${uiLabelMap.ProductTracking}</span> ${shipmentPackageRouteSeg.trackingCode?if_exists}</td>
+              <td><span class="label">${uiLabelMap.ProductBox}</span> ${shipmentPackageRouteSeg.boxNumber?if_exists}</td>
             </tr>
           </#list>
           <#-- toggle the row color -->

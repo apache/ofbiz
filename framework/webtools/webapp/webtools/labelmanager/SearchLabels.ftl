@@ -19,17 +19,18 @@ under the License.
 <div class="screenlet-body">
   <form action="<@ofbizUrl>SearchLabels</@ofbizUrl>" method="post">
     <table class="basic-table">
+      <tr><td colspan="4">${uiLabelMap.WebtoolsLabelManagerTemporarySearchTitle}</td></tr>    
       <tr>
-        <td align="right" class="label">
+        <td class="label">
           ${uiLabelMap.WebtoolsLabelManagerKey}
         </td>
-        <td align="left">
-          <input type="text" name="labelKey" size="30" maxlength="70" value="${parameters.labelKey?if_exists}">
+        <td>
+          <input type="text" name="labelKey" size="30" maxlength="70" value="${parameters.labelKey?if_exists}" />
         </td>
-        <td align="right" class="label">
+        <td class="label">
           ${uiLabelMap.WebtoolsLabelManagerComponentName}
         </td>
-        <td align="left">
+        <td>
           <select name="labelComponentName">
             <option value="">${uiLabelMap.WebtoolsLabelManagerAllComponents}</option>
             <#list componentNamesFound as componentNameFound>
@@ -39,30 +40,32 @@ under the License.
         </td>
       </tr>
       <tr>
-        <td align="right" class="label">
+        <td class="label">
           ${uiLabelMap.WebtoolsLabelManagerFileName}
         </td>
-        <td align="left">
+        <td>
           <select name="labelFileName">
             <option value="">${uiLabelMap.WebtoolsLabelManagerAllFiles}</option>
-            <#assign fileNames = fileNamesFound.keySet()>
-            <#list fileNames as fileName>
+            <#list filesFound as fileInfo>
+              <#assign fileName = fileInfo.getFileName()/>
               <option <#if parameters.labelFileName?exists && parameters.labelFileName == fileName>selected="selected"</#if> value="${fileName}">${fileName}</option>
             </#list>
           </select>
         </td>
-        <td align="right" class="label">
+        <td class="label">
           ${uiLabelMap.WebtoolsLabelManagerLocale}
         </td>
-        <td align="left">
+        <td>
           <select name="labelLocaleName">
             <option value="">${uiLabelMap.WebtoolsLabelManagerAllLocales}</option>
             <#list localesFound as localeFound>
               <#assign locale = Static["org.ofbiz.base.util.UtilMisc"].parseLocale(localeFound)?if_exists/>
               <#assign langAttr = localeFound.toString()?replace("_", "-")>
               <#assign langDir = "ltr">
-              <#if "ar.iw"?contains(langAttr?substring(0, 2))>
-                <#assign langDir = "rtl">
+              <#if 1 < langAttr?length>
+                <#if "ar.iw"?contains(langAttr?substring(0, 2))>
+                  <#assign langDir = "rtl">
+                </#if>
               </#if>
               <option <#if parameters.labelLocaleName?exists && parameters.labelLocaleName == localeFound>selected="selected"</#if> value="${localeFound}" lang="${langAttr}" dir="${langDir}"><#if locale?exists && locale?has_content>${locale.getDisplayName(locale)}<#else>${localeFound}</#if></option>
             </#list>
@@ -70,29 +73,29 @@ under the License.
         </td>
       </tr>
       <tr>
-        <td align="right" class="label">
+        <td class="label">
           ${uiLabelMap.WebtoolsLabelManagerOnlyNotUsedLabels}
         </td>
-        <td align="left">
-          <input type="checkbox" name="onlyNotUsedLabels" value="Y" <#if parameters.onlyNotUsedLabels?exists && parameters.onlyNotUsedLabels == "Y">checked</#if>>
+        <td>
+          <input type="checkbox" name="onlyNotUsedLabels" value="Y" <#if parameters.onlyNotUsedLabels?exists && parameters.onlyNotUsedLabels == "Y">checked="checked"</#if> />
         </td>
-        <td align="right" class="label">
+        <td class="label">
           ${uiLabelMap.WebtoolsLabelManagerOnlyMissingTranslations}
         </td>
-        <td align="left">
-          <input type="checkbox" name="onlyMissingTranslations" value="Y" <#if parameters.onlyMissingTranslations?exists && parameters.onlyMissingTranslations == "Y">checked</#if>>
+        <td>
+          <input type="checkbox" name="onlyMissingTranslations" value="Y" <#if parameters.onlyMissingTranslations?exists && parameters.onlyMissingTranslations == "Y">checked="checked"</#if> />
         </td>
       </tr>
       <tr>
         <td colspan="4" align="center">
           <#if (duplicatedLocalesLabels > 0)>
-            <br/>
+            <br />
             <b>${uiLabelMap.WebtoolsLabelManagerWarningMessage} (${duplicatedLocalesLabels})</b>
-            <br/>
+            <br />
             <#list duplicatedLocalesLabelsList as duplicatedLocalesLabel>
-                <br>${duplicatedLocalesLabel.labelKey}
+                <br/>${duplicatedLocalesLabel.labelKey}
             </#list>
-            <br/><br/>${uiLabelMap.WebtoolsLabelManagerClearCacheAfterFixingDuplicateLabels}
+            <br /><br />${uiLabelMap.WebtoolsLabelManagerClearCacheAfterFixingDuplicateLabels}
           <#else>
             <input type="submit" name="searchLabels" value="${uiLabelMap.CommonFind}"/>
           </#if>

@@ -22,10 +22,12 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.Serializable;
 import java.lang.ref.WeakReference;
+import java.math.BigDecimal;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -41,14 +43,16 @@ import java.util.TreeSet;
 import java.util.Vector;
 import java.util.WeakHashMap;
 
+import javax.xml.bind.DatatypeConverter;
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.ofbiz.base.util.UtilMisc;
-import org.ofbiz.base.util.UtilXml;
 import org.ofbiz.base.util.Debug;
-import org.ofbiz.base.util.UtilObject;
 import org.ofbiz.base.util.StringUtil;
-import org.ofbiz.entity.GenericDelegator;
+import org.ofbiz.base.util.UtilGenerics;
+import org.ofbiz.base.util.UtilMisc;
+import org.ofbiz.base.util.UtilObject;
+import org.ofbiz.base.util.UtilXml;
+import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericPK;
 import org.ofbiz.entity.GenericValue;
 import org.w3c.dom.Document;
@@ -57,8 +61,8 @@ import org.w3c.dom.Node;
 import org.xml.sax.SAXException;
 
 /**
- * <p><b>Title:</b> XmlSerializer
- * <p><b>Description:</b> Simple XML serialization/deserialization routines with embedded type information
+ * XmlSerializer class. This class is deprecated - new code should use the
+ * Java object marshalling/unmarshalling methods in <code>UtilXml.java</code>.
  *
  */
 public class XmlSerializer {
@@ -74,32 +78,60 @@ public class XmlSerializer {
         return UtilXml.writeXmlDocument(document);
     }
 
-    public static Object deserialize(String content, GenericDelegator delegator)
+    /** Deserialize a Java object from an XML string. <p>This method should be used with caution.
+     * If the XML string contains a serialized <code>GenericValue</code> or <code>GenericPK</code>
+     * then it is possible to unintentionally corrupt the database.</p>
+     * 
+     * @param content the content
+     * @param delegator the delegator
+     * @return return a deserialized object from XML string
+     * @throws SerializeException
+     * @throws SAXException
+     * @throws ParserConfigurationException
+     * @throws IOException
+     */
+    public static Object deserialize(String content, Delegator delegator)
         throws SerializeException, SAXException, ParserConfigurationException, IOException {
         // readXmlDocument with false second parameter to disable validation
         Document document = UtilXml.readXmlDocument(content, false);
         if (document != null) {
-            Element rootElement = document.getDocumentElement();
-            // find the first element below the root element, that should be the object
-            Node curChild = rootElement.getFirstChild();
-
-            while (curChild != null && curChild.getNodeType() != Node.ELEMENT_NODE) {
-                curChild = curChild.getNextSibling();
+            if (!"ofbiz-ser".equals(document.getDocumentElement().getTagName())) {
+                return UtilXml.fromXml(content);
             }
-            if (curChild == null) return null;
-            Element element = (Element) curChild;
-
-            return deserializeSingle(element, delegator);
+            return deserialize(document, delegator);
         } else {
             Debug.logWarning("Serialized document came back null", module);
             return null;
         }
     }
 
+    /** Deserialize a Java object from a DOM <code>Document</code>.
+     * <p>This method should be used with caution. If the DOM <code>Document</code>
+     * contains a serialized <code>GenericValue</code> or <code>GenericPK</code>
+     * then it is possible to unintentionally corrupt the database.</p>
+     * 
+     * @param document the document
+     * @param delegator the delegator
+     * @return returns a deserialized object from a DOM document
+     * @throws SerializeException
+     */
+    public static Object deserialize(Document document, Delegator delegator) throws SerializeException {
+        Element rootElement = document.getDocumentElement();
+        // find the first element below the root element, that should be the object
+        Node curChild = rootElement.getFirstChild();
+        while (curChild != null && curChild.getNodeType() != Node.ELEMENT_NODE) {
+            curChild = curChild.getNextSibling();
+        }
+        if (curChild == null) {
+            return null;
+        }
+        return deserializeSingle((Element) curChild, delegator);
+    }
+
     public static Element serializeSingle(Object object, Document document) throws SerializeException {
         if (document == null) return null;
 
-        if (object == null) return document.createElement("null");
+        if (object == null) return makeElement("null", object, document);
 
         // - Standard Objects -
         if (object instanceof String) {
@@ -116,9 +148,13 @@ public class XmlSerializer {
             return makeElement("std-Boolean", object, document);
         } else if (object instanceof Locale) {
             return makeElement("std-Locale", object, document);
+        } else if (object instanceof BigDecimal) {
+            String stringValue = ((BigDecimal) object).setScale(10, BigDecimal.ROUND_HALF_UP).toString();            
+            return makeElement("std-BigDecimal", stringValue, document);
             // - SQL Objects -
         } else if (object instanceof java.sql.Timestamp) {
-            return makeElement("sql-Timestamp", object, document);
+            String stringValue = object.toString().replace(' ', 'T');
+            return makeElement("sql-Timestamp", stringValue, document);
         } else if (object instanceof java.sql.Date) {
             return makeElement("sql-Date", object, document);
         } else if (object instanceof java.sql.Time) {
@@ -133,22 +169,22 @@ public class XmlSerializer {
             }
             return makeElement("std-Date", stringValue, document);
             // return makeElement("std-Date", object, document);
-        } else if (object instanceof Collection) {
+        } else if (object instanceof Collection<?>) {
             // - Collections -
             String elementName = null;
 
             // these ARE order sensitive; for instance Stack extends Vector, so if Vector were first we would lose the stack part
-            if (object instanceof ArrayList) {
+            if (object instanceof ArrayList<?>) {
                 elementName = "col-ArrayList";
-            } else if (object instanceof LinkedList) {
+            } else if (object instanceof LinkedList<?>) {
                 elementName = "col-LinkedList";
-            } else if (object instanceof Stack) {
+            } else if (object instanceof Stack<?>) {
                 elementName = "col-Stack";
-            } else if (object instanceof Vector) {
+            } else if (object instanceof Vector<?>) {
                 elementName = "col-Vector";
-            } else if (object instanceof TreeSet) {
+            } else if (object instanceof TreeSet<?>) {
                 elementName = "col-TreeSet";
-            } else if (object instanceof HashSet) {
+            } else if (object instanceof HashSet<?>) {
                 elementName = "col-HashSet";
             } else {
                 // no specific type found, do general Collection, will deserialize as LinkedList
@@ -157,9 +193,9 @@ public class XmlSerializer {
 
             // if (elementName == null) return serializeCustom(object, document);
 
-            Collection value = (Collection) object;
+            Collection<?> value = UtilGenerics.cast(object);
             Element element = document.createElement(elementName);
-            Iterator iter = value.iterator();
+            Iterator<?> iter = value.iterator();
 
             while (iter.hasNext()) {
                 element.appendChild(serializeSingle(iter.next(), document));
@@ -174,20 +210,20 @@ public class XmlSerializer {
             GenericValue value = (GenericValue) object;
 
             return value.makeXmlElement(document, "eeval-");
-        } else if (object instanceof Map) {
+        } else if (object instanceof Map<?, ?>) {
             // - Maps -
             String elementName = null;
 
             // these ARE order sensitive; for instance Properties extends Hashtable, so if Hashtable were first we would lose the Properties part
-            if (object instanceof HashMap) {
+            if (object instanceof HashMap<?, ?>) {
                 elementName = "map-HashMap";
             } else if (object instanceof Properties) {
                 elementName = "map-Properties";
-            } else if (object instanceof Hashtable) {
+            } else if (object instanceof Hashtable<?, ?>) {
                 elementName = "map-Hashtable";
-            } else if (object instanceof WeakHashMap) {
+            } else if (object instanceof WeakHashMap<?, ?>) {
                 elementName = "map-WeakHashMap";
-            } else if (object instanceof TreeMap) {
+            } else if (object instanceof TreeMap<?, ?>) {
                 elementName = "map-TreeMap";
             } else {
                 // serialize as a simple Map implementation if nothing else applies, these will deserialize as a HashMap
@@ -195,11 +231,11 @@ public class XmlSerializer {
             }
 
             Element element = document.createElement(elementName);
-            Map value = (Map) object;
-            Iterator iter = value.entrySet().iterator();
+            Map<?,?> value = UtilGenerics.cast(object);
+            Iterator<Map.Entry<?, ?>> iter = UtilGenerics.cast(value.entrySet().iterator());
 
             while (iter.hasNext()) {
-                Map.Entry entry = (Map.Entry) iter.next();
+                Map.Entry<?,?> entry = iter.next();
 
                 Element entryElement = document.createElement("map-Entry");
 
@@ -228,7 +264,8 @@ public class XmlSerializer {
             } else {
                 String byteHex = StringUtil.toHexString(objBytes);
                 Element element = document.createElement("cus-obj");
-                element.appendChild(document.createCDATASection(byteHex));
+                // this is hex encoded so does not need to be in a CDATA block
+                element.appendChild(document.createTextNode(byteHex));
                 return element;
             }
         } else {
@@ -237,15 +274,23 @@ public class XmlSerializer {
     }
 
     public static Element makeElement(String elementName, Object value, Document document) {
-        if (value == null) return document.createElement("null");
+        if (value == null) {
+            Element element = document.createElement("null");
+            element.setAttribute("xsi:nil", "true");
+            // I tried to put the schema in the envelope header (in createAndSendSOAPResponse) 
+            // resEnv.declareNamespace("http://www.w3.org/2001/XMLSchema-instance", null); 
+            // But it gets prefixed and that does not work. So adding in each instance
+            element.setAttribute("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance");
+            return element;
+        }
         Element element = document.createElement(elementName);
 
         element.setAttribute("value", value.toString());
         return element;
     }
 
-    public static Object deserializeSingle(Element element, GenericDelegator delegator) throws SerializeException {
-        String tagName = element.getTagName();
+    public static Object deserializeSingle(Element element, Delegator delegator) throws SerializeException {
+        String tagName = element.getLocalName();
 
         if (tagName.equals("null")) return null;
 
@@ -265,6 +310,9 @@ public class XmlSerializer {
             } else if ("std-Double".equals(tagName)) {
                 String valStr = element.getAttribute("value");
                 return Double.valueOf(valStr);
+            } else if ("std-BigDecimal".equals(tagName)) {
+                String valStr = element.getAttribute("value");
+                return new BigDecimal(valStr);
             } else if ("std-Boolean".equals(tagName)) {
                 String valStr = element.getAttribute("value");
                 return Boolean.valueOf(valStr);
@@ -289,7 +337,19 @@ public class XmlSerializer {
             // - SQL Objects -
             if ("sql-Timestamp".equals(tagName)) {
                 String valStr = element.getAttribute("value");
-                return java.sql.Timestamp.valueOf(valStr);
+                /*
+                 * sql-Timestamp is defined as xsd:dateTime in ModelService.getTypes(),
+                 * so try to parse the value as xsd:dateTime first.
+                 * Fallback is java.sql.Timestamp because it has been this way all the time.
+                 */
+                try {
+                    Calendar cal = DatatypeConverter.parseDate(valStr);
+                    return new java.sql.Timestamp(cal.getTimeInMillis());
+                }
+                catch (Exception e) {
+                    Debug.logWarning("sql-Timestamp does not conform to XML Schema definition, try java.sql.Timestamp format", module);
+                    return java.sql.Timestamp.valueOf(valStr);
+                }
             } else if ("sql-Date".equals(tagName)) {
                 String valStr = element.getAttribute("value");
                 return java.sql.Date.valueOf(valStr);
@@ -357,7 +417,8 @@ public class XmlSerializer {
                     if (curChild.getNodeType() == Node.ELEMENT_NODE) {
                         Element curElement = (Element) curChild;
 
-                        if ("map-Entry".equals(curElement.getTagName())) {
+                        if ("map-Entry".equals(curElement.getLocalName())) {
+
                             Element mapKeyElement = UtilXml.firstChildElement(curElement, "map-Key");
                             Element keyElement = null;
                             Node tempNode = mapKeyElement.getFirstChild();
@@ -401,7 +462,7 @@ public class XmlSerializer {
     }
 
     public static Object deserializeCustom(Element element) throws SerializeException {
-        String tagName = element.getTagName();
+        String tagName = element.getLocalName();
         if ("cus-obj".equals(tagName)) {
             String value = UtilXml.elementValue(element);
             if (value != null) {
@@ -413,9 +474,9 @@ public class XmlSerializer {
                     }
                 }
             }
-            throw new SerializeException("Problem deserializing object from byte array + " + element.getTagName());
+            throw new SerializeException("Problem deserializing object from byte array + " + element.getLocalName());
         } else {
-            throw new SerializeException("Cannot deserialize element named " + element.getTagName());
+            throw new SerializeException("Cannot deserialize element named " + element.getLocalName());
         }
     }
 

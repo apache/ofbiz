@@ -18,26 +18,29 @@
  *******************************************************************************/
 package org.ofbiz.service.eca;
 
-import java.util.*;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+
 import javax.transaction.xa.XAException;
 
 import javolution.util.FastMap;
 
-import org.ofbiz.base.util.UtilGenerics;
-import org.ofbiz.base.util.UtilMisc;
-import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.base.util.Debug;
+import org.ofbiz.base.util.UtilGenerics;
+import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.service.DispatchContext;
 import org.ofbiz.service.GenericServiceException;
 import org.ofbiz.service.LocalDispatcher;
 import org.ofbiz.service.ModelService;
-import org.ofbiz.service.ServiceXaWrapper;
 import org.ofbiz.service.ServiceUtil;
+import org.ofbiz.service.ServiceXaWrapper;
 import org.w3c.dom.Element;
 
 /**
  * ServiceEcaAction
  */
+@SuppressWarnings("serial")
 public class ServiceEcaAction implements java.io.Serializable {
 
     public static final String module = ServiceEcaAction.class.getName();
@@ -140,7 +143,7 @@ public class ServiceEcaAction implements java.io.Serializable {
         }
 
         // put the results in to the defined map
-        if (resultMapName != null && resultMapName.length() > 0) {
+        if (UtilValidate.isNotEmpty(resultMapName)) {
             Map<String, Object> resultMap = UtilGenerics.checkMap(context.get(resultMapName));
             if (resultMap == null) {
                 resultMap = FastMap.newInstance();
@@ -188,7 +191,7 @@ public class ServiceEcaAction implements java.io.Serializable {
         }
 
         // copy/combine error messages on error/failure (!success) or on resultToResult to combine any error info coming out, regardless of success status
-        if (!success || resultToResult) {
+        if ((!success || resultToResult) && UtilValidate.isNotEmpty(actionResult)) {
             String errorMessage = (String) actionResult.get(ModelService.ERROR_MESSAGE);
             String failMessage = (String) actionResult.get("failMessage");
             List<? extends Object> errorMessageList = UtilGenerics.checkList(actionResult.get(ModelService.ERROR_MESSAGE_LIST));
@@ -196,7 +199,7 @@ public class ServiceEcaAction implements java.io.Serializable {
 
             // do something with the errorMessage
             if (UtilValidate.isNotEmpty(errorMessage)) {
-                if (UtilValidate.isEmpty((String) result.get(ModelService.ERROR_MESSAGE))) {
+                if (UtilValidate.isEmpty(result.get(ModelService.ERROR_MESSAGE))) {
                     result.put(ModelService.ERROR_MESSAGE, errorMessage);
                 } else {
                     List<Object> origErrorMessageList = UtilGenerics.checkList(result.get(ModelService.ERROR_MESSAGE_LIST));
@@ -239,6 +242,7 @@ public class ServiceEcaAction implements java.io.Serializable {
         return success;
     }
 
+    @Override
     public boolean equals(Object obj) {
         if (obj instanceof ServiceEcaAction) {
             ServiceEcaAction other = (ServiceEcaAction) obj;

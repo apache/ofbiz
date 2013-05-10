@@ -21,9 +21,16 @@ under the License.
 <entity-eca xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/entity-eca.xsd">
     <!-- Product Keyword Indexing ECAs -->
-    <eca entity="Product" operation="create-store" event="return">
+    <eca entity="Product" operation="create" event="return">
         <condition field-name="autoCreateKeywords" operator="not-equals" value="N"/>
         <action service="indexProductKeywords" mode="sync" value-attr="productInstance"/>
+    </eca>
+    <eca entity="Product" operation="store" event="return">
+        <condition field-name="autoCreateKeywords" operator="not-equals" value="N"/>
+        <action service="indexProductKeywords" mode="sync"/>
+    </eca>
+    <eca entity="GoodIdentification" operation="create-store" event="return">
+        <action service="indexProductKeywords" mode="sync"/>
     </eca>
     <eca entity="ProductAttribute" operation="create-store" event="return">
         <action service="indexProductKeywords" mode="sync"/>
@@ -58,5 +65,19 @@ under the License.
     <!-- The InventoryItemDetail entity should never be updated/stored or deleted/removed, but we'll catch those too anyway... -->
     <eca entity="InventoryItemDetail" operation="create-store-remove" event="return">
         <action service="updateInventoryItemFromDetail" mode="sync"/>
+    </eca>
+    <eca entity="InventoryItemDetail" operation="create-store-remove" event="return">
+        <condition field-name="availableToPromiseDiff" operator="not-equals" value="0" type="BigDecimal"/>
+        <action service="setLastInventoryCount" mode="sync"/>
+    </eca>
+    <!-- If the Picklist status is Cancelled then cancel all the PicklistItems -->
+    <eca entity="Picklist" operation="create-store" event="return">
+        <condition field-name="statusId" operator="equals" value="PICKLIST_CANCELLED"/>
+        <action service="cancelPicklistAndItems" mode="async"/>
+    </eca>
+
+    <!-- Product GroupOrder ECAs -->
+    <eca entity="ProductGroupOrder" operation="create" event="return">
+        <action service="createJobForProductGroupOrder" mode="sync"/>
     </eca>
 </entity-eca>

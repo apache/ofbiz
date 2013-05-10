@@ -39,7 +39,7 @@ import org.ofbiz.datafile.DataFileException;
 import org.ofbiz.datafile.ModelRecord;
 import org.ofbiz.datafile.ModelField;
 import org.ofbiz.datafile.Record;
-import org.ofbiz.entity.GenericDelegator;
+import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericValue;
 
 
@@ -99,7 +99,7 @@ public class TaxwareUTL {
         // make the header file
         Record header = outHead.makeRecord("outHead");
 
-        header.set("NUMBER_RECORDS", new Long(outItem.getRecords().size()));
+        header.set("NUMBER_RECORDS", Long.valueOf(outItem.getRecords().size()));
         header.set("PROCESS_INDICATOR", "1");
         outHead.addRecord(header);
 
@@ -107,7 +107,7 @@ public class TaxwareUTL {
 
         try {
             // add the header
-            StringBuffer outBuffer = new StringBuffer();
+            StringBuilder outBuffer = new StringBuilder();
 
             outBuffer.append(outHead.writeDataFile());
 
@@ -136,7 +136,7 @@ public class TaxwareUTL {
 
             outItem.writeDataFile("TaxwareTest.in");
 
-            StringBuffer retBuffer = taxCalc(outBuffer);
+            StringBuilder retBuffer = taxCalc(outBuffer);
 
             // make the return data file
             returnCode = processOutFile(retBuffer);
@@ -166,9 +166,9 @@ public class TaxwareUTL {
             else
                 record.set("COMMODITY_PRODUCT_CODE", "DEFAULT");
             record.set("PART_NUMBER", product.get("productId"));
-            record.set("LINE_ITEM_AMOUNT", new Double(linePrice));
+            record.set("LINE_ITEM_AMOUNT", Double.valueOf(linePrice));
             if (itemShipping > 0)
-                record.set("FREIGHT_AMOUNT", new Double(itemShipping));
+                record.set("FREIGHT_AMOUNT", Double.valueOf(itemShipping));
         }
         records.add(record);
     }*/
@@ -253,8 +253,8 @@ public class TaxwareUTL {
         }
     }
 
-    private StringBuffer taxCalc(StringBuffer outBuffer) throws DataFileException, TaxwareException {
-        StringBuffer inBuffer = new StringBuffer();
+    private StringBuilder taxCalc(StringBuilder outBuffer) throws DataFileException, TaxwareException {
+        StringBuilder inBuffer = new StringBuilder();
         int result = callTaxware(outBuffer.toString(), inBuffer);
 
         if (Debug.verboseOn()) Debug.logVerbose("Taxware Return: " + result, module);
@@ -266,7 +266,7 @@ public class TaxwareUTL {
         return inBuffer;
     }
 
-    private int callTaxware(String inString, StringBuffer outBuffer) throws TaxwareException {
+    private int callTaxware(String inString, StringBuilder outBuffer) throws TaxwareException {
         try {
             return taxcommon.CalculateTax(inString, outBuffer);
         } catch (Exception e) {
@@ -283,14 +283,14 @@ public class TaxwareUTL {
             throw new TaxwareException("No items have been defined.");
     }
 
-    private int processOutFile(StringBuffer retBuffer) throws DataFileException, TaxwareException {
+    private int processOutFile(StringBuilder retBuffer) throws DataFileException, TaxwareException {
         DataFile retHead = createDataFile("TaxwareInHead");
         DataFile retItem = createDataFile("TaxwareInItem");
         String headStr = retBuffer.toString().substring(0, 283);
         String itemStr = retBuffer.toString().substring(284);
 
         if (Debug.verboseOn()) Debug.logVerbose("Return Size: " + retBuffer.length(), module);
-        GenericDelegator delegator = shipToAddress.getDelegator();
+        Delegator delegator = shipToAddress.getDelegator();
 
         retHead.readDataFile(headStr);
         retItem.readDataFile(itemStr);

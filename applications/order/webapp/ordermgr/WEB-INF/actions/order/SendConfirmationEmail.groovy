@@ -17,7 +17,7 @@
  * under the License.
  */
 import org.ofbiz.base.util.UtilMisc;
-import org.ofbiz.entity.GenericDelegator;
+import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericValue;
 import org.ofbiz.order.order.OrderReadHelper;
 import org.ofbiz.common.email.NotificationServices;
@@ -35,9 +35,9 @@ donePage = request.getParameter("DONE_PAGE") ?: "orderview";
 context.donePage = donePage;
 
 // Provide the correct order confirmation ProductStoreEmailSetting, if one exists
-orderHeader = delegator.findByPrimaryKey("OrderHeader", [orderId : orderId]);
+orderHeader = delegator.findOne("OrderHeader", [orderId : orderId], false);
 if (orderHeader.productStoreId) {
-    productStoreEmailSetting = delegator.findByPrimaryKeyCache("ProductStoreEmailSetting", [productStoreId : orderHeader.productStoreId, emailType : "PRDS_ODR_CONFIRM"]);
+    productStoreEmailSetting = delegator.findOne("ProductStoreEmailSetting", [productStoreId : orderHeader.productStoreId, emailType : emailType], true);
     if (productStoreEmailSetting) {
         context.productStoreEmailSetting = productStoreEmailSetting;
     }

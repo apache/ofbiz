@@ -20,67 +20,74 @@ package org.ofbiz.minilang.method.entityops;
 
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.GeneralException;
-import org.ofbiz.entity.GenericDelegator;
+import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.finder.ByConditionFinder;
+import org.ofbiz.minilang.MiniLangException;
+import org.ofbiz.minilang.MiniLangValidate;
 import org.ofbiz.minilang.SimpleMethod;
+import org.ofbiz.minilang.artifact.ArtifactInfoContext;
 import org.ofbiz.minilang.method.MethodContext;
 import org.ofbiz.minilang.method.MethodOperation;
 import org.w3c.dom.Element;
 
 /**
- * Uses the delegator to find entity values by a condition
+ * Implements the &lt;entity-condition&gt; element.
+ * 
+ * @see <a href="https://cwiki.apache.org/OFBADMIN/mini-language-reference.html#Mini-languageReference-{{%3Centitycondition%3E}}">Mini-language Reference</a>
  */
-public class EntityCondition extends MethodOperation {
-    public static final class EntityConditionFactory implements Factory<EntityCondition> {
-        public EntityCondition createMethodOperation(Element element, SimpleMethod simpleMethod) {
-            return new EntityCondition(element, simpleMethod);
-        }
-
-        public String getName() {
-            return "entity-condition";
-        }
-    }
+public final class EntityCondition extends MethodOperation {
 
     public static final String module = EntityCondition.class.getName();
 
-    protected ByConditionFinder finder;
+    private final ByConditionFinder finder;
 
-    public EntityCondition(Element element, SimpleMethod simpleMethod) {
+    public EntityCondition(Element element, SimpleMethod simpleMethod) throws MiniLangException {
         super(element, simpleMethod);
+        if (MiniLangValidate.validationOn()) {
+            MiniLangValidate.attributeNames(simpleMethod, element, "entity-name", "use-cache", "filter-by-date", "list", "distinct", "delegator-name");
+            MiniLangValidate.requiredAttributes(simpleMethod, element, "entity-name", "list");
+            MiniLangValidate.expressionAttributes(simpleMethod, element, "list");
+            MiniLangValidate.childElements(simpleMethod, element, "condition-expr", "condition-list", "condition-object", "having-condition-list", "select-field", "order-by", "limit-range", "limit-view", "use-iterator");
+            MiniLangValidate.requireAnyChildElement(simpleMethod, element, "condition-expr", "condition-list", "condition-object");
+        }
         this.finder = new ByConditionFinder(element);
     }
 
-    public boolean exec(MethodContext methodContext) {
+    @Override
+    public boolean exec(MethodContext methodContext) throws MiniLangException {
         try {
-            GenericDelegator delegator = methodContext.getDelegator();
+            Delegator delegator = methodContext.getDelegator();
             this.finder.runFind(methodContext.getEnvMap(), delegator);
         } catch (GeneralException e) {
-            Debug.logError(e, module);
-            String errMsg = "ERROR: Could not complete the " + simpleMethod.getShortDescription() + " process: " + e.getMessage();
-
-            if (methodContext.getMethodType() == MethodContext.EVENT) {
-                methodContext.putEnv(simpleMethod.getEventErrorMessageName(), errMsg);
-                methodContext.putEnv(simpleMethod.getEventResponseCodeName(), simpleMethod.getDefaultErrorCode());
-            } else if (methodContext.getMethodType() == MethodContext.SERVICE) {
-                methodContext.putEnv(simpleMethod.getServiceErrorMessageName(), errMsg);
-                methodContext.putEnv(simpleMethod.getServiceResponseMessageName(), simpleMethod.getDefaultErrorCode());
-            }
+            String errMsg = "Exception thrown while performing entity find: " + e.getMessage();
+            Debug.logWarning(e, errMsg, module);
+            simpleMethod.addErrorMessage(methodContext, errMsg);
             return false;
         }
         return true;
     }
 
-    public String getEntityName() {
-        return this.finder.getEntityName();
+    @Override
+    public void gatherArtifactInfo(ArtifactInfoContext aic) {
+        aic.addEntityName(this.finder.getEntityName());
     }
 
-    public String rawString() {
-        // TODO: something more than the empty tag
-        return "<entity-condition/>";
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder("<entity-condition ");
+        sb.append("entity-name=\"").append(this.finder.getEntityName()).append("\" />");
+        return sb.toString();
     }
-    public String expandedString(MethodContext methodContext) {
-        // TODO: something more than a stub/dummy
-        return this.rawString();
+
+    public static final class EntityConditionFactory implements Factory<EntityCondition> {
+        @Override
+        public EntityCondition createMethodOperation(Element element, SimpleMethod simpleMethod) throws MiniLangException {
+            return new EntityCondition(element, simpleMethod);
+        }
+
+        @Override
+        public String getName() {
+            return "entity-condition";
+        }
     }
 }
-

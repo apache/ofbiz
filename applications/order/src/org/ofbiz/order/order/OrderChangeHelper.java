@@ -18,7 +18,6 @@
  *******************************************************************************/
 package org.ofbiz.order.order;
 
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -26,7 +25,7 @@ import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilDateTime;
 import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.base.util.UtilValidate;
-import org.ofbiz.entity.GenericDelegator;
+import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
 import org.ofbiz.service.GenericServiceException;
@@ -152,54 +151,52 @@ public class OrderChangeHelper {
 
     public static void orderStatusChanges(LocalDispatcher dispatcher, GenericValue userLogin, String orderId, String orderStatus, String fromItemStatus, String toItemStatus, String digitalItemStatus) throws GenericServiceException {
         // set the status on the order header
-        Map statusFields = UtilMisc.toMap("orderId", orderId, "statusId", orderStatus, "userLogin", userLogin);
-        Map statusResult = dispatcher.runSync("changeOrderStatus", statusFields);
+        Map<String, Object> statusFields = UtilMisc.<String, Object>toMap("orderId", orderId, "statusId", orderStatus, "userLogin", userLogin);
+        Map<String, Object> statusResult = dispatcher.runSync("changeOrderStatus", statusFields);
         if (statusResult.containsKey(ModelService.ERROR_MESSAGE)) {
             Debug.logError("Problems adjusting order header status for order #" + orderId, module);
         }
 
         // set the status on the order item(s)
-        Map itemStatusFields = UtilMisc.toMap("orderId", orderId, "statusId", toItemStatus, "userLogin", userLogin);
+        Map<String, Object> itemStatusFields = UtilMisc.<String, Object>toMap("orderId", orderId, "statusId", toItemStatus, "userLogin", userLogin);
         if (fromItemStatus != null) {
             itemStatusFields.put("fromStatusId", fromItemStatus);
         }
-        Map itemStatusResult = dispatcher.runSync("changeOrderItemStatus", itemStatusFields);
+        Map<String, Object> itemStatusResult = dispatcher.runSync("changeOrderItemStatus", itemStatusFields);
         if (itemStatusResult.containsKey(ModelService.ERROR_MESSAGE)) {
             Debug.logError("Problems adjusting order item status for order #" + orderId, module);
         }
 
         // now set the status for digital items
         if (digitalItemStatus != null && !digitalItemStatus.equals(toItemStatus)) {
-            GenericDelegator delegator = dispatcher.getDelegator();
+            Delegator delegator = dispatcher.getDelegator();
             GenericValue orderHeader = null;
             try {
-                orderHeader = delegator.findByPrimaryKey("OrderHeader", UtilMisc.toMap("orderId", orderId));
+                orderHeader = delegator.findOne("OrderHeader", UtilMisc.toMap("orderId", orderId), false);
             } catch (GenericEntityException e) {
                 Debug.logError(e, "ERROR: Unable to get OrderHeader for OrderID : " + orderId, module);
             }
             if (orderHeader != null) {
-                List orderItems = null;
+                List<GenericValue> orderItems = null;
                 try {
-                    orderItems = orderHeader.getRelated("OrderItem");
+                    orderItems = orderHeader.getRelated("OrderItem", null, null, false);
                 } catch (GenericEntityException e) {
                     Debug.logError(e, "ERROR: Unable to get OrderItem records for OrderHeader : " + orderId, module);
                 }
                 if (UtilValidate.isNotEmpty(orderItems)) {
-                    Iterator oii = orderItems.iterator();
-                    while (oii.hasNext()) {
-                        GenericValue orderItem = (GenericValue) oii.next();
+                    for(GenericValue orderItem : orderItems) {
                         String orderItemSeqId = orderItem.getString("orderItemSeqId");
                         GenericValue product = null;
 
                         try {
-                            product = orderItem.getRelatedOne("Product");
+                            product = orderItem.getRelatedOne("Product", false);
                         } catch (GenericEntityException e) {
                             Debug.logError(e, "ERROR: Unable to get Product record for OrderItem : " + orderId + "/" + orderItemSeqId, module);
                         }
                         if (product != null) {
                             GenericValue productType = null;
                             try {
-                                productType = product.getRelatedOne("ProductType");
+                                productType = product.getRelatedOne("ProductType", false);
                             } catch (GenericEntityException e) {
                                 Debug.logError(e, "ERROR: Unable to get ProductType from Product : " + product, module);
                             }
@@ -207,8 +204,8 @@ public class OrderChangeHelper {
                                 String isDigital = productType.getString("isDigital");
                                 if (isDigital != null && "Y".equalsIgnoreCase(isDigital)) {
                                     // update the status
-                                    Map digitalStatusFields = UtilMisc.toMap("orderId", orderId, "orderItemSeqId", orderItemSeqId, "statusId", digitalItemStatus, "userLogin", userLogin);
-                                    Map digitalStatusChange = dispatcher.runSync("changeOrderItemStatus", digitalStatusFields);
+                                    Map<String, Object> digitalStatusFields = UtilMisc.<String, Object>toMap("orderId", orderId, "orderItemSeqId", orderItemSeqId, "statusId", digitalItemStatus, "userLogin", userLogin);
+                                    Map<String, Object> digitalStatusChange = dispatcher.runSync("changeOrderItemStatus", digitalStatusFields);
                                     if (ModelService.RESPOND_ERROR.equals(digitalStatusChange.get(ModelService.RESPONSE_MESSAGE))) {
                                         Debug.logError("Problems with digital product status change : " + product, module);
                                     }
@@ -218,8 +215,8 @@ public class OrderChangeHelper {
                             String orderItemType = orderItem.getString("orderItemTypeId");
                             if (!"PRODUCT_ORDER_ITEM".equals(orderItemType)) {
                                 // non-product items don't ship; treat as a digital item
-                                Map digitalStatusFields = UtilMisc.toMap("orderId", orderId, "orderItemSeqId", orderItemSeqId, "statusId", digitalItemStatus, "userLogin", userLogin);
-                                Map digitalStatusChange = dispatcher.runSync("changeOrderItemStatus", digitalStatusFields);
+                                Map<String, Object> digitalStatusFields = UtilMisc.<String, Object>toMap("orderId", orderId, "orderItemSeqId", orderItemSeqId, "statusId", digitalItemStatus, "userLogin", userLogin);
+                                Map<String, Object> digitalStatusChange = dispatcher.runSync("changeOrderItemStatus", digitalStatusFields);
                                 if (ModelService.RESPOND_ERROR.equals(digitalStatusChange.get(ModelService.RESPONSE_MESSAGE))) {
                                     Debug.logError("Problems with digital product status change : " + product, module);
                                 }
@@ -233,16 +230,16 @@ public class OrderChangeHelper {
 
     public static void cancelInventoryReservations(LocalDispatcher dispatcher, GenericValue userLogin, String orderId) throws GenericServiceException {
         // cancel the inventory reservations
-        Map cancelInvFields = UtilMisc.toMap("orderId", orderId, "userLogin", userLogin);
-        Map cancelInvResult = dispatcher.runSync("cancelOrderInventoryReservation", cancelInvFields);
+        Map<String, Object> cancelInvFields = UtilMisc.<String, Object>toMap("orderId", orderId, "userLogin", userLogin);
+        Map<String, Object> cancelInvResult = dispatcher.runSync("cancelOrderInventoryReservation", cancelInvFields);
         if (ModelService.RESPOND_ERROR.equals(cancelInvResult.get(ModelService.RESPONSE_MESSAGE))) {
             Debug.logError("Problems reversing inventory reservations for order #" + orderId, module);
         }
     }
 
     public static void releasePaymentAuthorizations(LocalDispatcher dispatcher, GenericValue userLogin, String orderId) throws GenericServiceException {
-        Map releaseFields = UtilMisc.toMap("orderId", orderId, "userLogin", userLogin);
-        Map releaseResult = dispatcher.runSync("releaseOrderPayments", releaseFields);
+        Map<String, Object> releaseFields = UtilMisc.<String, Object>toMap("orderId", orderId, "userLogin", userLogin);
+        Map<String, Object> releaseResult = dispatcher.runSync("releaseOrderPayments", releaseFields);
         if (ModelService.RESPOND_ERROR.equals(releaseResult.get(ModelService.RESPONSE_MESSAGE))) {
             Debug.logError("Problems releasing payment authorizations for order #" + orderId, module);
         }
@@ -251,7 +248,7 @@ public class OrderChangeHelper {
     public static void createReceivedPayments(LocalDispatcher dispatcher, GenericValue userLogin, String orderId) throws GenericEntityException, GenericServiceException {
         GenericValue orderHeader = null;
         try {
-            orderHeader = dispatcher.getDelegator().findByPrimaryKey("OrderHeader", UtilMisc.toMap("orderId", orderId));
+            orderHeader = dispatcher.getDelegator().findOne("OrderHeader", UtilMisc.toMap("orderId", orderId), false);
         } catch (GenericEntityException e) {
             Debug.logError(e, module);
         }
@@ -263,15 +260,13 @@ public class OrderChangeHelper {
                 partyId = btparty.getString("partyId");
             }
 
-            List opps = orh.getPaymentPreferences();
-            Iterator oppi = opps.iterator();
-            while (oppi.hasNext()) {
-                GenericValue opp = (GenericValue) oppi.next();
+            List<GenericValue> opps = orh.getPaymentPreferences();
+            for(GenericValue opp : opps) {
                 if ("PAYMENT_RECEIVED".equals(opp.getString("statusId"))) {
-                    List payments = orh.getOrderPayments(opp);
-                    if (payments == null || payments.size() == 0) {
+                    List<GenericValue> payments = orh.getOrderPayments(opp);
+                    if (UtilValidate.isEmpty(payments)) {
                         // only do this one time; if we have payment already for this pref ignore.
-                        Map results = dispatcher.runSync("createPaymentFromPreference",
+                        Map<String, Object> results = dispatcher.runSync("createPaymentFromPreference",
                                 UtilMisc.<String, Object>toMap("userLogin", userLogin, "orderPaymentPreferenceId", opp.getString("orderPaymentPreferenceId"),
                                 "paymentRefNum",  UtilDateTime.nowTimestamp().toString(), "paymentFromId", partyId));
                         if (results.get(ModelService.RESPONSE_MESSAGE).equals(ModelService.RESPOND_ERROR)) {
@@ -286,16 +281,16 @@ public class OrderChangeHelper {
     public static void createOrderInvoice(LocalDispatcher dispatcher, GenericValue userLogin, String orderId) throws GenericServiceException {
         GenericValue orderHeader = null;
         try {
-            orderHeader = dispatcher.getDelegator().findByPrimaryKey("OrderHeader", UtilMisc.toMap("orderId", orderId));
+            orderHeader = dispatcher.getDelegator().findOne("OrderHeader", UtilMisc.toMap("orderId", orderId), false);
         } catch (GenericEntityException e) {
             Debug.logError(e, module);
         }
         if (orderHeader != null) {
             OrderReadHelper orh = new OrderReadHelper(orderHeader);
-            List items = orh.getOrderItems();
+            List<GenericValue> items = orh.getOrderItems();
 
-            Map serviceParam = UtilMisc.toMap("orderId", orderId, "billItems", items, "userLogin", userLogin);
-            Map serviceRes = dispatcher.runSync("createInvoiceForOrder", serviceParam);
+            Map<String, Object> serviceParam = UtilMisc.<String, Object>toMap("orderId", orderId, "billItems", items, "userLogin", userLogin);
+            Map<String, Object> serviceRes = dispatcher.runSync("createInvoiceForOrder", serviceParam);
             if (ServiceUtil.isError(serviceRes)) {
                 throw new GenericServiceException(ServiceUtil.getErrorMessage(serviceRes));
             }
@@ -306,7 +301,7 @@ public class OrderChangeHelper {
     public static boolean releaseInitialOrderHold(LocalDispatcher dispatcher, String orderId) {
         /* NOTE DEJ20080609 commenting out this code because the old OFBiz Workflow Engine is being deprecated and this was only for that
         // get the delegator from the dispatcher
-        GenericDelegator delegator = dispatcher.getDelegator();
+        Delegator delegator = dispatcher.getDelegator();
 
         // find the workEffortId for this order
         List workEfforts = null;
@@ -348,7 +343,7 @@ public class OrderChangeHelper {
     public static boolean abortOrderProcessing(LocalDispatcher dispatcher, String orderId) {
         /* NOTE DEJ20080609 commenting out this code because the old OFBiz Workflow Engine is being deprecated and this was only for that
         Debug.logInfo("Aborting workflow for order " + orderId, module);
-        GenericDelegator delegator = dispatcher.getDelegator();
+        Delegator delegator = dispatcher.getDelegator();
 
         // find the workEffortId for this order
         GenericValue workEffort = null;

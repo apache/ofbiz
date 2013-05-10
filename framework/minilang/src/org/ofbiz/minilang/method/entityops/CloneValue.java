@@ -18,56 +18,67 @@
  *******************************************************************************/
 package org.ofbiz.minilang.method.entityops;
 
-import org.ofbiz.base.util.Debug;
+import org.ofbiz.base.util.collections.FlexibleMapAccessor;
 import org.ofbiz.entity.GenericValue;
+import org.ofbiz.minilang.MiniLangException;
+import org.ofbiz.minilang.MiniLangValidate;
 import org.ofbiz.minilang.SimpleMethod;
-import org.ofbiz.minilang.method.ContextAccessor;
 import org.ofbiz.minilang.method.MethodContext;
 import org.ofbiz.minilang.method.MethodOperation;
 import org.w3c.dom.Element;
 
 /**
- * Uses the delegator to find entity values by anding the map fields
+ * Implements the &lt;clone-value&gt; element.
+ * 
+ * @see <a href="https://cwiki.apache.org/OFBADMIN/mini-language-reference.html#Mini-languageReference-{{%3Cclonevalue%3E}}">Mini-language Reference</a>
  */
-public class CloneValue extends MethodOperation {
-    public static final class CloneValueFactory implements Factory<CloneValue> {
-        public CloneValue createMethodOperation(Element element, SimpleMethod simpleMethod) {
-            return new CloneValue(element, simpleMethod);
-        }
+public final class CloneValue extends MethodOperation {
 
-        public String getName() {
-            return "clone-value";
-        }
-    }
+    private final FlexibleMapAccessor<GenericValue> newValueFma;
+    private final FlexibleMapAccessor<GenericValue> valueFma;
 
-    public static final String module = CloneValue.class.getName();
-
-    ContextAccessor<GenericValue> valueAcsr;
-    ContextAccessor<GenericValue> newValueAcsr;
-
-    public CloneValue(Element element, SimpleMethod simpleMethod) {
+    public CloneValue(Element element, SimpleMethod simpleMethod) throws MiniLangException {
         super(element, simpleMethod);
-        valueAcsr = new ContextAccessor<GenericValue>(element.getAttribute("value-field"), element.getAttribute("value-name"));
-        newValueAcsr = new ContextAccessor<GenericValue>(element.getAttribute("new-value-field"), element.getAttribute("new-value-name"));
+        if (MiniLangValidate.validationOn()) {
+            MiniLangValidate.attributeNames(simpleMethod, element, "value-field", "new-value-field");
+            MiniLangValidate.requiredAttributes(simpleMethod, element, "value-field", "new-value-field");
+            MiniLangValidate.expressionAttributes(simpleMethod, element, "value-field", "new-value-field");
+            MiniLangValidate.noChildElements(simpleMethod, element);
+        }
+        valueFma = FlexibleMapAccessor.getInstance(element.getAttribute("value-field"));
+        newValueFma = FlexibleMapAccessor.getInstance(element.getAttribute("new-value-field"));
     }
 
-    public boolean exec(MethodContext methodContext) {
-        GenericValue value = valueAcsr.get(methodContext);
-        if (value == null) {
-            Debug.logWarning("In clone-value a value was not found with the specified valueAcsr: " + valueAcsr + ", not copying", module);
-            return true;
+    @Override
+    public boolean exec(MethodContext methodContext) throws MiniLangException {
+        GenericValue value = valueFma.get(methodContext.getEnvMap());
+        if (value != null) {
+            newValueFma.put(methodContext.getEnvMap(), GenericValue.create(value));
         }
-
-        newValueAcsr.put(methodContext, GenericValue.create(value));
         return true;
     }
 
-    public String rawString() {
-        // TODO: something more than the empty tag
-        return "<clone-value/>";
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder("<clone-value ");
+        sb.append("value-field=\"").append(this.valueFma).append("\" ");
+        sb.append("new-value-field=\"").append(this.newValueFma).append("\" ");
+        sb.append("/>");
+        return sb.toString();
     }
-    public String expandedString(MethodContext methodContext) {
-        // TODO: something more than a stub/dummy
-        return this.rawString();
+
+    /**
+     * A factory for the &lt;clone-value&gt; element.
+     */
+    public static final class CloneValueFactory implements Factory<CloneValue> {
+        @Override
+        public CloneValue createMethodOperation(Element element, SimpleMethod simpleMethod) throws MiniLangException {
+            return new CloneValue(element, simpleMethod);
+        }
+
+        @Override
+        public String getName() {
+            return "clone-value";
+        }
     }
 }

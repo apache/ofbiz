@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8" ?>
+<?xml version="1.0" encoding="UTF-8"?>
 <!--
 Licensed to the Apache Software Foundation (ASF) under one
 or more contributor license agreements.  See the NOTICE file
@@ -19,7 +19,7 @@ under the License.
 -->
 
 <simple-methods xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/simple-methods.xsd">
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/simple-methods-v2.xsd">
 
     <!-- a method to centralize facility security code, meant to be called in-line with
         call-simple-method, and the checkAction and callingMethodName attributes should be in the method context -->
@@ -47,14 +47,18 @@ under the License.
                 </not>
             </condition>
             <then>
-                <add-error><fail-message message="Security Error: to run ${callingMethodName} you must have the CATALOG_${checkAction} or CATALOG_ADMIN or FACILITY_${checkAction} or FACILITY_ADMIN permission."/></add-error>
+                <add-error>
+                    <fail-property resource="ProductUiLabels" property="ProductCatalogCreatePermissionError"/>
+                </add-error>
             </then>
         </if>
     </simple-method>
     <simple-method method-name="facilityGenericPermission" short-description="Main permission logic">
         <set field="mainAction" from-field="parameters.mainAction"/>
         <if-empty field="mainAction">
-            <add-error><fail-message message="In the permission-service element for the facilityGenericPermission service the main-action attribute was missing but is required"/></add-error>
+            <add-error>
+                <fail-property resource="ProductUiLabels" property="ProductMissingMainActionInPermissionService"/>
+            </add-error>
             <check-errors/>
         </if-empty>
 
@@ -78,7 +82,9 @@ under the License.
          <if-empty field="mainAction">
             <set field="mainAction" from-field="parameters.mainAction"/>
             <if-empty field="mainAction">
-                <add-error><fail-property resource="CommonUiLabels" property="CommonPermissionMainActionAttributeMissing"/></add-error>
+                <add-error>
+                    <fail-property resource="CommonUiLabels" property="CommonPermissionMainActionAttributeMissing"/>
+                </add-error>
             </if-empty>
         </if-empty>
         <check-errors/>
@@ -89,7 +95,7 @@ under the License.
         <set field="callingMethodName" from-field="resourceDescription"/>
         <set field="checkAction" from-field="mainAction"/>
         <set field="alternatePermissionRoot" value="FACILITY"/>
-        <call-simple-method method-name="checkProductRelatedPermission" xml-resource="org/ofbiz/product/product/ProductServices.xml"/>
+        <call-simple-method method-name="checkProductRelatedPermission" xml-resource="component://product/script/org/ofbiz/product/product/ProductServices.xml"/>
         <if-empty field="error_list">
             <set field="hasPermission" type="Boolean" value="true"/>
             <field-to-result field="hasPermission"/>
@@ -105,7 +111,60 @@ under the License.
 
     <!-- InventoryItem methods -->
     <simple-method method-name="createInventoryItem" short-description="Create an InventoryItem">
-
+        
+        <!-- Create a lot before -->
+        <entity-one value-field="product" entity-name="Product">
+            <field-map from-field="parameters.productId" field-name="productId"/>
+        </entity-one>
+        
+        <!-- Check if this product can or not have a lotId -->
+        <if>
+            <condition>
+                <and>
+                    <if-compare operator="equals" value="Mandatory" field="product.lotIdFilledIn" />
+                    <if-empty field="parameters.lotId" />
+                </and>
+            </condition>
+            <then>
+                <add-error>
+                    <fail-property resource="ProductErrorUiLabels" property="ProductLotIdMandatory"/>
+                </add-error>
+            </then>
+        </if>
+        
+        <if>
+            <condition>
+                <and>
+                    <if-compare operator="equals" value="Forbidden" field="product.lotIdFilledIn" />
+                       <not>
+                           <if-empty field="parameters.lotId" />
+                       </not>
+                </and>
+            </condition>
+            <then>
+                <add-error>
+                    <fail-property resource="ProductErrorUiLabels" property="ProductLotIdForbidden"/>
+                </add-error>
+            </then>
+        </if>
+        
+        <check-errors />
+        
+        <!-- If this InventoryItem is returned by a manufacturing task, don't create a lot -->
+        <if-compare operator="equals" value="N" field="parameters.isReturned">
+            <if-not-empty field="parameters.lotId">
+                  <!-- Check if the lot already exists -->
+                  <entity-and list="lotList" entity-name="Lot">
+                      <field-map field-name="lotId" from-field="parameters.lotId" />
+                  </entity-and>
+                  <if-empty field="lotList">
+                      <make-value value-field="lot" entity-name="Lot"/>
+                      <set field="lot.lotId" from-field="parameters.lotId"/>
+                      <create-value value-field="lot"/>
+                  </if-empty>
+              </if-not-empty>
+          </if-compare>
+          
         <make-value value-field="inventoryItem" entity-name="InventoryItem"/>
         <!-- TODO: make sure availableToPromiseTotal and quantityOnHandTotal are not changed -->
         <set-nonpk-fields map="parameters" value-field="inventoryItem"/>
@@ -155,7 +214,7 @@ under the License.
         </if>
         <if-empty field="inventoryItem.facilityId">
             <add-error>
-                <fail-message message="Error: you cannot create inventory items with no facility id."/>
+                <fail-property resource="ProductUiLabels" property="FacilityInventoryItemsMissingFacilityId"/>
             </add-error>
             <check-errors/>
         </if-empty>
@@ -166,7 +225,7 @@ under the License.
             <!-- if inventoryItem's ownerPartyId is still empty, return an error message -->
             <if-empty field="inventoryItem.ownerPartyId">
                 <add-error>
-                    <fail-message message="Error: you cannot create inventory items with no ownerPartyId."/>
+                    <fail-property resource="ProductUiLabels" property="FacilityInventoryItemsMissingOwnerPartyId"/>
                 </add-error>
                 <check-errors/>
             </if-empty>
@@ -185,7 +244,7 @@ under the License.
             <!-- if inventoryItem's currencyUomId is still empty, return an error message -->
             <if-empty field="inventoryItem.currencyUomId">
                 <add-error>
-                    <fail-message message="Error: you cannot create inventory items with no currencyUomId; you can set a default currency in the PartyAcctgPreference for the party [${inventoryItem.ownerPartyId}], or in the general.properties file under the key [currency.uom.id.default]."/>
+                    <fail-property resource="ProductUiLabels" property="FacilityInventoryItemsMissingCurrencyId"/>
                 </add-error>
                 <check-errors/>
             </if-empty>
@@ -204,7 +263,7 @@ under the License.
         <!-- TODO/WARNING: getProductCost returns 0 even if no std costs are found -->
         <if-empty field="inventoryItem.unitCost">
             <add-error>
-                <fail-message message="Error: you cannot create inventory items with no unitCost."/>
+                <fail-property resource="ProductUiLabels" property="FacilityInventoryItemsMissingUnitCost"/>
             </add-error>
         </if-empty>
         <check-errors/>
@@ -213,7 +272,7 @@ under the License.
         -->
         <if-compare field="inventoryItem.unitCost" operator="less" value="0" type="BigDecimal">
             <add-error>
-                <fail-message message="Error: you cannot create inventory items with a negative unitCost."/>
+                <fail-property resource="ProductUiLabels" property="FacilityInventoryItemsNegativeUnitCost"/>
             </add-error>
         </if-compare>
         <check-errors/>
@@ -233,10 +292,13 @@ under the License.
         </if-empty>
         <field-to-result field="lookedUpValue.ownerPartyId" result-name="oldOwnerPartyId"/>
         <field-to-result field="lookedUpValue.statusId" result-name="oldStatusId"/>
+        <field-to-result field="lookedUpValue.productId" result-name="oldProductId"/>
         <!-- special handling for the unitCost -->
         <if-not-empty field="parameters.unitCost">
             <if-compare field="parameters.unitCost" operator="less" value="0.0" type="BigDecimal">
-                <add-error><fail-message message="Unit cost for inventory item [${lookupPKMap.inventoryItemId}] cannot be negative."/></add-error>
+                <add-error>
+                    <fail-property resource="ProductUiLabels" property="FacilityInventoryItemsUnitCostCannotBeNegative"/>
+                </add-error>
                 <check-errors/>
             </if-compare>
         </if-not-empty>
@@ -303,6 +365,7 @@ under the License.
         <!-- if availableToPromiseDiff or quantityOnHandDiff are empty set to 0 -->
         <if-empty field="newEntity.availableToPromiseDiff"><set field="newEntity.availableToPromiseDiff" value="0" type="BigDecimal"/></if-empty>
         <if-empty field="newEntity.quantityOnHandDiff"><set field="newEntity.quantityOnHandDiff" value="0" type="BigDecimal"/></if-empty>
+        <if-empty field="newEntity.accountingQuantityDiff"><set field="newEntity.accountingQuantityDiff" value="0" type="BigDecimal"/></if-empty>
 
         <create-value value-field="newEntity"/>
     </simple-method>
@@ -312,6 +375,7 @@ under the License.
 
         <set field="inventoryItem.availableToPromiseTotal" from-field="inventoryItemDetailSummary.availableToPromiseTotal"/>
         <set field="inventoryItem.quantityOnHandTotal" from-field="inventoryItemDetailSummary.quantityOnHandTotal"/>
+        <set field="inventoryItem.accountingQuantityTotal" from-field="inventoryItemDetailSummary.accountingQuantityTotal"/>
         <store-value value-field="inventoryItem"/>
     </simple-method>
 
@@ -416,12 +480,16 @@ under the License.
                 <set field="getAssoc.productIdTo" from-field="product.productId"/>
                 <set field="getAssoc.productAssocTypeId" value="PRODUCT_VARIANT"/>
                 <find-by-and entity-name="ProductAssoc" map="getAssoc" list="assocs"/>
-                <filter-list-by-date list="assocs" to-list="assocsDate"/>
-                <first-from-list entry="assoc" list="assocsDate"/>
-                <get-related-one value-field="assoc" relation-name="MainProduct" to-value-field="virtProduct"/>
-                <if-empty field="product.salesDiscWhenNotAvail">
-                    <set field="product.salesDiscWhenNotAvail" from-field="virtProduct.salesDiscWhenNotAvail"/>
-                </if-empty>
+                <if-not-empty field="assocs">
+                    <filter-list-by-date list="assocs" to-list="assocsDate"/>
+                    <first-from-list entry="assoc" list="assocsDate"/>
+                    <if-not-empty field="assoc">
+                        <get-related-one value-field="assoc" relation-name="MainProduct" to-value-field="virtProduct"/>
+                        <if-empty field="product.salesDiscWhenNotAvail">
+                            <set field="product.salesDiscWhenNotAvail" from-field="virtProduct.salesDiscWhenNotAvail"/>
+                        </if-empty>
+                    </if-not-empty>
+                </if-not-empty>    
             </if-compare>
         </if-not-empty>
 
@@ -579,6 +647,7 @@ under the License.
         <!--
             this method can be called with some optional parameters:
                 -facilityId
+                -partyId
                 -locationSeqId
                 -containerId
             If the service definitions are used then only some of these will ever be specified, or none of them.
@@ -599,10 +668,18 @@ under the License.
         <set from-field="parameters.inventoryItemId" field="lookupFieldMap.inventoryItemId"/>
         <set from-field="parameters.productId" field="lookupFieldMap.productId"/>
         <set from-field="parameters.facilityId" field="lookupFieldMap.facilityId"/>
+        <set from-field="parameters.partyId" field="lookupFieldMap.partyId"/>
         <set from-field="parameters.locationSeqId" field="lookupFieldMap.locationSeqId"/>
         <set from-field="parameters.containerId" field="lookupFieldMap.containerId"/>
+        <set from-field="parameters.lotId" field="lookupFieldMap.lotId"/>
         <!-- we might get away with a cache here since real serious errors will occur during the reservation service... but only if we need the speed -->
-        <find-by-and entity-name="InventoryItem" map="lookupFieldMap" list="inventoryItems" use-iterator="true" use-cache="${parameters.useCache}"/>
+        <if-compare field="parameters.useCache" operator="equals" value="true" type="Boolean">
+            <!-- if caching was requested, don't use an iterator -->
+            <find-by-and entity-name="InventoryItem" map="lookupFieldMap" list="inventoryItems" use-cache="true"/>
+            <else>
+                <find-by-and entity-name="InventoryItem" map="lookupFieldMap" list="inventoryItems" use-iterator="true" use-cache="false"/>
+            </else>
+        </if-compare>
 
         <set field="parameters.availableToPromiseTotal" value="0" type="BigDecimal"/>
         <set field="parameters.quantityOnHandTotal" value="0" type="BigDecimal"/>
@@ -620,6 +697,7 @@ under the License.
                             <or>
                                 <if-empty field="inventoryItem.statusId"/>
                                 <if-compare field="inventoryItem.statusId" operator="equals" value="INV_AVAILABLE"/>
+                                <if-compare field="inventoryItem.statusId" operator="equals" value="INV_NS_RETURNED"/>
                                 <if-compare field="inventoryItem.inventoryItemTypeId" operator="equals" value="SERIALIZED_INV_ITEM"/><!-- status is reflected in total fields -->
                             </or>
                         </and>
@@ -636,12 +714,47 @@ under the License.
         <field-to-result field="parameters.quantityOnHandTotal" result-name="quantityOnHandTotal"/>
     </simple-method>
 
+    <simple-method method-name="countProductInventoryOnHand" short-description="Count Inventory On Hand for a Product constrained by a facilityId at a given date." use-transaction="false">
+        <entity-condition entity-name="InventoryItemDetailForSum" list="inventoryItemDetailTotals">
+            <condition-list combine="and">
+                <condition-expr field-name="effectiveDate" operator="less-equals" from-field="parameters.inventoryCountDate"/>
+                <condition-expr field-name="facilityId" operator="equals" from-field="parameters.facilityId"/>
+                <condition-expr field-name="productId" operator="equals" from-field="parameters.productId"/>
+            </condition-list>
+            <select-field field-name="quantityOnHandSum"/>
+        </entity-condition>
+        <first-from-list entry="inventoryItemDetailTotal" list="inventoryItemDetailTotals"/>
+        <set field="quantityOnHandTotal" from-field="inventoryItemDetailTotal.quantityOnHandSum" type="BigDecimal" default-value="0"/>
+        <field-to-result field="quantityOnHandTotal" result-name="quantityOnHandTotal"/>
+    </simple-method>
+
+    <simple-method method-name="countProductInventoryShippedForSales" short-description="Count Inventory Shipped for Sales Orders for a Product constrained by a facilityId in a given date range." use-transaction="false">
+        <if-empty field="parameters.thruDate">
+            <now-timestamp field="parameters.thruDate"/>
+        </if-empty>
+        <entity-condition entity-name="InventoryItemDetailForSum" list="inventoryItemDetailTotals">
+            <condition-list combine="and">
+                <condition-expr field-name="effectiveDate" operator="greater-equals" from-field="parameters.fromDate"/>
+                <condition-expr field-name="effectiveDate" operator="less" from-field="parameters.thruDate"/>
+                <condition-expr field-name="facilityId" operator="equals" from-field="parameters.facilityId"/>
+                <condition-expr field-name="productId" operator="equals" from-field="parameters.productId"/>
+                <condition-expr field-name="orderId" operator="not-equals" from-field="nullField"/>
+                <condition-expr field-name="quantityOnHandDiff" operator="less" value="0"/>
+            </condition-list>
+            <select-field field-name="quantityOnHandSum"/>
+        </entity-condition>
+        <first-from-list entry="inventoryItemDetailTotal" list="inventoryItemDetailTotals"/>
+        <set field="quantityOnHandTotal" from-field="${inventoryItemDetailTotal.quantityOnHandSum * -1}" type="BigDecimal" default-value="0"/>
+        <field-to-result field="quantityOnHandTotal" result-name="quantityOnHandTotal"/>
+    </simple-method>
+
     <simple-method method-name="getMktgPackagesAvailable" short-description="Get Marketing Packages Available From Components In Inventory" login-required="false" use-transaction="false">
         <set field="availableToPromiseTotal" value="0" type="BigDecimal"/>
         <set field="quantityOnHandTotal" value="0" type="BigDecimal"/>
         <set from-field="parameters.productId" field="lookupMktgPkgParams.productId"/>
         <entity-one entity-name="Product" value-field="product"/>
-        <if-compare field="product.productTypeId" operator="equals" value="MARKETING_PKG_AUTO">
+        <set field="isMarketingPkgAuto" value="${groovy: org.ofbiz.entity.util.EntityTypeUtil.hasParentType(delegator, 'ProductType', 'productTypeId', product.productTypeId, 'parentTypeId', 'MARKETING_PKG_AUTO')}" type="Boolean"/>
+        <if-compare field="isMarketingPkgAuto" operator="equals" value="true" type="Boolean">
             <set value="MANUF_COMPONENT" field="lookupMktgPkgParams.type"/>
         <else>
             <set value="PRODUCT_COMPONENT" field="lookupMktgPkgParams.type"/>
@@ -1199,26 +1312,6 @@ under the License.
         <remove-value value-field="lookedUpValue"/>
     </simple-method>
 
-    <!-- Test Physical Inventory Adjustment -->
-    <simple-method method-name="testPhysicalInventoryAdjustment" short-description="Test to create physical inventory and variance" login-required="false">
-        <log level="info" message="====================Create physical inventory and variance test case================================"/>
-        <set field="createPhysicalInventoryAndVarianceMap.inventoryItemId" value="9024"/>
-        <set field="createPhysicalInventoryAndVarianceMap.varianceReasonId" value="VAR_LOST"/>
-        <entity-one entity-name="UserLogin" value-field="createPhysicalInventoryAndVarianceMap.userLogin">
-            <field-map field-name="userLoginId" value="system"/>
-        </entity-one>
-        <call-service service-name="createPhysicalInventoryAndVariance" in-map-name="createPhysicalInventoryAndVarianceMap">
-            <result-to-field result-name="physicalInventoryId" field="physicalInventoryId"/>
-        </call-service>
-        <assert>
-            <not>
-                <if-empty field="physicalInventoryId">
-                    <log level="info" message="========physicalInventoryId ${physicalInventoryId} found null============================"/>
-                </if-empty>
-            </not>
-        </assert>
-        <check-errors/>
-    </simple-method>
     <simple-method method-name="changeOwnerUponIssuance" short-description="If product store setOwnerUponIssuance is Y or empty, set the inventory item owner upon issuance.">
         <entity-one entity-name="ItemIssuance" value-field="itemIssuance"/>
         <get-related-one value-field="itemIssuance" relation-name="InventoryItem" to-value-field="inventoryItem"/>
@@ -1291,6 +1384,44 @@ under the License.
                 <clear-field field="reassignInventoryReservationsCtx"/>
             </iterate>
         </else>
+        </if-empty>
+    </simple-method>
+    <simple-method method-name="setLastInventoryCount" short-description="Service that updates stock availability of products">
+        <entity-one value-field="inventoryItem" entity-name="InventoryItem"  auto-field-map="false">
+            <field-map field-name="inventoryItemId" from-field="parameters.inventoryItemId"/>
+        </entity-one>
+        <entity-and list="productFacilities" entity-name="ProductFacility">
+            <field-map field-name="productId" from-field="inventoryItem.productId" />
+        </entity-and>
+        <if-not-empty field="productFacilities">
+            <iterate list="productFacilities" entry="productFacility">
+                <set field="serviceInMap.productId" from-field="productFacility.productId"/>
+                <set field="serviceInMap.facilityId" from-field="productFacility.facilityId"/>
+                <call-service service-name="getInventoryAvailableByFacility" in-map-name="serviceInMap">
+                    <result-to-field result-name="availableToPromiseTotal"/>
+                </call-service>
+                <clear-field field="serviceInMap"/>
+                <set field="productFacility.lastInventoryCount" from-field="availableToPromiseTotal"/>
+                <set-service-fields service-name="updateProductFacility" map="productFacility" to-map="serviceInMap"/>
+                <call-service service-name="updateProductFacility" in-map-name="serviceInMap"/>
+                <clear-field field="productFacility"/>
+                <clear-field field="serviceInMap"/>
+            </iterate>
+        </if-not-empty>
+    </simple-method>
+    <simple-method method-name="createUpdateFacilityGeoPoint" short-description="Create or update GeoPoint assigned to facility">
+        <if-empty field="parameters.geoPointId">
+            <set-service-fields service-name="createGeoPoint" to-map="createGeoPointMap" map="parameters"/>
+            <call-service service-name="createGeoPoint" in-map-name="createGeoPointMap">
+                <result-to-field result-name="geoPointId" field="geoPointId"/>
+            </call-service>
+            <entity-one value-field="facility" entity-name="Facility"/>
+            <set field="facility.geoPointId" from-field="geoPointId"/>
+            <store-value value-field="facility"/>
+            <else>
+                <set-service-fields service-name="updateGeoPoint" to-map="updateGeoPointMap" map="parameters"/>
+                <call-service service-name="updateGeoPoint" in-map-name="updateGeoPointMap"/>
+            </else>
         </if-empty>
     </simple-method>
 </simple-methods>

@@ -24,6 +24,23 @@ import org.ofbiz.order.shoppingcart.*;
 import org.ofbiz.party.party.PartyWorker;
 import org.ofbiz.product.catalog.CatalogWorker;
 
+productId = parameters.productId;
+if (productId) {
+
+    quantityOnHandTotal = parameters.quantityOnHandTotal;
+    if (!quantityOnHandTotal) {
+        quantityOnHandTotal = 0;
+    }
+    context.quantityOnHandTotal = quantityOnHandTotal;
+
+    availableToPromiseTotal = parameters.availableToPromiseTotal;
+    if (!availableToPromiseTotal) {
+        availableToPromiseTotal = 0;
+    }
+    context.availableToPromiseTotal = availableToPromiseTotal;
+}
+context.productId = productId;
+
 // Just in case we are here from the choosecatalog form, the
 // following call will save in the session the new catalogId
 CatalogWorker.getCurrentCatalogId(request);
@@ -36,7 +53,7 @@ context.currencyUomId = shoppingCart.getCurrency();
 context.orderType = shoppingCart.getOrderType();
 
 // get all the possible gift wrap options
-allgiftWraps = delegator.findByAnd("ProductFeature", [productFeatureTypeId : "GIFT_WRAP"], ["defaultSequenceNum"]);
+allgiftWraps = delegator.findByAnd("ProductFeature", [productFeatureTypeId : "GIFT_WRAP"], ["defaultSequenceNum"], false);
 context.allgiftWraps = allgiftWraps;
 
 context.contentPathPrefix = CatalogWorker.getContentPathPrefix(request);
@@ -65,16 +82,18 @@ context.defaultComment = defaultComment;
 
 // get all party shopping lists
 if (partyId) {
-  shoppingLists = delegator.findByAnd("ShoppingList", [partyId : partyId]);
+  shoppingLists = delegator.findByAnd("ShoppingList", [partyId : partyId], null, false);
   context.shoppingLists = shoppingLists;
 }
 
 // get product inventory summary for each shopping cart item
-productStore = delegator.findByPrimaryKeyCache("ProductStore", [productStoreId : productStoreId]);
+productStore = delegator.findOne("ProductStore", [productStoreId : productStoreId], true);
+context.productStore = productStore
 productStoreFacilityId = null;
 if (productStore) {
     productStoreFacilityId = productStore.inventoryFacilityId;
 }
+context.facilityId = productStoreFacilityId;
 inventorySummary = dispatcher.runSync("getProductInventorySummaryForItems", [orderItems : shoppingCart.makeOrderItems(), facilityId : productStoreFacilityId]);
 context.availableToPromiseMap = inventorySummary.availableToPromiseMap;
 context.quantityOnHandMap = inventorySummary.quantityOnHandMap;
@@ -82,5 +101,5 @@ context.mktgPkgATPMap = inventorySummary.mktgPkgATPMap;
 context.mktgPkgQOHMap = inventorySummary.mktgPkgQOHMap;
 
 // get purchase order item types
-purchaseOrderItemTypeList = delegator.findByAndCache("OrderItemType", [parentTypeId : "PURCHASE_SPECIFIC"]);
+purchaseOrderItemTypeList = delegator.findByAnd("OrderItemType", [parentTypeId : "PURCHASE_SPECIFIC"], null, true);
 context.purchaseOrderItemTypeList = purchaseOrderItemTypeList;

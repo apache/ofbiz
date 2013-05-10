@@ -18,100 +18,125 @@
  *******************************************************************************/
 package org.ofbiz.minilang.method.otherops;
 
-import java.text.*;
-import java.util.*;
+import java.text.MessageFormat;
+import java.util.List;
 
-import org.w3c.dom.*;
-import javolution.util.FastMap;
-import org.ofbiz.base.util.*;
-import org.ofbiz.minilang.*;
-import org.ofbiz.minilang.method.*;
+import org.ofbiz.base.util.collections.FlexibleMapAccessor;
+import org.ofbiz.base.util.string.FlexibleStringExpander;
+import org.ofbiz.entity.util.EntityUtilProperties;
+import org.ofbiz.minilang.MiniLangException;
+import org.ofbiz.minilang.MiniLangRuntimeException;
+import org.ofbiz.minilang.MiniLangUtil;
+import org.ofbiz.minilang.MiniLangValidate;
+import org.ofbiz.minilang.SimpleMethod;
+import org.ofbiz.minilang.method.MethodContext;
+import org.ofbiz.minilang.method.MethodOperation;
+import org.w3c.dom.Element;
 
 /**
- * Copies an properties file property value to a field
+ * Implements the &lt;property-to-field&gt; element.
+ * 
+ * @see <a href="https://cwiki.apache.org/OFBADMIN/mini-language-reference.html#Mini-languageReference-{{%3Cpropertytofield%3E}}">Mini-language Reference</a>
  */
-public class PropertyToField extends MethodOperation {
-    public static final class PropertyToFieldFactory implements Factory<PropertyToField> {
-        public PropertyToField createMethodOperation(Element element, SimpleMethod simpleMethod) {
-            return new PropertyToField(element, simpleMethod);
-        }
+public final class PropertyToField extends MethodOperation {
 
-        public String getName() {
-            return "property-to-field";
+    // This method is needed only during the v1 to v2 transition
+    private static boolean autoCorrect(Element element) {
+        // Correct deprecated arg-list-name attribute
+        String listAttr = element.getAttribute("arg-list-name");
+        if (listAttr.length() > 0) {
+            element.setAttribute("arg-list", listAttr);
+            element.removeAttribute("arg-list-name");
+            return true;
         }
+        return false;
     }
 
-    public static final String module = PropertyToField.class.getName();
+    private final FlexibleMapAccessor<List<? extends Object>> argListFma;
+    private final FlexibleStringExpander defaultFse;
+    private final FlexibleMapAccessor<Object> fieldFma;
+    private final boolean noLocale;
+    private final FlexibleStringExpander propertyFse;
+    private final FlexibleStringExpander resourceFse;
 
-    String resource;
-    String property;
-    ContextAccessor<Map<String, Object>> mapAcsr;
-    ContextAccessor<Object> fieldAcsr;
-    String defaultVal;
-    boolean noLocale;
-    ContextAccessor<List<? extends Object>> argListAcsr;
-
-    public PropertyToField(Element element, SimpleMethod simpleMethod) {
+    public PropertyToField(Element element, SimpleMethod simpleMethod) throws MiniLangException {
         super(element, simpleMethod);
-        resource = element.getAttribute("resource");
-        property = element.getAttribute("property");
-        // the schema for this element now just has the "field" attribute, though the old "field-name" and "map-name" pair is still supported
-        this.fieldAcsr = new ContextAccessor<Object>(element.getAttribute("field"), element.getAttribute("field-name"));
-        this.mapAcsr = new ContextAccessor<Map<String, Object>>(element.getAttribute("map-name"));
-        defaultVal = element.getAttribute("default");
-        // defaults to false, ie anything but true is false
+        if (MiniLangValidate.validationOn()) {
+            MiniLangValidate.deprecatedAttribute(simpleMethod, element, "arg-list-name", "replace with \"arg-list\"");
+            MiniLangValidate.attributeNames(simpleMethod, element, "field", "resource", "property", "arg-list", "default", "no-locale");
+            MiniLangValidate.requiredAttributes(simpleMethod, element, "field", "resource", "property");
+            MiniLangValidate.expressionAttributes(simpleMethod, element, "field", "arg-list");
+            MiniLangValidate.noChildElements(simpleMethod, element);
+        }
+        boolean elementModified = autoCorrect(element);
+        if (elementModified && MiniLangUtil.autoCorrectOn()) {
+            MiniLangUtil.flagDocumentAsCorrected(element);
+        }
+        fieldFma = FlexibleMapAccessor.getInstance(element.getAttribute("field"));
+        resourceFse = FlexibleStringExpander.getInstance(element.getAttribute("resource"));
+        propertyFse = FlexibleStringExpander.getInstance(element.getAttribute("property"));
+        argListFma = FlexibleMapAccessor.getInstance(element.getAttribute("arg-list"));
+        defaultFse = FlexibleStringExpander.getInstance(element.getAttribute("default"));
         noLocale = "true".equals(element.getAttribute("no-locale"));
-        argListAcsr = new ContextAccessor<List<? extends Object>>(element.getAttribute("arg-list-name"));
     }
 
-    public boolean exec(MethodContext methodContext) {
-        String resource = methodContext.expandString(this.resource);
-        String property = methodContext.expandString(this.property);
-
+    @Override
+    public boolean exec(MethodContext methodContext) throws MiniLangException {
+        String resource = resourceFse.expandString(methodContext.getEnvMap());
+        String property = propertyFse.expandString(methodContext.getEnvMap());
         String value = null;
         if (noLocale) {
-            value = UtilProperties.getPropertyValue(resource, property);
+            value = EntityUtilProperties.getPropertyValue(resource, property, methodContext.getDelegator());
         } else {
-            value = UtilProperties.getMessage(resource, property, methodContext.getLocale());
+            value = EntityUtilProperties.getMessage(resource, property, methodContext.getLocale(), methodContext.getDelegator());
         }
-        if (value == null || value.length() == 0) {
-            value = defaultVal;
+        value = FlexibleStringExpander.expandString(value, methodContext.getEnvMap());
+        if (value.isEmpty()) {
+            value = defaultFse.expandString(methodContext.getEnvMap());
         }
-
-        // note that expanding the value string here will handle defaultValue and the string from
-        //  the properties file; if we decide later that we don't want the string from the properties
-        //  file to be expanded we should just expand the defaultValue at the beginning of this method.
-        value = methodContext.expandString(value);
-
-        if (!argListAcsr.isEmpty()) {
-            List<? extends Object> argList = argListAcsr.get(methodContext);
-            if (UtilValidate.isNotEmpty(argList)) {
+        List<? extends Object> argList = argListFma.get(methodContext.getEnvMap());
+        if (argList != null) {
+            try {
                 value = MessageFormat.format(value, argList.toArray());
+            } catch (IllegalArgumentException e) {
+                throw new MiniLangRuntimeException("Exception thrown while formatting the property value: " + e.getMessage(), this);
             }
         }
-
-        if (!mapAcsr.isEmpty()) {
-            Map<String, Object> toMap = mapAcsr.get(methodContext);
-
-            if (toMap == null) {
-                if (Debug.infoOn()) Debug.logInfo("Map not found with name " + mapAcsr + ", creating new map", module);
-                toMap = FastMap.newInstance();
-                mapAcsr.put(methodContext, toMap);
-            }
-            fieldAcsr.put(toMap, value, methodContext);
-        } else {
-            fieldAcsr.put(methodContext, value);
-        }
-
+        fieldFma.put(methodContext.getEnvMap(), value);
         return true;
     }
 
-    public String rawString() {
-        // TODO: add all attributes and other info
-        return "<property-to-field field-name=\"" + this.fieldAcsr + "\" map-name=\"" + this.mapAcsr + "\"/>";
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder("<property-to-field ");
+        sb.append("field=\"").append(this.fieldFma).append("\" ");
+        sb.append("resource=\"").append(this.resourceFse).append("\" ");
+        sb.append("property=\"").append(this.propertyFse).append("\" ");
+        if (!this.argListFma.isEmpty()) {
+            sb.append("arg-list=\"").append(this.argListFma).append("\" ");
+        }
+        if (!this.defaultFse.isEmpty()) {
+            sb.append("default=\"").append(this.defaultFse).append("\" ");
+        }
+        if (noLocale) {
+            sb.append("no-locale=\"true\" ");
+        }
+        sb.append("/>");
+        return sb.toString();
     }
-    public String expandedString(MethodContext methodContext) {
-        // TODO: something more than a stub/dummy
-        return this.rawString();
+
+    /**
+     * A factory for the &lt;property-to-field&gt; element.
+     */
+    public static final class PropertyToFieldFactory implements Factory<PropertyToField> {
+        @Override
+        public PropertyToField createMethodOperation(Element element, SimpleMethod simpleMethod) throws MiniLangException {
+            return new PropertyToField(element, simpleMethod);
+        }
+
+        @Override
+        public String getName() {
+            return "property-to-field";
+        }
     }
 }

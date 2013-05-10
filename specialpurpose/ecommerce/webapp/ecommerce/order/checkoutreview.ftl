@@ -28,7 +28,7 @@ under the License.
             document.${parameters.formNameValue}.processButton.disabled=true;
             document.${parameters.formNameValue}.submit();
         } else {
-            alert("You order is being processed, this may take a moment.");
+            showErrorAlert("${uiLabelMap.CommonErrorMessage2}","${uiLabelMap.YoureOrderIsBeingProcessed}");
         }
     }
 // -->
@@ -39,7 +39,7 @@ under the License.
 
 <#if cart?exists && 0 < cart.size()>
   ${screens.render("component://ecommerce/widget/OrderScreens.xml#orderheader")}
-  <br/>
+  <br />
   ${screens.render("component://ecommerce/widget/OrderScreens.xml#orderitems")}
   <table border="0" cellpadding="1" width="100%">
    <tr>
@@ -47,11 +47,14 @@ under the License.
         &nbsp;
       </td>
       <td align="right">
-        <form type="POST" action="<@ofbizUrl>processorder</@ofbizUrl>" name="${parameters.formNameValue}">
+        <form type="post" action="<@ofbizUrl>processorder</@ofbizUrl>" name="${parameters.formNameValue}">
           <#if (requestParameters.checkoutpage)?has_content>
-            <input type="hidden" name="checkoutpage" value="${requestParameters.checkoutpage}">
+            <input type="hidden" name="checkoutpage" value="${requestParameters.checkoutpage}" />
           </#if>
-          <input type="button" name="processButton" value="${uiLabelMap.OrderSubmitOrder}" onClick="processOrder();" class="mediumSubmit">
+          <#if (requestAttributes.issuerId)?has_content>
+            <input type="hidden" name="issuerId" value="${requestAttributes.issuerId}" />
+          </#if>
+          <input type="button" name="processButton" value="${uiLabelMap.OrderSubmitOrder}" onclick="processOrder();" class="mediumSubmit" />
         </form>
         <#-- doesn't work with Safari, seems to work with IE, Mozilla <a href="#" onclick="processOrder();" class="buttontextbig">[${uiLabelMap.OrderSubmitOrder}]&nbsp;</a> -->
       </td>

@@ -34,7 +34,7 @@ import org.ofbiz.base.util.UtilHttp;
 import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.webapp.website.WebSiteWorker;
-import org.ofbiz.entity.GenericDelegator;
+import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
 import org.ofbiz.entity.util.EntityUtil;
@@ -48,10 +48,21 @@ public class CatalogWorker {
 
     public static final String module = CatalogWorker.class.getName();
 
+    private CatalogWorker () {}
+
+    
+    /**
+     * @deprecated - Use WebSiteWorker.getWebSiteId(ServletRequest) instead
+     */
+    @Deprecated
     public static String getWebSiteId(ServletRequest request) {
         return WebSiteWorker.getWebSiteId(request);
     }
 
+    /**
+     * @deprecated - Use WebSiteWorker.getWebSite(ServletRequest) instead
+     */
+    @Deprecated
     public static GenericValue getWebSite(ServletRequest request) {
         return WebSiteWorker.getWebSite(request);
     }
@@ -59,7 +70,7 @@ public class CatalogWorker {
     public static List<String> getAllCatalogIds(ServletRequest request) {
         List<String> catalogIds = FastList.newInstance();
         List<GenericValue> catalogs = null;
-        GenericDelegator delegator = (GenericDelegator) request.getAttribute("delegator");
+        Delegator delegator = (Delegator) request.getAttribute("delegator");
         try {
             catalogs = delegator.findList("ProdCatalog", null, null, UtilMisc.toList("catalogName"), null, false);
         } catch (GenericEntityException e) {
@@ -75,13 +86,13 @@ public class CatalogWorker {
 
     public static List<GenericValue> getStoreCatalogs(ServletRequest request) {
         String productStoreId = ProductStoreWorker.getProductStoreId(request);
-        GenericDelegator delegator = (GenericDelegator) request.getAttribute("delegator");
+        Delegator delegator = (Delegator) request.getAttribute("delegator");
         return getStoreCatalogs(delegator, productStoreId);
     }
 
-    public static List<GenericValue> getStoreCatalogs(GenericDelegator delegator, String productStoreId) {
+    public static List<GenericValue> getStoreCatalogs(Delegator delegator, String productStoreId) {
         try {
-            return EntityUtil.filterByDate(delegator.findByAndCache("ProductStoreCatalog", UtilMisc.toMap("productStoreId", productStoreId), UtilMisc.toList("sequenceNum", "prodCatalogId")), true);
+            return EntityUtil.filterByDate(delegator.findByAnd("ProductStoreCatalog", UtilMisc.toMap("productStoreId", productStoreId), UtilMisc.toList("sequenceNum", "prodCatalogId"), true), true);
         } catch (GenericEntityException e) {
             Debug.logError(e, "Error looking up store catalogs for store with id " + productStoreId, module);
         }
@@ -95,17 +106,17 @@ public class CatalogWorker {
         if (userLogin == null) return null;
         String partyId = userLogin.getString("partyId");
         if (partyId == null) return null;
-        GenericDelegator delegator = (GenericDelegator) request.getAttribute("delegator");
+        Delegator delegator = (Delegator) request.getAttribute("delegator");
         return getPartyCatalogs(delegator, partyId);
     }
 
-    public static List<GenericValue> getPartyCatalogs(GenericDelegator delegator, String partyId) {
+    public static List<GenericValue> getPartyCatalogs(Delegator delegator, String partyId) {
         if (delegator == null || partyId == null) {
             return null;
         }
 
         try {
-            return EntityUtil.filterByDate(delegator.findByAndCache("ProdCatalogRole", UtilMisc.toMap("partyId", partyId, "roleTypeId", "CUSTOMER"), UtilMisc.toList("sequenceNum", "prodCatalogId")), true);
+            return EntityUtil.filterByDate(delegator.findByAnd("ProdCatalogRole", UtilMisc.toMap("partyId", partyId, "roleTypeId", "CUSTOMER"), UtilMisc.toList("sequenceNum", "prodCatalogId"), true), true);
         } catch (GenericEntityException e) {
             Debug.logError(e, "Error looking up ProdCatalog Roles for party with id " + partyId, module);
         }
@@ -113,15 +124,15 @@ public class CatalogWorker {
     }
 
     public static List<GenericValue> getProdCatalogCategories(ServletRequest request, String prodCatalogId, String prodCatalogCategoryTypeId) {
-        GenericDelegator delegator = (GenericDelegator) request.getAttribute("delegator");
+        Delegator delegator = (Delegator) request.getAttribute("delegator");
         return getProdCatalogCategories(delegator, prodCatalogId, prodCatalogCategoryTypeId);
     }
 
-    public static List<GenericValue> getProdCatalogCategories(GenericDelegator delegator, String prodCatalogId, String prodCatalogCategoryTypeId) {
+    public static List<GenericValue> getProdCatalogCategories(Delegator delegator, String prodCatalogId, String prodCatalogCategoryTypeId) {
         try {
-            List<GenericValue> prodCatalogCategories = EntityUtil.filterByDate(delegator.findByAndCache("ProdCatalogCategory",
+            List<GenericValue> prodCatalogCategories = EntityUtil.filterByDate(delegator.findByAnd("ProdCatalogCategory",
                         UtilMisc.toMap("prodCatalogId", prodCatalogId),
-                        UtilMisc.toList("sequenceNum", "productCategoryId")), true);
+                        UtilMisc.toList("sequenceNum", "productCategoryId"), true), true);
 
             if (UtilValidate.isNotEmpty(prodCatalogCategoryTypeId) && prodCatalogCategories != null) {
                 prodCatalogCategories = EntityUtil.filterByAnd(prodCatalogCategories,
@@ -156,7 +167,7 @@ public class CatalogWorker {
         // get it from the database
         if (prodCatalogId == null) {
             List<String> catalogIds = getCatalogIdsAvailable(request);
-            if (catalogIds != null && catalogIds.size() > 0) prodCatalogId = catalogIds.get(0);
+            if (UtilValidate.isNotEmpty(catalogIds)) prodCatalogId = catalogIds.get(0);
         }
 
         if (!fromSession) {
@@ -173,7 +184,7 @@ public class CatalogWorker {
         return getCatalogIdsAvailable(partyCatalogs, storeCatalogs);
     }
 
-    public static List<String> getCatalogIdsAvailable(GenericDelegator delegator, String productStoreId, String partyId) {
+    public static List<String> getCatalogIdsAvailable(Delegator delegator, String productStoreId, String partyId) {
         List<GenericValue> storeCatalogs = getStoreCatalogs(delegator, productStoreId);
         List<GenericValue> partyCatalogs = getPartyCatalogs(delegator, partyId);
         return getCatalogIdsAvailable(partyCatalogs, storeCatalogs);
@@ -199,10 +210,10 @@ public class CatalogWorker {
 
     public static String getCatalogName(ServletRequest request, String prodCatalogId) {
         if (prodCatalogId == null || prodCatalogId.length() <= 0) return null;
-        GenericDelegator delegator = (GenericDelegator) request.getAttribute("delegator");
+        Delegator delegator = (Delegator) request.getAttribute("delegator");
 
         try {
-            GenericValue prodCatalog = delegator.findByPrimaryKeyCache("ProdCatalog", UtilMisc.toMap("prodCatalogId", prodCatalogId));
+            GenericValue prodCatalog = delegator.findOne("ProdCatalog", UtilMisc.toMap("prodCatalogId", prodCatalogId), true);
 
             if (prodCatalog != null) {
                 return prodCatalog.getString("catalogName");
@@ -238,10 +249,10 @@ public class CatalogWorker {
 
     public static GenericValue getProdCatalog(ServletRequest request, String prodCatalogId) {
         if (prodCatalogId == null || prodCatalogId.length() <= 0) return null;
-        GenericDelegator delegator = (GenericDelegator) request.getAttribute("delegator");
+        Delegator delegator = (Delegator) request.getAttribute("delegator");
 
         try {
-            return delegator.findByPrimaryKeyCache("ProdCatalog", UtilMisc.toMap("prodCatalogId", prodCatalogId));
+            return delegator.findOne("ProdCatalog", UtilMisc.toMap("prodCatalogId", prodCatalogId), true);
         } catch (GenericEntityException e) {
             Debug.logError(e, "Error looking up name for prodCatalog with id " + prodCatalogId, module);
             return null;
@@ -271,9 +282,9 @@ public class CatalogWorker {
     }
 
     public static String getCatalogSearchCategoryId(ServletRequest request, String prodCatalogId) {
-        return getCatalogSearchCategoryId((GenericDelegator) request.getAttribute("delegator"), prodCatalogId);
+        return getCatalogSearchCategoryId((Delegator) request.getAttribute("delegator"), prodCatalogId);
     }
-    public static String getCatalogSearchCategoryId(GenericDelegator delegator, String prodCatalogId) {
+    public static String getCatalogSearchCategoryId(Delegator delegator, String prodCatalogId) {
         if (prodCatalogId == null || prodCatalogId.length() <= 0) return null;
 
         List<GenericValue> prodCatalogCategories = getProdCatalogCategories(delegator, prodCatalogId, "PCCT_SEARCH");
@@ -285,7 +296,7 @@ public class CatalogWorker {
         }
     }
 
-    public static String getCatalogViewAllowCategoryId(GenericDelegator delegator, String prodCatalogId) {
+    public static String getCatalogViewAllowCategoryId(Delegator delegator, String prodCatalogId) {
         if (prodCatalogId == null || prodCatalogId.length() <= 0) return null;
 
         List<GenericValue> prodCatalogCategories = getProdCatalogCategories(delegator, prodCatalogId, "PCCT_VIEW_ALLW");
@@ -297,7 +308,7 @@ public class CatalogWorker {
         }
     }
 
-    public static String getCatalogPurchaseAllowCategoryId(GenericDelegator delegator, String prodCatalogId) {
+    public static String getCatalogPurchaseAllowCategoryId(Delegator delegator, String prodCatalogId) {
         if (prodCatalogId == null || prodCatalogId.length() <= 0) return null;
 
         List<GenericValue> prodCatalogCategories = getProdCatalogCategories(delegator, prodCatalogId, "PCCT_PURCH_ALLW");
@@ -333,10 +344,10 @@ public class CatalogWorker {
 
     public static boolean getCatalogQuickaddUse(ServletRequest request, String prodCatalogId) {
         if (prodCatalogId == null || prodCatalogId.length() <= 0) return false;
-        GenericDelegator delegator = (GenericDelegator) request.getAttribute("delegator");
+        Delegator delegator = (Delegator) request.getAttribute("delegator");
 
         try {
-            GenericValue prodCatalog = delegator.findByPrimaryKeyCache("ProdCatalog", UtilMisc.toMap("prodCatalogId", prodCatalogId));
+            GenericValue prodCatalog = delegator.findOne("ProdCatalog", UtilMisc.toMap("prodCatalogId", prodCatalogId), true);
 
             if (prodCatalog != null) {
                 return "Y".equals(prodCatalog.getString("useQuickAdd"));
@@ -383,5 +394,19 @@ public class CatalogWorker {
         }
 
         return categoryIds;
+    }
+
+    public static String getCatalogTopEbayCategoryId(ServletRequest request, String prodCatalogId) {
+        if (prodCatalogId == null || prodCatalogId.length() <= 0) return null;
+
+        List<GenericValue> prodCatalogCategories = getProdCatalogCategories(request, prodCatalogId, "PCCT_EBAY_ROOT");
+
+        if (UtilValidate.isNotEmpty(prodCatalogCategories)) {
+            GenericValue prodCatalogCategory = EntityUtil.getFirst(prodCatalogCategories);
+
+            return prodCatalogCategory.getString("productCategoryId");
+        } else {
+            return null;
+        }
     }
 }

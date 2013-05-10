@@ -23,15 +23,19 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.concurrent.Callable;
+import java.util.concurrent.Future;
 
 import javolution.util.FastList;
 import javolution.util.FastMap;
 
 import org.ofbiz.base.component.ComponentConfig;
+import org.ofbiz.base.concurrent.ExecutionPool;
 import org.ofbiz.base.config.GenericConfigException;
 import org.ofbiz.base.config.MainResourceHandler;
 import org.ofbiz.base.config.ResourceHandler;
 import org.ofbiz.base.util.Debug;
+import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.base.util.UtilXml;
 import org.ofbiz.service.DispatchContext;
 import org.ofbiz.service.GenericServiceException;
@@ -56,6 +60,10 @@ public class ServiceEcaUtil {
     }
 
     public static void readConfig() {
+        // Only proceed if the cache hasn't already been populated, caller should be using reloadConfig() in that situation
+        if (UtilValidate.isNotEmpty(ecaCache)) {
+            return;
+        }
         Element rootElement = null;
         try {
             rootElement = ServiceConfigUtil.getXmlRootElement();
@@ -64,24 +72,43 @@ public class ServiceEcaUtil {
             return;
         }
 
+        List<Future<List<ServiceEcaRule>>> futures = FastList.newInstance();
         for (Element serviceEcasElement: UtilXml.childElementList(rootElement, "service-ecas")) {
             ResourceHandler handler = new MainResourceHandler(ServiceConfigUtil.SERVICE_ENGINE_XML_FILENAME, serviceEcasElement);
-            addEcaDefinitions(handler);
+            futures.add(ExecutionPool.GLOBAL_EXECUTOR.submit(createEcaLoaderCallable(handler)));
         }
 
         // get all of the component resource eca stuff, ie specified in each ofbiz-component.xml file
         for (ComponentConfig.ServiceResourceInfo componentResourceInfo: ComponentConfig.getAllServiceResourceInfos("eca")) {
-            addEcaDefinitions(componentResourceInfo.createResourceHandler());
+            futures.add(ExecutionPool.GLOBAL_EXECUTOR.submit(createEcaLoaderCallable(componentResourceInfo.createResourceHandler())));
+        }
+
+        for (List<ServiceEcaRule> handlerRules: ExecutionPool.getAllFutures(futures)) {
+            mergeEcaDefinitions(handlerRules);
         }
     }
 
+    protected static Callable<List<ServiceEcaRule>> createEcaLoaderCallable(final ResourceHandler handler) {
+        return new Callable<List<ServiceEcaRule>>() {
+            public List<ServiceEcaRule> call() throws Exception {
+                return getEcaDefinitions(handler);
+            }
+        };
+    }
+
     public static void addEcaDefinitions(ResourceHandler handler) {
+        List<ServiceEcaRule> handlerRules = getEcaDefinitions(handler);
+        mergeEcaDefinitions(handlerRules);
+    }
+
+    private static List<ServiceEcaRule> getEcaDefinitions(ResourceHandler handler) {
+        List<ServiceEcaRule> handlerRules = FastList.newInstance();
         Element rootElement = null;
         try {
             rootElement = handler.getDocument().getDocumentElement();
         } catch (GenericConfigException e) {
             Debug.logError(e, module);
-            return;
+            return handlerRules;
         }
 
         String resourceLocation = handler.getLocation();
@@ -90,11 +117,19 @@ public class ServiceEcaUtil {
         } catch (GenericConfigException e) {
             Debug.logError(e, "Could not get resource URL", module);
         }
-
-        int numDefs = 0;
         for (Element e: UtilXml.childElementList(rootElement, "eca")) {
-            String serviceName = e.getAttribute("service");
-            String eventName = e.getAttribute("event");
+            handlerRules.add(new ServiceEcaRule(e, resourceLocation));
+        }
+        if (Debug.importantOn()) {
+            Debug.logImportant("Loaded [" + StringUtil.leftPad(Integer.toString(handlerRules.size()), 3) + "] Service ECA Rules from " + resourceLocation, module);
+        }
+        return handlerRules;
+    }
+
+    private static void mergeEcaDefinitions(List<ServiceEcaRule> handlerRules) {
+        for (ServiceEcaRule rule: handlerRules) {
+            String serviceName = rule.getServiceName();
+            String eventName = rule.getEventName();
             Map<String, List<ServiceEcaRule>> eventMap = ecaCache.get(serviceName);
             List<ServiceEcaRule> rules = null;
 
@@ -110,11 +145,7 @@ public class ServiceEcaUtil {
                     eventMap.put(eventName, rules);
                 }
             }
-            rules.add(new ServiceEcaRule(e, resourceLocation));
-            numDefs++;
-        }
-        if (Debug.importantOn()) {
-            Debug.logImportant("Loaded [" + StringUtil.leftPad(Integer.toString(numDefs), 2) + "] Service ECA Rules from " + resourceLocation, module);
+            rules.add(rule);
         }
     }
 
@@ -142,12 +173,12 @@ public class ServiceEcaUtil {
     public static void evalRules(String serviceName, Map<String, List<ServiceEcaRule>> eventMap, String event, DispatchContext dctx, Map<String, Object> context, Map<String, Object> result, boolean isError, boolean isFailure) throws GenericServiceException {
         // if the eventMap is passed we save a Map lookup, but if not that's okay we'll just look it up now
         if (eventMap == null) eventMap = getServiceEventMap(serviceName);
-        if (eventMap == null || eventMap.size() == 0) {
+        if (UtilValidate.isEmpty(eventMap)) {
             return;
         }
 
         Collection<ServiceEcaRule> rules = eventMap.get(event);
-        if (rules == null || rules.size() == 0) {
+        if (UtilValidate.isEmpty(rules)) {
             return;
         }
 

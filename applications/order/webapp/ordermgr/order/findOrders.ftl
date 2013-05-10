@@ -40,7 +40,6 @@ function toggleOrderId(master) {
         var element = form.elements[i];
         if (element.name == "orderIdList") {
             element.checked = master.checked;
-            element.disabled = !element.disabled;
         }
     }
 }
@@ -49,15 +48,21 @@ function setServiceName(selection) {
 }
 function runAction() {
     var form = document.massOrderChangeForm;
-    var orders = form.elements.length;
-    for (var i = 0; i < orders; i++) {
-        var element = form.elements[i];
-        if (element.name == "orderIdList") {
-            element.disabled = false;
-        }
-    }
     form.submit();
 }
+
+function toggleOrderIdList() {
+    var form = document.massOrderChangeForm;
+    var orders = form.elements.length;
+    var isAllSelected = true;
+    for (var i = 0; i < orders; i++) {
+        var element = form.elements[i];
+        if (element.name == "orderIdList" && !element.checked)
+            isAllSelected = false;
+    }
+    jQuery('#checkAllOrders').attr("checked", isAllSelected);
+}
+
 // -->
 
     function paginateOrderList(viewSize, viewIndex, hideFields) {
@@ -71,7 +76,7 @@ function runAction() {
 
 <#if security.hasEntityPermission("ORDERMGR", "_VIEW", session)>
 <#if parameters.hideFields?has_content>
-<form name='lookupandhidefields${requestParameters.hideFields}' method="POST" action="<@ofbizUrl>searchorders</@ofbizUrl>">
+<form name='lookupandhidefields${requestParameters.hideFields?default("Y")}' method="post" action="<@ofbizUrl>searchorders</@ofbizUrl>">
   <#if parameters.hideFields?default("N")=='Y'>
     <input type="hidden" name="hideFields" value="N"/>
   <#else>
@@ -102,9 +107,15 @@ function runAction() {
   <input type='hidden' name='filterPartiallyReceivedPOs' value='${requestParameters.filterPartiallyReceivedPOs?if_exists}'/>
   <input type='hidden' name='filterPOsOpenPastTheirETA' value='${requestParameters.filterPOsOpenPastTheirETA?if_exists}'/>
   <input type='hidden' name='filterPOsWithRejectedItems' value='${requestParameters.filterPOsWithRejectedItems?if_exists}'/>
+  <input type='hidden' name='countryGeoId' value='${requestParameters.countryGeoId?if_exists}'/>
+  <input type='hidden' name='includeCountry' value='${requestParameters.includeCountry?if_exists}'/>
+  <input type='hidden' name='isViewed' value='${requestParameters.isViewed?if_exists}'/>
+  <input type='hidden' name='shipmentMethod' value='${requestParameters.shipmentMethod?if_exists}'/>
+  <input type='hidden' name='gatewayAvsResult' value='${requestParameters.gatewayAvsResult?if_exists}'/>
+  <input type='hidden' name='gatewayScoreResult' value='${requestParameters.gatewayScoreResult?if_exists}'/>
 </form>
 </#if>
-<form method="post" name="lookuporder" action="<@ofbizUrl>searchorders</@ofbizUrl>" onsubmit="javascript:lookupOrders();">
+<form method="post" name="lookuporder" id="lookuporder" action="<@ofbizUrl>searchorders</@ofbizUrl>" onsubmit="javascript:lookupOrders();">
 <input type="hidden" name="lookupFlag" value="Y"/>
 <input type="hidden" name="hideFields" value="Y"/>
 <input type="hidden" name="viewSize" value="${viewSize}"/>
@@ -117,7 +128,7 @@ function runAction() {
       <#if requestParameters.hideFields?default("N") == "Y">
         <li><a href="javascript:document.lookupandhidefields${requestParameters.hideFields}.submit()">${uiLabelMap.CommonShowLookupFields}</a></li>
       <#else>
-        <#if orderList?exists><li><a href="javascript:document.lookupandhidefields${requestParameters.hideFields}.submit()">${uiLabelMap.CommonHideFields}</a></li></#if>
+        <#if orderList?exists><li><a href="javascript:document.lookupandhidefields${requestParameters.hideFields?default("Y")}.submit()">${uiLabelMap.CommonHideFields}</a></li></#if>
         <li><a href="/partymgr/control/findparty?externalLoginKey=${requestAttributes.externalLoginKey?if_exists}">${uiLabelMap.PartyLookupParty}</a></li>
         <li><a href="javascript:lookupOrders(true);">${uiLabelMap.OrderLookupOrder}</a></li>
       </#if>
@@ -174,7 +185,7 @@ function runAction() {
                 <td width='25%' align='right' class='label'>${uiLabelMap.PartyRoleType}</td>
                 <td width='5%'>&nbsp;</td>
                 <td align='left'>
-                  <select name='roleTypeId' multiple="multiple">
+                  <select name='roleTypeId' id='roleTypeId' multiple="multiple">
                     <#if currentRole?has_content>
                     <option value="${currentRole.roleTypeId}">${currentRole.get("description", locale)}</option>
                     <option value="${currentRole.roleTypeId}">---</option>
@@ -190,14 +201,11 @@ function runAction() {
                 <td width='25%' align='right' class='label'>${uiLabelMap.PartyPartyId}</td>
                 <td width='5%'>&nbsp;</td>
                 <td align='left'>
-                  <input type='text' name='partyId' value='${requestParameters.partyId?if_exists}'/>
-                  <a href="javascript:call_fieldlookup2(document.lookuporder.partyId,'LookupPartyName');">
-                    <img src='/images/fieldlookup.gif' width='15' height='14' border='0' alt="${uiLabelMap.CommonClickHereForFieldLookup}"/>
-                  </a>
+                  <@htmlTemplate.lookupField value='${requestParameters.partyId?if_exists}' formName="lookuporder" name="partyId" id="partyId" fieldFormName="LookupPartyName"/>
                 </td>
               </tr>
               <tr>
-                <td width='25%' align='right' class='label'>${uiLabelMap.PartyUserLoginId}</td>
+                <td width='25%' align='right' class='label'>${uiLabelMap.CommonUserLoginId}</td>
                 <td width='5%'>&nbsp;</td>
                 <td align='left'><input type='text' name='userLoginId' value='${requestParameters.userLoginId?if_exists}'/></td>
               </tr>
@@ -210,7 +218,7 @@ function runAction() {
                     <option value="${currentType.orderTypeId}">${currentType.get("description", locale)}</option>
                     <option value="${currentType.orderTypeId}">---</option>
                     </#if>
-                    <option value="">${uiLabelMap.CommonAnyOrderType}</option>
+                    <option value="">${uiLabelMap.OrderAnyOrderType}</option>
                     <#list orderTypes as orderType>
                       <option value="${orderType.orderTypeId}">${orderType.get("description", locale)}</option>
                     </#list>
@@ -284,7 +292,7 @@ function runAction() {
                     <option value="${currentStatus.statusId}">${currentStatus.get("description", locale)}</option>
                     <option value="${currentStatus.statusId}">---</option>
                     </#if>
-                    <option value="">${uiLabelMap.CommonAnyOrderStatus}</option>
+                    <option value="">${uiLabelMap.OrderAnyOrderStatus}</option>
                     <#list orderStatuses as orderStatus>
                       <option value="${orderStatus.statusId}">${orderStatus.get("description", locale)}</option>
                     </#list>
@@ -306,21 +314,62 @@ function runAction() {
                 </td>
               </tr>
               <tr>
+                <td width='25%' align='right' class='label'>${uiLabelMap.OrderSelectShippingMethod}</td>
+                <td width='5%'>&nbsp;</td>
+                <td align='left'>
+                  <select name="shipmentMethod">
+                    <#if currentCarrierShipmentMethod?has_content>
+                      <#assign currentShipmentMethodType = currentCarrierShipmentMethod.getRelatedOne("ShipmentMethodType", false)>
+                      <option value="${currentCarrierShipmentMethod.partyId}@${currentCarrierShipmentMethod.shipmentMethodTypeId}">${currentCarrierShipmentMethod.partyId?if_exists} ${currentShipmentMethodType.description?if_exists}</option>
+                      <option value="${currentCarrierShipmentMethod.partyId}@${currentCarrierShipmentMethod.shipmentMethodTypeId}">---</option>
+                    </#if>
+                    <option value="">${uiLabelMap.OrderSelectShippingMethod}</option>
+                    <#list carrierShipmentMethods as carrierShipmentMethod>
+                      <#assign shipmentMethodType = carrierShipmentMethod.getRelatedOne("ShipmentMethodType", false)>
+                      <option value="${carrierShipmentMethod.partyId}@${carrierShipmentMethod.shipmentMethodTypeId}">${carrierShipmentMethod.partyId?if_exists} ${shipmentMethodType.description?if_exists}</option>
+                    </#list>
+                  </select>
+                </td>
+              </tr>
+              <tr>
+                <td width='25%' align='right' class='label'>${uiLabelMap.OrderViewed}</td>
+                <td width='5%'>&nbsp;</td>
+                <td align='left'>
+                  <select name="isViewed">
+                    <#if requestParameters.isViewed?has_content>
+                      <#assign isViewed = requestParameters.isViewed>
+                      <option value="${isViewed}"><#if "Y" == isViewed>${uiLabelMap.CommonYes}<#elseif "N" == isViewed>${uiLabelMap.CommonNo}</#if></option>
+                    </#if>
+                    <option value=""></option>
+                    <option value="Y">${uiLabelMap.CommonYes}</option>
+                    <option value="N">${uiLabelMap.CommonNo}</option>
+                  </select>
+                </td>
+              </tr>
+              <tr>
+                <td width='25%' align='right' class='label'>${uiLabelMap.OrderAddressVerification}</td>
+                <td width='5%'>&nbsp;</td>
+                <td align='left'><input type='text' name='gatewayAvsResult' value='${requestParameters.gatewayAvsResult?if_exists}'/></td>
+              </tr>
+              <tr>
+                <td width='25%' align='right' class='label'>${uiLabelMap.OrderScore}</td>
+                <td width='5%'>&nbsp;</td>
+                <td align='left'><input type='text' name='gatewayScoreResult' value='${requestParameters.gatewayScoreResult?if_exists}'/></td>
+              </tr>
+              <tr>
                 <td width='25%' align='right' class='label'>${uiLabelMap.CommonDateFilter}</td>
                 <td width='5%'>&nbsp;</td>
                 <td align='left'>
                   <table class="basic-table" cellspacing='0'>
                     <tr>
-                      <td nowrap>
-                        <input type='text' size='25' name='minDate' value='${requestParameters.minDate?if_exists}'/>
-                        <a href="javascript:call_cal(document.lookuporder.minDate,'${fromDateStr}');"><img src='/images/cal.gif' width='16' height='16' border='0' alt='Calendar'/></a>
+                      <td nowrap="nowrap">
+                        <@htmlTemplate.renderDateTimeField name="minDate" event="" action="" value="${requestParameters.minDate?if_exists}" className="" alert="" title="Format: yyyy-MM-dd HH:mm:ss.SSS" size="25" maxlength="30" id="minDate1" dateType="date" shortDateInput=false timeDropdownParamName="" defaultDateTimeString="" localizedIconTitle="" timeDropdown="" timeHourName="" classString="" hour1="" hour2="" timeMinutesName="" minutes="" isTwelveHour="" ampmName="" amSelected="" pmSelected="" compositeType="" formName=""/>
                         <span class='label'>${uiLabelMap.CommonFrom}</span>
                       </td>
                     </tr>
                     <tr>
-                      <td nowrap>
-                        <input type='text' size='25' name='maxDate' value='${requestParameters.maxDate?if_exists}'/>
-                        <a href="javascript:call_cal(document.lookuporder.maxDate,'${thruDateStr}');"><img src='/images/cal.gif' width='16' height='16' border='0' alt='Calendar'/></a>
+                      <td nowrap="nowrap">
+                        <@htmlTemplate.renderDateTimeField name="maxDate" event="" action="" value="${requestParameters.maxDate?if_exists}" className="" alert="" title="Format: yyyy-MM-dd HH:mm:ss.SSS" size="25" maxlength="30" id="maxDate1" dateType="date" shortDateInput=false timeDropdownParamName="" defaultDateTimeString="" localizedIconTitle="" timeDropdown="" timeHourName="" classString="" hour1="" hour2="" timeMinutesName="" minutes="" isTwelveHour="" ampmName="" amSelected="" pmSelected="" compositeType="" formName=""/>
                         <span class='label'>${uiLabelMap.CommonThru}</span>
                       </td>
                     </tr>
@@ -333,7 +382,7 @@ function runAction() {
                 <td align='left'>
                   <table class="basic-table" cellspacing='0'>
                     <tr>
-                      <td nowrap>
+                      <td nowrap="nowrap">
                         <input type="checkbox" name="filterInventoryProblems" value="Y"
                             <#if requestParameters.filterInventoryProblems?default("N") == "Y">checked="checked"</#if> />
                       </td>
@@ -347,7 +396,7 @@ function runAction() {
                 <td align='left'>
                   <table class="basic-table" cellspacing='0'>
                     <tr>
-                      <td nowrap>
+                      <td nowrap="nowrap">
                         <input type="checkbox" name="filterPartiallyReceivedPOs" value="Y"
                             <#if requestParameters.filterPartiallyReceivedPOs?default("N") == "Y">checked="checked"</#if> />
                       </td>
@@ -361,7 +410,7 @@ function runAction() {
                 <td align='left'>
                   <table class="basic-table" cellspacing='0'>
                     <tr>
-                      <td nowrap>
+                      <td nowrap="nowrap">
                         <input type="checkbox" name="filterPOsOpenPastTheirETA" value="Y"
                             <#if requestParameters.filterPOsOpenPastTheirETA?default("N") == "Y">checked="checked"</#if> />
                       </td>
@@ -375,7 +424,7 @@ function runAction() {
                 <td align='left'>
                   <table class="basic-table" cellspacing='0'>
                     <tr>
-                      <td nowrap>
+                      <td nowrap="nowrap">
                         <input type="checkbox" name="filterPOsWithRejectedItems" value="Y"
                             <#if requestParameters.filterPOsWithRejectedItems?default("N") == "Y">checked="checked"</#if> />
                       </td>
@@ -383,22 +432,61 @@ function runAction() {
                   </table>
                 </td>
               </tr>
-              <tr><td colspan="3"><hr/></td></tr>
+              <tr>
+                <td width='25%' align='right' class='label'>${uiLabelMap.OrderShipToCountry}</td>
+                <td width='5%'>&nbsp;</td>
+                <td align='left'>
+                  <select name="countryGeoId">
+                    <#if requestParameters.countryGeoId?has_content>
+                        <#assign countryGeoId = requestParameters.countryGeoId>
+                        <#assign geo = delegator.findOne("Geo", Static["org.ofbiz.base.util.UtilMisc"].toMap("geoId", countryGeoId), true)>
+                        <option value="${countryGeoId}">${geo.geoName?if_exists}</option>
+                        <option value="${countryGeoId}">---</option>
+                    <#else>
+                        <option value="">---</option>
+                    </#if>
+                    ${screens.render("component://common/widget/CommonScreens.xml#countries")}
+                  </select>
+                  <select name="includeCountry">
+                    <#if requestParameters.includeCountry?has_content>
+                       <#assign includeCountry = requestParameters.includeCountry>
+                       <option value="${includeCountry}"><#if "Y" == includeCountry>${uiLabelMap.OrderOnlyInclude}<#elseif "N" == includeCountry>${uiLabelMap.OrderDoNotInclude}</#if></option>
+                       <option value="${includeCountry}">---</option>
+                    </#if>
+                    <option value="Y">${uiLabelMap.OrderOnlyInclude}</option>
+                    <option value="N">${uiLabelMap.OrderDoNotInclude}</option>
+                  </select>
+                </td>
+              </tr>
+              <tr>
+                <td width='25%' align='right' class='label'>${uiLabelMap.AccountingPaymentStatus}</td>
+                <td width="5%">&nbsp;</td>
+                <td>
+                    <select name="paymentStatusId">
+                        <option value="">${uiLabelMap.CommonAll}</option>
+                        <#list paymentStatusList as paymentStatus>
+                            <option value="${paymentStatus.statusId}">${paymentStatus.get("description", locale)}</option>
+                        </#list>
+                    </select>
+                </td>
+              </tr>
+              <tr><td colspan="3"><hr /></td></tr>
               <tr>
                 <td width='25%' align='right'>&nbsp;</td>
                 <td width='5%'>&nbsp;</td>
                 <td align='left'>
-                    <input type='checkbox' name='showAll' value='Y' onclick="javascript:lookupOrders(true);"/>&nbsp;${uiLabelMap.CommonShowAllRecords}
+                    <input type="hidden" name="showAll" value="Y"/>
+                    <input type='submit' value='${uiLabelMap.CommonFind}'/>
                 </td>
               </tr>
             </table>
           </td>
         </tr>
       </table>
-      </#if>
     </div>
+      </#if>
 </div>
-<input type="image" src="<@ofbizContentUrl>/images/spacer.gif</@ofbizContentUrl>" onClick="javascript:lookupOrders(true);"/>
+<input type="image" src="<@ofbizContentUrl>/images/spacer.gif</@ofbizContentUrl>" onclick="javascript:lookupOrders(true);"/>
 </form>
 <#if requestParameters.hideFields?default("N") != "Y">
 <script language="JavaScript" type="text/javascript">
@@ -408,7 +496,7 @@ document.lookuporder.orderId.focus();
 </script>
 </#if>
 
-<br/>
+<br />
 
 <div id="findOrdersList" class="screenlet">
   <div class="screenlet-title-bar">
@@ -444,24 +532,25 @@ document.lookuporder.orderId.focus();
         </#list>
       </#if>
     </form>
-    <form name="massOrderChangeForm" method="post" action="javascript:void();">
+    <form name="massOrderChangeForm" method="post" action="javascript:void(0);">
       <div>&nbsp;</div>
       <div align="right">
-        <input type="hidden" name="orderIdList" value=""/>
         <input type="hidden" name="screenLocation" value="component://order/widget/ordermgr/OrderPrintScreens.xml#OrderPDF"/>
         <select name="serviceName" onchange="javascript:setServiceName(this);">
-           <option value="javascript:void();">&nbsp;</option>
+           <option value="javascript:void(0);">&nbsp;</option>
            <option value="<@ofbizUrl>massApproveOrders?hideFields=${requestParameters.hideFields?default("N")}${paramList}</@ofbizUrl>">${uiLabelMap.OrderApproveOrder}</option>
            <option value="<@ofbizUrl>massHoldOrders?hideFields=${requestParameters.hideFields?default("N")}${paramList}</@ofbizUrl>">${uiLabelMap.OrderHold}</option>
            <option value="<@ofbizUrl>massProcessOrders?hideFields=${requestParameters.hideFields?default("N")}${paramList}</@ofbizUrl>">${uiLabelMap.OrderProcessOrder}</option>
            <option value="<@ofbizUrl>massCancelOrders?hideFields=${requestParameters.hideFields?default("N")}${paramList}</@ofbizUrl>">${uiLabelMap.OrderCancelOrder}</option>
+           <option value="<@ofbizUrl>massCancelRemainingPurchaseOrderItems?hideFields=${requestParameters.hideFields?default("N")}${paramList}</@ofbizUrl>">${uiLabelMap.OrderCancelRemainingPOItems}</option>
            <option value="<@ofbizUrl>massRejectOrders?hideFields=${requestParameters.hideFields?default("N")}${paramList}</@ofbizUrl>">${uiLabelMap.OrderRejectOrder}</option>
            <option value="<@ofbizUrl>massPickOrders?hideFields=${requestParameters.hideFields?default("N")}${paramList}</@ofbizUrl>">${uiLabelMap.OrderPickOrders}</option>
+           <option value="<@ofbizUrl>massQuickShipOrders?hideFields=${requestParameters.hideFields?default("N")}${paramList}</@ofbizUrl>">${uiLabelMap.OrderQuickShipEntireOrder}</option>
            <option value="<@ofbizUrl>massPrintOrders?hideFields=${requestParameters.hideFields?default('N')}${paramList}</@ofbizUrl>">${uiLabelMap.CommonPrint}</option>
            <option value="<@ofbizUrl>massCreateFileForOrders?hideFields=${requestParameters.hideFields?default('N')}${paramList}</@ofbizUrl>">${uiLabelMap.ContentCreateFile}</option>
         </select>
         <select name="printerName">
-           <option value="javascript:void();">&nbsp;</option>
+           <option value="javascript:void(0);">&nbsp;</option>
            <#list printers as printer>
            <option value="${printer}">${printer}</option>
            </#list>
@@ -472,7 +561,7 @@ document.lookuporder.orderId.focus();
       <table class="basic-table hover-bar" cellspacing='0'>
         <tr class="header-row">
           <td width="1%">
-            <input type="checkbox" name="checkAllOrders" value="1" onchange="javascript:toggleOrderId(this);"/>
+            <input type="checkbox" id="checkAllOrders" name="checkAllOrders" value="1" onchange="javascript:toggleOrderId(this);"/>
           </td>
           <td width="5%">${uiLabelMap.OrderOrderType}</td>
           <td width="5%">${uiLabelMap.OrderOrderId}</td>
@@ -498,8 +587,8 @@ document.lookuporder.orderId.focus();
           <#assign alt_row = false>
           <#list orderList as orderHeader>
             <#assign orh = Static["org.ofbiz.order.order.OrderReadHelper"].getHelper(orderHeader)>
-            <#assign statusItem = orderHeader.getRelatedOneCache("StatusItem")>
-            <#assign orderType = orderHeader.getRelatedOneCache("OrderType")>
+            <#assign statusItem = orderHeader.getRelatedOne("StatusItem", true)>
+            <#assign orderType = orderHeader.getRelatedOne("OrderType", true)>
             <#if orderType.orderTypeId == "PURCHASE_ORDER">
               <#assign displayParty = orh.getSupplierAgent()?if_exists>
             <#else>
@@ -508,7 +597,7 @@ document.lookuporder.orderId.focus();
             <#assign partyId = displayParty.partyId?default("_NA_")>
             <tr valign="middle"<#if alt_row> class="alternate-row"</#if>>
               <td>
-                 <input type="checkbox" name="orderIdList" value="${orderHeader.orderId}"/>
+                 <input type="checkbox" name="orderIdList" value="${orderHeader.orderId}" onchange="javascript:toggleOrderIdList();"/>
               </td>
               <td>${orderType.get("description",locale)?default(orderType.orderTypeId?default(""))}</td>
               <td><a href="<@ofbizUrl>orderview?orderId=${orderHeader.orderId}</@ofbizUrl>" class='buttontext'>${orderHeader.orderId}</a></td>

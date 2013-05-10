@@ -31,10 +31,11 @@ import javax.servlet.http.HttpSession;
 import org.ofbiz.base.util.StringUtil;
 import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.base.util.UtilValidate;
-import org.ofbiz.entity.GenericDelegator;
+import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericValue;
 import org.ofbiz.webapp.control.RequestHandler;
 import org.ofbiz.webapp.taglib.ContentUrlTag;
+import org.ofbiz.widget.ModelWidget;
 import org.ofbiz.widget.WidgetWorker;
 import org.ofbiz.widget.menu.MenuStringRenderer;
 import org.ofbiz.widget.menu.ModelMenu;
@@ -77,7 +78,7 @@ public class HtmlMenuRenderer extends HtmlWidgetRenderer implements MenuStringRe
             }
                 //if (Debug.infoOn()) Debug.logInfo("in appendOfbizUrl, ctx is NOT null(2)", "");
         }
-        GenericDelegator delegator = (GenericDelegator)request.getAttribute("delegator");
+        Delegator delegator = (Delegator)request.getAttribute("delegator");
         if (delegator == null) {
                 //if (Debug.infoOn()) Debug.logInfo("in appendOfbizUrl, delegator is null(5)", "");
         }
@@ -106,11 +107,11 @@ public class HtmlMenuRenderer extends HtmlWidgetRenderer implements MenuStringRe
             //if (Debug.infoOn()) Debug.logInfo("in appendContentUrl, ctx is NOT null(2)", "");
             this.request.setAttribute("servletContext", ctx);
         }
-        GenericDelegator delegator = (GenericDelegator) request.getAttribute("delegator");
+        Delegator delegator = (Delegator) request.getAttribute("delegator");
         if (delegator == null) {
                 //if (Debug.infoOn()) Debug.logInfo("in appendContentUrl, delegator is null(6)", "");
         }
-        StringBuffer buffer = new StringBuffer();
+        StringBuilder buffer = new StringBuilder();
         ContentUrlTag.appendContentPrefix(this.request, buffer);
         writer.append(buffer.toString());
         writer.append(location);
@@ -148,7 +149,7 @@ public class HtmlMenuRenderer extends HtmlWidgetRenderer implements MenuStringRe
         if (hideThisItem)
             return;
 
-        String style = null;
+        String style = menuItem.getWidgetStyle();
 
         if (menuItem.isSelected(context)) {
             style = menuItem.getSelectedStyle();
@@ -157,7 +158,7 @@ public class HtmlMenuRenderer extends HtmlWidgetRenderer implements MenuStringRe
             }
         }
 
-        if (menuItem.getDisabled()) {
+        if (menuItem.getDisabled() || this.isDisableIfEmpty(menuItem, context)) {
             style = menuItem.getDisabledTitleStyle();
         }
 
@@ -166,7 +167,7 @@ public class HtmlMenuRenderer extends HtmlWidgetRenderer implements MenuStringRe
         if (UtilValidate.isNotEmpty(style) || UtilValidate.isNotEmpty(alignStyle)) {
             writer.append(" class=\"");
             if (UtilValidate.isNotEmpty(style)) {
-                writer.append(style + " ");
+                writer.append(style).append(" ");
             }
             if (UtilValidate.isNotEmpty(alignStyle)) {
                 writer.append(alignStyle);
@@ -175,7 +176,7 @@ public class HtmlMenuRenderer extends HtmlWidgetRenderer implements MenuStringRe
         }
         String toolTip = menuItem.getTooltip(context);
         if (UtilValidate.isNotEmpty(toolTip)) {
-            writer.append(" title=\"" + toolTip + "\"");
+            writer.append(" title=\"").append(toolTip).append("\"");
         }
         writer.append(">");
 
@@ -183,6 +184,24 @@ public class HtmlMenuRenderer extends HtmlWidgetRenderer implements MenuStringRe
         //if (Debug.infoOn()) Debug.logInfo("in HtmlMenuRendererImage, link(0):" + link,"");
         if (link != null) {
             renderLink(writer, context, link);
+        } else {
+            String txt = menuItem.getTitle(context);
+            StringUtil.SimpleEncoder simpleEncoder = (StringUtil.SimpleEncoder) context.get("simpleEncoder");
+            if (simpleEncoder != null) {
+                txt = simpleEncoder.encode(txt);
+            }
+            writer.append(txt);
+
+        }
+        if (!menuItem.getMenuItemList().isEmpty()) {
+            appendWhitespace(writer);
+            writer.append("    <ul>");
+            appendWhitespace(writer);
+            for (ModelMenuItem childMenuItem : menuItem.getMenuItemList()) {
+                childMenuItem.renderMenuItemString(writer, context, this);
+            }
+            writer.append("    </ul>");
+            appendWhitespace(writer);
         }
 
         writer.append("</li>");
@@ -220,53 +239,59 @@ public class HtmlMenuRenderer extends HtmlWidgetRenderer implements MenuStringRe
         }
 
             //Debug.logInfo("in HtmlMenuRenderer, userLoginIdHasChanged:" + userLoginIdHasChanged,"");
+        this.widgetCommentsEnabled = ModelWidget.widgetBoundaryCommentsEnabled(context);
         renderBeginningBoundaryComment(writer, "Menu Widget", modelMenu);
         writer.append("<div");
         String menuId = modelMenu.getId();
         if (UtilValidate.isNotEmpty(menuId)) {
-            writer.append(" id=\"" + menuId + "\"");
+            writer.append(" id=\"").append(menuId).append("\"");
         } else {
             // TODO: Remove else after UI refactor - allow both id and style
             String menuContainerStyle = modelMenu.getMenuContainerStyle(context);
             if (UtilValidate.isNotEmpty(menuContainerStyle)) {
-                writer.append(" class=\"" + menuContainerStyle + "\"");
+                writer.append(" class=\"").append(menuContainerStyle).append("\"");
             }
         }
         String menuWidth = modelMenu.getMenuWidth();
         // TODO: Eliminate embedded styling after refactor
         if (UtilValidate.isNotEmpty(menuWidth)) {
-            writer.append(" style=\"width:" + menuWidth + ";\"");
+            writer.append(" style=\"width:").append(menuWidth).append(";\"");
         }
         writer.append(">");
         appendWhitespace(writer);
         String menuTitle = modelMenu.getTitle(context);
         if (UtilValidate.isNotEmpty(menuTitle)) {
-            writer.append("<h2>" + menuTitle + "</h2>");
+            writer.append("<h2>").append(menuTitle).append("</h2>");
             appendWhitespace(writer);
         }
-        writer.append("<ul>");
-        appendWhitespace(writer);
-        writer.append("<li>");
-        appendWhitespace(writer);
-        writer.append(" <ul>");
-        appendWhitespace(writer);
+        if (modelMenu.renderedMenuItemCount(context) > 0) {
+            writer.append("<ul>");
+            appendWhitespace(writer);
+            writer.append("<li>");
+            appendWhitespace(writer);
+            writer.append(" <ul>");
+            appendWhitespace(writer);
+        }
     }
 
     /* (non-Javadoc)
      * @see org.ofbiz.widget.menu.MenuStringRenderer#renderMenuClose(java.io.Writer, java.util.Map, org.ofbiz.widget.menu.ModelMenu)
      */
     public void renderMenuClose(Appendable writer, Map<String, Object> context, ModelMenu modelMenu) throws IOException {
+        // TODO: div can't be directly inside an UL
         String fillStyle = modelMenu.getFillStyle();
         if (UtilValidate.isNotEmpty(fillStyle)) {
-            writer.append("<div class=\"" + fillStyle + "\">&nbsp;</div>");
+            writer.append("<div class=\"").append(fillStyle).append("\">&nbsp;</div>");
         }
         //String menuContainerStyle = modelMenu.getMenuContainerStyle(context);
-        writer.append(" </ul>");
-        appendWhitespace(writer);
-        writer.append("</li>");
-        appendWhitespace(writer);
-        writer.append("</ul>");
-        appendWhitespace(writer);
+        if (modelMenu.renderedMenuItemCount(context) > 0) {      
+            writer.append(" </ul>");
+            appendWhitespace(writer);
+            writer.append("</li>");
+            appendWhitespace(writer);
+            writer.append("</ul>");
+            appendWhitespace(writer);
+        }
         writer.append(" <br class=\"clear\"/>");
         appendWhitespace(writer);
         writer.append("</div>");
@@ -364,7 +389,7 @@ public class HtmlMenuRenderer extends HtmlWidgetRenderer implements MenuStringRe
     public void renderLink(Appendable writer, Map<String, Object> context, ModelMenuItem.Link link) throws IOException {
         String target = link.getTarget(context);
         ModelMenuItem menuItem = link.getLinkMenuItem();
-        if (menuItem.getDisabled()) {
+        if (menuItem.getDisabled() || isDisableIfEmpty(menuItem, context)) {
             target = null;
         }
 
@@ -390,21 +415,19 @@ public class HtmlMenuRenderer extends HtmlWidgetRenderer implements MenuStringRe
                     writer.append("\"");
                 }
 
-                writer.append(" onSubmit=\"javascript:submitFormDisableSubmits(this)\"");
-
                 writer.append(" name=\"");
                 writer.append(uniqueItemName);
                 writer.append("\">");
 
                 StringUtil.SimpleEncoder simpleEncoder = (StringUtil.SimpleEncoder) context.get("simpleEncoder");
-                for (WidgetWorker.Parameter parameter: link.getParameterList()) {
+                for (Map.Entry<String, String> parameter: link.getParameterMap(context).entrySet()) {
                     writer.append("<input name=\"");
-                    writer.append(parameter.getName());
+                    writer.append(parameter.getKey());
                     writer.append("\" value=\"");
                     if (simpleEncoder != null) {
-                        writer.append(simpleEncoder.encode(parameter.getValue(context)));
+                        writer.append(simpleEncoder.encode(parameter.getValue()));
                     } else {
-                        writer.append(parameter.getValue(context));
+                        writer.append(parameter.getValue());
                     }
                     writer.append("\" type=\"hidden\"/>");
                 }
@@ -432,30 +455,51 @@ public class HtmlMenuRenderer extends HtmlWidgetRenderer implements MenuStringRe
                 writer.append(name);
                 writer.append("\"");
             }
-            if (UtilValidate.isNotEmpty(targetWindow)) {
-                writer.append(" target=\"");
-                writer.append(targetWindow);
-                writer.append("\"");
+            if (!"hidden-form".equals(linkType)) {
+                if (UtilValidate.isNotEmpty(targetWindow)) {
+                    writer.append(" target=\"");
+                    writer.append(targetWindow);
+                    writer.append("\"");
+                }
             }
 
             writer.append(" href=\"");
+            String confirmationMsg = link.getConfirmation(context);
             if ("hidden-form".equals(linkType)) {
-                writer.append("javascript:document.");
-                writer.append(uniqueItemName);
-                writer.append(".submit()");
+                if (UtilValidate.isNotEmpty(confirmationMsg)) {
+                    writer.append("javascript:confirmActionFormLink('");
+                    writer.append(confirmationMsg);
+                    writer.append("', '");
+                    writer.append(uniqueItemName);
+                    writer.append("')");
+                } else {
+                    writer.append("javascript:document.");
+                    writer.append(uniqueItemName);
+                    writer.append(".submit()");
+                }
             } else {
-                WidgetWorker.buildHyperlinkUrl(writer, target, link.getUrlMode(), link.getParameterList(), link.getPrefix(context),
+                if (UtilValidate.isNotEmpty(confirmationMsg)) {
+                    writer.append("javascript:confirmActionLink('");
+                    writer.append(confirmationMsg);
+                    writer.append("', '");
+                    WidgetWorker.buildHyperlinkUrl(writer, target, link.getUrlMode(), link.getParameterMap(context), link.getPrefix(context),
+                            link.getFullPath(), link.getSecure(), link.getEncode(), request, response, context);
+                    writer.append("')");
+                } else {
+                WidgetWorker.buildHyperlinkUrl(writer, target, link.getUrlMode(), link.getParameterMap(context), link.getPrefix(context),
                         link.getFullPath(), link.getSecure(), link.getEncode(), request, response, context);
+                }
             }
             writer.append("\">");
         }
 
         // the text
         Image img = link.getImage();
-        if (img == null) {
-            writer.append(link.getText(context));
-        } else {
+        if (img != null) {
             renderImage(writer, context, img);
+            writer.append("&nbsp;" + link.getText(context));
+        } else {
+            writer.append(link.getText(context));
         }
 
         if (UtilValidate.isNotEmpty(target)) {
@@ -543,7 +587,7 @@ public class HtmlMenuRenderer extends HtmlWidgetRenderer implements MenuStringRe
                 }
             } else  if (urlMode != null && urlMode.equalsIgnoreCase("content")) {
                 if (request != null && response != null) {
-                    StringBuffer newURL = new StringBuffer();
+                    StringBuilder newURL = new StringBuilder();
                     ContentUrlTag.appendContentPrefix(request, newURL);
                     newURL.append(src);
                     writer.append(newURL.toString());
@@ -557,7 +601,3 @@ public class HtmlMenuRenderer extends HtmlWidgetRenderer implements MenuStringRe
         writer.append("/>");
     }
 }
-
-
-
-

@@ -27,17 +27,26 @@ invoiceId = context.invoiceId;
 if (!invoiceId) return;
 
 List invoiceItems = [];
-invoiceItemList = delegator.findByAnd("InvoiceItem", [invoiceId : invoiceId], ["invoiceItemSeqId"]);
+invoiceItemList = delegator.findByAnd("InvoiceItem", [invoiceId : invoiceId], ["invoiceItemSeqId"], false);
 if (invoiceItemList) {
     invoiceItemList.each { invoiceItem ->
         invoiceItemSeqId = invoiceItem.invoiceItemSeqId;
         invoiceId = invoiceItem.invoiceId;
-        orderItemBilling = EntityUtil.getFirst(delegator.findByAnd("OrderItemBilling", [invoiceId : invoiceId, invoiceItemSeqId : invoiceItemSeqId]));
+        orderItemBilling = EntityUtil.getFirst(delegator.findByAnd("OrderItemBilling", [invoiceId : invoiceId, invoiceItemSeqId : invoiceItemSeqId], null, false));
         Map invoiceItemMap = FastMap.newInstance();
         invoiceItemMap.putAll((Map) invoiceItem);
         if (orderItemBilling) {
             orderId = orderItemBilling.orderId;
             invoiceItemMap.orderId = orderId;
+        } else {
+            orderAdjustmentBilling = EntityUtil.getFirst(delegator.findByAnd("OrderAdjustmentBilling", [invoiceId : invoiceId, invoiceItemSeqId : invoiceItemSeqId], null, false));
+            if (orderAdjustmentBilling) {
+                orderAdjustment = EntityUtil.getFirst(delegator.findByAnd("OrderAdjustment", [orderAdjustmentId : orderAdjustmentBilling.orderAdjustmentId], null, false))
+                if (orderAdjustment) {
+                    orderId = orderAdjustment.orderId;
+                    invoiceItemMap.orderId = orderId;
+                }
+            }
         }
         invoiceItems.add(invoiceItemMap);
     }

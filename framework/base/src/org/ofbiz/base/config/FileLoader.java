@@ -18,16 +18,18 @@
  *******************************************************************************/
 package org.ofbiz.base.config;
 
-import java.net.*;
-import java.io.*;
-import org.ofbiz.base.util.*;
+import java.net.URL;
+import java.io.InputStream;
+import org.ofbiz.base.util.UtilURL;
 
 /**
  * Loads resources from the file system
  *
  */
+@SuppressWarnings("serial")
 public class FileLoader extends ResourceLoader implements java.io.Serializable {
 
+    @Override
     public URL getURL(String location) throws GenericConfigException {
         String fullLocation = fullLocation(location);
         URL fileUrl = null;
@@ -39,6 +41,7 @@ public class FileLoader extends ResourceLoader implements java.io.Serializable {
         return fileUrl;
     }
 
+    @Override
     public InputStream loadResource(String location) throws GenericConfigException {
         URL fileUrl = getURL(location);
         try {

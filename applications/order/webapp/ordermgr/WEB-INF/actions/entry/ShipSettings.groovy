@@ -22,6 +22,9 @@ import org.ofbiz.base.util.*;
 import org.ofbiz.order.shoppingcart.*;
 import org.ofbiz.party.contact.*;
 import org.ofbiz.product.catalog.*;
+import org.ofbiz.base.util.UtilValidate;
+import org.ofbiz.entity.condition.EntityCondition;
+import org.ofbiz.entity.util.EntityUtil;
 
 import javolution.util.FastMap;
 import javolution.util.FastList;
@@ -43,10 +46,10 @@ request.removeAttribute("_EVENT_MESSAGE_");
 
 if ("SALES_ORDER".equals(cart.getOrderType())) {
     if (!"_NA_".equals(orderPartyId)) {
-        orderParty = delegator.findByPrimaryKey("Party", [partyId : orderPartyId]);
+        orderParty = delegator.findOne("Party", [partyId : orderPartyId], false);
         if (orderParty) {
             shippingContactMechList = ContactHelper.getContactMech(orderParty, "SHIPPING_LOCATION", "POSTAL_ADDRESS", false);
-            orderPerson = orderParty.getRelatedOne("Person");
+            orderPerson = orderParty.getRelatedOne("Person", false);
             context.orderParty = orderParty;
             context.orderPerson = orderPerson;
             context.shippingContactMechList = shippingContactMechList;
@@ -54,7 +57,7 @@ if ("SALES_ORDER".equals(cart.getOrderType())) {
     }
     // Ship to another party
     if (shipToPartyId) {
-        shipToParty = delegator.findByPrimaryKey("Party", [partyId : shipToPartyId]);
+        shipToParty = delegator.findOne("Party", [partyId : shipToPartyId], false);
         if (shipToParty) {
             context.shipToParty = shipToParty;
             shipToPartyShippingContactMechList = ContactHelper.getContactMech(shipToParty, "SHIPPING_LOCATION", "POSTAL_ADDRESS", false);
@@ -62,18 +65,18 @@ if ("SALES_ORDER".equals(cart.getOrderType())) {
         }
     }
     // suppliers for the drop-ship select box
-    suppliers = delegator.findByAnd("PartyRole", [roleTypeId : "SUPPLIER"]);
+    suppliers = delegator.findByAnd("PartyRole", [roleTypeId : "SUPPLIER"], null, false);
     context.suppliers = suppliers;
 
     // facilities used to reserve the items per ship group
-    productStoreFacilities = delegator.findByAnd("ProductStoreFacility", [productStoreId : cart.getProductStoreId()]);
+    productStoreFacilities = delegator.findByAnd("ProductStoreFacility", [productStoreId : cart.getProductStoreId()], null, false);
     context.productStoreFacilities = productStoreFacilities;
 } else {
     // Purchase order
     if (!"_NA_".equals(orderPartyId)) {
-        orderParty = delegator.findByPrimaryKey("Party", [partyId : orderPartyId]);
+        orderParty = delegator.findOne("Party", [partyId : orderPartyId], false);
         if (orderParty) {
-           orderPerson = orderParty.getRelatedOne("Person");
+           orderPerson = orderParty.getRelatedOne("Person", false);
            context.orderParty = orderParty;
            context.orderPerson = orderPerson;
          }
@@ -82,7 +85,16 @@ if ("SALES_ORDER".equals(cart.getOrderType())) {
     companyId = cart.getBillToCustomerPartyId();
     if (companyId) {
         facilityMaps = FastList.newInstance();
-        facilities = delegator.findByAndCache("Facility", [ownerPartyId : companyId]);
+        facilities = delegator.findByAnd("Facility", [ownerPartyId : companyId], null, true);
+
+        // if facilites is null then check the PartyRelationship where there is a relationship set for Parent & Child organization. Then also fetch the value of companyId from there.
+        if (UtilValidate.isEmpty(facilities)) {
+            partyRelationship = EntityUtil.getFirst(delegator.findList("PartyRelationship", EntityCondition.makeCondition(["roleTypeIdFrom": "PARENT_ORGANIZATION", "partyIdTo": companyId]), null, null, null, false));
+            if (UtilValidate.isNotEmpty(partyRelationship)) {
+                companyId = partyRelationship.partyIdFrom;
+                facilities = delegator.findByAnd("Facility", [ownerPartyId : companyId], null, true);
+            }
+        }
         facilities.each { facility ->
             facilityMap = FastMap.newInstance();
             facilityContactMechValueMaps = ContactMechWorker.getFacilityContactMechValueMaps(delegator, facility.facilityId, false, null);

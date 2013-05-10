@@ -19,7 +19,7 @@ under the License.
 -->
 
 <simple-methods xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/simple-methods.xsd">
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/simple-methods-v2.xsd">
     <!-- ProductContent -->
     <simple-method method-name="createProductContent" short-description="Create Content For Product">
         <make-value value-field="newEntity" entity-name="ProductContent"/>
@@ -78,6 +78,8 @@ under the License.
         <set-service-fields service-name="persistContentAndAssoc" map="parameters" to-map="persistContentAndAssoc"/>
         <set field="persistContentAndAssoc.contentTypeId" value="DOCUMENT"/>
         <set field="persistContentAndAssoc.dataResourceTypeId" value="IMAGE_OBJECT"/>
+        <set field="persistContentAndAssoc.contentName" from-field="parameters._imageData_fileName"/>
+        <set field="persistContentAndAssoc.mimeTypeId" from-field="parameters._imageData_contentType"/>
         <call-service service-name="persistContentAndAssoc" in-map-name="persistContentAndAssoc" break-on-error="true" >
             <result-to-field result-name="contentId" field="createProductContent.contentId"/>
         </call-service>
@@ -125,5 +127,151 @@ under the License.
         <set-pk-fields map="parameters" value-field="lookupPKMap"/>
         <find-by-primary-key map="lookupPKMap" value-field="lookedUpValue"/>
         <remove-value value-field="lookedUpValue"/>
+    </simple-method>
+    
+    <simple-method method-name="uploadProductAdditionalViewImages" short-description="Method to upload multiple Additional View images for product">
+        <set-service-fields service-name="addAdditionalViewForProduct" map="parameters" to-map="addAdditionalViewForProductMap"/>
+        <if-not-empty field="parameters.additionalImageOne">
+            <set field="addAdditionalViewForProductMap.productId" from-field="parameters.productId"/>
+            <set field="addAdditionalViewForProductMap.uploadedFile" from-field="parameters.additionalImageOne"/>
+            <set field="addAdditionalViewForProductMap.productContentTypeId" value="ADDITIONAL_IMAGE_1"/>
+            <set field="addAdditionalViewForProductMap._uploadedFile_fileName" from-field="parameters._additionalImageOne_fileName"/>
+            <set field="addAdditionalViewForProductMap._uploadedFile_contentType" from-field="parameters._additionalImageOne_contentType"/>
+            <call-service service-name="addAdditionalViewForProduct" in-map-name="addAdditionalViewForProductMap"/>
+            <clear-field field="addAdditionalViewForProductMap"/>
+        </if-not-empty>
+        <if-not-empty field="parameters.additionalImageTwo">
+            <set field="addAdditionalViewForProductMap.productId" from-field="parameters.productId"/>
+            <set field="addAdditionalViewForProductMap.uploadedFile" from-field="parameters.additionalImageTwo"/>
+            <set field="addAdditionalViewForProductMap.productContentTypeId" value="ADDITIONAL_IMAGE_2"/>
+            <set field="addAdditionalViewForProductMap._uploadedFile_fileName" from-field="parameters._additionalImageTwo_fileName"/>
+            <set field="addAdditionalViewForProductMap._uploadedFile_contentType" from-field="parameters._additionalImageTwo_contentType"/>
+            <call-service service-name="addAdditionalViewForProduct" in-map-name="addAdditionalViewForProductMap"/>
+            <clear-field field="addAdditionalViewForProductMap"/>
+        </if-not-empty>
+        <if-not-empty field="parameters.additionalImageThree">
+            <set field="addAdditionalViewForProductMap.productId" from-field="parameters.productId"/>
+            <set field="addAdditionalViewForProductMap.uploadedFile" from-field="parameters.additionalImageThree"/>
+            <set field="addAdditionalViewForProductMap.productContentTypeId" value="ADDITIONAL_IMAGE_3"/>
+            <set field="addAdditionalViewForProductMap._uploadedFile_fileName" from-field="parameters._additionalImageThree_fileName"/>
+            <set field="addAdditionalViewForProductMap._uploadedFile_contentType" from-field="parameters._additionalImageThree_contentType"/>
+            <call-service service-name="addAdditionalViewForProduct" in-map-name="addAdditionalViewForProductMap"/>
+            <clear-field field="addAdditionalViewForProductMap"/>
+        </if-not-empty>
+        <if-not-empty field="parameters.additionalImageFour">
+            <set field="addAdditionalViewForProductMap.productId" from-field="parameters.productId"/>
+            <set field="addAdditionalViewForProductMap.uploadedFile" from-field="parameters.additionalImageFour"/>
+            <set field="addAdditionalViewForProductMap.productContentTypeId" value="ADDITIONAL_IMAGE_4"/>
+            <set field="addAdditionalViewForProductMap._uploadedFile_fileName" from-field="parameters._additionalImageFour_fileName"/>
+            <set field="addAdditionalViewForProductMap._uploadedFile_contentType" from-field="parameters._additionalImageFour_contentType"/>
+            <call-service service-name="addAdditionalViewForProduct" in-map-name="addAdditionalViewForProductMap"/>
+            <clear-field field="addAdditionalViewForProductMap"/>
+        </if-not-empty>
+        <field-to-result field="parameters.productId" result-name="productId"/>
+    </simple-method>
+
+    <!-- ProductPromoContent -->
+    <simple-method method-name="createProductPromoContent" short-description="Create Content For Product Promo">
+        <make-value value-field="newEntity" entity-name="ProductPromoContent"/>
+        <set-pk-fields map="parameters" value-field="newEntity"/>
+        <set-nonpk-fields map="parameters" value-field="newEntity"/>
+        <if-empty field="newEntity.fromDate">
+            <now-timestamp field="nowTimestamp"/>
+            <set field="newEntity.fromDate" from-field="nowTimestamp"/>
+        </if-empty>
+        <create-value value-field="newEntity"/>
+        <field-to-result field="newEntity.contentId" result-name="contentId"/>
+        <field-to-result field="newEntity.productPromoId" result-name="productPromoId"/>
+        <field-to-result field="newEntity.productPromoContentTypeId" result-name="productPromoContentTypeId"/>
+    </simple-method>
+
+    <simple-method method-name="updateProductPromoContent" short-description="Update Content For Product Promo">
+        <make-value value-field="lookupPKMap" entity-name="ProductPromoContent"/>
+        <set-pk-fields map="parameters" value-field="lookupPKMap"/>
+        <find-by-primary-key map="lookupPKMap" value-field="lookedUpValue"/>
+        <set-nonpk-fields map="parameters" value-field="lookedUpValue"/>
+        <store-value value-field="lookedUpValue"/>
+    </simple-method>
+
+    <simple-method method-name="removeProductPromoContent" short-description="Remove Content From Product Promo">
+        <make-value value-field="lookupPKMap" entity-name="ProductPromoContent"/>
+        <set-pk-fields map="parameters" value-field="lookupPKMap"/>
+        <find-by-primary-key map="lookupPKMap" value-field="lookedUpValue"/>
+        <set-nonpk-fields map="parameters" value-field="lookedUpValue"/>
+        <if-empty field="lookedUpValue.thruDate">
+            <now-timestamp field="nowTimestamp"/>
+            <set from-field="nowTimestamp" field="lookedUpValue.thruDate"/>
+        </if-empty>
+        <store-value value-field="lookedUpValue"/>
+    </simple-method>
+
+    <!-- Product Content SEO -->
+    <simple-method method-name="updateContentSEOForProduct" short-description="Update Product SEO">
+        <if-not-empty field="parameters.title">
+            <entity-and list="productContents" entity-name="ProductContentAndInfo">
+                <field-map field-name="productId" from-field="parameters.productId"/>
+                <field-map field-name="productContentTypeId" value="PAGE_TITLE"/>
+            </entity-and>
+            <if-not-empty field="productContents">
+                <first-from-list entry="productContent" list="productContents"/>
+                <entity-one value-field="electronicText" entity-name="ElectronicText">
+                    <field-map field-name="dataResourceId" from-field="productContent.dataResourceId"/>
+                </entity-one>
+                <if-not-empty field="electronicText">
+                    <set field="electronicText.textData" from-field="parameters.title"/>
+                    <store-value value-field="electronicText"/>
+                </if-not-empty>
+            <else>
+                <set field="createTextContentMap.productId" from-field="parameters.productId"/>
+                <set field="createTextContentMap.productContentTypeId" value="PAGE_TITLE"/>
+                <set field="createTextContentMap.text" from-field="parameters.title"/>
+                <call-service service-name="createSimpleTextContentForProduct" in-map-name="createTextContentMap"/>
+            </else>
+            </if-not-empty>
+        </if-not-empty>
+        <if-not-empty field="parameters.metaKeyword">
+            <entity-and list="productContents" entity-name="ProductContentAndInfo">
+                <field-map field-name="productId" from-field="parameters.productId"/>
+                <field-map field-name="productContentTypeId" value="META_KEYWORD"/>
+            </entity-and>
+            <if-not-empty field="productContents">
+                <first-from-list entry="productContent" list="productContents"/>
+                <entity-one value-field="electronicText" entity-name="ElectronicText">
+                    <field-map field-name="dataResourceId" from-field="productContent.dataResourceId"/>
+                </entity-one>
+                <if-not-empty field="electronicText">
+                    <set field="electronicText.textData" from-field="parameters.metaKeyword"/>
+                    <store-value value-field="electronicText"/>
+                </if-not-empty>
+            <else>
+                <set field="createTextContentMap.productId" from-field="parameters.productId"/>
+                <set field="createTextContentMap.productContentTypeId" value="META_KEYWORD"/>
+                <set field="createTextContentMap.text" from-field="parameters.metaKeyword"/>
+                <call-service service-name="createSimpleTextContentForProduct" in-map-name="createTextContentMap"/>
+            </else>
+            </if-not-empty>
+        </if-not-empty>
+        <if-not-empty field="parameters.metaDescription">
+            <entity-and list="productContents" entity-name="ProductContentAndInfo">
+                <field-map field-name="productId" from-field="parameters.productId"/>
+                <field-map field-name="productContentTypeId" value="META_DESCRIPTION"/>
+            </entity-and>
+            <if-not-empty field="productContents">
+                <first-from-list entry="productContent" list="productContents"/>
+                <entity-one value-field="electronicText" entity-name="ElectronicText">
+                    <field-map field-name="dataResourceId" from-field="productContent.dataResourceId"/>
+                </entity-one>
+                <if-not-empty field="electronicText">
+                    <set field="electronicText.textData" from-field="parameters.metaDescription"/>
+                    <store-value value-field="electronicText"/>
+                </if-not-empty>
+            <else>
+                <set field="createTextContentMap.productId" from-field="parameters.productId"/>
+                <set field="createTextContentMap.productContentTypeId" value="META_DESCRIPTION"/>
+                <set field="createTextContentMap.text" from-field="parameters.metaDescription"/>
+                <call-service service-name="createSimpleTextContentForProduct" in-map-name="createTextContentMap"/>
+            </else>
+            </if-not-empty>
+        </if-not-empty>
     </simple-method>
 </simple-methods>

@@ -19,18 +19,20 @@
 package org.ofbiz.manufacturing.routing;
 
 import java.math.BigDecimal;
-import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
+import javolution.util.FastMap;
+
 import org.ofbiz.base.util.UtilMisc;
-import org.ofbiz.entity.GenericDelegator;
+import org.ofbiz.base.util.UtilProperties;
+import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
+import org.ofbiz.manufacturing.jobshopmgt.ProductionRun;
 import org.ofbiz.service.DispatchContext;
 import org.ofbiz.service.LocalDispatcher;
 import org.ofbiz.service.ServiceUtil;
-
-import org.ofbiz.manufacturing.jobshopmgt.ProductionRun;
 
 /**
  * Routing related services
@@ -47,10 +49,11 @@ public class RoutingServices {
      * @param context Map containing the input parameters.
      * @return Map with the result of the service, the output parameters.
      */
-    public static Map getEstimatedTaskTime(DispatchContext ctx, Map context) {
-        Map result = new HashMap();
-        GenericDelegator delegator = ctx.getDelegator();
+    public static Map<String, Object> getEstimatedTaskTime(DispatchContext ctx, Map<String, ? extends Object> context) {
+        Map<String, Object> result = FastMap.newInstance();
+        Delegator delegator = ctx.getDelegator();
         LocalDispatcher dispatcher = ctx.getDispatcher();
+        Locale locale = (Locale) context.get("locale");
 
         // The mandatory IN parameters
         String taskId = (String) context.get("taskId");
@@ -65,19 +68,19 @@ public class RoutingServices {
 
         GenericValue task = null;
         try {
-            task = delegator.findByPrimaryKey("WorkEffort", UtilMisc.toMap("workEffortId", taskId));
+            task = delegator.findOne("WorkEffort", UtilMisc.toMap("workEffortId", taskId), false);
         } catch (GenericEntityException gee) {
-            ServiceUtil.returnError("Error finding routing task with id: " + taskId);
+            return ServiceUtil.returnError(UtilProperties.getMessage(resource, "ManufacturingRoutingErrorFindingTask", UtilMisc.toMap("taskId", taskId), locale));
         }
         // FIXME: the ProductionRun.getEstimatedTaskTime(...) method will be removed and
         // its logic will be implemented inside this method.
         long estimatedTaskTime = ProductionRun.getEstimatedTaskTime(task, quantity, productId, routingId, dispatcher);
-        result.put("estimatedTaskTime", new Long(estimatedTaskTime));
+        result.put("estimatedTaskTime", Long.valueOf(estimatedTaskTime));
         if (task != null && task.get("estimatedSetupMillis") != null) {
-            result.put("setupTime", task.getDouble("estimatedSetupMillis"));
+            result.put("setupTime", task.getBigDecimal("estimatedSetupMillis"));
         }
         if (task != null && task.get("estimatedMilliSeconds") != null) {
-            result.put("taskUnitTime", task.getDouble("estimatedMilliSeconds"));
+            result.put("taskUnitTime", task.getBigDecimal("estimatedMilliSeconds"));
         }
         return result;
     }

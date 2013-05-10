@@ -19,7 +19,7 @@ under the License.
 -->
 
 <simple-methods xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/simple-methods.xsd">
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/simple-methods-v2.xsd">
 
     <simple-method method-name="createPartyRole" short-description="Create Party Role">
         <entity-one entity-name="PartyRole" value-field="partyRole"/>
@@ -117,6 +117,9 @@ under the License.
                 <if-not-empty field="person.personalTitle">
                     <field-to-result field="person.personalTitle" result-name="personalTitle"/>
                 </if-not-empty>
+                <if-not-empty field="person.gender">
+                    <field-to-result field="person.gender" result-name="gender"/>
+                </if-not-empty>
                 <if-not-empty field="person.suffix">
                     <field-to-result field="person.suffix" result-name="suffix"/>
                 </if-not-empty>
@@ -150,6 +153,9 @@ under the License.
                     </if-not-empty>
                     <if-not-empty field="partyNameHistoryCurrent.suffix">
                         <field-to-result field="partyNameHistoryCurrent.suffix" result-name="suffix"/>
+                    </if-not-empty>
+                    <if-not-empty field="partyNameHistoryCurrent.gender">
+                        <field-to-result field="partyNameHistoryCurrent.gender" result-name="gender"/>
                     </if-not-empty>
 
 
@@ -191,6 +197,24 @@ under the License.
             <field-to-list field="geo" list="geos"/>
         </iterate>
         <field-to-result field="geos"/>
+    </simple-method>
+    
+    <!-- PartyIdentification methods -->
+    <simple-method method-name="createPartyIdentifications" short-description="create mass party identification with association between vale and type">
+        <set field="partyIdentCtx.partyId" from-field="parameters.partyId"/>
+        <iterate-map key="key" value="value" map="parameters.identifications">
+            <entity-one value-field="identificationType" entity-name="PartyIdentificationType" use-cache="true">
+                <field-map field-name="partyIdentificationTypeId" from-field="value"/>              
+            </entity-one>          
+            <if-not-empty field="identificationType">   
+                <set field="idValue" value="${parameters.identifications.${identificationType.partyIdentificationTypeId}}"/>          
+                <if-not-empty field="idValue">
+                    <set field="partyIdentCtx.partyIdentificationTypeId" from-field="identificationType.partyIdentificationTypeId"/>
+                    <set field="partyIdentCtx.idValue" from-field="idValue"/>
+                    <call-service service-name="createPartyIdentification" in-map-name="partyIdentCtx"/>
+                </if-not-empty> 
+            </if-not-empty>
+        </iterate-map>
     </simple-method>
 
     <!-- PartyClassification methods -->
@@ -469,6 +493,7 @@ under the License.
         <set value="Y" field="roleTypeIdFromInclueAllChildTypes"/>
 
         <set value="Y" field="includeFromToSwitched"/>
+        <set value="true" field="useCache"/>
 
         <call-simple-method method-name="followPartyRelationshipsInline"/>
 
@@ -661,7 +686,7 @@ under the License.
         <!-- first try to find primary email Address when not found get other email -->
         <entity-and entity-name="PartyContactWithPurpose" list="emailAddressesPurposes">
             <field-map field-name="partyId" from-field="parameters.partyId"/>
-            <field-map field-name="contactMechPurposeTypeId" value="PRIMARY_EMAIL"/>
+            <field-map field-name="contactMechPurposeTypeId" from-field="parameters.contactMechPurposeTypeId"/>
         </entity-and>
         <filter-list-by-date list="emailAddressesPurposes" to-list="emailAddressesPurposes1" from-field-name="purposeFromDate" thru-field-name="purposeThruDate"/>
         <filter-list-by-date list="emailAddressesPurposes1" to-list="emailAddresses" from-field-name="contactFromDate" thru-field-name="contactThruDate"/>
@@ -699,11 +724,12 @@ under the License.
             <set field="type" value="PHONE_SHIPPING"/><field-to-list field="type" list="types"/>
             <set field="type" value="PHONE_SHIP_ORIG"/><field-to-list field="type" list="types"/>
             <else>
-                <set field="type" from-field="parameters.contactMechPurposeTypeId"/><field-to-list field="type" list="types"/>
+                <set field="type" from-field="parameters.contactMechPurposeTypeId"/>
+                <field-to-list field="type" list="types"/>
             </else>
         </if-empty>
         <set field="findMap.contactMechTypeId" value="TELECOM_NUMBER"/>
-        <find-by-and entity-name="PartyContactDetailByPurpose" map="findMap" list="telephoneAll1"></find-by-and>
+        <find-by-and entity-name="PartyContactDetailByPurpose" map="findMap" list="telephoneAll1"/>
         <filter-list-by-date list="telephoneAll1" to-list="telephoneAll2" from-field-name="purposeFromDate" thru-field-name="purposeThruDate"/>
         <filter-list-by-date list="telephoneAll2" to-list="telephoneAll3"/>
         <if-not-empty field="telephoneAll3">
@@ -712,6 +738,7 @@ under the License.
                     <if-empty field="found">
                         <if-compare-field field="telephone.contactMechPurposeTypeId" to-field="type" operator="equals">
                             <set field="found" value="notImportant"/>
+                            <field-to-result field="telephone.contactMechId" result-name="contactMechId"/>
                             <if-not-empty field="telephone.countryCode">
                                 <field-to-result field="telephone.countryCode" result-name="countryCode"/>
                             </if-not-empty>
@@ -733,6 +760,7 @@ under the License.
                 <find-by-and entity-name="PartyAndContactMech" map="findMap" list="telephoneAll1"/>
                 <filter-list-by-date list="telephoneAll1" to-list="telephoneAll2"/>
                 <first-from-list entry="telephone" list="telephoneAll2"/>
+                <field-to-result field="telephone.contactMechId" result-name="contactMechId"/>
                 <if-not-empty field="telephone.tnCountryCode">
                     <field-to-result field="telephone.tnCountryCode" result-name="countryCode"/>
                 </if-not-empty>
@@ -745,6 +773,91 @@ under the License.
                 <if-not-empty field="telephone.extension">
                     <field-to-result field="telephone.extension" result-name="extension"/>
                 </if-not-empty>
+            </else>
+        </if-not-empty>
+    </simple-method>
+
+    <simple-method method-name="getPartyPostalAddress" short-description="Get the postal address of the party">
+        <set field="findMap.partyId" from-field="parameters.partyId"/>
+        <if-empty field="parameters.contactMechPurposeTypeId">
+                <!-- search in this order if not provided-->
+                <set field="type" value="GENERAL_LOCATION"/><field-to-list field="type" list="types"/>
+                <set field="type" value="BILLING_LOCATION"/><field-to-list field="type" list="types"/>
+                <set field="type" value="PAYMENT_LOCATION"/><field-to-list field="type" list="types"/>
+                <set field="type" value="SHIPPING_LOCATION"/><field-to-list field="type" list="types"/>
+                <else>
+                    <set field="type" from-field="parameters.contactMechPurposeTypeId"/><field-to-list field="type" list="types"/>
+                </else>
+        </if-empty>
+        <set field="findMap.contactMechTypeId" value="POSTAL_ADDRESS"/>
+        <find-by-and entity-name="PartyContactDetailByPurpose" map="findMap" list="addressAll1"></find-by-and>
+        <filter-list-by-date list="addressAll1" to-list="addressAll2" from-field-name="purposeFromDate" thru-field-name="purposeThruDate"/>
+        <filter-list-by-date list="addressAll2" to-list="addressAll3"/>
+        <if-not-empty field="addressAll3">
+            <iterate entry="type" list="types">
+                <iterate entry="address" list="addressAll3">
+                    <if-empty field="found">
+                        <if-compare-field field="address.contactMechPurposeTypeId" to-field="type" operator="equals">
+                            <set field="found" value="notImportant"/>
+                            <field-to-result field="address.contactMechId" result-name="contactMechId"/>
+                            <if-not-empty field="address.address1">
+                                <field-to-result field="address.address1" result-name="address1"/>
+                            </if-not-empty>
+                            <if-not-empty field="address.address2">
+                                <field-to-result field="address.address2" result-name="address2"/>
+                            </if-not-empty>
+                            <if-not-empty field="address.directions">
+                                <field-to-result field="address.directions" result-name="directions"/>
+                            </if-not-empty>
+                            <if-not-empty field="address.city">
+                                <field-to-result field="address.city" result-name="city"/>
+                            </if-not-empty>
+                            <if-not-empty field="address.postalCode">
+                                <field-to-result field="address.postalCode" result-name="postalCode"/>
+                            </if-not-empty>
+                            <if-not-empty field="address.stateProvinceGeoId">
+                                <field-to-result field="address.stateProvinceGeoId" result-name="stateProvinceGeoId"/>
+                            </if-not-empty>
+                            <if-not-empty field="address.countyGeoId">
+                                <field-to-result field="address.countyGeoId" result-name="countyGeoId"/>
+                            </if-not-empty>
+                            <if-not-empty field="address.countryGeoId">
+                                <field-to-result field="address.countryGeoId" result-name="countryGeoId"/>
+                            </if-not-empty>
+                            <field-to-result field="address.contactMechPurposeTypeId" result-name="contactMechPurposeTypeId"/>
+                        </if-compare-field>
+                    </if-empty>
+                </iterate>
+            </iterate>
+            <else>
+                <find-by-and entity-name="PartyAndContactMech" map="findMap" list="addressAll1"/>
+                <filter-list-by-date list="addressAll1" to-list="addressAll2"/>
+                <first-from-list entry="address" list="addressAll2"/>
+                      <field-to-result field="address.contactMechId" result-name="contactMechId"/>
+                      <if-not-empty field="address.paAddress1">
+                          <field-to-result field="address.paAddress1" result-name="address1"/>
+                      </if-not-empty>
+                      <if-not-empty field="address.paAddress2">
+                          <field-to-result field="address.paAddress2" result-name="address2"/>
+                      </if-not-empty>
+                      <if-not-empty field="address.paDirections">
+                          <field-to-result field="address.paDirections" result-name="directions"/>
+                      </if-not-empty>
+                      <if-not-empty field="address.paCity">
+                          <field-to-result field="address.paCity" result-name="city"/>
+                      </if-not-empty>
+                      <if-not-empty field="address.paPostalCode">
+                          <field-to-result field="address.paPostalCode" result-name="postalCode"/>
+                      </if-not-empty>
+                      <if-not-empty field="address.paStateProvinceGeoId">
+                          <field-to-result field="address.paStateProvinceGeoId" result-name="stateProvinceGeoId"/>
+                      </if-not-empty>
+                      <if-not-empty field="address.paCountyGeoId">
+                          <field-to-result field="address.paCountyGeoId" result-name="countyGeoId"/>
+                      </if-not-empty>
+                      <if-not-empty field="address.paCountryGeoId">
+                          <field-to-result field="address.paCountryGeoId" result-name="countryGeoId"/>
+                      </if-not-empty>
             </else>
         </if-not-empty>
     </simple-method>
@@ -811,6 +924,22 @@ under the License.
         <remove-value value-field="lookedUpValue"/>
     </simple-method>
 
+    <simple-method method-name="createPartyRelationshipContactAccount" short-description="create a company/contact relationship and add the related roles">
+        <set field="roleMap.partyId" from-field="parameters.accountPartyId"/>
+        <set field="roleMap.roleTypeId" value="ACCOUNT"/>
+        <call-service service-name="createPartyRole" in-map-name="roleMap"/>
+        <set field="roleMap.partyId" from-field="parameters.contactPartyId"/>
+        <set field="roleMap.roleTypeId" value="CONTACT"/>
+        <call-service service-name="createPartyRole" in-map-name="roleMap"/>
+        <set field="relMap.partyIdFrom" from-field="parameters.accountPartyId"/>
+        <set field="relMap.roleTypeIdFrom" value="ACCOUNT"/>
+        <set field="relMap.partyIdTo" from-field="parameters.contactPartyId"/>
+        <set field="relMap.roleTypeIdTo" value="CONTACT"/>
+        <set field="relMap.partyRelationshipTypeId" value="EMPLOYMENT"/>
+        <set field="relMap.comments" from-field="parameters.comments"/> 
+        <call-service service-name="createPartyRelationship" in-map-name="relMap"/>
+    </simple-method>
+    
     <simple-method method-name="createPartyCarrierAccount" short-description="Create PartyCarrierAccount">
         <make-value entity-name="PartyCarrierAccount" value-field="newEntity"/>
         <set-pk-fields map="parameters" value-field="newEntity"/>
@@ -832,12 +961,14 @@ under the License.
     <simple-method method-name="sendCreatePartyEmailNotification" short-description="Notification email on party creation" login-required="false">
         <map-to-map map="parameters" to-map="bodyParameters"/>
         <set field="emailType" value="PARTY_REGIS_CONFIRM"/>
-        <entity-condition entity-name="ProductStoreEmailSetting" list="productStoreEmailSettings">
-            <condition-list>
-                <condition-expr field-name="emailType" operator="equals" from-field="emailType"/>
-            </condition-list>
-        </entity-condition>
-        <first-from-list entry="storeEmail" list="productStoreEmailSettings"/>
+        <set field="productStoreId" from-field="parameters.productStoreId" />
+        <if-empty field="productStoreId">
+            <log level="warning" message="No productStoreId specified."/>
+        </if-empty>
+        <entity-one entity-name="ProductStoreEmailSetting" value-field="storeEmail">
+            <field-map field-name="emailType"/>
+            <field-map field-name="productStoreId"/>
+        </entity-one>
         <entity-and list="webSites" entity-name="WebSite">
             <field-map field-name="productStoreId" from-field="storeEmail.productStoreId"/>
         </entity-and>
@@ -863,12 +994,14 @@ under the License.
     <!-- send personal information update email notification -->
     <simple-method method-name="sendUpdatePersonalInfoEmailNotification" short-description="Send the Notification email on personal information updation" login-required="false">
         <map-to-map map="parameters" to-map="bodyParameters"/>
-        <entity-condition entity-name="ProductStoreEmailSetting" list="productStoreEmailSettings">
-            <condition-list>
-                <condition-expr field-name="emailType" operator="equals" value="UPD_PRSNL_INF_CNFRM"/>
-            </condition-list>
-        </entity-condition>
-        <first-from-list entry="storeEmail" list="productStoreEmailSettings"/>
+        <set field="productStoreId" from-field="parameters.productStoreId" />
+        <if-empty field="productStoreId">
+            <log level="warning" message="No productStoreId specified."/>
+        </if-empty>
+        <entity-one entity-name="ProductStoreEmailSetting" value-field="storeEmail">
+            <field-map field-name="emailType" value="UPD_PRSNL_INF_CNFRM"/>
+            <field-map field-name="productStoreId"/>
+        </entity-one>
         <entity-and list="webSites" entity-name="WebSite">
             <field-map field-name="productStoreId" from-field="storeEmail.productStoreId"/>
         </entity-and>
@@ -910,92 +1043,128 @@ under the License.
         </if-not-empty>
     </simple-method>
 
-    <simple-method method-name="getCountryList" short-description="Returns a list of country" login-required="false">
-        <call-class-method method-name="getCountryList" class-name="org.ofbiz.common.CommonWorkers" ret-field="geoList">
-            <field field="delegator" type="org.ofbiz.entity.GenericDelegator"/>
-        </call-class-method>
-        <iterate list="geoList" entry="countryGeo">
-            <set field="countryName" value="${countryGeo.geoName}: ${countryGeo.geoId}"/>
-            <field-to-list list="countryList" field="countryName"/>
-        </iterate>
-        <field-to-result field="countryList"/>
-    </simple-method>
-
-    <simple-method method-name="getAssociatedStateList" short-description="set the state options for selected country" login-required="false">
-        <set field="countryGeoId" from-field="parameters.countryGeoId"/>
-        <call-class-method method-name="getAssociatedStateList" class-name="org.ofbiz.common.CommonWorkers" ret-field="geoList">
-            <field field="delegator" type="org.ofbiz.entity.GenericDelegator"/>
-            <field field="countryGeoId" type="String"/>
-        </call-class-method>
-        <iterate list="geoList" entry="stateGeo">
-            <set field="stateName" value="${stateGeo.geoName}: ${stateGeo.geoId}"/>
-            <field-to-list list="stateList" field="stateName"/>
-        </iterate>
-        <if-empty field="stateList">
-            <set field="noOption" value="No States/Provinces exist: _NA_"/>
-            <field-to-list list="stateList" field="noOption"/>
-        </if-empty>
-        <field-to-result field="stateList"/>
-    </simple-method>
-
     <simple-method method-name="createUpdatePerson" short-description="Create and update a person" login-required="false">
-        <log level="info" message="========= Inside create update person ============="/>
-        <call-map-processor xml-resource="component://ecommerce/script/org/ofbiz/ecommerce/customer/CheckoutMapProcs.xml"
+        <call-map-processor xml-resource="component://party/script/org/ofbiz/party/party/PartyMapProcs.xml"
                 processor-name="person" in-map-name="parameters" out-map-name="personMap"/>
         <check-errors/>
-        <log level="info" message="==================map-processor successfully ran ================${personMap}========================"/>
         <set field="partyId" from-field="parameters.partyId"/>
+        <entity-one entity-name="Party" value-field="party"/>
+        <set field="personContext.partyId" from-field="partyId"/>
         <set-service-fields service-name="createPerson" map="personMap" to-map="personContext"/>
-        <if-empty field="partyId">
+        <if-empty field="party">
             <call-service service-name="createPerson" in-map-name="personContext">
                 <result-to-field result-name="partyId" field="partyId"/>
             </call-service>
-        <else><!-- If partyId already exists. -->
-            <set field="personContext.partyId" from-field="partyId"/>
+        <else><!-- If party object already exist, update the person record. -->
             <set field="personContext.userLogin" from-field="parameters.userLogin"/>
             <call-service service-name="updatePerson" in-map-name="personContext"/>
-            <log level="info" message="Party Updated partyId is ${partyId}"/>
         </else>
         </if-empty>
         <field-to-result field="partyId"/>
     </simple-method>
 
-    <simple-method method-name="createUpdateTelecomNumber" short-description="Create and update phone number" login-required="false">
-        <if-empty field="parameters.contactMechId">
-            <set-service-fields service-name="createPartyTelecomNumber" map="parameters" to-map="phoneContext"/>
-            <call-service service-name="createPartyTelecomNumber" in-map-name="phoneContext">
-                <result-to-field result-name="contactMechId" field="contactMechId"/>
-            </call-service>
-            <log level="info" message="Phone Contact created phoneContactMechId is ${contactMechId}"/>
-        <else>
-            <set-service-fields service-name="createPartyTelecomNumber" map="parameters" to-map="phoneContext"/>
-            <call-service service-name="updatePartyTelecomNumber" in-map-name="phoneContext">
-                <result-to-field result-name="contactMechId" field="contactMechId"/>
-            </call-service>
-            <log level="info" message="Phone Contact updated phoneContactMechId is ${contactMechId}"/>
-        </else>
-        </if-empty>
-        <field-to-result field="contactMechId"/>
+    <simple-method method-name="quickCreateCustomer" short-description="Create customer profile on basis of First Name ,Last Name and Email Address" login-required="false">
+        <call-map-processor xml-resource="component://party/script/org/ofbiz/party/contact/PartyContactMechMapProcs.xml"
+                processor-name="person" in-map-name="parameters" out-map-name="personInMap"/>
+        <call-map-processor xml-resource="component://party/script/org/ofbiz/party/contact/PartyContactMechMapProcs.xml"
+                processor-name="emailAddress" in-map-name="parameters" out-map-name="emailAddressInMap"/>
+        <check-errors/>
+        
+        <!-- create person  -->
+        <call-service service-name="createPerson" in-map-name="personInMap">
+            <result-to-field result-name="partyId"/>
+            <result-to-result result-name="partyId"/>
+        </call-service>
+
+        <!-- Create email address -->
+        <entity-one entity-name="UserLogin" value-field="userLogin">
+            <field-map field-name="userLoginId" value="system"/>
+        </entity-one>
+        <set field="emailAddressInMap.partyId" from-field="partyId"/>
+        <set field="emailAddressInMap.userLogin" from-field="userLogin"/>
+        <set field="emailAddressInMap.contactMechPurposeTypeId" value="PRIMARY_EMAIL"/>
+        <call-service service-name="createPartyEmailAddress" in-map-name="emailAddressInMap"/>
+
+        <!-- Signup for Contact List -->
+        <if-compare field="parameters.subscribeContactList" operator="equals" value="Y">
+            <set field="signUpForContactListMap.partyId" from-field="partyId"/>
+            <set field="signUpForContactListMap.contactListId" from-field="parameters.contactListId"/>
+            <set field="signUpForContactListMap.email" from-field="parameters.emailAddress"/>
+            <call-service service-name="signUpForContactList" in-map-name="signUpForContactListMap"/>
+        </if-compare>
+
+        <!-- Create the PartyRole -->
+        <set field="createPartyRoleInMap.partyId" from-field="partyId"/>
+        <set field="createPartyRoleInMap.roleTypeId" value="CUSTOMER"/>
+        <set field="createPartyRoleInMap.userLogin" from-field="userLogin"/>
+        <call-service service-name="createPartyRole" in-map-name="createPartyRoleInMap"/>
     </simple-method>
 
-    <simple-method method-name="createUpdateEmailAddress" short-description="Create and update email address" login-required="false">
-        <if-empty field="parameters.contactMechId">
-            <set-service-fields service-name="createPartyEmailAddress" map="parameters" to-map="emailAddressContext"/>
-            <set field="emailAddressContext.partyId" from-field="userLogin.partyId"/>
-            <call-service service-name="createPartyEmailAddress" in-map-name="emailAddressContext">
-                <result-to-field result-name="contactMechId" field="contactMechId"/>
-            </call-service>
-            <log level="info" message="Email Contact Created emailContactMechId is ${contactMechId}"></log>
-        <else>
-            <set-service-fields service-name="updatePartyEmailAddress" map="parameters" to-map="emailAddressContext"/>
-            <call-service service-name="updatePartyEmailAddress" in-map-name="emailAddressContext">
-                <result-to-field result-name="contactMechId" field="contactMechId"/>
-            </call-service>
-            <log level="info" message="Email Contact updated emailContactMechId is ${contactMechId}"></log>
-        </else>
-        </if-empty>
-        <entity-one entity-name="ContactMech" value-field="contactMech"/>
-        <field-to-result field="contactMech.infoString" result-name="emailAddress"/>
-        <field-to-result field="contactMechId"/>
+    <simple-method method-name="getPartyMainRole"
+        short-description="Get the main role of this party which is a child of the MAIN_ROLE roletypeId">
+        <entity-and entity-name="PartyRole" list="partyRoles">
+            <field-map field-name="partyId" from-field="parameters.partyId" />
+        </entity-and>
+        <!-- find the role in the list -->
+        <clear-field field="mainRoleTypeId"/>
+        <iterate entry="partyRole" list="partyRoles">
+            <if-empty field="mainRoleTypeId">
+                <entity-and entity-name="RoleTypeIn3Levels" list="roleTypeIn3Levels">
+                    <field-map field-name="topRoleTypeId" value="MAIN_ROLE" />
+                    <field-map field-name="lowRoleTypeId" from-field="partyRole.roleTypeId" />
+                </entity-and>
+                <if-not-empty field="roleTypeIn3Levels">
+                    <set field="mainRoleTypeId" from-field="partyRole.roleTypeId" />
+                </if-not-empty>
+            </if-empty>
+        </iterate>
+        <if-not-empty field="mainRoleTypeId">
+            <field-to-result field="mainRoleTypeId" result-name="roleTypeId" />
+            <entity-one entity-name="RoleType" value-field="roleType">
+                <field-map field-name="roleTypeId" from-field="mainRoleTypeId" />
+            </entity-one>
+            <field-to-result result-name="description" field="roleType.description" />
+        </if-not-empty>
+    </simple-method>
+    
+    <!-- send account activated email notification -->
+    <simple-method method-name="sendAccountActivatedEmailNotification" short-description="Notification email on account activated" login-required="false">
+        <map-to-map map="parameters" to-map="bodyParameters"/>
+        <set field="emailType" value="PRDS_CUST_ACTIVATED"/>
+        <set field="productStoreId" from-field="parameters.productStoreId" />
+        <entity-one entity-name="ProductStoreEmailSetting" value-field="storeEmail">
+            <field-map field-name="emailType"/>
+            <field-map field-name="productStoreId"/>
+        </entity-one>
+        <entity-and list="webSites" entity-name="WebSite">
+            <field-map field-name="productStoreId" from-field="storeEmail.productStoreId"/>
+        </entity-and>
+        <first-from-list entry="webSite" list="webSites"/>
+        <if-not-empty field="storeEmail.bodyScreenLocation">
+            <entity-one entity-name="UserLogin" value-field="userLoginParty"/>
+            <set field="parameters.partyId" from-field="userLoginParty.partyId"/>
+            <entity-condition entity-name="PartyContactDetailByPurpose" list="partyContactDetailByPurposes" filter-by-date="true">
+                <condition-list>
+                    <condition-expr field-name="contactMechPurposeTypeId" operator="equals" value="PRIMARY_EMAIL"/>
+                    <condition-expr field-name="partyId" operator="equals"  from-field="parameters.partyId"/>
+                </condition-list>
+            </entity-condition>
+            <first-from-list entry="partyContactDetailByPurpose" list="partyContactDetailByPurposes"/>
+            <entity-one entity-name="Person" value-field="person"/>
+            <set field="bodyParameters.person" from-field="person"/>
+            <set field="emailParams.bodyParameters" from-field="bodyParameters"/>
+            <set field="contactMechId" from-field="partyContactDetailByPurpose.contactMechId"/>
+            <entity-one entity-name="ContactMech" value-field="contactMech"/>
+            <set field="emailParams.sendTo" from-field="contactMech.infoString"/>
+            <set field="emailParams.subject" from-field="storeEmail.subject"/>
+            <set field="emailParams.sendFrom" from-field="storeEmail.fromAddress"/>
+            <set field="emailParams.sendCc" from-field="storeEmail.ccAddress"/>
+            <set field="emailParams.sendBcc" from-field="storeEmail.bccAddress"/>
+            <set field="emailParams.contentType" from-field="storeEmail.contentType"/>
+            <set field="emailParams.bodyScreenUri" from-field="storeEmail.bodyScreenLocation"/>
+            <set field="emailParams.webSiteId" from-field="webSite.webSiteId"/>
+            <set field="emailParams.emailType" from-field="emailType"/>
+            <call-service service-name="sendMailFromScreen" in-map-name="emailParams"/>
+        </if-not-empty>
     </simple-method>
 </simple-methods>

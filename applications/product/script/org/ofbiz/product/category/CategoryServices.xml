@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8" ?>
+<?xml version="1.0" encoding="UTF-8"?>
 <!--
 Licensed to the Apache Software Foundation (ASF) under one
 or more contributor license agreements.  See the NOTICE file
@@ -19,7 +19,7 @@ under the License.
 -->
 
 <simple-methods xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/simple-methods.xsd">
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/simple-methods-v2.xsd">
 
     <!-- ================================================================ -->
     <!-- ProductCategory Services -->
@@ -28,7 +28,7 @@ under the License.
     <simple-method method-name="createProductCategory" short-description="Create an ProductCategory">
         <check-permission permission="CATALOG" action="_CREATE">
             <alt-permission permission="CATALOG_ROLE" action="_CREATE"/>
-            <fail-message message="Security Error: to run createProductCategory you must have the CATALOG_CREATE or CATALOG_ADMIN permission, or the limited CATALOG_ROLE_CREATE permission"/>
+            <fail-property resource="ProductUiLabels" property="ProductCatalogCreatePermissionError"/>
         </check-permission>
         <check-errors/>
 
@@ -333,6 +333,7 @@ under the License.
         <find-by-primary-key entity-name="ProductCategoryRollup" map="lookupPKMap" value-field="lookedUpValue"/>
         <set-nonpk-fields map="parameters" value-field="lookedUpValue"/>
         <store-value value-field="lookedUpValue"/>
+        <field-to-result field="parameters.productCategoryId" result-name="productCategoryId"/>
     </simple-method>
     <simple-method method-name="removeProductCategoryFromCategory" short-description="Remove ProductCategory From Category">
         <set value="removeProductCategoryFromCategory" field="callingMethodName"/>
@@ -400,7 +401,7 @@ under the License.
         <set value="duplicateCategoryEntities" field="callingMethodName"/>
         <check-permission permission="CATALOG" action="_CREATE">
             <alt-permission permission="CATALOG_ROLE" action="_CREATE"/>
-            <fail-message message="Security Error: to run createProductCategory you must have the CATALOG_CREATE or CATALOG_ADMIN permission, or the limited CATALOG_ROLE_CREATE permission"/>
+            <fail-property resource="ProductUiLabels" property="ProductCatalogCreatePermissionError"/>
         </check-permission>
         <check-errors/>
 
@@ -555,7 +556,7 @@ under the License.
         <set value="duplicateProductCategory" field="callingMethodName"/>
         <check-permission permission="CATALOG" action="_CREATE">
             <alt-permission permission="CATALOG_ROLE" action="_CREATE"/>
-            <fail-message message="Security Error: to run createProductCategory you must have the CATALOG_CREATE or CATALOG_ADMIN permission, or the limited CATALOG_ROLE_CREATE permission"/>
+            <fail-property resource="ProductUiLabels" property="ProductCatalogCreatePermissionError"/>
         </check-permission>
         <check-errors/>
 
@@ -629,7 +630,7 @@ under the License.
     <simple-method method-name="createProductCategoryAttribute"
         short-description="Create an attribute for a product category">
         <check-permission permission="CATALOG" action="_CREATE">
-            <fail-message message="Security Error: to create a product category attribute requires the CATALOG_CREATE or CATALOG_ADMIN permission"/>
+            <fail-property resource="ProductUiLabels" property="ProductCatalogCreatePermissionError"/>
         </check-permission>
         <check-errors/>
 
@@ -642,8 +643,8 @@ under the License.
     <simple-method method-name="updateProductCategoryAttribute"
         short-description="Update an association between two product categories">
         <check-permission permission="CATALOG" action="_UPDATE">
-            <fail-message message="Security Error: to update a product category attribute requires the CATALOG_UPDATE or CATALOG_ADMIN permission"/>
-          </check-permission>
+            <fail-property resource="ProductUiLabels" property="ProductCatalogUpdatePermissionError"/>
+        </check-permission>
         <check-errors/>
 
         <make-value value-field="lookupPKMap" entity-name="ProductCategoryAttribute"/>
@@ -655,8 +656,8 @@ under the License.
     <simple-method method-name="deleteProductCategoryAttribute"
         short-description="Delete an association between two product categories">
         <check-permission permission="CATALOG" action="_DELETE">
-            <fail-message message="Security Error: to delete a product category attribute requires the CATALOG_DELETE or CATALOG_ADMIN permission"/>
-           </check-permission>
+            <fail-property resource="ProductUiLabels" property="ProductCatalogDeletePermissionError"/>
+        </check-permission>
         <check-errors/>
 
         <make-value value-field="lookupPKMap" entity-name="ProductCategoryAttribute"/>
@@ -747,7 +748,9 @@ under the License.
             </condition>
             <then>
                 <log level="verbose" message="Permission check failed, user does not have permission"/>
-                <add-error><fail-message message="Security Error: to run ${callingMethodName} you must have the CATALOG_${checkAction} or CATALOG_ADMIN permission or have the CATALOG_ROLE_${checkAction} permission and be associated with a category containing this category."/></add-error>
+                <add-error>
+                    <fail-property resource="ProductUiLabels" property="ProductCatalogCreatePermissionError"/>
+                </add-error>
                 <set field="hasPermission" type="Boolean" value="false"/>
             </then>
         </if>
@@ -755,7 +758,9 @@ under the License.
     <simple-method method-name="productCategoryGenericPermission" short-description="Main permission logic">
         <set field="mainAction" from-field="parameters.mainAction"/>
         <if-empty field="mainAction">
-            <add-error><fail-message message="In the permission-service element for the productGenericPermission service the main-action attribute was missing but is required"/></add-error>
+            <add-error>
+                <fail-property resource="ProductUiLabels" property="ProductMissingMainActionInPermissionService"/>
+            </add-error>
             <check-errors/>
         </if-empty>
 
@@ -839,5 +844,156 @@ under the License.
 
         <field-to-result field="hasPermission"/>
         <field-to-result field="failMessage"/>
+    </simple-method>
+
+    <!-- To help dynamically populate a products dropdown given a product category id from a change in another dropdown, possibly sorted on sequenceNum -->    
+    <simple-method method-name="getAssociatedProductsList" short-description="Set the product options for selected product category, mostly used by getDependentDropdownValues" login-required="false">
+        <set field="parameters.categoryId" from-field="parameters.productCategoryId"/>
+        <set-service-fields service-name="getProductCategoryMembers" map="parameters" to-map="getProductCategoryMembersMap"/>        
+        <call-service service-name="getProductCategoryMembers" in-map-name="getProductCategoryMembersMap">
+            <result-to-field result-name="categoryMembers" field="productsList"/>
+        </call-service>
+        <order-map-list list="productsList">
+            <order-by field-name="sequenceNum"/>
+        </order-map-list>
+        <iterate list="productsList" entry="productMember">
+            <entity-one entity-name="Product" value-field="product">
+                <field-map field-name="productId" from-field="productMember.productId"/>
+            </entity-one>
+            <set field="productName" value="${product.internalName}: ${product.productId}"/>
+            <field-to-list list="products" field="productName"/>
+        </iterate>
+        <if-empty field="products">
+            <property-to-field resource="ProductUiLabels" property="ProductNoProducts" field="noOption"/>
+            <field-to-list list="products" field="noOption"/>
+        </if-empty>
+        <field-to-result field="products"/>
+    </simple-method>
+    
+    <!-- Load data of best selling category -->
+    <simple-method method-name="loadBestSellingCategory" short-description="Load data of best selling category by week.">
+        <now-date-to-env field="nowDate"/>
+        <set field="week" value="${groovy: import java.util.Calendar;
+            Calendar cal = Calendar.getInstance();
+            cal.setTime(nowDate);
+            return cal.get(Calendar.WEEK_OF_YEAR);}" type="Long"/>
+        <set field="year" value="${groovy: import java.util.Calendar;
+            Calendar cal = Calendar.getInstance();
+            cal.setTime(nowDate);
+            int aa = cal.get(Calendar.YEAR);
+            return aa;}" type="Long"/>
+        <if-compare field="week" operator="equals" value="1">
+            <set field="week" value="52"/>
+        <else>
+            <calculate field="week">
+                <calcop field="week" operator="subtract">
+                    <number value="1"/>
+                </calcop>
+            </calculate>
+            <if-compare field="week" operator="equals" value="1">
+                <calculate field="year">
+                    <calcop field="year" operator="subtract">
+                        <number value="1"/>
+                    </calcop>
+                </calculate>
+            </if-compare>
+        </else>
+        </if-compare>
+        
+        <entity-and entity-name="ProductStoreCatalog" list="productStoreCatalogs" filter-by-date="true">
+            <field-map field-name="productStoreId" from-field="parameters.productStoreId"/>
+        </entity-and>
+        <if-not-empty field="productStoreCatalogs">
+            <first-from-list list="productStoreCatalogs" entry="productStoreCatalog"/>
+            <set field="callRemoveProductMap.prodCatalogId" from-field="productStoreCatalog.prodCatalogId"/>
+            <call-service service-name="RemoveProductFromBestSellCategory" in-map-name="callRemoveProductMap"/>
+            
+            <set field="callAddProductMap.productStoreId" from-field="parameters.productStoreId"/>
+            <set field="callAddProductMap.prodCatalogId" from-field="productStoreCatalog.prodCatalogId"/>
+            <set field="callAddProductMap.week" from-field="week" type="Long"/>
+            <set field="callAddProductMap.year" from-field="year" type="Long"/>
+            <call-service service-name="AddProductToBestSellCategory" in-map-name="callAddProductMap"/>
+        </if-not-empty>
+    </simple-method>
+    
+    <simple-method method-name="RemoveProductFromBestSellCategory" short-description="Remove products from best selling category.">
+        <entity-and entity-name="ProdCatalogCategory" list="prodCatalogCategorys">
+            <field-map field-name="prodCatalogId" from-field="parameters.prodCatalogId"/>
+            <field-map field-name="prodCatalogCategoryTypeId" value="PCCT_BEST_SELL"/>
+        </entity-and>
+        <iterate list="prodCatalogCategorys" entry="prodCatalogCategory">
+            <entity-and entity-name="ProductCategoryRollup" list="productCategoryRollups">
+                <field-map field-name="parentProductCategoryId" from-field="prodCatalogCategory.productCategoryId"/>
+            </entity-and>
+            <iterate list="productCategoryRollups" entry="productCategoryRollup">
+                <entity-and entity-name="ProductCategoryMember" list="productCategoryMembers">
+                    <field-map field-name="productCategoryId" from-field="productCategoryRollup.productCategoryId"/>
+                </entity-and>
+                <iterate list="productCategoryMembers" entry="productCategoryMember">
+                    <remove-value value-field="productCategoryMember"/>
+                </iterate>
+            </iterate>
+        </iterate>
+    </simple-method>
+    
+    <simple-method method-name="AddProductToBestSellCategory" short-description="Add products to best selling category.">
+        <entity-and entity-name="ProdCatalogCategory" list="prodCatalogCategorys">
+            <field-map field-name="prodCatalogId" from-field="parameters.prodCatalogId"/>
+            <field-map field-name="prodCatalogCategoryTypeId" value="PCCT_BEST_SELL"/>
+        </entity-and>
+        <first-from-list list="prodCatalogCategorys" entry="prodCatalogCategory"/>
+        <entity-and entity-name="ProductCategoryRollup" list="productCategoryRollupList">
+            <field-map field-name="parentProductCategoryId" from-field="prodCatalogCategory.productCategoryId"/>
+        </entity-and>
+        <iterate list="productCategoryRollupList" entry="productCategoryRollup">
+            <set-service-fields service-name="FindCategoryChild" map="parameters" to-map="CategoryChildMap"/>
+            <set field="CategoryChildMap.productCategoryId" from-field="productCategoryRollup.productCategoryId"/>
+            <set field="CategoryChildMap.primaryProductCategoryId" from-field="productCategoryRollup.productCategoryId"/>
+            <call-service service-name="FindCategoryChild" in-map-name="CategoryChildMap"/>
+        </iterate>
+    </simple-method>
+    
+    <simple-method method-name="FindCategoryChild" short-description="Find category child.">
+        <entity-and entity-name="ProductCategoryRollup" list="productCategoryRollupList">
+            <field-map field-name="parentProductCategoryId" from-field="parameters.productCategoryId"/>
+        </entity-and>
+        <if-empty field="productCategoryRollupList">
+            <set-service-fields service-name="FindBestSellingProduct" map="parameters" to-map="AddProductMap"/>
+            <set field="AddProductMap.productCategoryId" from-field="parameters.productCategoryId"/>
+            <call-service service-name="FindBestSellingProduct" in-map-name="AddProductMap"/>
+        <else>
+            <iterate list="productCategoryRollupList" entry="productCategoryRollup">
+                <set-service-fields service-name="FindCategoryChild" map="parameters" to-map="CategoryChildMap"/>
+                <set field="CategoryChildMap.productCategoryId" from-field="productCategoryRollup.productCategoryId"/>
+                <call-service service-name="FindCategoryChild" in-map-name="CategoryChildMap"/>
+            </iterate>
+        </else>
+        </if-empty>
+    </simple-method>
+    
+    <simple-method method-name="FindBestSellingProduct" short-description="Find best selling product.">
+        <now-timestamp field="nowTimestamp"/>
+        <entity-and entity-name="ProductCategoryMember" list="productCategoryMembers" filter-by-date="true">
+            <field-map field-name="productCategoryId" from-field="parameters.productCategoryId"/>
+        </entity-and>
+        <iterate list="productCategoryMembers" entry="productCategoryMember">
+            <entity-condition entity-name="SalesOrderItemStarSchema" list="salesOrderItemStarSchemas" distinct="true">
+                <condition-list combine="and">
+                    <condition-expr field-name="productProductId" operator="equals" from-field="productCategoryMember.productId"/>
+                    <condition-expr field-name="productStoreId" operator="equals" from-field="parameters.productStoreId"/>
+                    <condition-expr field-name="orderDateWeekOfYear" operator="equals" from-field="parameters.week"/>
+                    <condition-expr field-name="orderDateYearName" operator="equals" from-field="parameters.year"/>
+                </condition-list>
+            </entity-condition>
+            <if-not-empty field="salesOrderItemStarSchemas">
+                <first-from-list list="salesOrderItemStarSchemas" entry="salesOrderItemStarSchema"/>
+                <make-value entity-name="ProductCategoryMember" value-field="newEntity"/>
+                <set field="newEntity.productCategoryId" from-field="parameters.primaryProductCategoryId"/>
+                <set field="newEntity.productId" from-field="salesOrderItemStarSchema.productProductId"/>
+                <set field="newEntity.fromDate" from-field="nowTimestamp"/>
+                <set field="newEntity.quantity" from-field="salesOrderItemStarSchema.quantity"/>
+                <create-value value-field="newEntity"/>
+            </if-not-empty>
+        </iterate>
     </simple-method>
 </simple-methods>

@@ -23,10 +23,11 @@ under the License.
         xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/ofbiz-component.xsd">
     <resource-loader name="main" type="component"/>
     <classpath type="dir" location="config"/>
-    <classpath type="dir" location="script"/>
     <classpath type="jar" location="build/lib/*"/>
+    <classpath type="jar" location="lib/*"/>
 
     <entity-resource type="model" reader-name="main" loader="main" location="entitydef/entitymodel.xml"/>
+    <entity-resource type="model" reader-name="main" loader="main" location="entitydef/entitymodel_view.xml"/>
     <entity-resource type="model" reader-name="main" loader="main" location="entitydef/entitymodel_old.xml"/>
     <entity-resource type="model" reader-name="main" loader="main" location="entitydef/entitymodel_shipment.xml"/>
     <entity-resource type="model" reader-name="main" loader="main" location="entitydef/entitymodel_olap.xml"/>
@@ -34,11 +35,16 @@ under the License.
     <entity-resource type="eca" reader-name="main" loader="main" location="entitydef/eecas.xml"/>
     <entity-resource type="data" reader-name="seed-initial" loader="main" location="data/ProductScheduledServices.xml"/>
     <entity-resource type="data" reader-name="seed" loader="main" location="data/ProductTypeData.xml"/>
+    <entity-resource type="data" reader-name="seed" loader="main" location="data/ProductHelpData.xml"/>
     <entity-resource type="data" reader-name="seed" loader="main" location="data/ShipmentTypeData.xml"/>
-    <entity-resource type="data" reader-name="seed" loader="main" location="data/ProductSecurityData.xml"/>
-    <entity-resource type="data" reader-name="demo" loader="main" location="data/ProductUserDemoData.xml"/>
+    <entity-resource type="data" reader-name="seed" loader="main" location="data/ProductSecurityPermissionSeedData.xml"/>
+    <entity-resource type="data" reader-name="demo" loader="main" location="data/ProductSecurityGroupDemoData.xml"/>
+    <entity-resource type="data" reader-name="seed" loader="main" location="data/FacilitySecurityPermissionSeedData.xml"/>
+    <entity-resource type="data" reader-name="demo" loader="main" location="data/FacilitySecurityGroupDemoData.xml"/>
+    <entity-resource type="data" reader-name="demo" loader="main" location="data/ProductDemoData.xml"/>
     <entity-resource type="data" reader-name="seed" loader="main" location="data/ApiSchemaDhl.xml"/>
     <entity-resource type="data" reader-name="seed" loader="main" location="data/DimensionTypeData.xml"/>
+    <entity-resource type="data" reader-name="seed" loader="main" location="data/ProductPortletData.xml"/>
 
     <service-resource type="model" loader="main" location="servicedef/services.xml"/>
     <service-resource type="model" loader="main" location="servicedef/services_facility.xml"/>
@@ -46,6 +52,7 @@ under the License.
     <service-resource type="model" loader="main" location="servicedef/services_maint.xml"/>
     <service-resource type="model" loader="main" location="servicedef/services_picklist.xml"/>
     <service-resource type="model" loader="main" location="servicedef/services_pricepromo.xml"/>
+    <service-resource type="model" loader="main" location="servicedef/services_shipmentgateway.xml"/>
     <service-resource type="model" loader="main" location="servicedef/services_shipment_dhl.xml"/>
     <service-resource type="model" loader="main" location="servicedef/services_shipment_fedex.xml"/>
     <service-resource type="model" loader="main" location="servicedef/services_shipment_ups.xml"/>
@@ -64,11 +71,24 @@ under the License.
     <service-resource type="model" loader="main" location="servicedef/services_upgrade.xml"/>
 
     <!-- test suite -->
+    <test-suite loader="main" location="testdef/CatalogTests.xml"/>
     <test-suite loader="main" location="testdef/FacilityTest.xml"/>
-    <test-suite loader="main" location="testdef/ProductTest.xml"/>
+    <test-suite loader="main" location="testdef/CostTests.xml"/>
+    <test-suite loader="main" location="testdef/GroupOrderTest.xml"/>
+    <test-suite loader="main" location="testdef/ProductTagTest.xml"/>
 
-    <webapp name="catalog" title="Catalog" server="default-server" location="webapp/catalog"
-        base-permission="OFBTOOLS,CATALOG" mount-point="/catalog"/>
-    <webapp name="facility" title="Facility" server="default-server" location="webapp/facility"
-        base-permission="OFBTOOLS,FACILITY" mount-point="/facility"/>
+    <webapp name="catalog"
+        title="Catalog"
+        description="CatalogComponentDescription"
+        server="default-server"
+        location="webapp/catalog"
+        base-permission="OFBTOOLS,CATALOG"
+        mount-point="/catalog"/>
+    <webapp name="facility"
+        title="Facility"
+        description="FacilityComponentDescription"
+        server="default-server"
+        location="webapp/facility"
+        base-permission="OFBTOOLS,FACILITY"
+        mount-point="/facility"/>
 </ofbiz-component>

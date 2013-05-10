@@ -35,8 +35,8 @@ under the License.
                                 <set field="tabButtonItem" value="Employee"/>
                             </actions>
                             <widgets>
-                                <container>
-                                    <link target="NewEmployee" text="${uiLabelMap.HumanResNewEmployee}" style="buttontext"/>
+                                <container style="button-bar">
+                                    <link target="NewEmployee" text="${uiLabelMap.HumanResNewEmployee}" style="buttontext create"/>
                                 </container>
                                 <section>
                                     <widgets>
@@ -84,9 +84,6 @@ under the License.
                 <set field="tabButtonItem" value="EmployeeProfile"/>
                 <set field="labelTitleProperty" value="PartyTaxAuthInfos"/>
                 <set field="partyId" from-field="parameters.partyId"/>
-                <set field="layoutSettings.javaScripts[]" value="/images/prototypejs/prototype.js" global="true"/>
-                <set field="layoutSettings.javaScripts[]" value="/images/prototypejs/control.progress_bar.js" global="true"/>
-                <set field="layoutSettings.styleSheets[]" value="/images/prototypejs/progress_bar.css" global="true"/>
                 <set field="layoutSettings.javaScripts[]" value="/partymgr/js/PartyProfileContent.js" global="true"/>
                 <script location="component://party/webapp/partymgr/WEB-INF/actions/party/ViewProfile.groovy"/>
                 <script location="component://party/webapp/partymgr/WEB-INF/actions/party/GetUserLoginPrimaryEmail.groovy"/>
@@ -125,6 +122,7 @@ under the License.
                                             <include-screen name="Party" location="component://party/widget/partymgr/ProfileScreens.xml"/>
                                             <include-screen name="Contact" location="component://party/widget/partymgr/ProfileScreens.xml"/>
                                             <include-screen name="contactsAndAccounts" location="component://party/widget/partymgr/ProfileScreens.xml"/>
+                                            <include-screen name="trainingsList"/>
                                         </container>
                                         <container style="profile-right">
                                             <include-screen name="CurrentEmploymentData" location="component://humanres/widget/EmployeeScreens.xml"/>
@@ -194,19 +192,13 @@ under the License.
     <screen name="EditEmployeeTrainings">
         <section>
             <actions>
-                <set field="titleProperty" value="PageTitleViewPersonTraining"/>
                 <set field="tabButtonItem" value="EditEmployeeTrainings"/>
-                <set field="partyId" from-field="parameters.partyId"/>
-                <set field="trainingClassTypeId" from-field="parameters.trainingClassTypeId"/>
-                <set field="personTrainingsCtx.partyId" from-field="parameters.partyId"/>
-                <set field="parameters.insideEmployee" value="true"/>
             </actions>
             <widgets>
                 <decorator-screen name="EmployeeDecorator" location="${parameters.mainDecoratorLocation}">
                     <decorator-section name="body">
-                        <include-form name="ListEmployeeTrainings" location="component://humanres/widget/forms/EmployeeForms.xml"/>
-                        <screenlet id="AddPersonTrainingPanel" title="${uiLabelMap.HumanResAddPersonTraining}" collapsible="true">
-                            <include-form name="AddEmployeeTraining" location="component://humanres/widget/forms/EmployeeForms.xml"/>
+                        <screenlet id="TrainingStatus" title="${uiLabelMap.HumanResTrainingStatus}" collapsible="true">
+                            <include-form name="ListTrainingStatus" location="component://humanres/widget/forms/PersonTrainingForms.xml"/>
                         </screenlet>
                     </decorator-section>
                 </decorator-screen>
@@ -280,8 +272,7 @@ under the License.
                 <set field="titleProperty" value="HumanResEditEmplLeave"/>
                 <set field="tabButtonItem" value="EditEmployeeLeaves"/>
                 <set field="partyId" from-field="parameters.partyId"/>
-                <set field="emplLeaveCtx.partyId" from-field="parameters.partyId"/>
-                <set field="parameters.insideEmployee" value="true"/>
+                <entity-one entity-name="EmplLeave" value-field="leaveApp"/>
             </actions>
             <widgets>
                 <decorator-screen name="EmployeeDecorator" location="${parameters.mainDecoratorLocation}">
@@ -303,6 +294,66 @@ under the License.
             <widgets>
                 <screenlet title="${uiLabelMap.HumanResCurrentEmploymentData}">
                     <include-form name="CurrentEmploymentData" location="component://humanres/widget/forms/EmployeeForms.xml"/>
+                </screenlet>
+            </widgets>
+        </section>
+    </screen>
+    
+    <screen name="trainingsList">
+        <section>
+            <widgets>
+                <screenlet title="${uiLabelMap.HumanResTrainings}">
+                    <include-form name="simpleListTrainingStatus" location="component://humanres/widget/forms/PersonTrainingForms.xml"/>
+                </screenlet>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="PayrollHistory">
+        <section>
+            <actions>
+                <set field="titleProperty" value="HumanResPayRollHistory"/>
+                <set field="tabButtonItem" value="PayrollHistory"/>
+                <set field="partyId" from-field="parameters.partyId"/>
+                <set field="parameters.sortField" from-field="parameters.sortField" default-value="invoiceDate DESC"/>
+                <entity-condition list="payroll" entity-name="InvoiceAndType">
+                    <condition-list combine="and">
+                        <condition-expr field-name="partyIdFrom" operator="equals" from-field="partyId"/>
+                        <condition-expr field-name="invoiceTypeId" operator="equals" value="PAYROL_INVOICE"/>
+                    </condition-list>
+                    <order-by field-name="${parameters.sortField}"/>
+                </entity-condition>
+            </actions>
+            <widgets>
+                <decorator-screen name="EmployeeDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <include-form name="PayrollHistoryList" location="component://humanres/widget/forms/EmployeeForms.xml"/>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="MyLeaveList">
+        <section>
+            <actions>
+                <set field="partyId" from-field="userLogin.partyId"/>
+            </actions>
+            <widgets>
+                <screenlet title="${uiLabelMap.HumanResMyLeaves}" navigation-form-name="ListEmplLeaves">
+                    <include-form name="ListEmplLeaves" location="component://humanres/widget/forms/EmployeeForms.xml"/>
+                </screenlet>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="MyTrainings">
+        <section>
+            <actions>
+                <set field="partyId" from-field="userLogin.partyId"/>
+            </actions>
+            <widgets>
+                <screenlet title="${uiLabelMap.HumanResMyTrainings}">
+                    <include-form name="ListEmplTrainings" location="component://humanres/widget/forms/PersonTrainingForms.xml"/>
                 </screenlet>
             </widgets>
         </section>

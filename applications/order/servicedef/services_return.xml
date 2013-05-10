@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="UTF-8" ?>
 <!--
 Licensed to the Apache Software Foundation (ASF) under one
 or more contributor license agreements.  See the NOTICE file
@@ -47,7 +46,7 @@ under the License.
         <description>Update a ReturnHeader</description>
         <auto-attributes include="pk" mode="IN" optional="false"/>
         <auto-attributes include="nonpk" mode="IN" optional="true"/>
-        <attribute name="currentStatusId" type="String" mode="OUT" optional="false"/>
+        <attribute name="oldStatusId" type="String" mode="OUT" optional="false"/>
     </service>
     <service name="createReturnItemBilling" engine="simple" default-entity-name="ReturnItemBilling"
             location="component://order/script/org/ofbiz/order/order/OrderReturnServices.xml" invoke="createReturnItemBilling">
@@ -64,7 +63,6 @@ under the License.
         <auto-attributes entity-name="ReturnItem" include="all" mode="IN" optional="true">
             <exclude field-name="returnItemSeqId"/>
         </auto-attributes>
-        <attribute name="returnItemMapKey" type="String" mode="IN" optional="true"/>
         <attribute name="includeAdjustments" type="String" mode="IN" optional="true"/> <!-- The default is "Y": the adjustments associated with the item are included in the return -->
         <attribute name="returnItemSeqId" type="String" mode="OUT" optional="false"/>
         <override name="returnId" optional="false"/>
@@ -78,14 +76,13 @@ under the License.
         <description>Update a ReturnItem and related adjustments</description>
         <auto-attributes include="pk" mode="IN" optional="false"/>
         <auto-attributes include="nonpk" mode="IN" optional="true"/>
-        <attribute name="currentStatusId" type="String" mode="OUT" optional="false"/>
+        <attribute name="oldStatusId" type="String" mode="OUT" optional="false"/>
     </service>
     <service name="updateReturnItemsStatus" engine="simple"
             location="component://order/script/org/ofbiz/order/order/OrderReturnServices.xml" invoke="updateReturnItemsStatus">
         <description>Update ReturnItem(s) Status</description>
         <attribute name="returnId" type="String" mode="IN" optional="false"/>
         <attribute name="statusId" type="String" mode="IN" optional="false"/>
-        <attribute name="currentStatusId" type="String" mode="IN" optional="false"/>
     </service>
     <service name="removeReturnItem" engine="simple"
             location="component://order/script/org/ofbiz/order/order/OrderReturnServices.xml" invoke="removeReturnItem">
@@ -163,7 +160,7 @@ under the License.
         <description>update Return Item or Adjustment based on the parameters passed in</description>
         <auto-attributes mode="IN" include="all" entity-name="ReturnAdjustment" optional="true"/>
         <auto-attributes mode="IN" include="all" entity-name="ReturnItem" optional="true"/>
-        <attribute name="currentStatusId" type="String" mode="OUT" optional="true"/>
+        <attribute name="oldStatusId" type="String" mode="OUT" optional="true"/>
     </service>
 
     <!-- services to verify that returns refunds aren't issued more than once -->
@@ -199,16 +196,23 @@ under the License.
             location="org.ofbiz.order.order.OrderReturnServices" invoke="sendReturnAcceptNotification">
         <description>Send a notification that a return has been accepted</description>
         <attribute name="returnId" type="String" mode="IN" optional="false"/>
+        <attribute name="communicationEventId" type="String" mode="OUT" optional="true"/>
     </service>
     <service name="sendReturnCompleteNotification" engine="java" max-retry="3"
             location="org.ofbiz.order.order.OrderReturnServices" invoke="sendReturnCompleteNotification">
         <description>Send a notification that a return has been completed</description>
         <attribute name="returnId" type="String" mode="IN" optional="false"/>
+        <attribute name="communicationEventId" type="String" mode="OUT" optional="true"/>
     </service>
      <service name="sendReturnCancelNotification" engine="java" max-retry="3"
             location="org.ofbiz.order.order.OrderReturnServices" invoke="sendReturnCancelNotification">
         <description>Send a notification that a return has been cancelled</description>
         <attribute name="returnId" type="String" mode="IN" optional="false"/>
+        <attribute name="communicationEventId" type="String" mode="OUT" optional="true"/>
+    </service>
+    <service name="autoCancelReplacementOrders" engine="java" max-retry="3" transaction-timeout="36000"
+            location="org.ofbiz.order.order.OrderReturnServices" invoke="autoCancelReplacementOrders">
+        <description>Automatic cancellation of replacement order if return is not received within 30 days</description>
     </service>
 
     <!-- return processing services -->
@@ -221,6 +225,7 @@ under the License.
             location="org.ofbiz.order.order.OrderReturnServices" invoke="processRefundReturn">
         <description>Process the refunds in a return</description>
         <attribute name="returnId" type="String" mode="IN" optional="false"/>
+        <attribute name="returnTypeId" type="String" mode="IN" optional="false"/>
     </service>
     <service name="processReplacementReturn" engine="java" auth="true"
             location="org.ofbiz.order.order.OrderReturnServices" invoke="processReplacementReturn">
@@ -233,6 +238,11 @@ under the License.
         <description>Process the replacements in a wait return</description>
         <attribute name="returnId" type="String" mode="IN" optional="false"/>
     </service>
+    <service name="processWaitReplacementReservedReturn" engine="simple" auth="true"
+            location="component://order/script/org/ofbiz/order/order/OrderReturnServices.xml" invoke="processWaitReplacementReservedReturn">
+        <description>Process the replacements in a wait reserved return when the return is accepted and then received</description>
+        <attribute name="returnId" type="String" mode="IN" optional="false"/>
+    </service>
     <service name="processCrossShipReplacementReturn" engine="simple" auth="true"
             location="component://order/script/org/ofbiz/order/order/OrderReturnServices.xml" invoke="processCrossShipReplacementReturn">
         <description>Process the replacements in a cross-ship return</description>
@@ -243,10 +253,30 @@ under the License.
         <description>Process the replacements in a repair return</description>
         <attribute name="returnId" type="String" mode="IN" optional="false"/>
     </service>
+    <service name="processReplaceImmediatelyReturn" engine="simple" auth="true"
+            location="component://order/script/org/ofbiz/order/order/OrderReturnServices.xml" invoke="processReplaceImmediatelyReturn">
+        <description>Process the replacements in a Immediate Return</description>
+        <attribute name="returnId" type="String" mode="IN" optional="false"/>
+    </service>
+    <service name="processRefundOnlyReturn" engine="simple"  auth="true"
+            location="component://order/script/org/ofbiz/order/order/OrderReturnServices.xml" invoke="processRefundOnlyReturn">
+        <description>Process the Refund in a return</description>    
+        <attribute name="returnId" type="String" mode="IN" optional="false"/>
+    </service>
+    <service name="processRefundImmediatelyReturn" engine="simple"  auth="true"
+            location="component://order/script/org/ofbiz/order/order/OrderReturnServices.xml" invoke="processRefundImmediatelyReturn">
+        <description>Process the Immediate Refund in a return</description>    
+        <attribute name="returnId" type="String" mode="IN" optional="false"/>
+    </service>
     <service name="processSubscriptionReturn" engine="java" auth="true"
             location="org.ofbiz.order.order.OrderReturnServices" invoke="processSubscriptionReturn">
         <description>Process subscription changes from a return</description>
         <attribute name="returnId" type="String" mode="IN" optional="false"/>
+    </service>
+    <service name="processRefundReturnForReplacement" engine="java" auth="true"
+            location="org.ofbiz.order.order.OrderReturnServices" invoke="processRefundReturnForReplacement">
+        <description>Process the refund return for replacement order</description>
+        <attribute name="orderId" type="String" mode="IN" optional="false"/>
     </service>
 
     <!-- other return services -->
@@ -300,5 +330,50 @@ under the License.
         <description>Get the return status associated with customer/vendor return</description>
         <attribute name="returnHeaderTypeId" type="String" mode="IN" optional="false"/>
         <attribute name="statusItems" type="List" mode="OUT" optional="false"/>
+    </service>
+
+    <service name="createExchangeOrderAssoc" engine="simple"
+            location="component://order/script/org/ofbiz/order/order/OrderReturnServices.xml" invoke="createExchangeOrderAssoc">
+        <description>Associate exchange order with original order in OrderItemAssoc entity</description>
+        <attribute name="orderId" type="String" mode="IN" optional="false"/>
+        <attribute name="originOrderId" type="String" mode="IN" optional="false"/>
+    </service>
+
+    <service name="addProductsBackToCategory" engine="simple"
+            location="component://order/script/org/ofbiz/order/order/OrderReturnServices.xml" invoke="addProductsBackToCategory">
+        <description>Add product(s) back to category if it has no active category</description>
+        <attribute name="returnId" type="String" mode="IN" optional="true"/>
+        <attribute name="inventoryItemId" type="String" mode="IN" optional="true"/>
+    </service>
+    <service name="createReturnStatus" engine="simple"
+            location="component://order/script/org/ofbiz/order/order/OrderReturnServices.xml" invoke="createReturnStatus">
+        <description>Create Return Status</description>
+        <attribute name="returnId" type="String" mode="IN" optional="false"/>
+        <attribute name="returnItemSeqId" type="String" mode="IN" optional="true"/>
+    </service>
+
+    <!-- Return ContactMech Services -->
+    <service name="createReturnContactMech" default-entity-name="ReturnContactMech" engine="entity-auto" invoke="create" auth="true">
+        <description>Create a ReturnContactMech</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    <service name="updateReturnContactMech" engine="simple"
+            location="component://order/script/org/ofbiz/order/order/OrderReturnServices.xml" invoke="updateReturnContactMech" auth="true" default-entity-name="ReturnContactMech">
+        <description>Update Return Contact Mech</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <attribute name="oldContactMechId" type="String" mode="IN" optional="true"/>
+    </service>
+    <service name="deleteReturnContactMech" default-entity-name="ReturnContactMech" engine="entity-auto" invoke="delete" auth="true">
+        <description>Delete a ReturnContactMech</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+    </service>
+
+    <!-- Item Return Service -->
+    <service name="createReturnItemForRental" engine="simple"
+            location="component://order/script/org/ofbiz/order/order/OrderReturnServices.xml" invoke="createReturnItemForRental">
+        <description>Create the return item for rental (which items has product type is ASSET_USAGE_OUT_IN)</description>
+        <attribute name="orderId" type="String" mode="IN" optional="false"/>
+        <attribute name="returnId" type="String" mode="OUT" optional="false"/>
     </service>
 </services>

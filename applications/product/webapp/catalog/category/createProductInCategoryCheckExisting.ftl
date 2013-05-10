@@ -55,10 +55,10 @@ under the License.
             <h3>&nbsp;${uiLabelMap.ProductNoExistingProductsFound}.</h3>
         </#if>
     </div>
-    <br/>
+    <br />
     <div class="screenlet-body">
         <form name="createProductInCategoryForm" method="post" action="<@ofbizUrl>createProductInCategory</@ofbizUrl>" style="margin: 0;">
-            <input type="hidden" name="productCategoryId" value="${productCategoryId}">
+            <input type="hidden" name="productCategoryId" value="${productCategoryId}" />
             <table cellspacing="0" class="basic-table">
                 <#list productFeatureAndTypeDatas?if_exists as productFeatureAndTypeData>
                 <#assign productFeatureType = productFeatureAndTypeData.productFeatureType>
@@ -106,7 +106,8 @@ under the License.
                     <td width="15%">${uiLabelMap.ProductDefaultPrice}:</td>
                     <td>
                         <input type="hidden" name="defaultPrice" value="${requestParameters.defaultPrice?if_exists}"/>
-                        <div>&nbsp;${requestParameters.defaultPrice?default("&nbsp;")}</div>
+                        <input type="hidden" name="currencyUomId" value="${requestParameters.currencyUomId?if_exists}"/>
+                        <div>&nbsp;${requestParameters.defaultPrice?default("&nbsp;")}&nbsp;${requestParameters.currencyUomId?default("&nbsp;")}</div>
                     </td>
                 </tr>
                 <tr>

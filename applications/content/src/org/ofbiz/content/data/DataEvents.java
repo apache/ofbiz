@@ -19,8 +19,8 @@
 package org.ofbiz.content.data;
 
 import java.io.IOException;
-import java.io.OutputStream;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -36,13 +36,13 @@ import org.ofbiz.base.util.UtilHttp;
 import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.base.util.UtilProperties;
 import org.ofbiz.base.util.UtilValidate;
-import org.ofbiz.entity.GenericDelegator;
+import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericEntityException;
-import org.ofbiz.entity.GenericPK;
 import org.ofbiz.entity.GenericValue;
 import org.ofbiz.service.GenericServiceException;
 import org.ofbiz.service.LocalDispatcher;
 import org.ofbiz.service.ServiceUtil;
+import org.ofbiz.webapp.website.WebSiteWorker;
 
 /**
  * DataEvents Class
@@ -58,16 +58,15 @@ public class DataEvents {
 
     /** Streams any binary content data to the browser */
     public static String serveObjectData(HttpServletRequest request, HttpServletResponse response) {
-        GenericDelegator delegator = (GenericDelegator) request.getAttribute("delegator");
+        Delegator delegator = (Delegator) request.getAttribute("delegator");
         LocalDispatcher dispatcher = (LocalDispatcher) request.getAttribute("dispatcher");
         HttpSession session = request.getSession();
 
         GenericValue userLogin = (GenericValue) session.getAttribute("userLogin");
         String userAgent = request.getHeader("User-Agent");
 
-        Map httpParams = UtilHttp.getParameterMap(request);
+        Map<String, Object> httpParams = UtilHttp.getParameterMap(request);
         String contentId = (String) httpParams.get("contentId");
-        //String contentId = request.getParameter("contentId");
         if (UtilValidate.isEmpty(contentId)) {
             String errorMsg = "Required parameter contentId not found!";
             Debug.logError(errorMsg, module);
@@ -81,7 +80,7 @@ public class DataEvents {
         // get the content record
         GenericValue content;
         try {
-            content = delegator.findByPrimaryKey("Content", UtilMisc.toMap("contentId", contentId));
+            content = delegator.findOne("Content", UtilMisc.toMap("contentId", contentId), false);
         } catch (GenericEntityException e) {
             Debug.logError(e, module);
             request.setAttribute("_ERROR_MESSAGE_", e.getMessage());
@@ -108,7 +107,7 @@ public class DataEvents {
         // get the data resource
         GenericValue dataResource;
         try {
-            dataResource = delegator.findByPrimaryKey("DataResource", UtilMisc.toMap("dataResourceId", dataResourceId));
+            dataResource = delegator.findOne("DataResource", UtilMisc.toMap("dataResourceId", dataResourceId), false);
         } catch (GenericEntityException e) {
             Debug.logError(e, module);
             request.setAttribute("_ERROR_MESSAGE_", e.getMessage());
@@ -132,8 +131,8 @@ public class DataEvents {
         // not public check security
         if (!"Y".equalsIgnoreCase(isPublic)) {
             // do security check
-            Map permSvcCtx = UtilMisc.toMap("userLogin", userLogin, "mainAction", "VIEW", "contentId", contentId);
-            Map permSvcResp;
+            Map<String, Object> permSvcCtx = UtilMisc.toMap("userLogin", userLogin, "mainAction", "VIEW", "contentId", contentId);
+            Map<String, Object> permSvcResp;
             try {
                 permSvcResp = dispatcher.runSync(permissionService, permSvcCtx);
             } catch (GenericServiceException e) {
@@ -169,7 +168,7 @@ public class DataEvents {
 
         // hack for IE and mime types
         if (userAgent.indexOf("MSIE") > -1) {
-            Debug.log("Found MSIE changing mime type from - " + mimeType, module);
+            Debug.logInfo("Found MSIE changing mime type from - " + mimeType, module);
             mimeType = "application/octet-stream";
         }
 
@@ -181,7 +180,7 @@ public class DataEvents {
         }
 
         // get the data resource stream and conent length
-        Map resourceData;
+        Map<String, Object> resourceData;
         try {
             resourceData = DataResourceWorker.getDataResourceStream(dataResource, https, webSiteId, locale, contextRoot, false);
         } catch (IOException e) {
@@ -202,7 +201,7 @@ public class DataEvents {
             stream = (InputStream) resourceData.get("stream");
             length = (Long) resourceData.get("length");
         }
-        Debug.log("Got resource data stream: " + length + " bytes", module);
+        Debug.logInfo("Got resource data stream: " + length + " bytes", module);
 
         // stream the content to the browser
         if (stream != null && length != null) {
@@ -211,7 +210,9 @@ public class DataEvents {
             } catch (IOException e) {
                 Debug.logError(e, "Unable to write content to browser", module);
                 request.setAttribute("_ERROR_MESSAGE_", e.getMessage());
-                return "error";
+                // this must be handled with a special error string because the output stream has been already used and we will not be able to return the error page;
+                // the "io-error" should be associated to a response of type "none"
+                return "io-error";
             }
         } else {
             String errorMsg = "No data is available.";
@@ -229,10 +230,10 @@ public class DataEvents {
         HttpSession session = request.getSession();
         ServletContext application = session.getServletContext();
 
-        GenericDelegator delegator = (GenericDelegator) request.getAttribute("delegator");
-        Map parameters = UtilHttp.getParameterMap(request);
+        Delegator delegator = (Delegator) request.getAttribute("delegator");
+        Map<String, Object> parameters = UtilHttp.getParameterMap(request);
 
-        Debug.log("Img UserAgent - " + request.getHeader("User-Agent"), module);
+        Debug.logInfo("Img UserAgent - " + request.getHeader("User-Agent"), module);
 
         String dataResourceId = (String) parameters.get("imgId");
         if (UtilValidate.isEmpty(dataResourceId)) {
@@ -243,7 +244,7 @@ public class DataEvents {
         }
 
         try {
-            GenericValue dataResource = delegator.findByPrimaryKeyCache("DataResource", UtilMisc.toMap("dataResourceId", dataResourceId));
+            GenericValue dataResource = delegator.findOne("DataResource", UtilMisc.toMap("dataResourceId", dataResourceId), true);
             if (!"Y".equals(dataResource.getString("isPublic"))) {
                 // now require login...
                 GenericValue userLogin = (GenericValue) session.getAttribute("userLogin");
@@ -256,8 +257,8 @@ public class DataEvents {
 
                 // make sure the logged in user can download this content; otherwise is a pretty big security hole for DataResource records...
                 // TODO: should we restrict the roleTypeId?
-                List contentAndRoleList = delegator.findByAnd("ContentAndRole",
-                        UtilMisc.toMap("partyId", userLogin.get("partyId"), "dataResourceId", dataResourceId));
+                List<GenericValue> contentAndRoleList = delegator.findByAnd("ContentAndRole",
+                        UtilMisc.toMap("partyId", userLogin.get("partyId"), "dataResourceId", dataResourceId), null, false);
                 if (contentAndRoleList.size() == 0) {
                     String errorMsg = "You do not have permission to download the Data Resource with ID [" + dataResourceId + "], ie you are not associated with it.";
                     Debug.logError(errorMsg, module);
@@ -267,12 +268,11 @@ public class DataEvents {
             }
 
             String mimeType = DataResourceWorker.getMimeType(dataResource);
-            //if (Debug.infoOn()) Debug.logInfo("in serveImage, imageType:" + imageType, module);
 
             // hack for IE and mime types
             String userAgent = request.getHeader("User-Agent");
             if (userAgent.indexOf("MSIE") > -1) {
-                Debug.log("Found MSIE changing mime type from - " + mimeType, module);
+                Debug.logInfo("Found MSIE changing mime type from - " + mimeType, module);
                 mimeType = "application/octet-stream";
             }
 
@@ -280,7 +280,7 @@ public class DataEvents {
                 response.setContentType(mimeType);
             }
             OutputStream os = response.getOutputStream();
-            DataResourceWorker.streamDataResource(os, delegator, dataResourceId, "", application.getInitParameter("webSiteId"), UtilHttp.getLocale(request), application.getRealPath("/"));
+            DataResourceWorker.streamDataResource(os, delegator, dataResourceId, "", WebSiteWorker.getWebSiteId(request), UtilHttp.getLocale(request), application.getRealPath("/"));
             os.flush();
         } catch (GenericEntityException e) {
             String errMsg = "Error downloading digital product content: " + e.toString();
@@ -307,16 +307,16 @@ public class DataEvents {
      *  Needed to make permission criteria available to services.
      */
     public static String persistDataResource(HttpServletRequest request, HttpServletResponse response) {
-        Map result = null;
+        Map<String, Object> result = null;
         LocalDispatcher dispatcher = (LocalDispatcher) request.getAttribute("dispatcher");
-        GenericDelegator delegator = (GenericDelegator) request.getAttribute("delegator");
+        Delegator delegator = (Delegator) request.getAttribute("delegator");
         GenericValue userLogin = (GenericValue) request.getSession().getAttribute("userLogin");
-        Map paramMap = UtilHttp.getParameterMap(request);
+        Map<String, Object> paramMap = UtilHttp.getParameterMap(request);
         String dataResourceId = (String)paramMap.get("dataResourceId");
         GenericValue dataResource = delegator.makeValue("DataResource");
         dataResource.setPKFields(paramMap);
         dataResource.setNonPKFields(paramMap);
-        Map serviceInMap = UtilMisc.makeMapWritable(dataResource);
+        Map<String, Object> serviceInMap = UtilMisc.makeMapWritable(dataResource);
         serviceInMap.put("userLogin", userLogin);
         String mode = (String)paramMap.get("mode");
         Locale locale = UtilHttp.getLocale(request);
@@ -346,20 +346,14 @@ public class DataEvents {
             dataResource.set("dataResourceId", dataResourceId);
         }
 
-
-        // Save the primary key so that it can be used in a "quick pick" list later
-        GenericPK pk = dataResource.getPrimaryKey();
-        HttpSession session = request.getSession();
-        //ContentManagementWorker.mruAdd(session, pk);
-
         String returnStr = "success";
-        if (mode.equals("CREATE") ) {
+        if (mode.equals("CREATE")) {
             // Set up return message to guide selection of follow on view
-            request.setAttribute("dataResourceId", result.get("dataResourceId") );
+            request.setAttribute("dataResourceId", result.get("dataResourceId"));
             String dataResourceTypeId = (String)serviceInMap.get("dataResourceTypeId");
             if (dataResourceTypeId != null) {
                  if (dataResourceTypeId.equals("ELECTRONIC_TEXT")
-                     || dataResourceTypeId.equals("IMAGE_OBJECT") ) {
+                     || dataResourceTypeId.equals("IMAGE_OBJECT")) {
                     returnStr = dataResourceTypeId;
                  }
             }

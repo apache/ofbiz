@@ -17,18 +17,18 @@ specific language governing permissions and limitations
 under the License.
 -->
 
-<#macro renderField text><#if text?exists>${text}</#if></#macro>
+<#macro renderField text><#if text?exists>"${text}"</#if></#macro>
 
-<#macro renderDisplayField idName description class alert inPlaceEditorId="" inPlaceEditorUrl="" inPlaceEditorParams="">
+<#macro renderDisplayField type imageLocation idName description class alert inPlaceEditorId="" inPlaceEditorUrl="" inPlaceEditorParams="">
 <@renderField description />
 </#macro>
 <#macro renderHyperlinkField></#macro>
 
-<#macro renderTextField name className alert value textSize maxlength id event action clientAutocomplete ajaxUrl ajaxEnabled><@renderField value /></#macro>
+<#macro renderTextField name className alert value textSize maxlength id event action disabled clientAutocomplete ajaxUrl ajaxEnabled><@renderField value /></#macro>
 
-<#macro renderTextareaField name className alert cols rows id readonly value visualEdtiorEnalble buttons><@renderField value /></#macro>
+<#macro renderTextareaField name className alert cols rows id readonly value visualEditorEnable language buttons><@renderField value /></#macro>
 
-<#macro renderDateTimeField name className alert title value size maxlength id dateType shortDateInput timeDropdownParamName defaultDateTimeString calGif localizedIconTitle timeDropdown timeHourName classString hour1 hour2 timeMinutesName minutes isTwelveHour ampmName amSelected pmSelected compositeType formName><@renderField value /></#macro>
+<#macro renderDateTimeField name className alert title value size maxlength id event action dateType shortDateInput timeDropdownParamName defaultDateTimeString localizedIconTitle timeDropdown timeHourName classString hour1 hour2 timeMinutesName minutes isTwelveHour ampmName amSelected pmSelected compositeType formName><@renderField value /></#macro>
 
 <#macro renderDropDownField name className alert id multiple formName otherFieldName event action size firstInList currentValue explicitDescription allowEmpty options fieldName otherFieldName otherValue otherFieldSize dDFCurrent ajaxEnabled noCurrentSelectedKey ajaxOptions frequency minChars choices autoSelect partialSearch partialChars ignoreCase fullSearch>
 <#if currentValue?has_content && firstInList?has_content>
@@ -40,27 +40,30 @@ under the License.
 </#if>
 </#macro>
 
-<#macro renderCheckField items className alert allChecked currentValue name event action></#macro>
+<#macro renderTooltip tooltip tooltipStyle></#macro>
+<#macro renderCheckField items className alert id allChecked currentValue name event action></#macro>
 <#macro renderRadioField items className alert currentValue noCurrentSelectedKey name event ation></#macro>
 
-<#macro renderSubmitField buttonType className alert formName title name event action imgSrc containerId ajaxUrl></#macro>
+<#macro renderSubmitField buttonType className alert formName title name event action imgSrc confirmation containerId ajaxUrl></#macro>
 <#macro renderResetField className alert name title></#macro>
 
-<#macro renderHiddenField name value></#macro>
+<#macro renderHiddenField name value id event action></#macro>
 <#macro renderIgnoredField></#macro>
 
-<#macro renderFieldTitle style title><@renderField title /></#macro>
+<#macro renderFieldTitle style title id fieldHelpText=""><@renderField title /></#macro>
 <#macro renderSingleFormFieldTitle></#macro>
 
 <#macro renderFormOpen linkUrl formType targetWindow containerId containerStyle autocomplete name useRowSubmit></#macro>
-<#macro renderFormClose focusFieldName formName></#macro>
+<#macro renderFormClose focusFieldName formName containerId hasRequiredField></#macro>
 <#macro renderMultiFormClose></#macro>
 
 <#macro renderFormatListWrapperOpen formName style columnStyles></#macro>
 <#macro renderFormatListWrapperClose formName></#macro>
 
 <#macro renderFormatHeaderRowOpen style></#macro>
-<#macro renderFormatHeaderRowClose> </#macro>
+<#macro renderFormatHeaderRowClose>
+
+</#macro>
 <#macro renderFormatHeaderRowCellOpen style positionSpan></#macro>
 <#macro renderFormatHeaderRowCellClose></#macro>
 
@@ -69,17 +72,21 @@ under the License.
 <#macro renderFormatHeaderRowFormCellTitleSeparator style isLast></#macro>
 
 <#macro renderFormatItemRowOpen formName itemIndex altRowStyles evenRowStyle oddRowStyle></#macro>
-<#macro renderFormatItemRowClose formName></#macro>
+<#macro renderFormatItemRowClose formName>
+
+</#macro>
 <#macro renderFormatItemRowCellOpen fieldName style positionSpan></#macro>
 <#macro renderFormatItemRowCellClose fieldName></#macro>
 <#macro renderFormatItemRowFormCellOpen style></#macro>
 <#macro renderFormatItemRowFormCellClose></#macro>
 
 <#macro renderFormatSingleWrapperOpen formName style></#macro>
-<#macro renderFormatSingleWrapperClose formName></#macro>
+<#macro renderFormatSingleWrapperClose formName>
+</#macro>
 
 <#macro renderFormatFieldRowOpen></#macro>
-<#macro renderFormatFieldRowClose></#macro>
+<#macro renderFormatFieldRowClose>
+</#macro>
 <#macro renderFormatFieldRowTitleCellOpen style> </#macro>
 <#macro renderFormatFieldRowTitleCellClose></#macro>
 <#macro renderFormatFieldRowSpacerCell></#macro>
@@ -96,8 +103,8 @@ under the License.
 <@renderField value />
 </#macro>
 
-<#macro renderLookupField className alert name value size maxlength autocomplete descriptionFieldName formName lookupFieldFormName targetParameterIter imgSrc><@renderField value /></#macro>
-<#macro renderNextPrev paginateStyle paginateFirstStyle viewIndex highIndex listSize viewSize ajaxEnabled javaScriptEnabled ajaxFirstUrl firstUrl paginateFirstLabel paginatePreviousStyle ajaxPreviousUrl previousUrl paginatePreviousLabel pageLabel ajaxSelectUrl selectUrl commonDisplaying paginateNextStyle ajaxNextUrl nextUrl paginateNextLabel paginateLastStyle ajaxLastUrl lastUrl paginateLastLabel></#macro>
+<#macro renderLookupField className alert name value size maxlength id event action readonly autocomplete descriptionFieldName formName fieldFormName targetParameterIter imgSrc ajaxUrl ajaxEnabled presentation width height position fadeBackground clearText showDescription initiallyCollapsed><@renderField value /></#macro>
+<#macro renderNextPrev paginateStyle paginateFirstStyle viewIndex highIndex listSize viewSize ajaxEnabled javaScriptEnabled ajaxFirstUrl firstUrl paginateFirstLabel paginatePreviousStyle ajaxPreviousUrl previousUrl paginatePreviousLabel pageLabel ajaxSelectUrl selectUrl ajaxSelectSizeUrl selectSizeUrl commonDisplaying paginateNextStyle ajaxNextUrl nextUrl paginateNextLabel paginateLastStyle ajaxLastUrl lastUrl paginateLastLabel paginateViewSizeLabel></#macro>
 <#macro renderFileField className alert name value size maxlength autocomplete><@renderField value /></#macro>
 <#macro renderPasswordField className alert name value size maxlength id autocomplete></#macro>
 <#macro renderImageFiel value border width height event action></#macro>
@@ -105,8 +112,8 @@ under the License.
 <#macro renderFieldGroupOpen style id title collapsed collapsibleAreaId collapsible expandToolTip collapseToolTip></#macro>
 <#macro renderFieldGroupClose style id title></#macro>
 
-<#macro renderHyperlinkTitle name title></#macro>
-<#macro renderSortField style title linkUrl ajaxEnabled></#macro>
+<#macro renderHyperlinkTitle name title showSelectAll="N"></#macro>
+<#macro renderSortField style title linkUrl ajaxEnabled><@renderFieldTitle style title /></#macro>
 <#macro formatBoundaryComment boundaryType widgetType widgetName></#macro>
 <#macro makeHiddenFormLinkAnchor linkStyle hiddenFormName event action imgSrc description><@renderField description /></#macro>
-<#macro makeHyperlinkString linkStyle hiddenFormName event action imgSrc linkUrl targetWindow description><@renderField description /></#macro>
+<#macro makeHyperlinkString linkStyle hiddenFormName event action imgSrc alternate linkUrl targetWindow description><@renderField description /></#macro>

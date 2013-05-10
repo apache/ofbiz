@@ -18,11 +18,12 @@
  *******************************************************************************/
 package org.ofbiz.base.container;
 
-import org.ofbiz.base.config.*;
+import org.ofbiz.base.config.GenericConfigException;
 
 /**
  * ContainerException
  */
+@SuppressWarnings("serial")
 public class ContainerException extends GenericConfigException {
 
     public ContainerException() {

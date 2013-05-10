@@ -21,12 +21,11 @@ package org.ofbiz.pos.event;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.text.DecimalFormat;
-import java.text.ParseException;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import javolution.util.FastMap;
 import net.xoetrope.xui.XProjectManager;
 
 import org.ofbiz.base.util.Debug;
@@ -37,7 +36,7 @@ import org.ofbiz.base.util.UtilNumber;
 import org.ofbiz.base.util.UtilProperties;
 import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.base.util.cache.UtilCache;
-import org.ofbiz.entity.GenericDelegator;
+import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
 import org.ofbiz.entity.condition.EntityCondition;
@@ -217,7 +216,7 @@ public class ManagerEvents {
                     state.set("actualEndingGc", new BigDecimal(closeInfo[3]));
                     state.set("actualEndingOther", new BigDecimal(closeInfo[4]));
                     state.set("endingTxId", trans.getTransactionId());
-                    Debug.log("Updated State - " + state, module);
+                    Debug.logInfo("Updated State - " + state, module);
                     try {
                         state.store();
                         state.refresh();
@@ -239,7 +238,7 @@ public class ManagerEvents {
                     // transmit final data to server
                     GenericValue terminal = null;
                     try {
-                        terminal = state.getRelatedOne("PosTerminal");
+                        terminal = state.getRelatedOne("PosTerminal", false);
                     } catch (GenericEntityException e) {
                         Debug.logError(e, module);
                         pos.showDialog("dialog/error/exception", e.getMessage());
@@ -296,7 +295,7 @@ public class ManagerEvents {
             String orderId = input.value();
             GenericValue orderHeader = null;
             try {
-                orderHeader = session.getDelegator().findByPrimaryKey("OrderHeader", UtilMisc.toMap("orderId", orderId));
+                orderHeader = session.getDelegator().findOne("OrderHeader", UtilMisc.toMap("orderId", orderId), false);
             } catch (GenericEntityException e) {
                 Debug.logError(e, module);
             }
@@ -379,6 +378,22 @@ public class ManagerEvents {
         }
     }
 
+    public static synchronized void SwapKeyboard(PosScreen pos) {
+        if (!mgrLoggedIn) {
+            pos.showDialog("dialog/error/mgrnotloggedin");
+        } else {
+            String showKeyboardInSaveSale = null;
+            showKeyboardInSaveSale = UtilProperties.getPropertyValue("parameters.properties", "ShowKeyboardInSaveSale");
+            if ("N".equalsIgnoreCase(showKeyboardInSaveSale)) {
+                UtilProperties.setPropertyValueInMemory("parameters.properties", "ShowKeyboardInSaveSale", "Y");
+            } else {
+                UtilProperties.setPropertyValueInMemory("parameters.properties", "ShowKeyboardInSaveSale", "N");
+            }
+        }
+    }
+
+
+
     public static synchronized void shutdown(PosScreen pos) {
         if (!mgrLoggedIn) {
             pos.showDialog("dialog/error/mgrnotloggedin");
@@ -418,9 +433,9 @@ public class ManagerEvents {
         }
 
         PaidInOut PaidInOut = new PaidInOut(trans, pos, type);
-        Map mapInOut = PaidInOut.openDlg();
+        Map<String, String> mapInOut = PaidInOut.openDlg();
         if (null != mapInOut.get("amount")) {
-            String amount = (String) mapInOut.get("amount");
+            String amount = mapInOut.get("amount");
             BigDecimal amt = ZERO;
             try {
                 amt = new BigDecimal(amount);
@@ -468,32 +483,32 @@ public class ManagerEvents {
         boolean beganTransaction = false;
         try {
             beganTransaction = TransactionUtil.begin();
-        
-            GenericDelegator delegator = pos.getSession().getDelegator();
+
+            Delegator delegator = pos.getSession().getDelegator();
             List<EntityExpr> exprs = UtilMisc.toList(EntityCondition.makeCondition("originFacilityId", EntityOperator.EQUALS, trans.getFacilityId()),
                     EntityCondition.makeCondition("terminalId", EntityOperator.EQUALS, trans.getTerminalId()));
             EntityListIterator eli = null;
-    
+
             try {
                 eli = delegator.find("OrderHeaderAndPaymentPref", EntityCondition.makeCondition(exprs, EntityOperator.AND), null, null, null, null);
             } catch (GenericEntityException e) {
                 Debug.logError(e, module);
             }
-    
+
             Timestamp dayStart = state.getTimestamp("openedDate");
             Timestamp dayEnd = state.getTimestamp("closedDate");
             if (dayEnd == null) {
                 dayEnd = UtilDateTime.nowTimestamp();
             }
-    
+
             if (eli != null) {
                 GenericValue ohpp;
-                while (((ohpp = (GenericValue) eli.next()) != null)) {
+                while (((ohpp = eli.next()) != null)) {
                     Timestamp orderDate = ohpp.getTimestamp("orderDate");
                     if (orderDate.after(dayStart) && orderDate.before(dayEnd)) {
                         String pmt = ohpp.getString("paymentMethodTypeId");
                         BigDecimal amt = ohpp.getBigDecimal("maxAmount");
-    
+
                         if ("CASH".equals(pmt)) {
                             cashTotal = cashTotal.add(amt);
                         } else  if ("PERSONAL_CHECK".equals(pmt)) {
@@ -508,12 +523,12 @@ public class ManagerEvents {
                         total = total.add(amt);
                     }
                 }
-    
+
                 try {
                     eli.close();
                 } catch (GenericEntityException e) {
                     Debug.logWarning(e, "Trouble closing ELI", module);
-                    pos.showDialog("dialog/error/exception", e.getMessage());                    
+                    pos.showDialog("dialog/error/exception", e.getMessage());
                 }
             }
         } catch (GenericTransactionException e) {
@@ -533,9 +548,9 @@ public class ManagerEvents {
                 pos.showDialog("dialog/error/exception", e.getMessage());
             }
         }
-            
 
-        Map<String, String> reportMap = new HashMap<String, String>();
+
+        Map<String, String> reportMap = FastMap.newInstance();
         String reportTemplate = "totals.txt";
 
         // miscellaneous

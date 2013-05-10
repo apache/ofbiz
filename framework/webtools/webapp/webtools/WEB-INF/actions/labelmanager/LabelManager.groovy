@@ -17,17 +17,23 @@
  * under the License.
  */
 
-import org.ofbiz.entity.GenericDelegator;
+import org.ofbiz.entity.Delegator;
 import org.ofbiz.webtools.labelmanager.*;
 
-LabelManagerFactory.getLabelManagerFactory(delegator.getDelegatorName());
-context.labels = LabelManagerFactory.getLabels();
-context.labelsList = LabelManagerFactory.getLabelsList();
-context.localesFound = LabelManagerFactory.getLocalesFound();
-context.fileNamesFound = LabelManagerFactory.getFileNamesFound();
-context.componentNamesFound = LabelManagerFactory.getComponentNamesFound();
-context.references = LabelManagerFactory.getReferences();
-context.referencesList = LabelManagerFactory.getReferencesList();
-context.duplicatedLocalesLabels = LabelManagerFactory.getDuplicatedLocalesLabels();
-context.duplicatedLocalesLabelsList = LabelManagerFactory.getDuplicatedLocalesLabelsList();
-context.keySeparator = LabelManagerFactory.keySeparator;
+LabelManagerFactory factory = LabelManagerFactory.getInstance();
+context.factory = factory;
+factory.findMatchingLabels(parameters.labelComponentName, parameters.labelFileName, parameters.labelKey, parameters.labelLocaleName)
+context.labels = factory.getLabels();
+context.labelsList = factory.getLabelsList();
+context.localesFound = factory.getLocalesFound();
+context.filesFound = factory.getFilesFound();
+context.componentNamesFound = factory.getComponentNamesFound();
+context.duplicatedLocalesLabels = factory.getDuplicatedLocalesLabels();
+context.duplicatedLocalesLabelsList = factory.getDuplicatedLocalesLabelsList();
+context.keySeparator = factory.keySeparator;
+if ("Y".equals(parameters.onlyNotUsedLabels)) {
+    LabelReferences refsObject = new LabelReferences(delegator, factory);
+    Map references = refsObject.getLabelReferences();
+    context.references = references;
+    context.referencesList = references.keySet();
+}

@@ -41,7 +41,7 @@ under the License.
       <tr<#if alt_row> class="alternate-row"</#if>>
         <td>${(workEffort.estimatedStartDate.toString())?if_exists}</td>
         <td>${workEffort.priority?if_exists}</td>
-        <td>${(delegator.findByPrimaryKeyCache("StatusItem", Static["org.ofbiz.base.util.UtilMisc"].toMap("statusId", workEffort.getString("currentStatusId"))).get("description",locale))?if_exists}</td>
+        <td>${(delegator.findOne("StatusItem", Static["org.ofbiz.base.util.UtilMisc"].toMap("statusId", workEffort.getString("currentStatusId")), true).get("description",locale))?if_exists}</td>
         <td><a href="<@ofbizContentUrl>/workeffort/control/WorkEffortSummary?workEffortId=${workEffort.workEffortId}</@ofbizContentUrl>">${workEffort.workEffortName}</a></td>
         <td class="button-col"><a href="<@ofbizContentUrl>/workeffort/control/WorkEffortSummary?workEffortId=${workEffort.workEffortId}</@ofbizContentUrl>">${workEffort.workEffortId}</a></td>
       </tr>
@@ -66,8 +66,8 @@ under the License.
         <tr<#if alt_row> class="alternate-row"</#if>>
           <td>${(workEffort.estimatedStartDate.toString())?if_exists}</td>
           <td>${workEffort.priority?if_exists}</td>
-          <td>${(delegator.findByPrimaryKeyCache("StatusItem", Static["org.ofbiz.base.util.UtilMisc"].toMap("statusId", workEffort.getString("currentStatusId"))).get("description",locale))?if_exists}</td>
-          <td>${(delegator.findByPrimaryKeyCache("StatusItem", Static["org.ofbiz.base.util.UtilMisc"].toMap("statusId", workEffort.getString("statusId"))).get("description",locale))?if_exists}</td>
+          <td>${(delegator.findOne("StatusItem", Static["org.ofbiz.base.util.UtilMisc"].toMap("statusId", workEffort.getString("currentStatusId")), true).get("description",locale))?if_exists}</td>
+          <td>${(delegator.findOne("StatusItem", Static["org.ofbiz.base.util.UtilMisc"].toMap("statusId", workEffort.getString("statusId")), true).get("description",locale))?if_exists}</td>
           <#-- <td>${workEffort.partyId}</td> -->
           <td>${workEffort.roleTypeId}</td>
           <td><a href="<@ofbizContentUrl>/workeffort/control/WorkEffortSummary?workEffortId=${workEffort.workEffortId}</@ofbizContentUrl>">${workEffort.workEffortName}</a></td>
@@ -95,12 +95,12 @@ under the License.
         <tr<#if alt_row> class="alternate-row"</#if>>
           <td>${(workEffort.estimatedStartDate.toString())?if_exists}</td>
           <td>${workEffort.priority?if_exists}</td>
-          <td>${(delegator.findByPrimaryKeyCache("StatusItem", Static["org.ofbiz.base.util.UtilMisc"].toMap("statusId", workEffort.getString("currentStatusId"))).get("description",locale))?if_exists}</td>
-          <td>${(delegator.findByPrimaryKeyCache("StatusItem", Static["org.ofbiz.base.util.UtilMisc"].toMap("statusId", workEffort.getString("statusId"))).get("description",locale))?if_exists}</td>
+          <td>${(delegator.findOne("StatusItem", Static["org.ofbiz.base.util.UtilMisc"].toMap("statusId", workEffort.getString("currentStatusId")), true).get("description",locale))?if_exists}</td>
+          <td>${(delegator.findOne("StatusItem", Static["org.ofbiz.base.util.UtilMisc"].toMap("statusId", workEffort.getString("statusId")), true).get("description",locale))?if_exists}</td>
           <#-- <td>${workEffort.partyId}</td> -->
           <td>${workEffort.roleTypeId}</td>
           <td><a href="<@ofbizContentUrl>/workeffort/control/WorkEffortSummary?workEffortId=${workEffort.workEffortId}</@ofbizContentUrl>">${workEffort.workEffortName}</a></td>
-          <td class="button-col"><a href="<@ofbizContentUrl>/workeffort/control/acceptRoleAssignment?workEffortId=${workEffort.workEffortId}&partyId=${workEffort.partyId}&roleTypeId=${workEffort.roleTypeId}&fromDate=${workEffort.fromDate.toString()}</@ofbizContentUrl>">${uiLabelMap.WorkEffortAcceptAssignment}&nbsp;[${workEffort.workEffortId}]</a></td>
+          <td class="button-col"><a href="<@ofbizContentUrl>/workeffort/control/acceptRoleAssignment?workEffortId=${workEffort.workEffortId}&amp;partyId=${workEffort.partyId}&amp;roleTypeId=${workEffort.roleTypeId}&amp;fromDate=${workEffort.fromDate.toString()}</@ofbizContentUrl>">${uiLabelMap.WorkEffortAcceptAssignment}&nbsp;[${workEffort.workEffortId}]</a></td>
         </tr>
         <#assign alt_row = !alt_row>
       </#list>
@@ -124,12 +124,12 @@ under the License.
         <tr<#if alt_row> class="alternate-row"</#if>>
           <td>${(workEffort.estimatedStartDate.toString())?if_exists}</td>
           <td>${workEffort.priority?if_exists}</td>
-          <td>${(delegator.findByPrimaryKeyCache("StatusItem", Static["org.ofbiz.base.util.UtilMisc"].toMap("statusId", workEffort.getString("currentStatusId"))).get("description",locale))?if_exists}</td>
-          <td>${(delegator.findByPrimaryKeyCache("StatusItem", Static["org.ofbiz.base.util.UtilMisc"].toMap("statusId", workEffort.getString("statusId"))).get("description",locale))?if_exists}</td>
+          <td>${(delegator.findOne("StatusItem", Static["org.ofbiz.base.util.UtilMisc"].toMap("statusId", workEffort.getString("currentStatusId")), true).get("description",locale))?if_exists}</td>
+          <td>${(delegator.findOne("StatusItem", Static["org.ofbiz.base.util.UtilMisc"].toMap("statusId", workEffort.getString("statusId")), true).get("description",locale))?if_exists}</td>
           <td>${workEffort.groupPartyId}</td>
           <#-- <td>${workEffort.roleTypeId}</td> -->
           <td><a href="<@ofbizContentUrl>/workeffort/control/WorkEffortSummary?workEffortId=${workEffort.workEffortId}</@ofbizContentUrl>">${workEffort.workEffortName}</a></td>
-          <td class="button-col"><a href="<@ofbizContentUrl>/workeffort/control/acceptassignment?workEffortId=${workEffort.workEffortId}&partyId=${workEffort.partyId}&roleTypeId=${workEffort.roleTypeId}&fromDate=${workEffort.fromDate}</@ofbizContentUrl>">${uiLabelMap.WorkEffortAcceptAssignment}&nbsp;[${workEffort.workEffortId}]</a></td>
+          <td class="button-col"><a href="<@ofbizContentUrl>/workeffort/control/acceptassignment?workEffortId=${workEffort.workEffortId}&amp;partyId=${workEffort.partyId}&amp;roleTypeId=${workEffort.roleTypeId}&amp;fromDate=${workEffort.fromDate}</@ofbizContentUrl>">${uiLabelMap.WorkEffortAcceptAssignment}&nbsp;[${workEffort.workEffortId}]</a></td>
         </tr>
         <#assign alt_row = !alt_row>
       </#list>

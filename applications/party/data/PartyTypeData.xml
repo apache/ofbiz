@@ -33,24 +33,6 @@ under the License.
     <AgreementType agreementTypeId="COMMISSION_AGREEMENT" description="Commission" hasTable="N" parentTypeId=""/>
     <AgreementType agreementTypeId="EULA" description="End User License Agreement" hasTable="N" parentTypeId=""/>
 
-    <CommunicationEventPrpTyp communicationEventPrpTypId="ACTIVITY_REQUEST" description="Activity Request" hasTable="N" parentTypeId=""/>
-    <CommunicationEventPrpTyp communicationEventPrpTypId="CONFERENCE" description="Conference" hasTable="N" parentTypeId=""/>
-    <CommunicationEventPrpTyp communicationEventPrpTypId="CUSTOMER_SERVICE_CAL" description="Customer Service Call" hasTable="N" parentTypeId=""/>
-    <CommunicationEventPrpTyp communicationEventPrpTypId="INQUIRY" description="Inquiry" hasTable="N" parentTypeId=""/>
-    <CommunicationEventPrpTyp communicationEventPrpTypId="MEETING" description="Meeting" hasTable="N" parentTypeId=""/>
-    <CommunicationEventPrpTyp communicationEventPrpTypId="SALES_FOLLOW_UP" description="Sales Follow Up" hasTable="N" parentTypeId=""/>
-    <CommunicationEventPrpTyp communicationEventPrpTypId="SEMINAR" description="Seminar" hasTable="N" parentTypeId=""/>
-    <CommunicationEventPrpTyp communicationEventPrpTypId="SUPPORT_CALL" description="Support Call" hasTable="N" parentTypeId=""/>
-
-    <CommunicationEventType communicationEventTypeId="EMAIL_COMMUNICATION" description="Email" hasTable="N" parentTypeId=""/>
-    <CommunicationEventType communicationEventTypeId="FACE_TO_FACE_COMMUNI" description="Face-To-Face" hasTable="N" parentTypeId=""/>
-    <CommunicationEventType communicationEventTypeId="FAX_COMMUNICATION" description="Fax" hasTable="N" parentTypeId=""/>
-    <CommunicationEventType communicationEventTypeId="LETTER_CORRESPONDENC" description="Letter" hasTable="N" parentTypeId=""/>
-    <CommunicationEventType communicationEventTypeId="PHONE_COMMUNICATION" description="Phone" hasTable="N" parentTypeId=""/>
-    <CommunicationEventType communicationEventTypeId="WEB_SITE_COMMUNICATI" description="Web Site" hasTable="N" parentTypeId=""/>
-    <CommunicationEventType communicationEventTypeId="COMMENT_NOTE" description="Comment/Note" hasTable="N" parentTypeId=""/>
-    <CommunicationEventType communicationEventTypeId="AUTO_EMAIL_COMM" description="Auto Email" hasTable="N" parentTypeId=""/>
-
     <ContactMechPurposeType contactMechPurposeTypeId="SHIPPING_LOCATION" description="Shipping Destination Address"/>
     <ContactMechPurposeType contactMechPurposeTypeId="SHIP_ORIG_LOCATION" description="Shipping Origin Address"/>
     <ContactMechPurposeType contactMechPurposeTypeId="BILLING_LOCATION" description="Billing (AP) Address"/>
@@ -69,6 +51,8 @@ under the License.
     <ContactMechPurposeType contactMechPurposeTypeId="PHONE_WORK_SEC" description="Secondary Work Phone Number"/>
     <ContactMechPurposeType contactMechPurposeTypeId="FAX_NUMBER" description="Main Fax Number"/>
     <ContactMechPurposeType contactMechPurposeTypeId="FAX_NUMBER_SEC" description="Secondary Fax Number"/>
+    <ContactMechPurposeType contactMechPurposeTypeId="FAX_SHIPPING" description="Shipping Destination Fax Number"/>
+    <ContactMechPurposeType contactMechPurposeTypeId="FAX_BILLING" description="Billing Destination Fax Number"/>
     <ContactMechPurposeType contactMechPurposeTypeId="PHONE_MOBILE" description="Main Mobile Phone Number"/>
     <ContactMechPurposeType contactMechPurposeTypeId="PHONE_ASSISTANT" description="Assistant's Phone Number"/>
     <ContactMechPurposeType contactMechPurposeTypeId="PRIMARY_PHONE" description="Primary Phone Number"/>
@@ -78,8 +62,12 @@ under the License.
     <ContactMechPurposeType contactMechPurposeTypeId="BILLING_EMAIL" description="Billing (AP) Email"/>
     <ContactMechPurposeType contactMechPurposeTypeId="PAYMENT_EMAIL" description="Payment (AR) Email"/>
     <ContactMechPurposeType contactMechPurposeTypeId="OTHER_EMAIL" description="Other Email Address"/>
+    <ContactMechPurposeType contactMechPurposeTypeId="SUPPORT_EMAIL" description="Support Email"/>
     <ContactMechPurposeType contactMechPurposeTypeId="ORDER_EMAIL" description="Order Notification Email Address"/>
     <ContactMechPurposeType contactMechPurposeTypeId="PRIMARY_WEB_URL" description="Primary Website URL"/>
+    <ContactMechPurposeType contactMechPurposeTypeId="TWITTER_URL" description="Twitter Website URL"/>
+    <ContactMechPurposeType contactMechPurposeTypeId="FACEBOOK_URL" description="Facebook Website URL"/>
+    <ContactMechPurposeType contactMechPurposeTypeId="LINKEDIN_URL" description="LinkedIn Website URL"/>
 
     <ContactMechType contactMechTypeId="ELECTRONIC_ADDRESS" description="Electronic Address" hasTable="N" parentTypeId=""/>
     <ContactMechType contactMechTypeId="POSTAL_ADDRESS" description="Postal Address" hasTable="Y" parentTypeId=""/>
@@ -88,6 +76,7 @@ under the License.
     <ContactMechType contactMechTypeId="IP_ADDRESS" description="Internet IP Address" hasTable="N" parentTypeId="ELECTRONIC_ADDRESS"/>
     <ContactMechType contactMechTypeId="DOMAIN_NAME" description="Internet Domain Name" hasTable="N" parentTypeId="ELECTRONIC_ADDRESS"/>
     <ContactMechType contactMechTypeId="WEB_ADDRESS" description="Web URL/Address" hasTable="N" parentTypeId="ELECTRONIC_ADDRESS"/>
+    <ContactMechType contactMechTypeId="INTERNAL_PARTYID" description="Internal Note via partyId" hasTable="N" parentTypeId="ELECTRONIC_ADDRESS"/>
 
     <ContactMechTypePurpose contactMechPurposeTypeId="BILLING_EMAIL" contactMechTypeId="EMAIL_ADDRESS"/>
     <ContactMechTypePurpose contactMechPurposeTypeId="MARKETING_EMAIL" contactMechTypeId="EMAIL_ADDRESS"/>
@@ -116,8 +105,33 @@ under the License.
     <ContactMechTypePurpose contactMechPurposeTypeId="PHONE_PAYMENT" contactMechTypeId="TELECOM_NUMBER"/>
     <ContactMechTypePurpose contactMechPurposeTypeId="PRIMARY_PHONE" contactMechTypeId="TELECOM_NUMBER"/>
     <ContactMechTypePurpose contactMechPurposeTypeId="PHONE_QUICK" contactMechTypeId="TELECOM_NUMBER"/>
+    <ContactMechTypePurpose contactMechPurposeTypeId="FAX_SHIPPING" contactMechTypeId="TELECOM_NUMBER"/>
+    <ContactMechTypePurpose contactMechPurposeTypeId="FAX_BILLING" contactMechTypeId="TELECOM_NUMBER"/>
+    <ContactMechTypePurpose contactMechPurposeTypeId="PHONE_ASSISTANT" contactMechTypeId="TELECOM_NUMBER"/>
     <ContactMechTypePurpose contactMechPurposeTypeId="PRIMARY_WEB_URL" contactMechTypeId="WEB_ADDRESS"/>
-
+    <ContactMechTypePurpose contactMechPurposeTypeId="TWITTER_URL" contactMechTypeId="WEB_ADDRESS"/>
+    <ContactMechTypePurpose contactMechPurposeTypeId="FACEBOOK_URL" contactMechTypeId="WEB_ADDRESS"/>
+    <ContactMechTypePurpose contactMechPurposeTypeId="LINKEDIN_URL" contactMechTypeId="WEB_ADDRESS"/>
+    
+    <!-- communication events -->
+    <CommunicationEventPrpTyp communicationEventPrpTypId="ACTIVITY_REQUEST" description="Activity Request" hasTable="N" parentTypeId=""/>
+    <CommunicationEventPrpTyp communicationEventPrpTypId="CONFERENCE" description="Conference" hasTable="N" parentTypeId=""/>
+    <CommunicationEventPrpTyp communicationEventPrpTypId="CUSTOMER_SERVICE_CAL" description="Customer Service Call" hasTable="N" parentTypeId=""/>
+    <CommunicationEventPrpTyp communicationEventPrpTypId="INQUIRY" description="Inquiry" hasTable="N" parentTypeId=""/>
+    <CommunicationEventPrpTyp communicationEventPrpTypId="MEETING" description="Meeting" hasTable="N" parentTypeId=""/>
+    <CommunicationEventPrpTyp communicationEventPrpTypId="SALES_FOLLOW_UP" description="Sales Follow Up" hasTable="N" parentTypeId=""/>
+    <CommunicationEventPrpTyp communicationEventPrpTypId="SEMINAR" description="Seminar" hasTable="N" parentTypeId=""/>
+    <CommunicationEventPrpTyp communicationEventPrpTypId="SUPPORT_CALL" description="Support Call" hasTable="N" parentTypeId=""/>
+    
+    <CommunicationEventType communicationEventTypeId="EMAIL_COMMUNICATION" description="Email" hasTable="N" parentTypeId="" contactMechTypeId="EMAIL_ADDRESS"/>
+    <CommunicationEventType communicationEventTypeId="FACE_TO_FACE_COMMUNI" description="Face-To-Face" hasTable="N" parentTypeId=""/>
+    <CommunicationEventType communicationEventTypeId="FAX_COMMUNICATION" description="Fax" hasTable="N" parentTypeId="" contactMechTypeId="TELECOM_NUMBER"/>
+    <CommunicationEventType communicationEventTypeId="LETTER_CORRESPONDENC" description="Letter" hasTable="N" parentTypeId="" contactMechTypeId="POSTAL_ADDRESS"/>
+    <CommunicationEventType communicationEventTypeId="PHONE_COMMUNICATION" description="Phone" hasTable="N" parentTypeId="" contactMechTypeId="TELECOM_NUMBER"/>
+    <CommunicationEventType communicationEventTypeId="WEB_SITE_COMMUNICATI" description="Web Site" hasTable="N" parentTypeId="" contactMechTypeId="WEB_ADDRESS"/>
+    <CommunicationEventType communicationEventTypeId="COMMENT_NOTE" description="Comment/Note" hasTable="N" parentTypeId="" contactMechTypeId="INTERNAL_PARTYID"/>
+    <CommunicationEventType communicationEventTypeId="AUTO_EMAIL_COMM" description="Auto Email" hasTable="N" parentTypeId="" contactMechTypeId="EMAIL_ADDRESS"/>
+    
     <!-- party content types -->
     <PartyContentType description="Internal Content" parentTypeId="" partyContentTypeId="INTERNAL"/>
     <PartyContentType description="User Defined Content"  parentTypeId="" partyContentTypeId="USERDEF"/>
@@ -144,9 +158,17 @@ under the License.
     <Enumeration description="Update Personal Info Confirmation" enumCode="UPDAT_CONFIRM" enumId="UPD_PRSNL_INF_CNFRM" sequenceId="02" enumTypeId="PARTY_EMAIL"/>
     <Enumeration description="Party Email Address Verification" enumCode="EMAIL_VERIFY" enumId="PRDS_EMAIL_VERIFY" sequenceId="03" enumTypeId="PARTY_EMAIL"/>
     <Enumeration description="Party Invitation" enumCode="INVITE_EMAIL" enumId="PRDS_PARTYINV_EMAIL" sequenceId="04" enumTypeId="PARTY_EMAIL"/>
+    <Enumeration description="Contact-Us Notification" enumCode="CONT_EMAIL" enumId="CONT_NOTI_EMAIL" sequenceId="05" enumTypeId="PARTY_EMAIL"/>
+    <Enumeration description="Account Activated Notification" enumCode="ACCOUNT_ACTIVATED" enumId="PRDS_CUST_ACTIVATED" sequenceId="06" enumTypeId="PARTY_EMAIL"/>
+    <Enumeration description="Unsubscribe Contact List Notification" enumCode="UNSUB_CONT_EMAIL" enumId="UNSUB_CONT_LIST_NOTI" sequenceId="01" enumTypeId="PARTY_EMAIL"/>
+    <Enumeration description="Subscribe Contact List Notification" enumCode="SUB_CONT_EMAIL" enumId="SUB_CONT_LIST_NOTI" sequenceId="02" enumTypeId="PARTY_EMAIL"/>
+    <Enumeration description="Unsubscribe Contact List Verify" enumCode="UNSUB_CONT_VERIFY_EMAIL" enumId="UNSUB_CONT_LIST_VERI" sequenceId="03" enumTypeId="PARTY_EMAIL"/>
+    <Enumeration description="Contact List E-mail Template" enumCode="CONT_EMAIL_TEMPLATE" enumId="CONT_EMAIL_TEMPLATE" sequenceId="04" enumTypeId="PARTY_EMAIL"/>
+
+    <!-- the groups which are the main roles on he party listing -->
+    <RoleType description="Main Role" hasTable="N" parentTypeId="" roleTypeId="MAIN_ROLE"/>
 
     <!-- top level role types -->
-    <RoleType description="Account" hasTable="N" parentTypeId="" roleTypeId="ACCOUNT"/>
     <RoleType description="Account Lead" hasTable="N" parentTypeId="" roleTypeId="ACCOUNT_LEAD"/>
     <RoleType description="Administrator" hasTable="N" parentTypeId="" roleTypeId="ADMIN"/>
     <RoleType description="Agent" hasTable="N" parentTypeId="" roleTypeId="AGENT"/>
@@ -155,31 +177,34 @@ under the License.
     <RoleType description="Client" hasTable="N" parentTypeId="" roleTypeId="CLIENT"/>
     <RoleType description="Communication Participant" hasTable="N" parentTypeId="" roleTypeId="COMMEVENT_ROLE"/>
     <RoleType description="Consumer" hasTable="N" parentTypeId="" roleTypeId="CONSUMER"/>
-    <RoleType description="Contact" hasTable="N" parentTypeId="" roleTypeId="CONTACT"/>
     <RoleType description="Contractor" hasTable="N" parentTypeId="" roleTypeId="CONTRACTOR"/>
     <RoleType description="Customer" hasTable="N" parentTypeId="" roleTypeId="CUSTOMER"/>
     <RoleType description="Distribution Channel" hasTable="N" parentTypeId="" roleTypeId="DISTRIBUTION_CHANNEL"/>
     <RoleType description="ISP" hasTable="N" parentTypeId="" roleTypeId="ISP"/>
     <RoleType description="Hosting Server" hasTable="N" parentTypeId="" roleTypeId="HOSTING_SERVER"/>
-    <RoleType description="Lead" hasTable="N" parentTypeId="" roleTypeId="LEAD"/>
     <RoleType description="Manufacturer" hasTable="N" parentTypeId="" roleTypeId="MANUFACTURER"/>
     <RoleType description="Not Applicable" hasTable="N" parentTypeId="" roleTypeId="_NA_"/>
-    <RoleType description="Organization" hasTable="N" parentTypeId="" roleTypeId="ORGANIZATION_ROLE"/>
+    <RoleType description="Organization" hasTable="N" parentTypeId="MAIN_ROLE" roleTypeId="ORGANIZATION_ROLE"/>
     <RoleType description="Owner" hasTable="N"  parentTypeId="" roleTypeId="OWNER"/>
     <RoleType description="Prospect" hasTable="N" parentTypeId="" roleTypeId="PROSPECT"/>
     <RoleType description="Person" hasTable="N" parentTypeId="" roleTypeId="PERSON_ROLE"/>
     <RoleType description="Referrer" hasTable="N" parentTypeId="" roleTypeId="REFERRER"/>
-    <RoleType description="Request Manager" hasTable="N" parentTypeId="" roleTypeId="REQ_MANAGER"/>
-    <RoleType description="Requesting Party" hasTable="N" parentTypeId="" roleTypeId="REQ_REQUESTER"/>
-    <RoleType description="Request Taker" hasTable="N" parentTypeId="" roleTypeId="REQ_TAKER"/>
+    <RoleType description="Request Role" hasTable="N" parentTypeId="" roleTypeId="REQUEST_ROLE"/>
+    <RoleType description="Request Manager" hasTable="N" parentTypeId="REQUEST_ROLE" roleTypeId="REQ_MANAGER"/>
+    <RoleType description="Requesting Party" hasTable="N" parentTypeId="REQUEST_ROLE" roleTypeId="REQ_REQUESTER"/>
+    <RoleType description="Request Taker" hasTable="N" parentTypeId="REQUEST_ROLE" roleTypeId="REQ_TAKER"/>
+    <RoleType description="Request Respondent" hasTable="N" parentTypeId="REQUEST_ROLE" roleTypeId="REQ_RESPOND"/>
+    <RoleType description="Sales Force Autm." hasTable="N" parentTypeId="MAIN_ROLE" roleTypeId="SFA_ROLE"/>
     <RoleType description="Shareholder" hasTable="N" parentTypeId="" roleTypeId="SHAREHOLDER"/>
     <RoleType description="Subscriber" hasTable="N" parentTypeId="" roleTypeId="SUBSCRIBER"/>
     <RoleType description="Vendor" hasTable="N" parentTypeId="" roleTypeId="VENDOR"/>
     <RoleType description="Visitor" hasTable="N" parentTypeId="" roleTypeId="VISITOR"/>
     <RoleType description="Web Master" hasTable="N" parentTypeId="" roleTypeId="WEB_MASTER"/>
     <RoleType description="Workflow" hasTable="N" parentTypeId="" roleTypeId="WORKFLOW_ROLE"/>
+    <RoleType description="Accountant" hasTable="N" parentTypeId="" roleTypeId="ACCOUNTANT"/>
 
     <!-- second level role types -->
+    <RoleType description="Account" hasTable="N" parentTypeId="SFA_ROLE" roleTypeId="ACCOUNT"/>
     <RoleType description="Addressee" hasTable="N" parentTypeId="COMMEVENT_ROLE" roleTypeId="ADDRESSEE"/>
     <RoleType description="Association" hasTable="N" parentTypeId="ORGANIZATION_ROLE" roleTypeId="ASSOCIATION"/>
     <RoleType description="Bill-From Vendor" hasTable="N" parentTypeId="VENDOR" roleTypeId="BILL_FROM_VENDOR"/>
@@ -193,6 +218,7 @@ under the License.
     <RoleType description="Calendar Owner" hasTable="N" parentTypeId="CALENDAR_ROLE" roleTypeId="CAL_OWNER"/>
     <RoleType description="Carrier" hasTable="N" parentTypeId="ORGANIZATION_ROLE" roleTypeId="CARRIER"/>
     <RoleType description="Competitor" hasTable="N" parentTypeId="ORGANIZATION_ROLE" roleTypeId="COMPETITOR"/>
+    <RoleType description="Contact" hasTable="N" parentTypeId="SFA_ROLE" roleTypeId="CONTACT"/>
     <RoleType description="Carbon Copy" hasTable="N" parentTypeId="COMMEVENT_ROLE" roleTypeId="CC"/>
     <RoleType description="Originator" hasTable="N" parentTypeId="COMMEVENT_ROLE" roleTypeId="ORIGINATOR"/>
     <RoleType description="Distributor" hasTable="N" parentTypeId="DISTRIBUTION_CHANNEL" roleTypeId="DISTRIBUTOR"/>
@@ -200,6 +226,7 @@ under the License.
     <RoleType description="End-User Customer" hasTable="N" parentTypeId="CUSTOMER" roleTypeId="END_USER_CUSTOMER"/>
     <RoleType description="Household" hasTable="N" parentTypeId="ORGANIZATION_ROLE" roleTypeId="HOUSEHOLD"/>
     <RoleType description="Internal Organization" hasTable="Y" parentTypeId="ORGANIZATION_ROLE" roleTypeId="INTERNAL_ORGANIZATIO"/>
+    <RoleType description="Lead" hasTable="N" parentTypeId="SFA_ROLE" roleTypeId="LEAD"/>
     <RoleType description="Limited Administrator" hasTable="N" parentTypeId="ADMIN" roleTypeId="LTD_ADMIN"/>
     <RoleType description="Organization Unit" hasTable="N" parentTypeId="ORGANIZATION_ROLE" roleTypeId="ORGANIZATION_UNIT"/>
     <RoleType description="Partner" hasTable="N" parentTypeId="ORGANIZATION_ROLE" roleTypeId="PARTNER"/>
@@ -236,6 +263,8 @@ under the License.
     <RoleType description="Subsidiary" hasTable="N" parentTypeId="ORGANIZATION_UNIT" roleTypeId="SUBSIDIARY"/>
     <RoleType description="Worker" hasTable="N" parentTypeId="EMPLOYEE" roleTypeId="WORKER"/>
 
+    <RoleType description="Email Administrator" hasTable="N" parentTypeId="PERSON_ROLE" roleTypeId="EMAIL_ADMIN"/>
+
     <PartyClassificationType description="EEOC (Equal Opportunity)" hasTable="N" parentTypeId="" partyClassificationTypeId="EEOC_CLASSIFICATION"/>
     <PartyClassificationType description="Minority" hasTable="N" parentTypeId="" partyClassificationTypeId="MINORITY_CLASSIFICAT"/>
     <PartyClassificationType description="Income" hasTable="N" parentTypeId="" partyClassificationTypeId="INCOME_CLASSIFICATIO"/>
@@ -261,7 +290,7 @@ under the License.
     <PartyRelationshipType description="" hasTable="N" parentTypeId="" partyRelationshipName="Child" partyRelationshipTypeId="CHILD" roleTypeIdValidFrom="" roleTypeIdValidTo=""/>
     <PartyRelationshipType description="" hasTable="N" parentTypeId="" partyRelationshipName="Contact Relation" partyRelationshipTypeId="CONTACT_REL" roleTypeIdValidFrom="" roleTypeIdValidTo=""/>
     <PartyRelationshipType description="" hasTable="N" parentTypeId="" partyRelationshipName="Lead Relation" partyRelationshipTypeId="LEAD_REL" roleTypeIdValidFrom="" roleTypeIdValidTo=""/>
-    <PartyRelationshipType description="" hasTable="N" parentTypeId="" partyRelationshipName="Lead Owner" partyRelationshipTypeId="LEAD_OWNER" roleTypeIdValidFrom="" roleTypeIdValidTo=""/>
+    <PartyRelationshipType description="" hasTable="N" parentTypeId="" partyRelationshipName="Lead Owned by" partyRelationshipTypeId="LEAD_OWNER" roleTypeIdValidFrom="" roleTypeIdValidTo=""/>
     <PartyRelationshipType description="" hasTable="N" parentTypeId="" partyRelationshipName="Customer" partyRelationshipTypeId="CUSTOMER_REL" roleTypeIdValidFrom="CUSTOMER" roleTypeIdValidTo=""/>
     <PartyRelationshipType description="" hasTable="N" parentTypeId="" partyRelationshipName="Distributor" partyRelationshipTypeId="DISTRIBUTION_CHANNEL" roleTypeIdValidFrom="" roleTypeIdValidTo=""/>
     <PartyRelationshipType description="" hasTable="Y" parentTypeId="" partyRelationshipName="Employee" partyRelationshipTypeId="EMPLOYMENT" roleTypeIdValidFrom="" roleTypeIdValidTo=""/>
@@ -276,11 +305,12 @@ under the License.
     <PartyRelationshipType description="" hasTable="N" parentTypeId="" partyRelationshipName="Spouse" partyRelationshipTypeId="SPOUSE" roleTypeIdValidFrom="" roleTypeIdValidTo=""/>
     <PartyRelationshipType description="" hasTable="N" parentTypeId="" partyRelationshipName="Supplier" partyRelationshipTypeId="SUPPLIER_REL" roleTypeIdValidFrom="" roleTypeIdValidTo=""/>
     <PartyRelationshipType description="" hasTable="N" parentTypeId="" partyRelationshipName="Web Master" partyRelationshipTypeId="WEB_MASTER_ASSIGNMEN" roleTypeIdValidFrom="" roleTypeIdValidTo=""/>
-    <PartyRelationshipType description="" hasTable="N" parentTypeId="" partyRelationshipName="Account" partyRelationshipTypeId="ACCOUNT" roleTypeIdValidFrom="" roleTypeIdValidTo=""/>
+    <PartyRelationshipType description="" hasTable="N" parentTypeId="" partyRelationshipName="Account owned by" partyRelationshipTypeId="ACCOUNT" roleTypeIdValidFrom="" roleTypeIdValidTo=""/>
     <PartyRelationshipType description="" hasTable="N" parentTypeId="" partyRelationshipName="Assistant" partyRelationshipTypeId="ASSISTANT" roleTypeIdValidFrom="" roleTypeIdValidTo=""/>
-    <PartyRelationshipType description="" hasTable="N" parentTypeId="" partyRelationshipName="Owner" partyRelationshipTypeId="OWNER" roleTypeIdValidFrom="" roleTypeIdValidTo=""/>
+    <PartyRelationshipType description="" hasTable="N" parentTypeId="" partyRelationshipName="Owned by" partyRelationshipTypeId="OWNER" roleTypeIdValidFrom="" roleTypeIdValidTo=""/>
     <PartyRelationshipType description="" hasTable="N" parentTypeId="" partyRelationshipName="Parent Account" partyRelationshipTypeId="PARENT_ACCOUNT" roleTypeIdValidFrom="" roleTypeIdValidTo=""/>
     <PartyRelationshipType description="" hasTable="N" parentTypeId="" partyRelationshipName="Reports To" partyRelationshipTypeId="REPORTS_TO" roleTypeIdValidFrom="" roleTypeIdValidTo=""/>
+    <PartyRelationshipType description="" hasTable="N" parentTypeId="" partyRelationshipName="Lead Owners/Managers" partyRelationshipTypeId="LEAD_OWN_GRP_MEMBER" roleTypeIdValidFrom="" roleTypeIdValidTo=""/>
 
     <PartyType description="Automated Agent" hasTable="N" parentTypeId="" partyTypeId="AUTOMATED_AGENT"/>
     <PartyType description="Person" hasTable="Y" parentTypeId="" partyTypeId="PERSON"/>
@@ -296,37 +326,37 @@ under the License.
     <StatusItem description="Enabled" sequenceId="01" statusCode="ENABLED" statusId="PARTY_ENABLED" statusTypeId="PARTY_STATUS"/>
     <StatusItem description="Disabled" sequenceId="99" statusCode="DISABLED" statusId="PARTY_DISABLED" statusTypeId="PARTY_STATUS"/>
     <StatusValidChange condition="" statusId="PARTY_ENABLED" statusIdTo="PARTY_DISABLED" transitionName="Disable"/>
-
+    <StatusValidChange condition="" statusId="PARTY_DISABLED" statusIdTo="PARTY_ENABLED" transitionName="Re-Enable"/>
+    
     <StatusType description="Case" hasTable="N" parentTypeId="" statusTypeId="CASE_STATUS"/>
 
     <StatusType description="Communication Event" hasTable="N" parentTypeId="" statusTypeId="COM_EVENT_STATUS"/>
-    <StatusItem description="Entered" sequenceId="01" statusCode="ENTERED" statusId="COM_ENTERED" statusTypeId="COM_EVENT_STATUS"/>
-    <StatusItem description="Pending" sequenceId="02" statusCode="PENDING" statusId="COM_PENDING" statusTypeId="COM_EVENT_STATUS"/>
-    <StatusItem description="Read" sequenceId="03" statusCode="READ" statusId="COM_READ" statusTypeId="COM_EVENT_STATUS"/>
-    <StatusItem description="In-Progress" sequenceId="05" statusCode="IN_PROGRESS" statusId="COM_IN_PROGRESS" statusTypeId="COM_EVENT_STATUS"/>
-    <StatusItem description="Unknown Party" sequenceId="07" statusCode="UNKNOWN_PARTY" statusId="COM_UNKNOWN_PARTY" statusTypeId="COM_EVENT_STATUS"/>
+    <StatusItem description="Pending" sequenceId="01" statusCode="PENDING" statusId="COM_PENDING" statusTypeId="COM_EVENT_STATUS"/><!-- draft version, only visible by originator -->
+    <StatusItem description="Entered" sequenceId="02" statusCode="ENTERED" statusId="COM_ENTERED" statusTypeId="COM_EVENT_STATUS"/>
+    <!--StatusItem description="Read" sequenceId="03" statusCode="READ" statusId="COM_READ" statusTypeId="COM_EVENT_STATUS"/--><!-- the read status is maintained at the comm-role level; can be diffrent for all participants-->
+    <StatusItem description="In-Progress" sequenceId="05" statusCode="IN_PROGRESS" statusId="COM_IN_PROGRESS" statusTypeId="COM_EVENT_STATUS"/><!-- waiting to be sent -->
+    <StatusItem description="Unknown Party" sequenceId="07" statusCode="UNKNOWN_PARTY" statusId="COM_UNKNOWN_PARTY" statusTypeId="COM_EVENT_STATUS"/><!-- unknown incoming email address -->
     <StatusItem description="Closed" sequenceId="20" statusCode="COMPLETE" statusId="COM_COMPLETE" statusTypeId="COM_EVENT_STATUS"/>
     <StatusItem description="Resolved" sequenceId="21" statusCode="RESOLVED" statusId="COM_RESOLVED" statusTypeId="COM_EVENT_STATUS"/>
     <StatusItem description="Referred" sequenceId="22" statusCode="REFERRED" statusId="COM_REFERRED" statusTypeId="COM_EVENT_STATUS"/>
     <StatusItem description="Bounced" sequenceId="50" statusCode="BOUNCED" statusId="COM_BOUNCED" statusTypeId="COM_EVENT_STATUS"/>
     <StatusItem description="Cancelled" sequenceId="99" statusCode="CANCELLED" statusId="COM_CANCELLED" statusTypeId="COM_EVENT_STATUS"/>
-    <StatusValidChange condition="" statusId="COM_ENTERED" statusIdTo="COM_PENDING" transitionName="Set Pending"/>
+    <StatusValidChange condition="" statusId="COM_ENTERED" statusIdTo="COM_PENDING" transitionName="Set Pending, only visible to originator"/>
+    <StatusValidChange condition="" statusId="COM_ENTERED" statusIdTo="COM_IN_PROGRESS" transitionName="Set In Progress, waiting to be send"/>
     <StatusValidChange condition="" statusId="COM_ENTERED" statusIdTo="COM_COMPLETE" transitionName="Complete"/>
-    <StatusValidChange condition="" statusId="COM_PENDING" statusIdTo="COM_READ" transitionName="Mark Read"/>
-    <StatusValidChange condition="" statusId="COM_PENDING" statusIdTo="COM_IN_PROGRESS" transitionName="Set In Progress"/>
-    <StatusValidChange condition="" statusId="COM_READ" statusIdTo="COM_IN_PROGRESS" transitionName="Set In Progress"/>
-    <StatusValidChange condition="" statusId="COM_READ" statusIdTo="COM_COMPLETE" transitionName="Complete"/>
+    <StatusValidChange condition="" statusId="COM_PENDING" statusIdTo="COM_ENTERED" transitionName="Entered,visible to all participants"/>
+    <StatusValidChange condition="" statusId="COM_PENDING" statusIdTo="COM_IN_PROGRESS" transitionName="Set In Progress, waiting to be send"/>
     <StatusValidChange condition="" statusId="COM_IN_PROGRESS" statusIdTo="COM_COMPLETE" transitionName="Complete"/>
     <StatusValidChange condition="" statusId="COM_IN_PROGRESS" statusIdTo="COM_BOUNCED" transitionName="Bounced"/>
     <StatusValidChange condition="" statusId="COM_COMPLETE" statusIdTo="COM_RESOLVED" transitionName="Resolve"/>
     <StatusValidChange condition="" statusId="COM_COMPLETE" statusIdTo="COM_REFERRED" transitionName="Refer"/>
+    <StatusValidChange condition="" statusId="COM_COMPLETE" statusIdTo="COM_BOUNCED" transitionName="Bounced"/>
     <StatusValidChange condition="" statusId="COM_UNKNOWN_PARTY" statusIdTo="COM_COMPLETE" transitionName="Complete"/>
     <StatusValidChange condition="" statusId="COM_UNKNOWN_PARTY" statusIdTo="COM_ENTERED" transitionName="Corrected"/>
     <StatusValidChange condition="" statusId="COM_PENDING" statusIdTo="COM_COMPLETE" transitionName="Complete"/>
 
     <StatusValidChange condition="" statusId="COM_ENTERED" statusIdTo="COM_CANCELLED" transitionName="Cancel"/>
     <StatusValidChange condition="" statusId="COM_PENDING" statusIdTo="COM_CANCELLED" transitionName="Cancel"/>
-    <StatusValidChange condition="" statusId="COM_READ" statusIdTo="COM_CANCELLED" transitionName="Cancel"/>
     <StatusValidChange condition="" statusId="COM_IN_PROGRESS" statusIdTo="COM_CANCELLED" transitionName="Cancel"/>
     <StatusValidChange condition="" statusId="COM_COMPLETE" statusIdTo="COM_CANCELLED" transitionName="Cancel"/>
     <StatusValidChange condition="" statusId="COM_RESOLVED" statusIdTo="COM_CANCELLED" transitionName="Cancel"/>
@@ -406,10 +436,9 @@ under the License.
     <UserPrefGroupType userPrefGroupTypeId="GLOBAL_PREFERENCES" description="Global preferences"/>
     <UserPreference userLoginId="_NA_" userPrefTypeId="ORGANIZATION_PARTY" userPrefGroupTypeId="GLOBAL_PREFERENCES" userPrefValue="DEFAULT"/>
 
-    <EnumerationType description="Global preferences" enumTypeId="GLOBAL_PREFERENCES" hasTable="N" parentTypeId=""/>
+    <EnumerationType description="User preference groups" enumTypeId="USER_PREF_GROUPS" hasTable="N" parentTypeId=""/>
+    <EnumerationType description="Global preferences" enumTypeId="GLOBAL_PREFERENCES" hasTable="N" parentTypeId="USER_PREF_GROUPS"/>
     <Enumeration description="Organization party" enumCode="" enumId="ORGANIZATION_PARTY" sequenceId="01" enumTypeId="GLOBAL_PREFERENCES"/>
     <Enumeration description="Visual Theme" enumCode="" enumId="VISUAL_THEME" sequenceId="02" enumTypeId="GLOBAL_PREFERENCES"/>
-
-    <WebSite webSiteId="PARTY" siteName="Party Manager" visualThemeSetId="BACKOFFICE"/>
 
 </entity-engine-xml>

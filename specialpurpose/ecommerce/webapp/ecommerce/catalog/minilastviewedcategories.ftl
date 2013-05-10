@@ -20,31 +20,32 @@ under the License.
 <#assign maxToShow = 8/>
 <#assign lastViewedCategories = sessionAttributes.lastViewedCategories?if_exists/>
 <#if lastViewedCategories?has_content>
-    <#if (lastViewedCategories?size > maxToShow)><#assign limit=maxToShow/><#else><#assign limit=(lastViewedCategories?size-1)/></#if>
-    <div id="minilastviewedcategories" class="screenlet">
-        <div class="screenlet-header">
-            <div class="boxlink">
-                <a href="<@ofbizUrl>clearLastViewed</@ofbizUrl>" class="lightbuttontextsmall">[${uiLabelMap.CommonClear}]</a>
-            </div>
-            <div class="boxhead">${uiLabelMap.EcommerceLastCategories}</div>
-        </div>
-        <div class="screenlet-body">
-          <div class="browsecategorylist">
-            <#list lastViewedCategories[0..limit] as categoryId>
-                <#assign category = delegator.findByPrimaryKeyCache("ProductCategory", Static["org.ofbiz.base.util.UtilMisc"].toMap("productCategoryId", categoryId))?if_exists>
-                <#if category?has_content>
-                    <div class="browsecategorytext">
-                        <#if catContentWrappers?exists && catContentWrappers[category.productCategoryId]?exists && catContentWrappers[category.productCategoryId].get("CATEGORY_NAME")?exists>
-                            <a href="<@ofbizUrl>category/~category_id=${categoryId}</@ofbizUrl>" class="browsecategorybutton">${catContentWrappers[category.productCategoryId].get("CATEGORY_NAME")}</a>
-                        <#elseif catContentWrappers?exists && catContentWrappers[category.productCategoryId]?exists && catContentWrappers[category.productCategoryId].get("DESCRIPTION")?exists>
-                            <a href="<@ofbizUrl>category/~category_id=${categoryId}</@ofbizUrl>" class="browsecategorybutton">${catContentWrappers[category.productCategoryId].get("DESCRIPTION")}</a>
-                        <#else>
-                            <a href="<@ofbizUrl>category/~category_id=${categoryId}</@ofbizUrl>" class="browsecategorybutton">${category.description?if_exists}</a>
-                        </#if>
-                    </div>
-                </#if>
-            </#list>
-          </div>
-        </div>
+  <#if (lastViewedCategories?size > maxToShow)><#assign limit=maxToShow/><#else><#assign limit=(lastViewedCategories?size-1)/></#if>
+  <div id="minilastviewedcategories" class="screenlet">
+    <div class="screenlet-title-bar">
+      <ul>
+        <li class="h3">${uiLabelMap.EcommerceLastCategories}</li>
+        <li><a href="<@ofbizUrl>clearLastViewed</@ofbizUrl>">[${uiLabelMap.CommonClear}]</a></li>
+      </ul>
+      <br class="clear"/>
     </div>
+    <div class="screenlet-body">
+      <ul class="browsecategorylist">
+        <#list lastViewedCategories[0..limit] as categoryId>
+          <#assign category = delegator.findOne("ProductCategory", Static["org.ofbiz.base.util.UtilMisc"].toMap("productCategoryId", categoryId), true)?if_exists>
+          <#if category?has_content>
+            <li class="browsecategorytext">
+              <#if catContentWrappers?exists && catContentWrappers[category.productCategoryId]?exists && catContentWrappers[category.productCategoryId].get("CATEGORY_NAME")?exists>
+                <a href="<@ofbizCatalogAltUrl productCategoryId=categoryId/>" class="browsecategorybutton">${catContentWrappers[category.productCategoryId].get("CATEGORY_NAME")}</a>
+              <#elseif catContentWrappers?exists && catContentWrappers[category.productCategoryId]?exists && catContentWrappers[category.productCategoryId].get("DESCRIPTION")?exists>
+                <a href="<@ofbizCatalogAltUrl productCategoryId=categoryId/>" class="browsecategorybutton">${catContentWrappers[category.productCategoryId].get("DESCRIPTION")}</a>
+              <#else>
+                <a href="<@ofbizCatalogAltUrl productCategoryId=categoryId/>" class="browsecategorybutton">${category.description?if_exists}</a>
+              </#if>
+            </li>
+          </#if>
+        </#list>
+      </ul>
+    </div>
+  </div>
 </#if>

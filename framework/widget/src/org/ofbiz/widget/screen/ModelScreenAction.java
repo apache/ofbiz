@@ -33,11 +33,10 @@ import javax.servlet.http.HttpSession;
 import javolution.util.FastList;
 import javolution.util.FastMap;
 
-import org.ofbiz.base.util.BshUtil;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.GeneralException;
-import org.ofbiz.base.util.GroovyUtil;
 import org.ofbiz.base.util.ObjectType;
+import org.ofbiz.base.util.ScriptUtil;
 import org.ofbiz.base.util.StringUtil;
 import org.ofbiz.base.util.UtilGenerics;
 import org.ofbiz.base.util.UtilProperties;
@@ -52,12 +51,14 @@ import org.ofbiz.entity.finder.ByAndFinder;
 import org.ofbiz.entity.finder.ByConditionFinder;
 import org.ofbiz.entity.finder.EntityFinderUtil;
 import org.ofbiz.entity.finder.PrimaryKeyFinder;
+import org.ofbiz.entity.util.EntityUtilProperties;
 import org.ofbiz.minilang.MiniLangException;
 import org.ofbiz.minilang.SimpleMethod;
 import org.ofbiz.minilang.method.MethodContext;
 import org.ofbiz.service.DispatchContext;
 import org.ofbiz.service.GenericServiceException;
 import org.ofbiz.service.ModelService;
+import org.ofbiz.widget.WidgetWorker;
 import org.w3c.dom.Element;
 
 
@@ -65,6 +66,7 @@ import org.w3c.dom.Element;
  * Widget Library - Screen model class
  */
 @SuppressWarnings("serial")
+@Deprecated
 public abstract class ModelScreenAction implements Serializable {
     public static final String module = ModelScreenAction.class.getName();
 
@@ -75,8 +77,10 @@ public abstract class ModelScreenAction implements Serializable {
         if (Debug.verboseOn()) Debug.logVerbose("Reading Screen action with name: " + actionElement.getNodeName(), module);
     }
 
+    @Deprecated
     public abstract void runAction(Map<String, Object> context) throws GeneralException;
 
+    @Deprecated
     public static List<ModelScreenAction> readSubActions(ModelScreen modelScreen, Element parentElement) {
         List<ModelScreenAction> actions = FastList.newInstance();
 
@@ -110,6 +114,7 @@ public abstract class ModelScreenAction implements Serializable {
         return actions;
     }
 
+    @Deprecated
     public static void runSubActions(List<ModelScreenAction> actions, Map<String, Object> context) throws GeneralException {
         if (actions == null) return;
 
@@ -119,6 +124,7 @@ public abstract class ModelScreenAction implements Serializable {
         }
     }
 
+    @Deprecated
     public static class SetField extends ModelScreenAction {
         protected FlexibleMapAccessor<Object> field;
         protected FlexibleMapAccessor<Object> fromField;
@@ -144,6 +150,7 @@ public abstract class ModelScreenAction implements Serializable {
             }
         }
 
+        @Override
         public void runAction(Map<String, Object> context) {
             String globalStr = this.globalExdr.expandString(context);
             // default to false
@@ -156,7 +163,7 @@ public abstract class ModelScreenAction implements Serializable {
                     newValue = getInMemoryPersistedFromField(session, context);
                     if (Debug.verboseOn()) Debug.logVerbose("In user getting value for field from [" + this.fromField.getOriginalName() + "]: " + newValue, module);
                 } else if (!this.valueExdr.isEmpty()) {
-                    newValue = this.valueExdr.expandString(context);
+                    newValue = this.valueExdr.expand(context);
                 }
             } else if (this.fromScope != null && this.fromScope.equals("application")) {
                 if (!this.fromField.isEmpty()) {
@@ -171,13 +178,13 @@ public abstract class ModelScreenAction implements Serializable {
                     newValue = this.fromField.get(context);
                     if (Debug.verboseOn()) Debug.logVerbose("In screen getting value for field from [" + this.fromField.getOriginalName() + "]: " + newValue, module);
                 } else if (!this.valueExdr.isEmpty()) {
-                    newValue = this.valueExdr.expandString(context);
+                    newValue = this.valueExdr.expand(context);
                 }
             }
 
             // If newValue is still empty, use the default value
             if (ObjectType.isEmpty(newValue) && !this.defaultExdr.isEmpty()) {
-                newValue = this.defaultExdr.expandString(context);
+                newValue = this.defaultExdr.expand(context);
             }
 
             if (UtilValidate.isNotEmpty(this.type)) {
@@ -278,6 +285,7 @@ public abstract class ModelScreenAction implements Serializable {
         }
     }
 
+    @Deprecated
     public static class PropertyMap extends ModelScreenAction {
         protected FlexibleStringExpander resourceExdr;
         protected FlexibleMapAccessor<ResourceBundleMapWrapper> mapNameAcsr;
@@ -290,6 +298,7 @@ public abstract class ModelScreenAction implements Serializable {
             this.globalExdr = FlexibleStringExpander.getInstance(setElement.getAttribute("global"));
         }
 
+        @Override
         public void runAction(Map<String, Object> context) {
             String globalStr = this.globalExdr.expandString(context);
             // default to false
@@ -332,6 +341,7 @@ public abstract class ModelScreenAction implements Serializable {
         }
     }
 
+    @Deprecated
     public static class PropertyToField extends ModelScreenAction {
 
         protected FlexibleStringExpander resourceExdr;
@@ -353,6 +363,7 @@ public abstract class ModelScreenAction implements Serializable {
             this.globalExdr = FlexibleStringExpander.getInstance(setElement.getAttribute("global"));
         }
 
+        @Override
         public void runAction(Map<String, Object> context) {
             //String globalStr = this.globalExdr.expandString(context);
             // default to false
@@ -364,11 +375,11 @@ public abstract class ModelScreenAction implements Serializable {
 
             String value = null;
             if (noLocale) {
-                value = UtilProperties.getPropertyValue(resource, property);
+                value = EntityUtilProperties.getPropertyValue(resource, property, WidgetWorker.getDelegator(context));
             } else {
-                value = UtilProperties.getMessage(resource, property, locale);
+                value = EntityUtilProperties.getMessage(resource, property, locale, WidgetWorker.getDelegator(context));
             }
-            if (value == null || value.length() == 0) {
+            if (UtilValidate.isEmpty(value)) {
                 value = this.defaultExdr.expandString(context);
             }
 
@@ -388,46 +399,38 @@ public abstract class ModelScreenAction implements Serializable {
         }
     }
 
+    @Deprecated
     public static class Script extends ModelScreenAction {
         protected String location;
+        protected String method;
 
         public Script(ModelScreen modelScreen, Element scriptElement) {
             super (modelScreen, scriptElement);
-            this.location = scriptElement.getAttribute("location");
+            String scriptLocation = scriptElement.getAttribute("location");
+            this.location = WidgetWorker.getScriptLocation(scriptLocation);
+            this.method = WidgetWorker.getScriptMethodName(scriptLocation);
         }
 
+        @Override
         public void runAction(Map<String, Object> context) throws GeneralException {
-            if (location.endsWith(".bsh")) {
-                try {
-                    BshUtil.runBshAtLocation(location, context);
-                } catch (GeneralException e) {
-                    throw new GeneralException("Error running BSH script at location [" + location + "]", e);
-                }
-            } else if (location.endsWith(".groovy")) {
-                try {
-                    GroovyUtil.runScriptAtLocation(location, context);
-                } catch (GeneralException e) {
-                    throw new GeneralException("Error running Groovy script at location [" + location + "]", e);
-                }
-            } else if (location.contains(".xml#")) {
-                String xmlResource = ScreenFactory.getResourceNameFromCombined(location);
-                String methodName = ScreenFactory.getScreenNameFromCombined(location);
+            if (location.endsWith(".xml")) {
                 Map<String, Object> localContext = FastMap.newInstance();
                 localContext.putAll(context);
                 DispatchContext ctx = this.modelScreen.getDispatcher(context).getDispatchContext();
                 MethodContext methodContext = new MethodContext(ctx, localContext, null);
                 try {
-                    SimpleMethod.runSimpleMethod(xmlResource, methodName, methodContext);
+                    SimpleMethod.runSimpleMethod(location, method, methodContext);
                     context.putAll(methodContext.getResults());
                 } catch (MiniLangException e) {
                     throw new GeneralException("Error running simple method at location [" + location + "]", e);
                 }
             } else {
-                throw new GeneralException("For screen script actions the script type is not yet supported for location: [" + location + "]");
+                ScriptUtil.executeScript(this.location, this.method, context);
             }
         }
     }
 
+    @Deprecated
     public static class Service extends ModelScreenAction {
         protected FlexibleStringExpander serviceNameExdr;
         protected FlexibleMapAccessor<Map<String, Object>> resultMapNameAcsr;
@@ -443,6 +446,7 @@ public abstract class ModelScreenAction implements Serializable {
             this.fieldMap = EntityFinderUtil.makeFieldMap(serviceElement);
         }
 
+        @Override
         public void runAction(Map<String, Object> context) {
             String serviceNameExpanded = this.serviceNameExdr.expandString(context);
             if (UtilValidate.isEmpty(serviceNameExpanded)) {
@@ -504,6 +508,7 @@ public abstract class ModelScreenAction implements Serializable {
         }
     }
 
+    @Deprecated
     public static class EntityOne extends ModelScreenAction {
         protected PrimaryKeyFinder finder;
 
@@ -512,6 +517,7 @@ public abstract class ModelScreenAction implements Serializable {
             finder = new PrimaryKeyFinder(entityOneElement);
         }
 
+        @Override
         public void runAction(Map<String, Object> context) {
             try {
                 finder.runFind(context, this.modelScreen.getDelegator(context));
@@ -523,6 +529,7 @@ public abstract class ModelScreenAction implements Serializable {
         }
     }
 
+    @Deprecated
     public static class EntityAnd extends ModelScreenAction {
         protected ByAndFinder finder;
 
@@ -531,6 +538,7 @@ public abstract class ModelScreenAction implements Serializable {
             finder = new ByAndFinder(entityAndElement);
         }
 
+        @Override
         public void runAction(Map<String, Object> context) {
             try {
                 finder.runFind(context, this.modelScreen.getDelegator(context));
@@ -542,6 +550,7 @@ public abstract class ModelScreenAction implements Serializable {
         }
     }
 
+    @Deprecated
     public static class EntityCondition extends ModelScreenAction {
         ByConditionFinder finder;
 
@@ -550,6 +559,7 @@ public abstract class ModelScreenAction implements Serializable {
             finder = new ByConditionFinder(entityConditionElement);
         }
 
+        @Override
         public void runAction(Map<String, Object> context) {
             try {
                 finder.runFind(context, this.modelScreen.getDelegator(context));
@@ -561,6 +571,7 @@ public abstract class ModelScreenAction implements Serializable {
         }
     }
 
+    @Deprecated
     public static class GetRelatedOne extends ModelScreenAction {
         protected FlexibleMapAccessor<Object> valueNameAcsr;
         protected FlexibleMapAccessor<Object> toValueNameAcsr;
@@ -577,6 +588,7 @@ public abstract class ModelScreenAction implements Serializable {
             this.useCache = "true".equals(getRelatedOneElement.getAttribute("use-cache"));
         }
 
+        @Override
         public void runAction(Map<String, Object> context) {
             Object valueObject = valueNameAcsr.get(context);
             if (valueObject == null) {
@@ -590,11 +602,7 @@ public abstract class ModelScreenAction implements Serializable {
             }
             GenericValue value = (GenericValue) valueObject;
             try {
-                if (useCache) {
-                    toValueNameAcsr.put(context, value.getRelatedOneCache(relationName));
-                } else {
-                    toValueNameAcsr.put(context, value.getRelatedOne(relationName));
-                }
+                toValueNameAcsr.put(context, value.getRelatedOne(relationName, useCache));
             } catch (GenericEntityException e) {
                 String errMsg = "Problem getting related one from entity with name " + value.getEntityName() + " for the relation-name: " + relationName + ": " + e.getMessage();
                 Debug.logError(e, errMsg, module);
@@ -604,6 +612,7 @@ public abstract class ModelScreenAction implements Serializable {
 
     }
 
+    @Deprecated
     public static class GetRelated extends ModelScreenAction {
         protected FlexibleMapAccessor<Object> valueNameAcsr;
         protected FlexibleMapAccessor<List<GenericValue>> listNameAcsr;
@@ -626,6 +635,7 @@ public abstract class ModelScreenAction implements Serializable {
             this.useCache = "true".equals(getRelatedElement.getAttribute("use-cache"));
         }
 
+        @Override
         public void runAction(Map<String, Object> context) {
             Object valueObject = valueNameAcsr.get(context);
             if (valueObject == null) {
@@ -647,11 +657,7 @@ public abstract class ModelScreenAction implements Serializable {
                 constraintMap = mapAcsr.get(context);
             }
             try {
-                if (useCache) {
-                    listNameAcsr.put(context, value.getRelatedCache(relationName, constraintMap, orderByNames));
-                } else {
-                    listNameAcsr.put(context, value.getRelated(relationName, constraintMap, orderByNames));
-                }
+                listNameAcsr.put(context, value.getRelated(relationName, constraintMap, orderByNames, useCache));
             } catch (GenericEntityException e) {
                 String errMsg = "Problem getting related from entity with name " + value.getEntityName() + " for the relation-name: " + relationName + ": " + e.getMessage();
                 Debug.logError(e, errMsg, module);

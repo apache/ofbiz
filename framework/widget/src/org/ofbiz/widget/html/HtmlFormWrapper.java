@@ -27,10 +27,11 @@ import javax.servlet.http.HttpServletResponse;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.ofbiz.base.util.Debug;
+import org.ofbiz.base.util.UtilGenerics;
 import org.ofbiz.base.util.UtilHttp;
 import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.base.util.collections.MapStack;
-import org.ofbiz.entity.GenericDelegator;
+import org.ofbiz.entity.Delegator;
 import org.ofbiz.service.LocalDispatcher;
 import org.ofbiz.widget.form.FormFactory;
 import org.ofbiz.widget.form.FormStringRenderer;
@@ -62,9 +63,9 @@ public class HtmlFormWrapper {
         this.formName = formName;
         this.request = request;
         this.response = response;
-
+        Delegator delegator = null;
         try {
-            GenericDelegator delegator = (GenericDelegator) request.getAttribute("delegator");
+            delegator = (Delegator) request.getAttribute("delegator");
             LocalDispatcher dispatcher = (LocalDispatcher) request.getAttribute("dispatcher");
             this.modelForm = FormFactory.getFormFromLocation(resourceName, formName, delegator.getModelReader(), dispatcher.getDispatchContext());
         } catch (IllegalArgumentException iae) {
@@ -75,7 +76,7 @@ public class HtmlFormWrapper {
         this.renderer = new HtmlFormRenderer(request, response);
 
         this.context = new HashMap<String, Object>();
-        Map parameterMap = UtilHttp.getParameterMap(request);
+        Map<String, Object> parameterMap = UtilHttp.getParameterMap(request);
         context.put("parameters", parameterMap);
 
         //make sure the locale is in the context
@@ -84,21 +85,24 @@ public class HtmlFormWrapper {
         context.put("timeZone", UtilHttp.getTimeZone(request));
 
         // if there was an error message, this is an error
-        if (UtilValidate.isNotEmpty((String) request.getAttribute("_ERROR_MESSAGE_"))) {
+        if (UtilValidate.isNotEmpty(request.getAttribute("_ERROR_MESSAGE_"))) {
             context.put("isError", Boolean.TRUE);
         } else {
             context.put("isError", Boolean.FALSE);
         }
 
         // if a parameter was passed saying this is an error, it is an error
-        if ("true".equals((String) parameterMap.get("isError"))) {
+        if ("true".equals(parameterMap.get("isError"))) {
             context.put("isError", Boolean.TRUE);
         }
 
-        Map uiLabelMap = (Map) request.getAttribute("uiLabelMap");
-        if (uiLabelMap != null && uiLabelMap.size() > 0 && context.get("uiLabelMap") == null) {
+        Map<String, String> uiLabelMap = UtilGenerics.cast(request.getAttribute("uiLabelMap"));
+        if (UtilValidate.isNotEmpty(uiLabelMap) && context.get("uiLabelMap") == null) {
             Debug.logInfo("Got uiLabelMap: " + uiLabelMap, module);
             context.put("uiLabelMap", uiLabelMap);
+        }
+        if (UtilValidate.isNotEmpty(delegator) && context.get("delegator") == null) {
+            context.put("delegator", delegator);
         }
     }
 

@@ -39,10 +39,12 @@ public class InventoryItemTransferTest extends OFBizTestCase {
         super(name);
     }
 
+    @Override
     protected void setUp() throws Exception {
-        userLogin = delegator.findByPrimaryKey("UserLogin", UtilMisc.toMap("userLoginId", "system"));
+        userLogin = delegator.findOne("UserLogin", UtilMisc.toMap("userLoginId", "system"), false);
     }
 
+    @Override
     protected void tearDown() throws Exception {
     }
 
@@ -51,7 +53,7 @@ public class InventoryItemTransferTest extends OFBizTestCase {
         String statusId = "IXF_REQUESTED";
         String inventoryItemId = "9005";
         ctx.put("inventoryItemId", inventoryItemId);
-        ctx.put("statusId", statusId );
+        ctx.put("statusId", statusId);
         ctx.put("facilityId", "WebStoreWarehouse");
         ctx.put("facilityIdTo", "WebStoreWarehouse");
         ctx.put("receiveDate", UtilDateTime.nowTimestamp());
@@ -66,7 +68,7 @@ public class InventoryItemTransferTest extends OFBizTestCase {
         Map<String, Object> ctx = FastMap.newInstance();
         String statusId = "IXF_COMPLETE";
         ctx.put("inventoryTransferId", inventoryTransferId);
-        String inventoryItemId = delegator.findByPrimaryKey("InventoryTransfer", UtilMisc.toMap("inventoryTransferId", inventoryTransferId)).getString("inventoryItemId");
+        String inventoryItemId = delegator.findOne("InventoryTransfer", UtilMisc.toMap("inventoryTransferId", inventoryTransferId), false).getString("inventoryItemId");
         ctx.put("inventoryItemId", inventoryItemId);
         ctx.put("statusId", statusId);
         ctx.put("userLogin", userLogin);

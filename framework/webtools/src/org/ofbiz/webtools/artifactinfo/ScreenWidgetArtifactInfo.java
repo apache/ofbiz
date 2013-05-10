@@ -33,8 +33,6 @@ import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.GeneralException;
 import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.base.util.UtilURL;
-import org.ofbiz.service.ModelService;
-import org.ofbiz.widget.form.ModelForm;
 import org.ofbiz.widget.screen.ModelScreen;
 import org.xml.sax.SAXException;
 
@@ -89,7 +87,7 @@ public class ScreenWidgetArtifactInfo extends ArtifactInfoBase {
                 continue;
             }
             try {
-                ModelService modelService = aif.getModelService(serviceName);
+                aif.getModelService(serviceName);
             } catch (GeneralException e) {
                 Debug.logWarning("Service [" + serviceName + "] reference in screen [" + this.screenName + "] in resource [" + this.screenLocation + "] does not exist!", module);
                 continue;
@@ -136,7 +134,7 @@ public class ScreenWidgetArtifactInfo extends ArtifactInfoBase {
             }
 
             try {
-                ModelForm modelForm = aif.getModelForm(formName);
+                aif.getModelForm(formName);
             } catch (Exception e) {
                 Debug.logWarning("Form [" + formName + "] reference in screen [" + this.screenName + "] in resource [" + this.screenLocation + "] does not exist!", module);
                 continue;
@@ -168,27 +166,33 @@ public class ScreenWidgetArtifactInfo extends ArtifactInfoBase {
         }
     }
 
+    @Override
     public String getDisplayName() {
         // remove the component:// from the location
         return this.screenName + " (" + this.screenLocation.substring(12) + ")";
     }
 
+    @Override
     public String getDisplayType() {
         return "Screen Widget";
     }
 
+    @Override
     public String getType() {
         return ArtifactInfoFactory.ScreenWidgetInfoTypeId;
     }
 
+    @Override
     public String getUniqueId() {
         return this.screenLocation + "#" + this.screenName;
     }
 
+    @Override
     public URL getLocationURL() throws MalformedURLException {
         return FlexibleLocation.resolveLocation(this.screenLocation, null);
     }
 
+    @Override
     public boolean equals(Object obj) {
         if (obj instanceof ScreenWidgetArtifactInfo) {
             return (this.modelScreen.getName().equals(((ScreenWidgetArtifactInfo) obj).modelScreen.getName()) &&

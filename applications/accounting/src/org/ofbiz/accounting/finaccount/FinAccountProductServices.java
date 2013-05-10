@@ -23,10 +23,11 @@ import org.ofbiz.service.DispatchContext;
 import org.ofbiz.service.LocalDispatcher;
 import org.ofbiz.service.ServiceUtil;
 import org.ofbiz.service.GenericServiceException;
-import org.ofbiz.entity.GenericDelegator;
+import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericValue;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.util.EntityUtil;
+import org.ofbiz.entity.util.EntityUtilProperties;
 import org.ofbiz.base.util.*;
 import org.ofbiz.base.util.string.FlexibleStringExpander;
 import org.ofbiz.order.order.OrderReadHelper;
@@ -43,12 +44,14 @@ import javolution.util.FastMap;
 public class FinAccountProductServices {
 
     public static final String module = FinAccountProductServices.class.getName();
-
-    public static Map createPartyFinAccountFromPurchase(DispatchContext dctx, Map context) {
+    public static final String resourceOrderError = "OrderErrorUiLabels";
+    public static final String resourceError = "AccountingErrorUiLabels";
+    
+    public static Map<String, Object> createPartyFinAccountFromPurchase(DispatchContext dctx, Map<String, Object> context) {
         // this service should always be called via FULFILLMENT_EXTASYNC
         LocalDispatcher dispatcher = dctx.getDispatcher();
-        GenericDelegator delegator = dctx.getDelegator();
-
+        Delegator delegator = dctx.getDelegator();
+        Locale locale = (Locale) context.get("locale");
         GenericValue orderItem = (GenericValue) context.get("orderItem");
         GenericValue userLogin = (GenericValue) context.get("userLogin");
 
@@ -59,17 +62,18 @@ public class FinAccountProductServices {
         // the order header for store info
         GenericValue orderHeader;
         try {
-            orderHeader = orderItem.getRelatedOne("OrderHeader");
+            orderHeader = orderItem.getRelatedOne("OrderHeader", false);
         } catch (GenericEntityException e) {
             Debug.logError(e, "Unable to get OrderHeader from OrderItem", module);
-            return ServiceUtil.returnError("Unable to get OrderHeader from OrderItem");
+            return ServiceUtil.returnError(UtilProperties.getMessage(resourceOrderError, 
+                    "OrderCannotGetOrderHeader", UtilMisc.toMap("orderId", orderId), locale));
         }
 
         String productId = orderItem.getString("productId");
         GenericValue featureAndAppl;
         try {
-            List featureAndAppls = delegator.findByAnd("ProductFeatureAndAppl", UtilMisc.toMap("productId", productId,
-                    "productFeatureTypeId", "TYPE", "productFeatureApplTypeId", "STANDARD_FEATURE"));
+            List<GenericValue> featureAndAppls = delegator.findByAnd("ProductFeatureAndAppl", UtilMisc.toMap("productId", productId,
+                    "productFeatureTypeId", "TYPE", "productFeatureApplTypeId", "STANDARD_FEATURE"), null, false);
             featureAndAppls = EntityUtil.filterByDate(featureAndAppls);
             featureAndAppl = EntityUtil.getFirst(featureAndAppls);
         } catch (GenericEntityException e) {
@@ -92,7 +96,7 @@ public class FinAccountProductServices {
         // locate the financial account type
         GenericValue finAccountType;
         try {
-            finAccountType = delegator.findByPrimaryKey("FinAccountType", UtilMisc.toMap("finAccountTypeId", finAccountTypeId));
+            finAccountType = delegator.findOne("FinAccountType", UtilMisc.toMap("finAccountTypeId", finAccountTypeId), false);
         } catch (GenericEntityException e) {
             Debug.logError(e, module);
             return ServiceUtil.returnError(e.getMessage());
@@ -107,7 +111,7 @@ public class FinAccountProductServices {
 
         // make sure we have a currency
         if (currency == null) {
-            currency = UtilProperties.getPropertyValue("general.properties", "currency.uom.id.default", "USD");
+            currency = EntityUtilProperties.getPropertyValue("general.properties", "currency.uom.id.default", "USD", delegator);
         }
 
         // get the product store
@@ -116,9 +120,10 @@ public class FinAccountProductServices {
             productStoreId = orh.getProductStoreId();
         }
         if (productStoreId == null) {
-            String errMsg = "Unable to create financial accout; no productStoreId on OrderHeader : " + orderId;
-            Debug.logFatal(errMsg, module);
-            return ServiceUtil.returnError(errMsg);
+            Debug.logFatal("Unable to create financial accout; no productStoreId on OrderHeader : " + orderId, module);
+            return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, 
+                    "AccountingFinAccountCannotCreate", 
+                    UtilMisc.toMap("orderId", orderId), locale));
         }
 
         // party ID (owner)
@@ -129,13 +134,11 @@ public class FinAccountProductServices {
         }
 
         // payment method info
-        List payPrefs = orh.getPaymentPreferences();
+        List<GenericValue> payPrefs = orh.getPaymentPreferences();
         String paymentMethodId = null;
         if (payPrefs != null) {
-            Iterator i = payPrefs.iterator();
-            while (i.hasNext()) {
+            for (GenericValue pref : payPrefs) {
                 // needs to be a CC or EFT account
-                GenericValue pref = (GenericValue) i.next();
                 String type = pref.getString("paymentMethodTypeId");
                 if ("CREDIT_CARD".equals(type) || "EFT_ACCOUNT".equals(type)) {
                     paymentMethodId = pref.getString("paymentMethodId");
@@ -149,7 +152,7 @@ public class FinAccountProductServices {
 
         if (billToParty != null) {
             try {
-                party = billToParty.getRelatedOne("Party");
+                party = billToParty.getRelatedOne("Party", false);
             } catch (GenericEntityException e) {
                 Debug.logError(e, module);
             }
@@ -164,14 +167,14 @@ public class FinAccountProductServices {
         }
 
         // create the context for FSE
-        Map expContext = FastMap.newInstance();
+        Map<String, Object> expContext = FastMap.newInstance();
         expContext.put("orderHeader", orderHeader);
         expContext.put("orderItem", orderItem);
         expContext.put("party", party);
         expContext.put("person", person);
         expContext.put("partyGroup", partyGroup);
 
-        // expand the name field to dynamicly add information
+        // expand the name field to dynamically add information
         FlexibleStringExpander exp = FlexibleStringExpander.getInstance(finAccountName);
         finAccountName = exp.expandString(expContext);
 
@@ -181,7 +184,7 @@ public class FinAccountProductServices {
         BigDecimal deposit = price.multiply(quantity).setScale(FinAccountHelper.decimals, FinAccountHelper.rounding);
 
         // create the financial account
-        Map createCtx = FastMap.newInstance();
+        Map<String, Object> createCtx = FastMap.newInstance();
         String finAccountId;
 
         createCtx.put("finAccountTypeId", finAccountTypeId);
@@ -198,7 +201,7 @@ public class FinAccountProductServices {
             createCtx.put("replenishPaymentId", paymentMethodId);
         }
 
-        Map createResp;
+        Map<String, Object> createResp;
         try {
             createResp = dispatcher.runSync("createFinAccountForStore", createCtx);
         } catch (GenericServiceException e) {
@@ -208,18 +211,18 @@ public class FinAccountProductServices {
         if (ServiceUtil.isError(createResp)) {
             Debug.logFatal(ServiceUtil.getErrorMessage(createResp), module);
             return createResp;
-        } else {
-            finAccountId = (String) createResp.get("finAccountId");
         }
 
+        finAccountId = (String) createResp.get("finAccountId");
+
         // create the owner role
-        Map roleCtx = FastMap.newInstance();
+        Map<String, Object> roleCtx = FastMap.newInstance();
         roleCtx.put("partyId", partyId);
         roleCtx.put("roleTypeId", "OWNER");
         roleCtx.put("finAccountId", finAccountId);
         roleCtx.put("userLogin", userLogin);
         roleCtx.put("fromDate", UtilDateTime.nowTimestamp());
-        Map roleResp;
+        Map<String, Object> roleResp;
         try {
             roleResp = dispatcher.runSync("createFinAccountRole", roleCtx);
         } catch (GenericServiceException e) {
@@ -232,7 +235,7 @@ public class FinAccountProductServices {
         }
 
         // create the initial deposit
-        Map depositCtx = FastMap.newInstance();
+        Map<String, Object> depositCtx = FastMap.newInstance();
         depositCtx.put("finAccountId", finAccountId);
         depositCtx.put("productStoreId", productStoreId);
         depositCtx.put("currency", currency);
@@ -243,7 +246,7 @@ public class FinAccountProductServices {
         depositCtx.put("reasonEnumId", "FATR_IDEPOSIT");
         depositCtx.put("userLogin", userLogin);
 
-        Map depositResp;
+        Map<String, Object> depositResp;
         try {
             depositResp = dispatcher.runSync("finAccountDeposit", depositCtx);
         } catch (GenericServiceException e) {
@@ -255,7 +258,7 @@ public class FinAccountProductServices {
             return depositResp;
         }
 
-        Map result = ServiceUtil.returnSuccess();
+        Map<String, Object> result = ServiceUtil.returnSuccess();
         result.put("finAccountId", finAccountId);
         return result;
     }

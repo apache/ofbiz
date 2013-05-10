@@ -18,41 +18,58 @@
  *******************************************************************************/
 package org.ofbiz.minilang.method.conditional;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
 
-import javolution.util.FastList;
-
-import org.w3c.dom.*;
-import org.ofbiz.base.util.*;
-import org.ofbiz.minilang.*;
-import org.ofbiz.minilang.method.*;
+import org.ofbiz.base.util.UtilXml;
+import org.ofbiz.minilang.MiniLangElement;
+import org.ofbiz.minilang.MiniLangException;
+import org.ofbiz.minilang.MiniLangValidate;
+import org.ofbiz.minilang.SimpleMethod;
+import org.ofbiz.minilang.artifact.ArtifactInfoContext;
+import org.ofbiz.minilang.method.MethodContext;
+import org.ofbiz.minilang.method.MethodOperation;
+import org.w3c.dom.Element;
 
 /**
- * Implements the else-if alternate execution element.
+ * Implements the &lt;else-if&gt; element.
+ * 
+ * @see <a href="https://cwiki.apache.org/OFBADMIN/mini-language-reference.html#Mini-languageReference-{{%3Celseif%3E}}">Mini-language Reference</a>
  */
-public class ElseIf {
+public final class ElseIf extends MiniLangElement {
 
-    protected Conditional condition;
-    protected List<MethodOperation> thenSubOps = FastList.newInstance();
+    private final Conditional condition;
+    private final List<MethodOperation> thenSubOps;
 
-    public ElseIf (Element element, SimpleMethod simpleMethod) {
+    public ElseIf(Element element, SimpleMethod simpleMethod) throws MiniLangException {
+        super(element, simpleMethod);
+        if (MiniLangValidate.validationOn()) {
+            MiniLangValidate.childElements(simpleMethod, element, "condition", "then");
+            MiniLangValidate.requiredChildElements(simpleMethod, element, "condition", "then");
+        }
         Element conditionElement = UtilXml.firstChildElement(element, "condition");
         Element conditionChildElement = UtilXml.firstChildElement(conditionElement);
         this.condition = ConditionalFactory.makeConditional(conditionChildElement, simpleMethod);
-
         Element thenElement = UtilXml.firstChildElement(element, "then");
-        SimpleMethod.readOperations(thenElement, thenSubOps, simpleMethod);
+        this.thenSubOps = Collections.unmodifiableList(SimpleMethod.readOperations(thenElement, simpleMethod));
+    }
+
+    public boolean checkCondition(MethodContext methodContext) throws MiniLangException {
+        return condition.checkCondition(methodContext);
+    }
+
+    @Override
+    public void gatherArtifactInfo(ArtifactInfoContext aic) {
+        for (MethodOperation method : this.thenSubOps) {
+            method.gatherArtifactInfo(aic);
+        }
     }
 
     public List<MethodOperation> getThenSubOps() {
         return this.thenSubOps;
     }
 
-    public boolean checkCondition(MethodContext methodContext) {
-        return condition.checkCondition(methodContext);
-    }
-
-    public boolean runSubOps(MethodContext methodContext) {
+    public boolean runSubOps(MethodContext methodContext) throws MiniLangException {
         return SimpleMethod.runSubOps(thenSubOps, methodContext);
     }
 }

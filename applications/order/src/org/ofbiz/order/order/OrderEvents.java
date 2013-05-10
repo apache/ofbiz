@@ -21,6 +21,7 @@ package org.ofbiz.order.order;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
@@ -32,9 +33,16 @@ import org.ofbiz.base.util.GeneralException;
 import org.ofbiz.base.util.UtilHttp;
 import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.content.data.DataResourceWorker;
-import org.ofbiz.entity.GenericDelegator;
+import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
+
+import org.ofbiz.service.GenericServiceException;
+import org.ofbiz.service.LocalDispatcher;
+import org.ofbiz.service.ServiceUtil;
+import org.ofbiz.webapp.website.WebSiteWorker;
+
+import javolution.util.FastMap;
 
 /**
  * Order Events
@@ -46,21 +54,21 @@ public class OrderEvents {
     public static String downloadDigitalProduct(HttpServletRequest request, HttpServletResponse response) {
         HttpSession session = request.getSession();
         ServletContext application = session.getServletContext();
-        GenericDelegator delegator = (GenericDelegator) request.getAttribute("delegator");
+        Delegator delegator = (Delegator) request.getAttribute("delegator");
         GenericValue userLogin = (GenericValue) session.getAttribute("userLogin");
         String dataResourceId = request.getParameter("dataResourceId");
 
         try {
             // has the userLogin.partyId ordered a product with DIGITAL_DOWNLOAD content associated for the given dataResourceId?
-            List orderRoleAndProductContentInfoList = delegator.findByAnd("OrderRoleAndProductContentInfo",
-                    UtilMisc.toMap("partyId", userLogin.get("partyId"), "dataResourceId", dataResourceId, "productContentTypeId", "DIGITAL_DOWNLOAD", "statusId", "ITEM_COMPLETED"));
+            List<GenericValue> orderRoleAndProductContentInfoList = delegator.findByAnd("OrderRoleAndProductContentInfo",
+                    UtilMisc.toMap("partyId", userLogin.get("partyId"), "dataResourceId", dataResourceId, "productContentTypeId", "DIGITAL_DOWNLOAD", "statusId", "ITEM_COMPLETED"), null, false);
 
             if (orderRoleAndProductContentInfoList.size() == 0) {
                 request.setAttribute("_ERROR_MESSAGE_", "No record of purchase for digital download found (dataResourceId=[" + dataResourceId + "]).");
                 return "error";
             }
 
-            GenericValue orderRoleAndProductContentInfo = (GenericValue) orderRoleAndProductContentInfoList.get(0);
+            GenericValue orderRoleAndProductContentInfo = orderRoleAndProductContentInfoList.get(0);
 
             // TODO: check validity based on ProductContent fields: useCountLimit, useTime/useTimeUomId
 
@@ -68,7 +76,7 @@ public class OrderEvents {
                 response.setContentType(orderRoleAndProductContentInfo.getString("mimeTypeId"));
             }
             OutputStream os = response.getOutputStream();
-            DataResourceWorker.streamDataResource(os, delegator, dataResourceId, "", application.getInitParameter("webSiteId"), UtilHttp.getLocale(request), application.getRealPath("/"));
+            DataResourceWorker.streamDataResource(os, delegator, dataResourceId, "", WebSiteWorker.getWebSiteId(request), UtilHttp.getLocale(request), application.getRealPath("/"));
             os.flush();
         } catch (GenericEntityException e) {
             String errMsg = "Error downloading digital product content: " + e.toString();
@@ -88,5 +96,57 @@ public class OrderEvents {
         }
 
         return "success";
+    }
+
+    public static String cancelSelectedOrderItems(HttpServletRequest request, HttpServletResponse response) {
+        LocalDispatcher dispatcher = (LocalDispatcher) request.getAttribute("dispatcher");
+        Delegator delegator = (Delegator) request.getAttribute("delegator");
+        HttpSession session = request.getSession();
+        GenericValue userLogin = (GenericValue) session.getAttribute("userLogin");
+
+        Map<String, Object> resultMap = FastMap.newInstance();
+        String  orderId = request.getParameter("orderId");
+        String[] orderItemSeqIds = request.getParameterValues("selectedItem");
+
+        if (orderItemSeqIds != null) {
+            for (String orderItemSeqId : orderItemSeqIds) {
+                try {
+                    GenericValue orderItem = delegator.findOne("OrderItem", UtilMisc.toMap("orderId", orderId, "orderItemSeqId", orderItemSeqId), false);
+                    List<GenericValue> orderItemShipGroupAssocs = orderItem.getRelated("OrderItemShipGroupAssoc", null, null, false);
+                    for (GenericValue orderItemShipGroupAssoc : orderItemShipGroupAssocs) {
+                        GenericValue orderItemShipGroup = orderItemShipGroupAssoc.getRelatedOne("OrderItemShipGroup", false);
+                        String shipGroupSeqId = orderItemShipGroup.getString("shipGroupSeqId");
+
+                        Map<String, Object> contextMap = FastMap.newInstance();
+                        contextMap.put("orderId", orderId);
+                        contextMap.put("orderItemSeqId", orderItemSeqId);
+                        contextMap.put("shipGroupSeqId", shipGroupSeqId);
+                        contextMap.put("userLogin", userLogin);
+                        try {
+                            resultMap = dispatcher.runSync("cancelOrderItem", contextMap);
+
+                            if (ServiceUtil.isError(resultMap)) {
+                                String errorMessage = (String) resultMap.get("errorMessage");
+                                Debug.logError(errorMessage, module);
+                                request.setAttribute("_ERROR_MESSAGE_", errorMessage);
+                                return "error";
+                            }
+
+                        } catch (GenericServiceException e) {
+                            Debug.logError(e, module);
+                            request.setAttribute("_ERROR_MESSAGE_", resultMap.get("errorMessage"));
+                            return "error";
+                        }
+                    }
+                } catch (GenericEntityException e) {
+                    Debug.logError(e, module);
+                    return "error";
+                }
+            }
+            return "success";
+        } else {
+            request.setAttribute("_ERROR_MESSAGE_", "No order item selected. Please select an order item to cancel");
+            return "error";
+        }
     }
 }

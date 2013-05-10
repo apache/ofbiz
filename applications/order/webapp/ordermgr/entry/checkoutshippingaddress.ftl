@@ -17,8 +17,8 @@ specific language governing permissions and limitations
 under the License.
 -->
 
-<script language="javascript" type="text/javascript">
-<!--
+<script type="text/javascript">
+//<![CDATA[
 function submitForm(form, mode, value) {
     if (mode == "DN") {
         // done action; checkout
@@ -51,14 +51,14 @@ function toggleBillingAccount(box) {
     }
 }
 
-// -->
+//]]>
 </script>
 <#assign cart = shoppingCart?if_exists/>
 <form method="post" name="checkoutInfoForm" style="margin:0;">
     <input type="hidden" name="checkoutpage" value="shippingaddress"/>
     <div class="screenlet" style="height: 100%;">
-        <div class="screenlet-header">
-            <div class="boxhead">1)&nbsp;${uiLabelMap.OrderWhereShallWeShipIt}?</div>
+        <div class="screenlet-title-bar">
+            <div class="h3">1)&nbsp;${uiLabelMap.OrderWhereShallWeShipIt}?</div>
         </div>
         <div class="screenlet-body" style="height: 100%;">
             <table width="100%" border="0" cellpadding="1" cellspacing="0">
@@ -72,29 +72,29 @@ function toggleBillingAccount(box) {
                 </td>
               </tr>
                <#if shippingContactMechList?has_content>
-                 <tr><td colspan="2"><hr/></td></tr>
+                 <tr><td colspan="2"><hr /></td></tr>
                  <#list shippingContactMechList as shippingContactMech>
-                   <#assign shippingAddress = shippingContactMech.getRelatedOne("PostalAddress")>
+                   <#assign shippingAddress = shippingContactMech.getRelatedOne("PostalAddress", false)>
                    <#assign checkThisAddress = (shippingContactMech_index == 0 && !cart.getShippingContactMechId()?has_content) || (cart.getShippingContactMechId()?default("") == shippingAddress.contactMechId)/>
                    <tr>
-                     <td valign="top" width="1%" nowrap>
-                       <input type="radio" name="shipping_contact_mech_id" value="${shippingAddress.contactMechId}"<#if checkThisAddress> checked</#if>>
+                     <td valign="top" width="1%" nowrap="nowrap">
+                       <input type="radio" name="shipping_contact_mech_id" value="${shippingAddress.contactMechId}"<#if checkThisAddress> checked="checked"</#if> />
                      </td>
-                     <td valign="top" width="99%" nowrap>
+                     <td valign="top" width="99%" nowrap="nowrap">
                        <div>
-                         <#if shippingAddress.toName?has_content><b>${uiLabelMap.CommonTo}:</b>&nbsp;${shippingAddress.toName}<br/></#if>
-                         <#if shippingAddress.attnName?has_content><b>${uiLabelMap.PartyAddrAttnName}:</b>&nbsp;${shippingAddress.attnName}<br/></#if>
-                         <#if shippingAddress.address1?has_content>${shippingAddress.address1}<br/></#if>
-                         <#if shippingAddress.address2?has_content>${shippingAddress.address2}<br/></#if>
+                         <#if shippingAddress.toName?has_content><b>${uiLabelMap.CommonTo}:</b>&nbsp;${shippingAddress.toName}<br /></#if>
+                         <#if shippingAddress.attnName?has_content><b>${uiLabelMap.PartyAddrAttnName}:</b>&nbsp;${shippingAddress.attnName}<br /></#if>
+                         <#if shippingAddress.address1?has_content>${shippingAddress.address1}<br /></#if>
+                         <#if shippingAddress.address2?has_content>${shippingAddress.address2}<br /></#if>
                          <#if shippingAddress.city?has_content>${shippingAddress.city}</#if>
-                         <#if shippingAddress.stateProvinceGeoId?has_content><br/>${shippingAddress.stateProvinceGeoId}</#if>
-                         <#if shippingAddress.postalCode?has_content><br/>${shippingAddress.postalCode}</#if>
-                         <#if shippingAddress.countryGeoId?has_content><br/>${shippingAddress.countryGeoId}</#if>
+                         <#if shippingAddress.stateProvinceGeoId?has_content><br />${shippingAddress.stateProvinceGeoId}</#if>
+                         <#if shippingAddress.postalCode?has_content><br />${shippingAddress.postalCode}</#if>
+                         <#if shippingAddress.countryGeoId?has_content><br />${shippingAddress.countryGeoId}</#if>
                          <a href="javascript:submitForm(document.checkoutInfoForm, 'EA', '${shippingAddress.contactMechId}');" class="buttontext">${uiLabelMap.CommonUpdate}</a>
                        </div>
                      </td>
                    </tr>
-                   <tr><td colspan="2"><hr/></td></tr>
+                   <tr><td colspan="2"><hr /></td></tr>
                  </#list>
                </#if>
               </table>
@@ -104,7 +104,7 @@ function toggleBillingAccount(box) {
                    <#if agreements.size()!=1>
                      <tr>
                        <td>&nbsp;</td>
-                       <td align='left' valign='top' nowrap>
+                       <td align='left' valign='top' nowrap="nowrap">
                          <div class='tableheadtext'>
                            ${uiLabelMap.OrderSelectAgreement}
                          </div>
@@ -122,7 +122,7 @@ function toggleBillingAccount(box) {
                      </tr>
                    <#else>
                      <#list agreements as agreement>
-                        <input type="radio" name="agreementId" value="${agreement.agreementId?if_exists}"<#if checkThisAddress> checked</#if>>${agreement.description?if_exists} will be used for this order.
+                        <input type="radio" name="agreementId" value="${agreement.agreementId?if_exists}"<#if checkThisAddress> checked="checked"</#if> />${agreement.description?if_exists} will be used for this order.
                      </#list>
                    </#if>
                  </#if>

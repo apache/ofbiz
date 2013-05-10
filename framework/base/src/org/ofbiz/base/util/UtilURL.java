@@ -20,7 +20,6 @@ package org.ofbiz.base.util;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -35,7 +34,7 @@ public class UtilURL {
 
     public static final String module = UtilURL.class.getName();
 
-    public static URL fromClass(Class contextClass) {
+    public static <C> URL fromClass(Class<C> contextClass) {
         String resourceName = contextClass.getName();
         int dotIndex = resourceName.lastIndexOf('.');
 
@@ -49,7 +48,7 @@ public class UtilURL {
         return fromResource(resourceName, null);
     }
 
-    public static URL fromResource(Class contextClass, String resourceName) {
+    public static <C> URL fromResource(Class<C> contextClass, String resourceName) {
         if (contextClass == null)
             return fromResource(resourceName, null);
         else
@@ -57,31 +56,46 @@ public class UtilURL {
     }
 
     public static URL fromResource(String resourceName, ClassLoader loader) {
-        URL url = null;
-
-        if (loader != null && url == null) url = loader.getResource(resourceName);
-        if (loader != null && url == null) url = loader.getResource(resourceName + ".properties");
-
-        if (loader == null && url == null) {
+        if (loader == null) {
             try {
                 loader = Thread.currentThread().getContextClassLoader();
             } catch (SecurityException e) {
+                // Huh? The new object will be created by the current thread, so how is this any different than the previous code?
                 UtilURL utilURL = new UtilURL();
                 loader = utilURL.getClass().getClassLoader();
             }
         }
-
-        if (url == null) url = loader.getResource(resourceName);
-        if (url == null) url = loader.getResource(resourceName + ".properties");
-
-        if (url == null) url = ClassLoader.getSystemResource(resourceName);
-        if (url == null) url = ClassLoader.getSystemResource(resourceName + ".properties");
-
-        if (url == null) url = fromFilename(resourceName);
-        if (url == null) url = fromOfbizHomePath(resourceName);
-        if (url == null) url = fromUrlString(resourceName);
-
-        //Debug.log("[fromResource] got URL " + (url == null ? "[NotFound]" : url.toExternalForm()) + " from resourceName " + resourceName);
+        URL url = loader.getResource(resourceName);
+        if (url != null) {
+            return url;
+        }
+        String propertiesResourceName = null;
+        if (!resourceName.endsWith(".properties")) {
+            propertiesResourceName = resourceName.concat(".properties");
+            url = loader.getResource(propertiesResourceName);
+            if (url != null) {
+                return url;
+            }
+        }
+        url = ClassLoader.getSystemResource(resourceName);
+        if (url != null) {
+            return url;
+        }
+        if (propertiesResourceName != null) {
+            url = ClassLoader.getSystemResource(propertiesResourceName);
+            if (url != null) {
+                return url;
+            }
+        }
+        url = fromFilename(resourceName);
+        if (url != null) {
+            return url;
+        }
+        url = fromOfbizHomePath(resourceName);
+        if (url != null) {
+            return url;
+        }
+        url = fromUrlString(resourceName);
         return url;
     }
 

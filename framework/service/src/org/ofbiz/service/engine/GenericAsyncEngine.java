@@ -20,9 +20,6 @@ package org.ofbiz.service.engine;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.Date;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 
 import org.ofbiz.base.util.Debug;
@@ -41,8 +38,8 @@ import org.ofbiz.service.ServiceDispatcher;
 import org.ofbiz.service.config.ServiceConfigUtil;
 import org.ofbiz.service.job.GenericServiceJob;
 import org.ofbiz.service.job.Job;
-import org.ofbiz.service.job.JobManagerException;
 import org.ofbiz.service.job.JobManager;
+import org.ofbiz.service.job.JobManagerException;
 
 /**
  * Generic Asynchronous Engine
@@ -105,7 +102,7 @@ public abstract class GenericAsyncEngine extends AbstractEngine {
 
                 // Create the job info
                 String jobId = dispatcher.getDelegator().getNextSeqId("JobSandbox");
-                String jobName = Long.toString((new Date().getTime()));
+                String jobName = Long.toString(System.currentTimeMillis());
 
                 Map<String, Object> jFields = UtilMisc.toMap("jobId", jobId, "jobName", jobName, "runTime", UtilDateTime.nowTimestamp());
                 jFields.put("poolId", ServiceConfigUtil.getSendPool());
@@ -139,7 +136,7 @@ public abstract class GenericAsyncEngine extends AbstractEngine {
         } else {
             JobManager jMgr = dispatcher.getJobManager();
             if (jMgr != null) {
-                String name = Long.toString(new Date().getTime());
+                String name = Long.toString(System.currentTimeMillis());
                 String jobId = modelService.name + "." + name;
                 job = new GenericServiceJob(dctx, jobId, name, modelService.name, context, requester);
                 try {
@@ -153,6 +150,7 @@ public abstract class GenericAsyncEngine extends AbstractEngine {
         }
     }
 
+    @Override
     protected boolean allowCallbacks(ModelService model, Map<String, Object> context, int mode) throws GenericServiceException {
         return mode == GenericEngine.SYNC_MODE;
     }

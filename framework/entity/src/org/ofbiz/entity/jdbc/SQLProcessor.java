@@ -23,21 +23,29 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.math.BigDecimal;
-import java.sql.*;
+import java.sql.Blob;
+import java.sql.Clob;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.entity.GenericDataSourceException;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.config.DatasourceInfo;
 import org.ofbiz.entity.config.EntityConfigUtil;
+import org.ofbiz.entity.datasource.GenericHelperInfo;
 import org.ofbiz.entity.transaction.GenericTransactionException;
 import org.ofbiz.entity.transaction.TransactionUtil;
 
 /**
- * SQLProcessor - provides utitlity functions to ease database access
+ * SQLProcessor - provides utility functions to ease database access
  *
  */
 public class SQLProcessor {
@@ -51,16 +59,13 @@ public class SQLProcessor {
     public static boolean ENABLE_TEST = false;
 
     /** The datasource helper (see entityengine.xml <datasource name="..">) */
-    private String helperName;
+    private GenericHelperInfo helperInfo;
 
     // / The database resources to be used
     private Connection _connection = null;
 
     // / The database resources to be used
     private PreparedStatement _ps = null;
-
-    // / The database resources to be used
-    private Statement _stmt = null;
 
     // / The database resources to be used
     private ResultSet _rs = null;
@@ -79,16 +84,13 @@ public class SQLProcessor {
     // / true in case the connection shall be closed.
     private boolean _bDeleteConnection = false;
 
-    private Map<String, String> _needClobWorkAroundWrite = null;
-    private Map<String, String> _needBlobWorkAroundWrite = null;
-
     /**
      * Construct an object based on the helper/datasource
      *
-     * @param helperName  The datasource helper (see entityengine.xml &lt;datasource name=".."&gt;)
+     * @param helperInfo  The datasource helper (see entityengine.xml &lt;datasource name=".."&gt;)
      */
-    public SQLProcessor(String helperName) {
-        this.helperName = helperName;
+    public SQLProcessor(GenericHelperInfo helperInfo) {
+        this.helperInfo = helperInfo;
         this._manualTX = true;
     }
 
@@ -96,11 +98,11 @@ public class SQLProcessor {
      * Construct an object with an connection given. The connection will not
      * be closed by this SQLProcessor, but may be by some other.
      *
-     * @param helperName  The datasource helper (see entityengine.xml &lt;datasource name=".."&gt;)
+     * @param helperInfo  The datasource helper (see entityengine.xml &lt;datasource name=".."&gt;)
      * @param connection  The connection to be used
      */
-    public SQLProcessor(String helperName, Connection connection) {
-        this.helperName = helperName;
+    public SQLProcessor(GenericHelperInfo helperInfo, Connection connection) {
+        this.helperInfo = helperInfo;
         this._connection = connection;
 
         // Do not commit while closing
@@ -218,17 +220,6 @@ public class SQLProcessor {
             _ps = null;
         }
 
-        if (_stmt != null) {
-            try {
-                _stmt.close();
-                if (Debug.verboseOn()) Debug.logVerbose("SQLProcessor:close() statement close : _manualTX=" + _manualTX, module);
-            } catch (SQLException sqle) {
-                Debug.logWarning(sqle.getMessage(), module);
-            }
-
-            _stmt = null;
-        }
-
         if ((_connection != null) && _bDeleteConnection) {
             try {
                 _connection.close();
@@ -256,7 +247,7 @@ public class SQLProcessor {
         _manualTX = true;
 
         try {
-            _connection = ConnectionFactory.getConnection(helperName);
+            _connection = ConnectionFactory.getConnection(helperInfo);
             if (Debug.verboseOn()) Debug.logVerbose("SQLProcessor:connection() : manualTx=" + _manualTX, module);
         } catch (SQLException sqle) {
             throw new GenericDataSourceException("Unable to esablish a connection with the database.", sqle);
@@ -404,7 +395,7 @@ public class SQLProcessor {
     }
 
     /**
-     * Execute a query baed ont SQL string given
+     * Execute a query based on the SQL string given
      *
      * @param sql  The SQL string to be executed
      * @return  The result set of the query
@@ -476,7 +467,7 @@ public class SQLProcessor {
     }
 
     /**
-     * Getter: get the currently activ ResultSet
+     * Getter: get the currently active ResultSet
      *
      * @return ResultSet
      */
@@ -531,6 +522,19 @@ public class SQLProcessor {
         } finally {
             close();
         }
+    }
+
+    /**
+     * Set the next binding variable of the currently active prepared statement.
+     *
+     * @param handler
+     * @param field
+     *
+     * @throws SQLException
+     */
+    public <T> void setValue(JdbcValueHandler<T> handler, T field) throws SQLException {
+        handler.setValue(_ps, _ind, field);
+        _ind++;
     }
 
     /**
@@ -708,7 +712,7 @@ public class SQLProcessor {
         if (field != null) {
             _ps.setBoolean(_ind, field.booleanValue());
         } else {
-            _ps.setNull(_ind, Types.NULL); // TODO: really should be Types.BOOLEAN, but that wasn't introduced until Java 1.4... hmmm what to do?
+            _ps.setNull(_ind, Types.BOOLEAN);
         }
         _ind++;
     }
@@ -740,7 +744,7 @@ public class SQLProcessor {
         if (field != null) {
             _ps.setBlob(_ind, field);
         } else {
-            DatasourceInfo datasourceInfo = EntityConfigUtil.getDatasourceInfo(this.helperName);
+            DatasourceInfo datasourceInfo = EntityConfigUtil.getDatasourceInfo(this.helperInfo.getHelperBaseName());
             if (datasourceInfo.useBinaryTypeForBlob) {
                 _ps.setNull(_ind, Types.BINARY);
             } else {
@@ -791,7 +795,7 @@ public class SQLProcessor {
                 throw new SQLException(ex.getMessage());
             }
         } else {
-            DatasourceInfo datasourceInfo = EntityConfigUtil.getDatasourceInfo(this.helperName);
+            DatasourceInfo datasourceInfo = EntityConfigUtil.getDatasourceInfo(this.helperInfo.getHelperBaseName());
             if (datasourceInfo.useBinaryTypeForBlob) {
                 _ps.setNull(_ind, Types.BINARY);
             } else {
@@ -814,7 +818,7 @@ public class SQLProcessor {
         if (bytes != null) {
             _ps.setBytes(_ind, bytes);
         } else {
-            DatasourceInfo datasourceInfo = EntityConfigUtil.getDatasourceInfo(this.helperName);
+            DatasourceInfo datasourceInfo = EntityConfigUtil.getDatasourceInfo(this.helperInfo.getHelperBaseName());
             if (datasourceInfo.useBinaryTypeForBlob) {
                 _ps.setNull(_ind, Types.BINARY);
             } else {
@@ -824,6 +828,7 @@ public class SQLProcessor {
         _ind++;
     }
 
+    @Override
     protected void finalize() throws Throwable {
         try {
             this.close();
@@ -849,9 +854,9 @@ public class SQLProcessor {
         // do not set fetch size when using the cursor connection
         if (_connection instanceof CursorConnection) return;
 
-        // check if the statement was called with a specific fetchsize, if not grab the default from the datasource
+        // check if the statement was called with a specific fetch size, if not grab the default from the datasource
         if (fetchSize < 0) {
-            DatasourceInfo ds = EntityConfigUtil.getDatasourceInfo(helperName);
+            DatasourceInfo ds = EntityConfigUtil.getDatasourceInfo(this.helperInfo.getHelperBaseName());
             if (ds != null) {
                 fetchSize = ds.resultFetchSize;
             } else {

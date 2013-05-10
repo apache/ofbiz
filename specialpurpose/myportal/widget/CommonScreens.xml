@@ -35,8 +35,6 @@ under the License.
                 <property-map resource="ProjectMgrUiLabels" map-name="uiLabelMap" global="true"/>
                 <property-map resource="HumanResUiLabels" map-name="uiLabelMap" global="true"/>
 
-                <property-map resource="MyPortalHelpUrls" map-name="helpUrlsMap" global="true"/>
-                <set field="headerItem" value="${parameters._HOME_VIEW_PARAMS_.portalPageId}"/>
                 <set field="layoutSettings.companyName" from-field="uiLabelMap.MyPortalInformation" global="true"/>
                 <set field="layoutSettings.companySubtitle" from-field="uiLabelMap.PartyCompanySubtitle" global="true"/>
                 <set field="applicationMenuName" value="MyPortalAppBar" global="true"/>
@@ -76,14 +74,6 @@ under the License.
         </section>
     </screen>
 
-    <screen name="CommonCalendarDecorator">
-        <section>
-            <widgets>
-                <decorator-section-include name="body"/>
-            </widgets>
-        </section>
-    </screen>
-
     <screen name="CommonMyTimeDecorator">
         <section>
             <widgets>
@@ -97,26 +87,8 @@ under the License.
     <screen name="CommonCommunicationEventDecorator">
         <section>
             <widgets>
-                <decorator-screen name="CommonMyCommunicationEventDecorator" location="${parameters.mainDecoratorLocation}">
-                    <decorator-section name="body">
-                        <decorator-section-include name="body"/>
-                    </decorator-section>
-                </decorator-screen>
-            </widgets>
-        </section>
-    </screen>
-
-    <screen name="CommonMyCommunicationEventDecorator">
-        <section>
-            <actions>
-                <entity-one entity-name="CommunicationEvent" value-field="commEvent">
-                    <field-map field-name="communicationEventId" from-field="parameters.communicationEventId"/>
-                </entity-one>
-            </actions>
-            <widgets>
                 <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
                     <decorator-section name="body">
-                        <include-menu location="component://party/widget/partymgr/PartyMenus.xml" name="MyCommSubTabBar"/>
                         <decorator-section-include name="body"/>
                     </decorator-section>
                 </decorator-screen>
@@ -135,7 +107,19 @@ under the License.
             </widgets>
         </section>
     </screen>
-
+    
+    <screen name="CommonWorkEffortDecorator">
+        <section>
+            <widgets>
+                <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <decorator-section-include name="body"/>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    
     <screen name="login">
         <section>
             <widgets>
@@ -153,9 +137,6 @@ under the License.
     <!--New Register Person-->
     <screen name="newRegisterLogin">
         <section>
-            <actions>
-                <set field="layoutSettings.javaScripts[]" value="/images/dojo/dojo.js" global="true"/>
-            </actions>
             <widgets>
                 <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
                     <decorator-section name="body">
@@ -169,31 +150,19 @@ under the License.
                             <widgets>
                                 <label style="h2" text="${uiLabelMap.MyPortalRegisterComplete}"/><link target="main" style="h2" text="${uiLabelMap.CommonBeLogged}"/>
                                 <screenlet title="${uiLabelMap.PartyPersonalInformation}">
-                                    <include-form name="ViewPartyPerson" location="component://myportal/widget/MyPortalForms.xml"/>
+                                    <include-form name="ViewPartyPerson" location="component://party/widget/partymgr/PartyForms.xml"/>
                                 </screenlet>
                             </widgets>
                             <fail-widgets>
-                                <container style="screenlet">
-                                    <container style="screenlet-title-bar">
-                                        <container style="h3">
-                                            <label text="${uiLabelMap.MyPortalNewRegistration}"/>
-                                        </container>
-                                    </container>
-                                    <container style="screenlet-body">
-                                        <section>
-                                            <actions>
-                                                <set field="fileName" from-field="parameters.fileName"/>
-                                                <set field="idKey" from-field="parameters.ID_KEY"/>
-                                            </actions>
-                                            <widgets>
-                                                <!--<include-form name="RegisterPerson" location="component://myportal/widget/MyPortalForms.xml"/>  -->
-                                                <platform-specific><html>
-                                                <html-template location="component://myportal/widget/RegisterPerson.ftl"/></html>
-                                                    </platform-specific> 
-                                            </widgets>
-                                        </section>
-                                    </container>
-                                </container>
+                                <screenlet title="${uiLabelMap.MyPortalNewRegistration}">
+                                    <section>
+                                        <widgets>
+                                            <platform-specific>
+                                                <html><html-template location="component://myportal/widget/RegisterPerson.ftl"/></html>
+                                            </platform-specific> 
+                                        </widgets>
+                                    </section>
+                                </screenlet>
                             </fail-widgets>
                         </section>
                     </decorator-section>
@@ -213,25 +182,41 @@ under the License.
             </widgets>
         </section>
     </screen>
-
-    <screen name="reloadCaptchaImage">
+    <screen name="CommonProjectDecorator">
         <section>
-            <actions>
-                <property-map resource="MyPortalUiLabels" map-name="uiLabelMap" global="true"/>
-            </actions>
             <widgets>
-                <platform-specific><html><html-template location="component://myportal/widget/reloadCaptchaImage.ftl"/></html></platform-specific>
+                <decorator-screen name="CommonRequestDecorator" location="component://order/widget/ordermgr/CommonScreens.xml">
+                    <decorator-section name="body">
+                        <decorator-section-include name="body"/>
+                    </decorator-section>
+                </decorator-screen>
             </widgets>
         </section>
     </screen>
 
-    <screen name="reloadCaptchaCode">
+    <screen name="EmployeeDecorator">
+        <section>
+            <widgets>
+                <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <decorator-section-include name="body"/>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="CommonOpportunityDecorator">
         <section>
             <actions>
-                <property-map resource="MyPortalUiLabels" map-name="uiLabelMap" global="true"/>
+                <property-map resource="MarketingUiLabels" map-name="uiLabelMap" global="true"/>
             </actions>
             <widgets>
-                <platform-specific><html><html-template location="component://myportal/widget/reloadCaptchaCode.ftl"/></html></platform-specific>
+                <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <decorator-section-include name="body"/>
+                    </decorator-section>
+                </decorator-screen>
             </widgets>
         </section>
     </screen>

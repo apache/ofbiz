@@ -22,18 +22,17 @@ under the License.
     <import file="../macros.xml"/>
 
     <filelist id="framework-builds" dir="."
-        files="start/build.xml,base/build.xml,
+        files="start/build.xml,base/build.xml,sql/build.xml,
                entity/build.xml,geronimo/build.xml,
-               catalina/build.xml,jetty/build.xml,
+               catalina/build.xml,
                security/build.xml,service/build.xml,entityext/build.xml,
-               webslinger/build.xml,
-               bi/build.xml,datafile/build.xml,minilang/build.xml,
-               webapp/build.xml,guiapp/build.xml,widget/build.xml,
-               common/build.xml,
+               bi/build.xml,minilang/build.xml,
+               webapp/build.xml,widget/build.xml,
+               common/build.xml,datafile/build.xml,
                testtools/build.xml,
-               appserver/build.xml,webtools/build.xml,example/build.xml"/>
+               webtools/build.xml"/>
 
-    <filelist id="test-builds" dir="." files="base/build.xml,entity/build.xml"/>
+    <filelist id="test-builds" dir="." files="base/build.xml,sql/build.xml,entity/build.xml"/>
 
     <property name="memory.max.param" value="-Xmx384M"/>
 
@@ -52,7 +51,6 @@ under the License.
         <mkdir dir="../runtime/logs/test-results"/>
         <mkdir dir="../runtime/data"/>
         <mkdir dir="../runtime/data/derby"/>
-        <mkdir dir="../runtime/data/hsql"/>
 
         <condition property="isMac">
             <os family="mac"/>
@@ -83,6 +81,8 @@ under the License.
     </target>
 
     <target name="clean-data">
+        <delete includeemptydirs="true" dir="../runtime/data/derby"/>
+        <delete includeemptydirs="true" dir="../runtime/data/hsql"/>
         <delete verbose="on" includeemptydirs="true">
             <fileset dir="../runtime/data" includes="**/*">
                 <exclude name="README"/>
@@ -93,6 +93,7 @@ under the License.
 
     <target name="clean-logs">
         <delete verbose="on" dir="../runtime/logs/test-results"/>
+        <delete dir="../runtime/logs/cobertura-report"/>
         <delete verbose="on">
             <fileset dir="../runtime/logs" includes="*">
                 <exclude name="README"/>
@@ -114,6 +115,12 @@ under the License.
 
     <target name="clean-catalina">
         <delete dir="../runtime/catalina/work"/>
+    </target>
+
+    <target name="clean-tempfiles">
+        <delete verbose="on">
+            <fileset dir="../runtime" includes="tempfiles/**/*"/>
+        </delete>
     </target>
 
     <target name="tests">

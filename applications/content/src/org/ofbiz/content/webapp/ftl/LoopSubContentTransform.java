@@ -28,16 +28,17 @@ import java.util.Map;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.GeneralException;
 import org.ofbiz.base.util.UtilDateTime;
+import org.ofbiz.base.util.UtilGenerics;
 import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.base.util.template.FreeMarkerWorker;
 import org.ofbiz.content.content.ContentServicesComplex;
 import org.ofbiz.content.content.ContentWorker;
-import org.ofbiz.entity.GenericDelegator;
+import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
-import org.ofbiz.webapp.ftl.LoopWriter;
 import org.ofbiz.service.LocalDispatcher;
+import org.ofbiz.webapp.ftl.LoopWriter;
 
 import freemarker.core.Environment;
 import freemarker.template.TemplateModelException;
@@ -55,22 +56,32 @@ public class LoopSubContentTransform implements TemplateTransformModel {
     public static final String[] removeKeyNames = {"wrapTemplateId", "entityList", "entityIndex", "textData", "dataResourceId","drDataResourceId", "subContentIdSub", "parentContent", "wrappedFTL"};
 
     /**
+     * @deprecated use FreeMarkerWorker.getWrappedObject()
      * A wrapper for the FreeMarkerWorker version.
      */
+    @Deprecated
     public static Object getWrappedObject(String varName, Environment env) {
         return FreeMarkerWorker.getWrappedObject(varName, env);
     }
 
-    public static String getArg(Map args, String key, Environment env) {
+    /**
+     * @deprecated use FreeMarkerWorker.getArg()
+     */
+    @Deprecated
+    public static String getArg(Map<String, Object> args, String key, Environment env) {
         return FreeMarkerWorker.getArg(args, key, env);
     }
 
-    public static String getArg(Map args, String key, Map ctx) {
+    /**
+     * @deprecated use FreeMarkerWorker.getArg()
+     */
+    @Deprecated
+    public static String getArg(Map<String, Object> args, String key, Map<String, Object> ctx) {
         return FreeMarkerWorker.getArg(args, key, ctx);
     }
 
-    public static boolean prepCtx(GenericDelegator delegator, Map ctx) {
-        List lst = (List) ctx.get("entityList");
+    public static boolean prepCtx(Delegator delegator, Map<String, Object> ctx) {
+        List<GenericValue> lst = UtilGenerics.checkList(ctx.get("entityList"));
         Integer idx = (Integer) ctx.get("entityIndex");
         if (idx == null) idx = Integer.valueOf(0);
         int i = idx.intValue();
@@ -79,11 +90,11 @@ public class LoopSubContentTransform implements TemplateTransformModel {
         } else  if (i >= lst.size()) {
             return false;
         }
-        GenericValue subContentDataResourceView = (GenericValue) lst.get(i);
+        GenericValue subContentDataResourceView = lst.get(i);
         ctx.put("subContentDataResourceView", subContentDataResourceView);
         GenericValue electronicText = null;
         try {
-            electronicText = subContentDataResourceView.getRelatedOne("ElectronicText");
+            electronicText = subContentDataResourceView.getRelatedOne("ElectronicText", false);
         } catch (GenericEntityException e) {
             throw new RuntimeException(e.getMessage());
         }
@@ -105,7 +116,7 @@ public class LoopSubContentTransform implements TemplateTransformModel {
             String parentContentId = (String)ctx.get("contentId");
             if (UtilValidate.isEmpty(mimeTypeId) && UtilValidate.isNotEmpty(parentContentId)) { // will need these below
                 try {
-                    GenericValue parentContent = delegator.findByPrimaryKey("Content", UtilMisc.toMap("contentId", parentContentId));
+                    GenericValue parentContent = delegator.findOne("Content", UtilMisc.toMap("contentId", parentContentId), false);
                     if (parentContent != null) {
                         mimeTypeId = (String) parentContent.get("mimeTypeId");
                         ctx.put("parentContent", parentContent);
@@ -135,13 +146,14 @@ public class LoopSubContentTransform implements TemplateTransformModel {
         return true;
     }
 
+    @SuppressWarnings("unchecked")
     public Writer getWriter(final Writer out, Map args) {
         final StringBuilder buf = new StringBuilder();
         final Environment env = Environment.getCurrentEnvironment();
-        final Map templateCtx = (Map) FreeMarkerWorker.getWrappedObject("context", env);
-        final LocalDispatcher dispatcher = (LocalDispatcher) FreeMarkerWorker.getWrappedObject("dispatcher", env);
-        final GenericDelegator delegator = (GenericDelegator) FreeMarkerWorker.getWrappedObject("delegator", env);
-        final Map savedValues = FreeMarkerWorker.saveValues(templateCtx, saveKeyNames);
+        final Map<String, Object> templateCtx = FreeMarkerWorker.getWrappedObject("context", env);
+        final LocalDispatcher dispatcher = FreeMarkerWorker.getWrappedObject("dispatcher", env);
+        final Delegator delegator = FreeMarkerWorker.getWrappedObject("delegator", env);
+        final Map<String, Object> savedValues = FreeMarkerWorker.saveValues(templateCtx, saveKeyNames);
         FreeMarkerWorker.overrideWithArgs(templateCtx, args);
 
         String contentAssocTypeId = (String) templateCtx.get("contentAssocTypeId");
@@ -150,7 +162,7 @@ public class LoopSubContentTransform implements TemplateTransformModel {
             templateCtx.put("contentAssocTypeId ", contentAssocTypeId);
         }
 
-        List assocTypes = UtilMisc.toList(contentAssocTypeId);
+        List<String> assocTypes = UtilMisc.toList(contentAssocTypeId);
         templateCtx.put("assocTypes", assocTypes);
         Locale locale = (Locale) templateCtx.get("locale");
         if (locale == null) {
@@ -172,20 +184,23 @@ public class LoopSubContentTransform implements TemplateTransformModel {
 
         String thisMapKey = (String)templateCtx.get("mapKey");
         //GenericValue subContentDataResourceView = null;
-        Map results = ContentServicesComplex.getAssocAndContentAndDataResourceMethod(delegator, thisContentId, thisMapKey, null, fromDate, null, null, null, assocTypes, null);
-        List entityList = (List) results.get("entityList");
+        Map<String, Object> results = ContentServicesComplex.getAssocAndContentAndDataResourceMethod(delegator, thisContentId, thisMapKey, null, fromDate, null, null, null, assocTypes, null);
+        List<GenericValue> entityList = UtilGenerics.checkList(results.get("entityList"));
         templateCtx.put("entityList", entityList);
 
         return new LoopWriter(out) {
 
+            @Override
             public void write(char cbuf[], int off, int len) {
                 buf.append(cbuf, off, len);
             }
 
+            @Override
             public void flush() throws IOException {
                 out.flush();
             }
 
+            @Override
             public int onStart() throws TemplateModelException, IOException {
                 templateCtx.put("entityIndex", Integer.valueOf(0));
                 boolean inProgress = prepCtx(delegator, templateCtx);
@@ -196,6 +211,7 @@ public class LoopSubContentTransform implements TemplateTransformModel {
                 }
             }
 
+            @Override
             public int afterBody() throws TemplateModelException, IOException {
                 boolean inProgress = prepCtx(delegator, templateCtx);
                 if (inProgress) {
@@ -205,8 +221,8 @@ public class LoopSubContentTransform implements TemplateTransformModel {
                 }
             }
 
+            @Override
             public void close() throws IOException {
-
                 String wrappedFTL = buf.toString();
                 String encloseWrappedText = (String) templateCtx.get("encloseWrappedText");
                 if (UtilValidate.isEmpty(encloseWrappedText) || encloseWrappedText.equalsIgnoreCase("false")) {
@@ -217,8 +233,7 @@ public class LoopSubContentTransform implements TemplateTransformModel {
                 if (UtilValidate.isNotEmpty(wrapTemplateId)) {
                     templateCtx.put("wrappedFTL", wrappedFTL);
 
-                    Map templateRoot = FreeMarkerWorker.createEnvironmentMap(env);
-
+                    Map<String, Object> templateRoot = FreeMarkerWorker.createEnvironmentMap(env);
                     templateRoot.put("wrapDataResourceTypeId", templateCtx.get("subDataResourceTypeId"));
                     templateRoot.put("wrapContentIdTo", templateCtx.get("contentId"));
                     templateRoot.put("wrapMimeTypeId", templateCtx.get("mimeTypeId"));
@@ -228,7 +243,7 @@ public class LoopSubContentTransform implements TemplateTransformModel {
                     if (locale == null) locale = Locale.getDefault();
                     String mimeTypeId = (String) templateCtx.get("mimeTypeId");
                     try {
-                        ContentWorker.renderContentAsText(dispatcher, delegator, wrapTemplateId, out, templateRoot, locale, mimeTypeId, true);
+                        ContentWorker.renderContentAsText(dispatcher, delegator, wrapTemplateId, out, templateRoot, locale, mimeTypeId, null, null, true);
                     } catch (GeneralException e) {
                         Debug.logError(e, "Error rendering content", module);
                         throw new IOException("Error rendering content" + e.toString());

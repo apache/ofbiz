@@ -18,17 +18,17 @@ under the License.
 -->
 
 <#macro renderSurveyQuestionText surveyQuestionAndAppl>
-  <div class="tabletext">${surveyQuestionAndAppl.question?if_exists}</div>
+  <div>${surveyQuestionAndAppl.question?if_exists}</div>
   <#if surveyQuestionAndAppl.hint?has_content>
-    <div class="tabletext">${surveyQuestionAndAppl.hint}</div>
+    <div>${surveyQuestionAndAppl.hint}</div>
   </#if>
 </#macro>
 
 <#macro renderSurveyQuestionRequired surveyQuestionAndAppl>
   <#if surveyQuestionAndAppl.requiredField?default("N") == "Y">
-    <span class="tabletext">*[required]</span>
+    <span>*[required]</span>
   <#else/>
-    <span class="tabletext">[optional]</span>
+    <span>[optional]</span>
   </#if>
 </#macro>
 
@@ -45,35 +45,35 @@ under the License.
   <#elseif surveyQuestionAndAppl.surveyQuestionTypeId == "TEXTAREA"/>
     <textarea cols="40" rows="5" name="${questionFieldName}">${(answer.textResponse)?if_exists}</textarea>
   <#elseif surveyQuestionAndAppl.surveyQuestionTypeId == "TEXT_SHORT"/>
-    <input type="text" size="15" class="inputBox" name="${questionFieldName}" value="${(answer.textResponse)?default(defValue?if_exists)}">
+    <input type="text" size="15" class="inputBox" name="${questionFieldName}" value="${(answer.textResponse)?default(defValue?if_exists)}" />
   <#elseif surveyQuestionAndAppl.surveyQuestionTypeId == "TEXT_LONG"/>
-    <input type="text" size="35" class="inputBox" name="${questionFieldName}" value="${(answer.textResponse)?default(defValue?if_exists)}">
+    <input type="text" size="35" class="inputBox" name="${questionFieldName}" value="${(answer.textResponse)?default(defValue?if_exists)}" />
   <#elseif surveyQuestionAndAppl.surveyQuestionTypeId == "EMAIL"/>
-    <input type="text" size="30" class="inputBox" name="${questionFieldName}" value="${(answer.textResponse)?default(defValue?if_exists)}">
+    <input type="text" size="30" class="inputBox" name="${questionFieldName}" value="${(answer.textResponse)?default(defValue?if_exists)}" />
   <#elseif surveyQuestionAndAppl.surveyQuestionTypeId == "URL"/>
-    <input type="text" size="40" class="inputBox" name="${questionFieldName}" value="${(answer.textResponse)?default(defValue?if_exists)}">
+    <input type="text" size="40" class="inputBox" name="${questionFieldName}" value="${(answer.textResponse)?default(defValue?if_exists)}" />
   <#elseif surveyQuestionAndAppl.surveyQuestionTypeId == "DATE"/>
-    <input type="text" size="12" class="inputBox" name="${questionFieldName}" value="${(answer.textResponse)?default(defValue?if_exists)}">
+    <input type="text" size="12" class="inputBox" name="${questionFieldName}" value="${(answer.textResponse)?default(defValue?if_exists)}" />
   <#elseif surveyQuestionAndAppl.surveyQuestionTypeId == "CREDIT_CARD"/>
-    <input type="text" size="20" class="inputBox" name="${questionFieldName}" value="${(answer.textResponse)?default(defValue?if_exists)}">
+    <input type="text" size="20" class="inputBox" name="${questionFieldName}" value="${(answer.textResponse)?default(defValue?if_exists)}" />
   <#elseif surveyQuestionAndAppl.surveyQuestionTypeId == "GIFT_CARD"/>
-    <input type="text" size="20" class="inputBox" name="${questionFieldName}" value="${(answer.textResponse)?default(defValue?if_exists)}">
+    <input type="text" size="20" class="inputBox" name="${questionFieldName}" value="${(answer.textResponse)?default(defValue?if_exists)}" />
   <#elseif surveyQuestionAndAppl.surveyQuestionTypeId == "NUMBER_CURRENCY"/>
-    <input type="text" size="6" class="inputBox" name="${questionFieldName}" value="${(answer.currencyResponse)?default(defValue?if_exists)}">
+    <input type="text" size="6" class="inputBox" name="${questionFieldName}" value="${(answer.currencyResponse)?default(defValue?if_exists)}" />
   <#elseif surveyQuestionAndAppl.surveyQuestionTypeId == "NUMBER_FLOAT"/>
-    <input type="text" size="6" class="inputBox" name="${questionFieldName}" value="${(answer.floatResponse)?default(defValue?if_exists)}">
+    <input type="text" size="6" class="inputBox" name="${questionFieldName}" value="${(answer.floatResponse)?default(defValue?if_exists)}" />
   <#elseif surveyQuestionAndAppl.surveyQuestionTypeId == "NUMBER_LONG"/>
-    <input type="text" size="6" class="inputBox" name="${questionFieldName}" value="${(answer.numericResponse?default(defValue)?string("#"))?if_exists}">
+    <input type="text" size="6" class="inputBox" name="${questionFieldName}" value="${(answer.numericResponse?default(defValue)?string("#"))?if_exists}" />
   <#elseif surveyQuestionAndAppl.surveyQuestionTypeId == "PASSWORD"/>
-    <input type="password" size="30" class="textBox" name="${questionFieldName}" value="${(answer.textResponse)?default(defValue?if_exists)}">
+    <input type="password" size="30" class="textBox" name="${questionFieldName}" value="${(answer.textResponse)?default(defValue?if_exists)}" />
   <#elseif surveyQuestionAndAppl.surveyQuestionTypeId == "CONTENT"/>
      <#if (answer.contentId)?has_content>
-      <#assign content = answer.getRelatedOne("Content")>
+      <#assign content = answer.getRelatedOne("Content", false)>
       <a href="/content/control/img?imgId=${content.dataResourceId}" class="buttontext">${answer.contentId}</a>&nbsp;-&nbsp;${content.contentName?if_exists}&nbsp;&nbsp;&nbsp;
     </#if>
     <input type="file" size="15" name="${questionFieldName}" class="inputBox"/>
   <#elseif surveyQuestionAndAppl.surveyQuestionTypeId == "OPTION"/>
-    <#assign options = surveyQuestionAndAppl.getRelated("SurveyQuestionOption", sequenceSort)?if_exists/>
+    <#assign options = surveyQuestionAndAppl.getRelated("SurveyQuestionOption", null, sequenceSort, false)?if_exists/>
     <#assign selectedOption = (answer.surveyOptionSeqId)?default("_NA_")/>
     <select name="${questionFieldName}">
       <#if surveyQuestionAndAppl.requiredField?default("N") != "Y">
@@ -90,7 +90,7 @@ under the License.
   <#elseif surveyQuestionAndAppl.surveyQuestionTypeId == "ENUMERATION"/>
     <select name="${questionFieldName}">
     <#assign formatString = surveyQuestionAndAppl.get("formatString")?if_exists/>
-    <#assign enums = surveyQuestionAndAppl.getRelated("Enumeration")/>
+    <#assign enums = surveyQuestionAndAppl.getRelated("Enumeration", null, null, false)/>
     <#list enums as enum>
         <#if (((answer.textResponse)?has_content && answer.textResponse == enum.enumId) || (defValue == enum.enumId))>
             <#assign selected = 'selected'/>
@@ -133,13 +133,10 @@ under the License.
     </select>
   <#elseif surveyQuestionAndAppl.surveyQuestionTypeId == "COUNTRY"/>
     <select name="${questionFieldName}">
-    <#assign countries = Static["org.ofbiz.common.CommonWorkers"].getCountryList(delegator)>
-    <#list countries as country>
-        <option value='${country.geoId}'>${country.get("geoName",locale)?default(country.geoId)}</option>
-    </#list>
+      ${screens.render("component://common/widget/CommonScreens.xml#countries")}
     </select>
   <#else/>
-    <div class="tabletext">Unsupported question type : ${surveyQuestionAndAppl.surveyQuestionTypeId}</div>
+    <div>Unsupported question type : ${surveyQuestionAndAppl.surveyQuestionTypeId}</div>
   </#if>
 </#macro>
 
@@ -163,11 +160,11 @@ under the License.
 <input type="hidden" name="surveyId" value="${survey.surveyId}"/>
 
 <h1>${survey.description?if_exists}</h1>
-<br/>
+<br />
 
 <#if survey.comments?has_content>
-<div class="tabletext">${survey.comments}</div>
-<br/>
+<div>${survey.comments}</div>
+<br />
 </#if>
 
 <table width="100%" border="0" cellpadding="2" cellspacing="0">
@@ -179,9 +176,9 @@ under the License.
     <#-- Get and setup MultiResp info for this question -->
     <#assign openMultiRespHeader = false/>
     <#assign closeMultiRespHeader = false/>
-    <#assign surveyMultiResp = surveyQuestionAndAppl.getRelatedOneCache("SurveyMultiResp")?if_exists/>
+    <#assign surveyMultiResp = surveyQuestionAndAppl.getRelatedOne("SurveyMultiResp", true)?if_exists/>
     <#if surveyMultiResp?has_content>
-      <#assign surveyMultiRespColumnList = surveyMultiResp.getRelatedCache("SurveyMultiRespColumn", Static["org.ofbiz.base.util.UtilMisc"].toList("sequenceNum"))/>
+      <#assign surveyMultiRespColumnList = surveyMultiResp.getRelated("SurveyMultiRespColumn", null, Static["org.ofbiz.base.util.UtilMisc"].toList("sequenceNum"), true)/>
 
       <#if lastSurveyMultiRespId == "">
         <#assign openMultiRespHeader = true/>
@@ -255,9 +252,9 @@ under the License.
     <#-- special formatting for select boxes -->
     <#assign align = "left"/>
     <#if surveyQuestionAndAppl?exists && surveyQuestionAndAppl.surveyQuestionTypeId?has_content>
-    	<#if (surveyQuestionAndAppl.surveyQuestionTypeId == "BOOLEAN" || surveyQuestionAndAppl.surveyQuestionTypeId == "CONTENT" || surveyQuestionAndAppl.surveyQuestionTypeId == "OPTION")>
-      		<#assign align = "right"/>
-    	</#if>
+        <#if (surveyQuestionAndAppl.surveyQuestionTypeId == "BOOLEAN" || surveyQuestionAndAppl.surveyQuestionTypeId == "CONTENT" || surveyQuestionAndAppl.surveyQuestionTypeId == "OPTION")>
+              <#assign align = "right"/>
+        </#if>
     </#if>
 
     <#-- get an answer from the answerMap -->
@@ -274,9 +271,9 @@ under the License.
     <#if surveyQuestionAndAppl?exists && surveyQuestionAndAppl.surveyQuestionTypeId?has_content>
       <#-- seperator options -->
       <#if surveyQuestionAndAppl.surveyQuestionTypeId == "SEPERATOR_TEXT">
-        <td colspan="5"><div class="tabletext">${surveyQuestionAndAppl.question?if_exists}</div></td>
+        <td colspan="5"><div>${surveyQuestionAndAppl.question?if_exists}</div></td>
       <#elseif surveyQuestionAndAppl.surveyQuestionTypeId == "SEPERATOR_LINE"/>
-        <td colspan="5"><hr/></td>
+        <td colspan="5"><hr /></td>
       <#else/>
         <#-- standard question options -->
         <td align="right">

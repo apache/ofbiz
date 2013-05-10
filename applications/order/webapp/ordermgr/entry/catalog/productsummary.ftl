@@ -16,9 +16,48 @@ KIND, either express or implied.  See the License for the
 specific language governing permissions and limitations
 under the License.
 -->
+${virtualJavaScript?if_exists}
+<script type="text/javascript">
+<!--
+    function displayProductVirtualId(variantId, virtualProductId, pForm) {
+        if(variantId){
+            pForm.product_id.value = variantId;
+        }else{
+            pForm.product_id.value = '';
+            variantId = '';
+        }
+        var elem = document.getElementById('product_id_display');
+        var txt = document.createTextNode(variantId);
+        if(elem.hasChildNodes()) {
+            elem.replaceChild(txt, elem.firstChild);
+        } else {
+            elem.appendChild(txt);
+        }
+        
+        var priceElem = document.getElementById('variant_price_display');
+        var price = getVariantPrice(variantId);
+        var priceTxt = null;
+        if(price){
+            priceTxt = document.createTextNode(price);
+        }else{
+            priceTxt = document.createTextNode('');
+        }
+        
+        if(priceElem.hasChildNodes()) {
+            priceElem.replaceChild(priceTxt, priceElem.firstChild);
+        } else {
+            priceElem.appendChild(priceTxt);
+        }
+    }
+//-->
+</script>
 <#if product?exists>
     <#-- variable setup -->
-    <#assign productUrl = Static["org.ofbiz.product.category.CatalogUrlServlet"].makeCatalogUrl(request, product.productId, categoryId, "")/>
+    <#if backendPath?default("N") == "Y">
+        <#assign productUrl><@ofbizCatalogUrl productId=product.productId productCategoryId=categoryId/></#assign>
+    <#else>
+        <#assign productUrl><@ofbizCatalogAltUrl productId=product.productId productCategoryId=categoryId/></#assign>
+    </#if>
 
     <#if requestAttributes.productCategoryMember?exists>
         <#assign prodCatMem = requestAttributes.productCategoryMember>
@@ -36,20 +75,24 @@ under the License.
                 <span id="${productInfoLinkId}" class="popup_link"><img src="<@ofbizContentUrl>${contentPathPrefix?if_exists}${smallImageUrl}</@ofbizContentUrl>" alt="Small Image"/></span>
             </a>
         </div>
-        <div id="${productDetailId}" class="popup" >
+        <div id="${productDetailId}" class="popup" style="display:none;">
           <table>
             <tr valign="top">
               <td>
-                <img src="<@ofbizContentUrl>${contentPathPrefix?if_exists}${smallImageUrl}</@ofbizContentUrl>" alt="Small Image"/><br/>
-                ${uiLabelMap.ProductProductId}   : ${product.productId?if_exists}<br/>
-                ${uiLabelMap.ProductProductName} : ${product.productName?if_exists}<br/>
+                <img src="<@ofbizContentUrl>${contentPathPrefix?if_exists}${smallImageUrl}</@ofbizContentUrl>" alt="Small Image"/><br />
+                ${uiLabelMap.ProductProductId}   : ${product.productId?if_exists}<br />
+                ${uiLabelMap.ProductProductName} : ${product.productName?if_exists}<br />
                 ${uiLabelMap.CommonDescription}  : ${product.description?if_exists}
               </td>
             </tr>
           </table>
         </div>
         <script type="text/javascript">
-          new Popup('${productDetailId}','${productInfoLinkId}', {position: 'none'})
+          jQuery("#${productInfoLinkId}").hover(function() {
+                  jQuery("#${productDetailId}").fadeIn("slow");
+              }, function () {
+                  jQuery("#${productDetailId}").fadeOut("fast");
+              });
         </script>
         <div class="productbuy">
           <#-- check to see if introductionDate hasn't passed yet -->
@@ -62,7 +105,7 @@ under the License.
           <#elseif product.productTypeId?if_exists == "ASSET_USAGE">
             <a href="${productUrl}" class="buttontext">${uiLabelMap.OrderMakeBooking}...</a>
           <#-- check to see if it is an aggregated or configurable product; will enter parameters on the detail screen-->
-          <#elseif product.productTypeId?if_exists == "AGGREGATED">
+          <#elseif product.productTypeId?if_exists == "AGGREGATED" || product.productTypeId?if_exists == "AGGREGATED_SERVICE">
             <a href="${productUrl}" class="buttontext">${uiLabelMap.OrderConfigure}...</a>
           <#-- check to see if the product is a virtual product -->
           <#elseif product.isVirtual?exists && product.isVirtual == "Y">
@@ -70,21 +113,48 @@ under the License.
           <#-- check to see if the product requires an amount -->
           <#elseif product.requireAmount?exists && product.requireAmount == "Y">
             <a href="${productUrl}" class="buttontext">${uiLabelMap.OrderChooseAmount}...</a>
+          <#elseif product.productTypeId?if_exists == "ASSET_USAGE_OUT_IN">
+            <a href="${productUrl}" class="buttontext">${uiLabelMap.OrderRent}...</a>
           <#else>
             <form method="post" action="<@ofbizUrl>additem</@ofbizUrl>" name="the${requestAttributes.formNamePrefix?if_exists}${requestAttributes.listIndex?if_exists}form" style="margin: 0;">
               <input type="hidden" name="add_product_id" value="${product.productId}"/>
               <input type="text" size="5" name="quantity" value="1"/>
               <input type="hidden" name="clearSearch" value="N"/>
+              <input type="hidden" name="mainSubmitted" value="Y"/>
               <a href="javascript:document.the${requestAttributes.formNamePrefix?if_exists}${requestAttributes.listIndex?if_exists}form.submit()" class="buttontext">${uiLabelMap.OrderAddToCart}</a>
+            <#if mainProducts?has_content>
+                <input type="hidden" name="product_id" value=""/>
+                <select name="productVariantId" onchange="javascript:displayProductVirtualId(this.value, '${product.productId}', this.form);">
+                    <option value="">Select Unit Of Measure</option>
+                    <#list mainProducts as mainProduct>
+                        <option value="${mainProduct.productId}">${mainProduct.uomDesc} : ${mainProduct.piecesIncluded}</option>
+                    </#list>
+                </select>
+                <div style="display: inline-block;">
+                    <strong><span id="product_id_display"> </span></strong>
+                    <strong><span id="variant_price_display"> </span></strong>
+                </div>
+            </#if>
             </form>
-
+            
               <#if prodCatMem?exists && prodCatMem.quantity?exists && 0.00 < prodCatMem.quantity?double>
                 <form method="post" action="<@ofbizUrl>additem</@ofbizUrl>" name="the${requestAttributes.formNamePrefix?if_exists}${requestAttributes.listIndex?if_exists}defaultform" style="margin: 0;">
                   <input type="hidden" name="add_product_id" value="${prodCatMem.productId?if_exists}"/>
                   <input type="hidden" name="quantity" value="${prodCatMem.quantity?if_exists}"/>
                   <input type="hidden" name="clearSearch" value="N"/>
+                  <input type="hidden" name="mainSubmitted" value="Y"/>
                   <a href="javascript:document.the${requestAttributes.formNamePrefix?if_exists}${requestAttributes.listIndex?if_exists}defaultform.submit()" class="buttontext">${uiLabelMap.CommonAddDefault}(${prodCatMem.quantity?string.number}) ${uiLabelMap.OrderToCart}</a>
                 </form>
+                <#assign productCategory = delegator.findOne("ProductCategory", Static["org.ofbiz.base.util.UtilMisc"].toMap("productCategoryId", prodCatMem.productCategoryId), false)/>
+                <#if productCategory.productCategoryTypeId != "BEST_SELL_CATEGORY">
+                    <form method="post" action="<@ofbizUrl>additem</@ofbizUrl>" name="the${requestAttributes.formNamePrefix?if_exists}${requestAttributes.listIndex?if_exists}defaultform" style="margin: 0;">
+                      <input type="hidden" name="add_product_id" value="${prodCatMem.productId?if_exists}"/>
+                      <input type="hidden" name="quantity" value="${prodCatMem.quantity?if_exists}"/>
+                      <input type="hidden" name="clearSearch" value="N"/>
+                      <input type="hidden" name="mainSubmitted" value="Y"/>
+                      <a href="javascript:document.the${requestAttributes.formNamePrefix?if_exists}${requestAttributes.listIndex?if_exists}defaultform.submit()" class="buttontext">${uiLabelMap.CommonAddDefault}(${prodCatMem.quantity?string.number}) ${uiLabelMap.OrderToCart}</a>
+                    </form>
+                </#if>
               </#if>
           </#if>
         </div>
@@ -153,8 +223,13 @@ under the License.
           <#if averageRating?exists && (averageRating?double > 0) && numRatings?exists && (numRatings?long > 2)>
               <div>${uiLabelMap.OrderAverageRating}: ${averageRating} (${uiLabelMap.CommonFrom} ${numRatings} ${uiLabelMap.OrderRatings})</div>
           </#if>
+          <form method="post" action="<@ofbizUrl secure="${request.isSecure()?string}">addToCompare</@ofbizUrl>" name="addToCompare${requestAttributes.listIndex?if_exists}form">
+              <input type="hidden" name="productId" value="${product.productId}"/>
+              <input type="hidden" name="mainSubmitted" value="Y"/>
+          </form>
+          <a href="javascript:document.addToCompare${requestAttributes.listIndex?if_exists}form.submit()" class="buttontext">${uiLabelMap.ProductAddToCompare}</a>
         </div>
     </div>
 <#else>
-&nbsp;${uiLabelMap.ProductErrorProductNotFound}.<br/>
+&nbsp;${uiLabelMap.ProductErrorProductNotFound}.<br />
 </#if>

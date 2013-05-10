@@ -33,9 +33,6 @@ under the License.
     <PartyRole partyId="admin" roleTypeId="SHIPMENT_CLERK"/>
     <PartyRole partyId="admin" roleTypeId="SALES_REP"/>
     <PartyRole partyId="admin" roleTypeId="_NA_"/>
-    <ContactMech contactMechId="admin" contactMechTypeId="EMAIL_ADDRESS" infoString="ofbiztest@yahoo.com"/>
-    <PartyContactMech partyId="admin" contactMechId="admin" fromDate="2003-01-01 00:00:00.0" allowSolicitation="Y"/>
-    <PartyContactMechPurpose contactMechPurposeTypeId="PRIMARY_EMAIL" partyId="admin" contactMechId="admin" fromDate="2003-01-01 00:00:00.0"/>
 
     <!-- Party for System UserLogin Account - just in case logic depends on it -->
     <Party partyId="system" partyTypeId="PERSON"/>
@@ -49,6 +46,15 @@ under the License.
     <PartyRole partyId="ltdadmin" roleTypeId="LTD_ADMIN"/>
     <PartyRole partyId="ltdadmin" roleTypeId="_NA_"/>
     <PartyContactMech partyId="ltdadmin" contactMechId="admin" fromDate="2003-01-01 00:00:00.0" allowSolicitation="Y"/>
+    
+    <!-- Adding another limited admin record(i.e with partyId ltdadmin1) to test role based security -->
+    
+    <Party partyId="ltdadmin1" partyTypeId="PERSON"/>
+    <Person firstName="Limited" lastName="Administrator1" middleName="" partyId="ltdadmin1" personalTitle="Mr."/>
+    <PartyRole partyId="ltdadmin1" roleTypeId="ORDER_CLERK"/>
+    <PartyRole partyId="ltdadmin1" roleTypeId="LTD_ADMIN"/>
+    <PartyRole partyId="ltdadmin1" roleTypeId="_NA_"/>
+    <PartyContactMech partyId="ltdadmin1" contactMechId="admin" fromDate="2003-01-01 00:00:00.0" allowSolicitation="Y"/>
 
     <Party partyId="externaluser" partyTypeId="PERSON"/>
     <Person firstName="External" lastName="User" middleName="" partyId="externaluser" personalTitle="Mr."/>
@@ -65,18 +71,15 @@ under the License.
     <PartyRole partyId="bizadmin" roleTypeId="_NA_"/>
     <PartyContactMech partyId="bizadmin" contactMechId="admin" fromDate="2003-01-01 00:00:00.0" allowSolicitation="Y"/>
 
-    <UserLogin userLoginId="anonymous" partyId=""/>
     <UserLogin userLoginId="system" partyId="system"/>
     <UserLogin userLoginId="admin" partyId="admin"/>
     <UserLogin userLoginId="flexadmin" partyId="admin"/>
     <UserLogin userLoginId="demoadmin" partyId="admin"/>
     <UserLogin userLoginId="ltdadmin" partyId="ltdadmin"/>
+    <UserLogin userLoginId="ltdadmin1" partyId="ltdadmin1"/>
     <UserLogin userLoginId="bizadmin" partyId="bizadmin"/>
-
-    <UserLoginSecurityGroup groupId="FULLADMIN" userLoginId="admin" fromDate="2001-01-01 12:00:00.0"/>
-    <UserLoginSecurityGroup groupId="FLEXADMIN" userLoginId="flexadmin" fromDate="2001-01-01 12:00:00.0"/>
-    <UserLoginSecurityGroup groupId="VIEWADMIN" userLoginId="demoadmin" fromDate="2001-01-01 12:00:00.0"/>
-    <UserLoginSecurityGroup groupId="VIEWADMIN" userLoginId="ltdadmin" fromDate="2001-01-01 12:00:00.0"/>
-    <UserLoginSecurityGroup groupId="BIZADMIN" userLoginId="bizadmin" fromDate="2001-01-01 12:00:00.0"/>
+    
+    <EmailTemplateSetting emailTemplateSettingId="EMAIL_PASSWORD" subject="New Password Sent (${userLoginId})" fromAddress="ofbiztest@example.com"
+        description="Used to send a new password at user request"/>
 
 </entity-engine-xml>

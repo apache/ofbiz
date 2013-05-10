@@ -43,7 +43,7 @@ public class UtilGenerics {
         if (object != null) {
             if (!(clz.isInstance(object))) throw new ClassCastException("Not a " + clz.getName());
             int i = 0;
-            for (Object value: (Collection) object) {
+            for (Object value: (Collection<?>) object) {
                 if (value != null && !type.isInstance(value)) {
                     throw new IllegalArgumentException("Value(" + i + "), with value(" + value + ") is not a " + type.getName());
                 }
@@ -80,8 +80,8 @@ public class UtilGenerics {
 
     public static <K, V> Map<K, V> checkMap(Object object, Class<K> keyType, Class<V> valueType) {
         if (object != null) {
-            if (!(object instanceof Map)) throw new ClassCastException("Not a map");
-            Map<?, ?> map = (Map) object;
+            if (!(object instanceof Map<?, ?>)) throw new ClassCastException("Not a map");
+            Map<?, ?> map = (Map<?,?>) object;
             int i = 0;
             for (Map.Entry<?, ?> entry: map.entrySet()) {
                 if (entry.getKey() != null && !keyType.isInstance(entry.getKey())) {
@@ -142,7 +142,7 @@ public class UtilGenerics {
             throw new IllegalArgumentException("You must pass an even sized array to the toMap method");
         }
         Map<K, V> map = FastMap.newInstance();
-        for (int i = 0; i < data.length; ) {
+        for (int i = 0; i < data.length;) {
             Object key = data[i];
             if (key != null && !(keyType.isInstance(key))) throw new IllegalArgumentException("Key(" + i + ") is not a " + keyType.getName() + ", was(" + key.getClass().getName() + ")");
             i++;
@@ -163,7 +163,7 @@ public class UtilGenerics {
             throw new IllegalArgumentException("You must pass an even sized array to the toMap method");
         }
         Map<K, Object> map = FastMap.newInstance();
-        for (int i = 0; i < data.length; ) {
+        for (int i = 0; i < data.length;) {
             Object key = data[i];
             if (key != null && !(keyType.isInstance(key))) throw new IllegalArgumentException("Key(" + i + ") is not a " + keyType.getName() + ", was(" + key.getClass().getName() + ")");
             i++;

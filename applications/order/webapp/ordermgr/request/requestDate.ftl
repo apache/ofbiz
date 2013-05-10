@@ -17,8 +17,8 @@ specific language governing permissions and limitations
 under the License.
 -->
 <div class="screenlet">
-    <div class="screenlet-header">
-        <div class="boxhead">&nbsp;${uiLabelMap.CommonDate}</div>
+    <div class="screenlet-title-bar">
+        <div class="h3">${uiLabelMap.CommonDate}</div>
     </div>
     <div class="screenlet-body">
         <table cellspacing="0" class="basic-table">
@@ -31,7 +31,7 @@ under the License.
                     ${(custRequest.custRequestDate.toString())?if_exists}
                 </td>
             </tr>
-            <tr><td colspan="7"><hr/></td></tr>
+            <tr><td colspan="7"><hr /></td></tr>
             <tr>
                 <td align="right" valign="top" width="25%" class="label">
                     &nbsp;${uiLabelMap.OrderRequestCreatedDate}
@@ -41,7 +41,7 @@ under the License.
                     ${(custRequest.createdDate.toString())?if_exists}
                 </td>
             </tr>
-            <tr><td colspan="7"><hr/></td></tr>
+            <tr><td colspan="7"><hr /></td></tr>
             <tr>
                 <td align="right" valign="top" width="25%" class="label">
                     &nbsp;${uiLabelMap.OrderRequestLastModifiedDate}

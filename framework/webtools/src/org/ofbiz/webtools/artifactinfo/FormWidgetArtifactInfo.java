@@ -26,14 +26,11 @@ import java.util.TreeSet;
 
 import javax.xml.parsers.ParserConfigurationException;
 
-import javolution.util.FastSet;
-
 import org.ofbiz.base.location.FlexibleLocation;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.GeneralException;
 import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.base.util.UtilURL;
-import org.ofbiz.service.ModelService;
 import org.ofbiz.widget.form.ModelForm;
 import org.xml.sax.SAXException;
 
@@ -88,7 +85,7 @@ public class FormWidgetArtifactInfo extends ArtifactInfoBase {
             }
 
             try {
-                ModelForm modelForm = aif.getModelForm(formName);
+                aif.getModelForm(formName);
             } catch (Exception e) {
                 Debug.logWarning("Form [" + formName + "] reference in form [" + this.formName + "] in resource [" + this.formLocation + "] does not exist!", module);
                 return;
@@ -132,7 +129,7 @@ public class FormWidgetArtifactInfo extends ArtifactInfoBase {
                 continue;
             }
             try {
-                ModelService modelService = aif.getModelService(serviceName);
+                aif.getModelService(serviceName);
             } catch (GeneralException e) {
                 Debug.logWarning("Service [" + serviceName + "] reference in form [" + this.formName + "] in resource [" + this.formLocation + "] does not exist!", module);
                 continue;
@@ -182,27 +179,33 @@ public class FormWidgetArtifactInfo extends ArtifactInfoBase {
         }
     }
 
+    @Override
     public String getDisplayName() {
         // remove the component:// from the location
         return this.formName + " (" + this.formLocation.substring(12) + ")";
     }
 
+    @Override
     public String getDisplayType() {
         return "Form Widget";
     }
 
+    @Override
     public String getType() {
         return ArtifactInfoFactory.FormWidgetInfoTypeId;
     }
 
+    @Override
     public String getUniqueId() {
         return this.formLocation + "#" + this.formName;
     }
 
+    @Override
     public URL getLocationURL() throws MalformedURLException {
         return FlexibleLocation.resolveLocation(this.formLocation, null);
     }
 
+    @Override
     public boolean equals(Object obj) {
         if (obj instanceof FormWidgetArtifactInfo) {
             return (this.modelForm.getName().equals(((FormWidgetArtifactInfo) obj).modelForm.getName()) &&

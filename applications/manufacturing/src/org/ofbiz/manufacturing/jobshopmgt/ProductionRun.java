@@ -22,23 +22,24 @@ package org.ofbiz.manufacturing.jobshopmgt;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+
+import javolution.util.FastList;
 
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.base.util.UtilValidate;
-import org.ofbiz.entity.GenericDelegator;
+import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
 import org.ofbiz.entity.util.EntityUtil;
-import org.ofbiz.service.LocalDispatcher;
 import org.ofbiz.manufacturing.techdata.TechDataServices;
+import org.ofbiz.service.LocalDispatcher;
 
 
 /**
- * ProductionRun Object used by the Jobshop management OFBiz comonents,
+ * ProductionRun Object used by the Jobshop management OFBiz components,
  * this object is used to find or updated an existing ProductionRun.
  *
  */
@@ -57,13 +58,13 @@ public class ProductionRun {
     protected String productionRunName;
     protected String description;
     protected GenericValue currentStatus;
-    protected List productionRunComponents;
-    protected List productionRunRoutingTasks;
+    protected List<GenericValue> productionRunComponents;
+    protected List<GenericValue> productionRunRoutingTasks;
     protected LocalDispatcher dispatcher;
 
     /**
      * indicate if quantity or estimatedStartDate has been modified and
-     *  estimatedCompletionDate not yet recalculated with recalculateEstimatedCompletionDate() methode.
+     *  estimatedCompletionDate not yet recalculated with recalculateEstimatedCompletionDate() method.
      */
     private boolean updateCompletionDate = false;
     /**
@@ -71,15 +72,15 @@ public class ProductionRun {
      */
     private boolean quantityIsUpdated = false;
 
-    public ProductionRun(String productionRunId, GenericDelegator delegator, LocalDispatcher dispatcher) {
+    public ProductionRun(String productionRunId, Delegator delegator, LocalDispatcher dispatcher) {
         try {
             if (! UtilValidate.isEmpty(productionRunId)) {
                 this.dispatcher = dispatcher;
-                GenericValue workEffort = delegator.findByPrimaryKey("WorkEffort", UtilMisc.toMap("workEffortId", productionRunId));
+                GenericValue workEffort = delegator.findOne("WorkEffort", UtilMisc.toMap("workEffortId", productionRunId), false);
                 if (workEffort != null) {
                     // If this is a task, get the parent production run
                     if (workEffort.getString("workEffortTypeId") != null && "PROD_ORDER_TASK".equals(workEffort.getString("workEffortTypeId"))) {
-                        workEffort = delegator.findByPrimaryKey("WorkEffort", UtilMisc.toMap("workEffortId", workEffort.getString("workEffortParentId")));
+                        workEffort = delegator.findOne("WorkEffort", UtilMisc.toMap("workEffortId", workEffort.getString("workEffortParentId")), false);
                     }
                 }
                 this.productionRun = workEffort;
@@ -130,19 +131,19 @@ public class ProductionRun {
             try {
                 productionRun.store();
                 if (quantityIsUpdated) {
-                    productionRunProduct.set("estimatedQuantity",this.quantity);
+                    productionRunProduct.set("estimatedQuantity",this.quantity.doubleValue());
                     productionRunProduct.store();
                     quantityIsUpdated = false;
                 }
                 if (productionRunRoutingTasks != null) {
-                    for (Iterator iter = productionRunRoutingTasks.iterator(); iter.hasNext();) {
-                        GenericValue routingTask = (GenericValue) iter.next();
+                    for (Iterator<GenericValue> iter = productionRunRoutingTasks.iterator(); iter.hasNext();) {
+                        GenericValue routingTask = iter.next();
                         routingTask.store();
                     }
                 }
                 if (productionRunComponents != null) {
-                    for (Iterator iter = productionRunComponents.iterator(); iter.hasNext();) {
-                        GenericValue component = (GenericValue) iter.next();
+                    for (Iterator<GenericValue> iter = productionRunComponents.iterator(); iter.hasNext();) {
+                        GenericValue component = iter.next();
                         component.store();
                     }
                 }
@@ -164,10 +165,10 @@ public class ProductionRun {
         if (exist()) {
             if (productProduced == null) {
                 try {
-                    List productionRunProducts = productionRun.getRelated("WorkEffortGoodStandard", UtilMisc.toMap("workEffortGoodStdTypeId", "PRUN_PROD_DELIV"),null);
+                    List<GenericValue> productionRunProducts = productionRun.getRelated("WorkEffortGoodStandard", UtilMisc.toMap("workEffortGoodStdTypeId", "PRUN_PROD_DELIV"), null, false);
                     this.productionRunProduct = EntityUtil.getFirst(productionRunProducts);
                     quantity = productionRunProduct.getBigDecimal("estimatedQuantity");
-                    productProduced = productionRunProduct.getRelatedOneCache("Product");
+                    productProduced = productionRunProduct.getRelatedOne("Product", true);
                 } catch (GenericEntityException e) {
                     Debug.logWarning(e.getMessage(), module);
                 }
@@ -190,7 +191,7 @@ public class ProductionRun {
     }
     /**
      * set the quantity property and recalculated the productComponent quantity.
-     * @return
+     * @param newQuantity the new quantity to be set
      **/
     public void setQuantity(BigDecimal newQuantity) {
         if (quantity == null) getProductProduced();
@@ -199,10 +200,10 @@ public class ProductionRun {
         this.quantityIsUpdated = true;
         this.updateCompletionDate = true;
         if (productionRunComponents == null) getProductionRunComponents();
-        for (Iterator iter = productionRunComponents.iterator(); iter.hasNext();) {
-            GenericValue component = (GenericValue) iter.next();
+        for (Iterator<GenericValue> iter = productionRunComponents.iterator(); iter.hasNext();) {
+            GenericValue component = iter.next();
             componentQuantity = component.getBigDecimal("estimatedQuantity");
-            component.set("estimatedQuantity", componentQuantity.divide(previousQuantity, 10, BigDecimal.ROUND_HALF_UP).multiply(newQuantity));
+            component.set("estimatedQuantity", componentQuantity.divide(previousQuantity, 10, BigDecimal.ROUND_HALF_UP).multiply(newQuantity).doubleValue());
         }
     }
     /**
@@ -214,7 +215,7 @@ public class ProductionRun {
     }
     /**
      * set the estimatedStartDate property.
-     * @return
+     * @param estimatedStartDate set the estimatedStartDate property
      **/
     public void setEstimatedStartDate(Timestamp estimatedStartDate) {
         this.estimatedStartDate = estimatedStartDate;
@@ -236,7 +237,7 @@ public class ProductionRun {
     /**
      * set the estimatedCompletionDate property without any control or calculation.
      * usage productionRun.setEstimatedCompletionDate(productionRun.recalculateEstimatedCompletionDate(priority);
-     * @return
+     * @param estimatedCompletionDate set the estimatedCompletionDate property
      **/
     public void setEstimatedCompletionDate(Timestamp estimatedCompletionDate) {
         this.estimatedCompletionDate = estimatedCompletionDate;
@@ -254,8 +255,8 @@ public class ProductionRun {
             getProductionRunRoutingTasks();
             if (quantity == null) getQuantity();
             Timestamp endDate=null;
-            for (Iterator iter=productionRunRoutingTasks.iterator(); iter.hasNext();) {
-                GenericValue routingTask = (GenericValue) iter.next();
+            for (Iterator<GenericValue> iter = productionRunRoutingTasks.iterator(); iter.hasNext();) {
+                GenericValue routingTask = iter.next();
                 if (priority.compareTo(routingTask.getLong("priority")) <= 0) {
                     // Calculate the estimatedCompletionDate
                     long totalTime = ProductionRun.getEstimatedTaskTime(routingTask, quantity, dispatcher);
@@ -272,11 +273,11 @@ public class ProductionRun {
         }
     }
     /**
-     * call recalculateEstimatedCompletionDate(0,estimatedStartDate), so recalculated for all the routingtask.
+     * call recalculateEstimatedCompletionDate(0,estimatedStartDate), so recalculated for all the routing tasks.
      */
     public Timestamp recalculateEstimatedCompletionDate() {
         this.updateCompletionDate = false;
-        return recalculateEstimatedCompletionDate(new Long(0), estimatedStartDate);
+        return recalculateEstimatedCompletionDate(Long.valueOf(0), estimatedStartDate);
     }
     /**
      * get the productionRunName property.
@@ -308,7 +309,7 @@ public class ProductionRun {
         if (exist()) {
             if (currentStatus == null) {
                 try {
-                    currentStatus = productionRun.getRelatedOneCache("StatusItem");
+                    currentStatus = productionRun.getRelatedOne("CurrentStatusItem", true);
                 } catch (GenericEntityException e) {
                     Debug.logWarning(e.getMessage(), module);
                 }
@@ -321,17 +322,17 @@ public class ProductionRun {
      * get the list of all the productionRunComponents as a list of GenericValue.
      * @return the productionRunComponents related object
      **/
-    public List getProductionRunComponents() {
+    public List<GenericValue> getProductionRunComponents() {
         if (exist()) {
             if (productionRunComponents == null) {
                 if (productionRunRoutingTasks == null)  this.getProductionRunRoutingTasks();
                 if (productionRunRoutingTasks != null) {
                     try {
-                        productionRunComponents = new LinkedList();
+                        productionRunComponents = FastList.newInstance();
                         GenericValue routingTask;
-                        for (Iterator iter=productionRunRoutingTasks.iterator(); iter.hasNext();) {
-                            routingTask = (GenericValue)iter.next();
-                            productionRunComponents.addAll(routingTask.getRelated("WorkEffortGoodStandard", UtilMisc.toMap("workEffortGoodStdTypeId", "PRUNT_PROD_NEEDED"),null));
+                        for (Iterator<GenericValue> iter = productionRunRoutingTasks.iterator(); iter.hasNext();) {
+                            routingTask = iter.next();
+                            productionRunComponents.addAll(routingTask.getRelated("WorkEffortGoodStandard", UtilMisc.toMap("workEffortGoodStdTypeId", "PRUNT_PROD_NEEDED"),null, false));
                         }
                     } catch (GenericEntityException e) {
                         Debug.logWarning(e.getMessage(), module);
@@ -346,11 +347,11 @@ public class ProductionRun {
      * get the list of all the productionRunRoutingTasks as a list of GenericValue.
      * @return the productionRunRoutingTasks related object
      **/
-    public List getProductionRunRoutingTasks() {
+    public List<GenericValue> getProductionRunRoutingTasks() {
         if (exist()) {
             if (productionRunRoutingTasks == null) {
                 try {
-                    productionRunRoutingTasks = productionRun.getRelated("ChildWorkEffort",UtilMisc.toMap("workEffortTypeId","PROD_ORDER_TASK"),UtilMisc.toList("priority"));
+                    productionRunRoutingTasks = productionRun.getRelated("ChildWorkEffort",UtilMisc.toMap("workEffortTypeId","PROD_ORDER_TASK"),UtilMisc.toList("priority"), false);
                 } catch (GenericEntityException e) {
                     Debug.logWarning(e.getMessage(), module);
                 }
@@ -368,20 +369,19 @@ public class ProductionRun {
         if (exist()) {
             if (productionRunRoutingTasks == null) {
                 try {
-                    productionRunRoutingTasks = productionRun.getRelated("ChildWorkEffort",UtilMisc.toMap("workEffortTypeId","PROD_ORDER_TASK"),UtilMisc.toList("priority"));
+                    productionRunRoutingTasks = productionRun.getRelated("ChildWorkEffort",UtilMisc.toMap("workEffortTypeId","PROD_ORDER_TASK"),UtilMisc.toList("priority"), false);
                 } catch (GenericEntityException e) {
                     Debug.logWarning(e.getMessage(), module);
                 }
             }
-            return (GenericValue)(productionRunRoutingTasks != null && productionRunRoutingTasks.size() > 0? productionRunRoutingTasks.get(productionRunRoutingTasks.size() - 1): null);
+            return (UtilValidate.isNotEmpty(productionRunRoutingTasks) ? productionRunRoutingTasks.get(productionRunRoutingTasks.size() - 1): null);
         }
         return null;
     }
 
     /**
      * clear list of all the productionRunRoutingTasks to force re-reading at the next need.
-     * This methode is used when the routingTasks ordering is changed.
-     * @return
+     * This method is used when the routingTasks ordering is changed.
      **/
     public void clearRoutingTasksList() {
         this.productionRunRoutingTasks = null;
@@ -413,15 +413,15 @@ public class ProductionRun {
         if (task.get("estimateCalcMethod") != null) {
             String serviceName = null;
             try {
-                GenericValue genericService = task.getRelatedOne("CustomMethod");
+                GenericValue genericService = task.getRelatedOne("CustomMethod", false);
                 if (genericService != null && genericService.getString("customMethodName") != null) {
                     serviceName = genericService.getString("customMethodName");
                     // call the service
                     // and put the value in totalTaskTime
-                    Map estimateCalcServiceMap = UtilMisc.toMap("workEffort", task, "quantity", quantity, "productId", productId, "routingId", routingId);
-                    Map serviceContext = UtilMisc.toMap("arguments", estimateCalcServiceMap);
+                    Map<String, Object> estimateCalcServiceMap = UtilMisc.<String, Object>toMap("workEffort", task, "quantity", quantity, "productId", productId, "routingId", routingId);
+                    Map<String, Object> serviceContext = UtilMisc.<String, Object>toMap("arguments", estimateCalcServiceMap);
                     // serviceContext.put("userLogin", userLogin);
-                    Map resultService = dispatcher.runSync(serviceName, serviceContext);
+                    Map<String, Object> resultService = dispatcher.runSync(serviceName, serviceContext);
                     totalTaskTime = ((Double)resultService.get("totalTime")).doubleValue();
                 }
             } catch (Exception exc) {

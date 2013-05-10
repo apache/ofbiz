@@ -22,13 +22,13 @@ under the License.
   </div>
   <div class="screenlet-body">
     <#list searchConstraintStrings as searchConstraintString>
-        <div>&nbsp;<a href="<@ofbizUrl>WorkEffortSearchResults?removeConstraint=${searchConstraintString_index}&clearSearch=N</@ofbizUrl>" class="buttontext">X</a>&nbsp;${searchConstraintString}</div>
+        <div>&nbsp;<a href="<@ofbizUrl>WorkEffortSearchResults?removeConstraint=${searchConstraintString_index}&amp;clearSearch=N</@ofbizUrl>" class="buttontext">X</a>&nbsp;${searchConstraintString}</div>
     </#list>
     <div><span class="label">${uiLabelMap.CommonSortedBy}</span> ${searchSortOrderString}</div>
-    <div><a href="<@ofbizUrl>WorkEffortSearchOptions</@ofbizUrl>" class="buttontext">${uiLabelMap.CommonRefine} ${uiLabelMap.CommonSearch}</a></div>
+    <div><a href="<@ofbizUrl>WorkEffortSearchOptions</@ofbizUrl>" class="buttontext">${uiLabelMap.CommonRefineSearch}</a></div>
 
     <#if !workEffortIds?has_content>
-      <br/><h2>&nbsp;${uiLabelMap.ProductNoResultsFound}.</h2>
+      <br /><h2>&nbsp;${uiLabelMap.ProductNoResultsFound}.</h2>
     </#if>
 
     <#if workEffortIds?has_content>
@@ -55,7 +55,7 @@ under the License.
       <table width="100%" cellpadding="0" cellspacing="0">
         <#assign listIndex = lowIndex>
         <#list workEffortIds as workEffortId><#-- note that there is no boundary range because that is being done before the list is put in the content -->
-          <#assign workEffort = delegator.findByPrimaryKey("WorkEffort", Static["org.ofbiz.base.util.UtilMisc"].toMap("workEffortId", workEffortId))>
+          <#assign workEffort = delegator.findOne("WorkEffort", Static["org.ofbiz.base.util.UtilMisc"].toMap("workEffortId", workEffortId), false)>
           <tr>
             <td>
               <a href="<@ofbizUrl>EditWorkEffort?workEffortId=${workEffortId}</@ofbizUrl>" class="buttontext">${workEffortId} ${(workEffort.workEffortName)?if_exists}</a>

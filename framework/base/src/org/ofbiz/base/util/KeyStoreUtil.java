@@ -167,16 +167,16 @@ public class KeyStoreUtil {
         CertificateFactory cf = CertificateFactory.getInstance("X.509");
         ByteArrayInputStream bais = new ByteArrayInputStream(certChain);
 
-        Collection certCol = cf.generateCertificates(bais);
+        Collection<? extends Certificate> certCol = cf.generateCertificates(bais);
         Certificate[] certs = new Certificate[certCol.toArray().length];
         if (certCol.size() == 1) {
-            Debug.log("Single certificate; no chain", module);
+            Debug.logInfo("Single certificate; no chain", module);
             bais = new ByteArrayInputStream(certChain);
             Certificate cert = cf.generateCertificate(bais);
             certs[0] = cert;
         } else {
-            Debug.log("Certificate chain length : " + certCol.size(), module);
-            certs = (Certificate[]) certCol.toArray();
+            Debug.logInfo("Certificate chain length : " + certCol.size(), module);
+            certs = certCol.toArray(new Certificate[certCol.size()]);
         }
 
         ks.setKeyEntry(alias, pk, keyPass.toCharArray(), certs);

@@ -24,19 +24,52 @@ under the License.
         <condition field-name="statusId" operator="equals" value="CLPT_PENDING"/>
         <action service="sendContactListPartyVerifyEmail" mode="async" persist="true"/>
     </eca>
+    <eca service="createContactListPartyStatus" event="commit">
+        <condition field-name="statusId" operator="equals" value="CLPT_ACCEPTED"/>
+        <action service="sendContactListPartySubscribeEmail" mode="async" persist="true"/>
+    </eca>
     <eca service="updatePartyEmailAddress" event="return">
         <action service="updatePartyEmailContactListParty" mode="sync"/>
     </eca>
-
+    <eca service="updateContactListParty" event="commit">
+        <condition field-name="statusId" operator="equals" value="CLPT_REJECTED"/>
+        <action service="sendContactListPartyUnSubscribeEmail" mode="sync" persist="true"/>
+    </eca>
+    <eca service="createContactListPartyStatus" event="commit">
+        <condition field-name="statusId" operator="equals" value="CLPT_UNSUBSCRIBED"/>
+        <action service="sendContactListPartyUnSubscribeEmail" mode="async" persist="true"/>
+    </eca>
+    <eca service="createContactListPartyStatus" event="commit">
+        <condition field-name="statusId" operator="equals" value="CLPT_UNSUBS_PENDING"/>
+        <action service="sendContactListPartyUnSubscribeVerifyEmail" mode="async" persist="true"/>
+    </eca>
+    
+    <!--  update contact list communication status -->
+    <eca service="updateCommunicationEvent" event="commit">
+        <condition-field field-name="statusId" operator="not-equals" to-field-name="oldStatusId"/>
+        <action mode="sync" service="updateCommStatusFromCommEvent"/>
+    </eca>
+    
+    <!--  update contact list party for bounced messages -->
+    <eca service="updateContactListCommStatus" event="commit">
+        <condition field-name="statusId" operator="equals" value="COM_BOUNCED"/>
+        <condition field-name="contactMechId" operator="is-not-empty"/>
+        <condition field-name="partyId" operator="is-not-empty"/>
+        <set field-name="statusId" value="CLPT_INVALID"/>
+        <action service="updateContactListParty" mode="sync"/>
+    </eca>
+            
     <!-- quick add functions which pass a contactListId as well -->
     <eca service="createLead" event="commit">
         <condition field-name="contactListId" operator="is-not-empty"/>
+        <condition field-name="contactMechId" operator="is-not-empty"/>
         <set field-name="statusId" value="CLPT_ACCEPTED"/>
         <set field-name="preferredContactMechId" env-name="contactMechId"/>
         <action service="createContactListParty" mode="sync"/>
     </eca>
     <eca service="createContact" event="commit">
         <condition field-name="contactListId" operator="is-not-empty"/>
+        <condition field-name="contactMechId" operator="is-not-empty"/>
         <set field-name="statusId" value="CLPT_ACCEPTED"/>
         <set field-name="preferredContactMechId" env-name="contactMechId"/>
         <action service="createContactListParty" mode="sync"/>

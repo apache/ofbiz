@@ -20,7 +20,7 @@ under the License.
 <#assign viewIndex = viewIndex?default(0)>
 <#assign lowIndex = viewIndex?int * viewSize?int + 1>
 <#assign highIndex = viewIndex?int * viewSize?int + viewSize>
-<#--<br/>== viewIndex: ${viewIndex} ==viewSize: ${viewSize} ==lowIndex: ${lowIndex}== highIndex: ${highIndex} == ListSize: ${listSize}-->
+<#--<br />== viewIndex: ${viewIndex} ==viewSize: ${viewSize} ==lowIndex: ${lowIndex}== highIndex: ${highIndex} == ListSize: ${listSize}-->
 <#if forumMessages?has_content && forumMessages?size gt 0>
     <#assign listSize = forumMessages?size/>
     <#if highIndex gt listSize><#assign highIndex = listSize></#if>
@@ -30,18 +30,18 @@ under the License.
       <select name="pageSelect" class="selectBox" onchange="window.location=this[this.selectedIndex].value;">
         <option value="#">${uiLabelMap.CommonPage} ${viewIndex?int+1} ${uiLabelMap.CommonOf} ${viewIndexMax}</option>
         <#list 1..viewIndexMax as curViewNum>
-          <option value="<@ofbizUrl>showforum?forumId=${parameters.forumId}&VIEW_SIZE=${viewSize}&VIEW_INDEX=${curViewNum?int-1}</@ofbizUrl>">${uiLabelMap.CommonGotoPage} ${curViewNum}</option>
+          <option value="<@ofbizUrl>showforum?forumId=${parameters.forumId}&amp;VIEW_SIZE=${viewSize}&amp;VIEW_INDEX=${curViewNum?int-1}</@ofbizUrl>">${uiLabelMap.CommonGotoPage} ${curViewNum}</option>
         </#list>
       </select>
       <b>
         <#if (viewIndex?int >0)>
-          <a href="<@ofbizUrl>showforum?forumId=${parameters.forumId}&VIEW_SIZE=${viewSize}&VIEW_INDEX=${viewIndex?int-1}</@ofbizUrl>" class="buttontext">${uiLabelMap.CommonPrevious}</a> |
+          <a href="<@ofbizUrl>showforum?forumId=${parameters.forumId}&amp;VIEW_SIZE=${viewSize}&amp;VIEW_INDEX=${viewIndex?int-1}</@ofbizUrl>" class="buttontext">${uiLabelMap.CommonPrevious}</a> |
         </#if>
         <#if (listSize?int > 0)>
-          <span class="tabletext">${lowIndex} - ${highIndex} ${uiLabelMap.CommonOf} ${listSize}</span>
+          <span>${lowIndex} - ${highIndex} ${uiLabelMap.CommonOf} ${listSize}</span>
         </#if>
         <#if highIndex?int < listSize?int>
-          | <a href="<@ofbizUrl>showforum?forumId=${parameters.forumId}&VIEW_SIZE=${viewSize}&VIEW_INDEX=${viewIndex?int+1}</@ofbizUrl>" class="buttontext">${uiLabelMap.CommonNext}</a>
+          | <a href="<@ofbizUrl>showforum?forumId=${parameters.forumId}&amp;VIEW_SIZE=${viewSize}&amp;VIEW_INDEX=${viewIndex?int+1}</@ofbizUrl>" class="buttontext">${uiLabelMap.CommonNext}</a>
         </#if>
       </b>
    </div>

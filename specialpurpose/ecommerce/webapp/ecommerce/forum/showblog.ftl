@@ -20,11 +20,11 @@ under the License.
 <#import "/includes/bloglib.ftl" as blog/>
 
 <div class="screenlet" >
-<h1>&nbsp;&nbsp;&nbsp;&nbsp;${uiLabelMap.EcommerceFromSite}:</h1><br/>
-<div style="margin:10px;" >
+<h1>${uiLabelMap.EcommerceFromSite}:</h1><br />
+<div>
 <@renderSiteAncestryPath trail=siteAncestorList?default([])/>
 <#if trailList?exists && 1 < trailList?size >
-<h1>&nbsp;&nbsp;${uiLabelMap.EcommerceFromParentArticle}:</h1><br/>
+<h1>${uiLabelMap.EcommerceFromParentArticle}:</h1><br />
 </#if>
 <#if trailList?has_content>
     <@blog.renderAncestryPath trail=trailList startIndex=1 endIndexOffset=1 />
@@ -32,8 +32,8 @@ under the License.
         <#assign pair=trailList[trailList?size - 1]/>
         <#assign pair0 = pair[0]?if_exists>
         <#assign pair1 = pair[1]?if_exists>
-        <hr/>
-        <h1>${uiLabelMap.EcommerceContentFor} ${pair1?if_exists}[${pair0?if_exists}]:</h1><br/>
+        <hr />
+        <h1>${uiLabelMap.EcommerceContentFor} ${pair1?if_exists}[${pair0?if_exists}]:</h1><br />
     </#if>
 <#else>
 </#if>
@@ -52,12 +52,12 @@ under the License.
 <@checkPermission subContentId=subContentId targetOperation="CONTENT_CREATE|CONTENT_RESPOND" contentPurposeList="RESPONSE" >
 <a class="tabButton" href="<@ofbizUrl>AddResponse?contentIdTo=${subContentId}&amp;nodeTrailCsv=${nodeTrailCsv?if_exists}</@ofbizUrl>" >${uiLabelMap.EcommerceRespond}</a>
 </@checkPermission>
-<br/>
+<br />
 
     </td>
     </tr>
 </table>
-<hr/>
+
 <#--
 <@checkPermission mode="not-equals" subContentId=subContentId targetOperation="CONTENT_CREATE|CONTENT_RESPOND" contentPurposeList="RESPONSE" >
             ${permissionErrorMsg?if_exists}
@@ -71,7 +71,7 @@ under the License.
      It is not convenient to have the traverseSubContent check or recheck the first node
      because the associated ContentAssoc entity is not known.
 -->
-        <h1>${uiLabelMap.EcommerceResponses}</h1><br/>
+        <h1>${uiLabelMap.EcommerceResponses}</h1><br />
 <@loopSubContent contentAssocTypeId="RESPONSE" contentId=subContentId mapKey=""
                 pickWhen="contentAssocTypeId != null && contentAssocTypeId.equals(\"RESPONSE\") && mapKey == null"
                 followWhen="contentAssocTypeId != null && contentAssocTypeId.equals(\"RESPONSE\")">
@@ -97,10 +97,10 @@ under the License.
         </#if>
         <#if content?exists>
   <tr>
-  <td class="tabletext">
+  <td>
         ${indentFill}
         <a class="tabButton" href="<@ofbizUrl>ViewBlog?contentId=${thisContentId}&amp;nodeTrailCsv=${nodeTrailCsv?if_exists}</@ofbizUrl>" >${uiLabelMap.CommonView}</a>
-                     ${content.contentId?if_exists}-${content.description?if_exists}<br/>
+                     ${content.contentId?if_exists}-${content.description?if_exists}<br />
   </td>
   </tr>
         </#if>
@@ -144,7 +144,7 @@ ${uiLabelMap.CommonDescription}[${currentValue.contentId?if_exists}]:${descripti
     <#assign csv = "">
     <#assign counter = 0>
     <#assign len = trail?size>
-    <table border="0" class="tabletext" cellspacing="4">
+    <table border="0" cellspacing="4">
     <#list trail as webSitePublishPoint>
         <#if counter < len && startIndex <= counter >
        <tr>

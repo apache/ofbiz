@@ -18,10 +18,15 @@
  *******************************************************************************/
 package org.ofbiz.minilang.operation;
 
-import java.util.*;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 
-import org.w3c.dom.*;
-import org.ofbiz.base.util.*;
+import org.ofbiz.base.util.Debug;
+import org.ofbiz.base.util.UtilProperties;
+import org.ofbiz.base.util.UtilURL;
+import org.ofbiz.base.util.UtilValidate;
+import org.w3c.dom.Element;
 
 /**
  * A MakeInStringOperation that insert the value of a property from a properties file
@@ -30,8 +35,8 @@ public class PropertyOper extends MakeInStringOperation {
 
     public static final String module = PropertyOper.class.getName();
 
-    String resource;
     String property;
+    String resource;
 
     public PropertyOper(Element element) {
         super(element);
@@ -39,10 +44,11 @@ public class PropertyOper extends MakeInStringOperation {
         property = element.getAttribute("property");
     }
 
-    public String exec(Map inMap, List messages, Locale locale, ClassLoader loader) {
+    @Override
+    public String exec(Map<String, Object> inMap, List<Object> messages, Locale locale, ClassLoader loader) {
         String propStr = UtilProperties.getPropertyValue(UtilURL.fromResource(resource, loader), property);
 
-        if (propStr == null || propStr.length() == 0) {
+        if (UtilValidate.isEmpty(propStr)) {
             Debug.logWarning("[SimpleMapProcessor.PropertyOper.exec] Property " + property + " in resource " + resource + " not found, not appending anything", module);
             return null;
         } else {

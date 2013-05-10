@@ -27,10 +27,15 @@ under the License.
         "head1":"font-size=\"12\" font-weight=\"bold\"",
         "head2":"font-weight=\"bold\"",
         "head3":"font-weight=\"bold\" font-style=\"italic\"",
+        "h1":"font-size=\"12\" font-weight=\"bold\"",
+        "h2":"font-weight=\"bold\"",
+        "h3":"font-weight=\"bold\" font-style=\"italic\"",
         "error":"color=\"red\""}/>
     <#assign foStyle = foStyles[style]?default("")/>
     ${foStyle?default("")}
 </#macro>
+
+<#escape x as x?xml>
 
 <#macro renderScreenBegin>
 <?xml version="1.0" encoding="UTF-8"?>
@@ -46,7 +51,7 @@ under the License.
 </#macro>
 <#macro renderContainerBegin id style autoUpdateLink autoUpdateInterval><fo:block <#if style?has_content><@getFoStyle style/></#if>></#macro>
 <#macro renderContainerEnd></fo:block></#macro>
-<#macro renderContentBegin></#macro>
+<#macro renderContentBegin editRequest enableEditValue editContainerStyle></#macro>
 <#macro renderContentBody></#macro>
 <#macro renderContentEnd></#macro>
 <#macro renderSubContentBegin></#macro>
@@ -54,13 +59,15 @@ under the License.
 <#macro renderSubContentEnd urlString editMode editContainerStyle editRequest enableEditValue></#macro>
 
 <#macro renderHorizontalSeparator id style><fo:block><fo:leader leader-length="100%" leader-pattern="rule" rule-style="solid" rule-thickness="0.1mm" color="black"/></fo:block></#macro>
-<#macro renderLabel text id style><#if text?exists><#if style?has_content><fo:inline <@getFoStyle style/>></#if>${text}<#if style?has_content></fo:inline></#if></#if></#macro>
-<#macro renderLink></#macro>
-<#macro renderImage></#macro>
+<#macro renderLabel text id style><#if text?has_content><fo:block <#if style?has_content><@getFoStyle style/></#if>>${text}</fo:block></#if></#macro>
+<#macro renderLink parameterList targetWindow target uniqueItemName linkType actionUrl id style name linkUrl text imgStr></#macro>
+<#macro renderImage src id style wid hgt border alt urlString></#macro>
 
 <#macro renderContentFrame></#macro>
-<#macro renderScreenletBegin id></#macro>
+<#macro renderScreenletBegin id title collapsible saveCollapsed collapsibleAreaId expandToolTip collapseToolTip fullUrlString padded menuString showMore collapsed javaScriptEnabled></#macro>
 <#macro renderScreenletSubWidget></#macro>
 <#macro renderScreenletEnd></#macro>
 
 <#macro renderScreenletPaginateMenu lowIndex actualPageSize ofLabel listSize paginateLastStyle lastLinkUrl paginateLastLabel paginateNextStyle nextLinkUrl paginateNextLabel paginatePreviousStyle paginatePreviousLabel previousLinkUrl paginateFirstStyle paginateFirstLabel firstLinkUrl></#macro>
+</#escape>
+

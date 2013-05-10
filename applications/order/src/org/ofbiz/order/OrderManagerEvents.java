@@ -19,9 +19,6 @@
 package org.ofbiz.order;
 
 import java.math.BigDecimal;
-import java.text.NumberFormat;
-import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -30,13 +27,17 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import javolution.util.FastList;
+
 import org.ofbiz.base.util.Debug;
+import org.ofbiz.base.util.GeneralException;
+import org.ofbiz.base.util.ObjectType;
 import org.ofbiz.base.util.UtilDateTime;
 import org.ofbiz.base.util.UtilHttp;
 import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.base.util.UtilProperties;
 import org.ofbiz.base.util.UtilValidate;
-import org.ofbiz.entity.GenericDelegator;
+import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
 import org.ofbiz.entity.condition.EntityCondition;
@@ -57,22 +58,23 @@ public class OrderManagerEvents {
     public static final String module = OrderManagerEvents.class.getName();
     public static final String resource_error = "OrderErrorUiLabels";
 
+    // FIXME: this event doesn't seem to be used; we may want to remove it
     public static String processOfflinePayments(HttpServletRequest request, HttpServletResponse response) {
         HttpSession session = request.getSession();
         LocalDispatcher dispatcher = (LocalDispatcher) request.getAttribute("dispatcher");
-        GenericDelegator delegator = (GenericDelegator) request.getAttribute("delegator");
+        Delegator delegator = (Delegator) request.getAttribute("delegator");
         GenericValue userLogin = (GenericValue) session.getAttribute("userLogin");
         Locale locale = UtilHttp.getLocale(request);
 
         if (session.getAttribute("OFFLINE_PAYMENTS") != null) {
             String orderId = (String) request.getAttribute("orderId");
-            List toBeStored = new LinkedList();
-            List paymentPrefs = null;
+            List<GenericValue> toBeStored = FastList.newInstance();
+            List<GenericValue> paymentPrefs = null;
             GenericValue placingCustomer = null;
             try {
-                paymentPrefs = delegator.findByAnd("OrderPaymentPreference", UtilMisc.toMap("orderId", orderId));
-                List pRoles = delegator.findByAnd("OrderRole", UtilMisc.toMap("orderId", orderId, "roleTypeId", "PLACING_CUSTOMER"));
-                if (pRoles != null && pRoles.size() > 0)
+                paymentPrefs = delegator.findByAnd("OrderPaymentPreference", UtilMisc.toMap("orderId", orderId), null, false);
+                List<GenericValue> pRoles = delegator.findByAnd("OrderRole", UtilMisc.toMap("orderId", orderId, "roleTypeId", "PLACING_CUSTOMER"), null, false);
+                if (UtilValidate.isNotEmpty(pRoles))
                     placingCustomer = EntityUtil.getFirst(pRoles);
             } catch (GenericEntityException e) {
                 Debug.logError(e, "Problems looking up order payment preferences", module);
@@ -80,17 +82,15 @@ public class OrderManagerEvents {
                 return "error";
             }
             if (paymentPrefs != null) {
-                Iterator i = paymentPrefs.iterator();
-                while (i.hasNext()) {
+                for(GenericValue ppref : paymentPrefs) {
                     // update the preference to received
                     // TODO: updating payment preferences should be done as a service
-                    GenericValue ppref = (GenericValue) i.next();
                     ppref.set("statusId", "PAYMENT_RECEIVED");
                     ppref.set("authDate", UtilDateTime.nowTimestamp());
                     toBeStored.add(ppref);
 
                     // create a payment record
-                    Map results = null;
+                    Map<String, Object> results = null;
                     try {
                         results = dispatcher.runSync("createPaymentFromPreference", UtilMisc.toMap("orderPaymentPreferenceId", ppref.get("orderPaymentPreferenceId"),
                                 "paymentFromId", placingCustomer.getString("partyId"), "comments", "Payment received offline and manually entered."));
@@ -102,7 +102,7 @@ public class OrderManagerEvents {
 
                     if ((results == null) || (results.get(ModelService.RESPONSE_MESSAGE).equals(ModelService.RESPOND_ERROR))) {
                         Debug.logError((String) results.get(ModelService.ERROR_MESSAGE), module);
-                        request.setAttribute("_ERROR_MESSAGE_", (String) results.get(ModelService.ERROR_MESSAGE));
+                        request.setAttribute("_ERROR_MESSAGE_", results.get(ModelService.ERROR_MESSAGE));
                         return "error";
                     }
                 }
@@ -126,7 +126,7 @@ public class OrderManagerEvents {
     public static String receiveOfflinePayment(HttpServletRequest request, HttpServletResponse response) {
         HttpSession session = request.getSession();
         LocalDispatcher dispatcher = (LocalDispatcher) request.getAttribute("dispatcher");
-        GenericDelegator delegator = (GenericDelegator) request.getAttribute("delegator");
+        Delegator delegator = (Delegator) request.getAttribute("delegator");
         GenericValue userLogin = (GenericValue) session.getAttribute("userLogin");
         Locale locale = UtilHttp.getLocale(request);
 
@@ -135,7 +135,7 @@ public class OrderManagerEvents {
         // get the order header & payment preferences
         GenericValue orderHeader = null;
         try {
-            orderHeader = delegator.findByPrimaryKey("OrderHeader", UtilMisc.toMap("orderId", orderId));
+            orderHeader = delegator.findOne("OrderHeader", UtilMisc.toMap("orderId", orderId), false);
         } catch (GenericEntityException e) {
             Debug.logError(e, "Problems reading order header from datasource.", module);
             request.setAttribute("_ERROR_MESSAGE_", UtilProperties.getMessage(resource_error,"OrderProblemsReadingOrderHeaderInformation", locale));
@@ -148,7 +148,7 @@ public class OrderManagerEvents {
         }
 
         // get the payment types to receive
-        List paymentMethodTypes = null;
+        List<GenericValue> paymentMethodTypes = null;
 
         try {
             EntityExpr ee = EntityCondition.makeCondition("paymentMethodTypeId", EntityOperator.NOT_EQUAL, "EXT_OFFLINE");
@@ -164,11 +164,11 @@ public class OrderManagerEvents {
             return "error";
         }
 
-        List toBeStored = new LinkedList();
+        List<GenericValue> toBeStored = FastList.newInstance();
         GenericValue placingCustomer = null;
         try {
-            List pRoles = delegator.findByAnd("OrderRole", UtilMisc.toMap("orderId", orderId, "roleTypeId", "PLACING_CUSTOMER"));
-            if (pRoles != null && pRoles.size() > 0)
+            List<GenericValue> pRoles = delegator.findByAnd("OrderRole", UtilMisc.toMap("orderId", orderId, "roleTypeId", "PLACING_CUSTOMER"), null, false);
+            if (UtilValidate.isNotEmpty(pRoles))
                 placingCustomer = EntityUtil.getFirst(pRoles);
         } catch (GenericEntityException e) {
             Debug.logError(e, "Problems looking up order payment preferences", module);
@@ -176,17 +176,15 @@ public class OrderManagerEvents {
             return "error";
         }
 
-        Iterator pmti = paymentMethodTypes.iterator();
-        while (pmti.hasNext()) {
-            GenericValue paymentMethodType = (GenericValue) pmti.next();
+        for(GenericValue paymentMethodType : paymentMethodTypes) {
             String paymentMethodTypeId = paymentMethodType.getString("paymentMethodTypeId");
             String amountStr = request.getParameter(paymentMethodTypeId + "_amount");
             String paymentReference = request.getParameter(paymentMethodTypeId + "_reference");
             if (!UtilValidate.isEmpty(amountStr)) {
                 BigDecimal paymentTypeAmount = BigDecimal.ZERO;
                 try {
-                    paymentTypeAmount = new BigDecimal(NumberFormat.getNumberInstance(locale).parse(amountStr).doubleValue());
-                } catch (java.text.ParseException pe) {
+                    paymentTypeAmount = (BigDecimal) ObjectType.simpleTypeConvert(amountStr, "BigDecimal", null, locale);
+                } catch (GeneralException e) {
                     request.setAttribute("_ERROR_MESSAGE_", UtilProperties.getMessage(resource_error,"OrderProblemsPaymentParsingAmount", locale));
                     return "error";
                 }
@@ -194,7 +192,7 @@ public class OrderManagerEvents {
 
                     // create the OrderPaymentPreference
                     // TODO: this should be done with a service
-                    Map prefFields = UtilMisc.toMap("orderPaymentPreferenceId", delegator.getNextSeqId("OrderPaymentPreference"));
+                    Map<String, String> prefFields = UtilMisc.<String, String>toMap("orderPaymentPreferenceId", delegator.getNextSeqId("OrderPaymentPreference"));
                     GenericValue paymentPreference = delegator.makeValue("OrderPaymentPreference", prefFields);
                     paymentPreference.set("paymentMethodTypeId", paymentMethodType.getString("paymentMethodTypeId"));
                     paymentPreference.set("maxAmount", paymentTypeAmount);
@@ -214,7 +212,7 @@ public class OrderManagerEvents {
                     }
 
                     // create a payment record
-                    Map results = null;
+                    Map<String, Object> results = null;
                     try {
                         results = dispatcher.runSync("createPaymentFromPreference", UtilMisc.toMap("userLogin", userLogin,
                                 "orderPaymentPreferenceId", paymentPreference.get("orderPaymentPreferenceId"), "paymentRefNum", paymentReference,
@@ -227,7 +225,7 @@ public class OrderManagerEvents {
 
                     if ((results == null) || (results.get(ModelService.RESPONSE_MESSAGE).equals(ModelService.RESPOND_ERROR))) {
                         Debug.logError((String) results.get(ModelService.ERROR_MESSAGE), module);
-                        request.setAttribute("_ERROR_MESSAGE_", (String) results.get(ModelService.ERROR_MESSAGE));
+                        request.setAttribute("_ERROR_MESSAGE_", results.get(ModelService.ERROR_MESSAGE));
                         return "error";
                     }
                 }
@@ -236,7 +234,7 @@ public class OrderManagerEvents {
 
         // get the current payment prefs
         GenericValue offlineValue = null;
-        List currentPrefs = null;
+        List<GenericValue> currentPrefs = null;
         BigDecimal paymentTally = BigDecimal.ZERO;
         try {
             EntityConditionList<EntityExpr> ecl = EntityCondition.makeCondition(UtilMisc.toList(
@@ -248,9 +246,7 @@ public class OrderManagerEvents {
             Debug.logError(e, "ERROR: Unable to get existing payment preferences from order", module);
         }
         if (UtilValidate.isNotEmpty(currentPrefs)) {
-            Iterator cpi = currentPrefs.iterator();
-            while (cpi.hasNext()) {
-                GenericValue cp = (GenericValue) cpi.next();
+            for(GenericValue cp : currentPrefs) {
                 String paymentMethodType = cp.getString("paymentMethodTypeId");
                 if ("EXT_OFFLINE".equals(paymentMethodType)) {
                     offlineValue = cp;

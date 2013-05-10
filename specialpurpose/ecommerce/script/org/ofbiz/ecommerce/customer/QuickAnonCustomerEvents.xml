@@ -19,7 +19,7 @@ under the License.
 -->
 
 <simple-methods xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/simple-methods.xsd">
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/simple-methods-v2.xsd">
 
     <!-- =========================================== -->
     <!-- ======== Anonymous Checkout Events ======== -->
@@ -35,7 +35,7 @@ under the License.
         <if-compare field="create_allow_password" operator="not-equals" value="true">
             <set field="parameters.password" from-field="default_user_password"/>
             <set field="parameters.confirmPassword" from-field="default_user_password"/>
-            <set field="parameters.passwordHint" value="No hint set, accout not yet enabled"/>
+            <set field="parameters.passwordHint" value="No hint set, account not yet enabled"/>
         </if-compare>
 
         <!-- if username and/or password should be lowercased, do that now -->
@@ -65,7 +65,7 @@ under the License.
                 <set field=" userLoginExistsMap.userLoginId"  from-field="userLoginContext.userLoginId"/>
                 <find-by-primary-key entity-name="UserLogin" map="userLoginExistsMap" value-field="existingUserLogin"/>
                 <if-not-empty field="existingUserLogin">
-                    <set field="tempErrorMessage" value="Username in use, please choose another."/>
+                    <set field="tempErrorMessage" value="${uiLabelMap.PartyUserNameInUse}"/>
                     <field-to-list field="tempErrorMessage" list="error_list"/>
                 </if-not-empty>
             </if-not-empty>
@@ -310,7 +310,7 @@ under the License.
                     <set-current-user-login value-field="userLoginContext"/>
                 </else>
                 </if-empty>
-            <else><!-- of an anonymous vistor is coming back, update the party id in the userLogin object -->
+            <else><!-- if an anonymous visitor is coming back, update the party id in the userLogin object -->
                 <if-compare field="userLogin.userLoginId" value="anonymous" operator="equals">
                     <set field="userLogin.partyId" from-field="partyId"/>
                 </if-compare>
@@ -547,7 +547,7 @@ under the License.
                 <string value="SHIPPING_LOCATION"/>
                 <field field="parameters.shippingContactMechId"/>
             </call-object-method>
-            <call-object-method obj-field="cart" method-name="setShippingContactMechId">
+            <call-object-method obj-field="cart" method-name="setAllShippingContactMechId">
                 <field field="parameters.shippingContactMechId"/>
             </call-object-method>
         </if-not-empty>
@@ -577,44 +577,44 @@ under the License.
        <session-to-field field="cart" session-name="shoppingCart"/>
        <if-not-empty field="cart">
            <set field="shipmentMethodTypeId" from-field="parameters.shipmentMethodTypeId"/>
-           <call-object-method obj-field="cart" method-name="setShipmentMethodTypeId">
+           <call-object-method obj-field="cart" method-name="setAllShipmentMethodTypeId">
                <field field="shipmentMethodTypeId"/>
            </call-object-method>
 
            <set field="carrierPartyId" from-field="parameters.carrierPartyId"/>
-           <call-object-method obj-field="cart" method-name="setCarrierPartyId">
+           <call-object-method obj-field="cart" method-name="setAllCarrierPartyId">
                <field field="carrierPartyId"/>
            </call-object-method>
 
            <set field="maySplit" from-field="parameters.may_split" type="Boolean" default-value="false"/>
-           <call-object-method obj-field="cart" method-name="setMaySplit">
+           <call-object-method obj-field="cart" method-name="setAllMaySplit">
                <field field="maySplit" type="Boolean"/>
            </call-object-method>
 
            <set field="shippingInstruction" from-field="parameters.shipping_instructions" type="String"/>
            <if-not-empty field="shippingInstruction">
-           <call-object-method obj-field="cart" method-name="setShippingInstructions">
-               <field field="shippingInstruction" type="String"/>
-           </call-object-method>
+               <call-object-method obj-field="cart" method-name="setAllShippingInstructions">
+                   <field field="shippingInstruction" type="String"/>
+               </call-object-method>
            </if-not-empty>
 
            <set field="correspondingPoId" from-field="parameters.correspondingPoId" type="String"/>
            <if-not-empty field="correspondingPoId">
-           <call-object-method obj-field="cart" method-name="setPoNumber">
-               <field field="correspondingPoId" type="String"/>
-           </call-object-method>
+               <call-object-method obj-field="cart" method-name="setPoNumber">
+                   <field field="correspondingPoId" type="String"/>
+               </call-object-method>
            </if-not-empty>
 
            <set field="isGift" from-field="parameters.is_gift" type="Boolean" default-value="false"/>
-           <call-object-method obj-field="cart" method-name="setIsGift">
+           <call-object-method obj-field="cart" method-name="setAllIsGift">
                <field field="isGift" type="Boolean"/>
            </call-object-method>
 
            <set field="giftMessage" from-field="parameters.gift_message" type="String"/>
            <if-not-empty field="giftMessage">
-           <call-object-method obj-field="cart" method-name="setGiftMessage">
-               <field field="giftMessage" type="String"/>
-           </call-object-method>
+               <call-object-method obj-field="cart" method-name="setAllGiftMessage">
+                   <field field="giftMessage" type="String"/>
+               </call-object-method>
            </if-not-empty>
        </if-not-empty>
     </simple-method>

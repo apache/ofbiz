@@ -25,8 +25,6 @@ under the License.
   <!-- ========================================================= -->
     <title>Entity of an Open For Business Project Component</title>
     <description>None</description>
-    <copyright>Copyright 2001-2008 The Apache Software Foundation</copyright>
-    <author>None</author>
     <version>1.0</version>
 
   <!-- ========================================================= -->
@@ -38,6 +36,7 @@ under the License.
   <!--  - org.ofbiz.order.request -->
   <!--  - org.ofbiz.order.shoppingcart -->
   <!--  - org.ofbiz.order.shoppinglist -->
+  <!--  - org.ofbiz.order.communication -->
   <!-- ========================================================= -->
 
 
@@ -74,6 +73,43 @@ under the License.
         <key-map field-name="orderId"/>
       </view-link>
     </view-entity>
+
+    <view-entity entity-name="OrderHeaderAndItemFacilityLocation"
+            package-name="org.ofbiz.order.order"
+           title="OrderHeader, OrderItemShipGrpInvRes, OrderItemShipGroup, InventoryItem and FacilityLocation View Entity">
+      <member-entity entity-alias="OH" entity-name="OrderHeader"/>
+      <member-entity entity-alias="OISGIR" entity-name="OrderItemShipGrpInvRes"/>
+      <member-entity entity-alias="OISG" entity-name="OrderItemShipGroup"/>
+      <member-entity entity-alias="II" entity-name="InventoryItem"/>
+      <member-entity entity-alias="FL" entity-name="FacilityLocation"/>
+
+      <alias entity-alias="OH" name="orderId"/>
+      <alias entity-alias="OISGIR" name="orderItemSeqId"/>
+      <alias entity-alias="OISGIR" name="inventoryItemId"/>
+      <alias entity-alias="OISG" name="shipGroupSeqId"/>
+      <alias entity-alias="OISG" name="shipmentMethodTypeId"/>
+      <alias entity-alias="OISG" name="carrierPartyId"/>
+      <alias entity-alias="II" name="productId"/>
+      <alias entity-alias="II" name="facilityId"/>
+      <alias entity-alias="II" name="locationSeqId"/>
+      <alias entity-alias="FL" name="locationTypeEnumId"/>
+      <alias entity-alias="FL" name="areaId"/>
+      <view-link entity-alias="OH" rel-entity-alias="OISGIR">
+        <key-map field-name="orderId"/>
+      </view-link>
+      <view-link entity-alias="OISGIR" rel-entity-alias="OISG">
+        <key-map field-name="orderId"/>
+        <key-map field-name="shipGroupSeqId"/>
+      </view-link>
+      <view-link entity-alias="OISGIR" rel-entity-alias="II">
+        <key-map field-name="inventoryItemId"/>
+      </view-link>
+      <view-link entity-alias="II" rel-entity-alias="FL" rel-optional="true">
+        <key-map field-name="facilityId"/>
+        <key-map field-name="locationSeqId"/>
+      </view-link>
+    </view-entity>
+
     <view-entity entity-name="OrderHeaderAndPaymentPref"
             package-name="org.ofbiz.order.order"
             never-cache="true"
@@ -111,9 +147,9 @@ under the License.
       <alias entity-alias="ORLE" name="partyId" group-by="true"/>
       <alias entity-alias="ORLE" name="roleTypeId" group-by="true"/>
       <alias entity-alias="OH" name="orderId"/>
-      <alias entity-alias="OH" name="orderTypeId"/>
+      <alias entity-alias="OH" name="orderTypeId" group-by="true"/>
       <alias entity-alias="OH" name="orderDate"/>
-      <alias entity-alias="OH" name="statusId"/>
+      <alias entity-alias="OH" name="statusId" group-by="true"/>
       <alias entity-alias="OH" name="totalGrandAmount" field="grandTotal" function="sum"/>
       <alias entity-alias="OH" name="totalSubRemainingAmount" field="remainingSubTotal" function="sum"/>
       <alias entity-alias="OH" name="totalOrders" field="orderId" function="count"/>
@@ -876,12 +912,11 @@ under the License.
       <alias entity-alias="OPP" name="paymentMethodTypeId" group-by="true"/>
       <alias entity-alias="PMT" name="description" group-by="true"/>
       <alias entity-alias="OPP" name="maxAmount" function="sum"/>
-      <!-- these can be used for query, but generally won't be included in the fields-to-select -->
-      <alias entity-alias="OH" name="orderId"/>
-      <alias entity-alias="OH" name="orderTypeId"/>
-      <alias entity-alias="OH" name="orderDate"/>
-      <alias entity-alias="OH" name="billingAccountId"/>
-      <alias entity-alias="OPP" name="preferenceStatusId" field="statusId"/>
+      <alias entity-alias="OH" name="orderId" group-by="true"/>
+      <alias entity-alias="OH" name="orderTypeId" group-by="true"/>
+      <alias entity-alias="OH" name="orderDate" group-by="true"/>
+      <alias entity-alias="OH" name="billingAccountId" group-by="true"/>
+      <alias entity-alias="OPP" name="preferenceStatusId" field="statusId" group-by="true"/>
       <view-link entity-alias="OH" rel-entity-alias="OPP">
         <key-map field-name="orderId"/>
       </view-link>
@@ -1069,6 +1104,40 @@ under the License.
       </view-link>
       <view-link entity-alias="OH" rel-entity-alias="ORR">
         <key-map field-name="orderId"/>
+      </view-link>
+    </view-entity>
+    
+    <view-entity entity-name="OrderHeaderAndShipGroupsByProduct"
+            package-name="org.ofbiz.order.order"
+            never-cache="true"
+            title="Order Header And Ship Groups By Product">
+      <member-entity entity-alias="OISG" entity-name="OrderItemShipGroup"/>
+      <member-entity entity-alias="PA" entity-name="PostalAddress"/>
+      <member-entity entity-alias="OH" entity-name="OrderHeader"/>
+      <member-entity entity-alias="ORR" entity-name="OrderRole"/>
+      <member-entity entity-alias="OI" entity-name="OrderItem"/>
+      <member-entity entity-alias="PR" entity-name="Product"/>
+      <alias-all entity-alias="OISG"/>
+      <alias-all entity-alias="PA"/>
+      <alias-all entity-alias="ORR"/>
+      <alias-all entity-alias="OH"/>
+      <alias name="productId" field="productId" entity-alias="PR"/>
+      <alias name="brandName" field="brandName" entity-alias="PR"/>
+      <alias name="internalName" field="internalName" entity-alias="PR"/>
+      <view-link entity-alias="OH" rel-entity-alias="OISG">
+        <key-map field-name="orderId"/>
+      </view-link>
+      <view-link entity-alias="OISG" rel-entity-alias="PA">
+        <key-map field-name="contactMechId"/>
+      </view-link>
+      <view-link entity-alias="OH" rel-entity-alias="ORR">
+        <key-map field-name="orderId"/>
+      </view-link>
+      <view-link entity-alias="OH" rel-entity-alias="OI">
+        <key-map field-name="orderId"/>
+      </view-link>
+      <view-link entity-alias="OI" rel-entity-alias="PR">
+        <key-map field-name="productId"/>
       </view-link>
     </view-entity>
 
@@ -1277,6 +1346,22 @@ under the License.
         <key-map field-name="workEffortId"/>
       </relation>
     </view-entity>
+    <view-entity entity-name="CustRequestAndNote"
+            package-name="org.ofbiz.order.request"
+            title="Customer Request And Note">
+      <member-entity entity-alias="CRN" entity-name="CustRequestNote"/>
+      <member-entity entity-alias="ND" entity-name="NoteData"/>
+      <alias-all entity-alias="CRN">
+        <exclude field="noteId"/>
+      </alias-all>
+      <alias-all entity-alias="ND"/>
+      <view-link entity-alias="CRN" rel-entity-alias="ND">
+        <key-map field-name="noteId"/>
+      </view-link>
+      <relation type="one-nofk" rel-entity-name="CustRequest">
+        <key-map field-name="custRequestId"/>
+      </relation>
+    </view-entity>
     <view-entity entity-name="CustRequestInfoAndWorkEffortAndPartyRel"
             package-name="org.ofbiz.order.request"
             title="Customer Request And WorkEffort">
@@ -1342,6 +1427,22 @@ under the License.
       </view-link>
       <view-link entity-alias="ND" rel-entity-alias="PR">
         <key-map field-name="noteParty" rel-field-name="partyId"/>
+      </view-link>
+    </view-entity>
+    <view-entity entity-name="QuoteNoteView"
+            package-name="org.ofbiz.order.quote"
+            never-cache="true"
+            title="Quote Note View Entity">
+      <member-entity entity-alias="QD" entity-name="QuoteNote"/>
+      <member-entity entity-alias="ND" entity-name="NoteData"/>
+      <alias entity-alias="QD" name="quoteId"/>
+      <alias entity-alias="ND" name="noteId"/>
+      <alias entity-alias="ND" name="noteName"/>
+      <alias entity-alias="ND" name="noteInfo"/>
+      <alias entity-alias="ND" name="noteDateTime"/>
+      <alias entity-alias="ND" name="noteParty"/>
+      <view-link entity-alias="QD" rel-entity-alias="ND">
+        <key-map field-name="noteId"/>
       </view-link>
     </view-entity>
     <view-entity entity-name="QuoteWorkEffortView"
@@ -1459,7 +1560,7 @@ under the License.
     </view-entity>
     <view-entity entity-name="RequirementPartyProductCount"
             package-name="org.ofbiz.order.request"
-            title="A join on Requirement and RequirementRole to count number of distinict products required from a supplier party">
+            title="A join on Requirement and RequirementRole to count number of distinct products required from a supplier party">
       <member-entity entity-alias="RQ" entity-name="Requirement"/>
       <member-entity entity-alias="RQR" entity-name="RequirementRole"/>
       <alias entity-alias="RQ" name="requirementTypeId" group-by="false"/>
@@ -1489,22 +1590,9 @@ under the License.
     </view-entity>
 
   <!-- ========================================================= -->
-  <!-- org.ofbiz.order.opportunity -->
+  <!-- org.ofbiz.order.communication -->
   <!-- ========================================================= -->
 
-    <view-entity entity-name="SalesForecastAndCustomTimePeriod"
-            package-name="org.ofbiz.order.opportunity"
-            title="View for selecting the forecast with its time period.">
-      <member-entity entity-alias="SF" entity-name="SalesForecast"/>
-      <member-entity entity-alias="CTP" entity-name="CustomTimePeriod"/>
-      <alias-all entity-alias="SF"/>
-      <alias-all entity-alias="CTP">
-          <exclude field="organizationPartyId"/>
-      </alias-all>
-      <view-link entity-alias="SF" rel-entity-alias="CTP">
-        <key-map field-name="customTimePeriodId"/>
-      </view-link>
-    </view-entity>
     <view-entity entity-name="CommunicationEventAndOrder"
                  package-name="org.ofbiz.order.communication"
                  title="Communication Event And Order View Entity">
@@ -1573,7 +1661,9 @@ under the License.
     <member-entity entity-alias="OH" entity-name="OrderHeader"/>
     <member-entity entity-alias="OHWE" entity-name="OrderHeaderWorkEffort"/>
     <alias-all entity-alias="WE"/>
-    <alias-all entity-alias="OH"/>
+    <alias-all entity-alias="OH">
+        <exclude field="priority"/>
+    </alias-all>
     <alias-all entity-alias="OHWE"/>
     <view-link entity-alias="WE" rel-entity-alias="OHWE">
       <key-map field-name="workEffortId"/>
@@ -1582,5 +1672,46 @@ under the License.
       <key-map field-name="orderId"/>
     </view-link>
   </view-entity>
-</entitymodel>
 
+    <view-entity entity-name="OrderItemBillingAndInvoiceAndItem"
+          package-name="org.ofbiz.order.order" 
+          title="OrderItemBilling and Invoice and InvoiceItem View Entity">
+    <member-entity entity-alias="OIB" entity-name="OrderItemBilling"/>
+    <member-entity entity-alias="INV" entity-name="Invoice"/>
+    <member-entity entity-alias="II" entity-name="InvoiceItem"/>
+    <alias-all entity-alias="OIB"/>
+    <alias entity-alias="INV" name="statusId"/>
+    <view-link entity-alias="OIB" rel-entity-alias="INV">
+      <key-map field-name="invoiceId"/>
+    </view-link>
+    <view-link entity-alias="OIB" rel-entity-alias="II">
+      <key-map field-name="invoiceId"/>
+      <key-map field-name="invoiceItemSeqId"/>
+    </view-link>
+    <relation type="one-nofk" rel-entity-name="Invoice">
+        <key-map field-name="invoiceId"/>
+    </relation>
+    <relation type="one" rel-entity-name="InvoiceItem">
+        <key-map field-name="invoiceId"/>
+        <key-map field-name="invoiceItemSeqId"/>
+    </relation>
+  </view-entity>
+
+  <view-entity entity-name="OrderItemAndProduct"
+            package-name="org.ofbiz.order.order"
+            never-cache="true"
+            title="OrderItem And Product View Entity">
+      <member-entity entity-alias="OI" entity-name="OrderItem"/>
+      <member-entity entity-alias="PR" entity-name="Product"/>
+      <alias-all entity-alias="OI"/>
+      <alias-all entity-alias="PR">
+        <exclude field="comments"/>
+      </alias-all>
+      <view-link entity-alias="OI" rel-entity-alias="PR">
+        <key-map field-name="productId"/>
+      </view-link>
+      <relation type="one-nofk" rel-entity-name="Product">
+        <key-map field-name="productId"/>
+      </relation>
+  </view-entity>
+</entitymodel>

@@ -24,11 +24,12 @@ under the License.
     <resource-loader name="main" type="component"/>
     <classpath type="jar" location="build/lib/*"/>
     <classpath type="dir" location="config"/>
-    <classpath type="dir" location="script"/>
     <entity-resource type="model" reader-name="main" loader="main" location="entitydef/entitymodel.xml"/>
     <entity-resource type="model" reader-name="main" loader="main" location="entitydef/entitymodel_olap.xml"/>
     <entity-resource type="group" reader-name="main" loader="main" location="entitydef/entitygroup_olap.xml"/>
-    <entity-resource type="data" reader-name="seed" loader="main" location="data/CommonSecurityData.xml"/>
+    <entity-resource type="data" reader-name="seed" loader="main" location="data/CommonSecurityPermissionSeedData.xml"/>
+    <entity-resource type="data" reader-name="demo" loader="main" location="data/CommonSecurityGroupDemoData.xml"/>
+    <entity-resource type="data" reader-name="seed" loader="main" location="data/CommonSystemPropertyData.xml"/>
     <entity-resource type="data" reader-name="seed" loader="main" location="data/CommonTypeData.xml"/>
     <entity-resource type="data" reader-name="seed" loader="main" location="data/CountryCodeData.xml"/>
     <entity-resource type="data" reader-name="seed" loader="main" location="data/CurrencyData.xml"/>
@@ -37,14 +38,20 @@ under the License.
     <entity-resource type="data" reader-name="seed" loader="main" location="data/GeoData_AU.xml"/>
     <entity-resource type="data" reader-name="seed" loader="main" location="data/GeoData_BG.xml"/>
     <entity-resource type="data" reader-name="seed" loader="main" location="data/GeoData_BR.xml"/>
+    <entity-resource type="data" reader-name="seed" loader="main" location="data/GeoData_CA.xml"/>
+    <entity-resource type="data" reader-name="seed" loader="main" location="data/GeoData_CH.xml"/>
+    <entity-resource type="data" reader-name="seed" loader="main" location="data/GeoData_CN.xml"/>
     <entity-resource type="data" reader-name="seed" loader="main" location="data/GeoData_CO.xml"/>
     <entity-resource type="data" reader-name="seed" loader="main" location="data/GeoData_DE.xml"/>
     <entity-resource type="data" reader-name="seed" loader="main" location="data/GeoData_ES.xml"/>
     <entity-resource type="data" reader-name="seed" loader="main" location="data/GeoData_FR.xml"/>
-    <entity-resource type="data" reader-name="seed" loader="main" location="data/GeoData_IT.xml"/>
+    <entity-resource type="data" reader-name="seed" loader="main" location="data/GeoData_IE.xml"/>
     <entity-resource type="data" reader-name="seed" loader="main" location="data/GeoData_IN.xml"/>
-    <entity-resource type="data" reader-name="seed" loader="main" location="data/GeoData_IRL.xml"/>
+    <entity-resource type="data" reader-name="seed" loader="main" location="data/GeoData_IT.xml"/>
+    <entity-resource type="data" reader-name="seed" loader="main" location="data/GeoData_JP.xml"/>
+    <entity-resource type="data" reader-name="seed" loader="main" location="data/GeoData_MX.xml"/>
     <entity-resource type="data" reader-name="seed" loader="main" location="data/GeoData_NL.xml"/>
+    <entity-resource type="data" reader-name="seed" loader="main" location="data/GeoData_PL.xml"/>
     <entity-resource type="data" reader-name="seed" loader="main" location="data/GeoData_UK.xml"/>
     <entity-resource type="data" reader-name="seed" loader="main" location="data/GeoData_US.xml"/>
 
@@ -52,14 +59,18 @@ under the License.
     <entity-resource type="data" reader-name="seed" loader="main" location="data/UnitData.xml"/>
     <entity-resource type="data" reader-name="seed" loader="main" location="data/PeriodData.xml"/>
     <entity-resource type="data" reader-name="seed" loader="main" location="data/DimensionTypeData.xml"/>
+    <entity-resource type="data" reader-name="seed" loader="main" location="data/CommonPortletData.xml"/>
 
     <service-resource type="model" loader="main" location="servicedef/services.xml"/>
     <service-resource type="model" loader="main" location="servicedef/services_cdyne.xml"/>
     <service-resource type="model" loader="main" location="servicedef/services_email.xml"/>
     <service-resource type="model" loader="main" location="servicedef/services_olap.xml"/>
+    <service-resource type="model" loader="main" location="servicedef/services_security.xml"/>
     <service-resource type="model" loader="main" location="servicedef/services_test.xml"/>
     <service-resource type="group" loader="main" location="servicedef/groups_test.xml"/>
     <service-resource type="eca" loader="main" location="servicedef/secas_test.xml"/>
     <service-resource type="eca" loader="main" location="servicedef/secas_cdyne.xml"/>
     <service-resource type="mca" loader="main" location="servicedef/smcas_test.xml"/>
+
+    <test-suite loader="main" location="testdef/UserLoginTests.xml"/>
 </ofbiz-component>

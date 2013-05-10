@@ -20,10 +20,14 @@ under the License.
 <#if productCategory?exists>
   <#if productCategoryMembers?has_content>
       <#list productCategoryMembers as productCategoryMember>
-        <#assign product = productCategoryMember.getRelatedOneCache("Product")>
+        <#assign product = productCategoryMember.getRelatedOne("Product", true)>
           <div>
             <a href='<@ofbizUrl>EditProduct?productId=${product.productId}</@ofbizUrl>' class='buttontext'>
-              ${product.internalName?default("${uiLabelMap.CommonNo} ${uiLabelMap.ProductInternalName}")}
+              <#if product.internalName?has_content>
+                ${product.internalName}
+              <#else>
+                ${product.productName?default("${uiLabelMap.CommonNo} ${uiLabelMap.ProductInternalName} / ${uiLabelMap.ProductProductName}")}
+              </#if>    
             </a>
             <div>
               <b>${product.productId}</b>

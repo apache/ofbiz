@@ -20,8 +20,6 @@ package org.ofbiz.order.shoppingcart.product;
 
 import java.math.BigDecimal;
 import java.math.MathContext;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -32,10 +30,15 @@ import java.util.Map;
 import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
 
+import javolution.util.FastList;
+import javolution.util.FastMap;
+
 import org.ofbiz.base.util.Debug;
+import org.ofbiz.base.util.UtilGenerics;
 import org.ofbiz.base.util.UtilMisc;
+import org.ofbiz.base.util.UtilNumber;
 import org.ofbiz.base.util.UtilValidate;
-import org.ofbiz.entity.GenericDelegator;
+import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericEntity;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
@@ -44,6 +47,7 @@ import org.ofbiz.order.shoppingcart.ShoppingCart;
 import org.ofbiz.order.shoppingcart.ShoppingCartItem;
 import org.ofbiz.product.catalog.CatalogWorker;
 import org.ofbiz.product.category.CategoryWorker;
+import org.ofbiz.product.product.ProductWorker;
 
 
 public class ProductDisplayWorker {
@@ -52,43 +56,39 @@ public class ProductDisplayWorker {
 
     /* ========================================================================================*/
 
-    /* ============================= Special Data Retreival Methods ===========================*/
+    /* ============================= Special Data Retrieval Methods ===========================*/
 
-    public static List getRandomCartProductAssoc(ServletRequest request, boolean checkViewAllow) {
-        GenericDelegator delegator = (GenericDelegator) request.getAttribute("delegator");
+    public static List<GenericValue> getRandomCartProductAssoc(ServletRequest request, boolean checkViewAllow) {
+        Delegator delegator = (Delegator) request.getAttribute("delegator");
         HttpServletRequest httpRequest = (HttpServletRequest) request;
         ShoppingCart cart = (ShoppingCart) httpRequest.getSession().getAttribute("shoppingCart");
 
         if (cart == null || cart.size() <= 0) return null;
 
-        ArrayList cartAssocs = null;
+        List<GenericValue> cartAssocs = null;
         try {
-            Map products = new HashMap();
+            Map<String, GenericValue> products = FastMap.newInstance();
 
-            Iterator cartiter = cart.iterator();
+            Iterator<ShoppingCartItem> cartiter = cart.iterator();
 
             while (cartiter != null && cartiter.hasNext()) {
-                ShoppingCartItem item = (ShoppingCartItem) cartiter.next();
-                // Collection upgradeProducts = delegator.findByAndCache("ProductAssoc", UtilMisc.toMap("productId", item.getProductId(), "productAssocTypeId", "PRODUCT_UPGRADE"), null);
-                List complementProducts = delegator.findByAndCache("ProductAssoc", UtilMisc.toMap("productId", item.getProductId(), "productAssocTypeId", "PRODUCT_COMPLEMENT"), null);
+                ShoppingCartItem item = cartiter.next();
+                // Collection upgradeProducts = delegator.findByAnd("ProductAssoc", UtilMisc.toMap("productId", item.getProductId(), "productAssocTypeId", "PRODUCT_UPGRADE"), null, true);
+                List<GenericValue> complementProducts = delegator.findByAnd("ProductAssoc", UtilMisc.toMap("productId", item.getProductId(), "productAssocTypeId", "PRODUCT_COMPLEMENT"), null, true);
                 // since ProductAssoc records have a fromDate and thruDate, we can filter by now so that only assocs in the date range are included
                 complementProducts = EntityUtil.filterByDate(complementProducts);
 
-                List productsCategories = delegator.findByAndCache("ProductCategoryMember", UtilMisc.toMap("productId", item.getProductId()), null);
+                List<GenericValue> productsCategories = delegator.findByAnd("ProductCategoryMember", UtilMisc.toMap("productId", item.getProductId()), null, true);
                 productsCategories = EntityUtil.filterByDate(productsCategories, true);
                 if (productsCategories != null) {
-                    Iterator productsCategoriesIter = productsCategories.iterator();
-                    while (productsCategoriesIter.hasNext()) {
-                        GenericValue productsCategoryMember = (GenericValue) productsCategoriesIter.next();
-                        GenericValue productsCategory = productsCategoryMember.getRelatedOneCache("ProductCategory");
+                    for(GenericValue productsCategoryMember : productsCategories) {
+                        GenericValue productsCategory = productsCategoryMember.getRelatedOne("ProductCategory", true);
                         if ("CROSS_SELL_CATEGORY".equals(productsCategory.getString("productCategoryTypeId"))) {
-                            List curPcms = productsCategory.getRelatedCache("ProductCategoryMember");
+                            List<GenericValue> curPcms = productsCategory.getRelated("ProductCategoryMember", null, null, true);
                             if (curPcms != null) {
-                                Iterator curPcmsIter = curPcms.iterator();
-                                while (curPcmsIter.hasNext()) {
-                                    GenericValue curPcm = (GenericValue) curPcmsIter.next();
+                                for(GenericValue curPcm : curPcms) {
                                     if (!products.containsKey(curPcm.getString("productId"))) {
-                                        GenericValue product = curPcm.getRelatedOneCache("Product");
+                                        GenericValue product = curPcm.getRelatedOne("Product", true);
                                         products.put(product.getString("productId"), product);
                                     }
                                 }
@@ -98,11 +98,9 @@ public class ProductDisplayWorker {
                 }
 
                 if (UtilValidate.isNotEmpty(complementProducts)) {
-                    Iterator complIter = complementProducts.iterator();
-                    while (complIter.hasNext()) {
-                        GenericValue productAssoc = (GenericValue) complIter.next();
+                    for(GenericValue productAssoc : complementProducts) {
                         if (!products.containsKey(productAssoc.getString("productIdTo"))) {
-                            GenericValue product = productAssoc.getRelatedOneCache("AssocProduct");
+                            GenericValue product = productAssoc.getRelatedOne("AssocProduct", true);
                             products.put(product.getString("productId"), product);
                         }
                     }
@@ -112,7 +110,7 @@ public class ProductDisplayWorker {
             // remove all products that are already in the cart
             cartiter = cart.iterator();
             while (cartiter != null && cartiter.hasNext()) {
-                ShoppingCartItem item = (ShoppingCartItem) cartiter.next();
+                ShoppingCartItem item = cartiter.next();
                 products.remove(item.getProductId());
             }
 
@@ -121,14 +119,17 @@ public class ProductDisplayWorker {
                 String currentCatalogId = CatalogWorker.getCurrentCatalogId(request);
                 String viewProductCategoryId = CatalogWorker.getCatalogViewAllowCategoryId(delegator, currentCatalogId);
                 if (viewProductCategoryId != null) {
-                    List tempList = new ArrayList(products.values());
+                    List<GenericValue> tempList = FastList.newInstance();
+                    tempList.addAll(products.values());
                     tempList = CategoryWorker.filterProductsInCategory(delegator, tempList, viewProductCategoryId, "productId");
-                    cartAssocs = new ArrayList(tempList);
+                    cartAssocs = FastList.newInstance();
+                    cartAssocs.addAll(tempList);
                 }
             }
 
             if (cartAssocs == null) {
-                cartAssocs = new ArrayList(products.values());
+                cartAssocs = FastList.newInstance();
+                cartAssocs.addAll(products.values());
             }
 
             // randomly remove products while there are more than 3
@@ -147,96 +148,86 @@ public class ProductDisplayWorker {
         }
     }
 
-    public static Map getQuickReorderProducts(ServletRequest request) {
-        GenericDelegator delegator = (GenericDelegator) request.getAttribute("delegator");
+    public static Map<String, Object> getQuickReorderProducts(ServletRequest request) {
+        Delegator delegator = (Delegator) request.getAttribute("delegator");
         HttpServletRequest httpRequest = (HttpServletRequest) request;
         GenericValue userLogin = (GenericValue) httpRequest.getSession().getAttribute("userLogin");
-        Map results = new HashMap();
+        Map<String, Object> results = FastMap.newInstance();
 
         if (userLogin == null) userLogin = (GenericValue) httpRequest.getSession().getAttribute("autoUserLogin");
         if (userLogin == null) return results;
 
         try {
-            Map products = (Map) httpRequest.getSession().getAttribute("_QUICK_REORDER_PRODUCTS_");
-            Map productQuantities = (Map) httpRequest.getSession().getAttribute("_QUICK_REORDER_PRODUCT_QUANTITIES_");
-            Map productOccurances = (Map) httpRequest.getSession().getAttribute("_QUICK_REORDER_PRODUCT_OCCURANCES_");
+            Map<String, GenericValue> products = UtilGenerics.checkMap(httpRequest.getSession().getAttribute("_QUICK_REORDER_PRODUCTS_"));
+            Map<String, BigDecimal> productQuantities = UtilGenerics.checkMap(httpRequest.getSession().getAttribute("_QUICK_REORDER_PRODUCT_QUANTITIES_"));
+            Map<String, Integer> productOccurances = UtilGenerics.checkMap(httpRequest.getSession().getAttribute("_QUICK_REORDER_PRODUCT_OCCURANCES_"));
 
             if (products == null || productQuantities == null || productOccurances == null) {
-                products = new HashMap();
-                productQuantities = new HashMap();
+                products = new HashMap<String, GenericValue>();
+                productQuantities = new HashMap<String, BigDecimal>();
                 // keep track of how many times a product occurs in order to find averages and rank by purchase amount
-                productOccurances = new HashMap();
+                productOccurances = new HashMap<String, Integer>();
+                
+                // get all order role entities for user by customer role type : PLACING_CUSTOMER
+                List<GenericValue> orderRoles = delegator.findByAnd("OrderRole", UtilMisc.toMap("partyId", userLogin.get("partyId"), "roleTypeId", "PLACING_CUSTOMER"), null, false);
+                Iterator<GenericValue> ordersIter = UtilMisc.toIterator(orderRoles);
 
-                // get all order role entities for user by customer role type
-                // final String[] USER_ORDER_ROLE_TYPES = {"END_USER_CUSTOMER", "SHIP_TO_CUSTOMER", "BILL_TO_CUSTOMER", "PLACING_CUSTOMER"};
-                final String[] USER_ORDER_ROLE_TYPES = {"PLACING_CUSTOMER"};
+                while (ordersIter != null && ordersIter.hasNext()) {
+                    GenericValue orderRole = ordersIter.next();
+                    // for each order role get all order items
+                    List<GenericValue> orderItems = orderRole.getRelated("OrderItem", null, null, false);
+                    Iterator<GenericValue> orderItemsIter = UtilMisc.toIterator(orderItems);
 
-                for (int i = 0; i < USER_ORDER_ROLE_TYPES.length; i++) {
-                    Collection orderRoles = delegator.findByAnd("OrderRole", UtilMisc.toMap("partyId", userLogin.get("partyId"), "roleTypeId", USER_ORDER_ROLE_TYPES[i]), null);
-                    Iterator ordersIter = UtilMisc.toIterator(orderRoles);
+                    while (orderItemsIter != null && orderItemsIter.hasNext()) {
+                        GenericValue orderItem = orderItemsIter.next();
+                        String productId = orderItem.getString("productId");
+                        if (UtilValidate.isNotEmpty(productId)) {
+                            // for each order item get the associated product
+                            GenericValue product = orderItem.getRelatedOne("Product", true);
 
-                    while (ordersIter != null && ordersIter.hasNext()) {
-                        GenericValue orderRole = (GenericValue) ordersIter.next();
-                        // for each order role get all order items
-                        Collection orderItems = orderRole.getRelated("OrderItem");
-                        Iterator orderItemsIter = UtilMisc.toIterator(orderItems);
+                            products.put(product.getString("productId"), product);
 
-                        while (orderItemsIter != null && orderItemsIter.hasNext()) {
-                            GenericValue orderItem = (GenericValue) orderItemsIter.next();
-                            String productId = orderItem.getString("productId");
-                            if (UtilValidate.isNotEmpty(productId)) {
-                                // for each order item get the associated product
-                                GenericValue product = orderItem.getRelatedOneCache("Product");
+                            BigDecimal curQuant = productQuantities.get(product.get("productId"));
 
-                                products.put(product.get("productId"), product);
+                            if (curQuant == null) curQuant = BigDecimal.ZERO;
+                            BigDecimal orderQuant = orderItem.getBigDecimal("quantity");
 
-                                BigDecimal curQuant = (BigDecimal) productQuantities.get(product.get("productId"));
+                            if (orderQuant == null) orderQuant = BigDecimal.ZERO;
+                            productQuantities.put(product.getString("productId"), curQuant.add(orderQuant));
 
-                                if (curQuant == null) curQuant = BigDecimal.ZERO;
-                                BigDecimal orderQuant = orderItem.getBigDecimal("quantity");
+                            Integer curOcc = productOccurances.get(product.get("productId"));
 
-                                if (orderQuant == null) orderQuant = BigDecimal.ZERO;
-                                productQuantities.put(product.get("productId"), curQuant.add(orderQuant));
-
-                                Integer curOcc = (Integer) productOccurances.get(product.get("productId"));
-
-                                if (curOcc == null) curOcc = new Integer(0);
-                                productOccurances.put(product.get("productId"), new Integer(curOcc.intValue() + 1));
-                            }
+                            if (curOcc == null) curOcc = Integer.valueOf(0);
+                            productOccurances.put(product.getString("productId"), Integer.valueOf(curOcc.intValue() + 1));
                         }
                     }
                 }
 
                 // go through each product quantity and divide it by the occurances to get the average
-                Iterator quantEntries = productQuantities.entrySet().iterator();
-
-                while (quantEntries.hasNext()) {
-                    Map.Entry entry = (Map.Entry) quantEntries.next();
-                    Object prodId = entry.getKey();
-                    BigDecimal quantity = (BigDecimal) entry.getValue();
-                    Integer occs = (Integer) productOccurances.get(prodId);
+                for (Map.Entry<String, BigDecimal> entry : productQuantities.entrySet()) {
+                    String prodId = entry.getKey();
+                    BigDecimal quantity = entry.getValue();
+                    Integer occs = productOccurances.get(prodId);
                     BigDecimal nqint = quantity.divide(new BigDecimal(occs), new MathContext(10));
 
                     if (nqint.compareTo(BigDecimal.ONE) < 0) nqint = BigDecimal.ONE;
                     productQuantities.put(prodId, nqint);
                 }
-
-                httpRequest.getSession().setAttribute("_QUICK_REORDER_PRODUCTS_", new HashMap(products));
-                httpRequest.getSession().setAttribute("_QUICK_REORDER_PRODUCT_QUANTITIES_", new HashMap(productQuantities));
-                httpRequest.getSession().setAttribute("_QUICK_REORDER_PRODUCT_OCCURANCES_", new HashMap(productOccurances));
+                
+                httpRequest.getSession().setAttribute("_QUICK_REORDER_PRODUCTS_", new HashMap<String, GenericValue>(products));
+                httpRequest.getSession().setAttribute("_QUICK_REORDER_PRODUCT_QUANTITIES_", new HashMap<String, BigDecimal>(productQuantities));
+                httpRequest.getSession().setAttribute("_QUICK_REORDER_PRODUCT_OCCURANCES_", new HashMap<String, Integer>(productOccurances));
             } else {
                 // make a copy since we are going to change them
-                products = new HashMap(products);
-                productQuantities = new HashMap(productQuantities);
-                productOccurances = new HashMap(productOccurances);
+                products = new HashMap<String, GenericValue>(products);
+                productQuantities = new HashMap<String, BigDecimal>(productQuantities);
+                productOccurances = new HashMap<String, Integer>(productOccurances);
             }
 
             // remove all products that are already in the cart
             ShoppingCart cart = (ShoppingCart) httpRequest.getSession().getAttribute("shoppingCart");
-            if (cart != null && cart.size() > 0) {
-                Iterator cartiter = cart.iterator();
-                while (cartiter.hasNext()) {
-                    ShoppingCartItem item = (ShoppingCartItem) cartiter.next();
+            if (UtilValidate.isNotEmpty(cart)) {
+                for(ShoppingCartItem item : cart) {
                     String productId = item.getProductId();
                     products.remove(productId);
                     productQuantities.remove(productId);
@@ -246,14 +237,12 @@ public class ProductDisplayWorker {
 
             // if desired check view allow category
             //if (checkViewAllow) {
-                List prodKeyList = new ArrayList(products.keySet());
                 //Set prodKeySet = products.keySet();
                 String currentCatalogId = CatalogWorker.getCurrentCatalogId(request);
                 String viewProductCategoryId = CatalogWorker.getCatalogViewAllowCategoryId(delegator, currentCatalogId);
                 if (viewProductCategoryId != null) {
-                    Iterator valIter = prodKeyList.iterator();
-                    while (valIter.hasNext()) {
-                        String productId = (String) valIter.next();
+                    for (Map.Entry<String, GenericValue> entry : products.entrySet()) {
+                        String productId = entry.getKey();
                         if (!CategoryWorker.isProductInCategory(delegator, productId, viewProductCategoryId)) {
                             products.remove(productId);
                             productQuantities.remove(productId);
@@ -263,7 +252,8 @@ public class ProductDisplayWorker {
                 }
             //}
 
-            List reorderProds = new ArrayList(products.values());
+            List<GenericValue> reorderProds = FastList.newInstance();
+            reorderProds.addAll(products.values());
 
             /*
              //randomly remove products while there are more than 5
@@ -276,14 +266,19 @@ public class ProductDisplayWorker {
             // sort descending by new metric...
             BigDecimal occurancesModifier = BigDecimal.ONE;
             BigDecimal quantityModifier = BigDecimal.ONE;
-            Map newMetric = new HashMap();
-            Iterator occurEntries = productOccurances.entrySet().iterator();
-
-            while (occurEntries.hasNext()) {
-                Map.Entry entry = (Map.Entry) occurEntries.next();
-                Object prodId = entry.getKey();
-                Integer quantity = (Integer) entry.getValue();
-                BigDecimal occs = (BigDecimal) productQuantities.get(prodId);
+            Map<String, Object> newMetric = FastMap.newInstance();
+            for (Map.Entry<String, Integer> entry : productOccurances.entrySet()) {
+                String prodId = entry.getKey();
+                Integer quantity = entry.getValue();
+                BigDecimal occs = productQuantities.get(prodId);
+                //For quantity we should test if we allow to add decimal quantity for this product an productStore : if not then round to 0
+                if(! ProductWorker.isDecimalQuantityOrderAllowed(delegator, prodId, cart.getProductStoreId())){
+                    occs = occs.setScale(0, UtilNumber.getBigDecimalRoundingMode("order.rounding"));
+                }
+                else {
+                    occs = occs.setScale(UtilNumber.getBigDecimalScale("order.decimals"), UtilNumber.getBigDecimalRoundingMode("order.rounding"));
+                }
+                productQuantities.put(prodId, occs);
                 BigDecimal nqdbl = quantityModifier.multiply(new BigDecimal(quantity)).add(occs.multiply(occurancesModifier));
 
                 newMetric.put(prodId, nqdbl);
@@ -304,21 +299,22 @@ public class ProductDisplayWorker {
         return results;
     }
 
-    public static List productOrderByMap(Collection values, Map orderByMap, boolean descending) {
+    public static List<GenericValue> productOrderByMap(List<GenericValue> values, Map<String, Object> orderByMap, boolean descending) {
         if (values == null)  return null;
         if (values.size() == 0) return UtilMisc.toList(values);
 
-        List result = new ArrayList(values);
+        List<GenericValue> result = FastList.newInstance();
+        result.addAll(values);
 
         Collections.sort(result, new ProductByMapComparator(orderByMap, descending));
         return result;
     }
 
-    static class ProductByMapComparator implements Comparator {
-        private Map orderByMap;
+    static class ProductByMapComparator implements Comparator<Object> {
+        private Map<String, Object> orderByMap;
         private boolean descending;
 
-        ProductByMapComparator(Map orderByMap, boolean descending) {
+        ProductByMapComparator(Map<String, Object> orderByMap, boolean descending) {
             this.orderByMap = orderByMap;
             this.descending = descending;
         }
@@ -332,15 +328,17 @@ public class ProductDisplayWorker {
             return result;
         }
 
+        @SuppressWarnings("unchecked")
         private int compareAsc(GenericEntity prod1, GenericEntity prod2) {
             Object value = orderByMap.get(prod1.get("productId"));
             Object value2 = orderByMap.get(prod2.get("productId"));
 
             // null is defined as the smallest possible value
             if (value == null) return value2 == null ? 0 : -1;
-            return ((Comparable) value).compareTo(value2);
+            return ((Comparable<Object>) value).compareTo(value2);
         }
 
+        @Override
         public boolean equals(java.lang.Object obj) {
             if ((obj != null) && (obj instanceof ProductByMapComparator)) {
                 ProductByMapComparator that = (ProductByMapComparator) obj;

@@ -18,110 +18,87 @@
  *******************************************************************************/
 package org.ofbiz.minilang.method.ifops;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
 
-import javolution.util.FastList;
-
-import org.w3c.dom.*;
-import org.ofbiz.base.util.*;
-import org.ofbiz.minilang.*;
-import org.ofbiz.minilang.method.*;
+import org.ofbiz.base.util.ObjectType;
+import org.ofbiz.base.util.UtilXml;
+import org.ofbiz.base.util.collections.FlexibleMapAccessor;
+import org.ofbiz.minilang.MiniLangException;
+import org.ofbiz.minilang.SimpleMethod;
+import org.ofbiz.minilang.artifact.ArtifactInfoContext;
+import org.ofbiz.minilang.method.MethodContext;
+import org.ofbiz.minilang.method.MethodOperation;
+import org.w3c.dom.Element;
 
 /**
- * Iff the specified field is not empty process sub-operations
+ * Implements the &lt;if-not-empty&gt; element.
+ * 
+ * @see <a href="https://cwiki.apache.org/OFBADMIN/mini-language-reference.html#Mini-languageReference-{{%3Cifnotempty%3E}}">Mini-language Reference</a>
  */
-public class IfNotEmpty extends MethodOperation {
-    public static final class IfNotEmptyFactory implements Factory<IfNotEmpty> {
-        public IfNotEmpty createMethodOperation(Element element, SimpleMethod simpleMethod) {
-            return new IfNotEmpty(element, simpleMethod);
-        }
+public final class IfNotEmpty extends MethodOperation {
 
-        public String getName() {
-            return "if-not-empty";
-        }
-    }
+    private final List<MethodOperation> elseSubOps;
+    private final FlexibleMapAccessor<Object> fieldFma;
+    private final List<MethodOperation> subOps;
 
-    public static final String module = IfNotEmpty.class.getName();
-
-    protected List<MethodOperation> subOps = FastList.newInstance();
-    protected List<MethodOperation> elseSubOps = null;
-
-    protected ContextAccessor<Map<String, ? extends Object>> mapAcsr;
-    protected ContextAccessor<Object> fieldAcsr;
-
-    public IfNotEmpty(Element element, SimpleMethod simpleMethod) {
+    public IfNotEmpty(Element element, SimpleMethod simpleMethod) throws MiniLangException {
         super(element, simpleMethod);
-        // NOTE: this is still supported, but is deprecated
-        this.mapAcsr = new ContextAccessor<Map<String, ? extends Object>>(element.getAttribute("map-name"));
-        this.fieldAcsr = new ContextAccessor<Object>(element.getAttribute("field"));
-        if (this.fieldAcsr.isEmpty()) {
-            // NOTE: this is still supported, but is deprecated
-            this.fieldAcsr = new ContextAccessor<Object>(element.getAttribute("field-name"));
-        }
-
-        SimpleMethod.readOperations(element, subOps, simpleMethod);
-
+        this.fieldFma = FlexibleMapAccessor.getInstance(element.getAttribute("field"));
+        this.subOps = Collections.unmodifiableList(SimpleMethod.readOperations(element, simpleMethod));
         Element elseElement = UtilXml.firstChildElement(element, "else");
-
         if (elseElement != null) {
-            elseSubOps = FastList.newInstance();
-            SimpleMethod.readOperations(elseElement, elseSubOps, simpleMethod);
+            this.elseSubOps = Collections.unmodifiableList(SimpleMethod.readOperations(elseElement, simpleMethod));
+        } else {
+            this.elseSubOps = null;
         }
     }
 
-    public boolean exec(MethodContext methodContext) {
-        // if conditions fails, always return true; if a sub-op returns false
-        // return false and stop, otherwise return true
-        // return true;
-
-        Object fieldVal = null;
-
-        if (!mapAcsr.isEmpty()) {
-            Map<String, ? extends Object> fromMap = mapAcsr.get(methodContext);
-            if (fromMap == null) {
-                if (Debug.verboseOn()) Debug.logVerbose("Map not found with name " + mapAcsr + ", not running operations", module);
-            } else {
-                fieldVal = fieldAcsr.get(fromMap, methodContext);
-            }
-        } else {
-            // no map name, try the env
-            fieldVal = fieldAcsr.get(methodContext);
-        }
-
-        if (fieldVal == null) {
-            if (Debug.verboseOn()) Debug.logVerbose("Field value not found with name " + fieldAcsr + " in Map with name " + mapAcsr + ", not running operations", module);
-        }
-
-        // only run subOps if element is not empty/null
-        boolean runSubOps = !ObjectType.isEmpty(fieldVal);
-
-        if (runSubOps) {
-            // if (Debug.verboseOn()) Debug.logVerbose("IfNotEmpty: Running if operations mapAcsr=" + mapAcsr + " fieldAcsr=" + fieldAcsr, module);
+    @Override
+    public boolean exec(MethodContext methodContext) throws MiniLangException {
+        Object fieldVal = fieldFma.get(methodContext.getEnvMap());
+        if (!ObjectType.isEmpty(fieldVal)) {
             return SimpleMethod.runSubOps(subOps, methodContext);
         } else {
             if (elseSubOps != null) {
-                // if (Debug.verboseOn()) Debug.logVerbose("IfNotEmpty: Running else operations mapAcsr=" + mapAcsr + " fieldAcsr=" + fieldAcsr, module);
                 return SimpleMethod.runSubOps(elseSubOps, methodContext);
             } else {
-                // if (Debug.verboseOn()) Debug.logVerbose("IfNotEmpty: Not Running any operations mapAcsr=" + mapAcsr + " fieldAcsr=" + fieldAcsr, module);
                 return true;
             }
         }
     }
 
-    public List<MethodOperation> getAllSubOps() {
-        List<MethodOperation> allSubOps = FastList.newInstance();
-        allSubOps.addAll(this.subOps);
-        if (this.elseSubOps != null) allSubOps.addAll(this.elseSubOps);
-        return allSubOps;
+    @Override
+    public void gatherArtifactInfo(ArtifactInfoContext aic) {
+        for (MethodOperation method : this.subOps) {
+            method.gatherArtifactInfo(aic);
+        }
+        if (this.elseSubOps != null) {
+            for (MethodOperation method : this.elseSubOps) {
+                method.gatherArtifactInfo(aic);
+            }
+        }
     }
 
-    public String rawString() {
-        // TODO: add all attributes and other info
-        return "<if-not-empty field-name=\"" + this.fieldAcsr + "\" map-name=\"" + this.mapAcsr + "\"/>";
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder("<if-not-empty ");
+        sb.append("field=\"").append(this.fieldFma).append("\"/>");
+        return sb.toString();
     }
-    public String expandedString(MethodContext methodContext) {
-        // TODO: something more than a stub/dummy
-        return this.rawString();
+
+    /**
+     * A &lt;if-not-empty&gt; element factory. 
+     */
+    public static final class IfNotEmptyFactory implements Factory<IfNotEmpty> {
+        @Override
+        public IfNotEmpty createMethodOperation(Element element, SimpleMethod simpleMethod) throws MiniLangException {
+            return new IfNotEmpty(element, simpleMethod);
+        }
+
+        @Override
+        public String getName() {
+            return "if-not-empty";
+        }
     }
 }

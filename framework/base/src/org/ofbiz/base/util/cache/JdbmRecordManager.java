@@ -20,32 +20,47 @@ package org.ofbiz.base.util.cache;
 
 import java.io.IOException;
 
+import jdbm.RecordManager;
+import jdbm.helper.ISerializationHandler;
 import jdbm.helper.Serializer;
+import jdbm.recman.BaseRecordManager;
 
 /**
  * Customer JDBM Record Manager
  *
  */
-public class JdbmRecordManager implements jdbm.RecordManager {
+public class JdbmRecordManager implements RecordManager {
 
-    protected jdbm.recman.BaseRecordManager manager = null;
-    protected jdbm.helper.Serializer serial = null;
+    protected BaseRecordManager manager = null;
+    protected JdbmSerializer serial = null;
 
     public JdbmRecordManager(String name) throws IOException {
-        manager = new jdbm.recman.BaseRecordManager(name);
+        manager = new BaseRecordManager(name);
         serial = new JdbmSerializer();
     }
 
+    public ISerializationHandler getSerializationHandler() {
+        return serial;
+    }
+
+    public RecordManager getBaseRecordManager() {
+        return manager;
+    }
+
+    public RecordManager getRecordManager() {
+        return this;
+    }
+
     public long insert(Object o) throws IOException {
-        return manager.insert(o, serial);
+        return insert(o, serial);
     }
 
     public void update(long l, Object o) throws IOException {
-        manager.update(l, o, serial);
+        update(l, o, serial);
     }
 
     public Object fetch(long l) throws IOException {
-        return manager.fetch(l, serial);
+        return fetch(l, serial);
     }
 
     public void close() throws IOException {
@@ -60,6 +75,7 @@ public class JdbmRecordManager implements jdbm.RecordManager {
         manager.delete(l);
     }
 
+    @SuppressWarnings("unchecked")
     public Object fetch(long l, Serializer s) throws IOException {
         return manager.fetch(l, s);
     }
@@ -76,6 +92,7 @@ public class JdbmRecordManager implements jdbm.RecordManager {
         return manager.getRootCount();
     }
 
+    @SuppressWarnings("unchecked")
     public long insert(Object o, Serializer s) throws IOException {
         return manager.insert(o, s);
     }
@@ -92,6 +109,7 @@ public class JdbmRecordManager implements jdbm.RecordManager {
         manager.setRoot(i, l);
     }
 
+    @SuppressWarnings("unchecked")
     public void update(long l, Object o, Serializer s) throws IOException {
         manager.update(l, o, s);
     }

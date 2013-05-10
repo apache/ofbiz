@@ -60,7 +60,7 @@ under the License.
           <li><a href="<@ofbizUrl>view/ModelInduceFromDb</@ofbizUrl>" target="_blank">${uiLabelMap.WebtoolsInduceModelXMLFromDatabase}</a></li>
           <li><a href="<@ofbizUrl>EntityEoModelBundle</@ofbizUrl>">${uiLabelMap.WebtoolsExportEntityEoModelBundle}</a></li>
           <li><a href="<@ofbizUrl>view/checkdb</@ofbizUrl>">${uiLabelMap.WebtoolsCheckUpdateDatabase}</a></li>
-          <#-- not using Minerva by default any more <li><a href="<@ofbizUrl>minervainfo</@ofbizUrl>">Minerva Connection Info</a></li> -->
+          <li><a href="<@ofbizUrl>ConnectionPoolStatus</@ofbizUrl>">${uiLabelMap.ConnectionPoolStatus}</a></li>
           <#-- want to leave these out because they are only working so-so, and cause people more problems that they solve, IMHO
             <li><a href="<@ofbizUrl>view/EditEntity</@ofbizUrl>"  target="_blank">Edit Entity Definitions</a></li>
             <li><a href="<@ofbizUrl>ModelWriter</@ofbizUrl>" target="_blank">Generate Entity Model XML (all in one)</a></li>
@@ -95,6 +95,11 @@ under the License.
           <li><a href="<@ofbizUrl>viewdatafile</@ofbizUrl>">${uiLabelMap.WebtoolsWorkWithDataFiles}</a></li>
         </#if>
         <li><h3>${uiLabelMap.WebtoolsMiscSetupTools}</h3></li>
+        <#if security.hasPermission("PORTALPAGE_ADMIN", session)>
+          <li><a href="<@ofbizUrl>FindPortalPage</@ofbizUrl>">${uiLabelMap.WebtoolsAdminPortalPage}</a></li>
+          <li><a href="<@ofbizUrl>FindGeo</@ofbizUrl>">${uiLabelMap.WebtoolsGeoManagement}</a></li>
+          <li><a href="<@ofbizUrl>WebtoolsLayoutDemo</@ofbizUrl>">${uiLabelMap.WebtoolsLayoutDemo}</a></li>
+        </#if>
         <#if security.hasPermission("ENUM_STATUS_MAINT", session)>
           <#--
           <li><a href="<@ofbizUrl>EditEnumerationTypes</@ofbizUrl>">Edit Enumerations</a></li>
@@ -113,4 +118,3 @@ under the License.
     </#if>
   </div>
 </div>
-<!-- end main.ftl -->

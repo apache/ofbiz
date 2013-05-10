@@ -31,8 +31,8 @@ import org.ofbiz.entity.util.*;
 //TODO:
 
 // get products and categories under the root category
-productMemberList = delegator.findByAnd("ProductCategoryMember", [productCategoryId : rootProductCategoryId], ["sequenceNum"]);
-categoryRollupList = delegator.findByAnd("ProductCategoryRollup", [parentProductCategoryId : rootProductCategoryId], ["sequenceNum"]);
+productMemberList = delegator.findByAnd("ProductCategoryMember", [productCategoryId : rootProductCategoryId], ["sequenceNum"], false);
+categoryRollupList = delegator.findByAnd("ProductCategoryRollup", [parentProductCategoryId : rootProductCategoryId], ["sequenceNum"], false);
 
 // for use in the queries
 productIdSet = FastSet.newInstance();
@@ -44,13 +44,13 @@ productCategoryList = FastList.newInstance();
 
 productMemberList.each { productMember ->
     if (!productIdSet.contains(productMember.productId)) {
-        productList.add(productMember.getRelatedOneCache("Product"));
+        productList.add(productMember.getRelatedOne("Product", true));
     }
     productIdSet.add(productMember.productId);
 }
 categoryRollupList.each { categoryRollup ->
     if (!productCategoryIdSet.contains(categoryRollup.productCategoryId)) {
-        productCategoryList.add(categoryRollup.getRelatedOneCache("CurrentProductCategory"));
+        productCategoryList.add(categoryRollup.getRelatedOne("CurrentProductCategory", true));
     }
     productCategoryIdSet.add(categoryRollup.productCategoryId);
 }

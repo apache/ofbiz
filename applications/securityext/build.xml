@@ -32,6 +32,7 @@ under the License.
     <path id="local.class.path">
         <!--<fileset dir="${lib.dir}" includes="*.jar"/>-->
         <fileset dir="../../framework/base/lib" includes="*.jar"/>
+        <fileset dir="../../framework/base/lib/commons" includes="*.jar"/>
         <fileset dir="../../framework/base/lib/j2eespecs" includes="*.jar"/>
         <fileset dir="../../framework/base/build/lib" includes="*.jar"/>
         <fileset dir="../../framework/entity/lib" includes="*.jar"/>
@@ -42,32 +43,26 @@ under the License.
         <fileset dir="../../framework/webapp/lib" includes="*.jar"/>
         <fileset dir="../../framework/webapp/build/lib" includes="*.jar"/>
         <fileset dir="../../framework/common/build/lib" includes="*.jar"/>
+        <fileset dir="../../framework/testtools/build/lib" includes="*.jar"/>
         <fileset dir="../party/build/lib" includes="*.jar"/>
         <fileset dir="../product/build/lib" includes="*.jar"/>
         <fileset dir="../order/build/lib" includes="*.jar"/>
     </path>
 
-    <!-- ================================================================== -->
-    <!-- Compilation of the source files                                                                                                                         -->
-    <!-- ================================================================== -->
-
-    <target name="classes" depends="prepare">
-        <javac15>
+    <target name="init">
+        <patternset id="src.exc.set">
             <!-- exclude the Truition; comment if you have libs -->
             <exclude name="org/ofbiz/securityext/thirdparty/truition/**"/>
-        </javac15>
+        </patternset>
     </target>
 
-    <!-- ================================================================== -->
-    <!-- Build JavaDoc                                                      -->
-    <!-- ================================================================== -->
-
-    <target name="docs" depends="prepare-docs">
-        <javadoc packagenames="org.ofbiz.securityext.*"
-                 classpathref="local.class.path"
-                 destdir="${build.dir}/javadocs"
-                 Windowtitle="Open for Business - ${desc}">
-            <sourcepath path="${src.dir}"/>
-        </javadoc>
+    <target name="jar" depends="classes">
+        <main-jar/>
+        <test-jar>
+            <test-selector>
+                <filename name="META-INF/services"/>
+                <filename name="META-INF/services/*"/>
+            </test-selector>
+        </test-jar>
     </target>
 </project>

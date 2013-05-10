@@ -21,7 +21,6 @@ package org.ofbiz.widget.screen;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
-import java.util.Map;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletOutputStream;
@@ -33,23 +32,15 @@ import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.GeneralException;
 import org.ofbiz.base.util.StringUtil;
 import org.ofbiz.base.util.UtilJ2eeCompat;
-import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.base.util.UtilProperties;
 import org.ofbiz.base.util.UtilValidate;
-import org.ofbiz.base.util.template.FreeMarkerWorker;
 import org.ofbiz.webapp.view.AbstractViewHandler;
 import org.ofbiz.webapp.view.ViewHandlerException;
-import org.xml.sax.SAXException;
-
-import org.ofbiz.widget.menu.MenuStringRenderer;
-// TODO: uncomment these lines when the renderers are implemented
-//import org.ofbiz.widget.menu.MacroMenuRenderer;
-//import org.ofbiz.widget.tree.MacroTreeRenderer;
-import org.ofbiz.widget.tree.TreeStringRenderer;
 import org.ofbiz.widget.form.FormStringRenderer;
 import org.ofbiz.widget.form.MacroFormRenderer;
-import org.ofbiz.widget.screen.ScreenStringRenderer;
-import org.ofbiz.widget.screen.MacroScreenRenderer;
+import org.ofbiz.widget.tree.TreeStringRenderer;
+import org.ofbiz.widget.tree.MacroTreeRenderer;
+import org.xml.sax.SAXException;
 
 import freemarker.template.TemplateException;
 import freemarker.template.utility.StandardCompress;
@@ -84,8 +75,11 @@ public class MacroScreenViewHandler extends AbstractViewHandler {
                 encoding = UtilProperties.getPropertyValue("widget", getName() + ".default.encoding", "none");
             }
             boolean compressOutput = "compressed".equals(encoding);
+            if (!compressOutput) {
+                compressOutput = "true".equals(UtilProperties.getPropertyValue("widget", getName() + ".compress"));
+            }
             if (!compressOutput && this.servletContext != null) {
-                compressOutput = "true".equals((String) this.servletContext.getAttribute("compressHTML"));
+                compressOutput = "true".equals(this.servletContext.getAttribute("compressHTML"));
             }
             if (compressOutput) {
                 // StandardCompress defaults to a 2k buffer. That could be increased
@@ -93,21 +87,22 @@ public class MacroScreenViewHandler extends AbstractViewHandler {
                 writer = new StandardCompress().getWriter(writer, null);
             }
 
-            ScreenStringRenderer screenStringRenderer = new MacroScreenRenderer(UtilProperties.getPropertyValue("widget", getName() + ".name"), UtilProperties.getPropertyValue("widget", getName() + ".screenrenderer"), writer);
-            FormStringRenderer formStringRenderer = new MacroFormRenderer(UtilProperties.getPropertyValue("widget", getName() + ".formrenderer"), writer, request, response);
+            ScreenStringRenderer screenStringRenderer = new MacroScreenRenderer(UtilProperties.getPropertyValue("widget", getName() + ".name"), UtilProperties.getPropertyValue("widget", getName() + ".screenrenderer"));
+            FormStringRenderer formStringRenderer = new MacroFormRenderer(UtilProperties.getPropertyValue("widget", getName() + ".formrenderer"), request, response);
+            TreeStringRenderer treeStringRenderer = new MacroTreeRenderer(UtilProperties.getPropertyValue("widget", getName() + ".treerenderer"), writer);
             // TODO: uncomment these lines when the renderers are implemented
-            //TreeStringRenderer treeStringRenderer = new MacroTreeRenderer(UtilProperties.getPropertyValue("widget", getName() + ".treerenderer"), writer);
             //MenuStringRenderer menuStringRenderer = new MacroMenuRenderer(UtilProperties.getPropertyValue("widget", getName() + ".menurenderer"), writer);
 
             ScreenRenderer screens = new ScreenRenderer(writer, null, screenStringRenderer);
             screens.populateContextForRequest(request, response, servletContext);
             // this is the object used to render forms from their definitions
             screens.getContext().put("formStringRenderer", formStringRenderer);
-            // TODO: uncomment these lines when the renderers are implemented
-            //screens.getContext().put("treeStringRenderer", treeStringRenderer);
+            screens.getContext().put("treeStringRenderer", treeStringRenderer);
             //screens.getContext().put("menuStringRenderer", menuStringRenderer);
             screens.getContext().put("simpleEncoder", StringUtil.getEncoder(UtilProperties.getPropertyValue("widget", getName() + ".encoder")));
+            screenStringRenderer.renderScreenBegin(writer, screens.getContext());
             screens.render(page);
+            screenStringRenderer.renderScreenEnd(writer, screens.getContext());
             writer.flush();
         } catch (TemplateException e) {
             Debug.logError(e, "Error initializing screen renderer", module);

@@ -27,10 +27,13 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.ofbiz.base.util.UtilFormatOut;
 import org.ofbiz.base.util.UtilValidate;
+import org.ofbiz.widget.ModelWidget;
+import org.ofbiz.widget.WidgetWorker;
 import org.ofbiz.widget.form.FormStringRenderer;
 import org.ofbiz.widget.form.ModelForm;
 import org.ofbiz.widget.form.ModelFormField;
 import org.ofbiz.widget.form.ModelFormField.CheckField;
+import org.ofbiz.widget.form.ModelFormField.ContainerField;
 import org.ofbiz.widget.form.ModelFormField.DateFindField;
 import org.ofbiz.widget.form.ModelFormField.DateTimeField;
 import org.ofbiz.widget.form.ModelFormField.DisplayField;
@@ -113,9 +116,8 @@ public class FoFormRenderer extends HtmlWidgetRenderer implements FormStringRend
 
     public void renderDropDownField(Appendable writer, Map<String, Object> context, DropDownField dropDownField) throws IOException {
         ModelFormField modelFormField = dropDownField.getModelFormField();
-        ModelForm modelForm = modelFormField.getModelForm();
         String currentValue = modelFormField.getEntry(context);
-        List<ModelFormField.OptionValue> allOptionValues = dropDownField.getAllOptionValues(context, modelForm.getDelegator(context));
+        List<ModelFormField.OptionValue> allOptionValues = dropDownField.getAllOptionValues(context, WidgetWorker.getDelegator(context));
         // if the current value should go first, display it
         if (UtilValidate.isNotEmpty(currentValue) && "first-in-list".equals(dropDownField.getCurrent())) {
             String explicitDescription = dropDownField.getCurrentDescription(context);
@@ -177,6 +179,7 @@ public class FoFormRenderer extends HtmlWidgetRenderer implements FormStringRend
     }
 
     public void renderFormOpen(Appendable writer, Map<String, Object> context, ModelForm modelForm) throws IOException {
+        this.widgetCommentsEnabled = ModelWidget.widgetBoundaryCommentsEnabled(context);
         renderBeginningBoundaryComment(writer, "Form Widget", modelForm);
     }
 
@@ -415,5 +418,8 @@ public class FoFormRenderer extends HtmlWidgetRenderer implements FormStringRend
     }
 
     public void renderHyperlinkTitle(Appendable writer, Map<String, Object> context, ModelFormField modelFormField, String titleText) throws IOException {
+    }
+
+    public void renderContainerFindField(Appendable writer, Map<String, Object> context, ContainerField containerField) throws IOException {
     }
 }

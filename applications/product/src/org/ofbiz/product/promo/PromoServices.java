@@ -18,30 +18,36 @@
  *******************************************************************************/
 package org.ofbiz.product.promo;
 
-import javolution.util.FastList;
-import javolution.util.FastMap;
-import org.ofbiz.base.util.Debug;
-import org.ofbiz.base.util.UtilDateTime;
-import org.ofbiz.base.util.UtilMisc;
-import org.ofbiz.base.util.UtilValidate;
-import org.ofbiz.entity.GenericDelegator;
-import org.ofbiz.entity.GenericEntityException;
-import org.ofbiz.entity.GenericValue;
-import org.ofbiz.entity.condition.EntityCondition;
-import org.ofbiz.entity.condition.EntityConditionList;
-import org.ofbiz.entity.condition.EntityExpr;
-import org.ofbiz.entity.condition.EntityOperator;
-import org.ofbiz.entity.util.EntityListIterator;
-import org.ofbiz.service.*;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
-import java.sql.Timestamp;
-import java.util.List;
-import java.util.Map;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
+import java.sql.Timestamp;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+
+import javolution.util.FastList;
+import javolution.util.FastMap;
+
+import org.apache.commons.lang.RandomStringUtils;
+import org.ofbiz.base.util.Debug;
+import org.ofbiz.base.util.UtilDateTime;
+import org.ofbiz.base.util.UtilMisc;
+import org.ofbiz.base.util.UtilProperties;
+import org.ofbiz.base.util.UtilValidate;
+import org.ofbiz.entity.Delegator;
+import org.ofbiz.entity.GenericEntityException;
+import org.ofbiz.entity.GenericValue;
+import org.ofbiz.entity.condition.EntityCondition;
+import org.ofbiz.entity.condition.EntityOperator;
+import org.ofbiz.entity.util.EntityListIterator;
+import org.ofbiz.service.DispatchContext;
+import org.ofbiz.service.GenericServiceException;
+import org.ofbiz.service.LocalDispatcher;
+import org.ofbiz.service.ModelService;
+import org.ofbiz.service.ServiceUtil;
 
 /**
  * Promotions Services
@@ -49,38 +55,79 @@ import java.nio.charset.Charset;
 public class PromoServices {
 
     public final static String module = PromoServices.class.getName();
+    public static final String resource = "ProductUiLabels";
+    protected final static char[] smartChars = { 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'K', 'L', 'M', 'N', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y',
+            'Z', '2', '3', '4', '5', '6', '7', '8', '9' };
 
     public static Map<String, Object> createProductPromoCodeSet(DispatchContext dctx, Map<String, ? extends Object> context) {
-        //GenericDelegator delegator = dctx.getDelegator();
+        Locale locale = (Locale) context.get("locale");
+        Delegator delegator = dctx.getDelegator();
         LocalDispatcher dispatcher = dctx.getDispatcher();
         Long quantity = (Long) context.get("quantity");
-        //Long useLimitPerCode = (Long) context.get("useLimitPerCode");
-        //Long useLimitPerCustomer = (Long) context.get("useLimitPerCustomer");
-        //GenericValue promoItem = null;
-        //GenericValue newItem = null;
+        int codeLength = (Integer) context.get("codeLength");
+        String promoCodeLayout = (String) context.get("promoCodeLayout");
 
+        // For PromoCodes we give the option not to use chars that are easy to mix up like 0<>O, 1<>I, ...
+        boolean useSmartLayout = false;
+        boolean useNormalLayout = false;
+        if ("smart".equals(promoCodeLayout)) {
+            useSmartLayout = true;
+        } else if ("normal".equals(promoCodeLayout)) {
+            useNormalLayout = true;
+        }
+
+        String newPromoCodeId = "";
         StringBuilder bankOfNumbers = new StringBuilder();
-        for (long i = 0; i < quantity.longValue(); i++) {
+        bankOfNumbers.append(UtilProperties.getMessage(resource, "ProductPromoCodesCreated", locale));
+        for (long i = 0; i < quantity; i++) {
             Map<String, Object> createProductPromoCodeMap = null;
+            boolean foundUniqueNewCode = false;
+            long count = 0;
+
+            while (!foundUniqueNewCode) {
+                if (useSmartLayout) {
+                    newPromoCodeId = RandomStringUtils.random(codeLength, smartChars);
+                } else if (useNormalLayout) {
+                    newPromoCodeId = RandomStringUtils.randomAlphanumeric(codeLength);
+                }
+                GenericValue existingPromoCode = null;
+                try {
+                    existingPromoCode = delegator.findOne("ProductPromoCode", UtilMisc.toMap("productPromoCodeId", newPromoCodeId), true);
+                }
+                catch (GenericEntityException e) {
+                    Debug.logWarning("Could not find ProductPromoCode for just generated ID: " + newPromoCodeId, module);
+                }
+                if (existingPromoCode == null) {
+                    foundUniqueNewCode = true;
+                }
+
+                count++;
+                if (count > 999999) {
+                    return ServiceUtil.returnError("Unable to locate unique PromoCode! Length [" + codeLength + "]");
+                }
+            }
             try {
-                createProductPromoCodeMap = dispatcher.runSync("createProductPromoCode", dctx.makeValidContext("createProductPromoCode", "IN", context));
+                Map<String, Object> newContext = dctx.makeValidContext("createProductPromoCode", "IN", context);
+                newContext.put("productPromoCodeId", newPromoCodeId);
+                createProductPromoCodeMap = dispatcher.runSync("createProductPromoCode", newContext);
             } catch (GenericServiceException err) {
-                return ServiceUtil.returnError("Could not create a bank of promo codes", null, null, createProductPromoCodeMap);
+                return ServiceUtil.returnError(UtilProperties.getMessage(resource, "ProductPromoCodeCannotBeCreated", locale), null, null, createProductPromoCodeMap);
             }
             if (ServiceUtil.isError(createProductPromoCodeMap)) {
                 // what to do here? try again?
-                return ServiceUtil.returnError("Could not create a bank of promo codes", null, null, createProductPromoCodeMap);
+                return ServiceUtil.returnError(UtilProperties.getMessage(resource, "ProductPromoCodeCannotBeCreated", locale), null, null, createProductPromoCodeMap);
             }
             bankOfNumbers.append((String) createProductPromoCodeMap.get("productPromoCodeId"));
-            bankOfNumbers.append("<br/>");
+            bankOfNumbers.append(",");
         }
 
         return ServiceUtil.returnSuccess(bankOfNumbers.toString());
     }
 
     public static Map<String, Object> purgeOldStoreAutoPromos(DispatchContext dctx, Map<String, ? extends Object> context) {
-        GenericDelegator delegator = dctx.getDelegator();
+        Delegator delegator = dctx.getDelegator();
         String productStoreId = (String) context.get("productStoreId");
+        Locale locale = (Locale) context.get("locale");
         Timestamp nowTimestamp = UtilDateTime.nowTimestamp();
 
         List<EntityCondition> condList = FastList.newInstance();
@@ -102,9 +149,9 @@ public class PromoServices {
             }
             eli.close();
         } catch (GenericEntityException e) {
-            String errMsg = "Error removing expired ProductStorePromo records: " + e.toString();
-            Debug.logError(e, errMsg, module);
-            return ServiceUtil.returnError(errMsg);
+            Debug.logError(e, "Error removing expired ProductStorePromo records: " + e.toString(), module);
+            return ServiceUtil.returnError(UtilProperties.getMessage(resource, 
+                    "ProductPromoCodeCannotBeRemoved", UtilMisc.toMap("errorString", e.toString()), locale));
         }
 
         return ServiceUtil.returnSuccess();
@@ -112,15 +159,17 @@ public class PromoServices {
 
     public static Map<String, Object> importPromoCodesFromFile(DispatchContext dctx, Map<String, ? extends Object> context) {
         LocalDispatcher dispatcher = dctx.getDispatcher();
+        Locale locale = (Locale) context.get("locale");
 
         // check the uploaded file
         ByteBuffer fileBytes = (ByteBuffer) context.get("uploadedFile");
         if (fileBytes == null) {
-            return ServiceUtil.returnError("Uploaded file not valid or corrupted");
+            return ServiceUtil.returnError(UtilProperties.getMessage(resource, 
+                    "ProductPromoCodeImportUploadedFileNotValid", locale));
         }
 
-        String encoding = System.getProperty("file.encoding"); 
-        String file = Charset.forName(encoding).decode(fileBytes).toString();         
+        String encoding = System.getProperty("file.encoding");
+        String file = Charset.forName(encoding).decode(fileBytes).toString();
         // get the createProductPromoCode Model
         ModelService promoModel;
         try {
@@ -155,7 +204,7 @@ public class PromoServices {
                         }
                     } else {
                         // not valid ignore and notify
-                        errors.add(line + ": is not a valid promo code; must be between 1 and 20 characters");
+                        errors.add(line + UtilProperties.getMessage(resource, "ProductPromoCodeInvalidCode", locale));
                     }
                     ++lines;
                 }
@@ -178,7 +227,8 @@ public class PromoServices {
         if (errors.size() > 0) {
             return ServiceUtil.returnError(errors);
         } else if (lines == 0) {
-            return ServiceUtil.returnError("Empty file; nothing to do");
+            return ServiceUtil.returnError(UtilProperties.getMessage(resource, 
+                    "ProductPromoCodeImportEmptyFile", locale));
         }
 
         return ServiceUtil.returnSuccess();
@@ -186,16 +236,19 @@ public class PromoServices {
 
     public static Map<String, Object> importPromoCodeEmailsFromFile(DispatchContext dctx, Map<String, ? extends Object> context) {
         LocalDispatcher dispatcher = dctx.getDispatcher();
-
         String productPromoCodeId = (String) context.get("productPromoCodeId");
-        byte[] wrapper = (byte[]) context.get("uploadedFile");
         GenericValue userLogin = (GenericValue) context.get("userLogin");
+        Locale locale = (Locale) context.get("locale");
 
-        if (wrapper == null) {
-            return ServiceUtil.returnError("Uploaded file not valid or corrupted");
+        ByteBuffer bytebufferwrapper = (ByteBuffer) context.get("uploadedFile");
+
+        if (bytebufferwrapper == null) {
+            return ServiceUtil.returnError(UtilProperties.getMessage(resource, "ProductPromoCodeImportUploadedFileNotValid", locale));
         }
 
-        // read the bytes into a reader
+        byte[] wrapper = bytebufferwrapper.array();
+       
+      // read the bytes into a reader
         BufferedReader reader = new BufferedReader(new StringReader(new String(wrapper)));
         List<Object> errors = FastList.newInstance();
         int lines = 0;
@@ -237,7 +290,8 @@ public class PromoServices {
         if (errors.size() > 0) {
             return ServiceUtil.returnError(errors);
         } else if (lines == 0) {
-            return ServiceUtil.returnError("Empty file; nothing to do");
+            return ServiceUtil.returnError(UtilProperties.getMessage(resource, 
+                    "ProductPromoCodeImportEmptyFile", locale));
         }
 
         return ServiceUtil.returnSuccess();

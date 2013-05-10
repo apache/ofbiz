@@ -18,11 +18,10 @@
  *******************************************************************************/
 package org.ofbiz.content.content;
 
-import java.io.File;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -30,15 +29,20 @@ import javax.servlet.http.HttpSession;
 import javolution.util.FastList;
 import javolution.util.FastMap;
 
+import org.apache.commons.fileupload.FileItem;
+import org.apache.commons.fileupload.FileUploadException;
+import org.apache.commons.fileupload.disk.DiskFileItemFactory;
+import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.FileUtil;
 import org.ofbiz.base.util.StringUtil;
 import org.ofbiz.base.util.UtilDateTime;
+import org.ofbiz.base.util.UtilGenerics;
 import org.ofbiz.base.util.UtilHttp;
 import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.base.util.UtilProperties;
 import org.ofbiz.base.util.UtilValidate;
-import org.ofbiz.entity.GenericDelegator;
+import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericValue;
 import org.ofbiz.entity.model.ModelEntity;
 import org.ofbiz.entity.transaction.GenericTransactionException;
@@ -51,11 +55,6 @@ import org.ofbiz.service.LocalDispatcher;
 import org.ofbiz.service.ModelService;
 import org.ofbiz.service.ServiceAuthException;
 import org.ofbiz.service.ServiceUtil;
-
-import org.apache.commons.fileupload.FileItem;
-import org.apache.commons.fileupload.FileUploadException;
-import org.apache.commons.fileupload.disk.DiskFileItemFactory;
-import org.apache.commons.fileupload.servlet.ServletFileUpload;
 
 
 /**
@@ -70,21 +69,18 @@ public class UploadContentAndImage {
 
     public UploadContentAndImage() {}
 
-
     public static String uploadContentAndImage(HttpServletRequest request, HttpServletResponse response) {
-
-
         try {
             Locale locale = UtilHttp.getLocale(request);
             LocalDispatcher dispatcher = (LocalDispatcher)request.getAttribute("dispatcher");
-            GenericDelegator delegator = (GenericDelegator) request.getAttribute("delegator");
+            Delegator delegator = (Delegator) request.getAttribute("delegator");
             HttpSession session = request.getSession();
             GenericValue userLogin = (GenericValue)session.getAttribute("userLogin");
 
             ServletFileUpload dfu = new ServletFileUpload(new DiskFileItemFactory(10240, FileUtil.getFile("runtime/tmp")));
-            java.util.List lst = null;
+            List<FileItem> lst = null;
             try {
-                lst = dfu.parseRequest(request);
+                lst = UtilGenerics.checkList(dfu.parseRequest(request));
             } catch (FileUploadException e4) {
                 request.setAttribute("_ERROR_MESSAGE_", e4.getMessage());
                 Debug.logError("[UploadContentAndImage.uploadContentAndImage] " + e4.getMessage(), module);
@@ -99,12 +95,12 @@ public class UploadContentAndImage {
                 return "error";
             }
 
-            Map passedParams = FastMap.newInstance();
+            Map<String, Object> passedParams = FastMap.newInstance();
             FileItem fi = null;
             FileItem imageFi = null;
             byte[] imageBytes = {};
             for (int i = 0; i < lst.size(); i++) {
-                fi = (FileItem) lst.get(i);
+                fi = lst.get(i);
                 //String fn = fi.getName();
                 String fieldName = fi.getFieldName();
                 if (fi.isFormField()) {
@@ -115,17 +111,20 @@ public class UploadContentAndImage {
                     imageBytes = imageFi.get();
                 }
             }
-            if (Debug.infoOn()) Debug.logInfo("[UploadContentAndImage]passedParams: " + passedParams, module);
+            if (Debug.infoOn()) {
+                Debug.logInfo("[UploadContentAndImage]passedParams: " + passedParams, module);
+            }
 
             TransactionUtil.begin();
-            List contentPurposeList = ContentWorker.prepContentPurposeList(passedParams);
-            passedParams.put("contentPurposeList", contentPurposeList );
+            List<String> contentPurposeList = ContentWorker.prepContentPurposeList(passedParams);
+            passedParams.put("contentPurposeList", contentPurposeList);
             String entityOperation = (String)passedParams.get("entityOperation");
             String passedContentId = (String)passedParams.get("ftlContentId");
-            List targetOperationList = ContentWorker.prepTargetOperationList(passedParams, entityOperation);
-            passedParams.put("targetOperationList", targetOperationList );
+            List<String> targetOperationList = ContentWorker.prepTargetOperationList(passedParams, entityOperation);
+            passedParams.put("targetOperationList", targetOperationList);
+            
             // Create or update FTL template
-            Map ftlContext = FastMap.newInstance();
+            Map<String, Object> ftlContext = FastMap.newInstance();
             ftlContext.put("userLogin", userLogin);
             ftlContext.put("contentId", passedParams.get("ftlContentId"));
             ftlContext.put("ownerContentId", passedParams.get("ownerContentId"));
@@ -147,21 +146,21 @@ public class UploadContentAndImage {
             ftlContext.put("contentIdTo", contentIdTo);
             String contentAssocTypeId = (String)passedParams.get("contentAssocTypeId");
             ftlContext.put("contentAssocTypeId", null); // Don't post assoc at this time
-            Map ftlResults = dispatcher.runSync("persistContentAndAssoc", ftlContext);
+            Map<String, Object> ftlResults = dispatcher.runSync("persistContentAndAssoc", ftlContext);
             boolean isError = ModelService.RESPOND_ERROR.equals(ftlResults.get(ModelService.RESPONSE_MESSAGE));
             if (isError) {
                 request.setAttribute("_ERROR_MESSAGE_", ftlResults.get(ModelService.ERROR_MESSAGE));
-                    TransactionUtil.rollback();
+                TransactionUtil.rollback();
                 return "error";
             }
             String ftlContentId = (String)ftlResults.get("contentId");
-            if (UtilValidate.isNotEmpty(contentIdTo) ) {
-                Map map = FastMap.newInstance();
-                    map.put("fromDate", UtilDateTime.nowTimestamp());
-                    map.put("contentId", ftlContentId);
-                    map.put("contentIdTo", contentIdTo);
-                    map.put("userLogin", userLogin);
-                if (UtilValidate.isEmpty(contentAssocTypeId) && UtilValidate.isEmpty(passedContentId) && UtilValidate.isNotEmpty(contentIdTo) ) {
+            if (UtilValidate.isNotEmpty(contentIdTo)) {
+                Map<String, Object> map = FastMap.newInstance();
+                map.put("fromDate", UtilDateTime.nowTimestamp());
+                map.put("contentId", ftlContentId);
+                map.put("contentIdTo", contentIdTo);
+                map.put("userLogin", userLogin);
+                if (UtilValidate.isEmpty(contentAssocTypeId) && UtilValidate.isEmpty(passedContentId) && UtilValidate.isNotEmpty(contentIdTo)) {
                     // switch the association order because we are really not linking to the forum
                     // but showing that this content is released to that forum.
                     map.put("contentIdTo", ftlContentId);
@@ -170,7 +169,7 @@ public class UploadContentAndImage {
                 } else if (contentAssocTypeId.equals("PUBLISH_LINK")) {
                     map.put("contentAssocTypeId", "PUBLISH_LINK");
                     String publishOperation = (String)passedParams.get("publishOperation");
-                    if (UtilValidate.isEmpty(publishOperation) ) {
+                    if (UtilValidate.isEmpty(publishOperation)) {
                         publishOperation = "CONTENT_PUBLISH";
                     }
                     map.put("targetOperationList", StringUtil.split(publishOperation, "|"));
@@ -178,27 +177,28 @@ public class UploadContentAndImage {
                 } else {
                     map.put("contentAssocTypeId", contentAssocTypeId);
                 }
-                if (UtilValidate.isNotEmpty((String)map.get("contentAssocTypeId"))) {
+                if (UtilValidate.isNotEmpty(map.get("contentAssocTypeId"))) {
                     ftlResults = dispatcher.runSync("createContentAssoc", map);
                     isError = ModelService.RESPOND_ERROR.equals(ftlResults.get(ModelService.RESPONSE_MESSAGE));
                     if (isError) {
-                            request.setAttribute("_ERROR_MESSAGE_", ftlResults.get(ModelService.ERROR_MESSAGE));
-                                TransactionUtil.rollback();
-                            return "error";
+                        request.setAttribute("_ERROR_MESSAGE_", ftlResults.get(ModelService.ERROR_MESSAGE));
+                        TransactionUtil.rollback();
+                        return "error";
                     }
                 }
             }
 
-            if (UtilValidate.isEmpty(ftlContentId))
+            if (UtilValidate.isEmpty(ftlContentId)) {
                 ftlContentId = passedContentId;
+            }   
 
             String ftlDataResourceId = drid;
 
             if (Debug.infoOn()) Debug.logInfo("[UploadContentAndImage]ftlContentId:" + ftlContentId, module);
             //if (Debug.infoOn()) Debug.logInfo("[UploadContentAndImage]ftlDataResourceId:" + ftlDataResourceId, module);
             // Create or update summary text subContent
-            if ( passedParams.containsKey("summaryData") ) {
-                Map sumContext = FastMap.newInstance();
+            if (passedParams.containsKey("summaryData")) {
+                Map<String, Object> sumContext = FastMap.newInstance();
                 sumContext.put("userLogin", userLogin);
                 sumContext.put("contentId", passedParams.get("sumContentId"));
                 sumContext.put("ownerContentId", ftlContentId);
@@ -217,7 +217,7 @@ public class UploadContentAndImage {
                 sumContext.put("textData", passedParams.get("summaryData"));
                 sumContext.put("mapKey", "SUMMARY");
                 sumContext.put("dataTemplateTypeId", "NONE");
-                Map sumResults = dispatcher.runSync("persistContentAndAssoc", sumContext);
+                Map<String, Object> sumResults = dispatcher.runSync("persistContentAndAssoc", sumContext);
                 isError = ModelService.RESPOND_ERROR.equals(sumResults.get(ModelService.RESPONSE_MESSAGE));
                 if (isError) {
                     request.setAttribute("_ERROR_MESSAGE_", sumResults.get(ModelService.ERROR_MESSAGE));
@@ -227,8 +227,8 @@ public class UploadContentAndImage {
             }
 
             // Create or update electronic text subContent
-            if ( passedParams.containsKey("textData") ) {
-                Map txtContext = FastMap.newInstance();
+            if (passedParams.containsKey("textData")) {
+                Map<String, Object> txtContext = FastMap.newInstance();
                 txtContext.put("userLogin", userLogin);
                 txtContext.put("contentId", passedParams.get("txtContentId"));
                 txtContext.put("ownerContentId", ftlContentId);
@@ -247,17 +247,17 @@ public class UploadContentAndImage {
                 txtContext.put("textData", passedParams.get("textData"));
                 txtContext.put("mapKey", "ARTICLE");
                 txtContext.put("dataTemplateTypeId", "NONE");
-                Map txtResults = dispatcher.runSync("persistContentAndAssoc", txtContext);
+                Map<String, Object> txtResults = dispatcher.runSync("persistContentAndAssoc", txtContext);
                 isError = ModelService.RESPOND_ERROR.equals(txtResults.get(ModelService.RESPONSE_MESSAGE));
                 if (isError) {
                     request.setAttribute("_ERROR_MESSAGE_", txtResults.get(ModelService.ERROR_MESSAGE));
-                        TransactionUtil.rollback();
+                    TransactionUtil.rollback();
                     return "error";
                 }
             }
 
             // Create or update image subContent
-            Map imgContext = FastMap.newInstance();
+            Map<String, Object> imgContext = FastMap.newInstance();
             if (imageBytes.length > 0) {
                 imgContext.put("userLogin", userLogin);
                 imgContext.put("contentId", passedParams.get("imgContentId"));
@@ -272,7 +272,7 @@ public class UploadContentAndImage {
                 imgContext.put("dataResourceId", passedParams.get("imgDataResourceId"));
                 //String dataResourceTypeId = (String)passedParams.get("dataResourceTypeId");
                 //if (UtilValidate.isEmpty(dataResourceTypeId))
-                    //dataResourceTypeId = "IMAGE_OBJECT";
+                //dataResourceTypeId = "IMAGE_OBJECT";
                 String dataResourceTypeId = "IMAGE_OBJECT";
                 imgContext.put("dataResourceTypeId", dataResourceTypeId);
                 imgContext.put("contentIdTo", ftlContentId);
@@ -280,10 +280,10 @@ public class UploadContentAndImage {
                 imgContext.put("imageData", imageBytes);
                 imgContext.put("mapKey", "IMAGE");
                 imgContext.put("dataTemplateTypeId", "NONE");
-                String rootDir = request.getSession().getServletContext().getRealPath("/");
+                // String rootDir = request.getSession().getServletContext().getRealPath("/");
                 imgContext.put("rootDir", "rootDir");
                 if (Debug.infoOn()) Debug.logInfo("[UploadContentAndImage]imgContext " + imgContext, module);
-                Map imgResults = dispatcher.runSync("persistContentAndAssoc", imgContext);
+                Map<String, Object> imgResults = dispatcher.runSync("persistContentAndAssoc", imgContext);
                 isError = ModelService.RESPOND_ERROR.equals(imgResults.get(ModelService.RESPONSE_MESSAGE));
                 if (isError) {
                     request.setAttribute("_ERROR_MESSAGE_", imgResults.get(ModelService.ERROR_MESSAGE));
@@ -294,10 +294,10 @@ public class UploadContentAndImage {
 
             // Check for existing AUTHOR link
             String userLoginId = userLogin.getString("userLoginId");
-            GenericValue authorContent = delegator.findByPrimaryKeyCache("Content", UtilMisc.toMap("contentId", userLoginId));
+            GenericValue authorContent = delegator.findOne("Content", UtilMisc.toMap("contentId", userLoginId), true);
             if (authorContent != null) {
-                List authorAssocList = delegator.findByAnd("ContentAssoc", UtilMisc.toMap("contentId", ftlContentId, "contentIdTo", userLoginId, "contentAssocTypeId", "AUTHOR"));
-                List currentAuthorAssocList = EntityUtil.filterByDate(authorAssocList);
+                List<GenericValue> authorAssocList = delegator.findByAnd("ContentAssoc", UtilMisc.toMap("contentId", ftlContentId, "contentIdTo", userLoginId, "contentAssocTypeId", "AUTHOR"), null, false);
+                List<GenericValue> currentAuthorAssocList = EntityUtil.filterByDate(authorAssocList);
                 //if (Debug.infoOn()) Debug.logInfo("[UploadContentAndImage]currentAuthorAssocList " + currentAuthorAssocList, module);
                 if (currentAuthorAssocList.size() == 0) {
                     // Don't want to bother with permission checking on this association
@@ -324,93 +324,7 @@ public class UploadContentAndImage {
             request.setAttribute("passedParams", passedParams);
             //if (Debug.infoOn()) Debug.logInfo("[UploadContentAndImage]newTrail: " + newTrail, module);
             TransactionUtil.commit();
-        } catch ( Exception e) {
-            Debug.logError(e, "[UploadContentAndImage] " , module);
-            request.setAttribute("_ERROR_MESSAGE_", e.getMessage());
-            try {
-                    TransactionUtil.rollback();
-            } catch (GenericTransactionException e2) {
-            request.setAttribute("_ERROR_MESSAGE_", e2.getMessage());
-            return "error";
-            }
-            return "error";
-        }
-        return "success";
-    }
-
-    public static String uploadContentStuff(HttpServletRequest request, HttpServletResponse response) {
-
-
-        try {
-            HttpSession session = request.getSession();
-            GenericValue userLogin = (GenericValue)session.getAttribute("userLogin");
-
-            ServletFileUpload dfu = new ServletFileUpload(new DiskFileItemFactory(10240, FileUtil.getFile("runtime/tmp")));
-            //if (Debug.infoOn()) Debug.logInfo("[UploadContentAndImage]DiskFileUpload " + dfu, module);
-            java.util.List lst = null;
-            try {
-                lst = dfu.parseRequest(request);
-            } catch (FileUploadException e4) {
-                request.setAttribute("_ERROR_MESSAGE_", e4.getMessage());
-                Debug.logError("[UploadContentAndImage.uploadContentAndImage] " + e4.getMessage(), module);
-                return "error";
-            }
-            //if (Debug.infoOn()) Debug.logInfo("[UploadContentAndImage]lst " + lst, module);
-
-            if (lst.size() == 0) {
-                request.setAttribute("_ERROR_MESSAGE_", "No files uploaded");
-                Debug.logWarning("[DataEvents.uploadImage] No files uploaded", module);
-                return "error";
-            }
-
-            Map passedParams = FastMap.newInstance();
-            FileItem fi = null;
-            FileItem imageFi = null;
-            byte[] imageBytes = {};
-            passedParams.put("userLogin", userLogin);
-            for (int i = 0; i < lst.size(); i++) {
-                fi = (FileItem) lst.get(i);
-                //String fn = fi.getName();
-                String fieldName = fi.getFieldName();
-                if (fi.isFormField()) {
-                    String fieldStr = fi.getString();
-                    passedParams.put(fieldName, fieldStr);
-                } else if (fieldName.startsWith("imageData")) {
-                    imageFi = fi;
-                    String fileName = fi.getName();
-                    passedParams.put("drObjectInfo", fileName);
-                    String contentType = fi.getContentType();
-                    passedParams.put("drMimeTypeId", contentType);
-                    imageBytes = imageFi.get();
-                    passedParams.put(fieldName, imageBytes);
-            if (Debug.infoOn()) Debug.logInfo("[UploadContentAndImage]imageData: " + imageBytes.length, module);
-                }
-            }
-            if (Debug.infoOn()) Debug.logInfo("[UploadContentAndImage]passedParams: " + passedParams, module);
-
-            // The number of multi form rows is retrieved
-            int rowCount = UtilHttp.getMultiFormRowCount(request);
-            if (rowCount < 1) {
-                rowCount = 1;
-            }
-            TransactionUtil.begin();
-            for (int i=0; i < rowCount; i++) {
-                String suffix = "_o_" + i;
-                if (i==0)
-                   suffix = "";
-                String returnMsg = processContentUpload(passedParams, suffix, request);
-                if (returnMsg.equals("error")) {
-                    try {
-                        TransactionUtil.rollback();
-                    } catch (GenericTransactionException e2) {
-                        ServiceUtil.setMessages(request, e2.getMessage(), null, null);
-                        return "error";
-                    }
-                    return "error";
-                }
-            }
-            TransactionUtil.commit();
-        } catch ( Exception e) {
+        } catch (Exception e) {
             Debug.logError(e, "[UploadContentAndImage] " , module);
             request.setAttribute("_ERROR_MESSAGE_", e.getMessage());
             try {
@@ -424,136 +338,234 @@ public class UploadContentAndImage {
         return "success";
     }
 
-    public static String processContentUpload(Map passedParams, String suffix, HttpServletRequest request) throws GenericServiceException {
-
-            LocalDispatcher dispatcher = (LocalDispatcher)request.getAttribute("dispatcher");
-            GenericDelegator delegator = (GenericDelegator)request.getAttribute("delegator");
+    public static String uploadContentStuff(HttpServletRequest request, HttpServletResponse response) {
+        try {
             HttpSession session = request.getSession();
             GenericValue userLogin = (GenericValue)session.getAttribute("userLogin");
-            Map ftlContext = FastMap.newInstance();
 
-            String contentPurposeString = (String)passedParams.get("contentPurposeString" + suffix);
-            if (UtilValidate.isEmpty(contentPurposeString)) {
-                contentPurposeString = (String)passedParams.get("contentPurposeString");
-            }
-            List contentPurposeList = StringUtil.split(contentPurposeString,"|");
-            ftlContext.put("contentPurposeList", contentPurposeList);
-
-            String targetOperationString = (String)passedParams.get("targetOperationString" + suffix);
-            if (UtilValidate.isEmpty(targetOperationString)) {
-                targetOperationString = (String)passedParams.get("targetOperationString");
-            }
-            List targetOperationList = StringUtil.split(targetOperationString,"|");
-            ftlContext.put("targetOperationList",targetOperationList);
-
-            ftlContext.put("userLogin", userLogin);
-            Object objSequenceNum = passedParams.get("caSequenceNum");
-            if (objSequenceNum != null ) {
-                if (objSequenceNum instanceof String) {
-                    Long sequenceNum = null;
-                    try {
-                        sequenceNum = Long.valueOf((String)objSequenceNum);
-                    } catch (NumberFormatException e) {}
-                    passedParams.put("caSequenceNum", sequenceNum);
-                }
-            }
-
-            GenericValue contentAssocDataResourceViewFrom = delegator.makeValue("ContentAssocDataResourceViewFrom");
-            ModelEntity modelEntity = delegator.getModelEntity("ContentAssocDataResourceViewFrom");
-            List fieldNames = modelEntity.getAllFieldNames();
-            Iterator iter = fieldNames.iterator();
-            Map ftlContext2 = FastMap.newInstance();
-            Map ftlContext3 = FastMap.newInstance();
-            while (iter.hasNext()) {
-                String keyName = (String)iter.next();
-                Object obj = passedParams.get(keyName + suffix);
-                ftlContext2.put(keyName, obj);
-            }
-            if (Debug.infoOn()) Debug.logInfo("[UploadContentStuff]ftlContext2:" + ftlContext2, module);
-            List errorMessages = FastList.newInstance();
-            Locale loc = Locale.getDefault();
+            ServletFileUpload dfu = new ServletFileUpload(new DiskFileItemFactory(10240, FileUtil.getFile("runtime/tmp")));
+            //if (Debug.infoOn()) Debug.logInfo("[UploadContentAndImage]DiskFileUpload " + dfu, module);
+            List<FileItem> lst = null;
             try {
-                SimpleMapProcessor.runSimpleMapProcessor( "org/ofbiz/content/ContentManagementMapProcessors.xml", "contentIn", ftlContext2, ftlContext3, errorMessages, loc);
-                SimpleMapProcessor.runSimpleMapProcessor( "org/ofbiz/content/ContentManagementMapProcessors.xml", "contentOut", ftlContext3, ftlContext, errorMessages, loc);
-
-                ftlContext3 = FastMap.newInstance();
-                SimpleMapProcessor.runSimpleMapProcessor( "org/ofbiz/content/ContentManagementMapProcessors.xml", "dataResourceIn", ftlContext2, ftlContext3, errorMessages, loc);
-                SimpleMapProcessor.runSimpleMapProcessor( "org/ofbiz/content/ContentManagementMapProcessors.xml", "dataResourceOut", ftlContext3, ftlContext, errorMessages, loc);
-
-                ftlContext3 = FastMap.newInstance();
-                SimpleMapProcessor.runSimpleMapProcessor( "org/ofbiz/content/ContentManagementMapProcessors.xml", "contentAssocIn", ftlContext2, ftlContext3, errorMessages, loc);
-                SimpleMapProcessor.runSimpleMapProcessor( "org/ofbiz/content/ContentManagementMapProcessors.xml", "contentAssocOut", ftlContext3, ftlContext, errorMessages, loc);
-            } catch (MiniLangException e) {
-                throw new GenericServiceException(e.getMessage());
-            }
-
-
-            ftlContext.put("textData", passedParams.get("textData" + suffix));
-            byte[] bytes = (byte[])passedParams.get("imageData" + suffix);
-            ftlContext.put("imageData", bytes);
-            //if (Debug.infoOn()) Debug.logInfo("[UploadContentStuff]byteBuffer:" + bytes, module);
-            //contentAssocDataResourceViewFrom.setAllFields(ftlContext2, true, null, null);
-            //ftlContext.putAll(ftlContext2);
-            if (Debug.infoOn()) Debug.logInfo("[UploadContentStuff]ftlContext:" + ftlContext, module);
-            Map ftlResults = null;
-            try {
-                ftlResults = dispatcher.runSync("persistContentAndAssoc", ftlContext);
-            } catch (ServiceAuthException e) {
-                String msg = e.getMessage();
-                request.setAttribute("_ERROR_MESSAGE_", msg);
-                List errorMsgList = (List)request.getAttribute("_EVENT_MESSAGE_LIST_");
-                if (Debug.infoOn()) Debug.logInfo("[UploadContentStuff]errorMsgList:" + errorMsgList, module);
-                if (Debug.infoOn()) Debug.logInfo("[UploadContentStuff]msg:" + msg, module);
-                if (errorMsgList == null) {
-                    errorMsgList = FastList.newInstance();
-                    request.setAttribute("errorMessageList", errorMsgList);
-                }
-                errorMsgList.add(msg);
+                lst = UtilGenerics.checkList(dfu.parseRequest(request));
+            } catch (FileUploadException e4) {
+                request.setAttribute("_ERROR_MESSAGE_", e4.getMessage());
+                Debug.logError("[UploadContentAndImage.uploadContentAndImage] " + e4.getMessage(), module);
                 return "error";
             }
-            String msg = ServiceUtil.getErrorMessage(ftlResults);
-            if (UtilValidate.isNotEmpty(msg)) {
-                request.setAttribute("_ERROR_MESSAGE_", msg);
-                List errorMsgList = (List)request.getAttribute("_EVENT_MESSAGE_LIST_");
-                if (errorMsgList == null) {
-                    errorMsgList = FastList.newInstance();
-                    request.setAttribute("errorMessageList", errorMsgList);
-                }
-                errorMsgList.add(msg);
+            //if (Debug.infoOn()) Debug.logInfo("[UploadContentAndImage]lst " + lst, module);
+
+            if (lst.size() == 0) {
+                request.setAttribute("_ERROR_MESSAGE_", "No files uploaded");
+                Debug.logWarning("[DataEvents.uploadImage] No files uploaded", module);
                 return "error";
             }
-            String returnedContentId = (String)ftlResults.get("contentId");
-            if (Debug.infoOn()) Debug.logInfo("returnedContentId:" + returnedContentId, module);
-            request.setAttribute("contentId" + suffix, ftlResults.get("contentId"));
-            request.setAttribute("caContentIdTo" + suffix, ftlResults.get("contentIdTo"));
-            request.setAttribute("caContentIdStart" + suffix, ftlResults.get("contentIdTo"));
-            request.setAttribute("caContentAssocTypeId" + suffix, ftlResults.get("contentAssocTypeId"));
-            request.setAttribute("caFromDate" + suffix, ftlResults.get("fromDate"));
-            request.setAttribute("drDataResourceId" + suffix, ftlResults.get("dataResourceId"));
-            request.setAttribute("caContentId" + suffix, ftlResults.get("contentId"));
 
-            String caContentIdTo = (String)passedParams.get("caContentIdTo");
-            if (UtilValidate.isNotEmpty(caContentIdTo)) {
-                Map resequenceContext = FastMap.newInstance();
-                resequenceContext.put("contentIdTo", caContentIdTo);
-                resequenceContext.put("userLogin", userLogin);
-                try {
-                    ftlResults = dispatcher.runSync("resequence", resequenceContext);
-                } catch (ServiceAuthException e) {
-                    msg = e.getMessage();
-                    request.setAttribute("_ERROR_MESSAGE_", msg);
-                    List errorMsgList = (List)request.getAttribute("_EVENT_MESSAGE_LIST_");
-                    if (Debug.infoOn()) Debug.logInfo("[UploadContentStuff]errorMsgList:" + errorMsgList, module);
-                    if (Debug.infoOn()) Debug.logInfo("[UploadContentStuff]msg:" + msg, module);
-                    if (errorMsgList == null) {
-                        errorMsgList = FastList.newInstance();
-                        request.setAttribute("errorMessageList", errorMsgList);
+            Map<String, Object> passedParams = FastMap.newInstance();
+            FileItem fi = null;
+            FileItem imageFi = null;
+            byte[] imageBytes = {};
+            passedParams.put("userLogin", userLogin);
+            for (int i = 0; i < lst.size(); i++) {
+                fi = lst.get(i);
+                //String fn = fi.getName();
+                String fieldName = fi.getFieldName();
+                if (fi.isFormField()) {
+                    String fieldStr = fi.getString();
+                    passedParams.put(fieldName, fieldStr);
+                } else if (fieldName.startsWith("imageData")) {
+                    imageFi = fi;
+                    String fileName = fi.getName();
+                    passedParams.put("drObjectInfo", fileName);
+                    String contentType = fi.getContentType();
+                    passedParams.put("drMimeTypeId", contentType);
+                    imageBytes = imageFi.get();
+                    passedParams.put(fieldName, imageBytes);
+                    if (Debug.infoOn()) {
+                        Debug.logInfo("[UploadContentAndImage]imageData: " + imageBytes.length, module);
                     }
-                    errorMsgList.add(msg);
+                }
+            }
+            if (Debug.infoOn()) {
+                Debug.logInfo("[UploadContentAndImage]passedParams: " + passedParams, module);
+            }
+
+            // The number of multi form rows is retrieved
+            int rowCount = UtilHttp.getMultiFormRowCount(request);
+            if (rowCount < 1) {
+                rowCount = 1;
+            }
+            TransactionUtil.begin();
+            for (int i=0; i < rowCount; i++) {
+                String suffix = "_o_" + i;
+                if (i==0) {
+                   suffix = "";
+                }
+                String returnMsg = processContentUpload(passedParams, suffix, request);
+                if (returnMsg.equals("error")) {
+                    try {
+                        TransactionUtil.rollback();
+                    } catch (GenericTransactionException e2) {
+                        ServiceUtil.setMessages(request, e2.getMessage(), null, null);
+                        return "error";
+                    }
                     return "error";
                 }
             }
-            return "success";
+            TransactionUtil.commit();
+        } catch (Exception e) {
+            Debug.logError(e, "[UploadContentAndImage] " , module);
+            request.setAttribute("_ERROR_MESSAGE_", e.getMessage());
+            try {
+                TransactionUtil.rollback();
+            } catch (GenericTransactionException e2) {
+                request.setAttribute("_ERROR_MESSAGE_", e2.getMessage());
+                return "error";
+            }
+            return "error";
+        }
+        return "success";
+    }
+
+    public static String processContentUpload(Map<String, Object> passedParams, String suffix, HttpServletRequest request) throws GenericServiceException {
+        LocalDispatcher dispatcher = (LocalDispatcher)request.getAttribute("dispatcher");
+        Delegator delegator = (Delegator)request.getAttribute("delegator");
+        HttpSession session = request.getSession();
+        GenericValue userLogin = (GenericValue)session.getAttribute("userLogin");
+        Map<String, Object> ftlContext = FastMap.newInstance();
+
+        String contentPurposeString = (String)passedParams.get("contentPurposeString" + suffix);
+        if (UtilValidate.isEmpty(contentPurposeString)) {
+            contentPurposeString = (String)passedParams.get("contentPurposeString");
+        }
+        List<String> contentPurposeList = StringUtil.split(contentPurposeString,"|");
+        ftlContext.put("contentPurposeList", contentPurposeList);
+
+        String targetOperationString = (String)passedParams.get("targetOperationString" + suffix);
+        if (UtilValidate.isEmpty(targetOperationString)) {
+            targetOperationString = (String)passedParams.get("targetOperationString");
+        }
+        List<String> targetOperationList = StringUtil.split(targetOperationString,"|");
+        ftlContext.put("targetOperationList",targetOperationList);
+
+        ftlContext.put("userLogin", userLogin);
+        Object objSequenceNum = passedParams.get("caSequenceNum");
+        if (objSequenceNum != null) {
+            if (objSequenceNum instanceof String) {
+                Long sequenceNum = null;
+                try {
+                    sequenceNum = Long.valueOf((String)objSequenceNum);
+                } catch (NumberFormatException e) {}
+                passedParams.put("caSequenceNum", sequenceNum);
+            }
+        }
+
+        ModelEntity modelEntity = delegator.getModelEntity("ContentAssocDataResourceViewFrom");
+        List<String> fieldNames = modelEntity.getAllFieldNames();
+        Map<String, Object> ftlContext2 = FastMap.newInstance();
+        Map<String, Object> ftlContext3 = FastMap.newInstance();
+        for(String keyName : fieldNames) {
+            Object obj = passedParams.get(keyName + suffix);
+            ftlContext2.put(keyName, obj);
+        }
+        if (Debug.infoOn()) {
+            Debug.logInfo("[UploadContentStuff]ftlContext2:" + ftlContext2, module);
+        }
+        List<Object> errorMessages = FastList.newInstance();
+        Locale loc = Locale.getDefault();
+        try {
+            SimpleMapProcessor.runSimpleMapProcessor("component://content/script/org/ofbiz/content/ContentManagementMapProcessors.xml", "contentIn", ftlContext2, ftlContext3, errorMessages, loc);
+            SimpleMapProcessor.runSimpleMapProcessor("component://content/script/org/ofbiz/content/ContentManagementMapProcessors.xml", "contentOut", ftlContext3, ftlContext, errorMessages, loc);
+
+            ftlContext3 = FastMap.newInstance();
+            SimpleMapProcessor.runSimpleMapProcessor("component://content/script/org/ofbiz/content/ContentManagementMapProcessors.xml", "dataResourceIn", ftlContext2, ftlContext3, errorMessages, loc);
+            SimpleMapProcessor.runSimpleMapProcessor("component://content/script/org/ofbiz/content/ContentManagementMapProcessors.xml", "dataResourceOut", ftlContext3, ftlContext, errorMessages, loc);
+
+            ftlContext3 = FastMap.newInstance();
+            SimpleMapProcessor.runSimpleMapProcessor("component://content/script/org/ofbiz/content/ContentManagementMapProcessors.xml", "contentAssocIn", ftlContext2, ftlContext3, errorMessages, loc);
+            SimpleMapProcessor.runSimpleMapProcessor("component://content/script/org/ofbiz/content/ContentManagementMapProcessors.xml", "contentAssocOut", ftlContext3, ftlContext, errorMessages, loc);
+        } catch (MiniLangException e) {
+            throw new GenericServiceException(e.getMessage());
+        }
+
+        ftlContext.put("textData", passedParams.get("textData" + suffix));
+        byte[] bytes = (byte[])passedParams.get("imageData" + suffix);
+        ftlContext.put("imageData", bytes);
+        //if (Debug.infoOn()) Debug.logInfo("[UploadContentStuff]byteBuffer:" + bytes, module);
+        //contentAssocDataResourceViewFrom.setAllFields(ftlContext2, true, null, null);
+        //ftlContext.putAll(ftlContext2);
+        if (Debug.infoOn()) {
+            Debug.logInfo("[UploadContentStuff]ftlContext:" + ftlContext, module);
+        }
+        Map<String, Object> ftlResults = null;
+        try {
+            ftlResults = dispatcher.runSync("persistContentAndAssoc", ftlContext);
+        } catch (ServiceAuthException e) {
+            String msg = e.getMessage();
+            request.setAttribute("_ERROR_MESSAGE_", msg);
+            List<String> errorMsgList = UtilGenerics.checkList(request.getAttribute("_EVENT_MESSAGE_LIST_"));
+            if (Debug.infoOn()) {
+                Debug.logInfo("[UploadContentStuff]errorMsgList:" + errorMsgList, module);
+            }
+            if (Debug.infoOn()) {
+                Debug.logInfo("[UploadContentStuff]msg:" + msg, module);
+            }
+            if (errorMsgList == null) {
+                errorMsgList = FastList.newInstance();
+                request.setAttribute("errorMessageList", errorMsgList);
+            }
+            errorMsgList.add(msg);
+            return "error";
+        }
+        String msg = ServiceUtil.getErrorMessage(ftlResults);
+        if (UtilValidate.isNotEmpty(msg)) {
+            request.setAttribute("_ERROR_MESSAGE_", msg);
+            List<String> errorMsgList = UtilGenerics.checkList(request.getAttribute("_EVENT_MESSAGE_LIST_"));
+            if (errorMsgList == null) {
+                errorMsgList = FastList.newInstance();
+                request.setAttribute("errorMessageList", errorMsgList);
+            }
+            errorMsgList.add(msg);
+            return "error";
+        }
+        String returnedContentId = (String)ftlResults.get("contentId");
+        if (Debug.infoOn()) {
+            Debug.logInfo("returnedContentId:" + returnedContentId, module);
+        }
+        request.setAttribute("contentId" + suffix, ftlResults.get("contentId"));
+        request.setAttribute("caContentIdTo" + suffix, ftlResults.get("contentIdTo"));
+        request.setAttribute("caContentIdStart" + suffix, ftlResults.get("contentIdTo"));
+        request.setAttribute("caContentAssocTypeId" + suffix, ftlResults.get("contentAssocTypeId"));
+        request.setAttribute("caFromDate" + suffix, ftlResults.get("fromDate"));
+        request.setAttribute("drDataResourceId" + suffix, ftlResults.get("dataResourceId"));
+        request.setAttribute("caContentId" + suffix, ftlResults.get("contentId"));
+
+        String caContentIdTo = (String)passedParams.get("caContentIdTo");
+        if (UtilValidate.isNotEmpty(caContentIdTo)) {
+            Map<String, Object> resequenceContext = FastMap.newInstance();
+            resequenceContext.put("contentIdTo", caContentIdTo);
+            resequenceContext.put("userLogin", userLogin);
+            try {
+                ftlResults = dispatcher.runSync("resequence", resequenceContext);
+            } catch (ServiceAuthException e) {
+                msg = e.getMessage();
+                request.setAttribute("_ERROR_MESSAGE_", msg);
+                List<String> errorMsgList = UtilGenerics.checkList(request.getAttribute("_EVENT_MESSAGE_LIST_"));
+                if (Debug.infoOn()) {
+                    Debug.logInfo("[UploadContentStuff]errorMsgList:" + errorMsgList, module);
+                }
+                if (Debug.infoOn()) {
+                    Debug.logInfo("[UploadContentStuff]msg:" + msg, module);
+                }
+                if (errorMsgList == null) {
+                    errorMsgList = FastList.newInstance();
+                    request.setAttribute("errorMessageList", errorMsgList);
+                }
+                errorMsgList.add(msg);
+                return "error";
+            }
+        }
+        return "success";
     }
 
 } // end of UploadContentAndImage

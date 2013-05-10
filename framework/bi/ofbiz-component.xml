@@ -22,10 +22,12 @@ under the License.
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/ofbiz-component.xsd">
     <resource-loader name="main" type="component"/>
-    <classpath type="dir" location="script"/>
     <classpath type="dir" location="config"/>
     <classpath type="jar" location="build/lib/*"/>
-
+    <entity-resource type="data" reader-name="seed" loader="main" location="data/BiTypeData.xml"/>
+    <entity-resource type="data" reader-name="seed" loader="main" location="data/BiSecurityPermissionSeedData.xml"/>
+    <entity-resource type="data" reader-name="demo" loader="main" location="data/BiSecurityGroupDemoData.xml"/>
+    
     <service-resource type="model" loader="main" location="servicedef/services.xml"/>
 
     <webapp name="bi"
@@ -33,7 +35,7 @@ under the License.
         menu-name="secondary"
         server="default-server"
         location="webapp/bi"
-        base-permission="OFBTOOLS"
+        base-permission="OFBTOOLS,BI"
         mount-point="/bi"
         app-bar-display="true"/>
 </ofbiz-component>

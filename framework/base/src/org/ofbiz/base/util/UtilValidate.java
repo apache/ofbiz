@@ -18,10 +18,14 @@
  *******************************************************************************/
 package org.ofbiz.base.util;
 
-import java.util.Calendar;
+import java.sql.Timestamp;
 import java.util.Collection;
+import java.util.Map;
 
-import org.apache.commons.validator.EmailValidator;
+import org.apache.commons.validator.routines.EmailValidator;
+import org.ofbiz.base.lang.IsEmpty;
+
+import com.ibm.icu.util.Calendar;
 
 /**
  * General input/data validation methods
@@ -53,7 +57,7 @@ import org.apache.commons.validator.EmailValidator;
  * <br/> ==============================================================================
  * <br/> NOTE: This code was adapted from the Netscape JavaScript form validation code,
  * <br/> usually found in "FormChek.js". Credit card verification functions Originally
- * <br< included as Starter Application 1.0.0 in LivePayment.
+ * <br/> included as Starter Application 1.0.0 in LivePayment.
  * <br/> ==============================================================================
  */
 public class UtilValidate {
@@ -145,8 +149,8 @@ public class UtilValidate {
     public static final String isDatePrefixMsg = "The Day, Month, and Year for ";
     public static final String isDateSuffixMsg = " do not form a valid date.  Please reenter them now.";
     public static final String isHourMsg = "The Hour must be a number between 0 and 23.";
-    public static final String isMinuteMsg = "The Hour must be a number between 0 and 59.";
-    public static final String isSecondMsg = "The Hour must be a number between 0 and 59.";
+    public static final String isMinuteMsg = "The Minute must be a number between 0 and 59.";
+    public static final String isSecondMsg = "The Second must be a number between 0 and 59.";
     public static final String isTimeMsg = "The Time must be a valid time formed like: HH:MM or HH:MM:SS.";
     public static final String isDateMsg = "The Date must be a valid date formed like: MM/YY, MM/YYYY, MM/DD/YY, or MM/DD/YYYY.";
     public static final String isDateAfterToday = "The Date must be a valid date after today, and formed like: MM/YY, MM/YYYY, MM/DD/YY, or MM/DD/YYYY.";
@@ -190,24 +194,49 @@ public class UtilValidate {
         return !ObjectType.isEmpty(o);
     }
 
+    /** Check whether IsEmpty o is empty. */
+    public static boolean isEmpty(IsEmpty o) {
+        return o == null || o.isEmpty();
+    }
+
+    /** Check whether IsEmpty o is NOT empty. */
+    public static boolean isNotEmpty(IsEmpty o) {
+        return o != null && !o.isEmpty();
+    }
+
     /** Check whether string s is empty. */
     public static boolean isEmpty(String s) {
-        return ((s == null) || (s.length() == 0));
+        return (s == null) || s.length() == 0;
     }
 
     /** Check whether collection c is empty. */
-    public static boolean isEmpty(Collection c) {
-        return ((c == null) || (c.size() == 0));
+    public static <E> boolean isEmpty(Collection<E> c) {
+        return (c == null) || c.isEmpty();
+    }
+
+    /** Check whether map m is empty. */
+    public static <K,E> boolean isEmpty(Map<K,E> m) {
+        return (m == null) || m.isEmpty();
+    }
+
+    /** Check whether charsequence c is empty. */
+    public static <E> boolean isEmpty(CharSequence c) {
+        return (c == null) || c.length() == 0;
     }
 
     /** Check whether string s is NOT empty. */
     public static boolean isNotEmpty(String s) {
-        return ((s != null) && (s.length() > 0));
+        return (s != null) && s.length() > 0;
     }
 
     /** Check whether collection c is NOT empty. */
-    public static boolean isNotEmpty(Collection c) {
-        return ((c != null) && (c.size() > 0));
+    public static <E> boolean isNotEmpty(Collection<E> c) {
+        return (c != null) && !c.isEmpty();
+    }
+
+    /** Check whether charsequence c is NOT empty. */
+    public static <E> boolean isNotEmpty(CharSequence c) {
+        return ((c != null) && (c.length() > 0));
     }
 
     public static boolean isString(Object obj) {
@@ -235,31 +264,31 @@ public class UtilValidate {
     /** Removes all characters which appear in string bag from string s. */
     public static String stripCharsInBag(String s, String bag) {
         int i;
-        String returnString = "";
+        StringBuilder stringBuilder = new StringBuilder("");
 
         // Search through string's characters one by one.
         // If character is not in bag, append to returnString.
         for (i = 0; i < s.length(); i++) {
             char c = s.charAt(i);
 
-            if (bag.indexOf(c) == -1) returnString += c;
+            if (bag.indexOf(c) == -1) stringBuilder.append(c);
         }
-        return returnString;
+        return stringBuilder.toString();
     }
 
     /** Removes all characters which do NOT appear in string bag from string s. */
     public static String stripCharsNotInBag(String s, String bag) {
         int i;
-        String returnString = "";
+        StringBuilder stringBuilder = new StringBuilder("");
 
         // Search through string's characters one by one.
         // If character is in bag, append to returnString.
         for (i = 0; i < s.length(); i++) {
             char c = s.charAt(i);
 
-            if (bag.indexOf(c) != -1) returnString += c;
+            if (bag.indexOf(c) != -1) stringBuilder.append(c);
         }
-        return returnString;
+        return stringBuilder.toString();
     }
 
     /** Removes all whitespace characters from s.
@@ -353,7 +382,7 @@ public class UtilValidate {
         // if (isSignedInteger.arguments.length > 1) secondArg = isSignedInteger.arguments[1];
 
         // skip leading + or -
-        // if ((s.charAt(0) == "-") ||(s.charAt(0) == "+") ) startPos = 1;
+        // if ((s.charAt(0) == "-") ||(s.charAt(0) == "+")) startPos = 1;
         // return(isInteger(s.substring(startPos, s.length), secondArg))
     }
 
@@ -386,7 +415,7 @@ public class UtilValidate {
         }
 
         // return(isSignedInteger(s, secondArg)
-        // &&((isEmpty(s) && secondArg)  ||(parseInt(s) > 0) ) );
+        // &&((isEmpty(s) && secondArg)  ||(parseInt(s) > 0)));
     }
 
     /** Returns true if string s is an integer >= 0. */
@@ -403,7 +432,7 @@ public class UtilValidate {
         }
 
         // return(isSignedInteger(s, secondArg)
-        // &&((isEmpty(s) && secondArg)  ||(parseInt(s) >= 0) ) );
+        // &&((isEmpty(s) && secondArg)  ||(parseInt(s) >= 0)));
     }
 
     /** Returns true if string s is an integer < 0. */
@@ -420,7 +449,7 @@ public class UtilValidate {
         }
 
         // return(isSignedInteger(s, secondArg)
-        // &&((isEmpty(s) && secondArg)  ||(parseInt(s) < 0) ) );
+        // &&((isEmpty(s) && secondArg)  ||(parseInt(s) < 0)));
     }
 
     /** Returns true if string s is an integer <= 0. */
@@ -437,7 +466,7 @@ public class UtilValidate {
         }
 
         // return(isSignedInteger(s, secondArg)
-        // &&((isEmpty(s) && secondArg)  ||(parseInt(s) <= 0) ) );
+        // &&((isEmpty(s) && secondArg)  ||(parseInt(s) <= 0)));
     }
 
     /** True if string s is an unsigned floating point(real) number.
@@ -544,7 +573,7 @@ public class UtilValidate {
         // int startPos = 0;
         // if (isSignedFloat.arguments.length > 1) secondArg = isSignedFloat.arguments[1];
         // skip leading + or -
-        // if ((s.charAt(0) == "-") ||(s.charAt(0) == "+") ) startPos = 1;
+        // if ((s.charAt(0) == "-") ||(s.charAt(0) == "+")) startPos = 1;
         // return(isFloat(s.substring(startPos, s.length), secondArg))
     }
 
@@ -894,6 +923,23 @@ public class UtilValidate {
         }
     }
 
+    public static boolean isDateBeforeNow(Timestamp  date) {
+        Timestamp now = UtilDateTime.nowTimestamp();
+        if (date != null) {
+            return date.before(now);
+        } else {
+            return false;
+        }
+    }
+
+    public static boolean isDateAfterNow(Timestamp  date) {
+        Timestamp now = UtilDateTime.nowTimestamp();
+        if (date != null) {
+            return date.after(now);
+        } else {
+            return false;
+        }
+    }
     /** isTime returns true if string arguments hour, minute, and second form a valid time. */
     public static boolean isTime(String hour, String minute, String second) {
         // catch invalid years(not 2- or 4-digit) and invalid months and days.
@@ -1280,19 +1326,32 @@ public class UtilValidate {
     }
 
     public static char calcUpcChecksum(String upc) {
-        if (upc != null && upc.length() == 12) {
-            upc = upc.substring(0, 11);
+        return calcChecksum(upc, 12);
+    }
+
+    public static boolean isValidEan(String ean) {
+        if (ean == null || ean.length() != 13) {
+            throw new IllegalArgumentException("Invalid EAN length; must be 13 characters");
         }
-        if (upc == null || upc.length() != 11) {
-            throw new IllegalArgumentException("Illegal size of UPC; must be 11 characters");
+        char csum = ean.charAt(13);
+        char calcSum = calcChecksum(ean, 13);
+        return csum == calcSum;
+    }
+
+    public static char calcChecksum(String value, int length) {
+        if (value != null && value.length() == length + 1) {
+            value = value.substring(0, length);
+        }
+        if (value == null || value.length() != length) {
+            throw new IllegalArgumentException("Illegal size of value; must be either" + length + " or " + (length + 1) + " characters");
         }
         int oddsum = 0;
         int evensum = 0;
-        for (int i = upc.length() - 1; i >= 0; i--) {
-            if ((upc.length() - i) % 2 == 0) {
-                evensum += Character.digit(upc.charAt(i), 10);
+        for (int i = value.length() - 1; i >= 0; i--) {
+            if ((value.length() - i) % 2 == 0) {
+                evensum += Character.digit(value.charAt(i), 10);
             } else {
-                oddsum += Character.digit(upc.charAt(i), 10);
+                oddsum += Character.digit(value.charAt(i), 10);
             }
         }
         int check = 10 - ((evensum + 3 * oddsum) % 10);

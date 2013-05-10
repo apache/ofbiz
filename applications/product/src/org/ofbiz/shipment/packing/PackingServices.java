@@ -19,11 +19,14 @@
 package org.ofbiz.shipment.packing;
 
 import java.math.BigDecimal;
+import java.util.Locale;
 import java.util.Map;
 
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.GeneralException;
 import org.ofbiz.base.util.UtilGenerics;
+import org.ofbiz.base.util.UtilMisc;
+import org.ofbiz.base.util.UtilProperties;
 import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.service.DispatchContext;
 import org.ofbiz.service.ServiceUtil;
@@ -31,6 +34,7 @@ import org.ofbiz.service.ServiceUtil;
 public class PackingServices {
 
     public static final String module = PackingServices.class.getName();
+    public static final String resource = "ProductUiLabels";
 
     public static Map<String, Object> addPackLine(DispatchContext dctx, Map<String, ? extends Object> context) {
         PackingSession session = (PackingSession) context.get("packingSession");
@@ -53,7 +57,7 @@ public class PackingServices {
             quantity = BigDecimal.ONE;
         }
 
-        Debug.log("OrderId [" + orderId + "] ship group [" + shipGroupSeqId + "] Pack input [" + productId + "] @ [" + quantity + "] packageSeq [" + packageSeq + "] weight [" + weight +"]", module);
+        Debug.logInfo("OrderId [" + orderId + "] ship group [" + shipGroupSeqId + "] Pack input [" + productId + "] @ [" + quantity + "] packageSeq [" + packageSeq + "] weight [" + weight +"]", module);
 
         if (weight == null) {
             Debug.logWarning("OrderId [" + orderId + "] ship group [" + shipGroupSeqId + "] product [" + productId + "] being packed without a weight, assuming 0", module);
@@ -83,15 +87,16 @@ public class PackingServices {
      * Packs the same items n times in consecutive packages, starting from the package number retrieved from pkgInfo.</li>
      * </ul>
      * </p>
-     * @param dctx
-     * @param context
-     * @return
+     * @param dctx the dispatch context
+     * @param context the context
+     * @return returns the result of the service execution
      */
     public static Map<String, Object> packBulk(DispatchContext dctx, Map<String, ? extends Object> context) {
         PackingSession session = (PackingSession) context.get("packingSession");
         String orderId = (String) context.get("orderId");
         String shipGroupSeqId = (String) context.get("shipGroupSeqId");
         Boolean updateQuantity = (Boolean) context.get("updateQuantity");
+        Locale locale = (Locale) context.get("locale");
         if (updateQuantity == null) {
             updateQuantity = Boolean.FALSE;
         }
@@ -111,6 +116,7 @@ public class PackingServices {
         Map<String, String> pkgInfo = UtilGenerics.checkMap(context.get("pkgInfo"));
         Map<String, String> wgtInfo = UtilGenerics.checkMap(context.get("wgtInfo"));
         Map<String, String> numPackagesInfo = UtilGenerics.checkMap(context.get("numPackagesInfo"));
+        Map<String, String> boxTypeInfo = UtilGenerics.checkMap(context.get("boxTypeInfo"));
 
         if (selInfo != null) {
             for (String rowKey: selInfo.keySet()) {
@@ -125,8 +131,10 @@ public class PackingServices {
                 String pkgStr = pkgInfo.get(rowKey);
                 String qtyStr = qtyInfo.get(rowKey);
                 String wgtStr = wgtInfo.get(rowKey);
+                String boxType = boxTypeInfo.get(rowKey);
+                session.setShipmentBoxTypeId(boxType);
 
-                Debug.log("Item: " + orderItemSeqId + " / Product: " + prdStr + " / Quantity: " + qtyStr + " /  Package: " + pkgStr + " / Weight: " + wgtStr, module);
+                Debug.logInfo("Item: " + orderItemSeqId + " / Product: " + prdStr + " / Quantity: " + qtyStr + " /  Package: " + pkgStr + " / Weight: " + wgtStr, module);
 
                 // array place holders
                 String[] quantities;
@@ -143,17 +151,19 @@ public class PackingServices {
 
                 // check to make sure there is at least one package
                 if (packages == null || packages.length == 0) {
-                    return ServiceUtil.returnError("No packages defined for processing.");
+                    return ServiceUtil.returnError(UtilProperties.getMessage(resource, 
+                            "ProductPackBulkNoPackagesDefined", locale));
                 }
 
                 // process the quantity array
                 if (qtyStr == null) {
                     quantities = new String[packages.length];
                     for (int p = 0; p < packages.length; p++) {
-                        quantities[p] = (String) qtyInfo.get(rowKey + ":" + packages[p]);
+                        quantities[p] = qtyInfo.get(rowKey + ":" + packages[p]);
                     }
                     if (quantities.length != packages.length) {
-                        return ServiceUtil.returnError("Packages and quantities do not match.");
+                        return ServiceUtil.returnError(UtilProperties.getMessage(resource, 
+                                "ProductPackBulkPackagesAndQuantitiesDoNotMatch", locale));
                     }
                 } else {
                     quantities = new String[] { qtyStr };
@@ -225,6 +235,7 @@ public class PackingServices {
         String inventoryItemId = (String) context.get("inventoryItemId");
         String productId = (String) context.get("productId");
         Integer packageSeqId = (Integer) context.get("packageSeqId");
+        Locale locale = (Locale) context.get("locale");
 
         PackingSessionLine line = session.findLine(orderId, orderItemSeqId, shipGroupSeqId,
                 productId, inventoryItemId, packageSeqId.intValue());
@@ -233,7 +244,8 @@ public class PackingServices {
         if (line != null) {
             session.clearLine(line);
         } else {
-            return ServiceUtil.returnError("Packing line item not found; cannot clear.");
+            return ServiceUtil.returnError(UtilProperties.getMessage(resource, 
+                    "ProductPackLineNotFound", locale));
         }
 
         return ServiceUtil.returnSuccess();
@@ -269,7 +281,8 @@ public class PackingServices {
 
     public static Map<String, Object> completePack(DispatchContext dctx, Map<String, ? extends Object> context) {
         PackingSession session = (PackingSession) context.get("packingSession");
-
+        Locale locale = (Locale) context.get("locale");
+        
         // set the instructions -- will clear out previous if now null
         String instructions = (String) context.get("handlingInstructions");
         String pickerPartyId = (String) context.get("pickerPartyId");
@@ -297,9 +310,11 @@ public class PackingServices {
 
         Map<String, Object> resp;
         if ("EMPTY".equals(shipmentId)) {
-            resp = ServiceUtil.returnError("No items currently set to be shipped. Cannot complete!");
+            resp = ServiceUtil.returnError(UtilProperties.getMessage(resource, 
+                    "ProductPackCompleteNoItems", locale));
         } else {
-            resp = ServiceUtil.returnSuccess("Shipment #" + shipmentId + " created and marked as PACKED.");
+            resp = ServiceUtil.returnSuccess(UtilProperties.getMessage(resource, 
+                    "ProductPackComplete", UtilMisc.toMap("shipmentId", shipmentId), locale));
         }
 
         resp.put("shipmentId", shipmentId);
@@ -313,7 +328,7 @@ public class PackingServices {
                 String packageSeqId = entry.getKey();
                 String packageWeightStr = entry.getValue();
                 if (UtilValidate.isNotEmpty(packageWeightStr)) {
-                    BigDecimal packageWeight = new BigDecimal((String)packageWeights.get(packageSeqId));
+                    BigDecimal packageWeight = new BigDecimal(packageWeights.get(packageSeqId));
                     session.setPackageWeight(Integer.parseInt(packageSeqId), packageWeight);
                     shippableWeight = shippableWeight.add(packageWeight);
                 } else {

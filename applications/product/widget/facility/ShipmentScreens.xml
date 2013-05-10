@@ -44,6 +44,8 @@ under the License.
             <actions>
                 <set field="shipmentId" from-field="parameters.shipmentId"/>
                 <entity-one entity-name="Shipment" value-field="shipment"/>
+                <set field="shipmentId" from-field="shipment.shipmentId" global="true"/>
+                <get-related-one value-field="shipment" to-value-field="facility" relation-name="DestinationFacility"/>
             </actions>
             <widgets>
                 <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
@@ -56,6 +58,56 @@ under the License.
                                 <platform-specific>
                                     <html><html-template location="component://product/webapp/facility/shipment/ShipmentTabBar.ftl"/></html>
                                 </platform-specific>
+                                <section>
+                                    <condition>
+                                        <not><if-empty field="shipment"/></not>
+                                    </condition>
+                                    <widgets>
+                                        <label style="h1" text="${uiLabelMap.ProductShipmentId}: ${shipment.shipmentId}"/>
+                                        <container>
+                                            <link style="buttontext" text="${uiLabelMap.ProductGenerateShipmentManifestReport}" target="ShipmentManifest.pdf" target-window="_BLANK">
+                                                <parameter param-name="shipmentId" from-field="shipment.shipmentId"/>
+                                            </link>
+                                        </container>
+                                    </widgets>
+                                </section>
+                                <section>
+                                    <condition>
+                                        <and>
+                                            <not><if-empty field="shipment"/></not>
+                                            <not><if-empty field="facility"/></not>
+                                            <if-compare field="shipment.shipmentTypeId" operator="equals" value="PURCHASE_SHIPMENT"/>
+                                        </and>
+                                    </condition>
+                                    <widgets>
+                                        <container>
+                                            <link style="buttontext" text="${uiLabelMap.ProductReceiveInventory}" target="ReceiveInventory">
+                                                <parameter param-name="shipmentId" from-field="shipment.shipmentId"/>
+                                                <parameter param-name="facilityId" from-field="facility.facilityId"/>
+                                                <parameter param-name="purchaseOrderId" from-field="shipment.primaryOrderId"/>
+                                                <parameter param-name="initialSelected" value="Y"/>
+                                            </link>
+                                        </container>
+                                    </widgets>
+                                </section>
+                                <section>
+                                    <condition>
+                                        <and>
+                                            <not><if-empty field="shipment"/></not>
+                                            <not><if-empty field="facility"/></not>
+                                            <if-compare field="shipment.shipmentTypeId" operator="equals" value="PURCHASE_SHIPMENT"/>
+                                            <not><if-empty field="shipment.primaryOrderId"/></not>
+                                        </and>
+                                    </condition>
+                                    <widgets>
+                                        <container>
+                                            <link style="buttontext" text="${uiLabelMap.ProductReceiveInventoryAgainstPO}" target="ReceiveInventoryAgainstPurchaseOrder">
+                                                <parameter param-name="shipmentId" from-field="shipment.shipmentId"/>
+                                                <parameter param-name="purchaseOrderId" from-field="shipment.primaryOrderId"/>
+                                            </link>
+                                        </container>
+                                    </widgets>
+                                </section>
 
                                 <decorator-section-include name="body"/>
                             </widgets>
@@ -90,23 +142,29 @@ under the License.
                     <widgets>
                         <decorator-screen name="CommonShipmentDecorator">
                             <decorator-section name="body">
-                                <container>
-                                    <link style="buttontext" text="${uiLabelMap.ProductGenerateShipmentManifestReport}" target="ShipmentManifest.pdf">
-                                        <parameter param-name="shipmentId" from-field="shipment.shipmentId"/>
-                                    </link>
-                                </container>
                                 <platform-specific>
                                     <html><html-template location="component://product/webapp/facility/shipment/ViewShipmentInfo.ftl"/></html>
                                 </platform-specific>
-                                <platform-specific>
-                                    <html><html-template location="component://product/webapp/facility/shipment/ViewShipmentItemInfo.ftl"/></html>
-                                </platform-specific>
-                                <platform-specific>
-                                    <html><html-template location="component://product/webapp/facility/shipment/ViewShipmentPackageInfo.ftl"/></html>
-                                </platform-specific>
-                                <platform-specific>
-                                    <html><html-template location="component://product/webapp/facility/shipment/ViewShipmentRouteInfo.ftl"/></html>
-                                </platform-specific>
+                                <screenlet id="shipmentItemPanel" title="${uiLabelMap.PageTitleViewShipmentItemInfo}" initially-collapsed="true">
+                                    <platform-specific>
+                                        <html><html-template location="component://product/webapp/facility/shipment/ViewShipmentItemInfo.ftl"/></html>
+                                    </platform-specific>
+                                </screenlet>
+                                <screenlet id="shipmentPackagePanel" title="${uiLabelMap.PageTitleViewShipmentPackageInfo}" initially-collapsed="true">
+                                    <platform-specific>
+                                        <html><html-template location="component://product/webapp/facility/shipment/ViewShipmentPackageInfo.ftl"/></html>
+                                    </platform-specific>
+                                </screenlet>
+                                <screenlet id="shipmentRoutePanel" title="${uiLabelMap.PageTitleViewShipmentRouteInfo}" initially-collapsed="true">
+                                    <platform-specific>
+                                        <html><html-template location="component://product/webapp/facility/shipment/ViewShipmentRouteInfo.ftl"/></html>
+                                    </platform-specific>
+                                </screenlet>
+                                <screenlet id="shipmentReceiptPanel" title="${uiLabelMap.PageTitleViewShipmentReceipts}" initially-collapsed="true">
+                                    <platform-specific>
+                                        <html><html-template location="component://product/webapp/facility/shipment/ViewShipmentRouteInfo.ftl"/></html>
+                                    </platform-specific>
+                                </screenlet>
                             </decorator-section>
                         </decorator-screen>
                     </widgets>
@@ -129,9 +187,7 @@ under the License.
             <widgets>
                 <decorator-screen name="CommonShipmentDecorator">
                     <decorator-section name="body">
-                        <platform-specific>
-                            <html><html-template location="component://product/webapp/facility/shipment/EditShipment.ftl"/></html>
-                        </platform-specific>
+                        <include-form name="EditShipment" location="component://product/widget/facility/ShipmentForms.xml"/>
                     </decorator-section>
                 </decorator-screen>
             </widgets>
@@ -169,9 +225,34 @@ under the License.
             <widgets>
                 <decorator-screen name="CommonShipmentDecorator">
                     <decorator-section name="body">
-                        <platform-specific>
-                            <html><html-template location="component://product/webapp/facility/shipment/EditShipmentPlan.ftl"/></html>
-                        </platform-specific>
+                        <screenlet title="${uiLabelMap.ProductShipmentPlan}">
+                            <include-form name="findOrderItems" location="component://product/widget/facility//ShipmentForms.xml"/>
+                        </screenlet>
+                        <section>
+                            <condition>
+                                <not><if-empty field="addToShipmentPlanRows"/></not>
+                            </condition>
+                            <widgets>
+                                <screenlet title="${uiLabelMap.ProductShipmentPlanAdd}">
+                                    <include-form name="addToShipmentPlan" location="component://product/widget/facility//ShipmentForms.xml"/>
+                                </screenlet>
+                            </widgets>
+                        </section>
+                        <screenlet title="${uiLabelMap.ProductShipmentPlanList}">
+                            <include-form name="listShipmentPlan" location="component://product/widget/facility//ShipmentForms.xml"/>
+                            <label style="h2" text="${uiLabelMap.ProductShipmentTotalWeight}: ${totWeight} ${uiLabelMap.ProductShipmentTotalVolume}: ${totVolume}"/>
+                        </screenlet>
+                        <section>
+                            <condition>
+                                <if-compare field="shipment.shipmentTypeId" operator="equals" value="SALES_SHIPMENT"/>
+                            </condition>
+                            <widgets>
+                                <link text="${uiLabelMap.ProductShipmentPlanToOrderItems}" target="AddItemsFromOrder">
+                                    <parameter param-name="shipmentId"/>
+                                    <parameter param-name="selectFromShipmentPlan" value="true"/>
+                                </link>
+                            </widgets>
+                        </section>
                     </decorator-section>
                 </decorator-screen>
             </widgets>
@@ -237,6 +318,22 @@ under the License.
             </widgets>
         </section>
     </screen>
+    <screen name="ViewShipmentReceipts">
+        <section>
+            <actions>
+                <set field="titleProperty" value="ViewShipmentReceipts"/>
+                <set field="headerItem" value="shipment"/>
+                <set field="tabButtonItem" value="ViewShipmentReceipts"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonShipmentDecorator">
+                    <decorator-section name="body">
+                        <include-form name="ShipmentReceipts" location="component://product/widget/facility/ShipmentForms.xml"/>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
 
     <screen name="QuickShipOrder">
         <section>
@@ -263,6 +360,7 @@ under the License.
     <screen name="VerifyPick">
         <section>
             <actions>
+                <property-map resource="OrderUiLabels" map-name="uiLabelMap" global="true"/>
                 <set field="titleProperty" value="ProductVerifyPick"/>
                 <set field="headerItem" value="shipment"/>
                 <script location="component://product/webapp/facility/WEB-INF/actions/shipment/VerifyPick.groovy"/>
@@ -291,6 +389,25 @@ under the License.
                     <decorator-section name="body">
                         <platform-specific>
                             <html><html-template location="component://product/webapp/facility/shipment/PackOrder.ftl"/></html>
+                        </platform-specific>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="WeightPackageOnly">
+        <section>
+            <actions>
+                <set field="titleProperty" value="ProductWeighPackageOnly"/>
+                <set field="headerItem" value="shipment"/>
+                <script location="component://product/webapp/facility/WEB-INF/actions/shipment/WeightPackage.groovy"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <platform-specific>
+                            <html><html-template location="component://product/webapp/facility/shipment/WeightPackage.ftl"/></html>
                         </platform-specific>
                     </decorator-section>
                 </decorator-screen>
@@ -366,6 +483,7 @@ under the License.
             <actions>
                 <property-map resource="ProductUiLabels" map-name="uiLabelMap" global="true"/>
                 <property-map resource="CommonUiLabels" map-name="uiLabelMap" global="true"/>
+                <property-map resource="OrderUiLabels" map-name="uiLabelMap" global="true"/>
 
                 <set field="shipmentId" from-field="parameters.shipmentId"/>
                 <script location="component://product/webapp/facility/WEB-INF/actions/shipment/ViewShipment.groovy"/>

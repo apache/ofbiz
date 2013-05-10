@@ -25,7 +25,8 @@ under the License.
     <!-- Initialization of all property settings                            -->
     <!-- ================================================================== -->
 
-    <property name="name" value="ofbiz-base"/>
+    <property name="desc" value="Start API"/>
+    <property name="name" value="ofbiz"/>
 
     <!-- ================================================================== -->
     <!-- Compilation of the source files                                    -->
@@ -33,35 +34,23 @@ under the License.
 
     <target name="classes" depends="prepare">
         <!-- compile start -->
-    <javac15 destdir="${build.dir}/classes" srcdir="${src.dir}"/>
+        <javac16 destdir="${build.dir}/classes" srcdir="${src.dir}"/>
     </target>
 
     <target name="jar" depends="classes">
-        <jar jarfile="${build.dir}/lib/ofbiz.jar" manifest="${src.dir}/org/ofbiz/base/start/Start.mf">
-            <fileset dir="${build.dir}/classes"/>
-            <fileset dir="${src.dir}">
-                <include name="**/*.properties"/>
-                <include name="META-INF/**"/>
-            </fileset>
-            <!-- now add the NOTICE and LICENSE files to allow the jar file to be distributed alone -->
-            <zipfileset dir="${ofbiz.home.dir}" prefix="META-INF" includes="NOTICE,LICENSE"/>
-        </jar>
+        <main-jar>
+            <main-elements>
+                <manifest>
+                    <attribute name="Manifest-Version" value="1.0"/>
+                    <attribute name="Implementation-Title" value="Apache OFBiz Startup"/>
+                    <attribute name="Implementation-Vendor" value="The Apache Open for Business Project"/>
+                    <attribute name="Main-Class" value="org.ofbiz.base.start.Start"/>
+                </manifest>
+            </main-elements>
+        </main-jar>
         <!-- copy the ofbiz.jar file -->
         <copy todir="${basedir}/../..">
             <fileset dir="${build.dir}/lib" includes="ofbiz.jar"/>
         </copy>
-    </target>
-
-    <!-- ================================================================== -->
-    <!-- Build JavaDoc                                                      -->
-    <!-- ================================================================== -->
-
-    <target name="docs" depends="prepare-docs">
-        <javadoc packagenames="org.ofbiz.base.*"
-                 classpathref="local.class.path"
-                 destdir="${build.dir}/javadocs"
-                 Windowtitle="Open for Business - Start API">
-            <sourcepath path="${src.dir}"/>
-        </javadoc>
     </target>
 </project>

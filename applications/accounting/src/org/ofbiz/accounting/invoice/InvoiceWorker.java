@@ -21,10 +21,13 @@ package org.ofbiz.accounting.invoice;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.sql.Timestamp;
-import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import javolution.util.FastList;
+import javolution.util.FastMap;
+import javolution.util.FastSet;
 
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilDateTime;
@@ -32,14 +35,14 @@ import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.base.util.UtilNumber;
 import org.ofbiz.base.util.UtilProperties;
 import org.ofbiz.base.util.UtilValidate;
-import org.ofbiz.entity.GenericDelegator;
+import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
 import org.ofbiz.entity.condition.EntityCondition;
 import org.ofbiz.entity.condition.EntityConditionList;
+import org.ofbiz.entity.condition.EntityExpr;
 import org.ofbiz.entity.condition.EntityOperator;
 import org.ofbiz.entity.util.EntityUtil;
-import org.ofbiz.service.LocalDispatcher;
 
 /**
  * InvoiceWorker - Worker methods of invoices
@@ -54,28 +57,38 @@ public class InvoiceWorker {
     private static int taxRounding = UtilNumber.getBigDecimalRoundingMode("salestax.rounding");
 
     /**
-     * Method to return the total amount of an invoice
-     * @param invoice GenericValue object of the Invoice
-     * @return the invoice total as BigDecimal
+     * Return the total amount of the invoice (including tax) using the the invoiceId as input.
+     * @param delegator the delegator
+     * @param invoiceId the invoice id
+     * @return Return the total amount of the invoice 
      */
-    public static BigDecimal getInvoiceTotal(GenericDelegator delegator, String invoiceId) {
+    public static BigDecimal getInvoiceTotal(Delegator delegator, String invoiceId) {
         return getInvoiceTotal(delegator, invoiceId, Boolean.TRUE);
     }
 
-    public static BigDecimal getInvoiceTotal(GenericDelegator delegator, String invoiceId, Boolean actualCurrency) {
+    /**
+     * Return the total amount of the invoice (including tax) using the the invoiceId as input.
+     * with the ability to specify if the actual currency is required.
+     * @param delegator the delegator
+     * @param invoiceId the invoice Id
+     * @param actualCurrency true: provide the actual currency of the invoice (could be different from the system currency)
+     *                       false: if required convert the actual currency into the system currency.
+     * @return Return the total amount of the invoice
+     */
+    public static BigDecimal getInvoiceTotal(Delegator delegator, String invoiceId, Boolean actualCurrency) {
         if (delegator == null) {
             throw new IllegalArgumentException("Null delegator is not allowed in this method");
         }
 
         GenericValue invoice = null;
         try {
-            invoice = delegator.findByPrimaryKey("Invoice", UtilMisc.toMap("invoiceId", invoiceId));
+            invoice = delegator.findOne("Invoice", UtilMisc.toMap("invoiceId", invoiceId), false);
         } catch (GenericEntityException e) {
             Debug.logError(e, "Problem getting Invoice", module);
         }
 
         if (invoice == null) {
-            throw new IllegalArgumentException("The invoiceId passed does not match an existing invoice");
+            throw new IllegalArgumentException("The passed invoiceId [" +invoiceId + "] does not match an existing invoice");
         }
 
         return getInvoiceTotal(invoice, actualCurrency);
@@ -83,7 +96,7 @@ public class InvoiceWorker {
 
     /**
      * Method to return the total amount of an invoice item i.e. quantity * amount
-     * @param invoice GenericValue object of the Invoice
+     * @param invoiceItem GenericValue object of the invoice item
      * @return the invoice total as BigDecimal
      */
     public static BigDecimal getInvoiceItemTotal(GenericValue invoiceItem) {
@@ -91,52 +104,34 @@ public class InvoiceWorker {
         if (quantity == null) {
             quantity = BigDecimal.ONE;
         }
-        return quantity.multiply(invoiceItem.getBigDecimal("amount")).setScale(decimals, rounding);
+        BigDecimal amount = invoiceItem.getBigDecimal("amount");
+        if (amount == null) {
+            amount = ZERO;
+        }
+        return quantity.multiply(amount).setScale(decimals, rounding);
     }
 
     /** Method to get the taxable invoice item types as a List of invoiceItemTypeIds.  These are identified in Enumeration with enumTypeId TAXABLE_INV_ITM_TY. */
-    public static List getTaxableInvoiceItemTypeIds(GenericDelegator delegator) throws GenericEntityException {
-        List typeIds = FastList.newInstance();
-        List invoiceItemTaxTypes = delegator.findByAndCache("Enumeration", UtilMisc.toMap("enumTypeId", "TAXABLE_INV_ITM_TY"));
-        for (Iterator iter = invoiceItemTaxTypes.iterator(); iter.hasNext(); ) {
-            GenericValue invoiceItemTaxType = (GenericValue) iter.next();
-            typeIds.add(invoiceItemTaxType.get("enumId"));
+    public static List<String> getTaxableInvoiceItemTypeIds(Delegator delegator) throws GenericEntityException {
+        List<String> typeIds = FastList.newInstance();
+        List<GenericValue> invoiceItemTaxTypes = delegator.findByAnd("Enumeration", UtilMisc.toMap("enumTypeId", "TAXABLE_INV_ITM_TY"), null, true);
+        for (GenericValue invoiceItemTaxType : invoiceItemTaxTypes) {
+            typeIds.add(invoiceItemTaxType.getString("enumId"));
         }
         return typeIds;
     }
 
     public static BigDecimal getInvoiceTaxTotal(GenericValue invoice) {
-        BigDecimal invoiceTaxTotal = ZERO;
-        BigDecimal ONE = BigDecimal.ONE;
-
-        if (invoice == null)
-           throw new IllegalArgumentException("The invoiceId passed does not match an existing invoice");
-        List invoiceTaxItems = null;
-        try {
-            GenericDelegator delegator = invoice.getDelegator();
-            EntityConditionList condition = EntityCondition.makeCondition( UtilMisc.toList(
-                    EntityCondition.makeCondition("invoiceId", invoice.get("invoiceId")),
-                    EntityCondition.makeCondition("invoiceItemTypeId", EntityOperator.IN, getTaxableInvoiceItemTypeIds(delegator))
-                    ), EntityOperator.AND);
-            invoiceTaxItems = delegator.findList("InvoiceItem", condition, null, null, null, false);
-        } catch (GenericEntityException e) {
-            Debug.logError(e, "Trouble getting InvoiceItem list", module);
-        }
-        if (UtilValidate.isNotEmpty(invoiceTaxItems)) {
-            Iterator invoiceItemsIter = invoiceTaxItems.iterator();
-            while (invoiceItemsIter.hasNext()) {
-                GenericValue invoiceItem = (GenericValue) invoiceItemsIter.next();
-                BigDecimal amount = invoiceItem.getBigDecimal("amount");
-                BigDecimal quantity = invoiceItem.getBigDecimal("quantity");
-                if (amount == null)
-                    amount = ZERO;
-                if (quantity == null)
-                    quantity = ONE;
-                invoiceTaxTotal = invoiceTaxTotal.add(amount.multiply(quantity)).setScale(decimals + 1, rounding);
+        BigDecimal taxTotal = ZERO;
+        Map<String, Set<String>> taxAuthPartyAndGeos = InvoiceWorker.getInvoiceTaxAuthPartyAndGeos(invoice);
+        for (Map.Entry<String, Set<String>> taxAuthPartyGeos : taxAuthPartyAndGeos.entrySet()) {
+            String taxAuthPartyId = taxAuthPartyGeos.getKey();
+            for (String taxAuthGeoId : taxAuthPartyGeos.getValue()) {
+                taxTotal = taxTotal.add(InvoiceWorker.getInvoiceTaxTotalForTaxAuthPartyAndGeo(invoice, taxAuthPartyId, taxAuthGeoId));
             }
         }
-        return invoiceTaxTotal.setScale(decimals, rounding);
-
+        taxTotal = taxTotal.add(InvoiceWorker.getInvoiceUnattributedTaxTotal(invoice));
+        return taxTotal;
     }
 
     public static BigDecimal getInvoiceNoTaxTotal(GenericValue invoice) {
@@ -152,30 +147,33 @@ public class InvoiceWorker {
         return getInvoiceTotal(invoice, Boolean.TRUE);
     }
 
-    public static BigDecimal getInvoiceTotal(GenericValue invoice, Boolean actualCurrency) {
+     /**
+      *
+      * Return the total amount of the invoice (including tax) using the the invoice GenericValue as input.
+      * with the ability to specify if the actual currency is required.
+      * @param invoice GenericValue object of the Invoice
+      * @param actualCurrency true: provide the actual currency of the invoice (could be different from the system currency)
+      *                       false: if required convert the actual currency into the system currency.
+      * @return Return the total amount of the invoice
+      */
+     public static BigDecimal getInvoiceTotal(GenericValue invoice, Boolean actualCurrency) {
         BigDecimal invoiceTotal = ZERO;
         BigDecimal invoiceTaxTotal = ZERO;
-        List invoiceItems = null;
+        invoiceTaxTotal = InvoiceWorker.getInvoiceTaxTotal(invoice);
+
+        List<GenericValue> invoiceItems = null;
         try {
-            invoiceItems = invoice.getRelated("InvoiceItem");
+            invoiceItems = invoice.getRelated("InvoiceItem", null, null, false);
+            invoiceItems = EntityUtil.filterByAnd(
+                    invoiceItems, UtilMisc.toList(
+                            EntityCondition.makeCondition("invoiceItemTypeId", EntityOperator.NOT_IN, getTaxableInvoiceItemTypeIds(invoice.getDelegator()))
+                    ));
         } catch (GenericEntityException e) {
             Debug.logError(e, "Trouble getting InvoiceItem list", module);
         }
-        if (UtilValidate.isNotEmpty(invoiceItems)) {
-            Iterator invoiceItemsIter = invoiceItems.iterator();
-            while (invoiceItemsIter.hasNext()) {
-                GenericValue invoiceItem = (GenericValue) invoiceItemsIter.next();
-                BigDecimal amount = invoiceItem.getBigDecimal("amount");
-                BigDecimal quantity = invoiceItem.getBigDecimal("quantity");
-                if (amount == null)
-                    amount = ZERO;
-                if (quantity == null)
-                    quantity = BigDecimal.ONE;
-                if ("ITM_SALES_TAX".equals(invoiceItem.get("invoiceItemTypeId"))) {
-                    invoiceTaxTotal = invoiceTaxTotal.add( amount.multiply(quantity)).setScale(taxDecimals, taxRounding);
-                } else {
-                    invoiceTotal = invoiceTotal.add( amount.multiply(quantity)).setScale(decimals,rounding);
-                }
+        if (invoiceItems != null) {
+            for (GenericValue invoiceItem : invoiceItems) {
+                invoiceTotal = invoiceTotal.add(getInvoiceItemTotal(invoiceItem)).setScale(decimals,rounding);
             }
         }
         invoiceTotal = invoiceTotal.add(invoiceTaxTotal).setScale(decimals, rounding);
@@ -192,7 +190,7 @@ public class InvoiceWorker {
      */
     public static GenericValue getBillToParty(GenericValue invoice) {
         try {
-            GenericValue billToParty = invoice.getRelatedOne("Party");
+            GenericValue billToParty = invoice.getRelatedOne("Party", false);
             if (billToParty != null) {
                 return billToParty;
             }
@@ -201,10 +199,9 @@ public class InvoiceWorker {
         }
 
         // remaining code is the old method, which we leave here for compatibility purposes
-        List billToRoles = null;
+        List<GenericValue> billToRoles = null;
         try {
-            billToRoles = invoice.getRelated("InvoiceRole", UtilMisc.toMap("roleTypeId", "BILL_TO_CUSTOMER"),
-                UtilMisc.toList("-datetimePerformed"));
+            billToRoles = invoice.getRelated("InvoiceRole", UtilMisc.toMap("roleTypeId", "BILL_TO_CUSTOMER"), UtilMisc.toList("-datetimePerformed"), false);
         } catch (GenericEntityException e) {
             Debug.logError(e, "Trouble getting InvoiceRole list", module);
         }
@@ -213,7 +210,7 @@ public class InvoiceWorker {
             GenericValue role = EntityUtil.getFirst(billToRoles);
             GenericValue party = null;
             try {
-                party = role.getRelatedOne("Party");
+                party = role.getRelatedOne("Party", false);
             } catch (GenericEntityException e) {
                 Debug.logError(e, "Trouble getting Party from InvoiceRole", module);
             }
@@ -226,7 +223,7 @@ public class InvoiceWorker {
     /** Convenience method to obtain the bill from party for an invoice. Note that invoice.partyIdFrom is the bill from party. */
     public static GenericValue getBillFromParty(GenericValue invoice) {
         try {
-            return invoice.getRelatedOne("FromParty");
+            return invoice.getRelatedOne("FromParty", false);
         } catch (GenericEntityException e) {
             Debug.logError(e, "Trouble getting FromParty from Invoice", module);
         }
@@ -245,10 +242,9 @@ public class InvoiceWorker {
         }
 
         // remaining code is the old method, which we leave here for compatibility purposes
-        List sendFromRoles = null;
+        List<GenericValue> sendFromRoles = null;
         try {
-            sendFromRoles = invoice.getRelated("InvoiceRole", UtilMisc.toMap("roleTypeId", "BILL_FROM_VENDOR"),
-                UtilMisc.toList("-datetimePerformed"));
+            sendFromRoles = invoice.getRelated("InvoiceRole", UtilMisc.toMap("roleTypeId", "BILL_FROM_VENDOR"), UtilMisc.toList("-datetimePerformed"), false);
         } catch (GenericEntityException e) {
             Debug.logError(e, "Trouble getting InvoiceRole list", module);
         }
@@ -257,7 +253,7 @@ public class InvoiceWorker {
             GenericValue role = EntityUtil.getFirst(sendFromRoles);
             GenericValue party = null;
             try {
-                party = role.getRelatedOne("Party");
+                party = role.getRelatedOne("Party", false);
             } catch (GenericEntityException e) {
                 Debug.logError(e, "Trouble getting Party from InvoiceRole", module);
             }
@@ -286,33 +282,33 @@ public class InvoiceWorker {
     }
 
     public static GenericValue getInvoiceAddressByType(GenericValue invoice, String contactMechPurposeTypeId) {
-        GenericDelegator delegator = invoice.getDelegator();
-        List locations = null;
+        Delegator delegator = invoice.getDelegator();
+        List<GenericValue> locations = null;
         // first try InvoiceContactMech to see if we can find the address needed
         try {
-            locations = invoice.getRelated("InvoiceContactMech", UtilMisc.toMap("contactMechPurposeTypeId", contactMechPurposeTypeId), null);
+            locations = invoice.getRelated("InvoiceContactMech", UtilMisc.toMap("contactMechPurposeTypeId", contactMechPurposeTypeId), null, false);
         } catch (GenericEntityException e) {
             Debug.logError("Touble getting InvoiceContactMech entity list", module);
         }
 
-        if (locations == null || locations.size() == 0)    {
+        if (UtilValidate.isEmpty(locations))    {
             // if no locations found get it from the PartyAndContactMech using the from and to party on the invoice
             String destinationPartyId = null;
             if (invoice.getString("invoiceTypeId").equals("SALES_INVOICE"))
                 destinationPartyId = invoice.getString("partyId");
             if (invoice.getString("invoiceTypeId").equals("PURCHASE_INVOICE"))
-                destinationPartyId = "partyFrom";
+                destinationPartyId = invoice.getString("partyId");
             try {
                 locations = EntityUtil.filterByDate(delegator.findByAnd("PartyContactMechPurpose",
-                        UtilMisc.toMap("partyId", destinationPartyId, "contactMechPurposeTypeId", contactMechPurposeTypeId)));
+                        UtilMisc.toMap("partyId", destinationPartyId, "contactMechPurposeTypeId", contactMechPurposeTypeId), null, false));
             } catch (GenericEntityException e) {
                 Debug.logError("Trouble getting contact party purpose list", module);
             }
             //if still not found get it from the general location
-            if (locations == null || locations.size() == 0)    {
+            if (UtilValidate.isEmpty(locations))    {
                 try {
                     locations = EntityUtil.filterByDate(delegator.findByAnd("PartyContactMechPurpose",
-                            UtilMisc.toMap("partyId", destinationPartyId, "contactMechPurposeTypeId", "GENERAL_LOCATION")));
+                            UtilMisc.toMap("partyId", destinationPartyId, "contactMechPurposeTypeId", "GENERAL_LOCATION"), null, false));
                 } catch (GenericEntityException e) {
                     Debug.logError("Trouble getting contact party purpose list", module);
                 }
@@ -324,14 +320,14 @@ public class InvoiceWorker {
         GenericValue contactMech = null;
         if (UtilValidate.isNotEmpty(locations)) {
             try {
-                contactMech = ((GenericValue) locations.get(0)).getRelatedOne("ContactMech");
+                contactMech = locations.get(0).getRelatedOne("ContactMech", false);
             } catch (GenericEntityException e) {
-                Debug.logError(e, "Trouble getting Contact for contactMechId: " + contactMech.getString("contactMechId"), module);
+                Debug.logError(e, "Trouble getting Contact for contactMechId: " + locations.get(0).getString("contactMechId"), module);
             }
 
-            if (contactMech.getString("contactMechTypeId").equals("POSTAL_ADDRESS"))    {
+            if (contactMech != null && contactMech.getString("contactMechTypeId").equals("POSTAL_ADDRESS"))    {
                 try {
-                    postalAddress = contactMech.getRelatedOne("PostalAddress");
+                    postalAddress = contactMech.getRelatedOne("PostalAddress", false);
                     return postalAddress;
                 } catch (GenericEntityException e) {
                     Debug.logError(e, "Trouble getting PostalAddress for contactMechId: " + contactMech.getString("contactMechId"), module);
@@ -341,48 +337,17 @@ public class InvoiceWorker {
         return contactMech;
     }
 
-    private static GenericValue getAddressFromParty(GenericValue party, String purposeTypeId) {
-        if (party == null) return null;
-
-        GenericValue contactMech = null;
-        GenericValue postalAddress = null;
-        try {
-            List mecs = party.getRelated("PartyContactMechPurpose",
-                UtilMisc.toMap("contactMechPurposeTypeId", purposeTypeId), null);
-            if (mecs != null) {
-                List filteredMecs = EntityUtil.filterByDate(mecs);
-                GenericValue mecPurpose = EntityUtil.getFirst(filteredMecs);
-                if (mecPurpose != null)
-                    contactMech = mecPurpose.getRelatedOne("ContactMech");
-            }
-        } catch (GenericEntityException e) {
-            Debug.logError(e, "Trouble getting current ContactMech for Party/Purpose", module);
-        }
-
-        if (contactMech != null) {
-            if (contactMech.getString("contactMechTypeId").equals("POSTAL_ADDRESS")) {
-                try {
-                    postalAddress = contactMech.getRelatedOne("PostalAddress");
-                } catch (GenericEntityException e) {
-                    Debug.logError(e, "Trouble getting PostalAddress from ContactMech", module);
-                }
-            }
-        }
-
-        if (postalAddress != null)
-            return postalAddress;
-        return null;
-    }
-
     /**
      * Method to return the total amount of an invoice which is not yet applied to a payment
-     * @param invoice GenericValue object of the Invoice
+     * @param delegator the delegator
+     * @param invoiceId the invoice id
+     * @param actualCurrency the currency
      * @return the invoice total as BigDecimal
      */
-    public static BigDecimal getInvoiceNotApplied(GenericDelegator delegator, String invoiceId, Boolean actualCurrency) {
+    public static BigDecimal getInvoiceNotApplied(Delegator delegator, String invoiceId, Boolean actualCurrency) {
         return InvoiceWorker.getInvoiceTotal(delegator, invoiceId, actualCurrency).subtract(getInvoiceApplied(delegator, invoiceId,  UtilDateTime.nowTimestamp(), actualCurrency));
     }
-    public static BigDecimal getInvoiceNotApplied(GenericDelegator delegator, String invoiceId) {
+    public static BigDecimal getInvoiceNotApplied(Delegator delegator, String invoiceId) {
         return InvoiceWorker.getInvoiceTotal(delegator, invoiceId).subtract(getInvoiceApplied(delegator, invoiceId));
     }
     public static BigDecimal getInvoiceNotApplied(GenericValue invoice) {
@@ -392,11 +357,11 @@ public class InvoiceWorker {
         return InvoiceWorker.getInvoiceTotal(invoice, actualCurrency).subtract(getInvoiceApplied(invoice, actualCurrency));
     }
     /**
-     * Returns amount not applied (ie, still outstanding) of an invoice at an asOfDate, based on Payment.effectiveDate <= asOfDateTime
+     * Returns amount not applied (i.e., still outstanding) of an invoice at an asOfDate, based on Payment.effectiveDate <= asOfDateTime
      *
-     * @param invoice
-     * @param asOfDateTime
-     * @return
+     * @param invoice GenericValue object of the invoice
+     * @param asOfDateTime the date to use
+     * @return Returns amount not applied of the invoice
      */
     public static BigDecimal getInvoiceNotApplied(GenericValue invoice, Timestamp asOfDateTime) {
         return InvoiceWorker.getInvoiceTotal(invoice, Boolean.TRUE).subtract(getInvoiceApplied(invoice, asOfDateTime));
@@ -405,34 +370,35 @@ public class InvoiceWorker {
 
     /**
      * Method to return the total amount of an invoice which is applied to a payment
-     * @param invoice GenericValue object of the Invoice
+     * @param delegator the delegator
+     * @param invoiceId the invoice id
      * @return the invoice total as BigDecimal
      */
-    public static BigDecimal getInvoiceApplied(GenericDelegator delegator, String invoiceId) {
+    public static BigDecimal getInvoiceApplied(Delegator delegator, String invoiceId) {
         return getInvoiceApplied(delegator, invoiceId, UtilDateTime.nowTimestamp(), Boolean.TRUE);
     }
 
     /**
      * Returns amount applied to invoice before an asOfDateTime, based on Payment.effectiveDate <= asOfDateTime
      *
-     * @param delegator
-     * @param invoiceId
+     * @param delegator the delegator
+     * @param invoiceId the invoice id
      * @param asOfDateTime - a Timestamp
-     * @return
+     * @return returns amount applied to invoice before an asOfDateTime
      */
-    public static BigDecimal getInvoiceApplied(GenericDelegator delegator, String invoiceId, Timestamp asOfDateTime, Boolean actualCurrency) {
+    public static BigDecimal getInvoiceApplied(Delegator delegator, String invoiceId, Timestamp asOfDateTime, Boolean actualCurrency) {
         if (delegator == null) {
             throw new IllegalArgumentException("Null delegator is not allowed in this method");
         }
 
         BigDecimal invoiceApplied = ZERO;
-        List paymentApplications = null;
+        List<GenericValue> paymentApplications = null;
 
         // lookup payment applications which took place before the asOfDateTime for this invoice
-        EntityConditionList dateCondition = EntityCondition.makeCondition(UtilMisc.toList(
+        EntityConditionList<EntityExpr> dateCondition = EntityCondition.makeCondition(UtilMisc.toList(
                 EntityCondition.makeCondition("effectiveDate", EntityOperator.EQUALS, null),
                 EntityCondition.makeCondition("effectiveDate", EntityOperator.LESS_THAN_EQUAL_TO, asOfDateTime)), EntityOperator.OR);
-        EntityConditionList conditions = EntityCondition.makeCondition(UtilMisc.toList(
+        EntityConditionList<EntityCondition> conditions = EntityCondition.makeCondition(UtilMisc.toList(
                 dateCondition,
                 EntityCondition.makeCondition("invoiceId", EntityOperator.EQUALS, invoiceId)),
                 EntityOperator.AND);
@@ -442,10 +408,8 @@ public class InvoiceWorker {
         } catch (GenericEntityException e) {
             Debug.logError(e, "Trouble getting paymentApplicationlist", module);
         }
-        if (UtilValidate.isNotEmpty(paymentApplications)) {
-            Iterator p = paymentApplications.iterator();
-            while (p.hasNext()) {
-                GenericValue paymentApplication = (GenericValue) p.next();
+        if (paymentApplications != null) {
+            for (GenericValue paymentApplication : paymentApplications) {
                 invoiceApplied = invoiceApplied.add(paymentApplication.getBigDecimal("amountApplied")).setScale(decimals,rounding);
             }
         }
@@ -456,7 +420,7 @@ public class InvoiceWorker {
     }
     /**
      * Method to return the total amount of an invoice which is applied to a payment
-     * @param invoice GenericValue object of the Invoice
+     * @param invoice GenericValue object of the invoice
      * @return the applied total as BigDecimal
      */
     public static BigDecimal getInvoiceApplied(GenericValue invoice) {
@@ -464,10 +428,10 @@ public class InvoiceWorker {
     }
 
     /**
-     * @param delegator
-     * @param invoiceId
-     * @param invoiceItemSeqId
-     * @return
+     * Return the amount applied to the invoice
+     * @param invoice GenericValue object of the invoice
+     * @param actualCurrency the currency of the invoice
+     * @return returns the amount applied to the invoice
      */
     public static BigDecimal getInvoiceApplied(GenericValue invoice, Boolean actualCurrency) {
         return getInvoiceApplied(invoice.getDelegator(), invoice.getString("invoiceId"), UtilDateTime.nowTimestamp(), actualCurrency);
@@ -477,17 +441,19 @@ public class InvoiceWorker {
     }
     /**
      * Method to return the amount of an invoiceItem which is applied to a payment
-     * @param invoice GenericValue object of the Invoice
+     * @param delegator the delegator
+     * @param invoiceId the invoice id
+     * @param invoiceItemSeqId the invoice item id
      * @return the invoice total as BigDecimal
      */
-    public static BigDecimal getInvoiceItemApplied(GenericDelegator delegator, String invoiceId, String invoiceItemSeqId) {
+    public static BigDecimal getInvoiceItemApplied(Delegator delegator, String invoiceId, String invoiceItemSeqId) {
         if (delegator == null) {
             throw new IllegalArgumentException("Null delegator is not allowed in this method");
         }
 
         GenericValue invoiceItem = null;
         try {
-            invoiceItem = delegator.findByPrimaryKey("Invoice", UtilMisc.toMap("invoiceId", invoiceId,"invoiceItemSeqId", invoiceItemSeqId));
+            invoiceItem = delegator.findOne("Invoice", UtilMisc.toMap("invoiceId", invoiceId,"invoiceItemSeqId", invoiceItemSeqId), false);
         } catch (GenericEntityException e) {
             Debug.logError(e, "Problem getting InvoiceItem", module);
         }
@@ -501,21 +467,19 @@ public class InvoiceWorker {
 
     /**
      * Method to return the total amount of an invoiceItem which is applied to a payment
-     * @param invoice GenericValue object of the Invoice
+     * @param invoiceItem GenericValue object of the invoice item
      * @return the applied total as BigDecimal
      */
     public static BigDecimal getInvoiceItemApplied(GenericValue invoiceItem) {
         BigDecimal invoiceItemApplied = ZERO;
-        List paymentApplications = null;
+        List<GenericValue> paymentApplications = null;
         try {
-            paymentApplications = invoiceItem.getRelated("PaymentApplication");
+            paymentApplications = invoiceItem.getRelated("PaymentApplication", null, null, false);
         } catch (GenericEntityException e) {
             Debug.logError(e, "Trouble getting paymentApplicationlist", module);
         }
-        if (UtilValidate.isNotEmpty(paymentApplications)) {
-            Iterator p = paymentApplications.iterator();
-            while (p.hasNext()) {
-                GenericValue paymentApplication = (GenericValue) p.next();
+        if (paymentApplications != null) {
+            for (GenericValue paymentApplication : paymentApplications) {
                 invoiceItemApplied = invoiceItemApplied.add(paymentApplication.getBigDecimal("amountApplied")).setScale(decimals,rounding);
             }
         }
@@ -523,18 +487,18 @@ public class InvoiceWorker {
     }
     public static BigDecimal getInvoiceCurrencyConversionRate(GenericValue invoice) {
         BigDecimal conversionRate = null;
-        GenericDelegator delegator = invoice.getDelegator();
+        Delegator delegator = invoice.getDelegator();
         String otherCurrencyUomId = null;
         // find the organization party currencyUomId which different from the invoice currency
         try {
-            GenericValue party  = delegator.findByPrimaryKey("PartyAcctgPreference", UtilMisc.toMap("partyId", invoice.getString("partyIdFrom")));
+            GenericValue party  = delegator.findOne("PartyAcctgPreference", UtilMisc.toMap("partyId", invoice.getString("partyIdFrom")), false);
             if (UtilValidate.isEmpty(party) || party.getString("baseCurrencyUomId").equals(invoice.getString("currencyUomId"))) {
-                party  = delegator.findByPrimaryKey("PartyAcctgPreference", UtilMisc.toMap("partyId", invoice.getString("partyId")));
+                party  = delegator.findOne("PartyAcctgPreference", UtilMisc.toMap("partyId", invoice.getString("partyId")), false);
             }
             if (UtilValidate.isNotEmpty(party) && party.getString("baseCurrencyUomId") != null) {
-                otherCurrencyUomId = new String(party.getString("baseCurrencyUomId"));
+                otherCurrencyUomId = party.getString("baseCurrencyUomId");
             } else {
-                otherCurrencyUomId = new String(UtilProperties.getPropertyValue("general", "currency.uom.id.default"));
+                otherCurrencyUomId = UtilProperties.getPropertyValue("general", "currency.uom.id.default");
             }
             if (otherCurrencyUomId == null) {
                 otherCurrencyUomId = "USD"; // final default
@@ -548,18 +512,16 @@ public class InvoiceWorker {
 
         try {
             // check if the invoice is posted and get the conversion from there
-            List acctgTransEntries = invoice.getRelated("AcctgTrans");
+            List<GenericValue> acctgTransEntries = invoice.getRelated("AcctgTrans", null, null, false);
             if (UtilValidate.isNotEmpty(acctgTransEntries)) {
-                GenericValue acctgTransEntry = ((GenericValue) acctgTransEntries.get(0)).getRelated("AcctgTransEntry").get(0);
+                GenericValue acctgTransEntry = (acctgTransEntries.get(0)).getRelated("AcctgTransEntry", null, null, false).get(0);
                 conversionRate = acctgTransEntry.getBigDecimal("amount").divide(acctgTransEntry.getBigDecimal("origAmount"), new MathContext(100)).setScale(decimals,rounding);
             }
             // check if a payment is applied and use the currency conversion from there
             if (UtilValidate.isEmpty(conversionRate)) {
-                List paymentAppls = invoice.getRelated("PaymentApplication");
-                Iterator ii = paymentAppls.iterator();
-                while (ii.hasNext()) {
-                    GenericValue paymentAppl = (GenericValue) ii.next();
-                    GenericValue payment = paymentAppl.getRelatedOne("Payment");
+                List<GenericValue> paymentAppls = invoice.getRelated("PaymentApplication", null, null, false);
+                for (GenericValue paymentAppl : paymentAppls) {
+                    GenericValue payment = paymentAppl.getRelatedOne("Payment", false);
                     if (UtilValidate.isNotEmpty(payment.getBigDecimal("actualCurrencyAmount"))) {
                         if (UtilValidate.isEmpty(conversionRate)) {
                             conversionRate = payment.getBigDecimal("amount").divide(payment.getBigDecimal("actualCurrencyAmount"),new MathContext(100)).setScale(decimals,rounding);
@@ -571,9 +533,9 @@ public class InvoiceWorker {
             }
             // use the dated conversion entity
             if (UtilValidate.isEmpty(conversionRate)) {
-                List rates = EntityUtil.filterByDate(delegator.findByAnd("UomConversionDated", UtilMisc.toMap("uomIdTo", invoice.getString("currencyUomId"), "uomId", otherCurrencyUomId)), invoice.getTimestamp("invoiceDate"));
+                List<GenericValue> rates = EntityUtil.filterByDate(delegator.findByAnd("UomConversionDated", UtilMisc.toMap("uomIdTo", invoice.getString("currencyUomId"), "uomId", otherCurrencyUomId), null, false), invoice.getTimestamp("invoiceDate"));
                 if (UtilValidate.isNotEmpty(rates)) {
-                    conversionRate = (BigDecimal.ONE).divide(((GenericValue) rates.get(0)).getBigDecimal("conversionFactor"), new MathContext(100)).setScale(decimals,rounding);
+                    conversionRate = (BigDecimal.ONE).divide((rates.get(0)).getBigDecimal("conversionFactor"), new MathContext(100)).setScale(decimals,rounding);
                 } else {
                     Debug.logError("Could not find conversionrate for invoice: " + invoice.getString("invoiceId"), module);
                     return new BigDecimal("1");
@@ -586,14 +548,14 @@ public class InvoiceWorker {
         return(conversionRate);
     }
 
-    public static BigDecimal getInvoiceCurrencyConversionRate(GenericDelegator delegator, String invoiceId) {
+    public static BigDecimal getInvoiceCurrencyConversionRate(Delegator delegator, String invoiceId) {
         if (delegator == null) {
             throw new IllegalArgumentException("Null delegator is not allowed in this method");
         }
 
         GenericValue invoice = null;
         try {
-            invoice = delegator.findByPrimaryKey("Invoice", UtilMisc.toMap("invoiceId", invoiceId));
+            invoice = delegator.findOne("Invoice", UtilMisc.toMap("invoiceId", invoiceId), false);
         } catch (GenericEntityException e) {
             Debug.logError(e, "Problem getting Invoice", module);
         }
@@ -605,4 +567,177 @@ public class InvoiceWorker {
         return getInvoiceCurrencyConversionRate(invoice);
     }
 
+    /**
+     * Return a list of taxes separated by Geo and party and return the tax grand total
+     * @param invoice Generic Value
+     * @return  Map: taxByTaxAuthGeoAndPartyList(List) and taxGrandTotal(BigDecimal)
+     */
+    @Deprecated
+    public static Map<String, Object> getInvoiceTaxByTaxAuthGeoAndParty(GenericValue invoice) {
+        BigDecimal taxGrandTotal = ZERO;
+        List<Map<String, Object>> taxByTaxAuthGeoAndPartyList = FastList.newInstance();
+        List<GenericValue> invoiceItems = null;
+        if (UtilValidate.isNotEmpty(invoice)) {
+            try {
+                invoiceItems = invoice.getRelated("InvoiceItem", null, null, false);
+            } catch (GenericEntityException e) {
+                Debug.logError(e, "Trouble getting InvoiceItem list", module);
+            }
+            if ("SALES_INVOICE".equals(invoice.getString("invoiceTypeId"))) {
+                invoiceItems = EntityUtil.filterByOr(
+                        invoiceItems, UtilMisc.toList(
+                                EntityCondition.makeCondition("invoiceItemTypeId", EntityOperator.EQUALS, "INV_SALES_TAX"),
+                                EntityCondition.makeCondition("invoiceItemTypeId", EntityOperator.EQUALS, "ITM_SALES_TAX")));
+            } else if (("PURCHASE_INVOICE".equals(invoice.getString("invoiceTypeId")))) {
+                invoiceItems = EntityUtil.filterByOr(
+                        invoiceItems, UtilMisc.toList(
+                                EntityCondition.makeCondition("invoiceItemTypeId", EntityOperator.EQUALS, "PINV_SALES_TAX"),
+                                EntityCondition.makeCondition("invoiceItemTypeId", EntityOperator.EQUALS, "PITM_SALES_TAX")));
+            } else {
+                invoiceItems = null;
+            }
+            if (UtilValidate.isNotEmpty(invoiceItems)) {
+                invoiceItems = EntityUtil.orderBy(invoiceItems, UtilMisc.toList("taxAuthGeoId","taxAuthPartyId"));
+                // get the list of all distinct taxAuthGeoId and taxAuthPartyId. It is for getting the number of taxAuthGeoId and taxAuthPartyId in invoiceItems.
+                List<String> distinctTaxAuthGeoIdList = EntityUtil.getFieldListFromEntityList(invoiceItems, "taxAuthGeoId", true);
+                List<String> distinctTaxAuthPartyIdList = EntityUtil.getFieldListFromEntityList(invoiceItems, "taxAuthPartyId", true);
+                for (String taxAuthGeoId : distinctTaxAuthGeoIdList ) {
+                    for (String taxAuthPartyId : distinctTaxAuthPartyIdList) {
+                        //get all records for invoices filtered by taxAuthGeoId and taxAurhPartyId
+                        List<GenericValue> invoiceItemsByTaxAuthGeoAndPartyIds = EntityUtil.filterByAnd(invoiceItems, UtilMisc.toMap("taxAuthGeoId", taxAuthGeoId, "taxAuthPartyId", taxAuthPartyId));
+                        if (UtilValidate.isNotEmpty(invoiceItemsByTaxAuthGeoAndPartyIds)) {
+                            BigDecimal totalAmount = ZERO;
+                            //Now for each invoiceItem record get and add amount.
+                            for (GenericValue invoiceItem : invoiceItemsByTaxAuthGeoAndPartyIds) {
+                                BigDecimal amount = invoiceItem.getBigDecimal("amount");
+                                if (amount == null) {
+                                    amount = ZERO;
+                                }
+                                totalAmount = totalAmount.add(amount).setScale(taxDecimals, taxRounding);
+                            }
+                            totalAmount = totalAmount.setScale(UtilNumber.getBigDecimalScale("salestax.calc.decimals"), UtilNumber.getBigDecimalRoundingMode("salestax.rounding"));
+                            taxByTaxAuthGeoAndPartyList.add(UtilMisc.<String, Object>toMap("taxAuthPartyId", taxAuthPartyId, "taxAuthGeoId", taxAuthGeoId, "totalAmount", totalAmount));
+                            taxGrandTotal = taxGrandTotal.add(totalAmount);
+                        }
+                    }
+                }
+            }
+        }
+        Map<String, Object> result = FastMap.newInstance();
+        result.put("taxByTaxAuthGeoAndPartyList", taxByTaxAuthGeoAndPartyList);
+        result.put("taxGrandTotal", taxGrandTotal);
+        return result;
+    }
+
+    /**
+     * Returns a List of the TaxAuthority Party and Geos for the given Invoice.
+     * @param invoice GenericValue object representing the Invoice
+     * @return A Map containing the each taxAuthPartyId as a key and a Set of taxAuthGeoIds for that taxAuthPartyId as the values.  Note this method
+     *         will not account for tax lines that do not contain a taxAuthPartyId
+     */
+    public static Map<String, Set<String>> getInvoiceTaxAuthPartyAndGeos (GenericValue invoice) {
+        Map<String, Set<String>> result = FastMap.newInstance();
+
+        if (invoice == null)
+           throw new IllegalArgumentException("Invoice cannot be null.");
+        List<GenericValue> invoiceTaxItems = null;
+        try {
+            Delegator delegator = invoice.getDelegator();
+            EntityConditionList<EntityExpr> condition = EntityCondition.makeCondition(UtilMisc.toList(
+                    EntityCondition.makeCondition("invoiceId", invoice.getString("invoiceId")),
+                    EntityCondition.makeCondition("invoiceItemTypeId", EntityOperator.IN, getTaxableInvoiceItemTypeIds(delegator))),
+                    EntityOperator.AND);
+            invoiceTaxItems = delegator.findList("InvoiceItem", condition, null, null, null, false);
+        } catch (GenericEntityException e) {
+            Debug.logError(e, "Trouble getting InvoiceItem list", module);
+            return null;
+        }
+        if (invoiceTaxItems != null) {
+            for (GenericValue invoiceItem : invoiceTaxItems) {
+                String taxAuthPartyId = invoiceItem.getString("taxAuthPartyId");
+                String taxAuthGeoId = invoiceItem.getString("taxAuthGeoId");
+                if (UtilValidate.isNotEmpty(taxAuthPartyId)) {
+                    if (!result.containsKey(taxAuthPartyId)) {
+                        Set<String> taxAuthGeos = FastSet.newInstance();
+                        taxAuthGeos.add(taxAuthGeoId);
+                        result.put(taxAuthPartyId, taxAuthGeos);
+                    } else {
+                        Set<String> taxAuthGeos = result.get(taxAuthPartyId);
+                        taxAuthGeos.add(taxAuthGeoId);
+                    }
+                }
+            }
+        }
+        return result;
+    }
+
+    /**
+     * @param invoice GenericValue object representing the invoice
+     * @param taxAuthPartyId
+     * @param taxAuthGeoId
+     * @return The invoice tax total for a given tax authority and geo location
+     */
+    public static BigDecimal getInvoiceTaxTotalForTaxAuthPartyAndGeo(GenericValue invoice, String taxAuthPartyId, String taxAuthGeoId) {
+        List<GenericValue> invoiceTaxItems = null;
+        try {
+            Delegator delegator = invoice.getDelegator();
+            EntityConditionList<EntityExpr> condition = EntityCondition.makeCondition(UtilMisc.toList(
+                    EntityCondition.makeCondition("invoiceId", invoice.getString("invoiceId")),
+                    EntityCondition.makeCondition("invoiceItemTypeId", EntityOperator.IN, getTaxableInvoiceItemTypeIds(delegator)),
+                    EntityCondition.makeCondition("taxAuthPartyId", taxAuthPartyId),
+                    EntityCondition.makeCondition("taxAuthGeoId", taxAuthGeoId)),
+                    EntityOperator.AND);
+            invoiceTaxItems = delegator.findList("InvoiceItem", condition, null, null, null, false);
+        } catch (GenericEntityException e) {
+            Debug.logError(e, "Trouble getting InvoiceItem list", module);
+            return null;
+        }
+       return getTaxTotalForInvoiceItems(invoiceTaxItems);
+    }
+
+    /** Returns the invoice tax total for unattributed tax items, that is items which have no taxAuthPartyId value
+     * @param invoice GenericValue object representing the invoice
+     * @return Returns the invoice tax total for unattributed tax items
+     */
+    public static BigDecimal getInvoiceUnattributedTaxTotal(GenericValue invoice) {
+         List<GenericValue> invoiceTaxItems = null;
+         try {
+             Delegator delegator = invoice.getDelegator();
+             EntityConditionList<EntityExpr> condition = EntityCondition.makeCondition(UtilMisc.toList(
+                     EntityCondition.makeCondition("invoiceId", invoice.getString("invoiceId")),
+                     EntityCondition.makeCondition("invoiceItemTypeId", EntityOperator.IN, getTaxableInvoiceItemTypeIds(delegator)),
+                     EntityCondition.makeCondition("taxAuthPartyId", null)),
+                     EntityOperator.AND);
+             invoiceTaxItems = delegator.findList("InvoiceItem", condition, null, null, null, false);
+         } catch (GenericEntityException e) {
+             Debug.logError(e, "Trouble getting InvoiceItem list", module);
+             return null;
+         }
+        return getTaxTotalForInvoiceItems(invoiceTaxItems);
+    }
+
+    /** Returns the tax total for a given list of tax typed InvoiceItem records
+     * @param taxInvoiceItems
+     * @return
+     */
+    private static BigDecimal getTaxTotalForInvoiceItems(List<GenericValue> taxInvoiceItems) {
+        if (taxInvoiceItems == null) {
+            return ZERO;
+        }
+        BigDecimal taxTotal = ZERO;
+        for (GenericValue taxInvoiceItem : taxInvoiceItems) {
+            BigDecimal amount = taxInvoiceItem.getBigDecimal("amount");
+            if (amount == null) {
+                amount = ZERO;
+            }
+            BigDecimal quantity = taxInvoiceItem.getBigDecimal("quantity");
+            if (quantity == null) {
+                quantity = BigDecimal.ONE;
+            }
+            amount = amount.multiply(quantity);
+            amount = amount.setScale(taxDecimals, taxRounding);
+            taxTotal = taxTotal.add(amount);
+        }
+        return taxTotal.setScale(decimals, rounding);
+    }
 }

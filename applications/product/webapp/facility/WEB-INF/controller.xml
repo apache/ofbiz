@@ -21,9 +21,9 @@ under the License.
 <site-conf xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/site-conf.xsd">
     <include location="component://common/webcommon/WEB-INF/common-controller.xml"/>
+    <include location="component://commonext/webapp/WEB-INF/controller.xml"/>
     <description>Facility Manager Module Site Configuration File</description>
-    <owner>Copyright 2001-2008 The Apache Software Foundation</owner>
-
+    
     <handler name="service-multi" type="request" class="org.ofbiz.webapp.event.ServiceMultiEventHandler"/>
     <handler name="bsf" type="request" class="org.ofbiz.webapp.event.BsfEventHandler"/>
 
@@ -44,11 +44,6 @@ under the License.
     <request-map uri="view">
         <security https="true" auth="false"/>
         <response name="success" type="request" value="main"/>
-    </request-map>
-
-    <request-map uri="authview">
-        <security https="true" auth="true"/>
-        <response name="success" type="view" value="main"/>
     </request-map>
 
     <request-map uri="main">
@@ -515,7 +510,12 @@ under the License.
         <security https="true" auth="true"/>
         <response name="success" type="view" value="FindFacilityPhysicalInventory"/>
     </request-map>
-
+    <request-map uri="cancelReceivedItems">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="cancelReceivedItems"/>
+        <response name="success" type="view" value="ReceiveInventory"/>
+        <response name="error" type="view" value="ReceiveInventory"/>
+    </request-map>
 
     <!-- ================ Inventory Transfer Requests ================= -->
     <request-map uri="TransferInventoryItem">
@@ -574,6 +574,10 @@ under the License.
         <response name="success" type="view" value="ReceiveReturn"/>
         <response name="error" type="view" value="ReceiveReturn"/>
     </request-map>
+    <request-map uri="UpdatedInventoryItemStatus">
+        <security https="true" auth="true"/>
+        <response name="success" type="view" value="UpdatedInventoryItemStatus"/>
+    </request-map>
 
     <!-- ================ Picklist Requests ================= -->
     <request-map uri="PicklistOptions">
@@ -621,6 +625,12 @@ under the License.
         <response name="success" type="view" value="PicklistManage"/>
         <response name="error" type="view" value="PicklistManage"/>
     </request-map>
+    <request-map uri="editPicklistItem">
+        <security https="true" auth="true" />
+        <event type="service" path="" invoke="editPicklistItem"/>
+        <response name="success" type="view" value="PicklistManage"/>
+        <response name="error" type="view" value="PicklistManage"/>
+    </request-map>
 
     <request-map uri="PicklistReport.pdf">
         <security https="true" auth="true"/>
@@ -646,6 +656,16 @@ under the License.
         <event type="service" path="" invoke="processPhysicalStockMove"/>
         <response name="success" type="view" value="PickMoveStock"/>
         <response name="error" type="view" value="PickMoveStock"/>
+    </request-map>
+    <request-map uri="printPickSheets">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="printPickSheets"/>
+        <response name="success" type="view" value="PrintPickSheets.pdf"/>
+        <response name="error" type="view" value="PicklistOptions"/>
+    </request-map>
+    <request-map uri="ReviewOrdersNotPickedOrPacked">
+        <security https="true" auth="true"/>
+        <response name="success" type="view" value="ReviewOrdersNotPickedOrPacked"/>
     </request-map>
 
     <!-- ================ Picking Verify Requests ================= -->
@@ -680,6 +700,54 @@ under the License.
         <event type="service" invoke="completeVerifiedPick"/>
         <response name="success" type="view" value="VerifyPick"/>
         <response name="error" type="view" value="VerifyPick"/>
+    </request-map>
+
+     <!-- ============= Weight Package Only Requests ============== -->
+    <request-map uri="WeightPackageOnly">
+        <security https="true" auth="true"/>
+        <response name="success" type="view" value="WeightPackageOnly"/>
+        <response name="error" type="view" value="WeightPackageOnly"/>
+    </request-map>
+    <request-map uri="setPackageInfo">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="setPackageInfo"/>
+        <response name="success" type="view" value="WeightPackageOnly"/>
+        <response name="error" type="view" value="WeightPackageOnly"/>
+    </request-map>
+    <request-map uri="updatePackedLine">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="updatePackedLine"/>
+        <response name="success" type="view" value="WeightPackageOnly"/>
+        <response name="error" type="view" value="WeightPackageOnly"/>
+    </request-map>
+    <request-map uri="deletePackedLine">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="deletePackedLine"/>
+        <response name="success" type="view" value="WeightPackageOnly"/>
+        <response name="error" type="view" value="WeightPackageOnly"/>
+    </request-map>
+    <request-map uri="shipNow">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="completeShipment"/>
+        <response name="success" type="view" value="WeightPackageOnly"/>
+        <response name="error" type="view" value="WeightPackageOnly"/>
+    </request-map>
+    <request-map uri="HoldShipment">
+        <security https="true" auth="true"/>
+        <response name="success" type="view" value="WeightPackageOnly"/>
+        <response name="error" type="view" value="WeightPackageOnly"/>
+    </request-map>
+    <request-map uri="completePackage">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="completePackage"/>
+        <response name="success" type="view" value="WeightPackageOnly"/>
+        <response name="error" type="request" value="savePackagesInfo"/>
+    </request-map>
+    <request-map uri="savePackagesInfo">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="savePackagesInfo"/>
+        <response name="success" type="view" value="WeightPackageOnly"/>
+        <response name="error" type="view" value="WeightPackageOnly"/>
     </request-map>
 
     <!-- ============= Packing Wizard Requests ============== -->
@@ -742,6 +810,38 @@ under the License.
         <response name="success" type="view" value="ShipmentManifest.pdf"/>
     </request-map>
 
+    <!-- Facility Content -->
+    <request-map uri="EditFacilityContent">
+        <security https="true" auth="true"/>
+        <response name="success" type="view" value="EditFacilityContent"/>
+    </request-map>
+    <request-map uri="createFacilityContent">
+        <security auth="true" https="true"/>
+        <event path="component://product/script/org/ofbiz/product/storage/FacilityEvents.xml" type="simple" invoke="createFacilityContent"/>
+        <response name="success" type="request-redirect" value="EditFacilityContent">
+            <redirect-parameter name="facilityId"/>
+        </response>
+        <response name="error" type="view" value="EditFacilityContent"/>
+    </request-map>
+    <request-map uri="deleteFacilityContent">
+        <security auth="true" https="true"/>
+        <event invoke="deleteFacilityContent" type="service"/>
+        <response name="success" type="request-redirect" value="EditFacilityContent">
+            <redirect-parameter name="facilityId"/>
+        </response>
+        <response name="error" type="view" value="EditFacilityContent"/>
+    </request-map>
+    
+    <request-map uri="EditFacilityGeoPoint">
+        <security https="true" auth="true"/>
+        <response name="success" type="view" value="EditFacilityGeoPoint"/>
+    </request-map>
+    <request-map uri="createUpdateFacilityGeoPoint">
+        <security auth="true" https="true"/>
+        <event type="service" path="" invoke="createUpdateFacilityGeoPoint"/>
+        <response name="success" type="view" value="EditFacilityGeoPoint"/>
+        <response name="error" type="view" value="EditFacilityGeoPoint"/>
+    </request-map>
     <!-- ================ Shipment Scheduling Requests ================= -->
     <request-map uri="Scheduling">
         <security https="true" auth="true"/>
@@ -794,7 +894,9 @@ under the License.
     <request-map uri="createShipment">
         <security https="true" auth="true"/>
         <event type="service" path="" invoke="createShipment"/>
-        <response name="success" type="view" value="EditShipment"/>
+        <response name="success" type="request-redirect" value="EditShipment">
+            <redirect-parameter name="shipmentId"/>
+        </response>
         <response name="error" type="view" value="EditShipment"/>
     </request-map>
     <request-map uri="updateShipment">
@@ -1128,6 +1230,10 @@ under the License.
         <response name="error" type="view" value="EditShipmentItems"/>
     </request-map>
     -->
+    <request-map uri="ViewShipmentReceipts">
+        <security https="true" auth="true"/>
+        <response name="success" type="view" value="ViewShipmentReceipts"/>
+    </request-map>
 
     <!-- ================ Inventory Reports Requests ================= -->
     <request-map uri="InventoryReports">
@@ -1157,7 +1263,71 @@ under the License.
         <response name="success" type="view" value="FacilityLocationGeoLocation"/>
         <response name="error" type="view" value="EditFacility"/>
     </request-map>
+    
+    <!-- Shipment Gateway Config --> 
+    <request-map uri="FindShipmentGatewayConfig">
+        <security https="true" auth="true"/>
+        <response name="success" type="view" value="FindShipmentGatewayConfig"/>
+    </request-map>
+    <request-map uri="EditShipmentGatewayConfig">
+        <security https="true" auth="true"/>
+        <response name="success" type="view" value="EditShipmentGatewayConfig"/>
+    </request-map>
+    <request-map uri="UpdateShipmentGatewayConfig">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="updateShipmentGatewayConfig"/>
+        <response name="success" type="view" value="EditShipmentGatewayConfig"/>
+        <response name="error" type="view" value="EditShipmentGatewayConfig"/>
+    </request-map>
+    <request-map uri="UpdateShipmentGatewayConfigDhl">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="updateShipmentGatewayConfigDhl"/>
+        <response name="success" type="view" value="EditShipmentGatewayConfig"/>
+        <response name="error" type="view" value="EditShipmentGatewayConfig"/>
+    </request-map>
+    <request-map uri="UpdateShipmentGatewayConfigFedex">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="updateShipmentGatewayConfigFedex"/>
+        <response name="success" type="view" value="EditShipmentGatewayConfig"/>
+        <response name="error" type="view" value="EditShipmentGatewayConfig"/>
+    </request-map>
+    <request-map uri="UpdateShipmentGatewayConfigUps">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="updateShipmentGatewayConfigUps"/>
+        <response name="success" type="view" value="EditShipmentGatewayConfig"/>
+        <response name="error" type="view" value="EditShipmentGatewayConfig"/>
+    </request-map>
+    <request-map uri="UpdateShipmentGatewayConfigUsps">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="updateShipmentGatewayConfigUsps"/>
+        <response name="success" type="view" value="EditShipmentGatewayConfig"/>
+        <response name="error" type="view" value="EditShipmentGatewayConfig"/>
+    </request-map>
+    <request-map uri="FindShipmentGatewayConfigTypes">
+        <security https="true" auth="true"/>
+        <response name="success" type="view" value="FindShipmentGatewayConfigTypes"/>
+    </request-map>
+    <request-map uri="EditShipmentGatewayConfigType">
+        <security https="true" auth="true"/>
+        <response name="success" type="view" value="EditShipmentGatewayConfigType"/>
+    </request-map>
+    <request-map uri="UpdateShipmentGatewayConfigType">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="updateShipmentGatewayConfigType"/>
+        <response name="success" type="view" value="EditShipmentGatewayConfigType"/>
+        <response name="error" type="view" value="EditShipmentGatewayConfigType"/>
+    </request-map>
+    <request-map uri="getConvertedPrice">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="convertUom"/>
+        <response name="success" type="request" value="json"/>
+        <response name="error" type="request" value="json"/>
+    </request-map>
 
+    <request-map uri="EditFacilityAgreements">
+        <security https="true" auth="true"/>
+        <response name="success" type="view" value="EditFacilityAgreements"/>
+    </request-map>
 
     <!-- ================ Lookup Requests ================= -->
     <request-map uri="LookupOrderHeaderAndShipInfo"><security https="true" auth="true"/><response name="success" type="view" value="LookupOrderHeaderAndShipInfo"/></request-map>
@@ -1171,6 +1341,7 @@ under the License.
     <request-map uri="LookupProductInventoryLocation"><security auth="true" https="true"/><response name="success" type="view" value="LookupProductInventoryLocation"/></request-map>
     <request-map uri="LookupPartyName"><security https="true" auth="true"/><response name="success" type="view" value="LookupPartyName"/></request-map>
     <request-map uri="LookupInventoryItem"><security https="true" auth="true"/><response name="success" type="view" value="LookupInventoryItem"/></request-map>
+    <request-map uri="LookupContent"><security auth="true" https="true"/><response name="success" type="view" value="LookupContent"/></request-map>
     <!-- end of request mappings -->
 
     <!-- View Mappings -->
@@ -1201,7 +1372,7 @@ under the License.
     <view-map name="TransferInventoryItem" type="screen" page="component://product/widget/facility/FacilityScreens.xml#TransferInventoryItem"/>
     <view-map name="ReceiveInventory" type="screen" page="component://product/widget/facility/FacilityScreens.xml#ReceiveInventory"/>
     <view-map name="ReceiveReturn" type="screen" page="component://product/widget/facility/FacilityScreens.xml#ReceiveReturn"/>
-
+    <view-map name="UpdatedInventoryItemStatus" type="screen" page="component://product/widget/facility/FacilityScreens.xml#UpdatedInventoryItemStatus"/>
     <view-map name="FindFacilityPhysicalInventory" type="screen" page="component://product/widget/facility/FacilityScreens.xml#FindFacilityPhysicalInventory"/>
 
     <view-map name="PicklistOptions" type="screen" page="component://product/widget/facility/FacilityScreens.xml#PicklistOptions"/>
@@ -1209,6 +1380,8 @@ under the License.
     <view-map name="PickMoveStock" type="screen" page="component://product/widget/facility/FacilityScreens.xml#PickMoveStock"/>
     <view-map name="PickMoveStockSimple" type="screen" page="component://product/widget/facility/FacilityScreens.xml#PickMoveStockSimple"/>
     <view-map name="PicklistReport.pdf" type="screenfop" page="component://product/widget/facility/FacilityScreens.xml#PicklistReport.fo" content-type="application/pdf" encoding="none"/>
+    <view-map name="PrintPickSheets.pdf" type="screenfop" page="component://product/widget/facility/FacilityScreens.xml#PrintPickSheets.fo" content-type="application/pdf" encoding="none"/>
+    <view-map name="ReviewOrdersNotPickedOrPacked" type="screen" page="component://product/widget/facility/FacilityScreens.xml#ReviewOrdersNotPickedOrPacked"/>
 
     <view-map name="FindFacilityGroup" type="screen" page="component://product/widget/facility/FacilityGroupScreens.xml#FindFacilityGroup"/>
     <view-map name="EditFacilityGroup" type="screen" page="component://product/widget/facility/FacilityGroupScreens.xml#EditFacilityGroup"/>
@@ -1227,16 +1400,21 @@ under the License.
     <view-map name="ShipmentManifest.pdf" type="screenfop" page="component://product/widget/facility/ShipmentScreens.xml#ShipmentManifest.fo" content-type="application/pdf" encoding="none"/>
 
     <view-map name="VerifyPick" type="screen" page="component://product/widget/facility/ShipmentScreens.xml#VerifyPick"/>
+    <view-map name="WeightPackageOnly" type="screen" page="component://product/widget/facility/ShipmentScreens.xml#WeightPackageOnly"/>
 
     <view-map name="ScheduleShipmentRouteSegment" type="screen" page="component://product/widget/facility/FacilityScreens.xml#ScheduleShipmentRouteSegment"/>
     <view-map name="Labels" type="screen" page="component://product/widget/facility/FacilityScreens.xml#Labels"/>
     <view-map name="BatchPrintShippingLabels" type="screenfop" page="component://product/widget/facility/FacilityScreens.xml#BatchPrintShippingLabels" content-type="application/pdf" encoding="none"/>
+
+    <view-map name="EditFacilityContent" type="screen" page="component://product/widget/facility/FacilityScreens.xml#EditFacilityContent"/>
+    <view-map name="EditFacilityGeoPoint" type="screen" page="component://product/widget/facility/FacilityScreens.xml#EditFacilityGeoPoint"/>
 
     <view-map name="FindShipment" type="screen" page="component://product/widget/facility/ShipmentScreens.xml#FindShipment"/>
     <view-map name="ViewShipment" type="screen" page="component://product/widget/facility/ShipmentScreens.xml#ViewShipment"/>
     <view-map name="EditShipment" type="screen" page="component://product/widget/facility/ShipmentScreens.xml#EditShipment"/>
     <view-map name="EditShipmentItems" type="screen" page="component://product/widget/facility/ShipmentScreens.xml#EditShipmentItems"/>
     <view-map name="EditShipmentPlan" type="screen" page="component://product/widget/facility/ShipmentScreens.xml#EditShipmentPlan"/>
+    <view-map name="ViewShipmentReceipts" type="screen" page="component://product/widget/facility/ShipmentScreens.xml#ViewShipmentReceipts"/>
     <view-map name="EditShipmentPackages" type="screen" page="component://product/widget/facility/ShipmentScreens.xml#EditShipmentPackages"/>
     <view-map name="EditShipmentRouteSegments" type="screen" page="component://product/widget/facility/ShipmentScreens.xml#EditShipmentRouteSegments"/>
     <view-map name="AddItemsFromOrder" type="screen" page="component://product/widget/facility/ShipmentScreens.xml#AddItemsFromOrder"/>
@@ -1249,7 +1427,7 @@ under the License.
     <view-map name="InventoryItemGrandTotals" type="screen" page="component://product/widget/facility/FacilityScreens.xml#InventoryItemGrandTotals"/>
     <view-map name="InventoryAverageCosts" type="screen" page="component://product/widget/facility/FacilityScreens.xml#InventoryAverageCosts"/>
 
-    <view-map name="InventoryItemTotalsExport" type="screentext" page="component://product/widget/facility/FacilityScreens.xml#InventoryItemTotalsExport" content-type="text/csv" encoding="none"/>
+    <view-map name="InventoryItemTotalsExport" type="screencsv" page="component://product/widget/facility/FacilityScreens.xml#InventoryItemTotalsExport" content-type="text/csv" encoding="none"/>
 
     <view-map name="FacilityLocationGeoLocation" type="screen" page="component://product/widget/facility/FacilityScreens.xml#FacilityLocationGeoLocation"/>
 
@@ -1264,5 +1442,14 @@ under the License.
     <view-map name="LookupProductInventoryLocation" page="component://product/widget/facility/LookupScreens.xml#LookupProductInventoryLocation" type="screen"/>
     <view-map name="LookupPartyName" type="screen" page="component://party/widget/partymgr/LookupScreens.xml#LookupPartyName"/>
     <view-map name="LookupInventoryItem" type="screen" page="component://product/widget/facility/LookupScreens.xml#LookupInventoryItem"/>
+    <view-map name="LookupContent" type="screen" page="component://content/widget/content/ContentScreens.xml#LookupContent"/>
+
+    <!-- Shipment Gateway Config -->
+    <view-map name="FindShipmentGatewayConfig" page="component://product//widget/facility/ShipmentGatewayConfigScreens.xml#FindShipmentGatewayConfig" type="screen"/>
+    <view-map name="EditShipmentGatewayConfig" page="component://product//widget/facility/ShipmentGatewayConfigScreens.xml#EditShipmentGatewayConfig" type="screen"/>
+    <view-map name="FindShipmentGatewayConfigTypes" page="component://product//widget/facility/ShipmentGatewayConfigScreens.xml#FindShipmentGatewayConfigTypes" type="screen"/>
+    <view-map name="EditShipmentGatewayConfigType" page="component://product//widget/facility/ShipmentGatewayConfigScreens.xml#EditShipmentGatewayConfigType" type="screen"/>
+
+    <view-map name="EditFacilityAgreements" type="screen" page="component://product/widget/facility/FacilityScreens.xml#EditFacilityAgreements"/>
     <!-- end of view mappings -->
 </site-conf>

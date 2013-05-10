@@ -21,9 +21,12 @@ package org.ofbiz.entity.cache;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentMap;
 
+import org.ofbiz.base.util.Debug;
 import org.ofbiz.entity.GenericValue;
 import org.ofbiz.entity.condition.EntityCondition;
+import org.ofbiz.entity.model.ModelEntity;
 import org.ofbiz.entity.util.EntityUtil;
 
 public class EntityListCache extends AbstractEntityConditionCache<Object, List<GenericValue>> {
@@ -39,7 +42,7 @@ public class EntityListCache extends AbstractEntityConditionCache<Object, List<G
     }
 
     public List<GenericValue> get(String entityName, EntityCondition condition, List<String> orderBy) {
-        Map<Object, List<GenericValue>> conditionCache = getConditionCache(entityName, condition);
+        ConcurrentMap<Object, List<GenericValue>> conditionCache = getConditionCache(entityName, condition);
         if (conditionCache == null) return null;
         Object orderByKey = getOrderByKey(orderBy);
         List<GenericValue> valueList = conditionCache.get(orderByKey);
@@ -48,11 +51,12 @@ public class EntityListCache extends AbstractEntityConditionCache<Object, List<G
             Iterator<List<GenericValue>> it = conditionCache.values().iterator();
             if (it.hasNext()) valueList = it.next();
 
-            synchronized (conditionCache) {
-                if (valueList != null) {
-                    valueList = EntityUtil.orderBy(valueList, orderBy);
-                    conditionCache.put(orderByKey, valueList);
-                }
+            if (valueList != null) {
+                // Does not need to be synchronized; if 2 threads do the same ordering,
+                // the result will be exactly the same, and won't actually cause any
+                // incorrect results.
+                valueList = EntityUtil.orderBy(valueList, orderBy);
+                conditionCache.put(orderByKey, valueList);
             }
         }
         return valueList;
@@ -63,7 +67,16 @@ public class EntityListCache extends AbstractEntityConditionCache<Object, List<G
     }
 
     public List<GenericValue> put(String entityName, EntityCondition condition, List<String> orderBy, List<GenericValue> entities) {
-        return super.put(entityName, getFrozenConditionKey(condition), getOrderByKey(orderBy), entities);
+        ModelEntity entity = this.getDelegator().getModelEntity(entityName);
+        if (entity.getNeverCache()) {
+            Debug.logWarning("Tried to put a value of the " + entityName + " entity in the cache but this entity has never-cache set to true, not caching.", module);
+            return null;
+        }
+        for (GenericValue memberValue : entities) {
+            memberValue.setImmutable();
+        }
+        Map<Object, List<GenericValue>> conditionCache = getOrCreateConditionCache(entityName, getFrozenConditionKey(condition));
+        return conditionCache.put(getOrderByKey(orderBy), entities);
     }
 
     public List<GenericValue> remove(String entityName, EntityCondition condition, List<String> orderBy) {

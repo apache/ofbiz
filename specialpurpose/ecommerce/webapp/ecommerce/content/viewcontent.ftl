@@ -54,11 +54,11 @@ under the License.
       <#assign subContent=lastNode.value/>
     </#if>
 <#else>
-    <#assign subContent = delegator.findByPrimaryKeyCache("Content", Static["org.ofbiz.base.util.UtilMisc"].toMap("contentId", subContentId))/>
+    <#assign subContent = delegator.findOne("Content", Static["org.ofbiz.base.util.UtilMisc"].toMap("contentId", subContentId), true)/>
 </#if>
 <#assign dummy=Static["org.ofbiz.base.util.Debug"].logInfo("in viewcontent, subContent:" + subContent, "")/>
-<br/>
-<h1>${uiLabelMap.EcommerceContentFor} [${subContentId}] ${subContent.contentName?if_exists} - ${subContent.description?if_exists}:</h1><br/>
+<br />
+<h1>${uiLabelMap.EcommerceContentFor} [${subContentId}] ${subContent.contentName?if_exists} - ${subContent.description?if_exists}:</h1><br />
 <table border="0" class="blogtext">
     <tr>
     <td width="40">&nbsp;</td>
@@ -73,7 +73,7 @@ under the License.
     <a class="tabButton" href="<@ofbizUrl>createforumresponse?contentIdTo=${requestParameters.contentId}&amp;nodeTrailCsv=${nodeTrailCsv?if_exists}</@ofbizUrl>" >Respond</a>
 </@checkPermission>
 -->
-<br/>
+<br />
 
     </td>
     </tr>
@@ -87,7 +87,7 @@ under the License.
       </tr>
     </@loopSubContent>
 </table>
-<hr/>
+<hr />
 <#--
 <@checkPermission mode="not-equals" subContentId=subContentId targetOperation="CONTENT_CREATE|CONTENT_RESPOND" contentPurposeList="RESPONSE" >
             ${permissionErrorMsg?if_exists}
@@ -103,7 +103,7 @@ under the License.
     <#local csv = "">
     <#local counter = 0>
     <#local len = trail?size>
-    <table border="0" class="tabletext" cellspacing="4">
+    <table border="0" cellspacing="4">
     <#list trail as content>
       <#if counter < (len - endIndexOffset) && startIndex <= counter >
         <#if 0 < counter >

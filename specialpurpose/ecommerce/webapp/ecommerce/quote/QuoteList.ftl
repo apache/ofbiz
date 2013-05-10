@@ -18,60 +18,58 @@ under the License.
 -->
 
 <div class="screenlet">
-    <div class="screenlet-header">
-        <div class="boxhead">${uiLabelMap.EcommerceQuoteHistory}</div>
-    </div>
+    <h3>${uiLabelMap.EcommerceQuoteHistory}</h3>
     <div class="screenlet-body">
-        <table width="100%" cellpadding="1" cellspacing="0" border="0">
+        <table>
             <tr>
                 <td width="10%">
-                    <div class="tabletext"><b><span style="white-space: nowrap;">${uiLabelMap.OrderQuote} ${uiLabelMap.CommonNbr}</span></b></div>
+                    <div><span style="white-space: nowrap;">${uiLabelMap.OrderQuote} ${uiLabelMap.CommonNbr}</span></div>
                 </td>
                 <td width="10">&nbsp;</td>
                 <td width="20%">
-                    <div class="tabletext"><b>${uiLabelMap.CommonName}</b></div>
+                    <div>${uiLabelMap.CommonName}</div>
                 </td>
                 <td width="10">&nbsp;</td>
                 <td width="40%">
-                    <div class="tabletext"><b>${uiLabelMap.CommonDescription}</b></div>
+                    <div>${uiLabelMap.CommonDescription}</div>
                 </td>
                 <td width="10">&nbsp;</td>
                 <td width="10%">
-                    <div class="tabletext"><b>${uiLabelMap.CommonStatus}</b></div>
+                    <div>${uiLabelMap.CommonStatus}</div>
                 </td>
                 <td width="10">&nbsp;</td>
                 <td width="20%">
-                    <div class="tabletext"><b>${uiLabelMap.OrderOrderQuoteIssueDate}</b></div>
-                    <div class="tabletext"><b>${uiLabelMap.CommonValidFromDate}</b></div>
-                    <div class="tabletext"><b>${uiLabelMap.CommonValidThruDate}</b></div>
+                    <div>${uiLabelMap.OrderOrderQuoteIssueDate}</div>
+                    <div>${uiLabelMap.CommonValidFromDate}</div>
+                    <div>${uiLabelMap.CommonValidThruDate}</div>
                 </td>
                 <td width="10">&nbsp;</td>
                 <td width="10">&nbsp;</td>
             </tr>
             <#list quoteList as quote>
-                <#assign status = quote.getRelatedOneCache("StatusItem")>
-                <tr><td colspan="12"><hr/></td></tr>
+                <#assign status = quote.getRelatedOne("StatusItem", true)>
+                
                 <tr>
                     <td>
-                        <div class="tabletext">${quote.quoteId}</div>
+                        <div>${quote.quoteId}</div>
                     </td>
                     <td width="10">&nbsp;</td>
                     <td>
-                        <div class="tabletext">${quote.quoteName?if_exists}</div>
+                        <div>${quote.quoteName?if_exists}</div>
                     </td>
                     <td width="10">&nbsp;</td>
                     <td>
-                        <div class="tabletext">${quote.description?if_exists}</div>
+                        <div>${quote.description?if_exists}</div>
                     </td>
                     <td width="10">&nbsp;</td>
                     <td>
-                        <div class="tabletext">${status.get("description",locale)}</div>
+                        <div>${status.get("description",locale)}</div>
                     </td>
                     <td width="10">&nbsp;</td>
                     <td>
-                        <div class="tabletext"><span style="white-space: nowrap;">${quote.issueDate?if_exists}</span></div>
-                        <div class="tabletext"><span style="white-space: nowrap;">${quote.validFromDate?if_exists}</span></div>
-                        <div class="tabletext"><span style="white-space: nowrap;">${quote.validThruDate?if_exists}</span></div>
+                        <div><span style="white-space: nowrap;">${quote.issueDate?if_exists}</span></div>
+                        <div><span style="white-space: nowrap;">${quote.validFromDate?if_exists}</span></div>
+                        <div><span style="white-space: nowrap;">${quote.validThruDate?if_exists}</span></div>
                     </td>
                     <td width="10">&nbsp;</td>
                     <td align="right">

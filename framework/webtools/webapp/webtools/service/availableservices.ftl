@@ -42,7 +42,7 @@ under the License.
           <li class="h3">${uiLabelMap.WebtoolsService} ${selectedServiceMap.serviceName}</li>
           <li><a href='<@ofbizUrl>${url}</@ofbizUrl>'>${uiLabelMap.CommonListAll}</a></li>
           <li><a href='<@ofbizUrl>/scheduleJob?SERVICE_NAME=${selectedServiceMap.serviceName}</@ofbizUrl>'>${uiLabelMap.WebtoolsSchedule}</a></li>
-          <li><a href='<@ofbizUrl>/setSyncServiceParameters?SERVICE_NAME=${selectedServiceMap.serviceName}&POOL_NAME=pool&_RUN_SYNC_=Y</@ofbizUrl>'>${uiLabelMap.PageTitleRunService}</a></li>
+          <li><a href='<@ofbizUrl>/setSyncServiceParameters?SERVICE_NAME=${selectedServiceMap.serviceName}&amp;POOL_NAME=pool&amp;_RUN_SYNC_=Y</@ofbizUrl>'>${uiLabelMap.PageTitleRunService}</a></li>
         </ul>
         <br class="clear"/>
       </div>
@@ -67,13 +67,14 @@ under the License.
             <td><a href='<@ofbizUrl>${url}?constraint=location@${selectedServiceMap.location}</@ofbizUrl>'>${selectedServiceMap.location}</a></td>
           </tr>
           <tr>
-            <td class="label">${uiLabelMap.WebtoolsArtifactInfo}</td>
-            <td><a href='<@ofbizUrl>ArtifactInfo?name=${selectedServiceMap.serviceName}&type=service</@ofbizUrl>'>${uiLabelMap.WebtoolsArtifactInfo}</a></td>
+            <td class="label">${uiLabelMap.WebtoolsDefinitionLocation}</td>
+            <td><a href='<@ofbizUrl>${url}?constraint=definitionLocation@${selectedServiceMap.definitionLocation}</@ofbizUrl>'>${selectedServiceMap.definitionLocation}</a></td>
             <td class="label">${uiLabelMap.WebtoolsDefaultEntityName}</td>
             <td><a href='<@ofbizUrl>${url}?constraint=default_entity_name@${selectedServiceMap.defaultEntityName}</@ofbizUrl>'>${selectedServiceMap.defaultEntityName}</a></td>
           </tr>
           <tr>
-            <td colspan="2">&nbsp;</td>
+            <td class="label">${uiLabelMap.WebtoolsArtifactInfo}</td>
+            <td><a href='<@ofbizUrl>ArtifactInfo?name=${selectedServiceMap.serviceName}&amp;type=service</@ofbizUrl>'>${uiLabelMap.WebtoolsArtifactInfo}</a></td>
             <td class="label">${uiLabelMap.WebtoolsRequireNewTransaction}</td>
             <td>${selectedServiceMap.requireNewTransaction}</td>
           </tr>
@@ -93,7 +94,7 @@ under the License.
 
     <div class="screenlet">
       <div class="screenlet-title-bar">
-        <h3>${uiLabelMap.CommonSecurityGroups}</h3>
+        <h3>${uiLabelMap.SecurityGroups}</h3>
       </div>
       <#if selectedServiceMap.permissionGroups != 'NA'>
         <table class="basic-table" cellspacing='0'>
@@ -126,7 +127,7 @@ under the License.
           <b>${selectedServiceMap.implServices}</b>
         <#elseif selectedServiceMap.implServices?has_content>
           <#list selectedServiceMap.implServices as implSrv>
-            <a href='<@ofbizUrl>${url}?sel_service_name=${implSrv.getService()}</@ofbizUrl>'>${implSrv.getService()}</a><br/>
+            <a href='<@ofbizUrl>${url}?sel_service_name=${implSrv.getService()}</@ofbizUrl>'>${implSrv.getService()}</a><br />
           </#list>
         </#if>
       </div>
@@ -228,7 +229,7 @@ under the License.
                         <td><b>${uiLabelMap.WebtoolsRHSValueName}</b> ${condition.rhsValueName?default(uiLabelMap.CommonNA)}</td>
                         <td>&nbsp;</td>
                       </tr>
-                    </table><br/>
+                    </table><br />
                   </#list>
                 </td>
               </#if>
@@ -258,12 +259,12 @@ under the License.
                           <td colspan="2">&nbsp;</td>
                         </#if>
                       </tr>
-                    </table><br/>
+                    </table><br />
                   </#list>
                 </td>
               </#if>
             </tr>
-            <tr><td colspan='5'><hr></td></tr>
+            <tr><td colspan='5'><hr/></td></tr>
           </#list>
         </table>
       </div>
@@ -271,14 +272,21 @@ under the License.
     <#-- End if service has ECA's -->
 
     <#list selectedServiceMap.allParamsList?if_exists as paramList>
+      <style type="text/css">
+        .param-table tr td {
+          width: 12.5%;
+          vertical-align: top;
+        }
+      </style>
       <div class="screenlet">
         <div class="screenlet-title-bar">
           <h3>${paramList.title}</h3>
         </div>
         <#if paramList.paramList?exists && paramList.paramList?has_content>
-          <table class="basic-table" cellspacing='0'>
+          <table class="basic-table param-table" cellspacing='0'>
               <tr class="header-row">
                 <td>${uiLabelMap.WebtoolsParameterName}</td>
+                <td>${uiLabelMap.CommonDescription}</td>
                 <td>${uiLabelMap.WebtoolsOptional}</td>
                 <td>${uiLabelMap.CommonType}</td>
                 <#-- <td>Default Value</td> -->
@@ -290,6 +298,7 @@ under the License.
               <#list paramList.paramList as modelParam>
                 <tr>
                   <td>${modelParam.name?if_exists}</td>
+                  <td>${modelParam.description?if_exists}</td>
                   <td>${modelParam.optional?if_exists}</td>
                   <td>${modelParam.type?if_exists}</td>
                   <#-- <td>[${modelParam.defaultValue?if_exists}]</td> -->
@@ -331,9 +340,6 @@ under the License.
       <div class="button-bar">
         <#assign isfirst=true>
         <#list serviceNamesAlphaList as alpha>
-          <#if !isfirst>
-            |
-          </#if>
           <a href='<@ofbizUrl>${url}?constraint=alpha@${alpha}</@ofbizUrl>'>${alpha}</a>
           <#assign isfirst=false>
         </#list>
@@ -348,7 +354,7 @@ under the License.
                 }
             }
           </script>
-          <select id='sd' name='selDisp' onChange='submitDispForm();'>
+          <select id='sd' name='selDisp' onchange='submitDispForm();'>
             <option value='' selected="selected">${uiLabelMap.WebtoolsSelectDispatcher}</option>
             <option value='' ></option>
             <#list dispArrList as disp>
@@ -358,33 +364,34 @@ under the License.
         </#if>
       </div>
     </form>
-    <br />
   </#if>
 
   <div class="screenlet">
-    <div class="screenlet-title-bar">
-      <h3>${uiLabelMap.WebtoolsServicesListFor} ${dispatcherName?default(uiLabelMap.CommonNA)} (${servicesFoundCount} ${uiLabelMap.CommonFound})</h3>
-    </div>
-    <table class="basic-table hover-bar" cellspacing='0'>
-      <tr class="header-row">
-        <td>${uiLabelMap.WebtoolsServiceName}</td>
-        <td>${uiLabelMap.WebtoolsEngineName}</td>
-        <td>${uiLabelMap.WebtoolsDefaultEntityName}</td>
-        <td>${uiLabelMap.WebtoolsInvoke}</td>
-        <td>${uiLabelMap.WebtoolsLocation}</td>
-      </tr>
-      <#assign alt_row = false>
-      <#list servicesList as service>
-        <tr<#if alt_row> class="alternate-row"</#if>>
-          <td><a href='<@ofbizUrl>${url}?sel_service_name=${service.serviceName}</@ofbizUrl>'>${service.serviceName}</a></td>
-          <td><a href='<@ofbizUrl>${url}?constraint=engine_name@${service.engineName?default(uiLabelMap.CommonNA)}</@ofbizUrl>'>${service.engineName}</a></td>
-          <td><a href='<@ofbizUrl>${url}?constraint=default_entity_name@${service.defaultEntityName?default(uiLabelMap.CommonNA)}</@ofbizUrl>'>${service.defaultEntityName}</a></td>
-          <td>${service.invoke}</td>
-          <td><a href='<@ofbizUrl>${url}?constraint=location@${service.location?default(uiLabelMap.CommonNA)}</@ofbizUrl>'>${service.location}</a></td>
+    <div class="screenlet-body">
+      <label>${uiLabelMap.WebtoolsServicesListFor} ${dispatcherName?default(uiLabelMap.CommonNA)} (${servicesFoundCount} ${uiLabelMap.CommonFound})</label>
+      <table class="basic-table hover-bar" cellspacing='0'>
+        <tr class="header-row">
+          <td>${uiLabelMap.WebtoolsServiceName}</td>
+          <td>${uiLabelMap.WebtoolsEngineName}</td>
+          <td>${uiLabelMap.WebtoolsDefaultEntityName}</td>
+          <td>${uiLabelMap.WebtoolsInvoke}</td>
+          <td>${uiLabelMap.WebtoolsLocation}</td>
+          <td>${uiLabelMap.WebtoolsDefinitionLocation}</td>
         </tr>
-        <#assign alt_row = !alt_row>
-      </#list>
-    </table>
+        <#assign alt_row = false>
+        <#list servicesList as service>
+          <tr<#if alt_row> class="alternate-row"</#if>>
+            <td><a href='<@ofbizUrl>${url}?sel_service_name=${service.serviceName}</@ofbizUrl>'>${service.serviceName}</a></td>
+            <td><a href='<@ofbizUrl>${url}?constraint=engine_name@${service.engineName?default(uiLabelMap.CommonNA)}</@ofbizUrl>'>${service.engineName}</a></td>
+            <td><a href='<@ofbizUrl>${url}?constraint=default_entity_name@${service.defaultEntityName?default(uiLabelMap.CommonNA)}</@ofbizUrl>'>${service.defaultEntityName}</a></td>
+            <td>${service.invoke}</td>
+            <td><a href='<@ofbizUrl>${url}?constraint=location@${service.location?default(uiLabelMap.CommonNA)}</@ofbizUrl>'>${service.location}</a></td>
+            <td><a href='<@ofbizUrl>${url}?constraint=definitionLocation@${service.definitionLocation}</@ofbizUrl>'>${service.definitionLocation}</a></td>
+          </tr>
+          <#assign alt_row = !alt_row>
+        </#list>
+      </table>
+    </div>
   </div>
 <#else>
   ${uiLabelMap.WebtoolsNoServicesFound}.

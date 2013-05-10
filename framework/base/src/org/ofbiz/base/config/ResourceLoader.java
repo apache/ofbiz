@@ -23,6 +23,7 @@ import java.net.URL;
 
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilURL;
+import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.base.util.UtilXml;
 import org.ofbiz.base.util.cache.UtilCache;
 import org.w3c.dom.Document;
@@ -34,7 +35,7 @@ import org.w3c.dom.Element;
 public abstract class ResourceLoader {
 
     public static final String module = ResourceLoader.class.getName();
-    protected static UtilCache<String, Object> loaderCache = new UtilCache<String, Object>("resource.ResourceLoaders", 0, 0);
+    private static final UtilCache<String, Object> loaderCache = UtilCache.createUtilCache("resource.ResourceLoaders", 0, 0);
 
     protected String name;
     protected String prefix;
@@ -60,19 +61,14 @@ public abstract class ResourceLoader {
         ResourceLoader loader = (ResourceLoader) loaderCache.get(xmlFilename + "::" + loaderName);
 
         if (loader == null) {
-            synchronized (ResourceLoader.class) {
-                loader = (ResourceLoader) loaderCache.get(xmlFilename + "::" + loaderName);
-                if (loader == null) {
-                    Element rootElement = getXmlRootElement(xmlFilename);
+            Element rootElement = getXmlRootElement(xmlFilename);
 
-                    Element loaderElement = UtilXml.firstChildElement(rootElement, "resource-loader", "name", loaderName);
+            Element loaderElement = UtilXml.firstChildElement(rootElement, "resource-loader", "name", loaderName);
 
-                    loader = makeLoader(loaderElement);
+            loader = makeLoader(loaderElement);
 
-                    if (loader != null) {
-                        loaderCache.put(xmlFilename + "::" + loaderName, loader);
-                    }
-                }
+            if (loader != null) {
+                loader = (ResourceLoader) loaderCache.putIfAbsentAndGet(xmlFilename + "::" + loaderName, loader);
             }
         }
 
@@ -93,33 +89,30 @@ public abstract class ResourceLoader {
         UtilCache.clearCachesThatStartWith(xmlFilename);
     }
 
+    // This method should be avoided. DOM object trees take a lot of memory, so they should
+    // not be cached.
     public static Document getXmlDocument(String xmlFilename) throws GenericConfigException {
         Document document = (Document) loaderCache.get(xmlFilename);
 
         if (document == null) {
-            synchronized (ResourceLoader.class) {
-                document = (Document) loaderCache.get(xmlFilename);
-                if (document == null) {
-                    URL confUrl = UtilURL.fromResource(xmlFilename);
+            URL confUrl = UtilURL.fromResource(xmlFilename);
 
-                    if (confUrl == null) {
-                        throw new GenericConfigException("ERROR: could not find the [" + xmlFilename + "] XML file on the classpath");
-                    }
+            if (confUrl == null) {
+                throw new GenericConfigException("ERROR: could not find the [" + xmlFilename + "] XML file on the classpath");
+            }
 
-                    try {
-                        document = UtilXml.readXmlDocument(confUrl);
-                    } catch (org.xml.sax.SAXException e) {
-                        throw new GenericConfigException("Error reading " + xmlFilename + "", e);
-                    } catch (javax.xml.parsers.ParserConfigurationException e) {
-                        throw new GenericConfigException("Error reading " + xmlFilename + "", e);
-                    } catch (java.io.IOException e) {
-                        throw new GenericConfigException("Error reading " + xmlFilename + "", e);
-                    }
+            try {
+                document = UtilXml.readXmlDocument(confUrl);
+            } catch (org.xml.sax.SAXException e) {
+                throw new GenericConfigException("Error reading " + xmlFilename + "", e);
+            } catch (javax.xml.parsers.ParserConfigurationException e) {
+                throw new GenericConfigException("Error reading " + xmlFilename + "", e);
+            } catch (java.io.IOException e) {
+                throw new GenericConfigException("Error reading " + xmlFilename + "", e);
+            }
 
-                    if (document != null) {
-                        loaderCache.put(xmlFilename, document);
-                    }
-                }
+            if (document != null) {
+                document = (Document) loaderCache.putIfAbsentAndGet(xmlFilename, document);
             }
         }
         return document;
@@ -134,9 +127,9 @@ public abstract class ResourceLoader {
         ResourceLoader loader = null;
 
         try {
-            Class lClass = null;
+            Class<?> lClass = null;
 
-            if (className != null && className.length() > 0) {
+            if (UtilValidate.isNotEmpty(className)) {
                 try {
                     ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
                     lClass = classLoader.loadClass(className);
@@ -179,7 +172,7 @@ public abstract class ResourceLoader {
     public String fullLocation(String location) {
         StringBuilder buf = new StringBuilder();
 
-        if (envName != null && envName.length() > 0) {
+        if (UtilValidate.isNotEmpty(envName)) {
             String propValue = System.getProperty(envName);
             if (propValue == null) {
                 String errMsg = "The Java environment (-Dxxx=yyy) variable with name " + envName + " is not set, cannot load resource.";
@@ -188,7 +181,7 @@ public abstract class ResourceLoader {
             }
             buf.append(propValue);
         }
-        if (prefix != null && prefix.length() > 0) {
+        if (UtilValidate.isNotEmpty(prefix)) {
             buf.append(prefix);
         }
         buf.append(location);

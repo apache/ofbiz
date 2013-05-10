@@ -27,6 +27,7 @@ import javolution.util.FastMap;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.GeneralException;
 import org.ofbiz.base.util.UtilDateTime;
+import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.base.util.UtilProperties;
 import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.entity.GenericValue;
@@ -46,6 +47,7 @@ import org.ofbiz.service.ServiceUtil;
 public final class EntityAutoEngine extends GenericAsyncEngine {
 
     public static final String module = EntityAutoEngine.class.getName();
+    public static final String resource = "ServiceErrorUiLabels";
 
     public EntityAutoEngine(ServiceDispatcher dispatcher) {
         super(dispatcher);
@@ -54,6 +56,7 @@ public final class EntityAutoEngine extends GenericAsyncEngine {
     /**
      * @see org.ofbiz.service.engine.GenericEngine#runSyncIgnore(java.lang.String, org.ofbiz.service.ModelService, java.util.Map)
      */
+    @Override
     public void runSyncIgnore(String localName, ModelService modelService, Map<String, Object> context) throws GenericServiceException {
         runSync(localName, modelService, context);
     }
@@ -61,10 +64,11 @@ public final class EntityAutoEngine extends GenericAsyncEngine {
     /**
      * @see org.ofbiz.service.engine.GenericEngine#runSync(java.lang.String, org.ofbiz.service.ModelService, java.util.Map)
      */
+    @Override
     public Map<String, Object> runSync(String localName, ModelService modelService, Map<String, Object> parameters) throws GenericServiceException {
         // static java service methods should be: public Map<String, Object> methodName(DispatchContext dctx, Map<String, Object> context)
         DispatchContext dctx = dispatcher.getLocalContext(localName);
-
+        Locale locale = (Locale) parameters.get("locale");
         Map<String, Object> localContext = FastMap.newInstance();
         localContext.put("parameters", parameters);
         Map<String, Object> result = ServiceUtil.returnSuccess();
@@ -173,7 +177,7 @@ public final class EntityAutoEngine extends GenericAsyncEngine {
                         if (pkValue instanceof String) {
                             StringBuffer errorDetails = new StringBuffer();
                             if (!UtilValidate.isValidDatabaseId((String) pkValue, errorDetails)) {
-                                return ServiceUtil.returnError("The ID value in the parameter [" + singlePkModelParam.name + "] was not valid: " + errorDetails);
+                                return ServiceUtil.returnError(UtilProperties.getMessage(resource, "ServiceParameterValueNotValid", UtilMisc.toMap("parameterName", singlePkModelParam.name,"errorDetails", errorDetails), locale));
                             }
                         }
                     }
@@ -228,6 +232,21 @@ public final class EntityAutoEngine extends GenericAsyncEngine {
                     }
                 }
 
+                if (modelEntity.getField("createdDate") != null) {
+                    newEntity.set("createdDate", UtilDateTime.nowTimestamp());
+                    if (modelEntity.getField("createdByUserLogin") != null) {
+                        GenericValue userLogin = (GenericValue) parameters.get("userLogin");
+                        if (userLogin != null) {
+                            newEntity.set("createdByUserLogin", userLogin.get("userLoginId"));
+                            if (modelEntity.getField("lastModifiedByUserLogin") != null) {
+                                newEntity.set("lastModifiedByUserLogin", userLogin.get("userLoginId"));
+                            }
+                        }
+                    }
+                    if (modelEntity.getField("lastModifiedDate") != null) {
+                        newEntity.set("lastModifiedDate", UtilDateTime.nowTimestamp());
+                    }
+                }
                 newEntity.setNonPKFields(parameters, true);
                 newEntity.create();
             } else if ("update".equals(modelService.invoke)) {
@@ -246,7 +265,7 @@ public final class EntityAutoEngine extends GenericAsyncEngine {
 
                 GenericValue lookedUpValue = PrimaryKeyFinder.runFind(modelEntity, parameters, dctx.getDelegator(), false, true, null, null);
                 if (lookedUpValue == null) {
-                    return ServiceUtil.returnError("Value not found, cannot update");
+                    return ServiceUtil.returnError(UtilProperties.getMessage(resource, "ServiceValueNotFound", locale));
                 }
 
                 localContext.put("lookedUpValue", lookedUpValue);
@@ -291,12 +310,22 @@ public final class EntityAutoEngine extends GenericAsyncEngine {
                         GenericValue statusValidChange = dctx.getDelegator().findOne("StatusValidChange", true, "statusId", lookedUpStatusId, "statusIdTo", parameterStatusId);
                         if (statusValidChange == null) {
                             // uh-oh, no valid change...
-                            return ServiceUtil.returnError(UtilProperties.getMessage("CommonUiLabels", "CommonErrorNoStatusValidChange", localContext, (Locale) parameters.get("locale")));
+                            return ServiceUtil.returnError(UtilProperties.getMessage("CommonUiLabels", "CommonErrorNoStatusValidChange", localContext, locale));
                         }
                     }
                 }
 
                 // NOTE: nothing here to maintain the status history, that should be done with a custom service called by SECA rule
+
+                if (modelEntity.getField("lastModifiedDate") != null) {
+                    lookedUpValue.set("lastModifiedDate", UtilDateTime.nowTimestamp());
+                    if (modelEntity.getField("lastModifiedByUserLogin") != null) {
+                        GenericValue userLogin = (GenericValue) parameters.get("userLogin");
+                        if (userLogin != null) {
+                            lookedUpValue.set("lastModifiedByUserLogin", userLogin.get("userLoginId"));
+                        }
+                    }
+                }
 
                 lookedUpValue.setNonPKFields(parameters, true);
                 lookedUpValue.store();
@@ -319,9 +348,8 @@ public final class EntityAutoEngine extends GenericAsyncEngine {
                 }
             }
         } catch (GeneralException e) {
-            String errMsg = "Error doing entity-auto operation for entity [" + modelEntity.getEntityName() + "] in service [" + modelService.name + "]: " + e.toString();
-            Debug.logError(e, errMsg, module);
-            return ServiceUtil.returnError(errMsg);
+            Debug.logError(e, "Error doing entity-auto operation for entity [" + modelEntity.getEntityName() + "] in service [" + modelService.name + "]: " + e.toString(), module);
+            return ServiceUtil.returnError(UtilProperties.getMessage(resource, "ServiceEntityAutoOperation", UtilMisc.toMap("entityName", modelEntity.getEntityName(), "serviceName", modelService.name,"errorString", e.toString()), locale));
         }
 
         return result;

@@ -32,7 +32,7 @@ import org.ofbiz.base.crypto.HashCrypt;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilProperties;
 import org.ofbiz.base.util.UtilValidate;
-import org.ofbiz.entity.GenericDelegator;
+import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
 import org.ofbiz.entity.transaction.GenericTransactionException;
@@ -57,7 +57,7 @@ public class LdapAuthenticationServices {
             password = (String) context.get("password");
         }
         String dn = null;
-        GenericDelegator delegator = ctx.getDelegator();
+        Delegator delegator = ctx.getDelegator();
         boolean isServiceAuth = context.get("isServiceAuth") != null && ((Boolean) context.get("isServiceAuth")).booleanValue();
         GenericValue userLogin = null;
         try {
@@ -94,24 +94,16 @@ public class LdapAuthenticationServices {
         // Synchronize user's OFBiz password with user's LDAP password
         if (userLogin != null) {
             boolean useEncryption = "true".equals(UtilProperties.getPropertyValue("security.properties", "password.encrypt"));
-            String encodedPassword = useEncryption ? HashCrypt.getDigestHash(password, LoginServices.getHashType()) : password;
-            String encodedPasswordOldFunnyHexEncode = useEncryption ? HashCrypt.getDigestHashOldFunnyHexEncode(password, LoginServices.getHashType()) : password;
-            String encodedPasswordUsingDbHashType = encodedPassword;
             String currentPassword = userLogin.getString("currentPassword");
-            if (useEncryption && currentPassword != null && currentPassword.startsWith("{")) {
-                String dbHashType = HashCrypt.getHashTypeFromPrefix(currentPassword);
-                if (dbHashType != null) {
-                    encodedPasswordUsingDbHashType = HashCrypt.getDigestHash(password, dbHashType);
-                }
+            boolean samePassword;
+            if (useEncryption) {
+                samePassword = HashCrypt.comparePassword(currentPassword, LoginServices.getHashType(), password);
+            } else {
+                samePassword = currentPassword.equals(password);
             }
-            boolean samePassword = currentPassword != null &&
-                    (HashCrypt.removeHashTypePrefix(encodedPassword).equals(HashCrypt.removeHashTypePrefix(currentPassword)) ||
-                            HashCrypt.removeHashTypePrefix(encodedPasswordOldFunnyHexEncode).equals(HashCrypt.removeHashTypePrefix(currentPassword)) ||
-                            HashCrypt.removeHashTypePrefix(encodedPasswordUsingDbHashType).equals(HashCrypt.removeHashTypePrefix(currentPassword)) ||
-                        ("true".equals(UtilProperties.getPropertyValue("security.properties", "password.accept.encrypted.and.plain")) && password.equals(currentPassword)));
             if (!samePassword) {
                 Debug.logVerbose("Starting password synchronization", module);
-                userLogin.set("currentPassword", useEncryption ? HashCrypt.getDigestHash(password, LoginServices.getHashType()) : password, false);
+                userLogin.set("currentPassword", useEncryption ? HashCrypt.cryptUTF8(LoginServices.getHashType(), null, password) : password, false);
                 Transaction parentTx = null;
                 boolean beganTransaction = false;
                 try {

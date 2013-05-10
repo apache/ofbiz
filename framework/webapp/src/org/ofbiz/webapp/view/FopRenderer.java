@@ -18,7 +18,10 @@
  *******************************************************************************/
 package org.ofbiz.webapp.view;
 
-import java.io.*;
+import java.io.ByteArrayOutputStream;
+import java.io.Reader;
+import java.io.StringReader;
+import java.io.Writer;
 
 import org.apache.fop.apps.Fop;
 import org.apache.fop.apps.MimeConstants;
@@ -28,10 +31,14 @@ import org.apache.fop.apps.FOPException;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.GeneralException;
 
-import javax.xml.transform.*;
+import javax.xml.transform.Result;
+import javax.xml.transform.Source;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerConfigurationException;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.stream.StreamSource;
 import javax.xml.transform.sax.SAXResult;
-import javax.xml.transform.Result;
 
 /**
  * FopRenderer
@@ -67,13 +74,10 @@ public class FopRenderer {
                 // Transform the FOP XML source into a PDF, hopefully...
                 transformer.transform(src, res);
 
-                // We don't want to cache the images that get loaded by the FOP engine
-                fopFactory.getImageFactory().clearCaches();
-
                 return out;
 
             } catch (TransformerException e) {
-                Debug.logError("FOP transform failed:" + e, module );
+                Debug.logError("FOP transform failed:" + e, module);
                 throw new GeneralException("Unable to transform FO to PDF", e);
             }
 

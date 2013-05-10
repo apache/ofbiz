@@ -21,6 +21,26 @@ under the License.
 <screens xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/widget-screen.xsd">
 
+    <screen name="CommonPartyGlDecorator">
+        <section>
+            <actions>
+                <set field="tabButtonItemTop" value="PartyAccounts"/>
+                <entity-one entity-name="PartyNameView" value-field="currentOrganization" auto-field-map="false">
+                    <field-map field-name="partyId" from-field="organizationPartyId"/>
+                </entity-one>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonPartyDecorator" location="${parameters.partyDecoratorLocation}">
+                    <decorator-section name="body">
+                        <include-menu name="OrganizationAccountingTabBar" location="component://accounting/widget/AccountingMenus.xml"/>
+                        <label style="h1">${uiLabelMap[labelTitleProperty]} ${uiLabelMap.CommonFor}: ${currentOrganization.groupName} [${organizationPartyId}]</label>
+                        <decorator-section-include name="body"/>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
     <screen name="PartyAccountsSummary">
         <section>
             <actions>
@@ -33,49 +53,13 @@ under the License.
                 </entity-condition -->
             </actions>
             <widgets>
-                <decorator-screen name="CommonPartyAccountsDecorator" location="${parameters.mainDecoratorLocation}">
+                <decorator-screen name="CommonPartyGlDecorator" location="${parameters.partyGlDecoratorLocation}">
                     <decorator-section name="body">
                         <section>
                             <widgets>
-                                <container style="screenlet">
-                                    <container style="screenlet-title-bar">
-                                        <container style="h3">
-                                            <label text="${uiLabelMap.AccountingPartyAccountsSummary}"/>
-                                        </container>
-                                    </container>
-                                    <container style="screenlet-body">
-                                        <container>
-                                            <link target="CreateAcctgTransAndEntries" text="${uiLabelMap.AccountingCreateSalesAcctgTrans}" style="buttontext">
-                                                <parameter param-name="organizationPartyId"/>
-                                                <parameter param-name="debitGlAccountClassId" value="CURRENT_ASSET"/>
-                                                <parameter param-name="creditGlAccountClassId" value="REVENUE"/>
-                                                <parameter param-name="acctgTransTypeId" value="SALES"/>
-                                            </link>
-                                            <link target="TrialBalance" text="${uiLabelMap.AccountingTrialBalance}" style="buttontext">
-                                                <parameter param-name="organizationPartyId"/>
-                                            </link>
-                                        </container>
-                                        <container>
-                                            <link target="CreateAcctgTransAndEntries" text="${uiLabelMap.AccountingCreatePaymentAcctgTrans}" style="buttontext">
-                                                <parameter param-name="organizationPartyId"/>
-                                                <parameter param-name="debitGlAccountClassId" value="CASH_EQUIVALENT"/>
-                                                <parameter param-name="creditGlAccountClassId" value="CURRENT_LIABILITY"/>
-                                                <parameter param-name="acctgTransTypeId" value="PAYMENT_ACCTG_TRANS"/>
-                                            </link>
-                                            <link target="IncomeStatement" text="${uiLabelMap.AccountingIncomeStatement}" style="buttontext">
-                                                <parameter param-name="organizationPartyId"/>
-                                            </link>
-                                        </container>
-                                        <container>
-                                            <link text="${uiLabelMap.PageTitleUnpostedTransactions}" style="buttontext" target="ListUnpostedAcctgTrans">
-                                                <parameter param-name="organizationPartyId"/>
-                                            </link>
-                                            <link target="BalanceSheet" text="${uiLabelMap.AccountingBalanceSheet}" style="buttontext">
-                                                <parameter param-name="organizationPartyId"/>
-                                            </link>
-                                        </container>
-                                    </container>
-                                </container>
+                                <screenlet title="${uiLabelMap.AccountingPartyAccountsSummary}">
+                                <include-menu location="component://accounting/widget/AccountingMenus.xml" name="PartyGlShortCuts"/>
+                                </screenlet>
                             </widgets>
                         </section>
                     </decorator-section>
@@ -93,44 +77,60 @@ under the License.
                 <set field="organizationPartyId" from-field="parameters.organizationPartyId" global="true"/>
             </actions>
             <widgets>
-                <decorator-screen name="CommonPartyAccountsDecorator" location="${parameters.mainDecoratorLocation}">
+                <decorator-screen name="CommonPartyGlDecorator" location="${parameters.partyGlDecoratorLocation}">
                     <decorator-section name="body">
-                        <container style="screenlet">
-                            <container style="screenlet-title-bar">
-                                <container style="h3">
-                                    <label text="${uiLabelMap.AccountingAcctgTrans}"/>
-                                </container>
+                        <screenlet title="${uiLabelMap.AccountingAcctgTrans}">
+                            <container>
+                                <link text="${uiLabelMap.AccountingCreateAnAccountingTransaction}" style="buttontext" target="newAcctgTrans">
+                                    <parameter param-name="organizationPartyId"/>
+                                </link>
+                                <link text="${uiLabelMap.AccountingCreateAcctgTransAndEntries}" style="buttontext" target="CreateAcctgTransAndEntries">
+                                    <parameter param-name="organizationPartyId"/>
+                                </link>
+                                <link text="${uiLabelMap.PageTitleUnpostedTransactions}" style="buttontext" target="ListUnpostedAcctgTrans">
+                                    <parameter param-name="organizationPartyId"/>
+                                </link>
                             </container>
-                            <container style="screenlet-body">
-                                 <container>
-                                    <link text="${uiLabelMap.AccountingCreateAnAccountingTransaction}" style="buttontext" target="newAcctgTrans">
-                                        <parameter param-name="organizationPartyId"/>
-                                    </link>
-                                    <link text="${uiLabelMap.AccountingCreateAcctgTransAndEntries}" style="buttontext" target="CreateAcctgTransAndEntries">
-                                        <parameter param-name="organizationPartyId"/>
-                                    </link>
-                                    <link text="${uiLabelMap.PageTitleUnpostedTransactions}" style="buttontext" target="ListUnpostedAcctgTrans">
-                                        <parameter param-name="organizationPartyId"/>
-                                    </link>
-                                </container>
-                                <include-form name="FindAcctgTrans" location="component://accounting/widget/GlForms.xml"/>
-                            </container>
-                        </container>
+                            <include-form name="FindAcctgTrans" location="component://accounting/widget/GlForms.xml"/>
+                        </screenlet>
                         <section>
                             <condition>
                                 <if-compare field="parameters.performSearch" operator="equals" value="Y"/>
                             </condition>
                             <widgets>
-                                <container style="screenlet">
-                                    <container style="screenlet-title-bar">
-                                        <container style="h3">
-                                            <label text="${uiLabelMap.AccountingAcctgTrans}"/>
-                                        </container>
-                                    </container>
-                                    <container style="screenlet-body">
-                                        <include-form name="ListAcctgTrans" location="component://accounting/widget/GlForms.xml"/>
-                                    </container>
-                                </container>
+                                <screenlet title="${uiLabelMap.AccountingAcctgTrans}">
+                                    <link text="${uiLabelMap.AccountingExportAsCsv}" style="buttontext" target="AcctgTransSearchResultsCsv.csv">
+                                        <parameter param-name="organizationPartyId"/>
+                                        <parameter param-name="acctgTransId" from-field="parameters.acctgTransId"/>
+                                        <parameter param-name="productId" from-field="parameters.productId"/>
+                                        <parameter param-name="isPosted" from-field="parameters.isPosted"/>
+                                        <parameter param-name="invoiceId" from-field="parameters.invoiceId"/>
+                                        <parameter param-name="glFiscalTypeId" from-field="parameters.glFiscalTypeId"/>
+                                        <parameter param-name="shipmentId" from-field="parameters.shipmentId"/>
+                                        <parameter param-name="acctgTransTypeId" from-field="parameters.acctgTransTypeId"/>
+                                        <parameter param-name="workEffortId" from-field="parameters.workEffortId"/>
+                                        <parameter param-name="glJournalId" from-field="parameters.glJournalId"/>
+                                        <parameter param-name="paymentId" from-field="parameters.paymentId"/>
+                                        <parameter param-name="fromDate" from-field="parameters.fromDate"/>
+                                        <parameter param-name="thruDate" from-field="parameters.thruDate"/>
+                                    </link>
+                                    <link text="${uiLabelMap.AccountingExportAsPdf}" style="buttontext" target="AcctgTransSearchResultPdf.pdf" target-window="_BLANK">
+                                        <parameter param-name="organizationPartyId"/>
+                                        <parameter param-name="acctgTransId" from-field="parameters.acctgTransId"/>
+                                        <parameter param-name="productId" from-field="parameters.productId"/>
+                                        <parameter param-name="isPosted" from-field="parameters.isPosted"/>
+                                        <parameter param-name="invoiceId" from-field="parameters.invoiceId"/>
+                                        <parameter param-name="glFiscalTypeId" from-field="parameters.glFiscalTypeId"/>
+                                        <parameter param-name="shipmentId" from-field="parameters.shipmentId"/>
+                                        <parameter param-name="acctgTransTypeId" from-field="parameters.acctgTransTypeId"/>
+                                        <parameter param-name="workEffortId" from-field="parameters.workEffortId"/>
+                                        <parameter param-name="glJournalId" from-field="parameters.glJournalId"/>
+                                        <parameter param-name="paymentId" from-field="parameters.paymentId"/>
+                                        <parameter param-name="fromDate" from-field="parameters.fromDate"/>
+                                        <parameter param-name="thruDate" from-field="parameters.thruDate"/>
+                                    </link>
+                                    <include-form name="ListAcctgTrans" location="component://accounting/widget/GlForms.xml"/>
+                                </screenlet>
                             </widgets>
                         </section>
                     </decorator-section>
@@ -147,18 +147,11 @@ under the License.
                 <set field="organizationPartyId" from-field="parameters.organizationPartyId" global="true"/>
             </actions>
             <widgets>
-                <decorator-screen name="CommonPartyAccountsDecorator" location="${parameters.mainDecoratorLocation}">
+                <decorator-screen name="CommonPartyGlDecorator" location="${parameters.partyGlDecoratorLocation}">
                     <decorator-section name="body">
-                        <container style="screenlet">
-                            <container style="screenlet-title-bar">
-                                <container style="h3">
-                                    <label text="${uiLabelMap.AccountingAcctgTransEntries}"/>
-                                </container>
-                            </container>
-                            <container style="screenlet-body">
-                                <include-form name="FindAcctgTransEntries" location="component://accounting/widget/GlForms.xml"/>
-                            </container>
-                        </container>
+                        <screenlet title="${uiLabelMap.AccountingAcctgTransEntries}">
+                            <include-form name="FindAcctgTransEntries" location="component://accounting/widget/GlForms.xml"/>
+                        </screenlet>
                         <section>
                             <condition>
                                 <and>
@@ -167,16 +160,60 @@ under the License.
                                 </and>
                             </condition>
                             <widgets>
-                                <container style="screenlet">
-                                    <container style="screenlet-title-bar">
-                                        <container style="h3">
-                                            <label text="${uiLabelMap.AccountingAcctgTransEntries} ${uiLabelMap.AccountingByAccount}"/>
-                                        </container>
-                                    </container>
-                                    <container style="screenlet-body">
-                                        <include-form name="ListFindAcctgTransEntriesByAccount" location="component://accounting/widget/GlForms.xml"/>
-                                    </container>
-                                </container>
+                                <screenlet title="${uiLabelMap.AccountingAcctgTransEntries} ${uiLabelMap.AccountingByAccount}">
+                                    <link text="${uiLabelMap.AccountingExportAsCsv}" style="buttontext" target="AcctgTransEntriesSearchResultsCsv.csv">
+                                        <parameter param-name="organizationPartyId"/>
+                                        <parameter param-name="productId" from-field="parameters.productId"/>
+                                        <parameter param-name="isPosted" from-field="parameters.isPosted"/>
+                                        <parameter param-name="invoiceId" from-field="parameters.invoiceId"/>
+                                        <parameter param-name="acctgTransId" from-field="parameters.acctgTransId"/>
+                                        <parameter param-name="glFiscalTypeId" from-field="parameters.glFiscalTypeId"/>
+                                        <parameter param-name="glAccountId" from-field="parameters.glAccountId"/>
+                                        <parameter param-name="shipmentId" from-field="parameters.shipmentId"/>
+                                        <parameter param-name="acctgTransTypeId" from-field="parameters.acctgTransTypeId"/>
+                                        <parameter param-name="fromDate" from-field="parameters.fromDate"/>
+                                        <parameter param-name="workEffortId" from-field="parameters.workEffortId"/>
+                                        <parameter param-name="glJournalId" from-field="parameters.glJournalId"/>
+                                        <parameter param-name="partyId" from-field="parameters.partyId"/>
+                                        <parameter param-name="thruDate" from-field="parameters.thruDate"/>
+                                        <parameter param-name="paymentId" from-field="parameters.paymentId"/>
+                                    </link>
+                                    <link text="${uiLabelMap.AccountingExportAsPdf}" style="buttontext" target="AcctgTransEntriesSearchResultsPdf.pdf" target-window="_BLANK">
+                                        <parameter param-name="organizationPartyId"/>
+                                        <parameter param-name="productId" from-field="parameters.productId"/>
+                                        <parameter param-name="isPosted" from-field="parameters.isPosted"/>
+                                        <parameter param-name="invoiceId" from-field="parameters.invoiceId"/>
+                                        <parameter param-name="acctgTransId" from-field="parameters.acctgTransId"/>
+                                        <parameter param-name="glFiscalTypeId" from-field="parameters.glFiscalTypeId"/>
+                                        <parameter param-name="glAccountId" from-field="parameters.glAccountId"/>
+                                        <parameter param-name="shipmentId" from-field="parameters.shipmentId"/>
+                                        <parameter param-name="acctgTransTypeId" from-field="parameters.acctgTransTypeId"/>
+                                        <parameter param-name="fromDate" from-field="parameters.fromDate"/>
+                                        <parameter param-name="workEffortId" from-field="parameters.workEffortId"/>
+                                        <parameter param-name="glJournalId" from-field="parameters.glJournalId"/>
+                                        <parameter param-name="partyId" from-field="parameters.partyId"/>
+                                        <parameter param-name="thruDate" from-field="parameters.thruDate"/>
+                                        <parameter param-name="paymentId" from-field="parameters.paymentId"/>
+                                    </link>
+                                    <link text="${uiLabelMap.AccountingExportWithInvoiceAndPaymentAsPdf}" style="buttontext" target="AcctgTransEntriesSearchResultsInvoiceAndPaymentPdf.pdf" target-window="_BLANK">
+                                        <parameter param-name="organizationPartyId"/>
+                                        <parameter param-name="productId" from-field="parameters.productId"/>
+                                        <parameter param-name="isPosted" from-field="parameters.isPosted"/>
+                                        <parameter param-name="invoiceId" from-field="parameters.invoiceId"/>
+                                        <parameter param-name="acctgTransId" from-field="parameters.acctgTransId"/>
+                                        <parameter param-name="glFiscalTypeId" from-field="parameters.glFiscalTypeId"/>
+                                        <parameter param-name="glAccountId" from-field="parameters.glAccountId"/>
+                                        <parameter param-name="shipmentId" from-field="parameters.shipmentId"/>
+                                        <parameter param-name="acctgTransTypeId" from-field="parameters.acctgTransTypeId"/>
+                                        <parameter param-name="fromDate" from-field="parameters.fromDate"/>
+                                        <parameter param-name="workEffortId" from-field="parameters.workEffortId"/>
+                                        <parameter param-name="glJournalId" from-field="parameters.glJournalId"/>
+                                        <parameter param-name="partyId" from-field="parameters.partyId"/>
+                                        <parameter param-name="thruDate" from-field="parameters.thruDate"/>
+                                        <parameter param-name="paymentId" from-field="parameters.paymentId"/>
+                                    </link>
+                                    <include-form name="ListFindAcctgTransEntriesByAccount" location="component://accounting/widget/GlForms.xml"/>
+                                </screenlet>
                             </widgets>
                         </section>
                         <section>
@@ -187,16 +224,43 @@ under the License.
                                 </and>
                             </condition>
                             <widgets>
-                                <container style="screenlet">
-                                    <container style="screenlet-title-bar">
-                                        <container style="h3">
-                                            <label text="${uiLabelMap.AccountingAcctgTransEntries} ${uiLabelMap.AccountingByDate}"/>
-                                        </container>
-                                    </container>
-                                    <container style="screenlet-body">
-                                        <include-form name="ListFindAcctgTransEntriesByDate" location="component://accounting/widget/GlForms.xml"/>
-                                    </container>
-                                </container>
+                                <screenlet title="${uiLabelMap.AccountingAcctgTransEntries} ${uiLabelMap.AccountingByDate}">
+                                    <link text="${uiLabelMap.AccountingExportAsCsv}" style="buttontext" target="AcctgTransEntriesSearchResultsCsv.csv">
+                                        <parameter param-name="organizationPartyId"/>
+                                        <parameter param-name="productId" from-field="parameters.productId"/>
+                                        <parameter param-name="isPosted" from-field="parameters.isPosted"/>
+                                        <parameter param-name="invoiceId" from-field="parameters.invoiceId"/>
+                                        <parameter param-name="acctgTransId" from-field="parameters.acctgTransId"/>
+                                        <parameter param-name="glFiscalTypeId" from-field="parameters.glFiscalTypeId"/>
+                                        <parameter param-name="glAccountId" from-field="parameters.glAccountId"/>
+                                        <parameter param-name="shipmentId" from-field="parameters.shipmentId"/>
+                                        <parameter param-name="acctgTransTypeId" from-field="parameters.acctgTransTypeId"/>
+                                        <parameter param-name="fromDate" from-field="parameters.fromDate"/>
+                                        <parameter param-name="workEffortId" from-field="parameters.workEffortId"/>
+                                        <parameter param-name="glJournalId" from-field="parameters.glJournalId"/>
+                                        <parameter param-name="partyId" from-field="parameters.partyId"/>
+                                        <parameter param-name="thruDate" from-field="parameters.thruDate"/>
+                                        <parameter param-name="paymentId" from-field="parameters.paymentId"/>
+                                    </link>
+                                    <link text="${uiLabelMap.AccountingExportAsPdf}" style="buttontext" target="AcctgTransEntriesSearchResultsPDF.pdf" target-window="_BLANK">
+                                        <parameter param-name="organizationPartyId"/>
+                                        <parameter param-name="productId" from-field="parameters.productId"/>
+                                        <parameter param-name="isPosted" from-field="parameters.isPosted"/>
+                                        <parameter param-name="invoiceId" from-field="parameters.invoiceId"/>
+                                        <parameter param-name="acctgTransId" from-field="parameters.acctgTransId"/>
+                                        <parameter param-name="glFiscalTypeId" from-field="parameters.glFiscalTypeId"/>
+                                        <parameter param-name="glAccountId" from-field="parameters.glAccountId"/>
+                                        <parameter param-name="shipmentId" from-field="parameters.shipmentId"/>
+                                        <parameter param-name="acctgTransTypeId" from-field="parameters.acctgTransTypeId"/>
+                                        <parameter param-name="fromDate" from-field="parameters.fromDate"/>
+                                        <parameter param-name="workEffortId" from-field="parameters.workEffortId"/>
+                                        <parameter param-name="glJournalId" from-field="parameters.glJournalId"/>
+                                        <parameter param-name="partyId" from-field="parameters.partyId"/>
+                                        <parameter param-name="thruDate" from-field="parameters.thruDate"/>
+                                        <parameter param-name="paymentId" from-field="parameters.paymentId"/>
+                                    </link>
+                                    <include-form name="ListFindAcctgTransEntriesByDate" location="component://accounting/widget/GlForms.xml"/>
+                                </screenlet>
                             </widgets>
                         </section>
                     </decorator-section>
@@ -214,18 +278,11 @@ under the License.
                 <set field="labelTitleProperty" value="AccountingCreateAcctgTransAndEntries"/>
             </actions>
             <widgets>
-                <decorator-screen name="CommonPartyAccountsDecorator" location="${parameters.mainDecoratorLocation}">
+                <decorator-screen name="CommonPartyGlDecorator" location="${parameters.partyGlDecoratorLocation}">
                     <decorator-section name="body">
-                        <container style="screenlet">
-                            <container style="screenlet-title-bar">
-                                <container style="h3">
-                                    <label text="${uiLabelMap.AccountingCreateAcctgTransAndEntries}"/>
-                                </container>
-                            </container>
-                            <container style="screenlet-body">
-                                 <include-form name="CreateAcctgTransAndEntries" location="component://accounting/widget/GlForms.xml"/>
-                            </container>
-                        </container>
+                        <screenlet title="${uiLabelMap.AccountingCreateAcctgTransAndEntries}">
+                            <include-form name="CreateAcctgTransAndEntries" location="component://accounting/widget/GlForms.xml"/>
+                        </screenlet>
                     </decorator-section>
                 </decorator-screen>
             </widgets>
@@ -252,120 +309,38 @@ under the License.
                 </entity-and>
             </actions>
             <widgets>
-                <decorator-screen name="CommonPartyAccountsDecorator" location="${parameters.mainDecoratorLocation}">
+                <decorator-screen name="CommonPartyGlDecorator" location="${parameters.partyGlDecoratorLocation}">
                     <decorator-section name="body">
                         <section>
                             <condition>
                                 <not><if-empty field="acctgTransId"/></not>
                             </condition>
                             <widgets>
-                                <container>
-                                    <container style="screenlet">
-                                        <container style="screenlet-title-bar">
-                                            <container style="h3">
-                                                <section>
-                                                    <condition>
-                                                        <if-compare field="acctgTrans.isPosted" operator="equals"  value="Y"/>
-                                                    </condition>
-                                                    <widgets>
-                                                        <label text="${uiLabelMap.PageTitleViewTransaction}"/>
-                                                    </widgets>
-                                                    <fail-widgets>
-                                                        <label text="${uiLabelMap.PageTitleEditTransaction}"/>
-                                                    </fail-widgets>
-                                                </section>
-                                            </container>
-                                        </container>
-                                        <container style="screenlet-body">
-                                            <link text="${uiLabelMap.AccountingDuplicateAccountingTransaction}" style="buttontext" target="copyAcctgTransAndEntries">
-                                                <parameter param-name="revert" value="N"/>
-                                                <parameter param-name="fromAcctgTransId" from-field="acctgTransId"/>
-                                                <parameter param-name="organizationPartyId"/>
-                                            </link>
-                                            <link text="${uiLabelMap.AccountingRevertAccountingTransaction}" style="buttontext" target="copyAcctgTransAndEntries">
-                                                <parameter param-name="revert" value="Y"/>
-                                                <parameter param-name="fromAcctgTransId" from-field="acctgTransId"/>
-                                                <parameter param-name="organizationPartyId"/>
-                                            </link>
-                                            <section>
-                                                <condition>
-                                                    <if-compare field="acctgTrans.isPosted" operator="equals" value="Y"/>
-                                                </condition>
-                                                <widgets>
-                                                    <include-form name="ViewAcctgTrans" location="component://accounting/widget/GlForms.xml"/>
-                                                </widgets>
-                                                <fail-widgets>
-                                                    <include-form name="EditAcctgTrans" location="component://accounting/widget/GlForms.xml"/>
-                                                </fail-widgets>
-                                            </section>
-                                        </container>
-                                    </container>
-                                </container>
-                                <container>
-                                    <container style="screenlet">
-                                        <section>
-                                            <condition>
-                                                <if-compare field="acctgTrans.isPosted" operator="equals"  value="Y"/>
-                                            </condition>
-                                            <widgets>
-                                                <container style="screenlet-title-bar">
-                                                    <container style="h3">
-                                                        <label text="${uiLabelMap.PageTitleViewTransactionEntries}"/>
-                                                    </container>
-                                                </container>
-                                                <container style="screenlet-body">
-                                                    <include-form name="ViewAcctgTransEntries" location="component://accounting/widget/GlForms.xml"/>
-                                                </container>
-                                            </widgets>
-                                            <fail-widgets>
-                                                <container style="screenlet-title-bar">
-                                                    <container style="h3">
-                                                        <label text="${uiLabelMap.PageTitleEditTransactionEntries}"/>
-                                                    </container>
-                                                </container>
-                                                <container style="screenlet-body">
-                                                    <include-form name="ListAcctgTransEntries" location="component://accounting/widget/GlForms.xml"/>
-                                                </container>
-                                            </fail-widgets>
-                                        </section>
-                                    </container>
-                                </container>
-                            </widgets>
-                        </section>
-                        <section>
-                            <condition>
-                               <if-compare field="acctgTrans.isPosted" operator="not-equals" value="Y"/>
-                            </condition>
-                            <widgets>
-                                <container>
-                                    <container style="screenlet">
-                                        <container style="screenlet-title-bar">
-                                            <container style="h3">
-                                                <label text="${uiLabelMap.PageTitleAddTransactionEntry}"/>
-                                            </container>
-                                        </container>
-                                        <container style="screenlet-body">
-                                            <container>
-                                                <link text="${uiLabelMap.AccountingCompleteAcctgTransFields}" style="buttontext" target="completeAcctgTransEntries">
-                                                    <parameter param-name="acctgTransId"/>
-                                                    <parameter param-name="organizationPartyId"/>
-                                                </link>
-                                                <link text="${uiLabelMap.AccountingVerifyTransaction}" style="buttontext" target="postAcctgTrans">
-                                                    <parameter param-name="acctgTransId"/>
-                                                    <parameter param-name="organizationPartyId"/>
-                                                    <parameter param-name="verifyOnly" value="Y"/>
-                                                </link>
-                                                <link text="${uiLabelMap.AccountingPostTransaction}" style="buttontext" target="postAcctgTrans">
-                                                    <parameter param-name="acctgTransId"/>
-                                                    <parameter param-name="organizationPartyId"/>
-                                                </link>
-                                            </container>
-                                            <container>
-                                                <include-form name="EditAcctgTransEntry" location="component://accounting/widget/GlForms.xml"/>
-                                            </container>
-                                        </container>
-                                    </container>
-                                </container>
+                                <include-menu location="component://accounting/widget/AccountingMenus.xml" name="EditGlAcctgTransSubTabBar"/>
+                                <section>
+                                    <condition>
+                                        <if-compare field="acctgTrans.isPosted" operator="equals"  value="Y"/>
+                                    </condition>
+                                    <widgets>
+                                        <screenlet title="${uiLabelMap.PageTitleViewTransaction}">
+                                            <include-form name="ViewAcctgTrans" location="component://accounting/widget/GlForms.xml"/>
+                                        </screenlet>
+                                        <screenlet title="${uiLabelMap.PageTitleViewTransactionEntries}">
+                                            <include-form name="ViewAcctgTransEntries" location="component://accounting/widget/GlForms.xml"/>
+                                        </screenlet>
+                                    </widgets>
+                                    <fail-widgets>
+                                        <screenlet title="${uiLabelMap.PageTitleEditTransaction}">
+                                            <include-form name="EditAcctgTrans" location="component://accounting/widget/GlForms.xml"/>
+                                        </screenlet>
+                                        <screenlet title="${uiLabelMap.PageTitleEditTransactionEntries}">
+                                            <include-form name="ListAcctgTransEntries" location="component://accounting/widget/GlForms.xml"/>
+                                        </screenlet>
+                                        <screenlet title="${uiLabelMap.PageTitleAddTransactionEntry}">
+                                            <include-form name="EditAcctgTransEntry" location="component://accounting/widget/GlForms.xml"/>
+                                        </screenlet>
+                                    </fail-widgets>
+                                </section>
                             </widgets>
                         </section>
                     </decorator-section>
@@ -389,18 +364,11 @@ under the License.
                 </entity-condition>
             </actions>
             <widgets>
-                <decorator-screen name="CommonPartyAccountsDecorator" location="${parameters.mainDecoratorLocation}">
+                <decorator-screen name="CommonPartyGlDecorator" location="${parameters.partyGlDecoratorLocation}">
                     <decorator-section name="body">
-                        <container style="screenlet">
-                            <container style="screenlet-title-bar">
-                                <container style="h3">
-                                    <label text="${uiLabelMap.PageTitleUnpostedTransactions}"/>
-                                </container>
-                            </container>
-                            <container style="screenlet-body">
-                                <include-form name="ListUnpostedAcctgTrans" location="component://accounting/widget/GlForms.xml"/>
-                            </container>
-                        </container>
+                        <screenlet title="${uiLabelMap.PageTitleUnpostedTransactions}">
+                            <include-form name="ListUnpostedAcctgTrans" location="component://accounting/widget/GlForms.xml"/>
+                        </screenlet>
                     </decorator-section>
                 </decorator-screen>
             </widgets>
@@ -437,16 +405,9 @@ under the License.
                         <section>
                         <condition><if-has-permission permission="ACCOUNTING" action="_PRINT_CHECKS"/></condition>
                         <widgets>
-                            <container style="screenlet">
-                                <container style="screenlet-title-bar">
-                                    <container style="h3">
-                                        <label text="${uiLabelMap.AccountingPrintChecks}"/>
-                                    </container>
-                                </container>
-                                <container style="screenlet-body">
-                                     <include-form name="ListChecksToPrint" location="component://accounting/webapp/accounting/payment/PaymentForms.xml"/>
-                                </container>
-                            </container>
+                            <screenlet title="${uiLabelMap.AccountingPrintChecks}">
+                                <include-form name="ListChecksToPrint" location="component://accounting/widget/PaymentForms.xml"/>
+                            </screenlet>
                         </widgets>
                         <fail-widgets>
                             <label style="h3">${uiLabelMap.AccountingPrintChecksPermissionError}</label>
@@ -484,18 +445,16 @@ under the License.
                 <decorator-screen name="CommonAdminChecksDecorator" location="${parameters.mainDecoratorLocation}">
                     <decorator-section name="checks-body">
                         <section>
-                        <condition><if-has-permission permission="PAY_INFO" action="_UPDATE"/></condition>
+                        <condition>
+                            <or>
+                                <if-has-permission permission="ACCOUNTING" action="_UPDATE"/>
+                                <if-has-permission permission="PAY_INFO" action="_UPDATE"/>
+                            </or>
+                        </condition>
                         <widgets>
-                            <container style="screenlet">
-                                <container style="screenlet-title-bar">
-                                    <container style="h3">
-                                        <label text="${uiLabelMap.AccountingSendChecks}"/>
-                                    </container>
-                                </container>
-                                <container style="screenlet-body">
-                                     <include-form name="ListChecksToSend" location="component://accounting/webapp/accounting/payment/PaymentForms.xml"/>
-                                </container>
-                            </container>
+                            <screenlet title="${uiLabelMap.AccountingSendChecks}">
+                                <include-form name="ListChecksToSend" location="component://accounting/widget/PaymentForms.xml"/>
+                            </screenlet>
                         </widgets>
                         <fail-widgets>
                             <label style="h3">${uiLabelMap.AccountingUpdatePaymentPermissionError}</label>
@@ -515,18 +474,11 @@ under the License.
                 <set field="labelTitleProperty" value="AccountingCreateAnAccountingTransaction"/>
             </actions>
             <widgets>
-                <decorator-screen name="CommonPartyAccountsDecorator" location="${parameters.mainDecoratorLocation}">
+                <decorator-screen name="CommonPartyGlDecorator" location="${parameters.partyGlDecoratorLocation}">
                     <decorator-section name="body">
-                        <container style="screenlet">
-                            <container style="screenlet-title-bar">
-                                <container style="h3">
-                                    <label text="${uiLabelMap.AccountingCreateAnAccountingTransaction}"/>
-                                </container>
-                            </container>
-                            <container style="screenlet-body">
-                                 <include-form name="CreateAcctgTrans" location="component://accounting/widget/GlForms.xml"/>
-                            </container>
-                        </container>
+                        <screenlet title="${uiLabelMap.AccountingCreateAnAccountingTransaction}">
+                            <include-form name="CreateAcctgTrans" location="component://accounting/widget/GlForms.xml"/>
+                        </screenlet>
                     </decorator-section>
                 </decorator-screen>
             </widgets>
@@ -543,41 +495,19 @@ under the License.
                 <set field="glAccountId" from-field="parameters.glAccountId"/>
             </actions>
             <widgets>
-                <decorator-screen name="CommonPartyAccountsDecorator" location="${parameters.mainDecoratorLocation}">
+                <decorator-screen name="CommonPartyGlDecorator" location="${parameters.partyGlDecoratorLocation}">
                     <decorator-section name="body">
-                        <container style="screenlet">
-                            <container style="screenlet-title-bar">
-                                <container style="h3">
-                                    <label text="${uiLabelMap.AccountingAcctRecon}"/>
-                                </container>
-                            </container>
-                            <container style="screenlet-body">
-                                <section>
-                                    <widgets>
-                                        <include-form name="FindGlAccountReconciliation" location="component://accounting/widget/GlForms.xml"/>
-                                    </widgets>
-                                </section>
-                            </container>
-                        </container>
+                        <screenlet title="${uiLabelMap.AccountingAcctRecon}">
+                            <include-form name="FindGlAccountReconciliation" location="component://accounting/widget/GlForms.xml"/>
+                        </screenlet>
                         <section>
                             <condition>
                                 <if-compare field="parameters.performSearch" operator="equals" value="Y"/>
                             </condition>
                             <widgets>
-                                <container style="screenlet">
-                                    <container style="screenlet-title-bar">
-                                        <container style="h3">
-                                            <label text="${uiLabelMap.AccountingAcctRecon}"/>
-                                        </container>
-                                    </container>
-                                    <container style="screenlet-body">
-                                        <section>
-                                            <widgets>
-                                                <include-form name="ListGlAccountReconciliation" location="component://accounting/widget/GlForms.xml"/>
-                                            </widgets>
-                                        </section>
-                                    </container>
-                                </container>
+                                <screenlet title="${uiLabelMap.AccountingAcctRecon}">
+                                    <include-form name="ListGlAccountReconciliation" location="component://accounting/widget/GlForms.xml"/>
+                                </screenlet>
                             </widgets>
                         </section>
                     </decorator-section>
@@ -595,44 +525,14 @@ under the License.
                 <entity-one entity-name="GlReconciliation" value-field="glReconciliation"/>
             </actions>
             <widgets>
-                <decorator-screen name="CommonPartyAccountsDecorator" location="${parameters.mainDecoratorLocation}">
+                <decorator-screen name="CommonPartyGlDecorator" location="${parameters.partyGlDecoratorLocation}">
                     <decorator-section name="body">
-                        <section>
-                            <widgets>
-                                <container style="screenlet">
-                                    <container style="screenlet-title-bar">
-                                        <container style="h3">
-                                            <label text="${uiLabelMap.AccountingEditAcctRecon}"/>
-                                        </container>
-                                    </container>
-                                    <container style="screenlet-body">
-                                        <section>
-                                            <widgets>
-                                                <include-form name="EditGlReconciliation" location="component://accounting/widget/GlForms.xml"/>
-                                            </widgets>
-                                        </section>
-                                    </container>
-                                </container>
-                            </widgets>
-                        </section>
-                        <section>
-                            <widgets>
-                                <container style="screenlet">
-                                    <container style="screenlet-title-bar">
-                                        <container style="h3">
-                                            <label text="${uiLabelMap.AccountingEditAcctRecon}"/>
-                                        </container>
-                                    </container>
-                                    <container style="screenlet-body">
-                                        <section>
-                                            <widgets>
-                                                <include-form name="ListGlReconciliationEntries" location="component://accounting/widget/GlForms.xml"/>
-                                            </widgets>
-                                        </section>
-                                    </container>
-                                </container>
-                            </widgets>
-                        </section>
+                        <screenlet title="${uiLabelMap.AccountingEditAcctRecon}">
+                            <include-form name="EditGlReconciliation" location="component://accounting/widget/GlForms.xml"/>
+                        </screenlet>
+                        <screenlet title="${uiLabelMap.AccountingEditAcctRecon}">
+                            <include-form name="ListGlReconciliationEntries" location="component://accounting/widget/GlForms.xml"/>
+                        </screenlet>
                     </decorator-section>
                 </decorator-screen>
             </widgets>
@@ -648,43 +548,154 @@ under the License.
                 <set field="glAccountId" from-field="parameters.glAccountId"/>
             </actions>
             <widgets>
-                <decorator-screen name="CommonPartyAccountsDecorator" location="${parameters.mainDecoratorLocation}">
+                <decorator-screen name="CommonPartyGlDecorator" location="${parameters.partyGlDecoratorLocation}">
                     <decorator-section name="body">
-                        <container style="screenlet">
-                            <container style="screenlet-title-bar">
-                                <container style="h3">
-                                    <label text="${uiLabelMap.AccountingAcctRecons}"/>
-                                </container>
-                            </container>
-                            <container style="screenlet-body">
-                                <section>
-                                    <widgets>
-                                        <include-form name="FindGlAccountReconciliations" location="component://accounting/widget/GlForms.xml"/>
-                                    </widgets>
-                                </section>
-                            </container>
-                        </container>
+                        <screenlet title="${uiLabelMap.AccountingAcctRecons}">
+                            <include-form name="FindGlAccountReconciliations" location="component://accounting/widget/GlForms.xml"/>
+                        </screenlet>
                         <section>
                             <condition>
                                 <if-compare field="parameters.performSearch" operator="equals" value="Y"/>
                             </condition>
                             <widgets>
-                                <container style="screenlet">
-                                    <container style="screenlet-title-bar">
-                                        <container style="h3">
-                                            <label text="${uiLabelMap.AccountingAcctRecons}"/>
-                                        </container>
-                                    </container>
-                                    <container style="screenlet-body">
-                                        <section>
-                                            <widgets>
-                                                <include-form name="ListGlAccountReconciliations" location="component://accounting/widget/GlForms.xml"/>
-                                            </widgets>
-                                        </section>
-                                    </container>
-                                </container>
+                                <screenlet title="${uiLabelMap.AccountingAcctRecons}">
+                                    <include-form name="ListGlAccountReconciliations" location="component://accounting/widget/GlForms.xml"/>
+                                </screenlet>
                             </widgets>
                         </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="AcctgTransSearchResultsCsv">
+        <section>
+            <actions>
+                <property-map resource="AccountingUiLabels" map-name="uiLabelMap" global="true"/>
+                <set field="organizationPartyId" from-field="parameters.organizationPartyId"/>
+            </actions>
+            <widgets>
+                <container>
+                    <include-form name="AcctgTransSearchResultsCsv" location="component://accounting/widget/GlForms.xml"/>
+                </container>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="AcctgTransEntriesSearchResultsCsv">
+        <section>
+            <actions>
+                <property-map resource="AccountingUiLabels" map-name="uiLabelMap" global="true"/>
+                <set field="organizationPartyId" from-field="parameters.organizationPartyId"/>
+            </actions>
+            <widgets>
+                <container>
+                    <include-form name="AcctgTransEntriesSearchResultsCsv" location="component://accounting/widget/GlForms.xml"/>
+                </container>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="AcctgTransEntriesSearchResultsPdf">
+        <section>
+            <actions>
+                <property-map resource="CommonUiLabels" map-name="uiLabelMap" global="true"/>
+                <property-map resource="AccountingUiLabels" map-name="uiLabelMap" global="true"/>
+                <property-map resource="WorkEffortUiLabels" map-name="uiLabelMap" global="true"/>
+                <set field="organizationPartyId" from-field="parameters.organizationPartyId" global="true"/>
+                <entity-condition entity-name="AcctgTransAndEntries" list="acctgTransEntryList">
+                    <condition-list>
+                        <condition-expr field-name="organizationPartyId" operator="equals" from-field="parameters.organizationPartyId"/>
+                        <condition-expr field-name="glAccountId" operator="equals" from-field="parameters.glAccountId" ignore-if-empty="true"/>
+                        <condition-expr field-name="acctgTransTypeId" operator="equals" from-field="parameters.acctgTransTypeId" ignore-if-empty="true"/>
+                        <condition-expr field-name="glFiscalTypeId" operator="equals" from-field="parameters.glFiscalTypeId" ignore-if-empty="true"/>
+                        <condition-expr field-name="glJournalId" operator="equals" from-field="parameters.glJournalId" ignore-if-empty="true"/>
+                        <condition-expr field-name="isPosted" operator="equals" from-field="parameters.isPosted" ignore-if-empty="true"/>
+                        <condition-expr field-name="partyId" operator="equals" from-field="parameters.partyId" ignore-if-empty="true"/>
+                        <condition-expr field-name="invoiceId" operator="equals" from-field="parameters.invoiceId" ignore-if-empty="true"/>
+                        <condition-expr field-name="paymentId" operator="equals" from-field="parameters.paymentId" ignore-if-empty="true"/>
+                        <condition-expr field-name="productId" operator="equals" from-field="parameters.productId" ignore-if-empty="true"/>
+                        <condition-expr field-name="workEffortId" operator="equals" from-field="parameters.workEffortId" ignore-if-empty="true"/>
+                        <condition-expr field-name="shipmentId" operator="equals" from-field="parameters.shipmentId" ignore-if-empty="true"/>
+                        <condition-expr field-name="acctgTransId" operator="equals" from-field="parameters.acctgTransId" ignore-if-empty="true"/>
+                        <condition-expr field-name="transactionDate" operator="greater-equals" from-field="parameters.fromDate" ignore-if-empty="true"/>
+                        <condition-expr field-name="transactionDate" operator="less" from-field="parameters.thruDate" ignore-if-empty="true"/>
+                    </condition-list>
+                    <order-by field-name="-transactionDate"/>
+                </entity-condition>
+            </actions>
+            <widgets>
+                <platform-specific>
+                    <xsl-fo>
+                        <html-template location="component://accounting/webapp/accounting/reports/AcctgTransEntriesSearchResult.fo.ftl"/>
+                    </xsl-fo>
+                </platform-specific>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="AcctgTransSearchResultPdf">
+        <section>
+            <actions>
+                <property-map resource="CommonUiLabels" map-name="uiLabelMap" global="true"/>
+                <property-map resource="AccountingUiLabels" map-name="uiLabelMap" global="true"/>
+                <property-map resource="WorkEffortUiLabels" map-name="uiLabelMap" global="true"/>
+                <set field="organizationPartyId" from-field="parameters.organizationPartyId" global="true"/>
+                <entity-condition entity-name="AcctgTransAndEntries" list="acctgTransList" distinct="true" >
+                    <condition-list>
+                        <condition-expr field-name="organizationPartyId" operator="equals" from-field="organizationPartyId"/>
+                        <condition-expr field-name="acctgTransTypeId" operator="equals" from-field="parameters.acctgTransTypeId" ignore-if-empty="true"/>
+                        <condition-expr field-name="glFiscalTypeId" operator="equals" from-field="parameters.glFiscalTypeId" ignore-if-empty="true"/>
+                        <condition-expr field-name="glJournalId" operator="equals" from-field="parameters.glJournalId" ignore-if-empty="true"/>
+                        <condition-expr field-name="isPosted" operator="equals" from-field="parameters.isPosted" ignore-if-empty="true"/>
+                        <condition-expr field-name="invoiceId" operator="equals" from-field="parameters.invoiceId" ignore-if-empty="true"/>
+                        <condition-expr field-name="paymentId" operator="equals" from-field="parameters.paymentId" ignore-if-empty="true"/>
+                        <condition-expr field-name="productId" operator="equals" from-field="parameters.productId" ignore-if-empty="true"/>
+                        <condition-expr field-name="workEffortId" operator="equals" from-field="parameters.workEffortId" ignore-if-empty="true"/>
+                        <condition-expr field-name="shipmentId" operator="equals" from-field="parameters.shipmentId" ignore-if-empty="true"/>
+                        <condition-expr field-name="acctgTransId" operator="equals" from-field="parameters.acctgTransId" ignore-if-empty="true"/>
+                        <condition-expr field-name="transactionDate" operator="greater-equals" from-field="parameters.fromDate" ignore-if-empty="true"/>
+                        <condition-expr field-name="transactionDate" operator="less" from-field="parameters.thruDate" ignore-if-empty="true"/>
+                    </condition-list>
+                    <select-field field-name="acctgTransId"/>
+                    <select-field field-name="transactionDate"/>
+                    <select-field field-name="acctgTransTypeId"/>
+                    <select-field field-name="glFiscalTypeId"/>
+                    <select-field field-name="invoiceId"/>
+                    <select-field field-name="paymentId"/>
+                    <select-field field-name="workEffortId"/>
+                    <select-field field-name="shipmentId"/>
+                    <select-field field-name="isPosted"/>
+                    <select-field field-name="postedDate"/>
+                    <order-by field-name="-transactionDate"/>
+                </entity-condition>
+            </actions>
+            <widgets>
+                <platform-specific>
+                    <xsl-fo>
+                        <html-template location="component://accounting/webapp/accounting/reports/AcctgTransSearchResult.fo.ftl"/>
+                    </xsl-fo>
+                </platform-specific>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="AcctgTransDetailReportPdf">
+        <section>
+            <actions>
+                <property-map resource="AccountingUiLabels" map-name="uiLabelMap" global="true"/>
+                <set field="acctgTransId" from-field="parameters.acctgTransId"/>
+                <entity-one entity-name="AcctgTrans" value-field="acctgTrans"/>
+                <entity-and entity-name="AcctgTransEntry" list="acctgTransEntries">
+                    <field-map field-name="acctgTransId"/>
+                    <order-by field-name="acctgTransEntrySeqId"/>
+                </entity-and>
+            </actions>
+            <widgets>
+                <decorator-screen name="SimpleDecorator" location="component://common/widget/CommonScreens.xml">
+                    <decorator-section name="body">
+                        <include-form name="AcctgTransDetailReportPdf" location="component://accounting/widget/GlForms.xml"/>
+                        <include-form name="AcctgTransEntriesDetailReportPdf" location="component://accounting/widget/GlForms.xml"/>
                     </decorator-section>
                 </decorator-screen>
             </widgets>

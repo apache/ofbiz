@@ -20,7 +20,7 @@ under the License.
 <h1>${uiLabelMap.WebtoolsExportFromDataSource}</h1>
 <br />
 <p>This page can be used to export data from the database. The exported documents will have a root tag of "&lt;entity-engine-xml&gt;".</p>
-<hr/>
+<hr />
 <#if security.hasPermission("ENTITY_MAINT", session)>
     <a href="<@ofbizUrl>xmldsrawdump</@ofbizUrl>" class="buttontext" target="_blank">Click Here to Get Data (or save to file)</a>
 <#else>
@@ -35,17 +35,16 @@ under the License.
   </div>
 </#macro>
 
-<h1>${uiLabelMap.PageTitleEntityExport}</h1>
-<br />
+<div class="page-title"><span>${uiLabelMap.PageTitleEntityExport}</span></div>
 <p>${uiLabelMap.WebtoolsXMLExportInfo}</p>
-<hr/>
+<hr />
 
 <#if security.hasPermission("ENTITY_MAINT", session)>
   <h2>${uiLabelMap.WebtoolsResults}:</h2>
-  <#if Static["org.ofbiz.base.util.UtilValidate"].isNotEmpty(parameters.filename) && (numberOfEntities?number > 0)>
+  <#if parameters.filename?has_content && (numberOfEntities?number > 0)>
     <p>${uiLabelMap.WebtoolsWroteXMLForAllDataIn}</p>
     <p>${uiLabelMap.WebtoolsWroteNRecordsToXMLFile}</p>
-  <#elseif Static["org.ofbiz.base.util.UtilValidate"].isNotEmpty(parameters.outpath) && (numberOfEntities?number > 0)>
+  <#elseif parameters.outpath?has_content && (numberOfEntities?number > 0)>
     <#list results as result>
       <p>${result}</p>
     </#list>
@@ -53,7 +52,7 @@ under the License.
     <p>${uiLabelMap.WebtoolsNoFilenameSpecified}</p>
   </#if>
 
-  <hr/>
+  <hr />
 
   <h2>${uiLabelMap.WebtoolsExport}:</h2>
   <form method="post" action="<@ofbizUrl>xmldsdump</@ofbizUrl>" name="entityExport">
@@ -72,20 +71,22 @@ under the License.
       </tr>
       <tr>
         <td class="label">${uiLabelMap.WebtoolsRecordsUpdatedSince}</td>
-        <td><input type="text" size="25" name="entityFrom" />
-        <a href="javascript:call_cal(document.entityExport.entityFrom, null);" title="View Calendar"><img src="<@ofbizContentUrl>/images/cal.gif</@ofbizContentUrl>" width="16" height="16" border="0" alt="View Calendar"></a></td>
+        <td>
+        <@htmlTemplate.renderDateTimeField name="entityFrom" event="" action="" className="" alert="" title="Format: yyyy-MM-dd HH:mm:ss.SSS" value="" size="25" maxlength="30" id="entityFrom1" dateType="date" shortDateInput=false timeDropdownParamName="" defaultDateTimeString="" localizedIconTitle="" timeDropdown="" timeHourName="" classString="" hour1="" hour2="" timeMinutesName="" minutes="" isTwelveHour="" ampmName="" amSelected="" pmSelected="" compositeType="" formName=""/>
+        </td>
       </tr>
       <tr>
         <td class="label">${uiLabelMap.WebtoolsRecordsUpdatedBefore} </td>
-        <td><input type="text" size="25" name="entityThru" />
-        <a href="javascript:call_cal(document.entityExport.entityThru, null);" title="View Calendar"><img src="<@ofbizContentUrl>/images/cal.gif</@ofbizContentUrl>" width="16" height="16" border="0" alt="View Calendar"></a></td>
+        <td>
+            <@htmlTemplate.renderDateTimeField name="entityThru" event="" action="" className="" alert="" title="Format: yyyy-MM-dd HH:mm:ss.SSS" value="" size="25" maxlength="30" id="entityThru1" dateType="date" shortDateInput=false timeDropdownParamName="" defaultDateTimeString="" localizedIconTitle="" timeDropdown="" timeHourName="" classString="" hour1="" hour2="" timeMinutesName="" minutes="" isTwelveHour="" ampmName="" amSelected="" pmSelected="" compositeType="" formName=""/>
+        </td>
       </tr>
       <tr>
-        <td class="label">${uiLabelMap.WebtoolsOutToBrowser}</td>
-        <td><input type="checkbox" name="tobrowser"<#if tobrowser?has_content> checked="checked"</#if>></td>
+        <td class="label">${StringUtil.wrapString(uiLabelMap.WebtoolsOutToBrowser)}</td>
+        <td><input type="checkbox" name="tobrowser"<#if tobrowser?has_content> checked="checked"</#if> /></td>
       </tr>
     </table>
-    <br/>
+    <br />
     <p>${uiLabelMap.WebtoolsEntityNames}:</p>
     <@displayButtonBar/>
       <div>${uiLabelMap.WebtoolsEntitySyncDump}:
@@ -100,14 +101,14 @@ under the License.
         <option value="Product3">${uiLabelMap.WebtoolsPreConfiguredSet4}</option>
         <option value="Product4">${uiLabelMap.WebtoolsPreConfiguredSet5}</option>
       </select>
-      <br/>
+      <br />
 
       <table>
         <tr>
           <#assign entCount = 0>
           <#assign checkAll = parameters.checkAll?default("false")>
           <#list modelEntities as modelEntity>
-            <#if entCount % 3 == 0>
+            <#if entCount % 3 == 0 && entCount != 0>
               </tr><tr>
             </#if>
             <#assign entCount = entCount + 1>

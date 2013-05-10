@@ -31,10 +31,10 @@ your template file:
 <#macro NullMacro></#macro>
 
 <#macro DateField formName="" fieldName="" fieldValue="" fieldClass="">
-  <input type="text" name="${fieldName}"<#if fieldValue?has_content> value="${fieldValue}"</#if><#if fieldClass?has_content> class="${fieldClass}"</#if> maxlength="25" size="25"/>
   <#if javaScriptEnabled>
-    <a href="javascript:call_cal(document.${formName}.${fieldName},'${fieldValue}');">
-    <img src="/images/cal.gif" width="16" height="16" border="0" alt="${uiLabelMap.CommonViewCalendar}" title="${uiLabelMap.CommonViewCalendar}"/></a>
+    <@htmlTemplate.renderDateTimeField name="${fieldName}" event="${event!}" action="${action!}" className="${fieldClass!''}" alert="" title="Format: yyyy-MM-dd HH:mm:ss.SSS" value="${fieldValue!''}" size="25" maxlength="30" id="${fieldName}1" dateType="date" shortDateInput=false timeDropdownParamName="" defaultDateTimeString="" localizedIconTitle="" timeDropdown="" timeHourName="" classString="" hour1="" hour2="" timeMinutesName="" minutes="" isTwelveHour="" ampmName="" amSelected="" pmSelected="" compositeType="" formName=""/>
+  <#else>
+      <input type="text" name="${fieldName}"<#if fieldValue?has_content> value="${fieldValue}"</#if><#if fieldClass?has_content> class="${fieldClass}"</#if> maxlength="25" size="25"/>
   </#if>
   <span class="tooltip">${uiLabelMap.CommonFormatDateTime}</span>
   <#if fieldClass == "required">
@@ -94,5 +94,27 @@ your template file:
   </select>
   <#if fieldClass == "required">
     <span class="tooltip">${uiLabelMap.CommonRequired}</span>
+  </#if>
+</#macro>
+
+<#macro fieldErrors fieldName>
+  <#if errorMessageList?has_content>
+    <#assign fieldMessages = Static["org.ofbiz.base.util.MessageString"].getMessagesForField(fieldName, true, errorMessageList)>
+    <ul>
+      <#list fieldMessages as errorMsg>
+        <li class="errorMessage">${errorMsg}</li>
+      </#list>
+    </ul>
+  </#if>
+</#macro>
+
+<#macro fieldErrorsMulti fieldName1 fieldName2 fieldName3 fieldName4>
+  <#if errorMessageList?has_content>
+    <#assign fieldMessages = Static["org.ofbiz.base.util.MessageString"].getMessagesForField(fieldName1, fieldName2, fieldName3, fieldName4, true, errorMessageList)>
+    <ul>
+      <#list fieldMessages as errorMsg>
+        <li class="errorMessage">${errorMsg}</li>
+      </#list>
+    </ul>
   </#if>
 </#macro>

@@ -17,11 +17,9 @@ specific language governing permissions and limitations
 under the License.
 -->
 
-<h1>${uiLabelMap.WebtoolsImportToDataSource}</h1>
-<br />
+<div class="page-title"><span>${uiLabelMap.WebtoolsImportToDataSource}</span></div>
 <p>${uiLabelMap.WebtoolsXMLImportInfo}</p>
-<hr/>
-<h2>${uiLabelMap.WebtoolsImport}:</h2>
+<hr />
 
   <form method="post" action="<@ofbizUrl>entityImportDir</@ofbizUrl>">
     ${uiLabelMap.WebtoolsAbsolutePath}:<br />
@@ -30,13 +28,13 @@ under the License.
     <input type="checkbox" name="maintainTimeStamps" <#if keepStamps?exists>checked="checked"</#if>/>${uiLabelMap.WebtoolsMaintainTimestamps}<br />
     <input type="checkbox" name="createDummyFks" <#if createDummyFks?exists>checked="checked"</#if>/>${uiLabelMap.WebtoolsCreateDummyFks}<br />
     <input type="checkbox" name="deleteFiles" <#if (deleteFiles?exists)>checked="checked"</#if>/>${uiLabelMap.WebtoolsDeleteFiles}<br />
-    <input type="checkbox" name="checkDataOnly" <#if checkDataOnly?exists>"checked"</#if>/>${uiLabelMap.WebtoolsCheckDataOnly}<br />
+    <input type="checkbox" name="checkDataOnly" <#if checkDataOnly?exists>checked="checked"</#if>/>${uiLabelMap.WebtoolsCheckDataOnly}<br />
     ${uiLabelMap.WebtoolsTimeoutSeconds}:<input type="text" size="6" value="${txTimeoutStr?default("7200")}" name="txTimeout"/><br />
     ${uiLabelMap.WebtoolsPause}:<input type="text" size="6" value="${filePauseStr?default("0")}" name="filePause"/><br />
     <div class="button-bar"><input type="submit" value="${uiLabelMap.WebtoolsImportFile}"/></div>
   </form>
   <#if messages?exists>
-    <hr/>
+    <hr />
     <h1>${uiLabelMap.WebtoolsResults}:</h1>
     <#list messages as message>
         <p>${message}</p>

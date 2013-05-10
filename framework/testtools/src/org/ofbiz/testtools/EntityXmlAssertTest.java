@@ -18,25 +18,21 @@
  *******************************************************************************/
 package org.ofbiz.testtools;
 
-import junit.framework.TestResult;
-import junit.framework.AssertionFailedError;
+import java.net.URL;
+import java.util.List;
 
-import org.w3c.dom.Element;
-import org.ofbiz.entity.GenericDelegator;
+import javolution.util.FastList;
+import junit.framework.AssertionFailedError;
+import junit.framework.TestResult;
+
+import org.ofbiz.base.location.FlexibleLocation;
+import org.ofbiz.base.util.Debug;
+import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.entity.GenericValue;
 import org.ofbiz.entity.util.EntityDataAssert;
 import org.ofbiz.entity.util.EntitySaxReader;
 import org.ofbiz.service.testtools.OFBizTestCase;
-import org.ofbiz.base.util.UtilValidate;
-import org.ofbiz.base.util.Debug;
-import org.ofbiz.base.location.FlexibleLocation;
-
-import javolution.util.FastList;
-
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.net.URL;
+import org.w3c.dom.Element;
 
 public class EntityXmlAssertTest extends OFBizTestCase {
 
@@ -46,7 +42,9 @@ public class EntityXmlAssertTest extends OFBizTestCase {
     protected String action;
 
     /**
-     * @param modelTestSuite
+     * Tests of entity xml
+     * @param caseName test case name
+     * @param mainElement DOM main element 
      */
     public EntityXmlAssertTest(String caseName, Element mainElement) {
         super(caseName);
@@ -55,6 +53,7 @@ public class EntityXmlAssertTest extends OFBizTestCase {
         if (UtilValidate.isEmpty(this.action)) this.action = "assert";
     }
 
+    @Override
     public int countTestCases() {
         int testCaseCount = 0;
         try {
@@ -67,6 +66,7 @@ public class EntityXmlAssertTest extends OFBizTestCase {
         return testCaseCount;
     }
 
+    @Override
     public void run(TestResult result) {
         result.startTest(this);
 
@@ -78,7 +78,7 @@ public class EntityXmlAssertTest extends OFBizTestCase {
                 EntityDataAssert.assertData(entityXmlURL, delegator, errorMessages);
             } else if ("load".equals(this.action)) {
                 EntitySaxReader reader = new EntitySaxReader(delegator);
-                long numberRead = reader.parse(entityXmlURL);
+                reader.parse(entityXmlURL);
             } else {
                 // uh oh, bad value
                 result.addFailure(this, new AssertionFailedError("Bad value [" + this.action + "] for action attribute of entity-xml element"));

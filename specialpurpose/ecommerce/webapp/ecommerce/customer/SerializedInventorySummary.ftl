@@ -18,8 +18,8 @@ under the License.
 -->
 
 <div id="serialized-inventory-summary" class="screenlet">
-    <div class="screenlet-header">
-        <span class="boxhead">${uiLabelMap.ProductSerializedInventorySummary}</span>
+    <div class="screenlet-title-bar">
+        <span class="h3">${uiLabelMap.ProductSerializedInventorySummary}</span>
     </div>
     <div class="screenlet-body">
         <table width="100%" cellspacing="0" cellpadding="2">
@@ -35,7 +35,7 @@ under the License.
             </thead>
             <tbody>
                 <#list inventoryItemList as inventoryItem>
-                    <#assign product = inventoryItem.getRelatedOne('Product')?if_exists>
+                    <#assign product = inventoryItem.getRelatedOne('Product', false)?if_exists>
                     <tr>
                         <td>${inventoryItem.inventoryItemId}</td>
                         <td>

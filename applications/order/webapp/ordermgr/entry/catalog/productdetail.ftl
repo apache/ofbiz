@@ -82,11 +82,11 @@ ${virtualJavaScript?if_exists}
     }
     function addItem() {
        if (document.addform.add_product_id.value == 'NULL') {
-           alert("Please select all of the required options.");
+           showErrorAlert("${uiLabelMap.CommonErrorMessage2}","${uiLabelMap.CommonPleaseSelectAllRequiredOptions}");
            return;
        } else {
            if (isVirtual(document.addform.add_product_id.value)) {
-               document.location = '<@ofbizUrl>product?category_id=${categoryId?if_exists}&product_id=</@ofbizUrl>' + document.addform.add_product_id.value;
+               document.location = '<@ofbizUrl>product?category_id=${categoryId?if_exists}&amp;product_id=</@ofbizUrl>' + document.addform.add_product_id.value;
                return;
            } else {
                document.addform.submit();
@@ -107,7 +107,7 @@ ${virtualJavaScript?if_exists}
         if (detailImageUrl == "_NONE_") {
             hack = document.createElement('span');
             hack.innerHTML="${uiLabelMap.CommonNoDetailImageAvailableToDisplay}";
-            alert(hack.innerHTML);
+            showErrorAlert("${uiLabelMap.CommonErrorMessage2}","${uiLabelMap.CommonNoDetailImageAvailableToDisplay}");
             return;
         }
         detailImageUrl = detailImageUrl.replace(/\&\#47;/g, "/");
@@ -171,6 +171,9 @@ ${virtualJavaScript?if_exists}
             // using the selected index locate the sku
             var sku = document.forms["addform"].elements[name].options[indexSelected].value;
 
+            // display alternative packaging dropdown
+            ajaxUpdateArea("product_uom", "<@ofbizUrl>ProductUomDropDownOnly</@ofbizUrl>", "productId=" + sku);
+
             // set the product ID
             setAddProductId(sku);
 
@@ -187,25 +190,29 @@ ${virtualJavaScript?if_exists}
         msg[0]="Please use correct date format [yyyy-mm-dd]";
 
         var y=x.split("-");
-        if(y.length!=3){ alert(msg[0]);return false; }
-        if((y[2].length>2)||(parseInt(y[2])>31)) { alert(msg[0]); return false; }
+        if(y.length!=3){ showAlert(msg[0]);return false; }
+        if((y[2].length>2)||(parseInt(y[2])>31)) { showAlert(msg[0]); return false; }
         if(y[2].length==1){ y[2]="0"+y[2]; }
-        if((y[1].length>2)||(parseInt(y[1])>12)){ alert(msg[0]); return false; }
+        if((y[1].length>2)||(parseInt(y[1])>12)){ showAlert(msg[0]); return false; }
         if(y[1].length==1){ y[1]="0"+y[1]; }
-        if(y[0].length>4){ alert(msg[0]); return false; }
+        if(y[0].length>4){ showAlert(msg[0]); return false; }
         if(y[0].length<4) {
             if(y[0].length==2) {
                 y[0]="20"+y[0];
             } else {
-                alert(msg[0]);
+                showAlert(msg[0]);
                 return false;
             }
         }
         return (y[0]+"-"+y[1]+"-"+y[2]);
     }
 
+    function showAlert(msg) {
+        showErrorAlert("${uiLabelMap.CommonErrorMessage2}",msg);
+    }
+
     function additemSubmit(){
-        <#if product.productTypeId?if_exists == "ASSET_USAGE">
+        <#if product.productTypeId?if_exists == "ASSET_USAGE" || product.productTypeId?if_exists == "ASSET_USAGE_OUT_IN">
         newdatevalue = validate(document.addform.reservStart.value);
         if (newdatevalue == false) {
             document.addform.reservStart.focus();
@@ -219,7 +226,7 @@ ${virtualJavaScript?if_exists}
     }
 
     function addShoplistSubmit(){
-        <#if product.productTypeId?if_exists == "ASSET_USAGE">
+        <#if product.productTypeId?if_exists == "ASSET_USAGE" || product.productTypeId?if_exists == "ASSET_USAGE_OUT_IN">
         if (document.addToShoppingList.reservStartStr.value == "") {
             document.addToShoppingList.submit();
         } else {
@@ -239,26 +246,38 @@ ${virtualJavaScript?if_exists}
     }
 
     <#if product.virtualVariantMethodEnum?if_exists == "VV_FEATURETREE" && featureLists?has_content>
-	    function checkRadioButton() {
-		    var block1 = document.getElementById("addCart1");
-		    var block2 = document.getElementById("addCart2");
-	        <#list featureLists as featureList>
-			    <#list featureList as feature>
-				    <#if feature_index == 0>
-				        var myList = document.getElementById("FT${feature.productFeatureTypeId}");
-				         if (myList.options[0].selected == true){
-				         	block1.style.display = "none";
-				         	block2.style.display = "block";
-				         	return;
-				         }
-				    	<#break>
-				    </#if>
-			    </#list>
-	        </#list>
-	        block1.style.display = "block";
-	        block2.style.display = "none";
-	    }
+        function checkRadioButton() {
+            var block1 = document.getElementById("addCart1");
+            var block2 = document.getElementById("addCart2");
+            <#list featureLists as featureList>
+                <#list featureList as feature>
+                    <#if feature_index == 0>
+                        var myList = document.getElementById("FT${feature.productFeatureTypeId}");
+                         if (myList.options[0].selected == true){
+                             block1.style.display = "none";
+                             block2.style.display = "block";
+                             return;
+                         }
+                        <#break>
+                    </#if>
+                </#list>
+            </#list>
+            block1.style.display = "block";
+            block2.style.display = "none";
+        }
     </#if>
+    
+    function displayProductVirtualVariantId(variantId) {
+        document.addform.product_id.value = variantId;
+        var elem = document.getElementById('product_id_display');
+        var txt = document.createTextNode(variantId);
+        if(elem.hasChildNodes()) {
+            elem.replaceChild(txt, elem.firstChild);
+        } else {
+            elem.appendChild(txt);
+        }
+        setVariantPrice(variantId);
+    }
  //-->
  </script>
 
@@ -280,7 +299,7 @@ ${virtualJavaScript?if_exists}
     </tr>
   </#if>
 
-  <tr><td colspan="2"><hr/></td></tr>
+  <tr><td colspan="2"><hr /></td></tr>
 
   <#-- Product image/name/price -->
   <tr>
@@ -291,7 +310,7 @@ ${virtualJavaScript?if_exists}
         <#assign productLargeImageUrl = firstLargeImage>
       </#if>
       <#if productLargeImageUrl?string?has_content>
-        <a href="javascript:popupDetail();"><img src="<@ofbizContentUrl>${contentPathPrefix?if_exists}${productLargeImageUrl?if_exists}</@ofbizContentUrl>" name="mainImage" vspace="5" hspace="5" border="0" width="200"></a>
+        <a href="javascript:popupDetail();"><img src="<@ofbizContentUrl>${contentPathPrefix?if_exists}${productLargeImageUrl?if_exists}</@ofbizContentUrl>" name="mainImage" vspace="5" hspace="5" class='cssImgLarge' alt="" /></a>
       </#if>
     </td>
     <td align="right" valign="top">
@@ -339,10 +358,10 @@ ${virtualJavaScript?if_exists}
             <#assign priceStyle = "regularPrice">
           </#if>
             ${uiLabelMap.OrderYourPrice}: <#if "Y" = product.isVirtual?if_exists> ${uiLabelMap.CommonFrom} </#if><span class="${priceStyle}"><@ofbizCurrency amount=price.price isoCode=price.currencyUsed/></span>
-             <#if product.productTypeId?if_exists == "ASSET_USAGE">
-            <#if product.reserv2ndPPPerc?exists && product.reserv2ndPPPerc != 0><br/><span class="${priceStyle}">${uiLabelMap.ProductReserv2ndPPPerc}<#if !product.reservNthPPPerc?exists || product.reservNthPPPerc == 0>${uiLabelMap.CommonUntil} ${product.reservMaxPersons}</#if> <@ofbizCurrency amount=product.reserv2ndPPPerc*price.price/100 isoCode=price.currencyUsed/></span></#if>
-            <#if product.reservNthPPPerc?exists &&product.reservNthPPPerc != 0><br/><span class="${priceStyle}">${uiLabelMap.ProductReservNthPPPerc} <#if !product.reserv2ndPPPerc?exists || product.reserv2ndPPPerc == 0>${uiLabelMap.ProductReservSecond} <#else> ${uiLabelMap.ProductReservThird} </#if> ${uiLabelMap.CommonUntil} ${product.reservMaxPersons}, ${uiLabelMap.ProductEach}: <@ofbizCurrency amount=product.reservNthPPPerc*price.price/100 isoCode=price.currencyUsed/></span></#if>
-            <#if (!product.reserv2ndPPPerc?exists || product.reserv2ndPPPerc == 0) && (!product.reservNthPPPerc?exists || product.reservNthPPPerc == 0)><br/>${uiLabelMap.ProductMaximum} ${product.reservMaxPersons} ${uiLabelMap.ProductPersons}.</#if>
+             <#if product.productTypeId?if_exists == "ASSET_USAGE" || product.productTypeId?if_exists == "ASSET_USAGE_OUT_IN">
+            <#if product.reserv2ndPPPerc?exists && product.reserv2ndPPPerc != 0><br /><span class="${priceStyle}">${uiLabelMap.ProductReserv2ndPPPerc}<#if !product.reservNthPPPerc?exists || product.reservNthPPPerc == 0>${uiLabelMap.CommonUntil} ${product.reservMaxPersons}</#if> <@ofbizCurrency amount=product.reserv2ndPPPerc*price.price/100 isoCode=price.currencyUsed/></span></#if>
+            <#if product.reservNthPPPerc?exists &&product.reservNthPPPerc != 0><br /><span class="${priceStyle}">${uiLabelMap.ProductReservNthPPPerc} <#if !product.reserv2ndPPPerc?exists || product.reserv2ndPPPerc == 0>${uiLabelMap.ProductReservSecond} <#else> ${uiLabelMap.ProductReservThird} </#if> ${uiLabelMap.CommonUntil} ${product.reservMaxPersons}, ${uiLabelMap.ProductEach}: <@ofbizCurrency amount=product.reservNthPPPerc*price.price/100 isoCode=price.currencyUsed/></span></#if>
+            <#if (!product.reserv2ndPPPerc?exists || product.reserv2ndPPPerc == 0) && (!product.reservNthPPPerc?exists || product.reservNthPPPerc == 0)><br />${uiLabelMap.ProductMaximum} ${product.reservMaxPersons} ${uiLabelMap.ProductPersons}.</#if>
              </#if>
          </b>
       </div>
@@ -367,32 +386,32 @@ ${virtualJavaScript?if_exists}
         </div>
       </#if>
       <#if (product.quantityIncluded?exists && product.quantityIncluded?double != 0) || product.quantityUomId?has_content>
-        <#assign quantityUom = product.getRelatedOneCache("QuantityUom")?if_exists/>
+        <#assign quantityUom = product.getRelatedOne("QuantityUom", true)?if_exists/>
         <div>
           ${uiLabelMap.CommonQuantity}: ${product.quantityIncluded?if_exists} ${((quantityUom.abbreviation)?default(product.quantityUomId))?if_exists}
         </div>
       </#if>
 
       <#if (product.weight?exists && product.weight?double != 0) || product.weightUomId?has_content>
-        <#assign weightUom = product.getRelatedOneCache("WeightUom")?if_exists/>
+        <#assign weightUom = product.getRelatedOne("WeightUom", true)?if_exists/>
         <div>
           ${uiLabelMap.CommonWeight}: ${product.weight?if_exists} ${((weightUom.abbreviation)?default(product.weightUomId))?if_exists}
         </div>
       </#if>
       <#if (product.productHeight?exists && product.productHeight?double != 0) || product.heightUomId?has_content>
-        <#assign heightUom = product.getRelatedOneCache("HeightUom")?if_exists/>
+        <#assign heightUom = product.getRelatedOne("HeightUom", true)?if_exists/>
         <div>
           ${uiLabelMap.CommonHeight}: ${product.productHeight?if_exists} ${((heightUom.abbreviation)?default(product.heightUomId))?if_exists}
         </div>
       </#if>
       <#if (product.productWidth?exists && product.productWidth?double != 0) || product.widthUomId?has_content>
-        <#assign widthUom = product.getRelatedOneCache("WidthUom")?if_exists/>
+        <#assign widthUom = product.getRelatedOne("WidthUom", true)?if_exists/>
         <div>
           ${uiLabelMap.CommonWidth}: ${product.productWidth?if_exists} ${((widthUom.abbreviation)?default(product.widthUomId))?if_exists}
         </div>
       </#if>
       <#if (product.productDepth?exists && product.productDepth?double != 0) || product.depthUomId?has_content>
-        <#assign depthUom = product.getRelatedOneCache("DepthUom")?if_exists/>
+        <#assign depthUom = product.getRelatedOne("DepthUom", true)?if_exists/>
         <div>
           ${uiLabelMap.CommonDepth}: ${product.productDepth?if_exists} ${((depthUom.abbreviation)?default(product.depthUomId))?if_exists}
         </div>
@@ -405,7 +424,7 @@ ${virtualJavaScript?if_exists}
       <#if disFeatureList?exists && 0 < disFeatureList.size()>
       <p>&nbsp;</p>
         <#list disFeatureList as currentFeature>
-            <#assign disFeatureType = currentFeature.getRelatedOneCache("ProductFeatureType")/>
+            <#assign disFeatureType = currentFeature.getRelatedOne("ProductFeatureType", true)/>
             <div>
                 <#if disFeatureType.description?exists>${disFeatureType.get("description", locale)}<#else>${currentFeature.productFeatureTypeId}</#if>:&nbsp;${currentFeature.description}
             </div>
@@ -414,6 +433,12 @@ ${virtualJavaScript?if_exists}
       </#if>
 
       <form method="post" action="<@ofbizUrl>additem<#if requestAttributes._CURRENT_VIEW_?exists>/${requestAttributes._CURRENT_VIEW_}</#if></@ofbizUrl>" name="addform"  style="margin: 0;">
+        <#if requestAttributes.paramMap?has_content>
+          <input type="hidden" name="itemComment" value="${requestAttributes.paramMap.itemComment?if_exists}" />
+          <input type="hidden" name="shipBeforeDate" value="${requestAttributes.paramMap.shipBeforeDate?if_exists}" />
+          <input type="hidden" name="shipAfterDate" value="${requestAttributes.paramMap.shipAfterDate?if_exists}" />
+          <input type="hidden" name="itemDesiredDeliveryDate" value="${requestAttributes.paramMap.itemDesiredDeliveryDate?if_exists}" />
+        </#if>
         <#assign inStock = true>
         <#-- Variant Selection -->
         <#if product.isVirtual?if_exists?upper_case == "Y">
@@ -421,7 +446,7 @@ ${virtualJavaScript?if_exists}
             <#list featureLists as featureList>
                 <#list featureList as feature>
                     <#if feature_index == 0>
-                        <div>${feature.description}: <select id="FT${feature.productFeatureTypeId}" name="FT${feature.productFeatureTypeId}" onChange="javascript:checkRadioButton();">
+                        <div>${feature.description}: <select id="FT${feature.productFeatureTypeId}" name="FT${feature.productFeatureTypeId}" onchange="javascript:checkRadioButton();">
                         <option value="select" selected="selected"> select option </option>
                     <#else>
                         <option value="${feature.productFeatureId}">${feature.description} <#if feature.price?exists>(+ <@ofbizCurrency amount=feature.price?string isoCode=feature.currencyUomId/>)</#if></option>
@@ -441,7 +466,7 @@ ${virtualJavaScript?if_exists}
             <div id="addCart2" style="display:block;>
               <span style="white-space: nowrap;"><b>${uiLabelMap.CommonQuantity}:</b></span>&nbsp;
               <input type="text" size="5" value="1" disabled="disabled"/>
-              <a href="javascript:alert('Please select all features first');" class="buttontext"><span style="white-space: nowrap;">${uiLabelMap.OrderAddToCart}</span></a>
+              <a href="javascript:showErrorAlert("${uiLabelMap.CommonErrorMessage2}","${uiLabelMap.CommonPleaseSelectAllFeaturesFirst}");" class="buttontext"><span style="white-space: nowrap;">${uiLabelMap.OrderAddToCart}</span></a>
               &nbsp;
             </div>
           </#if>
@@ -454,6 +479,7 @@ ${virtualJavaScript?if_exists}
                 </select>
               </div>
             </#list>
+            <span id="product_uom"></span>
             <input type="hidden" name="product_id" value="${product.productId}"/>
             <input type="hidden" name="add_product_id" value="NULL"/>
             <div>
@@ -470,14 +496,16 @@ ${virtualJavaScript?if_exists}
         <#else>
           <input type="hidden" name="product_id" value="${product.productId}"/>
           <input type="hidden" name="add_product_id" value="${product.productId}"/>
-          <#assign isStoreInventoryNotAvailable = !(Static["org.ofbiz.product.store.ProductStoreWorker"].isStoreInventoryAvailable(request, product, 1.0?double))>
-          <#assign isStoreInventoryRequired = Static["org.ofbiz.product.store.ProductStoreWorker"].isStoreInventoryRequired(request, product)>
-          <#if isStoreInventoryNotAvailable>
-            <#if isStoreInventoryRequired>
-              <div><b>${uiLabelMap.ProductItemOutOfStock}.</b></div>
-              <#assign inStock = false>
-            <#else>
-              <div><b>${product.inventoryMessage?if_exists}</b></div>
+          <#if productStoreId?exists>
+            <#assign isStoreInventoryNotAvailable = !(Static["org.ofbiz.product.store.ProductStoreWorker"].isStoreInventoryAvailable(request, product, 1.0?double))>
+            <#assign isStoreInventoryRequired = Static["org.ofbiz.product.store.ProductStoreWorker"].isStoreInventoryRequired(request, product)>
+            <#if isStoreInventoryNotAvailable>
+              <#if isStoreInventoryRequired>
+                <div><b>${uiLabelMap.ProductItemOutOfStock}.</b></div>
+                <#assign inStock = false>
+              <#else>
+                <div><b>${product.inventoryMessage?if_exists}</b></div>
+              </#if>
             </#if>
           </#if>
         </#if>
@@ -501,14 +529,14 @@ ${virtualJavaScript?if_exists}
               <span style="white-space: nowrap;"><b>${uiLabelMap.CommonAmount}:</b></span>&nbsp;
               <input type="text" size="5" name="add_amount" value=""/>
             </div>
-            <#if product.productTypeId?if_exists == "ASSET_USAGE">
+            <#if product.productTypeId?if_exists == "ASSET_USAGE" || product.productTypeId?if_exists == "ASSET_USAGE_OUT_IN">
                 <table width="100%"><tr>
-                <td nowrap align="right">Start Date<br/>(yyyy-mm-dd)</td><td><input type="text" size="10" name="reservStart"/><a href="javascript:call_cal_notime(document.addform.reservStart, '${nowTimestamp.toString().substring(0,10)}');"><img src="<@ofbizContentUrl>/images/cal.gif</@ofbizContentUrl>" width="16" height="16" border="0" alt="Calendar"/></a></td>
-                <td nowrap align="right">End Date<br/>(yyyy-mm-dd)</td><td><input type="text" size="10" name="reservEnd"/><a href="javascript:call_cal_notime(document.addform.reservEnd, '${nowTimestamp.toString().substring(0,10)}');"><img src="<@ofbizContentUrl>/images/cal.gif</@ofbizContentUrl>" width="16" height="16" border="0" alt="Calendar"/></a></td></tr>
+                    <@htmlTemplate.renderDateTimeField name="reservStart" event="" action="" value="" className="" alert="" title="Format: yyyy-MM-dd HH:mm:ss.SSS" size="25" maxlength="30" id="startDate1" dateType="date" shortDateInput=false timeDropdownParamName="" defaultDateTimeString="" localizedIconTitle="" timeDropdown="" timeHourName="" classString="" hour1="" hour2="" timeMinutesName="" minutes="" isTwelveHour="" ampmName="" amSelected="" pmSelected="" compositeType="" formName=""/>
+                    <@htmlTemplate.renderDateTimeField name="reservEnd" event="" action="" value="" className="" alert="" title="Format: yyyy-MM-dd HH:mm:ss.SSS" size="25" maxlength="30" id="endDate1" dateType="date" shortDateInput=false timeDropdownParamName="" defaultDateTimeString="" localizedIconTitle="" timeDropdown="" timeHourName="" classString="" hour1="" hour2="" timeMinutesName="" minutes="" isTwelveHour="" ampmName="" amSelected="" pmSelected="" compositeType="" formName=""/>
                 <tr>
-                <#--td nowrap align="right">Number<br/>of days</td><td><input type="textt" size="4" name="reservLength"/></td></tr><tr><td>&nbsp;</td><td align="right" nowrap>&nbsp;</td-->
-                <td nowrap align="right">Number of persons</td><td><input type="text" size="4" name="reservPersons" value="2"/></td>
-                <td nowrap align="right">Number of rooms</td><td><input type="text" size="5" name="quantity" value="1"/></td></tr></table>
+                <#--td nowrap="nowrap" align="right">Number<br />of days</td><td><input type="textt" size="4" name="reservLength"/></td></tr><tr><td>&nbsp;</td><td align="right" nowrap>&nbsp;</td-->
+                <td nowrap="nowrap" align="right">Number of persons</td><td><input type="text" size="4" name="reservPersons" value="2"/></td>
+                <td nowrap="nowrap" align="right">Number of rooms</td><td><input type="text" size="5" name="quantity" value="1"/></td></tr></table>
             <#else/>
                 <input type="text" size="5" name="quantity" value="1"<#if product.isVirtual?if_exists?upper_case == "Y"> disabled="disabled"</#if>/>
             </#if>
@@ -522,11 +550,11 @@ ${virtualJavaScript?if_exists}
       </form>
     <div>
       <#if sessionAttributes.userLogin?has_content && sessionAttributes.userLogin.userLoginId != "anonymous">
-        <hr/>
+        <hr />
         <form name="addToShoppingList" method="post" action="<@ofbizUrl>addItemToShoppingList<#if requestAttributes._CURRENT_VIEW_?exists>/${requestAttributes._CURRENT_VIEW_}</#if></@ofbizUrl>">
           <input type="hidden" name="productId" value="${product.productId}"/>
           <input type="hidden" name="product_id" value="${product.productId}"/>
-          <input type="hidden" name="productStoreId" value="${productStoreId}"/>
+          <input type="hidden" name="productStoreId" value="${productStoreId?if_exists}"/>
           <input type="hidden" name="reservStart" value= ""/>
           <select name="shoppingListId">
             <#if shoppingLists?has_content>
@@ -538,15 +566,15 @@ ${virtualJavaScript?if_exists}
             <option value="">${uiLabelMap.OrderNewShoppingList}</option>
           </select>
           &nbsp;&nbsp;
-          <#if product.productTypeId?if_exists == "ASSET_USAGE">
-              <table><tr><td>&nbsp;</td><td align="right">${uiLabelMap.CommonStartDate} (yyyy-mm-dd)</td><td><input type="text" size="10" name="reservStartStr" ></td><td>Number of&nbsp;days</td><td><input type="text" size="4" name="reservLength"></td><td>&nbsp;</td><td align="right">Number of&nbsp;persons</td><td><input type="text" size="4" name="reservPersons" value="1"></td><td align="right">Qty&nbsp;</td><td><input type="text" size="5" name="quantity" value="1"></td></tr></table>
+          <#if product.productTypeId?if_exists == "ASSET_USAGE" || product.productTypeId?if_exists == "ASSET_USAGE_OUT_IN">
+              <table><tr><td>&nbsp;</td><td align="right">${uiLabelMap.CommonStartDate} (yyyy-mm-dd)</td><td><input type="text" size="10" name="reservStartStr" /></td><td>Number of&nbsp;days</td><td><input type="text" size="4" name="reservLength" /></td><td>&nbsp;</td><td align="right">Number of&nbsp;persons</td><td><input type="text" size="4" name="reservPersons" value="1" /></td><td align="right">Qty&nbsp;</td><td><input type="text" size="5" name="quantity" value="1" /></td></tr></table>
           <#else>
               <input type="text" size="5" name="quantity" value="1"/>
               <input type="hidden" name="reservStartStr" value= ""/>
           </#if>
           <a href="javascript:addShoplistSubmit();" class="buttontext">${uiLabelMap.OrderAddToShoppingList}</a>
         </form>
-      <#else> <br/>
+      <#else> <br />
         ${uiLabelMap.OrderYouMust} <a href="<@ofbizUrl>checkLogin/showcart</@ofbizUrl>" class="buttontext">${uiLabelMap.CommonBeLogged}</a>
         ${uiLabelMap.OrderToAddSelectedItemsToShoppingList}.&nbsp;
       </#if>
@@ -576,8 +604,8 @@ ${virtualJavaScript?if_exists}
                   <#assign imageUrl = "/images/defaultImage.jpg">
                 </#if>
                 <td align="center" valign="bottom">
-                  <a href="javascript:getList('FT${featureOrderFirst}','${indexer}',1);"><img src="<@ofbizContentUrl>${contentPathPrefix?if_exists}${imageUrl}</@ofbizContentUrl>" border="0" width="60" height="60"></a>
-                  <br/>
+                  <a href="javascript:getList('FT${featureOrderFirst}','${indexer}',1);"><img src="<@ofbizContentUrl>${contentPathPrefix?if_exists}${imageUrl}</@ofbizContentUrl>" class='cssImgSmall' alt="" /></a>
+                  <br />
                   <a href="javascript:getList('FT${featureOrderFirst}','${indexer}',1);" class="linktext">${key}</a>
                 </td>
               </#if>

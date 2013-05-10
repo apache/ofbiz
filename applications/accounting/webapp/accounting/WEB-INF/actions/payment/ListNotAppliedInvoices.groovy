@@ -31,7 +31,7 @@ import org.ofbiz.entity.condition.EntityConditionList;
 import java.math.*;
 
 paymentId = parameters.paymentId;
-payment = delegator.findByPrimaryKey("Payment", [paymentId : paymentId]);
+payment = delegator.findOne("Payment", [paymentId : paymentId], false);
 
 decimals = UtilNumber.getBigDecimalScale("invoice.decimals");
 rounding = UtilNumber.getBigDecimalRoundingMode("invoice.rounding");
@@ -41,7 +41,7 @@ exprList = [EntityCondition.makeCondition("partyId", EntityOperator.EQUALS, paym
 partyCond = EntityCondition.makeCondition(exprList, EntityOperator.AND);
 
 exprList1 = [EntityCondition.makeCondition("statusId", EntityOperator.EQUALS, "INVOICE_APPROVED"),
-             EntityCondition.makeCondition("statusId", EntityOperator.EQUALS, "INVOICE_SEND"),
+             EntityCondition.makeCondition("statusId", EntityOperator.EQUALS, "INVOICE_SENT"),
              EntityCondition.makeCondition("statusId", EntityOperator.EQUALS, "INVOICE_READY"),
              EntityCondition.makeCondition("statusId", EntityOperator.EQUALS, "INVOICE_RECEIVED")];
 statusCond = EntityCondition.makeCondition(exprList1, EntityOperator.OR);

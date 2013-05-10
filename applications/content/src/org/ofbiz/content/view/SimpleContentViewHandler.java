@@ -38,11 +38,12 @@ import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.content.content.ContentWorker;
 import org.ofbiz.content.data.DataResourceWorker;
-import org.ofbiz.entity.GenericDelegator;
+import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
 import org.ofbiz.webapp.view.AbstractViewHandler;
 import org.ofbiz.webapp.view.ViewHandlerException;
+import org.ofbiz.webapp.website.WebSiteWorker;
 
 /**
  * Uses XSL-FO formatted templates to generate PDF views
@@ -71,26 +72,25 @@ public class SimpleContentViewHandler extends AbstractViewHandler {
         String mimeTypeId = request.getParameter("mimeTypeId");
         Locale locale = UtilHttp.getLocale(request);
         String rootDir = null;
-        String webSiteId = null;
+        String webSiteId = WebSiteWorker.getWebSiteId(request);
         String https = null;
 
         if (UtilValidate.isEmpty(rootDir)) {
             rootDir = servletContext.getRealPath("/");
-        }
-        if (UtilValidate.isEmpty(webSiteId)) {
-            webSiteId = (String) servletContext.getAttribute("webSiteId");
         }
         if (UtilValidate.isEmpty(https)) {
             https = (String) servletContext.getAttribute("https");
         }
         try {
             if (Debug.verboseOn()) Debug.logVerbose("SCVH(0a)- dataResourceId:" + dataResourceId, module);
-            GenericDelegator delegator = (GenericDelegator)request.getAttribute("delegator");
+            Delegator delegator = (Delegator)request.getAttribute("delegator");
             if (UtilValidate.isEmpty(dataResourceId)) {
                 if (UtilValidate.isEmpty(contentRevisionSeqId)) {
                     if (UtilValidate.isEmpty(mapKey) && UtilValidate.isEmpty(contentAssocTypeId)) {
-                        GenericValue content = delegator.findByPrimaryKeyCache("Content", UtilMisc.toMap("contentId", contentId));
-                        dataResourceId = content.getString("dataResourceId");
+                        if (UtilValidate.isNotEmpty(contentId)) {
+                            GenericValue content = delegator.findOne("Content", UtilMisc.toMap("contentId", contentId), true);
+                            dataResourceId = content.getString("dataResourceId");
+                        }
                         if (Debug.verboseOn()) Debug.logVerbose("SCVH(0b)- dataResourceId:" + dataResourceId, module);
                     } else {
                         Timestamp fromDate = null;
@@ -110,7 +110,7 @@ public class SimpleContentViewHandler extends AbstractViewHandler {
                         if (Debug.verboseOn()) Debug.logVerbose("SCVH(0b)- dataResourceId:" + dataResourceId, module);
                     }
                 } else {
-                    GenericValue contentRevisionItem = delegator.findByPrimaryKeyCache("ContentRevisionItem", UtilMisc.toMap("contentId", rootContentId, "itemContentId", contentId, "contentRevisionSeqId", contentRevisionSeqId));
+                    GenericValue contentRevisionItem = delegator.findOne("ContentRevisionItem", UtilMisc.toMap("contentId", rootContentId, "itemContentId", contentId, "contentRevisionSeqId", contentRevisionSeqId), true);
                     if (contentRevisionItem == null) {
                         throw new ViewHandlerException("ContentRevisionItem record not found for contentId=" + rootContentId
                                                        + ", contentRevisionSeqId=" + contentRevisionSeqId + ", itemContentId=" + contentId);
@@ -121,33 +121,35 @@ public class SimpleContentViewHandler extends AbstractViewHandler {
                     if (Debug.verboseOn()) Debug.logVerbose("SCVH(3)- dataResourceId:" + dataResourceId, module);
                 }
             }
-            GenericValue dataResource = delegator.findByPrimaryKeyCache("DataResource", UtilMisc.toMap("dataResourceId", dataResourceId));
-            // DEJ20080717: why are we rendering the DataResource directly instead of rendering the content?
-            ByteBuffer byteBuffer = DataResourceWorker.getContentAsByteBuffer(delegator, dataResourceId, https, webSiteId, locale, rootDir);
-            ByteArrayInputStream bais = new ByteArrayInputStream(byteBuffer.array());
-            // hack for IE and mime types
-            //String userAgent = request.getHeader("User-Agent");
-            //if (userAgent.indexOf("MSIE") > -1) {
-            //    Debug.log("Found MSIE changing mime type from - " + mimeTypeId, module);
-            //    mimeTypeId = "application/octet-stream";
-            //}
-            // setup chararcter encoding and content type
-            String charset = dataResource.getString("characterSetId");
-            mimeTypeId = dataResource.getString("mimeTypeId");
-            if (UtilValidate.isEmpty(charset)) {
-                charset = servletContext.getInitParameter("charset");
+            if (UtilValidate.isNotEmpty(dataResourceId)) {
+                GenericValue dataResource = delegator.findOne("DataResource", UtilMisc.toMap("dataResourceId", dataResourceId), true);
+                // DEJ20080717: why are we rendering the DataResource directly instead of rendering the content?
+                ByteBuffer byteBuffer = DataResourceWorker.getContentAsByteBuffer(delegator, dataResourceId, https, webSiteId, locale, rootDir);
+                ByteArrayInputStream bais = new ByteArrayInputStream(byteBuffer.array());
+                // hack for IE and mime types
+                //String userAgent = request.getHeader("User-Agent");
+                //if (userAgent.indexOf("MSIE") > -1) {
+                //    Debug.logInfo("Found MSIE changing mime type from - " + mimeTypeId, module);
+                //    mimeTypeId = "application/octet-stream";
+                //}
+                // setup chararcter encoding and content type
+                String charset = dataResource.getString("characterSetId");
+                mimeTypeId = dataResource.getString("mimeTypeId");
+                if (UtilValidate.isEmpty(charset)) {
+                    charset = servletContext.getInitParameter("charset");
+                }
+                if (UtilValidate.isEmpty(charset)) {
+                    charset = "UTF-8";
+                }
+    
+                // setup content type
+                String contentType2 = UtilValidate.isNotEmpty(mimeTypeId) ? mimeTypeId + "; charset=" +charset : contentType;
+                String fileName = null;
+                if (!UtilValidate.isEmpty(dataResource.getString("dataResourceName"))) {
+                    fileName = dataResource.getString("dataResourceName").replace(" ", "_"); // spaces in filenames can be a problem
+                }
+                UtilHttp.streamContentToBrowser(response, bais, byteBuffer.limit(), contentType2, fileName);
             }
-            if (UtilValidate.isEmpty(charset)) {
-                charset = "UTF-8";
-            }
-
-            // setup content type
-            String contentType2 = UtilValidate.isNotEmpty(mimeTypeId) ? mimeTypeId + "; charset=" +charset : contentType;
-            String fileName = null;
-            if (!UtilValidate.isEmpty(dataResource.getString("dataResourceName"))) {
-                fileName = dataResource.getString("dataResourceName").replace(" ", "_"); // spaces in filenames can be a problem
-            }
-            UtilHttp.streamContentToBrowser(response, bais, byteBuffer.limit(), contentType2, fileName);
         } catch (GenericEntityException e) {
             throw new ViewHandlerException(e.getMessage());
         } catch (IOException e) {

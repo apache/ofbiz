@@ -34,6 +34,7 @@ import jpos.services.EventCallbacks;
 import org.ofbiz.pos.adaptor.KeyboardReceiver;
 import org.ofbiz.pos.adaptor.KeyboardAdaptor;
 import org.ofbiz.base.util.Debug;
+import org.ofbiz.base.util.UtilGenerics;
 import org.ofbiz.base.util.UtilValidate;
 
 public class KeyboardService extends BaseService implements jpos.services.POSKeyboardService17, KeyboardReceiver, KeyListener {
@@ -48,26 +49,27 @@ public class KeyboardService extends BaseService implements jpos.services.POSKey
     protected int keyData = -1;
 
     protected KeyEvent lastEvent = null;
-    protected Map keyMapping = null;
+    protected Map<Integer, PosKey> keyMapping = null;
 
     public KeyboardService() {
         KeyboardAdaptor.getInstance(this, KeyboardAdaptor.KEYBOARD_DATA);
     }
 
+    @Override
     public void open(String deviceName, EventCallbacks ecb) throws JposException {
         super.open(deviceName, ecb);
 
         // setup the key mapping
-        this.keyMapping = new HashMap();
-        Enumeration props = entry.getPropertyNames();
+        this.keyMapping = new HashMap<Integer, PosKey>();
+        Enumeration<String> props = UtilGenerics.cast(entry.getPropertyNames());
         while (props.hasMoreElements()) {
-            String propName = (String) props.nextElement();
+            String propName = props.nextElement();
             if (propName.startsWith("key.")) {
                 String propValue = (String) entry.getPropertyValue(propName);
                 propName = propName.substring(4);
 
                 PosKey key = new PosKey(propName, propValue);
-                keyMapping.put(new Integer(key.hashCode()), key);
+                keyMapping.put(key.hashCode(), key);
             }
         }
     }
@@ -136,7 +138,7 @@ public class KeyboardService extends BaseService implements jpos.services.POSKey
         if (lastEvent != null) {
             KeyEvent thisEvent = lastEvent;
             PosKey thisKey = new PosKey(thisEvent);
-            PosKey mappedKey = (PosKey) keyMapping.get(new Integer(thisKey.hashCode()));
+            PosKey mappedKey = keyMapping.get(thisKey.hashCode());
             if (mappedKey != null && mappedKey.checkModifiers(thisEvent.getModifiersEx())) {
                 this.received = true;
                 this.keyData = mappedKey.getMappedCode();
@@ -146,7 +148,7 @@ public class KeyboardService extends BaseService implements jpos.services.POSKey
                 this.fireEvent(event);
             }
         } else {
-            Debug.log("Last Event is null??", module);
+            Debug.logInfo("Last Event is null??", module);
         }
     }
 
@@ -219,7 +221,7 @@ public class KeyboardService extends BaseService implements jpos.services.POSKey
 
             // set the key modifiers
             String[] modifiers = null;
-            if (keyMod != null && keyMod.length() > 0) {
+            if (UtilValidate.isNotEmpty(keyMod)) {
                 if (keyMod.indexOf("+") != -1) {
                     modifiers = keyMod.split("\\+");
                 } else {
@@ -265,6 +267,7 @@ public class KeyboardService extends BaseService implements jpos.services.POSKey
             return mappedCode;
         }
 
+        @Override
         public int hashCode() {
             int code = this.keyCode;
             if (shift) code += KeyEvent.SHIFT_DOWN_MASK;

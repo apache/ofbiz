@@ -22,12 +22,27 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import javax.el.*;
+
+import javax.el.ArrayELResolver;
+import javax.el.BeanELResolver;
+import javax.el.CompositeELResolver;
+import javax.el.ELContext;
+import javax.el.ELResolver;
+import javax.el.ExpressionFactory;
+import javax.el.FunctionMapper;
+import javax.el.ListELResolver;
+import javax.el.MapELResolver;
+import javax.el.PropertyNotFoundException;
+import javax.el.PropertyNotWritableException;
+import javax.el.ResourceBundleELResolver;
+import javax.el.ValueExpression;
+import javax.el.VariableMapper;
 
 import javolution.util.FastList;
 import javolution.util.FastMap;
 
 import org.ofbiz.base.util.Debug;
+import org.ofbiz.base.util.StringUtil;
 import org.ofbiz.base.util.UtilGenerics;
 import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.base.util.collections.LocalizedMap;
@@ -42,6 +57,7 @@ public class UelUtil {
             add(new ExtendedMapResolver(false));
             add(new ExtendedListResolver(false));
             add(new ArrayELResolver(false));
+            add(new NodeELResolver()); // Below the most common but must be kept above BeanELResolver
             add(new ResourceBundleELResolver());
             add(new BeanELResolver(false));
         }
@@ -66,7 +82,7 @@ public class UelUtil {
      */
     @SuppressWarnings("unchecked")
     public static Object evaluate(Map<String, ? extends Object> context, String expression, Class expectedType) {
-        ELContext elContext = new BasicContext(context);
+        ELContext elContext = new ReadOnlyContext(context);
         ValueExpression ve = exprFactory.createValueExpression(elContext, expression, expectedType);
         return ve.getValue(elContext);
     }
@@ -104,27 +120,69 @@ public class UelUtil {
     }
 
     protected static class BasicContext extends ELContext {
+        protected final Map<String, Object> variables;
         protected final VariableMapper variableMapper;
-        public BasicContext(Map<String, ? extends Object> context) {
-            this.variableMapper = new BasicVariableMapper(context, this);
+        public BasicContext(Map<String, Object> context) {
+            this.variableMapper = new BasicVariableMapper(this);
+            this.variables = context;
         }
+        @Override
         public ELResolver getELResolver() {
             return defaultResolver;
         }
+        @Override
         public FunctionMapper getFunctionMapper() {
             return UelFunctions.getFunctionMapper();
         }
+        @Override
         public VariableMapper getVariableMapper() {
             return this.variableMapper;
         }
     }
 
-    protected static class BasicVariableMapper extends VariableMapper {
-        protected final ELContext elContext;
-        protected final Map<String, Object> variables;
-        protected BasicVariableMapper(Map<String, ? extends Object> context, ELContext parentContext) {
+    protected static class ReadOnlyContext extends ELContext {
+        protected final Map<String, ? extends Object> variables;
+        protected final VariableMapper variableMapper;
+        public ReadOnlyContext(Map<String, ? extends Object> context) {
+            this.variableMapper = new ReadOnlyVariableMapper(this);
             this.variables = UtilGenerics.cast(context);
-            this.elContext = parentContext;
+        }
+        @Override
+        public ELResolver getELResolver() {
+            return defaultResolver;
+        }
+        @Override
+        public FunctionMapper getFunctionMapper() {
+            return UelFunctions.getFunctionMapper();
+        }
+        @Override
+        public VariableMapper getVariableMapper() {
+            return this.variableMapper;
+        }
+        protected static class ReadOnlyVariableMapper extends VariableMapper {
+            protected final ReadOnlyContext elContext;
+            protected ReadOnlyVariableMapper(ReadOnlyContext elContext) {
+                this.elContext = elContext;
+            }
+            @Override
+            public ValueExpression resolveVariable(String variable) {
+                Object obj = UelUtil.resolveVariable(variable, this.elContext.variables, null);
+                if (obj != null) {
+                    return new ReadOnlyExpression(obj);
+                }
+                return null;
+            }
+            @Override
+            public ValueExpression setVariable(String variable, ValueExpression expression) {
+                throw new PropertyNotWritableException();
+            }
+        }
+    }
+
+    protected static class BasicVariableMapper extends VariableMapper {
+        protected final BasicContext elContext;
+        protected BasicVariableMapper(BasicContext elContext) {
+            this.elContext = elContext;
         }
 
         /**
@@ -133,61 +191,140 @@ public class UelUtil {
          * @param variable the variable's name
          * @return a BasicValueExpression containing the variable's value or null if the variable is unknown
          */
+        @Override
         public ValueExpression resolveVariable(String variable) {
-            Object obj = UelUtil.resolveVariable(variable, this.variables, null);
+            Object obj = UelUtil.resolveVariable(variable, this.elContext.variables, null);
             if (obj != null) {
-                return new BasicValueExpression(obj);
+                return new BasicValueExpression(variable, this.elContext);
             }
             return null;
         }
+        @Override
         public ValueExpression setVariable(String variable, ValueExpression expression) {
-            return new BasicValueExpression(this.variables.put(variable, expression.getValue(this.elContext)));
+            Object originalObj = this.elContext.variables.put(variable, expression.getValue(this.elContext));
+            if (originalObj == null) {
+                return null;
+            }
+            return new ReadOnlyExpression(originalObj);
         }
     }
 
     @SuppressWarnings("serial")
-    protected static class BasicValueExpression extends ValueExpression {
-        protected Object object;
-        public BasicValueExpression(Object object) {
-            super();
+    protected static class ReadOnlyExpression extends ValueExpression {
+        protected final Object object;
+        protected ReadOnlyExpression(Object object) {
             this.object = object;
         }
+
+        @Override
+        public Class<?> getExpectedType() {
+            return this.object.getClass();
+        }
+
+        @Override
+        public Class<?> getType(ELContext context) {
+            return this.getExpectedType();
+        }
+
+        @Override
+        public Object getValue(ELContext context) {
+            return this.object;
+        }
+
+        @Override
+        public boolean isReadOnly(ELContext context) {
+            return true;
+        }
+
+        @Override
+        public void setValue(ELContext context, Object value) {
+            throw new PropertyNotWritableException();
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            try {
+                ReadOnlyExpression other = (ReadOnlyExpression) obj;
+                return this.object.equals(other.object);
+            } catch (ClassCastException e) {}
+            return false;
+        }
+
+        @Override
+        public String getExpressionString() {
+            return null;
+        }
+
+        @Override
+        public int hashCode() {
+            return this.object.hashCode();
+        }
+
+        @Override
+        public boolean isLiteralText() {
+            return false;
+        }
+        
+    }
+
+    @SuppressWarnings("serial")
+    protected static class BasicValueExpression extends ValueExpression {
+        protected final BasicContext elContext;
+        protected final String varName;
+        public BasicValueExpression(String varName, BasicContext elContext) {
+            this.elContext = elContext;
+            this.varName = varName;
+        }
+        @Override
         public boolean equals(Object obj) {
             if (this == obj) {
                 return true;
             }
             try {
                 BasicValueExpression other = (BasicValueExpression) obj;
-                return this.object.equals(other.object);
-            } catch (Exception e) {}
+                return this.varName.equals(other.varName);
+            } catch (ClassCastException e) {}
             return false;
         }
+        @Override
         public int hashCode() {
-            return this.object == null ? 0 : this.object.hashCode();
+            return this.varName.hashCode();
         }
+        @Override
         public Object getValue(ELContext context) {
-            return this.object;
+            return this.elContext.variables.get(this.varName);
         }
+        @Override
         public String getExpressionString() {
             return null;
         }
+        @Override
         public boolean isLiteralText() {
             return false;
         }
+        @Override
         public Class<?> getType(ELContext context) {
-            return this.object == null ? null : this.object.getClass();
+            return this.getExpectedType();
         }
+        @Override
         public boolean isReadOnly(ELContext context) {
             return false;
         }
+        @Override
         public void setValue(ELContext context, Object value) {
-            this.object = value;
+            this.elContext.variables.put(this.varName, value);
         }
+        @Override
         public String toString() {
-            return "ValueExpression(" + this.object + ")";
+            return "ValueExpression(" + this.varName + ")";
         }
+        @Override
         public Class<?> getExpectedType() {
-            return this.object == null ? null : this.object.getClass();
+            Object obj = this.elContext.variables.get(this.varName);
+            return obj == null ? null : obj.getClass();
         }
     }
 
@@ -195,17 +332,18 @@ public class UelUtil {
      * auto-vivify.
      */
     protected static class ExtendedCompositeResolver extends CompositeELResolver {
+        @Override
         public void setValue(ELContext context, Object base, Object property, Object val) {
             super.setValue(context, base, property, val);
             if (!context.isPropertyResolved() && base == null) {
                 if (Debug.verboseOn()) {
                     Debug.logVerbose("ExtendedCompositeResolver.setValue: base = " + base + ", property = " + property + ", value = " + val, module);
                 }
-                ValueExpression ve = new BasicValueExpression(val);
-                VariableMapper vm = context.getVariableMapper();
-                vm.setVariable(property.toString(), ve);
-                context.setPropertyResolved(true);
-                return;
+                try {
+                    BasicContext elContext = (BasicContext) context;
+                    elContext.variables.put(property.toString(), val);
+                    context.setPropertyResolved(true);
+                } catch (ClassCastException e) {}
             }
         }
     }
@@ -219,6 +357,7 @@ public class UelUtil {
             super(isReadOnly);
             this.isReadOnly = isReadOnly;
         }
+        @Override
         @SuppressWarnings("unchecked")
         public void setValue(ELContext context, Object base, Object property, Object val) {
             if (context == null) {
@@ -265,6 +404,7 @@ public class UelUtil {
         public ExtendedMapResolver(boolean isReadOnly) {
             super(isReadOnly);
         }
+        @Override
         @SuppressWarnings("unchecked")
         public Object getValue(ELContext context, Object base, Object property) {
             if (context == null) {
@@ -327,28 +467,28 @@ public class UelUtil {
         }
     }
 
-    /** Prepares an expression for evaluation by UEL. The OFBiz syntax is
+    /** Prepares an expression for evaluation by UEL.<p>The OFBiz syntax is
      * converted to UEL-compatible syntax and the resulting expression is
-     * returned.
+     * returned.</p>
+     * @see <a href="StringUtil.html#convertOperatorSubstitutions(java.lang.String)">StringUtil.convertOperatorSubstitutions(java.lang.String)</a>
      * @param expression Expression to be converted
      * @return Converted expression
      */
     public static String prepareExpression(String expression) {
-        String result = expression;
-        int openBrace = expression.indexOf("[+");
-        int closeBrace = (openBrace == -1 ? -1 : expression.indexOf(']', openBrace));
+        String result = StringUtil.convertOperatorSubstitutions(expression);
+        result = result.replace("[]", "['add']");
+        int openBrace = result.indexOf("[+");
+        int closeBrace = (openBrace == -1 ? -1 : result.indexOf(']', openBrace));
         if (closeBrace != -1) {
-            String base = expression.substring(0, openBrace);
-            String property = expression.substring(openBrace+2, closeBrace).trim();
-            String end = expression.substring(closeBrace + 1);
+            String base = result.substring(0, openBrace);
+            String property = result.substring(openBrace+2, closeBrace).trim();
+            String end = result.substring(closeBrace + 1);
             result = base + "['insert@" + property + "']" + end;
         }
-        result = result.replace("[]", "['add']");
         return result;
     }
 
-    @SuppressWarnings("unchecked")
-    public static Object resolveVariable(String variable, Map<String, Object> variables, Locale locale) {
+    public static Object resolveVariable(String variable, Map<String, ? extends Object> variables, Locale locale) {
         Object obj = null;
         String createObjectType = null;
         String name = variable;
@@ -376,7 +516,7 @@ public class UelUtil {
                 createObjectType = "bigDecimal";
             }
         }
-        if (variables instanceof LocalizedMap) {
+        if (variables instanceof LocalizedMap<?>) {
             if (locale == null) {
                 locale = (Locale) variables.get(localizedMapLocaleKey);
                 if (locale == null) {

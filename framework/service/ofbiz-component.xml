@@ -30,7 +30,9 @@ under the License.
     <entity-resource type="model" reader-name="main" loader="main" location="entitydef/entitymodel.xml"/>
     <entity-resource type="data" reader-name="seed" loader="main" location="data/ScheduledServiceData.xml"/>
     <entity-resource type="data" reader-name="seed-initial" loader="main" location="data/ScheduledServices.xml"/>
-    <entity-resource type="data" reader-name="seed" loader="main" location="data/ServiceSecurityData.xml"/>
+    <entity-resource type="data" reader-name="seed" loader="main" location="data/ServiceSeedData.xml"/>
+    <entity-resource type="data" reader-name="seed" loader="main" location="data/ServiceSecurityPermissionSeedData.xml"/>
+    <entity-resource type="data" reader-name="demo" loader="main" location="data/ServiceSecurityGroupDemoData.xml"/>
     <entity-resource type="data" reader-name="demo" loader="main" location="data/ServiceDemoData.xml"/>
 
     <service-resource type="model" loader="main" location="servicedef/services.xml"/>
@@ -41,4 +43,45 @@ under the License.
 
     <keystore name="rmitrust" type="jks" password="changeit" is-truststore="true"
               is-certstore="false" loader="main" location="config/rmitrust.jks"/>
+
+    <container name="service-container" loaders="main,rmi,pos,install,test" class="org.ofbiz.service.ServiceContainer">
+        <property name="dispatcher-factory" value="org.ofbiz.service.GenericDispatcherFactory"/>
+    </container>
+
+    <!-- RMI Service Dispatcher -->
+    <container name="rmi-dispatcher" loaders="rmi" class="org.ofbiz.service.rmi.RmiServiceContainer">
+        <property name="bound-name" value="RMIDispatcher"/>
+        <property name="bound-host" value="127.0.0.1"/>
+        <property name="bound-port" value="1099"/>
+        <property name="delegator-name" value="default"/>
+        <property name="client-factory" value="org.ofbiz.service.rmi.socket.ssl.SSLClientSocketFactory"/>
+        <property name="server-factory" value="org.ofbiz.service.rmi.socket.ssl.SSLServerSocketFactory"/>
+        <property name="ssl-keystore" value="framework/base/config/ofbizrmi.jks"/>
+        <property name="ssl-keystore-type" value="JKS"/>
+        <property name="ssl-keystore-pass" value="changeit"/>
+        <property name="ssl-keystore-alias" value="rmissl"/>
+        <property name="ssl-client-auth" value="false"/>
+    </container>
+
+    <!-- JavaMail Listener Container - Triggers MCA Rules -->
+    <!-- if delete-mail is set to true, will delete messages after fetching them. otherwise, will try to mark them as seen
+        mail.store.protocol supports both imap and pop3, but pop3 will not be able to mark messages as seen, so you would need to delete them-->
+    <!-- To use the mail listerner just uncomment and go...
+    <container name="javamail-container" class="org.ofbiz.service.mail.JavaMailContainer">
+        <property name="delegator-name" value="default"/>
+        <property name="dispatcher-name" value="JavaMailDispatcher"/>
+        <property name="run-as-user" value="system"/>
+        <property name="poll-delay" value="300000"/>
+        <property name="delete-mail" value="false"/>
+        <property name="maxSize" value="100000"/>
+        <property name="default-listener" value="store-listener">
+        <property name="mail.store.protocol" value="imap"/>
+        <property name="mail.host" value="[host]"/>
+        <property name="mail.user" value="[user]"/>
+        <property name="mail.pass" value="[pass]"/>
+        <property name="mail.debug" value="false"/>
+        </property>
+    </container>
+    -->
+
 </ofbiz-component>

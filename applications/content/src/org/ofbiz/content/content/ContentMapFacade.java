@@ -1,5 +1,5 @@
 /*
- Licensed to the Apache Software Foundation (ASF) under one
+k Licensed to the Apache Software Foundation (ASF) under one
  or more contributor license agreements.  See the NOTICE file
  distributed with this work for additional information
  regarding copyright ownership.  The ASF licenses this file
@@ -19,20 +19,12 @@
 
 package org.ofbiz.content.content;
 
-import org.ofbiz.entity.GenericDelegator;
-import org.ofbiz.entity.GenericValue;
-import org.ofbiz.entity.GenericEntityException;
-import org.ofbiz.entity.util.EntityUtil;
-import org.ofbiz.service.LocalDispatcher;
-import org.ofbiz.webapp.control.RequestHandler;
-import org.ofbiz.base.util.UtilMisc;
-import org.ofbiz.base.util.Debug;
-import org.ofbiz.base.util.GeneralException;
-import org.ofbiz.base.util.UtilValidate;
-import org.ofbiz.content.data.DataResourceWorker;
-
-import java.util.*;
 import java.io.IOException;
+import java.util.Collection;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -41,10 +33,24 @@ import javolution.util.FastList;
 import javolution.util.FastMap;
 import javolution.util.FastSet;
 
+import org.ofbiz.base.util.Debug;
+import org.ofbiz.base.util.GeneralException;
+import org.ofbiz.base.util.UtilGenerics;
+import org.ofbiz.base.util.UtilMisc;
+import org.ofbiz.content.data.DataResourceWorker;
+import org.ofbiz.entity.Delegator;
+import org.ofbiz.entity.GenericEntityException;
+import org.ofbiz.entity.GenericValue;
+import org.ofbiz.entity.condition.EntityCondition;
+import org.ofbiz.entity.util.EntityUtil;
+import org.ofbiz.service.LocalDispatcher;
+import org.ofbiz.webapp.control.RequestHandler;
+import org.ofbiz.webapp.website.WebSiteWorker;
+
 /**
  * ContentMapFacade
  */
-public class ContentMapFacade implements Map {
+public class ContentMapFacade implements Map<Object, Object> {
 
     public static final String module = ContentMapFacade.class.getName();
 
@@ -62,24 +68,28 @@ public class ContentMapFacade implements Map {
     }
 
     protected final LocalDispatcher dispatcher;
-    protected final GenericDelegator delegator;
+    protected final Delegator delegator;
     protected final String contentId;
     protected final GenericValue value;
-    protected final Map context;
+    protected final Map<String, Object> context;
     protected final Locale locale;
     protected final String mimeType;
     protected final boolean cache;
     protected boolean allowRender = true;
     protected boolean isDecorated = false;
+    protected ContentMapFacade decoratedContent = null;
 
     // internal objects
+    private String sortOrder="-fromDate";
+    private String mapKeyFilter="";
+    private String statusFilter="";
     private DataResource dataResource;
     private SubContent subContent;
     private MetaData metaData;
     private Content content;
     private GenericValue fields = null;
 
-    public ContentMapFacade(LocalDispatcher dispatcher, GenericValue content, Map context, Locale locale, String mimeTypeId, boolean cache) {
+    public ContentMapFacade(LocalDispatcher dispatcher, GenericValue content, Map<String, Object> context, Locale locale, String mimeTypeId, boolean cache) {
         this.dispatcher = dispatcher;
         this.value = content;
         this.context = context;
@@ -92,7 +102,7 @@ public class ContentMapFacade implements Map {
         init();
     }
 
-    private ContentMapFacade(LocalDispatcher dispatcher, GenericDelegator delegator, String contentId, Map context, Locale locale, String mimeTypeId, boolean cache) {
+    private ContentMapFacade(LocalDispatcher dispatcher, Delegator delegator, String contentId, Map<String, Object> context, Locale locale, String mimeTypeId, boolean cache) {
         this.dispatcher = dispatcher;
         this.delegator = delegator;
         this.contentId = contentId;
@@ -102,9 +112,9 @@ public class ContentMapFacade implements Map {
         this.cache = cache;
         try {
             if (cache) {
-                this.value = delegator.findByPrimaryKeyCache("Content", UtilMisc.toMap("contentId", contentId));
+                this.value = delegator.findOne("Content", UtilMisc.toMap("contentId", contentId), true);
             } else {
-                this.value = delegator.findByPrimaryKey("Content", UtilMisc.toMap("contentId", contentId));
+                this.value = delegator.findOne("Content", UtilMisc.toMap("contentId", contentId), false);
             }
         } catch (GenericEntityException e) {
             Debug.logError(e, module);
@@ -155,7 +165,7 @@ public class ContentMapFacade implements Map {
         return null;
     }
 
-    public void putAll(Map map) {
+    public void putAll(Map<?, ?> map) {
         Debug.logWarning("This method [putAll()] is not implemented in ContentMapFacade", module);
     }
 
@@ -163,19 +173,49 @@ public class ContentMapFacade implements Map {
         Debug.logWarning("This method [clear()] is not implemented in ContentMapFacade", module);
     }
 
-    public Set<String> keySet() {
+    public Set<Object> keySet() {
         // Debug.logWarning("This method [keySet()] is not completely implemented in ContentMapFacade", module);
-        return mapKeySet;
+        return UtilGenerics.checkSet(mapKeySet);
     }
 
-    public Collection values() {
+    public Collection<Object> values() {
         Debug.logWarning("This method [values()] is not implemented in ContentMapFacade", module);
         return null;
     }
 
-    public Set entrySet() {
+    public Set<Map.Entry<Object, Object>> entrySet() {
         Debug.logWarning("This method [entrySet()] is not implemented in ContentMapFacade", module);
         return null;
+    }
+
+    public void setSortOrder(Object obj) {
+        if (!(obj instanceof String)) {
+            Debug.logWarning("sortOrder parameters must be a string", module);
+            return;
+        }
+        this.sortOrder=(String) obj;
+        this.subContent.setSortOrder(obj);
+    }
+
+    public void setMapKeyFilter(Object obj) {
+        if (!(obj instanceof String)) {
+            Debug.logWarning("mapKeyFilter parameters must be a string", module);
+            return;
+        }
+        this.mapKeyFilter=(String) obj;
+    }
+
+    public void setStatusFilter(Object obj) {
+        if (!(obj instanceof String)) {
+            Debug.logWarning("statusFilter parameters must be a string", module);
+            return;
+        }
+        this.statusFilter=(String) obj;
+        this.subContent.setStatusFilter(obj);
+    }
+
+    public void setDecoratedContent(ContentMapFacade decoratedContent) {
+        this.decoratedContent = decoratedContent;
     }
 
     // implemented get method
@@ -193,9 +233,9 @@ public class ContentMapFacade implements Map {
             }
             try {
                 if (cache) {
-                    this.fields = delegator.findByPrimaryKeyCache("Content", UtilMisc.toMap("contentId", contentId));
+                    this.fields = delegator.findOne("Content", UtilMisc.toMap("contentId", contentId), true);
                 } else {
-                    this.fields = delegator.findByPrimaryKey("Content", UtilMisc.toMap("contentId", contentId));
+                    this.fields = delegator.findOne("Content", UtilMisc.toMap("contentId", contentId), false);
                 }
             } catch (GenericEntityException e) {
                 Debug.logError(e, module);
@@ -204,14 +244,37 @@ public class ContentMapFacade implements Map {
 
         } else if ("link".equalsIgnoreCase(name)) {
             // link to this content
-            // TODO: make more intelligent to use a link alias if exists
 
             RequestHandler rh = (RequestHandler) this.context.get("_REQUEST_HANDLER_");
             HttpServletRequest request = (HttpServletRequest) this.context.get("request");
             HttpServletResponse response = (HttpServletResponse) this.context.get("response");
 
             if (rh != null && request != null && response != null) {
-                String contextLink = rh.makeLink(request, response, this.contentId, true, false, true);
+                String webSiteId = WebSiteWorker.getWebSiteId(request);
+                Delegator delegator = (Delegator) request.getAttribute("delegator");
+                
+                String contentUri = this.contentId;
+                // Try and find a WebSitePathAlias record to use, it isn't very feasible to find an alias by (parent)contentId/mapKey
+                // so we're only looking for a direct alias using contentId
+                if (webSiteId != null && delegator != null) {
+                    EntityCondition condition = EntityCondition.makeCondition(
+                            UtilMisc.toMap(
+                                    "mapKey", null,
+                                    "webSiteId", webSiteId,
+                                    "contentId", this.contentId
+                            )
+                    );
+                    try {
+                        List<GenericValue> webSitePathAliases = delegator.findList("WebSitePathAlias", condition, null, null, null, true);
+                        GenericValue webSitePathAlias = EntityUtil.getFirst(webSitePathAliases);
+                        if (webSitePathAlias != null) {
+                            contentUri = webSitePathAlias.getString("pathAlias");
+                        }
+                    } catch (GenericEntityException e) {
+                        Debug.logError(e, module);
+                    }
+                }
+                String contextLink = rh.makeLink(request, response, contentUri, true, false, true);
                 // Debug.logInfo("Made link to content with ID [" + this.contentId + "]: " + contextLink, module);
                 return contextLink;
             } else {
@@ -225,11 +288,16 @@ public class ContentMapFacade implements Map {
             List<ContentMapFacade> subContent = FastList.newInstance();
             List<GenericValue> subs = null;
             try {
-                if (cache) {
-                    subs = delegator.findByAndCache("ContentAssoc", UtilMisc.toMap("contentId", contentId), UtilMisc.toList("-fromDate"));
-                } else {
-                    subs = delegator.findByAnd("ContentAssoc", UtilMisc.toMap("contentId", contentId), UtilMisc.toList("-fromDate"));
+                Map<String, Object> expressions = FastMap.newInstance();
+                expressions.put("contentIdStart", contentId);
+                if(!this.mapKeyFilter.equals("")) {
+                    expressions.put("caMapKey", this.mapKeyFilter);
                 }
+                if(!this.statusFilter.equals("")) {
+                    expressions.put("statusId", this.statusFilter);
+                }
+
+                subs = delegator.findByAnd("ContentAssocViewTo", expressions, UtilMisc.toList(this.sortOrder), cache);
             } catch (GenericEntityException e) {
                 Debug.logError(e, module);
             }
@@ -237,7 +305,7 @@ public class ContentMapFacade implements Map {
                 subs = EntityUtil.filterByDate(subs);
 
                 for (GenericValue v: subs) {
-                    subContent.add(new ContentMapFacade(dispatcher, delegator, v.getString("contentIdTo"), context, locale, mimeType, cache));
+                    subContent.add(new ContentMapFacade(dispatcher, delegator, v.getString("contentId"), context, locale, mimeType, cache));
                 }
             }
             return subContent;
@@ -265,8 +333,11 @@ public class ContentMapFacade implements Map {
             return "=========> " + errorMsg + " <=========";
         }
         // TODO: change to use the MapStack instead of a cloned Map
-        Map renderCtx = FastMap.newInstance();
+        Map<String, Object> renderCtx = FastMap.newInstance();
         renderCtx.putAll(context);
+        if (this.decoratedContent != null) {
+            renderCtx.put("decoratedContent", decoratedContent);
+        }
 
         if (this.isDecorated) {
             renderCtx.put("_IS_DECORATED_", Boolean.TRUE);
@@ -283,11 +354,12 @@ public class ContentMapFacade implements Map {
         }
     }
 
+    @Override
     public String toString() {
         return this.renderThis();
     }
 
-    abstract class AbstractInfo implements Map {
+    abstract class AbstractInfo implements Map<Object, Object> {
         public int size() {
             return 1;
         }
@@ -317,7 +389,7 @@ public class ContentMapFacade implements Map {
             return null;
         }
 
-        public void putAll(Map map) {
+        public void putAll(Map<?, ?> map) {
             Debug.logWarning("This method [putAll()] is not implemented in ContentMapFacade.AbstractInfo", module);
         }
 
@@ -325,23 +397,24 @@ public class ContentMapFacade implements Map {
             Debug.logWarning("This method [clear()] is not implemented in ContentMapFacade.AbstractInfo", module);
         }
 
-        public Set keySet() {
+        public Set<Object> keySet() {
             Debug.logWarning("This method [keySet()] is not implemented in ContentMapFacade.AbstractInfo", module);
             return null;
         }
 
-        public Collection values() {
+        public Collection<Object> values() {
             Debug.logWarning("This method [values()] is not implemented in ContentMapFacade.AbstractInfo", module);
             return null;
         }
 
-        public Set entrySet() {
+        public Set<Map.Entry<Object, Object>> entrySet() {
             Debug.logWarning("This method [entrySet()] is not implemented in ContentMapFacade.AbstractInfo", module);
             return null;
         }
     }
 
     class Content extends AbstractInfo {
+        @Override
         public Object get(Object key) {
             if (!(key instanceof String)) {
                 Debug.logWarning("Key parameters must be a string", module);
@@ -356,9 +429,9 @@ public class ContentMapFacade implements Map {
             GenericValue content = null;
             try {
                 if (cache) {
-                    content = delegator.findByPrimaryKeyCache("Content", UtilMisc.toMap("contentId", name));
+                    content = delegator.findOne("Content", UtilMisc.toMap("contentId", name), true);
                 } else {
-                    content = delegator.findByPrimaryKey("Content", UtilMisc.toMap("contentId", name));
+                    content = delegator.findOne("Content", UtilMisc.toMap("contentId", name), false);
                 }
             } catch (GenericEntityException e) {
                 Debug.logError(e, module);
@@ -372,6 +445,9 @@ public class ContentMapFacade implements Map {
     }
 
     class SubContent extends AbstractInfo {
+        private String sortOrder="-fromDate";
+        private String statusFilter="";
+        @Override
         public Object get(Object key) {
             if (!(key instanceof String)) {
                 Debug.logWarning("Key parameters must be a string", module);
@@ -383,13 +459,15 @@ public class ContentMapFacade implements Map {
             }
 
             // key is the mapKey
-            List subs = null;
+            List<GenericValue> subs = null;
             try {
-                if (cache) {
-                    subs = delegator.findByAndCache("ContentAssoc", UtilMisc.toMap("contentId", contentId, "mapKey", name), UtilMisc.toList("-fromDate"));
-                } else {
-                    subs = delegator.findByAnd("ContentAssoc", UtilMisc.toMap("contentId", contentId, "mapKey", name), UtilMisc.toList("-fromDate"));
+                Map<String, Object> expressions = FastMap.newInstance();
+                expressions.put("contentIdStart", contentId);
+                expressions.put("caMapKey", name);
+                if(!this.statusFilter.equals("")) {
+                    expressions.put("statusId", this.statusFilter);
                 }
+                subs = delegator.findByAnd("ContentAssocViewTo", expressions, UtilMisc.toList(this.sortOrder), cache);
             } catch (GenericEntityException e) {
                 Debug.logError(e, module);
             }
@@ -397,28 +475,39 @@ public class ContentMapFacade implements Map {
                 subs = EntityUtil.filterByDate(subs);
                 GenericValue v = EntityUtil.getFirst(subs);
                 if (v != null) {
-                    return new ContentMapFacade(dispatcher, delegator, v.getString("contentIdTo"), context, locale, mimeType, cache);
+                    return new ContentMapFacade(dispatcher, delegator, v.getString("contentId"), context, locale, mimeType, cache);
                 }
             }
 
             return null;
         }
+        public void setSortOrder(Object obj) {
+            if (!(obj instanceof String)) {
+                Debug.logWarning("sortOrder parameters must be a string", module);
+                return;
+            }
+            this.sortOrder=(String) obj;
+        }
+        public void setStatusFilter(Object obj) {
+            if (!(obj instanceof String)) {
+                Debug.logWarning("statusFilter parameters must be a string", module);
+                return;
+            }
+            this.statusFilter=(String) obj;
+        }
     }
 
     class MetaData extends AbstractInfo {
+        @Override
         public Object get(Object key) {
             if (!(key instanceof String)) {
                 Debug.logWarning("Key parameters must be a string", module);
                 return null;
             }
             String name = (String) key;
-            List metaData = null;
+            List<GenericValue> metaData = null;
             try {
-                if (cache) {
-                    metaData = delegator.findByAndCache("ContentMetaData", UtilMisc.toMap("contentId", contentId, "metaDataPredicateId", name));
-                } else {
-                    metaData = delegator.findByAnd("ContentMetaData", UtilMisc.toMap("contentId", contentId, "metaDataPredicateId", name));
-                }
+                metaData = delegator.findByAnd("ContentMetaData", UtilMisc.toMap("contentId", contentId, "metaDataPredicateId", name), null, cache);
             } catch (GenericEntityException e) {
                 Debug.logError(e, module);
             }
@@ -427,6 +516,7 @@ public class ContentMapFacade implements Map {
     }
 
     class DataResource extends AbstractInfo {
+        @Override
         public Object get(Object key) {
             if (!(key instanceof String)) {
                 Debug.logWarning("Key parameters must be a string", module);
@@ -438,11 +528,7 @@ public class ContentMapFacade implements Map {
                 // get the data resource value object
                 GenericValue dr = null;
                 try {
-                    if (cache) {
-                        dr = value.getRelatedOneCache("DataResource");
-                    } else {
-                        dr = value.getRelatedOne("DataResource");
-                    }
+                    dr = value.getRelatedOne("DataResource", cache);
                 } catch (GenericEntityException e) {
                     Debug.logError(e, module);
                 }

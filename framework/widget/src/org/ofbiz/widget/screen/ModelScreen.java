@@ -18,7 +18,6 @@
  *******************************************************************************/
 package org.ofbiz.widget.screen;
 
-import java.io.Serializable;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -28,29 +27,32 @@ import javolution.util.FastSet;
 
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.GeneralException;
+import org.ofbiz.base.util.UtilGenerics;
 import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.base.util.UtilXml;
 import org.ofbiz.base.util.string.FlexibleStringExpander;
-import org.ofbiz.entity.GenericDelegator;
+import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericEntity;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.transaction.TransactionUtil;
 import org.ofbiz.service.LocalDispatcher;
 import org.ofbiz.webapp.control.ConfigXMLReader;
 import org.ofbiz.widget.ModelWidget;
+import org.ofbiz.widget.ModelWidgetAction;
 import org.w3c.dom.Element;
 
 /**
  * Widget Library - Screen model class
  */
 @SuppressWarnings("serial")
-public class ModelScreen extends ModelWidget implements Serializable {
+public class ModelScreen extends ModelWidget {
 
     public static final String module = ModelScreen.class.getName();
 
     protected String sourceLocation;
     protected FlexibleStringExpander transactionTimeoutExdr;
     protected Map<String, ModelScreen> modelScreenMap;
+    protected boolean useTransaction;
     protected boolean useCache;
 
     protected ModelScreenWidget.Section section;
@@ -65,6 +67,7 @@ public class ModelScreen extends ModelWidget implements Serializable {
         this.sourceLocation = sourceLocation;
         this.transactionTimeoutExdr = FlexibleStringExpander.getInstance(screenElement.getAttribute("transaction-timeout"));
         this.modelScreenMap = modelScreenMap;
+        this.useTransaction = "true".equals(screenElement.getAttribute("use-transaction"));
         this.useCache = "true".equals(screenElement.getAttribute("use-cache"));
 
         // read in the section, which will read all sub-widgets too
@@ -88,13 +91,13 @@ public class ModelScreen extends ModelWidget implements Serializable {
 
     protected static void findServiceNamesUsedInWidget(ModelScreenWidget currentWidget, Set<String> allServiceNamesUsed) {
         if (currentWidget instanceof ModelScreenWidget.Section) {
-            List<ModelScreenAction> actions = ((ModelScreenWidget.Section)currentWidget).actions;
+            List<ModelWidgetAction> actions = ((ModelScreenWidget.Section)currentWidget).actions;
             List<ModelScreenWidget> subWidgets = ((ModelScreenWidget.Section)currentWidget).subWidgets;
             List<ModelScreenWidget> failWidgets = ((ModelScreenWidget.Section)currentWidget).failWidgets;
             if (actions != null) {
-                for (ModelScreenAction screenOperation: actions) {
-                    if (screenOperation instanceof ModelScreenAction.Service) {
-                        String serviceName = ((ModelScreenAction.Service) screenOperation).serviceNameExdr.getOriginal();
+                for (ModelWidgetAction screenOperation: actions) {
+                    if (screenOperation instanceof ModelWidgetAction.Service) {
+                        String serviceName = ((ModelWidgetAction.Service) screenOperation).getServiceNameExdr().getOriginal();
                         if (UtilValidate.isNotEmpty(serviceName)) allServiceNamesUsed.add(serviceName);
                     }
                 }
@@ -147,25 +150,25 @@ public class ModelScreen extends ModelWidget implements Serializable {
     }
     protected static void findEntityNamesUsedInWidget(ModelScreenWidget currentWidget, Set<String> allEntityNamesUsed) {
         if (currentWidget instanceof ModelScreenWidget.Section) {
-            List<ModelScreenAction> actions = ((ModelScreenWidget.Section)currentWidget).actions;
+            List<ModelWidgetAction> actions = ((ModelScreenWidget.Section)currentWidget).actions;
             List<ModelScreenWidget> subWidgets = ((ModelScreenWidget.Section)currentWidget).subWidgets;
             List<ModelScreenWidget> failWidgets = ((ModelScreenWidget.Section)currentWidget).failWidgets;
             if (actions != null) {
-                for (ModelScreenAction screenOperation: actions) {
-                    if (screenOperation instanceof ModelScreenAction.EntityOne) {
-                        String entName = ((ModelScreenAction.EntityOne) screenOperation).finder.getEntityName();
+                for (ModelWidgetAction screenOperation: actions) {
+                    if (screenOperation instanceof ModelWidgetAction.EntityOne) {
+                        String entName = ((ModelWidgetAction.EntityOne) screenOperation).getFinder().getEntityName();
                         if (UtilValidate.isNotEmpty(entName)) allEntityNamesUsed.add(entName);
-                    } else if (screenOperation instanceof ModelScreenAction.EntityAnd) {
-                        String entName = ((ModelScreenAction.EntityAnd) screenOperation).finder.getEntityName();
+                    } else if (screenOperation instanceof ModelWidgetAction.EntityAnd) {
+                        String entName = ((ModelWidgetAction.EntityAnd) screenOperation).getFinder().getEntityName();
                         if (UtilValidate.isNotEmpty(entName)) allEntityNamesUsed.add(entName);
-                    } else if (screenOperation instanceof ModelScreenAction.EntityCondition) {
-                        String entName = ((ModelScreenAction.EntityCondition) screenOperation).finder.getEntityName();
+                    } else if (screenOperation instanceof ModelWidgetAction.EntityCondition) {
+                        String entName = ((ModelWidgetAction.EntityCondition) screenOperation).getFinder().getEntityName();
                         if (UtilValidate.isNotEmpty(entName)) allEntityNamesUsed.add(entName);
-                    } else if (screenOperation instanceof ModelScreenAction.GetRelated) {
-                        String relationName = ((ModelScreenAction.GetRelated) screenOperation).relationName;
+                    } else if (screenOperation instanceof ModelWidgetAction.GetRelated) {
+                        String relationName = ((ModelWidgetAction.GetRelated) screenOperation).getRelationName();
                         if (UtilValidate.isNotEmpty(relationName)) allEntityNamesUsed.add(relationName);
-                    } else if (screenOperation instanceof ModelScreenAction.GetRelatedOne) {
-                        String relationName = ((ModelScreenAction.GetRelatedOne) screenOperation).relationName;
+                    } else if (screenOperation instanceof ModelWidgetAction.GetRelatedOne) {
+                        String relationName = ((ModelWidgetAction.GetRelatedOne) screenOperation).getRelationName();
                         if (UtilValidate.isNotEmpty(relationName)) allEntityNamesUsed.add(relationName);
                     }
                 }
@@ -345,17 +348,15 @@ public class ModelScreen extends ModelWidget implements Serializable {
      *   use the same screen definitions for many types of screen UIs
      */
     public void renderScreenString(Appendable writer, Map<String, Object> context, ScreenStringRenderer screenStringRenderer) throws ScreenRenderException {
-        // make sure the "null" object is in there for entity ops
-        context.put("null", GenericEntity.NULL_FIELD);
-
-        setWidgetBoundaryComments(context);
+        // make sure the "nullField" object is in there for entity ops
+        context.put("nullField", GenericEntity.NULL_FIELD);
 
         // wrap the whole screen rendering in a transaction, should improve performance in querying and such
-        Map parameters = (Map) context.get("parameters");
+        Map<String, String> parameters = UtilGenerics.cast(context.get("parameters"));
         boolean beganTransaction = false;
         int transactionTimeout = -1;
         if (parameters != null) {
-            String transactionTimeoutPar = (String) parameters.get("TRANSACTION_TIMEOUT");
+            String transactionTimeoutPar = parameters.get("TRANSACTION_TIMEOUT");
             if (transactionTimeoutPar != null) {
                 try {
                     transactionTimeout = Integer.parseInt(transactionTimeoutPar);
@@ -382,11 +383,13 @@ public class ModelScreen extends ModelWidget implements Serializable {
             // If transaction timeout is not present (i.e. is equal to -1), the default transaction timeout is used
             // If transaction timeout is present, use it to start the transaction
             // If transaction timeout is set to zero, no transaction is started
-            if (transactionTimeout < 0) {
-                beganTransaction = TransactionUtil.begin();
-            }
-            if (transactionTimeout > 0) {
-                beganTransaction = TransactionUtil.begin(transactionTimeout);
+            if (useTransaction) {
+                if (transactionTimeout < 0) {
+                    beganTransaction = TransactionUtil.begin();
+                }
+                if (transactionTimeout > 0) {
+                    beganTransaction = TransactionUtil.begin(transactionTimeout);
+                }
             }
 
             // render the screen, starting with the top-level section
@@ -433,8 +436,8 @@ public class ModelScreen extends ModelWidget implements Serializable {
         return dispatcher;
     }
 
-    public GenericDelegator getDelegator(Map<String, Object> context) {
-        GenericDelegator delegator = (GenericDelegator) context.get("delegator");
+    public Delegator getDelegator(Map<String, Object> context) {
+        Delegator delegator = (Delegator) context.get("delegator");
         return delegator;
     }
 }

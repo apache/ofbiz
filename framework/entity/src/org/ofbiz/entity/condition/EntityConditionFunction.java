@@ -22,31 +22,35 @@ package org.ofbiz.entity.condition;
 import java.util.List;
 import java.util.Map;
 
-import org.ofbiz.entity.GenericDelegator;
+import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericModelException;
 import org.ofbiz.entity.config.DatasourceInfo;
 import org.ofbiz.entity.model.ModelEntity;
 
 /**
- * Encapsulates operations between entities and entity fields. This is a immutable class.
+ * Base class for entity condition functions.
  *
  */
+@SuppressWarnings("serial")
 public abstract class EntityConditionFunction extends EntityCondition {
 
     public static final int ID_NOT = 1;
 
     public static class NOT extends EntityConditionFunction {
         public NOT(EntityCondition nested) { super(ID_NOT, "NOT", nested); }
-        public boolean mapMatches(GenericDelegator delegator, Map<String, ? extends Object> map) {
+        @Override
+        public boolean mapMatches(Delegator delegator, Map<String, ? extends Object> map) {
             return !condition.mapMatches(delegator, map);
         }
+        @Override
         public EntityCondition freeze() {
             return new NOT(condition.freeze());
         }
-        public void encryptConditionFields(ModelEntity modelEntity, GenericDelegator delegator) {
+        @Override
+        public void encryptConditionFields(ModelEntity modelEntity, Delegator delegator) {
             // nothing to do here...
         }
-    };
+    }
 
     protected Integer idInt = null;
     protected String codeString = null;
@@ -79,20 +83,29 @@ public abstract class EntityConditionFunction extends EntityCondition {
         return idInt;
     }
 
+    @Override
     public void visit(EntityConditionVisitor visitor) {
         visitor.acceptEntityConditionFunction(this, condition);
     }
 
+    @Override
     public boolean equals(Object obj) {
         if (!(obj instanceof EntityConditionFunction)) return false;
         EntityConditionFunction otherFunc = (EntityConditionFunction) obj;
         return this.idInt == otherFunc.idInt && (this.condition != null ? condition.equals(otherFunc.condition) : otherFunc.condition != null);
     }
 
+    @Override
     public int hashCode() {
         return idInt.hashCode() ^ condition.hashCode();
     }
 
+    @Override
+    public boolean isEmpty() {
+        return false;
+    }
+
+    @Override
     public String makeWhereString(ModelEntity modelEntity, List<EntityConditionParam> entityConditionParams, DatasourceInfo datasourceInfo) {
         StringBuilder sb = new StringBuilder();
         sb.append(codeString).append('(');
@@ -101,6 +114,7 @@ public abstract class EntityConditionFunction extends EntityCondition {
         return sb.toString();
     }
 
+    @Override
     public void checkCondition(ModelEntity modelEntity) throws GenericModelException {
         condition.checkCondition(modelEntity);
     }

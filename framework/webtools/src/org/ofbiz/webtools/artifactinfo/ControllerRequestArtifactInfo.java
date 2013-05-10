@@ -57,26 +57,18 @@ public class ControllerRequestArtifactInfo extends ArtifactInfoBase {
         if (this.requestInfoMap == null) {
             throw new GeneralException("Controller request with name [" + requestUri + "] is not defined in controller file [" + controllerXmlUrl + "].");
         }
-
-        if (this.requestInfoMap == null) {
-            throw new GeneralException("Could not find Controller Request [" + requestUri + "] at URL [" + controllerXmlUrl.toExternalForm() + "]");
-        }
     }
 
     /** note this is mean to be called after the object is created and added to the ArtifactInfoFactory.allControllerRequestInfos in ArtifactInfoFactory.getControllerRequestArtifactInfo */
     public void populateAll() throws GeneralException {
         // populate serviceCalledByRequestEvent, requestsThatAreResponsesToThisRequest, viewsThatAreResponsesToThisRequest and related reverse maps
 
-        if (this.requestInfoMap.event != null && "service".equals(this.requestInfoMap.event.type)) {
-            String serviceName = (String) this.requestInfoMap.event.invoke;
-            try {
-                this.serviceCalledByRequestEvent = this.aif.getServiceArtifactInfo(serviceName);
-                if (this.serviceCalledByRequestEvent != null) {
-                    // add the reverse association
-                    UtilMisc.addToSortedSetInMap(this, aif.allRequestInfosReferringToServiceName, this.serviceCalledByRequestEvent.getUniqueId());
-                }
-            } catch (GeneralException e) {
-                Debug.logWarning(e.toString(), module);
+        if (this.requestInfoMap.event != null && this.requestInfoMap.event.type != null && (this.requestInfoMap.event.type.indexOf("service") >= 0)) {
+            String serviceName = this.requestInfoMap.event.invoke;
+            this.serviceCalledByRequestEvent = this.aif.getServiceArtifactInfo(serviceName);
+            if (this.serviceCalledByRequestEvent != null) {
+                // add the reverse association
+                UtilMisc.addToSortedSetInMap(this, aif.allRequestInfosReferringToServiceName, this.serviceCalledByRequestEvent.getUniqueId());
             }
         }
 
@@ -129,6 +121,7 @@ public class ControllerRequestArtifactInfo extends ArtifactInfoBase {
         return this.requestUri;
     }
 
+    @Override
     public String getDisplayName() {
         String location = UtilURL.getOfbizHomeRelativeLocation(this.controllerXmlUrl);
         if (location.endsWith("/WEB-INF/controller.xml")) {
@@ -137,22 +130,27 @@ public class ControllerRequestArtifactInfo extends ArtifactInfoBase {
         return this.requestUri + " (" + location + ")";
     }
 
+    @Override
     public String getDisplayType() {
         return "Controller Request";
     }
 
+    @Override
     public String getType() {
         return ArtifactInfoFactory.ControllerRequestInfoTypeId;
     }
 
+    @Override
     public String getUniqueId() {
         return this.controllerXmlUrl.toExternalForm() + "#" + this.requestUri;
     }
 
+    @Override
     public URL getLocationURL() throws MalformedURLException {
         return this.controllerXmlUrl;
     }
 
+    @Override
     public boolean equals(Object obj) {
         if (obj instanceof ControllerRequestArtifactInfo) {
             ControllerRequestArtifactInfo that = (ControllerRequestArtifactInfo) obj;

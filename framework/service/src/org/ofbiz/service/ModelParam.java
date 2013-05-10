@@ -43,6 +43,9 @@ public class ModelParam implements Serializable {
     /** Parameter name */
     public String name;
 
+    /** The description of this parameter */
+    public String description;
+
     /** Paramater type */
     public String type;
 
@@ -88,6 +91,7 @@ public class ModelParam implements Serializable {
 
     public ModelParam(ModelParam param) {
         this.name = param.name;
+        this.description = param.description;
         this.type = param.type;
         this.mode = param.mode;
         this.formLabel = param.formLabel;
@@ -128,6 +132,10 @@ public class ModelParam implements Serializable {
     public String getName() {
         return this.name;
     }
+    // Method to retrieve form-label from model parameter object in freemarker
+    public String getFormLabel() {
+        return this.formLabel;
+    }
 
     public String getType() {
         return this.type;
@@ -135,6 +143,18 @@ public class ModelParam implements Serializable {
 
     public String getMode() {
         return this.mode;
+    }
+
+    public String getEntityName() {
+        return this.entityName;
+    }
+
+    public String getFieldName() {
+        return this.fieldName;
+    }
+
+    public boolean getInternal() {
+        return this.internal;
     }
 
     public boolean isIn() {
@@ -181,6 +201,7 @@ public class ModelParam implements Serializable {
         return model.name.equals(this.name);
     }
 
+    @Override
     public String toString() {
         StringBuilder buf = new StringBuilder();
         buf.append(name).append("::");
@@ -206,43 +227,56 @@ public class ModelParam implements Serializable {
     public Part getWSDLPart(Definition def) throws WSDLException {
         Part part = def.createPart();
         part.setName(this.name);
-        part.setTypeName(new QName(ModelService.XSD, this.java2wsdlType()));
+        part.setTypeName(new QName(ModelService.TNS, this.java2wsdlType()));
         return part;
     }
 
     protected String java2wsdlType() throws WSDLException {
         if (ObjectType.instanceOf(java.lang.Character.class, this.type)) {
-            return "string";
+            return "std-String";
         } else if (ObjectType.instanceOf(java.lang.String.class, this.type)) {
-            return "string";
+            return "std-String";
         } else if (ObjectType.instanceOf(java.lang.Byte.class, this.type)) {
-            return "byte";
+            return "std-String";
         } else if (ObjectType.instanceOf(java.lang.Boolean.class, this.type)) {
-            return "boolean";
+            return "std-Boolean";
         } else if (ObjectType.instanceOf(java.lang.Integer.class, this.type)) {
-            return "int";
+            return "std-Integer";
         } else if (ObjectType.instanceOf(java.lang.Double.class, this.type)) {
-            return "double";
+            return "std-Double";
         } else if (ObjectType.instanceOf(java.lang.Float.class, this.type)) {
-            return "float";
+            return "std-Float";
         } else if (ObjectType.instanceOf(java.lang.Short.class, this.type)) {
-            return "short";
+            return "std-Integer";
         } else if (ObjectType.instanceOf(java.math.BigDecimal.class, this.type)) {
-            return "decimal";
+            return "std-Long";
         } else if (ObjectType.instanceOf(java.math.BigInteger.class, this.type)) {
-            return "integer";
+            return "std-Integer";
         } else if (ObjectType.instanceOf(java.util.Calendar.class, this.type)) {
-            return "dateTime";
+            return "sql-Timestamp";
+        } else if (ObjectType.instanceOf(com.ibm.icu.util.Calendar.class, this.type)) {
+            return "sql-Timestamp";
+        } else if (ObjectType.instanceOf(java.sql.Date.class, this.type)) {
+            return "sql-Date";
         } else if (ObjectType.instanceOf(java.util.Date.class, this.type)) {
-            return "dateTime";
+            return "sql-Timestamp";
         } else if (ObjectType.instanceOf(java.lang.Long.class, this.type)) {
-            return "unsignedInt";
+            return "std-Long";
         } else if (ObjectType.instanceOf(java.sql.Timestamp.class, this.type)) {
-            return "string";
+            return "sql-Timestamp";
+        } else if (ObjectType.instanceOf(org.ofbiz.entity.GenericValue.class, this.type)) {
+            return "eeval-";
+        } else if (ObjectType.instanceOf(org.ofbiz.entity.GenericPK.class, this.type)) {
+            return "eepk-";
+        } else if (ObjectType.instanceOf(java.util.Map.class, this.type)) {
+            return "map-Map";
+        } else if (ObjectType.instanceOf(java.util.List.class, this.type)) {
+            return "col-LinkedList";
+        } else {
+            return "cus-obj";
         }
 
-        // TODO add array support (maybe even convert List objects); add GenericValue/Map support
-        throw new WSDLException(WSDLException.OTHER_ERROR, "Service cannot be described with WSDL (" + this.name + " / " + this.type + ")");
+        //throw new WSDLException(WSDLException.OTHER_ERROR, "Service cannot be described with WSDL (" + this.name + " / " + this.type + ")");
     }
 
     static class ModelParamValidator implements Serializable {
@@ -279,6 +313,7 @@ public class ModelParam implements Serializable {
             return null;
         }
 
+        @Override
         public String toString() {
             return className + "::" + methodName + "::" + failMessage + "::" + failResource + "::" + failProperty;
         }

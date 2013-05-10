@@ -21,25 +21,23 @@ package org.ofbiz.manufacturing.jobshopmgt;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import javolution.util.FastMap;
+
 import org.ofbiz.base.util.Debug;
-import org.ofbiz.base.util.GeneralException;
 import org.ofbiz.base.util.UtilHttp;
 import org.ofbiz.base.util.UtilMisc;
-import org.ofbiz.entity.GenericDelegator;
+import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericPK;
-import org.ofbiz.service.GenericServiceException;
 import org.ofbiz.entity.GenericValue;
+import org.ofbiz.service.GenericServiceException;
 import org.ofbiz.service.LocalDispatcher;
-
-import javolution.util.FastMap;
+import org.ofbiz.service.ServiceUtil;
 
 public class ProductionRunEvents {
 
@@ -47,11 +45,11 @@ public class ProductionRunEvents {
 
     public static String productionRunDeclareAndProduce(HttpServletRequest request, HttpServletResponse response) {
         HttpSession session = request.getSession();
-        GenericDelegator delegator = (GenericDelegator) request.getAttribute("delegator");
+        Delegator delegator = (Delegator) request.getAttribute("delegator");
         LocalDispatcher dispatcher = (LocalDispatcher) request.getAttribute("dispatcher");
         GenericValue userLogin = (GenericValue) session.getAttribute("userLogin");
 
-        Map parameters = UtilHttp.getParameterMap(request);
+        Map<String, Object> parameters = UtilHttp.getParameterMap(request);
 
         BigDecimal quantity = null;
         try {
@@ -64,7 +62,7 @@ public class ProductionRunEvents {
         }
 
         Collection<Map<String, Object>> componentRows = UtilHttp.parseMultiFormData(parameters);
-        Map componentsLocationMap = FastMap.newInstance();
+        Map<GenericPK, Object> componentsLocationMap = FastMap.newInstance();
         for (Map<String, Object>componentRow : componentRows) {
             Timestamp fromDate = null;
             try {
@@ -75,22 +73,29 @@ public class ProductionRunEvents {
                 request.setAttribute("_ERROR_MESSAGE_", errMsg);
                 return "error";
             }
-            GenericPK key = GenericPK.create(delegator.getModelEntity("WorkEffortGoodStandard"), UtilMisc.toMap("workEffortId", (String)componentRow.get("productionRunTaskId"),
-                                                                                                                "productId", (String)componentRow.get("productId"),
-                                                                                                                "fromDate", fromDate,
-                                                                                                                "workEffortGoodStdTypeId", "PRUNT_PROD_NEEDED"));
-            componentsLocationMap.put(key, UtilMisc.toMap("locationSeqId", (String)componentRow.get("locationSeqId"),
-                                                          "secondaryLocationSeqId", (String)componentRow.get("secondaryLocationSeqId"),
-                                                          "failIfItemsAreNotAvailable", (String)componentRow.get("failIfItemsAreNotAvailable")));
+            GenericPK key = delegator.makePK("WorkEffortGoodStandard", 
+                    UtilMisc.<String, Object>toMap("workEffortId", (String)componentRow.get("productionRunTaskId"), 
+                            "productId", (String)componentRow.get("productId"),
+                            "fromDate", fromDate,
+                            "workEffortGoodStdTypeId", "PRUNT_PROD_NEEDED"));
+            componentsLocationMap.put(key, 
+                    UtilMisc.<String, Object>toMap("locationSeqId", (String)componentRow.get("locationSeqId"),
+                            "secondaryLocationSeqId", (String)componentRow.get("secondaryLocationSeqId"),
+                            "failIfItemsAreNotAvailable", (String)componentRow.get("failIfItemsAreNotAvailable")));
         }
 
         try {
-            Map inputMap = UtilMisc.toMap("workEffortId", parameters.get("workEffortId"), "inventoryItemTypeId", parameters.get("inventoryItemTypeId"));
+            Map<String, Object> inputMap = UtilMisc.<String, Object>toMap("workEffortId", parameters.get("workEffortId"),
+                    "inventoryItemTypeId", parameters.get("inventoryItemTypeId"));
             inputMap.put("componentsLocationMap", componentsLocationMap);
             inputMap.put("quantity", quantity);
             inputMap.put("lotId", parameters.get("lotId"));
             inputMap.put("userLogin", userLogin);
-            Map result = dispatcher.runSync("productionRunDeclareAndProduce", inputMap);
+            Map<String, Object> result = dispatcher.runSync("productionRunDeclareAndProduce", inputMap);
+            if (ServiceUtil.isError(result)) {
+                request.setAttribute("_ERROR_MESSAGE_", ServiceUtil.getErrorMessage(result));
+                return "error";
+            }
         } catch (GenericServiceException e) {
             String errMsg = "Error issuing materials: " + e.toString();
             Debug.logError(e, errMsg, module);

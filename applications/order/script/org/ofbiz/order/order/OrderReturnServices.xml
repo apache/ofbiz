@@ -19,7 +19,7 @@ under the License.
 -->
 
 <simple-methods xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/simple-methods.xsd">
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/simple-methods-v2.xsd">
     <simple-method method-name="createReturnHeader" short-description="Create a ReturnHeader">
         <now-timestamp field="nowTimestamp"/>
 
@@ -47,13 +47,15 @@ under the License.
             </if-compare>
         <else>
             <!-- make sure that the party to return to is an INTERNAL_ORGANIZATIO for customer return and SUPPLIER for vendor return else stop -->
-            <if-compare field="returnHeaderTypeId" operator="equals" value="CUSTOMER_RETURN">
+            <if-compare field="returnHeaderTypeId" operator="contains" value="CUSTOMER_">
                 <entity-one entity-name="PartyRole" value-field="partyRole" use-cache="true" auto-field-map="false">
                     <field-map field-name="partyId" from-field="parameters.toPartyId"/>
                     <field-map field-name="roleTypeId" value="INTERNAL_ORGANIZATIO"/>
                 </entity-one>
                 <if-empty field="partyRole">
-                    <add-error><fail-message message="Error: a return must be to a party in the role of internal organization"/></add-error>
+                    <add-error>
+                        <fail-property resource="OrderErrorUiLabels" property="OrderReturnRequestPartyRoleInternalOrg"/>
+                    </add-error>
                 </if-empty>
             <else>
                 <entity-one entity-name="PartyRole" value-field="partyRole" use-cache="true" auto-field-map="false">
@@ -61,7 +63,9 @@ under the License.
                     <field-map field-name="roleTypeId" value="SUPPLIER"/>
                 </entity-one>
                 <if-empty field="partyRole">
-                    <add-error><fail-message message="Error: a return must be to a party in the role of supplier"/></add-error>
+                    <add-error>
+                        <fail-property resource="OrderErrorUiLabels" property="OrderReturnRequestPartyRoleSupplier"/>
+                    </add-error>
                 </if-empty>
             </else>
             </if-compare>
@@ -245,36 +249,39 @@ under the License.
             <check-errors/>
         </if-compare>
 
-        <field-to-result field="returnHeader.statusId" result-name="currentStatusId"/>
+        <field-to-result field="returnHeader.statusId" result-name="oldStatusId"/>
         <set-nonpk-fields map="parameters" value-field="returnHeader"/>
         <store-value value-field="returnHeader"/>
     </simple-method>
 
     <simple-method method-name="createReturnItem" short-description="Create Return Item">
+
         <set field="lookupPKMap.returnId" from-field="parameters.returnId"/>
         <find-by-primary-key entity-name="ReturnHeader" map="lookupPKMap" value-field="returnHeader"/>
 
         <if>
-          <condition>
-            <and>
-              <not><if-has-permission permission="ORDERMGR" action="_CREATE"/></not>
-              <not><if-compare-field field="userLogin.partyId" to-field="returnHeader.fromPartyId" operator="equals"/></not>
-            </and>
-          </condition>
-          <then>
-            <add-error><fail-property resource="OrderErrorUiLabels" property="OrderSecurityErrorToRunCreateReturnItem"/></add-error>
-          </then>
+            <condition>
+                <and>
+                    <not>
+                        <if-has-permission permission="ORDERMGR" action="_CREATE"/>
+                    </not>
+                    <not>
+                        <if-compare-field field="userLogin.partyId" to-field="returnHeader.fromPartyId" operator="equals"/>
+                    </not>
+                </and>
+            </condition>
+            <then>
+                <add-error>
+                    <fail-property resource="OrderErrorUiLabels" property="OrderSecurityErrorToRunCreateReturnItem"/>
+                </add-error>
+            </then>
         </if>
         <check-errors/>
 
         <if-empty field="parameters.returnItemTypeId">
-            <if-not-empty field="parameters.returnItemMapKey">
-                <!-- find the item mapping -->
-            </if-not-empty>
-        </if-empty>
-
-        <if-empty field="parameters.returnItemTypeId">
-            <add-error><fail-message message="Return Item Type is not defined for this item; or no mapping was found."/></add-error>
+            <add-error>
+                <fail-property resource="OrderErrorUiLabels" property="OrderReturnItemTypeIsNotDefined"/>
+            </add-error>
             <check-errors/>
         </if-empty>
 
@@ -290,13 +297,17 @@ under the License.
                 </and>
             </condition>
             <then>
-                <add-error><fail-property resource="OrderErrorUiLabels" property="OrderReturnPaymentMethodNeededForThisTypeOfReturn"/></add-error>
+                <add-error>
+                    <fail-property resource="OrderErrorUiLabels" property="OrderReturnPaymentMethodNeededForThisTypeOfReturn"/>
+                </add-error>
             </then>
         </if>
         <check-errors/>
 
         <if-compare field="parameters.returnQuantity" operator="equals" value="0" type="BigDecimal">
-            <add-error><fail-property resource="OrderErrorUiLabels" property="OrderNoReturnQuantityAvailablePreviousReturnsMayExist"/></add-error>
+            <add-error>
+                <fail-property resource="OrderErrorUiLabels" property="OrderNoReturnQuantityAvailablePreviousReturnsMayExist"/>
+            </add-error>
             <check-errors/>
         </if-compare>
 
@@ -304,7 +315,7 @@ under the License.
         <set field="returnableQuantity" value="0" type="BigDecimal"/>
         <set field="returnablePrice" value="0" type="BigDecimal"/>
 
-        <!-- if an orderItemSeqId  is provided, then find the corresponding orderItem  -->
+        <!-- if an orderItemSeqId is provided, then find the corresponding orderItem  -->
         <if-not-empty field="parameters.orderItemSeqId">
             <make-value value-field="itemLookup" entity-name="OrderItem"/>
             <set-pk-fields map="parameters" value-field="itemLookup"/>
@@ -314,8 +325,9 @@ under the License.
             </if-not-empty>
         </if-not-empty>
 
-        <!-- get the returnableQuantity and returnablePrice: for orderItems, it's found by getReturnableQuantity; for adjustments,
-             either order adjustments or manual adjustments, it's always 1 and based on input parameter -->
+        <!-- get the returnableQuantity and returnablePrice:
+            for orderItems, it's found by getReturnableQuantity;
+            for adjustments, either order adjustments or manual adjustments, it's always 1 and based on input parameter -->
         <if-not-empty field="orderItem">
             <set field="serviceContext.orderItem" from-field="orderItem"/>
             <call-service service-name="getReturnableQuantity" in-map-name="serviceContext">
@@ -324,30 +336,36 @@ under the License.
             </call-service>
         </if-not-empty>
 
-
         <if-compare field="returnableQuantity" value="0" operator="greater" type="BigDecimal">
-            <!-- the user is only allowed to set a returnPrice if he has ORDERMGR_CREATE privilege, otherwise only the returnablePrice
-                 calculated by service is used -->
+            <!-- the user is only allowed to set a returnPrice if he has ORDERMGR_CREATE privilege, otherwise only the returnablePrice calculated by service is used -->
             <if>
                 <condition>
-                      <not><if-has-permission permission="ORDERMGR" action="_CREATE"/></not>
+                    <not>
+                        <if-has-permission permission="ORDERMGR" action="_CREATE"/>
+                    </not>
                 </condition>
                 <then>
-                      <set from-field="returnablePrice" field="parameters.returnPrice"/>
+                    <set from-field="returnablePrice" field="parameters.returnPrice"/>
                 </then>
             </if>
 
             <!-- make sure the returnQuantity is not greater than the returnableQuantity from service or the quantity on the original orderItem -->
             <if-compare-field field="parameters.returnQuantity" to-field="returnableQuantity" operator="greater" type="BigDecimal">
-                <add-error><fail-property resource="OrderErrorUiLabels" property="OrderRequestedReturnQuantityNotAvailablePreviousReturnsMayExist"/></add-error>
+                <add-error>
+                    <fail-property resource="OrderErrorUiLabels" property="OrderRequestedReturnQuantityNotAvailablePreviousReturnsMayExist"/>
+                </add-error>
             </if-compare-field>
             <if-not-empty field="orderItem">
                 <if-compare-field field="parameters.returnQuantity" to-field="orderItem.quantity" operator="greater" type="BigDecimal">
-                    <add-error><fail-property resource="OrderErrorUiLabels" property="OrderReturnQuantityCannotExceedTheOrderedQuantity"/></add-error>
+                    <add-error>
+                        <fail-property resource="OrderErrorUiLabels" property="OrderReturnQuantityCannotExceedTheOrderedQuantity"/>
+                    </add-error>
                 </if-compare-field>
             </if-not-empty>
             <if-compare-field field="parameters.returnPrice" to-field="returnablePrice" operator="greater" type="BigDecimal">
-                <add-error><fail-property resource="OrderErrorUiLabels" property="OrderReturnPriceCannotExceedThePurchasePrice"/></add-error>
+                <add-error>
+                    <fail-property resource="OrderErrorUiLabels" property="OrderReturnPriceCannotExceedThePurchasePrice"/>
+                </add-error>
             </if-compare-field>
             <check-errors/>
 
@@ -355,30 +373,19 @@ under the License.
                 <set from-field="parameters.orderId" field="orderId"/>
                 <set from-field="parameters.orderItemSeqId" field="orderItemSeqId"/>
                 <log level="error" message="Order ${orderId} item ${orderItemSeqId} has been returned in full"/>
-                <add-error><fail-property resource="OrderErrorUiLabels" property="OrderIllegalReturnItemTypePassed"/></add-error>
+                <add-error>
+                    <fail-property resource="OrderErrorUiLabels" property="OrderIllegalReturnItemTypePassed"/>
+                </add-error>
                 <check-errors/>
             </else>
         </if-compare>
 
         <make-value value-field="newEntity" entity-name="ReturnItem"/>
-        <!-- do a lookup to find the existing returnItems on this return, order by returnItemSeqId DESC, then get the first one
-             and add 1 to returnItemSeqId to get the new returnItemSeqId -->
         <set from-field="parameters.returnId" field="newEntity.returnId"/>
-        <set from-field="parameters.returnId" field="lookupMap.returnId"/>
-        <string-to-list string="-returnItemSeqId" list="orderBy"/>
-        <find-by-and entity-name="ReturnItem" list="currentItems" map="lookupMap" order-by-list="orderBy"></find-by-and>
-        <if-empty field="currentItems">
-            <set field="newEntity.returnItemSeqId" value="1"/>
-        <else>
-            <first-from-list entry="newestItem" list="currentItems"/>
-            <set field="newEntity.returnItemSeqId" value="${newestItem.returnItemSeqId + 1}" type="Integer"/>
-        </else>
-        </if-empty>
-        <to-string field="newEntity.returnItemSeqId" numeric-padding="5"/>
+        <make-next-seq-id seq-field-name="returnItemSeqId" value-field="newEntity"/>
         <set-nonpk-fields map="parameters" value-field="newEntity"/>
-        <set field="newEntity.statusId" value="RETURN_REQUESTED"/>  <!-- default status for new return items -->
+        <set field="newEntity.statusId" value="RETURN_REQUESTED"/> <!-- default status for new return items -->
         <field-to-result field="newEntity.returnItemSeqId" result-name="returnItemSeqId"/>
-        <log level="info" message="Return Item Seq ID: ${newEntity.returnItemSeqId}"/>
         <create-value value-field="newEntity"/>
         <refresh-value value-field="newEntity"/>
 
@@ -404,7 +411,9 @@ under the License.
                 </if-not-empty>
             </then>
         </if>
+
     </simple-method>
+
     <simple-method method-name="updateReturnItem" short-description="Update Return Item">
         <check-permission permission="ORDERMGR" action="_UPDATE"><fail-property resource="OrderErrorUiLabels" property="OrderSecurityErrorToRunUpdateReturnHeader"/></check-permission>
         <check-errors/>
@@ -414,7 +423,7 @@ under the License.
         <find-by-primary-key entity-name="ReturnItem" map="lookupPKMap" value-field="returnItem"/>
         <set field="originalReturnPrice" from-field="returnItem.returnPrice"/>
         <set field="originalReturnQuantity" from-field="returnItem.returnQuantity"/>
-        <field-to-result field="returnItem.statusId" result-name="currentStatusId"/>
+        <field-to-result field="returnItem.statusId" result-name="oldStatusId"/>
 
         <set-nonpk-fields map="parameters" value-field="returnItem"/>
         <store-value value-field="returnItem"/>
@@ -443,8 +452,11 @@ under the License.
         <find-by-and entity-name="ReturnItem" map="lookupPKMap" list="returnItems"/>
         <iterate entry="item" list="returnItems">
             <set field="item.statusId" from-field="parameters.statusId"/>
+            <set-service-fields service-name="updateReturnItem" map="item" to-map="serviceInMap"/>
+            <call-service service-name="updateReturnItem" in-map-name="serviceInMap"/>
+            <clear-field field="serviceInMap"/>
+            <clear-field field="item"/>
         </iterate>
-        <store-list list="returnItems"/>
     </simple-method>
     <simple-method method-name="removeReturnItem" short-description="Remove Return Item">
         <check-permission permission="ORDERMGR" action="_DELETE"><fail-property resource="OrderErrorUiLabels" property="OrderSecurityErrorToRunRemoveQuoteItem"/></check-permission>
@@ -484,7 +496,9 @@ under the License.
                 <not><if-has-permission permission="ORDERMGR" action="_CREATE"/></not>
             </condition>
             <then>
-                <add-error><fail-message message="Security error to run createReturnAdjustment"/></add-error>
+                <add-error>
+                    <fail-property resource="OrderErrorUiLabels" property="OrderErrorCreatePermissionError"/>
+                </add-error>
             </then>
         </if>
         <check-errors/>
@@ -498,7 +512,9 @@ under the License.
         <field-to-result field="responseMessage" result-name="successMessage"/>
     </simple-method>
     <simple-method method-name="removeReturnAdjustment" short-description="Remove Return Adjustment">
-        <check-permission permission="ORDERMGR" action="_DELETE"><fail-message message="Order security ErrorToRunUpdateReturnAdjustment"/></check-permission>
+        <check-permission permission="ORDERMGR" action="_DELETE">
+            <fail-property resource="OrderErrorUiLabels" property="OrderErrorDeletePermissionError"/>
+        </check-permission>
         <check-errors/>
 
         <set from-field="parameters.returnAdjustmentId" field="lookupPKMap.returnAdjustmentId"/>
@@ -526,28 +542,17 @@ under the License.
                 <field-map field-name="returnItemSeqId" from-field="receipt.returnItemSeqId"/>
             </entity-one>
             <set field="returnItem.receivedQuantity" from-field="${totalsMap.receipt.returnItemSeqId}" type="BigDecimal"/>
+            <set-service-fields service-name="updateReturnItem" map="returnItem" to-map="serviceInMap"/>
 
             <if-compare-field field="totalsMap.receipt.returnItemSeqId" to-field="returnItem.returnQuantity" operator="greater-equals" type="BigDecimal">
                 <!-- update the status for the item -->
-                <set field="returnItem.statusId" value="RETURN_RECEIVED"/>
-                <store-value value-field="returnItem"/>
-
-                <!-- create status change history -->
-                <!-- TODO: this should be done with a createReturnStatus service call -->
-                <make-value entity-name="ReturnStatus" value-field="newReturnStatus"/>
-                <sequenced-id sequence-name="ReturnStatus" field="newReturnStatus.returnStatusId"/>
-
-                <set field="newReturnStatus.returnId" from-field="returnItem.returnItemSeqId"/>
-                <set field="newReturnStatus.returnId" from-field="returnItem.returnId"/>
-                <set field="newReturnStatus.statusId" from-field="returnItem.statusId"/>
-
-                <now-timestamp field="newReturnStatus.statusDatetime"/>
-
-                <create-value value-field="newReturnStatus"/>
+                <set field="serviceInMap.statusId" value="RETURN_RECEIVED"/>
+                <call-service service-name="updateReturnItem" in-map-name="serviceInMap"/>
             </if-compare-field>
 
             <!-- update the returnItem with at least receivedQuantity, and also statusId if applicable -->
-            <store-value value-field="returnItem"/>
+            <call-service service-name="updateReturnItem" in-map-name="serviceInMap"/>
+            <clear-field field="serviceInMap"/>
         </iterate>
 
         <!-- check to see if all items have been received -->
@@ -583,16 +588,6 @@ under the License.
             <set field="returnHeaderCtx.statusId" value="RETURN_RECEIVED"/>
             <set from-field="returnHeader.returnId" field="returnHeaderCtx.returnId"/>
             <call-service service-name="updateReturnHeader" in-map-name="returnHeaderCtx"/>
-            <!-- create the status history -->
-            <make-value entity-name="ReturnStatus" value-field="newValue"/>
-            <sequenced-id sequence-name="ReturnStatus" field="newValue.returnStatusId"/>
-
-            <set field="newValue.returnId" from-field="returnHeader.returnId"/>
-            <set field="newValue.statusId" value="RETURN_RECEIVED"/>
-
-            <now-timestamp field="newValue.statusDatetime"/>
-
-            <create-value value-field="newValue"/>
         </if-compare>
 
         <!-- return the current return header status -->
@@ -725,7 +720,9 @@ under the License.
             </if-compare>
 
             <if-empty field="returnItemTypeMapping.returnItemTypeId">
-                <add-error><fail-message message="No matching return item type map found for order item: [${orderItem}]"/></add-error>
+                <add-error>
+                    <fail-property resource="OrderErrorUiLabels" property="OrderReturnItemTypeOrderItemNoMatching"/>
+                </add-error>
                 <check-errors/>
             <else>
                 <set from-field="returnItemTypeMapping.returnItemTypeId" field="newItemCtx.returnItemTypeId"/>
@@ -896,6 +893,57 @@ under the License.
         <set field="inMap.returnTypeId" value="RTN_REPAIR_REPLACE"/>
         <call-service service-name="processReplacementReturn" in-map-name="inMap"/>
     </simple-method>
+    <simple-method method-name="processWaitReplacementReservedReturn" short-description="Process the replacements in a wait reserved return when the return is accepted and then received">
+        <entity-one entity-name="ReturnHeader" value-field="returnHeader"/>
+        <if-compare field="returnHeader.statusId" operator="equals" value="RETURN_ACCEPTED">
+            <set field="inMap.returnId" from-field="parameters.returnId"/>
+            <set field="inMap.returnTypeId" value="RTN_WAIT_REPLACE_RES"/>
+            <call-service service-name="processReplacementReturn" in-map-name="inMap"/>
+        </if-compare>
+        <if-compare field="returnHeader.statusId" operator="equals" value="RETURN_RECEIVED">
+            <entity-and entity-name="ReturnItem" list="returnItems">
+                <field-map field-name="returnId" from-field="returnHeader.returnId"/>
+                <field-map field-name="returnTypeId" value="RTN_WAIT_REPLACE_RES"/>
+            </entity-and>
+            <if-not-empty field="returnItems">
+                <!-- Get the replacement order and update its status to Approved -->
+                <first-from-list list="returnItems" entry="returnItem"/>
+                <get-related-one relation-name="ReturnItemResponse" value-field="returnItem" to-value-field="returnItemResponse"/>
+                <entity-one entity-name="OrderHeader" value-field="orderHeader" >
+                    <field-map field-name="orderId" from-field="returnItemResponse.replacementOrderId"/>
+                </entity-one>
+                <if-not-empty field="orderHeader">
+                    <if-compare field="orderHeader.statusId" operator="equals" value="ORDER_HOLD">
+                        <set field="changeOrderStatusMap.statusId" value="ORDER_APPROVED"/>
+                        <set field="changeOrderStatusMap.orderId" from-field="returnItemResponse.replacementOrderId"/>
+                        <set field="changeOrderStatusMap.setItemStatus" value="Y"/>
+                        <call-service service-name="changeOrderStatus" in-map-name="changeOrderStatusMap"/>
+                    </if-compare>
+                    <if-compare field="orderHeader.statusId" operator="equals" value="ORDER_CANCELLED">
+                        <set field="createOrderMap.returnId" from-field="parameters.returnId"/>
+                        <set field="createOrderMap.returnTypeId" value="RTN_WAIT_REPLACE_RES"/>
+                        <call-service service-name="processReplacementReturn" in-map-name="createOrderMap"/>
+                    </if-compare>
+                </if-not-empty>                                
+            </if-not-empty>
+        </if-compare>
+    </simple-method>
+   
+    <simple-method method-name="processReplaceImmediatelyReturn" short-description="Process the replacements in a immediate return">
+        <set field="inMap.returnId" from-field="parameters.returnId"/>
+        <set field="inMap.returnTypeId" value="RTN_REPLACE_IMMEDIAT"/>
+        <call-service service-name="processReplacementReturn" in-map-name="inMap"/>
+    </simple-method> 
+    <simple-method method-name="processRefundOnlyReturn" short-description="Process the refund in a return">
+        <set field="inMap.returnId" from-field="parameters.returnId"/>
+        <set field="inMap.returnTypeId" value="RTN_REFUND"/>
+        <call-service service-name="processRefundReturn" in-map-name="inMap"/>
+    </simple-method> 
+    <simple-method method-name="processRefundImmediatelyReturn" short-description="Process the Immediate refund in a return">
+        <set field="inMap.returnId" from-field="parameters.returnId"/>
+        <set field="inMap.returnTypeId" value="RTN_REFUND_IMMEDIATE"/>
+        <call-service service-name="processRefundReturn" in-map-name="inMap"/>
+    </simple-method> 
 
     <simple-method method-name="createReturnItemShipment" short-description="Create a ReturnItemShipment">
         <check-permission permission="ORDERMGR" action="_CREATE"><fail-property resource="OrderErrorUiLabels" property="OrderSecurityErrorToRunCreateReturnItemShipment"/></check-permission>
@@ -918,6 +966,257 @@ under the License.
             </entity-and>
             <field-to-result field="statusItems"/>
         </else>
+        </if-compare>
+    </simple-method>
+
+    <simple-method method-name="createExchangeOrderAssoc" short-description="Associate exchange order with original order in OrderItemAssoc entity">
+        <entity-and entity-name="ReturnItem" list="returnItems">
+            <field-map field-name="orderId" from-field="parameters.originOrderId"/>
+            <field-map field-name="returnTypeId" value="RTN_REFUND"/>
+        </entity-and>
+        <set field="returnItemSize" value="${util:size(returnItems)}" type="Long"/>
+        <entity-and entity-name="OrderItem" list="orderItems">
+            <field-map field-name="orderId" from-field="parameters.orderId"/>
+        </entity-and>
+        <set field="orderItemSize" value="${util:size(orderItems)}" type="Long"/>
+        <if>
+            <condition>
+                <if-compare-field field="returnItemSize" operator="greater" to-field="orderItemSize" type="Long"/>
+            </condition>
+            <then>
+                <set field="returnItemCounter" value="1" type="Long"/>
+                <iterate list="returnItems" entry="returnItem">
+                    <set field="orderItemAssocMap.orderId" from-field="parameters.originOrderId"/>
+                    <set field="orderItemAssocMap.orderItemSeqId" from-field="returnItem.orderItemSeqId"/>
+                    <set field="orderItemCounter" value="1" type="Long"/>
+                    <iterate list="orderItems" entry="orderItem">
+                        <if>
+                            <condition>
+                                <if-compare-field field="returnItemCounter" operator="equals" to-field="orderItemCounter" type="Long"/>
+                            </condition>
+                            <then>
+                                <set field="orderItemAssocMap.toOrderId" from-field="parameters.orderId"/>
+                                <set field="orderItemAssocMap.toOrderItemSeqId" from-field="orderItem.orderItemSeqId"/>
+                            </then>
+                        <else-if>
+                            <condition>
+                                <if-compare-field field="returnItemCounter" operator="greater" to-field="orderItemSize" type="Long"/>
+                            </condition>
+                            <then>
+                                <set field="orderItemAssocMap.toOrderId" from-field="parameters.orderId"/>
+                                <set field="orderItemAssocMap.toOrderItemSeqId" from-field="orderItem.orderItemSeqId"/>
+                            </then>
+                        </else-if>
+                        </if>
+                        <set field="orderItemCounter" value="${orderItemCounter+1}" type="Long"/>
+                    </iterate>
+                    <set field="orderItemAssocMap.shipGroupSeqId" value="_NA_"/>
+                    <set field="orderItemAssocMap.toShipGroupSeqId" value="_NA_"/>
+                    <set field="orderItemAssocMap.orderItemAssocTypeId" value="EXCHANGE"/>
+                    <make-value entity-name="OrderItemAssoc" value-field="orderItemAssoc"/>
+                    <set-pk-fields map="orderItemAssocMap" value-field="orderItemAssoc"/>
+                    <find-by-primary-key entity-name="OrderItemAssoc" map="orderItemAssoc" value-field="orderItemAssocValue"/>
+                    <if-empty field="orderItemAssocValue">
+                        <create-value value-field="orderItemAssoc"/>
+                        <clear-field field="orderItemAssoc"/>
+                    </if-empty>
+                    <set field="returnItemCounter" value="${returnItemCounter+1}" type="Long"/>
+                </iterate>
+            </then>
+            <else>
+                <set field="orderItemCounter" value="1" type="Long"/>
+                <iterate list="orderItems" entry="orderItem">
+                    <set field="orderItemAssocMap.toOrderId" from-field="parameters.orderId"/>
+                    <set field="orderItemAssocMap.toOrderItemSeqId" from-field="orderItem.orderItemSeqId"/>
+                    <set field="returnItemCounter" value="1" type="Long"/>
+                    <iterate list="returnItems" entry="returnItem">
+                        <if>
+                            <condition>
+                                <if-compare-field field="orderItemCounter" operator="equals" to-field="returnItemCounter" type="Long"/>
+                            </condition>
+                            <then>
+                                <set field="orderItemAssocMap.orderId" from-field="parameters.originOrderId"/>
+                                <set field="orderItemAssocMap.orderItemSeqId" from-field="returnItem.orderItemSeqId"/>
+                            </then>
+                        <else-if>
+                            <condition>
+                                <if-compare-field field="orderItemCounter" operator="greater" to-field="returnItemSize" type="Long"/>
+                            </condition>
+                            <then>
+                                <set field="orderItemAssocMap.orderId" from-field="parameters.originOrderId"/>
+                                <set field="orderItemAssocMap.orderItemSeqId" from-field="returnItem.orderItemSeqId"/>
+                            </then>
+                        </else-if>
+                        </if>
+                        <set field="returnItemCounter" value="${returnItemCounter+1}" type="Long"/>
+                    </iterate>
+                    <set field="orderItemAssocMap.shipGroupSeqId" value="_NA_"/>
+                    <set field="orderItemAssocMap.toShipGroupSeqId" value="_NA_"/>
+                    <set field="orderItemAssocMap.orderItemAssocTypeId" value="EXCHANGE"/>
+                    <make-value entity-name="OrderItemAssoc" value-field="orderItemAssoc"/>
+                    <set-pk-fields map="orderItemAssocMap" value-field="orderItemAssoc"/>
+                    <find-by-primary-key entity-name="OrderItemAssoc" map="orderItemAssoc" value-field="orderItemAssocValue"/>
+                    <if-empty field="orderItemAssocValue">
+                        <create-value value-field="orderItemAssoc"/>
+                        <clear-field field="orderItemAssocMap"/>
+                    </if-empty>
+                    <set field="orderItemCounter" value="${orderItemCounter+1}" type="Long"/>
+                </iterate>
+            </else>
+        </if>
+    </simple-method>
+
+    <simple-method method-name="addProductsBackToCategory" short-description="When one or more product is received directly through receive inventory or refund return then add these product(s) back to category, if they does not have any active category">
+        <if-not-empty field="parameters.inventoryItemId">
+            <entity-one entity-name="InventoryItem" value-field="inventoryItem"/>
+            <get-related-one relation-name="Product" value-field="inventoryItem" to-value-field="product"/>
+            <set field="orderBy[]" value="-thruDate"/>
+            <get-related relation-name="ProductCategoryMember" value-field="product" list="productCategoryMembers" order-by-list="orderBy"/>
+            <!-- check whether this product is associated to any category, if not just skip -->
+            <if-not-empty field="productCategoryMembers">
+                <filter-list-by-date list="productCategoryMembers" to-list="pcms"/>
+                <!-- check if this product is associated to any active category, if not found then activate the most recent inactive category -->
+                <if-empty field="pcms">
+                    <first-from-list list="productCategoryMembers" entry="pcm"/>
+                    <clear-field field="pcm.thruDate"/>
+                    <set-service-fields service-name="updateProductToCategory" map="pcm" to-map="updateProductToCategoryMap"/>
+                    <call-service service-name="updateProductToCategory" in-map-name="updateProductToCategoryMap"/>
+                </if-empty>
+            </if-not-empty>
+        <else>
+            <if-not-empty field="parameters.returnId">
+                <entity-and entity-name="ReturnItem" list="returnItems">
+                    <field-map field-name="returnId" from-field="parameters.returnId"/>
+                    <field-map field-name="returnTypeId" value="RTN_REFUND"/>
+                </entity-and>
+                <if-not-empty field="returnItems">
+                    <iterate list="returnItems" entry="returnItem">
+                        <get-related-one relation-name="Product" value-field="returnItem" to-value-field="product"/>
+                        <set field="orderBy[]" value="-thruDate"/>
+                        <get-related relation-name="ProductCategoryMember" value-field="product" list="productCategoryMembers" order-by-list="orderBy"/>
+                        <!-- check whether this product is associated to any category, if not just skip -->
+                        <if-not-empty field="productCategoryMembers">
+                            <filter-list-by-date list="productCategoryMembers" to-list="pcms"/>
+                            <!-- check if this product is associated to any active category, if not found then activate the most recent inactive category -->
+                            <if-empty field="pcms">
+                                <first-from-list list="productCategoryMembers" entry="pcm"/>
+                                <clear-field field="pcm.thruDate"/>
+                                <set-service-fields service-name="updateProductToCategory" map="pcm" to-map="updateProductToCategoryMap"/>
+                                <call-service service-name="updateProductToCategory" in-map-name="updateProductToCategoryMap"/>
+                            </if-empty>
+                        </if-not-empty>
+                    </iterate>
+                </if-not-empty>
+            </if-not-empty>
+        </else>
+        </if-not-empty>
+    </simple-method>
+    
+    <simple-method method-name="createReturnStatus" short-description="Create ReturnHeader and ReturnItem Status">
+        <make-value entity-name="ReturnStatus" value-field="newEntity"/>
+        <if-empty field="parameters.returnItemSeqId">
+            <entity-one entity-name="ReturnHeader" value-field="returnHeader"/>
+            <set field="newEntity.statusId" from-field="returnHeader.statusId"/>
+        <else>
+            <entity-one entity-name="ReturnItem"  value-field="returnItem"/>
+            <set field="newEntity.returnItemSeqId" from-field="returnItem.returnItemSeqId"/>
+            <set field="newEntity.statusId" from-field="returnItem.statusId"/>
+        </else>
+        </if-empty>
+        <sequenced-id sequence-name="ReturnStatus" field="newEntity.returnStatusId"/>
+        <set field="newEntity.returnId" from-field="parameters.returnId"/>
+        <set field="newEntity.changeByUserLoginId" from-field="userLogin.userLoginId"/>
+        <now-timestamp field="newEntity.statusDatetime"/>
+        <create-value value-field="newEntity"/>
+    </simple-method>
+    
+    <simple-method method-name="updateReturnContactMech" short-description="Update ReturnContactMech">
+        <check-permission permission="ORDERMGR" action="_UPDATE">
+           <fail-property resource="OrderErrorUiLabels" property="OrderSecurityErrorToRunUpdateOrderContactMech"/>
+        </check-permission>
+        <check-errors/>
+
+        <make-value value-field="returnContactMechMap" entity-name="ReturnContactMech"/>
+
+        <set-pk-fields map="parameters" value-field="returnContactMechMap"/>
+        <entity-one value-field="returnHeader" entity-name="ReturnHeader"/>
+        <set from-field="parameters.returnId" field="createReturnContactMechMap.returnId"/>
+        <set from-field="parameters.contactMechPurposeTypeId" field="createReturnContactMechMap.contactMechPurposeTypeId"/>
+        <set from-field="parameters.contactMechId" field="createReturnContactMechMap.contactMechId"/>
+  
+        <find-by-and entity-name="ReturnContactMech" map="createReturnContactMechMap" list="returnContactMechList"/>
+        <!-- If returnContactMechList value is null then create new entry in ReturnContactMech entity-->
+        <if-empty field="returnContactMechList">
+            <if-compare value="SHIPPING_LOCATION" field="parameters.contactMechPurposeTypeId" operator="equals">
+                <set field="returnHeader.originContactMechId" from-field="createReturnContactMechMap.contactMechId"/>
+                <store-value value-field="returnHeader"/>
+            </if-compare>
+            <call-service service-name="createReturnContactMech" in-map-name="createReturnContactMechMap" include-user-login="true"/>
+            <set from-field="parameters.returnId" field="deleteReturnContactMechMap.returnId"/>
+            <set from-field="parameters.oldContactMechId" field="deleteReturnContactMechMap.contactMechId"/>
+            <set from-field="parameters.contactMechPurposeTypeId" field="deleteReturnContactMechMap.contactMechPurposeTypeId"/>
+            <call-service service-name="deleteReturnContactMech" in-map-name="deleteReturnContactMechMap" include-user-login="true"/>
+        </if-empty>
+        <store-value value-field="returnContactMechMap"/>
+     </simple-method>
+
+    <simple-method method-name="createReturnItemForRental" short-description="Create the return item for rental (which items has product type is ASSET_USAGE_OUT_IN)">
+        <entity-one entity-name="OrderHeader" value-field="orderHeader">
+            <field-map field-name="orderId" from-field="parameters.orderId"/>
+        </entity-one>
+
+        <if-compare operator="equals" value="SALES_ORDER" field="orderHeader.orderTypeId">
+            <entity-condition entity-name="OrderRole" list="orderRoles">
+                <condition-list combine="and">
+                    <condition-expr field-name="orderId" operator="equals" from-field="orderHeader.orderId"/>
+                    <condition-expr field-name="roleTypeId" operator="equals" value="BILL_TO_CUSTOMER"/>
+                </condition-list>
+            </entity-condition>
+            <first-from-list entry="orderRole" list="orderRoles"/>
+
+            <get-related-one relation-name="ProductStore" value-field="orderHeader" to-value-field="productStore"/>
+
+            <if-not-empty field="productStore.inventoryFacilityId">
+                <set field="createReturnCtx.destinationFacilityId" from-field="productStore.inventoryFacilityId"/>
+            </if-not-empty>
+
+            <if-not-empty field="productStore.reqReturnInventoryReceive">
+                <set field="updateHeaderCtx.needsInventoryReceive" from-field="productStore.reqReturnInventoryReceive"/>
+            <else>
+                <set field="updateHeaderCtx.needsInventoryReceive" value="N"/>
+            </else>
+            </if-not-empty>
+
+            <set field="createReturnCtx.orderId" from-field="orderHeader.orderId"/>
+            <set field="createReturnCtx.currencyUomId" from-field="orderHeader.currencyUom"/>
+            <set field="createReturnCtx.fromPartyId" from-field="orderRole.partyId"/>
+            <set field="createReturnCtx.toPartyId" from-field="productStore.payToPartyId"/>
+            <set field="createReturnCtx.returnHeaderTypeId" value="CUSTOMER_RETURN"/>
+            <set field="createReturnCtx.returnReasonId" value="RTN_NORMAL_RETURN"/>
+            <set field="createReturnCtx.returnTypeId" value="RTN_RENTAL"/>
+            <set field="createReturnCtx.returnItemTypeId" value="RET_FDPROD_ITEM"/>
+            <set field="createReturnCtx.expectedItemStatus" value="INV_RETURNED"/>
+            <set field="createReturnCtx.returnPrice" value="0.00" type="BigDecimal"/>
+
+            <entity-condition entity-name="OrderItemAndProduct" list="orderItems">
+                <condition-list combine="and">
+                    <condition-expr field-name="orderId" operator="equals" from-field="orderHeader.orderId"/>
+                    <condition-expr field-name="statusId" operator="equals" value="ITEM_COMPLETED"/>
+                    <condition-expr field-name="productTypeId" operator="equals" value="ASSET_USAGE_OUT_IN"/>
+                </condition-list>
+            </entity-condition>
+            <iterate entry="orderItem" list="orderItems">
+                <set field="createReturnCtx.productId" from-field="orderItem.productId"/>
+                <set field="createReturnCtx.orderItemSeqId" from-field="orderItem.orderItemSeqId"/>
+                <set field="createReturnCtx.description" from-field="orderItem.itemDescription"/>
+                <set field="createReturnCtx.returnQuantity" from-field="orderItem.quantity"/>
+                <call-service service-name="createReturnAndItemOrAdjustment" in-map-name="createReturnCtx" include-user-login="true">
+                    <result-to-field result-name="returnId" field="returnId"/>
+                </call-service>
+                <if-not-empty field="returnId">
+                    <set field="createReturnCtx.returnId" from-field="returnId"/>
+                </if-not-empty>
+            </iterate>
         </if-compare>
     </simple-method>
 </simple-methods>

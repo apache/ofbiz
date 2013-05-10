@@ -21,21 +21,20 @@ package org.ofbiz.entity.finder;
 import java.util.Map;
 
 import org.ofbiz.base.util.UtilXml;
-import org.ofbiz.entity.GenericDelegator;
 import org.ofbiz.entity.condition.EntityCondition;
-import org.ofbiz.entity.condition.EntityConditionList;
-import org.ofbiz.entity.condition.EntityJoinOperator;
 import org.ofbiz.entity.finder.EntityFinderUtil.Condition;
 import org.ofbiz.entity.finder.EntityFinderUtil.ConditionExpr;
 import org.ofbiz.entity.finder.EntityFinderUtil.ConditionList;
 import org.ofbiz.entity.finder.EntityFinderUtil.ConditionObject;
 import org.ofbiz.entity.model.ModelEntity;
+import org.ofbiz.entity.model.ModelFieldTypeReader;
 import org.w3c.dom.Element;
 
 /**
  * Uses the delegator to find entity values by a condition
  *
  */
+@SuppressWarnings("serial")
 public class ByConditionFinder extends ListFinder {
     public static final String module = ByConditionFinder.class.getName();
 
@@ -57,22 +56,28 @@ public class ByConditionFinder extends ListFinder {
         } else if (conditionObjectElement != null) {
             this.whereCondition = new ConditionObject(conditionObjectElement);
         }
+
+        Element havingConditionListElement = UtilXml.firstChildElement(element, "having-condition-list");
+        if (havingConditionListElement != null) {
+            this.havingCondition = new ConditionList(havingConditionListElement);
+        }
     }
 
-    protected EntityCondition getWhereEntityCondition(Map<String, Object> context, ModelEntity modelEntity, GenericDelegator delegator) {
+    @Override
+    public EntityCondition getWhereEntityCondition(Map<String, Object> context, ModelEntity modelEntity, ModelFieldTypeReader modelFieldTypeReader) {
         // create whereEntityCondition from whereCondition
         if (this.whereCondition != null) {
-            return this.whereCondition.createCondition(context, modelEntity.getEntityName(), delegator);
+            return this.whereCondition.createCondition(context, modelEntity, modelFieldTypeReader);
         }
         return null;
     }
 
-    protected EntityCondition getHavingEntityCondition(Map<String, Object> context, ModelEntity modelEntity, GenericDelegator delegator) {
+    @Override
+    public EntityCondition getHavingEntityCondition(Map<String, Object> context, ModelEntity modelEntity, ModelFieldTypeReader modelFieldTypeReader) {
         // create havingEntityCondition from havingCondition
         if (this.havingCondition != null) {
-            return this.havingCondition.createCondition(context, modelEntity.getEntityName(), delegator);
+            return this.havingCondition.createCondition(context, modelEntity, modelFieldTypeReader);
         }
         return null;
     }
 }
-

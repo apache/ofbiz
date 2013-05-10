@@ -18,31 +18,31 @@
  *******************************************************************************/
 package org.ofbiz.accounting.thirdparty.gosoftware;
 
-import java.util.Map;
-import java.util.Properties;
-import java.util.List;
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.text.DecimalFormat;
 import java.sql.Timestamp;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Properties;
 
-import org.ofbiz.service.DispatchContext;
-import org.ofbiz.service.ServiceUtil;
-import org.ofbiz.service.LocalDispatcher;
-import org.ofbiz.service.GenericServiceException;
-import org.ofbiz.base.util.GeneralException;
-import org.ofbiz.base.util.Debug;
-import org.ofbiz.base.util.UtilMisc;
-import org.ofbiz.base.util.StringUtil;
-import org.ofbiz.base.util.UtilNumber;
-import org.ofbiz.base.util.UtilValidate;
-import org.ofbiz.base.util.UtilProperties;
-import org.ofbiz.base.util.UtilDateTime;
-import org.ofbiz.entity.GenericValue;
-import org.ofbiz.entity.GenericDelegator;
-import org.ofbiz.entity.GenericEntityException;
-import org.ofbiz.entity.util.EntityUtil;
 import org.ofbiz.accounting.payment.PaymentGatewayServices;
+import org.ofbiz.base.util.Debug;
+import org.ofbiz.base.util.GeneralException;
+import org.ofbiz.base.util.StringUtil;
+import org.ofbiz.base.util.UtilDateTime;
+import org.ofbiz.base.util.UtilMisc;
+import org.ofbiz.base.util.UtilNumber;
+import org.ofbiz.base.util.UtilProperties;
+import org.ofbiz.base.util.UtilValidate;
+import org.ofbiz.entity.Delegator;
+import org.ofbiz.entity.GenericEntityException;
+import org.ofbiz.entity.GenericValue;
+import org.ofbiz.entity.util.EntityUtil;
+import org.ofbiz.service.DispatchContext;
+import org.ofbiz.service.GenericServiceException;
+import org.ofbiz.service.LocalDispatcher;
+import org.ofbiz.service.ServiceUtil;
 
 
 public class RitaServices {
@@ -50,12 +50,16 @@ public class RitaServices {
     public static final String module = RitaServices.class.getName();
     private static int decimals = UtilNumber.getBigDecimalScale("invoice.decimals");
     private static int rounding = UtilNumber.getBigDecimalRoundingMode("invoice.rounding");
+    public final static String resource = "AccountingUiLabels";
+    public static final String resourceOrder = "OrderUiLabels";
 
-    public static Map ccAuth(DispatchContext dctx, Map context) {
+    public static Map<String, Object> ccAuth(DispatchContext dctx, Map<String, ? extends Object> context) {
+        Locale locale = (Locale) context.get("locale");
         Properties props = buildPccProperties(context);
         RitaApi api = getApi(props, "CREDIT");
         if (api == null) {
-            return ServiceUtil.returnError("RiTA is not configured properly");
+            return ServiceUtil.returnError(UtilProperties.getMessage(resource, 
+                    "AccountingRitaErrorGettingPaymentGatewayConfig", locale));
         }
 
         try {
@@ -80,7 +84,7 @@ public class RitaServices {
         // send the transaction
         RitaApi out = null;
         try {
-            Debug.log("Sending request to RiTA", module);
+            Debug.logInfo("Sending request to RiTA", module);
             out = api.send();
         } catch (IOException e) {
             Debug.logError(e, module);
@@ -91,7 +95,7 @@ public class RitaServices {
         }
 
         if (out != null) {
-            Map result = ServiceUtil.returnSuccess();
+            Map<String, Object> result = ServiceUtil.returnSuccess();
             String resultCode = out.get(RitaApi.RESULT);
             boolean passed = false;
             if ("CAPTURED".equals(resultCode)) {
@@ -131,12 +135,14 @@ public class RitaServices {
             return result;
 
         } else {
-            return ServiceUtil.returnError("Receive a null result from RiTA");
+            return ServiceUtil.returnError(UtilProperties.getMessage(resource, 
+                    "AccountingRitaResultIsNull", locale));
         }
     }
 
-    public static Map ccCapture(DispatchContext dctx, Map context) {
+    public static Map<String, Object> ccCapture(DispatchContext dctx, Map<String, ? extends Object> context) {
         GenericValue orderPaymentPreference = (GenericValue) context.get("orderPaymentPreference");
+        Locale locale = (Locale) context.get("locale");
 
         //lets see if there is a auth transaction already in context
         GenericValue authTransaction = (GenericValue) context.get("authTrans");
@@ -146,14 +152,16 @@ public class RitaServices {
         }
 
         if (authTransaction == null) {
-            return ServiceUtil.returnError("No authorization transaction found for the OrderPaymentPreference; cannot capture");
+            return ServiceUtil.returnError(UtilProperties.getMessage(resource, 
+                    "AccountingPaymentTransactionAuthorizationNotFoundCannotCapture", locale));
         }
 
         // setup the RiTA Interface
         Properties props = buildPccProperties(context);
         RitaApi api = getApi(props, "CREDIT");
         if (api == null) {
-            return ServiceUtil.returnError("RiTA is not configured properly");
+            return ServiceUtil.returnError(UtilProperties.getMessage(resource, 
+                    "AccountingRitaErrorGettingPaymentGatewayConfig", locale));
         }
 
         api.set(RitaApi.ORIG_SEQ_NUM, authTransaction.getString("referenceNum"));
@@ -172,7 +180,7 @@ public class RitaServices {
         }
 
         if (out != null) {
-            Map result = ServiceUtil.returnSuccess();
+            Map<String, Object> result = ServiceUtil.returnSuccess();
             String resultCode = out.get(RitaApi.RESULT);
             if ("CAPTURED".equals(resultCode)) {
                 result.put("captureResult", Boolean.TRUE);
@@ -187,20 +195,22 @@ public class RitaServices {
 
             return result;
         } else {
-            return ServiceUtil.returnError("Receive a null result from RiTA");
+            return ServiceUtil.returnError(UtilProperties.getMessage(resource, 
+                    "AccountingRitaResultIsNull", locale));
         }
     }
 
-    public static Map ccVoidRelease(DispatchContext dctx, Map context) {
+    public static Map<String, Object> ccVoidRelease(DispatchContext dctx, Map<String, ? extends Object> context) {
         return ccVoid(dctx, context, false);
     }
 
-    public static Map ccVoidRefund(DispatchContext dctx, Map context) {
+    public static Map<String, Object> ccVoidRefund(DispatchContext dctx, Map<String, ? extends Object> context) {
         return ccVoid(dctx, context, true);
     }
 
-    private static Map ccVoid(DispatchContext dctx, Map context, boolean isRefund) {
+    private static Map<String, Object> ccVoid(DispatchContext dctx, Map<String, ? extends Object> context, boolean isRefund) {
         GenericValue orderPaymentPreference = (GenericValue) context.get("orderPaymentPreference");
+        Locale locale = (Locale) context.get("locale");
 
         //lets see if there is a auth transaction already in context
         GenericValue authTransaction = (GenericValue) context.get("authTrans");
@@ -210,14 +220,16 @@ public class RitaServices {
         }
 
         if (authTransaction == null) {
-            return ServiceUtil.returnError("No authorization transaction found for the OrderPaymentPreference; cannot release");
+            return ServiceUtil.returnError(UtilProperties.getMessage(resource, 
+                    "AccountingPaymentTransactionAuthorizationNotFoundCannotRelease", locale));
         }
 
         // setup the RiTA Interface
         Properties props = buildPccProperties(context);
         RitaApi api = getApi(props, "CREDIT");
         if (api == null) {
-            return ServiceUtil.returnError("RiTA is not configured properly");
+            return ServiceUtil.returnError(UtilProperties.getMessage(resource, 
+                    "AccountingRitaErrorGettingPaymentGatewayConfig", locale));
         }
 
         api.set(RitaApi.TRANS_AMOUNT, getAmountString(context, isRefund ? "refundAmount" : "releaseAmount"));
@@ -226,7 +238,8 @@ public class RitaServices {
 
         // check to make sure we are configured for SALE mode
         if (!"1".equals(props.getProperty("autoBill"))) {
-            return ServiceUtil.returnError("RiTA does not support releasing pre-auths.");
+            return ServiceUtil.returnError(UtilProperties.getMessage(resource, 
+                    "AccountingRitaCannotSupportReleasingPreAuth", locale));
         }
 
         // send the transaction
@@ -242,7 +255,7 @@ public class RitaServices {
         }
 
         if (out != null) {
-            Map result = ServiceUtil.returnSuccess();
+            Map<String, Object> result = ServiceUtil.returnSuccess();
             String resultCode = out.get(RitaApi.RESULT);
             if ("VOIDED".equals(resultCode)) {
                 result.put(isRefund ? "refundResult" : "releaseResult", Boolean.TRUE);
@@ -257,12 +270,14 @@ public class RitaServices {
 
             return result;
         } else {
-            return ServiceUtil.returnError("Receive a null result from RiTA");
+            return ServiceUtil.returnError(UtilProperties.getMessage(resource, 
+                    "AccountingRitaResultIsNull", locale));
         }
     }
 
-    public static Map ccCreditRefund(DispatchContext dctx, Map context) {
+    public static Map<String, Object> ccCreditRefund(DispatchContext dctx, Map<String, ? extends Object> context) {
         GenericValue orderPaymentPreference = (GenericValue) context.get("orderPaymentPreference");
+        Locale locale = (Locale) context.get("locale");
 
         //lets see if there is a auth transaction already in context
         GenericValue authTransaction = (GenericValue) context.get("authTrans");
@@ -272,14 +287,16 @@ public class RitaServices {
         }
 
         if (authTransaction == null) {
-            return ServiceUtil.returnError("No authorization transaction found for the OrderPaymentPreference; cannot refund");
+            return ServiceUtil.returnError(UtilProperties.getMessage(resource, 
+                    "AccountingPaymentTransactionAuthorizationNotFoundCannotRefund", locale));
         }
 
         // setup the RiTA Interface
         Properties props = buildPccProperties(context);
         RitaApi api = getApi(props, "CREDIT");
         if (api == null) {
-            return ServiceUtil.returnError("RiTA is not configured properly");
+            return ServiceUtil.returnError(UtilProperties.getMessage(resource, 
+                    "AccountingRitaErrorGettingPaymentGatewayConfig", locale));
         }
 
         // set the required cc info
@@ -306,7 +323,7 @@ public class RitaServices {
         }
 
         if (out != null) {
-            Map result = ServiceUtil.returnSuccess();
+            Map<String, Object> result = ServiceUtil.returnSuccess();
             String resultCode = out.get(RitaApi.RESULT);
             if ("CAPTURED".equals(resultCode)) {
                 result.put("refundResult", Boolean.TRUE);
@@ -321,20 +338,23 @@ public class RitaServices {
 
             return result;
         } else {
-            return ServiceUtil.returnError("Receive a null result from RiTA");
+            return ServiceUtil.returnError(UtilProperties.getMessage(resource, 
+                    "AccountingRitaResultIsNull", locale));
         }
     }
 
-    public static Map ccRefund(DispatchContext dctx, Map context) {
+    public static Map<String, Object> ccRefund(DispatchContext dctx, Map<String, ? extends Object> context) {
         LocalDispatcher dispatcher = dctx.getDispatcher();
-        GenericDelegator delegator = dctx.getDelegator();
+        Delegator delegator = dctx.getDelegator();
         GenericValue orderPaymentPreference = (GenericValue) context.get("orderPaymentPreference");
+        Locale locale = (Locale) context.get("locale");
         GenericValue orderHeader = null;
         try {
-            orderHeader = orderPaymentPreference.getRelatedOne("OrderHeader");
+            orderHeader = orderPaymentPreference.getRelatedOne("OrderHeader", false);
         } catch (GenericEntityException e) {
             Debug.logError(e, module);
-            return ServiceUtil.returnError("Unable to obtain order header information from payment preference");
+            return ServiceUtil.returnError(UtilProperties.getMessage(resourceOrder, 
+                    "OrderOrderNotFound", UtilMisc.toMap("orderId", orderPaymentPreference.getString("orderId")), locale));
         }
 
         if (orderHeader != null) {
@@ -344,7 +364,7 @@ public class RitaServices {
                 Timestamp orderDate = orderHeader.getTimestamp("orderDate");
                 GenericValue terminalState = null;
                 try {
-                    List states = delegator.findByAnd("PosTerminalState", UtilMisc.toMap("posTerminalId", terminalId));
+                    List<GenericValue> states = delegator.findByAnd("PosTerminalState", UtilMisc.toMap("posTerminalId", terminalId), null, false);
                     states = EntityUtil.filterByDate(states, UtilDateTime.nowTimestamp(), "openedDate", "closedDate", true);
                     terminalState = EntityUtil.getFirst(states);
                 } catch (GenericEntityException e) {
@@ -362,7 +382,7 @@ public class RitaServices {
                 }
             }
 
-            Map refundResp = null;
+            Map<String, Object> refundResp = null;
             try {
                 if (isVoid) {
                     refundResp = dispatcher.runSync("ritaCCVoidRefund", context);
@@ -371,24 +391,26 @@ public class RitaServices {
                 }
             } catch (GenericServiceException e) {
                 Debug.logError(e, module);
-                return ServiceUtil.returnError("Service invocation exception");
+                return ServiceUtil.returnError(UtilProperties.getMessage(resourceOrder, 
+                        "AccountingRitaErrorServiceException", locale));
             }
             return refundResp;
         } else {
-            return ServiceUtil.returnError("Unable to find order information; cannot complete the refund");
+            return ServiceUtil.returnError(UtilProperties.getMessage(resourceOrder, 
+                    "OrderOrderNotFound", UtilMisc.toMap("orderId", orderPaymentPreference.getString("orderId")), locale));
         }
     }
 
-    private static void setCreditCardInfo(RitaApi api, GenericDelegator delegator, Map context) throws GeneralException {
+    private static void setCreditCardInfo(RitaApi api, Delegator delegator, Map<String, ? extends Object> context) throws GeneralException {
         GenericValue orderPaymentPreference = (GenericValue) context.get("orderPaymentPreference");
         GenericValue creditCard = (GenericValue) context.get("creditCard");
         if (creditCard == null) {
-            creditCard = delegator.findByPrimaryKey("CreditCard", UtilMisc.toMap("paymentMethodId", orderPaymentPreference.getString("paymentMethodId")));
+            creditCard = delegator.findOne("CreditCard", UtilMisc.toMap("paymentMethodId", orderPaymentPreference.getString("paymentMethodId")), false);
         }
         if (creditCard != null) {
-            List expDateList = StringUtil.split(creditCard.getString("expireDate"), "/");
-            String month = (String) expDateList.get(0);
-            String year = (String) expDateList.get(1);
+            List<String> expDateList = StringUtil.split(creditCard.getString("expireDate"), "/");
+            String month = expDateList.get(0);
+            String year = expDateList.get(1);
             String y2d = year.substring(2);
 
             String title = creditCard.getString("titleOnCard");
@@ -396,18 +418,18 @@ public class RitaServices {
             String mname = creditCard.getString("middleNameOnCard");
             String lname = creditCard.getString("lastNameOnCard");
             String sufix = creditCard.getString("suffixOnCard");
-            StringBuffer name = new StringBuffer();
+            StringBuilder name = new StringBuilder();
             if (UtilValidate.isNotEmpty(title)) {
-                name.append(title + " ");
+                name.append(title).append(" ");
             }
             if (UtilValidate.isNotEmpty(fname)) {
-                name.append(fname + " ");
+                name.append(fname).append(" ");
             }
             if (UtilValidate.isNotEmpty(mname)) {
-                name.append(mname + " ");
+                name.append(mname).append(" ");
             }
             if (UtilValidate.isNotEmpty(lname)) {
-                name.append(lname + " ");
+                name.append(lname).append(" ");
             }
             if (UtilValidate.isNotEmpty(sufix)) {
                 name.append(sufix);
@@ -483,7 +505,7 @@ public class RitaServices {
         return api;
     }
 
-    private static Properties buildPccProperties(Map context) {
+    private static Properties buildPccProperties(Map<String, ? extends Object> context) {
         String configString = (String) context.get("paymentConfig");
         if (configString == null) {
             configString = "payment.properties";
@@ -522,12 +544,12 @@ public class RitaServices {
         props.put("ssl", ssl);
         props.put("autoBill", autoBill);
         props.put("forceTx", forceTx);
-        Debug.log("Returning properties - " + props, module);
+        Debug.logInfo("Returning properties - " + props, module);
 
         return props;
     }
 
-    private static String getAmountString(Map context, String amountField) {
+    private static String getAmountString(Map<String, ? extends Object> context, String amountField) {
         BigDecimal processAmount = (BigDecimal) context.get(amountField);
         return processAmount.setScale(decimals, rounding).toPlainString();
     }

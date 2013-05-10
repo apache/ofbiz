@@ -19,7 +19,7 @@ under the License.
 -->
 
 <simple-methods xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/simple-methods.xsd">
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/simple-methods-v2.xsd">
     <simple-method method-name="createAffiliate" short-description="Create Affiliate" login-required="false">
 
        <!-- Create the UserLogin Record -->
@@ -124,9 +124,7 @@ under the License.
                 processor-name="newAffil" in-map-name="parameters" out-map-name="af_context"/>
         <check-errors/>
         <call-service service-name="createAffiliate" in-map-name="af_context">
-            <default-message>Affiliate record successfully created.</default-message>
+            <default-message resource="EcommerceUiLabels" property="EcommerceAffiliateCreatedSuccessfully"/>
         </call-service>
-
     </simple-method>
-
 </simple-methods>

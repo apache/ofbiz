@@ -18,8 +18,8 @@ under the License.
 -->
 
 <div id="subscription-summary" class="screenlet">
-    <div class="screenlet-header">
-        <span class="boxhead">${uiLabelMap.ProductSubscriptions}</span>
+    <div class="screenlet-title-bar">
+        <span class="h3">${uiLabelMap.ProductSubscriptions}</span>
     </div>
     <div class="screenlet-body">
         <table width="100%" cellspacing="0" cellpadding="2">
@@ -32,19 +32,19 @@ under the License.
                     <td><div class="tableheadtext">${uiLabelMap.CommonFromDate}</div></td>
                     <td><div class="tableheadtext">${uiLabelMap.CommonThruDate}</div></td>
                 </tr>
-                <tr><td colspan="6"><hr/></td></tr>
+                <tr><td colspan="6"><hr /></td></tr>
             </thead>
             <tbody>
                 <#list subscriptionList as subscription>
                     <tr>
                         <td>${subscription.subscriptionId}</td>
                         <td>
-                            <#assign subscriptionType = subscription.getRelatedOne('SubscriptionType')?if_exists>
+                            <#assign subscriptionType = subscription.getRelatedOne('SubscriptionType', false)?if_exists>
                             ${(subscriptionType.description)?default(subscription.subscriptionTypeId?default('N/A'))}
                         </td>
                         <td>${subscription.description?if_exists}</td>
                         <td>
-                            <#assign product = subscription.getRelatedOne('Product')?if_exists>
+                            <#assign product = subscription.getRelatedOne('Product', false)?if_exists>
                             <#if product?has_content>
                                 <#assign productName = Static['org.ofbiz.product.product.ProductContentWrapper'].getProductContentAsText(product, 'PRODUCT_NAME', request)?if_exists>
                                 <a href="<@ofbizUrl>product?product_id=${product.productId}</@ofbizUrl>" class="linktext">${productName?default(product.productId)}</a>

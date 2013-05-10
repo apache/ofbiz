@@ -27,8 +27,8 @@ under the License.
             <h2 class="contracted">${uiLabelMap.CommonApplications}</h2>
             <div id="header-nav" class="clearfix" style="display:none">
                 <ul>
-                <h4>${uiLabelMap.CommonPrimaryApps}</h4>
-                    <#list displayApps as display>
+                <li><h4>${uiLabelMap.CommonPrimaryApps}</h4></li>
+            <#list displayApps as display>
               <#assign thisApp = display.getContextRoot()>
               <#assign permission = true>
               <#assign selected = false>
@@ -43,11 +43,16 @@ under the License.
                 <#if thisApp == contextPath || contextPath + "/" == thisApp>
                   <#assign selected = true>
                 </#if>
+                <#assign thisApp = StringUtil.wrapString(thisApp)>
                 <#assign thisURL = thisApp>
                 <#if thisApp != "/">
                   <#assign thisURL = thisURL + "/control/main">
                 </#if>
-                  <li><a href="${thisURL + externalKeyParam}" <#if uiLabelMap?exists> title="${uiLabelMap[display.description]}">${uiLabelMap[display.title]}<#else> title="${display.description}">${display.title}</#if></a></li>
+                  <#if layoutSettings.suppressTab?exists && display.name == layoutSettings.suppressTab>
+                    <!-- do not display this component-->
+                  <#else>
+                    <li><a href="${thisURL + externalKeyParam}" <#if uiLabelMap?exists> title="${uiLabelMap[display.description]}">${uiLabelMap[display.title]}<#else> title="${display.description}">${display.title}</#if></a></li>
+                  </#if>
               </#if>
             </#list>
                 </ul>
@@ -56,5 +61,3 @@ under the License.
             </div>
         </div>
 </#if>
-
-            

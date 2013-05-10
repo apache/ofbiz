@@ -18,69 +18,67 @@ under the License.
 -->
 
 <div class="screenlet">
-    <div class="screenlet-header">
-        <div class="boxhead">${uiLabelMap.EcommerceRequestHistory}</div>
-    </div>
+    <h3>${uiLabelMap.EcommerceRequestHistory}</h3>
     <div class="screenlet-body">
-        <table width="100%" cellpadding="1" cellspacing="0" border="0">
+        <table>
             <tr>
                 <td width="10%">
-                    <div class="tabletext"><b><span style="white-space: nowrap;">${uiLabelMap.OrderRequest} ${uiLabelMap.CommonNbr}</span></b></div>
+                    <div><span style="white-space: nowrap;">${uiLabelMap.OrderRequest} ${uiLabelMap.CommonNbr}</span></div>
                 </td>
                 <td width="10">&nbsp;</td>
                 <td width="10%">
-                    <div class="tabletext"><b><span style="white-space: nowrap;">${uiLabelMap.CommonType}</span></b></div>
+                    <div><span style="white-space: nowrap;">${uiLabelMap.CommonType}</span></div>
                 </td>
                 <td width="10">&nbsp;</td>
                 <td width="20%">
-                    <div class="tabletext"><b>${uiLabelMap.CommonName}</b></div>
+                    <div>${uiLabelMap.CommonName}</div>
                 </td>
                 <td width="10">&nbsp;</td>
                 <td width="40%">
-                    <div class="tabletext"><b>${uiLabelMap.CommonDescription}</b></div>
+                    <div>${uiLabelMap.CommonDescription}</div>
                 </td>
                 <td width="10">&nbsp;</td>
                 <td width="10%">
-                    <div class="tabletext"><b>${uiLabelMap.CommonStatus}</b></div>
+                    <div>${uiLabelMap.CommonStatus}</div>
                 </td>
                 <td width="10">&nbsp;</td>
                 <td width="20%">
-                    <div class="tabletext"><b>${uiLabelMap.OrderRequestDate}</b></div>
-                    <div class="tabletext"><b>${uiLabelMap.OrderRequestCreatedDate}</b></div>
-                    <div class="tabletext"><b>${uiLabelMap.OrderRequestLastModifiedDate}</b></div>
+                    <div>${uiLabelMap.OrderRequestDate}</div>
+                    <div>${uiLabelMap.OrderRequestCreatedDate}</div>
+                    <div>${uiLabelMap.OrderRequestLastModifiedDate}</div>
                 </td>
                 <td width="10">&nbsp;</td>
                 <td width="10">&nbsp;</td>
             </tr>
             <#list requestList as custRequest>
-                <#assign status = custRequest.getRelatedOneCache("StatusItem")>
-                <#assign type = custRequest.getRelatedOneCache("CustRequestType")>
-                <tr><td colspan="14"><hr/></td></tr>
+                <#assign status = custRequest.getRelatedOne("StatusItem", true)>
+                <#assign type = custRequest.getRelatedOne("CustRequestType", true)>
+                
                 <tr>
                     <td>
-                        <div class="tabletext">${custRequest.custRequestId}</div>
+                        <div>${custRequest.custRequestId}</div>
                     </td>
                     <td width="10">&nbsp;</td>
                     <td>
-                        <div class="tabletext">${type.get("description",locale)?if_exists}</div>
+                        <div>${type.get("description",locale)?if_exists}</div>
                     </td>
                     <td width="10">&nbsp;</td>
                     <td>
-                        <div class="tabletext">${custRequest.custRequestName?if_exists}</div>
+                        <div>${custRequest.custRequestName?if_exists}</div>
                     </td>
                     <td width="10">&nbsp;</td>
                     <td>
-                        <div class="tabletext">${custRequest.description?if_exists}</div>
+                        <div>${custRequest.description?if_exists}</div>
                     </td>
                     <td width="10">&nbsp;</td>
                     <td>
-                        <div class="tabletext">${status.get("description",locale)}</div>
+                        <div>${status.get("description",locale)}</div>
                     </td>
                     <td width="10">&nbsp;</td>
                     <td>
-                        <div class="tabletext"><span style="white-space: nowrap;">${custRequest.custRequestDate?if_exists}</span></div>
-                        <div class="tabletext"><span style="white-space: nowrap;">${custRequest.createdDate?if_exists}</span></div>
-                        <div class="tabletext"><span style="white-space: nowrap;">${custRequest.lastModifiedDate?if_exists}</span></div>
+                        <div><span style="white-space: nowrap;">${custRequest.custRequestDate?if_exists}</span></div>
+                        <div><span style="white-space: nowrap;">${custRequest.createdDate?if_exists}</span></div>
+                        <div><span style="white-space: nowrap;">${custRequest.lastModifiedDate?if_exists}</span></div>
                     </td>
                     <td width="10">&nbsp;</td>
                     <td align="right">

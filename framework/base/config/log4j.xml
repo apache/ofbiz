@@ -25,13 +25,13 @@
     <appender name="async" class="org.apache.log4j.AsyncAppender">
         <param name="locationInfo" value="true"/>
         <param name="blocking" value="false"/>
-        <param name="bufferSize" value="128"/>
+        <param name="bufferSize" value="256"/>
         <appender-ref ref="stdout"/>
         <appender-ref ref="ofbiz-file"/>
         <appender-ref ref="ofbiz-html"/>
         <appender-ref ref="debug"/>
         <appender-ref ref="error"/>
-        <!--<appender-ref ref="socket"/>-->
+        <!-- <appender-ref ref="socket"/> -->
         <!-- <appender-ref ref="email"/> -->
     </appender>
 
@@ -47,7 +47,7 @@
     <appender name="ofbiz-file" class="org.apache.log4j.RollingFileAppender">
         <param name="maxFileSize" value="1000KB"/>
         <param name="maxBackupIndex" value="10"/>
-        <param name="File" value="runtime/logs/ofbiz.log"/>
+        <param name="File" value="${ofbiz.home}/runtime/logs/ofbiz.log"/>
         <param name="threshold" value="info"/>
         <layout class="org.apache.log4j.PatternLayout">
             <param name="ConversionPattern" value="%d (%t) [%24F:%-3L:%-5p]%x %m%n"/>
@@ -58,10 +58,10 @@
     <appender name="ofbiz-html" class="org.apache.log4j.RollingFileAppender">
         <param name="maxFileSize" value="500KB"/>
         <param name="maxBackupIndex" value="1"/>
-        <param name="File" value="runtime/logs/ofbiz.html"/>
+        <param name="File" value="${ofbiz.home}/runtime/logs/ofbiz.html"/>
         <param name="threshold" value="info"/>
         <layout class="org.apache.log4j.PatternLayout">
-            <param name="ConversionPattern" value="&lt;div class=%p&gt;%d (%t) [%24F:%-3L:%-5p]%x %m &lt;/div&gt;%n"/>
+            <param name="ConversionPattern" value="&lt;div class=&quot;%p&quot;&gt;%d (%t) [%24F:%-3L:%-5p]%x %m &lt;/div&gt;%n"/>
         </layout>
     </appender>
 
@@ -69,7 +69,7 @@
     <appender name="debug" class="org.apache.log4j.RollingFileAppender">
         <param name="maxFileSize" value="10000KB"/>
         <param name="maxBackupIndex" value="10"/>
-        <param name="File" value="runtime/logs/debug.log"/>
+        <param name="File" value="${ofbiz.home}/runtime/logs/debug.log"/>
         <param name="Append" value="false"/>
         <layout class="org.apache.log4j.PatternLayout">
             <param name="ConversionPattern" value="%d (%t) [%24F:%-3L:%-5p]%x %m%n"/>
@@ -85,7 +85,7 @@
     <appender name="error" class="org.apache.log4j.RollingFileAppender">
         <param name="maxFileSize" value="10000KB"/>
         <param name="maxBackupIndex" value="10"/>
-        <param name="File" value="runtime/logs/error.log"/>
+        <param name="File" value="${ofbiz.home}/runtime/logs/error.log"/>
         <param name="Append" value="false"/>
         <layout class="org.apache.log4j.PatternLayout">
             <param name="ConversionPattern" value="%d (%t) [%24F:%-3L:%-5p]%x %m%n"/>
@@ -95,17 +95,6 @@
             <param name="LevelMin" value="error"/>
             <param name="AcceptOnMatch" value="true"/>
         </filter>
-    </appender>
-
-    <!-- special minerva log -->
-    <appender name="minerva-log" class="org.apache.log4j.RollingFileAppender">
-        <param name="maxFileSize" value="5000KB"/>
-        <param name="maxBackupIndex" value="10"/>
-        <param name="File" value="runtime/logs/minerva.log"/>
-        <param name="Append" value="false"/>
-        <layout class="org.apache.log4j.PatternLayout">
-            <param name="ConversionPattern" value="%d (%t) [%24F:%-3L:%-5p]%x %m%n"/>
-        </layout>
     </appender>
 
     <!-- chainsaw remote socket log monitor -->
@@ -126,42 +115,83 @@
         </layout>
     </appender>
 
-    <!-- special fop log -->
+    <!-- special appenders for subcomponents -->
     <appender name="fop-log" class="org.apache.log4j.RollingFileAppender">
         <param name="maxFileSize" value="5000KB"/>
         <param name="maxBackupIndex" value="10"/>
-        <param name="File" value="runtime/logs/fop.log"/>
+        <param name="File" value="${ofbiz.home}/runtime/logs/fop.log"/>
         <param name="Append" value="false"/>
         <layout class="org.apache.log4j.PatternLayout">
             <param name="ConversionPattern" value="%d (%t) [%24F:%-3L:%-5p]%x %m%n"/>
         </layout>
     </appender>
 
-    <category name="org.apache.catalina">
+    <appender name="freemarker-log" class="org.apache.log4j.RollingFileAppender">
+        <param name="maxFileSize" value="5000KB"/>
+        <param name="maxBackupIndex" value="10"/>
+        <param name="File" value="${ofbiz.home}/runtime/logs/freemarker.log"/>
+        <param name="Append" value="false"/>
+        <layout class="org.apache.log4j.PatternLayout">
+            <param name="ConversionPattern" value="%d (%t) [%24F:%-3L:%-5p]%x %m%n"/>
+        </layout>
+    </appender>
+
+    <appender name="tomcat-log" class="org.apache.log4j.RollingFileAppender">
+        <param name="maxFileSize" value="5000KB"/>
+        <param name="maxBackupIndex" value="10"/>
+        <param name="File" value="${ofbiz.home}/runtime/logs/tomcat.log"/>
+        <param name="Append" value="false"/>
+        <layout class="org.apache.log4j.PatternLayout">
+            <param name="ConversionPattern" value="%d (%t) [%24F:%-3L:%-5p]%x %m%n"/>
+        </layout>
+    </appender>
+
+    <category name="org.ofbiz.base.converter.Converters">
         <priority value="warn"/>
     </category>
 
-    <!-- log4j category -->
+    <category name="org.apache.axis">
+        <priority value="warn"/>
+    </category>
+
+    <category name="org.apache.commons.digester">
+        <priority value="warn"/>
+    </category>
+
+    <category name="org.apache.coyote">
+        <priority value="warn"/>
+    </category>
+
+    <category name="org.apache.jasper">
+        <priority value="warn"/>
+    </category>
+
+    <category name="org.apache.jk">
+        <priority value="warn"/>
+    </category>
+
+    <category name="org.apache.geronimo.transaction">
+        <priority value="warn"/>
+    </category>
+
     <category name="org.apache.log4j">
         <priority value="warn"/>
     </category>
 
-    <!-- log minerva to the special log >
-    <category name="org.ofbiz.minerva">
+    <!-- special category/loggers -->
+    <category name="org.apache.catalina">
         <priority value="warn"/>
-        <appender-ref ref="minerva-log"/>
-    </category-->
-
-    <!-- geronimo transaction logging -->
-    <category name="org.apache.geronimo.transaction">
-        <priority value="warn"/>
-        <appender-ref ref="minerva-log"/>
+        <appender-ref ref="tomcat-log"/>
     </category>
 
-    <!-- fop rendering logging -->
     <category name="org.apache.fop">
-        <priority value="info"/>
+        <priority value="warn"/>
         <appender-ref ref="fop-log"/>
+    </category>
+
+    <category name="freemarker">
+        <priority value="warn"/>
+        <appender-ref ref="freemarker-log"/>
     </category>
 
     <!-- root logger -->

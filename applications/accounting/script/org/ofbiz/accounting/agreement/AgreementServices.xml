@@ -19,7 +19,7 @@ under the License.
 -->
 
 <simple-methods xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/simple-methods.xsd">
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/simple-methods-v2.xsd">
 
     <!-- ================================================================ -->
     <!-- Agreement Services -->
@@ -97,6 +97,15 @@ under the License.
                 <set-service-fields service-name="createAgreementProductAppl" to-map="createAgreementProductApplInMap" map="agreementProductAppl"/>
                 <set from-field="agreementIdTo" field="createAgreementProductApplInMap.agreementId"/>
                 <call-service service-name="createAgreementProductAppl" in-map-name="createAgreementProductApplInMap"/>
+            </iterate>
+        </if-compare>
+        <if-compare field="parameters.copyAgreementFacilities" value="Y" operator="equals">
+            <get-related value-field="agreement" relation-name="AgreementFaclityAppl" list="agreementFaclityAppls"/>
+            <iterate list="agreementFaclityAppls" entry="agreementFaclityAppl">
+                <clear-field field="createAgreementFaclityApplInMap"/>
+                <set-service-fields service-name="createAgreementFaclityAppl" to-map="createAgreementFaclityApplInMap" map="agreementFaclityAppl"/>
+                <set from-field="agreementIdTo" field="createAgreementFaclityApplInMap.agreementId"/>
+                <call-service service-name="createAgreementFaclityAppl" in-map-name="createAgreementFaclityApplInMap"/>
             </iterate>
         </if-compare>
         <if-compare field="parameters.copyAgreementParties" value="Y" operator="equals">
@@ -308,23 +317,23 @@ under the License.
         <remove-value value-field="agreementRole"/>
     </simple-method>
 
-    <!--AgreementWorkEffortAppl-->
-    <simple-method method-name="createAgreementWorkEffortAppl" short-description="Create a link between a WorkEffort and a Agreement Appl">
-        <entity-one entity-name="AgreementWorkEffortAppl" value-field="agreementWorkEffortAppl"/>
-        <if-not-empty field="agreementWorkEffortAppl">
-            <add-error><fail-property resource="AccountingUiLabels" property="AccountingAgreementWorkEffortApplAlreadyExists"/></add-error>
+    <!--AgreementWorkEffortApplic-->
+    <simple-method method-name="createAgreementWorkEffortApplic" short-description="Create a link between a WorkEffort and a Agreement Appl">
+        <entity-one entity-name="AgreementWorkEffortApplic" value-field="agreementWorkEffortApplic"/>
+        <if-not-empty field="agreementWorkEffortApplic">
+            <add-error><fail-property resource="AccountingUiLabels" property="AccountingAgreementWorkEffortApplicAlreadyExists"/></add-error>
             <check-errors/>
         <else>
-            <make-value value-field="newEntity" entity-name="AgreementWorkEffortAppl"/>
+            <make-value value-field="newEntity" entity-name="AgreementWorkEffortApplic"/>
             <set-pk-fields map="parameters" value-field="newEntity"/>
             <create-value value-field="newEntity"/>
         </else>
         </if-not-empty>
     </simple-method>
 
-    <simple-method method-name="deleteAgreementWorkEffortAppl" short-description="Remove a link between a WorkEffort and a Agreement Appl">
-        <entity-one entity-name="AgreementWorkEffortAppl" value-field="agreementWorkEffortAppl"/>
-        <remove-value value-field="agreementWorkEffortAppl"/>
+    <simple-method method-name="deleteAgreementWorkEffortApplic" short-description="Remove a link between a WorkEffort and a Agreement Appl">
+        <entity-one entity-name="AgreementWorkEffortApplic" value-field="agreementWorkEffortApplic"/>
+        <remove-value value-field="agreementWorkEffortApplic"/>
     </simple-method>
 
 </simple-methods>

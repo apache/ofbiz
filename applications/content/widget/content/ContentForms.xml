@@ -25,17 +25,21 @@ under the License.
         header-row-style="header-row" default-table-style="basic-table">
         <!--auto-fields-entity entity-name="Content" default-field-type="find" /-->
         <field name="noConditionFind"><hidden value="Y"/><!-- if this isn't there then with all fields empty no query will be done --></field>
-        <field name="contentId"><text-find default-option="contains" ignore-case="true"/></field>
-        <field name="contentName"><text-find default-option="contains" ignore-case="true"/></field>
-        <field name="description"><text-find default-option="contains" ignore-case="true"/></field>
+        <field name="contentId"><text-find ignore-case="true"/></field>
+        <field name="contentName"><text-find ignore-case="true"/></field>
+        <field name="description"><text-find ignore-case="true"/></field>
         <field name="contentTypeId" position="1">
             <drop-down allow-empty="true">
-                <entity-options description="${description}" entity-name="ContentType" key-field-name="contentTypeId"/>
+                <entity-options description="${description}" entity-name="ContentType" key-field-name="contentTypeId">
+                    <entity-order-by field-name="description"/>
+                </entity-options>
             </drop-down>
         </field>
         <field name="mimeTypeId" position="2">
             <drop-down allow-empty="true">
-                <entity-options description="${description}" entity-name="MimeType" key-field-name="mimeTypeId"/>
+                <entity-options description="${description}" entity-name="MimeType" key-field-name="mimeTypeId">
+                    <entity-order-by field-name="description"/>
+                </entity-options>
             </drop-down>
         </field>
         <field name="dataResourceId" position="1">
@@ -48,16 +52,22 @@ under the License.
             <drop-down allow-empty="true">
                 <entity-options description="${description}" entity-name="StatusItem">
                     <entity-constraint name="statusTypeId" operator="equals" value="CONTENT_STATUS"/>
+                    <entity-order-by field-name="description"/>
                 </entity-options>
             </drop-down>
         </field>
-        <field name="createdByUserLogin" position="2"><lookup target-form-name="LookupPerson"/></field>
+        <field name="createdByUserLogin" position="2"><lookup target-form-name="LookupUserLoginAndPartyDetails"/></field>
         <field name="localeString">
-            <drop-down allow-empty="true">
-                <entity-options entity-name="CountryCode" description="${countryName} [${countryCode}]" key-field-name="countryCode"/>
-            </drop-down>
+            <lookup target-form-name="LookupLocale"></lookup>
         </field>
-        <field name="searchButton" widget-style="smallSubmit"><submit button-type="button"/></field>
+        <!--<field name="localeString">
+            <drop-down allow-empty="true">
+                <entity-options entity-name="CountryCode" description="${countryName} [${countryCode}]" key-field-name="countryCode">
+                    <entity-order-by field-name="countryName"/>
+                </entity-options>
+            </drop-down>
+        </field>-->
+        <field name="searchButton" title="${uiLabelMap.CommonFind}" widget-style="smallSubmit"><submit button-type="button"/></field>
     </form>
 
     <form name="ListContent" target="" title="" list-name="listIt" type="list" paginate-target="findContent"
@@ -66,38 +76,41 @@ under the License.
             <service service-name="performFind" result-map="result" result-map-list="listIt">
                 <field-map field-name="inputFields" from-field="parameters"/>
                 <field-map field-name="entityName" value="Content"/>
-                <field-map field-name="orderBy" value="contentId"/>
+                <field-map field-name="orderBy" from-field="parameters.sortField"/>
+                <field-map field-name="viewIndex" from-field="viewIndex"/>
+                <field-map field-name="viewSize" from-field="viewSize"/>
             </service>
         </actions>
 
         <field name="contentId"><hidden/></field>
-        <field name="contentName" widget-style="tabletext">
+        <field name="contentName" sort-field="true">
             <display-entity entity-name="Content" description="${contentName}" key-field-name="contentId">
                 <sub-hyperlink target="editContent" description="[${contentId}]" link-style="buttontext">
                     <parameter param-name="contentId"/>
                 </sub-hyperlink>
             </display-entity>
         </field>
-        <field name="description"><display/></field>
-        <field name="statusId"><display-entity entity-name="StatusItem"></display-entity></field>
-        <field name="localeString"><display-entity entity-name="CountryCode" key-field-name="countryCode" description="${countryName}[${countryCode}]"></display-entity></field>
-        <field name="contentTypeId"><display-entity entity-name="ContentType"></display-entity></field>
-        <field name="mimeTypeId"><display-entity entity-name="MimeType"></display-entity></field>
-        <field name="dataResourceId" use-when="dataResourceId==null"><display/></field>
-        <field name="dataResourceId" use-when="dataResourceId!=null">
-                <display-entity entity-name="DataResource" description="${dataResourceName}">
-                    <sub-hyperlink target="EditDataResource" link-style="buttontext" description="[${dataResourceId}]">
+        <field name="description" sort-field="true"><display/></field>
+        <field name="statusId" sort-field="true"><display-entity entity-name="StatusItem"></display-entity></field>
+        <field name="localeString" sort-field="true"><display-entity entity-name="CountryCode" key-field-name="countryCode" description="${countryName}[${countryCode}]"></display-entity></field>
+        <field name="contentTypeId" sort-field="true"><display-entity entity-name="ContentType"></display-entity></field>
+        <field name="mimeTypeId" sort-field="true"><display-entity entity-name="MimeType"></display-entity></field>
+        <field name="dataResourceId" use-when="dataResourceId==null" sort-field="true"><display/></field>
+        <field name="dataResourceId" use-when="dataResourceId!=null" sort-field="true">
+            <display-entity entity-name="DataResource" description="${dataResourceName}">
+                <sub-hyperlink target="EditDataResource" link-style="buttontext" description="[${dataResourceId}]">
                     <parameter param-name="dataResourceId"/>
                 </sub-hyperlink>
             </display-entity>
         </field>
-        <field name="ownerContentId">
+        <field name="ownerContentId" sort-field="true">
             <display-entity entity-name="Content" description="${contentName}" key-field-name="contentId">
                 <sub-hyperlink target="editContent" description="[${contentId}]" link-style="buttontext">
                     <parameter param-name="contentId"/>
                 </sub-hyperlink>
             </display-entity>
         </field>
+        <field name="createdByUserLogin" sort-field="true"><display/></field>
         <on-event-update-area event-type="paginate" area-id="search-results" area-target="findContentSearchResults"/>
     </form>
 
@@ -106,17 +119,15 @@ under the License.
     <form name="ListLookupContent" extends="ListContent" type="list" list-name="listIt" paginate-target="LookupContent"
         odd-row-style="alternate-row" default-table-style="basic-table hover-bar">
         <actions>
-            <service service-name="performFind" result-map="result" result-map-list="listIt">
-                <field-map field-name="inputFields" from-field="parameters"/>
-                <field-map field-name="entityName" value="Content"/>
-                <field-map field-name="orderBy" value="contentId"/>
-            </service>
+            <set field="parameters.sortField" from-field="parameters.sortField" default-value="contentId"/>
+            <call-parent-actions/>
         </actions>
         <field name="contentId">
             <hyperlink also-hidden="false" target-type="plain" description="${contentId}" target="javascript:set_value('${contentId}')"/>
         </field>
-        <field name="contentName" widget-style="tabletext"><display/></field>
+        <field name="contentName"><display/></field>
         <field name="createdByUserLogin"><ignored/></field>
+        <on-event-update-area event-type="paginate" area-id="search-results" area-target=""/>
     </form>
 
     <form name="EditContent" target="updateContent" title="" type="single" default-map-name="currentValue"
@@ -125,12 +136,14 @@ under the License.
             <entity-one entity-name="StatusItem" value-field="currentStatus" auto-field-map="false">
                 <field-map field-name="statusId" from-field="currentValue.statusId"/>
             </entity-one>
+            <set field="dataResourceId" from-field="currentValue.dataResourceId"/>
+            <set field="templateDataResourceId" from-field="currentValue.templateDataResourceId"/>
         </actions>
         <alt-target use-when="currentValue==null" target="createContent"/>
         <auto-fields-entity entity-name="Content"/>
-        <field use-when="currentValue!=null" name="contentId" tooltip="${uiLabelMap.CommonNotModifRecreat}" widget-style="tabletext"><display/></field>
+        <field use-when="currentValue!=null" name="contentId" tooltip="${uiLabelMap.CommonNotModifRecreat}"><display/></field>
         <field use-when="currentValue==null&amp;&amp;contentId==null" name="contentId"><text/></field>
-        <field use-when="currentValue==null&amp;&amp;contentId!=null" name="contentId" widget-style="tabletext"><display description="${uiLabelMap.CommonCannotBeFound}: [${contentId}]" also-hidden="false"/></field>
+        <field use-when="currentValue==null&amp;&amp;contentId!=null" name="contentId"><display description="${uiLabelMap.CommonCannotBeFound}: [${contentId}]" also-hidden="false"/></field>
         <field name="contentTypeId">
             <drop-down allow-empty="false">
                 <entity-options description="${description}" entity-name="ContentType" key-field-name="contentTypeId">
@@ -138,10 +151,33 @@ under the License.
                 </entity-options>
             </drop-down>
         </field>
-        <field name="dataResourceId">
+        <field name="dataResourceId" use-when="dataResourceId != null">
             <lookup target-form-name="LookupDataResource">
                 <sub-hyperlink link-style="buttontext" target="EditDataResource" description="${uiLabelMap.ContentGoToDataResource}">
                     <parameter param-name="dataResourceId" from-field="currentValue.dataResourceId"/>
+                </sub-hyperlink>
+            </lookup>
+        </field>
+        <field name="dataResourceId" use-when="dataResourceId == null ">
+            <lookup target-form-name="LookupDataResource">
+                <sub-hyperlink link-style="buttontext" target="AddDataResourceFromContent" description="${uiLabelMap.FormFieldTitle_newDataResourceId}">
+                    <parameter param-name="contentId" from-field="currentValue.contentId"/>
+                    <parameter param-name="template" value="N"/>
+                </sub-hyperlink>
+            </lookup>
+        </field>
+        <field name="templateDataResourceId" use-when="templateDataResourceId != null">
+            <lookup target-form-name="LookupDataResource">
+                <sub-hyperlink link-style="buttontext" target="EditDataResource" description="${uiLabelMap.ContentGoToDataResource}">
+                    <parameter param-name="dataResourceId" from-field="currentValue.templateDataResourceId"/>
+                </sub-hyperlink>
+            </lookup>
+        </field>
+        <field name="templateDataResourceId"  use-when="templateDataResourceId == null">
+            <lookup target-form-name="LookupDataResource">
+                <sub-hyperlink link-style="buttontext" target="AddDataResourceFromContent"  description="${uiLabelMap.FormFieldTitle_newDataResourceId}">
+                    <parameter param-name="contentId" from-field="currentValue.contentId"/>
+                    <parameter param-name="templateDataResource" value="Y"/>
                 </sub-hyperlink>
             </lookup>
         </field>
@@ -153,7 +189,10 @@ under the License.
                 </sub-hyperlink>
             </lookup>
         </field>
-        <field name="mimeTypeId">
+        <field name="localeString">
+            <lookup target-form-name="LookupLocale"></lookup>
+        </field>
+        <field name="mimeTypeId" encode-output="false">
             <drop-down allow-empty="true">
                 <entity-options description="${mimeTypeId} - ${description}" entity-name="MimeType" key-field-name="mimeTypeId">
                     <entity-order-by field-name="mimeTypeId"/>
@@ -178,41 +217,6 @@ under the License.
         <field name="updateButton" title="${uiLabelMap.CommonUpdate}" use-when="currentValue!=null" widget-style="smallSubmit"><submit button-type="button"/></field>
     </form>
 
-    <!-- form name="AddContent" target="createContent" title="" type="single"
-        default-title-style="tableheadtext" default-tooltip-style="tabletext" default-widget-style="inputBox">
-        <auto-fields-entity entity-name="Content"/>
-        <field name="contentId"><text/></field>
-        <field name="dataResourceId" map-name="currentValue"><lookup target-form-name="LookupDataResource"/></field>
-        <field name="contentPurposeTypeId" entity-name="ContentPurposeType" map-name="dummy">
-            <drop-down allow-empty="true">
-                <entity-options description="${description}" entity-name="ContentPurposeType" key-field-name="contentPurposeTypeId"/>
-            </drop-down>
-        </field>
-        <field name="submitButton" title="${uiLabelMap.CommonCreate}" widget-style="smallSubmit"><submit button-type="button"/></field>
-        <field name="contentTypeId">
-            <drop-down allow-empty="false">
-                <entity-options description="${description}" entity-name="ContentType" key-field-name="contentTypeId"/>
-            </drop-down>
-        </field>
-        <field name="ownerContentId" title="${uiLabelMap.CommonEmptyHeader}"><lookup target-form-name="LookupContent"/></field>
-        <field name="mimeTypeId">
-            <drop-down allow-empty="true">
-                <entity-options description="${description}" entity-name="MimeType" key-field-name="mimeTypeId"/>
-            </drop-down>
-        </field>
-        <field name="statusId">
-            <drop-down allow-empty="true">
-                <entity-options description="${description}" entity-name="StatusItem">
-                    <entity-constraint name="statusTypeId" operator="equals" value="CONTENT_STATUS "/>
-                </entity-options>
-            </drop-down>
-        </field>
-        <field name="createdByUserLogin" position="1"><display/></field>
-        <field name="createdDate" position="2"><display/></field>
-        <field name="lastModifiedByUserLogin" position="1"><display/></field>
-        <field name="lastModifiedDate" position="2"><display/></field>
-    </form -->
-
     <!-- Content Lookup forms -->
     <form name="mruLookupContent" default-entity-name="Content" list-name="mruList" target="" title="" type="list"
         odd-row-style="alternate-row" default-table-style="basic-table hover-bar">
@@ -235,16 +239,16 @@ under the License.
             </entity-one>
         </actions>
         <auto-fields-entity entity-name="ContentAssoc"/>
-        <field name="contentId" widget-style="tabletext"><display/></field>
-        <field name="contentIdTo" title="${uiLabelMap.CommonEmptyHeader}" widget-style="tabletext"><display/></field>
-        <field name="contentAssocTypeId" title="${uiLabelMap.CommonEmptyHeader}" widget-style="tabletext"><display/></field>
-        <field name="fromDate" widget-style="tabletext"><display/></field>
+        <field name="contentId"><display/></field>
+        <field name="contentIdTo"><display/></field>
+        <field name="contentAssocTypeId"><display/></field>
+        <field name="fromDate"><display/></field>
         <field name="updateButton" title="${uiLabelMap.CommonUpdate}" widget-style="smallSubmit"><submit button-type="button"/></field>
     </form>
     <form name="AddContentAssoc" target="createContentAssoc" title="" type="single"
         header-row-style="header-row" default-table-style="basic-table">
         <auto-fields-entity entity-name="ContentAssoc"/>
-        <field name="contentId" widget-style="tabletext"><display description="${contentId}"/></field>
+        <field name="contentId"><display description="${contentId}"/></field>
         <field name="contentIdTo" map-name="currentValue">
             <lookup target-form-name="LookupContent"/>
         </field>
@@ -279,7 +283,7 @@ under the License.
         <field name="contentId"><hidden/></field>
         <field name="contentIdTo">
             <display-entity entity-name="Content" description="${contentName},${description}" key-field-name="contentId">
-                <sub-hyperlink target="EditContentAssoc" description="${contentIdTo}" link-style="tabletext">
+                <sub-hyperlink target="EditContentAssoc" description="${contentIdTo}">
                     <parameter param-name="contentId" from-field="contentIdTo"/>
                 </sub-hyperlink>
             </display-entity>
@@ -287,7 +291,7 @@ under the License.
         <field name="contentAssocTypeId"><display-entity entity-name="ContentAssocType" description="${description}"></display-entity></field>
         <field name="mapKey"><display/></field>
         <field name="fromDate"><display description="${bsh:fromDate.toString().substring(0,10)}"/></field>
-        <field name="deleteLink" title="${uiLabelMap.CommonEmptyHeader}" widget-style="buttontext">
+        <field name="deleteLink" title=" " widget-style="buttontext">
             <hyperlink also-hidden="false" description="${uiLabelMap.CommonDelete}" target="removeContentAssoc">
                 <parameter param-name="contentId"/>
                 <parameter param-name="contentIdTo"/>
@@ -309,7 +313,7 @@ under the License.
         </actions>
         <field name="contentId">
             <display-entity entity-name="Content" description="${contentName},${description}">
-                <sub-hyperlink target="EditContentAssoc" description="${contentId}" link-style="tabletext">
+                <sub-hyperlink target="EditContentAssoc" description="${contentId}">
                     <parameter param-name="contentId"/>
                 </sub-hyperlink>
             </display-entity>
@@ -318,7 +322,7 @@ under the License.
         <field name="contentAssocTypeId"><display-entity entity-name="ContentAssocType" description="${description}"></display-entity></field>
         <field name="mapKey"><display/></field>
         <field name="fromDate"><display description="${bsh:fromDate.toString().substring(0,10)}"/></field>
-        <field name="deleteLink" title="${uiLabelMap.CommonEmptyHeader}" widget-style="buttontext">
+        <field name="deleteLink" title=" " widget-style="buttontext">
             <hyperlink also-hidden="false" description="${uiLabelMap.CommonDelete}" target="removeContentAssoc">
                 <parameter param-name="contentId"/>
                 <parameter param-name="contentIdTo"/>
@@ -369,7 +373,7 @@ under the License.
         <field name="submitButton" title="${uiLabelMap.CommonUpdate}" widget-style="smallSubmit">
             <submit button-type="button"/>
         </field>
-        <field name="deleteLink" title="${uiLabelMap.CommonEmptyHeader}" widget-style="buttontext">
+        <field name="deleteLink" title=" " widget-style="buttontext">
             <hyperlink also-hidden="false" description="${uiLabelMap.CommonDelete}" target="remove${contentRoleTarget}ContentRole">
                 <parameter param-name="contentId"/>
                 <parameter param-name="roleTypeId"/>
@@ -383,7 +387,7 @@ under the License.
     <form name="AddContentPurpose" target="addContentPurpose" title="" type="single"
         header-row-style="header-row" default-table-style="basic-table">
         <auto-fields-service service-name="createContentPurpose"/>
-        <field name="contentId" title="${uiLabelMap.CommonEmptyHeader}" widget-style="buttontext" ><lookup target-form-name="LookupContent"/></field>
+        <field name="contentId" title=" " widget-style="buttontext" ><lookup target-form-name="LookupContent"/></field>
         <field name="contentPurposeTypeId">
             <drop-down allow-empty="true">
                 <entity-options description="${description}" entity-name="ContentPurposeType" key-field-name="contentPurposeTypeId">
@@ -402,7 +406,7 @@ under the License.
         </actions>
         <auto-fields-service service-name="updateContentPurpose" default-field-type="display"/>
         <field name="submitButton" title="${uiLabelMap.CommonUpdate}" widget-style="smallSubmit"><submit button-type="button"/></field>
-        <field name="deleteLink" title="${uiLabelMap.CommonEmptyHeader}" widget-style="buttontext">
+        <field name="deleteLink" title=" " widget-style="buttontext">
             <hyperlink also-hidden="false" description="${uiLabelMap.CommonDelete}" target="removeContentPurpose">
                 <parameter param-name="contentId"/>
                 <parameter param-name="contentPurposeTypeId"/>
@@ -414,7 +418,7 @@ under the License.
     <form name="AddContentAttribute" target="addContentAttribute" title="" type="single"
         header-row-style="header-row" default-table-style="basic-table">
         <auto-fields-service service-name="createContentAttribute"/>
-        <field name="contentId" title="${uiLabelMap.CommonEmptyHeader}" widget-style="buttontext" >
+        <field name="contentId" title=" " widget-style="buttontext" >
             <lookup target-form-name="LookupContent"/>
         </field>
         <field name="submitButton" title="${uiLabelMap.CommonAdd}" widget-style="smallSubmit"><submit button-type="button"/></field>
@@ -429,7 +433,7 @@ under the License.
         <auto-fields-service service-name="updateContentAttribute" default-field-type="display"/>
         <field name="attrValue" widget-style="buttontext"><text/></field>
         <field name="submitButton" title="${uiLabelMap.CommonUpdate}" widget-style="smallSubmit"><submit button-type="button"/></field>
-        <field name="deleteLink" title="${uiLabelMap.CommonEmptyHeader}" widget-style="buttontext">
+        <field name="deleteLink" title=" " widget-style="buttontext">
             <hyperlink also-hidden="false" description="${uiLabelMap.CommonDelete}" target="removeContentAttribute">
                 <parameter param-name="contentId"/>
                 <parameter param-name="attrName"/>
@@ -441,7 +445,7 @@ under the License.
     <form name="AddContentMetaData" target="addContentMetaData" title="" type="single"
         header-row-style="header-row" default-table-style="basic-table">
         <auto-fields-service service-name="createContentMetaData"/>
-        <field name="contentId" title="${uiLabelMap.CommonEmptyHeader}" widget-style="buttontext" >
+        <field name="contentId" title=" " widget-style="buttontext" >
             <lookup target-form-name="LookupContent"/>
         </field>
         <field name="metaDataPredicateId">
@@ -451,7 +455,15 @@ under the License.
         </field>
         <field name="submitButton" title="${uiLabelMap.CommonAdd}" widget-style="smallSubmit"><submit button-type="button"/></field>
     </form>
-    <form name="ListWebSites" paginate-target="ListWebSite" paginate="true" extends="ListWebSites" extends-resource="component://content/webapp/content/website/WebSiteForms.xml">
+    <form name="ListWebSites"  type="list" paginate-target="ListWebSite" paginate="true" list-name="webSites"
+            odd-row-style="alternate-row" default-table-style="basic-table hover-bar" header-row-style="header-row-2">
+        <field name="webSiteId" title="${uiLabelMap.CommonId}" widget-style="buttontext" sort-field="true">
+            <hyperlink description="${webSiteId}" target="EditWebSite" also-hidden="false">
+                <parameter param-name="webSiteId"/>
+            </hyperlink>
+        </field>
+        <field name="siteName" title="${uiLabelMap.CommonName}" sort-field="true"><display/></field>
+        <field name="httpHost" sort-field="true"><display/></field>
         <field name="webSiteContentTypeId"><display-entity entity-name="WebSiteContentType" description="${description}"/></field>
         <field name="fromDate"><display type="date"/></field>
         <field name="thruDate"><display type="date"/></field>
@@ -467,7 +479,7 @@ under the License.
         <field name="contentId" widget-style="buttontext"><display/></field>
         <field name="metaDataPredicateId" widget-style="buttontext"><display/></field>
         <field name="submitButton" title="${uiLabelMap.CommonUpdate}" widget-style="smallSubmit"><submit button-type="button"/></field>
-        <field name="deleteLink" title="${uiLabelMap.CommonEmptyHeader}" widget-style="buttontext">
+        <field name="deleteLink" title=" " widget-style="buttontext">
             <hyperlink also-hidden="false" description="${uiLabelMap.CommonDelete}" target="removeContentMetaData">
                 <parameter param-name="contentId"/>
                 <parameter param-name="metaDataPredicateId"/>
@@ -478,19 +490,19 @@ under the License.
     <!-- Person Lookup forms -->
     <form name="mruLookupPerson" list-name="mruList" target="" title="" type="list"
         odd-row-style="alternate-row" default-table-style="basic-table hover-bar">
-        <field name="partyId" title="${uiLabelMap.CommonEmptyHeader}" widget-style="buttontext">
+        <field name="partyId" title=" " widget-style="buttontext">
             <hyperlink also-hidden="false" target-type="plain" description="${partyId}" target="javascript:set_value('${partyId}')"/>
         </field>
-        <field name="firstName" title="${uiLabelMap.CommonEmptyHeader}" widget-style="buttontext"><display/></field>
-        <field name="lastName" title="${uiLabelMap.CommonEmptyHeader}" widget-style="buttontext"><display/></field>
+        <field name="firstName" title=" " widget-style="buttontext"><display/></field>
+        <field name="lastName" title=" " widget-style="buttontext"><display/></field>
     </form>
     <form name="mruLookupPartyAndUserLoginAndPerson" list-name="mruList" target="" title="" type="list"
         odd-row-style="alternate-row" default-table-style="basic-table hover-bar">
-        <field name="partyId" title="${uiLabelMap.CommonEmptyHeader}" widget-style="buttontext">
+        <field name="partyId" title=" " widget-style="buttontext">
             <hyperlink also-hidden="false" target-type="plain" description="${partyId}" target="javascript:set_value('${partyId}', '${userLoginId}')"/>
         </field>
-        <field name="firstName" title="${uiLabelMap.CommonEmptyHeader}" widget-style="buttontext"><display/></field>
-        <field name="lastName" title="${uiLabelMap.CommonEmptyHeader}" widget-style="buttontext"><display/></field>
+        <field name="firstName" title=" " widget-style="buttontext"><display/></field>
+        <field name="lastName" title=" " widget-style="buttontext"><display/></field>
     </form>
 
     <!-- ContentWorkEffort forms -->
@@ -518,18 +530,18 @@ under the License.
             </entity-and>
         </actions>
         <auto-fields-service service-name="updateWorkEffortContent" default-field-type="edit"/>
-        <field name="workEffortId" widget-style="tabletext">
+        <field name="workEffortId">
             <display-entity entity-name="WorkEffort" key-field-name="workEffortId" description="${workEffortName}" also-hidden="true">
                 <sub-hyperlink target="/workeffort/control/EditWorkEffort"  description="${workEffortId}" link-style="buttontext" target-type="inter-app">
                     <parameter param-name="workEffortId"/>
                 </sub-hyperlink>
             </display-entity>
         </field>
-        <field name="contentId" widget-style="tabletext"><hidden/></field>
-        <field name="workEffortContentTypeId" widget-style="tabletext"><display-entity entity-name="WorkEffortContentType" description="${description}"/></field>
-        <field name="fromDate" widget-style="tabletext"><display/></field>
+        <field name="contentId"><hidden/></field>
+        <field name="workEffortContentTypeId"><display-entity entity-name="WorkEffortContentType" description="${description}"/></field>
+        <field name="fromDate"><display/></field>
         <field name="submitButton" title="${uiLabelMap.CommonUpdate}" widget-style="smallSubmit"><submit button-type="button"/></field>
-        <field name="deleteLink" title="${uiLabelMap.CommonEmptyHeader}" widget-style="buttontext">
+        <field name="deleteLink" title=" " widget-style="buttontext">
             <hyperlink also-hidden="false" description="${uiLabelMap.CommonDelete}" target="deleteWorkEffortContent">
                 <parameter param-name="workEffortContentTypeId"/>
                 <parameter param-name="fromDate"/>
@@ -538,24 +550,13 @@ under the License.
             </hyperlink>
         </field>
     </form>
-    <form name="ListDocument"  target="" type="list"  list-name="contentAssoc" paginate-target="navigateContent"
-        odd-row-style="alternate-row" header-row-style="header-row-2" default-table-style="basic-table hover-bar">
-        <row-actions>
-            <entity-one entity-name="Content" value-field="content">
-                <field-map field-name="contentId" from-field="contentIdTo"/>
-            </entity-one>
-            <set field="contentTypeId" from-field="content.contentTypeId"/>
-            <set field="statusId" from-field="content.statusId"/>
-            <entity-one entity-name="DataResource" value-field="dataResource">
-                <field-map field-name="dataResourceId" from-field="content.dataResourceId"/>
-            </entity-one>
-            <set field="mimeTypeId" from-field="dataResource.mimeTypeId"/>
-        </row-actions>
-        <field name="contentId">
-            <hyperlink also-hidden="false" description="${content.contentName} [${content.contentId}]" target="ViewSimpleContent">
-                <parameter param-name="contentId" from-field="content.contentId"/>
-                <parameter param-name="dataResourceId" from-field="content.dataResourceId"/>
-            </hyperlink>
+    <!--form name="ListDocument"  target="" type="list"  list-name="contentAssoc" paginate-target="navigateContent"
+        odd-row-style="alternate-row" header-row-style="header-row" default-table-style="basic-table hover-bar">
+        <field name="contentId" use-when="&quot;application/pdf&quot;.equals(mimeTypeId)">
+            <hyperlink also-hidden="false" description="${contentName} [${contentId}]" target="showContentPdf?contentId=${contentId}" target-window="_blank"/>
+        </field>
+        <field name="contentId" use-when="&quot;text/html&quot;.equals(mimeTypeId)">
+            <hyperlink also-hidden="false" description="${contentName} [${contentId}]" target="showContent?contentId=${contentId}" target-window="_blank"/>
         </field>
         <field name="contentTypeId">
             <display-entity entity-name="ContentType" key-field-name="contentTypeId" description="${description}"/>
@@ -566,7 +567,7 @@ under the License.
         <field name="statusId">
             <display-entity entity-name="StatusItem" key-field-name="statusId" description="${description}"/>
         </field>
-        <field name="createdDate"><display description="${content.createdDate}"/></field>
+        <field name="caCreatedDate"><display/></field>
         <field name="delete" title="${uiLabelMap.CommonDelete}">
             <hyperlink target="removeDocumentFromTree" description="${uiLabelMap.CommonDelete}">
                 <parameter param-name="contentId"/>
@@ -575,7 +576,7 @@ under the License.
                 <parameter param-name="fromDate"/>
             </hyperlink>
         </field>
-    </form>
+    </form-->
     <form name="AddDocument"  target="addDocumentToTree" title="" type="single"
         header-row-style="header-row" default-table-style="basic-table">
         <actions>
@@ -607,5 +608,50 @@ under the License.
             </drop-down>
         </field>
         <field name="submit" title="${uiLabelMap.CommonSubmit}"><submit/></field>
+    </form>
+    <form name="ViewContentDetail" type="single" default-map-name="lookupContentDetail">
+        <field name="contentId" widget-style="buttontext">
+            <hyperlink also-hidden="false" target-type="plain" description="${contentId}" target="javascript:set_value('${contentId}')"/>
+        </field>
+        <field name="contentName"><display/></field>
+        <field name="contentTypeId"><display/></field>
+        <field name="ownerContentId"><display/></field>
+        <field name="mimeTypeId"><display/></field>
+        <field name="select" widget-style="buttontext" title=" " use-when="contentId!=null">
+            <hyperlink also-hidden="true"
+                target-type="plain" description="${uiLabelMap.CommonSelect}"
+                target="javascript:set_value('${contentId}')"/>            
+        </field>
+    </form>
+    <form name="EditShowContentPortlet" extends="CommonPortletEdit" extends-resource="component://common/widget/PortletEditForms.xml">
+        <field name="contentId">
+            <drop-down>
+                <entity-options description="${contentName}" entity-name="Content">
+                    <entity-constraint name="contentTypeId" operator="equals" value="DOCUMENT"/>
+                    <entity-order-by field-name="contentName"/>
+                </entity-options>    
+            </drop-down>
+        </field>
+        <field name="saveButton"><submit/></field>
+    </form>
+    
+    <!-- Content Keyword Forms -->
+    <form name="AddContentKeyword" target="createContentKeyword" title="" type="single"
+        header-row-style="header-row" default-table-style="basic-table">
+        <auto-fields-service service-name="createContentKeyword"/>
+        <field name="contentId"><hidden value="${parameters.contentId}"/></field>
+        <field name="keyword" title="${uiLabelMap.ContentKeyword}*"><text size="10"/></field>
+        <field name="relevancyWeight" title="${uiLabelMap.ProductWeight}"><text size="5"/></field>
+        <field name="submitButton" title="${uiLabelMap.CommonAdd}" widget-style="smallSubmit"><submit button-type="button"/></field>
+    </form>
+    <form name="ListContentKeywords" type="list" target="deleteContentKeyword" odd-row-style="alternate-row" default-table-style="basic-table">
+        <actions>
+            <entity-and entity-name="ContentKeyword" use-cache="true">
+                <field-map from-field="contentId" field-name="contentId"/>
+            </entity-and>
+        </actions>
+        <auto-fields-entity entity-name="ContentKeyword" default-field-type="display"/>
+        <field name="contentId"><hidden/></field>
+        <field name="submitButton" title="${uiLabelMap.CommonDelete}"><submit button-type="button"/></field>
     </form>
 </forms>

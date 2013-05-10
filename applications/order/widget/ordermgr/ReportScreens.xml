@@ -20,6 +20,7 @@ under the License.
 
 <screens xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/widget-screen.xsd">
+
     <screen name="OrderPurchaseReportOptions">
         <section>
             <actions>
@@ -29,72 +30,84 @@ under the License.
             <widgets>
                 <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
                     <decorator-section name="body">
-                        <container>
-                            <label style="h1" text="${uiLabelMap.OrderReports}"/>
-                        </container>
-                        <container style="lefthalf">
-                            <container style="screenlet">
-                                <container style="screenlet-title-bar">
-                                    <container style="h3">
-                                        <label text="${uiLabelMap.OrderReportSalesByStore}"/>
-                                    </container>
-                                </container>
-                                <container style="screenlet-body">
-                                    <section>
-                                        <widgets>
-                                            <include-form name="SalesByStoreReport" location="component://order/widget/ordermgr/ReportForms.xml"/>
-                                        </widgets>
-                                    </section>
-                                </container>
-                            </container>
-                            <container style="screenlet">
-                                <container style="screenlet-title-bar">
-                                    <container style="h3">
-                                        <label text="${uiLabelMap.OrderReportOpenOrderItems}"/>
-                                    </container>
-                                </container>
-                                <container style="screenlet-body">
-                                    <include-form name="OpenOrderItemsReport" location="component://order/widget/ordermgr/ReportForms.xml"/>
-                                </container>
-                            </container>
-                            <container style="screenlet">
-                                <container style="screenlet-title-bar">
-                                    <container style="h3">
-                                        <label text="${uiLabelMap.OrderReportPurchasesByOrganization}"/>
-                                    </container>
-                                </container>
-                                <container style="screenlet-body">
-                                    <include-form name="PurchasesByOrganizationReport" location="component://order/widget/ordermgr/ReportForms.xml"/>
-                                </container>
-                            </container>
-                        </container>
-                        <container style="righthalf">
-                            <container style="screenlet">
-                                <container style="screenlet-title-bar">
-                                    <container style="h3">
-                                        <label text="${uiLabelMap.OrderReportPurchasesByProduct}"/>
-                                    </container>
-                                </container>
-                                <container style="screenlet-body">
-                                    <include-form name="OrderPurchaseProductOptions" location="component://order/widget/ordermgr/ReportForms.xml"/>
-                                </container>
-                            </container>
-                            <container style="screenlet">
-                                <container style="screenlet-title-bar">
-                                    <container style="h3">
-                                        <label text="${uiLabelMap.OrderReportPurchasesByPaymentMethod}"/>
-                                    </container>
-                                </container>
-                                <container style="screenlet-body">
-                                    <include-form name="OrderPurchasePaymentOptions" location="component://order/widget/ordermgr/ReportForms.xml"/>
-                                </container>
-                            </container>
-                        </container>
+                        <include-portal-page id="OrderReportPage"/>
                     </decorator-section>
                 </decorator-screen>
             </widgets>
         </section>
     </screen>
+
+    <screen name="OrderReportSalesByStore">
+        <section>
+            <actions>
+                <property-map resource="ProductUiLabels" map-name="uiLabelMap" global="true"/>
+                <property-map resource="AccountingUiLabels" map-name="uiLabelMap" global="true"/>
+                <property-map resource="OrderUiLabels" map-name="uiLabelMap" global="true"/>
+            </actions>
+            <widgets>
+                <screenlet title="${uiLabelMap.OrderReportSalesByStore}">
+                    <include-form name="SalesByStoreReport" location="component://order/widget/ordermgr/ReportForms.xml"/>
+                </screenlet>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="OrderReportOpenOrderItems">
+        <section>
+            <actions>
+                <property-map resource="ProductUiLabels" map-name="uiLabelMap" global="true"/>
+                <property-map resource="OrderUiLabels" map-name="uiLabelMap" global="true"/>
+            </actions>
+            <widgets>
+                <screenlet title="${uiLabelMap.OrderReportOpenOrderItems}">
+                    <include-form name="OpenOrderItemsReport" location="component://order/widget/ordermgr/ReportForms.xml"/>
+                </screenlet>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="OrderReportPurchasesByOrganization">
+        <section>
+            <actions>
+                <property-map resource="AccountingUiLabels" map-name="uiLabelMap" global="true"/>
+                <property-map resource="OrderUiLabels" map-name="uiLabelMap" global="true"/>
+            </actions>
+            <widgets>
+                <screenlet title="${uiLabelMap.OrderReportPurchasesByOrganization}">
+                    <include-form name="PurchasesByOrganizationReport" location="component://order/widget/ordermgr/ReportForms.xml"/>
+                </screenlet>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="OrderReportPurchasesByProduct">
+        <section>
+            <actions>
+                <property-map resource="ProductUiLabels" map-name="uiLabelMap" global="true"/>
+                <property-map resource="OrderUiLabels" map-name="uiLabelMap" global="true"/>
+            </actions>
+            <widgets>
+                <screenlet title="${uiLabelMap.OrderReportPurchasesByProduct}">
+                    <include-form name="OrderPurchaseProductOptions" location="component://order/widget/ordermgr/ReportForms.xml"/>
+                </screenlet>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="OrderReportPurchasesByPaymentMethod">
+        <section>
+            <actions>
+                <property-map resource="ProductUiLabels" map-name="uiLabelMap" global="true"/>
+                <property-map resource="OrderUiLabels" map-name="uiLabelMap" global="true"/>
+            </actions>
+            <widgets>
+                <screenlet title="${uiLabelMap.OrderReportPurchasesByPaymentMethod}">
+                    <include-form name="OrderPurchasePaymentOptions" location="component://order/widget/ordermgr/ReportForms.xml"/>
+                </screenlet>
+            </widgets>
+        </section>
+    </screen>
+
     <screen name="OrderPurchaseReportPayment">
         <section>
             <actions>
@@ -229,34 +242,12 @@ under the License.
             <widgets>
                 <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
                     <decorator-section name="body">
-                        <container style="screenlet">
-                            <container style="screenlet-title-bar">
-                                <container style="h3">
-                                    <label text="${uiLabelMap.OrderReportOpenOrderItems} - ${productStore.storeName}"/>
-                                </container>
-                            </container>
-                            <container style="screenlet-body">
-                                <section>
-                                    <widgets>
-                                        <include-form name="OpenOrderItemsList" location="component://order/widget/ordermgr/ReportForms.xml"/>
-                                    </widgets>
-                                </section>
-                            </container>
-                        </container>
-                        <container style="screenlet">
-                            <container style="screenlet-title-bar">
-                                <container style="h3">
-                                    <label text="${uiLabelMap.OrderReportOpenOrderItems}"/>
-                                </container>
-                            </container>
-                            <container style="screenlet-body">
-                                <section>
-                                    <widgets>
-                                        <include-form name="OpenOrderItemsTotal" location="component://order/widget/ordermgr/ReportForms.xml"/>
-                                    </widgets>
-                                </section>
-                            </container>
-                        </container>
+                        <screenlet title="${uiLabelMap.OrderReportOpenOrderItems} - ${productStore.storeName}">
+                            <include-form name="OpenOrderItemsList" location="component://order/widget/ordermgr/ReportForms.xml"/>
+                        </screenlet>
+                        <screenlet title="${uiLabelMap.OrderReportOpenOrderItems}">
+                            <include-form name="OpenOrderItemsTotal" location="component://order/widget/ordermgr/ReportForms.xml"/>
+                        </screenlet>
                     </decorator-section>
                 </decorator-screen>
             </widgets>

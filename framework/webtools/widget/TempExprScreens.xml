@@ -24,12 +24,12 @@ under the License.
     <screen name="TemporalExpressionDecorator">
         <section>
             <actions>
-                <set field="headerItem" value="tempexpr"/>
+                <set field="tabButtonItem" value="tempexpr"/>
                 <property-map resource="TemporalExpressionUiLabels" map-name="uiLabelMap" global="true"/>
                 <set field="title" value="${uiLabelMap[titleProperty]}" global="true"/>
             </actions>
             <widgets>
-                <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                <decorator-screen name="CommonConfigurationDecorator" location="${parameters.mainDecoratorLocation}">
                     <decorator-section name="body">
                         <section>
                             <condition>
@@ -64,15 +64,17 @@ under the License.
                                         <if-service-permission service-name="tempExprPermissionCheck" main-action="CREATE"/>
                                     </condition>
                                     <widgets>
-                                        <container style="button-bar"><link target="editTemporalExpression" text="${uiLabelMap.CommonCreate}" style="buttontext"/></container>
+                                        <container style="button-bar">
+                                            <link target="editTemporalExpression" text="${uiLabelMap.CommonCreate}" style="buttontext create"/>
+                                        </container>
                                     </widgets>
                                 </section>
                             </decorator-section>
                             <decorator-section name="search-options">
-                                <include-form name="FindTemporalExpression" location="component://webtools/webapp/webtools/tempexpr/tempExprForms.xml"/>
+                                <include-form name="FindTemporalExpression" location="component://webtools/widget/tempExprForms.xml"/>
                             </decorator-section>
                             <decorator-section name="search-results">
-                                <include-form name="ListTemporalExpressions" location="component://webtools/webapp/webtools/tempexpr/tempExprForms.xml"/>
+                                <include-form name="ListTemporalExpressions" location="component://webtools/widget/tempExprForms.xml"/>
                             </decorator-section>
                         </decorator-screen>
                     </decorator-section>
@@ -104,7 +106,7 @@ under the License.
                                 <not><if-empty field="childExpressionList"/></not>
                             </condition>
                             <widgets>
-                                <include-form name="ListChildExpressions" location="component://webtools/webapp/webtools/tempexpr/tempExprForms.xml"/>
+                                <include-form name="ListChildExpressions" location="component://webtools/widget/tempExprForms.xml"/>
                             </widgets>
                         </section>
                     </decorator-section>

@@ -27,6 +27,7 @@ import java.awt.Rectangle;
 import java.awt.Toolkit;
 import java.awt.Window;
 
+@SuppressWarnings("serial")
 public final class SplashScreen extends Frame {
 
     private final String fImageId;
@@ -87,6 +88,7 @@ public final class SplashScreen extends Frame {
             setVisible(true);
         }
 
+        @Override
         public void paint(Graphics graphics) {
             if (fImage != null) {
                 graphics.drawImage(fImage, 0, 0, this);

@@ -25,8 +25,6 @@ under the License.
   <!-- ========================================================= -->
     <title>Entity of an Open For Business Project Component</title>
     <description>None</description>
-    <copyright>Copyright 2001-2008 The Apache Software Foundation</copyright>
-    <author>None</author>
     <version>1.0</version>
 
   <!-- ========================================================= -->
@@ -95,9 +93,36 @@ under the License.
         <member-entity entity-alias="IISS" entity-name="ItemIssuance"/>
         <member-entity entity-alias="IITM" entity-name="InventoryItem"/>
         <alias-all entity-alias="IISS"/>
-        <alias-all entity-alias="IITM"/>
+        <alias entity-alias="IITM" name="inventoryItemId"/>
+        <alias entity-alias="IITM" name="inventoryItemTypeId"/>
+        <alias entity-alias="IITM" name="productId"/>
+        <alias entity-alias="IITM" name="partyId"/>
+        <alias entity-alias="IITM" name="ownerPartyId"/>
+        <alias entity-alias="IITM" name="statusId"/>
+        <alias entity-alias="IITM" name="datetimeReceived"/>
+        <alias entity-alias="IITM" name="datetimeManufactured"/>
+        <alias entity-alias="IITM" name="expireDate"/>
+        <alias entity-alias="IITM" name="facilityId"/>
+        <alias entity-alias="IITM" name="containerId"/>
+        <alias entity-alias="IITM" name="lotId"/>
+        <alias entity-alias="IITM" name="uomId"/>
+        <alias entity-alias="IITM" name="binNumber"/>
+        <alias entity-alias="IITM" name="locationSeqId"/>
+        <alias entity-alias="IITM" name="comments"/>
+        <alias entity-alias="IITM" name="quantityOnHandTotal"/>
+        <alias entity-alias="IITM" name="availableToPromiseTotal"/>
+        <alias entity-alias="IITM" name="accountingQuantityTotal"/>
+        <alias entity-alias="IITM" name="oldQuantityOnHand"/>
+        <alias entity-alias="IITM" name="oldAvailableToPromise"/>
+        <alias entity-alias="IITM" name="serialNumber"/>
+        <alias entity-alias="IITM" name="softIdentifier"/>
+        <alias entity-alias="IITM" name="activationNumber"/>
+        <alias entity-alias="IITM" name="activationValidThru"/>
+        <alias entity-alias="IITM" name="unitCost"/>
+        <alias entity-alias="IITM" name="currencyUomId"/>
+        <alias entity-alias="IITM" name="inventoryItemFixedAssetId" field="fixedAssetId"/>
         <view-link entity-alias="IISS" rel-entity-alias="IITM">
-        <key-map field-name="inventoryItemId"/>
+          <key-map field-name="inventoryItemId"/>
         </view-link>
     </view-entity>
     <entity entity-name="ItemIssuanceRole"
@@ -243,10 +268,10 @@ under the License.
                  package-name="org.ofbiz.shipment.picklist"
                  title="Picklist Item and Bin View Entity">
       <member-entity entity-alias="PB" entity-name="PicklistBin"/>
-      <member-entity entity-alias="PI" entity-name="PicklistItem"/>
+      <member-entity entity-alias="PIM" entity-name="PicklistItem"/>
       <alias-all entity-alias="PB"/>
-      <alias-all entity-alias="PI"/>
-      <view-link entity-alias="PB" rel-entity-alias="PI">
+      <alias-all entity-alias="PIM"/>
+      <view-link entity-alias="PB" rel-entity-alias="PIM">
         <key-map field-name="picklistBinId"/>
       </view-link>
     </view-entity>
@@ -332,6 +357,7 @@ under the License.
       <field name="inventoryItemId" type="id"></field>
       <field name="productId" type="id"></field>
       <field name="shipmentId" type="id"></field>
+      <field name="shipmentItemSeqId" type="id"></field>
       <field name="shipmentPackageSeqId" type="id"></field>
       <field name="orderId" type="id"></field>
       <field name="orderItemSeqId" type="id"></field>
@@ -370,6 +396,10 @@ under the License.
       <relation type="one-nofk" fk-name="SHP_RCPT_SHIPMT" rel-entity-name="Shipment">
         <key-map field-name="shipmentId"/>
       </relation>
+        <relation type="one-nofk" fk-name="SHP_RCPT_SHIPIT" rel-entity-name="ShipmentItem">
+          <key-map field-name="shipmentId"/>
+          <key-map field-name="shipmentItemSeqId"/>
+        </relation>
       <relation type="one" fk-name="SHP_RCPT_RETINVITM" rel-entity-name="ReturnItem">
         <key-map field-name="returnId"/>
         <key-map field-name="returnItemSeqId"/>
@@ -406,6 +436,7 @@ under the License.
       <alias entity-alias="II" name="quantityOnHandTotal"/>
       <alias entity-alias="II" name="availableToPromiseTotal"/>
       <alias entity-alias="II" name="unitCost"/>
+      <alias entity-alias="II" name="lotId"/>
       <view-link entity-alias="SR" rel-entity-alias="II">
         <key-map field-name="inventoryItemId"/>
       </view-link>
@@ -600,7 +631,7 @@ under the License.
       <relation type="one" fk-name="SHPMNT_PRTNHDR" title="Primary" rel-entity-name="ReturnHeader">
         <key-map field-name="primaryReturnId" rel-field-name="returnId"/>
       </relation>
-      <relation type="one" rel-entity-name="PicklistBin">
+      <relation type="one" fk-name="SHPMNT_PKLSTBIN" rel-entity-name="PicklistBin">
           <key-map field-name="picklistBinId"/>
       </relation>
       <relation type="one-nofk" title="Primary" rel-entity-name="OrderItemShipGroup">
@@ -764,6 +795,9 @@ under the License.
         <key-map field-name="carrierPartyId" rel-field-name="partyId"/>
         <key-map field-name="carrierRoleTypeId" rel-field-name="roleTypeId"/>
       </relation>
+      <relation type="one" fk-name="SHPMNT_PS_SH_METH" rel-entity-name="ProductStoreShipmentMeth">
+          <key-map field-name="productStoreShipMethId"/>
+      </relation>
       <relation type="one" fk-name="SHPMNT_CE_PARTY" rel-entity-name="Party">
         <key-map field-name="partyId"/>
       </relation>
@@ -797,6 +831,118 @@ under the License.
       </relation>
       <relation type="one" fk-name="SHPMNT_CE_PRC_QB" title="Price" rel-entity-name="QuantityBreak">
         <key-map field-name="priceBreakId" rel-field-name="quantityBreakId"/>
+      </relation>
+    </entity>
+    <entity entity-name="ShipmentGatewayConfigType"
+            package-name="org.ofbiz.shipment.shipment"
+            title="Shipment Gateway Config Type">
+      <field name="shipmentGatewayConfTypeId" type="id-ne"></field>
+      <field name="parentTypeId" type="id"></field>
+      <field name="hasTable" type="indicator"></field>
+      <field name="description" type="description"></field>
+      <prim-key field="shipmentGatewayConfTypeId"/>
+      <relation type="one" fk-name="SGCT_PAR" title="Parent" rel-entity-name="ShipmentGatewayConfigType">
+        <key-map field-name="parentTypeId" rel-field-name="shipmentGatewayConfTypeId"/>
+      </relation>
+      <relation type="many" title="Sibling" rel-entity-name="ShipmentGatewayConfigType">
+        <key-map field-name="parentTypeId"/>
+      </relation>
+    </entity>
+    <entity entity-name="ShipmentGatewayConfig"
+            package-name="org.ofbiz.shipment.shipment"
+            title="Shipment Gateway Config">
+      <field name="shipmentGatewayConfigId" type="id-ne"></field>
+      <field name="shipmentGatewayConfTypeId" type="id-ne"></field>
+      <field name="description" type="description"></field>
+      <prim-key field="shipmentGatewayConfigId"/>
+      <relation type="one" fk-name="SGC_SGCT" rel-entity-name="ShipmentGatewayConfigType">
+        <key-map field-name="shipmentGatewayConfTypeId" rel-field-name="shipmentGatewayConfTypeId"/>
+      </relation>
+    </entity>
+    <entity entity-name="ShipmentGatewayDhl"
+            package-name="org.ofbiz.shipment.shipment"
+            title="DHL Shipment Gateway Configuration">
+      <field name="shipmentGatewayConfigId" type="id-ne"></field>
+      <field name="connectUrl" type="value"><description>DHL Connection URL</description></field>
+      <field name="connectTimeout" type="numeric"><description>Timeout in seconds</description></field>
+      <field name="headVersion" type="short-varchar"><description>Head version attribute</description></field>
+      <field name="headAction" type="value"><description>Head action attribute</description></field>
+      <field name="accessUserId" type="value" encrypt="true"><description>Your DHL ShipIT User Id</description></field>
+      <field name="accessPassword" type="value" encrypt="true"><description>Your DHL ShipIT Access Password</description></field>
+      <field name="accessAccountNbr" type="value" encrypt="true"><description>Your DHL ShipIT Account Number</description></field>
+      <field name="accessShippingKey" type="value" encrypt="true"><description>Your DHL ShipIT Shipping Key</description></field>
+      <field name="labelImageFormat" type="short-varchar"><description>Label image format</description></field>
+      <field name="rateEstimateTemplate" type="value"><description>API Schema Templates</description></field>
+      <prim-key field="shipmentGatewayConfigId"/>
+      <relation type="one" fk-name="SGDHL_SGC" rel-entity-name="ShipmentGatewayConfig">
+        <key-map field-name="shipmentGatewayConfigId"/>
+      </relation>
+    </entity>
+    <entity entity-name="ShipmentGatewayFedex"
+            package-name="org.ofbiz.shipment.shipment"
+            title="Fedex Shipment Gateway Configuration">
+      <field name="shipmentGatewayConfigId" type="id-ne"></field>
+      <field name="connectUrl" type="value"><description>Fedex Connection URL</description></field>
+      <field name="connectSoapUrl" type="value"><description>Fedex Soap Connection URL</description></field>
+      <field name="connectTimeout" type="numeric"><description>Timeout in seconds</description></field>
+      <field name="accessAccountNbr" type="value" encrypt="true"><description>Your Fedex account number</description></field>
+      <field name="accessMeterNumber" type="value" encrypt="true"><description>Your Fedex meter number</description></field>
+      <field name="accessUserKey" type="value" encrypt="true"><description>Your Fedex user credential key</description></field>
+      <field name="accessUserPwd" type="value" encrypt="true"><description>Your Fedex user credential password</description></field>
+      <field name="labelImageType" type="short-varchar"><description>Label image type</description></field>
+      <field name="defaultDropoffType" type="value"><description>Default dropoff type</description></field>
+      <field name="defaultPackagingType" type="value"><description>Default packaging type</description></field>
+      <field name="templateShipment" type="value"><description>Shipment Template location</description></field>
+      <field name="templateSubscription" type="value"><description>Subscription Template location</description></field>
+      <field name="rateEstimateTemplate" type="value"><description>FedEx API Rate Estimate Template</description></field>
+      <prim-key field="shipmentGatewayConfigId"/>
+      <relation type="one" fk-name="SGFED_SGC" rel-entity-name="ShipmentGatewayConfig">
+        <key-map field-name="shipmentGatewayConfigId"/>
+      </relation>
+    </entity>
+    <entity entity-name="ShipmentGatewayUps"
+            package-name="org.ofbiz.shipment.shipment"
+            title="UPS Shipment Gateway Configuration">
+      <field name="shipmentGatewayConfigId" type="id-ne"></field>
+      <field name="connectUrl" type="value"><description>UPS Connection URL</description></field>
+      <field name="connectTimeout" type="numeric"><description>Timeout in seconds</description></field>
+      <field name="shipperNumber" type="value"><description>UPS Shipper Number</description></field>
+      <field name="billShipperAccountNumber" type="value"><description>UPS Bill Shipper Account Number</description></field>
+      <field name="accessLicenseNumber" type="value" encrypt="true"><description>UPS XPCI Access License Number</description></field>
+      <field name="accessUserId" type="value" encrypt="true"><description>UPS XPCI Access User ID</description></field>
+      <field name="accessPassword" type="value" encrypt="true"><description>UPS XPCI Access Password</description></field>
+      <field name="saveCertInfo" type="short-varchar"><description>Setting to save files needed for UPS certification (true|false)</description></field>
+      <field name="saveCertPath" type="value"><description>UPS file certificate path</description></field>
+      <field name="shipperPickupType" type="short-varchar"><description>Shipper Default Pickup Type</description></field>
+      <field name="customerClassification" type="short-varchar"><description>Customer Classification</description></field>
+      <field name="maxEstimateWeight" type="fixed-point"><description>Estimate split into packages</description></field>
+      <field name="minEstimateWeight" type="fixed-point"><description>Minimum weight for a package</description></field>
+      <field name="codAllowCod" type="value"><description>All shipment package items are from orders which have been fully paid via EXT_COD</description></field>
+      <field name="codSurchargeAmount" type="fixed-point"><description>Surcharge amount</description></field>
+      <field name="codSurchargeCurrencyUomId" type="short-varchar"><description>Surcharge currency</description></field>
+      <field name="codSurchargeApplyToPackage" type="short-varchar"><description>Surcharge amount will be applied to each shipment package</description></field>
+      <field name="codFundsCode" type="short-varchar"><description>The code that indicates the type of funds used for the COD payment</description></field>
+      <field name="defaultReturnLabelMemo" type="value"><description>Return label email memo</description></field>
+      <field name="defaultReturnLabelSubject" type="value"><description>Return label subject</description></field>
+      <prim-key field="shipmentGatewayConfigId"/>
+      <relation type="one" fk-name="SGUPS_SGC" rel-entity-name="ShipmentGatewayConfig">
+        <key-map field-name="shipmentGatewayConfigId"/>
+      </relation>
+    </entity>
+    <entity entity-name="ShipmentGatewayUsps"
+            package-name="org.ofbiz.shipment.shipment"
+            title="USPS Shipment Gateway Configuration">
+      <field name="shipmentGatewayConfigId" type="id-ne"></field>
+      <field name="connectUrl" type="value"><description>USPS Connection URL</description></field>
+      <field name="connectUrlLabels" type="value"><description>USPS Connection URL for Labels</description></field>
+      <field name="connectTimeout" type="numeric"><description>Timeout in seconds</description></field>
+      <field name="accessUserId" type="value" encrypt="true"><description>USPS Access User ID</description></field>
+      <field name="accessPassword" type="value" encrypt="true"><description>USPS Access Password</description></field>
+      <field name="maxEstimateWeight" type="numeric"><description>Estimate split into packages</description></field>
+      <field name="test" type="short-varchar"><description>Test/Production mode</description></field>
+      <prim-key field="shipmentGatewayConfigId"/>
+      <relation type="one" fk-name="SGUSPS_SGC" rel-entity-name="ShipmentGatewayConfig">
+        <key-map field-name="shipmentGatewayConfigId"/>
       </relation>
     </entity>
     <entity entity-name="ShipmentItem"
@@ -1019,6 +1165,10 @@ under the License.
       <field name="shipmentPackageSeqId" type="id-ne"></field>
       <field name="shipmentBoxTypeId" type="id"></field>
       <field name="dateCreated" type="date-time"></field>
+      <field name="boxLength" type="fixed-point"><description>This field store the length of package; if a shipmentBoxTypeId is specified then this overrides the dimension specified there; this field is meant to be used when there is no applicable ShipmentBoxType</description></field>
+      <field name="boxHeight" type="fixed-point"><description>This field store the height of package; if a shipmentBoxTypeId is specified then this overrides the dimension specified there; this field is meant to be used when there is no applicable ShipmentBoxType</description></field>
+      <field name="boxWidth" type="fixed-point"><description>This field store the width of package; if a shipmentBoxTypeId is specified then this overrides the dimension specified there; this field is meant to be used when there is no applicable ShipmentBoxType</description></field>
+      <field name="dimensionUomId" type="id"><description>This field store the unit of measurement of dimension (length, width and height)</description></field>
       <field name="weight" type="fixed-point"></field>
       <field name="weightUomId" type="id"></field>
       <field name="insuredValue" type="currency-amount"></field>
@@ -1032,6 +1182,9 @@ under the License.
       </relation>
       <relation type="many" rel-entity-name="CarrierShipmentBoxType">
         <key-map field-name="shipmentBoxTypeId"/>
+      </relation>
+      <relation type="one" fk-name="SHPKG_DUOM" title="Dimension" rel-entity-name="Uom">
+        <key-map field-name="dimensionUomId" rel-field-name="uomId"/>
       </relation>
       <relation type="one" fk-name="SHPKG_WUOM" title="Weight" rel-entity-name="Uom">
         <key-map field-name="weightUomId" rel-field-name="uomId"/>
@@ -1076,6 +1229,7 @@ under the License.
       <field name="labelIntlSignImage" type="blob"></field>
       <field name="labelHtml" type="very-long"></field>
       <field name="labelPrinted" type="indicator"></field> <!-- tracks if a label has been printed -->
+      <field name="internationalInvoice" type="blob"></field>
       <field name="packageTransportCost" type="currency-amount"></field>
       <field name="packageServiceCost" type="currency-amount"></field>
       <field name="packageOtherCost" type="currency-amount"></field>
@@ -1204,6 +1358,7 @@ under the License.
       <alias entity-alias="SPRS" name="shipmentPackageSeqId"/>
       <alias entity-alias="SPRS" name="shipmentRouteSegmentId"/>
       <alias entity-alias="SPRS" name="labelPrinted"/>
+      <alias entity-alias="SPRS" name="trackingCode"/>
       <alias entity-alias="SRS" name="carrierPartyId"/>
       <alias entity-alias="SRS" name="carrierServiceStatusId"/>
       <alias entity-alias="SRS" name="shipmentMethodTypeId"/>

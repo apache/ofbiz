@@ -22,6 +22,7 @@ import bsh.Interpreter;
 import bsh.EvalError;
 
 import org.ofbiz.base.util.Debug;
+import org.ofbiz.base.util.UtilValidate;
 
 /**
  * BeanShellContainer - Container implementation for BeanShell
@@ -33,26 +34,24 @@ public class BeanShellContainer implements Container {
 
     protected String configFileLocation = null;
     protected Interpreter bsh = null;
+    protected String containerName;
     protected String name;
     protected int port;
 
-    /**
-     * @see org.ofbiz.base.container.Container#init(java.lang.String[], java.lang.String)
-     */
-    public void init(String[] args, String configFile) {
+    @Override
+    public void init(String[] args, String name, String configFile) {
+        this.containerName = name;
         this.configFileLocation = configFile;
     }
 
-    /**
-     * @see org.ofbiz.base.container.Container#init(java.lang.String[], java.lang.String)
-     */
+    @Override
     public boolean start() throws ContainerException {
         // get the container config
-        ContainerConfig.Container cfg = ContainerConfig.getContainer("beanshell-container", configFileLocation);
+        ContainerConfig.Container cfg = ContainerConfig.getContainer(containerName, configFileLocation);
 
         // get the app-name
         ContainerConfig.Container.Property appName = cfg.getProperty("app-name");
-        if (appName == null || appName.value == null || appName.value.length() == 0) {
+        if (appName == null || UtilValidate.isEmpty(appName.value)) {
             throw new ContainerException("Invalid app-name defined in container configuration");
         } else {
             this.name = appName.value;
@@ -60,7 +59,7 @@ public class BeanShellContainer implements Container {
 
         // get the telnet-port
         ContainerConfig.Container.Property telnetPort = cfg.getProperty("telnet-port");
-        if (telnetPort == null || telnetPort.value == null || telnetPort.value.length() == 0) {
+        if (telnetPort == null || UtilValidate.isEmpty(telnetPort.value)) {
             throw new ContainerException("Invalid telnet-port defined in container configuration");
         } else {
             try {
@@ -113,5 +112,9 @@ public class BeanShellContainer implements Container {
      */
     public void stop() throws ContainerException {
         bsh = null;
+    }
+
+    public String getName() {
+        return containerName;
     }
 }

@@ -41,7 +41,7 @@ public class Input implements KeyboardReceiver, KeyListener {
                                                 "CREDITEXP", "POSTALCODE"};
 
 
-    protected Stack functionStack = new Stack();
+    protected Stack<String[]> functionStack = new Stack<String[]>();
     protected Component[] pageComs = null;
     protected Color lastColor = null;
     protected javax.swing.JTextField input = null;
@@ -73,7 +73,7 @@ public class Input implements KeyboardReceiver, KeyListener {
 
     public void setFunction(String function, String value) throws IllegalArgumentException {
         if (isValidFunction(function)) {
-            this.functionStack.push( new String[] { function, value });
+            this.functionStack.push(new String[] { function, value });
             input.setText("");
         } else {
             throw new IllegalArgumentException();
@@ -96,7 +96,7 @@ public class Input implements KeyboardReceiver, KeyListener {
     public String[] getLastFunction() {
         String[] f = null;
         try {
-            f = (String[]) this.functionStack.peek();
+            f = this.functionStack.peek();
         } catch (EmptyStackException e) {
         }
         return f;
@@ -105,16 +105,14 @@ public class Input implements KeyboardReceiver, KeyListener {
     public String[] clearLastFunction() {
         String[] f = null;
         try {
-            f = (String[]) this.functionStack.pop();
+            f = this.functionStack.pop();
         } catch (EmptyStackException e) {
         }
         return f;
     }
 
     public String[] getFunction(String function) {
-        Iterator i = functionStack.iterator();
-        while (i.hasNext()) {
-            String[] func = (String[]) i.next();
+        for (String[] func : functionStack) {
             if (func[0].equals(function)) {
                 return func;
             }
@@ -123,9 +121,9 @@ public class Input implements KeyboardReceiver, KeyListener {
     }
 
     public String[] clearFunction(String function) {
-        Iterator i = functionStack.iterator();
+        Iterator<String[]> i = functionStack.iterator();
         while (i.hasNext()) {
-            String[] func = (String[]) i.next();
+            String[] func = i.next();
             if (func[0].equals(function)) {
                 i.remove();
                 return func;
@@ -135,9 +133,7 @@ public class Input implements KeyboardReceiver, KeyListener {
     }
 
     public boolean isFunctionSet(String function) {
-        Iterator i = functionStack.iterator();
-        while (i.hasNext()) {
-            String func[] = (String[]) i.next();
+        for (String[] func : functionStack) {
             if (func[0].equals(function)) {
                 return true;
             }
@@ -199,7 +195,7 @@ public class Input implements KeyboardReceiver, KeyListener {
         boolean process = false;
         int remIdx = 0;
         for (int i = 0; i < chars.length; i++) {
-            if (((int) chars[i]) == 10 || ((int) chars[i]) == 8 || ((int) chars[i] == 27)) {
+            if ((chars[i]) == 10 || (chars[i]) == 8 || (chars[i] == 27)) {
                 idxToRemove[remIdx++] = i+1;
             } else {
                 process = true;

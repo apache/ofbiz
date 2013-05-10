@@ -18,121 +18,133 @@
  *******************************************************************************/
 package org.ofbiz.minilang.method.callops;
 
-import java.util.Iterator;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import javolution.util.FastList;
-import javolution.util.FastMap;
-
 import org.ofbiz.base.util.Debug;
-import org.ofbiz.base.util.GeneralException;
-import org.ofbiz.base.util.ObjectType;
-import org.ofbiz.base.util.UtilValidate;
+import org.ofbiz.base.util.collections.FlexibleMapAccessor;
+import org.ofbiz.base.util.string.FlexibleStringExpander;
+import org.ofbiz.minilang.MiniLangException;
+import org.ofbiz.minilang.MiniLangRuntimeException;
+import org.ofbiz.minilang.MiniLangUtil;
+import org.ofbiz.minilang.MiniLangValidate;
 import org.ofbiz.minilang.SimpleMethod;
-import org.ofbiz.minilang.method.ContextAccessor;
+import org.ofbiz.minilang.artifact.ArtifactInfoContext;
 import org.ofbiz.minilang.method.MethodContext;
 import org.ofbiz.minilang.method.MethodOperation;
 import org.ofbiz.service.GenericServiceException;
-import org.ofbiz.service.LocalDispatcher;
-import org.ofbiz.service.ModelParam;
 import org.ofbiz.service.ModelService;
 import org.w3c.dom.Element;
 
 /**
- * Sets all Service parameters/attributes in the to-map using the map as a source
+ * Implements the &lt;set-service-fields&gt; element.
+ * 
+ * @see <a href="https://cwiki.apache.org/OFBADMIN/mini-language-reference.html#Mini-languageReference-{{%3Csetservicefields%3E}}">Mini-language Reference</a>
  */
-public class SetServiceFields extends MethodOperation {
-    public static final class SetServiceFieldsFactory implements Factory<SetServiceFields> {
-        public SetServiceFields createMethodOperation(Element element, SimpleMethod simpleMethod) {
-            return new SetServiceFields(element, simpleMethod);
-        }
+public final class SetServiceFields extends MethodOperation {
 
-        public String getName() {
-            return "set-service-fields";
-        }
-    }
+    public static final String module = SetServiceFields.class.getName();
 
-    public static final String module = CallService.class.getName();
-
-    String serviceName;
-    ContextAccessor<Map<String, ? extends Object>> mapAcsr;
-    ContextAccessor<Map<String, Object>> toMapAcsr;
-    ContextAccessor<List<Object>> errorListAcsr;
-
-    public SetServiceFields(Element element, SimpleMethod simpleMethod) {
-        super(element, simpleMethod);
-        serviceName = element.getAttribute("service-name");
-        mapAcsr = new ContextAccessor<Map<String, ? extends Object>>(element.getAttribute("map"), element.getAttribute("map-name"));
-        toMapAcsr = new ContextAccessor<Map<String, Object>>(element.getAttribute("to-map"), element.getAttribute("to-map-name"));
-        errorListAcsr = new ContextAccessor<List<Object>>(element.getAttribute("error-list-name"), "error_list");
-    }
-
-    public boolean exec(MethodContext methodContext) {
-        List<Object> messages = errorListAcsr.get(methodContext);
-        if (messages == null) {
-            messages = FastList.newInstance();
-            errorListAcsr.put(methodContext, messages);
-        }
-
-        String serviceName = methodContext.expandString(this.serviceName);
-
-        Map<String, ? extends Object> fromMap = mapAcsr.get(methodContext);
-        if (fromMap == null) {
-            Debug.logWarning("The from map in set-service-field was not found with name: " + mapAcsr, module);
+    // This method is needed only during the v1 to v2 transition
+    private static boolean autoCorrect(Element element) {
+        String errorListAttr = element.getAttribute("error-list-name");
+        if (!errorListAttr.isEmpty()) {
+            element.removeAttribute("error-list-name");
             return true;
         }
+        return false;
+    }
 
-        Map<String, Object> toMap = toMapAcsr.get(methodContext);
-        if (toMap == null) {
-            toMap = FastMap.newInstance();
-            toMapAcsr.put(methodContext, toMap);
+    private final FlexibleMapAccessor<Map<String, ? extends Object>> mapFma;
+    private final FlexibleStringExpander serviceNameFse;
+    private final FlexibleMapAccessor<Map<String, Object>> toMapFma;
+
+    public SetServiceFields(Element element, SimpleMethod simpleMethod) throws MiniLangException {
+        super(element, simpleMethod);
+        if (MiniLangValidate.validationOn()) {
+            MiniLangValidate.attributeNames(simpleMethod, element, "service-name", "map", "to-map");
+            MiniLangValidate.requiredAttributes(simpleMethod, element, "service-name", "map", "to-map");
+            MiniLangValidate.constantPlusExpressionAttributes(simpleMethod, element, "service-name");
+            MiniLangValidate.expressionAttributes(simpleMethod, element, "map", "to-map");
+            MiniLangValidate.noChildElements(simpleMethod, element);
         }
+        boolean elementModified = autoCorrect(element);
+        if (elementModified && MiniLangUtil.autoCorrectOn()) {
+            MiniLangUtil.flagDocumentAsCorrected(element);
+        }
+        serviceNameFse = FlexibleStringExpander.getInstance(element.getAttribute("service-name"));
+        mapFma = FlexibleMapAccessor.getInstance(element.getAttribute("map"));
+        toMapFma = FlexibleMapAccessor.getInstance(element.getAttribute("to-map"));
+    }
 
-        LocalDispatcher dispatcher = methodContext.getDispatcher();
+    @Override
+    public boolean exec(MethodContext methodContext) throws MiniLangException {
+        Map<String, ? extends Object> fromMap = mapFma.get(methodContext.getEnvMap());
+        if (fromMap == null) {
+            if (Debug.verboseOn()) {
+                Debug.logVerbose("The from map in set-service-field was not found with name: " + mapFma, module);
+            }
+            return true;
+        }
+        String serviceName = serviceNameFse.expandString(methodContext.getEnvMap());
         ModelService modelService = null;
         try {
-            modelService = dispatcher.getDispatchContext().getModelService(serviceName);
+            modelService = methodContext.getDispatcher().getDispatchContext().getModelService(serviceName);
         } catch (GenericServiceException e) {
-            String errMsg = "In set-service-fields could not get service definition for service name [" + serviceName + "]: " + e.toString();
-            Debug.logError(e, errMsg, module);
-            methodContext.setErrorReturn(errMsg, simpleMethod);
-            return false;
+            throw new MiniLangRuntimeException("Could not get service definition for service name \"" + serviceName + "\": " + e.getMessage(), this);
         }
-        for (ModelParam modelParam: modelService.getInModelParamList()) {
-            if (fromMap.containsKey(modelParam.name)) {
-                Object value = fromMap.get(modelParam.name);
-
-                if (UtilValidate.isNotEmpty(modelParam.type)) {
-                    try {
-                        value = ObjectType.simpleTypeConvert(value, modelParam.type, null, methodContext.getTimeZone(), methodContext.getLocale(), true);
-                    } catch (GeneralException e) {
-                        String errMsg = "Could not convert field value for the parameter/attribute: [" + modelParam.name + "] on the [" + serviceName + "] service to the [" + modelParam.type + "] type for the value [" + value + "]: " + e.toString();
-                        Debug.logError(e, errMsg, module);
-                        // add the message to the list and set the value to null - tried and failed, just leave it out
-                        messages.add(errMsg);
-                        value = null;
-                    }
-                }
-
-                toMap.put(modelParam.name, value);
+        Map<String, Object> toMap = toMapFma.get(methodContext.getEnvMap());
+        if (toMap == null) {
+            toMap = new HashMap<String, Object>();
+            toMapFma.put(methodContext.getEnvMap(), toMap);
+        }
+        List<Object> errorMessages = new LinkedList<Object>();
+        Map<String, Object> validAttributes = modelService.makeValid(fromMap, "IN", true, errorMessages, methodContext.getTimeZone(), methodContext.getLocale());
+        if (errorMessages.size() > 0) {
+            for (Object obj : errorMessages) {
+                simpleMethod.addErrorMessage(methodContext, (String) obj);
             }
+            throw new MiniLangRuntimeException("Errors encountered while setting service attributes for service name \"" + serviceName + "\"", this);
         }
-
+        toMap.putAll(validAttributes);
         return true;
     }
 
-    public String getServiceName() {
-        return this.serviceName;
+    @Override
+    public void gatherArtifactInfo(ArtifactInfoContext aic) {
+        aic.addServiceName(this.serviceNameFse.toString());
     }
 
-    public String rawString() {
-        // TODO: something more than the empty tag
-        return "<set-service-fields/>";
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder("<set-service-fields ");
+        if (!this.serviceNameFse.isEmpty()) {
+            sb.append("service-name=\"").append(this.serviceNameFse).append("\" ");
+        }
+        if (!this.mapFma.isEmpty()) {
+            sb.append("map=\"").append(this.mapFma).append("\" ");
+        }
+        if (!this.toMapFma.isEmpty()) {
+            sb.append("to-map=\"").append(this.toMapFma).append("\" ");
+        }
+        sb.append("/>");
+        return sb.toString();
     }
-    public String expandedString(MethodContext methodContext) {
-        // TODO: something more than a stub/dummy
-        return this.rawString();
+
+    /**
+     * A factory for the &lt;set-service-fields&gt; element.
+     */
+    public static final class SetServiceFieldsFactory implements Factory<SetServiceFields> {
+        @Override
+        public SetServiceFields createMethodOperation(Element element, SimpleMethod simpleMethod) throws MiniLangException {
+            return new SetServiceFields(element, simpleMethod);
+        }
+
+        @Override
+        public String getName() {
+            return "set-service-fields";
+        }
     }
 }

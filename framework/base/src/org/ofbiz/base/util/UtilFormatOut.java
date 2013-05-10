@@ -22,7 +22,9 @@ import java.math.BigDecimal;
 import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.ParseException;
+import java.util.Date;
 import java.util.Locale;
+import java.util.TimeZone;
 
 /**
  * General output formatting functions - mainly for helping in JSPs
@@ -39,7 +41,8 @@ public class UtilFormatOut {
         }
     }
 
-    // ------------------- price format handlers -------------------    
+    // ------------------- price format handlers -------------------
+    // FIXME: This is not thread-safe! DecimalFormat is not synchronized.
     static DecimalFormat priceDecimalFormat = new DecimalFormat(UtilProperties.getPropertyValue("general.properties", "currency.decimal.format", "#,##0.00"));
 
     /** Formats a Double representing a price into a string
@@ -109,6 +112,21 @@ public class UtilFormatOut {
         return formatCurrency(price.doubleValue(), isoCode, locale, maximumFractionDigits);
     }
 
+    /** Format a decimal number to the pattern given
+     * @param number The price double to be formatted
+     * @param pattern pattern apply to format number
+     * @param locale The Locale used to format the number
+     * @return A String with the formatted price
+     */
+    public static String formatDecimalNumber(double number, String pattern, Locale locale) {
+        com.ibm.icu.text.NumberFormat nf = com.ibm.icu.text.NumberFormat.getNumberInstance(locale);
+        String nbParsing = "";
+        ((com.ibm.icu.text.DecimalFormat)nf).applyPattern( pattern );
+        ((com.ibm.icu.text.DecimalFormat)nf).toPattern();
+        nbParsing = nf.format(number);
+        return nbParsing;
+    }
+
     /** Formats a BigDecimal into a properly formatted currency string based on isoCode and Locale
      * @param price The price BigDecimal to be formatted
      * @param isoCode the currency ISO code
@@ -169,7 +187,7 @@ public class UtilFormatOut {
      */
     public static String formatPercentage(BigDecimal percentage) {
         if (percentage == null) return "";
-        return formatPercentage(percentage);
+        return percentageDecimalFormat.format(percentage);
     }
 
     /** Formats a double representing a percentage into a string
@@ -287,11 +305,12 @@ public class UtilFormatOut {
         return orgBuf.toString();
     }
 
-
     // ------------------- date handlers -------------------
-    /** Formats a String timestamp into a nice string
-     * @param timestamp String timestamp to be formatted
-     * @return A String with the formatted date/time
+
+    /** Formats a <code>Timestamp</code> into a date-time <code>String</code> using the default locale and time zone.
+     * Returns an empty <code>String</code> if <code>timestamp</code> is <code>null</code>.
+     * @param timestamp The <code>Timestamp</code> to format
+     * @return A <code>String</code> with the formatted date/time, or an empty <code>String</code> if <code>timestamp</code> is <code>null</code>
      */
     public static String formatDate(java.sql.Timestamp timestamp) {
         if (timestamp == null)
@@ -299,6 +318,34 @@ public class UtilFormatOut {
         DateFormat df = DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.FULL);
         java.util.Date date = timestamp;
         return df.format(date);
+    }
+
+    /** Formats a <code>Date</code> into a date-only <code>String</code> using the specified locale and time zone,
+     * or using the specified format.
+     *
+     * @param date The date to format
+     * @param dateTimeFormat Optional format string
+     * @param locale The format locale - can be <code>null</code> if <code>dateFormat</code> is not <code>null</code>
+     * @param timeZone The format time zone
+     * @return <code>date</code> formatted as a date-only <code>String</code>
+     * @throws NullPointerException if any required parameter is <code>null</code>
+     */
+    public static String formatDate(Date date, String dateTimeFormat, Locale locale, TimeZone timeZone) {
+        return UtilDateTime.toDateFormat(dateTimeFormat, timeZone, locale).format(date);
+    }
+
+    /** Formats a <code>Date</code> into a date-time <code>String</code> using the specified locale and time zone,
+     * or using the specified format.
+     *
+     * @param date The date to format
+     * @param dateTimeFormat Optional format string
+     * @param locale The format locale - can be <code>null</code> if <code>dateFormat</code> is not <code>null</code>
+     * @param timeZone The format time zone
+     * @return <code>date</code> formatted as a date-time <code>String</code>
+     * @throws NullPointerException if any required parameter is <code>null</code>
+     */
+    public static String formatDateTime(Date date, String dateTimeFormat, Locale locale, TimeZone timeZone) {
+        return UtilDateTime.toDateTimeFormat(dateTimeFormat, timeZone, locale).format(date);
     }
 
     // ------------------- null string handlers -------------------
@@ -382,7 +429,7 @@ public class UtilFormatOut {
      * @return <code>pre + base + post</code> if base String is not null or empty, otherwise an empty but non-null String.
      */
     public static String ifNotEmpty(String base, String pre, String post) {
-        if (base != null && base.length() > 0)
+        if (UtilValidate.isNotEmpty(base))
             return pre + base + post;
         else
             return "";
@@ -394,9 +441,9 @@ public class UtilFormatOut {
      * @return The first passed String if not empty, otherwise the second if not empty, otherwise an empty but non-null String
      */
     public static String checkEmpty(String string1, String string2) {
-        if (string1 != null && string1.length() > 0)
+        if (UtilValidate.isNotEmpty(string1))
             return string1;
-        else if (string2 != null && string2.length() > 0)
+        else if (UtilValidate.isNotEmpty(string2))
             return string2;
         else
             return "";
@@ -409,11 +456,11 @@ public class UtilFormatOut {
      * @return The first passed String if not empty, otherwise the second if not empty, otherwise the third if not empty, otherwise an empty but non-null String
      */
     public static String checkEmpty(String string1, String string2, String string3) {
-        if (string1 != null && string1.length() > 0)
+        if (UtilValidate.isNotEmpty(string1))
             return string1;
-        else if (string2 != null && string2.length() > 0)
+        else if (UtilValidate.isNotEmpty(string2))
             return string2;
-        else if (string3 != null && string3.length() > 0)
+        else if (UtilValidate.isNotEmpty(string3))
             return string3;
         else
             return "";
@@ -447,11 +494,11 @@ public class UtilFormatOut {
         return retString;
     }
 
-    /** Replaces all occurances of oldString in mainString with newString
+    /** Replaces all occurrences of oldString in mainString with newString
      * @param mainString The original string
      * @param oldString The string to replace
      * @param newString The string to insert in place of the old
-     * @return mainString with all occurances of oldString replaced by newString
+     * @return mainString with all occurrences of oldString replaced by newString
      */
     public static String replaceString(String mainString, String oldString, String newString) {
         return StringUtil.replaceString(mainString, oldString, newString);
@@ -500,17 +547,17 @@ public class UtilFormatOut {
         if (diff < 0) {
             return str.substring(0, setLen);
         } else {
-            String newString = new String();
+            StringBuilder newString = new StringBuilder();
             if (padEnd) {
-                newString = newString + str;
+                newString.append(str);
             }
             for (int i = 0; i < diff; i++) {
-                newString = newString + padChar;
+                newString.append(padChar);
             }
             if (!padEnd) {
-                newString = newString + str;
+                newString.append(str);
             }
-            return newString;
+            return newString.toString();
         }
     }
     public static String makeSqlSafe(String unsafeString) {
@@ -521,7 +568,7 @@ public class UtilFormatOut {
         if (original == null) return null;
         if (original.length() <= 4) return original;
 
-        StringBuffer buffer = new StringBuffer();
+        StringBuilder buffer = new StringBuilder();
         for(int i=0; i < original.length()-4 ; i++) {
             buffer.append('*');
         }

@@ -20,9 +20,9 @@ package org.ofbiz.widget.screen;
 
 import java.io.IOException;
 import java.net.URL;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.xml.parsers.ParserConfigurationException;
@@ -31,10 +31,11 @@ import javolution.util.FastMap;
 
 import org.ofbiz.base.location.FlexibleLocation;
 import org.ofbiz.base.util.Debug;
+import org.ofbiz.base.util.GeneralException;
 import org.ofbiz.base.util.UtilHttp;
+import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.base.util.UtilXml;
 import org.ofbiz.base.util.cache.UtilCache;
-
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
@@ -47,8 +48,8 @@ public class ScreenFactory {
 
     public static final String module = ScreenFactory.class.getName();
 
-    public static final UtilCache<String, Map<String, ModelScreen>> screenLocationCache = new UtilCache<String, Map<String, ModelScreen>>("widget.screen.locationResource", 0, 0, false);
-    public static final UtilCache<String, Map<String, ModelScreen>> screenWebappCache = new UtilCache<String, Map<String, ModelScreen>>("widget.screen.webappResource", 0, 0, false);
+    public static final UtilCache<String, Map<String, ModelScreen>> screenLocationCache = UtilCache.createUtilCache("widget.screen.locationResource", 0, 0, false);
+    public static final UtilCache<String, Map<String, ModelScreen>> screenWebappCache = UtilCache.createUtilCache("widget.screen.webappResource", 0, 0, false);
 
     public static boolean isCombinedName(String combinedName) {
         int numSignIndex = combinedName.lastIndexOf("#");
@@ -122,7 +123,7 @@ public class ScreenFactory {
                     if (screenFileUrl == null) {
                         throw new IllegalArgumentException("Could not resolve location to URL: " + resourceName);
                     }
-                    Document screenFileDoc = UtilXml.readXmlDocument(screenFileUrl, true);
+                    Document screenFileDoc = UtilXml.readXmlDocument(screenFileUrl, true, true);
                     modelScreenMap = readScreenDocument(screenFileDoc, resourceName);
                     screenLocationCache.put(resourceName, modelScreenMap);
                     double totalSeconds = (System.currentTimeMillis() - startTime)/1000.0;
@@ -151,14 +152,14 @@ public class ScreenFactory {
                     ServletContext servletContext = (ServletContext) request.getAttribute("servletContext");
 
                     URL screenFileUrl = servletContext.getResource(resourceName);
-                    Document screenFileDoc = UtilXml.readXmlDocument(screenFileUrl, true);
+                    Document screenFileDoc = UtilXml.readXmlDocument(screenFileUrl, true, true);
                     modelScreenMap = readScreenDocument(screenFileDoc, resourceName);
                     screenWebappCache.put(cacheKey, modelScreenMap);
                 }
             }
         }
 
-        ModelScreen modelScreen = (ModelScreen) modelScreenMap.get(screenName);
+        ModelScreen modelScreen = modelScreenMap.get(screenName);
         if (modelScreen == null) {
             throw new IllegalArgumentException("Could not find screen with name [" + screenName + "] in webapp resource [" + resourceName + "] in the webapp [" + webappName + "]");
         }
@@ -178,5 +179,40 @@ public class ScreenFactory {
             }
         }
         return modelScreenMap;
+    }
+
+    public static void renderReferencedScreen(String name, String location, ModelScreenWidget parentWidget, Appendable writer, Map<String, Object> context, ScreenStringRenderer screenStringRenderer) throws GeneralException, IOException {
+        // check to see if the name is a composite name separated by a #, if so split it up and get it by the full loc#name
+        if (ScreenFactory.isCombinedName(name)) {
+            String combinedName = name;
+            location = ScreenFactory.getResourceNameFromCombined(combinedName);
+            name = ScreenFactory.getScreenNameFromCombined(combinedName);
+        }
+
+        ModelScreen modelScreen = null;
+        if (UtilValidate.isNotEmpty(location)) {
+            try {
+                modelScreen = ScreenFactory.getScreenFromLocation(location, name);
+            } catch (IOException e) {
+                String errMsg = "Error rendering included screen named [" + name + "] at location [" + location + "]: " + e.toString();
+                Debug.logError(e, errMsg, module);
+                throw new RuntimeException(errMsg);
+            } catch (SAXException e) {
+                String errMsg = "Error rendering included screen named [" + name + "] at location [" + location + "]: " + e.toString();
+                Debug.logError(e, errMsg, module);
+                throw new RuntimeException(errMsg);
+            } catch (ParserConfigurationException e) {
+                String errMsg = "Error rendering included screen named [" + name + "] at location [" + location + "]: " + e.toString();
+                Debug.logError(e, errMsg, module);
+                throw new RuntimeException(errMsg);
+            }
+        } else {
+            modelScreen = parentWidget.getModelScreen().modelScreenMap.get(name);
+            if (modelScreen == null) {
+                throw new IllegalArgumentException("Could not find screen with name [" + name + "] in the same file as the screen with name [" + parentWidget.getModelScreen().getName() + "]");
+            }
+        }
+        //Debug.logInfo("parent(" + parentWidget + ") rendering(" + modelScreen + ")", module);
+        modelScreen.renderScreenString(writer, context, screenStringRenderer);
     }
 }

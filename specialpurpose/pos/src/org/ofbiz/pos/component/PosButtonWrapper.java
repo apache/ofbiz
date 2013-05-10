@@ -154,7 +154,7 @@ public class PosButtonWrapper {
         xbutton.setRolloverEnabled(false);
         xbutton.setText(newContent.toString());
 
-        //Debug.log("Button [" + name + "] = " + xbutton.getText(), module);
+        //Debug.logInfo("Button [" + name + "] = " + xbutton.getText(), module);
     }
 
     public String wrapText(String text, String newLine, int padding) {
@@ -193,7 +193,7 @@ public class PosButtonWrapper {
             if (thisPosition == text.length()) {
                 line = text;
                 buf.append(line);
-                text = new String();
+                text = "";
                 break;
             }
 
@@ -203,7 +203,7 @@ public class PosButtonWrapper {
             // we can only wrap if :
             // 1) we have a space available
             // 2) the next character is a space
-            if (space == -1 && ((int)text.charAt(thisPosition)) != 32) {
+            if (space == -1 && (text.charAt(thisPosition)) != 32) {
                 buf.append(text);
                 break;
             } else {

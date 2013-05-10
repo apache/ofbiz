@@ -27,13 +27,22 @@ under the License.
             </actions>
             <widgets>
                 <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
-                    <decorator-section name="body">
+                    <decorator-section name="pre-body">
                         <section>
                             <condition>
                                 <if-has-permission permission="WEBTOOLS" action="_VIEW"/>
                             </condition>
                             <widgets>
                                 <include-menu location="component://webtools/widget/Menus.xml" name="LoggingTabBar"/>
+                            </widgets>
+                        </section>
+                    </decorator-section>
+                    <decorator-section name="body">
+                        <section>
+                            <condition>
+                                <if-has-permission permission="WEBTOOLS" action="_VIEW"/>
+                            </condition>
+                            <widgets>
                                 <decorator-section-include name="body"/>
                             </widgets>
                             <fail-widgets>
@@ -45,59 +54,45 @@ under the License.
             </widgets>
         </section>
     </screen>
+    
+    <screen name="ServiceLog">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleServiceList"/>
+                <set field="tabButtonItem" value="serviceLog"/>
+                <script location="component://webtools/webapp/webtools/WEB-INF/actions/service/Services.groovy"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="log-decorator">
+                    <decorator-section name="body">
+                        <screenlet>
+                            <include-form name="ListServices" location="component://webtools/widget/ServiceForms.xml"/>
+                        </screenlet>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>  
 
     <screen name="LogConfiguration">
          <section>
              <actions>
                  <set field="titleProperty" value="PageTitleLogConfiguration"/>
-                 <set field="logMenuItem" value="logConfiguration"/>
+                 <set field="tabButtonItem" value="logConfiguration"/>
                  <script location="component://webtools/webapp/webtools/WEB-INF/actions/log/LogConfiguration.groovy"/>
              </actions>
              <widgets>
                  <decorator-screen name="log-decorator">
                      <decorator-section name="body">
-                         <container style="screenlet">
-                             <container style="screenlet-title-bar">
-                                 <container style="h3">
-                                     <label text="${uiLabelMap.WebtoolsDebuggingLevelFormDescription}"/>
-                                 </container>
-                             </container>
-                             <container style="screenlet-body">
-                                 <section>
-                                     <widgets>
-                                         <include-form name="LevelSwitch" location="component://webtools/webapp/webtools/log/LogForms.xml"/>
-                                     </widgets>
-                                 </section>
-                             </container>
-                         </container>
-                         <container style="screenlet">
-                             <container style="screenlet-title-bar">
-                                 <container style="h3">
-                                     <label text="${uiLabelMap.WebtoolsAddLoggerFormDescription}"/>
-                                 </container>
-                             </container>
-                             <container style="screenlet-body">
-                                 <section>
-                                     <widgets>
-                                         <include-form name="AddLogger" location="component://webtools/webapp/webtools/log/LogForms.xml"/>
-                                     </widgets>
-                                 </section>
-                             </container>
-                         </container>
-                         <container style="screenlet">
-                             <container style="screenlet-title-bar">
-                                 <container style="h3">
-                                     <label text="${uiLabelMap.WebtoolsLoggerListFormDescription}"/>
-                                 </container>
-                             </container>
-                             <container style="screenlet-body">
-                                 <section>
-                                     <widgets>
-                                         <include-form name="LoggerList" location="component://webtools/webapp/webtools/log/LogForms.xml"/>
-                                     </widgets>
-                                 </section>
-                             </container>
-                         </container>
+                         <screenlet title="${uiLabelMap.WebtoolsDebuggingLevelFormDescription}">
+                             <include-form name="LevelSwitch" location="component://webtools/widget/LogForms.xml"/>
+                         </screenlet>
+                         <screenlet title="${uiLabelMap.WebtoolsAddLoggerFormDescription}">
+                             <include-form name="AddLogger" location="component://webtools/widget/LogForms.xml"/>
+                         </screenlet>
+                         <screenlet title="${uiLabelMap.WebtoolsLoggerListFormDescription}">
+                             <include-form name="LoggerList" location="component://webtools/widget/LogForms.xml"/>
+                         </screenlet>
                      </decorator-section>
                  </decorator-screen>
                </widgets>
@@ -108,7 +103,7 @@ under the License.
          <section>
              <actions>
                  <set field="titleProperty" value="PageTitleLogView"/>
-                 <set field="logMenuItem" value="viewLog"/>
+                 <set field="tabButtonItem" value="logView"/>
                  <!-- TODO: the following command is not really working (and the default value is always used);
                               my guess is that the base/config/debug.properties file is not found in the classpath -->
                  <property-to-field resource="debug" property="log4j.appender.css.File" field="logFileName" default="runtime/logs/ofbiz.html" no-locale="true"/>
@@ -117,29 +112,18 @@ under the License.
              <widgets>
                  <decorator-screen name="log-decorator">
                      <decorator-section name="body">
-                         <container style="screenlet">
-                             <container style="screenlet-title-bar">
-                                 <container style="h3">
-                                     <label text="${uiLabelMap.WebtoolsViewLog}"/>
-                                 </container>
+                         <screenlet>
+                             <container style="button-bar">
+                                 <link target="LogView" text="${uiLabelMap.CommonRefresh}" style="buttontext refresh"/>
                              </container>
-                             <container style="screenlet-body">
-                                 <section>
-                                     <widgets>
-                                         <container style="button-bar">
-                                             <link target="LogView" text="${uiLabelMap.CommonRefresh}" style="buttontext"/>
-                                         </container>
-                                         <container style="button-bar">
-                                             <label style="label">${uiLabelMap.WebtoolsLogFileName}:</label>
-                                             <label>${logFileName}</label>
-                                         </container>
-                                         <platform-specific>
-                                             <html><html-template location="component://webtools/webapp/webtools/log/logContent.ftl"/></html>
-                                         </platform-specific>
-                                     </widgets>
-                                 </section>
+                             <container style="button-bar">
+                                 <label style="label">${uiLabelMap.WebtoolsLogFileName}:</label>
+                                 <label>${logFileName}</label>
                              </container>
-                         </container>
+                             <platform-specific>
+                                 <html><html-template location="component://webtools/webapp/webtools/log/logContent.ftl"/></html>
+                             </platform-specific>
+                         </screenlet>
                      </decorator-section>
                  </decorator-screen>
              </widgets>

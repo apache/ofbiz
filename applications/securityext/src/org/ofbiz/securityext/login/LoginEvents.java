@@ -29,17 +29,21 @@ import javax.servlet.http.HttpSession;
 
 import javolution.util.FastMap;
 
+import org.apache.commons.lang.RandomStringUtils;
+
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilFormatOut;
 import org.ofbiz.base.util.UtilHttp;
 import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.base.util.UtilProperties;
 import org.ofbiz.base.util.UtilValidate;
+import org.ofbiz.base.util.string.FlexibleStringExpander;
 import org.ofbiz.common.login.LoginServices;
 import org.ofbiz.base.crypto.HashCrypt;
-import org.ofbiz.entity.GenericDelegator;
+import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
+import org.ofbiz.entity.util.EntityUtilProperties;
 import org.ofbiz.party.contact.ContactHelper;
 import org.ofbiz.product.product.ProductEvents;
 import org.ofbiz.product.store.ProductStoreWorker;
@@ -118,7 +122,7 @@ public class LoginEvents {
      *@return String specifying the exit status of this event
      */
     public static String showPasswordHint(HttpServletRequest request, HttpServletResponse response) {
-        GenericDelegator delegator = (GenericDelegator) request.getAttribute("delegator");
+        Delegator delegator = (Delegator) request.getAttribute("delegator");
 
         String userLoginId = request.getParameter("USERNAME");
         String errMsg = null;
@@ -173,19 +177,15 @@ public class LoginEvents {
     public static String emailPassword(HttpServletRequest request, HttpServletResponse response) {
         String defaultScreenLocation = "component://securityext/widget/EmailSecurityScreens.xml#PasswordEmail";
 
-        GenericDelegator delegator = (GenericDelegator) request.getAttribute("delegator");
+        Delegator delegator = (Delegator) request.getAttribute("delegator");
         LocalDispatcher dispatcher = (LocalDispatcher) request.getAttribute("dispatcher");
         String productStoreId = ProductStoreWorker.getProductStoreId(request);
 
         String errMsg = null;
 
-        Map<String, String> subjectData = FastMap.newInstance();
-        subjectData.put("productStoreId", productStoreId);
-
         boolean useEncryption = "true".equals(UtilProperties.getPropertyValue("security.properties", "password.encrypt"));
 
         String userLoginId = request.getParameter("USERNAME");
-        subjectData.put("userLoginId", userLoginId);
 
         if ((userLoginId != null) && ("true".equals(UtilProperties.getPropertyValue("security.properties", "username.lowercase")))) {
             userLoginId = userLoginId.toLowerCase();
@@ -211,12 +211,12 @@ public class LoginEvents {
             }
             if (useEncryption) {
                 // password encrypted, can't send, generate new password and email to user
-                double randNum = Math.random();
-
-                // multiply by 100,000 to usually make a 5 digit number
-                passwordToSend = "auto" + ((long) (randNum * 100000));
-                supposedUserLogin.set("currentPassword", HashCrypt.getDigestHash(passwordToSend, LoginServices.getHashType()));
+                passwordToSend = RandomStringUtils.randomAlphanumeric(Integer.parseInt(UtilProperties.getPropertyValue("security", "password.length.min", "5")));
+                supposedUserLogin.set("currentPassword", HashCrypt.cryptUTF8(LoginServices.getHashType(), null, passwordToSend));
                 supposedUserLogin.set("passwordHint", "Auto-Generated Password");
+                if ("true".equals(UtilProperties.getPropertyValue("security.properties", "password.email_password.require_password_change"))){
+                    supposedUserLogin.set("requirePasswordChange", "Y");
+                }
             } else {
                 passwordToSend = supposedUserLogin.getString("currentPassword");
             }
@@ -227,19 +227,12 @@ public class LoginEvents {
             request.setAttribute("_ERROR_MESSAGE_", errMsg);
             return "error";
         }
-        if (supposedUserLogin == null) {
-            // the Username was not found
-            Map<String, String> messageMap = UtilMisc.toMap("userLoginId", userLoginId);
-            errMsg = UtilProperties.getMessage(resource, "loginevents.user_with_the_username_not_found", messageMap, UtilHttp.getLocale(request));
-            request.setAttribute("_ERROR_MESSAGE_", errMsg);
-            return "error";
-        }
 
         StringBuilder emails = new StringBuilder();
         GenericValue party = null;
 
         try {
-            party = supposedUserLogin.getRelatedOne("Party");
+            party = supposedUserLogin.getRelatedOne("Party", false);
         } catch (GenericEntityException e) {
             Debug.logWarning(e, "", module);
             party = null;
@@ -267,13 +260,10 @@ public class LoginEvents {
             Debug.logError(e, "Problem getting ProductStoreEmailSetting", module);
         }
 
-        if (productStoreEmail == null) {
-            errMsg = UtilProperties.getMessage(resource, "loginevents.problems_with_configuration_contact_customer_service", UtilHttp.getLocale(request));
-            request.setAttribute("_ERROR_MESSAGE_", errMsg);
-            return "error";
+        String bodyScreenLocation = null;
+        if (productStoreEmail != null) {
+            bodyScreenLocation = productStoreEmail.getString("bodyScreenLocation");
         }
-
-        String bodyScreenLocation = productStoreEmail.getString("bodyScreenLocation");
         if (UtilValidate.isEmpty(bodyScreenLocation)) {
             bodyScreenLocation = defaultScreenLocation;
         }
@@ -284,21 +274,41 @@ public class LoginEvents {
         bodyParameters.put("password", UtilFormatOut.checkNull(passwordToSend));
         bodyParameters.put("locale", UtilHttp.getLocale(request));
         bodyParameters.put("userLogin", supposedUserLogin);
+        bodyParameters.put("productStoreId", productStoreId);
 
         Map<String, Object> serviceContext = FastMap.newInstance();
         serviceContext.put("bodyScreenUri", bodyScreenLocation);
         serviceContext.put("bodyParameters", bodyParameters);
-        serviceContext.put("subject", productStoreEmail.getString("subject"));
-        serviceContext.put("sendFrom", productStoreEmail.get("fromAddress"));
-        serviceContext.put("sendCc", productStoreEmail.get("ccAddress"));
-        serviceContext.put("sendBcc", productStoreEmail.get("bccAddress"));
-        serviceContext.put("contentType", productStoreEmail.get("contentType"));
+        if (productStoreEmail != null) {
+            serviceContext.put("subject", productStoreEmail.getString("subject"));
+            serviceContext.put("sendFrom", productStoreEmail.get("fromAddress"));
+            serviceContext.put("sendCc", productStoreEmail.get("ccAddress"));
+            serviceContext.put("sendBcc", productStoreEmail.get("bccAddress"));
+            serviceContext.put("contentType", productStoreEmail.get("contentType"));
+        } else {
+            GenericValue emailTemplateSetting = null;
+            try {
+                emailTemplateSetting = delegator.findOne("EmailTemplateSetting", true, "emailTemplateSettingId", "EMAIL_PASSWORD");
+            } catch (GenericEntityException e) {
+                Debug.logError(e, module);
+            }
+            if (emailTemplateSetting != null) {
+                String subject = emailTemplateSetting.getString("subject");
+                subject = FlexibleStringExpander.expandString(subject, UtilMisc.toMap("userLoginId", userLoginId));
+                serviceContext.put("subject", subject);                
+                serviceContext.put("sendFrom", emailTemplateSetting.get("fromAddress"));
+            } else {
+                serviceContext.put("subject", UtilProperties.getMessage(resource, "loginservices.password_reminder_subject", UtilMisc.toMap("userLoginId", userLoginId), UtilHttp.getLocale(request)));
+                serviceContext.put("sendFrom", EntityUtilProperties.getPropertyValue("general.properties", "defaultFromEmailAddress", delegator));
+            }            
+        }
         serviceContext.put("sendTo", emails.toString());
+        serviceContext.put("partyId", party.getString("partyId"));
 
         try {
-            Map<String, Object> result = dispatcher.runSync("sendMailFromScreen", serviceContext);
+            Map<String, Object> result = dispatcher.runSync("sendMailHiddenInLogFromScreen", serviceContext);
 
-            if (ModelService.RESPOND_ERROR.equals((String) result.get(ModelService.RESPONSE_MESSAGE))) {
+            if (ModelService.RESPOND_ERROR.equals(result.get(ModelService.RESPONSE_MESSAGE))) {
                 Map<String, Object> messageMap = UtilMisc.toMap("errorMessage", result.get(ModelService.ERROR_MESSAGE));
                 errMsg = UtilProperties.getMessage(resource, "loginevents.error_unable_email_password_contact_customer_service_errorwas", messageMap, UtilHttp.getLocale(request));
                 request.setAttribute("_ERROR_MESSAGE_", errMsg);

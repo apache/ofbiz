@@ -18,16 +18,15 @@ specific language governing permissions and limitations
 under the License.
 -->
 
-<ofbiz-component name="ecommerce"
+<ofbiz-component name="ecommerce" enabled="true"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/ofbiz-component.xsd">
     <resource-loader name="main" type="component"/>
     <classpath type="jar" location="build/lib/*"/>
     <classpath type="dir" location="config"/>
-    <classpath type="dir" location="script"/>
     <entity-resource type="data" reader-name="seed" loader="main" location="data/EcommerceTypeData.xml"/>
+    <entity-resource type="data" reader-name="seed" loader="main" location="data/EcommerceSecurityData.xml"/>
     <entity-resource type="data" reader-name="demo" loader="main" location="data/DemoProduct.xml"/>
-    <entity-resource type="data" reader-name="demo" loader="main" location="data/DemoProductImages.xml"/>
     <entity-resource type="data" reader-name="demo" loader="main" location="data/DemoSurvey.xml"/>
     <entity-resource type="data" reader-name="demo" loader="main" location="data/DemoRentalShipping.xml"/>
     <entity-resource type="data" reader-name="demo" loader="main" location="data/DemoShipping.xml"/>
@@ -40,6 +39,7 @@ under the License.
     <entity-resource type="data" reader-name="demo" loader="main" location="data/DemoRelatedData.xml"/>
     <entity-resource type="data" reader-name="demo" loader="main" location="data/DemoConfigurator.xml"/>
     <entity-resource type="data" reader-name="demo" loader="main" location="data/DemoRentalProduct.xml"/>
+    <entity-resource type="data" reader-name="demo" loader="main" location="data/DemoProductImages.xml"/>
     <entity-resource type="data" reader-name="demo" loader="main" location="data/DemoTaxAuthority.xml"/>
     <entity-resource type="data" reader-name="demo" loader="main" location="data/DemoOrderPeopleData.xml"/>
     <entity-resource type="data" reader-name="demo" loader="main" location="data/DemoOrderTestData.xml"/>
@@ -51,7 +51,11 @@ under the License.
     <entity-resource type="data" reader-name="demo" loader="main" location="data/DemoProductI18nData.xml"/>
     <entity-resource type="data" reader-name="demo" loader="main" location="data/DemoProductCategoriesI18nData.xml"/>
     <entity-resource type="data" reader-name="demo" loader="main" location="data/DemoTreeContent.xml"/>
-
+    <entity-resource type="data" reader-name="demo" loader="main" location="data/DemoTestSurveyData.xml"/>
+    <entity-resource type="data" reader-name="demo" loader="main" location="data/DemoProductAdditionalViewData.xml"/>
+    <entity-resource type="data" reader-name="demo" loader="main" location="data/DemoPopularCategoriesData.xml"/>
+    <entity-resource type="data" reader-name="demo" loader="main" location="data/DemoContentAltUrl.xml"/>
+    
     <webapp name="ecommerce"
         title="eCommerce"
         server="default-server"
@@ -65,3 +69,4 @@ under the License.
         mount-point="/ecomclone"
         app-bar-display="false"/>
 </ofbiz-component>
+

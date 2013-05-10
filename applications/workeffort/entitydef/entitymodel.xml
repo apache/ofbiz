@@ -25,8 +25,6 @@ under the License.
   <!-- ========================================================= -->
     <title>Entity of an Open For Business Project Component</title>
     <description>None</description>
-    <copyright>Copyright 2001-2008 The Apache Software Foundation</copyright>
-    <author>None</author>
     <version>1.0</version>
 
   <!-- ========================================================= -->
@@ -224,12 +222,12 @@ under the License.
       <field name="runtimeDataId" type="id"></field>
       <field name="noteId" type="id"></field>
       <field name="serviceLoaderName" type="name"></field>
-      <field name="quantityToProduce" type="floating-point"></field>
-      <field name="quantityProduced" type="floating-point"></field>
-      <field name="quantityRejected" type="floating-point"></field>
-      <field name="reservPersons" type="floating-point"><description>the number of persons renting the attached asset</description></field>
-      <field name="reserv2ndPPPerc" type="floating-point"><description>reservationSecondPersonPricePercentage: percentage of the end price for the 2nd person renting this asset connected to the workEffort</description></field>
-      <field name="reservNthPPPerc" type="floating-point"><description>reservationNthPersonPricePercentage: percentage of the end price for the Nth (2+) person renting this asset connected to the workEffort</description></field>
+      <field name="quantityToProduce" type="fixed-point"></field>
+      <field name="quantityProduced" type="fixed-point"></field>
+      <field name="quantityRejected" type="fixed-point"></field>
+      <field name="reservPersons" type="fixed-point"><description>the number of persons renting the attached asset</description></field>
+      <field name="reserv2ndPPPerc" type="fixed-point"><description>reservationSecondPersonPricePercentage: percentage of the end price for the 2nd person renting this asset connected to the workEffort</description></field>
+      <field name="reservNthPPPerc" type="fixed-point"><description>reservationNthPersonPricePercentage: percentage of the end price for the Nth (2+) person renting this asset connected to the workEffort</description></field>
       <field name="accommodationMapId" type="id"/>
       <field name="accommodationSpotId" type="id"/>
       <field name="revisionNumber" type="numeric"></field>
@@ -403,14 +401,17 @@ under the License.
         <key-map field-name="invoiceItemSeqId"/>
       </relation>
     </entity>
-    <entity entity-name="WorkEffortContactMech"
+    <entity entity-name="WorkEffortContactMech" table-name="WORK_EFFORT_CONTACT_MECH_NEW"
             package-name="org.ofbiz.workeffort.workeffort"
             title="WorkEffort Contact Mechanism Entity">
       <field name="workEffortId" type="id-ne"></field>
       <field name="contactMechId" type="id-ne"></field>
+      <field name="fromDate" type="date-time"></field>
+      <field name="thruDate" type="date-time"></field>
       <field name="comments" type="comment"></field>
       <prim-key field="workEffortId"/>
       <prim-key field="contactMechId"/>
+      <prim-key field="fromDate"/>
       <relation type="one" fk-name="WKEFF_CMECH_WKEFF" rel-entity-name="WorkEffort">
         <key-map field-name="workEffortId"/>
       </relation>
@@ -468,18 +469,19 @@ under the License.
             package-name="org.ofbiz.workeffort.workeffort"
             title="Work Effort Event Reminder Entity">
       <field name="workEffortId" type="id-ne"></field>
-      <field name="contactMechId" type="id-ne"></field>
       <field name="sequenceId" type="id-ne"></field>
-      <field name="isPopup" type="indicator"></field>
+      <field name="contactMechId" type="id"></field>
+      <field name="partyId" type="id">
+          <description>The party this reminder is assigned to</description>
+      </field>
       <field name="reminderDateTime" type="date-time"></field>
       <field name="repeatCount" type="numeric"></field>
       <field name="repeatInterval" type="numeric">
           <description>The millisecond interval between reminder repeats</description>
       </field>
       <field name="currentCount" type="numeric"></field>
-      <field name="recurrenceOffset" type="numeric">
-          <description>If the work effort is recurring, the millisecond offset from
-          the recurring event that will be used to calculate the reminder date/time</description>
+      <field name="reminderOffset" type="numeric">
+          <description>The millisecond offset from the event to activate a reminder</description>
       </field>
       <field name="localeId" type="id"></field>
       <field name="timeZoneId" type="id-long"></field>
@@ -490,6 +492,9 @@ under the License.
       </relation>
       <relation type="one" fk-name="WE_EVENT_REMIND_CM" rel-entity-name="ContactMech">
         <key-map field-name="contactMechId"/>
+      </relation>
+      <relation type="one" fk-name="WE_EVENT_REMIND_PY" rel-entity-name="Party">
+        <key-map field-name="partyId"/>
       </relation>
     </entity>
     <entity entity-name="WorkEffortFixedAssetAssign"
@@ -573,6 +578,18 @@ under the License.
       <relation type="one" fk-name="WKEFF_GDSTD_TPAR" title="Parent" rel-entity-name="WorkEffortGoodStandardType">
         <key-map field-name="parentTypeId" rel-field-name="workEffortGoodStdTypeId"/>
       </relation>
+    </entity>
+    <entity entity-name="WorkEffortIcalData"
+            package-name="org.ofbiz.workeffort.workeffort"
+            title="Work Effort iCalendar Data">
+        <field name="workEffortId" type="id-ne"></field>
+        <field name="icalData" type="very-long">
+            <description>iCalender Data</description>
+        </field>
+        <prim-key field="workEffortId"/>
+        <relation type="one" fk-name="WKEFF_ICAL_DATA" rel-entity-name="WorkEffort">
+            <key-map field-name="workEffortId"/>
+        </relation>
     </entity>
     <entity entity-name="WorkEffortInventoryAssign"
             package-name="org.ofbiz.workeffort.workeffort"
@@ -715,8 +732,12 @@ under the License.
     <entity entity-name="WorkEffortPurposeType" package-name="org.ofbiz.workeffort.workeffort" title="Work Effort Purpose Type Entity"
            default-resource-name="WorkEffortEntityLabels">
       <field name="workEffortPurposeTypeId" type="id-ne"></field>
+      <field name="parentTypeId" type="id-ne"></field>           
       <field name="description" type="description"></field>
       <prim-key field="workEffortPurposeTypeId"/>
+      <relation type="one" fk-name="WK_EFFRT_PTYPE_PAR" title="Parent" rel-entity-name="WorkEffortPurposeType">
+        <key-map field-name="parentTypeId" rel-field-name="workEffortPurposeTypeId"/>
+      </relation>
     </entity>
     <entity entity-name="WorkEffortReview" package-name="org.ofbiz.workeffort.workeffort" title="WorkEffort Review Entity">
         <field name="workEffortId" type="id-ne"></field>
@@ -849,6 +870,26 @@ under the License.
       </relation>
       <relation type="many" rel-entity-name="WorkEffort">
         <key-map field-name="workEffortTypeId"/>
+      </relation>
+    </entity>
+    <entity entity-name="WorkEffortSurveyAppl"
+            package-name="org.ofbiz.workeffort.workeffort"
+            title="Work Effort Survey Appl Entity">
+      <field name="workEffortId" type="id-ne"/>
+      <field name="surveyId" type="id-ne"/>
+      <field name="fromDate" type="date-time"></field>
+      <field name="thruDate" type="date-time"></field>
+      <prim-key field="workEffortId"/>
+      <prim-key field="surveyId"/>
+      <prim-key field="fromDate"/>
+      <relation type="one" fk-name="WKEF_SURVAPL_SVY" rel-entity-name="Survey">
+        <key-map field-name="surveyId"/>
+      </relation>
+      <relation type="one" fk-name="WKEF_SURVAPL_WKE" rel-entity-name="WorkEffort">
+        <key-map field-name="workEffortId"/>
+      </relation>
+      <relation type="one" fk-name="WKEF_SURVAPL_PSSA" rel-entity-name="ProductStoreSurveyAppl">
+        <key-map field-name="surveyId" rel-field-name="productStoreSurveyId"/>
       </relation>
     </entity>
 </entitymodel>

@@ -38,12 +38,12 @@ under the License.
                                 </tr>
                                 <#list orderTerms as orderTerm>
                                     <tr <#if orderTerm_index % 2 != 0>class="alternate-row"</#if> >
-                                        <td nowrap="nowrap">${orderTerm.getRelatedOne('TermType').get('description', locale)}</td>
+                                        <td nowrap="nowrap">${orderTerm.getRelatedOne('TermType', false).get('description', locale)}</td>
                                         <td align="center">${orderTerm.termValue?if_exists}</td>
                                         <td align="center">${orderTerm.termDays?if_exists}</td>
                                         <td nowrap="nowrap">${orderTerm.textValue?if_exists}</td>
                                         <td align="right">
-                                            <a href="<@ofbizUrl>setOrderTerm?termIndex=${orderTerm_index}&createNew=Y</@ofbizUrl>" class="buttontext">${uiLabelMap.CommonUpdate}</a>
+                                            <a href="<@ofbizUrl>setOrderTerm?termIndex=${orderTerm_index}&amp;createNew=Y</@ofbizUrl>" class="buttontext">${uiLabelMap.CommonUpdate}</a>
                                             <a href="<@ofbizUrl>removeCartOrderTerm?termIndex=${orderTerm_index}</@ofbizUrl>" class="buttontext">${uiLabelMap.CommonRemove}</a>
                                         </td>
                                     </tr>

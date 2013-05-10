@@ -25,9 +25,7 @@ under the License.
     <screen name="LookupSegmentGroup">
         <section>
             <condition>
-                <or>
-                    <if-has-permission permission="MARKETING" action="_VIEW"/>
-                </or>
+                <if-has-permission permission="MARKETING" action="_VIEW"/>
             </condition>
             <actions>
                 <property-map resource="MarketingUiLabels" map-name="uiLabelMap" global="true"/>
@@ -40,10 +38,10 @@ under the License.
             <widgets>
                 <decorator-screen name="LookupDecorator" location="component://common/widget/CommonScreens.xml">
                     <decorator-section name="search-options">
-                        <include-form name="LookupSegmentGroup" location="component://marketing/webapp/marketing/lookup/LookupForms.xml"/>
+                        <include-form name="LookupSegmentGroup" location="component://marketing/widget/LookupForms.xml"/>
                     </decorator-section>
                     <decorator-section name="search-results">
-                        <include-form name="listLookupSegmentGroup" location="component://marketing/webapp/marketing/lookup/LookupForms.xml"/>
+                        <include-form name="listLookupSegmentGroup" location="component://marketing/widget/LookupForms.xml"/>
                     </decorator-section>
                 </decorator-screen>
             </widgets>
@@ -53,9 +51,7 @@ under the License.
     <screen name="LookupSalesForecast">
         <section>
             <condition>
-                <or>
-                    <if-has-permission permission="MARKETING" action="_VIEW"/>
-                </or>
+                <if-has-permission permission="MARKETING" action="_VIEW"/>
             </condition>
             <actions>
                 <property-map resource="MarketingUiLabels" map-name="uiLabelMap" global="true"/>
@@ -66,10 +62,10 @@ under the License.
             <widgets>
                 <decorator-screen name="LookupDecorator" location="component://common/widget/CommonScreens.xml">
                     <decorator-section name="search-options">
-                        <include-form name="LookupSalesForecast" location="component://marketing/webapp/marketing/lookup/LookupForms.xml"/>
+                        <include-form name="LookupSalesForecast" location="component://marketing/widget/LookupForms.xml"/>
                     </decorator-section>
                     <decorator-section name="search-results">
-                        <include-form name="ListLookupSalesForecast" location="component://marketing/webapp/marketing/lookup/LookupForms.xml"/>
+                        <include-form name="ListLookupSalesForecast" location="component://marketing/widget/LookupForms.xml"/>
                     </decorator-section>
                 </decorator-screen>
             </widgets>

@@ -22,16 +22,16 @@ import org.ofbiz.base.util.*;
 
 inventoryStock = [:];
 shipmentId = parameters.shipmentId;
-shipment = delegator.findByPrimaryKey("Shipment", [shipmentId : shipmentId]);
+shipment = delegator.findOne("Shipment", [shipmentId : shipmentId], false);
 
 context.shipmentIdPar = shipment.shipmentId;
 context.estimatedReadyDatePar = shipment.estimatedReadyDate;
 context.estimatedShipDatePar = shipment.estimatedShipDate;
-
+records = [];
 if (shipment) {
-    shipmentPlans = delegator.findByAnd("OrderShipment", [shipmentId : shipmentId]);
+    shipmentPlans = delegator.findByAnd("OrderShipment", [shipmentId : shipmentId], null, false);
     shipmentPlans.each { shipmentPlan ->
-        orderLine = delegator.findByPrimaryKey("OrderItem", [orderId : shipmentPlan.orderId , orderItemSeqId : shipmentPlan.orderItemSeqId]);
+        orderLine = delegator.findOne("OrderItem", [orderId : shipmentPlan.orderId , orderItemSeqId : shipmentPlan.orderItemSeqId], false);
         recordGroup = [:];
         recordGroup.ORDER_ID = shipmentPlan.orderId;
         recordGroup.ORDER_ITEM_SEQ_ID = shipmentPlan.orderItemSeqId;
@@ -40,7 +40,7 @@ if (shipment) {
 
         recordGroup.PRODUCT_ID = orderLine.productId;
         recordGroup.QUANTITY = shipmentPlan.quantity;
-        product = delegator.findByPrimaryKey("Product", [productId : orderLine.productId]);
+        product = delegator.findOne("Product", [productId : orderLine.productId], false);
         recordGroup.PRODUCT_NAME = product.internalName;
 
         inputPar = [productId : orderLine.productId,
@@ -50,11 +50,10 @@ if (shipment) {
 
         result = [:];
         result = dispatcher.runSync("getNotAssembledComponents",inputPar);
-        if (result)
+        if (result) {
             components = (List)result.get("notAssembledComponents");
-        componentsIt = components.iterator();
-        while (componentsIt) {
-            oneComponent = (org.ofbiz.manufacturing.bom.BOMNode)componentsIt.next();
+        }
+        components.each { oneComponent ->
             record = new HashMap(recordGroup);
             record.componentId = oneComponent.getProduct().productId;
             record.componentName = oneComponent.getProduct().internalName;
@@ -66,11 +65,11 @@ if (shipment) {
                     serviceInput = [productId : oneComponent.getProduct().productId , facilityId : facilityId];
                     serviceOutput = dispatcher.runSync("getInventoryAvailableByFacility",serviceInput);
                     qha = serviceOutput.quantityOnHandTotal ?: 0.0;
-                    inventoryStock.oneComponent.getProduct().productId = qha;
+                    inventoryStock.put(oneComponent.getProduct().productId, qha);
                 }
                 qty = inventoryStock[oneComponent.getProduct().productId];
                 qty = qty - oneComponent.getQuantity();
-                inventoryStock.oneComponent.getProduct().productId = qty;
+                inventoryStock.put(oneComponent.getProduct().productId, qty);
             }
             record.componentOnHand = qty;
             // Now we get the products qty already reserved by production runs

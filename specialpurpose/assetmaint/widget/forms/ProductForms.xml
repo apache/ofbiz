@@ -52,7 +52,7 @@
         <field use-when="product!=null" name="lastUpdatedByText" title="${uiLabelMap.ProductLastModifiedBy}:">
             <display description="[${product.lastModifiedByUserLogin}] ${uiLabelMap.CommonOn} ${product.lastModifiedDate}" also-hidden="false"/>
         </field>
-        <field use-when="product!=null" name="createdByText" title="${uiLabelMap.ProductCreatedBy}:">
+        <field use-when="product!=null" name="createdByText" title="${uiLabelMap.CommonCreatedBy}:">
             <display description="[${product.createdByUserLogin}] ${uiLabelMap.CommonOn} ${product.createdDate}" also-hidden="false"/>
         </field>
     </form>
@@ -63,6 +63,8 @@
             <service service-name="performFind" result-map="result" result-map-list="listIt">
                 <field-map field-name="inputFields" from-field="parameters"/>
                 <field-map field-name="entityName" value="Product"/>
+                <field-map field-name="viewIndex" from-field="viewIndex"/>
+                <field-map field-name="viewSize" from-field="viewSize"/>
             </service>
         </actions>
         <field name="productId" title="${uiLabelMap.CommonId}" widget-style="buttontext">
@@ -81,9 +83,9 @@
     <form name="lookupProduct" target="${submitTarget}" type="single"
         header-row-style="header-row" default-table-style="basic-table">
         <!-- <auto-fields-entity entity-name="Product" default-field-type="hidden"/> -->
-        <field name="productId" title="${uiLabelMap.CommonId}"><text-find default-option="contains" ignore-case="true"/></field>
-        <field name="brandName" title="${uiLabelMap.ProductBrandName}"><text-find default-option="contains" ignore-case="true"/></field>
-        <field name="internalName" title="${uiLabelMap.ProductInternalName}"><text-find default-option="contains" ignore-case="true"/></field>
+        <field name="productId" title="${uiLabelMap.CommonId}"><text-find ignore-case="true"/></field>
+        <field name="brandName" title="${uiLabelMap.ProductBrandName}"><text-find ignore-case="true"/></field>
+        <field name="internalName" title="${uiLabelMap.ProductInternalName}"><text-find ignore-case="true"/></field>
         <field name="noConditionFind"><hidden value="Y"/><!-- if this isn't there then with all fields empty no query will be done --></field>
        <!-- <field name="isVariant"><hidden value="N"/></field>  -->
         <field name="submitButton" title="${uiLabelMap.CommonFind}"><submit button-type="button"/></field>
@@ -95,6 +97,8 @@
             <service service-name="performFind" result-map="result" result-map-list="listIt">
                 <field-map field-name="inputFields" from-field="parameters"/>
                 <field-map field-name="entityName" value="Product"/>
+                <field-map field-name="viewIndex" from-field="viewIndex"/>
+                <field-map field-name="viewSize" from-field="viewSize"/>
             </service>
         </actions>
         <field name="productId" title="${uiLabelMap.CommonId}" widget-style="buttontext">
@@ -110,7 +114,7 @@
         </field>
     </form>
 
-    <form name="AddProductMaint" extends="AddProductMaint" extends-resource="component://product/webapp/catalog/product/ProductForms.xml">
+    <form name="AddProductMaint" extends="AddProductMaint" extends-resource="component://product/widget/catalog/ProductForms.xml">
         <field name="fixedAssetId"><hidden value="${parameters.fixedAssetId}"></hidden></field>
     </form>
 

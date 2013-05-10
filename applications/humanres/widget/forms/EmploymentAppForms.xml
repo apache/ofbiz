@@ -29,6 +29,8 @@ under the License.
                 <field-map field-name="inputFields" from-field="employmentAppCtx"/>
                 <field-map field-name="entityName" value="EmploymentApp"/>
                 <field-map field-name="orderBy" value="applicationId"/>
+                <field-map field-name="viewIndex" from-field="viewIndex"/>
+                <field-map field-name="viewSize" from-field="viewSize"/>
             </service>
             <set field="insideEmployee" from-field="parameters.insideEmployee"/>
         </actions>
@@ -97,8 +99,10 @@ under the License.
             <lookup target-form-name="LookupPartyName"/>
         </field>
         <field name="referredByPartyId" use-when="referredByPartyId!=null"><hidden/></field>
+        <field name="approverPartyId"><hidden/></field>
+        <field name="jobRequisitionId"><hidden/></field>
          <field name="searchButton" widget-style="smallSubmit"><submit button-type="button"/></field>
-        <field name="searchButton" widget-style="smallSubmit"><submit button-type="button"/></field>
+        <field name="searchButton" title="${uiLabelMap.CommonFind}" widget-style="smallSubmit"><submit button-type="button"/></field>
     </form>
     <form name="AddEmploymentApp" type="single" target="createEmploymentApp" default-entity-name="EmploymentApp" paginate-target="FindEmploymentApps"
         header-row-style="header-row" default-table-style="basic-table">

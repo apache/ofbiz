@@ -18,26 +18,43 @@
  *******************************************************************************/
 package org.ofbiz.common;
 
-import java.io.*;
+import static org.ofbiz.base.util.UtilGenerics.checkList;
+import static org.ofbiz.base.util.UtilGenerics.checkMap;
+
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.RandomAccessFile;
+import java.io.Writer;
 import java.nio.ByteBuffer;
 import java.sql.Timestamp;
-import java.util.*;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 
 import javax.mail.internet.MimeMessage;
 import javax.transaction.xa.XAException;
 
+import javolution.util.FastList;
 import javolution.util.FastMap;
 
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
+import org.ofbiz.base.metrics.Metrics;
+import org.ofbiz.base.metrics.MetricsFactory;
 import org.ofbiz.base.util.Debug;
+import org.ofbiz.base.util.StringUtil;
 import org.ofbiz.base.util.UtilDateTime;
-import org.ofbiz.base.util.UtilValidate;
-
-import static org.ofbiz.base.util.UtilGenerics.checkList;
-import static org.ofbiz.base.util.UtilGenerics.checkMap;
 import org.ofbiz.base.util.UtilMisc;
-import org.ofbiz.entity.GenericDelegator;
+import org.ofbiz.base.util.UtilProperties;
+import org.ofbiz.base.util.UtilValidate;
+import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
 import org.ofbiz.entity.model.ModelEntity;
@@ -49,6 +66,7 @@ import org.ofbiz.service.ModelService;
 import org.ofbiz.service.ServiceUtil;
 import org.ofbiz.service.ServiceXaWrapper;
 import org.ofbiz.service.mail.MimeMessageWrapper;
+import org.owasp.esapi.errors.EncodingException;
 
 /**
  * Common Services
@@ -56,6 +74,7 @@ import org.ofbiz.service.mail.MimeMessageWrapper;
 public class CommonServices {
 
     public final static String module = CommonServices.class.getName();
+    public static final String resource = "CommonUiLabels";
 
     /**
      * Generic Test Service
@@ -85,6 +104,28 @@ public class CommonServices {
         return response;
     }
 
+    /**
+     * Generic Test SOAP Service
+     *@param dctx The DispatchContext that this service is operating in
+     *@param context Map containing the input parameters
+     *@return Map with the result of the service, the output parameters
+     */
+    public static Map<String, Object> testSOAPService(DispatchContext dctx, Map<String, ?> context) {
+        Delegator delegator = dctx.getDelegator();
+        Map<String, Object> response = ServiceUtil.returnSuccess();
+
+        List<GenericValue> testingNodes = FastList.newInstance();
+        for (int i = 0; i < 3; i ++) {
+            GenericValue testingNode = delegator.makeValue("TestingNode");
+            testingNode.put("testingNodeId", "TESTING_NODE" + i);
+            testingNode.put("description", "Testing Node " + i);
+            testingNode.put("createdStamp", UtilDateTime.nowTimestamp());
+            testingNodes.add(testingNode);
+        }
+        response.put("testingNodes", testingNodes);
+        return response;
+    }
+
     public static Map<String, Object> blockingTestService(DispatchContext dctx, Map<String, ?> context) {
         Long duration = (Long) context.get("duration");
         if (duration == null) {
@@ -98,13 +139,8 @@ public class CommonServices {
         return CommonServices.testService(dctx, context);
     }
 
-    public static Map<String, Object> testWorkflowCondition(DispatchContext dctx, Map<String, ?> context) {
-        Map<String, Object> result = FastMap.newInstance();
-        result.put("evaluationResult", Boolean.TRUE);
-        return result;
-    }
-
     public static Map<String, Object> testRollbackListener(DispatchContext dctx, Map<String, ?> context) {
+        Locale locale = (Locale) context.get("locale");
         ServiceXaWrapper xar = new ServiceXaWrapper(dctx);
         xar.setRollbackService("testScv", context);
         try {
@@ -112,7 +148,7 @@ public class CommonServices {
         } catch (XAException e) {
             Debug.logError(e, module);
         }
-        return ServiceUtil.returnError("Rolling back!");
+        return ServiceUtil.returnError(UtilProperties.getMessage(resource, "CommonTestRollingBack", locale));
     }
 
     public static Map<String, Object> testCommitListener(DispatchContext dctx, Map<String, ?> context) {
@@ -133,13 +169,14 @@ public class CommonServices {
      *@return Map with the result of the service, the output parameters
      */
     public static Map<String, Object> createNote(DispatchContext ctx, Map<String, ?> context) {
-        GenericDelegator delegator = ctx.getDelegator();
+        Delegator delegator = ctx.getDelegator();
         GenericValue userLogin = (GenericValue) context.get("userLogin");
         Timestamp noteDate = (Timestamp) context.get("noteDate");
         String partyId = (String) context.get("partyId");
         String noteName = (String) context.get("noteName");
         String note = (String) context.get("note");
         String noteId = delegator.getNextSeqId("NoteData");
+        Locale locale = (Locale) context.get("locale");
         if (noteDate == null) {
             noteDate = UtilDateTime.nowTimestamp();
         }
@@ -151,7 +188,7 @@ public class CommonServices {
                 partyId = userLogin.getString("partyId");
         }
 
-        Map<String, String> fields = UtilMisc.toMap("noteId", noteId, "noteName", noteName, "noteInfo", note,
+        Map<String, Object> fields = UtilMisc.toMap("noteId", noteId, "noteName", noteName, "noteInfo", note,
                 "noteParty", partyId, "noteDateTime", noteDate);
 
         try {
@@ -159,17 +196,18 @@ public class CommonServices {
 
             delegator.create(newValue);
         } catch (GenericEntityException e) {
-            return ServiceUtil.returnError("Could update note data (write failure): " + e.getMessage());
+            return ServiceUtil.returnError(UtilProperties.getMessage(resource, "CommonNoteCannotBeUpdated", UtilMisc.toMap("errorString", e.getMessage()), locale));
         }
         Map<String, Object> result = ServiceUtil.returnSuccess();
 
         result.put("noteId", noteId);
+        result.put("partyId", partyId);
         return result;
     }
 
     /**
      * Service for setting debugging levels.
-     *@param dctx The DispatchContext that this service is operating in
+     *@param dctc The DispatchContext that this service is operating in
      *@param context Map containing the input parameters
      *@return Map with the result of the service, the output parameters
      */
@@ -222,7 +260,8 @@ public class CommonServices {
      * Return Error Service; Used for testing error handling
      */
     public static Map<String, Object> returnErrorService(DispatchContext dctx, Map<String, ?> context) {
-        return ServiceUtil.returnError("Return Error Service : Returning Error");
+        Locale locale = (Locale) context.get("locale");
+        return ServiceUtil.returnError(UtilProperties.getMessage(resource, "CommonServiceReturnError", locale));
     }
 
     /**
@@ -245,7 +284,8 @@ public class CommonServices {
 
     /** Cause a Referential Integrity Error */
     public static Map<String, Object> entityFailTest(DispatchContext dctx, Map<String, ?> context) {
-        GenericDelegator delegator = dctx.getDelegator();
+        Delegator delegator = dctx.getDelegator();
+        Locale locale = (Locale) context.get("locale");
 
         // attempt to create a DataSource entity w/ an invalid dataSourceTypeId
         GenericValue newEntity = delegator.makeValue("DataSource");
@@ -256,7 +296,7 @@ public class CommonServices {
             delegator.create(newEntity);
         } catch (GenericEntityException e) {
             Debug.logError(e, module);
-            return ServiceUtil.returnError("Unable to create test entity");
+            return ServiceUtil.returnError(UtilProperties.getMessage(resource, "CommonEntityTestFailure", locale));
         }
 
         /*
@@ -272,7 +312,7 @@ public class CommonServices {
 
     /** Test entity sorting */
     public static Map<String, Object> entitySortTest(DispatchContext dctx, Map<String, ?> context) {
-        GenericDelegator delegator = dctx.getDelegator();
+        Delegator delegator = dctx.getDelegator();
         Set<ModelEntity> set = new TreeSet<ModelEntity>();
 
         set.add(delegator.getModelEntity("Person"));
@@ -288,16 +328,16 @@ public class CommonServices {
         set.add(delegator.getModelEntity("RoleType"));
 
         for (ModelEntity modelEntity: set) {
-            Debug.log(modelEntity.getEntityName(), module);
+            Debug.logInfo(modelEntity.getEntityName(), module);
         }
         return ServiceUtil.returnSuccess();
     }
 
     public static Map<String, Object> makeALotOfVisits(DispatchContext dctx, Map<String, ?> context) {
-        GenericDelegator delegator = dctx.getDelegator();
+        Delegator delegator = dctx.getDelegator();
         int count = ((Integer) context.get("count")).intValue();
 
-        for (int i = 0; i < count; i++ ) {
+        for (int i = 0; i < count; i++) {
             GenericValue v = delegator.makeValue("Visit");
             String seqId = delegator.getNextSeqId("Visit");
 
@@ -330,10 +370,10 @@ public class CommonServices {
             if (UtilValidate.isNotEmpty(TransactionUtil.debugResMap)) {
                 TransactionUtil.logRunningTx();
             } else {
-                Debug.log("No running transaction to display.", module);
+                Debug.logInfo("No running transaction to display.", module);
             }
         } else {
-            Debug.log("Debug resources is disabled.", module);
+            Debug.logInfo("Debug resources is disabled.", module);
         }
 
         return ServiceUtil.returnSuccess();
@@ -421,8 +461,8 @@ public class CommonServices {
         Map<String, String> mapOfStrings = checkMap(context.get("mapOfStrings"), String.class, String.class);
 
         for (String str: listOfStrings) {
-            String v = (String) mapOfStrings.get(str);
-            Debug.log("SimpleMapListTest: " + str + " -> " + v, module);
+            String v = mapOfStrings.get(str);
+            Debug.logInfo("SimpleMapListTest: " + str + " -> " + v, module);
         }
 
         return ServiceUtil.returnSuccess();
@@ -433,17 +473,17 @@ public class CommonServices {
         MimeMessage message = wrapper.getMessage();
         try {
             if (message.getAllRecipients() != null) {
-               Debug.log("To: " + UtilMisc.toListArray(message.getAllRecipients()), module);
+               Debug.logInfo("To: " + UtilMisc.toListArray(message.getAllRecipients()), module);
             }
             if (message.getFrom() != null) {
-               Debug.log("From: " + UtilMisc.toListArray(message.getFrom()), module);
+               Debug.logInfo("From: " + UtilMisc.toListArray(message.getFrom()), module);
             }
-            Debug.log("Subject: " + message.getSubject(), module);
+            Debug.logInfo("Subject: " + message.getSubject(), module);
             if (message.getSentDate() != null) {
-                Debug.log("Sent: " + message.getSentDate().toString(), module);
+                Debug.logInfo("Sent: " + message.getSentDate().toString(), module);
             }
             if (message.getReceivedDate() != null) {
-                Debug.log("Received: " + message.getReceivedDate().toString(), module);
+                Debug.logInfo("Received: " + message.getReceivedDate().toString(), module);
             }
         } catch (Exception e) {
             Debug.logError(e, module);
@@ -461,7 +501,7 @@ public class CommonServices {
 
         try {
             while ((line = reader.readLine()) != null) {
-                Debug.log("Read line: " + line, module);
+                Debug.logInfo("Read line: " + line, module);
                 writer.write(line);
             }
         } catch (IOException e) {
@@ -481,8 +521,9 @@ public class CommonServices {
     }
 
     public static Map<String, Object> ping(DispatchContext dctx, Map<String, ?> context) {
-        GenericDelegator delegator = dctx.getDelegator();
+        Delegator delegator = dctx.getDelegator();
         String message = (String) context.get("message");
+        Locale locale = (Locale) context.get("locale");
         if (message == null) {
             message = "PONG";
         }
@@ -492,7 +533,7 @@ public class CommonServices {
             count = delegator.findCountByCondition("SequenceValueItem", null, null, null);
         } catch (GenericEntityException e) {
             Debug.logError(e.getMessage(), module);
-            return ServiceUtil.returnError("Unable to connect to datasource!");
+            return ServiceUtil.returnError(UtilProperties.getMessage(resource, "CommonPingDatasourceCannotConnect", locale));
         }
 
         if (count > 0) {
@@ -500,8 +541,39 @@ public class CommonServices {
             result.put("message", message);
             return result;
         } else {
-            return ServiceUtil.returnError("Invalid count returned from database");
+            return ServiceUtil.returnError(UtilProperties.getMessage(resource, "CommonPingDatasourceInvalidCount", locale));
         }
     }
 
+    public static Map<String, Object> getAllMetrics(DispatchContext dctx, Map<String, ?> context) {
+        List<Map<String, Object>> metricsMapList = FastList.newInstance();
+        List<Metrics> metricsList = MetricsFactory.getMetrics();
+        for (Metrics metrics : metricsList) {
+            Map<String, Object> metricsMap = FastMap.newInstance();
+            metricsMap.put("name", metrics.getName());
+            metricsMap.put("serviceRate", metrics.getServiceRate());
+            metricsMap.put("threshold", metrics.getThreshold());
+            metricsMap.put("totalEvents", metrics.getTotalEvents());
+            metricsMapList.add(metricsMap);
+        }
+        Map<String, Object> result = ServiceUtil.returnSuccess();
+        result.put("metricsList", metricsMapList);
+        return result;
+    }
+
+    public static Map<String, Object> resetMetric(DispatchContext dctx, Map<String, ?> context) {
+        String name = (String) context.get("name");
+        try {
+            name = StringUtil.defaultWebEncoder.decodeFromURL(name);
+        } catch (EncodingException e) {
+            return ServiceUtil.returnError("Exception thrown while decoding metric name \"" + name + "\"");
+        }
+        Metrics metric = MetricsFactory.getMetric(name);
+        if (metric != null) {
+            metric.reset();
+            return ServiceUtil.returnSuccess();
+
+        }
+        return ServiceUtil.returnError("Metric \"" + name + "\" not found.");
+    }
 }

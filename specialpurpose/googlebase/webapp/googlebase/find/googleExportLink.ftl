@@ -19,8 +19,18 @@ under the License.
 
 <script language="JavaScript" type="text/javascript">
     function exportToGoogle() {
-        document.products.action="<@ofbizUrl>ProductsExportToGoogle</@ofbizUrl>";
-        document.products.submit();
+        var productIds = document.getElementsByName("selectResult");
+        var count = 0;
+        for(var i=0; i<productIds.length; i++){
+            if(productIds[i].checked)
+                count++;
+        }
+        if(count > 0){
+            document.products.action="<@ofbizUrl>ProductsExportToGoogle</@ofbizUrl>";
+            document.products.submit();
+        } else {
+            alert("${StringUtil.wrapString(uiLabelMap.productsExportToGoogle.missingProduct)}");
+        }
     }
 </script>
 
@@ -28,7 +38,7 @@ under the License.
     <table cellspacing="0" class="basic-table">
         <tr>
             <td align="center" colspan="2">
-                <hr/>
+                <hr />
                 <a href="javascript:exportToGoogle();" class="buttontext">${uiLabelMap.GoogleBaseExportToGoogle}</a>
             </td>
         </tr>

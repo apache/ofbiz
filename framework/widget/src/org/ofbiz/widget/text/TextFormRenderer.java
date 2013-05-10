@@ -19,7 +19,6 @@
 package org.ofbiz.widget.text;
 
 import java.io.IOException;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -27,10 +26,12 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.ofbiz.base.util.UtilValidate;
+import org.ofbiz.widget.WidgetWorker;
 import org.ofbiz.widget.form.FormStringRenderer;
 import org.ofbiz.widget.form.ModelForm;
 import org.ofbiz.widget.form.ModelFormField;
 import org.ofbiz.widget.form.ModelFormField.CheckField;
+import org.ofbiz.widget.form.ModelFormField.ContainerField;
 import org.ofbiz.widget.form.ModelFormField.DateFindField;
 import org.ofbiz.widget.form.ModelFormField.DateTimeField;
 import org.ofbiz.widget.form.ModelFormField.DisplayField;
@@ -107,9 +108,8 @@ public class TextFormRenderer implements FormStringRenderer {
 
     public void renderDropDownField(Appendable writer, Map<String, Object> context, DropDownField dropDownField) throws IOException {
         ModelFormField modelFormField = dropDownField.getModelFormField();
-        ModelForm modelForm = modelFormField.getModelForm();
         String currentValue = modelFormField.getEntry(context);
-        List allOptionValues = dropDownField.getAllOptionValues(context, modelForm.getDelegator(context));
+        List<ModelFormField.OptionValue> allOptionValues = dropDownField.getAllOptionValues(context, WidgetWorker.getDelegator(context));
         // if the current value should go first, display it
         if (UtilValidate.isNotEmpty(currentValue) && "first-in-list".equals(dropDownField.getCurrent())) {
             String explicitDescription = dropDownField.getCurrentDescription(context);
@@ -119,9 +119,7 @@ public class TextFormRenderer implements FormStringRenderer {
                 this.makeTextString(writer, modelFormField.getWidgetStyle(), ModelFormField.FieldInfoWithOptions.getDescriptionForOptionKey(currentValue, allOptionValues));
             }
         } else {
-            Iterator optionValueIter = allOptionValues.iterator();
-            while (optionValueIter.hasNext()) {
-                ModelFormField.OptionValue optionValue = (ModelFormField.OptionValue) optionValueIter.next();
+            for (ModelFormField.OptionValue optionValue: allOptionValues) {
                 String noCurrentSelectedKey = dropDownField.getNoCurrentSelectedKey(context);
                 if ((UtilValidate.isNotEmpty(currentValue) && currentValue.equals(optionValue.getKey()) && "selected".equals(dropDownField.getCurrent())) ||
                         (UtilValidate.isEmpty(currentValue) && noCurrentSelectedKey != null && noCurrentSelectedKey.equals(optionValue.getKey()))) {
@@ -296,5 +294,8 @@ public class TextFormRenderer implements FormStringRenderer {
     }
 
     public void renderHyperlinkTitle(Appendable writer, Map<String, Object> context, ModelFormField modelFormField, String titleText) {
+    }
+
+    public void renderContainerFindField(Appendable writer, Map<String, Object> context, ContainerField containerField) throws IOException {
     }
 }

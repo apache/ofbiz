@@ -18,39 +18,36 @@
  *******************************************************************************/
 package org.ofbiz.entity.finder;
 
+import static org.ofbiz.base.util.UtilGenerics.cast;
+
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javolution.util.FastMap;
-
 import org.ofbiz.base.util.Debug;
-import org.ofbiz.base.util.UtilValidate;
-import org.ofbiz.base.util.StringUtil;
 import org.ofbiz.base.util.ObjectType;
-import static org.ofbiz.base.util.UtilGenerics.cast;
-import org.ofbiz.base.util.UtilFormatOut;
+import org.ofbiz.base.util.StringUtil;
+import org.ofbiz.base.util.UtilGenerics;
+import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.base.util.UtilXml;
 import org.ofbiz.base.util.collections.FlexibleMapAccessor;
 import org.ofbiz.base.util.string.FlexibleStringExpander;
-import org.ofbiz.entity.GenericDelegator;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
 import org.ofbiz.entity.condition.EntityComparisonOperator;
 import org.ofbiz.entity.condition.EntityCondition;
-import org.ofbiz.entity.condition.EntityConditionList;
-import org.ofbiz.entity.condition.EntityExpr;
 import org.ofbiz.entity.condition.EntityFunction;
 import org.ofbiz.entity.condition.EntityJoinOperator;
 import org.ofbiz.entity.condition.EntityOperator;
 import org.ofbiz.entity.model.ModelEntity;
-import org.ofbiz.entity.model.ModelField;
+import org.ofbiz.entity.model.ModelFieldTypeReader;
 import org.ofbiz.entity.util.EntityListIterator;
 import org.w3c.dom.Element;
 
@@ -66,24 +63,24 @@ public class EntityFinderUtil {
         Map<FlexibleMapAccessor<Object>, Object> fieldMap = null;
         List<? extends Element> fieldMapElementList = UtilXml.childElementList(element, "field-map");
         if (fieldMapElementList.size() > 0) {
-            fieldMap = FastMap.newInstance();
+            fieldMap = new HashMap<FlexibleMapAccessor<Object>, Object>(fieldMapElementList.size());
             for (Element fieldMapElement: fieldMapElementList) {
                 // set the env-name for each field-name, noting that if no field-name is specified it defaults to the env-name
                 String fieldName = fieldMapElement.getAttribute("field-name");
                 String envName = fieldMapElement.getAttribute("from-field");
-                if (UtilValidate.isEmpty(envName)) {
+                if (envName.isEmpty()) {
                     envName = fieldMapElement.getAttribute("env-name");
                 }
                 String value = fieldMapElement.getAttribute("value");
-                if (UtilValidate.isEmpty(fieldName)) {
+                if (fieldName.isEmpty()) {
                     // no fieldName, use envName for both
                     fieldMap.put(FlexibleMapAccessor.getInstance(envName), FlexibleMapAccessor.getInstance(envName));
                 } else {
-                    if (UtilValidate.isNotEmpty(value)) {
+                    if (!value.isEmpty()) {
                         fieldMap.put(FlexibleMapAccessor.getInstance(fieldName), FlexibleStringExpander.getInstance(value));
                     } else {
                         // at this point we have a fieldName and no value, do we have a envName?
-                        if (UtilValidate.isNotEmpty(envName)) {
+                        if (!envName.isEmpty()) {
                             fieldMap.put(FlexibleMapAccessor.getInstance(fieldName), FlexibleMapAccessor.getInstance(envName));
                         } else {
                             // no envName, use fieldName for both
@@ -102,7 +99,7 @@ public class EntityFinderUtil {
             for (Map.Entry<FlexibleMapAccessor<Object>, Object> entry: fieldMap.entrySet()) {
                 FlexibleMapAccessor<Object> serviceContextFieldAcsr = entry.getKey();
                 Object valueSrc = entry.getValue();
-                if (valueSrc instanceof FlexibleMapAccessor) {
+                if (valueSrc instanceof FlexibleMapAccessor<?>) {
                     FlexibleMapAccessor<Object> contextEnvAcsr = cast(valueSrc);
                     serviceContextFieldAcsr.put(outContext, contextEnvAcsr.get(context));
                 } else if (valueSrc instanceof FlexibleStringExpander) {
@@ -119,7 +116,7 @@ public class EntityFinderUtil {
         List<FlexibleStringExpander> selectFieldExpanderList = null;
         List<? extends Element> selectFieldElementList = UtilXml.childElementList(element, "select-field");
         if (selectFieldElementList.size() > 0) {
-            selectFieldExpanderList = new LinkedList<FlexibleStringExpander>();
+            selectFieldExpanderList = new ArrayList<FlexibleStringExpander>(selectFieldElementList.size());
             for (Element selectFieldElement: selectFieldElementList) {
                 selectFieldExpanderList.add(FlexibleStringExpander.getInstance(selectFieldElement.getAttribute("field-name")));
             }
@@ -141,7 +138,7 @@ public class EntityFinderUtil {
     public static List<String> makeOrderByFieldList(List<FlexibleStringExpander> orderByExpanderList, Map<String, Object> context) {
         List<String> orderByFields = null;
         if (UtilValidate.isNotEmpty(orderByExpanderList)) {
-            orderByFields = new LinkedList<String>();
+            orderByFields = new ArrayList<String>(orderByExpanderList.size());
             for (FlexibleStringExpander orderByExpander: orderByExpanderList) {
                 orderByFields.add(orderByExpander.expandString(context));
             }
@@ -150,31 +147,39 @@ public class EntityFinderUtil {
     }
 
     public static interface Condition extends Serializable {
-        public EntityCondition createCondition(Map<String, ? extends Object> context, String entityName, GenericDelegator delegator);
+        public EntityCondition createCondition(Map<String, ? extends Object> context, ModelEntity modelEntity, ModelFieldTypeReader modelFieldTypeReader);
     }
-    public static class ConditionExpr implements Condition {
-        protected FlexibleStringExpander fieldNameExdr;
-        protected FlexibleStringExpander operatorExdr;
-        protected FlexibleMapAccessor<Object> envNameAcsr;
-        protected FlexibleStringExpander valueExdr;
-        protected FlexibleStringExpander ignoreExdr;
-        protected boolean ignoreIfNull;
-        protected boolean ignoreIfEmpty;
-        protected boolean ignoreCase;
+
+    @SuppressWarnings("serial")
+    public static final class ConditionExpr implements Condition {
+        private final String fieldName;
+        private final EntityOperator<?,?,?> operator;
+        private final FlexibleMapAccessor<Object> envNameAcsr;
+        private final FlexibleStringExpander valueExdr;
+        private final FlexibleStringExpander ignoreExdr;
+        private final boolean ignoreIfNull;
+        private final boolean ignoreIfEmpty;
+        private final boolean ignoreCase;
 
         public ConditionExpr(Element conditionExprElement) {
-            this.fieldNameExdr = FlexibleStringExpander.getInstance(conditionExprElement.getAttribute("field-name"));
-            if (this.fieldNameExdr.isEmpty()) {
-                // no "field-name"? try "name"
-                this.fieldNameExdr = FlexibleStringExpander.getInstance(conditionExprElement.getAttribute("name"));
+            String fieldNameAttribute = conditionExprElement.getAttribute("field-name");
+            if (fieldNameAttribute.isEmpty()) {
+                fieldNameAttribute = conditionExprElement.getAttribute("name");
             }
-
-            this.operatorExdr = FlexibleStringExpander.getInstance(UtilFormatOut.checkEmpty(conditionExprElement.getAttribute("operator"), "equals"));
-            if (UtilValidate.isNotEmpty(conditionExprElement.getAttribute("from-field"))) {
-                this.envNameAcsr = FlexibleMapAccessor.getInstance(conditionExprElement.getAttribute("from-field"));
-            } else {
-                this.envNameAcsr = FlexibleMapAccessor.getInstance(conditionExprElement.getAttribute("env-name"));
+            this.fieldName = fieldNameAttribute;
+            String operatorAttribute = conditionExprElement.getAttribute("operator");
+            if (operatorAttribute.isEmpty()) {
+                operatorAttribute = "equals";
             }
+            this.operator = EntityOperator.lookup(operatorAttribute);
+            if (this.operator == null) {
+                throw new IllegalArgumentException("Could not find an entity operator for the name: " + operatorAttribute);
+            }
+            String fromFieldAttribute = conditionExprElement.getAttribute("from-field");
+            if (fromFieldAttribute.isEmpty()) {
+                fromFieldAttribute = conditionExprElement.getAttribute("env-name");
+            }
+            this.envNameAcsr = FlexibleMapAccessor.getInstance(fromFieldAttribute);
             this.valueExdr = FlexibleStringExpander.getInstance(conditionExprElement.getAttribute("value"));
             this.ignoreIfNull = "true".equals(conditionExprElement.getAttribute("ignore-if-null"));
             this.ignoreIfEmpty = "true".equals(conditionExprElement.getAttribute("ignore-if-empty"));
@@ -182,28 +187,20 @@ public class EntityFinderUtil {
             this.ignoreExdr = FlexibleStringExpander.getInstance(conditionExprElement.getAttribute("ignore"));
         }
 
-        public EntityCondition createCondition(Map<String, ? extends Object> context, String entityName, GenericDelegator delegator) {
-            ModelEntity modelEntity = delegator.getModelEntity(entityName);
-            if (modelEntity == null) {
-                throw new IllegalArgumentException("Error in Entity Find: could not find entity with name [" + entityName + "]");
+        public EntityCondition createCondition(Map<String, ? extends Object> context, ModelEntity modelEntity, ModelFieldTypeReader modelFieldTypeReader) {
+            if ("true".equals(this.ignoreExdr.expandString(context))) {
+                return null;
+            }
+            if (modelEntity.getField(fieldName) == null) {
+                throw new IllegalArgumentException("Error in Entity Find: could not find field [" + fieldName + "] in entity with name [" + modelEntity.getEntityName() + "]");
             }
 
-            String fieldName = fieldNameExdr.expandString(context);
-
-            Object value = null;
-            // start with the environment variable, will override if exists and a value is specified
-            if (envNameAcsr != null) {
-                value = envNameAcsr.get(context);
-            }
-            // no value so far, and a string value is specified, use that
-            if (value == null && valueExdr != null) {
+            Object value = envNameAcsr.get(context);
+            if (value == null && !valueExdr.isEmpty()) {
                 value = valueExdr.expandString(context);
             }
-
-            String operatorName = operatorExdr.expandString(context);
-            EntityOperator operator = EntityOperator.lookup(operatorName);
-            if (operator == null) {
-                throw new IllegalArgumentException("Could not find an entity operator for the name: " + operatorName);
+            if (this.ignoreIfNull && value == null) {
+                return null;
             }
 
             // If IN or BETWEEN operator, see if value is a literal list and split it
@@ -215,28 +212,21 @@ public class EntityFinderUtil {
                 } else if (((String)value).indexOf(",") >= 0) {
                     delim = ",";
                 }
-                if (UtilValidate.isNotEmpty(delim)) {
+                if (delim != null) {
                     value = StringUtil.split((String)value, delim);
                 }
             }
 
             // don't convert the field to the desired type if this is an IN or BETWEEN operator and we have a Collection
             if (!((operator.equals(EntityOperator.IN) || operator.equals(EntityOperator.BETWEEN) || operator.equals(EntityOperator.NOT_IN))
-                    && value instanceof Collection)) {
+                    && value instanceof Collection<?>)) {
                 // now to a type conversion for the target fieldName
-                value = modelEntity.convertFieldValue(modelEntity.getField(fieldName), value, delegator, context);
+                value = modelEntity.convertFieldValue(modelEntity.getField(fieldName), value, modelFieldTypeReader, context);
             }
 
             if (Debug.verboseOn()) Debug.logVerbose("Got value for fieldName [" + fieldName + "]: " + value, module);
 
-            if (this.ignoreIfNull && value == null) {
-                return null;
-            }
             if (this.ignoreIfEmpty && ObjectType.isEmpty(value)) {
-                return null;
-            }
-
-            if ("true".equals(this.ignoreExdr.expandString(context))) {
                 return null;
             }
 
@@ -245,87 +235,93 @@ public class EntityFinderUtil {
                 // this makes more sense logically, but if anyone ever needs it to not behave this way we should add an "or-null" attribute that is true by default
                 if (ignoreCase) {
                     return EntityCondition.makeCondition(
-                            EntityCondition.makeCondition(EntityFunction.UPPER_FIELD(fieldName), (EntityComparisonOperator) operator, EntityFunction.UPPER(value)),
+                            EntityCondition.makeCondition(EntityFunction.UPPER_FIELD(fieldName), UtilGenerics.<EntityComparisonOperator<?,?>>cast(operator), EntityFunction.UPPER(value)),
                             EntityOperator.OR,
                             EntityCondition.makeCondition(fieldName, EntityOperator.EQUALS, null));
                 } else {
                     return EntityCondition.makeCondition(
-                            EntityCondition.makeCondition(fieldName, (EntityComparisonOperator) operator, value),
+                            EntityCondition.makeCondition(fieldName, UtilGenerics.<EntityComparisonOperator<?,?>>cast(operator), value),
                             EntityOperator.OR,
                             EntityCondition.makeCondition(fieldName, EntityOperator.EQUALS, null));
                 }
             } else {
                 if (ignoreCase) {
                     // use the stuff to upper case both sides
-                    return EntityCondition.makeCondition(EntityFunction.UPPER_FIELD(fieldName), (EntityComparisonOperator) operator, EntityFunction.UPPER(value));
+                    return EntityCondition.makeCondition(EntityFunction.UPPER_FIELD(fieldName), UtilGenerics.<EntityComparisonOperator<?,?>>cast(operator), EntityFunction.UPPER(value));
                 } else {
-                    return EntityCondition.makeCondition(fieldName, (EntityComparisonOperator) operator, value);
+                    return EntityCondition.makeCondition(fieldName, UtilGenerics.<EntityComparisonOperator<?,?>>cast(operator), value);
                 }
             }
         }
     }
 
-    public static class ConditionList implements Condition {
-        List<Condition> conditionList = new LinkedList<Condition>();
-        FlexibleStringExpander combineExdr;
+    @SuppressWarnings("serial")
+    public static final class ConditionList implements Condition {
+        private final List<Condition> conditionList;
+        private final EntityOperator<?,?,?> operator;
 
         public ConditionList(Element conditionListElement) {
-            this.combineExdr = FlexibleStringExpander.getInstance(conditionListElement.getAttribute("combine"));
-
+            String operatorAttribute = conditionListElement.getAttribute("combine");
+            if (operatorAttribute.isEmpty()) {
+                operatorAttribute = "and";
+            }
+            this.operator = EntityOperator.lookup(operatorAttribute);
+            if (this.operator == null) {
+                throw new IllegalArgumentException("Could not find an entity operator for the name: " + operatorAttribute);
+            }
             List<? extends Element> subElements = UtilXml.childElementList(conditionListElement);
-            for (Element subElement: subElements) {
-                if ("condition-expr".equals(subElement.getNodeName())) {
-                    conditionList.add(new ConditionExpr(subElement));
-                } else if ("condition-list".equals(subElement.getNodeName())) {
-                    conditionList.add(new ConditionList(subElement));
-                } else if ("condition-object".equals(subElement.getNodeName())) {
-                    conditionList.add(new ConditionObject(subElement));
-                } else {
-                    throw new IllegalArgumentException("Invalid element with name [" + subElement.getNodeName() + "] found under a condition-list element.");
+            if (subElements.isEmpty()) {
+                this.conditionList = null;
+            } else {
+                List<Condition> conditionList = new ArrayList<Condition>(subElements.size());
+                for (Element subElement : subElements) {
+                    if ("condition-expr".equals(subElement.getNodeName())) {
+                        conditionList.add(new ConditionExpr(subElement));
+                    } else if ("condition-list".equals(subElement.getNodeName())) {
+                        conditionList.add(new ConditionList(subElement));
+                    } else if ("condition-object".equals(subElement.getNodeName())) {
+                        conditionList.add(new ConditionObject(subElement));
+                    } else {
+                        throw new IllegalArgumentException("Invalid element with name [" + subElement.getNodeName() + "] found under a condition-list element.");
+                    }
                 }
+                this.conditionList = Collections.unmodifiableList(conditionList);
             }
         }
 
-        public EntityCondition createCondition(Map<String, ? extends Object> context, String entityName, GenericDelegator delegator) {
-            if (this.conditionList.size() == 0) {
+        public EntityCondition createCondition(Map<String, ? extends Object> context, ModelEntity modelEntity, ModelFieldTypeReader modelFieldTypeReader) {
+            if (this.conditionList == null) {
                 return null;
             }
             if (this.conditionList.size() == 1) {
                 Condition condition = this.conditionList.get(0);
-                return condition.createCondition(context, entityName, delegator);
+                return condition.createCondition(context, modelEntity, modelFieldTypeReader);
             }
-
-            List<EntityCondition> entityConditionList = new LinkedList<EntityCondition>();
-            for (Condition curCondition: conditionList) {
-                EntityCondition econd = curCondition.createCondition(context, entityName, delegator);
+            List<EntityCondition> entityConditionList = new ArrayList<EntityCondition>(this.conditionList.size());
+            for (Condition curCondition: this.conditionList) {
+                EntityCondition econd = curCondition.createCondition(context, modelEntity, modelFieldTypeReader);
                 if (econd != null) {
                     entityConditionList.add(econd);
                 }
             }
-
-            String operatorName = combineExdr.expandString(context);
-            EntityOperator operator = EntityOperator.lookup(operatorName);
-            if (operator == null) {
-                throw new IllegalArgumentException("Could not find an entity operator for the name: " + operatorName);
-            }
-
-            return EntityCondition.makeCondition(entityConditionList, (EntityJoinOperator) operator);
+            return EntityCondition.makeCondition(entityConditionList, UtilGenerics.<EntityJoinOperator>cast(operator));
         }
     }
-    public static class ConditionObject implements Condition {
-        protected FlexibleMapAccessor<Object> fieldNameAcsr;
+
+    @SuppressWarnings("serial")
+    public static final class ConditionObject implements Condition {
+        private final FlexibleMapAccessor<Object> fieldNameAcsr;
 
         public ConditionObject(Element conditionExprElement) {
-            this.fieldNameAcsr = FlexibleMapAccessor.getInstance(conditionExprElement.getAttribute("field-name"));
-            if (this.fieldNameAcsr.isEmpty()) {
-                // no "field-name"? try "name"
-                this.fieldNameAcsr = FlexibleMapAccessor.getInstance(conditionExprElement.getAttribute("name"));
+            String fieldNameAttribute = conditionExprElement.getAttribute("field");
+            if (fieldNameAttribute.isEmpty()) {
+                fieldNameAttribute = conditionExprElement.getAttribute("field-name");
             }
+            this.fieldNameAcsr = FlexibleMapAccessor.getInstance(fieldNameAttribute);
         }
 
-        public EntityCondition createCondition(Map<String, ? extends Object> context, String entityName, GenericDelegator delegator) {
-            EntityCondition condition = (EntityCondition) fieldNameAcsr.get(context);
-            return condition;
+        public EntityCondition createCondition(Map<String, ? extends Object> context, ModelEntity modelEntity, ModelFieldTypeReader modelFieldTypeReader) {
+            return (EntityCondition) fieldNameAcsr.get(context);
         }
     }
 
@@ -333,6 +329,8 @@ public class EntityFinderUtil {
         public void handleOutput(EntityListIterator eli, Map<String, Object> context, FlexibleMapAccessor<Object> listAcsr);
         public void handleOutput(List<GenericValue> results, Map<String, Object> context, FlexibleMapAccessor<Object> listAcsr);
     }
+
+    @SuppressWarnings("serial")
     public static class LimitRange implements OutputHandler {
         FlexibleStringExpander startExdr;
         FlexibleStringExpander sizeExdr;
@@ -365,7 +363,7 @@ public class EntityFinderUtil {
         }
 
         public void handleOutput(EntityListIterator eli, Map<String, Object> context, FlexibleMapAccessor<Object> listAcsr) {
-            int start = getStart(context);
+            int start = getStart(context) + 1; // ELI index is one-based.
             int size = getSize(context);
             try {
                 listAcsr.put(context, eli.getPartialList(start, size));
@@ -378,15 +376,23 @@ public class EntityFinderUtil {
         }
 
         public void handleOutput(List<GenericValue> results, Map<String, Object> context, FlexibleMapAccessor<Object> listAcsr) {
+            List<GenericValue> result = null;
             int start = getStart(context);
-            int size = getSize(context);
-
-            int end = start + size;
-            if (end > results.size()) end = results.size();
-
-            listAcsr.put(context, results.subList(start, end));
+            if (start < results.size()) {
+                int size = getSize(context);
+                int end = start + size;
+                if (end > results.size()) {
+                    end = results.size();
+                }
+                result = results.subList(start, end);
+            } else {
+                result = new LinkedList<GenericValue>();
+            }
+            listAcsr.put(context, result);
         }
     }
+
+    @SuppressWarnings("serial")
     public static class LimitView implements OutputHandler {
         FlexibleStringExpander viewIndexExdr;
         FlexibleStringExpander viewSizeExdr;
@@ -421,9 +427,8 @@ public class EntityFinderUtil {
         public void handleOutput(EntityListIterator eli, Map<String, Object> context, FlexibleMapAccessor<Object> listAcsr) {
             int index = this.getIndex(context);
             int size = this.getSize(context);
-
             try {
-                listAcsr.put(context, eli.getPartialList(((index - 1) * size) + 1, size));
+                listAcsr.put(context, eli.getPartialList(((index - 1) * size) + 1, size)); // ELI index is one-based.
                 eli.close();
             } catch (GenericEntityException e) {
                 String errMsg = "Error getting partial list in limit-view with index=" + index + " and size=" + size + ": " + e.toString();
@@ -433,16 +438,24 @@ public class EntityFinderUtil {
         }
 
         public void handleOutput(List<GenericValue> results, Map<String, Object> context, FlexibleMapAccessor<Object> listAcsr) {
+            List<GenericValue> result = null;
             int index = this.getIndex(context);
             int size = this.getSize(context);
-
-            int begin = index * size;
-            int end = index * size + size;
-            if (end > results.size()) end = results.size();
-
-            listAcsr.put(context, results.subList(begin, end));
+            int begin = (index - 1) * size;
+            if (begin < results.size()) {
+                int end = begin + size;
+                if (end > results.size()) {
+                    end = results.size();
+                }
+                result = results.subList(begin, end);
+            } else {
+                result = new LinkedList<GenericValue>();
+            }
+            listAcsr.put(context, result);
         }
     }
+
+    @SuppressWarnings("serial")
     public static class UseIterator implements OutputHandler {
         public UseIterator(Element useIteratorElement) {
             // no parameters, nothing to do
@@ -456,6 +469,7 @@ public class EntityFinderUtil {
             throw new IllegalArgumentException("Cannot handle output with use-iterator when the query is cached, or the result in general is not an EntityListIterator");
         }
     }
+    @SuppressWarnings("serial")
     public static class GetAll implements OutputHandler {
         public GetAll() {
             // no parameters, nothing to do

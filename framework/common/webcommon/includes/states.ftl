@@ -25,11 +25,11 @@ under the License.
 <#if requestParameters.CUSTOMER_COUNTRY?exists>
     <#assign stateAssocs = Static["org.ofbiz.common.CommonWorkers"].getAssociatedStateList(delegator,requestParameters.CUSTOMER_COUNTRY)>
 <#else>
-    <#assign stateAssocs = Static["org.ofbiz.common.CommonWorkers"].getAssociatedStateList(delegator,defaultCountryId)>
+    <#assign stateAssocs = Static["org.ofbiz.common.CommonWorkers"].getAssociatedStateList(delegator,null)>
 </#if>
 
 <#list stateAssocs as stateAssoc>
-    <#assign state = delegator.getRelatedOne("AssocGeo", stateAssoc )>
+    <#assign state = stateAssoc.getRelatedOne("AssocGeo", false)>
     <option value='${state.geoId}'>${state.geoName?default(state.geoId)}</option>
 </#list>
 -->

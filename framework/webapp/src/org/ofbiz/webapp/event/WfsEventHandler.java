@@ -38,9 +38,13 @@ import javolution.util.FastMap;
 
 import org.ofbiz.base.location.FlexibleLocation;
 import org.ofbiz.base.util.UtilFormatOut;
+import org.ofbiz.base.util.UtilGenerics;
 import org.ofbiz.base.util.UtilProperties;
 import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.base.util.UtilXml;
+import org.ofbiz.base.util.template.FreeMarkerWorker;
+import org.ofbiz.entity.GenericValue;
+import org.ofbiz.minilang.MiniLangException;
 import org.ofbiz.minilang.SimpleMethod;
 import org.ofbiz.minilang.method.MethodContext;
 import org.ofbiz.webapp.control.ConfigXMLReader.Event;
@@ -50,7 +54,6 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.xml.sax.SAXException;
 
-import freemarker.ext.beans.BeansWrapper;
 import freemarker.ext.dom.NodeModel;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
@@ -73,12 +76,12 @@ public class WfsEventHandler implements EventHandler {
     }
 
     /** Invoke the web event
-     *@param eventPath The path or location of this event
-     *@param eventMethod The method to invoke
-     *@param request The servlet request object
-     *@param response The servlet response object
-     *@return String Result code
-     *@throws EventHandlerException
+     * @param event Contains information about what to execute
+     * @param requestMap Contains information about the request-map the event was called from
+     * @param request The servlet request object
+     * @param response The servlet response object
+     * @return String Result code
+     * @throws EventHandlerException
      */
     public String invoke(Event event, RequestMap requestMap, HttpServletRequest request, HttpServletResponse response) throws EventHandlerException {
         //LocalDispatcher dispatcher = (LocalDispatcher) request.getAttribute("dispatcher");
@@ -86,11 +89,10 @@ public class WfsEventHandler implements EventHandler {
         Element queryElem = null;
 
         try {
-            Map paramMap = request.getParameterMap();
-            typeName = (String)request.getParameter("typename");
+            typeName = request.getParameter("typename");
             //determine if "get" or "post" and get "filter" param accordingly
             if (UtilValidate.isNotEmpty(typeName)) {
-                String queryFieldCoded = (String)request.getParameter("filter");
+                String queryFieldCoded = request.getParameter("filter");
                 String queryFieldDecoded = UtilFormatOut.decodeQueryValue(queryFieldCoded);
                 Document doc = UtilXml.readXmlDocument(queryFieldDecoded);
                 queryElem = doc.getDocumentElement();
@@ -107,10 +109,10 @@ public class WfsEventHandler implements EventHandler {
             // run simple method script to get a list of entities
             Document simpleDoc = UtilXml.readXmlDocument(xmlScript);
             Element simpleElem = simpleDoc.getDocumentElement();
-            SimpleMethod meth = new SimpleMethod(simpleElem, null, null);
+            SimpleMethod meth = new SimpleMethod(simpleElem, null);
             MethodContext methodContext = new MethodContext(request, response, null);
-            String retStr = meth.exec(methodContext); //Need to check return string
-            List entityList = (List) request.getAttribute("entityList");
+            meth.exec(methodContext); //Need to check return string
+            List<GenericValue> entityList = UtilGenerics.cast(request.getAttribute("entityList"));
             request.setAttribute("entityList", entityList);
 
         } catch (TemplateException ioe) {
@@ -131,6 +133,9 @@ public class WfsEventHandler implements EventHandler {
         } catch (IOException ioe) {
             sendError(response, "Problem handling event");
             throw new EventHandlerException("Cannot read the input stream", ioe);
+        } catch (MiniLangException e) {
+            sendError(response, "Problem handling event");
+            throw new EventHandlerException("Error encountered while running simple method", e);
         }
 
 
@@ -149,28 +154,7 @@ public class WfsEventHandler implements EventHandler {
             throw new EventHandlerException(e.getMessage(), e);
         }
     }
-
-    private String getLocationURI(HttpServletRequest request) {
-        StringBuilder uri = new StringBuilder();
-//        uri.append(request.getScheme());
-//        uri.append("://");
-//        uri.append(request.getServerName());
-//        if (request.getServerPort() != 80 && request.getServerPort() != 443) {
-//            uri.append(":");
-//            uri.append(request.getServerPort());
-//        }
-//        uri.append(request.getContextPath());
-//        uri.append(request.getServletPath());
-//
-//        String reqInfo = RequestHandler.getRequestUri(request.getPathInfo());
-//        if (!reqInfo.startsWith("/")) {
-//            reqInfo = "/" + reqInfo;
-//        }
-//
-//        uri.append(reqInfo);
-        return uri.toString();
-    }
-
+   
     public static String processWfsEntity(String entityName, Node domNode, String templatePath) throws TemplateException, FileNotFoundException, IOException, URISyntaxException {
         String result = null;
         NodeModel nodeModel = NodeModel.wrap(domNode);
@@ -199,7 +183,7 @@ public class WfsEventHandler implements EventHandler {
 
     public static Configuration makeDefaultOfbizConfig() throws TemplateException, IOException {
         Configuration config = new Configuration();
-        config.setObjectWrapper(BeansWrapper.getDefaultInstance());
+        config.setObjectWrapper(FreeMarkerWorker.getDefaultOfbizWrapper());
         config.setSetting("datetime_format", "yyyy-MM-dd HH:mm:ss.SSS");
         Configuration defaultOfbizConfig = config;
         return defaultOfbizConfig;

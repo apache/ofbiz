@@ -19,7 +19,6 @@
 package org.ofbiz.common;
 
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -27,11 +26,12 @@ import java.util.StringTokenizer;
 import java.util.TreeSet;
 
 import javolution.util.FastMap;
+
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.base.util.UtilProperties;
 import org.ofbiz.base.util.UtilValidate;
-import org.ofbiz.entity.GenericDelegator;
+import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
 
@@ -164,7 +164,7 @@ public class KeywordSearchUtil {
             }
 
             // group by word, add up weight
-            Long curWeight = (Long) keywords.get(token);
+            Long curWeight = keywords.get(token);
             if (curWeight == null) {
                 keywords.put(token, Long.valueOf(1));
             } else {
@@ -214,11 +214,11 @@ public class KeywordSearchUtil {
         return keywords.keySet();
     }
 
-    public static boolean expandKeywordForSearch(String enteredKeyword, Set<String> addToSet, GenericDelegator delegator) {
+    public static boolean expandKeywordForSearch(String enteredKeyword, Set<String> addToSet, Delegator delegator) {
         boolean replaceEnteredKeyword = false;
 
         try {
-            List<GenericValue> thesaurusList = delegator.findByAndCache("KeywordThesaurus", UtilMisc.toMap("enteredKeyword", enteredKeyword));
+            List<GenericValue> thesaurusList = delegator.findByAnd("KeywordThesaurus", UtilMisc.toMap("enteredKeyword", enteredKeyword), null, true);
             for (GenericValue keywordThesaurus: thesaurusList) {
                 String relationshipEnumId = (String) keywordThesaurus.get("relationshipEnumId");
                 if (thesaurusRelsToInclude.contains(relationshipEnumId)) {

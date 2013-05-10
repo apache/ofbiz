@@ -24,6 +24,7 @@ import java.util.Locale;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.ofbiz.base.util.UtilDateTime;
 import org.ofbiz.base.util.UtilHttp;
 import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.base.util.UtilProperties;
@@ -40,7 +41,7 @@ public class UtilCacheEvents {
     /** An HTTP WebEvent handler the specified element from the specified cache
      * @param request The HTTP request object for the current JSP or Servlet request.
      * @param response The HTTP response object for the current JSP or Servlet request.
-     * @return
+     * @return return an HTTP WebEvent handler the specified element from the specified cache
      */
     public static String removeElementEvent(HttpServletRequest request, HttpServletResponse response) {
         String errMsg = "";
@@ -74,29 +75,22 @@ public class UtilCacheEvents {
             return "error";
         }
 
-        UtilCache utilCache = UtilCache.findCache(name);
+        UtilCache<?, ?> utilCache = UtilCache.findCache(name);
 
         if (utilCache != null) {
             Object key = null;
 
-            if (utilCache.getMaxSize() > 0) {
-                try {
-                    key = utilCache.cacheLineTable.getKeyFromMemory(number);
-                } catch (Exception e) {}
-            } else {
-                // no LRU, try looping through the keySet to see if we find the specified index...
-                Iterator ksIter = utilCache.cacheLineTable.keySet().iterator();
-                int curNum = 0;
+            Iterator<?> ksIter = utilCache.getCacheLineKeys().iterator();
+            int curNum = 0;
 
-                while (ksIter.hasNext()) {
-                    if (number == curNum) {
-                        key = ksIter.next();
-                        break;
-                    } else {
-                        ksIter.next();
-                    }
-                    curNum++;
+            while (ksIter.hasNext()) {
+                if (number == curNum) {
+                    key = ksIter.next();
+                    break;
+                } else {
+                    ksIter.next();
                 }
+                curNum++;
             }
 
             if (key != null) {
@@ -119,7 +113,7 @@ public class UtilCacheEvents {
     /** An HTTP WebEvent handler that clears the named cache
      * @param request The HTTP request object for the current JSP or Servlet request.
      * @param response The HTTP response object for the current JSP or Servlet request.
-     * @return
+     * @return return an HTTP WebEvent handler that clears the named cache
      */
     public static String clearEvent(HttpServletRequest request, HttpServletResponse response) {
         String errMsg = "";
@@ -139,7 +133,7 @@ public class UtilCacheEvents {
             request.setAttribute("_ERROR_MESSAGE_", errMsg);
             return "error";
         }
-        UtilCache utilCache = UtilCache.findCache(name);
+        UtilCache<?, ?> utilCache = UtilCache.findCache(name);
 
         if (utilCache != null) {
             utilCache.clear();
@@ -156,7 +150,7 @@ public class UtilCacheEvents {
     /** An HTTP WebEvent handler that clears all caches
      * @param request The HTTP request object for the current JSP or Servlet request.
      * @param response The HTTP response object for the current JSP or Servlet request.
-     * @return
+     * @return return an HTTP WebEvent handler that clears all caches
      */
     public static String clearAllEvent(HttpServletRequest request, HttpServletResponse response) {
         String errMsg = "";
@@ -170,37 +164,15 @@ public class UtilCacheEvents {
         }
 
         UtilCache.clearAllCaches();
-        errMsg = UtilProperties.getMessage(UtilCacheEvents.err_resource, "utilCache.clearAllCaches", locale) + ".";
-        request.setAttribute("_EVENT_MESSAGE_", errMsg);
-        return "success";
-    }
-
-    /** An HTTP WebEvent handler that clears all caches
-     * @param request The HTTP request object for the current JSP or Servlet request.
-     * @param response The HTTP response object for the current JSP or Servlet request.
-     * @return
-     */
-    public static String clearAllExpiredEvent(HttpServletRequest request, HttpServletResponse response) {
-        String errMsg = "";
-        Locale locale = UtilHttp.getLocale(request);
-
-        Security security = (Security) request.getAttribute("security");
-        if (!security.hasPermission("UTIL_CACHE_EDIT", request.getSession())) {
-            errMsg = UtilProperties.getMessage(UtilCacheEvents.err_resource, "utilCacheEvents.permissionEdit", locale) + ".";
-            request.setAttribute("_ERROR_MESSAGE_", errMsg);
-            return "error";
-        }
-
-        UtilCache.clearExpiredFromAllCaches();
-        errMsg = UtilProperties.getMessage(UtilCacheEvents.err_resource, "utilCache.clearAllExpiredElements", locale) + ".";
-        request.setAttribute("_EVENT_MESSAGE_", errMsg);
+        errMsg = UtilProperties.getMessage(UtilCacheEvents.err_resource, "utilCache.clearAllCaches", locale);
+        request.setAttribute("_EVENT_MESSAGE_", errMsg + " (" + UtilDateTime.nowDateString("yyyy-MM-dd HH:mm:ss")  + ").");
         return "success";
     }
 
     /** An HTTP WebEvent handler that updates the named cache
      * @param request The HTTP request object for the current JSP or Servlet request.
      * @param response The HTTP response object for the current JSP or Servlet request.
-     * @return
+     * @return return an HTTP WebEvent handler that updates the named cache
      */
     public static String updateEvent(HttpServletRequest request, HttpServletResponse response) {
         String errMsg = "";
@@ -220,24 +192,25 @@ public class UtilCacheEvents {
             request.setAttribute("_ERROR_MESSAGE_", errMsg);
             return "error";
         }
-        String maxSizeStr = request.getParameter("UTIL_CACHE_MAX_SIZE");
+        String maxInMemoryStr = request.getParameter("UTIL_CACHE_MAX_IN_MEMORY");
         String expireTimeStr = request.getParameter("UTIL_CACHE_EXPIRE_TIME");
         String useSoftReferenceStr = request.getParameter("UTIL_CACHE_USE_SOFT_REFERENCE");
 
-        Long maxSize = null, expireTime = null;
+        Integer maxInMemory = null;
+        Long expireTime = null;
 
         try {
-            maxSize = Long.valueOf(maxSizeStr);
+            maxInMemory = Integer.valueOf(maxInMemoryStr);
         } catch (Exception e) {}
         try {
             expireTime = Long.valueOf(expireTimeStr);
         } catch (Exception e) {}
 
-        UtilCache utilCache = UtilCache.findCache(name);
+        UtilCache<?, ?> utilCache = UtilCache.findCache(name);
 
         if (utilCache != null) {
-            if (maxSize != null)
-                utilCache.setMaxSize(maxSize.intValue());
+            if (maxInMemory != null)
+                utilCache.setMaxInMemory(maxInMemory.intValue());
             if (expireTime != null)
                 utilCache.setExpireTime(expireTime.longValue());
             if (useSoftReferenceStr != null) {

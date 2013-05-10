@@ -23,21 +23,20 @@ import java.io.Serializable;
 import java.sql.Timestamp;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import javolution.util.FastList;
-import javolution.util.FastMap;
-import javolution.util.FastSet;
 
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilDateTime;
 import org.ofbiz.base.util.UtilGenerics;
 import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.base.util.UtilValidate;
-import org.ofbiz.entity.GenericDelegator;
+import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericEntity;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
@@ -53,14 +52,14 @@ public class EntityUtil {
 
     public static final String module = EntityUtil.class.getName();
 
-    public static Map<String, Object> makeFields(Object... args) {
-        Map<String, Object> fields = FastMap.newInstance();
+    public static <V> Map<String, V> makeFields(V... args) {
+        Map<String, V> fields = new HashMap<String, V>();
         if (args != null) {
             for (int i = 0; i < args.length;) {
                 if (!(args[i] instanceof String)) throw new IllegalArgumentException("Key(" + i + "), with value(" + args[i] + ") is not a String.");
                 String key = (String) args[i];
                 i++;
-                if (!(args[i] instanceof Comparable)) throw new IllegalArgumentException("Value(" + i + "), with value(" + args[i] + ") does not implement Comparable.");
+                if (!(args[i] instanceof Comparable<?>)) throw new IllegalArgumentException("Value(" + i + "), with value(" + args[i] + ") does not implement Comparable.");
                 if (!(args[i] instanceof Serializable)) throw new IllegalArgumentException("Value(" + i + "), with value(" + args[i] + ") does not implement Serializable.");
                 fields.put(key, args[i]);
                 i++;
@@ -170,7 +169,7 @@ public class EntityUtil {
         if (fromDateName == null) fromDateName = "fromDate";
         if (thruDateName == null) thruDateName = "thruDate";
 
-        List<T> result = FastList.newInstance();
+        List<T> result = new LinkedList<T>();
         Iterator<T> iter = datedValues.iterator();
 
         if (allAreSame) {
@@ -244,11 +243,11 @@ public class EntityUtil {
         if (values == null) return null;
 
         List<T> result = null;
-        if (fields == null || fields.size() == 0) {
-            result = FastList.newInstance();
+        if (UtilValidate.isEmpty(fields)) {
+            result = new LinkedList<T>();
             result.addAll(values);
         } else {
-            result = FastList.newInstance();
+            result = new LinkedList<T>();
             for (T value: values) {
                 if (value.matchesFields(fields)) {
                     result.add(value);
@@ -267,12 +266,12 @@ public class EntityUtil {
      */
     public static <T extends GenericEntity> List<T> filterByAnd(List<T> values, List<? extends EntityCondition> exprs) {
         if (values == null) return null;
-        if (exprs == null || exprs.size() == 0) {
+        if (UtilValidate.isEmpty(exprs)) {
             // no constraints... oh well
             return values;
         }
 
-        List<T> result = FastList.newInstance();
+        List<T> result = new LinkedList<T>();
         for (T value: values) {
             boolean include = true;
 
@@ -296,11 +295,11 @@ public class EntityUtil {
      */
     public static <T extends GenericEntity> List<T> filterByOr(List<T> values, List<? extends EntityCondition> exprs) {
         if (values == null) return null;
-        if (exprs == null || exprs.size() == 0) {
+        if (UtilValidate.isEmpty(exprs)) {
             return values;
         }
 
-        List<T> result = FastList.newInstance();
+        List<T> result = new LinkedList<T>();
         for (T value: values) {
             boolean include = false;
 
@@ -325,46 +324,58 @@ public class EntityUtil {
      */
     public static <T extends GenericEntity> List<T> orderBy(Collection<T> values, List<String> orderBy) {
         if (values == null) return null;
-        if (values.size() == 0) return FastList.newInstance();
-        if (orderBy == null || orderBy.size() == 0) {
-            List<T> newList = FastList.newInstance();
+        if (values.size() == 0) return new LinkedList<T>();
+        if (UtilValidate.isEmpty(orderBy)) {
+            List<T> newList = new LinkedList<T>();
             newList.addAll(values);
             return newList;
         }
 
-        List<T> result = FastList.newInstance();
+        List<T> result = new LinkedList<T>();
         result.addAll(values);
         if (Debug.verboseOn()) Debug.logVerbose("Sorting " + values.size() + " values, orderBy=" + orderBy.toString(), module);
         Collections.sort(result, new OrderByList(orderBy));
         return result;
     }
 
+    /**
+     * @deprecated use {@link #getRelated(String, Map, List, boolean)}
+     */
+    @Deprecated
     public static List<GenericValue> getRelated(String relationName, List<GenericValue> values) throws GenericEntityException {
-        if (values == null) return null;
-
-        List<GenericValue> result = FastList.newInstance();
-        for (GenericValue value: values) {
-            result.addAll(value.getRelated(relationName));
-        }
-        return result;
+        return getRelated(relationName, null, values, false);
     }
 
+    /**
+     * @deprecated use {@link #getRelated(String, Map, List, boolean)}
+     */
+    @Deprecated
     public static List<GenericValue> getRelatedCache(String relationName, List<GenericValue> values) throws GenericEntityException {
-        if (values == null) return null;
-
-        List<GenericValue> result = FastList.newInstance();
-        for (GenericValue value: values) {
-            result.addAll(value.getRelatedCache(relationName));
-        }
-        return result;
+        return getRelated(relationName, null, values, true);
     }
 
+    /**
+     * @deprecated use {@link #getRelated(String, Map, List, boolean)}
+     */
+    @Deprecated
     public static List<GenericValue> getRelatedByAnd(String relationName, Map<String, ? extends Object> fields, List<GenericValue> values) throws GenericEntityException {
+        return getRelated(relationName, fields, values, false);
+    }
+
+    /**
+     * @deprecated use {@link #getRelated(String, Map, List, boolean)}
+     */
+    @Deprecated
+    public static List<GenericValue> getRelatedByAndCache(String relationName, Map<String, ? extends Object> fields, List<GenericValue> values) throws GenericEntityException {
+        return getRelated(relationName, fields, values, true);
+    }
+
+    public static List<GenericValue> getRelated(String relationName, Map<String, ? extends Object> fields, List<GenericValue> values, boolean useCache) throws GenericEntityException {
         if (values == null) return null;
 
-        List<GenericValue> result = FastList.newInstance();
+        List<GenericValue> result = new LinkedList<GenericValue>();
         for (GenericValue value: values) {
-            result.addAll(value.getRelatedByAnd(relationName, fields));
+            result.addAll(value.getRelated(relationName, fields, null, useCache));
         }
         return result;
     }
@@ -372,7 +383,7 @@ public class EntityUtil {
     public static <T extends GenericEntity> List<T> filterByCondition(List<T> values, EntityCondition condition) {
         if (values == null) return null;
 
-        List<T> result = FastList.newInstance();
+        List<T> result = new LinkedList<T>();
         for (T value: values) {
             if (condition.entityMatches(value)) {
                 result.add(value);
@@ -384,7 +395,7 @@ public class EntityUtil {
     public static <T extends GenericEntity> List<T> filterOutByCondition(List<T> values, EntityCondition condition) {
         if (values == null) return null;
 
-        List<T> result = FastList.newInstance();
+        List<T> result = new LinkedList<T>();
         for (T value: values) {
             if (!condition.entityMatches(value)) {
                 result.add(value);
@@ -393,28 +404,28 @@ public class EntityUtil {
         return result;
     }
 
-    public static List<GenericValue> findDatedInclusionEntity(GenericDelegator delegator, String entityName, Map<String, ? extends Object> search) throws GenericEntityException {
+    public static List<GenericValue> findDatedInclusionEntity(Delegator delegator, String entityName, Map<String, ? extends Object> search) throws GenericEntityException {
         return findDatedInclusionEntity(delegator, entityName, search, UtilDateTime.nowTimestamp());
     }
 
-    public static List<GenericValue> findDatedInclusionEntity(GenericDelegator delegator, String entityName, Map<String, ? extends Object> search, Timestamp now) throws GenericEntityException {
+    public static List<GenericValue> findDatedInclusionEntity(Delegator delegator, String entityName, Map<String, ? extends Object> search, Timestamp now) throws GenericEntityException {
         EntityCondition searchCondition = EntityCondition.makeCondition(UtilMisc.toList(
                 EntityCondition.makeCondition(search), EntityUtil.getFilterByDateExpr(now)));
         return delegator.findList(entityName, searchCondition, null, UtilMisc.toList("-fromDate"), null, false);
     }
 
-    public static GenericValue newDatedInclusionEntity(GenericDelegator delegator, String entityName, Map<String, ? extends Object> search) throws GenericEntityException {
+    public static GenericValue newDatedInclusionEntity(Delegator delegator, String entityName, Map<String, ? extends Object> search) throws GenericEntityException {
         return newDatedInclusionEntity(delegator, entityName, search, UtilDateTime.nowTimestamp());
     }
 
-    public static GenericValue newDatedInclusionEntity(GenericDelegator delegator, String entityName, Map<String, ? extends Object> find, Timestamp now) throws GenericEntityException {
+    public static GenericValue newDatedInclusionEntity(Delegator delegator, String entityName, Map<String, ? extends Object> find, Timestamp now) throws GenericEntityException {
         Map<String, Object> search;
         List<GenericValue> entities = findDatedInclusionEntity(delegator, entityName, find, now);
         if (UtilValidate.isNotEmpty(entities)) {
             search = null;
             for (GenericValue entity: entities) {
                 if (now.equals(entity.get("fromDate"))) {
-                    search = FastMap.newInstance();
+                    search = new HashMap<String, Object>();
                     for (Map.Entry<String, ? super Object> entry: entity.getPrimaryKey().entrySet()) {
                         search.put(entry.getKey(), entry.getValue());
                     }
@@ -425,18 +436,18 @@ public class EntityUtil {
                 entity.store();
             }
             if (search == null) {
-                search = FastMap.newInstance();
+                search = new HashMap<String, Object>();
                 search.putAll(EntityUtil.getFirst(entities));
             }
         } else {
             /* why is this being done? leaving out for now...
             search = new HashMap(search);
             */
-            search = FastMap.newInstance();
+            search = new HashMap<String, Object>();
             search.putAll(find);
         }
         if (now.equals(search.get("fromDate"))) {
-            return EntityUtil.getOnly(delegator.findByAnd(entityName, search));
+            return EntityUtil.getOnly(delegator.findByAnd(entityName, search, null, false));
         } else {
             search.put("fromDate",now);
             search.remove("thruDate");
@@ -444,11 +455,11 @@ public class EntityUtil {
         }
     }
 
-    public static void delDatedInclusionEntity(GenericDelegator delegator, String entityName, Map<String, ? extends Object> search) throws GenericEntityException {
+    public static void delDatedInclusionEntity(Delegator delegator, String entityName, Map<String, ? extends Object> search) throws GenericEntityException {
         delDatedInclusionEntity(delegator, entityName, search, UtilDateTime.nowTimestamp());
     }
 
-    public static void delDatedInclusionEntity(GenericDelegator delegator, String entityName, Map<String, ? extends Object> search, Timestamp now) throws GenericEntityException {
+    public static void delDatedInclusionEntity(Delegator delegator, String entityName, Map<String, ? extends Object> search, Timestamp now) throws GenericEntityException {
         List<GenericValue> entities = findDatedInclusionEntity(delegator, entityName, search, now);
         for (GenericValue entity: entities) {
             entity.set("thruDate",now);
@@ -460,10 +471,10 @@ public class EntityUtil {
         if (genericValueList == null || fieldName == null) {
             return null;
         }
-        List<T> fieldList = FastList.newInstance();
+        List<T> fieldList = new LinkedList<T>();
         Set<T> distinctSet = null;
         if (distinct) {
-            distinctSet = FastSet.newInstance();
+            distinctSet = new HashSet<T>();
         }
 
         for (GenericValue value: genericValueList) {
@@ -487,10 +498,10 @@ public class EntityUtil {
         if (genericValueEli == null || fieldName == null) {
             return null;
         }
-        List<T> fieldList = FastList.newInstance();
+        List<T> fieldList = new LinkedList<T>();
         Set<T> distinctSet = null;
         if (distinct) {
-            distinctSet = FastSet.newInstance();
+            distinctSet = new HashSet<T>();
         }
 
         GenericValue value = null;

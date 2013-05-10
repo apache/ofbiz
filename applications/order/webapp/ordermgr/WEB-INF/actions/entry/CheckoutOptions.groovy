@@ -28,7 +28,7 @@ import org.ofbiz.order.shoppingcart.shipping.*;
 shoppingCart = session.getAttribute("shoppingCart");
 currencyUomId = shoppingCart.getCurrency();
 partyId = shoppingCart.getPartyId();
-party = delegator.findByPrimaryKeyCache("Party", [partyId : partyId]);
+party = delegator.findOne("Party", [partyId : partyId], true);
 productStore = ProductStoreWorker.getProductStore(request);
 
 shippingEstWpr = null;
@@ -36,21 +36,18 @@ if (shoppingCart) {
     shippingEstWpr = new ShippingEstimateWrapper(dispatcher, shoppingCart, 0);
     context.shippingEstWpr = shippingEstWpr;
     context.carrierShipmentMethodList = shippingEstWpr.getShippingMethods();
+    // Reassign items requiring drop-shipping to new or existing drop-ship groups
+    shoppingCart.createDropShipGroups(dispatcher);    
 }
 
-// Reassign items requiring drop-shipping to new or existing drop-ship groups
-if (shoppingCart) {
-    shoppingCart.createDropShipGroups(dispatcher);
-}
-
-profiledefs = delegator.findByPrimaryKey("PartyProfileDefault", [partyId : userLogin.partyId, productStoreId : productStoreId]);
+profiledefs = delegator.findOne("PartyProfileDefault", [partyId : userLogin.partyId, productStoreId : productStoreId], false);
 context.profiledefs = profiledefs;
 
 context.shoppingCart = shoppingCart;
 context.userLogin = userLogin;
 context.productStoreId = productStore.get("productStoreId");
 context.productStore = productStore;
-shipToParty = delegator.findByPrimaryKeyCache("Party", [partyId : shoppingCart.getShipToCustomerPartyId()]);
+shipToParty = delegator.findOne("Party", [partyId : shoppingCart.getShipToCustomerPartyId()], true);
 context.shippingContactMechList = ContactHelper.getContactMech(shipToParty, "SHIPPING_LOCATION", "POSTAL_ADDRESS", false);
 context.emailList = ContactHelper.getContactMechByType(party, "EMAIL_ADDRESS", false);
 

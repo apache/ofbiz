@@ -123,4 +123,24 @@ under the License.
         <condition field-name="orderId" operator="is-not-empty"/>
         <action service="updateIssuanceShipmentAndPoOnReceiveInventory" mode="sync"/>
     </eca>
+
+    <!-- Set the average cost of product -->
+    <eca service="receiveInventoryProduct" event="commit">
+        <action service="updateProductAverageCostOnReceiveInventory" mode="sync"/>
+    </eca>
+    
+    <!-- Remove party content of image  -->
+    <eca service="deletePartyRole" event="commit">
+        <condition field-name="roleTypeId" operator="equals" value="IMAGEAPPROVER"/>
+        <action service="removeImageContentApproval" mode="sync"/>
+    </eca>
+
+    <!-- ProductStoreGroup seca  -->
+    <eca service="updateProductStoreGroup" event="commit">
+        <condition field-name="primaryParentGroupId" operator="not-equals" value=""/>
+        <action service="checkProductStoreGroupRollup" mode="sync"/>
+    </eca>
+    <eca service="createProductStoreGroupRollup" event="commit">
+        <action service="checkProductStoreGroupRollup" mode="sync"/>
+    </eca>
 </service-eca>

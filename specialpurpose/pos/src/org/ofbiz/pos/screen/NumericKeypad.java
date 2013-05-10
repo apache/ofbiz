@@ -18,6 +18,11 @@
  *******************************************************************************/
 package org.ofbiz.pos.screen;
 
+import java.util.Locale;
+
+import org.ofbiz.base.util.UtilProperties;
+import org.ofbiz.pos.PosTransaction;
+
 import net.xoetrope.swing.XButton;
 import net.xoetrope.swing.XDialog;
 import net.xoetrope.swing.XEdit;
@@ -25,6 +30,7 @@ import net.xoetrope.xui.PageSupport;
 import net.xoetrope.xui.XPage;
 import net.xoetrope.xui.events.XEventHelper;
 
+@SuppressWarnings("serial")
 public class NumericKeypad extends XPage
 {
     public static final String module = NumericKeypad.class.getName();
@@ -36,25 +42,35 @@ public class NumericKeypad extends XPage
 
     boolean m_minus = false;
     boolean m_percent = false;
+    String originalText;
 
     public NumericKeypad(PosScreen pos) {
         m_pos = pos;
-        return;
+        m_pageSupport = pageMgr.loadPage(m_pos.getScreenLocation() + "/dialog/numerickeypad");
+        m_dialog = (XDialog) m_pageSupport;
+        m_edit = (XEdit) m_pageSupport.findComponent("numeric_input");
+        m_edit.setText("");
+        m_dialog.setCaption(UtilProperties.getMessage(PosTransaction.resource, "PosVirtualNumPadTitle", Locale.getDefault()));
+
     }
 
     public String openDlg() {
-
-        m_pageSupport = pageMgr.loadPage(m_pos.getScreenLocation() + "/dialog/numeric");
-        m_dialog = (XDialog)m_pageSupport;
-
-        m_edit = (XEdit) m_pageSupport.findComponent("numeric_input");
-        m_edit.setText("");
-
         setupEvents();
+        originalText = getText();
 
         m_dialog.pack();
         m_dialog.showDialog(this);
 
+        return m_edit.getText();
+    }
+
+    // call before openDlg
+    public void setText(String text) {
+        clear();
+        m_edit.setText(text);
+    }
+
+    public String getText() {
         return m_edit.getText();
     }
 
@@ -69,6 +85,9 @@ public class NumericKeypad extends XPage
 
     //call before openDlg
     public void setPercent(boolean percent) {
+        if (percent) {
+            disableButton("menuCancel");
+        }
         m_percent = percent;
     }
 
@@ -79,11 +98,6 @@ public class NumericKeypad extends XPage
     private void disableButton(String button) {
         XButton xbutton = (XButton) m_dialog.findComponent(button);
         xbutton.setVisible(false);
-    }
-
-    private void enableButton(String button) {
-        XButton xbutton = (XButton) m_dialog.findComponent(button);
-        xbutton.setVisible(true);
     }
 
     private void setupEvents() {
@@ -113,6 +127,8 @@ public class NumericKeypad extends XPage
         XEventHelper.addMouseHandler(this, button, "triggerClear");
         button = (XButton) m_dialog.findComponent("menuEnter");
         XEventHelper.addMouseHandler(this, button, "triggerEnter");
+        button = (XButton) m_dialog.findComponent("menuCancel");
+        XEventHelper.addMouseHandler(this, button, "triggerCancel");
 
         if (getMinus()) {
             button = (XButton) m_dialog.findComponent("numMinus");
@@ -193,6 +209,11 @@ public class NumericKeypad extends XPage
     public void triggerEnter()
     {
         close();
+    }
+
+    public void triggerCancel()
+    {
+        cancel();
     }
 
     public void triggerMinus()
@@ -276,6 +297,14 @@ public class NumericKeypad extends XPage
             }
             m_dialog.repaint();
             //update the screen?
+            return;
+        }
+    }
+
+    private synchronized void cancel() {
+        if (wasMouseClicked()) {
+            this.setText(originalText);
+            m_dialog.closeDlg();
             return;
         }
     }

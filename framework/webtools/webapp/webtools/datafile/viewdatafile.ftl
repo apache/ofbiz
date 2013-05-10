@@ -16,24 +16,15 @@ KIND, either express or implied.  See the License for the
 specific language governing permissions and limitations
 under the License.
 -->
-<div class="screenlet">
-  <div class="screenlet-title-bar">
-    <ul>
-      <li class="h3">${uiLabelMap.WebtoolsDataFileMainTitle}</li>
-    </ul>
-    <br class="clear"/>
-  </div>
-  <div class="screenlet-body">
-    <br/>
     <p>${uiLabelMap.WebtoolsDataFileMessage1}.</p>
-    <br/>
+    <br />
     <#if security.hasPermission("DATAFILE_MAINT", session)>
       <form method="post" action="<@ofbizUrl>viewdatafile</@ofbizUrl>">
         <table class="basic-table" cellspacing="0">
           <tr>
             <td class="label">${uiLabelMap.WebtoolsDataDefinitionFileName}</td>
-            <td><input name="DEFINITION_LOCATION" type="text" size="60" value="${parameters.DEFINITION_LOCATION?if_exists}"></td>
-            <td><span class="label">${uiLabelMap.WebtoolsDataIsUrl}</span><input type="checkbox" name="DEFINITION_IS_URL"<#if parameters.DEFINITION_IS_URL?has_content> checked="checked"</#if>></td>
+            <td><input name="DEFINITION_LOCATION" type="text" size="60" value="${parameters.DEFINITION_LOCATION?if_exists}" /></td>
+            <td><span class="label">${uiLabelMap.WebtoolsDataIsUrl}</span><input type="checkbox" name="DEFINITION_IS_URL"<#if parameters.DEFINITION_IS_URL?has_content> checked="checked"</#if> /></td>
           </tr>
           <tr>
             <td class="label">${uiLabelMap.WebtoolsDataDefinitionName}</td>
@@ -42,20 +33,20 @@ under the License.
                 <select name="DEFINITION_NAME">
                   <option value=""></option>
                   <#list definitionNames as oneDefinitionName>
-                    boolean isSelected = definitionName != null && definitionName.equals(oneDefinitionName);
-                    <option value="${oneDefinitionName}" <#if parameters.DEFINITION_NAME?exists && parameters.DEFINITION_NAME == oneDefinitionName> selected </#if>>${oneDefinitionName}</option>
+                    boolean isSelected = definitionName?? && definitionName.equals(oneDefinitionName);
+                    <option value="${oneDefinitionName}" <#if parameters.DEFINITION_NAME?exists && parameters.DEFINITION_NAME == oneDefinitionName> selected="selected" </#if>>${oneDefinitionName}</option>
                   </#list>
                 </select>
               <#else>
-                <input name="DEFINITION_NAME" type="text" size="30" value="${definitionName?if_exists}">
+                <input name="DEFINITION_NAME" type="text" size="30" value="${definitionName?if_exists}" />
               </#if>
             </td>
             <td>&nbsp;</td>
           </tr>
           <tr>
             <td class="label">${uiLabelMap.WebtoolsDataFileName}</td>
-            <td><input name="DATAFILE_LOCATION" type="text" size="60" value="${parameters.DATAFILE_LOCATION?if_exists}"></td>
-            <td><span class="label">${uiLabelMap.WebtoolsDataIsUrl}</span><input type="checkbox" name="DATAFILE_IS_URL"<#if parameters.DATAFILE_IS_URL?has_content> checked="checked"</#if>></td>
+            <td><input name="DATAFILE_LOCATION" type="text" size="60" value="${parameters.DATAFILE_LOCATION?if_exists}" /></td>
+            <td><span class="label">${uiLabelMap.WebtoolsDataIsUrl}</span><input type="checkbox" name="DATAFILE_IS_URL"<#if parameters.DATAFILE_IS_URL?has_content> checked="checked"</#if> /></td>
           </tr>
           <tr>
             <td class="label">${uiLabelMap.WebtoolsDataSaveToFile}</td>
@@ -64,19 +55,19 @@ under the License.
           </tr>
           <tr>
             <td class="label">${uiLabelMap.WebtoolsDataSaveToXml}</td>
-            <td><input name="ENTITYXML_FILE_SAVE" type="text" size="60" value="${parameters.ENTITYXML_FILE_SAVE?if_exists}"></td>
+            <td><input name="ENTITYXML_FILE_SAVE" type="text" size="60" value="${parameters.ENTITYXML_FILE_SAVE?if_exists}" /></td>
             <td>&nbsp;</td>
           </tr>
           <tr>
             <td>&nbsp;</td>
-            <td><input type="submit" value="${uiLabelMap.CommonRun}"></td>
+            <td><input type="submit" value="${uiLabelMap.CommonRun}" /></td>
             <td>&nbsp;</td>
           </tr>
         </table>
       </form>
 
       <#if messages?has_content>
-        <hr/>
+        <hr />
         <h1>${uiLabelMap.CommonFollowingOccurred}:</h1>
         <div>
           <#list messages as message>
@@ -91,8 +82,8 @@ under the License.
           <#assign modelRecord = record.getModelRecord()>
           <#-- if record is different than the last displayed, make a new table and header row -->
           <#if !modelRecord.name.equals(lastRecordName)>
-            <#if lastRecordName != null>
-              </table><br/>
+            <#if lastRecordName??>
+              </table><br />
             </#if>
             <table class="basic-table hover-bar" cellspacing="0">
               <tr>
@@ -122,7 +113,7 @@ under the License.
               </#if>
             </#list>
           </tr>
-          <#if record.getChildRecords() != null && (record.getChildRecords().size() > 0)>
+          <#if (record.getChildRecords())?has_content>
             <@displayrecords records = record.getChildRecords()/>
           </#if>
         </#list>
@@ -130,7 +121,7 @@ under the License.
     </#macro>
 
       <#if dataFile?has_content && modelDataFile?has_content && (!parameters.ENTITYXML_FILE_SAVE?has_content || parameters.ENTITYXML_FILE_SAVE.length() == 0) && (parameters.DATAFILE_SAVE == null || parameters.DATAFILE_SAVE.length() == 0)>
-        <hr/>
+        <hr />
         <table class="basic-table" cellspacing="0">
           <tr class="header-row">
             <td>Name</td>
@@ -153,11 +144,9 @@ under the License.
             <td colspan="">${modelDataFile.description}</td>
           </tr>
         </table>
-        <br/>
+        <br />
         <@displayrecords records = dataFile.getRecords()/>
       </#if>
     <#else>
       <h3>You do not have permission to use this page (DATAFILE_MAINT needed)</h3>
     </#if>
-  </div>
-</div>

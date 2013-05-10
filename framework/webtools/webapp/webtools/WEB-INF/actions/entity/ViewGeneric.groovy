@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import org.ofbiz.entity.GenericDelegator;
+import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericPK;
 import org.ofbiz.entity.GenericValue;
 import org.ofbiz.security.Security;
@@ -28,6 +28,7 @@ import org.ofbiz.entity.model.ModelRelation;
 import org.ofbiz.entity.model.ModelKeyMap;
 import org.ofbiz.base.util.UtilFormatOut;
 import org.ofbiz.base.util.UtilMisc;
+import org.ofbiz.base.util.UtilValidate;
 import java.sql.Timestamp;
 import java.sql.Date;
 import java.sql.Time;
@@ -64,11 +65,12 @@ context.put("hasDeletePermission" , hasDeletePermission);
 boolean useValue = true;
 String curFindString = "entityName=" + entityName;
 GenericPK findByPK = delegator.makePK(entityName);
-for(int fnum = 0; fnum < entity.getPksSize(); fnum++) {
-    ModelField field = entity.getPk(fnum);
+Iterator pkIterator = entity.getPksIterator();
+while (pkIterator.hasNext()) {
+    ModelField field = pkIterator.next();
     ModelFieldType type = delegator.getEntityFieldType(entity, field.getType());
     String fval = parameters.get(field.getName());
-    if (fval != null && fval.length() > 0) {
+    if (UtilValidate.isNotEmpty(fval)) {
         curFindString = curFindString + "&" + field.getName() + "=" + fval;
         findByPK.setString(field.getName(), fval);
     }
@@ -91,10 +93,11 @@ if (value == null) {
 
 if (value != null) {
     List fieldList = FastList.newInstance();
-    for (int fnum = 0; fnum < entity.getFieldsSize(); fnum++) {
+    Iterator fieldIterator = entity.getFieldsIterator();
+    while (fieldIterator.hasNext()) {
         Map mapField = FastMap.newInstance();
 
-        ModelField field = entity.getField(fnum);
+        ModelField field = fieldIterator.next();
         ModelFieldType type = delegator.getEntityFieldType(entity, field.getType());
 
         String fieldValue = "";
@@ -144,10 +147,11 @@ if ((session.getAttribute("_ERROR_MESSAGE_") != null || request.getAttribute("_E
 context.put("useValue", useValue);
 
 List newFieldPkList = FastList.newInstance();
-for (int fnum = 0; fnum < entity.getPksSize();fnum++) {
+pkIterator = entity.getPksIterator();
+while (pkIterator.hasNext()) {
     Map mapField = FastMap.newInstance();
 
-    ModelField field = entity.getPk(fnum);
+    ModelField field = pkIterator.next();
     ModelFieldType type = delegator.getEntityFieldType(entity, field.getType());
 
     String fieldValue = "";
@@ -220,10 +224,11 @@ for (int fnum = 0; fnum < entity.getPksSize();fnum++) {
 context.put("newFieldPkList", newFieldPkList);
 
 List newFieldNoPkList = FastList.newInstance();
-for (int fnum = 0; fnum < entity.getNopksSize();fnum++) {
+Iterator noPkIterator = entity.getNopksIterator();
+while (noPkIterator.hasNext()) {
     Map mapField = FastMap.newInstance();
 
-    ModelField field = entity.getNopk(fnum);
+    ModelField field = noPkIterator.next();
     ModelFieldType type = delegator.getEntityFieldType(entity, field.getType());
 
     String fieldValue = "";
@@ -320,16 +325,17 @@ for (int relIndex = 0; relIndex < entity.getRelationsSize(); relIndex++) {
     if ("one".equals(relation.getType()) || "one-nofk".equals(relation.getType())) {
         if (value != null) {
             if (hasAllView || security.hasEntityPermission(relatedEntity.getPlainTableName(), "_VIEW", session)) {
-                Iterator tempIter = UtilMisc.toIterator(value.getRelated(relation.getTitle() + relatedEntity.getEntityName()));
+                Iterator tempIter = UtilMisc.toIterator(value.getRelated(relation.getTitle() + relatedEntity.getEntityName(), null, null, false));
                 GenericValue valueRelated = null;
                 if (tempIter != null && tempIter.hasNext()) {
                     valueRelated = (GenericValue) tempIter.next();
                 }
 
                 List relatedFieldsList = FastList.newInstance();
-                for (int fnum = 0; fnum < relatedEntity.getFieldsSize(); fnum++) {
+                Iterator relFieldIterator = relatedEntity.getFieldsIterator();
+                while (relFieldIterator.hasNext()) {
                     Map mapRelatedFields = FastMap.newInstance();
-                    ModelField field = relatedEntity.getField(fnum);
+                    ModelField field = relFieldIterator.next();
                     ModelFieldType type = delegator.getEntityFieldType(entity, field.getType());
 
                     String fieldValue = "";
@@ -396,7 +402,7 @@ for (int relIndex = 0; relIndex < entity.getRelationsSize(); relIndex++) {
                 mapRelation.put("relType", "one");
 
                 String findString = "entityName=" + relatedEntity.getEntityName();
-                for (int knum = 0; knum < relation.getKeyMapsSize(); knum++) {
+                for (int knum = 0; knum < relation.getKeyMaps().size(); knum++) {
                     ModelKeyMap keyMap = relation.getKeyMap(knum);
                     if (value.get(keyMap.getFieldName()) != null) {
                         findString += "&" + keyMap.getRelFieldName() + "=" + value.get(keyMap.getFieldName());
@@ -414,7 +420,7 @@ for (int relIndex = 0; relIndex < entity.getRelationsSize(); relIndex++) {
                 mapRelation.put("relType", "many");
 
                 String findString = "entityName=" + relatedEntity.getEntityName();
-                for (int knum = 0; knum < relation.getKeyMapsSize(); knum++) {
+                for (int knum = 0; knum < relation.getKeyMaps().size(); knum++) {
                     ModelKeyMap keyMap = relation.getKeyMap(knum);
                     if (value.get(keyMap.getFieldName()) != null) {
                         findString += "&" + keyMap.getRelFieldName() + "=" + value.get(keyMap.getFieldName());

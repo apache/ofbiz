@@ -35,26 +35,26 @@ under the License.
       <table border="0" cellspacing="0" cellpadding="0" class="boxbottom">
         <tr>
           <td align="right">
-            <input type="radio" name="additionalPartyType" value="Person" onclick="<#if additionalPartyType?exists>javascript:document.quickAddPartyForm.additionalPartyId.value='';</#if>document.quickAddPartyForm.submit()"<#if (additionalPartyType?exists && additionalPartyType == "Person")> checked="checked"</#if>>
-	  </td>
+            <input type="radio" id="additionalPartyType_Person" name="additionalPartyType" value="Person" onclick="<#if additionalPartyType?exists>javascript:document.quickAddPartyForm.additionalPartyId.value='';</#if>document.quickAddPartyForm.submit()"<#if (additionalPartyType?exists && additionalPartyType == "Person")> checked="checked"</#if> />
+      </td>
           <td>
-            <div>${uiLabelMap.CommonPerson}</div>
+            <label for="additionalPartyType_Person">${uiLabelMap.CommonPerson}</label>
           </td>
         </tr>
         <tr>
           <td align="right">
-            <input type="radio" name="additionalPartyType" value="Group" onclick="<#if additionalPartyType?exists>javascript:document.quickAddPartyForm.additionalPartyId.value='';</#if>document.quickAddPartyForm.submit()"<#if additionalPartyType?exists && additionalPartyType == "Group"> checked="checked"</#if>>
+            <input type="radio" id="additionalPartyType_Group" name="additionalPartyType" value="Group" onclick="<#if additionalPartyType?exists>javascript:document.quickAddPartyForm.additionalPartyId.value='';</#if>document.quickAddPartyForm.submit()"<#if additionalPartyType?exists && additionalPartyType == "Group"> checked="checked"</#if> />
           </td>
           <td>
-            <div>${uiLabelMap.CommonGroup}</div>
+            <label for="additionalPartyType_Group">${uiLabelMap.CommonGroup}</label>
           </td>
         </tr>
         <tr>
           <td align="right">
-            <input type="radio" name="additionalPartyType" value="None" onclick="<#if additionalPartyType?exists>javascript:document.quickAddPartyForm.additionalPartyId.value='';</#if>document.quickAddPartyForm.submit()"<#if !additionalPartyType?exists> checked="checked"</#if>>
+            <input type="radio" id="additionalPartyType_None" name="additionalPartyType" value="None" onclick="<#if additionalPartyType?exists>javascript:document.quickAddPartyForm.additionalPartyId.value='';</#if>document.quickAddPartyForm.submit()"<#if !additionalPartyType?exists> checked="checked"</#if> />
           </td>
           <td>
-            <div>${uiLabelMap.OrderPartyDontWish}</div>
+            <label for="additionalPartyType_None">${uiLabelMap.OrderPartyDontWish}</label>
           </td>
         </tr>
       </table>
@@ -83,10 +83,7 @@ under the License.
             <div>${uiLabelMap.CommonIdentifier} :</div>
           </td>
           <td>
-            <input type="text" name="additionalPartyId" value="${additionalPartyId?if_exists}" onchange="javascript:document.quickAddPartyForm.submit()">
-          </td>
-          <td>
-            <a href="javascript:document.quickAddPartyForm.additionalPartyId.focus();call_fieldlookup2(document.quickAddPartyForm.additionalPartyId, '${lookupPartyView}');"><img src="<@ofbizContentUrl>/images/fieldlookup.gif</@ofbizContentUrl>" width="16" height="16" border="0" alt="${uiLabelMap.CommonClickHereForFieldLookup}"></a>
+            <@htmlTemplate.lookupField value="${additionalPartyId?if_exists}" formName="quickAddPartyForm" name="additionalPartyId" id="additionalPartyId" fieldFormName="${lookupPartyView}"/>
           </td>
           <td>
             &nbsp;<a href="javascript:document.quickAddPartyForm.submit()" class="buttontext">${uiLabelMap.CommonApply}</a>
@@ -110,11 +107,11 @@ under the License.
   <tr>
     <td width="100%">
       <table border="0" cellspacing="0" cellpadding="0" class="boxbottom">
-        <form method="post" action="<@ofbizUrl>addAdditionalParty</@ofbizUrl>">
+        <form method="post" action="<@ofbizUrl>addAdditionalParty</@ofbizUrl>" name="addAdditionalPartyForm" id="addAdditionalPartyForm">
         <tr>
           <td>&nbsp;</td>
           <td>
-            <select name="additionalRoleTypeId" size="5" multiple="multiple">
+            <select name="additionalRoleTypeId" id="additionalRoleTypeId" size="5" multiple="multiple">
               <#list roles as role>
               <option value="${role.roleTypeId}">${role.get("description",locale)}</option>
               </#list>
@@ -122,8 +119,8 @@ under the License.
           </td>
           <td>&nbsp;</td>
           <td>
-            <input type="hidden" name="additionalPartyId" value="${additionalPartyId}">
-            <input type="submit" class="smallSubmit" value="${uiLabelMap.CommonAdd}">
+            <input type="hidden" name="additionalPartyId" value="${additionalPartyId}" />
+            <input type="submit" class="smallSubmit" value="${uiLabelMap.CommonAdd} "/>
           </td>
         </tr>
         </form>

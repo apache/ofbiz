@@ -50,8 +50,10 @@ under the License.
         <description>Gets a tree of product variants based on a virtual product and a list of features.</description>
         <attribute name="productId" type="String" mode="IN"/>
         <attribute name="featureOrder" type="java.util.Collection" mode="IN"/>
-        <attribute name="productStoreId" type="String" mode="IN"/>
+        <attribute name="productStoreId" type="String" mode="IN" optional="true"/>
+        <attribute name="checkInventory" type="Boolean" mode="IN" default-value="true" optional="true"/>
         <attribute name="variantTree" type="java.util.Map" mode="OUT" optional="true"/>
+        <attribute name="unavailableVariants" type="java.util.List" mode="OUT" optional="true"/>
         <attribute name="variantSample" type="java.util.Map" mode="OUT" optional="true"/>
         <attribute name="virtualVariant" type="java.util.List" mode="OUT" optional="true"/>
     </service>
@@ -63,12 +65,19 @@ under the License.
     </service>
     <service name="getAssociatedProducts" engine="java"
             location="org.ofbiz.product.product.ProductServices" invoke="prodFindAssociatedByType">
-        <description>Finds associated products by the defined type.</description>
+        <description>
+            Finds associated products by the defined type.  Only one of either productId or productIdTo can be supplied,
+            not both.  If bidirectional is set to true then the passed in productId will be treated as both a productId
+            and a productIdTo (defaults to false).  If sortDescending is true then assocProducts will be returned sorted
+            by sequenceNum descending (defaults to false).
+        </description>
         <attribute name="productId" type="String" mode="IN" optional="true"/>
         <attribute name="productIdTo" type="String" mode="IN" optional="true"/>
         <attribute name="checkViewAllow" type="Boolean" mode="IN" optional="true"/>
         <attribute name="prodCatalogId" type="String" mode="IN" optional="true"/>
         <attribute name="type" type="String" mode="IN"/>
+        <attribute name="bidirectional" type="Boolean" mode="IN" optional="true"/>
+        <attribute name="sortDescending" type="Boolean" mode="IN" optional="true"/>
         <attribute name="assocProducts" type="java.util.Collection" mode="OUT" optional="true"/>
     </service>
     <service name="getProductFeatures" engine="java"
@@ -107,12 +116,22 @@ under the License.
         <attribute name="category" type="org.ofbiz.entity.GenericValue" mode="OUT"/>
         <attribute name="categoryMembers" type="java.util.Collection" mode="OUT"/>
     </service>
+    
+    <service name="getAssociatedProductsList" engine="simple" auth="false"
+        location="component://product/script/org/ofbiz/product/category/CategoryServices.xml" invoke="getAssociatedProductsList">
+        <description>Set the product options for selected product category, mostly used by getDependentDropdownValues</description>
+        <attribute name="productCategoryId" mode="IN" type="String" optional="false"/>
+        <attribute name="products" mode="OUT" type="java.util.List"/>
+    </service>
+    
     <service name="getPreviousNextProducts" engine="java"
         location="org.ofbiz.product.category.CategoryServices" invoke="getPreviousNextProducts">
         <description>Gets the previous and next product Ids.</description>
         <attribute name="categoryId" type="String" mode="IN"/>
         <attribute name="productId" type="String" mode="IN"/>
         <attribute name="activeOnly" type="Boolean" mode="IN" optional="true"/>
+        <attribute name="introductionDateLimit" type="java.sql.Timestamp" mode="IN" optional="true"/>
+        <attribute name="releaseDateLimit" type="java.sql.Timestamp" mode="IN" optional="true"/>
         <attribute name="orderByFields" type="List" mode="IN" optional="true"/>
         <attribute name="category" type="org.ofbiz.entity.GenericValue" mode="OUT" optional="true"/>
         <attribute name="previousProductId" type="String" mode="OUT" optional="true"/>
@@ -130,6 +149,8 @@ under the License.
         <attribute name="viewSizeString" type="String" mode="IN" optional="true"/>
         <attribute name="useCacheForMembers" type="Boolean" mode="IN" optional="true"/>
         <attribute name="activeOnly" type="Boolean" mode="IN" optional="true"/>
+        <attribute name="introductionDateLimit" type="java.sql.Timestamp" mode="IN" optional="true"/>
+        <attribute name="releaseDateLimit" type="java.sql.Timestamp" mode="IN" optional="true"/>
         <attribute name="orderByFields" type="List" mode="IN" optional="true"/>
         <attribute name="productCategory" type="org.ofbiz.entity.GenericValue" mode="OUT" optional="true"/>
         <attribute name="productCategoryMembers" type="java.util.Collection" mode="OUT" optional="true"/> <!-- this list will only contain the limited members if limitView=true -->

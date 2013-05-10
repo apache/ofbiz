@@ -32,10 +32,7 @@ import org.ofbiz.product.store.ProductStoreWorker;
 
 public class PosContainer extends XuiContainer {
 
-    public String getContainerConfigName() {
-        return "pos-container";
-    }
-
+    @Override
     public void configure(ContainerConfig.Container cc) throws ContainerException {
         XuiSession session = XuiContainer.getSession();
         GenericValue productStore = null;
@@ -47,7 +44,7 @@ public class PosContainer extends XuiContainer {
             throw new ContainerException("No facility-id value set in pos-container!");
         } else {
             try {
-                facility = session.getDelegator().findByPrimaryKey("Facility", UtilMisc.toMap("facilityId", facilityId));
+                facility = session.getDelegator().findOne("Facility", UtilMisc.toMap("facilityId", facilityId), false);
             } catch (GenericEntityException e) {
                 throw new ContainerException("Invalid facilityId : " + facilityId);
             }

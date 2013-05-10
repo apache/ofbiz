@@ -18,16 +18,15 @@
  *******************************************************************************/
 package org.ofbiz.widget.cache;
 
-import org.ofbiz.base.util.Debug;
-import org.ofbiz.base.util.UtilGenerics;
-import org.ofbiz.base.util.UtilMisc;
-
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
 import javolution.util.FastMap;
 import javolution.util.FastSet;
+
+import org.ofbiz.base.util.Debug;
+import org.ofbiz.base.util.UtilGenerics;
+import org.ofbiz.base.util.UtilMisc;
 
 public class WidgetContextCacheKey {
 
@@ -81,15 +80,17 @@ public class WidgetContextCacheKey {
 
     protected Map<String, Object> context;
 
-    public WidgetContextCacheKey(Map<String, Object> context) {
+    public WidgetContextCacheKey(Map<String, ? extends Object> context) {
         this.context = FastMap.newInstance();
         this.context.putAll(context);
     }
 
+    @Override
     public int hashCode() {
         return 0;
     }
 
+    @Override
     public boolean equals(Object obj) {
         WidgetContextCacheKey key = null;
         if (obj instanceof WidgetContextCacheKey) {
@@ -105,9 +106,7 @@ public class WidgetContextCacheKey {
         Set<String> unifiedContext = FastSet.newInstance();
         unifiedContext.addAll(this.context.keySet());
         unifiedContext.addAll(key.context.keySet());
-        Iterator fieldNameIt = unifiedContext.iterator();
-        while (fieldNameIt.hasNext()) {
-            String fieldName = (String)fieldNameIt.next();
+        for (String fieldName: unifiedContext) {
             if (fieldNamesToSkip.contains(fieldName)) {
                 continue;
             }
@@ -121,7 +120,7 @@ public class WidgetContextCacheKey {
                 return false;
             }
             if ("parameters".equals(fieldName)) {
-                if (!parametersAreEqual(UtilGenerics.checkMap(field1), UtilGenerics.checkMap(field2))) {
+                if (!parametersAreEqual(UtilGenerics.<String, Object>checkMap(field1), UtilGenerics.<String, Object>checkMap(field2))) {
                     return false;
                 }
                 continue;
@@ -134,40 +133,37 @@ public class WidgetContextCacheKey {
         return true;
     }
 
+    @Override
     public String toString() {
         Map<String, Object> printableMap = FastMap.newInstance();
-        Iterator fieldNameIt = this.context.keySet().iterator();
-        while (fieldNameIt.hasNext()) {
-            String fieldName = (String)fieldNameIt.next();
+        for (String fieldName: this.context.keySet()) {
             if (!fieldNamesToSkip.contains(fieldName) && !"parameters".equals(fieldName)) {
                 printableMap.put(fieldName, this.context.get(fieldName));
             }
         }
-        return printMap(printableMap) + "\n" + printMap((Map)this.context.get("parameters"));
+        Map<String, Object> parameters = UtilGenerics.checkMap(this.context.get("parameters"));
+        return printMap(printableMap) + "\n" + printMap(parameters);
     }
 
-    public static String printMap(Map map) {
+    public static String printMap(Map<String, ? extends Object> map) {
         Map<String, Object> printableMap = FastMap.newInstance();
-        Iterator fieldNameIt = map.keySet().iterator();
-        while (fieldNameIt.hasNext()) {
-            String fieldName = (String)fieldNameIt.next();
+        for (Map.Entry<String, ? extends Object> entry : map.entrySet()) {
+            String fieldName = entry.getKey();
             if (!fieldNamesToSkip.contains(fieldName) &&
                     !fieldName.startsWith("javax.servlet") &&
                     !fieldName.startsWith("org.apache") &&
                     !fieldName.startsWith("_CLIENT_")) {
-                printableMap.put(fieldName, map.get(fieldName));
+                printableMap.put(fieldName, entry.getValue());
             }
         }
         return UtilMisc.printMap(printableMap);
     }
 
-    public static boolean parametersAreEqual(Map<Object, Object> map1, Map<Object, Object> map2) {
-        Set<Object> unifiedContext = FastSet.newInstance();
+    public static boolean parametersAreEqual(Map<String, ? extends Object> map1, Map<String, ? extends Object> map2) {
+        Set<String> unifiedContext = FastSet.newInstance();
         unifiedContext.addAll(map1.keySet());
         unifiedContext.addAll(map2.keySet());
-        Iterator fieldNameIt = unifiedContext.iterator();
-        while (fieldNameIt.hasNext()) {
-            String fieldName = (String)fieldNameIt.next();
+        for (String fieldName: unifiedContext) {
             if (fieldNamesToSkip.contains(fieldName)) {
                 continue;
             }

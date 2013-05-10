@@ -47,8 +47,14 @@ import javax.print.attribute.PrintServiceAttributeSet;
 import javax.print.attribute.standard.PrinterName;
 import javax.xml.transform.stream.StreamSource;
 
+import javolution.util.FastMap;
+
+import org.apache.fop.apps.Fop;
+import org.apache.fop.apps.MimeConstants;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilDateTime;
+import org.ofbiz.base.util.UtilGenerics;
+import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.base.util.UtilProperties;
 import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.base.util.collections.MapStack;
@@ -58,10 +64,6 @@ import org.ofbiz.webapp.view.ApacheFopWorker;
 import org.ofbiz.widget.fo.FoFormRenderer;
 import org.ofbiz.widget.fo.FoScreenRenderer;
 import org.ofbiz.widget.screen.ScreenRenderer;
-
-import javolution.util.FastMap;
-import org.apache.fop.apps.Fop;
-import org.apache.fop.apps.MimeConstants;
 
 
 /**
@@ -73,12 +75,12 @@ public class OutputServices {
 
     protected static final FoScreenRenderer foScreenRenderer = new FoScreenRenderer();
     protected static final FoFormRenderer foFormRenderer = new FoFormRenderer();
+    public static final String resource = "ContentUiLabels";
 
     public static Map<String, Object> sendPrintFromScreen(DispatchContext dctx, Map<String, ? extends Object> serviceContext) {
-
         Locale locale = (Locale) serviceContext.get("locale");
         String screenLocation = (String) serviceContext.remove("screenLocation");
-        Map screenContext = (Map) serviceContext.remove("screenContext");
+        Map<String, Object> screenContext = UtilGenerics.checkMap(serviceContext.remove("screenContext"));
         String contentType = (String) serviceContext.remove("contentType");
         String printerContentType = (String) serviceContext.remove("printerContentType");
 
@@ -95,7 +97,7 @@ public class OutputServices {
 
         try {
 
-            MapStack screenContextTmp = MapStack.create();
+            MapStack<String> screenContextTmp = MapStack.create();
             screenContextTmp.put("locale", locale);
 
             Writer writer = new StringWriter();
@@ -123,7 +125,7 @@ public class OutputServices {
             InputStream bais = new ByteArrayInputStream(baos.toByteArray());
 
             DocAttributeSet docAttributeSet = new HashDocAttributeSet();
-            List docAttributes = (List) serviceContext.remove("docAttributes");
+            List<Object> docAttributes = UtilGenerics.checkList(serviceContext.remove("docAttributes"));
             if (UtilValidate.isNotEmpty(docAttributes)) {
                 for (Object da : docAttributes) {
                     Debug.logInfo("Adding DocAttribute: " + da, module);
@@ -147,11 +149,11 @@ public class OutputServices {
                     printer = printServices[0];
                     Debug.logInfo("Using printer: " + printer.getName(), module);
                     if (!printer.isDocFlavorSupported(psInFormat)) {
-                        return ServiceUtil.returnError("DocFlavor [" + psInFormat + "] not supported by printer: " + printer.getName());
+                        return ServiceUtil.returnError(UtilProperties.getMessage(resource, "ContentPrinterNotSupportDocFlavorFormat", UtilMisc.toMap("psInFormat", psInFormat, "printerName", printer.getName()), locale));
                     }
                 }
                 if (printer == null) {
-                    return ServiceUtil.returnError("No printer found with name: " + printerName);
+                    return ServiceUtil.returnError(UtilProperties.getMessage(resource, "ContentPrinterNotFound", UtilMisc.toMap("printerName", printerName), locale));
                 }
 
             } else {
@@ -164,12 +166,12 @@ public class OutputServices {
             }
 
             if (printer == null) {
-                return ServiceUtil.returnError("No printer available");
+                return ServiceUtil.returnError(UtilProperties.getMessage(resource, "ContentPrinterNotAvailable", locale));
             }
 
 
             PrintRequestAttributeSet praset = new HashPrintRequestAttributeSet();
-            List printRequestAttributes = (List) serviceContext.remove("printRequestAttributes");
+            List<Object> printRequestAttributes = UtilGenerics.checkList(serviceContext.remove("printRequestAttributes"));
             if (UtilValidate.isNotEmpty(printRequestAttributes)) {
                 for (Object pra : printRequestAttributes) {
                     Debug.logInfo("Adding PrintRequestAttribute: " + pra, module);
@@ -178,22 +180,18 @@ public class OutputServices {
             }
             DocPrintJob job = printer.createPrintJob();
             job.print(myDoc, praset);
-
-
         } catch (Exception e) {
-            String errMsg = "Error rendering [" + contentType + "]: " + e.toString();
-            Debug.logError(e, errMsg, module);
-            return ServiceUtil.returnError(errMsg);
+            Debug.logError(e, "Error rendering [" + contentType + "]: " + e.toString(), module);
+            return ServiceUtil.returnError(UtilProperties.getMessage(resource, "ContentRenderingError", UtilMisc.toMap("contentType", contentType, "errorString", e.toString()), locale));
         }
 
         return ServiceUtil.returnSuccess();
     }
 
     public static Map<String, Object> createFileFromScreen(DispatchContext dctx, Map<String, ? extends Object> serviceContext) {
-
         Locale locale = (Locale) serviceContext.get("locale");
         String screenLocation = (String) serviceContext.remove("screenLocation");
-        Map screenContext = (Map) serviceContext.remove("screenContext");
+        Map<String, Object> screenContext = UtilGenerics.checkMap(serviceContext.remove("screenContext"));
         String contentType = (String) serviceContext.remove("contentType");
         String filePath = (String) serviceContext.remove("filePath");
         String fileName = (String) serviceContext.remove("fileName");
@@ -207,7 +205,7 @@ public class OutputServices {
         }
 
         try {
-            MapStack screenContextTmp = MapStack.create();
+            MapStack<String> screenContextTmp = MapStack.create();
             screenContextTmp.put("locale", locale);
 
             Writer writer = new StringWriter();
@@ -248,9 +246,8 @@ public class OutputServices {
             fos.close();
 
         } catch (Exception e) {
-            String errMsg = "Error rendering [" + contentType + "]: " + e.toString();
-            Debug.logError(e, errMsg, module);
-            return ServiceUtil.returnError(errMsg);
+            Debug.logError(e, "Error rendering [" + contentType + "]: " + e.toString(), module);
+            return ServiceUtil.returnError(UtilProperties.getMessage(resource, "ContentRenderingError", UtilMisc.toMap("contentType", contentType, "errorString", e.toString()), locale));
         }
 
         return ServiceUtil.returnSuccess();

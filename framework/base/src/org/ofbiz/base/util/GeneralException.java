@@ -26,6 +26,7 @@ import java.util.List;
  * Base OFBiz Exception, provides nested exceptions, etc
  *
  */
+@SuppressWarnings("serial")
 public class GeneralException extends Exception {
 
     public static <T> T checkException(Throwable t) throws GeneralException {
@@ -110,6 +111,7 @@ public class GeneralException extends Exception {
     }
 
     /** Returns the detail message, including the message from the nested exception if there is one. */
+    @Override
     public String getMessage() {
         Throwable nested = getCause();
         if (nested != null) {
@@ -142,16 +144,19 @@ public class GeneralException extends Exception {
     }
 
     /** Prints the composite message to System.err. */
+    @Override
     public void printStackTrace() {
         super.printStackTrace();
     }
 
     /** Prints the composite message and the embedded stack trace to the specified stream ps. */
+    @Override
     public void printStackTrace(PrintStream ps) {
         super.printStackTrace(ps);
     }
 
     /** Prints the composite message and the embedded stack trace to the specified print writer pw. */
+    @Override
     public void printStackTrace(PrintWriter pw) {
         super.printStackTrace(pw);
     }

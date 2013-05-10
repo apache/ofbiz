@@ -23,52 +23,42 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.oro.text.perl.Perl5Util;
 import org.apache.oro.text.regex.MalformedPatternException;
-import org.apache.oro.text.regex.Pattern;
-import org.apache.oro.text.regex.PatternCompiler;
-import org.apache.oro.text.regex.PatternMatcher;
-import org.apache.oro.text.regex.Perl5Compiler;
-import org.apache.oro.text.regex.Perl5Matcher;
+import org.ofbiz.base.util.CompilerMatcher;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilGenerics;
 import org.ofbiz.base.util.UtilValidate;
-import org.ofbiz.entity.GenericDelegator;
+import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericModelException;
 import org.ofbiz.entity.config.DatasourceInfo;
 import org.ofbiz.entity.model.ModelEntity;
 import org.ofbiz.entity.model.ModelField;
 
 /**
- * Encapsulates operations between entities and entity fields. This is a immutable class.
+ * Base class for comparisons.
  */
-public class EntityComparisonOperator extends EntityOperator<Boolean> {
+@SuppressWarnings("serial")
+public abstract class EntityComparisonOperator<L, R> extends EntityOperator<L, R, Boolean> {
 
     public static final String module = EntityComparisonOperator.class.getName();
 
-    protected static PatternMatcher matcher = new Perl5Matcher();
-    protected static Perl5Util perl5Util = new Perl5Util();
-    protected static PatternCompiler compiler = new Perl5Compiler();
+    protected transient static ThreadLocal<CompilerMatcher> compilerMatcher = CompilerMatcher.getThreadLocal();
 
-    public static Pattern makeOroPattern(String sqlLike) {
+    public static String makeOroPattern(String sqlLike) {
         try {
-            sqlLike = perl5Util.substitute("s/([$^.+*?])/\\\\$1/g", sqlLike);
-            sqlLike = perl5Util.substitute("s/%/.*/g", sqlLike);
-            sqlLike = perl5Util.substitute("s/_/./g", sqlLike);
+            sqlLike = compilerMatcher.get().substitute("s/([$^.+*?])/\\\\$1/g", sqlLike);
+            sqlLike = compilerMatcher.get().substitute("s/%/.*/g", sqlLike);
+            sqlLike = compilerMatcher.get().substitute("s/_/./g", sqlLike);
         } catch (Throwable t) {
             String errMsg = "Error in ORO pattern substitution for SQL like clause [" + sqlLike + "]: " + t.toString();
             Debug.logError(t, errMsg, module);
             throw new IllegalArgumentException(errMsg);
         }
-        try {
-            return compiler.compile(sqlLike);
-        } catch (MalformedPatternException e) {
-            e.printStackTrace();
-        }
-        return null;
+        return sqlLike;
     }
 
-    public void validateSql(ModelEntity entity, Object lhs, Object rhs) throws GenericModelException {
+    @Override
+    public void validateSql(ModelEntity entity, L lhs, R rhs) throws GenericModelException {
         if (lhs instanceof EntityConditionValue) {
             EntityConditionValue ecv = (EntityConditionValue) lhs;
             ecv.validateSql(entity);
@@ -79,12 +69,14 @@ public class EntityComparisonOperator extends EntityOperator<Boolean> {
         }
     }
 
-    public void visit(EntityConditionVisitor visitor, Object lhs, Object rhs) {
+    @Override
+    public void visit(EntityConditionVisitor visitor, L lhs, R rhs) {
         visitor.accept(lhs);
         visitor.accept(rhs);
     }
 
-    public void addSqlValue(StringBuilder sql, ModelEntity entity, List<EntityConditionParam> entityConditionParams, boolean compat, Object lhs, Object rhs, DatasourceInfo datasourceInfo) {
+    @Override
+    public void addSqlValue(StringBuilder sql, ModelEntity entity, List<EntityConditionParam> entityConditionParams, boolean compat, L lhs, R rhs, DatasourceInfo datasourceInfo) {
         //Debug.logInfo("EntityComparisonOperator.addSqlValue field=" + lhs + ", value=" + rhs + ", value type=" + (rhs == null ? "null object" : rhs.getClass().getName()), module);
 
         // if this is an IN operator and the rhs Object isEmpty, add "1=0" instead of the normal SQL.  Note that "FALSE" does not work with all databases.
@@ -113,12 +105,17 @@ public class EntityComparisonOperator extends EntityOperator<Boolean> {
         makeRHSWhereString(entity, entityConditionParams, sql, field, rhs, datasourceInfo);
     }
 
-    protected void makeRHSWhereString(ModelEntity entity, List<EntityConditionParam> entityConditionParams, StringBuilder sql, ModelField field, Object rhs, DatasourceInfo datasourceInfo) {
+    @Override
+    public boolean isEmpty(L lhs, R rhs) {
+        return false;
+    }
+
+    protected void makeRHSWhereString(ModelEntity entity, List<EntityConditionParam> entityConditionParams, StringBuilder sql, ModelField field, R rhs, DatasourceInfo datasourceInfo) {
         sql.append(' ').append(getCode()).append(' ');
         makeRHSWhereStringValue(entity, entityConditionParams, sql, field, rhs, datasourceInfo);
     }
 
-    protected void makeRHSWhereStringValue(ModelEntity entity, List<EntityConditionParam> entityConditionParams, StringBuilder sql, ModelField field, Object rhs, DatasourceInfo datasourceInfo) {
+    protected void makeRHSWhereStringValue(ModelEntity entity, List<EntityConditionParam> entityConditionParams, StringBuilder sql, ModelField field, R rhs, DatasourceInfo datasourceInfo) {
         if (rhs instanceof EntityConditionValue) {
             EntityConditionValue ecv = (EntityConditionValue) rhs;
             ecv.addSqlValue(sql, entity, entityConditionParams, false, datasourceInfo);
@@ -127,16 +124,14 @@ public class EntityComparisonOperator extends EntityOperator<Boolean> {
         }
     }
 
-    public boolean compare(Comparable lhs, Object rhs) {
-        throw new UnsupportedOperationException(codeString);
-    }
+    public abstract boolean compare(L lhs, R rhs);
 
-    public Boolean eval(GenericDelegator delegator, Map<String, ? extends Object> map, Object lhs, Object rhs) {
+    public Boolean eval(Delegator delegator, Map<String, ? extends Object> map, L lhs, R rhs) {
         return Boolean.valueOf(mapMatches(delegator, map, lhs, rhs));
     }
 
-    @SuppressWarnings("unchecked")
-    public boolean mapMatches(GenericDelegator delegator, Map<String, ? extends Object> map, Object lhs, Object rhs) {
+    @Override
+     public boolean mapMatches(Delegator delegator, Map<String, ? extends Object> map, L lhs, R rhs) {
         Object leftValue;
         if (lhs instanceof EntityConditionValue) {
             EntityConditionValue ecv = (EntityConditionValue) lhs;
@@ -155,10 +150,11 @@ public class EntityComparisonOperator extends EntityOperator<Boolean> {
         }
 
         if (leftValue == WILDCARD || rightValue == WILDCARD) return true;
-        return compare((Comparable) leftValue, rightValue);
+        return compare(UtilGenerics.<L>cast(leftValue), UtilGenerics.<R>cast(rightValue));
     }
 
-    public EntityCondition freeze(Object lhs, Object rhs) {
+    @Override
+    public EntityCondition freeze(L lhs, R rhs) {
         return EntityCondition.makeCondition(freeze(lhs), this, freeze(rhs));
     }
 
@@ -175,7 +171,7 @@ public class EntityComparisonOperator extends EntityOperator<Boolean> {
         super(id, code);
     }
 
-    public static final boolean compareEqual(Comparable lhs, Object rhs) {
+    public static final <T> boolean compareEqual(Comparable<T> lhs, T rhs) {
         if (lhs == null) {
             if (rhs != null) {
                 return false;
@@ -186,7 +182,7 @@ public class EntityComparisonOperator extends EntityOperator<Boolean> {
         return true;
     }
 
-    public static final boolean compareNotEqual(Comparable lhs, Object rhs) {
+    public static final <T> boolean compareNotEqual(Comparable<T> lhs, T rhs) {
         if (lhs == null) {
             if (rhs == null) {
                 return false;
@@ -197,7 +193,7 @@ public class EntityComparisonOperator extends EntityOperator<Boolean> {
         return true;
     }
 
-    public static final boolean compareGreaterThan(Comparable lhs, Object rhs) {
+    public static final <T> boolean compareGreaterThan(Comparable<T> lhs, T rhs) {
         if (lhs == null) {
             if (rhs != null) {
                 return false;
@@ -208,7 +204,7 @@ public class EntityComparisonOperator extends EntityOperator<Boolean> {
         return true;
     }
 
-    public static final boolean compareGreaterThanEqualTo(Comparable lhs, Object rhs) {
+    public static final <T> boolean compareGreaterThanEqualTo(Comparable<T> lhs, T rhs) {
         if (lhs == null) {
             if (rhs != null) {
                 return false;
@@ -219,7 +215,7 @@ public class EntityComparisonOperator extends EntityOperator<Boolean> {
         return true;
     }
 
-    public static final boolean compareLessThan(Comparable lhs, Object rhs) {
+    public static final <T> boolean compareLessThan(Comparable<T> lhs, T rhs) {
         if (lhs == null) {
             if (rhs != null) {
                 return false;
@@ -230,7 +226,7 @@ public class EntityComparisonOperator extends EntityOperator<Boolean> {
         return true;
     }
 
-    public static final boolean compareLessThanEqualTo(Comparable lhs, Object rhs) {
+    public static final <T> boolean compareLessThanEqualTo(Comparable<T> lhs, T rhs) {
         if (lhs == null) {
             if (rhs != null) {
                 return false;
@@ -241,15 +237,15 @@ public class EntityComparisonOperator extends EntityOperator<Boolean> {
         return true;
     }
 
-    public static final boolean compareIn(Object lhs, Object rhs) {
+    public static final <L,R> boolean compareIn(L lhs, R rhs) {
         if (lhs == null) {
             if (rhs != null) {
                 return false;
             } else {
                 return true;
             }
-        } else if (rhs instanceof Collection) {
-            if (((Collection) rhs).contains(lhs)) {
+        } else if (rhs instanceof Collection<?>) {
+            if (((Collection<?>) rhs).contains(lhs)) {
                 return true;
             } else {
                 return false;
@@ -261,14 +257,20 @@ public class EntityComparisonOperator extends EntityOperator<Boolean> {
         }
     }
 
-    public static final boolean compareLike(Object lhs, Object rhs) {
+    public static final <L,R> boolean compareLike(L lhs, R rhs) {
         if (lhs == null) {
             if (rhs != null) {
                 return false;
             }
         } else if (lhs instanceof String && rhs instanceof String) {
             //see if the lhs value is like the rhs value, rhs will have the pattern characters in it...
-            return matcher.matches((String) lhs, makeOroPattern((String) rhs));
+            try {
+                return compilerMatcher.get().matches((String) lhs, makeOroPattern((String) rhs));
+            }
+            catch (MalformedPatternException e) {
+                Debug.logError(e, module);
+                return false;
+            }
         }
         return true;
     }

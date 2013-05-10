@@ -16,7 +16,7 @@ KIND, either express or implied.  See the License for the
 specific language governing permissions and limitations
 under the License.
 -->
-<hr/>
+<hr />
     <form method="post"  action="/content/control/AdminSearch"  name="searchQuery" style="margin: 0;">
 <table border="0" cellpadding="2" cellspacing="0">
 
@@ -29,7 +29,7 @@ under the License.
 <input type="text" class="inputBox" name="queryLine" size="60"/>
 </td>
 </tr>
-<tr>
+
 <tr>
 <td width="20%" align="right">
 <span class="tableheadtext">${uiLabelMap.CommonSelect} ${uiLabelMap.ContentCategory}</span>
@@ -46,42 +46,43 @@ under the License.
 
 <!-- category form -->
 <tr>
-  <table border="0" wdith="100%">
+<td>
+  <table border="0" width="100%">
     <tr>
       <td align="right" valign="middle">
-        <div class="tabletext">${uiLabelMap.ProductFeatures}:</div>
+        <div>${uiLabelMap.ProductFeatures}:</div>
       </td>
       <td align="right" valign="middle">
-        <div class="tabletext">
-          ${uiLabelMap.CommonAll} <input type="radio" name="any_or_all" value="all" checked>
-          ${uiLabelMap.CommonAny} <input type="radio" name="any_or_all" value="any">
+        <div>
+          ${uiLabelMap.CommonAll} <input type="radio" name="any_or_all" value="all" checked="checked"/>
+          ${uiLabelMap.CommonAny} <input type="radio" name="any_or_all" value="any"/>
         </div>
       </td>
     </tr>
 <#--
     <tr>
       <td align="right" valign="middle">
-        <div class="tabletext">Feature IDs:</div>
+        <div>Feature IDs:</div>
       </td>
       <td valign="middle">
-        <div class="tabletext">
-          <input type="text" class="inputBox" name="SEARCH_FEAT" size="15" value="${requestParameters.SEARCH_FEAT?if_exists}">&nbsp;
-          <input type="text" class="inputBox" name="SEARCH_FEAT2" size="15" value="${requestParameters.SEARCH_FEAT?if_exists}">&nbsp;
-          <input type="text" class="inputBox" name="SEARCH_FEAT3" size="15" value="${requestParameters.SEARCH_FEAT?if_exists}">&nbsp;
+        <div>
+          <input type="text" class="inputBox" name="SEARCH_FEAT" size="15" value="${requestParameters.SEARCH_FEAT?if_exists}"/>&nbsp;
+          <input type="text" class="inputBox" name="SEARCH_FEAT2" size="15" value="${requestParameters.SEARCH_FEAT?if_exists}"/>&nbsp;
+          <input type="text" class="inputBox" name="SEARCH_FEAT3" size="15" value="${requestParameters.SEARCH_FEAT?if_exists}"/>&nbsp;
         </div>
       </td>
     </tr>
 -->
     <#list productFeatureTypeIdsOrdered as productFeatureTypeId>
       <#assign findPftMap = Static["org.ofbiz.base.util.UtilMisc"].toMap("productFeatureTypeId", productFeatureTypeId)>
-      <#assign productFeatureType = delegator.findByPrimaryKeyCache("ProductFeatureType", findPftMap)>
+      <#assign productFeatureType = delegator.findOne("ProductFeatureType", findPftMap, true)>
       <#assign productFeatures = productFeaturesByTypeMap[productFeatureTypeId]>
       <tr>
         <td align="right" valign="middle">
-          <div class="tabletext">${(productFeatureType.description)?if_exists}:</div>
+          <div>${(productFeatureType.description)?if_exists}:</div>
         </td>
         <td valign="middle">
-          <div class="tabletext">
+          <div>
             <select name="pft_${productFeatureTypeId}">
               <option value="">- ${uiLabelMap.CommonAny} -</option>
               <#list productFeatures as productFeature>
@@ -95,20 +96,24 @@ under the License.
     <#if searchConstraintStrings?has_content>
       <tr>
         <td align="right" valign="top">
-          <div class="tabletext">${uiLabelMap.CommonLast} ${uiLabelMap.CommonSearch}:</div>
+          <div>${uiLabelMap.CommonLast} ${uiLabelMap.CommonSearch}:</div>
         </td>
         <td valign="top">
             <#list searchConstraintStrings as searchConstraintString>
-                <div class="tabletext">&nbsp;-&nbsp;${searchConstraintString}</div>
+                <div>&nbsp;-&nbsp;${searchConstraintString}</div>
             </#list>
-            <div class="tabletext">${uiLabelMap.CommonSortedBy}: ${searchSortOrderString}</div>
-            <div class="tabletext">
-              ${uiLabelMap.CommonNew} ${uiLabelMap.CommonSearch} <input type="radio" name="clearSearch" value="Y" checked>
-              ${uiLabelMap.CommonRefine} ${uiLabelMap.CommonSearch} <input type="radio" name="clearSearch" value="N">
+            <div>${uiLabelMap.CommonSortedBy}: ${searchSortOrderString}</div>
+            <div>
+              ${uiLabelMap.CommonNew} ${uiLabelMap.CommonSearch} <input type="radio" name="clearSearch" value="Y" checked="checked"/>
+              ${uiLabelMap.CommonRefineSearch} <input type="radio" name="clearSearch" value="N"/>
             </div>
         </td>
       </tr>
     </#if>
+    </table>
+    </td>
+</tr>
+<tr>
 <td width="20%" align="right">
 &nbsp;</td>
 <td>&nbsp;</td>
@@ -121,7 +126,7 @@ under the License.
 </form>
 
 
-<hr/>
+<hr />
 
 <#macro listSiteIds contentId indentIndex=0>
   <#assign dummy=Static["org.ofbiz.base.util.Debug"].logInfo("in listSiteIds, contentId:" + contentId,"")/>

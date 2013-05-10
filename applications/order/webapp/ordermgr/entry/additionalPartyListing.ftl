@@ -20,17 +20,17 @@ under the License.
 <#-- ==================== Party Listing dialog box ========================= -->
 <#if additionalPartyRoleMap?has_content>
 <div class="screenlet">
-    <div class="screenlet-header">
-        <div class="boxhead">&nbsp;${uiLabelMap.PartyAdditionalPartyListing}</div>
+    <div class="screenlet-title-bar">
+        <div class="h3">${uiLabelMap.PartyAdditionalPartyListing}</div>
     </div>
     <div class="screenlet-body">
       <table border="0" width="100%" cellpadding="0">
         <#list roleList as role>
           <tr>
-            <td valign="bottom"><div>${roleData[role].get("description",locale)}</div></td>
+            <td valign="bottom"><div>${roleData[role].get("description", locale)}</div></td>
           </tr>
           <tr>
-            <td colspan="4"><hr/></td>
+            <td colspan="4"><hr /></td>
           </tr>
           <#list additionalPartyRoleMap[role] as party>
             <tr>

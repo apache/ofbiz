@@ -20,14 +20,14 @@ under the License.
 <#escape x as x?xml>
 
     <#if hasPermission>
-        <#assign shipGroup = shipment.getRelatedOne("PrimaryOrderItemShipGroup")?if_exists>
+        <#assign shipGroup = shipment.getRelatedOne("PrimaryOrderItemShipGroup", false)?if_exists>
         <#assign carrier = (shipGroup.carrierPartyId)?default("N/A")>
             <#if packages?has_content>
             <#list packages as package>
 
             <fo:block><fo:leader/></fo:block>
 
-            <fo:block font-size="14pt">${uiLabelMap.ProductShipmentId} #${shipmentId} / Package ${package_index + 1}<#if (packages?size > 1)> of ${packages?size}</#if></fo:block>
+            <fo:block font-size="14pt">${uiLabelMap.ProductShipmentId} #${shipmentId} / ${uiLabelMap.ProductPackage} ${package_index + 1}<#if (packages?size > 1)> of ${packages?size}</#if></fo:block>
             <fo:block font-size="12pt">${uiLabelMap.ProductOrderId} #${shipment.primaryOrderId?default("N/A")} / ${shipment.primaryShipGroupSeqId?default("N/A")}</fo:block>
             <fo:block><fo:leader/></fo:block>
 
@@ -72,7 +72,9 @@ under the License.
                                 <#if carrier != "_NA_">
                                    ${carrier}
                                 </#if>
-                                ${shipGroup.shipmentMethodTypeId?default("??")}
+                                <#if (shipGroup.shipmentMethodTypeId)?exists>
+                                  ${(shipGroup.getRelatedOne("ShipmentMethodType", false).get("description", locale))?default(shipGroup.shipmentMethodTypeId)}
+                                </#if>
                             </fo:block>
                         </fo:table-cell>
                         <fo:table-cell padding="2pt">
@@ -99,10 +101,10 @@ under the License.
                 <fo:table-header>
                     <fo:table-row font-weight="bold">
                         <fo:table-cell padding="2pt" background-color="#D4D0C8"><fo:block>${uiLabelMap.ProductProduct}</fo:block></fo:table-cell>
-                        <fo:table-cell padding="2pt" background-color="#D4D0C8"><fo:block>Requested</fo:block></fo:table-cell>
-                        <fo:table-cell padding="2pt" background-color="#D4D0C8"><fo:block>In this Package</fo:block></fo:table-cell>
-                        <#if (packages?size > 1)><fo:table-cell padding="2pt" background-color="#D4D0C8"><fo:block>In this Shipment</fo:block></fo:table-cell></#if>
-                        <fo:table-cell padding="2pt" background-color="#D4D0C8"><fo:block>Total Shipped</fo:block></fo:table-cell>
+                        <fo:table-cell padding="2pt" background-color="#D4D0C8"><fo:block>${uiLabelMap.ProductQuantityRequested}</fo:block></fo:table-cell>
+                        <fo:table-cell padding="2pt" background-color="#D4D0C8"><fo:block>${uiLabelMap.ProductQuantityOfPackage}</fo:block></fo:table-cell>
+                        <#if (packages?size > 1)><fo:table-cell padding="2pt" background-color="#D4D0C8"><fo:block>${uiLabelMap.ProductQuantityShippedOfPackage}</fo:block></fo:table-cell></#if>
+                        <fo:table-cell padding="2pt" background-color="#D4D0C8"><fo:block>${uiLabelMap.ProductQuantityShipped}</fo:block></fo:table-cell>
                     </fo:table-row>
                 </fo:table-header>
                 <fo:table-body>

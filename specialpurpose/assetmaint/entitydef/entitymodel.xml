@@ -26,7 +26,6 @@
   <!-- ========================================================= -->
     <title>Entity of an Open For Business Project Component</title>
     <description>None</description>
-    <author>None</author>
     <version>1.0</version>
 
     <view-entity entity-name="FixedAssetAndIdent" package-name="org.ofbiz.specialpurpose.assetmaint"
@@ -55,19 +54,6 @@
         <view-link entity-alias="FAM" rel-entity-alias="WE">
             <key-map field-name="scheduleWorkEffortId" rel-field-name="workEffortId"/>
         </view-link>
-    </view-entity>
-    <view-entity entity-name="WorkEffortAndTimeEntry" package-name="org.ofbiz.specialpurpose.assetmaint"
-        title="WorkEffort and TimeEntry View Entity">
-        <member-entity entity-alias="WE" entity-name="WorkEffort"/>
-        <member-entity entity-alias="TE" entity-name="TimeEntry"/>
-        <alias-all entity-alias="WE"/>
-        <alias-all entity-alias="TE"/>
-        <view-link entity-alias="WE" rel-entity-alias="TE">
-            <key-map field-name="workEffortId"/>
-        </view-link>
-        <relation type="many" rel-entity-name="WorkEffortSkillStandard">
-            <key-map field-name="workEffortId"/>
-        </relation>
     </view-entity>
     <view-entity entity-name="FixedAssetMaintWorkEffortAndPartyAssignment"
         package-name="org.ofbiz.specialpurpose.assetmaint"
@@ -130,6 +116,7 @@
         <alias-all entity-alias="IMIE"/>
         <alias-all entity-alias="IYIM">
             <exclude field="facilityId"/>
+            <exclude field="fixedAssetId"/>
         </alias-all>
         <alias entity-alias="PT" name="productId"/>
         <alias entity-alias="PT" name="productTypeId"/>
@@ -146,6 +133,7 @@
         <alias entity-alias="PT" name="isVariant"/>
         <alias entity-alias="PT" name="createdDate"/>
         <alias entity-alias="PT" name="createdByUserLogin"/>
+        <alias entity-alias="IYIM" name="inventoryItemFixedAssetId" field="fixedAssetId"/>
         <view-link entity-alias="IMIE" rel-entity-alias="IYIM">
             <key-map field-name="inventoryItemId"/>
         </view-link>
@@ -168,6 +156,7 @@
         <alias-all entity-alias="IMIE"/>
         <alias-all entity-alias="IYIM">
             <exclude field="facilityId"/>
+            <exclude field="fixedAssetId"/>
         </alias-all>
         <alias entity-alias="PT" name="productId"/>
         <alias entity-alias="PT" name="productTypeId"/>
@@ -184,6 +173,7 @@
         <alias entity-alias="PT" name="isVariant"/>
         <alias entity-alias="PT" name="createdDate"/>
         <alias entity-alias="PT" name="createdByUserLogin"/>
+        <alias entity-alias="IYIM" name="inventoryItemFixedAssetId" field="fixedAssetId"/>
         <view-link entity-alias="PT" rel-entity-alias="IYIM">
             <key-map field-name="productId"/>
         </view-link>

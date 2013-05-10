@@ -27,7 +27,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilValidate;
-import org.ofbiz.entity.GenericDelegator;
+import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
 import org.ofbiz.widget.WidgetContentWorker;
@@ -48,9 +48,9 @@ public class HtmlMenuRendererImage extends HtmlMenuRenderer {
 
     public String buildDivStr(ModelMenuItem menuItem, Map<String, Object> context) throws IOException {
 
-        String imgStr = "<img src=\"";
+        StringBuilder imgStr = new StringBuilder("<img src=\"");
         String contentId = menuItem.getAssociatedContentId(context);
-        GenericDelegator delegator = (GenericDelegator)request.getAttribute("delegator");
+        Delegator delegator = (Delegator)request.getAttribute("delegator");
         GenericValue webSitePublishPoint = null;
                 //Debug.logInfo("in HtmlMenuRendererImage, contentId:" + contentId,"");
         try {
@@ -66,17 +66,15 @@ public class HtmlMenuRendererImage extends HtmlMenuRenderer {
         String medallionLogoStr = webSitePublishPoint.getString("medallionLogo");
         StringWriter buf = new StringWriter();
         appendContentUrl(buf, medallionLogoStr);
-        imgStr += buf.toString();
+        imgStr.append(buf.toString());
                 //Debug.logInfo("in HtmlMenuRendererImage, imgStr:" + imgStr,"");
         String cellWidth = menuItem.getCellWidth();
-        imgStr += "\"";
-        String widthStr = "";
+        imgStr.append("\"");
         if (UtilValidate.isNotEmpty(cellWidth))
-            widthStr = " width=\"" + cellWidth + "\" ";
+            imgStr.append(" width=\"").append(cellWidth).append("\" ");
 
-        imgStr += widthStr;
-        imgStr += " border=\"0\" />";
-        return imgStr;
+        imgStr.append(" border=\"0\" />");
+        return imgStr.toString();
     }
 
 }

@@ -38,10 +38,12 @@ import org.ofbiz.base.util.UtilGenerics;
 import org.ofbiz.base.util.UtilHttp;
 import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.base.util.UtilValidate;
-import org.ofbiz.entity.GenericDelegator;
+import org.ofbiz.entity.Delegator;
+import org.ofbiz.entity.GenericValue;
 import org.ofbiz.service.LocalDispatcher;
 import org.ofbiz.webapp.control.RequestHandler;
 import org.ofbiz.webapp.taglib.ContentUrlTag;
+import org.ofbiz.widget.ModelWidget;
 import org.ofbiz.widget.WidgetContentWorker;
 import org.ofbiz.widget.WidgetDataResourceWorker;
 import org.ofbiz.widget.WidgetWorker;
@@ -80,6 +82,9 @@ public class HtmlScreenRenderer extends HtmlWidgetRenderer implements ScreenStri
     }
 
     public void renderSectionBegin(Appendable writer, Map<String, Object> context, ModelScreenWidget.Section section) throws IOException {
+        if (section.isMainSection) {
+            this.widgetCommentsEnabled = ModelWidget.widgetBoundaryCommentsEnabled(context);
+        }
         renderBeginningBoundaryComment(writer, section.isMainSection?"Screen":"Section Widget", section);
     }
 
@@ -104,7 +109,7 @@ public class HtmlScreenRenderer extends HtmlWidgetRenderer implements ScreenStri
             writer.append("', '");
             writer.append(rh.makeLink(request, response, autoUpdateTarget));
             writer.append("', '");
-            writer.append("', '" + container.getAutoUpdateInterval() + "');</script>");
+            writer.append("', '").append(container.getAutoUpdateInterval()).append("');</script>");
             appendWhitespace(writer);
         }
         writer.append("<div");
@@ -134,11 +139,11 @@ public class HtmlScreenRenderer extends HtmlWidgetRenderer implements ScreenStri
         writer.append("<hr");
         String className = separator.getStyle(context);
         if (UtilValidate.isNotEmpty(className)) {
-            writer.append(" class=\"" + className + "\"");
+            writer.append(" class=\"").append(className).append("\"");
         }
         String idName = separator.getId(context);
         if (UtilValidate.isNotEmpty(idName)) {
-            writer.append(" id=\"" + idName + "\"");
+            writer.append(" id=\"").append(idName).append("\"");
         }
         writer.append("/>");
         appendWhitespace(writer);
@@ -192,26 +197,26 @@ public class HtmlScreenRenderer extends HtmlWidgetRenderer implements ScreenStri
                 if (collapsed) {
                     writer.append("collapsed\"><a ");
                     if (javaScriptEnabled) {
-                        writer.append("onclick=\"javascript:toggleScreenlet(this, '" + collapsibleAreaId + "', '" + expandToolTip + "', '" + collapseToolTip + "');\"");
+                        writer.append("onclick=\"javascript:toggleScreenlet(this, '").append(collapsibleAreaId).append("', '").append(expandToolTip).append("', '").append(collapseToolTip).append("');\"");
                     } else {
                         requestParameters.put(screenlet.getPreferenceKey(context) + "_collapsed", "false");
                         String queryString = UtilHttp.urlEncodeArgs(requestParameters);
-                        writer.append("href=\"" + request.getRequestURI() + "?" + queryString + "\"");
+                        writer.append("href=\"").append(request.getRequestURI()).append("?").append(queryString).append("\"");
                     }
                     if (UtilValidate.isNotEmpty(expandToolTip)) {
-                        writer.append(" title=\"" + expandToolTip + "\"");
+                        writer.append(" title=\"").append(expandToolTip).append("\"");
                     }
                 } else {
                     writer.append("expanded\"><a ");
                     if (javaScriptEnabled) {
-                        writer.append("onclick=\"javascript:toggleScreenlet(this, '" + collapsibleAreaId + "', '" + expandToolTip + "', '" + collapseToolTip + "');\"");
+                        writer.append("onclick=\"javascript:toggleScreenlet(this, '").append(collapsibleAreaId).append("', '").append(expandToolTip).append("', '").append(collapseToolTip).append("');\"");
                     } else {
                         requestParameters.put(screenlet.getPreferenceKey(context) + "_collapsed", "true");
                         String queryString = UtilHttp.urlEncodeArgs(requestParameters);
-                        writer.append("href=\"" + request.getRequestURI() + "?" + queryString + "\"");
+                        writer.append("href=\"").append(request.getRequestURI()).append("?").append(queryString).append("\"");
                     }
                     if (UtilValidate.isNotEmpty(collapseToolTip)) {
-                        writer.append(" title=\"" + collapseToolTip + "\"");
+                        writer.append(" title=\"").append(collapseToolTip).append("\"");
                     }
                 }
                 writer.append(">&nbsp</a></li>");
@@ -236,7 +241,7 @@ public class HtmlScreenRenderer extends HtmlWidgetRenderer implements ScreenStri
             appendWhitespace(writer);
             writer.append("<div");
             if (UtilValidate.isNotEmpty(collapsibleAreaId)) {
-                writer.append(" id=\"" + collapsibleAreaId + "\"");
+                writer.append(" id=\"").append(collapsibleAreaId).append("\"");
                 if (collapsed) {
                     writer.append(" style=\"display: none;\"");
                 }
@@ -261,7 +266,7 @@ public class HtmlScreenRenderer extends HtmlWidgetRenderer implements ScreenStri
         }
 
         // get the parametrized pagination index and size fields
-        int paginatorNumber = modelForm.getPaginatorNumber(context);
+        int paginatorNumber = WidgetWorker.getPaginatorNumber(context);
         String viewIndexParam = modelForm.getMultiPaginateIndexField(context);
         String viewSizeParam = modelForm.getMultiPaginateSizeField(context);
 
@@ -277,12 +282,12 @@ public class HtmlScreenRenderer extends HtmlWidgetRenderer implements ScreenStri
         if (actualPageSize >= listSize && listSize >= 0) return;
 
         // needed for the "Page" and "rows" labels
-        Map uiLabelMap = (Map) context.get("uiLabelMap");
+        Map<String, String> uiLabelMap = UtilGenerics.cast(context.get("uiLabelMap"));
         String ofLabel = "";
         if (uiLabelMap == null) {
             Debug.logWarning("Could not find uiLabelMap in context", module);
         } else {
-            ofLabel = (String) uiLabelMap.get("CommonOf");
+            ofLabel = uiLabelMap.get("CommonOf");
             ofLabel = ofLabel.toLowerCase();
         }
 
@@ -312,17 +317,17 @@ public class HtmlScreenRenderer extends HtmlWidgetRenderer implements ScreenStri
         if (paginateAnchor != null) anchor = "#" + paginateAnchor;
 
         // preparing the link text, so that later in the code we can reuse this and just add the viewIndex
-        String prepLinkText = "";
-        prepLinkText = targetService;
-        if (prepLinkText.indexOf("?") < 0) {
-            prepLinkText += "?";
-        } else if (!prepLinkText.endsWith("?")) {
-            prepLinkText += "&amp;";
+        StringBuilder prepLinkTextBuffer = new StringBuilder(targetService);
+        if (prepLinkTextBuffer.indexOf("?") < 0) {
+            prepLinkTextBuffer.append("?");
+        } else if (prepLinkTextBuffer.indexOf("?", prepLinkTextBuffer.length() - 1) > 0) {
+            prepLinkTextBuffer.append("&amp;");
         }
         if (!UtilValidate.isEmpty(queryString) && !queryString.equals("null")) {
-            prepLinkText += queryString + "&amp;";
+            prepLinkTextBuffer.append(queryString).append("&amp;");
         }
-        prepLinkText += viewSizeParam + "=" + viewSize + "&amp;" + viewIndexParam + "=";
+        prepLinkTextBuffer.append(viewSizeParam).append("=").append(viewSize).append("&amp;").append(viewIndexParam).append("=");
+        String prepLinkText = prepLinkTextBuffer.toString();
 
         String linkText;
 
@@ -330,37 +335,37 @@ public class HtmlScreenRenderer extends HtmlWidgetRenderer implements ScreenStri
         // The current screenlet title bar navigation syling requires rendering
         // these links in reverse order
         // Last button
-        writer.append("<li class=\"" + modelForm.getPaginateLastStyle());
+        writer.append("<li class=\"").append(modelForm.getPaginateLastStyle());
         if (highIndex < listSize) {
             writer.append("\"><a href=\"");
             int page = (listSize / viewSize) - 1;
             linkText = prepLinkText + page + anchor;
             // - make the link
             writer.append(rh.makeLink(request, response, linkText));
-            writer.append("\">" + modelForm.getPaginateLastLabel(context) + "</a>");
+            writer.append("\">").append(modelForm.getPaginateLastLabel(context)).append("</a>");
         } else {
             // disabled button
-            writer.append(" disabled\">" + modelForm.getPaginateLastLabel(context));
+            writer.append(" disabled\">").append(modelForm.getPaginateLastLabel(context));
         }
         writer.append("</li>");
         appendWhitespace(writer);
         // Next button
-        writer.append("<li class=\"" + modelForm.getPaginateNextStyle());
+        writer.append("<li class=\"").append(modelForm.getPaginateNextStyle());
         if (highIndex < listSize) {
             writer.append("\"><a href=\"");
             linkText = prepLinkText + (viewIndex + 1) + anchor;
             // - make the link
             writer.append(rh.makeLink(request, response, linkText));
-            writer.append("\">" + modelForm.getPaginateNextLabel(context) + "</a>");
+            writer.append("\">").append(modelForm.getPaginateNextLabel(context)).append("</a>");
         } else {
             // disabled button
-            writer.append(" disabled\">" + modelForm.getPaginateNextLabel(context));
+            writer.append(" disabled\">").append(modelForm.getPaginateNextLabel(context));
         }
         writer.append("</li>");
         appendWhitespace(writer);
         if (listSize > 0) {
             writer.append("<li>");
-            writer.append((lowIndex + 1) + " - " + (lowIndex + actualPageSize ) + " " + ofLabel + " " + listSize);
+            writer.append(Integer.toString(lowIndex + 1)).append(" - ").append(Integer.toString(lowIndex + actualPageSize)).append(" ").append(ofLabel).append(" ").append(Integer.toString(listSize));
             writer.append("</li>");
             appendWhitespace(writer);
         }
@@ -371,10 +376,10 @@ public class HtmlScreenRenderer extends HtmlWidgetRenderer implements ScreenStri
             linkText = prepLinkText + (viewIndex - 1) + anchor;
             // - make the link
             writer.append(rh.makeLink(request, response, linkText));
-            writer.append("\">" + modelForm.getPaginatePreviousLabel(context) + "</a>");
+            writer.append("\">").append(modelForm.getPaginatePreviousLabel(context)).append("</a>");
         } else {
             // disabled button
-            writer.append(" disabled\">" + modelForm.getPaginatePreviousLabel(context));
+            writer.append(" disabled\">").append(modelForm.getPaginatePreviousLabel(context));
         }
         writer.append("</li>");
         appendWhitespace(writer);
@@ -384,9 +389,9 @@ public class HtmlScreenRenderer extends HtmlWidgetRenderer implements ScreenStri
             writer.append("\"><a href=\"");
             linkText = prepLinkText + 0 + anchor;
             writer.append(rh.makeLink(request, response, linkText));
-            writer.append("\">" + modelForm.getPaginateFirstLabel(context) + "</a>");
+            writer.append("\">").append(modelForm.getPaginateFirstLabel(context)).append("</a>");
         } else {
-            writer.append(" disabled\">" + modelForm.getPaginateFirstLabel(context));
+            writer.append(" disabled\">").append(modelForm.getPaginateFirstLabel(context));
         }
         writer.append("</li>");
         appendWhitespace(writer);
@@ -422,7 +427,9 @@ public class HtmlScreenRenderer extends HtmlWidgetRenderer implements ScreenStri
         public ScreenletMenuRenderer(HttpServletRequest request, HttpServletResponse response) {
             super(request, response);
         }
+        @Override
         public void renderMenuOpen(Appendable writer, Map<String, Object> context, ModelMenu modelMenu) {}
+        @Override
         public void renderMenuClose(Appendable writer, Map<String, Object> context, ModelMenu modelMenu) {}
     }
 
@@ -435,7 +442,7 @@ public class HtmlScreenRenderer extends HtmlWidgetRenderer implements ScreenStri
         // open tag
         String style = label.getStyle(context);
         String id = label.getId(context);
-        if (UtilValidate.isNotEmpty(style) || UtilValidate.isNotEmpty(id) ) {
+        if (UtilValidate.isNotEmpty(style) || UtilValidate.isNotEmpty(id)) {
                writer.append("<span");
 
             if (UtilValidate.isNotEmpty(id)) {
@@ -487,17 +494,17 @@ public class HtmlScreenRenderer extends HtmlWidgetRenderer implements ScreenStri
                 writer.append("\"");
             }
 
-            writer.append(" onSubmit=\"javascript:submitFormDisableSubmits(this)\"");
+            writer.append(" onsubmit=\"javascript:submitFormDisableSubmits(this)\"");
 
             writer.append(" name=\"");
             writer.append(uniqueItemName);
             writer.append("\">");
 
-            for (WidgetWorker.Parameter parameter: link.getParameterList()) {
+            for (Map.Entry<String, String> parameter: link.getParameterMap(context).entrySet()) {
                 writer.append("<input name=\"");
-                writer.append(parameter.getName());
+                writer.append(parameter.getKey());
                 writer.append("\" value=\"");
-                writer.append(parameter.getValue(context));
+                writer.append(parameter.getValue());
                 writer.append("\" type=\"hidden\"/>");
             }
 
@@ -535,7 +542,7 @@ public class HtmlScreenRenderer extends HtmlWidgetRenderer implements ScreenStri
                 writer.append(uniqueItemName);
                 writer.append(".submit()");
             } else {
-                WidgetWorker.buildHyperlinkUrl(writer, target, link.getUrlMode(), link.getParameterList(), link.getPrefix(context),
+                WidgetWorker.buildHyperlinkUrl(writer, target, link.getUrlMode(), link.getParameterMap(context), link.getPrefix(context),
                         link.getFullPath(), link.getSecure(), link.getEncode(), request, response, context);
             }
             writer.append("\"");
@@ -618,7 +625,7 @@ public class HtmlScreenRenderer extends HtmlWidgetRenderer implements ScreenStri
             }
         } else  if (urlMode != null && urlMode.equalsIgnoreCase("content")) {
             if (request != null && response != null) {
-                StringBuffer newURL = new StringBuffer();
+                StringBuilder newURL = new StringBuilder();
                 ContentUrlTag.appendContentPrefix(request, newURL);
                 newURL.append(src);
                 writer.append(newURL.toString());
@@ -642,7 +649,7 @@ public class HtmlScreenRenderer extends HtmlWidgetRenderer implements ScreenStri
 
         if (UtilValidate.isNotEmpty(editRequest) && "true".equals(enableEditValue)) {
             writer.append("<div");
-            writer.append(" class=\"" + editContainerStyle + "\"> ");
+            writer.append(" class=\"").append(editContainerStyle).append("\"> ");
             appendWhitespace(writer);
         }
     }
@@ -655,7 +662,7 @@ public class HtmlScreenRenderer extends HtmlWidgetRenderer implements ScreenStri
         String expandedDataResourceId = content.getDataResourceId(context);
         String renderedContent = null;
         LocalDispatcher dispatcher = (LocalDispatcher) context.get("dispatcher");
-        GenericDelegator delegator = (GenericDelegator) context.get("delegator");
+        Delegator delegator = (Delegator) context.get("delegator");
 
         // make a new map for content rendering; so our current map does not get clobbered
         Map<String, Object> contentContext = FastMap.newInstance();
@@ -734,9 +741,7 @@ public class HtmlScreenRenderer extends HtmlWidgetRenderer implements ScreenStri
                 editRequest += "contentId=" + expandedContentId;
                 ServletContext ctx = (ServletContext) request.getAttribute("servletContext");
                 RequestHandler rh = (RequestHandler) ctx.getAttribute("_REQUEST_HANDLER_");
-                String urlString = rh.makeLink(request, response, editRequest, false, false, false);
-                String linkString = "<a href=\"" + urlString + "\">" + editMode + "</a>";
-                writer.append(linkString);
+                writer.append("<a href=\"").append(rh.makeLink(request, response, editRequest, false, false, false)).append("\">").append(editMode).append("</a>");
             }
             if (UtilValidate.isNotEmpty(editContainerStyle)) {
                 writer.append("</div>");
@@ -747,25 +752,24 @@ public class HtmlScreenRenderer extends HtmlWidgetRenderer implements ScreenStri
 
     public void renderContentFrame(Appendable writer, Map<String, Object> context, ModelScreenWidget.Content content) throws IOException {
 
-        String dataResourceId = content.getDataResourceId(context);
-//        String urlString = "/content/control/ViewSimpleContent?dataResourceId=" + dataResourceId;
-        String urlString = "/ViewSimpleContent?dataResourceId=" + dataResourceId;
-
-        String width = content.getWidth();
-        String widthString=" width=\"" + width + "\"";
-        String height = content.getHeight();
-        String heightString=" height=\"" + height + "\"";
-        String border = content.getBorder();
-        String borderString = (UtilValidate.isNotEmpty(border)) ? " border=\"" + border + "\"" : "";
 
         HttpServletRequest request = (HttpServletRequest) context.get("request");
         HttpServletResponse response = (HttpServletResponse) context.get("response");
         if (request != null && response != null) {
             ServletContext ctx = (ServletContext) request.getAttribute("servletContext");
             RequestHandler rh = (RequestHandler) ctx.getAttribute("_REQUEST_HANDLER_");
-            String fullUrlString = rh.makeLink(request, response, urlString, true, false, false);
-            String linkString = "<iframe src=\"" + fullUrlString + "\" " + widthString + heightString + borderString + " />";
-            writer.append(linkString);
+            String dataResourceId = content.getDataResourceId(context);
+//          String urlString = "/content/control/ViewSimpleContent?dataResourceId=" + dataResourceId;
+            String urlString = "/ViewSimpleContent?dataResourceId=" + dataResourceId;
+
+            writer.append("<iframe src=\"").append(rh.makeLink(request, response, urlString, true, false, false)).append("\" ");
+            writer.append(" width=\"").append(content.getWidth()).append("\"");
+            writer.append(" height=\"").append(content.getHeight()).append("\"");
+            String border = content.getBorder();
+            if (UtilValidate.isNotEmpty(border)) {
+                writer.append(" border=\"").append(border).append("\"");
+            }
+            writer.append(" />");
         }
 
     }
@@ -778,7 +782,7 @@ public class HtmlScreenRenderer extends HtmlWidgetRenderer implements ScreenStri
         String enableEditValue = (String)context.get(enableEditName);
         if (UtilValidate.isNotEmpty(editRequest) && "true".equals(enableEditValue)) {
             writer.append("<div");
-            writer.append(" class=\"" + editContainerStyle + "\"> ");
+            writer.append(" class=\"").append(editContainerStyle).append("\"> ");
 
             appendWhitespace(writer);
         }
@@ -791,7 +795,7 @@ public class HtmlScreenRenderer extends HtmlWidgetRenderer implements ScreenStri
             String expandedMapKey = content.getMapKey(context);
             String renderedContent = null;
             LocalDispatcher dispatcher = (LocalDispatcher) context.get("dispatcher");
-            GenericDelegator delegator = (GenericDelegator) context.get("delegator");
+            Delegator delegator = (Delegator) context.get("delegator");
 
             // create a new map for the content rendering; so our current context does not get overwritten!
             Map<String, Object> contentContext = FastMap.newInstance();
@@ -857,7 +861,7 @@ public class HtmlScreenRenderer extends HtmlWidgetRenderer implements ScreenStri
                 //HttpSession session = request.getSession();
                 //GenericValue userLogin = (GenericValue)session.getAttribute("userLogin");
                 /* don't know why this is here. might come to me later. -amb
-                GenericDelegator delegator = (GenericDelegator)request.getAttribute("delegator");
+                Delegator delegator = (Delegator)request.getAttribute("delegator");
                 String contentIdTo = content.getContentId(context);
                 String mapKey = content.getAssocName(context);
                 GenericValue view = null;
@@ -869,14 +873,34 @@ public class HtmlScreenRenderer extends HtmlWidgetRenderer implements ScreenStri
                 */
                 ServletContext ctx = (ServletContext) request.getAttribute("servletContext");
                 RequestHandler rh = (RequestHandler) ctx.getAttribute("_REQUEST_HANDLER_");
-                String urlString = rh.makeLink(request, response, editRequest, false, false, false);
-                String linkString = "<a href=\"" + urlString + "\">" + editMode + "</a>";
-                writer.append(linkString);
+                writer.append("<a href=\"").append(rh.makeLink(request, response, editRequest, false, false, false)).append("\">").append(editMode).append("</a>");
             }
             if (UtilValidate.isNotEmpty(editContainerStyle)) {
                 writer.append("</div>");
             }
             appendWhitespace(writer);
         }
+    }
+
+    public void renderPortalPageBegin(Appendable writer, Map<String, Object> context, ModelScreenWidget.PortalPage portalPage) throws GeneralException, IOException {
+        // TODO: not implemented
+    }
+    public void renderPortalPageEnd(Appendable writer, Map<String, Object> context, ModelScreenWidget.PortalPage portalPage) throws GeneralException, IOException {
+        // TODO: not implemented
+    }
+    public void renderPortalPageColumnBegin(Appendable writer, Map<String, Object> context, ModelScreenWidget.PortalPage portalPage, GenericValue portalPageColumn) throws GeneralException, IOException {
+        // TODO: not implemented
+    }
+    public void renderPortalPageColumnEnd(Appendable writer, Map<String, Object> context, ModelScreenWidget.PortalPage portalPage, GenericValue portalPageColumn) throws GeneralException, IOException {
+        // TODO: not implemented
+    }
+    public void renderPortalPagePortletBegin(Appendable writer, Map<String, Object> context, ModelScreenWidget.PortalPage portalPage, GenericValue portalPortlet) throws GeneralException, IOException {
+        // TODO: not implemented
+    }
+    public void renderPortalPagePortletEnd(Appendable writer, Map<String, Object> context, ModelScreenWidget.PortalPage portalPage, GenericValue portalPortlet) throws GeneralException, IOException {
+        // TODO: not implemented
+    }
+    public void renderPortalPagePortletBody(Appendable writer, Map<String, Object> context, ModelScreenWidget.PortalPage portalPage, GenericValue portalPortlet) throws GeneralException, IOException {
+        // TODO: not implemented
     }
 }

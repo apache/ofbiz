@@ -37,14 +37,13 @@ import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.base.util.UtilProperties;
 import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.common.KeywordSearchUtil;
-import org.ofbiz.entity.GenericDelegator;
+import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
 import org.ofbiz.entity.condition.EntityComparisonOperator;
 import org.ofbiz.entity.condition.EntityCondition;
 import org.ofbiz.entity.condition.EntityConditionList;
 import org.ofbiz.entity.condition.EntityExpr;
-import org.ofbiz.entity.condition.EntityFieldValue;
 import org.ofbiz.entity.condition.EntityFunction;
 import org.ofbiz.entity.condition.EntityOperator;
 import org.ofbiz.entity.model.DynamicViewEntity;
@@ -82,7 +81,7 @@ public class WorkEffortSearch {
     public static final String module = WorkEffortSearch.class.getName();
     public static final String resource = "WorkEffortUiLabels";
 
-    public static ArrayList<String> searchWorkEfforts(List<? extends WorkEffortSearchConstraint> workEffortSearchConstraintList, ResultSortOrder resultSortOrder, GenericDelegator delegator, String visitId) {
+    public static ArrayList<String> searchWorkEfforts(List<? extends WorkEffortSearchConstraint> workEffortSearchConstraintList, ResultSortOrder resultSortOrder, Delegator delegator, String visitId) {
         WorkEffortSearchContext workEffortSearchContext = new WorkEffortSearchContext(delegator, visitId);
 
         workEffortSearchContext.addWorkEffortSearchConstraints(workEffortSearchConstraintList);
@@ -92,7 +91,7 @@ public class WorkEffortSearch {
         return workEffortIds;
     }
 
-    public static void getAllSubWorkEffortIds(String workEffortId, Set<String> workEffortIdSet, GenericDelegator delegator, Timestamp nowTimestamp) {
+    public static void getAllSubWorkEffortIds(String workEffortId, Set<String> workEffortIdSet, Delegator delegator, Timestamp nowTimestamp) {
         if (nowTimestamp == null) {
             nowTimestamp = UtilDateTime.nowTimestamp();
         }
@@ -103,7 +102,7 @@ public class WorkEffortSearch {
         // now find all sub-categories, filtered by effective dates, and call this routine for them
         try {
             // Find WorkEffortAssoc, workEffortAssocTypeId=WORK_EFF_BREAKDOWN
-            List<GenericValue> workEffortAssocList = delegator.findByAndCache("WorkEffortAssoc", UtilMisc.toMap("workEffortIdFrom", workEffortId, "workEffortAssocTypeId", "WORK_EFF_BREAKDOWN"));
+            List<GenericValue> workEffortAssocList = delegator.findByAnd("WorkEffortAssoc", UtilMisc.toMap("workEffortIdFrom", workEffortId, "workEffortAssocTypeId", "WORK_EFF_BREAKDOWN"), null, true);
             for (GenericValue workEffortAssoc: workEffortAssocList) {
                 String subWorkEffortId = workEffortAssoc.getString("workEffortIdTo");
                 if (workEffortIdSet.contains(subWorkEffortId)) {
@@ -151,17 +150,17 @@ public class WorkEffortSearch {
         public ResultSortOrder resultSortOrder = null;
         public Integer resultOffset = null;
         public Integer maxResults = null;
-        protected GenericDelegator delegator = null;
+        protected Delegator delegator = null;
         protected String visitId = null;
         protected Integer totalResults = null;
 
-        public WorkEffortSearchContext(GenericDelegator delegator, String visitId) {
+        public WorkEffortSearchContext(Delegator delegator, String visitId) {
             this.delegator = delegator;
             this.visitId = visitId;
             dynamicViewEntity.addMemberEntity("WEFF", "WorkEffort");
         }
 
-        public GenericDelegator getDelegator() {
+        public Delegator getDelegator() {
             return this.delegator;
         }
 
@@ -298,7 +297,7 @@ public class WorkEffortSearch {
             }
         }
 
-        public EntityListIterator doQuery(GenericDelegator delegator) {
+        public EntityListIterator doQuery(Delegator delegator) {
             // handle the now assembled or and and keyword fixed lists
             this.finishKeywordConstraints();
 
@@ -313,6 +312,9 @@ public class WorkEffortSearch {
             EntityFindOptions efo = new EntityFindOptions();
             efo.setDistinct(true);
             efo.setResultSetType(EntityFindOptions.TYPE_SCROLL_INSENSITIVE);
+            if (maxResults != null) {
+                efo.setMaxRows(maxResults);
+            }
 
             EntityListIterator eli = null;
             try {
@@ -388,7 +390,7 @@ public class WorkEffortSearch {
                 workEffortIds.add(searchResult.getString("workEffortId"));
                 workEffortIdSet.add(searchResult.getString("workEffortId"));
 
-                while (((searchResult = (GenericValue) eli.next()) != null) && (maxResults == null || numRetreived < maxResults.intValue())) {
+                while (((searchResult = eli.next()) != null) && (maxResults == null || numRetreived < maxResults.intValue())) {
                     String workEffortId = searchResult.getString("workEffortId");
                     if (!workEffortIdSet.contains(workEffortId)) {
                         workEffortIds.add(workEffortId);
@@ -415,12 +417,7 @@ public class WorkEffortSearch {
                 }
 
                 if (searchResult != null) {
-                    // we weren't at the end, so go to the end and get the index
-                    //Debug.logInfo("Getting totalResults from ending index - before last() currentIndex=" + eli.currentIndex(), module);
-                    if (eli.last()) {
-                        this.totalResults = Integer.valueOf(eli.currentIndex());
-                        //Debug.logInfo("Getting totalResults from ending index - after last() currentIndex=" + eli.currentIndex(), module);
-                    }
+                    this.totalResults = eli.getResultsSizeAfterPartialList();
                 }
                 if (this.totalResults == null || this.totalResults.intValue() == 0) {
                     int total = numRetreived;
@@ -485,15 +482,17 @@ public class WorkEffortSearch {
     // Search Constraint Classes
     // ======================================================================
 
+    @SuppressWarnings("serial")
     public static abstract class WorkEffortSearchConstraint implements java.io.Serializable {
         public WorkEffortSearchConstraint() { }
 
         public abstract void addConstraint(WorkEffortSearchContext workEffortSearchContext);
         /** pretty print for log messages and even UI stuff */
-        public abstract String prettyPrintConstraint(GenericDelegator delegator, boolean detailed, Locale locale);
+        public abstract String prettyPrintConstraint(Delegator delegator, boolean detailed, Locale locale);
     }
 
 
+    @SuppressWarnings("serial")
     public static class WorkEffortAssocConstraint extends WorkEffortSearchConstraint {
         public static final String constraintName = "WorkEffortAssoc";
         protected String workEffortId;
@@ -506,6 +505,7 @@ public class WorkEffortSearch {
             this.includeSubWorkEfforts = includeSubWorkEfforts;
         }
 
+        @Override
         public void addConstraint(WorkEffortSearchContext workEffortSearchContext) {
             Set<String> workEffortIdSet = FastSet.newInstance();
             if (includeSubWorkEfforts) {
@@ -573,12 +573,13 @@ public class WorkEffortSearch {
 
 
         /** pretty print for log messages and even UI stuff */
-        public String prettyPrintConstraint(GenericDelegator delegator, boolean detailed, Locale locale) {
+        @Override
+        public String prettyPrintConstraint(Delegator delegator, boolean detailed, Locale locale) {
             GenericValue workEffort = null;
             GenericValue workEffortAssocType = null;
             try {
-                workEffort = delegator.findByPrimaryKeyCache("WorkEffort", UtilMisc.toMap("workEffortId", this.workEffortId));
-                workEffortAssocType = delegator.findByPrimaryKeyCache("WorkEffortAssocType", UtilMisc.toMap("workEffortAssocTypeId", this.workEffortAssocTypeId));
+                workEffort = delegator.findOne("WorkEffort", UtilMisc.toMap("workEffortId", this.workEffortId), true);
+                workEffortAssocType = delegator.findOne("WorkEffortAssocType", UtilMisc.toMap("workEffortAssocTypeId", this.workEffortAssocTypeId), true);
             } catch (GenericEntityException e) {
                 Debug.logError(e, "Error looking up WorkEffortAssocConstraint pretty print info: " + e.toString(), module);
             }
@@ -609,6 +610,7 @@ public class WorkEffortSearch {
             return ppBuf.toString();
         }
 
+        @Override
         public boolean equals(Object obj) {
             WorkEffortSearchConstraint psc = (WorkEffortSearchConstraint) obj;
             if (psc instanceof WorkEffortAssocConstraint) {
@@ -640,6 +642,8 @@ public class WorkEffortSearch {
             }
         }
     }
+    
+    @SuppressWarnings("serial")
     public static class WorkEffortReviewConstraint extends WorkEffortSearchConstraint {
         public static final String constraintName = "WorkEffortReview";
         protected String reviewTextString;
@@ -648,6 +652,7 @@ public class WorkEffortSearch {
             this.reviewTextString = reviewTextString;
         }
 
+        @Override
         public void addConstraint(WorkEffortSearchContext workEffortSearchContext) {
             String entityAlias = "WFR" + workEffortSearchContext.index;
             String prefix = "wfr" + workEffortSearchContext.index;
@@ -663,13 +668,15 @@ public class WorkEffortSearch {
 
 
         /** pretty print for log messages and even UI stuff */
-        public String prettyPrintConstraint(GenericDelegator delegator, boolean detailed, Locale locale) {
+        @Override
+        public String prettyPrintConstraint(Delegator delegator, boolean detailed, Locale locale) {
             StringBuilder ppBuf = new StringBuilder();
             ppBuf.append(UtilProperties.getMessage(resource, "WorkEffortReviews", locale) + ": \"");
             ppBuf.append(this.reviewTextString).append("\", ").append(UtilProperties.getMessage(resource, "WorkEffortKeywordWhere", locale)).append(" ");
             return ppBuf.toString();
         }
 
+        @Override
         public boolean equals(Object obj) {
             WorkEffortSearchConstraint psc = (WorkEffortSearchConstraint) obj;
             if (psc instanceof WorkEffortReviewConstraint) {
@@ -690,6 +697,7 @@ public class WorkEffortSearch {
         }
     }
 
+    @SuppressWarnings("serial")
     public static class PartyAssignmentConstraint extends WorkEffortSearchConstraint {
         public static final String constraintName = "PartyAssignment";
         protected String partyId;
@@ -700,6 +708,7 @@ public class WorkEffortSearch {
             this.roleTypeId = roleTypeId;
         }
 
+        @Override
         public void addConstraint(WorkEffortSearchContext workEffortSearchContext) {
             // make index based values and increment
             String entityAlias = "WEPA" + workEffortSearchContext.index;
@@ -724,12 +733,13 @@ public class WorkEffortSearch {
             workEffortSearchContext.workEffortSearchConstraintList.add(workEffortSearchContext.getDelegator().makeValue("WorkEffortSearchConstraint", UtilMisc.toMap("constraintName", constraintName, "infoString", this.partyId + "," + this.roleTypeId)));
         }
 
-        public String prettyPrintConstraint(GenericDelegator delegator, boolean detailed, Locale locale) {
+        @Override
+        public String prettyPrintConstraint(Delegator delegator, boolean detailed, Locale locale) {
             GenericValue partyNameView = null;
             GenericValue roleType = null;
             try {
-                partyNameView = delegator.findByPrimaryKeyCache("PartyNameView", UtilMisc.toMap("partyId", partyId));
-                roleType = delegator.findByPrimaryKeyCache("RoleType", UtilMisc.toMap("roleTypeId", roleTypeId));
+                partyNameView = delegator.findOne("PartyNameView", UtilMisc.toMap("partyId", partyId), true);
+                roleType = delegator.findOne("RoleType", UtilMisc.toMap("roleTypeId", roleTypeId), true);
             } catch (GenericEntityException e) {
                 Debug.logError(e, "Error finding PartyAssignmentConstraint information for constraint pretty print", module);
             }
@@ -768,6 +778,7 @@ public class WorkEffortSearch {
             return ppBuf.toString();
         }
 
+        @Override
         public boolean equals(Object obj) {
             WorkEffortSearchConstraint psc = (WorkEffortSearchConstraint) obj;
             if (psc instanceof PartyAssignmentConstraint) {
@@ -797,6 +808,7 @@ public class WorkEffortSearch {
         }
     }
 
+    @SuppressWarnings("serial")
     public static class ProductSetConstraint extends WorkEffortSearchConstraint {
         public static final String constraintName = "ProductSet";
         protected Set<String> productIdSet;
@@ -805,6 +817,7 @@ public class WorkEffortSearch {
             this.productIdSet = UtilMisc.makeSetWritable(productIdSet);
         }
 
+        @Override
         public void addConstraint(WorkEffortSearchContext workEffortSearchContext) {
             // make index based values and increment
             String entityAlias = "WEGS" + workEffortSearchContext.index;
@@ -835,13 +848,14 @@ public class WorkEffortSearch {
             workEffortSearchContext.workEffortSearchConstraintList.add(workEffortSearchContext.getDelegator().makeValue("WorkEffortSearchConstraint", UtilMisc.toMap("constraintName", constraintName, "infoString", productIdInfo.toString())));
         }
 
-        public String prettyPrintConstraint(GenericDelegator delegator, boolean detailed, Locale locale) {
+        @Override
+        public String prettyPrintConstraint(Delegator delegator, boolean detailed, Locale locale) {
             StringBuilder infoOut = new StringBuilder();
             try {
                 Iterator<String> productIdIter = this.productIdSet.iterator();
                 while (productIdIter.hasNext()) {
                     String productId = productIdIter.next();
-                    GenericValue product = delegator.findByPrimaryKeyCache("Product", UtilMisc.toMap("productId", productId));
+                    GenericValue product = delegator.findOne("Product", UtilMisc.toMap("productId", productId), true);
                     if (product == null) {
                         infoOut.append("[");
                         infoOut.append(productId);
@@ -861,6 +875,7 @@ public class WorkEffortSearch {
             return infoOut.toString();
         }
 
+        @Override
         public boolean equals(Object obj) {
             WorkEffortSearchConstraint psc = (WorkEffortSearchConstraint) obj;
             if (psc instanceof ProductSetConstraint) {
@@ -881,6 +896,7 @@ public class WorkEffortSearch {
         }
     }
 
+    @SuppressWarnings("serial")
     public static class KeywordConstraint extends WorkEffortSearchConstraint {
         public static final String constraintName = "Keyword";
         protected String keywordsString;
@@ -901,7 +917,7 @@ public class WorkEffortSearch {
             }
         }
 
-        public Set<String> makeFullKeywordSet(GenericDelegator delegator) {
+        public Set<String> makeFullKeywordSet(Delegator delegator) {
             Set<String> keywordSet = KeywordSearchUtil.makeKeywordSet(this.keywordsString, null, true);
             Set<String> fullKeywordSet = new TreeSet<String>();
 
@@ -918,6 +934,7 @@ public class WorkEffortSearch {
             return fullKeywordSet;
         }
 
+        @Override
         public void addConstraint(WorkEffortSearchContext workEffortSearchContext) {
             // just make the fixed keyword lists and put them in the context
             if (isAnd) {
@@ -958,7 +975,8 @@ public class WorkEffortSearch {
         }
 
         /** pretty print for log messages and even UI stuff */
-        public String prettyPrintConstraint(GenericDelegator delegator, boolean detailed, Locale locale) {
+        @Override
+        public String prettyPrintConstraint(Delegator delegator, boolean detailed, Locale locale) {
             StringBuilder ppBuf = new StringBuilder();
             ppBuf.append(UtilProperties.getMessage(resource, "WorkEffortKeywords", locale)).append(": \"");
             ppBuf.append(this.keywordsString).append("\", ").append(UtilProperties.getMessage(resource, "WorkEffortKeywordWhere", locale)).append(" ");
@@ -966,6 +984,7 @@ public class WorkEffortSearch {
             return ppBuf.toString();
         }
 
+        @Override
         public boolean equals(Object obj) {
             WorkEffortSearchConstraint psc = (WorkEffortSearchConstraint) obj;
             if (psc instanceof KeywordConstraint) {
@@ -998,6 +1017,7 @@ public class WorkEffortSearch {
         }
     }
 
+    @SuppressWarnings("serial")
     public static class LastUpdatedRangeConstraint extends WorkEffortSearchConstraint {
         public static final String constraintName = "LastUpdatedRange";
         protected Timestamp fromDate;
@@ -1008,6 +1028,7 @@ public class WorkEffortSearch {
             this.thruDate = thruDate;
         }
 
+        @Override
         public void addConstraint(WorkEffortSearchContext workEffortSearchContext) {
             workEffortSearchContext.dynamicViewEntity.addAlias("WEFF", "lastModifiedDate", "lastModifiedDate", null, null, null, null);
 
@@ -1042,7 +1063,8 @@ public class WorkEffortSearch {
         }
 
         /** pretty print for log messages and even UI stuff */
-        public String prettyPrintConstraint(GenericDelegator delegator, boolean detailed, Locale locale) {
+        @Override
+        public String prettyPrintConstraint(Delegator delegator, boolean detailed, Locale locale) {
             StringBuilder ppBuf = new StringBuilder();
             ppBuf.append(UtilProperties.getMessage(resource, "WorkEffortLastModified", locale)).append(": \"");
             ppBuf.append(fromDate).append("-").append(thruDate).append("\", ").append(UtilProperties.getMessage(resource, "WorkEffortLastModified", locale)).append(" ");
@@ -1050,6 +1072,7 @@ public class WorkEffortSearch {
         }
 
 
+        @Override
         public boolean equals(Object obj) {
             WorkEffortSearchConstraint psc = (WorkEffortSearchConstraint) obj;
             if (psc instanceof LastUpdatedRangeConstraint) {
@@ -1083,6 +1106,7 @@ public class WorkEffortSearch {
     // Result Sort Classes
     // ======================================================================
 
+    @SuppressWarnings("serial")
     public static abstract class ResultSortOrder implements java.io.Serializable {
         public ResultSortOrder() {
         }
@@ -1093,10 +1117,12 @@ public class WorkEffortSearch {
         public abstract boolean isAscending();
     }
 
+    @SuppressWarnings("serial")
     public static class SortKeywordRelevancy extends ResultSortOrder {
         public SortKeywordRelevancy() {
         }
 
+        @Override
         public void setSortOrder(WorkEffortSearchContext workEffortSearchContext) {
             if (workEffortSearchContext.includedKeywordSearch) {
                 // we have to check this in order to be sure that there is a totalRelevancy to sort by...
@@ -1105,19 +1131,23 @@ public class WorkEffortSearch {
             }
         }
 
+        @Override
         public String getOrderName() {
             return "KeywordRelevancy";
         }
 
+        @Override
         public String prettyPrintSortOrder(boolean detailed, Locale locale) {
             return UtilProperties.getMessage(resource, "WorkEffortKeywordRelevancy", locale);
         }
 
+        @Override
         public boolean isAscending() {
             return false;
         }
     }
 
+    @SuppressWarnings("serial")
     public static class SortWorkEffortField extends ResultSortOrder {
         protected String fieldName;
         protected boolean ascending;
@@ -1134,6 +1164,7 @@ public class WorkEffortSearch {
             this.ascending = ascending;
         }
 
+        @Override
         public void setSortOrder(WorkEffortSearchContext workEffortSearchContext) {
             if (workEffortSearchContext.getDelegator().getModelEntity("WorkEffort").isField(fieldName)) {
                 workEffortSearchContext.dynamicViewEntity.addAlias("WEFF", fieldName);
@@ -1146,10 +1177,12 @@ public class WorkEffortSearch {
             workEffortSearchContext.fieldsToSelect.add(fieldName);
         }
 
+        @Override
         public String getOrderName() {
             return "WorkEffortField:" + this.fieldName;
         }
 
+        @Override
         public String prettyPrintSortOrder(boolean detailed, Locale locale) {
             if ("workEffortName".equals(this.fieldName)) {
                 return UtilProperties.getMessage(resource, "WorkEffortName", locale);
@@ -1163,6 +1196,7 @@ public class WorkEffortSearch {
             return this.fieldName;
         }
 
+        @Override
         public boolean isAscending() {
             return this.ascending;
         }

@@ -18,12 +18,14 @@ specific language governing permissions and limitations
 under the License.
 -->
 
-<ofbiz-component name="hhfacility"
+<ofbiz-component name="hhfacility" enabled="true"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/ofbiz-component.xsd">
     <resource-loader name="main" type="component"/>
-    <classpath type="dir" location="script"/>
     <classpath type="jar" location="build/lib/*"/>
+
+    <entity-resource type="data" reader-name="seed" loader="main" location="data/HhFacilitySecurityPermissionSeedData.xml"/>
+    <entity-resource type="data" reader-name="demo" loader="main" location="data/HhFacilitySecurityGroupDemoData.xml"/>
 
     <service-resource type="model" loader="main" location="servicedef/services_hhfacility.xml"/>
 
@@ -32,7 +34,7 @@ under the License.
         menu-name="secondary"
         server="default-server"
         location="webapp/hhfacility"
-        base-permission="OFBTOOLS,FACILITY"
+        base-permission="OFBTOOLS,HHFACILITY"
         mount-point="/hhfacility"
         app-bar-display="true"/>
 </ofbiz-component>

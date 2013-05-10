@@ -19,7 +19,7 @@
 package org.ofbiz.order.order;
 
 import java.io.Serializable;
-import java.util.ArrayList;
+import java.sql.Timestamp;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -27,13 +27,16 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
+import javolution.util.FastList;
 import javolution.util.FastMap;
 
 import org.ofbiz.base.util.Debug;
+import org.ofbiz.base.util.UtilDateTime;
 import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.base.util.UtilValidate;
-import org.ofbiz.entity.GenericDelegator;
+import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericEntityException;
+import org.ofbiz.entity.GenericValue;
 import org.ofbiz.entity.condition.EntityCondition;
 import org.ofbiz.entity.condition.EntityOperator;
 import org.ofbiz.entity.util.EntityFindOptions;
@@ -64,17 +67,17 @@ public class OrderListState implements Serializable {
     // state variables
     protected int viewSize;
     protected int viewIndex;
-    protected Map orderStatusState;
-    protected Map orderTypeState;
-    protected Map orderFilterState;
+    protected Map<String, String> orderStatusState;
+    protected Map<String, String> orderTypeState;
+    protected Map<String, String> orderFilterState;
     protected int orderListSize;
 
     // parameter to ID maps
-    protected static final Map parameterToOrderStatusId;
-    protected static final Map parameterToOrderTypeId;
-    protected static final Map parameterToFilterId;
+    protected static final Map<String, String> parameterToOrderStatusId;
+    protected static final Map<String, String> parameterToOrderTypeId;
+    protected static final Map<String, String> parameterToFilterId;
     static {
-        Map map = FastMap.newInstance();
+        Map<String, String> map = FastMap.newInstance();
         map.put("viewcompleted", "ORDER_COMPLETED");
         map.put("viewcancelled", "ORDER_CANCELLED");
         map.put("viewrejected", "ORDER_REJECTED");
@@ -164,8 +167,7 @@ public class OrderListState implements Serializable {
     }
 
     private void changeOrderListStates(HttpServletRequest request) {
-        for (Iterator iter = parameterToOrderStatusId.keySet().iterator(); iter.hasNext(); ) {
-            String param = (String) iter.next();
+        for(String param : parameterToOrderStatusId.keySet()) {
             String value = request.getParameter(param);
             if ("Y".equals(value)) {
                 orderStatusState.put(param, "Y");
@@ -173,8 +175,7 @@ public class OrderListState implements Serializable {
                 orderStatusState.put(param, "N");
             }
         }
-        for (Iterator iter = parameterToOrderTypeId.keySet().iterator(); iter.hasNext(); ) {
-            String param = (String) iter.next();
+        for(String param : parameterToOrderTypeId.keySet()) {
             String value = request.getParameter(param);
             if ("Y".equals(value)) {
                 orderTypeState.put(param, "Y");
@@ -182,8 +183,7 @@ public class OrderListState implements Serializable {
                 orderTypeState.put(param, "N");
             }
         }
-        for (Iterator iter = parameterToFilterId.keySet().iterator(); iter.hasNext(); ) {
-            String param = (String) iter.next();
+        for(String param : parameterToFilterId.keySet()) {
             String value = request.getParameter(param);
             if ("Y".equals(value)) {
                 orderFilterState.put(param, "Y");
@@ -198,16 +198,19 @@ public class OrderListState implements Serializable {
     //==============   Get and Set methods   =================//
 
 
-    public Map getOrderStatusState() { return orderStatusState; };
-    public Map getOrderTypeState() { return orderTypeState; }
-    public Map getorderFilterState() { return orderFilterState; }
+    public Map<String, String> getOrderStatusState() { return orderStatusState; }
+    public Map<String, String> getOrderTypeState() { return orderTypeState; }
+    public Map<String, String> getorderFilterState() { return orderFilterState; }
 
+    public void setStatus(String param, boolean b) { orderStatusState.put(param, (b ? "Y" : "N")); }
+    public void setType(String param, boolean b) { orderTypeState.put(param, (b ? "Y" : "N")); }
+    
     public boolean hasStatus(String param) { return ("Y".equals(orderStatusState.get(param))); }
     public boolean hasType(String param) { return ("Y".equals(orderTypeState.get(param))); }
     public boolean hasFilter(String param) { return ("Y".equals(orderFilterState.get(param))); }
 
     public boolean hasAllStatus() {
-        for (Iterator iter = orderStatusState.values().iterator(); iter.hasNext(); ) {
+        for (Iterator<String> iter = orderStatusState.values().iterator(); iter.hasNext();) {
             if (!"Y".equals(iter.next())) return false;
         }
         return true;
@@ -223,24 +226,29 @@ public class OrderListState implements Serializable {
     /**
      * Get the OrderHeaders corresponding to the state.
      */
-    public List getOrders(String facilityId, GenericDelegator delegator) throws GenericEntityException {
-        List allConditions = new ArrayList();
+    public List<GenericValue> getOrders(String facilityId, Timestamp filterDate, Delegator delegator) throws GenericEntityException {
+        List<EntityCondition> allConditions = FastList.newInstance();
 
         if (facilityId != null) {
             allConditions.add(EntityCondition.makeCondition("originFacilityId", EntityOperator.EQUALS, facilityId));
         }
 
-        List statusConditions = new ArrayList();
-        for (Iterator iter = orderStatusState.keySet().iterator(); iter.hasNext(); ) {
-            String status = (String) iter.next();
-            if (!hasStatus(status)) continue;
-            statusConditions.add( EntityCondition.makeCondition("statusId", EntityOperator.EQUALS, parameterToOrderStatusId.get(status)) );
+        if (filterDate != null) {
+            List<EntityCondition> andExprs = FastList.newInstance();
+            andExprs.add(EntityCondition.makeCondition("orderDate", EntityOperator.GREATER_THAN_EQUAL_TO, UtilDateTime.getDayStart(filterDate)));
+            andExprs.add(EntityCondition.makeCondition("orderDate", EntityOperator.LESS_THAN_EQUAL_TO, UtilDateTime.getDayEnd(filterDate)));
+            allConditions.add(EntityCondition.makeCondition(andExprs, EntityOperator.AND));
         }
-        List typeConditions = new ArrayList();
-        for (Iterator iter = orderTypeState.keySet().iterator(); iter.hasNext(); ) {
-            String type = (String) iter.next();
+
+        List<EntityCondition> statusConditions = FastList.newInstance();
+        for(String status : orderStatusState.keySet()) {
+            if (!hasStatus(status)) continue;
+            statusConditions.add(EntityCondition.makeCondition("statusId", EntityOperator.EQUALS, parameterToOrderStatusId.get(status)));
+        }
+        List<EntityCondition> typeConditions = FastList.newInstance();
+        for(String type : orderTypeState.keySet()) {
             if (!hasType(type)) continue;
-            typeConditions.add( EntityCondition.makeCondition("orderTypeId", EntityOperator.EQUALS, parameterToOrderTypeId.get(type)) );
+            typeConditions.add(EntityCondition.makeCondition("orderTypeId", EntityOperator.EQUALS, parameterToOrderTypeId.get(type)));
         }
 
         EntityCondition statusConditionsList = EntityCondition.makeCondition(statusConditions,  EntityOperator.OR);
@@ -254,19 +262,20 @@ public class OrderListState implements Serializable {
 
         EntityCondition queryConditionsList = EntityCondition.makeCondition(allConditions, EntityOperator.AND);
         EntityFindOptions options = new EntityFindOptions(true, EntityFindOptions.TYPE_SCROLL_INSENSITIVE, EntityFindOptions.CONCUR_READ_ONLY, true);
+        options.setMaxRows(viewSize * (viewIndex + 1));
         EntityListIterator iterator = delegator.find("OrderHeader", queryConditionsList, null, null, UtilMisc.toList("orderDate DESC"), options);
 
         // get subset corresponding to pagination state
-        List orders = iterator.getPartialList(viewSize * viewIndex, viewSize);
-        iterator.last();
-        orderListSize = iterator.currentIndex();
+        List<GenericValue> orders = iterator.getPartialList(viewSize * viewIndex, viewSize);
+        orderListSize = iterator.getResultsSizeAfterPartialList();
         iterator.close();
         //Debug.logInfo("### size of list: " + orderListSize, module);
         return orders;
     }
 
+    @Override
     public String toString() {
-        StringBuffer buff = new StringBuffer("OrderListState:\n\t");
+        StringBuilder buff = new StringBuilder("OrderListState:\n\t");
         buff.append("viewIndex=").append(viewIndex).append(", viewSize=").append(viewSize).append("\n\t");
         buff.append(getOrderStatusState().toString()).append("\n\t");
         buff.append(getOrderTypeState().toString()).append("\n\t");

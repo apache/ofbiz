@@ -53,7 +53,7 @@ under the License.
         </tr>
         <tr>
           <td class="label">${uiLabelMap.PartyClient}</td>
-          <td><a href="http://ws.arin.net/cgi-bin/whois.pl?queryinput=${visit.clientIpAddress?if_exists}" target="_blank">${visit.clientIpAddress?if_exists}</a> / <a href="http://www.networksolutions.com/cgi-bin/whois/whois?STRING=${visit.clientHostName?if_exists}&SearchType=do" target="_blank">${visit.clientHostName?if_exists}</a></td>
+          <td><a href="http://ws.arin.net/cgi-bin/whois.pl?queryinput=${visit.clientIpAddress?if_exists}" target="_blank">${visit.clientIpAddress?if_exists}</a> / <a href="http://www.networksolutions.com/cgi-bin/whois/whois?STRING=${visit.clientHostName?if_exists}&amp;SearchType=do" target="_blank">${visit.clientHostName?if_exists}</a></td>
         </tr>
         <tr>
           <td class="label">${uiLabelMap.PartyClientUser}</td>
@@ -98,13 +98,13 @@ under the License.
         <div class="align-float">
           <span class="label">
             <#if 0 < viewIndex>
-              <a href="<@ofbizUrl>visitdetail?visitId=${visitId}&VIEW_SIZE=${viewSize}&VIEW_INDEX=${viewIndex-1}</@ofbizUrl>" class="smallSubmit">${uiLabelMap.CommonPrevious}</a> |
+              <a href="<@ofbizUrl>visitdetail?visitId=${visitId}&amp;VIEW_SIZE=${viewSize}&amp;VIEW_INDEX=${viewIndex-1}</@ofbizUrl>" class="smallSubmit">${uiLabelMap.CommonPrevious}</a> |
             </#if>
             <#if 0 < listSize>
               ${lowIndex+1} - ${highIndex} ${uiLabelMap.CommonOf} ${listSize}
             </#if>
             <#if highIndex < listSize>
-              | <a href="<@ofbizUrl>visitdetail?visitId=${visitId}&VIEW_SIZE=${viewSize}&VIEW_INDEX=${viewIndex+1}</@ofbizUrl>" class="smallSubmit">${uiLabelMap.CommonNext}</a>
+              | <a href="<@ofbizUrl>visitdetail?visitId=${visitId}&amp;VIEW_SIZE=${viewSize}&amp;VIEW_INDEX=${viewIndex+1}</@ofbizUrl>" class="smallSubmit">${uiLabelMap.CommonNext}</a>
             </#if>
           </span>
         </div>
@@ -123,7 +123,7 @@ under the License.
         <#assign alt_row = false>
         <#if serverHits?has_content>
         <#list serverHits[lowIndex..highIndex-1] as hit>
-          <#assign serverHitType = hit.getRelatedOne("ServerHitType")?if_exists>
+          <#assign serverHitType = hit.getRelatedOne("ServerHitType", false)?if_exists>
           <tr<#if alt_row> class="alternate-row"</#if>>
             <td>${hit.contentId?if_exists}</td>
             <td>${serverHitType.get("description",locale)?if_exists}</td>
@@ -154,13 +154,13 @@ under the License.
         <div class="align-float">
           <span class="label">
             <#if 0 < viewIndex>
-              <a href="<@ofbizUrl>visitdetail?visitId=${visitId}&VIEW_SIZE=${viewSize}&VIEW_INDEX=${viewIndex-1}</@ofbizUrl>" class="smallSubmit">${uiLabelMap.CommonPrevious}</a> |
+              <a href="<@ofbizUrl>visitdetail?visitId=${visitId}&amp;VIEW_SIZE=${viewSize}&amp;VIEW_INDEX=${viewIndex-1}</@ofbizUrl>" class="smallSubmit">${uiLabelMap.CommonPrevious}</a> |
             </#if>
             <#if 0 < listSize>
               ${lowIndex+1} - ${highIndex} ${uiLabelMap.CommonOf} ${listSize}
             </#if>
             <#if highIndex < listSize>
-              | <a href="<@ofbizUrl>visitdetail?visitId=${visitId}&VIEW_SIZE=${viewSize}&VIEW_INDEX=${viewIndex+1}</@ofbizUrl>" class="smallSubmit">${uiLabelMap.CommonNext}</a>
+              | <a href="<@ofbizUrl>visitdetail?visitId=${visitId}&amp;VIEW_SIZE=${viewSize}&amp;VIEW_INDEX=${viewIndex+1}</@ofbizUrl>" class="smallSubmit">${uiLabelMap.CommonNext}</a>
             </#if>
           </span>
         </div>
@@ -168,42 +168,53 @@ under the License.
       </#if>
   </div>
 </div>
+
+<!--
+*******************************************************************************
+JIRA OFBIZ-4488: BEGIN
+https://issues.apache.org/jira/browse/OFBIZ-4488
+*******************************************************************************
 <div class="screenlet">
   <div class="screenlet-title-bar">
     <ul>
       <li class="h3">${uiLabelMap.PartyPagePushFollowing}</li>
     </ul>
     <br class="clear"/>
-  </div>
+  </div>  
   <div class="screenlet-body">
       <#if security.hasPermission("SEND_CONTROL_APPLET", session)>
         <table class="basic-table" cellspacing="0">
-          <form name="pushPage" method="get" action="<@ofbizUrl>pushPage</@ofbizUrl>">
             <tr>
               <th>${uiLabelMap.PartyPushURL}</th>
               <td>
-                <input type="hidden" name="followerSid" value="${visit.sessionId}">
-                <input type="hidden" name="visitId" value="${visit.visitId}">
-                <input type="text" name="pageUrl">
+                <form name="pushPage" method="get" action="<@ofbizUrl>pushPage</@ofbizUrl>">
+                  <input type="hidden" name="followerSid" value="${visit.sessionId}" />
+                  <input type="hidden" name="visitId" value="${visit.visitId}" />
+                  <input type="text" name="pageUrl" />
+                  <input type="submit" value="${uiLabelMap.CommonSubmit}" />
+                </form>
               </td>
-              <td><input type="submit" value="${uiLabelMap.CommonSubmit}"></td>
             </tr>
             <tr>
-              <td colspan="3"><hr/></td>
+              <td colspan="3"><hr /></td>
             </tr>
-          </form>
-          <form name="setFollower" method="get" action="<@ofbizUrl>setAppletFollower</@ofbizUrl>">
             <tr>
               <th>${uiLabelMap.PartyFollowSession}</th>
               <td>
-                <input type="hidden" name="followerSid" value="${visit.sessionId}">
-                <input type="hidden" name="visitId" value="${visit.visitId}">
-                <input type="text" name="followSid">
+                <form name="setFollower" method="get" action="<@ofbizUrl>setAppletFollower</@ofbizUrl>">
+                  <input type="hidden" name="followerSid" value="${visit.sessionId}" />
+                  <input type="hidden" name="visitId" value="${visit.visitId}" />
+                  <input type="text" name="followSid" />
+                  <input type="submit" value="${uiLabelMap.CommonSubmit}" />
+                </form>
               </td>
-              <td><input type="submit" value="${uiLabelMap.CommonSubmit}"></td>
             </tr>
-          </form>
         </table>
       </#if>
   </div>
 </div>
+*******************************************************************************
+JIRA OFBIZ-4488: END
+*******************************************************************************
+-->
+

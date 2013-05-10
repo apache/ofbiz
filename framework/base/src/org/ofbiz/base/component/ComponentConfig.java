@@ -24,7 +24,6 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.Collection;
 import java.util.Comparator;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -34,8 +33,14 @@ import javax.xml.parsers.ParserConfigurationException;
 import javolution.util.FastList;
 import javolution.util.FastMap;
 
+import org.ofbiz.base.container.ContainerConfig;
+import org.ofbiz.base.container.ContainerException;
 import org.ofbiz.base.location.FlexibleLocation;
-import org.ofbiz.base.util.*;
+import org.ofbiz.base.util.Debug;
+import org.ofbiz.base.util.KeyStoreUtil;
+import org.ofbiz.base.util.UtilURL;
+import org.ofbiz.base.util.UtilValidate;
+import org.ofbiz.base.util.UtilXml;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
@@ -84,6 +89,15 @@ public class ComponentConfig {
             }
         }
         return componentConfig;
+    }
+
+    public static Boolean componentExists(String componentName) {
+        ComponentConfig componentConfig = componentConfigs.get(componentName);
+        if (componentConfig == null) {
+            return Boolean.FALSE;
+        } else {
+            return Boolean.TRUE;
+        }
     }
 
     public static Collection<ComponentConfig> getAllComponents() {
@@ -212,6 +226,20 @@ public class ComponentConfig {
         return webappInfos;
     }
 
+    public static List<ContainerConfig.Container> getAllContainers() {
+        return getAllContainers(null);
+    }
+
+    public static List<ContainerConfig.Container> getAllContainers(String componentName) {
+        List<ContainerConfig.Container> containers = FastList.newInstance();
+        for (ComponentConfig cc: getAllComponents()) {
+            if (componentName == null || componentName.equals(cc.getComponentName())) {
+                containers.addAll(cc.getContainers());
+            }
+        }
+        return containers;
+    }
+
     public static boolean isFileResourceLoader(String componentName, String resourceLoaderName) throws ComponentException {
         ComponentConfig cc = ComponentConfig.getComponentConfig(componentName);
         if (cc == null) {
@@ -252,11 +280,11 @@ public class ComponentConfig {
         return cc.getRootLocation();
     }
 
-    public static List getAppBarWebInfos(String serverName) {
+    public static List<WebappInfo> getAppBarWebInfos(String serverName) {
         return ComponentConfig.getAppBarWebInfos(serverName, null, null);
     }
 
-    public static List getAppBarWebInfos(String serverName, String menuName) {
+    public static List<WebappInfo> getAppBarWebInfos(String serverName, String menuName) {
         return ComponentConfig.getAppBarWebInfos(serverName, null, menuName);
     }
 
@@ -327,6 +355,7 @@ public class ComponentConfig {
     protected List<TestSuiteInfo> testSuiteInfos = FastList.newInstance();
     protected List<KeystoreInfo> keystoreInfos = FastList.newInstance();
     protected List<WebappInfo> webappInfos = FastList.newInstance();
+    protected List<ContainerConfig.Container> containers = FastList.newInstance();
 
     protected ComponentConfig() {}
 
@@ -339,10 +368,10 @@ public class ComponentConfig {
 
         File rootLocationDir = new File(rootLocation);
         if (!rootLocationDir.exists()) {
-            throw new ComponentException("The given component root location is does not exist: " + rootLocation);
+            throw new ComponentException("The component root location does not exist: " + rootLocation);
         }
         if (!rootLocationDir.isDirectory()) {
-            throw new ComponentException("The given component root location is not a directory: " + rootLocation);
+            throw new ComponentException("The component root location is not a directory: " + rootLocation);
         }
 
         String xmlFilename = rootLocation + "/" + OFBIZ_COMPONENT_XML_FILENAME;
@@ -409,6 +438,13 @@ public class ComponentConfig {
         for (Element curElement: UtilXml.childElementList(ofbizComponentElement, "webapp")) {
             WebappInfo webappInfo = new WebappInfo(this, curElement);
             this.webappInfos.add(webappInfo);
+        }
+
+        // containers
+        try {
+            this.containers.addAll(ContainerConfig.getContainers(xmlUrl));
+        } catch(ContainerException ce) {
+            throw new ComponentException("Error reading containers for component: " + this.globalName, ce);
         }
 
         if (Debug.verboseOn()) Debug.logVerbose("Read component config : [" + rootLocation + "]", module);
@@ -484,7 +520,7 @@ public class ComponentConfig {
             buf.append(rootLocation);
         }
 
-        if (resourceLoaderInfo.prependEnv != null && resourceLoaderInfo.prependEnv.length() > 0) {
+        if (UtilValidate.isNotEmpty(resourceLoaderInfo.prependEnv)) {
             String propValue = System.getProperty(resourceLoaderInfo.prependEnv);
             if (propValue == null) {
                 String errMsg = "The Java environment (-Dxxx=yyy) variable with name " + resourceLoaderInfo.prependEnv + " is not set, cannot load resource.";
@@ -493,7 +529,7 @@ public class ComponentConfig {
             }
             buf.append(propValue);
         }
-        if (resourceLoaderInfo.prefix != null && resourceLoaderInfo.prefix.length() > 0) {
+        if (UtilValidate.isNotEmpty(resourceLoaderInfo.prefix)) {
             buf.append(resourceLoaderInfo.prefix);
         }
         buf.append(location);
@@ -538,6 +574,10 @@ public class ComponentConfig {
 
     public List<WebappInfo> getWebappInfos() {
         return this.webappInfos;
+    }
+
+    public List<ContainerConfig.Container> getContainers() {
+        return this.containers;
     }
 
     public boolean enabled() {
@@ -680,6 +720,7 @@ public class ComponentConfig {
         public String position;
         public boolean appBarDisplay;
         public boolean sessionCookieAccepted;
+        public boolean privileged;
 
         public WebappInfo(ComponentConfig componentConfig, Element element) {
             this.virtualHosts = FastList.newInstance();
@@ -693,6 +734,7 @@ public class ComponentConfig {
             this.location = element.getAttribute("location");
             this.appBarDisplay = !"false".equals(element.getAttribute("app-bar-display"));
             this.sessionCookieAccepted = !"false".equals(element.getAttribute("session-cookie-accepted"));
+            this.privileged = !"false".equals(element.getAttribute("privileged"));
             String basePermStr = element.getAttribute("base-permission");
             if (UtilValidate.isNotEmpty(basePermStr)) {
                 this.basePermission = basePermStr.split(",");
@@ -701,7 +743,7 @@ public class ComponentConfig {
                 this.basePermission = new String[] { "NONE" };
             }
 
-            // trim the permussions (remove spaces)
+            // trim the permissions (remove spaces)
             for (int i = 0; i < this.basePermission.length; i++) {
                 this.basePermission[i] = this.basePermission[i].trim();
                 if (this.basePermission[i].indexOf('_') != -1) {

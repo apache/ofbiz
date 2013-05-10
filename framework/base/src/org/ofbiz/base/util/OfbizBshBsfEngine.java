@@ -61,8 +61,10 @@ public class OfbizBshBsfEngine extends BSFEngineImpl {
     protected Interpreter interpreter;
     protected boolean installedApplyMethod;
 
-    public static UtilCache<String, Interpreter.ParsedScript> parsedScripts = new UtilCache<String, Interpreter.ParsedScript>("script.BshBsfParsedCache", 0, 0, false);
+    private static final UtilCache<String, Interpreter.ParsedScript> parsedScripts = UtilCache.createUtilCache("script.BshBsfParsedCache", 0, 0, false);
 
+    @SuppressWarnings("unchecked")
+    @Override
     public void initialize(BSFManager mgr, String lang, Vector declaredBeans) throws BSFException {
         super.initialize(mgr, lang, declaredBeans);
 
@@ -132,9 +134,11 @@ public class OfbizBshBsfEngine extends BSFEngineImpl {
 
     /**
      * This is an implementation of the BSF apply() method.
-     * It exectutes the funcBody text in an "anonymous" method call with
+     * It executes the funcBody text in an "anonymous" method call with
      * arguments.
      */
+    @SuppressWarnings("unchecked")
+    @Override
     public Object apply(String source, int lineNo, int columnNo, Object funcBody, Vector namesVec, Vector argsVec) throws BSFException {
         if (namesVec.size() != argsVec.size()) throw new BSFException("number of params/names mismatch");
         if (!(funcBody instanceof String)) throw new BSFException("apply: function body must be a string");
@@ -170,17 +174,12 @@ public class OfbizBshBsfEngine extends BSFEngineImpl {
 
             Interpreter.ParsedScript script = null;
 
-            if (source != null && source.length() > 0) {
+            if (UtilValidate.isNotEmpty(source)) {
                 script = parsedScripts.get(source);
                 if (script == null) {
-                    synchronized (OfbizBshBsfEngine.class) {
-                        script = parsedScripts.get(source);
-                        if (script == null) {
-                            script = interpreter.parseScript(source, new StringReader((String) expr));
-                            Debug.logVerbose("Caching BSH script at: " + source, module);
-                            parsedScripts.put(source, script);
-                        }
-                    }
+                    script = interpreter.parseScript(source, new StringReader((String) expr));
+                    Debug.logVerbose("Caching BSH script at: " + source, module);
+                    script = parsedScripts.putIfAbsentAndGet(source, script);
                 }
             } else {
                 script = interpreter.parseScript(source, new StringReader((String) expr));
@@ -199,6 +198,7 @@ public class OfbizBshBsfEngine extends BSFEngineImpl {
     }
 
 
+    @Override
     public void exec(String source, int lineNo, int columnNo, Object script) throws BSFException {
         eval(source, lineNo, columnNo, script);
     }
@@ -216,6 +216,7 @@ public class OfbizBshBsfEngine extends BSFEngineImpl {
                 Object script, CodeBuffer cb) throws BSFException;
  */
 
+    @Override
     public void declareBean(BSFDeclaredBean bean) throws BSFException {
         try {
             interpreter.set(bean.name, bean.bean);
@@ -224,6 +225,7 @@ public class OfbizBshBsfEngine extends BSFEngineImpl {
         }
     }
 
+    @Override
     public void undeclareBean(BSFDeclaredBean bean) throws BSFException {
         try {
             interpreter.unset(bean.name);
@@ -232,6 +234,7 @@ public class OfbizBshBsfEngine extends BSFEngineImpl {
         }
     }
 
+    @Override
     public void terminate() { }
 
     private String sourceInfo(String source, int lineNo, int columnNo) {

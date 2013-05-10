@@ -26,6 +26,7 @@ under the License.
                 <!-- base/top/specific map first, then more common map added for shared labels -->
                 <property-map resource="TemporalExpressionUiLabels" map-name="uiLabelMap" global="true"/>
                 <property-map resource="WebtoolsUiLabels" map-name="uiLabelMap" global="true"/>
+                <property-map resource="SecurityUiLabels" map-name="uiLabelMap" global="true"/>
                 <property-map resource="CommonUiLabels" map-name="uiLabelMap" global="true"/>
                 <set field="layoutSettings.companyName" from-field="uiLabelMap.WebtoolsCompanyName" global="true"/>
                 <set field="layoutSettings.companySubtitle" from-field="uiLabelMap.WebtoolsCompanySubtitle" global="true"/>
@@ -79,15 +80,13 @@ under the License.
     <screen name="browsercerts">
         <section>
             <actions>
-                <set field="headerItem" value="main"/>
+                <set field="tabButtonItem" value="myCertificates"/>
                 <set field="titleProperty" value="WebtoolsCertsX509"/>
             </actions>
             <widgets>
-                <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                <decorator-screen name="CommonConfigurationDecorator" location="component://webtools/widget/CommonScreens.xml">
                     <decorator-section name="body">
-                        <platform-specific>
-                            <html><html-template location="component://webtools/webapp/webtools/cert/viewbrowsercerts.ftl"/></html>
-                        </platform-specific>
+                        <platform-specific><html><html-template location="component://webtools/webapp/webtools/cert/viewbrowsercerts.ftl"/></html></platform-specific>
                     </decorator-section>
                 </decorator-screen>
             </widgets>
@@ -101,6 +100,16 @@ under the License.
             </actions>
             <widgets>
                 <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="pre-body">
+                        <section>
+                            <condition>
+                                <if-has-permission permission="ENTITY_MAINT"/>
+                            </condition>
+                            <widgets>
+                                <include-menu name="EntityTabBar" location="component://webtools/widget/Menus.xml"/>
+                            </widgets>
+                        </section>
+                    </decorator-section>
                     <decorator-section name="body">
                         <section>
                             <!-- do check for WEBTOOLS, _VIEW permission -->
@@ -108,7 +117,6 @@ under the License.
                                 <if-has-permission permission="ENTITY_MAINT"/>
                             </condition>
                             <widgets>
-                                <include-menu name="EntityTabBar" location="component://webtools/widget/Menus.xml"/>
                                 <decorator-section-include name="body"/>
                             </widgets>
                             <fail-widgets>
@@ -128,6 +136,16 @@ under the License.
             </actions>
             <widgets>
                 <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="pre-body">
+                        <section>
+                            <condition>
+                                <if-has-permission permission="WEBTOOLS" action="_VIEW"/>
+                            </condition>
+                            <widgets>
+                                <include-menu name="serviceTabBar" location="component://webtools/widget/Menus.xml"/>
+                            </widgets>
+                        </section>
+                    </decorator-section>
                     <decorator-section name="body">
                         <section>
                             <!-- do check for WEBTOOLS, _VIEW permission -->
@@ -135,7 +153,6 @@ under the License.
                                 <if-has-permission permission="WEBTOOLS" action="_VIEW"/>
                             </condition>
                             <widgets>
-                                <include-menu name="serviceTabBar" location="component://webtools/widget/Menus.xml"/>
                                 <decorator-section-include name="body"/>
                             </widgets>
                             <fail-widgets>
@@ -148,4 +165,148 @@ under the License.
         </section>
     </screen>
 
+    <screen name="CommonImportExportDecorator">
+        <section>
+            <actions>
+                <set field="headerItem" value="importExport"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="pre-body">
+                        <section>
+                            <condition>
+                                <if-has-permission permission="ENTITY_MAINT"/>
+                            </condition>
+                            <widgets>
+                                <include-menu name="importExportTabBar" location="component://webtools/widget/Menus.xml"/>
+                            </widgets>
+                        </section>
+                    </decorator-section>
+                    <decorator-section name="body">
+                        <section>
+                            <!-- do check for WEBTOOLS, _VIEW permission -->
+                            <condition>
+                                <if-has-permission permission="ENTITY_MAINT"/>
+                            </condition>
+                            <widgets>
+                                <decorator-section-include name="body"/>
+                            </widgets>
+                            <fail-widgets>
+                                <label style="h3">${uiLabelMap.WebtoolsPermissionError}</label>
+                            </fail-widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    
+    <screen name="CommonArtifactDecorator">
+        <section>
+            <actions>
+                <set field="headerItem" value="artifact"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="pre-body">
+                        <section>
+                            <condition>
+                                <if-has-permission permission="ENTITY_MAINT"/>
+                            </condition>
+                            <widgets>
+                                <include-menu name="artifactTabBar" location="component://webtools/widget/Menus.xml"/>
+                            </widgets>
+                        </section>
+                    </decorator-section>
+                    <decorator-section name="body">
+                        <section>
+                            <!-- do check for WEBTOOLS, _VIEW permission -->
+                            <condition>
+                                <if-has-permission permission="ENTITY_MAINT"/>
+                            </condition>
+                            <widgets>
+                                <decorator-section-include name="body"/>
+                            </widgets>
+                            <fail-widgets>
+                                <label style="h3">${uiLabelMap.WebtoolsPermissionError}</label>
+                            </fail-widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="CommonConfigurationDecorator">
+        <section>
+            <actions>
+                <set field="headerItem" value="configuration"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="pre-body">
+                        <section>
+                            <condition>
+                                <if-has-permission permission="ENTITY_MAINT"/>
+                            </condition>
+                            <widgets>
+                                <include-menu name="configurationTabBar" location="component://webtools/widget/Menus.xml"/>
+                            </widgets>
+                        </section>
+                    </decorator-section>
+                    <decorator-section name="body">
+                        <section>
+                            <!-- do check for WEBTOOLS, _VIEW permission -->
+                            <condition>
+                                <if-has-permission permission="ENTITY_MAINT"/>
+                            </condition>
+                            <widgets>
+                                <decorator-section-include name="body"/>
+                            </widgets>
+                            <fail-widgets>
+                                <label style="h3">${uiLabelMap.WebtoolsPermissionError}</label>
+                            </fail-widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="CommonGeoManagementDecorator">
+        <section>
+            <actions>
+                <set field="headerItem" value="geoManagement"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="pre-body">
+                        <section>
+                            <condition>
+                                <if-has-permission permission="WEBTOOLS" action="_VIEW"/>
+                            </condition>
+                            <widgets>
+                                <include-menu name="geoManagement" location="component://webtools/widget/Menus.xml"/>
+                            </widgets>
+                        </section>
+                    </decorator-section>
+                    <decorator-section name="body">
+                        <section>
+                            <!-- do check for WEBTOOLS, _VIEW permission -->
+                            <condition>
+                                <if-has-permission permission="WEBTOOLS" action="_VIEW"/>
+                            </condition>
+                            <widgets>
+                                <decorator-section-include name="body"/>
+                            </widgets>
+                            <fail-widgets>
+                                <label style="h3">${uiLabelMap.WebtoolsPermissionError}</label>
+                            </fail-widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    
 </screens>

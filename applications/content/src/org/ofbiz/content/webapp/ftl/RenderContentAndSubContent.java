@@ -20,28 +20,20 @@ package org.ofbiz.content.webapp.ftl;
 
 import java.io.IOException;
 import java.io.Writer;
-import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import javolution.util.FastMap;
 
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.GeneralException;
-import org.ofbiz.base.util.UtilFormatOut;
 import org.ofbiz.base.util.UtilHttp;
 import org.ofbiz.base.util.UtilMisc;
-import org.ofbiz.base.util.UtilProperties;
 import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.base.util.collections.MapStack;
 import org.ofbiz.base.util.template.FreeMarkerWorker;
 import org.ofbiz.content.content.ContentWorker;
-import org.ofbiz.entity.GenericDelegator;
-import org.ofbiz.entity.GenericValue;
-import org.ofbiz.widget.WidgetWorker;
+import org.ofbiz.entity.Delegator;
 import org.ofbiz.service.LocalDispatcher;
 
 import freemarker.core.Environment;
@@ -57,32 +49,36 @@ public class RenderContentAndSubContent implements TemplateTransformModel {
 //    public static final String [] upSaveKeyNames = {"globalNodeTrail"};
 //    public static final String [] saveKeyNames = {"contentId", "subContentId", "subDataResourceTypeId", "mimeTypeId", "whenMap", "locale",  "wrapTemplateId", "encloseWrapText", "nullThruDatesOnly", "globalNodeTrail"};
 
+    @SuppressWarnings("unchecked")
     public Writer getWriter(final Writer out, Map args) {
         final Environment env = Environment.getCurrentEnvironment();
-        final LocalDispatcher dispatcher = (LocalDispatcher) FreeMarkerWorker.getWrappedObject("dispatcher", env);
-        final GenericDelegator delegator = (GenericDelegator) FreeMarkerWorker.getWrappedObject("delegator", env);
-        final HttpServletRequest request = (HttpServletRequest) FreeMarkerWorker.getWrappedObject("request", env);
-        final HttpServletResponse response = (HttpServletResponse) FreeMarkerWorker.getWrappedObject("response", env);
-        final Map envMap = FreeMarkerWorker.createEnvironmentMap(env);
-        final Map templateRoot = MapStack.create();
+        final LocalDispatcher dispatcher = FreeMarkerWorker.getWrappedObject("dispatcher", env);
+        final Delegator delegator = FreeMarkerWorker.getWrappedObject("delegator", env);
+        final HttpServletRequest request = FreeMarkerWorker.getWrappedObject("request", env);
+        // final HttpServletResponse response = FreeMarkerWorker.getWrappedObject("response", env);
+        final Map<String, Object> envMap = FreeMarkerWorker.createEnvironmentMap(env);
+        final MapStack<String> templateRoot = MapStack.create();
         ((MapStack)templateRoot).push(envMap);
         if (Debug.verboseOn()) Debug.logVerbose("in RenderContentAndSubContent, contentId(0):" + templateRoot.get("contentId"), module);
         FreeMarkerWorker.getSiteParameters(request, templateRoot);
-//        final Map savedValuesUp = FastMap.newInstance();
-        //FreeMarkerWorker.saveContextValues(templateRoot, upSaveKeyNames, savedValuesUp);
+        // final Map savedValuesUp = FastMap.newInstance();
+        // FreeMarkerWorker.saveContextValues(templateRoot, upSaveKeyNames, savedValuesUp);
         FreeMarkerWorker.overrideWithArgs(templateRoot, args);
 
-        final Map savedValues = FastMap.newInstance();
+        // final Map<String, Object> savedValues = FastMap.newInstance();
 
         return new Writer(out) {
 
+            @Override
             public void write(char cbuf[], int off, int len) {
             }
 
+            @Override
             public void flush() throws IOException {
                 out.flush();
             }
 
+            @Override
             public void close() throws IOException {
                 renderSubContent();
                 //if (Debug.verboseOn()) Debug.logVerbose("in Render(2), globalNodeTrail ." + getWrapped(env, "globalNodeTrail") , module);
@@ -126,7 +122,7 @@ public class RenderContentAndSubContent implements TemplateTransformModel {
 //                              contentId = null;
 //                            }
                         } else if (contentId != null) {
-                            ContentWorker.renderContentAsText(dispatcher, delegator, contentId, out, templateRoot, locale, mimeTypeId, true);
+                            ContentWorker.renderContentAsText(dispatcher, delegator, contentId, out, templateRoot, locale, mimeTypeId, null, null, true);
 //                            ((MapStack)templateRoot).pop();
                         }
                         //FreeMarkerWorker.reloadValues(templateRoot, savedValues, env);

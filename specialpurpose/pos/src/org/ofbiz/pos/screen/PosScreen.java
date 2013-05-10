@@ -24,9 +24,8 @@ import java.awt.Frame;
 import java.awt.Window;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
-
 import java.math.BigDecimal;
-import java.util.*;
+import java.util.Locale;
 
 import net.xoetrope.xui.XPage;
 import net.xoetrope.xui.XProject;
@@ -45,8 +44,10 @@ import org.ofbiz.pos.component.Journal;
 import org.ofbiz.pos.component.Operator;
 import org.ofbiz.pos.component.Output;
 import org.ofbiz.pos.component.PosButton;
+import org.ofbiz.pos.component.PromoStatusBar;
 import org.ofbiz.pos.device.DeviceLoader;
 
+@SuppressWarnings("serial")
 public class PosScreen extends XPage implements Runnable, DialogCallback, FocusListener {
 
 
@@ -54,10 +55,10 @@ public class PosScreen extends XPage implements Runnable, DialogCallback, FocusL
     public static final Frame appFrame = XProjectManager.getCurrentProject().getAppFrame();
     public static final Window appWin = XProjectManager.getCurrentProject().getAppWindow();
     public static final String BUTTON_ACTION_METHOD = "buttonPressed";
-    public static final long MAX_INACTIVITY = 1800000;
+    public static final long MAX_INACTIVITY = Long.valueOf(UtilProperties.getPropertyValue(PosTransaction.resource, "MaxInactivity", "1800000"));
     public static PosScreen currentScreen;
 
-    protected XProject currentProject = (XProject)XProjectManager.getCurrentProject();
+    protected XProject currentProject = XProjectManager.getCurrentProject();
     protected static boolean monitorRunning = false;
     protected static boolean firstInit = false;
     protected static long lastActivity = 0;
@@ -73,6 +74,7 @@ public class PosScreen extends XPage implements Runnable, DialogCallback, FocusL
     protected String scrLocation = null;
     protected boolean isLocked = false;
     protected boolean inDialog = false;
+    protected PromoStatusBar promoStatusBar = null;
 
     private Locale defaultLocale = Locale.getDefault();
 
@@ -82,6 +84,7 @@ public class PosScreen extends XPage implements Runnable, DialogCallback, FocusL
         this.addFocusListener(this);
     }
 
+    @Override
     public void pageCreated() {
         super.pageCreated();
 
@@ -95,6 +98,7 @@ public class PosScreen extends XPage implements Runnable, DialogCallback, FocusL
         this.input = new InputWithPassword(this);
         this.journal = new Journal(this);
         this.operator = new Operator(this);
+        this.promoStatusBar = new PromoStatusBar(this);
         this.setLastActivity(System.currentTimeMillis());
 
         if (!firstInit) {
@@ -130,6 +134,7 @@ public class PosScreen extends XPage implements Runnable, DialogCallback, FocusL
         KeyboardAdaptor.attachComponents(this);
     }
 
+    @Override
     public void pageActivated() {
         super.pageActivated();
 
@@ -149,6 +154,7 @@ public class PosScreen extends XPage implements Runnable, DialogCallback, FocusL
         this.refresh();
     }
 
+    @Override
     public void pageDeactivated() {
         super.pageDeactivated();
 
@@ -158,40 +164,40 @@ public class PosScreen extends XPage implements Runnable, DialogCallback, FocusL
     }
 
     public void logInfo() {
-        Debug.log("App Frame :", module);
-        Debug.log("name      - " + appFrame.getName(), module);
-        Debug.log("title     - " + appFrame.getTitle(), module);
-        Debug.log("active    - " + appFrame.isActive(), module);
-        Debug.log("enabled   - " + appFrame.isEnabled(), module);
-        Debug.log("visible   - " + appFrame.isVisible(), module);
-        Debug.log("showing   - " + appFrame.isShowing(), module);
-        Debug.log("opaque    - " + appFrame.isOpaque(), module);
-        Debug.log("focusable - " + appFrame.isFocusable(), module);
-        Debug.log("focused   - " + appFrame.isFocused(), module);
-        Debug.log("hasFocus  - " + appFrame.hasFocus(), module);
+        Debug.logInfo("App Frame :", module);
+        Debug.logInfo("name      - " + appFrame.getName(), module);
+        Debug.logInfo("title     - " + appFrame.getTitle(), module);
+        Debug.logInfo("active    - " + appFrame.isActive(), module);
+        Debug.logInfo("enabled   - " + appFrame.isEnabled(), module);
+        Debug.logInfo("visible   - " + appFrame.isVisible(), module);
+        Debug.logInfo("showing   - " + appFrame.isShowing(), module);
+        Debug.logInfo("opaque    - " + appFrame.isOpaque(), module);
+        Debug.logInfo("focusable - " + appFrame.isFocusable(), module);
+        Debug.logInfo("focused   - " + appFrame.isFocused(), module);
+        Debug.logInfo("hasFocus  - " + appFrame.hasFocus(), module);
 
-        Debug.log("", module);
-        Debug.log("App Window :", module);
-        Debug.log("name      - " + appWin.getName(), module);
-        Debug.log("active    - " + appWin.isActive(), module);
-        Debug.log("enabled   - " + appWin.isEnabled(), module);
-        Debug.log("visible   - " + appWin.isVisible(), module);
-        Debug.log("showing   - " + appWin.isShowing(), module);
-        Debug.log("opaque    - " + appWin.isOpaque(), module);
-        Debug.log("focusable - " + appWin.isFocusable(), module);
-        Debug.log("focused   - " + appWin.isFocused(), module);
-        Debug.log("hasFocus  - " + appWin.hasFocus(), module);
+        Debug.logInfo("", module);
+        Debug.logInfo("App Window :", module);
+        Debug.logInfo("name      - " + appWin.getName(), module);
+        Debug.logInfo("active    - " + appWin.isActive(), module);
+        Debug.logInfo("enabled   - " + appWin.isEnabled(), module);
+        Debug.logInfo("visible   - " + appWin.isVisible(), module);
+        Debug.logInfo("showing   - " + appWin.isShowing(), module);
+        Debug.logInfo("opaque    - " + appWin.isOpaque(), module);
+        Debug.logInfo("focusable - " + appWin.isFocusable(), module);
+        Debug.logInfo("focused   - " + appWin.isFocused(), module);
+        Debug.logInfo("hasFocus  - " + appWin.hasFocus(), module);
 
-        Debug.log("", module);
+        Debug.logInfo("", module);
 
-        Debug.log("POS Screen :", module);
-        Debug.log("name      - " + this.getName(), module);
-        Debug.log("enabled   - " + this.isEnabled(), module);
-        Debug.log("visible   - " + this.isVisible(), module);
-        Debug.log("showing   - " + this.isShowing(), module);
-        Debug.log("opaque    - " + this.isOpaque(), module);
-        Debug.log("focusable - " + this.isFocusable(), module);
-        Debug.log("focused   - " + this.hasFocus(), module);
+        Debug.logInfo("POS Screen :", module);
+        Debug.logInfo("name      - " + this.getName(), module);
+        Debug.logInfo("enabled   - " + this.isEnabled(), module);
+        Debug.logInfo("visible   - " + this.isVisible(), module);
+        Debug.logInfo("showing   - " + this.isShowing(), module);
+        Debug.logInfo("opaque    - " + this.isOpaque(), module);
+        Debug.logInfo("focusable - " + this.isFocusable(), module);
+        Debug.logInfo("focused   - " + this.hasFocus(), module);
     }
 
     public void refresh() {
@@ -231,6 +237,8 @@ public class PosScreen extends XPage implements Runnable, DialogCallback, FocusL
                         output.print(UtilProperties.getMessage(PosTransaction.resource,"PosIsClosed",defaultLocale));
                     }
                 }
+            } else {
+                promoStatusBar.clear();
             }
             //journal.focus();
         } else {
@@ -279,6 +287,10 @@ public class PosScreen extends XPage implements Runnable, DialogCallback, FocusL
         return this.buttons;
     }
 
+    public PromoStatusBar getPromoStatusBar() {
+        return this.promoStatusBar;
+    }
+
     public void setLastActivity(long l) {
         lastActivity = l;
     }
@@ -295,6 +307,7 @@ public class PosScreen extends XPage implements Runnable, DialogCallback, FocusL
     }
 
     // generic page display methods - extends those in XPage
+    @Override
     public PosScreen showPage(String pageName) {
         return this.showPage(pageName, true);
     }
@@ -347,7 +360,7 @@ public class PosScreen extends XPage implements Runnable, DialogCallback, FocusL
 
     // PosDialog Callback method
     public void receiveDialogCb(PosDialog dialog) {
-        Debug.log("Dialog closed; refreshing screen", module);
+        Debug.logInfo("Dialog closed; refreshing screen", module);
         this.refresh();
     }
 
@@ -355,7 +368,7 @@ public class PosScreen extends XPage implements Runnable, DialogCallback, FocusL
     public void run() {
         while (monitorRunning) {
             if (!isLocked && (System.currentTimeMillis() - lastActivity) > MAX_INACTIVITY) {
-                Debug.log("POS terminal auto-lock activated", module);
+                Debug.logInfo("POS terminal auto-lock activated", module);
                 PosScreen.currentScreen.showPage("pospanel").setLock(true);
             }
             try {
@@ -369,14 +382,14 @@ public class PosScreen extends XPage implements Runnable, DialogCallback, FocusL
     public void focusGained(FocusEvent event) {
         if (Debug.verboseOn()) {
             String from = event != null && event.getOppositeComponent() != null ? event.getOppositeComponent().getName() : "??";
-            Debug.log(event.getSource() + " focus gained from " + from, module);
+            Debug.logInfo(event.getSource() + " focus gained from " + from, module);
         }
     }
 
     public void focusLost(FocusEvent event) {
         if (Debug.verboseOn()) {
             String to = event != null && event.getOppositeComponent() != null ? event.getOppositeComponent().getName() : "??";
-            Debug.log(event.getSource() + " focus lost to " + to, module);
+            Debug.logInfo(event.getSource() + " focus lost to " + to, module);
         }
     }
 

@@ -16,6 +16,8 @@ KIND, either express or implied.  See the License for the
 specific language governing permissions and limitations
 under the License.
 -->
+<#assign externalKeyParam = "&amp;externalLoginKey=" + requestAttributes.externalLoginKey?if_exists>
+
 <#if (requestAttributes.person)?exists><#assign person = requestAttributes.person></#if>
 <#if (requestAttributes.partyGroup)?exists><#assign partyGroup = requestAttributes.partyGroup></#if>
 <#assign docLangAttr = locale.toString()?replace("_", "-")>
@@ -78,12 +80,20 @@ under the License.
             ${extraHead}
         </#list>
     </#if>
+    <#if layoutSettings.WEB_ANALYTICS?has_content>
+      <script language="JavaScript" type="text/javascript">
+        <#list layoutSettings.WEB_ANALYTICS as webAnalyticsConfig>
+          ${StringUtil.wrapString(webAnalyticsConfig.webAnalyticsCode?if_exists)}
+        </#list>
+      </script>
+    </#if>
 </head>
 <#if layoutSettings.headerImageLinkUrl?exists>
   <#assign logoLinkURL = "${layoutSettings.headerImageLinkUrl}">
 <#else>
   <#assign logoLinkURL = "${layoutSettings.commonHeaderImageLinkUrl}">
 </#if>
+<#assign organizationLogoLinkURL = "${layoutSettings.organizationLogoLinkUrl?if_exists}">
 
 <#if person?has_content>
   <#assign userName = person.firstName?if_exists + " " + person.middleName?if_exists + " " + person.lastName?if_exists>
@@ -102,6 +112,9 @@ under the License.
 </#if>
 
 <body>
+  <div id="wait-spinner" style="display:none">
+    <div id="wait-spinner-image"></div>
+  </div>
   <div class="page-container">
     <div class="hidden">
       <a href="#column-container" title="${uiLabelMap.CommonSkipNavigation}" accesskey="2">
@@ -111,11 +124,13 @@ under the License.
     <div id="masthead">
       <ul>
         <#if (userPreferences.COMPACT_HEADER)?default("N") == "Y">
-          <li class="logo-area">
             <#if shortcutIcon?has_content>
-              <a href="<@ofbizUrl>${logoLinkURL}</@ofbizUrl>"><img src="<@ofbizContentUrl>${StringUtil.wrapString(shortcutIcon)}</@ofbizContentUrl>" height="16px" width="16px"/></a>
-            </#if>
-          </li>
+                <#if organizationLogoLinkURL?has_content>
+                    <li><a href="<@ofbizUrl>${logoLinkURL}</@ofbizUrl>"><img alt="${layoutSettings.companyName}" src="<@ofbizContentUrl>${StringUtil.wrapString(organizationLogoLinkURL)}</@ofbizContentUrl>" height="16px" width="16px"></a></li>
+                    <#else>
+                    <li class="logo-area"><a href="<@ofbizUrl>${logoLinkURL}</@ofbizUrl>"><img src="<@ofbizContentUrl>${StringUtil.wrapString(shortcutIcon)}</@ofbizContentUrl>" height="16px" width="16px" alt="" /></a></li>
+                </#if>
+          </#if>
         <#else>
           <#if layoutSettings.headerImageUrl?exists>
             <#assign headerImageUrl = layoutSettings.headerImageUrl>
@@ -125,48 +140,68 @@ under the License.
             <#assign headerImageUrl = layoutSettings.VT_HDR_IMAGE_URL.get(0)>
           </#if>
           <#if headerImageUrl?exists>
-            <li class="logo-area"><a href="<@ofbizUrl>${logoLinkURL}</@ofbizUrl>"><img alt="${layoutSettings.companyName}" src="<@ofbizContentUrl>${StringUtil.wrapString(headerImageUrl)}</@ofbizContentUrl>"/></a></li>
+                <#if organizationLogoLinkURL?has_content>
+                    <li><a href="<@ofbizUrl>${logoLinkURL}</@ofbizUrl>"><img alt="${layoutSettings.companyName}" src="<@ofbizContentUrl>${StringUtil.wrapString(organizationLogoLinkURL)}</@ofbizContentUrl>"></a></li>
+                    <#else>
+                    <li class="logo-area"><a href="<@ofbizUrl>${logoLinkURL}</@ofbizUrl>"><img alt="${layoutSettings.companyName}" src="<@ofbizContentUrl>${StringUtil.wrapString(headerImageUrl)}</@ofbizContentUrl>"/></a></li>
+                </#if>
+          </#if>
+          <#if layoutSettings.middleTopMessage1?has_content && layoutSettings.middleTopMessage1 != " ">
+            <li>
+            <div class="last-system-msg">
+            <center>${layoutSettings.middleTopHeader?if_exists}</center>
+            <a href="${layoutSettings.middleTopLink1?if_exists}">${layoutSettings.middleTopMessage1?if_exists}</a><br/>
+            <a href="${layoutSettings.middleTopLink2?if_exists}">${layoutSettings.middleTopMessage2?if_exists}</a><br/>
+            <a href="${layoutSettings.middleTopLink3?if_exists}">${layoutSettings.middleTopMessage3?if_exists}</a>
+            </div>
+            </li>
           </#if>
         </#if>
-
         <li class="control-area">
           <ul id="preferences-menu">
             <#if userLogin?exists>
               <#if userLogin.partyId?exists>
-                <li class="user"><a href="/partymgr/control/viewprofile?partyId=${userLogin.partyId}">${userName}</a></li>
+                <li class="user"><a href="/partymgr/control/viewprofile?partyId=${userLogin.partyId}${externalKeyParam?if_exists}">${userName}</a></li>
               <#else>
                 <li class="user">${userName}</li>
               </#if>
-              <li class="org">${orgName}</li>
+              <#if orgName?has_content>              
+                <li class="org">${orgName}</li>
+              </#if>
             </#if>
-            <li class="first"><a href="<@ofbizUrl>LookupLocales</@ofbizUrl>">${uiLabelMap.CommonLanguageTitle} : ${locale.getDisplayName(locale)}</a></li>
+            <li class="first"><a href="<@ofbizUrl>ListLocales</@ofbizUrl>">${uiLabelMap.CommonLanguageTitle} : ${locale.getDisplayName(locale)}</a></li>
             <#if userLogin?exists>
-              <li><a href="<@ofbizUrl>LookupVisualThemes</@ofbizUrl>">${uiLabelMap.CommonVisualThemes}</a></li>
+              <li><a href="<@ofbizUrl>ListVisualThemes</@ofbizUrl>">${uiLabelMap.CommonVisualThemes}</a></li>
               <li><a href="<@ofbizUrl>logout</@ofbizUrl>">${uiLabelMap.CommonLogout}</a></li>
             <#else>
               <li><a href="<@ofbizUrl>${checkLoginUrl}</@ofbizUrl>">${uiLabelMap.CommonLogin}</a></li>
             </#if>
-            <#include "component://common/webcommon/includes/helplink.ftl" />
-
+            <#--if webSiteId?exists && requestAttributes._CURRENT_VIEW_?exists && helpTopic?exists-->
+            <#if parameters.componentName?exists && requestAttributes._CURRENT_VIEW_?exists && helpTopic?exists>
+              <#include "component://common/webcommon/includes/helplink.ftl" />
+              <li><a class="help-link <#if pageAvail?has_content> alert</#if>" href="javascript:lookup_popup1('showHelp?helpTopic=${helpTopic}&amp;portalPageId=${parameters.portalPageId?if_exists}','help' ,500,500);" title="${uiLabelMap.CommonHelp}"></a></li>
+            </#if>
             <#if userLogin?exists>
               <#if (userPreferences.COMPACT_HEADER)?default("N") == "Y">
                 <li class="collapsed"><a href="javascript:document.setUserPreferenceCompactHeaderN.submit()">&nbsp;&nbsp;</a>
                 <form name="setUserPreferenceCompactHeaderN" method="post" action="<@ofbizUrl>setUserPreference</@ofbizUrl>">
-                    <input type="hidden" name="userPrefGroupTypeId" value="GLOBAL_PREFERENCES">
-                    <input type="hidden" name="userPrefTypeId" value="COMPACT_HEADER">
-                    <input type="hidden" name="userPrefValue" value="N">
+                    <input type="hidden" name="userPrefGroupTypeId" value="GLOBAL_PREFERENCES"/>
+                    <input type="hidden" name="userPrefTypeId" value="COMPACT_HEADER"/>
+                    <input type="hidden" name="userPrefValue" value="N"/>
                 </form>
                 </li>
               <#else>
                 <li class="expanded"><a href="javascript:document.setUserPreferenceCompactHeaderY.submit()">&nbsp;&nbsp;</a>
                 <form name="setUserPreferenceCompactHeaderY" method="post" action="<@ofbizUrl>setUserPreference</@ofbizUrl>">
-                    <input type="hidden" name="userPrefGroupTypeId" value="GLOBAL_PREFERENCES">
-                    <input type="hidden" name="userPrefTypeId" value="COMPACT_HEADER">
-                    <input type="hidden" name="userPrefValue" value="Y">
+                    <input type="hidden" name="userPrefGroupTypeId" value="GLOBAL_PREFERENCES"/>
+                    <input type="hidden" name="userPrefTypeId" value="COMPACT_HEADER"/>
+                    <input type="hidden" name="userPrefValue" value="Y"/>
                 </form>
                 </li>
               </#if>
             </#if>
+            <li class="control-area">
+            </li>
           </ul>
         </li>
       </ul>

@@ -19,13 +19,10 @@
 package org.ofbiz.pos.component;
 
 import java.awt.Color;
-import java.awt.Font;
-import java.io.StringWriter;
 import java.util.Locale;
 
 import javax.swing.ListSelectionModel;
 
-import net.xoetrope.data.XDataSource;
 import net.xoetrope.swing.XScrollPane;
 import net.xoetrope.swing.XTable;
 import net.xoetrope.xui.XProject;
@@ -35,13 +32,14 @@ import net.xoetrope.xui.style.XStyle;
 
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilProperties;
+import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.pos.PosTransaction;
 import org.ofbiz.pos.screen.PosScreen;
 
 public class Journal {
 
     public static final String module = Journal.class.getName();
-    protected XProject currentProject = (XProject)XProjectManager.getCurrentProject();
+    protected XProject currentProject = XProjectManager.getCurrentProject();
 
     private static String[] field = { "sku", "desc", "qty", "price" };
     private static String[] name = { "PosSku", "PosItem", "PosQty", "PosAmt" };
@@ -75,7 +73,7 @@ public class Journal {
         // some settings needed for XUI 3.2rc2b update
         jtable.setRowHeight(30); // Better to catch the line on a touch screen (minimal height I think)
         XStyle style = currentProject.getStyleManager().getStyle("journalBorder");
-        Color borderColor = style.getStyleAsColor(XStyle.COLOR_FORE );
+        Color borderColor = style.getStyleAsColor(XStyle.COLOR_FORE);
         jtable.setGridColor(borderColor); // jtable.setBorderStyle("journalBorder"); above is not working anymore
         style = currentProject.getStyleManager().getStyle("journalData");
         Color backgoundColor = style.getStyleAsColor(XStyle.COLOR_BACK);
@@ -89,8 +87,12 @@ public class Journal {
             jtable.setModel(jmodel);
 
             for (int i = 0; i < width.length; i++) {
+                if (defaultLocale.getLanguage().equals("ar")) {
+                    jtable.setColWidth(width.length - i - 1, width[i]);
+                } else {
                 jtable.setColWidth(i, width[i]);
             }
+        }
         }
         jtable.setSelectedRow(0);
     }
@@ -138,7 +140,7 @@ public class Journal {
 
         PosTransaction tx = PosTransaction.getCurrentTx(pos.getSession());
         XModel jmodel = this.createModel();
-        if (tx != null && !tx.isEmpty()) {
+        if (UtilValidate.isNotEmpty(tx)) {
             tx.appendItemDataModel(jmodel);
             this.appendEmpty(jmodel);
             tx.appendTotalDataModel(jmodel);
@@ -174,34 +176,34 @@ public class Journal {
         }
         jmodel.setTagName("table");
         // create the header
-        XModel headerNode = appendNode(jmodel, "th", "header", "");
+        XModel headerNode = appendNode(new JournalLineParams(jmodel, "th", "header", ""));
+        if (defaultLocale.getLanguage().equals("ar")) {
+            for (int i = field.length - 1; i >= 0; i--) {
+                appendNode(new JournalLineParams(headerNode, "td", field[i], UtilProperties.getMessage(PosTransaction.resource, name[i], defaultLocale)));
+            }
+        } else {
         for (int i = 0 ; i < field.length; i++) {
-            appendNode(headerNode, "td", field[i],UtilProperties.getMessage(PosTransaction.resource,name[i],defaultLocale));
+                appendNode(new JournalLineParams(headerNode, "td", field[i], UtilProperties.getMessage(PosTransaction.resource, name[i], defaultLocale)));
+        }
         }
 
         return jmodel;
     }
 
     private void appendEmpty(XModel jmodel) {
-        XModel headerNode = appendNode(jmodel, "tr", "emptyrow", "");
+        XModel headerNode = appendNode(new JournalLineParams(jmodel, "tr", "emptyrow", ""));
         for (int i = 0 ; i < field.length; i++) {
-            appendNode(headerNode, "td", field[i], "");
+            appendNode(new JournalLineParams(headerNode, "td", field[i], ""));
         }
     }
 
-    public static XModel appendNode(XModel node, String tag, String name, String value) {
-        XModel newNode = (XModel) node.append(name);
-        newNode.setTagName(tag);
-        if (value != null) {
-            newNode.set(value);
+    public static XModel appendNode(JournalLineParams journalLineParams) {
+        XModel newNode = (XModel) journalLineParams.getNode().append(journalLineParams.getName());
+        newNode.setTagName(journalLineParams.getTag());
+
+        if (journalLineParams.getValue() != null) {
+            newNode.set(journalLineParams.getValue());
         }
         return newNode;
-    }
-
-    private String getModelText(XModel model)
-    {
-        StringWriter sw = new StringWriter();
-        XDataSource.outputModel( sw, model );
-        return "<Datasets>" + sw.toString() + "</Datasets>";
     }
 }

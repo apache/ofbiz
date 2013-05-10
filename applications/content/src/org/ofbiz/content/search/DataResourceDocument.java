@@ -29,15 +29,14 @@ import org.ofbiz.base.util.GeneralException;
 import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.content.data.DataResourceWorker;
-import org.ofbiz.entity.GenericDelegator;
+import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
 
 import org.apache.lucene.document.Document;
-import org.apache.lucene.document.Field;
-import org.apache.lucene.document.Field.Index;
 import org.apache.lucene.document.Field.Store;
-import org.apache.lucene.document.Field.TermVector;
+import org.apache.lucene.document.StringField;
+import org.apache.lucene.document.TextField;
 
 /**
  * DataResourceDocument Class
@@ -47,12 +46,12 @@ public class DataResourceDocument {
     static char dirSep = System.getProperty("file.separator").charAt(0);
     public static final String module = ContentDocument.class.getName();
 
-    public static Document Document(String id, GenericDelegator delegator, Map context) throws InterruptedException  {
+    public static Document Document(String id, Delegator delegator, Map<String, Object> context) throws InterruptedException  {
 
         Document doc = null;
         GenericValue dataResource = null;
           try {
-              dataResource = delegator.findByPrimaryKeyCache("DataResource", UtilMisc.toMap("dataResourceId",id));
+              dataResource = delegator.findOne("DataResource", UtilMisc.toMap("dataResourceId",id), true);
           } catch (GenericEntityException e) {
               Debug.logError(e, module);
               return doc;
@@ -60,7 +59,7 @@ public class DataResourceDocument {
           // make a new, empty document
           doc = new Document();
 
-          doc.add(new Field("dataResourceId", id, Store.YES, Index.UN_TOKENIZED, TermVector.NO));
+          doc.add(new StringField("dataResourceId", id, Store.YES));
 
           String mimeTypeId = dataResource.getString("mimeTypeId");
         if (UtilValidate.isEmpty(mimeTypeId)) {
@@ -84,7 +83,7 @@ public class DataResourceDocument {
           String text = outWriter.toString();
           Debug.logInfo("in DataResourceDocument, text:" + text, module);
                 if (UtilValidate.isNotEmpty(text))
-              doc.add(new Field("content", text, Store.NO, Index.TOKENIZED, TermVector.NO));
+              doc.add(new TextField("content", text, Store.NO));
 
         return doc;
     }

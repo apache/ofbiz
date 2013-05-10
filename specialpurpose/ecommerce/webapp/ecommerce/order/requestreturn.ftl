@@ -18,13 +18,13 @@ under the License.
 -->
 
 <div class="screenlet">
-    <div class="screenlet-header">
+    <div class="screenlet-title-bar">
         <div class="boxlink">
           <#if maySelectItems?default(false)>
               <a href="javascript:document.addCommonToCartForm.add_all.value='true';document.addCommonToCartForm.submit()" class="submenutext">${uiLabelMap.OrderAddAllToCart}</a><a href="javascript:document.addCommonToCartForm.add_all.value='false';document.addCommonToCartForm.submit()" class="submenutextright">${uiLabelMap.OrderAddCheckedToCart}</a>
           </#if>
         </div>
-        <div class="boxhead">&nbsp;${uiLabelMap.OrderReturnItems}</div>
+        <div class="h3">${uiLabelMap.OrderReturnItems}</div>
     </div>
     <div class="screenlet-body">
         <form name="selectAllForm" method="post" action="<@ofbizUrl>requestReturn</@ofbizUrl>">
@@ -53,7 +53,7 @@ under the License.
               <td><div class="tableheadtext">${uiLabelMap.OrderRequestedResponse}</div></td>
               <td>&nbsp;</td>
             </tr>
-            <tr><td colspan="6"><hr/></td></tr>
+            <tr><td colspan="6"><hr /></td></tr>
             <#if returnableItems?has_content>
               <#assign rowCount = 0>
               <#list returnableItems.keySet() as orderItem>
@@ -67,14 +67,14 @@ under the License.
                 <input type="hidden" name="returnPrice_o_${rowCount}" value="${returnableItems.get(orderItem).get("returnablePrice")}"/>
 
                 <#-- need some order item information -->
-                <#assign orderHeader = orderItem.getRelatedOne("OrderHeader")>
+                <#assign orderHeader = orderItem.getRelatedOne("OrderHeader", false)>
                 <#assign itemCount = orderItem.quantity>
                 <#assign itemPrice = orderItem.unitPrice>
                 <#-- end of order item information -->
 
                 <tr>
                   <td>
-                    <div class="tabletext">
+                    <div>
                       <#if orderItem.productId?exists>
                         &nbsp;<a href="<@ofbizUrl>product?product_id=${orderItem.productId}</@ofbizUrl>" class="buttontext">${orderItem.productId}</a>
                         <input type="hidden" name="productId_o_${rowCount}" value="${orderItem.productId}"/>
@@ -86,7 +86,7 @@ under the License.
                     <input type="text" class="inputBox" size="6" name="returnQuantity_o_${rowCount}" value="${returnableItems.get(orderItem).get("returnableQuantity")}"/>
                   </td>
                   <td>
-                    <div class="tabletext"><@ofbizCurrency amount=returnableItems.get(orderItem).get("returnablePrice") isoCode=orderHeader.currencyUom/></div>
+                    <div><@ofbizCurrency amount=returnableItems.get(orderItem).get("returnablePrice") isoCode=orderHeader.currencyUom/></div>
                   </td>
                   <td>
                     <select name="returnReasonId_o_${rowCount}" class="selectBox">
@@ -106,7 +106,7 @@ under the License.
                     <input type="checkbox" name="_rowSubmit_o_${rowCount}" value="Y" onclick="javascript:checkToggle(this, 'selectAllForm');"/>
                   </td>
                 </tr>
-                <tr><td colspan="6"><hr/></td></tr>
+                <tr><td colspan="6"><hr /></td></tr>
                 <#assign rowCount = rowCount + 1>
               </#if>
               </#list>
@@ -114,27 +114,27 @@ under the License.
               <tr>
                 <td colspan="6"><div class="tableheadtext">${uiLabelMap.OrderSelectShipFromAddress}:</td>
               </tr>
-              <tr><td colspan="6"><hr/></td></tr>
+              <tr><td colspan="6"><hr /></td></tr>
               <tr>
                 <td colspan="6">
                   <table cellspacing="1" cellpadding="2" width="100%">
                     <#list shippingContactMechList as shippingContactMech>
-                      <#assign shippingAddress = shippingContactMech.getRelatedOne("PostalAddress")>
+                      <#assign shippingAddress = shippingContactMech.getRelatedOne("PostalAddress", false)>
                       <tr>
-                        <td align="right" width="1%" valign="top" nowrap>
+                        <td align="right" width="1%" valign="top" nowrap="nowrap">
                           <input type="radio" name="originContactMechId" value="${shippingAddress.contactMechId}"/>
                         </td>
-                        <td width="99%" valign="top" nowrap>
-                          <div class="tabletext">
-                            <#if shippingAddress.toName?has_content><b>${uiLabelMap.CommonTo}:</b>&nbsp;${shippingAddress.toName}<br/></#if>
-                            <#if shippingAddress.attnName?has_content><b>${uiLabelMap.PartyAddrAttnName}:</b>&nbsp;${shippingAddress.attnName}<br/></#if>
-                            <#if shippingAddress.address1?has_content>${shippingAddress.address1}<br/></#if>
-                            <#if shippingAddress.address2?has_content>${shippingAddress.address2}<br/></#if>
+                        <td width="99%" valign="top" nowrap="nowrap">
+                          <div>
+                            <#if shippingAddress.toName?has_content><b>${uiLabelMap.CommonTo}:</b>&nbsp;${shippingAddress.toName}<br /></#if>
+                            <#if shippingAddress.attnName?has_content><b>${uiLabelMap.PartyAddrAttnName}:</b>&nbsp;${shippingAddress.attnName}<br /></#if>
+                            <#if shippingAddress.address1?has_content>${shippingAddress.address1}<br /></#if>
+                            <#if shippingAddress.address2?has_content>${shippingAddress.address2}<br /></#if>
                             <#if shippingAddress.city?has_content>${shippingAddress.city}</#if>
-                            <#if shippingAddress.stateProvinceGeoId?has_content><br/>${shippingAddress.stateProvinceGeoId}</#if>
-                            <#if shippingAddress.postalCode?has_content><br/>${shippingAddress.postalCode}</#if>
-                            <#if shippingAddress.countryGeoId?has_content><br/>${shippingAddress.countryGeoId}</#if>
-                            <a href="<@ofbizUrl>editcontactmech?DONE_PAGE=checkoutoptions&contactMechId=${shippingAddress.contactMechId}</@ofbizUrl>" class="buttontext">[${uiLabelMap.CommonUpdate}]</a>
+                            <#if shippingAddress.stateProvinceGeoId?has_content><br />${shippingAddress.stateProvinceGeoId}</#if>
+                            <#if shippingAddress.postalCode?has_content><br />${shippingAddress.postalCode}</#if>
+                            <#if shippingAddress.countryGeoId?has_content><br />${shippingAddress.countryGeoId}</#if>
+                            <a href="<@ofbizUrl>editcontactmech?DONE_PAGE=checkoutoptions&amp;contactMechId=${shippingAddress.contactMechId}</@ofbizUrl>" class="buttontext">[${uiLabelMap.CommonUpdate}]</a>
                           </div>
                         </td>
                       </tr>
@@ -142,14 +142,14 @@ under the License.
                   </table>
                 </td>
               </tr>
-              <tr><td colspan="6"><hr/></td></tr>
+              <tr><td colspan="6"><hr /></td></tr>
               <tr>
                 <td colspan="6" align="right">
                   <a href="javascript:document.selectAllForm.submit();" class="buttontext">${uiLabelMap.OrderReturnSelectedItems}</a>
                 </td>
               </tr>
             <#else>
-              <tr><td colspan="6"><div class="tabletext">${uiLabelMap.OrderNoReturnableItems} ${uiLabelMap.CommonNbr}${orderId}</div></td></tr>
+              <tr><td colspan="6"><div>${uiLabelMap.OrderNoReturnableItems} ${uiLabelMap.CommonNbr}${orderId}</div></td></tr>
             </#if>
           </table>
         </form>

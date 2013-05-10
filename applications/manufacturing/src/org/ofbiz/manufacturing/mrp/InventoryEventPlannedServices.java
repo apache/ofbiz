@@ -19,61 +19,64 @@
 package org.ofbiz.manufacturing.mrp;
 
 import java.math.BigDecimal;
+import java.util.Locale;
 import java.util.Map;
 
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilMisc;
+import org.ofbiz.base.util.UtilProperties;
 import org.ofbiz.base.util.UtilValidate;
-import org.ofbiz.entity.GenericDelegator;
+import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
 import org.ofbiz.service.DispatchContext;
 import org.ofbiz.service.ServiceUtil;
 
-
 public class InventoryEventPlannedServices {
 
     public static final String module = InventoryEventPlannedServices.class.getName();
+    public static final String resource = "ManufacturingUiLabels";
 
     /**
      *
      *  Create an MrpEvent.
      *  Make an update if a record exist with same key,  (adding the event quantity to the exiting record)
      *
-     * @param ctx
-     * @param context: a map containing the parameters used to create an MrpEvent
-     * @return result: a map with service status
+     * @param ctx the dispatch context
+     * @param context a map containing the parameters used to create an MrpEvent
+     * @return result a map with service status
      */
-    public static Map createMrpEvent(DispatchContext ctx, Map context) {
-        GenericDelegator delegator = ctx.getDelegator();
-        Map parameters = UtilMisc.toMap("mrpId", context.get("mrpId"),
+    public static Map<String, Object> createMrpEvent(DispatchContext ctx, Map<String, ? extends Object> context) {
+        Delegator delegator = ctx.getDelegator();
+        Locale locale = (Locale) context.get("locale");
+        Map<String, Object> parameters = UtilMisc.<String, Object>toMap("mrpId", context.get("mrpId"),
                                         "productId", context.get("productId"),
                                         "eventDate", context.get("eventDate"),
                                         "mrpEventTypeId", context.get("mrpEventTypeId"));
         BigDecimal quantity = (BigDecimal)context.get("quantity");
-        GenericValue mrpEvent = null;
         try {
             createOrUpdateMrpEvent(parameters, quantity, (String)context.get("facilityId"), (String)context.get("eventName"), false, delegator);
         } catch (GenericEntityException e) {
-            Debug.logError(e,"Error : findByPrimaryKey(\"MrpEvent\", parameters =)"+parameters, module);
-            return ServiceUtil.returnError("Problem, on database access, for more detail look at the log");
+            Debug.logError(e,"Error : findOne(\"MrpEvent\", parameters =)"+parameters, module);
+            return ServiceUtil.returnError(UtilProperties.getMessage(resource, "ManufacturingMrpCreateOrUpdateEvent", UtilMisc.toMap("parameters", parameters), locale));
         }
         return ServiceUtil.returnSuccess();
     }
 
-    public static void createOrUpdateMrpEvent(Map mrpEventKeyMap, BigDecimal newQuantity, String facilityId, String eventName, boolean isLate, GenericDelegator delegator) throws GenericEntityException {
+    public static void createOrUpdateMrpEvent(Map<String, Object> mrpEventKeyMap, BigDecimal newQuantity, String facilityId,
+            String eventName, boolean isLate, Delegator delegator) throws GenericEntityException {
         GenericValue mrpEvent = null;
-        mrpEvent = delegator.findByPrimaryKey("MrpEvent", mrpEventKeyMap);
+        mrpEvent = delegator.findOne("MrpEvent", mrpEventKeyMap, false);
         if (mrpEvent == null) {
             mrpEvent = delegator.makeValue("MrpEvent", mrpEventKeyMap);
-            mrpEvent.put("quantity", newQuantity);
+            mrpEvent.put("quantity", newQuantity.doubleValue());
             mrpEvent.put("eventName", eventName);
             mrpEvent.put("facilityId", facilityId);
             mrpEvent.put("isLate", (isLate? "Y": "N"));
             mrpEvent.create();
         } else {
-            BigDecimal qties = newQuantity.add((BigDecimal)mrpEvent.getBigDecimal("quantity"));
-            mrpEvent.put("quantity", qties);
+            BigDecimal qties = newQuantity.add(mrpEvent.getBigDecimal("quantity"));
+            mrpEvent.put("quantity", qties.doubleValue());
             if (!UtilValidate.isEmpty(eventName)) {
                 String existingEventName = mrpEvent.getString("eventName");
                 mrpEvent.put("eventName", (UtilValidate.isEmpty(existingEventName)? eventName: existingEventName + ", " + eventName));

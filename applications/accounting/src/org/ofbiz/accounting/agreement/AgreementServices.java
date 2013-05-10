@@ -20,16 +20,17 @@
 package org.ofbiz.accounting.agreement;
 
 import java.math.BigDecimal;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+
 import javolution.util.FastList;
+
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.base.util.UtilNumber;
 import org.ofbiz.base.util.UtilProperties;
-import org.ofbiz.entity.GenericDelegator;
+import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericEntity;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
@@ -75,11 +76,11 @@ public class AgreementServices {
      *              currencyUomId   String  Currency
      *              productId       String  Product Id
      */
-    public static Map getCommissionForProduct(DispatchContext ctx, Map context) {
-        GenericDelegator delegator = ctx.getDelegator();
+    public static Map<String, Object> getCommissionForProduct(DispatchContext ctx, Map<String, Object> context) {
+        Delegator delegator = ctx.getDelegator();
         Locale locale = (Locale) context.get("locale");
         String errMsg = null;
-        List commissions = FastList.newInstance();
+        List<Map<String, Object>> commissions = FastList.newInstance();
 
         try {
             BigDecimal amount = ((BigDecimal)context.get("amount"));
@@ -91,35 +92,35 @@ public class AgreementServices {
             quantity = quantity.abs();
             String productId = (String) context.get("productId");
             String invoiceItemTypeId = (String) context.get("invoiceItemTypeId");
+            String invoiceItemSeqId = (String) context.get("invoiceItemSeqId");
+            String invoiceId = (String) context.get("invoiceId");
 
             // Collect agreementItems applicable to this orderItem/returnItem
             // TODO: partyIds should be part of this query!
-            List agreementItems = delegator.findByAndCache("AgreementItemAndProductAppl", UtilMisc.toMap(
+            List<GenericValue> agreementItems = delegator.findByAnd("AgreementItemAndProductAppl", UtilMisc.toMap(
                     "productId", productId,
-                    "agreementItemTypeId", "AGREEMENT_COMMISSION"));
+                    "agreementItemTypeId", "AGREEMENT_COMMISSION"), null, true);
             // Try the first available virtual product if this is a variant product
             if (agreementItems.size() == 0) {
-                List productAssocs = delegator.findByAndCache("ProductAssoc", UtilMisc.toMap(
+                List<GenericValue> productAssocs = delegator.findByAnd("ProductAssoc", UtilMisc.toMap(
                         "productIdTo", productId,
-                        "productAssocTypeId", "PRODUCT_VARIANT"));
+                        "productAssocTypeId", "PRODUCT_VARIANT"), null, true);
                 productAssocs = EntityUtil.filterByDate(productAssocs);
                 if (productAssocs.size() > 0) {
                     GenericEntity productAssoc = EntityUtil.getFirst(productAssocs);
-                    agreementItems = delegator.findByAndCache("AgreementItemAndProductAppl", UtilMisc.toMap(
+                    agreementItems = delegator.findByAnd("AgreementItemAndProductAppl", UtilMisc.toMap(
                             "productId", productAssoc.getString("productId"),
-                            "agreementItemTypeId", "AGREEMENT_COMMISSION"));
+                            "agreementItemTypeId", "AGREEMENT_COMMISSION"), null, true);
                 }
             }
             // this is not very efficient if there were many
             agreementItems = EntityUtil.filterByDate(agreementItems);
 
-            Iterator it = agreementItems.iterator();
-            while (it.hasNext()) {
-                GenericValue agreementItem = (GenericValue) it.next();
-                List terms = delegator.findByAndCache("AgreementTerm", UtilMisc.toMap(
+            for (GenericValue agreementItem : agreementItems) {
+                List<GenericValue> terms = delegator.findByAnd("AgreementTerm", UtilMisc.toMap(
                         "agreementId", agreementItem.getString("agreementId"),
                         "agreementItemSeqId", agreementItem.getString("agreementItemSeqId"),
-                        "invoiceItemTypeId", invoiceItemTypeId));
+                        "invoiceItemTypeId", invoiceItemTypeId), null, true);
                 if (terms.size() > 0) {
                     BigDecimal commission = ZERO;
                     BigDecimal min = new BigDecimal("-1e12");   // Limit to 1 trillion commission
@@ -127,11 +128,9 @@ public class AgreementServices {
 
                     // number of days due for commission, which will be the lowest termDays of all the AgreementTerms
                     long days = -1;
-                    Iterator itt = terms.iterator();
-                    while (itt.hasNext()) {
-                        GenericValue elem = (GenericValue) itt.next();
-                        String termTypeId = elem.getString("termTypeId");
-                        BigDecimal termValue = elem.getBigDecimal("termValue");
+                    for (GenericValue term : terms) {
+                        String termTypeId = term.getString("termTypeId");
+                        BigDecimal termValue = term.getBigDecimal("termValue");
                         if (termValue != null) {
                             if (termTypeId.equals("FIN_COMM_FIXED")) {
                                 commission = commission.add(termValue);
@@ -147,7 +146,7 @@ public class AgreementServices {
                         }
 
                         // see if we need to update the number of days for paying commission
-                        Long termDays = elem.getLong("termDays");
+                        Long termDays = term.getLong("termDays");
                         if (termDays != null) {
                             // if days is greater than zero, then it has been set with another value, so we use the lowest term days
                             // if days is less than zero, then it has not been set yet.
@@ -165,22 +164,26 @@ public class AgreementServices {
                     commission = negative ? commission.negate() : commission;
                     commission = commission.setScale(decimals, rounding);
 
-                    Map partyCommissionResult = UtilMisc.toMap(
+                    Map<String, Object> partyCommissionResult = UtilMisc.toMap(
                             "partyIdFrom", agreementItem.getString("partyIdFrom"),
                             "partyIdTo", agreementItem.getString("partyIdTo"),
+                            "invoiceItemSeqId", invoiceItemSeqId,
+                            "invoiceId", invoiceId,
                             "commission", commission,
                             "quantity", quantity,
                             "currencyUomId", agreementItem.getString("currencyUomId"),
                             "productId", productId);
                     if (days >= 0) {
-                        partyCommissionResult.put("days", new Long(days));
+                        partyCommissionResult.put("days", Long.valueOf(days));
                     }
-                    commissions.add(partyCommissionResult);
+                    if (!commissions.contains(partyCommissionResult)) {
+                        commissions.add(partyCommissionResult);
+                    }
                 }
             }
         } catch (GenericEntityException e) {
             Debug.logWarning(e, module);
-            Map messageMap = UtilMisc.toMap("errMessage", e.getMessage());
+            Map<String, String> messageMap = UtilMisc.toMap("errMessage", e.getMessage());
             errMsg = UtilProperties.getMessage("CommonUiLabels", "CommonDatabaseProblem", messageMap, locale);
             return ServiceUtil.returnError(errMsg);
         }

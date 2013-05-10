@@ -27,21 +27,21 @@
 <#assign text_check=""/>
 <#assign img_check=""/>
 <#if (imageContent?has_content && (drDataTemplateTypeId?default("") == "SCREEN_COMBINED") || drMimeTypeId?default("")?starts_with("image"))>
-    <#assign img_check="checked"/>
+    <#assign img_check="checked='checked'"/>
 </#if>
 <#if (textContent?has_content && drMimeTypeId?default("")?starts_with("text"))
         || (textContent?has_content && (drDataTemplateTypeId?default("") == "SCREEN_COMBINED"))
         || !img_check?has_content>
-    <#assign text_check="checked"/>
+    <#assign text_check="checked='checked'"/>
 </#if>
 
 <#-- Sets one of the two templates -->
 <#assign topleft_check=""/>
 <#assign topcenter_check=""/>
 <#if view.drDataResourceId?has_content && view.drDataResourceId == "BLOG_TPL_TOPLEFT">
-    <#assign topleft_check="checked"/>
+    <#assign topleft_check="checked='checked'"/>
 <#else>
-    <#assign topcenter_check="checked"/>
+    <#assign topcenter_check="checked='checked'"/>
 </#if>
 
 <#-- Fills in existing text -->
@@ -88,7 +88,7 @@
         <div class="inputBox"><input type="checkBox" ${text_check} name="drMimeTypeId_TEXT" value="Y"/>Text</div>
         </td>
         <td>&nbsp;</td>
-        <td width="60%"
+        <td width="60%">
         <textarea class="textAreaBox" class="inputBox" name="textData" cols="60" rows="24">${textData?if_exists}</textarea>
         </td>
         <td width="10%" align="right">
@@ -107,12 +107,12 @@
         <td>&nbsp;</td>
         <td width="60%">
             <div class="inputBox">Existing file name:  <#if imageContent?has_content && imageContent.drObjectInfo?has_content>${imageContent.drObjectInfo}</#if></div>
-            <br/>
+            <br />
             <input type="file" class="inputBox" name="uploadedFile" size="25"/>
             <#--
             Force: <input type="checkbox" value="true" name="forceElectronicText"/>
             -->
-            <br/>
+            <br />
             Top-left:<input type="radio" ${topleft_check} class="inputBox" name="templateId" value="BLOG_TPL_TOPLEFT"/>
             &nbsp;Top-center:<input type="radio" ${topcenter_check} class="inputBox" name="templateId" value="BLOG_TPL_TOPCENTER"/>
         </td>

@@ -19,17 +19,18 @@
 package org.ofbiz.widget.screen;
 
 import java.io.IOException;
-import java.io.Serializable;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.ListIterator;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.xml.parsers.ParserConfigurationException;
 
 import javolution.util.FastList;
+import javolution.util.FastMap;
 
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.GeneralException;
@@ -41,33 +42,35 @@ import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.base.util.UtilXml;
 import org.ofbiz.base.util.collections.MapStack;
 import org.ofbiz.base.util.string.FlexibleStringExpander;
-import org.ofbiz.entity.GenericDelegator;
+import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
 import org.ofbiz.widget.ModelWidget;
+import org.ofbiz.widget.ModelWidgetAction;
+import org.ofbiz.widget.WidgetFactory;
 import org.ofbiz.widget.WidgetWorker;
-import org.ofbiz.widget.fo.FoScreenRenderer;
+import org.ofbiz.widget.PortalPageWorker;
 import org.ofbiz.widget.form.FormFactory;
 import org.ofbiz.widget.form.FormStringRenderer;
 import org.ofbiz.widget.form.ModelForm;
 import org.ofbiz.widget.html.HtmlFormRenderer;
 import org.ofbiz.widget.html.HtmlMenuRenderer;
-import org.ofbiz.widget.html.HtmlTreeRenderer;
 import org.ofbiz.widget.menu.MenuFactory;
 import org.ofbiz.widget.menu.MenuStringRenderer;
 import org.ofbiz.widget.menu.ModelMenu;
 import org.ofbiz.widget.tree.ModelTree;
 import org.ofbiz.widget.tree.TreeFactory;
 import org.ofbiz.widget.tree.TreeStringRenderer;
-import org.ofbiz.widget.xml.XmlFormRenderer;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
+import org.ofbiz.entity.condition.*;
+
 
 /**
  * Widget Library - Screen model class
  */
 @SuppressWarnings("serial")
-public abstract class ModelScreenWidget extends ModelWidget implements Serializable {
+public abstract class ModelScreenWidget extends ModelWidget {
     public static final String module = ModelScreenWidget.class.getName();
 
     protected ModelScreen modelScreen;
@@ -85,45 +88,8 @@ public abstract class ModelScreenWidget extends ModelWidget implements Serializa
     public static List<ModelScreenWidget> readSubWidgets(ModelScreen modelScreen, List<? extends Element> subElementList) {
         List<ModelScreenWidget> subWidgets = FastList.newInstance();
         for (Element subElement: subElementList) {
-            if ("section".equals(subElement.getNodeName())) {
-                subWidgets.add(new Section(modelScreen, subElement));
-            } else if ("container".equals(subElement.getNodeName())) {
-                subWidgets.add(new Container(modelScreen, subElement));
-            } else if ("screenlet".equals(subElement.getNodeName())) {
-                subWidgets.add(new Screenlet(modelScreen, subElement));
-            } else if ("include-screen".equals(subElement.getNodeName())) {
-                subWidgets.add(new IncludeScreen(modelScreen, subElement));
-            } else if ("decorator-screen".equals(subElement.getNodeName())) {
-                subWidgets.add(new DecoratorScreen(modelScreen, subElement));
-            } else if ("decorator-section-include".equals(subElement.getNodeName())) {
-                subWidgets.add(new DecoratorSectionInclude(modelScreen, subElement));
-            } else if ("label".equals(subElement.getNodeName())) {
-                subWidgets.add(new Label(modelScreen, subElement));
-            } else if ("include-form".equals(subElement.getNodeName())) {
-                subWidgets.add(new Form(modelScreen, subElement));
-            } else if ("include-menu".equals(subElement.getNodeName())) {
-                subWidgets.add(new Menu(modelScreen, subElement));
-            } else if ("include-tree".equals(subElement.getNodeName())) {
-                subWidgets.add(new Tree(modelScreen, subElement));
-            } else if ("content".equals(subElement.getNodeName())) {
-                subWidgets.add(new Content(modelScreen, subElement));
-            } else if ("sub-content".equals(subElement.getNodeName())) {
-                subWidgets.add(new SubContent(modelScreen, subElement));
-            } else if ("platform-specific".equals(subElement.getNodeName())) {
-                subWidgets.add(new PlatformSpecific(modelScreen, subElement));
-            } else if ("link".equals(subElement.getNodeName())) {
-                subWidgets.add(new Link(modelScreen, subElement));
-            } else if ("image".equals(subElement.getNodeName())) {
-                subWidgets.add(new Image(modelScreen, subElement));
-            } else if ("iterate-section".equals(subElement.getNodeName())) {
-                subWidgets.add(new IterateSectionWidget(modelScreen, subElement));
-            } else if ("horizontal-separator".equals(subElement.getNodeName())) {
-                subWidgets.add(new HorizontalSeparator(modelScreen, subElement));
-            } else {
-                throw new IllegalArgumentException("Found invalid screen widget element with name: " + subElement.getNodeName());
-            }
+            subWidgets.add(WidgetFactory.getModelScreenWidget(modelScreen, subElement));
         }
-
         return subWidgets;
     }
 
@@ -137,10 +103,6 @@ public abstract class ModelScreenWidget extends ModelWidget implements Serializa
             // render the sub-widget itself
             subWidget.renderWidgetString(writer, context, screenStringRenderer);
         }
-    }
-
-    public boolean boundaryCommentsEnabled() {
-        return modelScreen.boundaryCommentsEnabled();
     }
 
     public ModelScreen getModelScreen() {
@@ -171,8 +133,9 @@ public abstract class ModelScreenWidget extends ModelWidget implements Serializa
     }
 
     public static class Section extends ModelScreenWidget {
+        public static final String TAG_NAME = "section";
         protected ModelScreenCondition condition;
-        protected List<ModelScreenAction> actions;
+        protected List<ModelWidgetAction> actions;
         protected List<ModelScreenWidget> subWidgets;
         protected List<ModelScreenWidget> failWidgets;
         public boolean isMainSection = false;
@@ -189,7 +152,7 @@ public abstract class ModelScreenWidget extends ModelWidget implements Serializa
             // read all actions under the "actions" element
             Element actionsElement = UtilXml.firstChildElement(sectionElement, "actions");
             if (actionsElement != null) {
-                this.actions = ModelScreenAction.readSubActions(modelScreen, actionsElement);
+                this.actions = ModelWidgetAction.readSubActions(modelScreen, actionsElement);
             }
 
             // read sub-widgets
@@ -205,6 +168,7 @@ public abstract class ModelScreenWidget extends ModelWidget implements Serializa
             }
         }
 
+        @Override
         public void renderWidgetString(Appendable writer, Map<String, Object> context, ScreenStringRenderer screenStringRenderer) throws GeneralException, IOException {
             // check the condition, if there is one
             boolean condTrue = true;
@@ -217,7 +181,7 @@ public abstract class ModelScreenWidget extends ModelWidget implements Serializa
             // if condition does not exist or evals to true run actions and render widgets, otherwise render fail-widgets
             if (condTrue) {
                 // run the actions only if true
-                ModelScreenAction.runSubActions(this.actions, context);
+                ModelWidgetAction.runSubActions(this.actions, context);
 
                 try {
                     // section by definition do not themselves do anything, so this method will generally do nothing, but we'll call it anyway
@@ -250,6 +214,7 @@ public abstract class ModelScreenWidget extends ModelWidget implements Serializa
 
         }
 
+        @Override
         public String getBoundaryCommentName() {
             if (isMainSection) {
                 return modelScreen.getSourceLocation() + "#" + modelScreen.getName();
@@ -258,12 +223,14 @@ public abstract class ModelScreenWidget extends ModelWidget implements Serializa
             }
         }
 
+        @Override
         public String rawString() {
             return "<section" + (UtilValidate.isNotEmpty(this.name)?" name=\"" + this.name + "\"":"") + ">";
         }
     }
 
     public static class Container extends ModelScreenWidget {
+        public static final String TAG_NAME = "container";
         protected FlexibleStringExpander idExdr;
         protected FlexibleStringExpander styleExdr;
         protected FlexibleStringExpander autoUpdateTargetExdr;
@@ -284,6 +251,7 @@ public abstract class ModelScreenWidget extends ModelWidget implements Serializa
             this.subWidgets = ModelScreenWidget.readSubWidgets(this.modelScreen, subElementList);
         }
 
+        @Override
         public void renderWidgetString(Appendable writer, Map<String, Object> context, ScreenStringRenderer screenStringRenderer) throws GeneralException, IOException {
             try {
                 screenStringRenderer.renderContainerBegin(writer, context, this);
@@ -315,19 +283,22 @@ public abstract class ModelScreenWidget extends ModelWidget implements Serializa
             return this.autoUpdateInterval;
         }
 
+        @Override
         public String rawString() {
             return "<container id=\"" + this.idExdr.getOriginal() + "\" style=\"" + this.styleExdr.getOriginal() + "\" auto-update-target=\"" + this.autoUpdateTargetExdr.getOriginal() + "\">";
         }
     }
 
     public static class Screenlet extends ModelScreenWidget {
+        public static final String TAG_NAME = "screenlet";
         protected FlexibleStringExpander idExdr;
         protected FlexibleStringExpander titleExdr;
         protected Menu navigationMenu = null;
         protected Menu tabMenu = null;
         protected Form navigationForm = null;
         protected boolean collapsible = false;
-        protected boolean initiallyCollapsed = false;
+        protected FlexibleStringExpander initiallyCollapsed;
+        protected boolean saveCollapsed = true;
         protected boolean padded = true;
         protected List<ModelScreenWidget> subWidgets;
 
@@ -335,10 +306,13 @@ public abstract class ModelScreenWidget extends ModelWidget implements Serializa
             super(modelScreen, screenletElement);
             this.idExdr = FlexibleStringExpander.getInstance(screenletElement.getAttribute("id"));
             this.collapsible = "true".equals(screenletElement.getAttribute("collapsible"));
-            this.initiallyCollapsed = "true".equals(screenletElement.getAttribute("initially-collapsed"));
-            if (this.initiallyCollapsed) {
+            this.initiallyCollapsed = FlexibleStringExpander.getInstance(screenletElement.getAttribute("initially-collapsed"));
+            if ("true".equals(this.initiallyCollapsed.getOriginal())) {
                 this.collapsible = true;
             }
+            // By default, for a collapsible screenlet, the collapsed/expanded status must be saved
+            this.saveCollapsed = !("false".equals(screenletElement.getAttribute("save-collapsed")));
+
             this.padded = !"false".equals(screenletElement.getAttribute("padded"));
             if (this.collapsible && UtilValidate.isEmpty(this.name) && idExdr.isEmpty()) {
                 throw new IllegalArgumentException("Collapsible screenlets must have a name or id [" + this.modelScreen.getName() + "]");
@@ -380,8 +354,9 @@ public abstract class ModelScreenWidget extends ModelWidget implements Serializa
             }
         }
 
+        @Override
         public void renderWidgetString(Appendable writer, Map<String, Object> context, ScreenStringRenderer screenStringRenderer) throws GeneralException, IOException {
-            boolean collapsed = initiallyCollapsed;
+            boolean collapsed = getInitiallyCollapsed(context);
             if (this.collapsible) {
                 String preferenceKey = getPreferenceKey(context) + "_collapsed";
                 Map<String, Object> requestParameters = UtilGenerics.checkMap(context.get("requestParameters"));
@@ -409,10 +384,20 @@ public abstract class ModelScreenWidget extends ModelWidget implements Serializa
             return this.collapsible;
         }
 
-        public boolean initiallyCollapsed() {
-            return this.initiallyCollapsed;
+        //initially-collapsed status, which may be overriden by user preference
+        public boolean getInitiallyCollapsed(Map<String, Object> context) {
+            String screenletId = this.getId(context) + "_collapsed";
+            Map<String, ? extends Object> userPreferences = UtilGenerics.checkMap(context.get("userPreferences"));
+            if (userPreferences != null && userPreferences.containsKey(screenletId)) {
+                return Boolean.valueOf((String)userPreferences.get(screenletId)).booleanValue() ;
+            }
+
+            return "true".equals(this.initiallyCollapsed.expand(context));
         }
 
+        public boolean saveCollapsed() {
+            return this.saveCollapsed;
+        }
         public boolean padded() {
             return this.padded;
         }
@@ -430,7 +415,12 @@ public abstract class ModelScreenWidget extends ModelWidget implements Serializa
         }
 
         public String getTitle(Map<String, Object> context) {
-            return this.titleExdr.expandString(context);
+            String title = this.titleExdr.expandString(context);
+            StringUtil.SimpleEncoder simpleEncoder = (StringUtil.SimpleEncoder) context.get("simpleEncoder");
+            if (simpleEncoder != null) {
+                title = simpleEncoder.encode(title);
+            }
+            return title;
         }
 
         public Menu getNavigationMenu() {
@@ -445,12 +435,14 @@ public abstract class ModelScreenWidget extends ModelWidget implements Serializa
             return this.tabMenu;
         }
 
+        @Override
         public String rawString() {
             return "<screenlet id=\"" + this.idExdr.getOriginal() + "\" title=\"" + this.titleExdr.getOriginal() + "\">";
         }
     }
 
     public static class HorizontalSeparator extends ModelScreenWidget {
+        public static final String TAG_NAME = "horizontal-separator";
         protected FlexibleStringExpander idExdr;
         protected FlexibleStringExpander styleExdr;
 
@@ -460,6 +452,7 @@ public abstract class ModelScreenWidget extends ModelWidget implements Serializa
             this.styleExdr = FlexibleStringExpander.getInstance(separatorElement.getAttribute("style"));
         }
 
+        @Override
         public void renderWidgetString(Appendable writer, Map<String, Object> context, ScreenStringRenderer screenStringRenderer) throws GeneralException, IOException {
             screenStringRenderer.renderHorizontalSeparator(writer, context, this);
         }
@@ -472,12 +465,14 @@ public abstract class ModelScreenWidget extends ModelWidget implements Serializa
             return this.styleExdr.expandString(context);
         }
 
+        @Override
         public String rawString() {
             return "<horizontal-separator id=\"" + this.idExdr.getOriginal() + "\" name=\"" + this.idExdr.getOriginal() + "\" style=\"" + this.styleExdr.getOriginal() + "\">";
         }
     }
 
     public static class IncludeScreen extends ModelScreenWidget {
+        public static final String TAG_NAME = "include-screen";
         protected FlexibleStringExpander nameExdr;
         protected FlexibleStringExpander locationExdr;
         protected FlexibleStringExpander shareScopeExdr;
@@ -489,15 +484,16 @@ public abstract class ModelScreenWidget extends ModelWidget implements Serializa
             this.shareScopeExdr = FlexibleStringExpander.getInstance(includeScreenElement.getAttribute("share-scope"));
         }
 
+        @Override
         public void renderWidgetString(Appendable writer, Map<String, Object> context, ScreenStringRenderer screenStringRenderer) throws GeneralException, IOException {
             // if we are not sharing the scope, protect it using the MapStack
             boolean protectScope = !shareScope(context);
             if (protectScope) {
-                if (!(context instanceof MapStack)) {
+                if (!(context instanceof MapStack<?>)) {
                     context = MapStack.create(context);
                 }
 
-                ((MapStack) context).push();
+                UtilGenerics.<MapStack<String>>cast(context).push();
 
                 // build the widgetpath
                 List<String> widgetTrail = UtilGenerics.toList(context.get("_WIDGETTRAIL_"));
@@ -519,40 +515,10 @@ public abstract class ModelScreenWidget extends ModelWidget implements Serializa
                 return;
             }
 
-            // check to see if the name is a composite name separated by a #, if so split it up and get it by the full loc#name
-            if (ScreenFactory.isCombinedName(name)) {
-                String combinedName = name;
-                location = ScreenFactory.getResourceNameFromCombined(combinedName);
-                name = ScreenFactory.getScreenNameFromCombined(combinedName);
-            }
-
-            ModelScreen modelScreen = null;
-            if (UtilValidate.isNotEmpty(location)) {
-                try {
-                    modelScreen = ScreenFactory.getScreenFromLocation(location, name);
-                } catch (IOException e) {
-                    String errMsg = "Error rendering included screen named [" + name + "] at location [" + location + "]: " + e.toString();
-                    Debug.logError(e, errMsg, module);
-                    throw new RuntimeException(errMsg);
-                } catch (SAXException e) {
-                    String errMsg = "Error rendering included screen named [" + name + "] at location [" + location + "]: " + e.toString();
-                    Debug.logError(e, errMsg, module);
-                    throw new RuntimeException(errMsg);
-                } catch (ParserConfigurationException e) {
-                    String errMsg = "Error rendering included screen named [" + name + "] at location [" + location + "]: " + e.toString();
-                    Debug.logError(e, errMsg, module);
-                    throw new RuntimeException(errMsg);
-                }
-            } else {
-                modelScreen = this.modelScreen.modelScreenMap.get(name);
-                if (modelScreen == null) {
-                    throw new IllegalArgumentException("Could not find screen with name [" + name + "] in the same file as the screen with name [" + this.modelScreen.getName() + "]");
-                }
-            }
-            modelScreen.renderScreenString(writer, context, screenStringRenderer);
+            ScreenFactory.renderReferencedScreen(name, location, this, writer, context, screenStringRenderer);
 
             if (protectScope) {
-                ((MapStack) context).pop();
+                UtilGenerics.<MapStack<String>>cast(context).pop();
             }
         }
 
@@ -570,12 +536,14 @@ public abstract class ModelScreenWidget extends ModelWidget implements Serializa
             return "true".equals(shareScopeString);
         }
 
+        @Override
         public String rawString() {
             return "<include-screen name=\"" + this.nameExdr.getOriginal() + "\" location=\"" + this.locationExdr.getOriginal() + "\" share-scope=\"" + this.shareScopeExdr.getOriginal() + "\"/>";
         }
     }
 
     public static class DecoratorScreen extends ModelScreenWidget {
+        public static final String TAG_NAME = "decorator-screen";
         protected FlexibleStringExpander nameExdr;
         protected FlexibleStringExpander locationExdr;
         protected Map<String, DecoratorSection> sectionMap = new HashMap<String, DecoratorSection>();
@@ -587,11 +555,12 @@ public abstract class ModelScreenWidget extends ModelWidget implements Serializa
 
             List<? extends Element> decoratorSectionElementList = UtilXml.childElementList(decoratorScreenElement, "decorator-section");
             for (Element decoratorSectionElement: decoratorSectionElementList) {
-                String name = decoratorSectionElement.getAttribute("name");
-                this.sectionMap.put(name, new DecoratorSection(modelScreen, decoratorSectionElement));
+                DecoratorSection decoratorSection = new DecoratorSection(modelScreen, decoratorSectionElement);
+                this.sectionMap.put(decoratorSection.getName(), decoratorSection);
             }
         }
 
+        @Override
         @SuppressWarnings("unchecked")
         public void renderWidgetString(Appendable writer, Map<String, Object> context, ScreenStringRenderer screenStringRenderer) throws GeneralException, IOException {
             // isolate the scope
@@ -613,37 +582,7 @@ public abstract class ModelScreenWidget extends ModelWidget implements Serializa
             String name = this.getName(context);
             String location = this.getLocation(context);
 
-            // check to see if the name is a composite name separated by a #, if so split it up and get it by the full loc#name
-            if (ScreenFactory.isCombinedName(name)) {
-                String combinedName = name;
-                location = ScreenFactory.getResourceNameFromCombined(combinedName);
-                name = ScreenFactory.getScreenNameFromCombined(combinedName);
-            }
-
-            ModelScreen modelScreen = null;
-            if (UtilValidate.isNotEmpty(location)) {
-                try {
-                    modelScreen = ScreenFactory.getScreenFromLocation(location, name);
-                } catch (IOException e) {
-                    String errMsg = "Error rendering included screen named [" + name + "] at location [" + location + "]: " + e.toString();
-                    Debug.logError(e, errMsg, module);
-                    throw new RuntimeException(errMsg);
-                } catch (SAXException e) {
-                    String errMsg = "Error rendering included screen named [" + name + "] at location [" + location + "]: " + e.toString();
-                    Debug.logError(e, errMsg, module);
-                    throw new RuntimeException(errMsg);
-                } catch (ParserConfigurationException e) {
-                    String errMsg = "Error rendering included screen named [" + name + "] at location [" + location + "]: " + e.toString();
-                    Debug.logError(e, errMsg, module);
-                    throw new RuntimeException(errMsg);
-                }
-            } else {
-                modelScreen = this.modelScreen.modelScreenMap.get(name);
-                if (modelScreen == null) {
-                    throw new IllegalArgumentException("Could not find screen with name [" + name + "] in the same file as the screen with name [" + this.modelScreen.getName() + "]");
-                }
-            }
-            modelScreen.renderScreenString(writer, context, screenStringRenderer);
+            ScreenFactory.renderReferencedScreen(name, location, this, writer, context, screenStringRenderer);
 
             contextMs.pop();
         }
@@ -656,12 +595,14 @@ public abstract class ModelScreenWidget extends ModelWidget implements Serializa
             return this.locationExdr.expandString(context);
         }
 
+        @Override
         public String rawString() {
             return "<decorator-screen name=\"" + this.nameExdr.getOriginal() + "\" location=\"" + this.locationExdr.getOriginal() + "\"/>";
         }
     }
 
     public static class DecoratorSection extends ModelScreenWidget {
+        public static final String TAG_NAME = "decorator-section";
         protected List<ModelScreenWidget> subWidgets;
 
         public DecoratorSection(ModelScreen modelScreen, Element decoratorSectionElement) {
@@ -671,22 +612,26 @@ public abstract class ModelScreenWidget extends ModelWidget implements Serializa
             this.subWidgets = ModelScreenWidget.readSubWidgets(this.modelScreen, subElementList);
         }
 
+        @Override
         public void renderWidgetString(Appendable writer, Map<String, Object> context, ScreenStringRenderer screenStringRenderer) throws GeneralException, IOException {
             // render sub-widgets
             renderSubWidgetsString(this.subWidgets, writer, context, screenStringRenderer);
         }
 
+        @Override
         public String rawString() {
             return "<decorator-section name=\"" + this.name + "\">";
         }
     }
 
     public static class DecoratorSectionInclude extends ModelScreenWidget {
+        public static final String TAG_NAME = "decorator-section-include";
 
         public DecoratorSectionInclude(ModelScreen modelScreen, Element decoratorSectionElement) {
             super(modelScreen, decoratorSectionElement);
         }
 
+        @Override
         public void renderWidgetString(Appendable writer, Map<String, Object> context, ScreenStringRenderer screenStringRenderer) throws GeneralException, IOException {
             Map<String, ? extends Object> preRenderedContent = UtilGenerics.checkMap(context.get("preRenderedContent"));
             if (preRenderedContent != null && preRenderedContent.containsKey(this.name)) {
@@ -708,12 +653,14 @@ public abstract class ModelScreenWidget extends ModelWidget implements Serializa
             }
         }
 
+        @Override
         public String rawString() {
             return "<decorator-section-include name=\"" + this.name + "\">";
         }
     }
 
     public static class Label extends ModelScreenWidget {
+        public static final String TAG_NAME = "label";
         protected FlexibleStringExpander textExdr;
 
         protected FlexibleStringExpander idExdr;
@@ -731,6 +678,7 @@ public abstract class ModelScreenWidget extends ModelWidget implements Serializa
             this.styleExdr = FlexibleStringExpander.getInstance(labelElement.getAttribute("style"));
         }
 
+        @Override
         public void renderWidgetString(Appendable writer, Map<String, Object> context, ScreenStringRenderer screenStringRenderer) {
             try {
                 screenStringRenderer.renderLabel(writer, context, this);
@@ -758,12 +706,14 @@ public abstract class ModelScreenWidget extends ModelWidget implements Serializa
             return this.styleExdr.expandString(context);
         }
 
+        @Override
         public String rawString() {
             return "<label id=\"" + this.idExdr.getOriginal() + "\" style=\"" + this.styleExdr.getOriginal() + "\" text=\"" + this.textExdr.getOriginal() + "\"/>";
         }
     }
 
     public static class Form extends ModelScreenWidget {
+        public static final String TAG_NAME = "include-form";
         protected FlexibleStringExpander nameExdr;
         protected FlexibleStringExpander locationExdr;
         protected FlexibleStringExpander shareScopeExdr;
@@ -777,13 +727,14 @@ public abstract class ModelScreenWidget extends ModelWidget implements Serializa
             this.shareScopeExdr = FlexibleStringExpander.getInstance(formElement.getAttribute("share-scope"));
         }
 
+        @Override
         public void renderWidgetString(Appendable writer, Map<String, Object> context, ScreenStringRenderer screenStringRenderer) {
             boolean protectScope = !shareScope(context);
             if (protectScope) {
-                if (!(context instanceof MapStack)) {
+                if (!(context instanceof MapStack<?>)) {
                     context = MapStack.create(context);
                 }
-                ((MapStack) context).push();
+                UtilGenerics.<MapStack<String>>cast(context).push();
             }
 
             // try finding the formStringRenderer by name in the context in case one was prepared and put there
@@ -812,7 +763,7 @@ public abstract class ModelScreenWidget extends ModelWidget implements Serializa
             }
 
             if (protectScope) {
-                ((MapStack) context).pop();
+                UtilGenerics.<MapStack<String>>cast(context).pop();
             }
         }
 
@@ -844,12 +795,14 @@ public abstract class ModelScreenWidget extends ModelWidget implements Serializa
             return "true".equals(shareScopeString);
         }
 
+        @Override
         public String rawString() {
             return "<include-form name=\"" + this.nameExdr.getOriginal() + "\" location=\"" + this.locationExdr.getOriginal() + "\" share-scope=\"" + this.shareScopeExdr.getOriginal() + "\"/>";
         }
     }
 
     public static class Tree extends ModelScreenWidget {
+        public static final String TAG_NAME = "include-tree";
         protected FlexibleStringExpander nameExdr;
         protected FlexibleStringExpander locationExdr;
         protected FlexibleStringExpander shareScopeExdr;
@@ -862,13 +815,14 @@ public abstract class ModelScreenWidget extends ModelWidget implements Serializa
             this.shareScopeExdr = FlexibleStringExpander.getInstance(treeElement.getAttribute("share-scope"));
         }
 
+        @Override
         public void renderWidgetString(Appendable writer, Map<String, Object> context, ScreenStringRenderer screenStringRenderer) throws GeneralException, IOException {
             boolean protectScope = !shareScope(context);
             if (protectScope) {
-                if (!(context instanceof MapStack)) {
+                if (!(context instanceof MapStack<?>)) {
                     context = MapStack.create(context);
                 }
-                ((MapStack) context).push();
+                UtilGenerics.<MapStack<String>>cast(context).push();
             }
 
             String name = this.getName(context);
@@ -890,22 +844,9 @@ public abstract class ModelScreenWidget extends ModelWidget implements Serializa
                 throw new RuntimeException(errMsg);
             }
 
-            // try finding the treeStringRenderer by name in the context in case one was prepared and put there
             TreeStringRenderer treeStringRenderer = (TreeStringRenderer) context.get("treeStringRenderer");
-            // if there was no treeStringRenderer put in place, now try finding the request/response in the context and creating a new one
             if (treeStringRenderer == null) {
-                treeStringRenderer = new HtmlTreeRenderer();
-                /*
-                String renderClassStyle = modelTree.getRenderStyle();
-                if (UtilValidate.isNotEmpty(renderClassStyle) && renderClassStyle.equals("simple"))
-                    treeStringRenderer = new HtmlTreeRenderer();
-                else
-                    treeStringRenderer = new HtmlTreeExpandCollapseRenderer();
-                */
-            }
-            // still null, throw an error
-            if (treeStringRenderer == null) {
-                throw new IllegalArgumentException("Could not find a treeStringRenderer in the context, and could not find HTTP request/response objects need to create one.");
+                throw new IllegalArgumentException("Could not find a treeStringRenderer in the context");
             }
 
             StringBuffer renderBuffer = new StringBuffer();
@@ -919,7 +860,7 @@ public abstract class ModelScreenWidget extends ModelWidget implements Serializa
             }
 
             if (protectScope) {
-                ((MapStack) context).pop();
+                UtilGenerics.<MapStack<String>>cast(context).pop();
             }
         }
 
@@ -937,12 +878,14 @@ public abstract class ModelScreenWidget extends ModelWidget implements Serializa
             return "true".equals(shareScopeString);
         }
 
+        @Override
         public String rawString() {
             return "<include-tree name=\"" + this.nameExdr.getOriginal() + "\" location=\"" + this.locationExdr.getOriginal() + "\" share-scope=\"" + this.shareScopeExdr.getOriginal() + "\"/>";
         }
     }
 
     public static class PlatformSpecific extends ModelScreenWidget {
+        public static final String TAG_NAME = "platform-specific";
         protected Map<String, ModelScreenWidget> subWidgets;
 
         public PlatformSpecific(ModelScreen modelScreen, Element platformSpecificElement) {
@@ -964,19 +907,21 @@ public abstract class ModelScreenWidget extends ModelWidget implements Serializa
             }
         }
 
+        @Override
         public void renderWidgetString(Appendable writer, Map<String, Object> context, ScreenStringRenderer screenStringRenderer) throws GeneralException, IOException {
             ModelScreenWidget subWidget = null;
-            subWidget = (ModelScreenWidget)subWidgets.get(screenStringRenderer.getRendererName());
+            subWidget = subWidgets.get(screenStringRenderer.getRendererName());
             if (subWidget == null) {
                 // This is here for backward compatibility
                 Debug.logWarning("In platform-dependent could not find template for " + screenStringRenderer.getRendererName() + ", using the one for html.", module);
-                subWidget = (ModelScreenWidget)subWidgets.get("html");
+                subWidget = subWidgets.get("html");
             }
             if (subWidget != null) {
                 subWidget.renderWidgetString(writer, context, screenStringRenderer);
             }
         }
 
+        @Override
         public String rawString() {
             Collection<ModelScreenWidget> subWidgetList = this.subWidgets.values();
             StringBuilder subWidgetsRawString = new StringBuilder("<platform-specific>");
@@ -988,6 +933,7 @@ public abstract class ModelScreenWidget extends ModelWidget implements Serializa
     }
 
     public static class Content extends ModelScreenWidget {
+        public static final String TAG_NAME = "content";
 
         protected FlexibleStringExpander contentId;
         protected FlexibleStringExpander editRequest;
@@ -1016,29 +962,30 @@ public abstract class ModelScreenWidget extends ModelWidget implements Serializa
             this.border = subContentElement.getAttribute("border");
         }
 
+        @Override
         public void renderWidgetString(Appendable writer, Map<String, Object> context, ScreenStringRenderer screenStringRenderer) {
             try {
                 // pushing the contentId on the context as "contentId" is done
                 // because many times there will be embedded "subcontent" elements
                 // that use the syntax: <subcontent content-id="${contentId}"...
                 // and this is a step to make sure that it is there.
-                GenericDelegator delegator = (GenericDelegator) context.get("delegator");
+                Delegator delegator = (Delegator) context.get("delegator");
                 GenericValue content = null;
                 String expandedDataResourceId = getDataResourceId(context);
                 String expandedContentId = getContentId(context);
-                if (!(context instanceof MapStack)) {
+                if (!(context instanceof MapStack<?>)) {
                     context = MapStack.create(context);
                 }
 
                 // This is an important step to make sure that the current contentId is in the context
                 // as templates that contain "subcontent" elements will expect to find the master
                 // contentId in the context as "contentId".
-                ((MapStack) context).push();
+                UtilGenerics.<MapStack<String>>cast(context).push();
                 context.put("contentId", expandedContentId);
 
                 if (UtilValidate.isEmpty(expandedDataResourceId)) {
                     if (UtilValidate.isNotEmpty(expandedContentId)) {
-                        content = delegator.findByPrimaryKeyCache("Content", UtilMisc.toMap("contentId", expandedContentId));
+                        content = delegator.findOne("Content", UtilMisc.toMap("contentId", expandedContentId), true);
                     } else {
                         String errMsg = "contentId is empty.";
                         Debug.logError(errMsg, module);
@@ -1055,24 +1002,107 @@ public abstract class ModelScreenWidget extends ModelWidget implements Serializa
 
                 GenericValue dataResource = null;
                 if (UtilValidate.isNotEmpty(expandedDataResourceId)) {
-                    dataResource = delegator.findByPrimaryKeyCache("DataResource", UtilMisc.toMap("dataResourceId", expandedDataResourceId));
-                    this.dataResourceId = FlexibleStringExpander.getInstance(expandedDataResourceId);
+                    dataResource = delegator.findOne("DataResource", UtilMisc.toMap("dataResourceId", expandedDataResourceId), true);
                 }
 
                 String mimeTypeId = null;
                 if (dataResource != null) {
                     mimeTypeId = dataResource.getString("mimeTypeId");
                 }
+                if (UtilValidate.isNotEmpty(content)) {
+                    mimeTypeId = content.getString("mimeTypeId");
+                }
 
                 if (UtilValidate.isNotEmpty(mimeTypeId)
-                        && ((mimeTypeId.indexOf("application") >= 0) || (mimeTypeId.indexOf("image")) >= 0) ) {
-                    screenStringRenderer.renderContentFrame(writer, context, this);
+                        && ((mimeTypeId.indexOf("application") >= 0) || (mimeTypeId.indexOf("image")) >= 0)) {
+
+/*
+                     // this code is not yet working, will update it the next few weeks...(Hans)
+                    if (mimeTypeId.equals("application/pdf")) {
+                        TransformerFactory tfactory = TransformerFactory.newInstance();
+                        try {
+
+                            //
+                            //  this part is not working. If somebody can help to make it work?
+                            //  currently using only real temp files for debugging purposes.
+                            //
+                            //  most of the code should be replaced by functions in xslTransform.java and other files.
+                            //  for debugging here mostly code using the code outside of ofbiz.
+                            //
+                            SAXParserFactory pfactory= SAXParserFactory.newInstance();
+                            pfactory.setNamespaceAware(true);
+                            pfactory.setValidating(true);
+                            pfactory.setXIncludeAware(true);
+                            XMLReader reader = null;
+                            try {
+                                reader = pfactory.newSAXParser().getXMLReader();
+                            } catch (Exception e) {
+                                throw new TransformerException("Error creating SAX parser/reader", e);
+                            }
+
+                            // do the actual preprocessing fr includes
+                            String fileName = "/home/hans/ofbiz/svn/applications/commonext/documents/ApacheOfbiz.xml";
+                            SAXSource source = new SAXSource(reader, new InputSource(fileName));
+                            // compile the xsl template
+                            Transformer transformer1 = tfactory.newTransformer(new StreamSource("/home/hans/ofbiz/svn/applications/content/template/docbook/fo/docbook.xsl"));
+                            // and apply the xsl template to the source document and save in a result string
+                            StringWriter sw = new StringWriter();
+                            StreamResult sr = new StreamResult(sw);
+                            transformer1.transform(source, sr);
+                            // store into a file for debugging
+//                            java.io.FileWriter fw = new java.io.FileWriter(new java.io.File("/tmp/file1.fo"));
+//                            fw.write(sw.toString());
+//                            fw.close();
+
+
+                            FopFactory fopFactory = FopFactory.newInstance();
+                            FOUserAgent foUserAgent = fopFactory.newFOUserAgent();
+                            // configure foUserAgent as desired
+
+                            // Setup output stream.  Note: Using BufferedOutputStream
+                            // for performance reasons (helpful with FileOutputStreams).
+//                            OutputStream out = new FileOutputStream("/tmp/file.pdf");
+//                            out = new BufferedOutputStream(out);
+//                            OutputStream outWriter = (OutputStream) writer;
+                            ByteArrayOutputStream out = new ByteArrayOutputStream();
+                            Fop fop = fopFactory.newFop(MimeConstants.MIME_PDF, foUserAgent, out);
+
+                            // Setup JAXP using identity transformer
+                            TransformerFactory factory = TransformerFactory.newInstance();
+                            Transformer transformer = factory.newTransformer(); // identity transformer
+
+                            // Setup input stream
+                            Source src = new StreamSource(new ByteArrayInputStream(sw.toString().getBytes()));
+
+                            // Resulting SAX events (the generated FO) must be piped through to FOP
+                            Result result = new SAXResult(fop.getDefaultHandler());
+
+                            // Start XSLT transformation and FOP processing
+                            transformer.transform(src, result);
+
+                            out.flush();
+                            out.close();
+                            // to a file for debugging
+                           FileOutputStream fw = new FileOutputStream("/tmp/file.pdf");
+                            fw.write(out.toByteArray());
+                            fw.close();
+                            HttpServletResponse response = (HttpServletResponse) context.get("response");
+                            response.setContentType("application/pdf");
+                            response.setContentLength(out.size());
+                            response.setHeader("Content-Disposition", "attachment;filename=" + fileName);
+                            writer.append(new String(out.toByteArray()));
+                        } catch(Exception e) {
+                            Debug.logError("Exception converting from FO to PDF: " + e, module);
+                        }
+                    } else {
+*/                        screenStringRenderer.renderContentFrame(writer, context, this);
+//                    }
                 } else {
                     screenStringRenderer.renderContentBegin(writer, context, this);
                     screenStringRenderer.renderContentBody(writer, context, this);
                     screenStringRenderer.renderContentEnd(writer, context, this);
                 }
-                ((MapStack) context).pop();
+                UtilGenerics.<MapStack<String>>cast(context).pop();
             } catch (IOException e) {
                 String errMsg = "Error rendering content with contentId [" + getContentId(context) + "]: " + e.toString();
                 Debug.logError(e, errMsg, module);
@@ -1109,6 +1139,7 @@ public abstract class ModelScreenWidget extends ModelWidget implements Serializa
             return this.xmlEscape;
         }
 
+        @Override
         public String rawString() {
             // may want to expand this a bit more
             return "<content content-id=\"" + this.contentId.getOriginal() + "\" xml-escape=\"" + this.xmlEscape + "\"/>";
@@ -1128,6 +1159,7 @@ public abstract class ModelScreenWidget extends ModelWidget implements Serializa
     }
 
     public static class SubContent extends ModelScreenWidget {
+        public static final String TAG_NAME = "sub-content";
         protected FlexibleStringExpander contentId;
         protected FlexibleStringExpander mapKey;
         protected FlexibleStringExpander editRequest;
@@ -1150,6 +1182,7 @@ public abstract class ModelScreenWidget extends ModelWidget implements Serializa
             this.xmlEscape = "true".equals(subContentElement.getAttribute("xml-escape"));
         }
 
+        @Override
         public void renderWidgetString(Appendable writer, Map<String, Object> context, ScreenStringRenderer screenStringRenderer) {
             try {
                 screenStringRenderer.renderSubContentBegin(writer, context, this);
@@ -1186,6 +1219,7 @@ public abstract class ModelScreenWidget extends ModelWidget implements Serializa
             return this.xmlEscape;
         }
 
+        @Override
         public String rawString() {
             // may want to expand this a bit more
             return "<sub-content content-id=\"" + this.contentId.getOriginal() + "\" map-key=\"" + this.mapKey.getOriginal() + "\" xml-escape=\"" + this.xmlEscape + "\"/>";
@@ -1193,6 +1227,7 @@ public abstract class ModelScreenWidget extends ModelWidget implements Serializa
     }
 
     public static class Menu extends ModelScreenWidget {
+        public static final String TAG_NAME = "include-menu";
         protected FlexibleStringExpander nameExdr;
         protected FlexibleStringExpander locationExdr;
 
@@ -1203,28 +1238,21 @@ public abstract class ModelScreenWidget extends ModelWidget implements Serializa
             this.locationExdr = FlexibleStringExpander.getInstance(menuElement.getAttribute("location"));
         }
 
+        @Override
         public void renderWidgetString(Appendable writer, Map<String, Object> context, ScreenStringRenderer screenStringRenderer) throws IOException {
             // try finding the menuStringRenderer by name in the context in case one was prepared and put there
             MenuStringRenderer menuStringRenderer = (MenuStringRenderer) context.get("menuStringRenderer");
             // if there was no menuStringRenderer put in place, now try finding the request/response in the context and creating a new one
             if (menuStringRenderer == null) {
-                // try finding the menuStringRenderer by name in the context in
-                // case one was prepared and put there
-                menuStringRenderer = (MenuStringRenderer) context.get("menuStringRenderer");
-                // if there was no menuStringRenderer put in place, now try
-                // finding the request/response in the context and creating a
-                // new one
-                if (menuStringRenderer == null) {
-                    HttpServletRequest request = (HttpServletRequest) context.get("request");
-                    HttpServletResponse response = (HttpServletResponse) context.get("response");
-                    if (request != null && response != null) {
-                        menuStringRenderer = new HtmlMenuRenderer(request, response);
-                    }
+                HttpServletRequest request = (HttpServletRequest) context.get("request");
+                HttpServletResponse response = (HttpServletResponse) context.get("response");
+                if (request != null && response != null) {
+                    menuStringRenderer = new HtmlMenuRenderer(request, response);
                 }
-                // still null, throw an error
-                if (menuStringRenderer == null) {
-                    throw new IllegalArgumentException("Could not find a menuStringRenderer in the context, and could not find HTTP request/response objects need to create one.");
-                }
+            }
+            // still null, throw an error
+            if (menuStringRenderer == null) {
+                throw new IllegalArgumentException("Could not find a menuStringRenderer in the context, and could not find HTTP request/response objects need to create one.");
             }
 
             ModelMenu modelMenu = getModelMenu(context);
@@ -1236,7 +1264,7 @@ public abstract class ModelScreenWidget extends ModelWidget implements Serializa
             String location = this.getLocation(context);
             ModelMenu modelMenu = null;
             try {
-                modelMenu = MenuFactory.getMenuFromLocation(location, name, this.modelScreen.getDelegator(context), this.modelScreen.getDispatcher(context));
+                modelMenu = MenuFactory.getMenuFromLocation(location, name);
             } catch (Exception e) {
                 String errMsg = "Error rendering included menu named [" + name + "] at location [" + location + "]: ";
                 Debug.logError(e, errMsg, module);
@@ -1253,12 +1281,14 @@ public abstract class ModelScreenWidget extends ModelWidget implements Serializa
             return this.locationExdr.expandString(context);
         }
 
+        @Override
         public String rawString() {
             return "<include-menu name=\"" + this.nameExdr.getOriginal() + "\" location=\"" + this.locationExdr.getOriginal() + "\"/>";
         }
     }
 
     public static class Link extends ModelScreenWidget {
+        public static final String TAG_NAME = "link";
         protected FlexibleStringExpander textExdr;
         protected FlexibleStringExpander idExdr;
         protected FlexibleStringExpander styleExdr;
@@ -1272,6 +1302,8 @@ public abstract class ModelScreenWidget extends ModelWidget implements Serializa
         protected boolean secure = false;
         protected boolean encode = false;
         protected String linkType;
+        protected String width;
+        protected String height;
         protected List<WidgetWorker.Parameter> parameterList = FastList.newInstance();
 
 
@@ -1299,8 +1331,12 @@ public abstract class ModelScreenWidget extends ModelWidget implements Serializa
             for (Element parameterElement: parameterElementList) {
                 this.parameterList.add(new WidgetWorker.Parameter(parameterElement));
             }
+
+            this.width = linkElement.getAttribute("width");
+            this.height = linkElement.getAttribute("height");
         }
 
+        @Override
         public void renderWidgetString(Appendable writer, Map<String, Object> context, ScreenStringRenderer screenStringRenderer) {
             try {
                 screenStringRenderer.renderLink(writer, context, this);
@@ -1373,8 +1409,29 @@ public abstract class ModelScreenWidget extends ModelWidget implements Serializa
             return this.linkType;
         }
 
-        public List<WidgetWorker.Parameter> getParameterList() {
-            return this.parameterList;
+        public String getWidth() {
+            return this.width;
+        }
+
+        public String getHeight() {
+            return this.height;
+        }
+
+        public Map<String, String> getParameterMap(Map<String, Object> context) {
+            Map<String, String> fullParameterMap = FastMap.newInstance();
+
+            /* leaving this here... may want to add it at some point like the hyperlink element:
+            Map<String, String> addlParamMap = this.parametersMapAcsr.get(context);
+            if (addlParamMap != null) {
+                fullParameterMap.putAll(addlParamMap);
+            }
+            */
+            
+            for (WidgetWorker.Parameter parameter: this.parameterList) {
+                fullParameterMap.put(parameter.getName(), parameter.getValue(context));
+            }
+            
+            return fullParameterMap;
         }
 
         public void setText(String val) {
@@ -1430,6 +1487,7 @@ public abstract class ModelScreenWidget extends ModelWidget implements Serializa
             this.image = img;
         }
 
+        @Override
         public String rawString() {
             // may want to add more to this
             return "<link id=\"" + this.idExdr.getOriginal() + "\" style=\"" + this.styleExdr.getOriginal() + "\" text=\"" + this.textExdr.getOriginal() + "\" target=\"" + this.targetExdr.getOriginal() + "\" name=\"" + this.nameExdr.getOriginal() + "\" url-mode=\"" + this.urlMode + "\"/>";
@@ -1437,6 +1495,7 @@ public abstract class ModelScreenWidget extends ModelWidget implements Serializa
     }
 
     public static class Image extends ModelScreenWidget {
+        public static final String TAG_NAME = "image";
         protected FlexibleStringExpander srcExdr;
         protected FlexibleStringExpander idExdr;
         protected FlexibleStringExpander styleExdr;
@@ -1459,6 +1518,7 @@ public abstract class ModelScreenWidget extends ModelWidget implements Serializa
             setUrlMode(UtilFormatOut.checkEmpty(imageElement.getAttribute("url-mode"), "content"));
         }
 
+        @Override
         public void renderWidgetString(Appendable writer, Map<String, Object> context, ScreenStringRenderer screenStringRenderer) {
             try {
                 screenStringRenderer.renderImage(writer, context, this);
@@ -1494,7 +1554,12 @@ public abstract class ModelScreenWidget extends ModelWidget implements Serializa
         }
 
         public String getAlt(Map<String, Object> context) {
-            return this.alt.expandString(context);
+            String alt = this.alt.expandString(context);
+            StringUtil.SimpleEncoder simpleEncoder = (StringUtil.SimpleEncoder) context.get("simpleEncoder");
+            if (simpleEncoder != null) {
+                alt = simpleEncoder.encode(alt);
+            }
+            return alt;
         }
 
         public String getUrlMode() {
@@ -1533,23 +1598,178 @@ public abstract class ModelScreenWidget extends ModelWidget implements Serializa
             }
         }
 
+        @Override
         public String rawString() {
             // may want to add more to this
             return "<image id=\"" + this.idExdr.getOriginal() + "\" style=\"" + this.styleExdr.getOriginal() + "\" src=\"" + this.srcExdr.getOriginal() + "\" url-mode=\"" + this.urlMode + "\"/>";
         }
     }
+
+    public static class PortalPage extends ModelScreenWidget {
+        public static final String TAG_NAME = "include-portal-page";
+        protected FlexibleStringExpander idExdr;
+        protected FlexibleStringExpander confModeExdr;
+        protected String originalPortalPageId;
+        protected String actualPortalPageId;
+        protected Boolean usePrivate;
+
+        public PortalPage(ModelScreen modelScreen, Element portalPageElement) {
+            super(modelScreen, portalPageElement);
+            this.idExdr = FlexibleStringExpander.getInstance(portalPageElement.getAttribute("id"));
+            this.confModeExdr = FlexibleStringExpander.getInstance(portalPageElement.getAttribute("conf-mode"));
+            this.usePrivate = !("false".equals(portalPageElement.getAttribute("use-private")));
+        }
+
+        @Override
+        public void renderWidgetString(Appendable writer, Map<String, Object> context, ScreenStringRenderer screenStringRenderer) throws GeneralException, IOException {
+            try {
+                Delegator delegator = (Delegator) context.get("delegator");
+                GenericValue portalPage = null;
+                List<GenericValue> portalPageColumns = null;
+                List<GenericValue> portalPagePortlets = null;
+                List<GenericValue> portletAttributes = null;
+
+                String expandedPortalPageId = getId(context);
+
+                if (UtilValidate.isNotEmpty(expandedPortalPageId)) {
+                    if (usePrivate) {
+                        portalPage = PortalPageWorker.getPortalPage(expandedPortalPageId, context);
+                    }
+                    else {
+                        portalPage = delegator.findOne("PortalPage", UtilMisc.toMap("portalPageId", expandedPortalPageId), true);
+                    }
+                    if (portalPage == null) {
+                        String errMsg = "Could not find PortalPage with portalPageId [" + expandedPortalPageId + "] ";
+                        Debug.logError(errMsg, module);
+                        throw new RuntimeException(errMsg);
+                    } else {
+                        actualPortalPageId = portalPage.getString("portalPageId");
+                        originalPortalPageId = portalPage.getString("originalPortalPageId");
+                        portalPageColumns = delegator.findByAnd("PortalPageColumn", UtilMisc.toMap("portalPageId", actualPortalPageId), UtilMisc.toList("columnSeqId"), true);
+                    }
+                } else {
+                    String errMsg = "portalPageId is empty.";
+                    Debug.logError(errMsg, module);
+                    return;
+                }
+
+                // Renders the portalPage header
+                screenStringRenderer.renderPortalPageBegin(writer, context, this);
+                
+                // First column has no previous column
+                String prevColumnSeqId = "";
+                
+                // Iterates through the PortalPage columns
+                ListIterator <GenericValue>columnsIterator = portalPageColumns.listIterator();
+                while(columnsIterator.hasNext()) {
+                    GenericValue columnValue = columnsIterator.next();
+                    String columnSeqId = columnValue.getString("columnSeqId");
+                    
+                    // Renders the portalPageColumn header
+                    screenStringRenderer.renderPortalPageColumnBegin(writer, context, this, columnValue);
+
+                    // Get the Portlets located in the current column
+                    portalPagePortlets = delegator.findByAnd("PortalPagePortletView", UtilMisc.toMap("portalPageId", portalPage.getString("portalPageId"), "columnSeqId", columnSeqId), UtilMisc.toList("sequenceNum"), false);
+                    
+                    // First Portlet in a Column has no previous Portlet
+                    String prevPortletId = "";
+                    String prevPortletSeqId = "";
+
+                    // If this is not the last column, get the next columnSeqId
+                    String nextColumnSeqId = "";
+                    if (columnsIterator.hasNext()) {
+                        nextColumnSeqId = portalPageColumns.get(columnsIterator.nextIndex()).getString("columnSeqId");
+                    }
+                    
+                    // Iterates through the Portlets in the Column
+                    ListIterator <GenericValue>portletsIterator = portalPagePortlets.listIterator();
+                    while(portletsIterator.hasNext()) {
+                        GenericValue portletValue = portletsIterator.next();
+
+                        // If not the last portlet in the column, get the next nextPortletId and nextPortletSeqId
+                        String nextPortletId = "";
+                        String nextPortletSeqId = "";
+                        if (portletsIterator.hasNext()) {
+                            nextPortletId = portalPagePortlets.get(portletsIterator.nextIndex()).getString("portalPortletId");
+                            nextPortletSeqId = portalPagePortlets.get(portletsIterator.nextIndex()).getString("portletSeqId");
+                        }
+
+                        // Set info to allow portlet movement in the page
+                        context.put("prevPortletId", prevPortletId);
+                        context.put("prevPortletSeqId", prevPortletSeqId);
+                        context.put("nextPortletId", nextPortletId);
+                        context.put("nextPortletSeqId", nextPortletSeqId);
+                        context.put("prevColumnSeqId", prevColumnSeqId);
+                        context.put("nextColumnSeqId", nextColumnSeqId);
+                       
+                        // Get portlet's attributes
+                        portletAttributes = delegator.findList("PortletAttribute",
+                            EntityCondition.makeCondition(UtilMisc.toMap("portalPageId", portletValue.get("portalPageId"), "portalPortletId", portletValue.get("portalPortletId"), "portletSeqId", portletValue.get("portletSeqId"))),
+                            null, null, null, false);
+                        ListIterator <GenericValue>attributesIterator = portletAttributes.listIterator();
+                        while (attributesIterator.hasNext()) {
+                            GenericValue attribute = attributesIterator.next();
+                            context.put(attribute.getString("attrName"), attribute.getString("attrValue"));
+                        }
+                        
+                        // Renders the portalPagePortlet
+                        screenStringRenderer.renderPortalPagePortletBegin(writer, context, this, portletValue);
+                        screenStringRenderer.renderPortalPagePortletBody(writer, context, this, portletValue);
+                        screenStringRenderer.renderPortalPagePortletEnd(writer, context, this, portletValue);
+
+                        // Remove the portlet's attributes so that these are not available for other portlets
+                        while (attributesIterator.hasPrevious()) {
+                            GenericValue attribute = attributesIterator.previous();
+                            context.remove(attribute.getString("attrName"));
+                        }
+                        
+                        // Uses the actual portlet as prevPortlet for next iteration
+                        prevPortletId = (String) portletValue.get("portalPortletId");
+                        prevPortletSeqId = (String) portletValue.get("portletSeqId");
+                    }
+                    // Renders the portalPageColumn footer
+                    screenStringRenderer.renderPortalPageColumnEnd(writer, context, this, columnValue);
+
+                    // Uses the actual columnSeqId as prevColumnSeqId for next iteration
+                    prevColumnSeqId = columnSeqId;
+                }
+                // Renders the portalPage footer
+                screenStringRenderer.renderPortalPageEnd(writer, context, this);
+            } catch (IOException e) {
+                String errMsg = "Error rendering PortalPage with portalPageId [" + getId(context) + "]: " + e.toString();
+                Debug.logError(e, errMsg, module);
+                throw new RuntimeException(errMsg);
+            } catch (GenericEntityException e) {
+                String errMsg = "Error obtaining PortalPage with portalPageId [" + getId(context) + "]: " + e.toString();
+                Debug.logError(e, errMsg, module);
+                throw new RuntimeException(errMsg);
+            }
+        }
+
+        public String getId(Map<String, Object> context) {
+            return this.idExdr.expandString(context);
+        }
+
+        public String getOriginalPortalPageId() {
+            return this.originalPortalPageId;
+        }
+        
+        public String getActualPortalPageId() {
+            return this.actualPortalPageId;
+        }
+
+        public String getConfMode(Map<String, Object> context) {
+            return this.confModeExdr.expandString(context);
+        }
+
+        public String getUsePrivate() {
+            return Boolean.toString(this.usePrivate);
+        }
+
+        @Override
+        public String rawString() {
+            return "<include-portal-page id=\"" + this.idExdr.getOriginal() + "\" name=\"" + this.idExdr.getOriginal() + "\">";
+        }
+    }
+
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-

@@ -19,10 +19,17 @@
 
 package org.ofbiz.datafile;
 
-import java.util.*;
-import java.net.*;
-import java.io.*;
-import org.ofbiz.base.util.*;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.net.URL;
+
+import org.ofbiz.base.util.UtilFormatOut;
+import org.ofbiz.base.util.UtilURL;
+import org.ofbiz.base.util.UtilValidate;
 
 public class DataFile2EntityXml {
 
@@ -31,7 +38,9 @@ public class DataFile2EntityXml {
     }
 
     /**
-     * @param args the command line arguments
+     * Writes the entity xml
+     * @param fileName the file name
+     * @param dataFile the data file name
      */
     public static void writeToEntityXml(String fileName, DataFile dataFile) throws DataFileException {
         File file = new File(fileName);
@@ -106,12 +115,12 @@ public class DataFile2EntityXml {
         //}
 
         DataFile dataFile = null;
-        if (dataFileUrl != null && definitionUrl != null && definitionName != null && definitionName.length() > 0) {
+        if (dataFileUrl != null && definitionUrl != null && UtilValidate.isNotEmpty(definitionName)) {
             try {
                 dataFile = DataFile.readFile(dataFileUrl, definitionUrl, definitionName);
             } catch (Exception e) {
                 //messages.add(e.toString());
-                //Debug.log(e);
+                //Debug.logInfo(e);
             }
         }
 

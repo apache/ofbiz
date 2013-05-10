@@ -19,28 +19,15 @@
 
 package org.ofbiz.accounting.thirdparty.clearcommerce;
 
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.lang.Thread;
 import java.math.BigDecimal;
+import java.util.Map;
 
 import junit.framework.TestCase;
 
 import org.ofbiz.base.util.Debug;
-import org.ofbiz.base.util.UtilDateTime;
 import org.ofbiz.base.util.UtilMisc;
-import org.ofbiz.base.util.UtilXml;
 import org.ofbiz.entity.GenericValue;
-import org.ofbiz.entity.GenericDelegator;
-import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.service.GenericServiceException;
-import org.ofbiz.service.GenericDispatcher;
-import org.ofbiz.service.LocalDispatcher;
 import org.ofbiz.service.ModelService;
 import org.ofbiz.service.testtools.OFBizTestCase;
 
@@ -54,7 +41,7 @@ public class CCServicesTest extends OFBizTestCase {
     protected GenericValue creditCard = null;
     protected GenericValue billingAddress = null;
     protected GenericValue shippingAddress = null;
-    protected Map pbOrder = null;
+    protected Map<String, Object> pbOrder = null;
     protected BigDecimal creditAmount = null;
     protected String configFile = null;
 
@@ -62,32 +49,28 @@ public class CCServicesTest extends OFBizTestCase {
         super(name);
     }
 
+    @Override
     protected void setUp() throws Exception {
         // populate test data
-        configFile = new String("paymentTest.properties");
+        configFile = "paymentTest.properties";
         creditAmount = new BigDecimal("234.00");
-        emailAddr = delegator.makeValue("ContactMech", UtilMisc.toMap(
-                "infoString","test@hansbakker.com"));
-        orderId = new String("testOrder1000");
-        creditCard = delegator.makeValue("CreditCard", UtilMisc.toMap(
-                "cardType","VISA",
+        emailAddr = delegator.makeValue("ContactMech", UtilMisc.toMap("infoString","test@hansbakker.com"));
+        orderId = "testOrder1000";
+        creditCard = delegator.makeValue("CreditCard", UtilMisc.toMap("cardType","VISA",
                 "expireDate","12/2008",  // mm/yyyy, gets converted to mm/yy
                 "cardNumber","4111111111111111"));
-        billingAddress = delegator.makeValue("PostalAddress", UtilMisc.toMap(
-                "toName","The customer Name",
+        billingAddress = delegator.makeValue("PostalAddress", UtilMisc.toMap("toName","The customer Name",
                 "address1","The customer billingAddress1",
                 "address2","The customer billingAddress2",
                 "city","The customer city",
                 "stateProvinceGeoId", "NLD"));
-        shippingAddress = delegator.makeValue("PostalAddress", UtilMisc.toMap(
-                "toName","The customer Name",
+        shippingAddress = delegator.makeValue("PostalAddress", UtilMisc.toMap("toName","The customer Name",
                 "address1","The customer shippingStreet1",
                 "address2","The customer shippingStreet2",
                 "city","The customer city",
                 "stateProvinceGeoId", "NLD",
                 "postalCode","12345"));
-        pbOrder = UtilMisc.toMap(
-                "OrderFrequencyCycle", "M",
+        pbOrder = UtilMisc.<String, Object>toMap("OrderFrequencyCycle", "M",
                 "OrderFrequencyInterval", "3",
                 "TotalNumberPayments", "4");
     }
@@ -98,18 +81,17 @@ public class CCServicesTest extends OFBizTestCase {
     public void testAuth() throws Exception{
         Debug.logInfo("=====[testAuth] starting....", module);
         try {
-            Map serviceInput = UtilMisc.toMap(
-                    "paymentConfig", configFile,
+            Map<String, Object> serviceInput = UtilMisc.<String, Object>toMap("paymentConfig", configFile,
                     "billToEmail", emailAddr,
                     "creditCard", creditCard,
                     "billingAddress", billingAddress,
                     "shippingAddress", shippingAddress,
                     "orderId", orderId
-            );
+           );
             serviceInput.put("processAmount", new BigDecimal("200.00"));
 
             // run the service (make sure in payment
-            Map result = dispatcher.runSync("clearCommerceCCAuth",serviceInput);
+            Map<String, Object> result = dispatcher.runSync("clearCommerceCCAuth",serviceInput);
 
             // verify the results
             String responseMessage = (String) result.get(ModelService.RESPONSE_MESSAGE);
@@ -132,16 +114,14 @@ public class CCServicesTest extends OFBizTestCase {
     public void testCredit() throws Exception{
         Debug.logInfo("=====[testCCredit] starting....", module);
         try {
-            Map serviceMap = UtilMisc.toMap(
-                    "paymentConfig", configFile,
+            Map<String, Object> serviceMap = UtilMisc.<String, Object>toMap("paymentConfig", configFile,
                     "orderId", orderId,
                     "creditAmount", creditAmount,
                     "billToEmail", emailAddr,
                     "creditCard", creditCard,
-                    "creditAmount", new BigDecimal("200.00")
-            );
+                    "creditAmount", new BigDecimal("200.00"));
             // run the service
-            Map result = dispatcher.runSync("clearCommerceCCCredit",serviceMap);
+            Map<String, Object> result = dispatcher.runSync("clearCommerceCCCredit",serviceMap);
 
             // verify the results
             String responseMessage = (String) result.get(ModelService.RESPONSE_MESSAGE);
@@ -163,19 +143,17 @@ public class CCServicesTest extends OFBizTestCase {
     public void testPurchaseSubscription() throws Exception {
         Debug.logInfo("=====[testPurchaseSubscription] starting....", module);
         try {
-
-            Map serviceMap = UtilMisc.toMap(
-                    "paymentConfig", configFile,
+            Map<String, Object> serviceMap = UtilMisc.<String, Object>toMap("paymentConfig", configFile,
                     "orderId", orderId,
                     "creditAmount", creditAmount,
                     "billToEmail", emailAddr,
                     "creditCard", creditCard,
-                    "pbOrder", pbOrder          // if supplied, the crediting is for a subscription and credit by period is managed by ClearCommerce
-            );
+                    "pbOrder", pbOrder);  // if supplied, the crediting is for a subscription and credit by period is managed by ClearCommerce
+                       
             serviceMap.put("creditAmount", new BigDecimal("200.00"));
 
             // run the service
-            Map result = dispatcher.runSync("clearCommerceCCCredit",serviceMap);
+            Map<String, Object> result = dispatcher.runSync("clearCommerceCCCredit", serviceMap);
 
             // verify the results
             String responseMessage = (String) result.get(ModelService.RESPONSE_MESSAGE);
@@ -218,13 +196,11 @@ cancelled. If the order is to be resumed, a new recurring order must be submitte
         Debug.logInfo("=====[testReport] starting....", module);
         try {
 
-            Map serviceMap = UtilMisc.toMap(
-                    "orderId", "4488668f-2db0-3002-002b-0003ba1d84d5",
-                    "paymentConfig", configFile
-            );
+            Map<String, Object> serviceMap = UtilMisc.<String, Object>toMap("orderId", "4488668f-2db0-3002-002b-0003ba1d84d5",
+                    "paymentConfig", configFile);
 
             // run the service
-            Map result = dispatcher.runSync("clearCommerceCCReport",serviceMap);
+            Map<String, Object> result = dispatcher.runSync("clearCommerceCCReport",serviceMap);
 
             // verify the results
             String responseMessage = (String) result.get(ModelService.RESPONSE_MESSAGE);

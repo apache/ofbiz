@@ -92,7 +92,7 @@
         <auto-attributes include="pk" mode="IN" optional="false"/>
         <auto-attributes include="nonpk" mode="IN" optional="true"/>
     </service>
-    <service name="udpateWebSitePathAlias" default-entity-name="WebSitePathAlias" engine="simple" auth="true"
+    <service name="updateWebSitePathAlias" default-entity-name="WebSitePathAlias" engine="simple" auth="true"
             location="component://content/script/org/ofbiz/content/website/WebSiteServices.xml" invoke="updateWebSitePathAlias">
         <description>Update a WebSite Path Alias</description>
         <permission-service service-name="contentManagerPermission" main-action="UPDATE"/>
@@ -153,5 +153,13 @@
         <description>Auto Create Content Publish Points</description>
         <attribute name="webSiteId" type="String" mode="IN" optional="false"/>
         <attribute name="webSiteContentTypeId" type="List" mode="IN" optional="false"/>
+    </service>
+
+    <service name="generateMissingSeoUrlForWebsite" engine="simple" auth="true"
+            location="component://content/script/org/ofbiz/content/website/WebSiteServices.xml" invoke="generateMissingSeoUrlForWebsite" transaction-timeout="36000000">
+        <description>Generate Missing Seo URL's for Website</description>
+        <attribute name="webSiteId" type="String" mode="IN" optional="false"/>
+        <attribute name="prodCatalogId" type="String" mode="IN" optional="false"/>
+        <attribute name="typeGenerate" type="List" mode="IN" optional="false"/>
     </service>
 </services>

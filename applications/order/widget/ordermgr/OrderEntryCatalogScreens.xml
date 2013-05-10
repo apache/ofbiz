@@ -57,6 +57,7 @@ under the License.
         <section>
             <actions>
                 <set field="showPriceDetails" value="Y"/>
+                <set field="backendPath" value="Y"/>
                 <script location="component://order/webapp/ordermgr/WEB-INF/actions/entry/catalog/ProductSummary.groovy"/>
             </actions>
             <widgets>
@@ -76,13 +77,20 @@ under the License.
         </section>
     </screen>
 
+    <screen name="compareproductslist">
+        <section>
+            <widgets>
+                <platform-specific><html><html-template location="component://order/webapp/ordermgr/entry/catalog/compareproductslist.ftl"/></html></platform-specific>
+            </widgets>
+        </section>
+    </screen>
     <!-- =========== Top-Level and Stand-Alone Screens =========== -->
 
     <!-- Category Screens -->
     <screen name="category">
         <section>
             <actions>
-                <set field="title-property" value="PageTitleCategoryPage"/>
+                <set field="titleProperty" value="PageTitleCategoryPage"/>
             </actions>
             <widgets>
                 <decorator-screen name="CommonOrderCatalogDecorator" location="component://order/widget/ordermgr/OrderEntryCommonScreens.xml">
@@ -128,13 +136,7 @@ under the License.
     <screen name="product">
         <section>
             <actions>
-<!--                <set field="leftbarScreenName" value="leftbar"/>
-                <set field="rightbarScreenName" value="rightbar"/>
-                <set field="MainColumnStyle" value="center"/>-->
-                <set field="layoutSettings.javaScripts[]" value="/images/prototypejs/prototype.js" global="true"/>
-                <set field="layoutSettings.javaScripts[]" value="/images/prototypejs/popup.js" global="true"/>
-                <set field="layoutSettings.styleSheets[]" value="/images/prototypejs/popup.css" global="true"/>
-                <set field="title-property" value="PageTitleProductPage"/>
+                <set field="titleProperty" value="PageTitleProductPage"/>
                 <set field="configproductdetailScreen" value="component://order/widget/ordermgr/OrderEntryCatalogScreens.xml#configproductdetail"/>
                 <script location="component://order/webapp/ordermgr/WEB-INF/actions/entry/catalog/Product.groovy"/>
             </actions>
@@ -204,10 +206,7 @@ under the License.
     <screen name="keywordsearch">
         <section>
             <actions>
-                <!--<set field="leftbarScreenName" value="leftbar"/>
-                <set field="MainColumnStyle" value="center"/>-->
-
-                <set field="title-property" value="PageTitleSearchResults"/>
+                <set field="titleProperty" value="PageTitleSearchResults"/>
                 <set field="productsummaryScreen" value="component://order/widget/ordermgr/OrderEntryCatalogScreens.xml#productsummary"/>
                 <script location="component://order/webapp/ordermgr/WEB-INF/actions/entry/catalog/KeywordSearch.groovy"/>
             </actions>
@@ -223,10 +222,7 @@ under the License.
     <screen name="advancedsearch">
         <section>
             <actions>
-                <!--<set field="leftbarScreenName" value="leftbar"/>
-                <set field="MainColumnStyle" value="center"/>-->
-
-                <set field="title-property" value="PageTitleAdvancedSearch"/>
+                <set field="titleProperty" value="PageTitleAdvancedSearch"/>
                 <set field="headerItem" value="Advanced Search"/>
                 <script location="component://order/webapp/ordermgr/WEB-INF/actions/entry/catalog/AdvancedSearchOptions.groovy"/>
 
@@ -249,9 +245,7 @@ under the License.
     <screen name="quickadd">
         <section>
             <actions>
-                <!--<set field="leftbarScreenName" value="leftbar"/>
-                <set field="MainColumnStyle" value="center"/>-->
-                <set field="title-property" value="PageTitleQuickAdd"/>
+                <set field="titleProperty" value="PageTitleQuickAdd"/>
                 <set field="quickaddsummaryScreen" value="component://order/widget/ordermgr/OrderEntryCatalogScreens.xml#quickaddsummary"/>
                 <script location="component://order/webapp/ordermgr/WEB-INF/actions/entry/catalog/QuickAdd.groovy"/>
             </actions>
@@ -271,6 +265,47 @@ under the License.
             </actions>
             <widgets>
                 <platform-specific><html><html-template location="component://order/webapp/ordermgr/entry/catalog/quickaddsummary.ftl"/></html></platform-specific>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="compareProducts">
+        <section>
+            <actions>
+                <set field="titleProperty" value="ProductCompareProducts"/>
+                <property-map resource="ProductUiLabels" map-name="uiLabelMap" global="true"/>
+                <set field="title" from-field="uiLabelMap.ProductCompareProducts"/>
+                <script location="component://order/webapp/ordermgr/WEB-INF/actions/entry/catalog/CompareProducts.groovy"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonPopUpDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <platform-specific>
+                            <html>
+                                <html-template location="component://order/webapp/ordermgr/entry/catalog/compareproducts.ftl"/>
+                            </html>
+                        </platform-specific>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    
+    <screen name="ProductUomDropDownOnly">
+        <section>
+            <actions>
+                <script location="component://order/webapp/ordermgr/WEB-INF/actions/entry/catalog/ProductUomDropDownOnly.groovy"/>
+            </actions>
+            <widgets>
+                <section>
+                    <condition>
+                        <not><if-empty field="product"/></not>
+                    </condition>
+                    <widgets>
+                        <platform-specific>
+                            <html><html-template location="component://order/webapp/ordermgr/entry/catalog/ProductUomDropDownOnly.ftl"/></html>
+                        </platform-specific>
+                    </widgets>
+                </section>
             </widgets>
         </section>
     </screen>

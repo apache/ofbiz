@@ -28,13 +28,13 @@ under the License.
     <div class="screenlet-body">
       <a href="<@ofbizUrl>authview/${donePage}?orderId=${orderId}</@ofbizUrl>" class="buttontext">${uiLabelMap.CommonGoBack}</a>
       <a href="javascript:document.sendConfirmationForm.submit()" class="buttontext">${uiLabelMap.CommonSend}</a>      
-      <br/>
+      <br />
       <form method="post" action="<@ofbizUrl>sendconfirmationmail/${donePage}</@ofbizUrl>" name="sendConfirmationForm">
         <input type="hidden" name="orderId" value="${orderId?if_exists}" />
         <#if ! productStoreEmailSetting?exists>
             <#assign productStoreEmailSetting = {} />
         </#if>
-        <input type="hidden" name="partyId" value="${partyId?if_exists}">
+        <input type="hidden" name="partyId" value="${partyId?if_exists}" />
         <input type="hidden" name="contentType" value="${productStoreEmailSetting.contentType?default("")}" />
         <table class="basic-table" cellspacing='0'>
             <tr>
@@ -84,7 +84,7 @@ under the License.
             </tr>
         </table>
       </form>
-      <br/>
+      <br />
       <a href="<@ofbizUrl>authview/${donePage}?orderId=${orderId}</@ofbizUrl>" class="buttontext">${uiLabelMap.CommonGoBack}</a>
       <a href="javascript:document.sendConfirmationForm.submit()" class="buttontext">${uiLabelMap.CommonSend}</a>
     </div>

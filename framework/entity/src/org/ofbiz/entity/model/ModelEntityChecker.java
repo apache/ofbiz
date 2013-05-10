@@ -19,16 +19,15 @@
 package org.ofbiz.entity.model;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeSet;
 
-import javolution.util.FastMap;
-
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilValidate;
-import org.ofbiz.entity.GenericDelegator;
+import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericEntityException;
 
 /**
@@ -39,13 +38,13 @@ public class ModelEntityChecker {
 
     public static final String module = ModelEntityChecker.class.getName();
 
-    public static void checkEntities(GenericDelegator delegator, List<String> warningList) throws GenericEntityException {
+    public static void checkEntities(Delegator delegator, List<String> warningList) throws GenericEntityException {
         ModelReader reader = delegator.getModelReader();
 
         TreeSet<String> reservedWords = new TreeSet<String>();
         initReservedWords(reservedWords);
 
-        Map<String, TreeSet<String>> packages = FastMap.newInstance();
+        Map<String, TreeSet<String>> packages = new HashMap<String, TreeSet<String>>();
         TreeSet<String> packageNames = new TreeSet<String>();
         TreeSet<String> tableNames = new TreeSet<String>();
 
@@ -94,6 +93,12 @@ public class ModelEntityChecker {
                 if (entity.getPlainTableName() != null && reservedWords.contains(entity.getPlainTableName().toUpperCase())) {
                         warningList.add("[TableNameRW] Table name [" + entity.getPlainTableName() + "] of entity " + entity.getEntityName() + " is a reserved word.");
                 }
+                
+                // don't check columns/relations/keys when never-check is set to "true"
+                if (entity.getNeverCheck()) {
+                    continue;
+                }
+                
                 TreeSet<String> ufields = new TreeSet<String>();
                 Iterator<ModelField> fieldIter = entity.getFieldsIterator();
                 while (fieldIter.hasNext()) {
@@ -194,7 +199,8 @@ public class ModelEntityChecker {
 
                         // make sure all FK names are <= 18 characters
                         if (relation.getFkName().length() > 18) {
-                            warningList.add("[RelFKNameGT18] The foregn key name (length:" + relation.getFkName().length()
+                            warningList.add("[RelFKNameGT18] The foreign key named " + relation.getFkName() 
+                                            + " (length:" + relation.getFkName().length()
                                             + ") was greater than 18 characters in length for relation " + relation.getTitle() + relation.getRelEntityName()
                                             + " of entity " + entity.getEntityName() + ".");
                         }
@@ -203,16 +209,16 @@ public class ModelEntityChecker {
                         try {
                             relatedEntity = reader.getModelEntity(relation.getRelEntityName());
                         } catch (GenericEntityException e) {
-                            Debug.log("Entity referred to in relation is not defined: " + relation.getRelEntityName());
+                            Debug.logInfo("Entity referred to in relation is not defined: " + relation.getRelEntityName(), module);
                         }
                         if (relatedEntity != null) {
                             //if relation is of type one, make sure keyMaps
                             // match the PK of the relatedEntity
                             if ("one".equals(relation.getType()) || "one-nofk".equals(relation.getType())) {
-                                if (relatedEntity.getPksSize() != relation.getKeyMapsSize())
+                                if (relatedEntity.getPksSize() != relation.getKeyMaps().size())
                                         warningList.add("[RelatedOneKeyMapsWrongSize] The number of primary keys (" + relatedEntity.getPksSize()
                                                         + ") of related entity " + relation.getRelEntityName()
-                                                        + " does not match the number of keymaps (" + relation.getKeyMapsSize()
+                                                        + " does not match the number of keymaps (" + relation.getKeyMaps().size()
                                                         + ") for relation of type one \"" + relation.getTitle() + relation.getRelEntityName()
                                                         + "\" of entity " + entity.getEntityName() + ".");
                                 Iterator<ModelField> pksIter = relatedEntity.getPksIterator();
@@ -232,8 +238,7 @@ public class ModelEntityChecker {
                         // this entity
                         //make sure all keyMap 'relFieldName's match fields of
                         // the relatedEntity
-                        for (int rkm = 0; rkm < relation.getKeyMapsSize(); rkm++) {
-                            ModelKeyMap keyMap = relation.getKeyMap(rkm);
+                        for (ModelKeyMap keyMap : relation.getKeyMaps()) {
 
                             ModelField field = entity.getField(keyMap.getFieldName());
                             ModelField rfield = null;
@@ -277,7 +282,7 @@ public class ModelEntityChecker {
     }
 
     public static final String[] rwArray = { "ABORT", "ABS", "ABSOLUTE",
-            "ACCEPT", "ACCES", "ACS", "ACTION", "ACTIVATE", "ADD", "ADDFORM",
+            "ACCEPT", "ACCES", "ACCESS", "ACS", "ACTION", "ACTIVATE", "ADD", "ADDFORM",
             "ADMIN", "AFTER", "AGGREGATE", "ALIAS", "ALL", "ALLOCATE", "ALTER",
             "ANALYZE", "AND", "ANDFILENAME", "ANY", "ANYFINISH", "APPEND",
             "ARCHIVE", "ARE", "ARRAY", "AS", "ASC", "ASCENDING", "ASCII",
@@ -465,7 +470,7 @@ public class ModelEntityChecker {
             "START_TRANSACTION", "STATE", "STATIC", "STATISTICS", "STATUS",
             "STDDEV", "STDEV", "STEP", "STOP", "STORE", "STRAIGHT_JOIN",
             "STRING", "STRUCTURE", "SUBMENU", "SUBSTR", "SUBSTRING", "SUBTYPE",
-            "SUCCEEDS", "SUCCESFULL", "SUCCESSFULL", "SUM", "SUMU", "SUPERDBA",
+            "SUCCEEDS", "SUCCESFULL", "SUCCESSFULL", "SUCCESSFUL", "SUM", "SUMU", "SUPERDBA",
             "SYB_TERMINATE", "SYNONYM", "SYSDATE", "SYSSORT", "SYSTEM_USER",
 
             "TABLE", "TABLEDATA", "TABLES", "TEMP", "TEMPORARY", "TERMINATE",
@@ -498,7 +503,7 @@ public class ModelEntityChecker {
     public static void initReservedWords(TreeSet<String> reservedWords) {
         //create extensive list of reserved words
         int asize = rwArray.length;
-        Debug.log("[initReservedWords] array length=" + asize);
+        Debug.logInfo("[initReservedWords] array length=" + asize, module);
         for (int i = 0; i < asize; i++) {
             reservedWords.add(rwArray[i]);
         }

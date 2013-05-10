@@ -34,7 +34,7 @@ import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.base.util.UtilProperties;
 import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.base.util.string.FlexibleStringExpander;
-import org.ofbiz.entity.GenericDelegator;
+import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericPK;
 import org.ofbiz.entity.GenericValue;
@@ -56,11 +56,12 @@ import org.ofbiz.service.ServiceUtil;
 public class ProductUtilServices {
 
     public static final String module = ProductUtilServices.class.getName();
-    public static final String resource = "ProductErrorUiLabels";
+    public static final String resource = "ProductUiLabels";
+    public static final String resourceError = "ProductErrorUiLabels";
 
     /** First expire all ProductAssocs for all disc variants, then disc all virtuals that have all expired variant ProductAssocs */
     public static Map<String, Object> discVirtualsWithDiscVariants(DispatchContext dctx, Map<String, ? extends Object> context) {
-        GenericDelegator delegator = dctx.getDelegator();
+        Delegator delegator = dctx.getDelegator();
         Timestamp nowTimestamp = UtilDateTime.nowTimestamp();
         Locale locale = (Locale) context.get("locale");
         String errMsg = null;
@@ -70,17 +71,17 @@ public class ProductUtilServices {
                     EntityCondition.makeCondition("isVariant", EntityOperator.EQUALS, "Y"),
                     EntityCondition.makeCondition("salesDiscontinuationDate", EntityOperator.NOT_EQUAL, null),
                     EntityCondition.makeCondition("salesDiscontinuationDate", EntityOperator.LESS_THAN_EQUAL_TO, nowTimestamp)
-                    ), EntityOperator.AND);
+                   ), EntityOperator.AND);
             EntityListIterator eliOne = delegator.find("Product", conditionOne, null, null, null, null);
             GenericValue productOne = null;
             int numSoFarOne = 0;
             while ((productOne = eliOne.next()) != null) {
                 String virtualProductId = ProductWorker.getVariantVirtualId(productOne);
-                GenericValue virtualProduct = delegator.findByPrimaryKey("Product", UtilMisc.toMap("productId", virtualProductId));
+                GenericValue virtualProduct = delegator.findOne("Product", UtilMisc.toMap("productId", virtualProductId), false);
                 if (virtualProduct == null) {
                     continue;
                 }
-                List<GenericValue> passocList = delegator.findByAnd("ProductAssoc", UtilMisc.toMap("productId", virtualProductId, "productIdTo", productOne.get("productId"), "productAssocTypeId", "PRODUCT_VARIANT"));
+                List<GenericValue> passocList = delegator.findByAnd("ProductAssoc", UtilMisc.toMap("productId", virtualProductId, "productIdTo", productOne.get("productId"), "productAssocTypeId", "PRODUCT_VARIANT"), null, false);
                 passocList = EntityUtil.filterByDate(passocList);
                 if (passocList.size() > 0) {
                     for (GenericValue passoc: passocList) {
@@ -100,15 +101,16 @@ public class ProductUtilServices {
             EntityCondition condition = EntityCondition.makeCondition(UtilMisc.toList(
                     EntityCondition.makeCondition("isVirtual", EntityOperator.EQUALS, "Y"),
                     EntityCondition.makeCondition(EntityCondition.makeCondition("salesDiscontinuationDate", EntityOperator.EQUALS, null), EntityOperator.OR, EntityCondition.makeCondition("salesDiscontinuationDate", EntityOperator.GREATER_THAN_EQUAL_TO, nowTimestamp))
-                    ), EntityOperator.AND);
+                   ), EntityOperator.AND);
             EntityListIterator eli = delegator.find("Product", condition, null, null, null, null);
             GenericValue product = null;
             int numSoFar = 0;
             while ((product = eli.next()) != null) {
-                List<GenericValue> passocList = delegator.findByAnd("ProductAssoc", UtilMisc.toMap("productId", product.get("productId"), "productAssocTypeId", "PRODUCT_VARIANT"));
+                List<GenericValue> passocList = delegator.findByAnd("ProductAssoc", UtilMisc.toMap("productId", product.get("productId"), "productAssocTypeId", "PRODUCT_VARIANT"), null, false);
                 passocList = EntityUtil.filterByDate(passocList);
                 if (passocList.size() == 0) {
                     product.set("salesDiscontinuationDate", nowTimestamp);
+                    delegator.store(product);
 
                     numSoFar++;
                     if (numSoFar % 500 == 0) {
@@ -119,7 +121,7 @@ public class ProductUtilServices {
             eli.close();
         } catch (GenericEntityException e) {
             Map<String, String> messageMap = UtilMisc.toMap("errMessage", e.toString());
-            errMsg = UtilProperties.getMessage(resource,"productutilservices.entity_error_running_discVirtualsWithDiscVariants", messageMap, locale);
+            errMsg = UtilProperties.getMessage(resourceError,"productutilservices.entity_error_running_discVirtualsWithDiscVariants", messageMap, locale);
             Debug.logError(e, errMsg, module);
             return ServiceUtil.returnError(errMsg);
         }
@@ -129,7 +131,7 @@ public class ProductUtilServices {
 
     /** for all disc products, remove from category memberships */
     public static Map<String, Object> removeCategoryMembersOfDiscProducts(DispatchContext dctx, Map<String, ? extends Object> context) {
-        GenericDelegator delegator = dctx.getDelegator();
+        Delegator delegator = dctx.getDelegator();
         Timestamp nowTimestamp = UtilDateTime.nowTimestamp();
         Locale locale = (Locale) context.get("locale");
         String errMsg = null;
@@ -138,13 +140,13 @@ public class ProductUtilServices {
             EntityCondition condition = EntityCondition.makeCondition(UtilMisc.toList(
                     EntityCondition.makeCondition("salesDiscontinuationDate", EntityOperator.NOT_EQUAL, null),
                     EntityCondition.makeCondition("salesDiscontinuationDate", EntityOperator.LESS_THAN_EQUAL_TO, nowTimestamp)
-                    ), EntityOperator.AND);
+                   ), EntityOperator.AND);
             EntityListIterator eli = delegator.find("Product", condition, null, null, null, null);
             GenericValue product = null;
             int numSoFar = 0;
             while ((product = eli.next()) != null) {
                 String productId = product.getString("productId");
-                List<GenericValue> productCategoryMemberList = delegator.findByAnd("ProductCategoryMember", UtilMisc.toMap("productId", productId));
+                List<GenericValue> productCategoryMemberList = delegator.findByAnd("ProductCategoryMember", UtilMisc.toMap("productId", productId), null, false);
                 if (productCategoryMemberList.size() > 0) {
                     for (GenericValue productCategoryMember: productCategoryMemberList) {
                         // coded this way rather than a removeByAnd so it can be easily changed...
@@ -160,7 +162,7 @@ public class ProductUtilServices {
             Debug.logInfo("Completed - Removed category members for " + numSoFar + " sales discontinued products.", module);
         } catch (GenericEntityException e) {
             Map<String, String> messageMap = UtilMisc.toMap("errMessage", e.toString());
-            errMsg = UtilProperties.getMessage(resource,"productutilservices.entity_error_running_removeCategoryMembersOfDiscProducts", messageMap, locale);
+            errMsg = UtilProperties.getMessage(resourceError,"productutilservices.entity_error_running_removeCategoryMembersOfDiscProducts", messageMap, locale);
             Debug.logError(e, errMsg, module);
             return ServiceUtil.returnError(errMsg);
         }
@@ -169,7 +171,7 @@ public class ProductUtilServices {
     }
 
     public static Map<String, Object> removeDuplicateOpenEndedCategoryMembers(DispatchContext dctx, Map<String, ? extends Object> context) {
-        GenericDelegator delegator = dctx.getDelegator();
+        Delegator delegator = dctx.getDelegator();
         Timestamp nowTimestamp = UtilDateTime.nowTimestamp();
         Locale locale = (Locale) context.get("locale");
         String errMsg = null;
@@ -186,13 +188,13 @@ public class ProductUtilServices {
             EntityCondition condition = EntityCondition.makeCondition(UtilMisc.toList(
                     EntityCondition.makeCondition("fromDate", EntityOperator.LESS_THAN, nowTimestamp),
                     EntityCondition.makeCondition("thruDate", EntityOperator.EQUALS, null)
-                    ), EntityOperator.AND);
+                   ), EntityOperator.AND);
             EntityCondition havingCond = EntityCondition.makeCondition("productIdCount", EntityOperator.GREATER_THAN, Long.valueOf(1));
             EntityListIterator eli = delegator.findListIteratorByCondition(dve, condition, havingCond, UtilMisc.toList("productId", "productCategoryId", "productIdCount"), null, null);
             GenericValue pcm = null;
             int numSoFar = 0;
             while ((pcm = eli.next()) != null) {
-                List<GenericValue> productCategoryMemberList = delegator.findByAnd("ProductCategoryMember", UtilMisc.toMap("productId", pcm.get("productId"), "productCategoryId", pcm.get("productCategoryId")));
+                List<GenericValue> productCategoryMemberList = delegator.findByAnd("ProductCategoryMember", UtilMisc.toMap("productId", pcm.get("productId"), "productCategoryId", pcm.get("productCategoryId")), null, false);
                 if (productCategoryMemberList.size() > 1) {
                     // remove all except the first...
                     productCategoryMemberList.remove(0);
@@ -209,7 +211,7 @@ public class ProductUtilServices {
             Debug.logInfo("Completed - Removed category members for " + numSoFar + " products with duplicate category members.", module);
         } catch (GenericEntityException e) {
             Map<String, String> messageMap = UtilMisc.toMap("errMessage", e.toString());
-            errMsg = UtilProperties.getMessage(resource,"productutilservices.entity_error_running_removeDuplicateOpenEndedCategoryMembers", messageMap, locale);
+            errMsg = UtilProperties.getMessage(resourceError,"productutilservices.entity_error_running_removeDuplicateOpenEndedCategoryMembers", messageMap, locale);
             Debug.logError(e, errMsg, module);
             return ServiceUtil.returnError(errMsg);
         }
@@ -218,7 +220,7 @@ public class ProductUtilServices {
     }
 
     public static Map<String, Object> makeStandAloneFromSingleVariantVirtuals(DispatchContext dctx, Map<String, ? extends Object> context) {
-        GenericDelegator delegator = dctx.getDelegator();
+        Delegator delegator = dctx.getDelegator();
         LocalDispatcher dispatcher = dctx.getDispatcher();
         GenericValue userLogin = (GenericValue) context.get("userLogin");
         Timestamp nowTimestamp = UtilDateTime.nowTimestamp();
@@ -245,7 +247,7 @@ public class ProductUtilServices {
             EntityCondition condition = EntityCondition.makeCondition(UtilMisc.toList(
                     EntityCondition.makeCondition("productAssocTypeId", EntityOperator.EQUALS, "PRODUCT_VARIANT"),
                     EntityCondition.makeCondition(EntityCondition.makeCondition("salesDiscontinuationDate", EntityOperator.EQUALS, null), EntityOperator.OR, EntityCondition.makeCondition("salesDiscontinuationDate", EntityOperator.GREATER_THAN, nowTimestamp))
-                    ), EntityOperator.AND);
+                   ), EntityOperator.AND);
             EntityCondition havingCond = EntityCondition.makeCondition("productIdToCount", EntityOperator.EQUALS, Long.valueOf(1));
             EntityListIterator eliOne = delegator.findListIteratorByCondition(dve, condition, havingCond, UtilMisc.toList("productId", "productIdToCount"), null, null);
             List<GenericValue> valueList = eliOne.getCompleteList();
@@ -257,7 +259,7 @@ public class ProductUtilServices {
             for (GenericValue value: valueList) {
                 // has only one variant period, is it valid? should already be discontinued if not
                 String productId = value.getString("productId");
-                List<GenericValue> paList = delegator.findByAnd("ProductAssoc", UtilMisc.toMap("productId", productId, "productAssocTypeId", "PRODUCT_VARIANT"));
+                List<GenericValue> paList = delegator.findByAnd("ProductAssoc", UtilMisc.toMap("productId", productId, "productAssocTypeId", "PRODUCT_VARIANT"), null, false);
                 paList = EntityUtil.filterByDate(paList);
                 // verify the query; tested on a bunch, looks good
                 if (paList.size() != 1) {
@@ -281,7 +283,7 @@ public class ProductUtilServices {
                     EntityCondition.makeCondition(EntityCondition.makeCondition("salesDiscontinuationDate", EntityOperator.EQUALS, null), EntityOperator.OR, EntityCondition.makeCondition("salesDiscontinuationDate", EntityOperator.GREATER_THAN, nowTimestamp)),
                     EntityCondition.makeCondition("fromDate", EntityOperator.LESS_THAN_EQUAL_TO, nowTimestamp),
                     EntityCondition.makeCondition(EntityCondition.makeCondition("thruDate", EntityOperator.EQUALS, null), EntityOperator.OR, EntityCondition.makeCondition("thruDate", EntityOperator.GREATER_THAN_EQUAL_TO, nowTimestamp))
-                    ), EntityOperator.AND);
+                   ), EntityOperator.AND);
             EntityListIterator eliMulti = delegator.findListIteratorByCondition(dve, conditionWithDates, havingCond, UtilMisc.toList("productId", "productIdToCount"), null, null);
             List<GenericValue> valueMultiList = eliMulti.getCompleteList();
             eliMulti.close();
@@ -293,7 +295,7 @@ public class ProductUtilServices {
                 // has only one valid variant
                 String productId = value.getString("productId");
 
-                List<GenericValue> paList = EntityUtil.filterByDate(delegator.findByAnd("ProductAssoc", UtilMisc.toMap("productId", productId, "productAssocTypeId", "PRODUCT_VARIANT")));
+                List<GenericValue> paList = EntityUtil.filterByDate(delegator.findByAnd("ProductAssoc", UtilMisc.toMap("productId", productId, "productAssocTypeId", "PRODUCT_VARIANT"), null, false));
 
                 // verify the query; tested on a bunch, looks good
                 if (paList.size() != 1) {
@@ -312,12 +314,12 @@ public class ProductUtilServices {
             Debug.logInfo("Found virtual products with one valid variant: " + numWithOneValid + ", with one variant only: " + numWithOneOnly, module);
         } catch (GenericEntityException e) {
             Map<String, String> messageMap = UtilMisc.toMap("errMessage", e.toString());
-            errMsg = UtilProperties.getMessage(resource,"productutilservices.entity_error_running_makeStandAloneFromSingleVariantVirtuals", messageMap, locale);
+            errMsg = UtilProperties.getMessage(resourceError,"productutilservices.entity_error_running_makeStandAloneFromSingleVariantVirtuals", messageMap, locale);
             Debug.logError(e, errMsg, module);
             return ServiceUtil.returnError(errMsg);
         } catch (GenericServiceException e) {
             Map<String, String> messageMap = UtilMisc.toMap("errMessage", e.toString());
-            errMsg = UtilProperties.getMessage(resource,"productutilservices.entity_error_running_makeStandAloneFromSingleVariantVirtuals", messageMap, locale);
+            errMsg = UtilProperties.getMessage(resourceError,"productutilservices.entity_error_running_makeStandAloneFromSingleVariantVirtuals", messageMap, locale);
             Debug.logError(e, errMsg, module);
             return ServiceUtil.returnError(errMsg);
         }
@@ -326,7 +328,7 @@ public class ProductUtilServices {
     }
 
     public static Map<String, Object> mergeVirtualWithSingleVariant(DispatchContext dctx, Map<String, ? extends Object> context) {
-        GenericDelegator delegator = dctx.getDelegator();
+        Delegator delegator = dctx.getDelegator();
         Timestamp nowTimestamp = UtilDateTime.nowTimestamp();
 
         String productId = (String) context.get("productId");
@@ -342,20 +344,20 @@ public class ProductUtilServices {
         }
 
         try {
-            GenericValue product = delegator.findByPrimaryKey("Product", UtilMisc.toMap("productId", productId));
+            GenericValue product = delegator.findOne("Product", UtilMisc.toMap("productId", productId), false);
             Debug.logInfo("Processing virtual product with one variant with ID: " + productId + " and name: " + product.getString("internalName"), module);
 
-            List<GenericValue> paList = EntityUtil.filterByDate(delegator.findByAnd("ProductAssoc", UtilMisc.toMap("productId", productId, "productAssocTypeId", "PRODUCT_VARIANT")));
+            List<GenericValue> paList = EntityUtil.filterByDate(delegator.findByAnd("ProductAssoc", UtilMisc.toMap("productId", productId, "productAssocTypeId", "PRODUCT_VARIANT"), null, false));
             if (paList.size() > 1) {
                 Map<String, String> messageMap = UtilMisc.toMap("productId", productId);
-                errMsg = UtilProperties.getMessage(resource,"productutilservices.found_more_than_one_valid_variant_for_virtual_ID", messageMap, locale);
+                errMsg = UtilProperties.getMessage(resourceError,"productutilservices.found_more_than_one_valid_variant_for_virtual_ID", messageMap, locale);
                 Debug.logInfo(errMsg, module);
                 return ServiceUtil.returnError(errMsg);
             }
 
             if (paList.size() == 0) {
                 Map<String, String> messageMap = UtilMisc.toMap("productId", productId);
-                errMsg = UtilProperties.getMessage(resource,"productutilservices.did_not_find_any_valid_variants_for_virtual_ID", messageMap, locale);
+                errMsg = UtilProperties.getMessage(resourceError,"productutilservices.did_not_find_any_valid_variants_for_virtual_ID", messageMap, locale);
                 Debug.logInfo(errMsg, module);
                 return ServiceUtil.returnError(errMsg);
             }
@@ -380,7 +382,7 @@ public class ProductUtilServices {
             String variantProductId = productAssoc.getString("productIdTo");
 
             // Product
-            GenericValue variantProduct = delegator.findByPrimaryKey("Product", UtilMisc.toMap("productId", variantProductId));
+            GenericValue variantProduct = delegator.findOne("Product", UtilMisc.toMap("productId", variantProductId), false);
 
             Debug.logInfo("--variant has ID: " + variantProductId + " and name: " + variantProduct.getString("internalName"), module);
 
@@ -427,11 +429,12 @@ public class ProductUtilServices {
             }
 
             if (test) {
-                return ServiceUtil.returnError("Test mode - returning error to get a rollback");
+                return ServiceUtil.returnError(UtilProperties.getMessage(resource, 
+                        "ProductMergeVirtualWithSingleVariant", locale));
             }
         } catch (GenericEntityException e) {
             Map<String, String> messageMap = UtilMisc.toMap("errMessage", e.toString());
-            errMsg = UtilProperties.getMessage(resource,"productutilservices.entity_error_running_makeStandAloneFromSingleVariantVirtuals", messageMap, locale);
+            errMsg = UtilProperties.getMessage(resourceError,"productutilservices.entity_error_running_makeStandAloneFromSingleVariantVirtuals", messageMap, locale);
             Debug.logError(e, errMsg, module);
             return ServiceUtil.returnError(errMsg);
         }
@@ -439,8 +442,8 @@ public class ProductUtilServices {
         return ServiceUtil.returnSuccess();
     }
 
-    protected static void duplicateRelated(GenericValue product, String title, String relatedEntityName, String productIdField, String variantProductId, Timestamp nowTimestamp, boolean removeOld, GenericDelegator delegator, boolean test) throws GenericEntityException {
-        List<GenericValue> relatedList = EntityUtil.filterByDate(product.getRelated(title + relatedEntityName), nowTimestamp);
+    protected static void duplicateRelated(GenericValue product, String title, String relatedEntityName, String productIdField, String variantProductId, Timestamp nowTimestamp, boolean removeOld, Delegator delegator, boolean test) throws GenericEntityException {
+        List<GenericValue> relatedList = EntityUtil.filterByDate(product.getRelated(title + relatedEntityName, null, null, false), nowTimestamp);
         for (GenericValue relatedValue: relatedList) {
             GenericValue newRelatedValue = (GenericValue) relatedValue.clone();
             newRelatedValue.set(productIdField, variantProductId);
@@ -452,7 +455,7 @@ public class ProductUtilServices {
                 // can't just set to null, need to remove the value so it isn't a constraint in the query
                 //findValue.set("fromDate", null);
                 findValue.remove("fromDate");
-                List<GenericValue> existingValueList = EntityUtil.filterByDate(delegator.findByAnd(relatedEntityName, findValue), nowTimestamp);
+                List<GenericValue> existingValueList = EntityUtil.filterByDate(delegator.findByAnd(relatedEntityName, findValue, null, false), nowTimestamp);
                 if (existingValueList.size() > 0) {
                     if (test) {
                         Debug.logInfo("Found " + existingValueList.size() + " existing values for related entity name: " + relatedEntityName + ", not copying, findValue is: " + findValue, module);
@@ -484,7 +487,7 @@ public class ProductUtilServices {
      * NOTE: only works on fields of Product right now
      */
     public static Map<String, Object> setAllProductImageNames(DispatchContext dctx, Map<String, ? extends Object> context) {
-        GenericDelegator delegator = dctx.getDelegator();
+        Delegator delegator = dctx.getDelegator();
         String pattern = (String) context.get("pattern");
         Locale locale = (Locale) context.get("locale");
         String errMsg = null;
@@ -508,7 +511,7 @@ public class ProductUtilServices {
 
                 if ("Y".equals(product.getString("isVirtual"))) {
                     // find the first variant, use it's ID for the names...
-                    List<GenericValue> productAssocList = EntityUtil.filterByDate(delegator.findByAnd("ProductAssoc", UtilMisc.toMap("productId", productId, "productAssocTypeId", "PRODUCT_VARIANT")));
+                    List<GenericValue> productAssocList = EntityUtil.filterByDate(delegator.findByAnd("ProductAssoc", UtilMisc.toMap("productId", productId, "productAssocTypeId", "PRODUCT_VARIANT"), null, false));
                     if (productAssocList.size() > 0) {
                         GenericValue productAssoc = EntityUtil.getFirst(productAssocList);
                         smallMap.put("productId", productAssoc.getString("productIdTo"));
@@ -538,7 +541,7 @@ public class ProductUtilServices {
             Debug.logInfo("Completed - Image URLs set for " + numSoFar + " products.", module);
         } catch (GenericEntityException e) {
             Map<String, String> messageMap = UtilMisc.toMap("errMessage", e.toString());
-            errMsg = UtilProperties.getMessage(resource,"productutilservices.entity_error_running_setAllProductImageNames", messageMap, locale);
+            errMsg = UtilProperties.getMessage(resourceError,"productutilservices.entity_error_running_setAllProductImageNames", messageMap, locale);
             Debug.logError(e, errMsg, module);
             return ServiceUtil.returnError(errMsg);
         }
@@ -547,7 +550,7 @@ public class ProductUtilServices {
     }
 
     public static Map<String, Object> clearAllVirtualProductImageNames(DispatchContext dctx, Map<String, ? extends Object> context) {
-        GenericDelegator delegator = dctx.getDelegator();
+        Delegator delegator = dctx.getDelegator();
         Locale locale = (Locale) context.get("locale");
         String errMsg = null;
 
@@ -570,7 +573,7 @@ public class ProductUtilServices {
             Debug.logInfo("Completed - Image URLs set for " + numSoFar + " products.", module);
         } catch (GenericEntityException e) {
             Map<String, String> messageMap = UtilMisc.toMap("errMessage", e.toString());
-            errMsg = UtilProperties.getMessage(resource,"productutilservices.entity_error_running_clearAllVirtualProductImageNames", messageMap, locale);
+            errMsg = UtilProperties.getMessage(resourceError,"productutilservices.entity_error_running_clearAllVirtualProductImageNames", messageMap, locale);
             Debug.logError(e, errMsg, module);
             return ServiceUtil.returnError(errMsg);
         }
@@ -602,7 +605,7 @@ while (allCatIter.hasNext()) {
 
 
     public static Map<String, Object> attachProductFeaturesToCategory(DispatchContext dctx, Map<String, ? extends Object> context) {
-        GenericDelegator delegator = dctx.getDelegator();
+        Delegator delegator = dctx.getDelegator();
         String productCategoryId = (String) context.get("productCategoryId");
         String doSubCategoriesStr = (String) context.get("doSubCategories");
         Locale locale = (Locale) context.get("locale");
@@ -632,7 +635,7 @@ while (allCatIter.hasNext()) {
             attachProductFeaturesToCategory(productCategoryId, productFeatureTypeIdsToInclude, productFeatureTypeIdsToExclude, delegator, doSubCategories, nowTimestamp);
         } catch (GenericEntityException e) {
             Map<String, String> messageMap = UtilMisc.toMap("errMessage", e.toString());
-            errMsg = UtilProperties.getMessage(resource,"productutilservices.error_in_attachProductFeaturesToCategory", messageMap, locale);
+            errMsg = UtilProperties.getMessage(resourceError,"productutilservices.error_in_attachProductFeaturesToCategory", messageMap, locale);
             Debug.logError(e, errMsg, module);
             return ServiceUtil.returnError(errMsg);
         }
@@ -643,13 +646,13 @@ while (allCatIter.hasNext()) {
     /** Get all features associated with products and associate them with a feature group attached to the category for each feature type;
      * includes products associated with this category only, but will also associate all feature groups of sub-categories with this category, optionally calls this method for all sub-categories too
      */
-    public static void attachProductFeaturesToCategory(String productCategoryId, Set<String> productFeatureTypeIdsToInclude, Set<String> productFeatureTypeIdsToExclude, GenericDelegator delegator, boolean doSubCategories, Timestamp nowTimestamp) throws GenericEntityException {
+    public static void attachProductFeaturesToCategory(String productCategoryId, Set<String> productFeatureTypeIdsToInclude, Set<String> productFeatureTypeIdsToExclude, Delegator delegator, boolean doSubCategories, Timestamp nowTimestamp) throws GenericEntityException {
         if (nowTimestamp == null) {
             nowTimestamp = UtilDateTime.nowTimestamp();
         }
 
         // do sub-categories first so all feature groups will be in place
-        List<GenericValue> subCategoryList = delegator.findByAnd("ProductCategoryRollup", UtilMisc.toMap("parentProductCategoryId", productCategoryId));
+        List<GenericValue> subCategoryList = delegator.findByAnd("ProductCategoryRollup", UtilMisc.toMap("parentProductCategoryId", productCategoryId), null, false);
         if (doSubCategories) {
             for (GenericValue productCategoryRollup: subCategoryList) {
                 attachProductFeaturesToCategory(productCategoryRollup.getString("productCategoryId"), productFeatureTypeIdsToInclude, productFeatureTypeIdsToExclude, delegator, true, nowTimestamp);
@@ -658,20 +661,20 @@ while (allCatIter.hasNext()) {
 
         // now get all features for this category and make associated feature groups
         Map<String, Set<String>> productFeatureIdByTypeIdSetMap = FastMap.newInstance();
-        List<GenericValue> productCategoryMemberList = delegator.findByAnd("ProductCategoryMember", UtilMisc.toMap("productCategoryId", productCategoryId));
+        List<GenericValue> productCategoryMemberList = delegator.findByAnd("ProductCategoryMember", UtilMisc.toMap("productCategoryId", productCategoryId), null, false);
         for (GenericValue productCategoryMember: productCategoryMemberList) {
             String productId = productCategoryMember.getString("productId");
             EntityCondition condition = EntityCondition.makeCondition(UtilMisc.toList(
                     EntityCondition.makeCondition("productId", EntityOperator.EQUALS, productId),
                     EntityCondition.makeCondition("fromDate", EntityOperator.LESS_THAN_EQUAL_TO, nowTimestamp),
                     EntityCondition.makeCondition(EntityCondition.makeCondition("thruDate", EntityOperator.EQUALS, null), EntityOperator.OR, EntityCondition.makeCondition("thruDate", EntityOperator.GREATER_THAN_EQUAL_TO, nowTimestamp))
-            ), EntityOperator.AND);
+           ), EntityOperator.AND);
             EntityListIterator productFeatureAndApplEli = delegator.find("ProductFeatureAndAppl", condition, null, null, null, null);
             GenericValue productFeatureAndAppl = null;
-            while ((productFeatureAndAppl = (GenericValue) productFeatureAndApplEli.next()) != null) {
+            while ((productFeatureAndAppl = productFeatureAndApplEli.next()) != null) {
                 String productFeatureId = productFeatureAndAppl.getString("productFeatureId");
                 String productFeatureTypeId = productFeatureAndAppl.getString("productFeatureTypeId");
-                if (productFeatureTypeIdsToInclude != null && productFeatureTypeIdsToInclude.size() > 0 && !productFeatureTypeIdsToInclude.contains(productFeatureTypeId)) {
+                if (UtilValidate.isNotEmpty(productFeatureTypeIdsToInclude) && !productFeatureTypeIdsToInclude.contains(productFeatureTypeId)) {
                     continue;
                 }
                 if (productFeatureTypeIdsToExclude != null && productFeatureTypeIdsToExclude.contains(productFeatureTypeId)) {
@@ -697,7 +700,7 @@ while (allCatIter.hasNext()) {
                 productFeatureGroupId = productFeatureGroupId.substring(0, 20);
             }
 
-            GenericValue productFeatureGroup = delegator.findByPrimaryKey("ProductFeatureGroup", UtilMisc.toMap("productFeatureGroupId", productFeatureGroupId));
+            GenericValue productFeatureGroup = delegator.findOne("ProductFeatureGroup", UtilMisc.toMap("productFeatureGroupId", productFeatureGroupId), false);
             if (productFeatureGroup == null) {
                 // auto-create the group
                 String description = "Feature Group for type [" + productFeatureTypeId + "] features in category [" + productCategoryId + "]";
@@ -715,7 +718,7 @@ while (allCatIter.hasNext()) {
                         EntityCondition.makeCondition("productFeatureGroupId", EntityOperator.EQUALS, productFeatureGroupId),
                         EntityCondition.makeCondition("fromDate", EntityOperator.LESS_THAN_EQUAL_TO, nowTimestamp),
                         EntityCondition.makeCondition(EntityCondition.makeCondition("thruDate", EntityOperator.EQUALS, null), EntityOperator.OR, EntityCondition.makeCondition("thruDate", EntityOperator.GREATER_THAN_EQUAL_TO, nowTimestamp))
-                ), EntityOperator.AND);
+               ), EntityOperator.AND);
                 if (delegator.findCountByCondition("ProductFeatureGroupAppl", condition, null, null) == 0) {
                     // if no valid ones, create one
                     GenericValue productFeatureGroupAppl = delegator.makeValue("ProductFeatureGroupAppl", UtilMisc.toMap("productFeatureGroupId", productFeatureGroupId, "productFeatureId", productFeatureId, "fromDate", nowTimestamp));
@@ -731,7 +734,7 @@ while (allCatIter.hasNext()) {
                     EntityCondition.makeCondition("productCategoryId", EntityOperator.EQUALS, subProductCategoryId),
                     EntityCondition.makeCondition("fromDate", EntityOperator.LESS_THAN_EQUAL_TO, nowTimestamp),
                     EntityCondition.makeCondition(EntityCondition.makeCondition("thruDate", EntityOperator.EQUALS, null), EntityOperator.OR, EntityCondition.makeCondition("thruDate", EntityOperator.GREATER_THAN_EQUAL_TO, nowTimestamp))
-            ), EntityOperator.AND);
+           ), EntityOperator.AND);
             EntityListIterator productFeatureCatGrpApplEli = delegator.find("ProductFeatureCatGrpAppl", condition, null, null, null, null);
             GenericValue productFeatureCatGrpAppl = null;
             while ((productFeatureCatGrpAppl = productFeatureCatGrpApplEli.next()) != null) {
@@ -741,7 +744,7 @@ while (allCatIter.hasNext()) {
                         EntityCondition.makeCondition("productFeatureGroupId", EntityOperator.EQUALS, productFeatureGroupId),
                         EntityCondition.makeCondition("fromDate", EntityOperator.LESS_THAN_EQUAL_TO, nowTimestamp),
                         EntityCondition.makeCondition(EntityCondition.makeCondition("thruDate", EntityOperator.EQUALS, null), EntityOperator.OR, EntityCondition.makeCondition("thruDate", EntityOperator.GREATER_THAN_EQUAL_TO, nowTimestamp))
-                ), EntityOperator.AND);
+               ), EntityOperator.AND);
                 if (delegator.findCountByCondition("ProductFeatureCatGrpAppl", checkCondition, null, null) == 0) {
                     // if no valid ones, create one
                     GenericValue productFeatureGroupAppl = delegator.makeValue("ProductFeatureCatGrpAppl", UtilMisc.toMap("productFeatureGroupId", productFeatureGroupId, "productCategoryId", productCategoryId, "fromDate", nowTimestamp));
@@ -756,7 +759,7 @@ while (allCatIter.hasNext()) {
         return ServiceUtil.returnSuccess();
     }
 
-    public static void getFeatureGroupsForCategory(String productCategoryId, Set<String> productFeatureGroupIdsToRemove, GenericDelegator delegator, boolean doSubCategories, Timestamp nowTimestamp) throws GenericEntityException {
+    public static void getFeatureGroupsForCategory(String productCategoryId, Set<String> productFeatureGroupIdsToRemove, Delegator delegator, boolean doSubCategories, Timestamp nowTimestamp) throws GenericEntityException {
 
     }
 }

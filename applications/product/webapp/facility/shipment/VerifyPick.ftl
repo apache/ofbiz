@@ -26,28 +26,28 @@ under the License.
       </ul>
       <br class="clear"/>
     </div>
-    <#if shipmentId?has_content>
+    <#if (shipmentId?has_content) || (isOrderStatusApproved == false)>
       <#assign showInput = "N">
     </#if>
     <#if shipmentId?has_content>
       <div>
-        ${uiLabelMap.ProductShipmentId} <a href="<@ofbizUrl>/ViewShipment?shipmentId=${shipmentId}</@ofbizUrl>" class="buttontext">${shipmentId}</a>
+        <span class="label">${uiLabelMap.ProductShipmentId}</span><a href="<@ofbizUrl>/ViewShipment?shipmentId=${shipmentId}</@ofbizUrl>" class="buttontext">${shipmentId}</a>
       </div>
       <#if invoiceIds?exists && invoiceIds?has_content>
         <div>
-          <p>${uiLabelMap.AccountingInvoices}:</p>
+          <span class="label">${uiLabelMap.AccountingInvoices}:</span>
           <ul>
             <#list invoiceIds as invoiceId>
               <li>
-                #<a href="/accounting/control/invoiceOverview?invoiceId=${invoiceId}&externalLoginKey=${externalLoginKey}" target="_blank" class="buttontext">${invoiceId}</a>
-                (<a href="/accounting/control/invoice.pdf?invoiceId=${invoiceId}&externalLoginKey=${externalLoginKey}" target="_blank" class="buttontext">PDF</a>)
+                ${uiLabelMap.CommonNbr}<a href="/accounting/control/invoiceOverview?invoiceId=${invoiceId}&amp;externalLoginKey=${externalLoginKey}" target="_blank" class="buttontext">${invoiceId}</a>
+                (<a href="/accounting/control/invoice.pdf?invoiceId=${invoiceId}&amp;externalLoginKey=${externalLoginKey}" target="_blank" class="buttontext">PDF</a>)
               </li>
             </#list>
           </ul>
         </div>
       </#if>
     </#if>
-    <br/>
+    <br />
     <div class="screenlet-body">
       <form name="selectOrderForm" method="post" action="<@ofbizUrl>VerifyPick</@ofbizUrl>">
         <input type="hidden" name="facilityId" value="${facility.facilityId?if_exists}"/>
@@ -74,7 +74,7 @@ under the License.
           </tr>
         </table>
       </form>
-      <br/>
+      <br />
       <!-- select picklist bin form -->
       <form name="selectPicklistBinForm" method="post" action="<@ofbizUrl>VerifyPick</@ofbizUrl>" style="margin: 0;">
         <input type="hidden" name="facilityId" value="${facility.facilityId?if_exists}"/>
@@ -106,40 +106,40 @@ under the License.
     <div class="screenlet">
       <div class="screenlet-title-bar">
         <ul>
-          <li class="h3">${uiLabelMap.ProductOrderId} #<a href="/ordermgr/control/orderview?orderId=${orderId}">${orderId}</a> / ${uiLabelMap.ProductOrderShipGroupId} #${shipGroupSeqId}</li>
+          <li class="h3">${uiLabelMap.ProductOrderId} ${uiLabelMap.CommonNbr}<a href="/ordermgr/control/orderview?orderId=${orderId}">${orderId}</a> / ${uiLabelMap.ProductOrderShipGroupId} #${shipGroupSeqId}</li>
         </ul>
         <br class="clear"/>
       </div>
       <div class="screenlet-body">
         <#if orderItemShipGroup?has_content>
-          <#assign postalAddress = orderItemShipGroup.getRelatedOne("PostalAddress")>
+          <#assign postalAddress = orderItemShipGroup.getRelatedOne("PostalAddress", false)>
           <#assign carrier = orderItemShipGroup.carrierPartyId?default("N/A")>
           <table cellpadding="4" cellspacing="4" class="basic-table">
             <tr>
               <td valign="top">
                 <span class="label">${uiLabelMap.ProductShipToAddress}</span>
-                <br/>
+                <br />
                 ${uiLabelMap.CommonTo}: ${postalAddress.toName?default("")}
-                <br/>
+                <br />
                 <#if postalAddress.attnName?has_content>
                   ${uiLabelMap.CommonAttn}: ${postalAddress.attnName}
-                  <br/>
+                  <br />
                 </#if>
                 ${postalAddress.address1}
-                <br/>
+                <br />
                 <#if postalAddress.address2?has_content>
                   ${postalAddress.address2}
-                  <br/>
+                  <br />
                 </#if>
                 ${postalAddress.city?if_exists}, ${postalAddress.stateProvinceGeoId?if_exists} ${postalAddress.postalCode?if_exists}
-                <br/>
+                <br />
                 ${postalAddress.countryGeoId}
-                <br/>
+                <br />
               </td>
               <td>&nbsp;</td>
               <td valign="top">
                 <span class="label">${uiLabelMap.ProductCarrierShipmentMethod}</span>
-                <br/>
+                <br />
                 <#if carrier == "USPS">
                   <#assign color = "red">
                 <#elseif carrier == "UPS">
@@ -156,13 +156,13 @@ under the License.
               <td>&nbsp;</td>
               <td valign="top">
                 <span class="label">${uiLabelMap.OrderInstructions}</span>
-                <br/>
+                <br />
                 ${orderItemShipGroup.shippingInstructions?default("(${uiLabelMap.CommonNone})")}
               </td>
             </tr>
           </table>
         </#if>
-        <hr/>
+        <hr />
         <form name="singlePickForm" method="post" action="<@ofbizUrl>processVerifyPick</@ofbizUrl>">
           <input type="hidden" name="orderId" value="${orderId?if_exists}"/>
           <input type="hidden" name="shipGroupSeqId" value="${shipGroupSeqId?if_exists}"/>
@@ -181,7 +181,7 @@ under the License.
             </tr>
           </table>
         </form>
-        <br/>
+        <br />
         <#assign orderItems = orderItems?if_exists>
         <form name="multiPickForm" method="post" action="<@ofbizUrl>processBulkVerifyPick</@ofbizUrl>">
           <input type="hidden" name="facilityId" value="${facility.facilityId?if_exists}"/>
@@ -191,13 +191,12 @@ under the License.
           <table class="basic-table" cellspacing='0'>
             <tr class="header-row">
               <td>&nbsp;</td>
-              <td>${uiLabelMap.ProductItem} #</td>
+              <td>${uiLabelMap.ProductItem} ${uiLabelMap.CommonNbr}</td>
               <td>${uiLabelMap.ProductProductId}</td>
               <td>${uiLabelMap.ProductInternalName}</td>
+              <td>${uiLabelMap.ProductCountryOfOrigin}</td>
               <td align="right">${uiLabelMap.ProductOrderedQuantity}</td>
               <td align="right">${uiLabelMap.ProductVerified}&nbsp;${uiLabelMap.CommonQuantity}</td>
-              <td>&nbsp;</td>
-              <td align="right">${uiLabelMap.CommonReady}&nbsp;${uiLabelMap.CommonTo}&nbsp;${uiLabelMap.ProductVerify}</td>
               <td align="center">${uiLabelMap.CommonQty}&nbsp;${uiLabelMap.CommonTo}&nbsp;${uiLabelMap.ProductVerify}</td>
             </tr>
             <#if orderItems?has_content>
@@ -209,13 +208,13 @@ under the License.
                 <#assign readyToVerify = verifyPickSession.getReadyToVerifyQuantity(orderId,orderItemSeqId)>
                 <#assign orderItemQuantity = orderItem.getBigDecimal("quantity")>
                 <#assign verifiedQuantity = 0.000000>
-                <#assign shipments = delegator.findByAnd("Shipment", Static["org.ofbiz.base.util.UtilMisc"].toMap("primaryOrderId", orderItem.getString("orderId"), "statusId", "SHIPMENT_PICKED"))>
+                <#assign shipments = delegator.findByAnd("Shipment", Static["org.ofbiz.base.util.UtilMisc"].toMap("primaryOrderId", orderItem.getString("orderId"), "statusId", "SHIPMENT_PICKED"), null, false)/>
                 <#if (shipments?has_content)>
                   <#list shipments as shipment>
-                    <#assign orderShipments = shipment.getRelatedByAnd("OrderShipment", Static["org.ofbiz.base.util.UtilMisc"].toMap("orderId", "${orderId}", "orderItemSeqId", orderItemSeqId))>
-                    <#if orderShipments?has_content>
-                      <#list orderShipments as orderShipment>
-                        <#assign verifiedQuantity = verifiedQuantity + orderShipment.getBigDecimal("quantity")>
+                    <#assign itemIssuances = delegator.findByAnd("ItemIssuance", Static["org.ofbiz.base.util.UtilMisc"].toMap("shipmentId", shipment.getString("shipmentId"), "orderItemSeqId", orderItemSeqId), null, false)/>
+                    <#if itemIssuances?has_content>
+                      <#list itemIssuances as itemIssuance>
+                        <#assign verifiedQuantity = verifiedQuantity + itemIssuance.getBigDecimal("quantity")>
                       </#list>
                     </#if>
                   </#list>
@@ -224,7 +223,7 @@ under the License.
                   <#assign counter = counter +1>
                 </#if>
                 <#assign orderItemQuantity = orderItemQuantity.subtract(verifiedQuantity)>
-                <#assign orderProduct = orderItem.getRelatedOne("Product")?if_exists/>
+                <#assign product = orderItem.getRelatedOne("Product", false)?if_exists/>
                 <tr>
                   <#if (orderItemQuantity.compareTo(readyToVerify) > 0) >
                     <td><input type="checkbox" name="sel_${rowKey}" value="Y" checked=""/></td>
@@ -233,13 +232,23 @@ under the License.
                     <td>&nbsp;</td>
                   </#if>
                   <td>${orderItemSeqId?if_exists}</td>
-                  <td>${orderProduct.productId?default("N/A")}</td>
+                  <td>${product.productId?default("N/A")}</td>
                   <td>
-                    <a href="/catalog/control/EditProduct?productId=${orderProduct.productId?if_exists}${externalKeyParam}" class="buttontext" target="_blank">${(orderProduct.internalName)?if_exists}</a>
+                    <a href="/catalog/control/EditProduct?productId=${product.productId?if_exists}${externalKeyParam}" class="buttontext" target="_blank">${(product.internalName)?if_exists}</a>
+                  </td>
+                  <td>
+                    <select name="geo_${rowKey}">
+                      <#if product.originGeoId?has_content>
+                        <#assign originGeoId = product.originGeoId>
+                        <#assign geo = delegator.findOne("Geo", Static["org.ofbiz.base.util.UtilMisc"].toMap("geoId", originGeoId), true)>
+                        <option value="${originGeoId}">${geo.geoName?if_exists}</option>
+                        <option value="${originGeoId}">---</option>
+                      </#if>
+                      <option value=""></option>
+                      ${screens.render("component://common/widget/CommonScreens.xml#countries")}
+                    </select>
                   </td>
                   <td align="right">${orderItemQuantity?if_exists}</td>
-                  <td align="right">${verifiedQuantity?if_exists}</td>
-                  <td>&nbsp;&nbsp;&nbsp;</td>
                   <td align="right">${readyToVerify?if_exists}</td>
                   <td align="center">
                     <#if (orderItemQuantity.compareTo(readyToVerify) > 0)>
@@ -252,6 +261,39 @@ under the License.
                   <input type="hidden" name="prd_${rowKey}" value="${(orderItem.productId)?if_exists}"/>
                   <input type="hidden" name="ite_${rowKey}" value="${(orderItem.orderItemSeqId)?if_exists}"/>
                 </tr>
+                <#assign workOrderItemFulfillments = orderItem.getRelated("WorkOrderItemFulfillment", null, null, false)/>
+                <#if workOrderItemFulfillments?has_content>
+                  <#assign workOrderItemFulfillment = Static["org.ofbiz.entity.util.EntityUtil"].getFirst(workOrderItemFulfillments)/>
+                  <#if workOrderItemFulfillment?has_content>
+                    <#assign workEffort = workOrderItemFulfillment.getRelatedOne("WorkEffort", false)/>
+                    <#if workEffort?has_content>
+                      <#assign workEffortTask = Static["org.ofbiz.entity.util.EntityUtil"].getFirst(delegator.findByAnd("WorkEffort", Static["org.ofbiz.base.util.UtilMisc"].toMap("workEffortParentId", workEffort.workEffortId), null, false))/>
+                      <#if workEffortTask?has_content>
+                        <#assign workEffortInventoryAssigns = workEffortTask.getRelated("WorkEffortInventoryAssign", null, null, false)/>
+                        <#if workEffortInventoryAssigns?has_content>
+                          <tr>
+                            <th colspan="8">
+                              ${uiLabelMap.OrderMarketingPackageComposedBy}
+                            </th>
+                          </tr>
+                          <tr><td colspan="8"><hr /></td></tr>
+                          <#list workEffortInventoryAssigns as workEffortInventoryAssign>
+                            <#assign inventoryItem = workEffortInventoryAssign.getRelatedOne("InventoryItem", false)/>
+                            <#assign product = inventoryItem.getRelatedOne("Product", false)/>
+                            <tr>
+                              <td colspan="2"></td>
+                              <td>${product.productId?default("N/A")}</td>
+                              <td>${product.internalName?if_exists}</td>
+                              <td></td>
+                              <td align="right">${workEffortInventoryAssign.quantity?if_exists}</td>
+                            </tr>
+                          </#list>
+                          <tr><td colspan="8"><hr /></td></tr>
+                        </#if>
+                      </#if>
+                    </#if>
+                  </#if>
+                </#if>
                 <#assign rowKey = rowKey + 1>
               </#list>
             </#if>
@@ -271,7 +313,7 @@ under the License.
             </tr>
           </table>
         </form>
-        <br/>
+        <br />
       </div>
     </div>
     <#assign orderId = orderId?if_exists >
@@ -292,38 +334,42 @@ under the License.
           <div class="screenlet-body">
             <table class="basic-table" cellspacing='0'>
               <tr class="header-row">
-                <td>${uiLabelMap.ProductItem} #</td>
+                <td>${uiLabelMap.ProductItem} ${uiLabelMap.CommonNbr}</td>
                 <td>${uiLabelMap.ProductProductId}</td>
-                <td align="right">${uiLabelMap.ProductVerify}&nbsp;${uiLabelMap.CommonQty}</td>
+                <td>${uiLabelMap.ProductInventoryItem} ${uiLabelMap.CommonNbr}</td>
+                <td align="right">${uiLabelMap.ProductVerified}&nbsp;${uiLabelMap.CommonQuantity}</td>
                 <td>&nbsp;</td>
               </tr>
               <#list pickRows as pickRow>
                 <#if (pickRow.getOrderId()?if_exists).equals(orderId)>
                   <tr>
-                    <td>${pickRow.getOrderSeqId()?if_exists}</td>
+                    <td>${pickRow.getOrderItemSeqId()?if_exists}</td>
                     <td>${pickRow.getProductId()?if_exists}</td>
+                    <td>${pickRow.getInventoryItemId()?if_exists}</td>
                     <td align="right">${pickRow.getReadyToVerifyQty()?if_exists}</td>
                   </tr>
                 </#if>
               </#list>
             </table>
-            <input type="submit" value="${uiLabelMap.ProductComplete}"/>
+            <div align="right">
+              <a href="javascript:document.completePickForm.submit()" class="buttontext">${uiLabelMap.ProductComplete}</a>
+            </div>
           </div>
         </div>
       </#if>
     </form>
   </#if>
   <#if orderId?has_content>
-    <script language="javascript">
+    <script language="javascript" type="text/javascript">
       document.singlePickForm.productId.focus();
     </script>
   <#else>
-    <script language="javascript">
+    <script language="javascript" type="text/javascript">
       document.selectOrderForm.orderId.focus();
     </script>
   </#if>
   <#if shipmentId?has_content>
-    <script language="javascript">
+    <script language="javascript" type="text/javascript">
       document.selectOrderForm.orderId.focus();
     </script>
   </#if>

@@ -20,10 +20,10 @@ package org.ofbiz.widget;
 
 import java.io.Serializable;
 import java.util.Map;
-import org.w3c.dom.Element;
+
 import org.ofbiz.base.util.UtilGenerics;
 import org.ofbiz.base.util.UtilProperties;
-import org.ofbiz.base.util.UtilValidate;
+import org.w3c.dom.Element;
 
 /**
  * Widget Library - Widget model class. ModelWidget is a base class that is
@@ -34,25 +34,14 @@ public class ModelWidget implements Serializable {
 
     /**
      * The parameter name used to control widget boundary comments. Currently
-     * set to "widgetVerbose". Set the parameter to "true" to enable widget
-     * boundary comments.<br/><br/>
-     * <code>WEB-INF/web.xml</code> example:<br/><br/>
-     * <code>
-     * &lt;context-param&gt;<br/>
-     * &nbsp;&nbsp;&lt;param-name&gt;widgetVerbose&lt;/param-name&gt;<br/>
-     * &nbsp;&nbsp;&lt;param-value&gt;true&lt;/param-value&gt;<br/>
-     * &lt;/context-param&gt;
-     * </code><br/><br/>
-     * Screen widget example:<br/><br/>
-     * <code>
-     * &lt;actions&gt;<br/>
-     * &nbsp;&nbsp;&lt;set field="parameters.widgetVerbose" value="true" global="true"/&gt;<br/>
-     * &lt;/actions&gt;
-     * </code>
+     * set to "widgetVerbose".
      */
     public static final String enableBoundaryCommentsParam = "widgetVerbose";
     protected String name;
     protected boolean enableWidgetBoundaryComments = false;
+    private String systemId;
+    private int startColumn;
+    private int startLine;
 
     protected ModelWidget() {}
 
@@ -62,6 +51,9 @@ public class ModelWidget implements Serializable {
      */
     public ModelWidget(Element widgetElement) {
         this.name = widgetElement.getAttribute("name");
+        this.systemId = (String) widgetElement.getUserData("systemId");
+        this.startColumn = ((Integer) widgetElement.getUserData("startColumn")).intValue();
+        this.startLine = ((Integer) widgetElement.getUserData("startLine")).intValue();
     }
 
     /**
@@ -70,6 +62,35 @@ public class ModelWidget implements Serializable {
      */
     public String getName() {
         return name;
+    }
+
+    /**
+     * Returns the url as a string, from where this widget was defined.
+     * @return url
+     */
+    public String getSystemId() {
+        return systemId;
+    }
+
+    /**
+     * Returns the column where this widget was defined, in it's containing xml file.
+     * @return start column
+     */
+    public int getStartColumn() {
+        return startColumn;
+    }
+
+    /**
+     * Returns the line where this widget was defined, in it's containing xml file.
+     * @return start line
+     */
+    public int getStartLine() {
+        return startLine;
+    }
+
+    @Override
+    public String toString() {
+        return getClass().getSimpleName() + "[" + getSystemId() + "#" + getName() + "@" + getStartColumn() + "," + getStartLine() + "]";
     }
 
     /**
@@ -86,7 +107,9 @@ public class ModelWidget implements Serializable {
      * Returns true if boundary comments are enabled for this widget, otherwise
      * returns false.
      * @return True if boundary comments are enabled for this widget
+     * @deprecated Use the static <code>widgetBoundaryCommentsEnabled</code> method instead
      */
+    @Deprecated
     public boolean boundaryCommentsEnabled() {
         return enableWidgetBoundaryComments;
     }
@@ -94,51 +117,39 @@ public class ModelWidget implements Serializable {
     /**
      * Enables/disables boundary comments for this widget.
      * @param context The screen rendering context
+     * @deprecated Do not use this - it is not thread-safe
      */
-    public void setWidgetBoundaryComments(Map<String, Object> context) {
-        Map<String, ? extends Object> parameters = UtilGenerics.checkMap(context.get("parameters"));
-        enableWidgetBoundaryComments = widgetBoundaryCommentsEnabled(parameters);
+    @Deprecated
+    public void setWidgetBoundaryComments(Map<String, ? extends Object> context) {
+        enableWidgetBoundaryComments = widgetBoundaryCommentsEnabled(context);
     }
 
     /**
-     * Returns true if widget boundary comments are enabled. Widget boundary comments are
-     * enabled by setting widgetVerbose true in the parameters Map, or by setting
-     * widget.verbose=true in widget.properties.
-     * @param parameters Optional parameters Map
+     * Returns <code>true</code> if widget boundary comments are enabled. Widget boundary comments are
+     * enabled by setting <code>widget.verbose=true</code> in the <code>widget.properties</code> file.
+     * The <code>true</code> setting can be overridden in <code>web.xml</code> or in the screen
+     * rendering context. If <code>widget.verbose</code> is set to <code>false</code> in the
+     * <code>widget.properties</code> file, then that setting will override all other settings and
+     * disable all widget boundary comments.
+     * 
+     * @param context Optional context Map
      */
-    public static boolean widgetBoundaryCommentsEnabled(Map<String, ? extends Object> parameters) {
+    public static boolean widgetBoundaryCommentsEnabled(Map<String, ? extends Object> context) {
         boolean result = "true".equals(UtilProperties.getPropertyValue("widget", "widget.verbose"));
-        if (!result && parameters != null) {
-            result = "true".equals(parameters.get(enableBoundaryCommentsParam));
+        if (result && context != null) {
+            String str = (String) context.get(enableBoundaryCommentsParam);
+            if (str != null) {
+                result = "true".equals(str);
+            } else{
+                Map<String, ? extends Object> parameters = UtilGenerics.checkMap(context.get("parameters"));
+                if (parameters != null) {
+                    str = (String) parameters.get(enableBoundaryCommentsParam);
+                    if (str != null) {
+                        result = "true".equals(str);
+                    }
+                }
+            }
         }
         return result;
     }
-
-    public int getPaginatorNumber(Map<String, Object> context) {
-        int paginator_number = 0;
-        Map<String, Object> globalCtx = UtilGenerics.checkMap(context.get("globalContext"));
-        if (globalCtx != null) {
-            Integer paginateNumberInt= (Integer)globalCtx.get("PAGINATOR_NUMBER");
-            if (paginateNumberInt == null) {
-                paginateNumberInt = Integer.valueOf(0);
-                globalCtx.put("PAGINATOR_NUMBER", paginateNumberInt);
-            }
-            paginator_number = paginateNumberInt.intValue();
-        }
-        return paginator_number;
-    }
-
-    public void incrementPaginatorNumber(Map<String, Object> context) {
-        Map<String, Object> globalCtx = UtilGenerics.checkMap(context.get("globalContext"));
-        if (globalCtx != null) {
-            Boolean NO_PAGINATOR = (Boolean) globalCtx.get("NO_PAGINATOR");
-            if (UtilValidate.isNotEmpty(NO_PAGINATOR)) {
-                globalCtx.remove("NO_PAGINATOR");
-            } else {
-                Integer paginateNumberInt = Integer.valueOf(getPaginatorNumber(context) + 1);
-                globalCtx.put("PAGINATOR_NUMBER", paginateNumberInt);
-            }
-        }
-    }
-
 }

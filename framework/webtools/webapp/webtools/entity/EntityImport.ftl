@@ -17,23 +17,20 @@ specific language governing permissions and limitations
 under the License.
 -->
 
-<h1>${uiLabelMap.WebtoolsImportToDataSource}</h1>
-<br />
+<div class="page-title"><span>${uiLabelMap.WebtoolsImportToDataSource}</span></div>
 <p>${uiLabelMap.WebtoolsXMLImportInfo}</p>
-<hr/>
-<h2>${uiLabelMap.WebtoolsImport}:</h2>
-<br />
+<hr />
 
   <form method="post" action="<@ofbizUrl>entityImport</@ofbizUrl>">
     ${uiLabelMap.WebtoolsAbsoluteFileNameOrUrl}:<br />
     <input type="text" size="60" name="filename" value="${filename?if_exists}"/><br />
     ${uiLabelMap.WebtoolsAbsoluteFTLFilename}:<br />
     <input type="text" size="40" name="fmfilename" value="${fmfilename?if_exists}"/><br />
-    <input type="checkbox" name="isUrl" <#if isUrl?exists>"checked"</#if>/>${uiLabelMap.WebtoolsIsURL}<br />
-    <input type="checkbox" name="mostlyInserts" <#if mostlyInserts?exists>"checked"</#if>/>${uiLabelMap.WebtoolsMostlyInserts}<br />
-    <input type="checkbox" name="maintainTimeStamps" <#if keepStamps?exists>"checked"</#if>/>${uiLabelMap.WebtoolsMaintainTimestamps}<br />
-    <input type="checkbox" name="createDummyFks" <#if createDummyFks?exists>"checked"</#if>/>${uiLabelMap.WebtoolsCreateDummyFks}<br />
-    <input type="checkbox" name="checkDataOnly" <#if checkDataOnly?exists>"checked"</#if>/>${uiLabelMap.WebtoolsCheckDataOnly}<br />
+    <input type="checkbox" name="isUrl" <#if isUrl?exists>checked="checked"</#if>/>${uiLabelMap.WebtoolsIsURL}<br />
+    <input type="checkbox" name="mostlyInserts" <#if mostlyInserts?exists>checked="checked"</#if>/>${uiLabelMap.WebtoolsMostlyInserts}<br />
+    <input type="checkbox" name="maintainTimeStamps" <#if keepStamps?exists>checked="checked"</#if>/>${uiLabelMap.WebtoolsMaintainTimestamps}<br />
+    <input type="checkbox" name="createDummyFks" <#if createDummyFks?exists>checked="checked"</#if>/>${uiLabelMap.WebtoolsCreateDummyFks}<br />
+    <input type="checkbox" name="checkDataOnly" <#if checkDataOnly?exists>checked="checked"</#if>/>${uiLabelMap.WebtoolsCheckDataOnly}<br />
     ${uiLabelMap.WebtoolsTimeoutSeconds}:<input type="text" size="6" value="${txTimeoutStr?default("7200")}" name="txTimeout"/><br />
     <div class="button-bar"><input type="submit" value="${uiLabelMap.WebtoolsImportFile}"/></div>
   </form>
@@ -43,7 +40,7 @@ under the License.
     <div class="button-bar"><input type="submit" value="${uiLabelMap.WebtoolsImportText}"/></div>
   </form>
   <#if messages?exists>
-      <hr/>
+      <hr />
       <h3>${uiLabelMap.WebtoolsResults}:</h3>
       <#list messages as message>
           <p>${message}</p>

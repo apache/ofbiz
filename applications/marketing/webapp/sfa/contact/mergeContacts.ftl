@@ -23,40 +23,40 @@ under the License.
         <#if contactInfoList?has_content >
           <#assign contactInfo1 = contactInfoList[0]/>
           <#assign contactInfo2 = contactInfoList[1]/>
-          <input type="hidden" name="partyIdTo" value="${contactInfo1.partyId?if_exists}">
-          <input type="hidden" name="partyId" value="${contactInfo2.partyId?if_exists}">
+          <input type="hidden" name="partyIdTo" value="${contactInfo1.partyId?if_exists}" />
+          <input type="hidden" name="partyId" value="${contactInfo2.partyId?if_exists}" />
 
-          <input type="hidden" name="addrContactMechIdTo" value="${contactInfo1.addrContactMechId?if_exists}">
-          <input type="hidden" name="phoneContactMechIdTo" value="${contactInfo1.phoneContactMechId?if_exists}">
-          <input type="hidden" name="emailContactMechIdTo" value="${contactInfo1.emailContactMechId?if_exists}">
+          <input type="hidden" name="addrContactMechIdTo" value="${contactInfo1.addrContactMechId?if_exists}" />
+          <input type="hidden" name="phoneContactMechIdTo" value="${contactInfo1.phoneContactMechId?if_exists}" />
+          <input type="hidden" name="emailContactMechIdTo" value="${contactInfo1.emailContactMechId?if_exists}" />
 
-          <input type="hidden" name="addrContactMechId" value="${contactInfo2.addrContactMechId?if_exists}">
-          <input type="hidden" name="phoneContactMechId" value="${contactInfo2.phoneContactMechId?if_exists}">
-          <input type="hidden" name="emailContactMechId" value="${contactInfo2.emailContactMechId?if_exists}">
+          <input type="hidden" name="addrContactMechId" value="${contactInfo2.addrContactMechId?if_exists}" />
+          <input type="hidden" name="phoneContactMechId" value="${contactInfo2.phoneContactMechId?if_exists}" />
+          <input type="hidden" name="emailContactMechId" value="${contactInfo2.emailContactMechId?if_exists}" />
 
           <table  >
-            <tr width="100%">
+            <tr>
               <td width="20%" ></td>
-              <td width="30%"><h2>${uiLabelMap.SfaFirstContact}</h2><br/></b></td>
-              <td width="30%"><h2>${uiLabelMap.SfaSecondContact}</h2><br/></b></td>
-              <td width="20%"><h2>${uiLabelMap.CommonSelect}</h2></td>
-              <br/><br/>
+              <td width="30%"><h2>${uiLabelMap.SfaFirstContact}</h2><br /></td>
+              <td width="30%"><h2>${uiLabelMap.SfaSecondContact}</h2><br /></td>
+              <td width="20%"><h2>${uiLabelMap.CommonSelect}</h2><br /></td>
             </tr>
-            <tr width="100%">
+            <tr>
               <td width="20%">${uiLabelMap.PartyFirstName}</td>
               <td width="30%"><h3>${contactInfo1.firstName?if_exists}</h3></td>
               <td width="30%"><h3>${contactInfo2.firstName?if_exists}</h3></td>
               <td width="20%"></td>
             </tr>
-            <tr width="100%">
+            <tr>
               <td width="20%">${uiLabelMap.PartyLastName}</td>
               <td width="30%"><h3>${contactInfo1.lastName?if_exists}</h3></td>
               <td width="30%"><h3>${contactInfo2.lastName?if_exists}</h3></td>
               <td width="20%"></td>
-            </tr><br/>
+            </tr>
             <tr>
-              <td width="30"><br/><h3>${uiLabelMap.PartyGeneralCorrespondenceAddress}</h3></td>
+              <td width="30"><br /><h3>${uiLabelMap.PartyGeneralCorrespondenceAddress}</h3></td>
               <td width="30"></td>
+            </tr>
             <tr>
               <td width="20%" >${uiLabelMap.PartyAddressLine1}</td>
               <td width="30%">${contactInfo1.address1?if_exists}</td>
@@ -90,14 +90,14 @@ under the License.
               <td width="20%"></td>
             </tr>
             <tr>
-              <td width="20%" >${uiLabelMap.PartyCountry}</td>
+              <td width="20%" >${uiLabelMap.CommonCountry}</td>
               <td width="30%">${contactInfo1.country?if_exists}</td>
               <td width="30%">${contactInfo2.country?if_exists}</td>
               <td width="20%"></td>
-            </tr><br/>
-            <tr><td><br/><h3>${uiLabelMap.PartyPrimaryPhone}</h3></td></tr>
+            </tr>
+            <tr><td><br /><h3>${uiLabelMap.PartyPrimaryPhone}</h3></td></tr>
             <tr>
-              <td width="20%">${uiLabelMap.PartyCountryCode}</td>
+              <td width="20%">${uiLabelMap.CommonCountryCode}</td>
               <td width="30%">${contactInfo1.countryCode?if_exists}</td>
               <td width="30%">${contactInfo2.countryCode?if_exists}</td>
               <td width="10%"><input type="checkbox" name="useContactNum2" value="Y"/></td>
@@ -121,7 +121,7 @@ under the License.
               <td width="10%"><input type="checkbox" name="useEmail2" value="Y"/></td>
             </tr>
             <tr>
-              <td colspan="4" align="center"><br/>
+              <td colspan="4" align="center"><br />
                 <input type="submit" value="${uiLabelMap.CommonSubmit}"/>
               </td>
             </tr>

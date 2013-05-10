@@ -18,58 +18,66 @@ under the License.
 -->
 <#if (requestAttributes.uiLabelMap)?exists><#assign uiLabelMap = requestAttributes.uiLabelMap></#if>
 
-<script language="JavaScript" type="text/javascript">
- <!--
+<script type="text/javascript">
+//<![CDATA[
      function changeCategory() {
          document.forms["keywordsearchform"].elements["SEARCH_CATEGORY_ID"].value=document.forms["advancedsearchform"].elements["DUMMYCAT"].value;
          document.forms["advancedsearchform"].elements["SEARCH_CATEGORY_ID"].value=document.forms["advancedsearchform"].elements["DUMMYCAT"].value;
      }
-     function submitProductJump() {
-         document.forms["productjumpform"].action=document.forms["productjumpform"].elements["DUMMYPAGE"].value;
-         document.forms["productjumpform"].submit();
+     function submitProductJump(that) {
+         jQuery('#productJumpForm input[name=productId]').val(jQuery('#productJumpForm input[name=productId]').val().replace(" ",""));
+         jQuery('#productJumpForm').attr('action', jQuery('#dummyPage').val());
+         jQuery('#productJumpForm').submit();
      }
- //-->
+//]]>
  </script>
 
-<form name="keywordsearchform" method="post" action="<@ofbizUrl>keywordsearch?VIEW_SIZE=25&PAGING=Y</@ofbizUrl>" style="margin: 0;">
-  <span class="label">${uiLabelMap.ProductKeywords}:</span><input type="text"name="SEARCH_STRING" size="20" maxlength="50" value="${requestParameters.SEARCH_STRING?if_exists}"/>
-  <span class="label">
-    ${uiLabelMap.ProductCategoryId}:
-  </span>
-  <input type="text" name="SEARCH_CATEGORY_ID" size="15" maxlength="20" value="${requestParameters.SEARCH_CATEGORY_ID?if_exists}"/><a href="javascript:call_fieldlookup2(document.keywordsearchform.SEARCH_CATEGORY_ID,'LookupProductCategory');"><img src='/images/fieldlookup.gif' width='15' height='14' border='0' alt="${uiLabelMap.CommonClickHereForFieldLookup}"/></a>
-  <span class="label">
-    ${uiLabelMap.CommonNoContains}
-  </span>
-  <input type="checkbox" name="SEARCH_CONTAINS" value="N" <#if requestParameters.SEARCH_CONTAINS?if_exists == "N">checked="checked"</#if>/>
-  <span class="label">
-    ${uiLabelMap.CommonAny}
-  </span>
-  <input type="radio" name="SEARCH_OPERATOR" value="OR" <#if requestParameters.SEARCH_OPERATOR?if_exists != "AND">checked="checked"</#if>/>
-  <span class="label">
-    ${uiLabelMap.CommonAll}
-  </span>
-  <input type="radio" name="SEARCH_OPERATOR" value="AND" <#if requestParameters.SEARCH_OPERATOR?if_exists == "AND">checked="checked"</#if>/>
-  &nbsp;
-  <a href="javascript:document.keywordsearchform.submit()" class="buttontext">${uiLabelMap.CommonFind}</a>
+<form name="keywordsearchform" id="keywordSearchForm" method="post" action="<@ofbizUrl>keywordsearch?VIEW_SIZE=25&amp;PAGING=Y</@ofbizUrl>">
+  <fieldset>
+    <div>
+      <label for="keywordSearchString">${uiLabelMap.ProductKeywords}:</label>
+      <input type="text" name="SEARCH_STRING" id="keywordSearchString" size="20" maxlength="50" value="${requestParameters.SEARCH_STRING?if_exists}" />
+    </div>
+    <div>
+      <label for="keywordSearchCategoryId">${uiLabelMap.ProductCategoryId}:</label>
+      <@htmlTemplate.lookupField value="${requestParameters.SEARCH_CATEGORY_ID?if_exists}" formName="keywordsearchform" name="SEARCH_CATEGORY_ID" id="keywordSearchCategoryId" fieldFormName="LookupProductCategory"/>
+    </div>
+    <div>
+      <label for="keywordSearchCointains">${uiLabelMap.CommonNoContains}</label>
+      <input type="checkbox" name="SEARCH_CONTAINS" id="keywordSearchCointains" value="N" <#if requestParameters.SEARCH_CONTAINS?if_exists == "N">checked="checked"</#if> />
+      <label for="keywordSearchOperatorOr">${uiLabelMap.CommonAny}</label>
+      <input type="radio" name="SEARCH_OPERATOR" id="keywordSearchOperatorOr" value="OR" <#if requestParameters.SEARCH_OPERATOR?if_exists != "AND">checked="checked"</#if> />
+      <label for="keywordSearchOperatorAnd">${uiLabelMap.CommonAll}</label>
+      <input type="radio" name="SEARCH_OPERATOR" id="keywordSearchOperatorAnd" value="AND" <#if requestParameters.SEARCH_OPERATOR?if_exists == "AND">checked="checked"</#if> />
+    </div>
+    <div>
+      <input type="submit" name="find" value="${uiLabelMap.CommonFind}" class="buttontext" />
+    </div>
+    </fieldset>
 </form>
-<form name="advancedsearchform" method="post" action="<@ofbizUrl>advancedsearch</@ofbizUrl>" style="margin: 0;">
-  <span class="label">
-    ${uiLabelMap.ProductCategoryId}:
-  </span>
-  <input type="text" name="SEARCH_CATEGORY_ID" size="15" maxlength="20" value="${requestParameters.SEARCH_CATEGORY_ID?if_exists}"/><a href="javascript:call_fieldlookup2(document.advancedsearchform.SEARCH_CATEGORY_ID,'LookupProductCategory');"><img src='/images/fieldlookup.gif' width='15' height='14' border='0' alt="${uiLabelMap.CommonClickHereForFieldLookup}"/></a>
-  <div>
-    <a href="javascript:document.advancedsearchform.submit()" class="buttontext">${uiLabelMap.ProductAdvancedSearch}</a>
-  </div>
+<form name="advancedsearchform" id="advancedSearchForm" method="post" action="<@ofbizUrl>advancedsearch</@ofbizUrl>">
+  <fieldset>
+    <div>
+      <label for="searchCategoryId">${uiLabelMap.ProductCategoryId}:</label>
+      <@htmlTemplate.lookupField value="${requestParameters.SEARCH_CATEGORY_ID?if_exists}" formName="advancedsearchform" name="SEARCH_CATEGORY_ID" id="searchCategoryId" fieldFormName="LookupProductCategory"/>
+    </div>
+    <div>
+    <a href="javascript:document.getElementById('advancedSearchForm').submit()" class="buttontext">${uiLabelMap.ProductAdvancedSearch}</a>
+    </div>
+  </fieldset>
 </form>
-<form name="productjumpform" method="post" action="<@ofbizUrl>EditProduct</@ofbizUrl>" style="margin: 0;">
-    <input type="text" name="productId" size="10" maxlength="20" value="${requestParameters.productId?if_exists}"/>
-    <a href="javascript:call_fieldlookup2(document.productjumpform.productId,'LookupProduct');"><img src='/images/fieldlookup.gif' width='15' height='14' border='0' alt="${uiLabelMap.CommonClickHereForFieldLookup}"/></a>
-    <select name="DUMMYPAGE" onchange="submitProductJump()">
+<form name="productjumpform" id="productJumpForm" method="post" action="<@ofbizUrl>EditProduct</@ofbizUrl>">
+  <fieldset>
+    <input type="hidden" name="viewSize" value="20" />
+    <input type="hidden" name="viewIndex" value="1" />
+    <@htmlTemplate.lookupField value="${requestParameters.productId?if_exists}" formName="productjumpform" name="productId" id="productJumpFormProductId" fieldFormName="LookupProduct"/>
+    <select name="DUMMYPAGE" id="dummyPage" onchange="submitProductJump()">
         <option value="<@ofbizUrl>EditProduct</@ofbizUrl>">-${uiLabelMap.ProductProductJump}-</option>
         <option value="<@ofbizUrl>EditProductQuickAdmin</@ofbizUrl>">${uiLabelMap.ProductQuickAdmin}</option>
         <option value="<@ofbizUrl>EditProduct</@ofbizUrl>">${uiLabelMap.ProductProduct}</option>
         <option value="<@ofbizUrl>EditProductPrices</@ofbizUrl>">${uiLabelMap.ProductPrices}</option>
         <option value="<@ofbizUrl>EditProductContent</@ofbizUrl>">${uiLabelMap.ProductContent}</option>
+        <option value="<@ofbizUrl>EditProductGeos</@ofbizUrl>">${uiLabelMap.ProductGeos}</option>        
         <option value="<@ofbizUrl>EditProductGoodIdentifications</@ofbizUrl>">${uiLabelMap.CommonIds}</option>
         <option value="<@ofbizUrl>EditProductCategories</@ofbizUrl>">${uiLabelMap.ProductCategories}</option>
         <option value="<@ofbizUrl>EditProductKeyword</@ofbizUrl>">${uiLabelMap.ProductKeywords}</option>
@@ -90,5 +98,8 @@ under the License.
         <option value="<@ofbizUrl>EditProductSubscriptionResources</@ofbizUrl>">${uiLabelMap.ProductSubscriptionResources}</option>
         <option value="<@ofbizUrl>QuickAddVariants</@ofbizUrl>">${uiLabelMap.ProductVariants}</option>
         <option value="<@ofbizUrl>EditProductConfigs</@ofbizUrl>">${uiLabelMap.ProductConfigs}</option>
+        <option value="<@ofbizUrl>viewProductOrder</@ofbizUrl>">${uiLabelMap.OrderOrders}</option>
+        <option value="<@ofbizUrl>EditProductCommunicationEvents</@ofbizUrl>">${uiLabelMap.PartyCommunications}</option>
     </select>
+  </fieldset>
 </form>

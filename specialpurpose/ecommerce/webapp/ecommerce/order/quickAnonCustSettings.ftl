@@ -40,8 +40,8 @@ under the License.
 </#macro>
 
 <div class="screenlet">
-  <div class="screenlet-header">
-     <div class="boxhead">&nbsp;${uiLabelMap.PartyBasicInformation}</div>
+  <div class="screenlet-title-bar">
+     <div class="h3">${uiLabelMap.PartyBasicInformation}</div>
   </div>
   <div class="screenlet-body">
   <form name="${parameters.formNameValue}" id="quickAnonProcessCustomer" method="post" action="<@ofbizUrl>quickAnonProcessCustomerSettings</@ofbizUrl>">
@@ -66,35 +66,35 @@ under the License.
                  <td width="72%">&nbsp;</td>
               </tr>
               <tr>
-                <td width="26%" align="right"><div class="tabletext">${uiLabelMap.PartyFirstName}</div></td>
+                <td width="26%" align="right"><div>${uiLabelMap.PartyFirstName}</div></td>
                 <td width="2%">&nbsp;</td>
                 <td width="72%">
                   <@fieldErrors fieldName="firstName"/>
-                    <input type="text" class="inputBox required" name="firstName" id="firstName" value="${parameters.firstName?if_exists}" size="30" maxlength="30"/>*<span id="advice-required-firstName" class="required" style="display:none">(required)</span>
+                    <input type="text" class="inputBox required" name="firstName" id="firstName" value="${parameters.firstName?if_exists}" size="30" maxlength="30"/>*<span id="advice-required-firstName" class="required" style="display:none">(${uiLabelMap.CommonRequired})</span>
                 </td>
               </tr>
               <tr>
-                <td width="26%" align="right"><div class="tabletext">${uiLabelMap.PartyMiddleInitial}</div></td>
+                <td width="26%" align="right"><div>${uiLabelMap.PartyMiddleInitial}</div></td>
                 <td width="2%">&nbsp;</td>
                 <td width="72%">
                   <input type="text" class="inputBox"  name="middleName" value="${parameters.middleName?if_exists}" size="4" maxlength="4"/>
                 </td>
               </tr>
               <tr>
-                <td width="26%" align="right"><div class="tabletext">${uiLabelMap.PartyLastName} </div></td>
+                <td width="26%" align="right"><div>${uiLabelMap.PartyLastName} </div></td>
                 <td width="2%">&nbsp;</td>
                 <td width="72%">
                   <@fieldErrors fieldName="lastName"/>
-                  <input type="text" class="inputBox required" name="lastName" value="${parameters.lastName?if_exists}" size="30" maxlength="30"/>*<span id="advice-required-lastName" class="required" style="display:none">(required)</span>
+                  <input type="text" class="inputBox required" name="lastName" value="${parameters.lastName?if_exists}" size="30" maxlength="30"/>*<span id="advice-required-lastName" class="required" style="display:none">(${uiLabelMap.CommonRequired})</span>
                 </td>
               </tr>
               <tr>
-                <td width="26%" align="right" valign="top"><div class="tabletext"></div></td>
+                <td width="26%" align="right" valign="top"><div></div></td>
                 <td width="2%">&nbsp;</td>
-                <td width="72%"><div class="tabletext">[${uiLabelMap.PartyCountryCode}] [${uiLabelMap.PartyAreaCode}] [${uiLabelMap.PartyContactNumber}] [${uiLabelMap.PartyExtension}]</div></td>
+                <td width="72%"><div>[${uiLabelMap.CommonCountryCode}] [${uiLabelMap.PartyAreaCode}] [${uiLabelMap.PartyContactNumber}] [${uiLabelMap.PartyExtension}]</div></td>
               </tr>
               <tr>
-                <td width="10%" align="right"><div class="tabletext">${uiLabelMap.PartyHomePhone}</div></td>
+                <td width="10%" align="right"><div>${uiLabelMap.PartyHomePhone}</div></td>
                 <td width="2%">&nbsp;</td>
                 <td width="88%">
                   <@fieldErrorsMulti fieldName1="homeCountryCode" fieldName2="homeAreaCode" fieldName3="homeContactNumber" fieldName4="homeExt"/>
@@ -108,7 +108,7 @@ under the License.
                 </td>
               </tr>
               <tr>
-                <td width="26%" align="right"><div class="tabletext">${uiLabelMap.PartyBusinessPhone}</div></td>
+                <td width="26%" align="right"><div>${uiLabelMap.PartyBusinessPhone}</div></td>
                 <td width="2%">&nbsp;</td>
                 <td width="72%">
                   <input type="hidden" name="workPhoneContactMechId" value="${parameters.workPhoneContactMechId?if_exists}"/>
@@ -119,7 +119,7 @@ under the License.
                 </td>
               </tr>
               <tr>
-                <td width="26%" align="right"><div class="tabletext">${uiLabelMap.PartyEmailAddress}</div></td>
+                <td width="26%" align="right"><div>${uiLabelMap.PartyEmailAddress}</div></td>
                 <td width="2%">&nbsp;</td>
                 <td width="72%">
                   <@fieldErrors fieldName="emailAddress"/>
@@ -131,7 +131,7 @@ under the License.
          </td>
      </tr>
      <tr>
-        <td colspan="3" align="center"><hr/></td>
+        <td colspan="3" align="center"><hr /></td>
      </tr>
      <tr>
         <td width="50%">
@@ -147,7 +147,7 @@ under the License.
                  <td width="72%">&nbsp;</td>
               </tr>
               <tr>
-                <td width="26%" align="right"><div class="tabletext">${uiLabelMap.PartyToName}</div></td>
+                <td width="26%" align="right"><div>${uiLabelMap.PartyToName}</div></td>
                 <td width="2%">&nbsp;</td>
                 <td width="72%">
                   <@fieldErrors fieldName="shipToName"/>
@@ -155,7 +155,7 @@ under the License.
                 </td>
               </tr>
               <tr>
-                <td width="26%" align="right"><div class="tabletext">${uiLabelMap.PartyAttentionName}</div></td>
+                <td width="26%" align="right"><div>${uiLabelMap.PartyAttentionName}</div></td>
                 <td width="2%">&nbsp;</td>
                 <td width="72%">
                   <@fieldErrors fieldName="shipToAttnName"/>
@@ -163,30 +163,30 @@ under the License.
                 </td>
               </tr>
               <tr>
-                 <td width="26%" align="right" valign=middle><div class="tabletext">${uiLabelMap.PartyAddressLine1}</div></td>
+                 <td width="26%" align="right" valign="middle"><div>${uiLabelMap.PartyAddressLine1}</div></td>
                  <td width="2%">&nbsp;</td>
                  <td width="72%">
                     <@fieldErrors fieldName="shipToAddress1"/>
-                    <input type="text" class="inputBox required" size="30" maxlength="30" id="shipToAddress1" name="shipToAddress1" value="${parameters.shipToAddress1?if_exists}">
+                    <input type="text" class="inputBox required" size="30" maxlength="30" id="shipToAddress1" name="shipToAddress1" value="${parameters.shipToAddress1?if_exists}" />
                  *</td>
               </tr>
               <tr>
-                 <td width="26%" align="right" valign=middle><div class="tabletext">${uiLabelMap.PartyAddressLine2}</div></td>
+                 <td width="26%" align="right" valign="middle"><div>${uiLabelMap.PartyAddressLine2}</div></td>
                  <td width="2%">&nbsp;</td>
                  <td width="72%">
-                    <input type="text" class="inputBox" size="30" maxlength="30" id="shipToAddress2" name="shipToAddress2" value="${parameters.shipToAddress2?if_exists}">
+                    <input type="text" class="inputBox" size="30" maxlength="30" id="shipToAddress2" name="shipToAddress2" value="${parameters.shipToAddress2?if_exists}" />
                  </td>
               </tr>
               <tr>
-                 <td width="26%" align="right" valign=middle><div class="tabletext">${uiLabelMap.PartyCity}</div></td>
+                 <td width="26%" align="right" valign="middle"><div>${uiLabelMap.PartyCity}</div></td>
                  <td width="2%">&nbsp;</td>
                  <td width="72%">
                     <@fieldErrors fieldName="shipToCity"/>
-                    <input type="text" class="inputBox required" size="30" maxlength="30" id="shipToCity" name="shipToCity" value="${parameters.shipToCity?if_exists}">
+                    <input type="text" class="inputBox required" size="30" maxlength="30" id="shipToCity" name="shipToCity" value="${parameters.shipToCity?if_exists}" />
                  *</td>
               </tr>
               <tr>
-                 <td width="26%" align="right" valign=middle><div class="tabletext">${uiLabelMap.PartyState}</div></td>
+                 <td width="26%" align="right" valign="middle"><div>${uiLabelMap.PartyState}</div></td>
                  <td width="2%">&nbsp;</td>
                  <td width="72%">
                     <@fieldErrors fieldName="shipToStateProvinceGeoId"/>
@@ -202,15 +202,15 @@ under the License.
                  *</td>
               </tr>
               <tr>
-                 <td width="26%" align="right" valign=middle><div class="tabletext">${uiLabelMap.PartyZipCode}</div></td>
+                 <td width="26%" align="right" valign="middle"><div>${uiLabelMap.PartyZipCode}</div></td>
                  <td width="2%">&nbsp;</td>
                  <td width="72%">
                     <@fieldErrors fieldName="shipToPostalCode"/>
-                    <input type="text" class="inputBox required" size="12" maxlength="10" id="shipToPostalCode" name="shipToPostalCode" value="${parameters.shipToPostalCode?if_exists}">
+                    <input type="text" class="inputBox required" size="12" maxlength="10" id="shipToPostalCode" name="shipToPostalCode" value="${parameters.shipToPostalCode?if_exists}" />
                  *</td>
               </tr>
               <tr>
-                 <td width="26%" align="right" valign=middle><div class="tabletext">${uiLabelMap.PartyCountry}</div></td>
+                 <td width="26%" align="right" valign="middle"><div>${uiLabelMap.CommonCountry}</div></td>
                  <td width="2%">&nbsp;</td>
                  <td width="72%">
                     <@fieldErrors fieldName="shipToCountryGeoId"/>
@@ -230,7 +230,7 @@ under the License.
            <table width="100%" border="0" cellpadding="1" cellspacing="0">
               <tr>
                 <td align="center" valign="top" colspan="3">
-                  <div class="tabletext">
+                  <div>
                     <input type="checkbox" class="checkbox" id="useShippingPostalAddressForBilling" name="useShippingPostalAddressForBilling" value="Y"/>
                     ${uiLabelMap.FacilityBillingAddressSameShipping}
                   </div>
@@ -242,7 +242,7 @@ under the License.
                  <td width="72%">&nbsp;</td>
               </tr>
               <tr>
-                <td width="26%" align="right"><div class="tabletext">${uiLabelMap.PartyToName}</div></td>
+                <td width="26%" align="right"><div>${uiLabelMap.PartyToName}</div></td>
                 <td width="2%">&nbsp;</td>
                 <td width="72%">
                   <@fieldErrors fieldName="billToName"/>
@@ -250,7 +250,7 @@ under the License.
                 </td>
               </tr>
               <tr>
-                <td width="26%" align="right"><div class="tabletext">${uiLabelMap.PartyAttentionName}</div></td>
+                <td width="26%" align="right"><div>${uiLabelMap.PartyAttentionName}</div></td>
                 <td width="2%">&nbsp;</td>
                 <td width="72%">
                   <@fieldErrors fieldName="billToAttnName"/>
@@ -258,30 +258,30 @@ under the License.
                 </td>
               </tr>
               <tr>
-                 <td width="26%" align="right" valign=middle><div class="tabletext">${uiLabelMap.PartyAddressLine1}</div></td>
+                 <td width="26%" align="right" valign="middle"><div>${uiLabelMap.PartyAddressLine1}</div></td>
                  <td width="2%">&nbsp;</td>
                  <td width="72%">
                     <@fieldErrors fieldName="billToAddress1"/>
-                    <input type="text" class="inputBox required" id="billToAddress1" size="30" maxlength="30" name="billToAddress1" value="${parameters.billToAddress1?if_exists}">
+                    <input type="text" class="inputBox required" id="billToAddress1" size="30" maxlength="30" name="billToAddress1" value="${parameters.billToAddress1?if_exists}" />
                  *</td>
               </tr>
               <tr>
-                 <td width="26%" align="right" valign=middle><div class="tabletext">${uiLabelMap.PartyAddressLine2}</div></td>
+                 <td width="26%" align="right" valign="middle"><div>${uiLabelMap.PartyAddressLine2}</div></td>
                  <td width="2%">&nbsp;</td>
                  <td width="72%">
-                    <input type="text" class="inputBox" id="billToAddress2" size="30" maxlength="30" name="billToAddress2" value="${parameters.billToAddress2?if_exists}">
+                    <input type="text" class="inputBox" id="billToAddress2" size="30" maxlength="30" name="billToAddress2" value="${parameters.billToAddress2?if_exists}" />
                  </td>
               </tr>
               <tr>
-                 <td width="26%" align="right" valign=middle><div class="tabletext">${uiLabelMap.PartyCity}</div></td>
+                 <td width="26%" align="right" valign="middle"><div>${uiLabelMap.PartyCity}</div></td>
                  <td width="2%">&nbsp;</td>
                  <td width="72%">
                     <@fieldErrors fieldName="billToCity"/>
-                    <input type="text" class="inputBox required" id="billToCity" size="30" maxlength="30" name="billToCity" value="${parameters.billToCity?if_exists}">
+                    <input type="text" class="inputBox required" id="billToCity" size="30" maxlength="30" name="billToCity" value="${parameters.billToCity?if_exists}" />
                  *</td>
               </tr>
               <tr>
-                 <td width="26%" align="right" valign=middle><div class="tabletext">${uiLabelMap.PartyState}</div></td>
+                 <td width="26%" align="right" valign="middle"><div>${uiLabelMap.PartyState}</div></td>
                  <td width="2%">&nbsp;</td>
                  <td width="72%">
                     <@fieldErrors fieldName="billToStateProvinceGeoId"/>
@@ -297,15 +297,15 @@ under the License.
                  *</td>
               </tr>
               <tr>
-                 <td width="26%" align="right" valign=middle><div class="tabletext">${uiLabelMap.PartyZipCode}</div></td>
+                 <td width="26%" align="right" valign="middle"><div>${uiLabelMap.PartyZipCode}</div></td>
                  <td width="2%">&nbsp;</td>
                  <td width="72%">
                     <@fieldErrors fieldName="billToPostalCode"/>
-                    <input type="text" class="inputBox required" size="12" maxlength="10" id="billToPostalCode" name="billToPostalCode" value="${parameters.billToPostalCode?if_exists}">
+                    <input type="text" class="inputBox required" size="12" maxlength="10" id="billToPostalCode" name="billToPostalCode" value="${parameters.billToPostalCode?if_exists}" />
                  *</td>
               </tr>
               <tr>
-                 <td width="26%" align="right" valign=middle><div class="tabletext">${uiLabelMap.PartyCountry}</div></td>
+                 <td width="26%" align="right" valign="middle"><div>${uiLabelMap.CommonCountry}</div></td>
                  <td width="2%">&nbsp;</td>
                  <td width="72%">
                     <@fieldErrors fieldName="billToCountryGeoId"/>

@@ -28,7 +28,7 @@ under the License.
                 <order-by field-name="groupId"/>
             </entity-condition>
         </actions>
-        <field name="groupId" title="${uiLabelMap.PartySecurityGroupId}" widget-style="buttontext">
+        <field name="groupId" title="${uiLabelMap.CommonSecurityGroupId}" widget-style="buttontext">
             <hyperlink also-hidden="false" description="${groupId}" target="EditSecurityGroup">
                 <parameter param-name="groupId"/>
             </hyperlink>
@@ -40,9 +40,9 @@ under the License.
         header-row-style="header-row" default-table-style="basic-table">
         <alt-target use-when="securityGroup==null" target="createSecurityGroup"/>
         <auto-fields-service service-name="updateSecurityGroup" map-name="securityGroup"/>
-        <field use-when="securityGroup!=null" name="groupId" title="${uiLabelMap.PartySecurityGroupId}"  tooltip="${uiLabelMap.CommonNotModifRecreat}"><display/></field>
-        <field use-when="securityGroup==null&amp;&amp;groupId==null" name="groupId" title="${uiLabelMap.PartySecurityGroupId}"><text size="20" maxlength="20"/></field>
-        <field use-when="securityGroup==null&amp;&amp;groupId!=null" name="groupId" title="${uiLabelMap.PartySecurityGroupId}" tooltip="${uiLabelMap.CommonCannotBeFound}: [${groupId}]"><text size="20" maxlength="20"/></field>
+        <field use-when="securityGroup!=null" name="groupId" title="${uiLabelMap.CommonSecurityGroupId}"  tooltip="${uiLabelMap.CommonNotModifRecreat}"><display/></field>
+        <field use-when="securityGroup==null&amp;&amp;groupId==null" name="groupId" title="${uiLabelMap.CommonSecurityGroupId}"><text size="20" maxlength="20"/></field>
+        <field use-when="securityGroup==null&amp;&amp;groupId!=null" name="groupId" title="${uiLabelMap.CommonSecurityGroupId}" tooltip="${uiLabelMap.CommonCannotBeFound}: [${groupId}]"><text size="20" maxlength="20"/></field>
         <field name="description" title="${uiLabelMap.CommonDescription}"><text size="60" maxlength="250"/></field>
         <field name="submitButton" title="${uiLabelMap.CommonUpdate}"><submit button-type="button"/></field>
     </form>
@@ -58,7 +58,7 @@ under the License.
         </actions>
         <field name="groupId"><hidden/></field>
         <field name="permissionId" title="${uiLabelMap.PartyPermissionId}"><display-entity entity-name="SecurityPermission" description="${permissionId} ${description}"/></field>
-        <field name="deleteLink" title="${uiLabelMap.CommonEmptyHeader}" widget-style="buttontext">
+        <field name="deleteLink" title=" " widget-style="buttontext">
             <hyperlink target="removeSecurityPermissionFromSecurityGroup" description="${uiLabelMap.CommonRemove}">
                 <parameter param-name="permissionId"/>
                 <parameter param-name="groupId"/>
@@ -98,7 +98,7 @@ under the License.
             </entity-condition>
         </actions>
         <field name="groupId"><hidden/></field>
-        <field name="userLoginId" title="${uiLabelMap.PartyUserLoginId}"><display/></field>
+        <field name="userLoginId" title="${uiLabelMap.CommonUserLoginId}"><display/></field>
         <field name="fromDate" title="${uiLabelMap.CommonFromDate}"><display/></field>
         <field name="thruDate" title="${uiLabelMap.CommonThruDate}"><date-time/></field>
         <field name="partyId" title="${uiLabelMap.PartyParty}">
@@ -109,7 +109,7 @@ under the License.
             </display-entity>
         </field>
         <field name="submitButton" title="${uiLabelMap.CommonUpdate}"><submit button-type="button"/></field>
-        <field name="deleteLink" title="${uiLabelMap.CommonEmptyHeader}" widget-style="buttontext">
+        <field name="deleteLink" title=" " widget-style="buttontext">
             <hyperlink description="${uiLabelMap.CommonRemove}" target="removeUserLoginFromSecurityGroup" also-hidden="false">
                 <parameter param-name="userLoginId"/>
                 <parameter param-name="groupId"/>
@@ -122,7 +122,7 @@ under the License.
         header-row-style="header-row" default-table-style="basic-table">
         <auto-fields-service service-name="addUserLoginToSecurityGroup"/>
         <field name="groupId"><hidden/></field>
-        <field name="userLoginId" title="${uiLabelMap.PartyUserLoginId}"><lookup target-form-name="LookupUserLoginAndPartyDetails" size="30"></lookup></field>
+        <field name="userLoginId" title="${uiLabelMap.CommonUserLoginId}"><lookup target-form-name="LookupUserLoginAndPartyDetails" size="30"></lookup></field>
         <field name="submitButton" title="${uiLabelMap.CommonAdd}"><submit button-type="button"/></field>
     </form>
 
@@ -147,7 +147,7 @@ under the License.
         <field name="fromDate" title="${uiLabelMap.CommonFromDate}"><display/></field>
         <field name="thruDate" title="${uiLabelMap.CommonThruDate}"><date-time/></field>
         <field name="submitButton" title="${uiLabelMap.CommonUpdate}"><submit button-type="button"/></field>
-        <field name="deleteLink" title="${uiLabelMap.CommonEmptyHeader}" widget-style="buttontext">
+        <field name="deleteLink" title=" " widget-style="buttontext">
             <hyperlink description="${uiLabelMap.CommonRemove}" target="userLogin_removeUserLoginFromSecurityGroup" also-hidden="false">
                 <parameter param-name="partyId"/>
                 <parameter param-name="userLoginId"/>
@@ -187,7 +187,7 @@ under the License.
         <field name="maxHitsDuration" title="${uiLabelMap.PartyMaxHitDuration}"><text/></field>
         <field name="tarpitDuration" title="${uiLabelMap.PartyTarpitDuration}"><text/></field>
         <field name="submitButton" title="${uiLabelMap.CommonUpdate}"><submit button-type="button"/></field>
-        <field name="deleteLink" title="${uiLabelMap.CommonEmptyHeader}" widget-style="buttontext">
+        <field name="deleteLink" title=" " widget-style="buttontext">
             <hyperlink description="${uiLabelMap.CommonRemove}" target="removeProtectedViewFromSecurityGroup" also-hidden="false">
                 <parameter param-name="groupId"/>
                 <parameter param-name="viewNameId"/>

@@ -24,22 +24,27 @@ under the License.
     <resource-loader name="main" type="component"/>
     <classpath type="jar" location="build/lib/*"/>
     <classpath type="dir" location="config"/>
-    <classpath type="dir" location="script"/>
 
     <entity-resource type="model" reader-name="main" loader="main" location="entitydef/entitymodel.xml"/>
+    <entity-resource type="model" reader-name="main" loader="main" location="entitydef/entitymodel_old.xml"/>    
     <entity-resource type="data" reader-name="seed" loader="main" location="data/PartyTypeData.xml"/>
-    <entity-resource type="data" reader-name="seed" loader="main" location="data/PartySecurityData.xml"/>
+    <entity-resource type="data" reader-name="seed" loader="main" location="data/PartySecurityPermissionSeedData.xml"/>
+    <entity-resource type="data" reader-name="demo" loader="main" location="data/PartySecurityGroupDemoData.xml"/>
     <entity-resource type="data" reader-name="seed" loader="main" location="data/PartyGeoPointData.xml"/>
     <entity-resource type="data" reader-name="seed" loader="main" location="data/PartyPortletData.xml"/>
+    <entity-resource type="data" reader-name="demo" loader="main" location="data/PartyDemoData.xml"/>
     <entity-resource type="data" reader-name="seed-initial" loader="main" location="data/ScheduledJobs.xml"/>
     <service-resource type="model" loader="main" location="servicedef/services.xml"/>
     <service-resource type="model" loader="main" location="servicedef/services_view.xml"/>
     <service-resource type="eca" loader="main" location="servicedef/secas.xml"/>
-
+    <service-resource type="mca" loader="main" location="servicedef/mcas.xml"/>
+    
     <test-suite loader="main" location="testdef/PartyTests.xml"/>
+    <test-suite loader="main" location="testdef/PartyContactMechTests.xml"/>
 
     <webapp name="party"
         title="Party"
+        description="PartyComponentDescription"
         server="default-server"
         location="webapp/partymgr"
         base-permission="OFBTOOLS,PARTYMGR"

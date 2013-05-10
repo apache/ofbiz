@@ -19,7 +19,6 @@
 package org.ofbiz.service.jms;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -50,8 +49,8 @@ import org.ofbiz.base.config.GenericConfigException;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.GeneralException;
 import org.ofbiz.base.util.JNDIContextFactory;
+import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.base.util.UtilXml;
-import org.ofbiz.entity.serialize.XmlSerializer;
 import org.ofbiz.entity.transaction.GenericTransactionException;
 import org.ofbiz.entity.transaction.TransactionUtil;
 import org.ofbiz.service.GenericRequester;
@@ -97,13 +96,13 @@ public class JmsServiceEngine extends AbstractEngine {
         throws GenericServiceException, JMSException {
         List<String> outParams = modelService.getParameterNames(ModelService.OUT_PARAM, false);
 
-        if (outParams != null && outParams.size() > 0)
+        if (UtilValidate.isNotEmpty(outParams))
             throw new GenericServiceException("JMS service cannot have required OUT parameters; no parameters will be returned.");
         String xmlContext = null;
 
         try {
             if (Debug.verboseOn()) Debug.logVerbose("Serializing Context --> " + context, module);
-            xmlContext = XmlSerializer.serialize(context);
+            xmlContext = JmsSerializer.serialize(context);
         } catch (Exception e) {
             throw new GenericServiceException("Cannot serialize context.", e);
         }

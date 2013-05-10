@@ -18,10 +18,13 @@
  *******************************************************************************/
 package org.ofbiz.entity.transaction;
 
-import javax.transaction.*;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.SQLException;
+import javax.transaction.TransactionManager;
+import javax.transaction.UserTransaction;
 
-import org.ofbiz.entity.*;
+import org.ofbiz.entity.GenericEntityException;
+import org.ofbiz.entity.datasource.GenericHelperInfo;
 
 /**
  * TransactionFactory - central source for JTA objects
@@ -34,7 +37,7 @@ public interface TransactionFactoryInterface {
 
     public String getTxMgrName();
 
-    public Connection getConnection(String helperName) throws SQLException, GenericEntityException;
+    public Connection getConnection(GenericHelperInfo helperInfo) throws SQLException, GenericEntityException;
 
     public void shutdown();
 }

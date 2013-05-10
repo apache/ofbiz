@@ -20,16 +20,22 @@ under the License.
 <#if techDataCalendar?has_content>
 <div class="screenlet">
   <div class="screenlet-title-bar">
-    <h3>${uiLabelMap.ManufacturingUpdateCalendar}</h3>
+    <ul>
+      <li class="h3">${uiLabelMap.ManufacturingUpdateCalendar}</li>
+    </ul>
+    <br class="clear"/>
   </div>
   <div class="screenlet-body">
-  <a href="<@ofbizUrl>EditCalendar</@ofbizUrl>" class="buttontext">${uiLabelMap.ManufacturingNewCalendar}</a>
+  <div class="button-bar"><a href="<@ofbizUrl>EditCalendar</@ofbizUrl>" class="buttontext">${uiLabelMap.ManufacturingNewCalendar}</a></div>
   <form name="calendarform" method="post" action="<@ofbizUrl>UpdateCalendar</@ofbizUrl>">
-    <input type="hidden" name="calendarId" value="${techDataCalendar.calendarId}">
+    <input type="hidden" name="calendarId" value="${techDataCalendar.calendarId}" />
 <#else>
 <div class="screenlet">
   <div class="screenlet-title-bar">
-    <h3>${uiLabelMap.ManufacturingCreateCalendar}</h3>
+    <ul>
+      <li class="h3">${uiLabelMap.ManufacturingCreateCalendar}</li>
+    </ul>
+    <br class="clear"/>
   </div>
   <div class="screenlet-body">
   <a href="<@ofbizUrl>EditCalendar</@ofbizUrl>" class="buttontext">${uiLabelMap.ManufacturingNewCalendar}</a>
@@ -46,13 +52,13 @@ under the License.
     <tr>
       <td width='26%' align='right' valign="top" class="label">${uiLabelMap.ManufacturingCalendarId}</td>
       <td width="5">&nbsp;</td>
-      <td width="74%"><input type="text" size="12" name="calendarId" value="${calendarData.calendarId?if_exists}"></td>
+      <td width="74%"><input type="text" size="12" name="calendarId" value="${calendarData.calendarId?if_exists}" /></td>
     </tr>
     </#if>
     <tr>
       <td width='26%' align='right' valign='top' class="label">${uiLabelMap.CommonDescription}</td>
       <td width="5">&nbsp;</td>
-      <td width="74%"><input type="text" size="40" name="description" value="${calendarData.description?if_exists}"></td>
+      <td width="74%"><input type="text" size="40" name="description" value="${calendarData.description?if_exists}" /></td>
     </tr>
     <tr>
       <td width='26%' align='right' valign='top' class="label">${uiLabelMap.ManufacturingCalendarWeekId}</td>
@@ -63,11 +69,12 @@ under the License.
           <option value="${calendarWeek.calendarWeekId}" <#if calendarData?has_content && calendarData.calendarWeekId?default("") == calendarWeek.calendarWeekId>SELECTED</#if>>${(calendarWeek.get("description",locale))?if_exists}</option>
           </#list>
         </select>
+      </td>
     </tr>
     <tr>
-      <td width="26%" align="right" valign="top">
+      <td width="26%" align="right" valign="top"></td>
       <td width="5">&nbsp;</td>
-      <td width="74%"><input type="submit" value="${uiLabelMap.CommonUpdate}"></td>
+      <td width="74%"><input type="submit" value="${uiLabelMap.CommonUpdate}" /></td>
     </tr>
   </table>
   </form>

@@ -22,9 +22,8 @@
         xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/widget-form.xsd">
     <form name="FindFixedAssets" type="single" target="findFixedAssets" title="${uiLabelMap.AccountingFindFixedAssets}"
         header-row-style="header-row" default-table-style="basic-table">
-        <field name="hideSearch"><hidden value="Y"/></field>
-        <field name="fixedAssetId"  title="${uiLabelMap.AccountingFixedAssetId}"><text-find default-option="contains" ignore-case="true"/></field>
-        <field name="instanceOfProductId" title="${uiLabelMap.AccountingInstanceOfProductId}"><text-find default-option="contains" ignore-case="true"/></field>
+        <field name="fixedAssetId"  title="${uiLabelMap.AccountingFixedAssetId}"><text-find ignore-case="true"/></field>
+        <field name="instanceOfProductId" title="${uiLabelMap.AccountingInstanceOfProductId}"><text-find ignore-case="true"/></field>
         <field name="classEnumId" title="${uiLabelMap.AccountingFixedAssetClassEnumId}">
             <drop-down allow-empty="true">
                 <entity-options description="${description}" entity-name="Enumeration" key-field-name="enumId">
@@ -40,8 +39,8 @@
     <!-- Maintences Search Options form -->
     <form name="FindFixedAssetMaint" default-map-name="timesheet" target="findFixedAssetMaints" type="single"
         header-row-style="header-row" default-table-style="basic-table">
-        <field name="fixedAssetId"><text-find default-option="contains" ignore-case="true"/></field>
-        <field name="maintHistSeqId"><text-find default-option="contains" ignore-case="true"/></field>
+        <field name="fixedAssetId"><text-find ignore-case="true"/></field>
+        <field name="maintHistSeqId"><text-find ignore-case="true"/></field>
         <field name="productMaintTypeId" title="${uiLabelMap.AccountingFixedAssetMaintType}">
             <drop-down allow-empty="true">
                 <entity-options description="${description}" entity-name="ProductMaintType">
@@ -71,6 +70,8 @@
                 <field-map field-name="inputFields" from-field="parameters"/>
                 <field-map field-name="entityName" value="FixedAssetMaintWorkEffort"/>
                 <field-map field-name="orderBy" value="-actualStartDate"/>
+                <field-map field-name="viewIndex" from-field="viewIndex"/>
+                <field-map field-name="viewSize" from-field="viewSize"/>
             </service>
         </actions>
         <field name="maintHistSeqId" widget-style="linktext">
@@ -89,7 +90,7 @@
         <field name="actualCompletionDate"><display/></field>
     </form>
 
-    <form name="EditFixedAssetMaint" extends="EditFixedAssetMaint" extends-resource="component://accounting/webapp/accounting/fixedasset/FixedAssetForms.xml" target="updateFixedAssetMaintAndWorkEffort">
+    <form name="EditFixedAssetMaint" extends="EditFixedAssetMaint" extends-resource="component://accounting/widget/FixedAssetForms.xml" target="updateFixedAssetMaintAndWorkEffort">
         <alt-target use-when="fixedAssetMaint==null" target="createFixedAssetMaintUpdateWorkEffort"/>
         <field name="fixedAssetId" use-when="fixedAssetMaint==null" title="${uiLabelMap.AccountingFixedAssetId}" tooltip="${uiLabelMap.CommonRequired}" widget-style="required"><lookup target-form-name="LookupFixedAsset"/></field>
         <field name="scheduleWorkEffortId"><hidden/></field>
@@ -115,7 +116,7 @@
                 </entity-options>
             </drop-down>
         </field>
-        <field name="productId" title="${uiLabelMap.AssetMaintPartId}*" required-field="true"><lookup target-form-name="LookupPartsProduct"/></field>
+        <field name="productId" title="${uiLabelMap.AssetMaintPartId}*" required-field="true"><lookup  target-form-name="LookupPartsProduct"/></field>
         <field name="quantity" position="1" title="${uiLabelMap.CommonQuantity}*"><text size="10"/></field>
         <field name="maintHistSeqId"><hidden/></field>
         <field name="fixedAssetId"><hidden/></field>
@@ -129,7 +130,7 @@
         <field name="productName" position="1" title="${uiLabelMap.CommonName}"><display/></field>
         <field name="comments" position="1" title="${uiLabelMap.CommonComments}"><display/></field>
         <field name="description" position="1" title="${uiLabelMap.CommonDescription}"><display/></field>
-        <field name="returnPart" title="${uiLabelMap.CommonEmptyHeader}" widget-style="linktext">
+        <field name="returnPart" title=" " widget-style="linktext">
             <hyperlink description="${uiLabelMap.CommonReturn}" target="returnPartIssuedToFixedAssetMaint">
                 <parameter param-name="itemIssuanceId"/>
                 <parameter param-name="fixedAssetId"/>

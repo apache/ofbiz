@@ -20,6 +20,43 @@ under the License.
 <screens xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/widget-screen.xsd">
 
+    <screen name="CommonQuoteDecorator">
+        <section>
+            <actions>
+                <set field="headerItem" value="quote"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <section>
+                            <!-- do check for ORDERMGR, _VIEW permission -->
+                            <condition>
+                                <if-has-permission permission="ORDERMGR" action="_VIEW"/>
+                            </condition>
+                            <widgets>
+                                <section>
+                                    <condition>
+                                        <not><if-empty field="quote"/></not>
+                                    </condition>
+                                    <widgets>
+                                        <include-menu name="QuoteTabBar" location="component://order/widget/ordermgr/OrderMenus.xml"/>
+                                        <container style="page-title">
+                                            <label>${uiLabelMap[titleProperty]} [${uiLabelMap.CommonId}:${quote.quoteId}] ${quote.description}</label>
+                                        </container>
+                                    </widgets>
+                                </section>
+                                <decorator-section-include name="body"/>
+                            </widgets>
+                            <fail-widgets>
+                                <label style="h3">${uiLabelMap.OrderViewPermissionError}</label>
+                            </fail-widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
     <!-- list all assets in a tabular format -->
     <screen name="FindQuote">
         <section>
@@ -32,24 +69,13 @@ under the License.
             <widgets>
                 <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
                     <decorator-section name="body">
-                        <container style="screenlet">
-                            <container style="screenlet-title-bar">
-                                <container style="h3">
-                                    <label text="${uiLabelMap.OrderOrderQuotes}"/>
-                                </container>
+                        <screenlet title="${uiLabelMap.OrderOrderQuotes}">
+                            <container>
+                                <link target="EditQuote" text="${uiLabelMap.OrderCreateOrderQuote}" style="buttontext"/>
                             </container>
-                            <container style="screenlet-body">
-                                <section>
-                                    <widgets>
-                                        <container>
-                                            <link target="EditQuote" text="${uiLabelMap.OrderCreateOrderQuote}" style="buttontext"/>
-                                        </container>
-                                        <include-form name="FindQuotes" location="component://order/webapp/ordermgr/quote/QuoteForms.xml"/>
-                                        <include-form name="ListQuotes" location="component://order/webapp/ordermgr/quote/QuoteForms.xml"/>
-                                    </widgets>
-                                </section>
-                            </container>
-                        </container>
+                            <include-form name="FindQuotes" location="component://order/widget/ordermgr/QuoteForms.xml"/>
+                            <include-form name="ListQuotes" location="component://order/widget/ordermgr/QuoteForms.xml"/>
+                        </screenlet>
                     </decorator-section>
                 </decorator-screen>
             </widgets>
@@ -59,7 +85,6 @@ under the License.
         <section>
             <actions>
                 <set field="titleProperty" value="OrderViewQuote"/>
-                <set field="headerItem" value="quote"/>
                 <set field="tabButtonItem" value="ViewQuote"/>
 
                 <set field="showQuoteManagementLinks" value="Y"/>
@@ -82,37 +107,17 @@ under the License.
                 <property-map resource="OrderUiLabels" map-name="uiLabelMap"/>
             </actions>
             <widgets>
-                <decorator-screen name="CommonQuoteDecorator" location="${parameters.mainDecoratorLocation}">
+                <decorator-screen name="CommonQuoteDecorator" location="${parameters.quoteDecoratorLocation}">
                     <decorator-section name="body">
                         <container>
-                            <link target="QuoteReport" text="${uiLabelMap.CommonReports}" style="buttontext">
-                                <parameter param-name="quoteId" from-field="quote.quoteId"/>
-                            </link>
-                            <link target="EditQuoteReportMail" text="${uiLabelMap.CommonSendReportByMail}" style="buttontext">
-                                <parameter param-name="quoteId" from-field="quote.quoteId"/>
-                                <parameter param-name="emailType" value="PRDS_QUO_CONFIRM"/>
-                            </link>
+                            <include-menu name="QuoteSubTabBar" location="component://order/widget/ordermgr/OrderMenus.xml"/>
                         </container>
-                        <platform-specific>
-                            <html><html-template location="component://order/webapp/ordermgr/quote/CreateOrderQuote.ftl"/></html>
-                        </platform-specific>
                         <include-screen name="ViewQuoteTemplate"/>
-                        <container style="screenlet">
-                            <container style="screenlet-title-bar">
-                                <container style="h3">
-                                    <label text="${uiLabelMap.OrderCopyQuote}"/>
-                                </container>
-                            </container>
-                            <container style="screenlet-body">
-                                <section>
-                                    <widgets>
-                                        <platform-specific>
-                                            <html><html-template location="component://order/webapp/ordermgr/quote/CopyQuote.ftl"/></html>
-                                        </platform-specific>
-                                    </widgets>
-                                </section>
-                            </container>
-                        </container>
+                        <screenlet title="${uiLabelMap.OrderCopyQuote}">
+                            <platform-specific>
+                                <html><html-template location="component://order/webapp/ordermgr/quote/CopyQuote.ftl"/></html>
+                            </platform-specific>
+                        </screenlet>
                     </decorator-section>
                 </decorator-screen>
             </widgets>
@@ -216,7 +221,6 @@ under the License.
         <section>
             <actions>
                 <set field="titleProperty" value="OrderOrderQuoteEdit"/>
-                <set field="headerItem" value="quote"/>
                 <set field="tabButtonItem" value="EditQuote"/>
 
                 <set field="quoteId" from-field="parameters.quoteId"/>
@@ -225,22 +229,11 @@ under the License.
                 <property-to-field field="defaultCurrencyUomId" resource="general" property="currency.uom.id.default" default="USD"/>
             </actions>
             <widgets>
-                <decorator-screen name="CommonQuoteDecorator" location="${parameters.mainDecoratorLocation}">
+                <decorator-screen name="CommonQuoteDecorator" location="${parameters.quoteDecoratorLocation}">
                     <decorator-section name="body">
-                        <container style="screenlet">
-                            <container style="screenlet-title-bar">
-                                <container style="h3">
-                                    <label text="${uiLabelMap.OrderOrderQuoteEdit}"/>
-                                </container>
-                            </container>
-                            <container style="screenlet-body">
-                                <section>
-                                    <widgets>
-                                        <include-form name="EditQuote" location="component://order/webapp/ordermgr/quote/QuoteForms.xml"/>
-                                    </widgets>
-                                </section>
-                            </container>
-                        </container>
+                        <screenlet title="${uiLabelMap.OrderOrderQuoteEdit}">
+                            <include-form name="EditQuote" location="component://order/widget/ordermgr/QuoteForms.xml"/>
+                        </screenlet>
                     </decorator-section>
                 </decorator-screen>
             </widgets>
@@ -250,7 +243,6 @@ under the License.
         <section>
             <actions>
                 <set field="titleProperty" value="OrderOrderQuoteListRoles"/>
-                <set field="headerItem" value="quote"/>
                 <set field="tabButtonItem" value="ListQuoteRoles"/>
 
                 <entity-one entity-name="Quote" value-field="quote" auto-field-map="true"/>
@@ -260,27 +252,16 @@ under the License.
 
             </actions>
             <widgets>
-                <decorator-screen name="CommonQuoteDecorator" location="${parameters.mainDecoratorLocation}">
+                <decorator-screen name="CommonQuoteDecorator" location="${parameters.quoteDecoratorLocation}">
                     <decorator-section name="body">
-                        <container style="screenlet">
-                            <container style="screenlet-title-bar">
-                                <container style="h3">
-                                    <label text="${uiLabelMap.OrderOrderQuoteListRoles}"/>
-                                </container>
+                        <screenlet title="${uiLabelMap.OrderOrderQuoteListRoles}">
+                            <container>
+                                <link target="EditQuoteRole" text="${uiLabelMap.OrderCreateOrderQuoteRole}" style="buttontext">
+                                    <parameter param-name="quoteId" from-field="quote.quoteId"/>
+                                </link>
                             </container>
-                            <container style="screenlet-body">
-                                <section>
-                                    <widgets>
-                                        <container>
-                                            <link target="EditQuoteRole" text="${uiLabelMap.OrderCreateOrderQuoteRole}" style="buttontext">
-                                                <parameter param-name="quoteId" from-field="quote.quoteId"/>
-                                            </link>
-                                        </container>
-                                        <include-form name="ListQuoteRoles" location="component://order/webapp/ordermgr/quote/QuoteForms.xml"/>
-                                    </widgets>
-                                </section>
-                            </container>
-                        </container>
+                            <include-form name="ListQuoteRoles" location="component://order/widget/ordermgr/QuoteForms.xml"/>
+                        </screenlet>
                     </decorator-section>
                 </decorator-screen>
             </widgets>
@@ -290,7 +271,6 @@ under the License.
         <section>
             <actions>
                 <set field="titleProperty" value="OrderOrderQuoteEditRoles"/>
-                <set field="headerItem" value="quote"/>
                 <set field="tabButtonItem" value="ListQuoteRoles"/>
 
                 <set field="quoteId" from-field="parameters.quoteId"/>
@@ -300,27 +280,16 @@ under the License.
                 <entity-one entity-name="QuoteRole" value-field="quoteRole"/>
             </actions>
             <widgets>
-                <decorator-screen name="CommonQuoteDecorator" location="${parameters.mainDecoratorLocation}">
+                <decorator-screen name="CommonQuoteDecorator" location="${parameters.quoteDecoratorLocation}">
                     <decorator-section name="body">
-                        <container style="screenlet">
-                            <container style="screenlet-title-bar">
-                                <container style="h3">
-                                    <label text="${uiLabelMap.OrderOrderQuoteEditRoles}"/>
-                                </container>
+                        <screenlet title="${uiLabelMap.OrderOrderQuoteEditRoles}">
+                            <container>
+                                <link target="EditQuoteRole" text="${uiLabelMap.OrderCreateOrderQuoteRole}" style="buttontext">
+                                    <parameter param-name="quoteId" from-field="quote.quoteId"/>
+                                </link>
                             </container>
-                            <container style="screenlet-body">
-                                <section>
-                                    <widgets>
-                                        <container>
-                                            <link target="EditQuoteRole" text="${uiLabelMap.OrderCreateOrderQuoteRole}" style="buttontext">
-                                                <parameter param-name="quoteId" from-field="quote.quoteId"/>
-                                            </link>
-                                        </container>
-                                        <include-form name="EditQuoteRole" location="component://order/webapp/ordermgr/quote/QuoteForms.xml"/>
-                                    </widgets>
-                                </section>
-                            </container>
-                        </container>
+                            <include-form name="EditQuoteRole" location="component://order/widget/ordermgr/QuoteForms.xml"/>
+                        </screenlet>
                     </decorator-section>
                 </decorator-screen>
             </widgets>
@@ -330,7 +299,6 @@ under the License.
         <section>
             <actions>
                 <set field="titleProperty" value="OrderOrderQuoteListItems"/>
-                <set field="headerItem" value="quote"/>
                 <set field="tabButtonItem" value="ListQuoteItems"/>
 
                 <set field="viewIndex" from-field="parameters.VIEW_INDEX" type="Integer"/>
@@ -343,27 +311,12 @@ under the License.
 
             </actions>
             <widgets>
-                <decorator-screen name="CommonQuoteDecorator" location="${parameters.mainDecoratorLocation}">
+                <decorator-screen name="CommonQuoteDecorator" location="${parameters.quoteDecoratorLocation}">
                     <decorator-section name="body">
-                        <container style="screenlet">
-                            <container style="screenlet-title-bar">
-                                <container style="h3">
-                                    <label text="${uiLabelMap.OrderOrderQuoteListItems}"/>
-                                </container>
-                            </container>
-                            <container style="screenlet-body">
-                                <section>
-                                    <widgets>
-                                        <container>
-                                            <link target="EditQuoteItem" text="${uiLabelMap.OrderCreateOrderQuoteItem}" style="buttontext">
-                                                <parameter param-name="quoteId" from-field="quote.quoteId"/>
-                                            </link>
-                                        </container>
-                                        <include-form name="ListQuoteItems" location="component://order/webapp/ordermgr/quote/QuoteForms.xml"/>
-                                    </widgets>
-                                </section>
-                            </container>
-                        </container>
+                        <include-menu name="quoteItemSubTabBar" location="component://order/widget/ordermgr/OrderMenus.xml"/>
+                        <screenlet title="${uiLabelMap.OrderOrderQuoteListItems}">
+                            <include-form name="ListQuoteItems" location="component://order/widget/ordermgr/QuoteForms.xml"/>
+                        </screenlet>
                     </decorator-section>
                 </decorator-screen>
             </widgets>
@@ -373,7 +326,6 @@ under the License.
         <section>
             <actions>
                 <set field="titleProperty" value="OrderOrderQuoteEditItems"/>
-                <set field="headerItem" value="quote"/>
                 <set field="tabButtonItem" value="ListQuoteItems"/>
 
                 <set field="quoteId" from-field="parameters.quoteId"/>
@@ -381,28 +333,33 @@ under the License.
 
                 <entity-one entity-name="Quote" value-field="quote" auto-field-map="true"/>
                 <entity-one entity-name="QuoteItem" value-field="quoteItem"/>
+                <entity-and entity-name="QuoteTerm" list="quoteTerms">
+                    <field-map field-name="quoteId"  from-field="parameters.quoteId"/>
+                    <field-map field-name="quoteItemSeqId" from-field="parameters.quoteItemSeqId"/>
+                </entity-and>
             </actions>
             <widgets>
-                <decorator-screen name="CommonQuoteDecorator" location="${parameters.mainDecoratorLocation}">
+                <decorator-screen name="CommonQuoteDecorator" location="${parameters.quoteDecoratorLocation}">
                     <decorator-section name="body">
-                        <container style="screenlet">
-                            <container style="screenlet-title-bar">
-                                <container style="h3">
-                                    <label text="${uiLabelMap.OrderOrderQuoteEditItems}"/>
-                                </container>
-                            </container>
-                            <container style="screenlet-body">
-                                <section>
-                                    <widgets>
-                                        <container>
-                                            <link target="EditQuoteItem" text="${uiLabelMap.OrderCreateOrderQuoteItem}" style="buttontext">
-                                                <parameter param-name="quoteId" from-field="quote.quoteId"/>
-                                            </link>
-                                        </container>
-                                        <include-form name="EditQuoteItem" location="component://order/webapp/ordermgr/quote/QuoteForms.xml"/>
-                                    </widgets>
-                                </section>
-                            </container>
+                        <container>
+                            <include-menu name="quoteTermSubTabBar" location="component://order/widget/ordermgr/OrderMenus.xml"/>
+                        </container>
+                        <container style="lefthalf">
+                            <screenlet title="${uiLabelMap.OrderOrderQuoteEditItems}" >
+                                <include-form name="EditQuoteItem" location="component://order/widget/ordermgr/QuoteForms.xml"/>
+                            </screenlet>
+                        </container>
+                        <container style="righthalf">
+                            <section>
+                                <condition>
+                                    <not><if-empty field="quoteItemSeqId"/></not>
+                                </condition>
+                                <widgets>
+                                    <screenlet title="${uiLabelMap.OrderOrderQuoteTermList}">
+                                        <include-form name="ListQuoteTermItem" location="component://order/widget/ordermgr/QuoteForms.xml"/>
+                                    </screenlet>
+                                </widgets>
+                            </section>
                         </container>
                     </decorator-section>
                 </decorator-screen>
@@ -413,7 +370,6 @@ under the License.
         <section>
             <actions>
                 <set field="titleProperty" value="OrderOrderQuoteListAttributes"/>
-                <set field="headerItem" value="quote"/>
                 <set field="tabButtonItem" value="ListQuoteAttributes"/>
 
                 <entity-one entity-name="Quote" value-field="quote" auto-field-map="true"/>
@@ -422,27 +378,16 @@ under the License.
                 </entity-and>
             </actions>
             <widgets>
-                <decorator-screen name="CommonQuoteDecorator" location="${parameters.mainDecoratorLocation}">
+                <decorator-screen name="CommonQuoteDecorator" location="${parameters.quoteDecoratorLocation}">
                     <decorator-section name="body">
-                        <container style="screenlet">
-                            <container style="screenlet-title-bar">
-                                <container style="h3">
-                                    <label text="${uiLabelMap.OrderOrderQuoteListAttributes}"/>
-                                </container>
+                        <screenlet title="${uiLabelMap.OrderOrderQuoteListAttributes}">
+                            <container>
+                                <link target="EditQuoteAttribute" text="${uiLabelMap.OrderCreateOrderQuoteAttribute}" style="buttontext">
+                                    <parameter param-name="quoteId" from-field="quote.quoteId"/>
+                                </link>
                             </container>
-                            <container style="screenlet-body">
-                                <section>
-                                    <widgets>
-                                        <container>
-                                            <link target="EditQuoteAttribute" text="${uiLabelMap.OrderCreateOrderQuoteAttribute}" style="buttontext">
-                                                <parameter param-name="quoteId" from-field="quote.quoteId"/>
-                                            </link>
-                                        </container>
-                                        <include-form name="ListQuoteAttributes" location="component://order/webapp/ordermgr/quote/QuoteForms.xml"/>
-                                    </widgets>
-                                </section>
-                            </container>
-                        </container>
+                            <include-form name="ListQuoteAttributes" location="component://order/widget/ordermgr/QuoteForms.xml"/>
+                        </screenlet>
                     </decorator-section>
                 </decorator-screen>
             </widgets>
@@ -452,7 +397,6 @@ under the License.
         <section>
             <actions>
                 <set field="titleProperty" value="OrderOrderQuoteEditAttributes"/>
-                <set field="headerItem" value="quote"/>
                 <set field="tabButtonItem" value="ListQuoteAttributes"/>
 
                 <set field="quoteId" from-field="parameters.quoteId"/>
@@ -462,27 +406,16 @@ under the License.
                 <entity-one entity-name="QuoteAttribute" value-field="quoteAttribute"/>
             </actions>
             <widgets>
-                <decorator-screen name="CommonQuoteDecorator" location="${parameters.mainDecoratorLocation}">
+                <decorator-screen name="CommonQuoteDecorator" location="${parameters.quoteDecoratorLocation}">
                     <decorator-section name="body">
-                        <container style="screenlet">
-                            <container style="screenlet-title-bar">
-                                <container style="h3">
-                                    <label text="${uiLabelMap.OrderOrderQuoteEditAttributes}"/>
-                                </container>
+                        <screenlet title="${uiLabelMap.OrderOrderQuoteEditAttributes}">
+                            <container>
+                                <link target="EditQuoteAttribute" text="${uiLabelMap.OrderCreateOrderQuoteAttribute}" style="buttontext">
+                                    <parameter param-name="quoteId" from-field="quote.quoteId"/>
+                                </link>
                             </container>
-                            <container style="screenlet-body">
-                                <section>
-                                    <widgets>
-                                        <container>
-                                            <link target="EditQuoteAttribute" text="${uiLabelMap.OrderCreateOrderQuoteAttribute}" style="buttontext">
-                                                <parameter param-name="quoteId" from-field="quote.quoteId"/>
-                                            </link>
-                                        </container>
-                                        <include-form name="EditQuoteAttribute" location="component://order/webapp/ordermgr/quote/QuoteForms.xml"/>
-                                    </widgets>
-                                </section>
-                            </container>
-                        </container>
+                            <include-form name="EditQuoteAttribute" location="component://order/widget/ordermgr/QuoteForms.xml"/>
+                        </screenlet>
                     </decorator-section>
                 </decorator-screen>
             </widgets>
@@ -492,7 +425,6 @@ under the License.
         <section>
             <actions>
                 <set field="titleProperty" value="OrderOrderQuoteListCoefficients"/>
-                <set field="headerItem" value="quote"/>
                 <set field="tabButtonItem" value="ListQuoteCoefficients"/>
 
                 <entity-one entity-name="Quote" value-field="quote" auto-field-map="true"/>
@@ -501,27 +433,16 @@ under the License.
                 </entity-and>
             </actions>
             <widgets>
-                <decorator-screen name="CommonQuotePriceDecorator" location="${parameters.mainDecoratorLocation}">
+                <decorator-screen name="CommonQuoteDecorator" location="${parameters.quoteDecoratorLocation}">
                     <decorator-section name="body">
-                        <container style="screenlet">
-                            <container style="screenlet-title-bar">
-                                <container style="h3">
-                                    <label text="${uiLabelMap.OrderOrderQuoteListCoefficients}"/>
-                                </container>
+                        <screenlet title="${uiLabelMap.OrderOrderQuoteListCoefficients}">
+                            <container>
+                                <link target="EditQuoteCoefficient" text="${uiLabelMap.OrderCreateOrderQuoteCoefficient}" style="buttontext">
+                                    <parameter param-name="quoteId" from-field="quote.quoteId"/>
+                                </link>
                             </container>
-                            <container style="screenlet-body">
-                                <section>
-                                    <widgets>
-                                        <container>
-                                            <link target="EditQuoteCoefficient" text="${uiLabelMap.OrderCreateOrderQuoteCoefficient}" style="buttontext">
-                                                <parameter param-name="quoteId" from-field="quote.quoteId"/>
-                                            </link>
-                                        </container>
-                                        <include-form name="ListQuoteCoefficients" location="component://order/webapp/ordermgr/quote/QuoteForms.xml"/>
-                                    </widgets>
-                                </section>
-                            </container>
-                        </container>
+                            <include-form name="ListQuoteCoefficients" location="component://order/widget/ordermgr/QuoteForms.xml"/>
+                        </screenlet>
                     </decorator-section>
                 </decorator-screen>
             </widgets>
@@ -531,7 +452,6 @@ under the License.
         <section>
             <actions>
                 <set field="titleProperty" value="OrderOrderQuoteEditCoefficients"/>
-                <set field="headerItem" value="quote"/>
                 <set field="tabButtonItem" value="ListQuoteCoefficients"/>
 
                 <set field="quoteId" from-field="parameters.quoteId"/>
@@ -541,27 +461,16 @@ under the License.
                 <entity-one entity-name="QuoteCoefficient" value-field="quoteCoefficient"/>
             </actions>
             <widgets>
-                <decorator-screen name="CommonQuotePriceDecorator" location="${parameters.mainDecoratorLocation}">
+                <decorator-screen name="CommonQuoteDecorator" location="${parameters.quoteDecoratorLocation}">
                     <decorator-section name="body">
-                        <container style="screenlet">
-                            <container style="screenlet-title-bar">
-                                <container style="h3">
-                                    <label text="${uiLabelMap.OrderOrderQuoteEditCoefficients}"/>
-                                </container>
+                        <screenlet title="${uiLabelMap.OrderOrderQuoteEditCoefficients}">
+                            <container>
+                                <link target="EditQuoteCoefficient" text="${uiLabelMap.OrderCreateOrderQuoteCoefficient}" style="buttontext">
+                                    <parameter param-name="quoteId" from-field="quote.quoteId"/>
+                                </link>
                             </container>
-                            <container style="screenlet-body">
-                                <section>
-                                    <widgets>
-                                        <container>
-                                            <link target="EditQuoteCoefficient" text="${uiLabelMap.OrderCreateOrderQuoteCoefficient}" style="buttontext">
-                                                <parameter param-name="quoteId" from-field="quote.quoteId"/>
-                                            </link>
-                                        </container>
-                                        <include-form name="EditQuoteCoefficient" location="component://order/webapp/ordermgr/quote/QuoteForms.xml"/>
-                                    </widgets>
-                                </section>
-                            </container>
-                        </container>
+                            <include-form name="EditQuoteCoefficient" location="component://order/widget/ordermgr/QuoteForms.xml"/>
+                        </screenlet>
                     </decorator-section>
                 </decorator-screen>
             </widgets>
@@ -571,7 +480,6 @@ under the License.
         <section>
             <actions>
                 <set field="titleProperty" value="OrderOrderQuotePrices"/>
-                <set field="headerItem" value="quote"/>
                 <set field="tabButtonItem" value="ManageQuotePrices"/>
                 <set field="viewIndex" from-field="parameters.VIEW_INDEX" type="Integer"/>
                 <set field="viewSize" from-field="parameters.VIEW_SIZE" type="Integer" default-value="50"/>
@@ -591,41 +499,19 @@ under the License.
                 <script location="component://order/webapp/ordermgr/WEB-INF/actions/quote/ManageQuotePrices.groovy"/>
             </actions>
             <widgets>
-                <decorator-screen name="CommonQuotePriceDecorator" location="${parameters.mainDecoratorLocation}">
+                <decorator-screen name="CommonQuoteDecorator" location="${parameters.quoteDecoratorLocation}">
                     <decorator-section name="body">
-                        <container style="screenlet">
-                            <container style="screenlet-title-bar">
-                                <container style="h3">
-                                    <label text="${uiLabelMap.OrderOrderQuotePrices}"/>
-                                </container>
-                            </container>
-                            <container style="screenlet-body">
-                                <section>
-                                    <widgets>
-                                        <platform-specific>
-                                            <html><html-template location="component://order/webapp/ordermgr/quote/ManageQuotePrices.ftl"/></html>
-                                        </platform-specific>
-                                    </widgets>
-                                </section>
-                            </container>
-                        </container>
-                        <container style="screenlet">
-                            <container style="screenlet-title-bar">
-                                <container style="h3">
-                                    <label text="${uiLabelMap.OrderOrderQuotePrices}"/>
-                                </container>
-                            </container>
-                            <container style="screenlet-body">
-                                <section>
-                                    <widgets>
-                                        <include-form name="ManageQuotePrices" location="component://order/webapp/ordermgr/quote/QuoteForms.xml"/>
-                                        <platform-specific>
-                                            <html><html-template location="component://order/webapp/ordermgr/quote/ManageQuotePricesTotals.ftl"/></html>
-                                        </platform-specific>
-                                    </widgets>
-                                </section>
-                            </container>
-                        </container>
+                        <screenlet title="${uiLabelMap.OrderOrderQuotePrices}">
+                            <platform-specific>
+                                <html><html-template location="component://order/webapp/ordermgr/quote/ManageQuotePrices.ftl"/></html>
+                            </platform-specific>
+                        </screenlet>
+                        <screenlet title="${uiLabelMap.OrderOrderQuotePrices}">
+                            <include-form name="ManageQuotePrices" location="component://order/widget/ordermgr/QuoteForms.xml"/>
+                            <platform-specific>
+                                <html><html-template location="component://order/webapp/ordermgr/quote/ManageQuotePricesTotals.ftl"/></html>
+                            </platform-specific>
+                        </screenlet>
                     </decorator-section>
                 </decorator-screen>
             </widgets>
@@ -635,7 +521,6 @@ under the License.
         <section>
             <actions>
                 <set field="titleProperty" value="OrderOrderQuoteListAdjustments"/>
-                <set field="headerItem" value="quote"/>
                 <set field="tabButtonItem" value="ListQuoteAdjustments"/>
                 <set field="viewIndex" from-field="parameters.VIEW_INDEX" type="Integer"/>
                 <set field="viewSize" from-field="parameters.VIEW_SIZE" type="Integer" default-value="50"/>
@@ -647,30 +532,19 @@ under the License.
                 </entity-and>
             </actions>
             <widgets>
-                <decorator-screen name="CommonQuotePriceDecorator" location="${parameters.mainDecoratorLocation}">
+                <decorator-screen name="CommonQuoteDecorator" location="${parameters.quoteDecoratorLocation}">
                     <decorator-section name="body">
-                        <container style="screenlet">
-                            <container style="screenlet-title-bar">
-                                <container style="h3">
-                                    <label text="${uiLabelMap.OrderOrderQuoteListAdjustments}"/>
-                                </container>
+                        <screenlet title="${uiLabelMap.OrderOrderQuoteListAdjustments}">
+                            <container>
+                                <link target="autoCreateQuoteAdjustments" text="${uiLabelMap.OrderRunStorePromotions}" style="buttontext">
+                                    <parameter param-name="quoteId"/>
+                                </link>
+                                <link target="EditQuoteAdjustment" text="${uiLabelMap.OrderCreateOrderQuoteAdjustment}" style="buttontext">
+                                    <parameter param-name="quoteId" from-field="quote.quoteId"/>
+                                </link>
                             </container>
-                            <container style="screenlet-body">
-                                <section>
-                                    <widgets>
-                                        <container>
-                                            <link target="autoCreateQuoteAdjustments" text="${uiLabelMap.OrderRunStorePromotions}" style="buttontext">
-                                                <parameter param-name="quoteId"/>
-                                            </link>
-                                            <link target="EditQuoteAdjustment" text="${uiLabelMap.OrderCreateOrderQuoteAdjustment}" style="buttontext">
-                                                <parameter param-name="quoteId" from-field="quote.quoteId"/>
-                                            </link>
-                                        </container>
-                                        <include-form name="ListQuoteAdjustments" location="component://order/webapp/ordermgr/quote/QuoteForms.xml"/>
-                                    </widgets>
-                                </section>
-                            </container>
-                        </container>
+                            <include-form name="ListQuoteAdjustments" location="component://order/widget/ordermgr/QuoteForms.xml"/>
+                        </screenlet>
                     </decorator-section>
                 </decorator-screen>
             </widgets>
@@ -680,7 +554,6 @@ under the License.
         <section>
             <actions>
                 <set field="titleProperty" value="OrderOrderQuoteEditAdjustments"/>
-                <set field="headerItem" value="quote"/>
                 <set field="tabButtonItem" value="ListQuoteAdjustments"/>
 
                 <set field="quoteId" from-field="parameters.quoteId"/>
@@ -690,27 +563,16 @@ under the License.
                 <entity-one entity-name="QuoteAdjustment" value-field="quoteAdjustment"/>
             </actions>
             <widgets>
-                <decorator-screen name="CommonQuotePriceDecorator" location="${parameters.mainDecoratorLocation}">
+                <decorator-screen name="CommonQuoteDecorator" location="${parameters.quoteDecoratorLocation}">
                     <decorator-section name="body">
-                        <container style="screenlet">
-                            <container style="screenlet-title-bar">
-                                <container style="h3">
-                                    <label text="${uiLabelMap.OrderOrderQuoteEditAdjustments}"/>
-                                </container>
+                        <screenlet title="${uiLabelMap.OrderOrderQuoteEditAdjustments}">
+                            <container>
+                                <link target="EditQuoteAdjustment" text="${uiLabelMap.OrderCreateOrderQuoteAdjustment}" style="buttontext">
+                                    <parameter param-name="quoteId" from-field="quote.quoteId"/>
+                                </link>
                             </container>
-                            <container style="screenlet-body">
-                                <section>
-                                    <widgets>
-                                        <container>
-                                            <link target="EditQuoteAdjustment" text="${uiLabelMap.OrderCreateOrderQuoteAdjustment}" style="buttontext">
-                                                <parameter param-name="quoteId" from-field="quote.quoteId"/>
-                                            </link>
-                                        </container>
-                                        <include-form name="EditQuoteAdjustment" location="component://order/webapp/ordermgr/quote/QuoteForms.xml"/>
-                                    </widgets>
-                                </section>
-                            </container>
-                        </container>
+                            <include-form name="EditQuoteAdjustment" location="component://order/widget/ordermgr/QuoteForms.xml"/>
+                        </screenlet>
                     </decorator-section>
                 </decorator-screen>
             </widgets>
@@ -720,7 +582,6 @@ under the License.
         <section>
             <actions>
                 <set field="titleProperty" value="OrderOrderQuoteViewProfit"/>
-                <set field="headerItem" value="quote"/>
                 <set field="tabButtonItem" value="ViewQuoteProfit"/>
                 <set field="viewIndex" from-field="parameters.VIEW_INDEX" type="Integer"/>
                 <set field="viewSize" from-field="parameters.VIEW_SIZE" type="Integer" default-value="50"/>
@@ -740,25 +601,14 @@ under the License.
                 <script location="component://order/webapp/ordermgr/WEB-INF/actions/quote/ViewQuoteProfit.groovy"/>
             </actions>
             <widgets>
-                <decorator-screen name="CommonQuotePriceDecorator" location="${parameters.mainDecoratorLocation}">
+                <decorator-screen name="CommonQuoteDecorator" location="${parameters.quoteDecoratorLocation}">
                     <decorator-section name="body">
-                        <container style="screenlet">
-                            <container style="screenlet-title-bar">
-                                <container style="h3">
-                                    <label text="${uiLabelMap.OrderOrderQuoteViewProfit}"/>
-                                </container>
-                            </container>
-                            <container style="screenlet-body">
-                                <section>
-                                    <widgets>
-                                        <platform-specific>
-                                            <html><html-template location="component://order/webapp/ordermgr/quote/ViewQuoteProfit.ftl"/></html>
-                                        </platform-specific>
-                                        <include-form name="ViewQuoteProfit" location="component://order/webapp/ordermgr/quote/QuoteForms.xml"/>
-                                    </widgets>
-                                </section>
-                            </container>
-                        </container>
+                        <screenlet title="${uiLabelMap.OrderOrderQuoteViewProfit}">
+                            <platform-specific>
+                                <html><html-template location="component://order/webapp/ordermgr/quote/ViewQuoteProfit.ftl"/></html>
+                            </platform-specific>
+                            <include-form name="ViewQuoteProfit" location="component://order/widget/ordermgr/QuoteForms.xml"/>
+                        </screenlet>
                     </decorator-section>
                 </decorator-screen>
             </widgets>
@@ -768,7 +618,6 @@ under the License.
         <section>
             <actions>
                 <set field="titleProperty" value="OrderOrderQuoteEditReportMail"/>
-                <set field="headerItem" value="quote"/>
                 <set field="tabButtonItem" value="ViewQuote"/>
 
                 <set field="quoteId" from-field="parameters.quoteId"/>
@@ -777,22 +626,11 @@ under the License.
                 <script location="component://order/webapp/ordermgr/WEB-INF/actions/quote/GetPartyEmailAddress.groovy"/>
             </actions>
             <widgets>
-                <decorator-screen name="CommonQuoteDecorator" location="${parameters.mainDecoratorLocation}">
+                <decorator-screen name="CommonQuoteDecorator" location="${parameters.quoteDecoratorLocation}">
                     <decorator-section name="body">
-                        <container style="screenlet">
-                            <container style="screenlet-title-bar">
-                                <container style="h3">
-                                    <label text="${uiLabelMap.OrderOrderQuoteEditReportMail}"/>
-                                </container>
-                            </container>
-                            <container style="screenlet-body">
-                                <section>
-                                    <widgets>
-                                        <include-form name="EditQuoteReportMail" location="component://order/webapp/ordermgr/quote/QuoteForms.xml"/>
-                                    </widgets>
-                                </section>
-                            </container>
-                        </container>
+                        <screenlet title="${uiLabelMap.OrderOrderQuoteEditReportMail}">
+                            <include-form name="EditQuoteReportMail" location="component://order/widget/ordermgr/QuoteForms.xml"/>
+                        </screenlet>
                     </decorator-section>
                 </decorator-screen>
             </widgets>
@@ -804,11 +642,10 @@ under the License.
                 <not><if-empty field="quote"/></not>
             </condition>
             <widgets>
-                <label text="${note}" style="tabletext"/>
+                <label text="${note}"/>
                 <include-screen name="ViewQuoteInfo"/>
-                <container style="leftclear">
+                <container style="clear"/>
                     <include-screen name="ViewQuoteItemInfo"/>
-                </container>
             </widgets>
             <fail-widgets>
                 <label style="h3">${uiLabelMap.OrderNoQuoteFound}</label>
@@ -817,6 +654,16 @@ under the License.
     </screen>
     <screen name="ViewQuoteInfo">
         <section>
+            <actions>
+                <entity-and entity-name="QuoteTerm" list="quoteTerms">
+                    <field-map field-name="quoteId"  from-field="parameters.quoteId"/>
+                    <field-map field-name="quoteItemSeqId" value="_NA_"/>
+                </entity-and>
+                <entity-and entity-name="QuoteNoteView" list="quoteNotes">
+                    <field-map field-name="quoteId"  from-field="parameters.quoteId"/>
+                    <order-by field-name="-noteDateTime"/>
+                </entity-and>
+            </actions>
             <widgets>
                 <container style="lefthalf">
                     <include-screen name="quoteInfo"/>
@@ -824,6 +671,8 @@ under the License.
                 <container style="righthalf">
                     <include-screen name="quoteDate"/>
                     <include-screen name="quoteRoles"/>
+                    <include-screen name="ListQuoteInfo"/>
+                    <include-screen name="ListQuoteNoteInfo"/>
                 </container>
             </widgets>
         </section>
@@ -834,6 +683,30 @@ under the License.
                 <platform-specific>
                     <html><html-template location="component://order/webapp/ordermgr/quote/quoteInfo.ftl"/></html>
                 </platform-specific>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="ListQuoteInfo">
+        <section>
+            <condition>
+                <not><if-empty field="quoteTerms"/></not>
+            </condition>
+            <widgets>
+                <screenlet title="${uiLabelMap.OrderOrderQuoteTermList}">
+                    <include-form name="ListQuoteInfo" location="component://order/widget/ordermgr/QuoteForms.xml"/>
+                </screenlet>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="ListQuoteNoteInfo">
+        <section>
+            <condition>
+                <not><if-empty field="quoteNotes"/></not>
+            </condition>
+            <widgets>
+                <screenlet title="${uiLabelMap.OrderOrderQuoteNotes}">
+                    <include-form name="ListQuoteNoteInfo" location="component://order/widget/ordermgr/QuoteForms.xml"/>
+                </screenlet>
             </widgets>
         </section>
     </screen>
@@ -860,6 +733,15 @@ under the License.
             <condition>
                 <not><if-empty field="quoteItems"/></not>
             </condition>
+            <actions>
+                <entity-and list="quoteItemList" entity-name="QuoteItem">
+                    <field-map field-name="quoteId" from-field="parameters.quoteId"/>
+                </entity-and>
+                <entity-one value-field="quote" entity-name="Quote">
+                    <field-map field-name="quoteId" from-field="parameters.quoteId"/>
+                </entity-one>
+                <set field="quoteStatusId" from-field="quote.statusId"/>
+            </actions>
             <widgets>
                 <platform-specific>
                     <html><html-template location="component://order/webapp/ordermgr/quote/ViewQuoteItemInfo.ftl"/></html>
@@ -867,4 +749,157 @@ under the License.
             </widgets>
         </section>
     </screen>
+    <screen name="EditQuoteTerm">
+        <section>
+            <actions>
+                <set field="titleProperty" value="${uiLabelMap.OrderOrderQuoteEditTerm}"/>
+                <set field="tabButtonItem" value="QuoteTerms"/>
+                <set field="quoteId" from-field="parameters.quoteId"/>
+                <set field="termTypeId" from-field="parameters.termTypeId"/>
+                <set field="quoteItemSeqId" from-field="parameters.quoteItemSeqId"/>
+                <entity-one entity-name="QuoteTerm" value-field="quoteTerm"/>
+                <entity-one entity-name="Quote" value-field="quote" auto-field-map="true"/>
+                <set field="target" from-field="parameters.target"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonQuoteDecorator" location="${parameters.quoteDecoratorLocation}">
+                    <decorator-section name="body">
+                        <screenlet title="${uiLabelMap.OrderOrderQuoteEditTerm}">
+                            <include-form name="EditQuoteTerm" location="component://order/widget/ordermgr/QuoteForms.xml"/>
+                        </screenlet>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="EditQuoteTermItem">
+        <section>
+            <actions>
+                <set field="titleProperty" value="${uiLabelMap.OrderOrderQuoteEditTerm}"/>
+                <set field="tabButtonItem" value="ListQuoteItems"/>
+                <set field="quoteId" from-field="parameters.quoteId"/>
+                <set field="termTypeId" from-field="parameters.termTypeId"/>
+                <set field="quoteItemSeqId" from-field="parameters.quoteItemSeqId"/>
+                <entity-one entity-name="QuoteTerm" value-field="quoteTerm"/>
+                <entity-one entity-name="Quote" value-field="quote" auto-field-map="true"/>
+                <set field="target" from-field="parameters.target"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonQuoteDecorator" location="${parameters.quoteDecoratorLocation}">
+                    <decorator-section name="body">
+                        <screenlet title="${uiLabelMap.OrderOrderQuoteEditTerm}">
+                            <include-form name="EditQuoteTermItem" location="component://order/widget/ordermgr/QuoteForms.xml"/>
+                        </screenlet>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="ListQuoteTerms">
+        <section>
+            <actions>
+                <set field="titleProperty" value="${uiLabelMap.OrderOrderQuoteEditTerm}"/>
+                <set field="tabButtonItem" value="QuoteTerms"/>
+                <set field="quoteId" from-field="parameters.quoteId"/>
+                <set field="termTypeId" from-field="parameters.termTypeId"/>
+                <set field="quoteItemSeqId" from-field="parameters.quoteItemSeqId"/>
+                <entity-one entity-name="QuoteTerm" value-field="quoteTerm"/>
+                <entity-one entity-name="Quote" value-field="quote" auto-field-map="true"/>
+                <entity-and entity-name="QuoteTerm" list="quoteTerms">
+                    <field-map field-name="quoteId"  from-field="parameters.quoteId"/>
+                </entity-and>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonQuoteDecorator" location="${parameters.quoteDecoratorLocation}">
+                    <decorator-section name="body">
+                        <include-menu name="quoteTermSubTabBar" location="component://order/widget/ordermgr/OrderMenus.xml"/>
+                        <screenlet title="${uiLabelMap.OrderOrderQuoteTermList}">
+                            <include-form name="ListQuoteTerms" location="component://order/widget/ordermgr/QuoteForms.xml"/>
+                        </screenlet>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="ListQuoteNotes">
+        <section>
+            <actions>
+                <set field="titleProperty" value="OrderOrderQuoteNoteList"/>
+                <set field="tabButtonItem" value="ListQuoteNotes"/>
+                <set field="quoteId" from-field="parameters.quoteId"/>
+                <set field="headerRowStyle" value="header-row-2"/>
+                <entity-one entity-name="Quote" value-field="quote" auto-field-map="true"/>
+                <entity-and entity-name="QuoteNoteView" list="quoteNotes">
+                    <field-map field-name="quoteId"  from-field="parameters.quoteId"/>
+                    <order-by field-name="-noteDateTime"/>
+                </entity-and>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonQuoteDecorator" location="${parameters.quoteDecoratorLocation}">
+                    <decorator-section name="body">
+                        <container style="button-bar button-style-1">
+                            <link target="createnewquotenote" text="${uiLabelMap.OrderCreateOrderQuoteNote}">
+                                <parameter param-name="quoteId" from-field="quote.quoteId"/>
+                            </link>
+                        </container>
+                        <include-form name="ListQuoteNotes" location="component://order/widget/ordermgr/QuoteForms.xml"/>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="QuoteNewNote">
+        <section>
+            <condition>
+                <not><if-empty field="parameters.quoteId"/></not>
+            </condition>
+            <actions>
+                <set field="titleProperty" value="OrderAddNote"/>
+                <set field="tabButtonItem" value="QuoteNotes"/>
+                <set field="target" value="createquotenote"/>
+                <set field="quoteId" from-field="parameters.quoteId"/>
+                <entity-one entity-name="Quote" value-field="quote"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonQuoteDecorator">
+                    <decorator-section name="body">
+                        <include-form name="AddOrEditQuoteNote" location="component://order/widget/ordermgr/QuoteForms.xml"/>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+            <fail-widgets>
+                <label style="h3">${uiLabelMap.OrderViewPermissionError}</label>
+            </fail-widgets>
+        </section>
+    </screen>
+    <screen name="EditQuoteNote">
+        <section>
+            <condition>
+                <and>
+                    <not><if-empty field="parameters.noteId"/></not>
+                    <not><if-empty field="parameters.quoteId"/></not>
+                </and>
+            </condition>
+            <actions>
+                <set field="titleProperty" value="QuoteEditNote"/>
+                <set field="tabButtonItem" value="QuoteNotes"/>
+                <set field="target" value="updateQuoteNote"/>
+                <set field="quoteId" from-field="parameters.quoteId"/>
+                <set field="noteId" from-field="parameters.noteId"/>
+                <entity-one entity-name="Quote" value-field="quote"/>
+                <entity-one entity-name="QuoteNoteView" value-field="quoteNoteData"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonQuoteDecorator">
+                    <decorator-section name="body">
+                        <include-form name="AddOrEditQuoteNote" location="component://order/widget/ordermgr/QuoteForms.xml"/>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+            <fail-widgets>
+                <label style="h3">${uiLabelMap.OrderViewPermissionError}</label>
+            </fail-widgets>
+        </section>
+    </screen>
+
 </screens>

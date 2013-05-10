@@ -18,8 +18,6 @@
  *******************************************************************************/
 package org.ofbiz.base.util;
 
-import java.util.Map;
-
 import javolution.util.FastMap;
 
 /**
@@ -32,7 +30,10 @@ import javolution.util.FastMap;
 public class UtilTimer {
 
     public static final String module = UtilTimer.class.getName();
-    protected static Map<String, UtilTimer> staticTimers = FastMap.newInstance();
+    protected static FastMap<String, UtilTimer> staticTimers = FastMap.newInstance();
+    static {
+        staticTimers.setShared(true);
+    }
 
     protected String timerName = null;
     protected String lastMessage = null;
@@ -95,20 +96,20 @@ public class UtilTimer {
         // time this call to avoid it interfering with the main timer
         long tsStart = System.currentTimeMillis();
 
-        String retString = "[[" + message + "- total:" + secondsSinceStart();
+        StringBuilder retBuf = new StringBuilder();
+        retBuf.append("[[").append(message).append("- total:").append(secondsSinceStart());
         if (lastMessage != null) {
-            retString += ",since last(" + ((lastMessage.length() > 20) ? (lastMessage.substring(0, 17) + "...") : lastMessage) + "):" +
-                    secondsSinceLast() + "]]";
-        } else {
-            retString += "]]";
+            retBuf.append(",since last(").append(((lastMessage.length() > 20) ? (lastMessage.substring(0, 17) + "...") : lastMessage)).append("):").append(secondsSinceLast());
         }
+        retBuf.append("]]");
 
         // append the timer name
         if (UtilValidate.isNotEmpty(timerName)) {
-            retString = retString + " - '" + timerName + "'";
+            retBuf.append(" - '").append(timerName).append("'");
         }
 
         lastMessage = message;
+        String retString = retBuf.toString();
         if (log) Debug.log(Debug.TIMING, null, retString, module, "org.ofbiz.base.util.UtilTimer");
 
         // have lastMessageTime come as late as possible to just time what happens between calls
@@ -123,14 +124,14 @@ public class UtilTimer {
      * @return The number of seconds since the timer started
      */
     public double secondsSinceStart() {
-        return ((double) timeSinceStart()) / 1000.0;
+        return (timeSinceStart()) / 1000.0;
     }
 
     /** Returns the number of seconds since the last time timerString was called
      * @return The number of seconds since the last time timerString was called
      */
     public double secondsSinceLast() {
-        return ((double) timeSinceLast()) / 1000.0;
+        return (timeSinceLast()) / 1000.0;
     }
 
     /** Returns the number of milliseconds since the timer started
@@ -222,14 +223,10 @@ public class UtilTimer {
     public static UtilTimer getTimer(String timerName, boolean log) {
         UtilTimer timer = staticTimers.get(timerName);
         if (timer == null) {
-            synchronized(UtilTimer.class) {
-                timer = staticTimers.get(timerName);
-                if (timer == null) {
-                    timer = new UtilTimer(timerName, false);
-                    timer.setLog(log);
-                    staticTimers.put(timerName, timer);
-                }
-            }
+            timer = new UtilTimer(timerName, false);
+            timer.setLog(log);
+            staticTimers.putIfAbsent(timerName, timer);
+            timer = staticTimers.get(timerName);
         }
         return timer;
     }
@@ -260,8 +257,6 @@ public class UtilTimer {
         if (message != null) {
             UtilTimer.timerLog(timerName, message, module);
         }
-        synchronized(UtilTimer.class) {
-            staticTimers.remove(timerName);
-        }
+        staticTimers.remove(timerName);
     }
 }

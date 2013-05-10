@@ -22,7 +22,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Set;
 
-import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.GeneralException;
 import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.base.util.UtilObject;
@@ -63,14 +62,10 @@ public class ControllerViewArtifactInfo extends ArtifactInfoBase {
             String fullScreenName = this.viewInfoMap.page;
             if (UtilValidate.isNotEmpty(fullScreenName)) {
                 int poundIndex = fullScreenName.indexOf('#');
-                try {
-                    this.screenCalledByThisView = this.aif.getScreenWidgetArtifactInfo(fullScreenName.substring(poundIndex+1), fullScreenName.substring(0, poundIndex));
-                    if (this.screenCalledByThisView != null) {
-                        // add the reverse association
-                        UtilMisc.addToSortedSetInMap(this, aif.allViewInfosReferringToScreen, this.screenCalledByThisView.getUniqueId());
-                    }
-                } catch (GeneralException e) {
-                    Debug.logWarning(e.toString(), module);
+                this.screenCalledByThisView = this.aif.getScreenWidgetArtifactInfo(fullScreenName.substring(poundIndex+1), fullScreenName.substring(0, poundIndex));
+                if (this.screenCalledByThisView != null) {
+                    // add the reverse association
+                    UtilMisc.addToSortedSetInMap(this, aif.allViewInfosReferringToScreen, this.screenCalledByThisView.getUniqueId());
                 }
             }
         }
@@ -84,6 +79,7 @@ public class ControllerViewArtifactInfo extends ArtifactInfoBase {
         return this.viewUri;
     }
 
+    @Override
     public String getDisplayName() {
         String location = UtilURL.getOfbizHomeRelativeLocation(this.controllerXmlUrl);
         if (location.endsWith("/WEB-INF/controller.xml")) {
@@ -92,22 +88,27 @@ public class ControllerViewArtifactInfo extends ArtifactInfoBase {
         return this.viewUri + " (" + location + ")";
     }
 
+    @Override
     public String getDisplayType() {
         return "Controller View";
     }
 
+    @Override
     public String getType() {
         return ArtifactInfoFactory.ControllerViewInfoTypeId;
     }
 
+    @Override
     public String getUniqueId() {
         return this.controllerXmlUrl.toExternalForm() + "#" + this.viewUri;
     }
 
+    @Override
     public URL getLocationURL() throws MalformedURLException {
         return this.controllerXmlUrl;
     }
 
+    @Override
     public boolean equals(Object obj) {
         if (obj instanceof ControllerViewArtifactInfo) {
             ControllerViewArtifactInfo that = (ControllerViewArtifactInfo) obj;

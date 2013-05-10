@@ -38,7 +38,7 @@ import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilHttp;
 import org.ofbiz.webapp.control.ContextFilter;
 import org.ofbiz.webapp.view.AbstractViewHandler;
-import org.ofbiz.entity.GenericDelegator;
+import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.jdbc.ConnectionFactory;
 
 /**
@@ -61,17 +61,17 @@ public class JasperReportsXmlViewHandler extends AbstractViewHandler {
         if (request == null) {
             throw new ViewHandlerException("The HttpServletRequest object was null, how did that happen?");
         }
-        if (page == null || page.length() == 0) {
+        if (UtilValidate.isEmpty(page)) {
             throw new ViewHandlerException("View page was null or empty, but must be specified");
         }
-        if (info == null || info.length() == 0) {
+        if (UtilValidate.isEmpty(info)) {
             Debug.logWarning("View info string was null or empty, but must be used to specify an Entity that is mapped to the Entity Engine datasource that the report will use.", module);
         }
 
         // tell the ContextFilter we are forwarding
         request.setAttribute(ContextFilter.FORWARDED_FROM_SERVLET, Boolean.valueOf(true));
 
-        GenericDelegator delegator = (GenericDelegator) request.getAttribute("delegator");
+        Delegator delegator = (Delegator) request.getAttribute("delegator");
 
         if (delegator == null) {
             throw new ViewHandlerException("The delegator object was null, how did that happen?");
@@ -89,7 +89,7 @@ public class JasperReportsXmlViewHandler extends AbstractViewHandler {
             PipedOutputStream fillToPrintOutputStream = new PipedOutputStream();
             PipedInputStream fillToPrintInputStream = new PipedInputStream(fillToPrintOutputStream);
 
-            if (datasourceName != null && datasourceName.length() > 0) {
+            if (UtilValidate.isNotEmpty(datasourceName)) {
                 JasperFillManager.fillReportToStream(report, fillToPrintOutputStream, parameters, ConnectionFactory.getConnection(datasourceName));
             } else {
                 JasperFillManager.fillReportToStream(report, fillToPrintOutputStream, parameters, new JREmptyDataSource());

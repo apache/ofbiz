@@ -27,6 +27,7 @@ import javolution.util.FastMap;
 /**
  * AbstractParameterTag - Tag which support child parameter tags.
  */
+@SuppressWarnings("serial")
 public abstract class AbstractParameterTag extends TagSupport {
 
     private Map<String, Object> inParameters = null;
@@ -58,11 +59,13 @@ public abstract class AbstractParameterTag extends TagSupport {
             return this.outParameters;
     }
 
+    @Override
     public int doStartTag() throws JspTagException {
         inParameters = FastMap.newInstance();
         return EVAL_BODY_INCLUDE;
     }
 
+    @Override
     public abstract int doEndTag() throws JspTagException;
 
 }

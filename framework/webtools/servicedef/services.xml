@@ -87,6 +87,7 @@ under the License.
         <description>Exports all entities into xml files</description>
         <permission-service service-name="entityMaintPermCheck" main-action="VIEW"/>
         <attribute name="outpath" type="String" mode="IN" optional="true"/>
+        <attribute name="fromDate" type="Timestamp" mode="IN" optional="true"/>
         <attribute name="txTimeout" type="Integer" mode="IN" optional="true"/>
         <attribute name="results" type="List" mode="OUT" optional="false"/>
     </service>
@@ -123,27 +124,10 @@ under the License.
         <attribute name="eomodeldFullPath" type="java.lang.String" mode="IN" optional="false"/>
         <attribute name="serviceName" type="java.lang.String" mode="IN" optional="false"/>
     </service>
+
     <service name="saveLabelsToXmlFile" engine="java" location="org.ofbiz.webtools.labelmanager.SaveLabelsToXmlFile"
              invoke="saveLabelsToXmlFile" auth="true" use-transaction="false">
         <description>Save labels to xml file</description>
-        <attribute name="labelFileName" type="String" mode="IN" optional="true"/>
-    </service>
-    <service name="updateLabelKey" engine="java" location="org.ofbiz.webtools.labelmanager.LabelManagerFactory"
-             invoke="updateLabelKey" auth="true" use-transaction="false">
-        <description>Update Label Key</description>
-        <attribute name="key" type="String" mode="IN" optional="true"/>
-        <attribute name="keyComment" type="String" mode="IN" optional="true"/>
-        <attribute name="update_label" type="String" mode="IN" optional="false"/>
-        <attribute name="fileName" type="String" mode="IN" optional="false"/>
-        <attribute name="confirm" type="String" mode="IN" optional="true"/>
-        <attribute name="removeLabel" type="String" mode="IN" optional="true"/>
-        <attribute name="localeNames" type="List" mode="IN" optional="true"/>
-        <attribute name="localeValues" type="List" mode="IN" optional="true"/>
-        <attribute name="localeComments" type="List" mode="IN" optional="true"/>
-    </service>
-    <service name="updateAndSaveLabelKey" engine="java" location="org.ofbiz.webtools.labelmanager.LabelManagerFactory"
-             invoke="updateAndSaveLabelKey" auth="true" use-transaction="false">
-        <description>Update Label Key</description>
         <attribute name="key" type="String" mode="IN" optional="true"/>
         <attribute name="keyComment" type="String" mode="IN" optional="true"/>
         <attribute name="update_label" type="String" mode="IN" optional="false"/>

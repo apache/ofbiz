@@ -18,37 +18,18 @@
  *******************************************************************************/
 package org.ofbiz.common.olap;
 
-import java.io.*;
-import java.nio.ByteBuffer;
-import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.Map;
 
-import javax.mail.internet.MimeMessage;
-import javax.transaction.xa.XAException;
-
-import javolution.util.FastMap;
-
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
-import org.ofbiz.base.util.Debug;
-import org.ofbiz.base.util.UtilDateTime;
-import static org.ofbiz.base.util.UtilGenerics.checkList;
-import static org.ofbiz.base.util.UtilGenerics.checkMap;
 import org.ofbiz.base.util.UtilMisc;
-import org.ofbiz.entity.GenericDelegator;
+import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
-import org.ofbiz.entity.model.ModelEntity;
-import org.ofbiz.entity.transaction.TransactionUtil;
 import org.ofbiz.entity.util.EntityUtil;
 import org.ofbiz.service.DispatchContext;
-import org.ofbiz.service.GenericServiceException;
-import org.ofbiz.service.LocalDispatcher;
-import org.ofbiz.service.ModelService;
 import org.ofbiz.service.ServiceUtil;
-import org.ofbiz.service.ServiceXaWrapper;
-import org.ofbiz.service.mail.MimeMessageWrapper;
 
 /**
  * Common Services
@@ -63,10 +44,9 @@ public class CommonDimensionServices {
      * The DateDimension entity is a nearly constant dimension ("Slowly Changing Dimension" or SCD):
      * the default strategy to handle data change is "Type 1" (i.e. overwrite the values).
      */
-    public static Map loadDateDimension(DispatchContext ctx, Map context) {
-        GenericDelegator delegator = ctx.getDelegator();
-        LocalDispatcher dispatcher = ctx.getDispatcher();
-
+    public static Map<String, Object> loadDateDimension(DispatchContext ctx, Map<String, ? extends Object> context) {
+        Delegator delegator = ctx.getDelegator();
+        
         Date fromDate = (Date) context.get("fromDate");
         Date thruDate = (Date) context.get("thruDate");
 
@@ -86,7 +66,7 @@ public class CommonDimensionServices {
         while (currentDate.compareTo(thruDate) <= 0) {
             GenericValue dateValue = null;
             try {
-                dateValue = EntityUtil.getFirst(delegator.findByAnd("DateDimension", UtilMisc.toMap("dateValue", currentDate)));
+                dateValue = EntityUtil.getFirst(delegator.findByAnd("DateDimension", UtilMisc.toMap("dateValue", currentDate), null, false));
             } catch (GenericEntityException gee) {
                 return ServiceUtil.returnError(gee.getMessage());
             }

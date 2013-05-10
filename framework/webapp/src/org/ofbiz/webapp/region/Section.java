@@ -40,6 +40,7 @@ import org.ofbiz.webapp.view.ViewHandlerException;
  * <p>Note that a section's content can also be a region;if so,
  * Region.render is called from Section.Render().</p>
  */
+@SuppressWarnings("serial")
 public class Section extends Content {
 
     protected final String name;
@@ -59,6 +60,7 @@ public class Section extends Content {
         return name;
     }
 
+    @Override
     public void render(PageContext pageContext) throws JspException {
         try {
             if (UtilJ2eeCompat.doFlushOnRender(pageContext.getServletContext())) {
@@ -82,6 +84,7 @@ public class Section extends Content {
         }
     }
 
+    @Override
     public void render(HttpServletRequest request, HttpServletResponse response) throws java.io.IOException, ServletException {
         ServletContext context = (ServletContext) request.getAttribute("servletContext");
         boolean verboseOn = Debug.verboseOn();
@@ -175,6 +178,7 @@ public class Section extends Content {
     }
      */
 
+    @Override
     public String toString() {
         return "Section: " + name + ", info=" + info + ", content=" + content + ", type=" + type;
     }

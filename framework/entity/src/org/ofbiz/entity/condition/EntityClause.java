@@ -20,6 +20,7 @@
 package org.ofbiz.entity.condition;
 
 
+import org.ofbiz.base.util.UtilGenerics;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.model.ModelEntity;
 import org.ofbiz.entity.model.ModelReader;
@@ -36,13 +37,13 @@ public class EntityClause {
     private String secondField = "";
     private ModelEntity firstModelEntity = null;
     private ModelEntity secondModelEntity = null;
-    private EntityOperator<?> interFieldOperation = null;
-    private EntityOperator<?> intraFieldOperation = null;
+    private EntityOperator<?,?,?> interFieldOperation = null;
+    private EntityOperator<?,?,?> intraFieldOperation = null;
 
     private Object value = null;
     public EntityClause() {}
 
-    public EntityClause(String firstEntity, String secondEntity, String firstField, String secondField, EntityOperator<?> interFieldOperation, EntityOperator<?> intraFieldOperation) {
+    public EntityClause(String firstEntity, String secondEntity, String firstField, String secondField, EntityOperator<?, ?, ?> interFieldOperation, EntityOperator<?, ?, ?> intraFieldOperation) {
         this.firstEntity = firstEntity;
         this.secondEntity = secondEntity;
         this.firstField = firstField;
@@ -51,7 +52,7 @@ public class EntityClause {
         this.intraFieldOperation = intraFieldOperation;
     }
 
-    public EntityClause(String firstEntity, String firstField, Object value, EntityOperator<?> interFieldOperation, EntityOperator<?> intraFieldOperation) {
+    public EntityClause(String firstEntity, String firstField, Object value, EntityOperator<?, ?, ?> interFieldOperation, EntityOperator<?, ?, ?> intraFieldOperation) {
         this.firstEntity = firstEntity;
         this.firstField = firstField;
         this.value = value;
@@ -80,12 +81,12 @@ public class EntityClause {
         return value;
     }
 
-    public EntityOperator<?> getInterFieldOperation() {
-        return interFieldOperation;
+    public <L,R,T> EntityOperator<L,R,T> getInterFieldOperation() {
+        return UtilGenerics.cast(interFieldOperation);
     }
 
-    public EntityOperator<?> getIntraFieldOperation() {
-        return intraFieldOperation;
+    public <L,R,T> EntityOperator<L,R,T> getIntraFieldOperation() {
+        return UtilGenerics.cast(intraFieldOperation);
     }
 
     public void setFirstEntity(String firstEntity) {
@@ -104,11 +105,11 @@ public class EntityClause {
         this.secondField = secondField;
     }
 
-    public void setInterFieldOperation(EntityOperator<?> interFieldOperation) {
+    public <L,R,T> void setInterFieldOperation(EntityOperator<L,R,T> interFieldOperation) {
         this.interFieldOperation = interFieldOperation;
     }
 
-    public void setIntraFieldOperation(EntityOperator<?> intraFieldOperation) {
+    public <L,R,T> void setIntraFieldOperation(EntityOperator<L,R,T> intraFieldOperation) {
         this.intraFieldOperation = intraFieldOperation;
     }
 
@@ -128,18 +129,19 @@ public class EntityClause {
         return secondModelEntity;
     }
 
+    @Override
     public String toString() {
         StringBuilder outputBuffer = new StringBuilder();
 
-        outputBuffer.append("[firstEntity," + (firstEntity == null ? "null" : firstEntity) + "]");
-        outputBuffer.append("[secondEntity," + (secondEntity == null ? "null" : secondEntity) + "]");
-        outputBuffer.append("[firstField," + (firstField == null ? "null" : firstField) + "]");
-        outputBuffer.append("[secondField," + (secondField == null ? "null" : secondField) + "]");
-        outputBuffer.append("[firstModelEntity," + (firstModelEntity == null ? "null" : (firstModelEntity.getEntityName() == null ? "null" : firstModelEntity.getEntityName())) + "]");
-        outputBuffer.append("[secondModelEntity," + (secondModelEntity == null ? "null" : (secondModelEntity.getEntityName() == null ? "null" : secondModelEntity.getEntityName())) + "]");
-        outputBuffer.append("[interFieldOperation," + (interFieldOperation == null ? "null" : (interFieldOperation.getCode() == null ? "null" : interFieldOperation.getCode())) + "]");
-        outputBuffer.append("[intraFieldOperation," + (intraFieldOperation == null ? "null" : (intraFieldOperation.getCode() == null ? "null" : intraFieldOperation.getCode())) + "]");
-        outputBuffer.append("[value," + (getValue().toString() == null ? "null" : getValue().toString()) + "]");
+        outputBuffer.append("[firstEntity,").append(firstEntity == null ? "null" : firstEntity).append("]");
+        outputBuffer.append("[secondEntity,").append(secondEntity == null ? "null" : secondEntity).append("]");
+        outputBuffer.append("[firstField,").append(firstField == null ? "null" : firstField).append("]");
+        outputBuffer.append("[secondField,").append(secondField == null ? "null" : secondField).append("]");
+        outputBuffer.append("[firstModelEntity,").append(firstModelEntity == null ? "null" : (firstModelEntity.getEntityName() == null ? "null" : firstModelEntity.getEntityName())).append("]");
+        outputBuffer.append("[secondModelEntity,").append(secondModelEntity == null ? "null" : (secondModelEntity.getEntityName() == null ? "null" : secondModelEntity.getEntityName())).append("]");
+        outputBuffer.append("[interFieldOperation,").append(interFieldOperation == null ? "null" : (interFieldOperation.getCode() == null ? "null" : interFieldOperation.getCode())).append("]");
+        outputBuffer.append("[intraFieldOperation,").append(intraFieldOperation == null ? "null" : (intraFieldOperation.getCode() == null ? "null" : intraFieldOperation.getCode())).append("]");
+        outputBuffer.append("[value,").append(getValue().toString() == null ? "null" : getValue().toString()).append("]");
         return outputBuffer.toString();
     }
 

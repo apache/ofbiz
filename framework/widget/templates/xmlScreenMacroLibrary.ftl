@@ -17,9 +17,21 @@ specific language governing permissions and limitations
 under the License.
 -->
 
-<#macro renderSectionBegin></#macro>
-<#macro renderSectionEnd>
+<#macro renderScreenBegin>
+<?xml version="1.0" encoding="UTF-8"?>
+<export>
 </#macro>
+
+<#macro renderScreenEnd>
+</export>
+</#macro>
+
+<#macro renderSectionBegin boundaryComment>
+</#macro>
+
+<#macro renderSectionEnd boundaryComment>
+</#macro>
+
 <#macro renderContainerBegin id style autoUpdateLink autoUpdateInterval>
 </#macro>
 <#macro renderContainerEnd></#macro>
@@ -40,7 +52,7 @@ under the License.
 </#macro>
 
 <#macro renderContentFrame fullUrl width height border></#macro>
-<#macro renderScreenletBegin id title collapsible collapsibleAreaId expandToolTip collapseToolTip fullUrlString padded menuString showMore collapsed javaScriptEnabled>
+<#macro renderScreenletBegin id title collapsible saveCollapsed collapsibleAreaId expandToolTip collapseToolTip fullUrlString padded menuString showMore collapsed javaScriptEnabled>
 </#macro>
 <#macro renderScreenletSubWidget></#macro>
 <#macro renderScreenletEnd></#macro>

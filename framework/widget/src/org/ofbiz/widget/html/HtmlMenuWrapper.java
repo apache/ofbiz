@@ -75,7 +75,7 @@ public class HtmlMenuWrapper {
         this.renderer = getMenuRenderer();
 
         this.context = new HashMap<String, Object>();
-        Map parameterMap = UtilHttp.getParameterMap(request);
+        Map<String, Object> parameterMap = UtilHttp.getParameterMap(request);
         context.put("parameters", parameterMap);
 
         HttpSession session = request.getSession();
@@ -86,14 +86,14 @@ public class HtmlMenuWrapper {
         context.put("locale", UtilHttp.getLocale(request));
 
         // if there was an error message, this is an error
-        if (UtilValidate.isNotEmpty((String) request.getAttribute("_ERROR_MESSAGE_"))) {
+        if (UtilValidate.isNotEmpty(request.getAttribute("_ERROR_MESSAGE_"))) {
             context.put("isError", Boolean.TRUE);
         } else {
             context.put("isError", Boolean.FALSE);
         }
 
         // if a parameter was passed saying this is an error, it is an error
-        if ("true".equals((String) parameterMap.get("isError"))) {
+        if ("true".equals(parameterMap.get("isError"))) {
             context.put("isError", Boolean.TRUE);
         }
     }
@@ -185,12 +185,12 @@ public class HtmlMenuWrapper {
 
     public void setRequest(HttpServletRequest request) {
         this.request = request;
-        ((HtmlMenuRenderer)renderer).setRequest( request );
+        ((HtmlMenuRenderer)renderer).setRequest(request);
     }
 
     public void setResponse(HttpServletResponse response) {
         this.response = response;
-        ((HtmlMenuRenderer)renderer).setResponse( response );
+        ((HtmlMenuRenderer)renderer).setResponse(response);
     }
 
     public HttpServletRequest getRequest() {
@@ -201,7 +201,7 @@ public class HtmlMenuWrapper {
         return ((HtmlMenuRenderer)renderer).response;
     }
 
-    public static HtmlMenuWrapper getMenuWrapper(HttpServletRequest request, HttpServletResponse response, HttpSession session, String menuDefFile, String menuName, String menuWrapperClassName ) {
+    public static HtmlMenuWrapper getMenuWrapper(HttpServletRequest request, HttpServletResponse response, HttpSession session, String menuDefFile, String menuName, String menuWrapperClassName) {
 
         HtmlMenuWrapper menuWrapper = null;
 
@@ -212,7 +212,7 @@ public class HtmlMenuWrapper {
 
         if (menuWrapper == null) {
             try {
-                Class cls = Class.forName("org.ofbiz.widget.html." + menuWrapperClassName);
+                Class<?> cls = Class.forName("org.ofbiz.widget.html." + menuWrapperClassName);
                 menuWrapper = (HtmlMenuWrapper)cls.newInstance();
                 menuWrapper.init(menuDefFile, menuName, request, response);
             } catch (InstantiationException e) {
@@ -231,8 +231,8 @@ public class HtmlMenuWrapper {
         } else {
             menuWrapper.setRequest(request);
             menuWrapper.setResponse(response);
-            Map parameterMap = UtilHttp.getParameterMap(request);
-            menuWrapper.setParameters( parameterMap);
+            Map<String, Object> parameterMap = UtilHttp.getParameterMap(request);
+            menuWrapper.setParameters(parameterMap);
 
             GenericValue userLogin = (GenericValue)session.getAttribute("userLogin");
             menuWrapper.putInContext("userLogin", userLogin);
@@ -245,7 +245,7 @@ public class HtmlMenuWrapper {
         return menuWrapper;
     }
 
-    public void setParameters(Map paramMap) {
+    public void setParameters(Map<String, Object> paramMap) {
         context.put("parameters", paramMap);
     }
 

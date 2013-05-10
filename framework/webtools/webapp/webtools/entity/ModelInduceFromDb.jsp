@@ -24,21 +24,29 @@ if(security.hasPermission("ENTITY_MAINT", session)) {
     response.setContentType("text/html");
 %>
 
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html lang="en" dir="ltr" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>ModelInduceFromDB</title>
+</head>
+<body>
 <div class='h3'><b>Put the name of the Datasource in the EntityEngine.xml to induce from:</b></div>
 <form action='' method="post">
-    <input type='TEXT' class='inputBox' size='40' name='helperName'>
-    <input type=SUBMIT value='Induce!'>
+    <input type='text' class='inputBox' size='40' name='helperName' />
+    <input type='submit' value='Induce!' />
 </form>
 It's the datasource name. It doesn't need to be associated with a
- delegator, just defined in entityengine.xml.
+ delegator, just defined in entityengine.xml.<br/>
+   <b> Use the browser to view the source and see the entities that were created.</b>
 
-
+</body>
+</html>
 
 <%
   } else {
       response.setContentType("text/xml");
       Collection messages = new LinkedList();
-      GenericDAO dao = GenericDAO.getGenericDAO(helperName);
+      GenericDAO dao = GenericDAO.getGenericDAO(new GenericHelperInfo(null, helperName));
       List newEntList = dao.induceModelFromDb(messages);
 
       if(messages.size() > 0) {
@@ -54,7 +62,7 @@ ERRORS:
       if(newEntList != null) {
         String title = "Entity of an Apache Open For Business Project (Apache OFBiz) Component";
         String description = "None";
-        String copyright = "Copyright 2001-2008 The Apache Software Foundation";
+        String copyright = "Copyright 2001-2012 The Apache Software Foundation";
         String author = "None";
         String version = "1.0";
 %><?xml version="1.0" encoding="UTF-8"?>
@@ -110,8 +118,9 @@ under the License.
             author="<%=entity.getAuthor()%>"<%}%><%if(!version.equals(entity.getVersion())){%>
             version="<%=entity.getVersion()%>"<%}%>><%if(!description.equals(entity.getDescription())){%>
       <description><%=entity.getDescription()%></description><%}%><%
-  for (int y = 0; y < entity.getFieldsSize(); y++) {
-    ModelField field = entity.getField(y);%>
+  Iterator<ModelField> fieldIterator = entity.getFieldsIterator();
+  while (fieldIterator.hasNext()) {
+    ModelField field = fieldIterator.next();%>
       <field name="<%=field.getName()%>"<%if(!field.getColName().equals(ModelUtil.javaNameToDbName(field.getName()))){
       %> col-name="<%=field.getColName()%>"<%}%> type="<%=field.getType()%>"><%
     for (int v = 0; v<field.getValidatorsSize(); v++) {
@@ -119,8 +128,9 @@ under the License.
       %><validate name="<%=valName%>"/><%
     }%></field><%
   }
-  for (int y = 0; y < entity.getPksSize(); y++) {
-    ModelField field = entity.getPk(y);%>
+  Iterator<ModelField> pkIterator = entity.getPksIterator();
+  while (pkIterator.hasNext()) {
+    ModelField field = pkIterator.next();%>
       <prim-key field="<%=field.getName()%>"/><%
   }
   if (entity.getRelationsSize() > 0) {

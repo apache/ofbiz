@@ -19,7 +19,6 @@
 package org.ofbiz.base.util.collections;
 
 import java.util.Comparator;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -47,6 +46,7 @@ public class MapComparator implements Comparator<Map<Object, Object>> {
     /**
      * @see java.lang.Object#equals(java.lang.Object)
      */
+    @Override
     public boolean equals(Object obj) {
         return obj.equals(this);
     }
@@ -67,7 +67,7 @@ public class MapComparator implements Comparator<Map<Object, Object>> {
             Object o1 = null;
             Object o2 = null;
 
-            if (key instanceof FlexibleMapAccessor) {
+            if (key instanceof FlexibleMapAccessor<?>) {
                 FlexibleMapAccessor<Object> fmaKey = UtilGenerics.cast(key);
                 ascending = fmaKey.getIsAscending();
 

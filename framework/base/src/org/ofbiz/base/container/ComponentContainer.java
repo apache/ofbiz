@@ -22,7 +22,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Iterator;
+import java.util.Arrays;
 import java.util.List;
 
 import org.ofbiz.base.component.AlreadyLoadedException;
@@ -48,17 +48,20 @@ public class ComponentContainer implements Container {
 
     //protected static List loadedComponents2 = null;
     protected Classpath classPath = new Classpath(System.getProperty("java.class.path"));
+    protected Classpath libraryPath = new Classpath(System.getProperty("java.library.path"));
     protected String configFileLocation = null;
+    private String name;
     private boolean loaded = false;
+    private String instrumenterClassName;
+    private String instrumenterFile;
 
-    /**
-     * @see org.ofbiz.base.container.Container#init(java.lang.String[], java.lang.String)
-     */
-    public void init(String[] args, String configFile) throws ContainerException {
+    @Override
+    public void init(String[] args, String name, String configFile) throws ContainerException {
+        this.name = name;
         this.configFileLocation = configFile;
 
         // get the config for this container
-        ContainerConfig.Container cc = ContainerConfig.getContainer("component-container", configFileLocation);
+        ContainerConfig.Container cc = ContainerConfig.getContainer(name, configFileLocation);
 
         // check for an override loader config
         String loaderConfig = null;
@@ -71,10 +74,20 @@ public class ComponentContainer implements Container {
         if (cc.getProperty("update-classpath") != null) {
             updateClassPath = "true".equalsIgnoreCase(cc.getProperty("update-classpath").value);
         }
+        if (cc.getProperty("ofbiz.instrumenterClassName") != null) {
+            instrumenterClassName = cc.getProperty("ofbiz.instrumenterClassName").value;
+        } else {
+            instrumenterClassName = null;
+        }
+        if (cc.getProperty("ofbiz.instrumenterFile") != null) {
+            instrumenterFile = cc.getProperty("ofbiz.instrumenterFile").value;
+        } else {
+            instrumenterFile = null;
+        }
 
         // load the components
         try {
-            loadComponents(loaderConfig, updateClassPath);
+            loadComponents(loaderConfig, updateClassPath, instrumenterClassName, instrumenterFile);
         } catch (AlreadyLoadedException e) {
             throw new ContainerException(e);
         } catch (ComponentException e) {
@@ -90,6 +103,10 @@ public class ComponentContainer implements Container {
     }
 
     public synchronized void loadComponents(String loaderConfig, boolean updateClasspath) throws AlreadyLoadedException, ComponentException {
+        loadComponents(loaderConfig, updateClasspath, null, null);
+    }
+
+    public synchronized void loadComponents(String loaderConfig, boolean updateClasspath, String instrumenterClassName, String instrumenterFile) throws AlreadyLoadedException, ComponentException {
         // set the loaded list; and fail if already loaded
         //if (loadedComponents == null) {
         //    loadedComponents = new LinkedList();
@@ -119,7 +136,12 @@ public class ComponentContainer implements Container {
 
         // set the new classloader/classpath on the current thread
         if (updateClasspath) {
+            if (UtilValidate.isNotEmpty(instrumenterFile) && UtilValidate.isNotEmpty(instrumenterClassName)) {
+                classPath.instrument(instrumenterFile, instrumenterClassName);
+            }
+
             System.setProperty("java.class.path", classPath.toString());
+            System.setProperty("java.library.path", libraryPath.toString());
             ClassLoader cl = classPath.getClassLoader();
             Thread.currentThread().setContextClassLoader(cl);
         }
@@ -177,7 +199,9 @@ public class ComponentContainer implements Container {
                     Debug.logError(e, "Unable to load components from URL: " + configUrl.toExternalForm(), module);
                 }
             } else {
-                for (String sub: parentPath.list()) {
+                String[] fileNames = parentPath.list();
+                Arrays.sort(fileNames);
+                for (String sub: fileNames) {
                     try {
                         File componentPath = FileUtil.getFile(parentPath.getCanonicalPath() + "/" + sub);
                         if (componentPath.isDirectory() && !sub.equals("CVS") && !sub.equals(".svn")) {
@@ -223,40 +247,47 @@ public class ComponentContainer implements Container {
             configRoot = configRoot + "/";
         }
         if (classpathInfos != null) {
+            String nativeLibExt = System.mapLibraryName("someLib").replace("someLib", "").toLowerCase();
             for (ComponentConfig.ClasspathInfo cp: classpathInfos) {
                 String location = cp.location.replace('\\', '/');
                 // set the location to not have a leading slash
                 if (location.startsWith("/")) {
                     location = location.substring(1);
                 }
-                if ("dir".equals(cp.type)) {
-                    classPath.addComponent(configRoot + location);
-                } else if ("jar".equals(cp.type)) {
-                    String dirLoc = location;
-                    if (dirLoc.endsWith("/*")) {
-                        // strip off the slash splat
-                        dirLoc = location.substring(0, location.length() - 2);
-                    }
-                    File path = FileUtil.getFile(configRoot + dirLoc);
-                    if (path.exists()) {
-                        if (path.isDirectory()) {
-                            // load all .jar and .zip files in this directory
-                            File files[] = path.listFiles();
-                            for (File file: path.listFiles()) {
-                                String fileName = file.getName();
-                                if (fileName.endsWith(".jar") || fileName.endsWith(".zip")) {
-                                    classPath.addComponent(file);
-                                }
-                            }
-                        } else {
-                            // add a single file
+                if (!"jar".equals(cp.type) && !"dir".equals(cp.type)) {
+                    Debug.logError("Classpath type '" + cp.type + "' is not supported; '" + location + "' not loaded", module);
+                    continue;
+                }
+                String dirLoc = location;
+                if (dirLoc.endsWith("/*")) {
+                    // strip off the slash splat
+                    dirLoc = location.substring(0, location.length() - 2);
+                }
+                File path = FileUtil.getFile(configRoot + dirLoc);
+                if (path.exists()) {
+                    if (path.isDirectory()) {
+                        if ("dir".equals(cp.type)) {
                             classPath.addComponent(configRoot + location);
                         }
+                        // load all .jar, .zip files and native libs in this directory
+                        boolean containsNativeLibs = false;
+                        for (File file: path.listFiles()) {
+                            String fileName = file.getName().toLowerCase();
+                            if (fileName.endsWith(".jar") || fileName.endsWith(".zip")) {
+                                classPath.addComponent(file);
+                            } else if (fileName.endsWith(nativeLibExt)) {
+                                containsNativeLibs = true;
+                            }
+                        }
+                        if (containsNativeLibs) {
+                            libraryPath.addComponent(path);
+                        }
                     } else {
-                        Debug.logWarning("Location '" + configRoot + dirLoc + "' does not exist", module);
+                        // add a single file
+                        classPath.addComponent(configRoot + location);
                     }
                 } else {
-                    Debug.logError("Classpath type '" + cp.type + "' is not supported; '" + location + "' not loaded", module);
+                    Debug.logWarning("Location '" + configRoot + dirLoc + "' does not exist", module);
                 }
             }
         }
@@ -266,6 +297,10 @@ public class ComponentContainer implements Container {
      * @see org.ofbiz.base.container.Container#stop()
      */
     public void stop() throws ContainerException {
+    }
+
+    public String getName() {
+        return name;
     }
 
     /**

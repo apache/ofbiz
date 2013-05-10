@@ -22,11 +22,8 @@ under the License.
   <div class="screenlet-title-bar">
     <#if !eftAccount?exists>
       <h3>${uiLabelMap.AccountingAddNewEftAccount}</h3>
-      <form method="post" action='<@ofbizUrl>createEftAccount?DONE_PAGE=${donePage}</@ofbizUrl>' name="editeftaccountform" style='margin: 0;'>
     <#else>
       <h3>${uiLabelMap.PageTitleEditEftAccount}</h3>
-      <form method="post" action='<@ofbizUrl>updateEftAccount?DONE_PAGE=${donePage}</@ofbizUrl>' name="editeftaccountform" style='margin: 0;'>
-        <input type="hidden" name='paymentMethodId' value='${paymentMethodId}'>
     </#if>
   </div>
   <div class="screenlet-body">
@@ -34,32 +31,38 @@ under the License.
           <a href="<@ofbizUrl>${donePage}?partyId=${partyId}</@ofbizUrl>" class="smallSubmit">${uiLabelMap.CommonCancelDone}</a>
           <a href="javascript:document.editeftaccountform.submit()" class="smallSubmit">${uiLabelMap.CommonSave}</a>
         </div>
+    <#if !eftAccount?exists>
+      <form method="post" action='<@ofbizUrl>createEftAccount?DONE_PAGE=${donePage}</@ofbizUrl>' name="editeftaccountform" style='margin: 0;'>
+    <#else>
+      <form method="post" action='<@ofbizUrl>updateEftAccount?DONE_PAGE=${donePage}</@ofbizUrl>' name="editeftaccountform" style='margin: 0;'>
+        <input type="hidden" name='paymentMethodId' value='${paymentMethodId}' />
+    </#if>
         <input type="hidden" name="partyId" value="${partyId}"/>
         <table class="basic-table" cellspacing="0">
         <tr>
           <td class="label">${uiLabelMap.AccountingNameAccount}</td>
           <td>
-            <input type="text" class='required' size="30" maxlength="60" name="nameOnAccount" value="${eftAccountData.nameOnAccount?if_exists}">
+            <input type="text" class='required' size="30" maxlength="60" name="nameOnAccount" value="${eftAccountData.nameOnAccount?if_exists}" />
             <span class="tooltip">${uiLabelMap.CommonRequired}</span>
           </td>
         </tr>
         <tr>
           <td class="label">${uiLabelMap.AccountingCompanyNameAccount}</td>
           <td>
-            <input type="text" size="30" maxlength="60" name="companyNameOnAccount" value="${eftAccountData.companyNameOnAccount?if_exists}">
+            <input type="text" size="30" maxlength="60" name="companyNameOnAccount" value="${eftAccountData.companyNameOnAccount?if_exists}" />
           </td>
         </tr>
         <tr>
           <td class="label">${uiLabelMap.AccountingBankName}</td>
           <td>
-            <input type="text" class='required' size="30" maxlength="60" name="bankName" value="${eftAccountData.bankName?if_exists}">
+            <input type="text" class='required' size="30" maxlength="60" name="bankName" value="${eftAccountData.bankName?if_exists}" />
             <span class="tooltip">${uiLabelMap.CommonRequired}</span>
           </td>
         </tr>
         <tr>
           <td class="label">${uiLabelMap.AccountingRoutingNumber}</td>
           <td>
-            <input type="text" class='required' size="10" maxlength="30" name="routingNumber" value="${eftAccountData.routingNumber?if_exists}">
+            <input type="text" class='required' size="10" maxlength="30" name="routingNumber" value="${eftAccountData.routingNumber?if_exists}" />
             <span class="tooltip">${uiLabelMap.CommonRequired}</span>
           </td>
         </tr>
@@ -78,14 +81,14 @@ under the License.
         <tr>
           <td class="label">${uiLabelMap.AccountingAccountNumber}</td>
           <td>
-            <input type="text" class='required' size="20" maxlength="40" name="accountNumber" value="${eftAccountData.accountNumber?if_exists}">
+            <input type="text" class='required' size="20" maxlength="40" name="accountNumber" value="${eftAccountData.accountNumber?if_exists}" />
             <span class="tooltip">${uiLabelMap.CommonRequired}</span>
           </td>
         </tr>
         <tr>
           <td class="label">${uiLabelMap.CommonDescription}</td>
           <td>
-            <input type="text" class='required' size="30" maxlength="60" name="description" value="${paymentMethodData.description?if_exists}">
+            <input type="text" class='required' size="30" maxlength="60" name="description" value="${paymentMethodData.description?if_exists}" />
             <span class="tooltip">${uiLabelMap.CommonRequired}</span>
           </td>
         </tr>
@@ -100,12 +103,12 @@ under the License.
             <#if curPostalAddress?exists>
               <tr>
                 <td class="button-col">
-                  <input type="radio" name="contactMechId" value="${curContactMechId}" checked>
+                  <input type="radio" name="contactMechId" value="${curContactMechId}" checked="checked" />
                 </td>
                 <td>
                   <p><b>${uiLabelMap.PartyUseCurrentAddress}:</b></p>
                   <#list curPartyContactMechPurposes as curPartyContactMechPurpose>
-                    <#assign curContactMechPurposeType = curPartyContactMechPurpose.getRelatedOneCache("ContactMechPurposeType")>
+                    <#assign curContactMechPurposeType = curPartyContactMechPurpose.getRelatedOne("ContactMechPurposeType", true)>
                     <p><b>${curContactMechPurposeType.get("description",locale)?if_exists}</b></p>
                     <#if curPartyContactMechPurpose.thruDate?exists>
                       <p>(${uiLabelMap.CommonExpire}:${curPartyContactMechPurpose.thruDate.toString()})</p>
@@ -142,11 +145,11 @@ under the License.
                 <#assign partyContactMech = postalAddressInfo.partyContactMech>
                 <tr>
                   <td class="button-col">
-                    <input type='radio' name='contactMechId' value='${contactMech.contactMechId}'>
+                    <input type='radio' name='contactMechId' value='${contactMech.contactMechId}' />
                   </td>
                   <td>
                     <#list partyContactMechPurposes as partyContactMechPurpose>
-                      <#assign contactMechPurposeType = partyContactMechPurpose.getRelatedOneCache("ContactMechPurposeType")>
+                      <#assign contactMechPurposeType = partyContactMechPurpose.getRelatedOne("ContactMechPurposeType", true)>
                       <p><b>${contactMechPurposeType.get("description",locale)?if_exists}</b></p>
                       <#if partyContactMechPurpose.thruDate?exists><p>(${uiLabelMap.CommonExpire}:${partyContactMechPurpose.thruDate})</p></#if>
                     </#list>

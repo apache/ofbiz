@@ -28,11 +28,10 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.ofbiz.base.util.Debug;
-import org.ofbiz.base.util.UtilHttp;
-import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.base.util.UtilProperties;
 import org.ofbiz.base.util.UtilValidate;
-import org.ofbiz.entity.GenericDelegator;
+import org.ofbiz.entity.Delegator;
+import org.ofbiz.entity.DelegatorFactory;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
 import org.ofbiz.entity.model.ModelEntity;
@@ -102,17 +101,17 @@ public class VisitHandler {
                 synchronized (session) {
                     visit = (GenericValue) session.getAttribute("visit");
                     if (visit == null) {
-                        GenericDelegator delegator = null;
+                        Delegator delegator = null;
 
                         // first try the session attribute delegatorName
                         String delegatorName = (String) session.getAttribute("delegatorName");
                         if (UtilValidate.isNotEmpty(delegatorName)) {
-                            delegator = GenericDelegator.getGenericDelegator(delegatorName);
+                            delegator = DelegatorFactory.getDelegator(delegatorName);
                         }
 
                         // then try the ServletContext attribute delegator, should always be there...
                         if (delegator == null) {
-                            delegator = (GenericDelegator) session.getServletContext().getAttribute("delegator");
+                            delegator = (Delegator) session.getServletContext().getAttribute("delegator");
                         }
 
                         if (delegator == null) {
@@ -150,7 +149,19 @@ public class VisitHandler {
                             // get the visitorId
                             GenericValue visitor = (GenericValue) session.getAttribute("visitor");
                             if (visitor != null) {
-                                visit.set("visitorId", visitor.get("visitorId"));
+                                String visitorId = visitor.getString("visitorId");
+                                
+                                // sometimes these values get stale, so check it before we use it
+                                try {
+                                    GenericValue checkVisitor = delegator.findOne("Visitor", false, "visitorId", visitorId);
+                                    if (checkVisitor == null) {
+                                        GenericValue newVisitor = delegator.create("Visitor", "visitorId", visitorId);
+                                        session.setAttribute("visitor", newVisitor);
+                                    }
+                                    visit.set("visitorId", visitorId);
+                                } catch (GenericEntityException e) {
+                                    Debug.logWarning("Problem checking the visitorId: " + e.toString(), module);
+                                }
                             }
 
                             // get localhost ip address and hostname to store
@@ -195,11 +206,11 @@ public class VisitHandler {
                 synchronized (session) {
                     visitor = (GenericValue) session.getAttribute("visitor");
                     if (visitor == null) {
-                        GenericDelegator delegator = (GenericDelegator) request.getAttribute("delegator");
+                        Delegator delegator = (Delegator) request.getAttribute("delegator");
 
                         String delegatorName = (String) session.getAttribute("delegatorName");
                         if (delegator == null && UtilValidate.isNotEmpty(delegatorName)) {
-                            delegator = GenericDelegator.getGenericDelegator(delegatorName);
+                            delegator = DelegatorFactory.getDelegator(delegatorName);
                         }
 
                         if (delegator == null) {

@@ -40,12 +40,12 @@ under the License.
          <tr>
         <td>
           <#if state.hasPrevious()>
-            <a href="<@ofbizUrl>orderlist?viewIndex=${state.getViewIndex() - 1}&viewSize=${state.getViewSize()}</@ofbizUrl>" class="buttontext">${uiLabelMap.CommonPrevious}</a>
+            <a href="<@ofbizUrl>orderlist?viewIndex=${state.getViewIndex() - 1}&amp;viewSize=${state.getViewSize()}&amp;filterDate=${filterDate?if_exists}</@ofbizUrl>" class="buttontext">${uiLabelMap.CommonPrevious}</a>
           </#if>
         </td>
         <td align="right">
           <#if state.hasNext()>
-            <a href="<@ofbizUrl>orderlist?viewIndex=${state.getViewIndex() + 1}&viewSize=${state.getViewSize()}</@ofbizUrl>" class="buttontext">${uiLabelMap.CommonNext}</a>
+            <a href="<@ofbizUrl>orderlist?viewIndex=${state.getViewIndex() + 1}&amp;viewSize=${state.getViewSize()}&amp;filterDate=${filterDate?if_exists}</@ofbizUrl>" class="buttontext">${uiLabelMap.CommonNext}</a>
           </#if>
         </td>
       </tr>
@@ -62,12 +62,12 @@ under the License.
     </div>
     <div class="screenlet-body">
       <form method="post" name="findorder" action="<@ofbizUrl>orderlist</@ofbizUrl>">
-        <input type="hidden" name="changeStatusAndTypeState" value="Y">
+        <input type="hidden" name="changeStatusAndTypeState" value="Y" />
         <table class="basic-table" cellspacing='0'>
           <tr>
             <td align="right" class="label">${uiLabelMap.CommonStatus}</td>
             <td>&nbsp;&nbsp;</td>
-            <td nowrap>
+            <td nowrap="nowrap">
                 <div>
                     <input type="checkbox" name="viewall" value="Y" onclick="javascript:setCheckboxes()" <#if state.hasAllStatus()>checked="checked"</#if> />${uiLabelMap.CommonAll}
                     <input type="checkbox" name="viewcreated" value="Y" <#if state.hasStatus('viewcreated')>checked="checked"</#if> />${uiLabelMap.CommonCreated}
@@ -84,7 +84,7 @@ under the License.
           <tr>
             <td align="right" class="label">${uiLabelMap.CommonType}</td>
             <td>&nbsp;&nbsp;</td>
-            <td nowrap>
+            <td nowrap="nowrap">
                 <div>
                     <input type="checkbox" name="view_SALES_ORDER" value="Y" <#if state.hasType('view_SALES_ORDER')>checked="checked"</#if>/>
                     ${descr_SALES_ORDER}
@@ -96,7 +96,7 @@ under the License.
           <tr>
             <td align="right" class="label">${uiLabelMap.CommonFilter}</td>
             <td>&nbsp;&nbsp;</td>
-            <td nowrap>
+            <td nowrap="nowrap">
                 <div>
                     <input type="checkbox" name="filterInventoryProblems" value="Y"
                         <#if state.hasFilter('filterInventoryProblems')>checked="checked"</#if>/>
@@ -110,7 +110,7 @@ under the License.
           <tr>
             <td align="right" class="label">${uiLabelMap.CommonFilter} (${uiLabelMap.OrderFilterPOs})</td>
             <td>&nbsp;&nbsp;</td>
-            <td nowrap>
+            <td nowrap="nowrap">
                 <div>
                     <input type="checkbox" name="filterPartiallyReceivedPOs" value="Y"
                         <#if state.hasFilter('filterPartiallyReceivedPOs')>checked="checked"</#if>/>
@@ -126,7 +126,7 @@ under the License.
           </tr>
           <tr>
             <td colspan="3" align="center">
-              <br/>
+              <br />
             </td>
           </tr>
           <tr>
@@ -150,10 +150,12 @@ under the License.
         <table class="basic-table hover-bar" cellspacing='0'>
           <tr class="header-row">
             <td width="15%">${uiLabelMap.CommonDate}</td>
-            <td width="10%">${uiLabelMap.OrderOrder} #</td>
+            <td width="10%">${uiLabelMap.OrderOrder} ${uiLabelMap.CommonNbr}</td>
+            <td width="10%">${uiLabelMap.OrderOrderName}</td>
             <td width="10%">${uiLabelMap.OrderOrderType}</td>
-            <td width="15%">${uiLabelMap.OrderOrderBillFromParty}</td>
-            <td width="15%">${uiLabelMap.OrderOrderBillToParty}</td>
+            <td width="10%">${uiLabelMap.OrderOrderBillFromParty}</td>
+            <td width="10%">${uiLabelMap.OrderOrderBillToParty}</td>
+            <td width="10%">${uiLabelMap.OrderProductStore}</td>
             <td width="10%">${uiLabelMap.CommonAmount}</td>
             <td width="10%">${uiLabelMap.OrderTrackingCode}</td>
             <#if state.hasFilter('filterInventoryProblems') || state.hasFilter('filterAuthProblems') || state.hasFilter('filterPOsOpenPastTheirETA') || state.hasFilter('filterPOsWithRejectedItems') || state.hasFilter('filterPartiallyReceivedPOs')>
@@ -164,7 +166,7 @@ under the License.
             </#if>
           </tr>
           <#list orderHeaderList as orderHeader>
-            <#assign status = orderHeader.getRelatedOneCache("StatusItem")>
+            <#assign status = orderHeader.getRelatedOne("StatusItem", true)>
             <#assign orh = Static["org.ofbiz.order.order.OrderReadHelper"].getHelper(orderHeader)>
             <#assign billToParty = orh.getBillToParty()?if_exists>
             <#assign billFromParty = orh.getBillFromParty()?if_exists>
@@ -180,24 +182,27 @@ under the License.
             <#else>
               <#assign billFrom = ''/>
             </#if>
+            <#assign productStore = orderHeader.getRelatedOne("ProductStore", true)?if_exists />
             <tr>
-              <td>${orderHeader.orderDate.toString()}</td>
+              <td><#if orderHeader.orderDate?has_content>${Static["org.ofbiz.base.util.UtilFormatOut"].formatDateTime(orderHeader.orderDate, "", locale, timeZone)!}</#if></td>
               <td>
                 <a href="<@ofbizUrl>orderview?orderId=${orderHeader.orderId}</@ofbizUrl>" class="buttontext">${orderHeader.orderId}</a>
               </td>
-              <td>${orderHeader.getRelatedOneCache("OrderType").get("description",locale)}</td>
+              <td>${orderHeader.orderName?if_exists}</td>
+              <td>${orderHeader.getRelatedOne("OrderType", true).get("description",locale)}</td>
               <td>${billFrom?if_exists}</td>
               <td>${billTo?if_exists}</td>
+              <td><#if productStore?has_content>${productStore.storeName?default(productStore.productStoreId)}</#if></td>
               <td><@ofbizCurrency amount=orderHeader.grandTotal isoCode=orderHeader.currencyUom/></td>
               <td>
-                <#assign trackingCodes = orderHeader.getRelated("TrackingCodeOrder")>
+                <#assign trackingCodes = orderHeader.getRelated("TrackingCodeOrder", null, null, false)>
                 <#list trackingCodes as trackingCode>
                     <#if trackingCode?has_content>
-                        <a href="/marketing/control/FindTrackingCodeOrders?trackingCodeId=${trackingCode.trackingCodeId}&externalLoginKey=${requestAttributes.externalLoginKey?if_exists}">${trackingCode.trackingCodeId}</a><br/>
+                        <a href="/marketing/control/FindTrackingCodeOrders?trackingCodeId=${trackingCode.trackingCodeId}&amp;externalLoginKey=${requestAttributes.externalLoginKey?if_exists}">${trackingCode.trackingCodeId}</a><br />
                     </#if>
                 </#list>
               </td>
-              <td>${orderHeader.getRelatedOneCache("StatusItem").get("description",locale)}</td>
+              <td>${orderHeader.getRelatedOne("StatusItem", true).get("description",locale)}</td>
               <#if state.hasFilter('filterInventoryProblems') || state.hasFilter('filterAuthProblems') || state.hasFilter('filterPOsOpenPastTheirETA') || state.hasFilter('filterPOsWithRejectedItems') || state.hasFilter('filterPartiallyReceivedPOs')>
               <td>
                   <#if filterInventoryProblems.contains(orderHeader.orderId)>
@@ -229,5 +234,5 @@ under the License.
     </div>
   </div>
 <#else>
-<h3>${uiLabelMap.OrderViewPermissionError}</h3>
+  <h3>${uiLabelMap.OrderViewPermissionError}</h3>
 </#if>

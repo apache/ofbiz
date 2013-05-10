@@ -38,7 +38,7 @@ access. For a detailed description see the core/docs/entityconfig.html file.
     </transaction-factory>
     -->
     <!--
-    	It is common to use UserTransaction for the TransactionManager, but if that doesn't work, try this: <transaction-manager-jndi jndi-server-name="default" jndi-name="java:comp/TransactionManager"/>
+        It is common to use UserTransaction for the TransactionManager, but if that doesn't work, try this: <transaction-manager-jndi jndi-server-name="default" jndi-name="java:comp/TransactionManager"/>
         Common UserTransaction locations:
             java:comp/UserTransaction (most servers: Resin, Orion, OC4J, etc)
             UserTransaction (RexIP)
@@ -49,24 +49,44 @@ access. For a detailed description see the core/docs/entityconfig.html file.
     <!-- the connection factory class to use, one is needed for obtaining connections/pools for defined resources -->
     <connection-factory class="org.ofbiz.entity.connection.DBCPConnectionFactory"/>
 
+    <debug-xa-resources value="false" />  <!-- see https://issues.apache.org/jira/browse/OFBIZ-4282 for more -->
+    
     <delegator name="default" entity-model-reader="main" entity-group-reader="main" entity-eca-reader="main" distributed-cache-clear-enabled="false">
         <group-map group-name="org.ofbiz" datasource-name="localderby"/>
         <group-map group-name="org.ofbiz.olap" datasource-name="localderbyolap"/>
+        <group-map group-name="org.ofbiz.tenant" datasource-name="localderbytenant"/>
+        <!-- <group-map group-name="org.ofbiz" datasource-name="localmysql"/>
+        <group-map group-name="org.ofbiz.olap" datasource-name="localmysqlolap"/>
+        <group-map group-name="org.ofbiz.tenant" datasource-name="localmysqltenant"/>  -->
+        <!-- <group-map group-name="org.ofbiz" datasource-name="localpostnew"/>
+        <group-map group-name="org.ofbiz.olap" datasource-name="localpostolap"/>
+        <group-map group-name="org.ofbiz.tenant" datasource-name="localposttenant"/> -->
     </delegator>
     <delegator name="default-no-eca" entity-model-reader="main" entity-group-reader="main" entity-eca-reader="main" entity-eca-enabled="false" distributed-cache-clear-enabled="false">
         <group-map group-name="org.ofbiz" datasource-name="localderby"/>
         <group-map group-name="org.ofbiz.olap" datasource-name="localderbyolap"/>
+        <group-map group-name="org.ofbiz.tenant" datasource-name="localderbytenant"/>
+        <!-- <group-map group-name="org.ofbiz" datasource-name="localmysql"/>
+        <group-map group-name="org.ofbiz.olap" datasource-name="localmysqlolap"/>
+        <group-map group-name="org.ofbiz.tenant" datasource-name="localmysqltenant"/>  -->
+        <!-- <group-map group-name="org.ofbiz" datasource-name="localpostnew"/>
+        <group-map group-name="org.ofbiz.olap" datasource-name="localpostolap"/>
+        <group-map group-name="org.ofbiz.tenant" datasource-name="localposttenant"/>  -->
     </delegator>
 
-    <!-- be sure that your default delegator (or the one you use) uses the same datasource for test. You must run "ant run-install" before running "ant run-tests" -->
+    <!-- be sure that your default delegator (or the one you use) uses the same datasource for test. You must run "ant load-demo" before running "ant run-tests" -->
     <delegator name="test" entity-model-reader="main" entity-group-reader="main" entity-eca-reader="main">
         <group-map group-name="org.ofbiz" datasource-name="localderby"/>
         <group-map group-name="org.ofbiz.olap" datasource-name="localderbyolap"/>
+        <group-map group-name="org.ofbiz.tenant" datasource-name="localderbytenant"/>
+        <!-- <group-map group-name="org.ofbiz" datasource-name="localmysql"/>
+        <group-map group-name="org.ofbiz.olap" datasource-name="localmysqlolap"/>
+        <group-map group-name="org.ofbiz.tenant" datasource-name="localmysqltenant"/>  -->
+        <!-- <group-map group-name="org.ofbiz" datasource-name="localpostnew"/>
+        <group-map group-name="org.ofbiz.olap" datasource-name="localpostolap"/>
+        <group-map group-name="org.ofbiz.tenant" datasource-name="localposttenant"/>  -->
     </delegator>
-    <delegator name="other" entity-model-reader="main" entity-group-reader="main" entity-eca-reader="main">
-        <group-map group-name="org.ofbiz" datasource-name="localpostgres"/>
-    </delegator>
-
+   
     <!-- need to at least define a name for each component to use -->
     <entity-model-reader name="main"/>
 
@@ -78,6 +98,7 @@ access. For a detailed description see the core/docs/entityconfig.html file.
 
     <!-- need to at least define a name for each component to use -->
     <!-- defining:
+        tenant       = OFBiz and External Tenant Data
         seed         = OFBiz and External Seed Data - to be maintained along with source and updated whenever a system deployment is updated
         seed-initial = OFBiz and External Seed Data - to be maintained along with source like other seed data, but only loaded initially and not updated when a system is updated except manually reviewing each line
         demo         = OFBiz Only Demo Data
@@ -85,6 +106,7 @@ access. For a detailed description see the core/docs/entityconfig.html file.
         ext-test     = External Test Data (custom)
         ext-demo     = External Demo Data (custom)
     -->
+    <entity-data-reader name="tenant"/>
     <entity-data-reader name="seed"/>
     <entity-data-reader name="seed-initial"/>
     <entity-data-reader name="demo"/>
@@ -94,7 +116,6 @@ access. For a detailed description see the core/docs/entityconfig.html file.
 
     <field-type name="hsql" loader="fieldfile" location="fieldtypehsql.xml"/>
     <field-type name="derby" loader="fieldfile" location="fieldtypederby.xml"/>
-    <field-type name="cloudscape" loader="fieldfile" location="fieldtypecloudscape.xml"/>
     <field-type name="daffodil" loader="fieldfile" location="fieldtypedaffodil.xml"/>
     <field-type name="axion" loader="fieldfile" location="fieldtypeaxion.xml"/>
     <field-type name="mysql" loader="fieldfile" location="fieldtypemysql.xml"/>
@@ -106,7 +127,7 @@ access. For a detailed description see the core/docs/entityconfig.html file.
     <field-type name="firebird" loader="fieldfile" location="fieldtypefirebird.xml"/>
     <field-type name="mssql" loader="fieldfile" location="fieldtypemssql.xml"/>
     <field-type name="advantage" loader="fieldfile" location="fieldtypeadvantage.xml"/>
-
+    
     <!--
     For DAO/JDBC Helper: Tries:
       1. JNDI Datasource IF jdbc.jndi.name, context.provider, etc are specified
@@ -132,18 +153,22 @@ access. For a detailed description see the core/docs/entityconfig.html file.
             use-fk-initially-deferred="false"
             join-style="ansi-no-parenthesis"
             alias-view-columns="true">
+        <read-data reader-name="tenant"/>
         <read-data reader-name="seed"/>
         <read-data reader-name="seed-initial"/>
         <read-data reader-name="demo"/>
         <read-data reader-name="ext"/>
+        <read-data reader-name="ext-test"/>
+        <read-data reader-name="ext-demo"/>
         <inline-jdbc
                 jdbc-driver="org.hsqldb.jdbcDriver"
                 jdbc-uri="jdbc:hsqldb:data/hsqldb/ofbiz"
                 jdbc-username="sa"
                 jdbc-password=""
-                isolation-level="ReadUncommitted"
+                isolation-level="ReadCommitted"
                 pool-minsize="2"
-                pool-maxsize="250"/>
+                pool-maxsize="250"
+                time-between-eviction-runs-millis="600000"/>
         <!-- <jndi-jdbc jndi-server-name="localjndi" jndi-name="java:/HsqlDataSource" isolation-level="ReadUncommitted"/> -->
         <!-- <jndi-jdbc jndi-server-name="default" jndi-name="comp/env/jdbc/xa/localhsql" isolation-level="ReadUncommitted"/> --> <!-- Orion Style JNDI name -->
         <!-- <jndi-jdbc jndi-server-name="localjndi" jndi-name="localhsqlDataSource"/> --> <!-- Weblogic Style JNDI name -->
@@ -157,11 +182,17 @@ access. For a detailed description see the core/docs/entityconfig.html file.
             add-missing-on-start="true"
             use-pk-constraint-names="false"
             use-indices-unique="false"
-            alias-view-columns="false">
+            alias-view-columns="false"
+            use-order-by-nulls="true"
+            offset-style="fetch">
+        <read-data reader-name="tenant"/>
         <read-data reader-name="seed"/>
         <read-data reader-name="seed-initial"/>
         <read-data reader-name="demo"/>
         <read-data reader-name="ext"/>
+        <read-data reader-name="ext-test"/>
+        <read-data reader-name="ext-demo"/>
+        <!-- beware use-indices-unique="false" is needed because of Derby bug with null values in a unique index -->
         <inline-jdbc
                 jdbc-driver="org.apache.derby.jdbc.EmbeddedDriver"
                 jdbc-uri="jdbc:derby:ofbiz;create=true"
@@ -169,7 +200,8 @@ access. For a detailed description see the core/docs/entityconfig.html file.
                 jdbc-password="ofbiz"
                 isolation-level="ReadCommitted"
                 pool-minsize="2"
-                pool-maxsize="250"/>
+                pool-maxsize="250"
+                time-between-eviction-runs-millis="600000"/>
         <!-- <jndi-jdbc jndi-server-name="localjndi" jndi-name="java:/DerbyDataSource" isolation-level="ReadCommitted"/> -->
     </datasource>
     <datasource name="localderbyodbc"
@@ -180,7 +212,10 @@ access. For a detailed description see the core/docs/entityconfig.html file.
         add-missing-on-start="true"
         use-pk-constraint-names="false"
         use-indices-unique="false"
-        alias-view-columns="false">
+        alias-view-columns="false"
+        use-order-by-nulls="true"
+        offset-style="fetch">
+        <!-- beware use-indices-unique="false" is needed because of Derby bug with null values in a unique index -->
         <inline-jdbc
             jdbc-driver="org.apache.derby.jdbc.EmbeddedDriver"
             jdbc-uri="jdbc:derby:ofbizodbc;create=true"
@@ -188,7 +223,8 @@ access. For a detailed description see the core/docs/entityconfig.html file.
             jdbc-password="ofbiz"
             isolation-level="ReadCommitted"
             pool-minsize="2"
-            pool-maxsize="250"/>
+            pool-maxsize="250"
+                time-between-eviction-runs-millis="600000"/>
         <!-- <jndi-jdbc jndi-server-name="localjndi" jndi-name="java:/DerbyDataSource" isolation-level="ReadCommitted"/> -->
     </datasource>
     <datasource name="localderbyolap"
@@ -199,11 +235,16 @@ access. For a detailed description see the core/docs/entityconfig.html file.
             add-missing-on-start="true"
             use-pk-constraint-names="false"
             use-indices-unique="false"
-            alias-view-columns="false">
+            alias-view-columns="false"
+            use-order-by-nulls="true">
+        <!-- beware use-indices-unique="false" is needed because of Derby bug with null values in a unique index -->
+        <read-data reader-name="tenant"/>
         <read-data reader-name="seed"/>
         <read-data reader-name="seed-initial"/>
         <read-data reader-name="demo"/>
         <read-data reader-name="ext"/>
+        <read-data reader-name="ext-test"/>
+        <read-data reader-name="ext-demo"/>
         <inline-jdbc
                 jdbc-driver="org.apache.derby.jdbc.EmbeddedDriver"
                 jdbc-uri="jdbc:derby:ofbizolap;create=true"
@@ -211,39 +252,52 @@ access. For a detailed description see the core/docs/entityconfig.html file.
                 jdbc-password="ofbiz"
                 isolation-level="ReadCommitted"
                 pool-minsize="2"
-                pool-maxsize="250"/>
+                pool-maxsize="250"
+                time-between-eviction-runs-millis="600000"/>
         <!-- <jndi-jdbc jndi-server-name="localjndi" jndi-name="java:/DerbyDataSource" isolation-level="ReadCommitted"/> -->
     </datasource>
-
-    <datasource name="localcloudscape"
-            helper-class="org.ofbiz.entity.datasource.GenericHelperDAO"
-            field-type-name="cloudscape"
-            check-on-start="true"
-            add-missing-on-start="true">
+    <datasource name="localderbytenant"
+        helper-class="org.ofbiz.entity.datasource.GenericHelperDAO"
+        schema-name="OFBIZ"
+        field-type-name="derby"
+        check-on-start="true"
+        add-missing-on-start="true"
+        use-pk-constraint-names="false"
+        use-indices-unique="false"
+        alias-view-columns="false"
+        use-order-by-nulls="true">
+        <read-data reader-name="tenant"/>
         <read-data reader-name="seed"/>
         <read-data reader-name="seed-initial"/>
         <read-data reader-name="demo"/>
         <read-data reader-name="ext"/>
+        <read-data reader-name="ext-test"/>
+        <read-data reader-name="ext-demo"/>
+        <!-- beware use-indices-unique="false" is needed because of Derby bug with null values in a unique index -->
         <inline-jdbc
-                jdbc-driver="COM.cloudscape.core.JDBCDriver"
-                jdbc-uri="jdbc:cloudscape:../../data/ofbiz; create=true"
-                jdbc-username="ofbiz"
-                jdbc-password="ofbiz"
-                isolation-level="ReadCommitted"
-                pool-minsize="2"
-                pool-maxsize="250"/>
-        <!-- <jndi-jdbc jndi-server-name="localjndi" jndi-name="java:/CloudscapeDataSource" isolation-level="Serializable"/> -->
+            jdbc-driver="org.apache.derby.jdbc.EmbeddedDriver"
+            jdbc-uri="jdbc:derby:ofbiztenant;create=true"
+            jdbc-username="ofbiz"
+            jdbc-password="ofbiz"
+            isolation-level="ReadCommitted"
+            pool-minsize="2"
+            pool-maxsize="250"
+            time-between-eviction-runs-millis="600000"/>
+        <!-- <jndi-jdbc jndi-server-name="localjndi" jndi-name="java:/DerbyDataSource" isolation-level="ReadCommitted"/> -->
     </datasource>
-
+    
     <datasource name="localdaffodil"
             helper-class="org.ofbiz.entity.datasource.GenericHelperDAO"
             field-type-name="daffodil"
             check-on-start="true"
             add-missing-on-start="true">
+        <read-data reader-name="tenant"/>
         <read-data reader-name="seed"/>
         <read-data reader-name="seed-initial"/>
         <read-data reader-name="demo"/>
         <read-data reader-name="ext"/>
+        <read-data reader-name="ext-test"/>
+        <read-data reader-name="ext-demo"/>
         <!-- this setup is for the embedded version of Daffodil, with in.co.daffodil.db.jdbc.DaffodilDBDriver -->
         <!-- note that Daffodil can also run in a network mode with the driver class: in.co.daffodil.db.rmi.RmiDaffodilDBDriver and URI: jdbc:daffodilDB://<hostname>:<port>/ofbiz;create=true -->
         <inline-jdbc
@@ -253,7 +307,8 @@ access. For a detailed description see the core/docs/entityconfig.html file.
                 jdbc-password="ofbiz"
                 isolation-level="ReadCommitted"
                 pool-minsize="2"
-                pool-maxsize="250"/>
+                pool-maxsize="250"
+                time-between-eviction-runs-millis="600000"/>
         <!-- <jndi-jdbc jndi-server-name="localjndi" jndi-name="java:/DaffodilDataSource" isolation-level="ReadCommitted"/> -->
     </datasource>
 
@@ -263,10 +318,13 @@ access. For a detailed description see the core/docs/entityconfig.html file.
             check-on-start="true"
             add-missing-on-start="true"
             use-pk-constraint-names="false">
+        <read-data reader-name="tenant"/>
         <read-data reader-name="seed"/>
         <read-data reader-name="seed-initial"/>
         <read-data reader-name="demo"/>
         <read-data reader-name="ext"/>
+        <read-data reader-name="ext-test"/>
+        <read-data reader-name="ext-demo"/>
         <inline-jdbc
                 jdbc-driver="org.axiondb.jdbc.AxionDriver"
                 jdbc-uri="jdbc:axiondb:ofbiz:data/axion/ofbiz"
@@ -274,7 +332,8 @@ access. For a detailed description see the core/docs/entityconfig.html file.
                 jdbc-password="ofbiz"
                 isolation-level="ReadCommitted"
                 pool-minsize="2"
-                pool-maxsize="250"/>
+                pool-maxsize="250"
+                time-between-eviction-runs-millis="600000"/>
     </datasource>
 
     <datasource name="localmysql"
@@ -290,10 +349,13 @@ access. For a detailed description see the core/docs/entityconfig.html file.
             table-type="InnoDB"
             character-set="latin1"
             collate="latin1_general_cs">
+        <read-data reader-name="tenant"/>
         <read-data reader-name="seed"/>
         <read-data reader-name="seed-initial"/>
         <read-data reader-name="demo"/>
         <read-data reader-name="ext"/>
+        <read-data reader-name="ext-test"/>
+        <read-data reader-name="ext-demo"/>
         <inline-jdbc
                 jdbc-driver="com.mysql.jdbc.Driver"
                 jdbc-uri="jdbc:mysql://127.0.0.1/ofbiz?autoReconnect=true"
@@ -301,7 +363,76 @@ access. For a detailed description see the core/docs/entityconfig.html file.
                 jdbc-password="ofbiz"
                 isolation-level="ReadCommitted"
                 pool-minsize="2"
-                pool-maxsize="250"/>
+                pool-maxsize="250"
+                time-between-eviction-runs-millis="600000"/><!-- Please note that at least one person has experienced a problem with this value with MySQL
+                and had to set it to -1 in order to avoid this issue.
+                For more look at http://markmail.org/thread/5sivpykv7xkl66px and http://commons.apache.org/dbcp/configuration.html-->
+        <!-- <jndi-jdbc jndi-server-name="localjndi" jndi-name="java:/MySqlDataSource" isolation-level="Serializable"/> -->
+    </datasource>
+    <datasource name="localmysqlolap"
+            helper-class="org.ofbiz.entity.datasource.GenericHelperDAO"
+            field-type-name="mysql"
+            check-on-start="true"
+            add-missing-on-start="true"
+            check-pks-on-start="false"
+            use-foreign-keys="true"
+            join-style="ansi-no-parenthesis"
+            alias-view-columns="false"
+            drop-fk-use-foreign-key-keyword="true"
+            table-type="InnoDB"
+            character-set="latin1"
+            collate="latin1_general_cs">
+        <read-data reader-name="tenant"/>
+        <read-data reader-name="seed"/>
+        <read-data reader-name="seed-initial"/>
+        <read-data reader-name="demo"/>
+        <read-data reader-name="ext"/>
+        <read-data reader-name="ext-test"/>
+        <read-data reader-name="ext-demo"/>
+        <inline-jdbc
+                jdbc-driver="com.mysql.jdbc.Driver"
+                jdbc-uri="jdbc:mysql://127.0.0.1/ofbizolap?autoReconnect=true"
+                jdbc-username="ofbiz"
+                jdbc-password="ofbiz"
+                isolation-level="ReadCommitted"
+                pool-minsize="2"
+                pool-maxsize="250"
+                time-between-eviction-runs-millis="600000"/><!-- Please note that at least one person has experienced a problem with this value with MySQL
+                and had to set it to -1 in order to avoid this issue.
+                For more look at http://markmail.org/thread/5sivpykv7xkl66px and http://commons.apache.org/dbcp/configuration.html-->
+        <!-- <jndi-jdbc jndi-server-name="localjndi" jndi-name="java:/MySqlDataSource" isolation-level="Serializable"/> -->
+    </datasource>
+    <datasource name="localmysqltenant"
+            helper-class="org.ofbiz.entity.datasource.GenericHelperDAO"
+            field-type-name="mysql"
+            check-on-start="true"
+            add-missing-on-start="true"
+            check-pks-on-start="false"
+            use-foreign-keys="true"
+            join-style="ansi-no-parenthesis"
+            alias-view-columns="false"
+            drop-fk-use-foreign-key-keyword="true"
+            table-type="InnoDB"
+            character-set="latin1"
+            collate="latin1_general_cs">
+        <read-data reader-name="tenant"/>
+        <read-data reader-name="seed"/>
+        <read-data reader-name="seed-initial"/>
+        <read-data reader-name="demo"/>
+        <read-data reader-name="ext"/>
+        <read-data reader-name="ext-test"/>
+        <read-data reader-name="ext-demo"/>
+        <inline-jdbc
+                jdbc-driver="com.mysql.jdbc.Driver"
+                jdbc-uri="jdbc:mysql://127.0.0.1/ofbiztenant?autoReconnect=true"
+                jdbc-username="ofbiz"
+                jdbc-password="ofbiz"
+                isolation-level="ReadCommitted"
+                pool-minsize="2"
+                pool-maxsize="250"
+                time-between-eviction-runs-millis="600000"/><!-- Please note that at least one person has experienced a problem with this value with MySQL
+                and had to set it to -1 in order to avoid this issue.
+                For more look at http://markmail.org/thread/5sivpykv7xkl66px and http://commons.apache.org/dbcp/configuration.html-->
         <!-- <jndi-jdbc jndi-server-name="localjndi" jndi-name="java:/MySqlDataSource" isolation-level="Serializable"/> -->
     </datasource>
     <datasource name="odbcmysql"
@@ -317,6 +448,7 @@ access. For a detailed description see the core/docs/entityconfig.html file.
             table-type="InnoDB"
             character-set="latin1"
             collate="latin1_general_cs">
+        <read-data reader-name="tenant"/>
         <read-data reader-name="seed"/>
         <inline-jdbc
                 jdbc-driver="com.mysql.jdbc.Driver"
@@ -325,7 +457,8 @@ access. For a detailed description see the core/docs/entityconfig.html file.
                 jdbc-password="ofbiz"
                 isolation-level="ReadCommitted"
                 pool-minsize="2"
-                pool-maxsize="250"/>
+                pool-maxsize="250"
+                time-between-eviction-runs-millis="600000"/>
         <!-- <jndi-jdbc jndi-server-name="localjndi" jndi-name="java:/MySqlDataSource" isolation-level="Serializable"/> -->
     </datasource>
 
@@ -338,14 +471,18 @@ access. For a detailed description see the core/docs/entityconfig.html file.
             use-fk-initially-deferred="false"
             alias-view-columns="false"
             join-style="ansi"
-            use-binary-type-for-blob="true">
+            use-binary-type-for-blob="true"
+            use-order-by-nulls="true">
             <!-- use this attribute to make the EntityListIterator more effective for pgjdbc 7.5devel and later:
                 result-fetch-size="50"
             -->
+        <read-data reader-name="tenant"/>
         <read-data reader-name="seed"/>
         <read-data reader-name="seed-initial"/>
         <read-data reader-name="demo"/>
         <read-data reader-name="ext"/>
+        <read-data reader-name="ext-test"/>
+        <read-data reader-name="ext-demo"/>
         <inline-jdbc
                 jdbc-driver="org.postgresql.Driver"
                 jdbc-uri="jdbc:postgresql://127.0.0.1/ofbiz"
@@ -353,7 +490,10 @@ access. For a detailed description see the core/docs/entityconfig.html file.
                 jdbc-password="ofbiz"
                 isolation-level="ReadCommitted"
                 pool-minsize="2"
-                pool-maxsize="250"/>
+                pool-maxsize="250"
+                time-between-eviction-runs-millis="600000"/><!-- Be warned that at this date (2009-09-20) the max_connections parameters in postgresql.conf
+                is set by default to 100 by the initdb process see http://www.postgresql.org/docs/8.4/static/runtime-config-connection.html#GUC-MAX-CONNECTIONS-->
+
         <!-- <jndi-jdbc jndi-server-name="default" jndi-name="java:comp/env/jdbc/localpostgres" isolation-level="ReadCommitted"/>-->
         <!-- <jndi-jdbc jndi-server-name="default" jndi-name="comp/env/jdbc/xa/localpostgres" isolation-level="ReadCommitted"/> --> <!-- Orion Style JNDI name -->
         <!-- <jndi-jdbc jndi-server-name="localweblogic" jndi-name="PostgresDataSource"/> --> <!-- Weblogic Style JNDI name -->
@@ -365,6 +505,42 @@ access. For a detailed description see the core/docs/entityconfig.html file.
      at or above 8.1 (for more information see the comment in the fieldtype file "fieldtypepostnew") -->
 
     <datasource name="localpostnew"
+        helper-class="org.ofbiz.entity.datasource.GenericHelperDAO"
+        schema-name="public"
+        field-type-name="postnew"
+        check-on-start="true"
+        add-missing-on-start="true"
+        use-fk-initially-deferred="false"
+        alias-view-columns="false"
+        join-style="ansi"
+        result-fetch-size="50"
+        use-binary-type-for-blob="true"
+        use-order-by-nulls="true">
+        <read-data reader-name="tenant"/>
+        <read-data reader-name="seed"/>
+        <read-data reader-name="seed-initial"/>
+        <read-data reader-name="demo"/>
+        <read-data reader-name="ext"/>
+        <read-data reader-name="ext-test"/>
+        <read-data reader-name="ext-demo"/>
+        <inline-jdbc
+            jdbc-driver="org.postgresql.Driver"
+            jdbc-uri="jdbc:postgresql://127.0.0.1/ofbiz"
+            jdbc-username="ofbiz"
+            jdbc-password="ofbiz"
+            isolation-level="ReadCommitted"
+            pool-minsize="2"
+            pool-maxsize="250"
+            time-between-eviction-runs-millis="600000"/><!-- Be warned that at this date (2009-09-20) the max_connections parameters in postgresql.conf
+                is set by default to 100 by the initdb process see http://www.postgresql.org/docs/8.4/static/runtime-config-connection.html#GUC-MAX-CONNECTIONS-->
+        
+        <!-- <jndi-jdbc jndi-server-name="default" jndi-name="java:comp/env/jdbc/localpostgres" isolation-level="ReadCommitted"/>-->
+        <!-- <jndi-jdbc jndi-server-name="default" jndi-name="comp/env/jdbc/xa/localpostgres" isolation-level="ReadCommitted"/> --> <!-- Orion Style JNDI name -->
+        <!-- <jndi-jdbc jndi-server-name="localweblogic" jndi-name="PostgresDataSource"/> --> <!-- Weblogic Style JNDI name -->
+        <!-- <jndi-jdbc jndi-server-name="default" jndi-name="jdbc/localpostgres" isolation-level="ReadCommitted"/> --> <!-- JRun4 Style JNDI name -->
+        <!-- <tyrex-dataSource dataSource-name="localpostgres" isolation-level="ReadCommitted"/> -->
+    </datasource>
+    <datasource name="localpostolap"
             helper-class="org.ofbiz.entity.datasource.GenericHelperDAO"
             schema-name="public"
             field-type-name="postnew"
@@ -374,19 +550,67 @@ access. For a detailed description see the core/docs/entityconfig.html file.
             alias-view-columns="false"
             join-style="ansi"
             result-fetch-size="50"
-            use-binary-type-for-blob="true">
+            use-binary-type-for-blob="true"
+            use-order-by-nulls="true">
+        <read-data reader-name="tenant"/>
         <read-data reader-name="seed"/>
         <read-data reader-name="seed-initial"/>
         <read-data reader-name="demo"/>
         <read-data reader-name="ext"/>
+        <read-data reader-name="ext-test"/>
+        <read-data reader-name="ext-demo"/>
         <inline-jdbc
                 jdbc-driver="org.postgresql.Driver"
-                jdbc-uri="jdbc:postgresql://127.0.0.1/ofbiz"
+                jdbc-uri="jdbc:postgresql://127.0.0.1/ofbizolap"
                 jdbc-username="ofbiz"
                 jdbc-password="ofbiz"
                 isolation-level="ReadCommitted"
                 pool-minsize="2"
-                pool-maxsize="250"/>
+                pool-maxsize="250"
+                time-between-eviction-runs-millis="600000"/><!-- Be warned that at this date (2009-09-20) the max_connections parameters in postgresql.conf
+                    is set by default to 100 by the initdb process see http://www.postgresql.org/docs/8.4/static/runtime-config-connection.html#GUC-MAX-CONNECTIONS-->
+        
+        <!-- <jndi-jdbc jndi-server-name="default" jndi-name="java:comp/env/jdbc/localpostgres" isolation-level="ReadCommitted"/>-->
+        <!-- <jndi-jdbc jndi-server-name="default" jndi-name="comp/env/jdbc/xa/localpostgres" isolation-level="ReadCommitted"/> --> <!-- Orion Style JNDI name -->
+        <!-- <jndi-jdbc jndi-server-name="localweblogic" jndi-name="PostgresDataSource"/> --> <!-- Weblogic Style JNDI name -->
+        <!-- <jndi-jdbc jndi-server-name="default" jndi-name="jdbc/localpostgres" isolation-level="ReadCommitted"/> --> <!-- JRun4 Style JNDI name -->
+        <!-- <tyrex-dataSource dataSource-name="localpostgres" isolation-level="ReadCommitted"/> -->
+    </datasource>
+    <datasource name="localposttenant"
+            helper-class="org.ofbiz.entity.datasource.GenericHelperDAO"
+            schema-name="public"
+            field-type-name="postnew"
+            check-on-start="true"
+            add-missing-on-start="true"
+            use-fk-initially-deferred="false"
+            alias-view-columns="false"
+            join-style="ansi"
+            result-fetch-size="50"
+            use-binary-type-for-blob="true"
+            use-order-by-nulls="true">
+        <read-data reader-name="tenant"/>
+        <read-data reader-name="seed"/>
+        <read-data reader-name="seed-initial"/>
+        <read-data reader-name="demo"/>
+        <read-data reader-name="ext"/>
+        <read-data reader-name="ext-test"/>
+        <read-data reader-name="ext-demo"/>
+        <inline-jdbc
+                jdbc-driver="org.postgresql.Driver"
+                jdbc-uri="jdbc:postgresql://127.0.0.1/ofbiztenant"
+                jdbc-username="ofbiz"
+                jdbc-password="ofbiz"
+                isolation-level="ReadCommitted"
+                pool-minsize="2"
+                pool-maxsize="250"
+                time-between-eviction-runs-millis="600000"/><!-- Be warned that at this date (2009-09-20) the max_connections parameters in postgresql.conf
+                    is set by default to 100 by the initdb process see http://www.postgresql.org/docs/8.4/static/runtime-config-connection.html#GUC-MAX-CONNECTIONS-->
+        
+        <!-- <jndi-jdbc jndi-server-name="default" jndi-name="java:comp/env/jdbc/localpostgres" isolation-level="ReadCommitted"/>-->
+        <!-- <jndi-jdbc jndi-server-name="default" jndi-name="comp/env/jdbc/xa/localpostgres" isolation-level="ReadCommitted"/> --> <!-- Orion Style JNDI name -->
+        <!-- <jndi-jdbc jndi-server-name="localweblogic" jndi-name="PostgresDataSource"/> --> <!-- Weblogic Style JNDI name -->
+        <!-- <jndi-jdbc jndi-server-name="default" jndi-name="jdbc/localpostgres" isolation-level="ReadCommitted"/> --> <!-- JRun4 Style JNDI name -->
+        <!-- <tyrex-dataSource dataSource-name="localpostgres" isolation-level="ReadCommitted"/> -->
     </datasource>
 
     <datasource name="localoracle"
@@ -396,18 +620,23 @@ access. For a detailed description see the core/docs/entityconfig.html file.
             check-on-start="true"
             add-missing-on-start="true"
             alias-view-columns="false"
-            join-style="ansi">
+            join-style="ansi"
+            use-order-by-nulls="true">
+        <read-data reader-name="tenant"/>
         <read-data reader-name="seed"/>
         <read-data reader-name="seed-initial"/>
         <read-data reader-name="demo"/>
         <read-data reader-name="ext"/>
+        <read-data reader-name="ext-test"/>
+        <read-data reader-name="ext-demo"/>
         <inline-jdbc
                 jdbc-driver="oracle.jdbc.driver.OracleDriver"
                 jdbc-uri="jdbc:oracle:thin:@127.0.0.1:1521:ofbiz"
                 jdbc-username="ofbiz"
                 jdbc-password="ofbiz"
                 pool-minsize="2"
-                pool-maxsize="250"/>
+                pool-maxsize="250"
+                time-between-eviction-runs-millis="600000"/>
     </datasource>
     <datasource name="localoracledd"
             helper-class="org.ofbiz.entity.datasource.GenericHelperDAO"
@@ -415,7 +644,8 @@ access. For a detailed description see the core/docs/entityconfig.html file.
             field-type-name="oracle"
             check-on-start="true"
             add-missing-on-start="true"
-            join-style="ansi">
+            join-style="ansi"
+            use-order-by-nulls="true">
         <read-data reader-name="main"/>
         <inline-jdbc
                 jdbc-driver="com.ddtek.jdbc.oracle.OracleDriver"
@@ -423,7 +653,8 @@ access. For a detailed description see the core/docs/entityconfig.html file.
                 jdbc-username="ofbiz"
                 jdbc-password="ofbiz"
                 pool-minsize="2"
-                pool-maxsize="250"/>
+                pool-maxsize="250"
+                time-between-eviction-runs-millis="600000"/>
     </datasource>
 
     <datasource name="localsybase"
@@ -434,10 +665,13 @@ access. For a detailed description see the core/docs/entityconfig.html file.
             add-missing-on-start="true"
             use-fk-initially-deferred="false"
             join-style="ansi">
+        <read-data reader-name="tenant"/>
         <read-data reader-name="seed"/>
         <read-data reader-name="seed-initial"/>
         <read-data reader-name="demo"/>
         <read-data reader-name="ext"/>
+        <read-data reader-name="ext-test"/>
+        <read-data reader-name="ext-demo"/>
         <inline-jdbc
                 jdbc-driver="com.sybase.jdbc2.jdbc.SybDriver"
                 jdbc-uri="jdbc:sybase:Tds:10.1.1.10:11222/ofbiz?DYNAMIC_PREPARE=true"
@@ -445,7 +679,8 @@ access. For a detailed description see the core/docs/entityconfig.html file.
                 jdbc-password="ofbiz1"
                 isolation-level="ReadCommitted"
                 pool-minsize="2"
-                pool-maxsize="250"/>
+                pool-maxsize="250"
+                time-between-eviction-runs-millis="600000"/>
     </datasource>
 
     <datasource name="localsapdb"
@@ -456,10 +691,13 @@ access. For a detailed description see the core/docs/entityconfig.html file.
             fk-style="name_fk"
             use-fk-initially-deferred="false"
             join-style="ansi-no-parenthesis">
+        <read-data reader-name="tenant"/>
         <read-data reader-name="seed"/>
         <read-data reader-name="seed-initial"/>
         <read-data reader-name="demo"/>
         <read-data reader-name="ext"/>
+        <read-data reader-name="ext-test"/>
+        <read-data reader-name="ext-demo"/>
         <inline-jdbc
                 jdbc-driver="com.sap.dbtech.jdbc.DriverSapDB"
                 jdbc-uri="jdbc:sapdb://localhost/OFBIZ"
@@ -467,7 +705,8 @@ access. For a detailed description see the core/docs/entityconfig.html file.
                 jdbc-password="ofbiz"
                 isolation-level="ReadCommitted"
                 pool-minsize="2"
-                pool-maxsize="250"/>
+                pool-maxsize="250"
+                time-between-eviction-runs-millis="600000"/>
         <!-- <jndi-jdbc jndi-server-name="default" jndi-name="comp/env/jdbc/xa/localsapdb" isolation-level="ReadCommitted"/> --> <!-- Orion Style JNDI name -->
         <!-- <jndi-jdbc jndi-server-name="localweblogic" jndi-name="SapDBDataSource"/> --> <!-- Weblogic Style JNDI name -->
         <!-- <jndi-jdbc jndi-server-name="default" jndi-name="jdbc/localsapdb" isolation-level="ReadCommitted"/> --> <!-- JRun4 Style JNDI name -->
@@ -482,10 +721,13 @@ access. For a detailed description see the core/docs/entityconfig.html file.
             add-missing-on-start="true"
             alias-view-columns="false"
             join-style="ansi">
+        <read-data reader-name="tenant"/>
         <read-data reader-name="seed"/>
         <read-data reader-name="seed-initial"/>
         <read-data reader-name="demo"/>
         <read-data reader-name="ext"/>
+        <read-data reader-name="ext-test"/>
+        <read-data reader-name="ext-demo"/>
         <inline-jdbc
                 jdbc-driver="org.firebirdsql.jdbc.FBDriver"
                 jdbc-uri="jdbc:firebirdsql:127.0.0.1:C:\\data\\ofbiz.gdb"
@@ -493,10 +735,11 @@ access. For a detailed description see the core/docs/entityconfig.html file.
                 jdbc-password="masterkey"
                 isolation-level="ReadCommitted"
                 pool-minsize="2"
-                pool-maxsize="250"/>
+                pool-maxsize="250"
+                time-between-eviction-runs-millis="600000"/>
         <!-- Sample remote URI: jdbc-uri="jdbc:firebirdsql://localhost:3050//opt/interbase/data/ofbiz.gdb" -->
         <!-- <jndi-jdbc jndi-server-name="default" jndi-name="comp/env/jdbc/xa/localfirebird" isolation-level="ReadCommitted"/> --> <!-- Orion Style JNDI name -->
-        <!-- <tyrex-dataSource dataSource-name="firebird" isolation-level="ReadCommitted"/> Â -->
+        <!-- <tyrex-dataSource dataSource-name="firebird" isolation-level="ReadCommitted"/> -->
     </datasource>
     <!--
      The following has been tested with SQL Server 2005 + MS SQL Server JDBC Driver 1.1
@@ -523,10 +766,13 @@ access. For a detailed description see the core/docs/entityconfig.html file.
             join-style="ansi"
             alias-view-columns="false"
             use-fk-initially-deferred="false">
+        <read-data reader-name="tenant"/>
         <read-data reader-name="seed"/>
         <read-data reader-name="seed-initial"/>
         <read-data reader-name="demo"/>
         <read-data reader-name="ext"/>
+        <read-data reader-name="ext-test"/>
+        <read-data reader-name="ext-demo"/>
         <inline-jdbc
                 jdbc-driver="com.microsoft.sqlserver.jdbc.SQLServerDriver"
                 jdbc-uri="jdbc:sqlserver://localhost:1791;databaseName=ofbiz;SelectMethod=cursor;"
@@ -534,7 +780,8 @@ access. For a detailed description see the core/docs/entityconfig.html file.
                 jdbc-password="ofbiz"
                 isolation-level="ReadCommitted"
                 pool-minsize="2"
-                pool-maxsize="250"/>
+                pool-maxsize="250"
+                time-between-eviction-runs-millis="600000"/>
         <!-- <jndi-jdbc jndi-server-name="default" jndi-name="comp/env/jdbc/xa/localmssql" isolation-level="ReadCommitted"/> --> <!-- Orion Style JNDI name -->
     </datasource>
 
@@ -545,10 +792,13 @@ access. For a detailed description see the core/docs/entityconfig.html file.
             check-on-start="true"
             add-missing-on-start="true"
             join-style="ansi">
+        <read-data reader-name="tenant"/>
         <read-data reader-name="seed"/>
         <read-data reader-name="seed-initial"/>
         <read-data reader-name="demo"/>
         <read-data reader-name="ext"/>
+        <read-data reader-name="ext-test"/>
+        <read-data reader-name="ext-demo"/>
         <inline-jdbc
                 jdbc-driver="com.p6spy.engine.spy.P6SpyDriver"
                 jdbc-uri="jdbc:postgresql://127.0.0.1/ofbiz"
@@ -556,7 +806,8 @@ access. For a detailed description see the core/docs/entityconfig.html file.
                 jdbc-password="ofbiz"
                 isolation-level="ReadCommitted"
                 pool-minsize="2"
-                pool-maxsize="250"/>
+                pool-maxsize="250"
+                time-between-eviction-runs-millis="600000"/>
         <!-- <jndi-jdbc jndi-server-name="localjndi" jndi-name="java:/OracleDataSource" isolation-level="Serializable"/> -->
     </datasource>
 
@@ -565,16 +816,19 @@ access. For a detailed description see the core/docs/entityconfig.html file.
             field-type-name="advantage"
             check-on-start="true"
             add-missing-on-start="true"
-            check-indices-on-start="true"
+            check-indices-on-start="false"
             use-foreign-keys="false"
             use-foreign-key-indices="true"
             join-style="ansi-no-parenthesis"
             alias-view-columns="false"
             always-use-constraint-keyword="true">
+        <read-data reader-name="tenant"/>
         <read-data reader-name="seed"/>
         <read-data reader-name="seed-initial"/>
         <read-data reader-name="demo"/>
         <read-data reader-name="ext"/>
+        <read-data reader-name="ext-test"/>
+        <read-data reader-name="ext-demo"/>
         <inline-jdbc
                 jdbc-driver="com.extendedsystems.jdbc.advantage.ADSDriver"
                 jdbc-uri="jdbc:extendedsystems:advantage://localhost:6262;catalog=c:\\advantage\\OFBIZ.ADD;TableType=adt"
@@ -582,6 +836,7 @@ access. For a detailed description see the core/docs/entityconfig.html file.
                 jdbc-password="adssys"
                 isolation-level="ReadCommitted"
                 pool-minsize="2"
-                pool-maxsize="250"/>
+                pool-maxsize="250"
+                time-between-eviction-runs-millis="600000"/>
     </datasource>
 </entity-config>

@@ -20,7 +20,7 @@
 
 <forms xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/widget-form.xsd">
     <form name="findBlogContent" default-entity-name="ContentAssocDataResourceViewFrom" target="CMSContentFind" title="" type="single"
-        default-title-style="tableheadtext" default-tooltip-style="tabletext" default-widget-style="inputBox">
+        default-title-style="tableheadtext" default-widget-style="inputBox">
         <field name="caContentIdTo" title="${uiLabelMap.ContentPublishToContent}">
             <drop-down>
                 <option key="OFBIZBLOGROOT" description="${uiLabelMap.ContentBlogs}"/>
@@ -48,25 +48,27 @@
         <field name="submitButton" title="${uiLabelMap.CommonFind}" widget-style="smallSubmit">
             <submit button-type="button"/>
         </field>
-        <field name="createBlog" title="${uiLabelMap.CommonEmptyHeader}" widget-style="buttontext">
+        <field name="createBlog" title=" " widget-style="buttontext">
             <hyperlink also-hidden="false" description="${uiLabelMap.CommonNew} ${uiLabelMap.ContentForum}" target="EditBlogArticle"/>
         </field>
-        <field name="createForum" title="${uiLabelMap.CommonEmptyHeader}" widget-style="buttontext">
+        <field name="createForum" title=" " widget-style="buttontext">
             <hyperlink also-hidden="false" description="${uiLabelMap.CommonNew} ${uiLabelMap.ContentForum}" target="EditForumArticle"/>
         </field>
     </form>
 
     <form name="listFindBlogContent" type="list" target=""
-        default-title-style="tableheadtext" default-widget-style="inputBox" default-tooltip-style="tabletext"
+        default-title-style="tableheadtext" default-widget-style="inputBox"
         paginate-target="/CMSContentFind" view-size="20">
         <actions>
             <service service-name="performFind" result-map-list="listIt">
                 <field-map field-name="inputFields" from-field="requestParameters"/>
                 <field-map field-name="entityName" from-field="entityName"/>
+                <field-map field-name="viewIndex" from-field="viewIndex"/>
+                <field-map field-name="viewSize" from-field="viewSize"/>
             </service>
         </actions>
 
-        <field name="editContent" title="${uiLabelMap.CommonEmptyHeader}">
+        <field name="editContent" title=" ">
             <hyperlink also-hidden="false" description="${uiLabelMap.CommonEdit}" target="CMSContentEdit">
                 <parameter param-name="contentId"/>
                 <parameter param-name="drDataResourceId"/>
@@ -85,7 +87,7 @@
     </form>
 
     <form name="AddBlogResponse" target="createBlogResponse" title="" type="single"
-        default-title-style="treeHeader" default-tooltip-style="tabletext" default-widget-style="inputBox">
+        default-title-style="treeHeader" default-widget-style="inputBox">
         <auto-fields-entity entity-name="ContentAssocDataResourceViewTo" default-field-type="hidden" map-name="rsp"/>
         <field name="contentName" entry-name="contentName" map-name="rsp">
             <text size="40"/>
@@ -99,7 +101,7 @@
         <field name="statusId">
             <radio no-current-selected-key="CTNT_INITIAL_DRAFT">
                 <option key="CTNT_PUBLISHED" description="${uiLabelMap.ContentBlogPost}"/>
-                <option key="CTNT_INITIAL_DRAFT" description="${uiLabelMap.EcommerceBlogPreview}"/>
+                <option key="CTNT_INITIAL_DRAFT" description="${uiLabelMap.ContentBlogPreview}"/>
             </radio>
         </field>
         <field name="submitButton" title="${uiLabelMap.CommonSubmit}" widget-style="smallSubmit">
@@ -145,7 +147,7 @@
     </form>
 
     <form name="EditBlogResponse" target="updateBlogResponse" title="" type="single"
-        default-title-style="treeHeader" default-tooltip-style="tabletext" default-widget-style="inputBox">
+        default-title-style="treeHeader" default-widget-style="inputBox">
         <auto-fields-entity entity-name="Content" default-field-type="hidden" map-name="content"/>
         <auto-fields-entity entity-name="DataResource" default-field-type="hidden" map-name="dataResource"/>
         <field name="contentName" entry-name="contentName" map-name="rsp">
@@ -166,7 +168,7 @@
         <field name="statusId">
             <radio no-current-selected-key="CTNT_INITIAL_DRAFT">
                 <option key="CTNT_PUBLISHED" description="${uiLabelMap.ContentBlogPost}"/>
-                <option key="CTNT_INITIAL_DRAFT" description="${uiLabelMap.EcommerceBlogPreview}"/>
+                <option key="CTNT_INITIAL_DRAFT" description="${uiLabelMap.ContentBlogPreview}"/>
             </radio>
         </field>
         <field name="submitButton" title="${uiLabelMap.CommonSubmit}" widget-style="smallSubmit">
@@ -194,40 +196,15 @@
         </sort-order>
     </form>
 
-    <form name="EditArticle" target="createBlogArticle" title="" type="upload" skip-end="true" default-map-name="blogEntry"
-        default-title-style="treeHeader" default-tooltip-style="tabletext" default-widget-style="inputBox">
-        <alt-target use-when="contentId!=void" target="updateBlogArticle"/>
-        <field name="blogContentId"><hidden value="${parameters.blogContentId}"/></field>
-        <field name="contentId" title="${uiLabelMap.EcommerceBlogEntryId}" use-when="contentId!=void"><display/></field>
-        <field name="contentName"><text size="40"/></field>
-        <field name="description"><textarea cols="40" rows="2"/></field>
-        <field name="summaryData" title="${uiLabelMap.EcommerceSummary}" widget-style="inputBox dojo-ResizableTextArea"><textarea cols="60" rows="4"/></field>
-        <field name="articleData" title="${uiLabelMap.EcommerceBlogArticle}" widget-style="inputBox dojo-ResizableTextArea"><textarea cols="60" rows="12"/></field>
-        <field name="uploadedFile" title="${uiLabelMap.ContentImage}"><file size="25"/></field>
-        <field name="templateDataResourceId" title="${uiLabelMap.ContentTemplate}">
-            <drop-down>
-                <option key="BLOG_TPL_TOPLEFT" description="${uiLabelMap.EcommerceBlogTopLeft}"/>
-                <option key="BLOG_TPL_TOPCENTER" description="${uiLabelMap.EcommerceBlogTopCenter}"/>
-            </drop-down>
-        </field>
-        <field name="statusId" title="${uiLabelMap.CommonStatus}">
-            <drop-down no-current-selected-key="CTNT_INITIAL_DRAFT">
-                <option key="CTNT_PUBLISHED" description="${uiLabelMap.EcommerceBlogPublish}"/>
-                <option key="CTNT_INITIAL_DRAFT" description="${uiLabelMap.EcommerceBlogPreview}"/>
-            </drop-down>
-        </field>
-        <field name="submitButton" title="${uiLabelMap.CommonSubmit}" widget-style="smallSubmit"><submit button-type="button"/></field>
-    </form>
-
     <form name="editFormSubmit" target="" title="" type="single" skip-start="true" skip-end="true"
-        default-title-style="treeHeader" default-tooltip-style="tabletext" default-widget-style="inputBox">
+        default-title-style="treeHeader" default-widget-style="inputBox">
         <field name="submitButton" title="${uiLabelMap.CommonSubmit}" widget-style="smallSubmit">
             <submit button-type="button"/>
         </field>
     </form>
 
     <form name="editFormEnd" target="" title="" type="single" skip-start="true"
-        default-title-style="treeHeader" default-tooltip-style="tabletext" default-widget-style="inputBox">
+        default-title-style="treeHeader" default-widget-style="inputBox">
     </form>
 
 </forms>

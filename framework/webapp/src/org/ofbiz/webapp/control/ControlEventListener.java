@@ -28,8 +28,10 @@ import javax.servlet.http.HttpSessionListener;
 
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilDateTime;
+import org.ofbiz.base.util.UtilGenerics;
 import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.base.util.UtilValidate;
+import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
 import org.ofbiz.entity.serialize.XmlSerializer;
@@ -74,8 +76,12 @@ public class ControlEventListener implements HttpSessionListener {
             // instead of using this message, get directly from session attribute so it won't create a new one: GenericValue visit = VisitHandler.getVisit(session);
             GenericValue visit = (GenericValue) session.getAttribute("visit");
             if (visit != null) {
-                visit.set("thruDate", new Timestamp(session.getLastAccessedTime()));
-                visit.store();
+                Delegator delegator = visit.getDelegator();
+                visit = delegator.findOne("Visit", UtilMisc.toMap("visitId", visit.get("visitId")), false);
+                if (visit != null) {
+                    visit.set("thruDate", new Timestamp(session.getLastAccessedTime()));
+                    visit.store();
+                }
             } else {
                 Debug.logWarning("Could not find visit value object in session [" + session.getId() + "] that is being destroyed", module);
             }
@@ -85,7 +91,7 @@ public class ControlEventListener implements HttpSessionListener {
             GenericValue userLogin = (GenericValue) session.getAttribute("userLogin");
             if (userLogin != null && userLoginSessionString != null) {
                 GenericValue userLoginSession = null;
-                userLoginSession = userLogin.getRelatedOne("UserLoginSession");
+                userLoginSession = userLogin.getRelatedOne("UserLoginSession", false);
 
                 if (userLoginSession == null) {
                     userLoginSession = userLogin.getDelegator().makeValue("UserLoginSession",
@@ -121,43 +127,45 @@ public class ControlEventListener implements HttpSessionListener {
 
     public void logStats(HttpSession session, GenericValue visit) {
         if (Debug.verboseOn() || session.getAttribute("org.ofbiz.log.session.stats") != null) {
-            Debug.log("<===================================================================>", module);
-            Debug.log("Session ID     : " + session.getId(), module);
-            Debug.log("Created Time   : " + session.getCreationTime(), module);
-            Debug.log("Last Access    : " + session.getLastAccessedTime(), module);
-            Debug.log("Max Inactive   : " + session.getMaxInactiveInterval(), module);
-            Debug.log("--------------------------------------------------------------------", module);
-            Debug.log("Total Sessions : " + ControlEventListener.getTotalActiveSessions(), module);
-            Debug.log("Total Active   : " + ControlEventListener.getTotalActiveSessions(), module);
-            Debug.log("Total Passive  : " + ControlEventListener.getTotalPassiveSessions(),  module);
-            Debug.log("** note : this session has been counted as destroyed.", module);
-            Debug.log("--------------------------------------------------------------------", module);
-            Debug.log("Visit ID       : " + visit.getString("visitId"), module);
-            Debug.log("Party ID       : " + visit.getString("partyId"), module);
-            Debug.log("Client IP      : " + visit.getString("clientIpAddress"), module);
-            Debug.log("Client Host    : " + visit.getString("clientHostName"), module);
-            Debug.log("Client User    : " + visit.getString("clientUser"), module);
-            Debug.log("WebApp         : " + visit.getString("webappName"), module);
-            Debug.log("Locale         : " + visit.getString("initialLocale"), module);
-            Debug.log("UserAgent      : " + visit.getString("initialUserAgent"), module);
-            Debug.log("Referrer       : " + visit.getString("initialReferrer"), module);
-            Debug.log("Initial Req    : " + visit.getString("initialRequest"), module);
-            Debug.log("Visit From     : " + visit.getString("fromDate"), module);
-            Debug.log("Visit Thru     : " + visit.getString("thruDate"), module);
-            Debug.log("--------------------------------------------------------------------", module);
-            Debug.log("--- Start Session Attributes: ---", module);
-            Enumeration sesNames = null;
+            Debug.logInfo("<===================================================================>", module);
+            Debug.logInfo("Session ID     : " + session.getId(), module);
+            Debug.logInfo("Created Time   : " + session.getCreationTime(), module);
+            Debug.logInfo("Last Access    : " + session.getLastAccessedTime(), module);
+            Debug.logInfo("Max Inactive   : " + session.getMaxInactiveInterval(), module);
+            Debug.logInfo("--------------------------------------------------------------------", module);
+            Debug.logInfo("Total Sessions : " + ControlEventListener.getTotalActiveSessions(), module);
+            Debug.logInfo("Total Active   : " + ControlEventListener.getTotalActiveSessions(), module);
+            Debug.logInfo("Total Passive  : " + ControlEventListener.getTotalPassiveSessions(),  module);
+            Debug.logInfo("** note : this session has been counted as destroyed.", module);
+            Debug.logInfo("--------------------------------------------------------------------", module);
+            if (visit != null) {
+                Debug.logInfo("Visit ID       : " + visit.getString("visitId"), module);
+                Debug.logInfo("Party ID       : " + visit.getString("partyId"), module);
+                Debug.logInfo("Client IP      : " + visit.getString("clientIpAddress"), module);
+                Debug.logInfo("Client Host    : " + visit.getString("clientHostName"), module);
+                Debug.logInfo("Client User    : " + visit.getString("clientUser"), module);
+                Debug.logInfo("WebApp         : " + visit.getString("webappName"), module);
+                Debug.logInfo("Locale         : " + visit.getString("initialLocale"), module);
+                Debug.logInfo("UserAgent      : " + visit.getString("initialUserAgent"), module);
+                Debug.logInfo("Referrer       : " + visit.getString("initialReferrer"), module);
+                Debug.logInfo("Initial Req    : " + visit.getString("initialRequest"), module);
+                Debug.logInfo("Visit From     : " + visit.getString("fromDate"), module);
+                Debug.logInfo("Visit Thru     : " + visit.getString("thruDate"), module);
+            }
+            Debug.logInfo("--------------------------------------------------------------------", module);
+            Debug.logInfo("--- Start Session Attributes: ---", module);
+            Enumeration<String> sesNames = null;
             try {
-                sesNames = session.getAttributeNames();
+                sesNames = UtilGenerics.cast(session.getAttributeNames());
             } catch (IllegalStateException e) {
-                Debug.log("Cannot get session attributes : " + e.getMessage(), module);
+                Debug.logInfo("Cannot get session attributes : " + e.getMessage(), module);
             }
             while (sesNames != null && sesNames.hasMoreElements()) {
-                String attName = (String) sesNames.nextElement();
-                Debug.log(attName + ":" + session.getAttribute(attName), module);
+                String attName = sesNames.nextElement();
+                Debug.logInfo(attName + ":" + session.getAttribute(attName), module);
             }
-            Debug.log("--- End Session Attributes ---", module);
-            Debug.log("<===================================================================>", module);
+            Debug.logInfo("--- End Session Attributes ---", module);
+            Debug.logInfo("<===================================================================>", module);
         }
     }
 
@@ -192,7 +200,7 @@ public class ControlEventListener implements HttpSessionListener {
     }
 
     private String getUserLoginSession(HttpSession session) {
-        Map userLoginSession = (Map) session.getAttribute("userLoginSession");
+        Map<String, ?> userLoginSession = UtilGenerics.cast(session.getAttribute("userLoginSession"));
 
         String sessionData = null;
         if (UtilValidate.isNotEmpty(userLoginSession)) {

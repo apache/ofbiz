@@ -19,7 +19,7 @@ under the License.
 -->
 
 <simple-methods xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/simple-methods.xsd">
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/simple-methods-v2.xsd">
 
     <simple-method method-name="tc_ProductExists" short-description="Check Product Exists" login-required="false">
         <set from-field="parameters.productId" field="productIdMap.productId"/>
@@ -31,7 +31,9 @@ under the License.
         </if-not-empty>
         <if-empty field="product.productId">
             <log level="info" message="No product found for ID ${parameters.productId}, "/>
-            <add-error error-list-name="errorMessageList"><fail-message message="Product not found"/></add-error>
+            <add-error error-list-name="errorMessageList">
+                <fail-property resource="ProductUiLabels" property="ProductErrorProductNotFound"/>
+            </add-error>
             <return response-code="error"/>  <!-- all done -->
         </if-empty>
     </simple-method>

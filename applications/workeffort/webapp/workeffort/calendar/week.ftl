@@ -16,16 +16,11 @@ KIND, either express or implied.  See the License for the
 specific language governing permissions and limitations
 under the License.
 -->
-  <div class="screenlet-title-bar">
-    <ul>
-      <li class="h3">${uiLabelMap.CommonWeek} ${start?date?string("w")}</li>
-      <li><a href="<@ofbizUrl>week?start=${next.time?string("#")}<#if eventsParam?has_content>&${eventsParam}</#if>${addlParam?if_exists}</@ofbizUrl>">${uiLabelMap.WorkEffortNextWeek}</a></li>
-      <li><a href="<@ofbizUrl>week?start=${nowTimestamp.time?string("#")}<#if eventsParam?has_content>&${eventsParam}</#if>${addlParam?if_exists}</@ofbizUrl>">${uiLabelMap.WorkEffortThisWeek}</a></li>
-      <li><a href="<@ofbizUrl>week?start=${prev.time?string("#")}<#if eventsParam?has_content>&${eventsParam}</#if>${addlParam?if_exists}</@ofbizUrl>">${uiLabelMap.WorkEffortPreviousWeek}</a></li>
-    </ul>
-    <br class="clear"/>
-  </div>
 <#if periods?has_content>
+  <#-- Allow containing screens to specify the URL for creating a new event -->
+  <#if !newCalEventUrl?exists>
+    <#assign newCalEventUrl = parameters._LAST_VIEW_NAME_>
+  </#if>
   <#if (maxConcurrentEntries < 2)>
     <#assign entryWidth = 100>
   <#else>
@@ -34,31 +29,56 @@ under the License.
 <table cellspacing="0" class="basic-table calendar">
   <tr class="header-row">
     <td>${uiLabelMap.CommonTime}</td>
-    <td colspan=${maxConcurrentEntries}>${uiLabelMap.WorkEffortCalendarEntries}</td>
+    <td colspan="${maxConcurrentEntries}">${uiLabelMap.WorkEffortCalendarEntries}</td>
   </tr>
   <#list periods as period>
     <#assign currentPeriod = false/>
     <#if (nowTimestamp >= period.start) && (nowTimestamp <= period.end)><#assign currentPeriod = true/></#if>
   <tr<#if currentPeriod> class="current-period"<#else><#if (period.calendarEntries?size > 0)> class="active-period"</#if></#if>>
     <td class="centered" width="1%">
-      <a href="<@ofbizUrl>day?start=${period.start.time?string("#")}<#if eventsParam?has_content>&${eventsParam}</#if>${addlParam?if_exists}</@ofbizUrl>">${period.start?date?string("EEEE")?cap_first}&nbsp;${period.start?date?string.short}</a><br/>
-      <a href="<@ofbizUrl>EditWorkEffort?workEffortTypeId=EVENT&currentStatusId=CAL_TENTATIVE&estimatedStartDate=${period.start?string("yyyy-MM-dd HH:mm:ss")}&estimatedCompletionDate=${period.end?string("yyyy-MM-dd HH:mm:ss")}${addlParam?if_exists}</@ofbizUrl>">${uiLabelMap.CommonAddNew}</a>
+      <a href="<@ofbizUrl>${parameters._LAST_VIEW_NAME_}?period=day&amp;start=${period.start.time?string("#")}${urlParam?if_exists}${addlParam?if_exists}</@ofbizUrl>">${period.start?date?string("EEEE")?cap_first}&nbsp;${period.start?date?string.short}</a><br />
+      <a href="<@ofbizUrl>${newCalEventUrl}?period=week&amp;form=edit&amp;start=${parameters.start?if_exists}&amp;parentTypeId=${parentTypeId?if_exists}&amp;currentStatusId=CAL_TENTATIVE&amp;estimatedStartDate=${period.start?string("yyyy-MM-dd HH:mm:ss")}&amp;estimatedCompletionDate=${period.end?string("yyyy-MM-dd HH:mm:ss")}${addlParam?if_exists}${urlParam?if_exists}</@ofbizUrl>">${uiLabelMap.CommonAddNew}</a>
     </td>
     <#list period.calendarEntries as calEntry>
+        <#if calEntry.workEffort.actualStartDate?exists>
+            <#assign startDate = calEntry.workEffort.actualStartDate>
+          <#else>
+            <#assign startDate = calEntry.workEffort.estimatedStartDate?if_exists>
+        </#if>
+
+        <#if calEntry.workEffort.actualCompletionDate?exists>
+            <#assign completionDate = calEntry.workEffort.actualCompletionDate>
+          <#else>
+            <#assign completionDate = calEntry.workEffort.estimatedCompletionDate?if_exists>
+        </#if>
+
+        <#if !completionDate?has_content && calEntry.workEffort.actualMilliSeconds?has_content>
+            <#assign completionDate =  calEntry.workEffort.actualStartDate + calEntry.workEffort.actualMilliSeconds>
+        </#if>    
+        <#if !completionDate?has_content && calEntry.workEffort.estimatedMilliSeconds?has_content>
+            <#assign completionDate =  calEntry.workEffort.estimatedStartDate + calEntry.workEffort.estimatedMilliSeconds>
+        </#if>    
+    
     <#if calEntry.startOfPeriod>
     <td<#if (calEntry.periodSpan > 1)> rowspan="${calEntry.periodSpan}"</#if> width="${entryWidth?string("#")}%">
-    <#if (calEntry.workEffort.estimatedStartDate.compareTo(start)  <= 0 && calEntry.workEffort.estimatedCompletionDate.compareTo(next) >= 0)>
+    <#if (startDate.compareTo(period.start) <= 0 && completionDate?has_content && completionDate.compareTo(period.end) >= 0)>
       ${uiLabelMap.CommonAllWeek}
-    <#elseif (calEntry.workEffort.estimatedStartDate.compareTo(period.start)  = 0 && calEntry.workEffort.estimatedCompletionDate.compareTo(period.end) = 0)>
+    <#elseif (startDate.compareTo(period.start)  = 0 && completionDate?has_content && completionDate.compareTo(period.end) = 0)>
       ${uiLabelMap.CommonAllDay}
-    <#elseif calEntry.workEffort.estimatedStartDate.before(start)>
-      ${uiLabelMap.CommonUntil} ${calEntry.workEffort.estimatedCompletionDate?datetime?string.short}
-    <#elseif calEntry.workEffort.estimatedCompletionDate.after(next)>
-      ${uiLabelMap.CommonFrom} ${calEntry.workEffort.estimatedStartDate?time?string.short}
+    <#elseif startDate.before(start) && completionDate?has_content>
+      ${uiLabelMap.CommonUntil} ${completionDate?datetime?string.short}
+    <#elseif !completionDate?has_content>
+      ${uiLabelMap.CommonFrom} ${startDate?time?string.short} - ?
+    <#elseif completionDate.after(period.end)>
+      ${uiLabelMap.CommonFrom} ${startDate?time?string.short}
     <#else>
-      ${calEntry.workEffort.estimatedStartDate?time?string.short}-${calEntry.workEffort.estimatedCompletionDate?time?string.short}
+      ${startDate?time?string.short}-${completionDate?time?string.short}
     </#if>
-      <br/><a href="<@ofbizUrl>WorkEffortSummary?workEffortId=${calEntry.workEffort.workEffortId}${addlParam?if_exists}</@ofbizUrl>" class="event">${calEntry.workEffort.workEffortName?default("Undefined")}</a>&nbsp;</td>
+    <br />
+    ${setRequestAttribute("periodType", "week")}
+    ${setRequestAttribute("workEffortId", calEntry.workEffort.workEffortId)}
+    ${screens.render("component://workeffort/widget/CalendarScreens.xml#calendarEventContent")}
+    </td>  
     </#if>
     </#list>
     <#if (period.calendarEntries?size < maxConcurrentEntries)>

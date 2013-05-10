@@ -19,15 +19,19 @@
 package org.ofbiz.common.status;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import javolution.util.FastList;
 import javolution.util.FastMap;
 
 import org.ofbiz.base.util.Debug;
+import org.ofbiz.base.util.UtilProperties;
+import org.ofbiz.base.util.UtilValidate;
+
 import static org.ofbiz.base.util.UtilGenerics.checkList;
 import org.ofbiz.base.util.UtilMisc;
-import org.ofbiz.entity.GenericDelegator;
+import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
 import org.ofbiz.service.DispatchContext;
@@ -39,18 +43,20 @@ import org.ofbiz.service.ServiceUtil;
 public class StatusServices {
 
     public static final String module = StatusServices.class.getName();
+    public static final String resource = "CommonUiLabels";
 
     public static Map<String, Object> getStatusItems(DispatchContext ctx, Map<String, ?> context) {
-        GenericDelegator delegator = ctx.getDelegator();
+        Delegator delegator = ctx.getDelegator();
         List<String> statusTypes = checkList(context.get("statusTypeIds"), String.class);
-        if (statusTypes == null || statusTypes.size() == 0) {
-            return ServiceUtil.returnError("Parameter statusTypeIds can not be null and must contain at least one element");
+        Locale locale = (Locale) context.get("locale");
+        if (UtilValidate.isEmpty(statusTypes)) {
+            return ServiceUtil.returnError(UtilProperties.getMessage(resource, "CommonStatusMandatory", locale));
         }
 
         List<GenericValue> statusItems = FastList.newInstance();
         for (String statusTypeId: statusTypes) {
             try {
-                List<GenericValue> myStatusItems = delegator.findByAndCache("StatusItem", UtilMisc.toMap("statusTypeId", statusTypeId), UtilMisc.toList("sequenceId"));
+                List<GenericValue> myStatusItems = delegator.findByAnd("StatusItem", UtilMisc.toMap("statusTypeId", statusTypeId), UtilMisc.toList("sequenceId"), true);
                 statusItems.addAll(myStatusItems);
             } catch (GenericEntityException e) {
                 Debug.logError(e, module);
@@ -62,11 +68,11 @@ public class StatusServices {
     }
 
     public static Map<String, Object> getStatusValidChangeToDetails(DispatchContext ctx, Map<String, ?> context) {
-        GenericDelegator delegator = ctx.getDelegator();
+        Delegator delegator = ctx.getDelegator();
         List<GenericValue> statusValidChangeToDetails = null;
         String statusId = (String) context.get("statusId");
         try {
-            statusValidChangeToDetails = delegator.findByAndCache("StatusValidChangeToDetail", UtilMisc.toMap("statusId", statusId), UtilMisc.toList("sequenceId"));
+            statusValidChangeToDetails = delegator.findByAnd("StatusValidChangeToDetail", UtilMisc.toMap("statusId", statusId), UtilMisc.toList("sequenceId"), true);
         } catch (GenericEntityException e) {
             Debug.logError(e, module);
         }

@@ -22,24 +22,22 @@ under the License.
   <title>${uiLabelMap.EcommerceTellAFriend}</title>
 </head>
 <body class="ecbody">
-  <center>
     <form name="tellafriend" action="<@ofbizUrl>emailFriend</@ofbizUrl>" method="post">
-      <#if requestParameters.productId?exists>
-        <input type="hidden" name="pageUrl" value="<@ofbizUrl fullPath="true" encode="false" secure="false">/product?product_id=${requestParameters.productId}</@ofbizUrl>">
-      <#elseif requestParameters.categoryId?exists>
-        <input type="hidden" name="pageUrl" value="<@ofbizUrl fullPath="true" encode="false" secure="false">/category?category_id=${requestParameters.categoryId}</@ofbizUrl>">
-      <#else>
-        <#assign cancel = "Y">
-      </#if>
+        <#if (requestParameters.productId)?exists || (requestParameters.productId)?exists>
+            <input type="hidden" name="pageUrl" value="<@ofbizCatalogAltUrl fullPath="true" secure="false" productCategoryId=requestParameters.categoryId!"" productId=requestParameters.productId!""/>" />
+        <#else>
+            <#assign cancel = "Y">
+        </#if>
+        <input type="hidden" name="webSiteId" value="${context.webSiteId?if_exists}">
       <#if !cancel?exists>
         <table>
           <tr>
             <td>${uiLabelMap.CommonYouremail}:</td>
-            <td><input type="text" name="sendFrom" size="30"></td>
+            <td><input type="text" name="sendFrom" size="30" /></td>
           </tr>
           <tr>
             <td>${uiLabelMap.CommonEmailTo}:</td>
-            <td><input type="text" name="sendTo" size="30"></td>
+            <td><input type="text" name="sendTo" size="30" /></td>
           </tr>
           <tr>
             <td colspan="2" align="center">${uiLabelMap.CommonMessage}</td>
@@ -51,7 +49,7 @@ under the License.
           </tr>
           <tr>
             <td colspan="2" align="center">
-              <input type="submit" value="${uiLabelMap.CommonSend}">
+              <input type="submit" value="${uiLabelMap.CommonSend}" />
             </td>
           </tr>
         </table>
@@ -61,9 +59,8 @@ under the License.
         window.close();
         // -->
         </script>
-        <div class="tabletext">${uiLabelMap.EcommerceTellAFriendSorry}</div>
+        <div>${uiLabelMap.EcommerceTellAFriendSorry}</div>
       </#if>
     </form>
-  </center>
 </body>
 </html>

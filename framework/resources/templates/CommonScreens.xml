@@ -17,7 +17,7 @@
                 <set field="applicationTitle" value="${uiLabelMap.@component-resource-name@Application}" global="true"/>
             </actions>
             <widgets>
-                <include-screen name="GlobalDecorator" location="component://common/widget/CommonScreens.xml"/>
+                <include-screen name="ApplicationDecorator" location="component://commonext/widget/CommonScreens.xml"/>
             </widgets>
         </section>
     </screen>
@@ -25,7 +25,6 @@
     <screen name="@component-resource-name@CommonDecorator">
         <section>
             <actions>
-                <set field="headerItem" value="main"/>
             </actions>
             <widgets>
                 <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">

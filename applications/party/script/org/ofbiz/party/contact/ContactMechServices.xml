@@ -19,7 +19,7 @@ under the License.
 -->
 
 <simple-methods xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/simple-methods.xsd">
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/simple-methods-v2.xsd">
     <simple-method method-name="createContactMech" short-description="Create Contact Mechanism">
         <make-value value-field="newValue" entity-name="ContactMech"/>
         <if-empty field="parameters.contactMechId">
@@ -36,28 +36,32 @@ under the License.
     </simple-method>
 
     <simple-method method-name="updateContactMech" short-description="Update Contact Mechanism">
-        <if-compare field="contactMechTypeId" operator="equals" value="POSTAL_ADDRESS">
+        <!-- NOTE DEJ20101020: commenting these out becuase they make NO sense... the problem is that 
+            updatePostalAddress below in this file calls updateContactMech, so it must be allowed...
+            This was "fixed" by JLR in rev 1023842, so undoing part of that to get things working again.
+        <if-compare field="parameters.contactMechTypeId" operator="equals" value="POSTAL_ADDRESS">
             <add-error><fail-property resource="PartyUiLabels" property="PartyServiceNotForPostalAddress"/></add-error>
         </if-compare>
-        <if-compare field="contactMechTypeId" operator="equals" value="TELECOM_NUMBER">
+        <if-compare field="parameters.contactMechTypeId" operator="equals" value="TELECOM_NUMBER">
             <add-error><fail-property resource="PartyUiLabels" property="PartyServiceNotForTelecomNumber"/></add-error>
         </if-compare>
         <check-errors/>
+        -->
 
         <set field="successMessageProperty" value="PartyContactMechanismSuccessfullyUpdated"/>
-        <if-compare field="context.contactMechTypeId" operator="equals" value="EMAIL_ADDRESS">
+        <if-compare field="parameters.contactMechTypeId" operator="equals" value="EMAIL_ADDRESS">
             <set field="successMessageProperty" value="PartyEmailAddressSuccessfullyUpdated"/>
         </if-compare>
-        <if-compare field="context.contactMechTypeId" operator="equals" value="WEB_ADDRESS">
+        <if-compare field="parameters.contactMechTypeId" operator="equals" value="WEB_ADDRESS">
             <set field="successMessageProperty" value="PartyWebAddressSuccessfullyUpdated"/>
         </if-compare>
-        <if-compare field="context.contactMechTypeId" operator="equals" value="IP_ADDRESS">
+        <if-compare field="parameters.contactMechTypeId" operator="equals" value="IP_ADDRESS">
             <set field="successMessageProperty" value="PartyIpAddressSuccessfullyUpdated"/>
         </if-compare>
-        <if-compare field="context.contactMechTypeId" operator="equals" value="ELECTRONIC_ADDRESS">
+        <if-compare field="parameters.contactMechTypeId" operator="equals" value="ELECTRONIC_ADDRESS">
             <set field="successMessageProperty" value="PartyElectronicAddressSuccessfullyUpdated"/>
         </if-compare>
-        <if-compare field="context.contactMechTypeId" operator="equals" value="DOMAIN_NAME">
+        <if-compare field="parameters.contactMechTypeId" operator="equals" value="DOMAIN_NAME">
             <set field="successMessageProperty" value="PartyDomainNameSuccessfullyUpdated"/>
         </if-compare>
 
@@ -102,6 +106,7 @@ under the License.
         <check-errors/>
         <make-value entity-name="PostalAddress" value-field="newValue"/>
         <set field="context.contactMechTypeId" value="POSTAL_ADDRESS"/>
+        <set field="context.contactMechId" from-field="parameters.contactMechId"/>
         <call-service service-name="createContactMech" in-map-name="context">
             <default-message resource="PartyUiLabels" property="PartyPostalAddressSuccessfullyCreated"/>
             <result-to-field result-name="contactMechId" field="newValue.contactMechId"/>
@@ -165,6 +170,7 @@ under the License.
     <simple-method method-name="createTelecomNumber" short-description="Create Contact Mechanism with Telecom Number">
         <make-value entity-name="TelecomNumber" value-field="newValue"/>
         <set field="context.contactMechTypeId" value="TELECOM_NUMBER"/>
+        <set field="context.contactMechId" from-field="parameters.contactMechId"/>
         <call-service service-name="createContactMech" in-map-name="context">
             <default-message resource="PartyUiLabels" property="PartyTelecomNumberSuccessfullyCreated"/>
             <result-to-field result-name="contactMechId" field="newValue.contactMechId"/>

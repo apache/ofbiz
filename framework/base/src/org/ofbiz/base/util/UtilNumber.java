@@ -43,8 +43,8 @@ public class UtilNumber {
      * @return  int - Scale factor to pass to BigDecimal's methods. Defaults to DEFAULT_BD_SCALE (2)
      */
     public static int getBigDecimalScale(String file, String property) {
-        if ((file == null) || (file.length() == 0)) return DEFAULT_BD_SCALE;
-        if ((property == null) || (property.length() == 0)) return DEFAULT_BD_SCALE;
+        if (UtilValidate.isEmpty(file)) return DEFAULT_BD_SCALE;
+        if (UtilValidate.isEmpty(property)) return DEFAULT_BD_SCALE;
 
         int scale = -1;
         String value = UtilProperties.getPropertyValue(file, property);
@@ -75,8 +75,8 @@ public class UtilNumber {
      * @return  int - Rounding mode to pass to BigDecimal's methods. Defaults to DEFAULT_BD_ROUNDING_MODE (BigDecimal.ROUND_HALF_UP)
      */
     public static int getBigDecimalRoundingMode(String file, String property) {
-        if ((file == null) || (file.length() == 0)) return DEFAULT_BD_SCALE;
-        if ((property == null) || (property.length() == 0)) return DEFAULT_BD_ROUNDING_MODE;
+        if (UtilValidate.isEmpty(file)) return DEFAULT_BD_SCALE;
+        if (UtilValidate.isEmpty(property)) return DEFAULT_BD_ROUNDING_MODE;
 
         String value = UtilProperties.getPropertyValue(file, property);
         int mode = roundingModeFromString(value);
@@ -152,11 +152,51 @@ public class UtilNumber {
         + "%%hundredths:\n"
         + "    100: <00<;\n";
 
+    // ICU4J rule sets for the th_TH locale. To add more rules, expand this string.
+    // For reference, see the RbnfSampleRuleSets.java file distributed with ICU4J
+    public static final String ruleSet_th_TH =
+        /*
+         * These rules format a number in one of the two styles often used
+         * on checks.  %bahts-and-hundredths formats stangs as hundredths of
+         * a baht (23.40 comes out as "twenty-three and 40/100 bahts").
+         * %bahts-and-stangs formats in bahts and stangs (23.40 comes out as
+         * "twenty-three bahts and forty stangs")
+         */
+        "%bahts-and-stangs:\n"
+        + "    x.0: << [and >%%stangs>];\n"
+        + "    0.x: >%%stangs>;\n"
+        + "    0: zero bahts; one baht; =%%main= bahts;\n"
+        + "%%main:\n"
+        + "    zero; one; two; three; four; five; six; seven; eight; nine;\n"
+        + "    ten; eleven; twelve; thirteen; fourteen; fifteen; sixteen;\n"
+        + "        seventeen; eighteen; nineteen;\n"
+        + "    20: twenty[->>];\n"
+        + "    30: thirty[->>];\n"
+        + "    40: forty[->>];\n"
+        + "    50: fifty[->>];\n"
+        + "    60: sixty[->>];\n"
+        + "    70: seventy[->>];\n"
+        + "    80: eighty[->>];\n"
+        + "    90: ninety[->>];\n"
+        + "    100: << hundred[ >>];\n"
+        + "    1000: << thousand[ >>];\n"
+        + "    1,000,000: << million[ >>];\n"
+        + "    1,000,000,000: << billion[ >>];\n"
+        + "    1,000,000,000,000: << trillion[ >>];\n"
+        + "    1,000,000,000,000,000: =#,##0=;\n"
+        + "%%stangs:\n"
+        + "    100: <%%main< stang[s];\n"
+        + "%bahts-and-hundredths:\n"
+        + "    x.0: <%%main< and >%%hundredths>/100;\n" // this used to end in 'bahts' but that should be added later
+        + "%%hundredths:\n"
+        + "    100: <00<;\n";
+
     // hash map to store ICU4J rule sets keyed to Locale
     public static HashMap<Locale, String> rbnfRuleSets;
     static {
         rbnfRuleSets = new HashMap<Locale, String>();
         rbnfRuleSets.put(Locale.US, ruleSet_en_US);
+        rbnfRuleSets.put(new Locale("th"), ruleSet_th_TH);
     }
 
     /**
@@ -173,7 +213,7 @@ public class UtilNumber {
      * @return  formatted string or an empty string if there was an error
      */
     public static String formatRuleBasedAmount(double amount, String rule, Locale locale) {
-        String ruleSet = (String) rbnfRuleSets.get(locale);
+        String ruleSet = rbnfRuleSets.get(locale);
         if (ruleSet == null) {
             Debug.logWarning("Cannot format rule based amount for locale " + locale.toString() + " because rule set for that locale does not exist", module);
             return "";

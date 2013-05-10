@@ -49,7 +49,7 @@ fromDateStr = parameters.FROM_DATE;
 
 fromDate = null;
 if (UtilValidate.isNotEmpty(fromDateStr)) {
-    fromDate = Timestamp.valueOf(fromDateStr);
+    fromDate = ObjectType.simpleTypeConvert(fromDateStr, "Timestamp", null, timeZone, locale, false);
 }
 if (!fromDate) {
     fromDate = request.getAttribute("ProductAssocCreateFromDate");
@@ -82,7 +82,7 @@ assocTypes = delegator.findList("ProductAssocType", null, null, ['description'],
 context.assocTypes = assocTypes;
 
 if (product) {
-    context.assocFromProducts = product.getRelated("MainProductAssoc", null, ['sequenceNum']);
+    context.assocFromProducts = product.getRelated("MainProductAssoc", null, ['sequenceNum'], false);
 
-    context.assocToProducts = product.getRelated("AssocProductAssoc");
+    context.assocToProducts = product.getRelated("AssocProductAssoc", null, null, false);
 }

@@ -21,17 +21,17 @@ under the License.
   <table border='0'  cellpadding='3' cellspacing='0'>
     <tr>
       <td>
-        <h2>${productCategory.description?if_exists}</h2>
+        <h2>${productCategory.categoryName?if_exists}</h2>
       </td>
       <td align="right">
         <form name="choosequickaddform" method="post" action="<@ofbizUrl>quickadd</@ofbizUrl>" style='margin: 0;'>
           <select name='category_id'>
-            <option value='${productCategory.productCategoryId}'>${productCategory.description?if_exists}</option>
+            <option value='${productCategory.productCategoryId}'>${productCategory.categoryName?if_exists}</option>
             <option value='${productCategory.productCategoryId}'>--</option>
             <#list quickAddCats as quickAddCatalogId>
-              <#assign loopCategory = delegator.findByPrimaryKeyCache("ProductCategory", Static["org.ofbiz.base.util.UtilMisc"].toMap("productCategoryId", quickAddCatalogId))>
+              <#assign loopCategory = delegator.findOne("ProductCategory", Static["org.ofbiz.base.util.UtilMisc"].toMap("productCategoryId", quickAddCatalogId), true)>
               <#if loopCategory?has_content>
-                <option value='${quickAddCatalogId}'>${loopCategory.description?if_exists}</option>
+                <option value='${quickAddCatalogId}'>${loopCategory.categoryName?if_exists}</option>
               </#if>
             </#list>
           </select>
@@ -40,12 +40,12 @@ under the License.
       </td>
     </tr>
     <#if productCategory.categoryImageUrl?exists || productCategory.longDescription?exists>
-      <tr><td colspan='2'><hr class='sepbar'></td></tr>
+      <tr><td colspan='2'><hr class='sepbar'/></td></tr>
       <tr>
         <td valign="top" width="0" colspan='2'>
           <div>
             <#if productCategory.categoryImageUrl?exists>
-              <img src="<@ofbizContentUrl>${productCategory.categoryImageUrl}</@ofbizContentUrl>" vspace="5" hspace="5" border="1" height='100'>
+              <img src="<@ofbizContentUrl>${productCategory.categoryImageUrl}</@ofbizContentUrl>" vspace="5" hspace="5" class="cssImgLarge" alt="" />
             </#if>
             ${productCategory.longDescription?if_exists}
           </div>
@@ -56,30 +56,30 @@ under the License.
 </#if>
 
 <#if productCategoryMembers?exists && 0 < productCategoryMembers?size>
-  <br/>
+  <br />
   <center>
   <form method="post" action="<@ofbizUrl>addtocartbulk</@ofbizUrl>" name="bulkaddform" style='margin: 0;'>
-    <input type='hidden' name='category_id' value='${categoryId}'>
-    <div align="right">
-      <a href="javascript:document.bulkaddform.submit()" class="buttontext"><span style="white-space: nowrap;">${uiLabelMap.OrderAddAllToCart}</span></a>
+    <input type='hidden' name='category_id' value='${categoryId}' />
+    <div class="quickaddall">
+      <a href="javascript:document.bulkaddform.submit()" class="buttontext">${uiLabelMap.OrderAddAllToCart}</a>
     </div>
-    <table border='1' cellpadding='2' cellspacing='0'>
+    <div class="quickaddtable">
       <#list productCategoryMembers as productCategoryMember>
-        <#assign product = productCategoryMember.getRelatedOneCache("Product")>
-        <tr>
+        <#assign product = productCategoryMember.getRelatedOne("Product", true)>
+        <p>
             ${setRequestAttribute("optProductId", productCategoryMember.productId)}
             ${screens.render(quickaddsummaryScreen)}
-        </tr>
+        </p>
       </#list>
-    </table>
-    <div align="right">
-      <a href="javascript:document.bulkaddform.submit()" class="buttontext"><span style="white-space: nowrap;">${uiLabelMap.OrderAddAllToCart}</span></a>
+    </div>
+    <div class="quickaddall">
+      <a href="javascript:document.bulkaddform.submit()" class="buttontext">${uiLabelMap.OrderAddAllToCart}</a>
     </div>
   </form>
   </center>
 <#else>
   <table border="0" cellpadding="2">
-    <tr><td colspan="2"><hr class='sepbar'></td></tr>
+    <tr><td colspan="2"><hr class='sepbar'/></td></tr>
     <tr>
       <td>
         <div class='tabletext'>${uiLabelMap.ProductNoProductsInThisCategory}.</div>
@@ -87,3 +87,4 @@ under the License.
     </tr>
   </table>
 </#if>
+

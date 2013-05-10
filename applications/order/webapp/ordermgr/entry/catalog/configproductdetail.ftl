@@ -69,7 +69,7 @@ ${virtualJavaScript?if_exists}
         if (detailImageUrl == "_NONE_") {
             hack = document.createElement('span');
             hack.innerHTML="${uiLabelMap.CommonNoDetailImageAvailableToDisplay}";
-            alert(hack.innerHTML);
+            showErrorAlert("${uiLabelMap.CommonErrorMessage2}","${uiLabelMap.CommonNoDetailImageAvailableToDisplay}");
             return;
         }
         detailImageUrl = detailImageUrl.replace(/\&\#47;/g, "/");
@@ -138,44 +138,32 @@ ${virtualJavaScript?if_exists}
 <script language="JavaScript" type="text/javascript">
 <!--
 
-document.observe('dom:loaded', function() {
-  Event.observe($('configFormId'),'change',getConfigDetails);
+jQuery(document).ready( function() {
+  jQuery('#configFormId').change(getConfigDetails);
 });
 
-function getConfigDetails(event) {
-       var element = Event.element(event);
-       if (element.identify().startsWith('comments_')) {
+function getConfigDetails() {
+       var element = jQuery(this);
+       if (element.attr("id").is("[id^='comments_']")) {
          //  don't update the price for comment change
          return;
        }
 
-       new Ajax.Request('/ordermgr/control/getConfigDetailsEvent',{parameters: $('configFormId').serialize(),  requestHeaders: {Accept: 'application/json'},
-
-           onSuccess: function(transport){
-                var data = transport.responseText.evalJSON(true);
-
-                if (data._ERROR_MESSAGE_LIST_ != undefined) {
-                   //console.log(data._ERROR_MESSAGE_LIST_);
-                   //alert(data._ERROR_MESSAGE_LIST_);
-                }else if (data._ERROR_MESSAGE_ != undefined) {
-                   //console.log(data._ERROR_MESSAGE_);
-                   //alert(data._ERROR_MESSAGE_);
-                }else {
-                  //console.log(data.totalPrice);
-                  //console.log(data.configId);
+       jQuery.ajax({
+           url: '/ordermgr/control/getConfigDetailsEvent',
+           data: jQuery('configFormId').serialize(),
+           type: "POST",
+           success: function(data) {
                   var totalPrice = data.totalPrice;
                   var configId = data.configId;
                   document.getElementById('totalPrice').innerHTML = totalPrice;
                   document.addToShoppingList.configId.value = configId;
-                  event.stop();
                 }
-            },
+           },
+           error: function(data) {
 
-           onFailure: function(transport) {
-             var data = transport.responseText.evalJSON(true);
-             //console.log('Failure');
            }
-        });
+       });
 }
 
 -->
@@ -200,7 +188,7 @@ function getConfigDetails(event) {
     </tr>
   </#if>
 
-  <tr><td colspan="2"><hr class='sepbar'></td></tr>
+  <tr><td colspan="2"><hr class='sepbar'/></td></tr>
 
   <#-- Product image/name/price -->
   <tr>
@@ -211,7 +199,7 @@ function getConfigDetails(event) {
         <#assign productLargeImageUrl = firstLargeImage>
       </#if>
       <#if productLargeImageUrl?string?has_content>
-        <a href="javascript:popupDetail();"><img src='<@ofbizContentUrl>${contentPathPrefix?if_exists}${productLargeImageUrl?if_exists}</@ofbizContentUrl>' name='mainImage' vspace='5' hspace='5' border='0' width='200' align='left'></a>
+        <a href="javascript:popupDetail();"><img src='<@ofbizContentUrl>${contentPathPrefix?if_exists}${productLargeImageUrl?if_exists}</@ofbizContentUrl>' name='mainImage' vspace='5' hspace='5' class='cssImgLarge' align='left' alt="" /></a>
       </#if>
     </td>
     <td align="right" valign="top">
@@ -308,17 +296,17 @@ function getConfigDetails(event) {
                 </select>
               </div>
             </#list>
-            <input type='hidden' name="product_id" value='${product.productId}'>
-            <input type='hidden' name="add_product_id" value='NULL'>
+            <input type='hidden' name="product_id" value='${product.productId}' />
+            <input type='hidden' name="add_product_id" value='NULL' />
           <#else>
-            <input type='hidden' name="product_id" value='${product.productId}'>
-            <input type='hidden' name="add_product_id" value='NULL'>
+            <input type='hidden' name="product_id" value='${product.productId}' />
+            <input type='hidden' name="add_product_id" value='NULL' />
             <div class='tabletext'><b>${uiLabelMap.ProductItemOutOfStock}.</b></div>
             <#assign inStock = false>
           </#if>
         <#else>
-          <input type='hidden' name="product_id" value='${product.productId}'>
-          <input type='hidden' name="add_product_id" value='${product.productId}'>
+          <input type='hidden' name="product_id" value='${product.productId}' />
+          <input type='hidden' name="add_product_id" value='${product.productId}' />
           <#if productNotAvailable?exists>
             <#assign isStoreInventoryRequired = Static["org.ofbiz.product.store.ProductStoreWorker"].isStoreInventoryRequired(request, product)>
             <#if isStoreInventoryRequired>
@@ -349,28 +337,28 @@ function getConfigDetails(event) {
             </#if>
             <div id="add_amount" class="${hiddenStyle}">
               <span style="white-space: nowrap;"><b>Amount:</b></span>&nbsp;
-              <input type="text" size="5" name="add_amount" value="">
+              <input type="text" size="5" name="add_amount" value="" />
             </div>
             <#if !configwrapper.isCompleted()>
               <div>[${uiLabelMap.EcommerceProductNotConfigured}]&nbsp;
-              <input type="text" size="5" name="quantity" value="0" disabled></div>
+              <input type="text" size="5" name="quantity" value="0" disabled="disabled" /></div>
             <#else>
               <a href="javascript:addItem()" class="buttontext"><span style="white-space: nowrap;">${uiLabelMap.OrderAddToCart}</span></a>&nbsp;
-              <input type="text" size="5" name="quantity" value="1" >
+              <input type="text" size="5" name="quantity" value="1" />
             </#if>
           </#if>
           <#if requestParameters.category_id?exists>
-            <input type='hidden' name='category_id' value='${requestParameters.category_id}'>
+            <input type='hidden' name='category_id' value='${requestParameters.category_id}' />
           </#if>
         </#if>
       </form>
     <div>
       <#if sessionAttributes.userLogin?has_content && sessionAttributes.userLogin.userLoginId != "anonymous">
-        <hr/>
+        <hr />
         <form name="addToShoppingList" method="post" action="<@ofbizUrl>addItemToShoppingList<#if requestAttributes._CURRENT_VIEW_?exists>/${requestAttributes._CURRENT_VIEW_}</#if></@ofbizUrl>">
-          <input type="hidden" name="productId" value="${product.productId}">
-          <input type="hidden" name="product_id" value="${product.productId}">
-          <input type="hidden" name="configId" value="${configId?if_exists}">
+          <input type="hidden" name="productId" value="${product.productId}" />
+          <input type="hidden" name="product_id" value="${product.productId}" />
+          <input type="hidden" name="configId" value="${configId?if_exists}" />
           <select name="shoppingListId">
             <#if shoppingLists?has_content>
               <#list shoppingLists as shoppingList>
@@ -381,10 +369,10 @@ function getConfigDetails(event) {
             <option value="">${uiLabelMap.OrderNewShoppingList}</option>
           </select>
           &nbsp;&nbsp;
-          <input type="text" size="5" name="quantity" value="1">
+          <input type="text" size="5" name="quantity" value="1" />
           <a href="javascript:document.addToShoppingList.submit();" class="buttontext">[${uiLabelMap.OrderAddToShoppingList}]</a>
         </form>
-      <#else> <br/>
+      <#else> <br />
         ${uiLabelMap.OrderYouMust} <a href="<@ofbizUrl>checkLogin/showcart</@ofbizUrl>" class="buttontext">${uiLabelMap.CommonBeLogged}</a>
         ${uiLabelMap.OrderToAddSelectedItemsToShoppingList}.&nbsp;
       </#if>
@@ -414,8 +402,8 @@ function getConfigDetails(event) {
                   <#assign imageUrl = "/images/defaultImage.jpg">
                 </#if>
                 <td align="center" valign="bottom">
-                  <a href="javascript:getList('FT${featureOrderFirst}','${indexer}',1);"><img src="<@ofbizContentUrl>${contentPathPrefix?if_exists}${imageUrl}</@ofbizContentUrl>" border="0" width="60" height="60"></a>
-                  <br/>
+                  <a href="javascript:getList('FT${featureOrderFirst}','${indexer}',1);"><img src="<@ofbizContentUrl>${contentPathPrefix?if_exists}${imageUrl}</@ofbizContentUrl>" class='cssImgStandard' alt="" /></a>
+                  <br />
                   <a href="javascript:getList('FT${featureOrderFirst}','${indexer}',1);" class="buttontext">${key}</a>
                 </td>
               </#if>
@@ -430,7 +418,7 @@ function getConfigDetails(event) {
     </td>
   </tr>
 
-  <tr><td colspan="2"><hr class='sepbar'></td></tr>
+  <tr><td colspan="2"><hr class='sepbar'/></td></tr>
 
   <#-- Long description of product -->
   <tr>
@@ -439,18 +427,18 @@ function getConfigDetails(event) {
     </td>
   </tr>
 
-  <tr><td colspan="2"><hr class='sepbar'></td></tr>
+  <tr><td colspan="2"><hr class='sepbar'/></td></tr>
 
   <#-- Any attributes/etc may go here -->
   <#-- Product Configurator -->
   <tr>
     <td colspan="2">
       <form name="configform" id="configFormId" method="post" action="<@ofbizUrl>product<#if requestAttributes._CURRENT_VIEW_?exists>/${requestAttributes._CURRENT_VIEW_}</#if></@ofbizUrl>">
-        <input type='hidden' name='add_product_id' value='${product.productId}'>
-        <input type='hidden' name='add_category_id' value=''>
-        <input type='hidden' name='quantity' value='1'>
+        <input type='hidden' name='add_product_id' value='${product.productId}' />
+        <input type='hidden' name='add_category_id' value='' />
+        <input type='hidden' name='quantity' value='1' />
 
-        <input type='hidden' name='product_id' value='${product.productId}'>
+        <input type='hidden' name='product_id' value='${product.productId}' />
         <table >
           <tr>
             <td>
@@ -459,7 +447,7 @@ function getConfigDetails(event) {
                 </div>
             </td>
           </tr>
-          <tr><td><hr/></td></tr>
+          <tr><td><hr /></td></tr>
           <#assign counter = 0>
           <#assign questions = configwrapper.questions>
           <#list questions as question>
@@ -471,11 +459,11 @@ function getConfigDetails(event) {
                 <div>${question.description?if_exists}</div>
                 <#assign instructions = question.content.get("INSTRUCTIONS")?if_exists>
                 <#if instructions?has_content>
-                  <a href="javascript:alert('${instructions}');" class="buttontext">Instructions</a>
+                  <a href="javascript:showErrorAlert("${uiLabelMap.CommonErrorMessage2}","${instructions}");" class="buttontext">Instructions</a>
                 </#if>
                 <#assign image = question.content.get("IMAGE_URL")?if_exists>
                 <#if image?has_content>
-                  <img src='<@ofbizContentUrl>${contentPathPrefix?if_exists}${image?if_exists}</@ofbizContentUrl>' vspace='5' hspace='5' border='0' width='200' align='left'>
+                  <img src='<@ofbizContentUrl>${contentPathPrefix?if_exists}${image?if_exists}</@ofbizContentUrl>' vspace='5' hspace='5' class='cssImgSmall' align='left' alt="" />
                 </#if>
               <#else>
                 <div><a href='#${question.getConfigItem().getString("configItemId")}' class="buttontext">Details</a></div>
@@ -490,7 +478,7 @@ function getConfigDetails(event) {
               <#assign optionCounter = 0>
               <#list options as option>
                 <div>${option.description} <#if !option.isAvailable()> (*)</#if></div>
-                <div>${uiLabelMap.CommonComments}: <input type='text' name='comments_${counter}_${optionCounter}' id='comments_${counter}_${optionCounter}' value='${option.comments?if_exists}' ></div>
+                <div>${uiLabelMap.CommonComments}: <input type='text' name='comments_${counter}_${optionCounter}' id='comments_${counter}_${optionCounter}' value='${option.comments?if_exists}' /></div>
                 <#assign optionCounter = optionCounter + 1>
               </#list>
             <#else>
@@ -506,7 +494,7 @@ function getConfigDetails(event) {
                 <#if renderSingleChoiceWithRadioButtons?exists && "Y" == renderSingleChoiceWithRadioButtons>
                 <#-- This is the radio button implementation -->
                 <#if !question.isMandatory()>
-                  <div><input type="radio" name='${counter}' value='<#if !question.isSelected()>checked</#if>'> No option</div>
+                  <div><input type="radio" name='${counter}' value='<#if !question.isSelected()>checked="checked"</#if>' /> No option</div>
                 </#if>
                 <#assign optionComment = "">
                 <#assign optionCounter = 0>
@@ -523,7 +511,7 @@ function getConfigDetails(event) {
                     <#-- Render virtual compoennts -->
                     <#if option.hasVirtualComponent()>
                       <div >
-                        <input type='radio' name='${counter}' id="${counter}_${optionCounter}" value='${optionCounter}' onclick="javascript:checkOptionVariants('${counter}_${optionCounter}');">
+                        <input type='radio' name='${counter}' id="${counter}_${optionCounter}" value='${optionCounter}' onclick="javascript:checkOptionVariants('${counter}_${optionCounter}');" />
                         ${option.description} <#if !option.isAvailable()> (*)</#if>
                         <#assign components = option.getComponents()>
                         <#list components as component>
@@ -538,7 +526,7 @@ function getConfigDetails(event) {
                       </div>
                     <#else>
                       <div>
-                        <input type="radio" name='${counter}' value='${optionCounter}' <#if option.isSelected() || (!question.isSelected() && optionCounter == 0 && question.isMandatory())>checked</#if>>
+                        <input type="radio" name='${counter}' value='${optionCounter}' <#if option.isSelected() || (!question.isSelected() && optionCounter == 0 && question.isMandatory())>checked="checked"</#if> />
                         ${option.description}&nbsp;
                         <#if (shownPrice > 0)>+<@ofbizCurrency amount=shownPrice isoCode=price.currencyUsed/>&nbsp;</#if>
                         <#if (shownPrice < 0)>-<@ofbizCurrency amount=(-1*shownPrice) isoCode=price.currencyUsed/>&nbsp;</#if>
@@ -567,7 +555,7 @@ function getConfigDetails(event) {
                     <#assign optionComment = option.getComments()>
                     <#assign optionCounter = optionCounter + 1>
                   </#if>
-                  <option value='${optionCounter}' <#if option.isSelected()>selected</#if>>
+                  <option value='${optionCounter}' <#if option.isSelected()>selected="selected"</#if>>
                     ${option.description}&nbsp;
                     <#if (shownPrice > 0)>+<@ofbizCurrency amount=shownPrice isoCode=price.currencyUsed/>&nbsp;</#if>
                     <#if (shownPrice < 0)>-<@ofbizCurrency amount=(-1*shownPrice) isoCode=price.currencyUsed/>&nbsp;</#if>
@@ -587,7 +575,7 @@ function getConfigDetails(event) {
                     <#-- Render virtual compoennts -->
                     <#if option.hasVirtualComponent()>
                       <div >
-                        <input type='CHECKBOX' name='${counter}' id="${counter}_${optionCounter}" value='${optionCounter}' onclick="javascript:checkOptionVariants('${counter}_${optionCounter}');">
+                        <input type='CHECKBOX' name='${counter}' id="${counter}_${optionCounter}" value='${optionCounter}' onclick="javascript:checkOptionVariants('${counter}_${optionCounter}');" />
                         ${option.description} <#if !option.isAvailable()> (*)</#if>
                         <#assign components = option.getComponents()>
                         <#list components as component>
@@ -602,11 +590,11 @@ function getConfigDetails(event) {
                       </div>
                     <#else>
                     <div>
-                      <input type='CHECKBOX' name='${counter}' value='${optionCounter}' <#if option.isSelected()>checked</#if>>
+                      <input type='CHECKBOX' name='${counter}' value='${optionCounter}' <#if option.isSelected()>checked="checked"</#if> />
                       ${option.description} +<@ofbizCurrency amount=option.price isoCode=price.currencyUsed/><#if !option.isAvailable()> (*)</#if>
                     </div>
                     </#if>
-                    <div>${uiLabelMap.CommonComments}: <input type="text" name='comments_${counter}_${optionCounter}' id='comments_${counter}_${optionCounter}' value='${option.comments?if_exists}'></div>
+                    <div>${uiLabelMap.CommonComments}: <input type="text" name='comments_${counter}_${optionCounter}' id='comments_${counter}_${optionCounter}' value='${option.comments?if_exists}' /></div>
                   <#assign optionCounter = optionCounter + 1>
                 </#list>
               </#if>
@@ -614,7 +602,7 @@ function getConfigDetails(event) {
             </td>
           </tr>
           <#if question_has_next>
-            <tr><td><hr/></td></tr>
+            <tr><td><hr /></td></tr>
           </#if>
           <#assign counter = counter + 1>
         </#list>
@@ -622,7 +610,7 @@ function getConfigDetails(event) {
       </form>
     </td>
   </tr>
-  <tr><td colspan="2"><hr class='sepbar'></td></tr>
+  <tr><td colspan="2"><hr class='sepbar'/></td></tr>
 
 <#-- Upgrades/Up-Sell/Cross-Sell -->
   <#macro associated assocProducts beforeName showName afterName formNamePrefix targetRequestName>
@@ -633,7 +621,7 @@ function getConfigDetails(event) {
   <#if assocProducts?has_content>
     <tr><td>&nbsp;</td></tr>
     <tr><td colspan="2"><h2>${beforeName?if_exists}<#if showName == "Y">${productContentWrapper.get("PRODUCT_NAME")?if_exists}</#if>${afterName?if_exists}</h2></td></tr>
-    <tr><td><hr/></td></tr>
+    <tr><td><hr /></td></tr>
     <#list assocProducts as productAssoc>
       <tr><td>
         <div>
@@ -655,7 +643,7 @@ function getConfigDetails(event) {
         </td>
       </tr>
       <#local listIndex = listIndex + 1>
-      <tr><td><hr/></td></tr>
+      <tr><td><hr /></td></tr>
     </#list>
     ${setRequestAttribute("optProductId", "")}
     ${setRequestAttribute("formNamePrefix", "")}
@@ -680,7 +668,7 @@ ${setRequestAttribute("productValue", productValue)}
 <#-- special cross/up-sell area using commonFeatureResultIds (from common feature product search) -->
 <#if commonFeatureResultIds?has_content>
   <h2>Similar Products That Might Interest You...</h2>
-  <hr/>
+  <hr />
 
   <#list commonFeatureResultIds as commonFeatureResultId>
     <div>
@@ -691,7 +679,7 @@ ${setRequestAttribute("productValue", productValue)}
       ${screens.render(productsummaryScreen)}
     </div>
     <#if commonFeatureResultId_has_next>
-      <hr/>
+      <hr />
     </#if>
   </#list>
 </#if>

@@ -36,6 +36,8 @@ public class ContactHelper {
 
     public static final String module = ContactHelper.class.getName();
 
+    private ContactHelper() {}
+
     public static Collection<GenericValue> getContactMech(GenericValue party, boolean includeOld) {
         return getContactMech(party, null, null, includeOld);
     }
@@ -54,24 +56,24 @@ public class ContactHelper {
             List<GenericValue> partyContactMechList;
 
             if (contactMechPurposeTypeId == null) {
-                partyContactMechList = party.getRelated("PartyContactMech");
+                partyContactMechList = party.getRelated("PartyContactMech", null, null, false);
             } else {
                 List<GenericValue> list;
 
-                list = party.getRelatedByAnd("PartyContactMechPurpose", UtilMisc.toMap("contactMechPurposeTypeId", contactMechPurposeTypeId));
+                list = party.getRelated("PartyContactMechPurpose", UtilMisc.toMap("contactMechPurposeTypeId", contactMechPurposeTypeId), null, false);
                 if (!includeOld) {
                     list = EntityUtil.filterByDate(list, true);
                 }
-                partyContactMechList = EntityUtil.getRelated("PartyContactMech", list);
+                partyContactMechList = EntityUtil.getRelated("PartyContactMech", null, list, false);
             }
             if (!includeOld) {
                 partyContactMechList = EntityUtil.filterByDate(partyContactMechList, true);
             }
             partyContactMechList = EntityUtil.orderBy(partyContactMechList, UtilMisc.toList("fromDate DESC"));
             if (contactMechTypeId == null) {
-                return EntityUtil.getRelated("ContactMech", partyContactMechList);
+                return EntityUtil.getRelated("ContactMech", null, partyContactMechList, false);
             } else {
-                return EntityUtil.getRelatedByAnd("ContactMech", UtilMisc.toMap("contactMechTypeId", contactMechTypeId), partyContactMechList);
+                return EntityUtil.getRelated("ContactMech", UtilMisc.toMap("contactMechTypeId", contactMechTypeId), partyContactMechList, false);
             }
         } catch (GenericEntityException gee) {
             Debug.logWarning(gee, module);

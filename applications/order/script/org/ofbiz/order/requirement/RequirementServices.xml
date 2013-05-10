@@ -19,18 +19,20 @@ under the License.
 -->
 
 <simple-methods xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/simple-methods.xsd">
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/simple-methods-v2.xsd">
     <simple-method method-name="createRequirement" short-description="Create a new requirement">
         <make-value value-field="newEntity" entity-name="Requirement"/>
         <sequenced-id sequence-name="Requirement" field="requirementId"/>
-        <to-string field="requirementId"/>
-        <set from-field="requirementId" field="newEntity.requirementId"/>
+        <set field="newEntity.requirementId" from-field="requirementId"/>
         <set-nonpk-fields map="parameters" value-field="newEntity"/>
         <if-empty field="parameters.statusId">
             <set value="REQ_CREATED" field="newEntity.statusId"/>
         </if-empty>
         <now-timestamp field="nowTimestamp"/>
-        <set from-field="nowTimestamp" field="newEntity.createdDate"/>
+        <set field="newEntity.createdDate" from-field="nowTimestamp"/>
+        <set field="newEntity.lastModifiedDate" from-field="nowTimestamp"/>
+        <set field="newEntity.createdByUserLogin" from-field="userLogin.userLoginId"/>
+        <set field="newEntity.lastModifiedByUserLogin" from-field="userLogin.userLoginId"/>
         <create-value value-field="newEntity"/>
         <field-to-result field="requirementId" result-name="requirementId"/>
     </simple-method>
@@ -39,9 +41,11 @@ under the License.
         <make-value value-field="lookupPKMap" entity-name="Requirement"/>
         <set-pk-fields map="parameters" value-field="lookupPKMap"/>
         <find-by-primary-key entity-name="Requirement" map="lookupPKMap" value-field="lookedUpValue"/>
-        <clone-value value-field="lookedUpValue" new-value-field="savedValue"/>
         <field-to-result field="lookedUpValue.statusId" result-name="oldStatusId"/>
         <set-nonpk-fields map="parameters" value-field="lookedUpValue"/>
+        <now-timestamp field="nowTimestamp"/>
+        <set field="newEntity.lastModifiedDate" from-field="nowTimestamp"/>
+        <set field="newEntity.lastModifiedByUserLogin" from-field="userLogin.userLoginId"/>
         <store-value value-field="lookedUpValue"/>
     </simple-method>
 
@@ -95,7 +99,7 @@ under the License.
     <!-- create a new RequirementRole -->
     <simple-method method-name="createRequirementRole" short-description="Create a RequirementRole">
         <check-permission permission="ORDERMGR" action="_CREATE">
-            <fail-message message="Security Error: to run createRequirementRole you must have the ORDERMGR_CREATE or ORDERMGR_ADMIN permission"/>
+            <fail-property resource="OrderErrorUiLabels" property="OrderErrorCreatePermissionError"/>
         </check-permission>
         <check-errors/>
         <set from-field="parameters.partyId" field="lookupPKMap.partyId"/>
@@ -120,8 +124,7 @@ under the License.
     <!-- update an existing RequirementRole -->
     <simple-method method-name="updateRequirementRole" short-description="Update an existing RequirementRole">
         <check-permission permission="ORDERMGR" action="_CREATE">
-            <fail-message message="Security Error: to run updateRequirementRole you must have the ORDERMGR_CREATE or ORDERMGR_ADMIN permission"/>
-        </check-permission>
+            <fail-property resource="OrderErrorUiLabels" property="OrderErrorCreatePermissionError"/></check-permission>
         <check-errors/>
         <entity-one entity-name="RequirementRole" value-field="requirementRole" auto-field-map="true"/>
         <check-errors/>
@@ -133,7 +136,7 @@ under the License.
     <!-- remove an existing RequirementRole -->
     <simple-method method-name="removeRequirementRole" short-description="Remove an existing RequirementRole">
         <check-permission permission="ORDERMGR" action="_CREATE">
-            <fail-message message="Security Error: to run removeRequirementRole you must have the ORDERMGR_CREATE or ORDERMGR_ADMIN permission"/>
+            <fail-property resource="OrderErrorUiLabels" property="OrderErrorCreatePermissionError"/>
         </check-permission>
         <check-errors/>
         <entity-one entity-name="RequirementRole" value-field="requirementRole" auto-field-map="true"/>
@@ -144,7 +147,7 @@ under the License.
 
     <simple-method method-name="createTransferFromRequirement" short-description="Create the inventory transfers required to fulfill the requirement.">
         <check-permission permission="ORDERMGR" action="_CREATE">
-            <fail-message message="Security Error: to run createTransferFromRequirement you must have the ORDERMGR_CREATE or ORDERMGR_ADMIN permission"/>
+            <fail-property resource="OrderErrorUiLabels" property="OrderErrorCreatePermissionError"/>
         </check-permission>
         <check-errors/>
         <entity-one entity-name="Requirement" value-field="requirement" auto-field-map="true"/>

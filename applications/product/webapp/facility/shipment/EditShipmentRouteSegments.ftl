@@ -35,7 +35,7 @@ under the License.
                 <div>${uiLabelMap.ProductOriginDestinationPhoneId}</div>
                 <div>${uiLabelMap.ProductShipmentThirdPartyAccountNumber}</div>
                 <div>${uiLabelMap.ProductShipmentThirdPartyPostalCode}</div>
-                <div>${uiLabelMap.ProductShipmentThirdPartyCountryCode}</div>
+                <div>${uiLabelMap.ProductShipmentThirdCommonCountryCode}</div>
             </td>
             <td valign="top">
                 <div>${uiLabelMap.ProductShipmentFedexHomeDeliveryTypeDate}</div>
@@ -85,11 +85,11 @@ under the License.
             <td valign="top">
                 <div>
                     ${shipmentRouteSegment.shipmentRouteSegmentId}
-                    <br/>
+                    <br />
                     <a href="javascript:document.updateShipmentRouteSegmentForm${shipmentRouteSegmentData_index}.submit();" class="buttontext">${uiLabelMap.CommonUpdate}</a>
-                    <br/>
+                    <br />
                     <a href="javascript:document.duplicateShipmentRouteSegment_${shipmentRouteSegmentData_index}.submit();" class="buttontext">${uiLabelMap.CommonDuplicate}</a>
-                    <br/>
+                    <br />
                     <a href="javascript:document.deleteShipmentRouteSegment_${shipmentRouteSegmentData_index}.submit();" class="buttontext">${uiLabelMap.CommonDelete}</a>
                 </div>
             </td>
@@ -117,7 +117,7 @@ under the License.
                             <option value="${shipmentMethodTypeOption.shipmentMethodTypeId}">${shipmentMethodTypeOption.get("description",locale)}</option>
                         </#list>
                     </select>
-                    <br/>
+                    <br />
                     <select name="originFacilityId">
                         <#if originFacility?has_content>
                             <option value="${originFacility.facilityId}">${originFacility.facilityName} [${originFacility.facilityId}]</option>
@@ -140,7 +140,7 @@ under the License.
                             <option value="${facility.facilityId}">${facility.facilityName} [${facility.facilityId}]</option>
                         </#list>
                     </select>
-                    <br/>
+                    <br />
                     <div>
                         <input type="text" size="15" name="originContactMechId" value="${shipmentRouteSegment.originContactMechId?if_exists}"/>
                         <#if originPostalAddress?has_content><span class="tooltip">${uiLabelMap.CommonTo}: ${originPostalAddress.toName?if_exists}, ${uiLabelMap.CommonAttn}: ${originPostalAddress.attnName?if_exists}, ${originPostalAddress.address1?if_exists}, ${originPostalAddress.address2?if_exists}, ${originPostalAddress.city?if_exists}, ${originPostalAddress.stateProvinceGeoId?if_exists}, ${originPostalAddress.postalCode?if_exists}, ${originPostalAddress.countryGeoId?if_exists}</span></#if>
@@ -173,16 +173,16 @@ under the License.
                     <#if "UPS" == shipmentRouteSegment.carrierPartyId?if_exists>
                         <#if !shipmentRouteSegment.carrierServiceStatusId?has_content || "SHRSCS_NOT_STARTED" == shipmentRouteSegment.carrierServiceStatusId?if_exists>
                             <a href="javascript:document.upsShipmentConfirm_${shipmentRouteSegmentData_index}.submit()" class="buttontext">${uiLabelMap.ProductConfirmShipmentUps}</a>
-                            <br/>
+                            <br />
                             ${uiLabelMap.ProductShipmentUpsResidential}:
-                            <input type="checkbox" name="homeDeliveryType" value="Y" ${(shipmentRouteSegment.homeDeliveryType?has_content)?string("checked=\"checked\"","")}>
+                            <input type="checkbox" name="homeDeliveryType" value="Y" ${(shipmentRouteSegment.homeDeliveryType?has_content)?string("checked=\"checked\"","")} />
                         <#elseif "SHRSCS_CONFIRMED" == shipmentRouteSegment.carrierServiceStatusId?if_exists>
-                            <a href="javascript:document.upsShipmentAccept_${shipmentRouteSegmentData_index}.submit()" class="buttontext">${uiLabelMap.ProductAcceptUpsShipmentConfirmation}</a> 
-                            <br/>
+                            <a href="javascript:document.upsShipmentAccept_${shipmentRouteSegmentData_index}.submit()" class="buttontext">${uiLabelMap.ProductAcceptUpsShipmentConfirmation}</a>
+                            <br />
                             <a href="javascript:document.upsVoidShipment_${shipmentRouteSegmentData_index}.submit()" class="buttontext">${uiLabelMap.ProductVoidUpsShipmentConfirmation}</a>
                         <#elseif "SHRSCS_ACCEPTED" == shipmentRouteSegment.carrierServiceStatusId?if_exists>
                             <a href="javascript:document.upsTrackShipment_${shipmentRouteSegmentData_index}.submit()" class="buttontext">${uiLabelMap.ProductTrackUpsShipment}</a>
-                            <br/>
+                            <br />
                             <a href="javascript:document.upsVoidShipment_${shipmentRouteSegmentData_index}.submit()" class="buttontext">${uiLabelMap.ProductVoidUpsShipment}</a>
                         </#if>
                     </#if>
@@ -194,7 +194,7 @@ under the License.
                     <#if "FEDEX" == shipmentRouteSegment.carrierPartyId?if_exists>
                         <#if !shipmentRouteSegment.carrierServiceStatusId?has_content || "SHRSCS_NOT_STARTED" == shipmentRouteSegment.carrierServiceStatusId?if_exists>
                             <a href="javascript:document.fedexShipmentConfirm_${shipmentRouteSegmentData_index}.submit()" class="buttontext">${uiLabelMap.ProductConfirmShipmentFedex}</a>
-                            <br/>
+                            <br />
                             <#if shipmentMethodType?exists && shipmentMethodType.shipmentMethodTypeId=="GROUND_HOME">
                                 <select name="homeDeliveryType">
                                     <option value="">${uiLabelMap.ProductShipmentNone}</option>
@@ -202,7 +202,7 @@ under the License.
                                     <option ${(shipmentRouteSegment.homeDeliveryType?default("")=="EVENING")?string("selected=\"selected\"","")} value="EVENING">${uiLabelMap.ProductShipmentFedexHomeEvening}</option>
                                     <option ${(shipmentRouteSegment.homeDeliveryType?default("")=="APPOINTMENT")?string("selected=\"selected\"","")} value="APPOINTMENT">${uiLabelMap.ProductShipmentFedexHomeAppointment}</option>
                                 </select>
-                                <input type="text" size="25" name="homeDeliveryDate" value="${(shipmentRouteSegment.homeDeliveryDate.toString())?if_exists}"/><a href="javascript:call_cal(document.updateShipmentRouteSegmentForm${shipmentRouteSegmentData_index}.homeDeliveryDate, '${(shipmentRouteSegment.homeDeliveryDate.toString())?default(nowTimestampString)}');"><img src='<@ofbizContentUrl>/images/cal.gif</@ofbizContentUrl>' width='16' height='16' border='0' alt='Calendar'></a>
+                                <@htmlTemplate.renderDateTimeField name="homeDeliveryDate" event="" action="" className="" alert="" title="Format: yyyy-MM-dd HH:mm:ss.SSS" value="${(shipmentRouteSegment.homeDeliveryDate.toString())?if_exists}" size="25" maxlength="30" id="homeDeliveryDate1" dateType="date" shortDateInput=false timeDropdownParamName="" defaultDateTimeString="" localizedIconTitle="" timeDropdown="" timeHourName="" classString="" hour1="" hour2="" timeMinutesName="" minutes="" isTwelveHour="" ampmName="" amSelected="" pmSelected="" compositeType="" formName=""/>
                             </#if>
                         <#else>
                             <#-- Todo: implement closeout with Fedex -->
@@ -212,10 +212,10 @@ under the License.
                             <#if shipmentRouteSegment.homeDeliveryDate?exists>
                                 &nbsp;(${shipmentRouteSegment.homeDeliveryDate?string("yyyy-MM-dd")})
                             </#if>
-                            <br/>
+                            <br />
                         </#if>
                     </#if>
-                    <br/>
+                    <br />
                     <select name="carrierServiceStatusId">
                         <#if carrierServiceStatusItem?has_content>
                             <option value="${carrierServiceStatusItem.statusId}">${carrierServiceStatusItem.description}</option>
@@ -227,14 +227,14 @@ under the License.
                             <option value="${carrierServiceStatusValidChangeToDetail.statusIdTo}">${carrierServiceStatusValidChangeToDetail.transitionName} [${carrierServiceStatusValidChangeToDetail.description}]</option>
                         </#list>
                     </select>
-                    <br/>
+                    <br />
                     <input type="text" size="24" name="trackingIdNumber" value="${shipmentRouteSegment.trackingIdNumber?if_exists}"/>
-                    <br/>
-                    <input type="text" size="25" name="estimatedStartDate" value="${(shipmentRouteSegment.estimatedStartDate.toString())?if_exists}"/><a href="javascript:call_cal(document.updateShipmentRouteSegmentForm${shipmentRouteSegmentData_index}.estimatedStartDate, '${(shipmentRouteSegment.estimatedStartDate.toString())?default(nowTimestampString)}');"><img src='<@ofbizContentUrl>/images/cal.gif</@ofbizContentUrl>' width='16' height='16' border='0' alt='Calendar'></a>
-                    <input type="text" size="25" name="estimatedArrivalDate" value="${(shipmentRouteSegment.estimatedArrivalDate.toString())?if_exists}"/><a href="javascript:call_cal(document.updateShipmentRouteSegmentForm${shipmentRouteSegmentData_index}.estimatedArrivalDate, '${(shipmentRouteSegment.estimatedArrivalDate.toString())?default(nowTimestampString)}');"><img src='<@ofbizContentUrl>/images/cal.gif</@ofbizContentUrl>' width='16' height='16' border='0' alt='Calendar'></a>
-                    <br/>
-                    <input type="text" size="25" name="actualStartDate" value="${(shipmentRouteSegment.actualStartDate.toString())?if_exists}"/><a href="javascript:call_cal(document.updateShipmentRouteSegmentForm${shipmentRouteSegmentData_index}.actualStartDate, '${(shipmentRouteSegment.actualStartDate.toString())?default(nowTimestampString)}');"><img src='<@ofbizContentUrl>/images/cal.gif</@ofbizContentUrl>' width='16' height='16' border='0' alt='Calendar'></a>
-                    <input type="text" size="25" name="actualArrivalDate" value="${(shipmentRouteSegment.actualArrivalDate.toString())?if_exists}"/><a href="javascript:call_cal(document.updateShipmentRouteSegmentForm${shipmentRouteSegmentData_index}.actualArrivalDate, '${(shipmentRouteSegment.actualArrivalDate.toString())?default(nowTimestampString)}');"><img src='<@ofbizContentUrl>/images/cal.gif</@ofbizContentUrl>' width='16' height='16' border='0' alt='Calendar'></a>
+                    <br />
+                    <@htmlTemplate.renderDateTimeField name="estimatedStartDate" event="" action="" className="" alert="" title="Format: yyyy-MM-dd HH:mm:ss.SSS" value="${(shipmentRouteSegment.estimatedStartDate.toString())?if_exists}" size="25" maxlength="30" id="estimatedStartDate1" dateType="date" shortDateInput=false timeDropdownParamName="" defaultDateTimeString="" localizedIconTitle="" timeDropdown="" timeHourName="" classString="" hour1="" hour2="" timeMinutesName="" minutes="" isTwelveHour="" ampmName="" amSelected="" pmSelected="" compositeType="" formName=""/>
+                    <@htmlTemplate.renderDateTimeField name="estimatedArrivalDate" event="" action="" className="" alert="" title="Format: yyyy-MM-dd HH:mm:ss.SSS" value="${(shipmentRouteSegment.estimatedArrivalDate.toString())?if_exists}" size="25" maxlength="30" id="estimatedArrivalDate1" dateType="date" shortDateInput=false timeDropdownParamName="" defaultDateTimeString="" localizedIconTitle="" timeDropdown="" timeHourName="" classString="" hour1="" hour2="" timeMinutesName="" minutes="" isTwelveHour="" ampmName="" amSelected="" pmSelected="" compositeType="" formName=""/>
+                    <br />
+                    <@htmlTemplate.renderDateTimeField name="actualStartDate" event="" action="" className="" alert="" title="Format: yyyy-MM-dd HH:mm:ss.SSS" value="${(shipmentRouteSegment.actualStartDate.toString())?if_exists}" size="25" maxlength="30" id="actualStartDate2" dateType="date" shortDateInput=false timeDropdownParamName="" defaultDateTimeString="" localizedIconTitle="" timeDropdown="" timeHourName="" classString="" hour1="" hour2="" timeMinutesName="" minutes="" isTwelveHour="" ampmName="" amSelected="" pmSelected="" compositeType="" formName=""/>
+                    <@htmlTemplate.renderDateTimeField name="actualArrivalDate" event="" action="" className="" alert="" title="Format: yyyy-MM-dd HH:mm:ss.SSS" value="${(shipmentRouteSegment.actualArrivalDate.toString())?if_exists}" size="25" maxlength="30" id="actualArrivalDate2" dateType="date" shortDateInput=false timeDropdownParamName="" defaultDateTimeString="" localizedIconTitle="" timeDropdown="" timeHourName="" classString="" hour1="" hour2="" timeMinutesName="" minutes="" isTwelveHour="" ampmName="" amSelected="" pmSelected="" compositeType="" formName=""/>
                 </div>
             </td>
             <td valign="top">
@@ -250,7 +250,7 @@ under the License.
                         <option value="${weightUom.uomId}">${weightUom.get("description",locale)} [${weightUom.abbreviation}]</option>
                     </#list>
                 </select>
-                <br/>
+                <br />
                 <select name="currencyUomId">
                     <#if currencyUom?has_content>
                         <option value="${currencyUom.uomId}">${currencyUom.get("description",locale)} [${currencyUom.uomId}]</option>
@@ -262,13 +262,13 @@ under the License.
                         <option value="${altCurrencyUom.uomId}">${altCurrencyUom.get("description",locale)} [${altCurrencyUom.uomId}]</option>
                     </#list>
                 </select>
-                <br/>
+                <br />
                 <input type="text" size="8" name="actualTransportCost" value="${shipmentRouteSegment.actualTransportCost?if_exists}"/>
-                <br/>
+                <br />
                 <input type="text" size="8" name="actualServiceCost" value="${shipmentRouteSegment.actualServiceCost?if_exists}"/>
-                <br/>
+                <br />
                 <input type="text" size="8" name="actualOtherCost" value="${shipmentRouteSegment.actualOtherCost?if_exists}"/>
-                <br/>
+                <br />
                 <input type="text" size="8" name="actualCost" value="${shipmentRouteSegment.actualCost?if_exists}"/>
             </td>
         </tr>
@@ -310,14 +310,14 @@ under the License.
                 <div>
                     <span class="label">${uiLabelMap.ProductPackage}</span> ${shipmentPackageRouteSeg.shipmentPackageSeqId}
                     <#if shipmentPackageRouteSeg.labelImage?exists>
-                        <a href="javascript:document.viewShipmentPackageRouteSegLabelImage_${shipmentRouteSegmentData_index}_${shipmentPackageRouteSeg_index}.submit();" target="_blank" class="buttontext">${uiLabelMap.ProductViewLabelImage}</a>
+                        <a href="javascript:document.viewShipmentPackageRouteSegLabelImage_${shipmentRouteSegmentData_index}_${shipmentPackageRouteSeg_index}.submit();" class="buttontext">${uiLabelMap.ProductViewLabelImage}</a>
                     </#if>
-                    <span class="label">${uiLabelMap.ProductTrack} #</span><input type="text" size="22" name="trackingCode" value="${shipmentPackageRouteSeg.trackingCode?if_exists}"/>
+                    <span class="label">${uiLabelMap.ProductTrack} ${uiLabelMap.CommonNbr}</span><input type="text" size="22" name="trackingCode" value="${shipmentPackageRouteSeg.trackingCode?if_exists}"/>
                 </div>
             </td>
             <td valign="top">
                <div>
-                   <span class="label">${uiLabelMap.ProductBox} #</span>
+                   <span class="label">${uiLabelMap.ProductBox} ${uiLabelMap.CommonNbr}</span>
                    <input type="text" size="5" name="boxNumber" value="${shipmentPackageRouteSeg.boxNumber?if_exists}"/>
                </div>
             </td>
@@ -383,7 +383,7 @@ under the License.
                 <td valign="top">
                     <div>
                         <span class="label">${uiLabelMap.ProductNewSegment}</span>
-                        <br/>
+                        <br />
                         <a href="javascript:document.createShipmentRouteSegmentForm.submit();" class="buttontext">${uiLabelMap.CommonCreate}</a>
                     </div>
                 </td>
@@ -400,7 +400,7 @@ under the License.
                                 <option value="${shipmentMethodTypeOption.shipmentMethodTypeId}">${shipmentMethodTypeOption.get("description",locale)}</option>
                             </#list>
                         </select>
-                        <br/>
+                        <br />
                         <select name="originFacilityId">
                                 <option value="">&nbsp;</option>
                             <#list facilities as facility>
@@ -413,10 +413,10 @@ under the License.
                                 <option value="${facility.facilityId}">${facility.facilityName} [${facility.facilityId}]</option>
                             </#list>
                         </select>
-                        <br/>
+                        <br />
                         <input type="text" size="15" name="originContactMechId" value=""/>
                         <input type="text" size="15" name="destContactMechId" value=""/>
-                        <br/>
+                        <br />
                         <input type="text" size="15" name="originTelecomNumberId" value=""/>
                         <input type="text" size="15" name="destTelecomNumberId" value=""/>
                     </div>
@@ -428,14 +428,14 @@ under the License.
                             <option value="${carrierServiceStatusValidChangeToDetail.statusIdTo}">${carrierServiceStatusValidChangeToDetail.transitionName} [${carrierServiceStatusValidChangeToDetail.description}]</option>
                         </#list>
                     </select>
-                    <br/>
+                    <br />
                     <input type="text" size="24" name="trackingIdNumber" value=""/>
-                    <br/>
-                    <input type="text" size="25" name="estimatedStartDate" value=""/><a href="javascript:call_cal(document.createShipmentRouteSegmentForm.estimatedStartDate, '${nowTimestampString}');"><img src='<@ofbizContentUrl>/images/cal.gif</@ofbizContentUrl>' width='16' height='16' border='0' alt='Calendar'></a>
-                    <input type="text" size="25" name="estimatedArrivalDate" value=""/><a href="javascript:call_cal(document.createShipmentRouteSegmentForm.estimatedArrivalDate, '${nowTimestampString}');"><img src='<@ofbizContentUrl>/images/cal.gif</@ofbizContentUrl>' width='16' height='16' border='0' alt='Calendar'></a>
-                    <br/>
-                    <input type="text" size="25" name="actualStartDate" value=""/><a href="javascript:call_cal(document.createShipmentRouteSegmentForm.actualStartDate, '${nowTimestampString}');"><img src='<@ofbizContentUrl>/images/cal.gif</@ofbizContentUrl>' width='16' height='16' border='0' alt='Calendar'></a>
-                    <input type="text" size="25" name="actualArrivalDate" value=""/><a href="javascript:call_cal(document.createShipmentRouteSegmentForm.actualArrivalDate, '${nowTimestampString}');"><img src='<@ofbizContentUrl>/images/cal.gif</@ofbizContentUrl>' width='16' height='16' border='0' alt='Calendar'></a>
+                    <br />
+                    <@htmlTemplate.renderDateTimeField name="estimatedStartDate" event="" action="" className="" alert="" title="Format: yyyy-MM-dd HH:mm:ss.SSS" value="" size="25" maxlength="30" id="estimatedStartDate3" dateType="date" shortDateInput=false timeDropdownParamName="" defaultDateTimeString="" localizedIconTitle="" timeDropdown="" timeHourName="" classString="" hour1="" hour2="" timeMinutesName="" minutes="" isTwelveHour="" ampmName="" amSelected="" pmSelected="" compositeType="" formName=""/>
+                    <@htmlTemplate.renderDateTimeField name="estimatedArrivalDate" event="" action="" className="" alert="" title="Format: yyyy-MM-dd HH:mm:ss.SSS" value="" size="25" maxlength="30" id="estimatedArrivalDate3" dateType="date" shortDateInput=false timeDropdownParamName="" defaultDateTimeString="" localizedIconTitle="" timeDropdown="" timeHourName="" classString="" hour1="" hour2="" timeMinutesName="" minutes="" isTwelveHour="" ampmName="" amSelected="" pmSelected="" compositeType="" formName=""/>
+                    <br />
+                    <@htmlTemplate.renderDateTimeField name="actualStartDate" event="" action="" className="" alert="" title="Format: yyyy-MM-dd HH:mm:ss.SSS" value="" size="25" maxlength="30" id="actualArrivalDate3" dateType="date" shortDateInput=false timeDropdownParamName="" defaultDateTimeString="" localizedIconTitle="" timeDropdown="" timeHourName="" classString="" hour1="" hour2="" timeMinutesName="" minutes="" isTwelveHour="" ampmName="" amSelected="" pmSelected="" compositeType="" formName=""/>
+                    <@htmlTemplate.renderDateTimeField name="actualArrivalDate" event="" action="" className="" alert="" title="Format: yyyy-MM-dd HH:mm:ss.SSS" value="" size="25" maxlength="30" id="actualArrivalDate3" dateType="date" shortDateInput=false timeDropdownParamName="" defaultDateTimeString="" localizedIconTitle="" timeDropdown="" timeHourName="" classString="" hour1="" hour2="" timeMinutesName="" minutes="" isTwelveHour="" ampmName="" amSelected="" pmSelected="" compositeType="" formName=""/>
                 </td>
                 <td valign="top">
                     <input type="text" size="5" name="billingWeight" value="${(shipmentRouteSegment.billingWeight)?if_exists}"/>
@@ -445,20 +445,20 @@ under the License.
                             <option value="${weightUom.uomId}">${weightUom.get("description",locale)} [${weightUom.abbreviation}]</option>
                         </#list>
                     </select>
-                    <br/>
+                    <br />
                     <select name="currencyUomId">
                         <option value="">&nbsp;</option>
                         <#list currencyUoms as altCurrencyUom>
                             <option value="${altCurrencyUom.uomId}">${altCurrencyUom.get("description",locale)} [${altCurrencyUom.uomId}]</option>
                         </#list>
                     </select>
-                    <br/>
+                    <br />
                     <input type="text" size="8" name="actualTransportCost"/>
-                    <br/>
+                    <br />
                     <input type="text" size="8" name="actualServiceCost"/>
-                    <br/>
+                    <br />
                     <input type="text" size="8" name="actualOtherCost"/>
-                    <br/>
+                    <br />
                     <input type="text" size="8" name="actualCost"/>
                 </td>
             </tr>

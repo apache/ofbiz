@@ -57,16 +57,16 @@ if (contentId) {
 //Assume it is a generic simple text content
 textData = [:];
 if (contentId && content) {
-    textDr = content.getRelatedOne("DataResource");
+    textDr = content.getRelatedOne("DataResource", false);
     if (textDr) {
-        text = textDr.getRelatedOne("ElectronicText");
+        text = textDr.getRelatedOne("ElectronicText", false);
         if (text) {
             textData.text = text.textData;
             textData.textDataResourceId = text.dataResourceId;
         }
     }
 }
-updateProductContentWrapper = new HtmlFormWrapper("component://product/webapp/catalog/config/ConfigForms.xml", "EditProductConfigItemContentSimpleText", request, response);
+updateProductContentWrapper = new HtmlFormWrapper("component://product/widget/catalog/ConfigForms.xml", "EditProductConfigItemContentSimpleText", request, response);
 updateProductContentWrapper.putInContext("textData", textData);
 
 context.updateProductContentWrapper = updateProductContentWrapper;

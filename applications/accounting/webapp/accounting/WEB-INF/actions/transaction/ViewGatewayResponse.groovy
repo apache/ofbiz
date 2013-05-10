@@ -34,25 +34,28 @@ import org.ofbiz.entity.util.EntityUtil;
 // get this field first, it determines which purpose this script satisfies
 orderPaymentPreferenceId = context.orderPaymentPreferenceId;
 
-// first purpose: retrieve orderId and pamentPreferenceId
+// first purpose: retrieve orderId and paymentPreferenceId
 if (!orderPaymentPreferenceId) {
   paymentGatewayResponse = context.paymentGatewayResponse;
-  orderPaymentPreference = paymentGatewayResponse.getRelatedOne("OrderPaymentPreference");
+  orderPaymentPreference = paymentGatewayResponse.getRelatedOne("OrderPaymentPreference", false);
   context.orderId = orderPaymentPreference.orderId;
   context.orderPaymentPreferenceId = orderPaymentPreference.orderPaymentPreferenceId;
-  return;
-}
-
-// second purpose: grab the latest gateway response of the orderaymentpreferenceId
-orderPaymentPreference = delegator.findByPrimaryKey("OrderPaymentPreference", [orderPaymentPreferenceId : orderPaymentPreferenceId]);
-gatewayResponses = orderPaymentPreference.getRelated("PaymentGatewayResponse", ["transactionDate DESC"]);
-EntityUtil.filterByCondition(gatewayResponses, EntityCondition.makeCondition("transCodeEnumId", EntityOperator.EQUALS, "PGT_AUTHORIZE"));
-
-if (gatewayResponses) {
-    latestAuth = gatewayResponses[0];
-    context.paymentGatewayResponse = latestAuth;
 } else {
-    // todo: some kind of error telling user to re-authorize
+    // second purpose: grab the latest gateway response of the orderpaymentpreferenceId
+    orderPaymentPreference = delegator.findOne("OrderPaymentPreference", [orderPaymentPreferenceId : orderPaymentPreferenceId], false);
+    gatewayResponses = orderPaymentPreference.getRelated("PaymentGatewayResponse", null, ["transactionDate DESC"], false);
+    EntityUtil.filterByCondition(gatewayResponses, EntityCondition.makeCondition("transCodeEnumId", EntityOperator.EQUALS, "PGT_AUTHORIZE"));
+    
+    if (gatewayResponses) {
+        latestAuth = gatewayResponses[0];
+        context.paymentGatewayResponse = latestAuth;
+    } else {
+        // todo: some kind of error telling user to re-authorize
+    }
+    
+    context.orderId = orderPaymentPreference.orderId;
 }
-
-context.orderId = orderPaymentPreference.orderId;
+// get the list of payments associated to gateway response
+if (context.paymentGatewayResponse) {
+    context.payments = context.paymentGatewayResponse.getRelated("Payment", null, null, false);
+}

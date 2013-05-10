@@ -28,7 +28,7 @@ import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilHttp;
 import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.base.util.UtilValidate;
-import org.ofbiz.entity.GenericDelegator;
+import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
 import org.ofbiz.service.GenericServiceException;
@@ -43,7 +43,7 @@ public class ShipmentEvents {
 
     public static String viewShipmentPackageRouteSegLabelImage(HttpServletRequest request, HttpServletResponse response) {
 
-        GenericDelegator delegator = (GenericDelegator) request.getAttribute("delegator");
+        Delegator delegator = (Delegator) request.getAttribute("delegator");
 
         String shipmentId = request.getParameter("shipmentId");
         String shipmentRouteSegmentId = request.getParameter("shipmentRouteSegmentId");
@@ -51,7 +51,7 @@ public class ShipmentEvents {
 
         GenericValue shipmentPackageRouteSeg = null;
         try {
-            shipmentPackageRouteSeg = delegator.findByPrimaryKey("ShipmentPackageRouteSeg", UtilMisc.toMap("shipmentId", shipmentId, "shipmentRouteSegmentId", shipmentRouteSegmentId, "shipmentPackageSeqId", shipmentPackageSeqId));
+            shipmentPackageRouteSeg = delegator.findOne("ShipmentPackageRouteSeg", UtilMisc.toMap("shipmentId", shipmentId, "shipmentRouteSegmentId", shipmentRouteSegmentId, "shipmentPackageSeqId", shipmentPackageSeqId), false);
         } catch (GenericEntityException e) {
             String errorMsg = "Error looking up ShipmentPackageRouteSeg: " + e.toString();
             Debug.logError(e, errorMsg, module);
@@ -94,7 +94,6 @@ public class ShipmentEvents {
 
         String shipmentId = request.getParameter("shipmentIdReceived");
         String forceShipmentReceived = request.getParameter("forceShipmentReceived");
-        String orderId = request.getParameter("orderId");
         if (UtilValidate.isNotEmpty(shipmentId) && "Y".equals(forceShipmentReceived)) {
             try {
                 Map<String, Object> inputMap = UtilMisc.<String, Object>toMap("shipmentId", shipmentId, "statusId", "PURCH_SHIP_RECEIVED");

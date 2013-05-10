@@ -23,9 +23,7 @@ under the License.
     <screen name="LookupRouting">
         <section>
             <condition>
-                <or>
-                    <if-has-permission permission="MANUFACTURING" action="_VIEW"/>
-                </or>
+                <if-has-permission permission="MANUFACTURING" action="_VIEW"/>
             </condition>
             <actions>
                 <property-map resource="ManufacturingUiLabels" map-name="uiLabelMap" global="true"/>
@@ -40,10 +38,10 @@ under the License.
             <widgets>
                 <decorator-screen name="LookupDecorator" location="component://common/widget/CommonScreens.xml">
                     <decorator-section name="search-options">
-                        <include-form name="lookupRouting" location="component://manufacturing/webapp/manufacturing/lookup/FieldLookupForms.xml"/>
+                        <include-form name="lookupRouting" location="component://manufacturing/widget/manufacturing/FieldLookupForms.xml"/>
                     </decorator-section>
                     <decorator-section name="search-results">
-                        <include-form name="listLookupRouting" location="component://manufacturing/webapp/manufacturing/lookup/FieldLookupForms.xml"/>
+                        <include-form name="listLookupRouting" location="component://manufacturing/widget/manufacturing/FieldLookupForms.xml"/>
                     </decorator-section>
                 </decorator-screen>
             </widgets>
@@ -52,9 +50,7 @@ under the License.
     <screen name="LookupRoutingTask">
         <section>
             <condition>
-                <or>
-                    <if-has-permission permission="MANUFACTURING" action="_VIEW"/>
-                </or>
+                <if-has-permission permission="MANUFACTURING" action="_VIEW"/>
             </condition>
             <actions>
                 <property-map resource="ManufacturingUiLabels" map-name="uiLabelMap" global="true"/>
@@ -69,10 +65,10 @@ under the License.
             <widgets>
                 <decorator-screen name="LookupDecorator" location="component://common/widget/CommonScreens.xml">
                     <decorator-section name="search-options">
-                        <include-form name="lookupRoutingTask" location="component://manufacturing/webapp/manufacturing/lookup/FieldLookupForms.xml"/>
+                        <include-form name="lookupRoutingTask" location="component://manufacturing/widget/manufacturing/FieldLookupForms.xml"/>
                     </decorator-section>
                     <decorator-section name="search-results">
-                        <include-form name="listLookupRoutingTask" location="component://manufacturing/webapp/manufacturing/lookup/FieldLookupForms.xml"/>
+                        <include-form name="listLookupRoutingTask" location="component://manufacturing/widget/manufacturing/FieldLookupForms.xml"/>
                     </decorator-section>
                 </decorator-screen>
             </widgets>

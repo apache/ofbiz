@@ -25,8 +25,6 @@ under the License.
   <!-- ========================================================= -->
     <title>Entity of an Open For Business Project Component</title>
     <description>None</description>
-    <copyright>Copyright 2001-2008 The Apache Software Foundation</copyright>
-    <author>None</author>
     <version>1.0</version>
 
   <!-- ========================================================= -->
@@ -75,6 +73,9 @@ under the License.
       <field name="lastTimeZone" type="id-long"></field>
       <field name="disabledDateTime" type="date-time"></field>
       <field name="successiveFailedLogins" type="numeric"></field>
+      <field name="externalAuthId" type="id-vlong-ne">
+          <description>For use with external authentication; the userLdapDn should be replaced with this</description>
+      </field>
       <field name="userLdapDn" type="id-vlong-ne">
           <description>The user's LDAP Distinguished Name - used for LDAP authentication</description>
       </field>
@@ -102,7 +103,7 @@ under the License.
       <field name="visitId" type="id"></field>
       <field name="fromDate" type="date-time"></field>
       <field name="thruDate" type="date-time"></field>
-      <field name="passwordUsed" type="short-varchar" encrypt="true"></field>
+      <field name="passwordUsed" type="long-varchar" encrypt="true"></field>
       <field name="successfulLogin" type="indicator"></field>
       <prim-key field="userLoginId"/>
       <prim-key field="fromDate"/>
@@ -122,7 +123,7 @@ under the License.
         <key-map field-name="userLoginId"/>
       </relation>
     </entity>
-
+    
   <!-- ========================================================= -->
   <!-- org.ofbiz.security.securitygroup -->
   <!-- ========================================================= -->
@@ -211,7 +212,6 @@ under the License.
     </entity>
     <view-entity entity-name="UserLoginAndProtectedView"
           package-name="org.ofbiz.security.securitygroup"
-          never-cache="true"
           title="UserLogin And ProtectedView View Entity">
       <member-entity entity-alias="ULSGPV" entity-name="UserLoginSecurityGroup"/>
       <member-entity entity-alias="PV" entity-name="ProtectedView"/>

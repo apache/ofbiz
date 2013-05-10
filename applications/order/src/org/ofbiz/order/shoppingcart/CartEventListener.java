@@ -18,20 +18,19 @@
  *******************************************************************************/
 package org.ofbiz.order.shoppingcart;
 
-import java.math.BigDecimal;
-import java.util.Iterator;
-
 import javax.servlet.http.HttpSession;
 import javax.servlet.http.HttpSessionEvent;
 import javax.servlet.http.HttpSessionListener;
 
 import org.ofbiz.base.util.Debug;
+import org.ofbiz.base.util.UtilProperties;
 import org.ofbiz.base.util.UtilValidate;
-import org.ofbiz.webapp.stats.VisitHandler;
-import org.ofbiz.entity.GenericDelegator;
+import org.ofbiz.entity.Delegator;
+import org.ofbiz.entity.DelegatorFactory;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
 import org.ofbiz.entity.transaction.TransactionUtil;
+import org.ofbiz.webapp.stats.VisitHandler;
 
 /**
  * HttpSessionListener that saves information about abandoned carts
@@ -56,9 +55,9 @@ public class CartEventListener implements HttpSessionListener {
         }
 
         String delegatorName = (String) session.getAttribute("delegatorName");
-        GenericDelegator delegator = null;
+        Delegator delegator = null;
         if (UtilValidate.isNotEmpty(delegatorName)) {
-            delegator = GenericDelegator.getGenericDelegator(delegatorName);
+            delegator = DelegatorFactory.getDelegator(delegatorName);
         }
         if (delegator == null) {
             Debug.logError("Could not find delegator with delegatorName in session, not saving abandoned cart info.", module);
@@ -71,19 +70,18 @@ public class CartEventListener implements HttpSessionListener {
 
             GenericValue visit = VisitHandler.getVisit(session);
             if (visit == null) {
+            if (UtilProperties.propertyValueEqualsIgnoreCase("serverstats", "stats.persist.visit", "false")) return;
                 Debug.logError("Could not get the current visit, not saving abandoned cart info.", module);
                 return;
             }
 
             Debug.logInfo("Saving abandoned cart", module);
-            Iterator cartItems = cart.iterator();
             int seqId = 1;
-            while (cartItems.hasNext()) {
-                ShoppingCartItem cartItem = (ShoppingCartItem) cartItems.next();
+            for(ShoppingCartItem cartItem : cart) {
                 GenericValue cartAbandonedLine = delegator.makeValue("CartAbandonedLine");
 
                 cartAbandonedLine.set("visitId", visit.get("visitId"));
-                cartAbandonedLine.set("cartAbandonedLineSeqId", (new Integer(seqId)).toString());
+                cartAbandonedLine.set("cartAbandonedLineSeqId", (Integer.valueOf(seqId)).toString());
                 cartAbandonedLine.set("productId", cartItem.getProductId());
                 cartAbandonedLine.set("prodCatalogId", cartItem.getProdCatalogId());
                 cartAbandonedLine.set("quantity", cartItem.getQuantity());

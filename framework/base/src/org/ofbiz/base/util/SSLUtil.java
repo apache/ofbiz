@@ -28,9 +28,21 @@ import java.security.SecureRandom;
 import java.security.Principal;
 import java.security.cert.X509Certificate;
 import java.security.cert.CertificateException;
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 
-import javax.net.ssl.*;
+import javax.net.ssl.KeyManager;
+import javax.net.ssl.KeyManagerFactory;
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLPeerUnverifiedException;
+import javax.net.ssl.SSLServerSocketFactory;
+import javax.net.ssl.SSLSession;
+import javax.net.ssl.SSLSocketFactory;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509KeyManager;
+import javax.net.ssl.X509TrustManager;
 
 import javolution.util.FastList;
 
@@ -208,7 +220,7 @@ public class SSLUtil {
                         }
                         for (javax.security.cert.X509Certificate peerCert: peerCerts) {
                             Principal x500s = peerCert.getSubjectDN();
-                            Map subjectMap = KeyStoreUtil.getX500Map(x500s);
+                            Map<String, String> subjectMap = KeyStoreUtil.getX500Map(x500s);
 
                             if (Debug.infoOn())
                                 Debug.logInfo(peerCert.getSerialNumber().toString(16) + " :: " + subjectMap.get("CN"), module);

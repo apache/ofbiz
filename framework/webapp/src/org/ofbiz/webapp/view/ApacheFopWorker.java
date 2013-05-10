@@ -18,7 +18,12 @@
  *******************************************************************************/
 package org.ofbiz.webapp.view;
 
-import java.io.*;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.URL;
 
 import javax.xml.transform.Result;
@@ -30,12 +35,11 @@ import javax.xml.transform.URIResolver;
 import javax.xml.transform.sax.SAXResult;
 import javax.xml.transform.stream.StreamSource;
 
-import org.apache.fop.apps.Fop;
 import org.apache.fop.apps.FOPException;
-import org.apache.fop.apps.FopFactory;
 import org.apache.fop.apps.FOUserAgent;
+import org.apache.fop.apps.Fop;
+import org.apache.fop.apps.FopFactory;
 import org.apache.fop.apps.MimeConstants;
-
 import org.ofbiz.base.location.FlexibleLocation;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.FileUtil;
@@ -73,18 +77,24 @@ public class ApacheFopWorker {
                 fopFactory.setStrictValidation(false);
 
                 try {
-                    String fopPath = UtilProperties.getPropertyValue("fop.properties", "fop.path", "framework/webapp/config");
+                    String ofbizHome = System.getProperty("ofbiz.home");
+                    String fopPath = UtilProperties.getPropertyValue("fop.properties", "fop.path", ofbizHome + "/framework/webapp/config");
                     File userConfigFile = FileUtil.getFile(fopPath + "/fop.xconf");
-                    fopFactory.setUserConfig(userConfigFile);
-                    String fopFontBaseUrl = fopFactory.getFontBaseURL();
-                    if (fopFontBaseUrl == null) {
-                        String ofbizHome = System.getProperty("ofbiz.home");
-                        fopFontBaseUrl = UtilProperties.getPropertyValue("fop.properties", "fop.font.base.url", "file:///" + ofbizHome + "/framework/webapp/config/");
-                        fopFactory.setFontBaseURL(fopFontBaseUrl);
+                    if (userConfigFile.exists()) {
+                        fopFactory.setUserConfig(userConfigFile);
+                    } else {
+                        Debug.logWarning("FOP configuration file not found: " + userConfigFile, module);
                     }
-                    Debug.logInfo("FOP-FontBaseURL: " + fopFontBaseUrl, module);
+                    String fopFontBaseProperty = UtilProperties.getPropertyValue("fop.properties", "fop.font.base.url", ofbizHome + "/framework/webapp/config/");
+                    File fontBaseFile = FileUtil.getFile(fopFontBaseProperty);
+                    if (fontBaseFile.isDirectory()) {
+                        fopFactory.getFontManager().setFontBaseURL(fontBaseFile.toURI().toURL().toString());
+                    } else {
+                        Debug.logWarning("FOP font base URL not found: " + fontBaseFile, module);
+                    }
+                    Debug.logInfo("FOP FontBaseURL: " + fopFactory.getFontManager().getFontBaseURL(), module);
                 } catch (Exception e) {
-                    Debug.logWarning("Error reading FOP configuration", module);
+                    Debug.logWarning(e, "Error reading FOP configuration: ", module);
                 }
             }
         }
@@ -146,8 +156,6 @@ public class ApacheFopWorker {
             }
             transformer.setURIResolver(new LocalResolver(transformer.getURIResolver()));
             transformer.transform(src, res);
-            FopFactory fopFactory = getFactoryInstance();
-            fopFactory.getImageFactory().clearCaches();
         } catch (Exception e) {
             throw new FOPException(e);
         }

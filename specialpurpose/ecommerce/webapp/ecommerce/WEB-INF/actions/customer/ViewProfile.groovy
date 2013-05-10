@@ -31,7 +31,7 @@ productStoreId = ProductStoreWorker.getProductStoreId(request);
 context.productStoreId = productStoreId;
 
 if (userLogin) {
-    profiledefs = delegator.findByPrimaryKey("PartyProfileDefault", [partyId : partyId, productStoreId : productStoreId]);
+    profiledefs = delegator.findOne("PartyProfileDefault", [partyId : partyId, productStoreId : productStoreId], false);
 
     showOld = "true".equals(parameters.SHOW_OLD);
 
@@ -45,7 +45,7 @@ if (userLogin) {
 
     // shipping methods - for default selection
     if (profiledefs?.defaultShipAddr) {
-        shipAddress = delegator.findByPrimaryKey("PostalAddress", [contactMechId : profiledefs.defaultShipAddr]);
+        shipAddress = delegator.findOne("PostalAddress", [contactMechId : profiledefs.defaultShipAddr], false);
         if (shipAddress) {
             carrierShipMeths = ProductStoreWorker.getAvailableStoreShippingMethods(delegator, productStoreId, shipAddress, [1], null, 0, 1);
             context.carrierShipMethods = carrierShipMeths;
@@ -58,14 +58,14 @@ if (userLogin) {
     orderBy = ["-entryDate"];
     findOpts = new EntityFindOptions();
     findOpts.setMaxRows(5);
-    exprs = [EntityCondition.makeCondition("partyIdTo", EntityOperator.EQUALS, partyId)];
-    exprs.add(EntityCondition.makeCondition("statusId", EntityOperator.NOT_EQUAL, "COM_READ"));
+    exprs = [EntityCondition.makeCondition("partyId", EntityOperator.EQUALS, partyId)];
+    exprs.add(EntityCondition.makeCondition("roleStatusId", EntityOperator.NOT_EQUAL, "COM_ROLE_READ"));
     condition = EntityCondition.makeCondition(exprs, EntityOperator.AND);
-    messages = delegator.findList("CommunicationEvent", condition, null, orderBy, findOpts, false);
+    messages = delegator.findList("CommunicationEventAndRole", condition, null, orderBy, findOpts, false);
     context.messages = messages;
     context.profileMessages = true;
 
-    partyContent = delegator.findByAnd("ContentRole", [partyId : partyId, roleTypeId : "OWNER"]);
+    partyContent = delegator.findByAnd("ContentRole", [partyId : partyId, roleTypeId : "OWNER"], null, false);
     partyContent = EntityUtil.filterByDate(partyContent);
     context.partyContent = partyContent;
 
@@ -83,14 +83,14 @@ if (userLogin) {
     context.totalSubRemainingAmount = result.totalSubRemainingAmount;
     context.totalOrders = result.totalOrders;
 
-    contactListPartyList = delegator.findByAnd("ContactListParty", [partyId : partyId], ["-fromDate"]);
+    contactListPartyList = delegator.findByAnd("ContactListParty", [partyId : partyId], ["-fromDate"], false);
     // show all, including history, ie don't filter: contactListPartyList = EntityUtil.filterByDate(contactListPartyList, true);
     context.contactListPartyList = contactListPartyList;
 
-    publicContactLists = delegator.findByAnd("ContactList", [isPublic : "Y"], ["contactListName"]);
+    publicContactLists = delegator.findByAnd("ContactList", [isPublic : "Y"], ["contactListName"], false);
     context.publicContactLists = publicContactLists;
 
-    partyAndContactMechList = delegator.findByAnd("PartyAndContactMech", [partyId : partyId], ["-fromDate"]);
+    partyAndContactMechList = delegator.findByAnd("PartyAndContactMech", [partyId : partyId], ["-fromDate"], false);
     partyAndContactMechList = EntityUtil.filterByDate(partyAndContactMechList);
     context.partyAndContactMechList = partyAndContactMechList;
 }

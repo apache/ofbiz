@@ -74,7 +74,7 @@ public class ServiceMultiEventHandler implements EventHandler {
     }
 
     /**
-     * @see org.ofbiz.webapp.event.EventHandler#invoke(java.lang.String, java.lang.String, javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
+     * @see org.ofbiz.webapp.event.EventHandler#invoke(ConfigXMLReader.Event, ConfigXMLReader.RequestMap, javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
      */
     public String invoke(Event event, RequestMap requestMap, HttpServletRequest request, HttpServletResponse response) throws EventHandlerException {
         // TODO: consider changing this to use the new UtilHttp.parseMultiFormData method
@@ -161,7 +161,7 @@ public class ServiceMultiEventHandler implements EventHandler {
         //  event should be wrapped in a transaction
         String requestUri = RequestHandler.getRequestUri(request.getPathInfo());
         ConfigXMLReader.ControllerConfig controllerConfig = ConfigXMLReader.getControllerConfig(ConfigXMLReader.getControllerConfigURL(servletContext));
-        boolean eventGlobalTransaction = controllerConfig.requestMapMap.get(requestUri).event.globalTransaction;
+        boolean eventGlobalTransaction = controllerConfig.getRequestMapMap().get(requestUri).event.globalTransaction;
 
         Set<String> urlOnlyParameterNames = UtilHttp.getUrlOnlyParameterMap(request).keySet();
 
@@ -210,10 +210,10 @@ public class ServiceMultiEventHandler implements EventHandler {
                     if ("timeZone".equals(paramName)) continue;
 
                     Object value = null;
-                    if (modelParam.stringMapPrefix != null && modelParam.stringMapPrefix.length() > 0) {
+                    if (UtilValidate.isNotEmpty(modelParam.stringMapPrefix)) {
                         Map<String, Object> paramMap = UtilHttp.makeParamMapWithPrefix(request, modelParam.stringMapPrefix, curSuffix);
                         value = paramMap;
-                    } else if (modelParam.stringListSuffix != null && modelParam.stringListSuffix.length() > 0) {
+                    } else if (UtilValidate.isNotEmpty(modelParam.stringListSuffix)) {
                         List<Object> paramList = UtilHttp.makeParamListWithSuffix(request, modelParam.stringListSuffix, null);
                         value = paramList;
                     } else {
@@ -224,7 +224,7 @@ public class ServiceMultiEventHandler implements EventHandler {
                         if (value == null) {
                             String name = paramName + curSuffix;
 
-                            ServiceEventHandler.checkSecureParameter(requestMap, urlOnlyParameterNames, name, session, serviceName);
+                            ServiceEventHandler.checkSecureParameter(requestMap, urlOnlyParameterNames, name, session, serviceName, dctx.getDelegator());
 
                             String[] paramArr = request.getParameterValues(name);
                             if (paramArr != null) {
@@ -259,6 +259,11 @@ public class ServiceMultiEventHandler implements EventHandler {
                                     value = session.getAttribute(paramName);
                                 }
                             }
+                        }
+
+                        // make any composite parameter data (e.g., from a set of parameters {name_c_date, name_c_hour, name_c_minutes})
+                        if (value == null) {
+                            value = UtilHttp.makeParamValueFromComposite(request, paramName + curSuffix, locale);
                         }
 
                         if (value == null) {
@@ -330,7 +335,7 @@ public class ServiceMultiEventHandler implements EventHandler {
                     }
 
                     // get the success messages
-                    if (!UtilValidate.isEmpty((String)result.get(ModelService.SUCCESS_MESSAGE))) {
+                    if (!UtilValidate.isEmpty(result.get(ModelService.SUCCESS_MESSAGE))) {
                         String newSuccessMessage = (String)result.get(ModelService.SUCCESS_MESSAGE);
                         if (!successMessages.contains(newSuccessMessage)) {
                             successMessages.add(newSuccessMessage);
@@ -339,7 +344,7 @@ public class ServiceMultiEventHandler implements EventHandler {
                     if (!UtilValidate.isEmpty(result.get(ModelService.SUCCESS_MESSAGE_LIST))) {
                         List<String> newSuccessMessages = UtilGenerics.<String>checkList(result.get(ModelService.SUCCESS_MESSAGE_LIST));
                         for (int j = 0; j < newSuccessMessages.size(); j++) {
-                            String newSuccessMessage = (String)newSuccessMessages.get(j);
+                            String newSuccessMessage = newSuccessMessages.get(j);
                             if (!successMessages.contains(newSuccessMessage)) {
                                 successMessages.add(newSuccessMessage);
                             }
@@ -355,6 +360,8 @@ public class ServiceMultiEventHandler implements EventHandler {
                         if (resultKey != null && !ModelService.RESPONSE_MESSAGE.equals(resultKey) && !ModelService.ERROR_MESSAGE.equals(resultKey) &&
                                 !ModelService.ERROR_MESSAGE_LIST.equals(resultKey) && !ModelService.ERROR_MESSAGE_MAP.equals(resultKey) &&
                                 !ModelService.SUCCESS_MESSAGE.equals(resultKey) && !ModelService.SUCCESS_MESSAGE_LIST.equals(resultKey)) {
+                            //set the result to request w/ and w/o a suffix to handle both cases: to have the result in each iteration and to prevent its overriding
+                            request.setAttribute(resultKey + curSuffix, resultValue);
                             request.setAttribute(resultKey, resultValue);
                         }
                     }

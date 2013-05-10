@@ -40,7 +40,7 @@ import org.ofbiz.base.util.UtilHttp;
 import org.ofbiz.base.util.cache.UtilCache;
 import org.ofbiz.webapp.control.ContextFilter;
 import org.ofbiz.webapp.view.AbstractViewHandler;
-import org.ofbiz.entity.GenericDelegator;
+import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.jdbc.ConnectionFactory;
 
 
@@ -52,7 +52,7 @@ public class JasperReportsPoiXlsViewHandler extends AbstractViewHandler {
     public static final String module = JasperReportsPoiXlsViewHandler.class.getName();
 
     protected ServletContext context;
-    public static UtilCache jasperReportsCompiledCache = new UtilCache("webapp.JasperReportsCompiled");
+    public static UtilCache jasperReportsCompiledCache = UtilCache.createUtilCache("webapp.JasperReportsCompiled");
 
     public void init(ServletContext context) throws ViewHandlerException {
         this.context = context;
@@ -65,16 +65,16 @@ public class JasperReportsPoiXlsViewHandler extends AbstractViewHandler {
         if (request == null) {
             throw new ViewHandlerException("The HttpServletRequest object was null, how did that happen?");
         }
-        if (page == null || page.length() == 0) {
+        if (UtilValidate.isEmpty(page)) {
             throw new ViewHandlerException("View page was null or empty, but must be specified");
         }
-        if (info == null || info.length() == 0) {
+        if (UtilValidate.isEmpty(info)) {
             Debug.logInfo("View info string was null or empty, (optionally used to specify an Entity that is mapped to the Entity Engine datasource that the report will use).", module);
         }
 
         // tell the ContextFilter we are forwarding
         request.setAttribute(ContextFilter.FORWARDED_FROM_SERVLET, Boolean.valueOf(true));
-        GenericDelegator delegator = (GenericDelegator) request.getAttribute("delegator");
+        Delegator delegator = (Delegator) request.getAttribute("delegator");
         if (delegator == null) {
             throw new ViewHandlerException("The delegator object was null, how did that happen?");
         }
@@ -103,7 +103,7 @@ public class JasperReportsPoiXlsViewHandler extends AbstractViewHandler {
             JasperPrint jp = null;
             if (jrDataSource == null) {
                 String datasourceName = delegator.getEntityHelperName(info);
-                if (datasourceName != null && datasourceName.length() > 0) {
+                if (UtilValidate.isNotEmpty(datasourceName)) {
                     Debug.logInfo("Filling report with connection from datasource: " + datasourceName, module);
                     jp = JasperFillManager.fillReport(report, parameters, ConnectionFactory.getConnection(datasourceName));
                 } else {

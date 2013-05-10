@@ -71,7 +71,7 @@ if (phases) {
                 EntityCondition.makeCondition("currentStatusId", EntityOperator.NOT_EQUAL, "PTS_CANCELLED"),
                 EntityCondition.makeCondition("workEffortParentId", EntityOperator.EQUALS, phase.phaseId)
                 ], EntityOperator.AND);
-        tasks = delegator.findList("WorkEffort", cond, null, ["workEffortName"], null, false);
+        tasks = delegator.findList("WorkEffort", cond, null, ["sequenceNum","workEffortName"], null, false);
         if (tasks) {
             tasks.each { task ->
                 resultTaskInfo = dispatcher.runSync("getProjectTask", [userLogin : userLogin , taskId : task.workEffortId]);
@@ -83,7 +83,7 @@ if (phases) {
                 } else {
                     taskInfo.resource = taskInfo.actualHours + " Hrs";
                 }
-                double duration = resultTaskInfo.plannedHours;
+                Double duration = resultTaskInfo.plannedHours;
                 if (taskInfo.currentStatusId.equals("PTS_COMPLETED")) {
                     taskInfo.completion = 100;
                 } else {
@@ -109,7 +109,7 @@ if (phases) {
                 }
                 taskInfo.estimatedStartDate = UtilDateTime.toDateString(taskInfo.estimatedStartDate, "MM/dd/yyyy");
                 taskInfo.estimatedCompletionDate = UtilDateTime.toDateString(taskInfo.estimatedCompletionDate, "MM/dd/yyyy");
-                taskInfo.workEffortTypeId = "TASK";
+                taskInfo.workEffortTypeId = task.workEffortTypeId;
                 if (security.hasEntityPermission("PROJECTMGR", "_READ", session) || security.hasEntityPermission("PROJECTMGR", "_ADMIN", session)) {
                     taskInfo.url = "/projectmgr/control/taskView?workEffortId="+task.workEffortId;
                 } else {
@@ -117,20 +117,14 @@ if (phases) {
                 }
 
                 // dependency can only show one in the ganttchart, so onl show the latest one..
-                preTasks = delegator.findByAnd("WorkEffortAssoc", ["workEffortIdTo" : task.workEffortId], ["workEffortIdFrom"]);
-                latestTaskId = "";
-                Timestamp latestDate = null;
+                preTasks = delegator.findByAnd("WorkEffortAssoc", ["workEffortIdTo" : task.workEffortId], ["workEffortIdFrom"], false);
+                latestTaskIds = new LinkedList();
                 preTasks.each { preTask ->
-                    wf = preTask.getRelatedOne("FromWorkEffort");
-                    if (wf.estimatedStartDate) {
-                        if (!latestDate || latestDate.before(wf.estimatedStartDate)) {
-                            latestTaskId = wf.workEffortId;
-                            latestDate = wf.estimatedStartDate;
-                        }
-                    }
+                    wf = preTask.getRelatedOne("FromWorkEffort", false);
+                    latestTaskIds.add(wf.workEffortId);
                 }
-                if (latestDate) {
-                    taskInfo.preDecessor = latestTaskId;
+                if (UtilValidate.isNotEmpty(latestTaskIds)) {
+                    taskInfo.preDecessor = latestTaskIds;
                 }
                 ganttList.add(taskInfo);
             }

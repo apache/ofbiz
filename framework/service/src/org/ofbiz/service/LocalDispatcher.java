@@ -20,7 +20,7 @@ package org.ofbiz.service;
 
 import java.util.Map;
 
-import org.ofbiz.entity.GenericDelegator;
+import org.ofbiz.entity.Delegator;
 import org.ofbiz.security.Security;
 import org.ofbiz.service.jms.JmsListenerFactory;
 import org.ofbiz.service.job.JobManager;
@@ -44,7 +44,7 @@ public interface LocalDispatcher {
 
     /**
      * Returns whether Service Engine Condition Actions (SECAs) are disabled or not.
-     * @return
+     * @return returns whether Service Engine Condition Actions (SECAs) are disabled or not.
      * @throws GenericServiceException
      */
     public boolean isEcasDisabled();
@@ -316,7 +316,8 @@ public interface LocalDispatcher {
      * Gets the GenericEntityDelegator associated with this dispatcher
      * @return GenericEntityDelegator associated with this dispatcher
      */
-    public GenericDelegator getDelegator();
+    public Delegator getDelegator();
+
 
     /**
      * Gets the Security object associated with this dispatcher
@@ -337,7 +338,7 @@ public interface LocalDispatcher {
     public DispatchContext getDispatchContext();
 
     /**
-     * De-Registers this LocalDispatcher with the ServiceDispatcher
+     * De-Registers this LocalDispatcher
      */
     public void deregister();
 }

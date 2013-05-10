@@ -19,16 +19,20 @@
 package org.ofbiz.entity.model;
 
 import java.io.Serializable;
-import java.util.*;
-import org.w3c.dom.*;
 
-import org.ofbiz.base.util.*;
+import org.ofbiz.base.util.UtilXml;
+import org.ofbiz.entity.jdbc.JdbcValueHandler;
+import org.w3c.dom.Element;
 
 /**
  * Generic Entity - FieldType model class
  *
  */
+
+@SuppressWarnings("serial")
 public class ModelFieldType implements Serializable {
+
+    public static final String module = ModelFieldType.class.getName();
 
     /** The type of the Field */
     protected String type = null;
@@ -36,14 +40,14 @@ public class ModelFieldType implements Serializable {
     /** The java-type of the Field */
     protected String javaType = null;
 
+    /** The JDBC value handler for this Field */
+    protected JdbcValueHandler<?> jdbcValueHandler = null;
+
     /** The sql-type of the Field */
     protected String sqlType = null;
 
     /** The sql-type-alias of the Field, this is optional */
     protected String sqlTypeAlias = null;
-
-    /** validators to be called when an update is done */
-    protected List<ModelFieldValidator> validators = new ArrayList<ModelFieldValidator>();
 
     /** Default Constructor */
     public ModelFieldType() {}
@@ -54,16 +58,7 @@ public class ModelFieldType implements Serializable {
         this.javaType = UtilXml.checkEmpty(fieldTypeElement.getAttribute("java-type")).intern();
         this.sqlType = UtilXml.checkEmpty(fieldTypeElement.getAttribute("sql-type")).intern();
         this.sqlTypeAlias = UtilXml.checkEmpty(fieldTypeElement.getAttribute("sql-type-alias")).intern();
-
-        NodeList validateList = fieldTypeElement.getElementsByTagName("validate");
-        for (int i = 0; i < validateList.getLength(); i++) {
-            Element element = (Element) validateList.item(i);
-            String methodName = element.getAttribute("method");
-            String className = element.getAttribute("class");
-            if (methodName != null) {
-                this.validators.add(new ModelFieldValidator(className.intern(), methodName.intern()));
-            }
-        }
+        this.jdbcValueHandler = JdbcValueHandler.getInstance(this.javaType, this.sqlType);
     }
 
     /** The type of the Field */
@@ -76,6 +71,11 @@ public class ModelFieldType implements Serializable {
         return this.javaType;
     }
 
+    /** Returns the JDBC value handler for this field type */
+    public JdbcValueHandler<?> getJdbcValueHandler() {
+        return this.jdbcValueHandler;
+    }
+
     /** The sql-type of the Field */
     public String getSqlType() {
         return this.sqlType;
@@ -84,11 +84,6 @@ public class ModelFieldType implements Serializable {
     /** The sql-type-alias of the Field */
     public String getSqlTypeAlias() {
         return this.sqlTypeAlias;
-    }
-
-    /** validators to be called when an update is done */
-    public List<ModelFieldValidator> getValidators() {
-        return this.validators;
     }
 
     /** A simple function to derive the max length of a String created from the field value, based on the sql-type
@@ -116,30 +111,5 @@ public class ModelFieldType implements Serializable {
             return 5000;
         }
         return 20;
-    }
-
-    class ModelFieldValidator implements Serializable {
-
-        protected String validatorClass = null;
-        protected String validatorMethod = null;
-
-        public ModelFieldValidator(String className, String methodName) {
-            this.validatorClass = className;
-            this.validatorMethod = methodName;
-        }
-
-        public String getClassName() {
-            if (UtilValidate.isNotEmpty(validatorClass) && UtilValidate.isNotEmpty(validatorMethod)) {
-                return validatorClass;
-            }
-            return null;
-        }
-
-        public String getMethodName() {
-            if (UtilValidate.isNotEmpty(validatorClass) && UtilValidate.isNotEmpty(validatorMethod)) {
-                return validatorMethod;
-            }
-            return null;
-        }
     }
 }

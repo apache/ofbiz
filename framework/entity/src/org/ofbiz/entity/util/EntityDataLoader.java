@@ -20,22 +20,19 @@ package org.ofbiz.entity.util;
 
 import java.io.File;
 import java.net.URL;
-import java.util.Collection;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.StringTokenizer;
-
-import org.w3c.dom.Element;
 
 import org.ofbiz.base.component.ComponentConfig;
 import org.ofbiz.base.config.GenericConfigException;
 import org.ofbiz.base.config.MainResourceHandler;
 import org.ofbiz.base.config.ResourceHandler;
 import org.ofbiz.base.util.Debug;
-import org.ofbiz.base.util.UtilMisc;
-import org.ofbiz.entity.GenericDelegator;
+import org.ofbiz.base.util.UtilProperties;
+import org.ofbiz.base.util.UtilValidate;
+import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
 import org.ofbiz.entity.config.DatasourceInfo;
@@ -45,6 +42,7 @@ import org.ofbiz.entity.model.ModelEntity;
 import org.ofbiz.entity.model.ModelReader;
 import org.ofbiz.entity.model.ModelUtil;
 import org.ofbiz.entity.model.ModelViewEntity;
+import org.w3c.dom.Element;
 
 /**
  * Some utility routines for loading seed data.
@@ -55,12 +53,12 @@ public class EntityDataLoader {
 
     public static String getPathsString(String helperName) {
         StringBuilder pathBuffer = new StringBuilder();
-        if (helperName != null && helperName.length() > 0) {
+        if (UtilValidate.isNotEmpty(helperName)) {
             DatasourceInfo datasourceInfo = EntityConfigUtil.getDatasourceInfo(helperName);
             for (Element sqlLoadPathElement: datasourceInfo.sqlLoadPaths) {
                 String prependEnv = sqlLoadPathElement.getAttribute("prepend-env");
                 pathBuffer.append(pathBuffer.length() == 0 ? "" : ";");
-                if (prependEnv != null && prependEnv.length() > 0) {
+                if (UtilValidate.isNotEmpty(prependEnv)) {
                     pathBuffer.append(System.getProperty(prependEnv));
                     pathBuffer.append("/");
                 }
@@ -80,11 +78,11 @@ public class EntityDataLoader {
         return getUrlList(helperName, componentName, datasourceInfo.readDatas);
     }
 
-    public static List<URL> getUrlList(String helperName, List readerNames) {
+    public static <E> List<URL> getUrlList(String helperName, List<E> readerNames) {
         return getUrlList(helperName, null, readerNames);
     }
 
-    public static List<URL> getUrlList(String helperName, String componentName, List readerNames) {
+    public static <E> List<URL> getUrlList(String helperName, String componentName, List<E> readerNames) {
         String paths = getPathsString(helperName);
         List<URL> urlList = new LinkedList<URL>();
 
@@ -98,6 +96,12 @@ public class EntityDataLoader {
                     readerName = ((Element) readerInfo).getAttribute("reader-name");
                 } else {
                     throw new IllegalArgumentException("Reader name list does not contain String(s) or Element(s)");
+                }
+                readerName = readerName.trim();
+                
+                // ignore the "tenant" reader if the multitenant property is "N"
+                if ("tenant".equals(readerName) && "N".equals(UtilProperties.getPropertyValue("general.properties", "multitenant"))) {
+                    continue;
                 }
 
                 // get all of the main resource model stuff, ie specified in the entityengine.xml file
@@ -142,7 +146,7 @@ public class EntityDataLoader {
         }
 
         // get files from the paths string
-        if (paths != null && paths.length() > 0) {
+        if (UtilValidate.isNotEmpty(paths)) {
             StringTokenizer tokenizer = new StringTokenizer(paths, ";");
             while (tokenizer.hasMoreTokens()) {
                 String path = tokenizer.nextToken().toLowerCase();
@@ -178,15 +182,48 @@ public class EntityDataLoader {
         return urlList;
     }
 
-    public static int loadData(URL dataUrl, String helperName, GenericDelegator delegator, List<Object> errorMessages) throws GenericEntityException {
+    public static List<URL> getUrlByComponentList(String helperName, List<String> components, List<String> readerNames) {
+        List<URL> urlList = new LinkedList<URL>();
+        for (String readerName:  readerNames) {
+            List<String> loadReaderNames = new LinkedList<String>();
+            loadReaderNames.add(readerName);
+            for (String component : components) {
+                urlList.addAll(getUrlList(helperName, component, loadReaderNames));
+            }
+        }
+        return urlList;
+    }
+
+    public static List<URL> getUrlByComponentList(String helperName, List<String> components) {
+        DatasourceInfo datasourceInfo = EntityConfigUtil.getDatasourceInfo(helperName);
+        List<String> readerNames = new LinkedList<String>();
+        for (Object readerInfo :  datasourceInfo.readDatas) {
+            String readerName = null;
+            if (readerInfo instanceof Element) {
+                readerName = ((Element) readerInfo).getAttribute("reader-name");
+            } else {
+                throw new IllegalArgumentException("Reader name list does not contain String(s) or Element(s)");
+            }
+            
+            // ignore the "tenant" reader if the multitenant property is "N"
+            if ("tenant".equals(readerName) && "N".equals(UtilProperties.getPropertyValue("general.properties", "multitenant"))) {
+                continue;
+            }
+            
+            readerNames.add(readerName);
+        }
+        return getUrlByComponentList(helperName, components, readerNames);
+    }
+
+    public static int loadData(URL dataUrl, String helperName, Delegator delegator, List<Object> errorMessages) throws GenericEntityException {
         return loadData(dataUrl, helperName, delegator, errorMessages, -1);
     }
 
-    public static int loadData(URL dataUrl, String helperName, GenericDelegator delegator, List<Object> errorMessages, int txTimeout) throws GenericEntityException {
+    public static int loadData(URL dataUrl, String helperName, Delegator delegator, List<Object> errorMessages, int txTimeout) throws GenericEntityException {
         return loadData(dataUrl, helperName, delegator, errorMessages, txTimeout, false, false, false);
     }
 
-    public static int loadData(URL dataUrl, String helperName, GenericDelegator delegator, List<Object> errorMessages, int txTimeout, boolean dummyFks, boolean maintainTxs, boolean tryInsert) throws GenericEntityException {
+    public static int loadData(URL dataUrl, String helperName, Delegator delegator, List<Object> errorMessages, int txTimeout, boolean dummyFks, boolean maintainTxs, boolean tryInsert) throws GenericEntityException {
         int rowsChanged = 0;
 
         if (dataUrl == null) {
@@ -223,7 +260,7 @@ public class EntityDataLoader {
         return rowsChanged;
     }
 
-    public static int generateData(GenericDelegator delegator, List<Object> errorMessages) throws GenericEntityException {
+    public static int generateData(Delegator delegator, List<Object> errorMessages) throws GenericEntityException {
         int rowsChanged = 0;
         ModelReader reader = delegator.getModelReader();
         for (String entityName: reader.getEntityNames()) {

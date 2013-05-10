@@ -25,13 +25,36 @@ import org.ofbiz.entity.util.*;
 import org.ofbiz.entity.condition.*;
 import org.ofbiz.party.contact.ContactMechWorker;
 import org.ofbiz.product.store.ProductStoreWorker;
+import org.ofbiz.webapp.website.WebSiteWorker;
 import org.ofbiz.accounting.payment.PaymentWorker;
 
-publicEmailContactLists = delegator.findByAnd("ContactList", [isPublic : "Y", contactMechTypeId : "EMAIL_ADDRESS"], ["contactListName"]);
+/*publicEmailContactLists = delegator.findByAnd("ContactList", [isPublic : "Y", contactMechTypeId : "EMAIL_ADDRESS"], ["contactListName"], false);
+context.publicEmailContactLists = publicEmailContactLists;*/
+
+webSiteId = WebSiteWorker.getWebSiteId(request);
+exprList = [];
+exprListThruDate = [];
+exprList.add(EntityCondition.makeCondition("webSiteId", EntityOperator.EQUALS, webSiteId));
+exprListThruDate.add(EntityCondition.makeCondition("thruDate", EntityOperator.EQUALS, null));
+exprListThruDate.add(EntityCondition.makeCondition("thruDate", EntityOperator.GREATER_THAN_EQUAL_TO, UtilDateTime.nowTimestamp()));
+orCond = EntityCondition.makeCondition(exprListThruDate, EntityOperator.OR);
+exprList.add(orCond);
+topCond = EntityCondition.makeCondition(exprList, EntityOperator.AND);
+webSiteContactList = delegator.findList("WebSiteContactList", topCond, null, null, null, false);
+
+publicEmailContactLists = [];
+webSiteContactList.each { webSiteContactList ->
+    contactList = webSiteContactList.getRelatedOne("ContactList", false);
+    contactListType = contactList.getRelatedOne("ContactListType", false);
+    temp = [:];
+    temp.contactList = contactList;
+    temp.contactListType = contactListType;
+    publicEmailContactLists.add(temp);
+}
 context.publicEmailContactLists = publicEmailContactLists;
 
 if (userLogin) {
-    partyAndContactMechList = delegator.findByAnd("PartyAndContactMech", [partyId : partyId, contactMechTypeId : "EMAIL_ADDRESS"], ["-fromDate"]);
+    partyAndContactMechList = delegator.findByAnd("PartyAndContactMech", [partyId : partyId, contactMechTypeId : "EMAIL_ADDRESS"], ["-fromDate"], false);
     partyAndContactMechList = EntityUtil.filterByDate(partyAndContactMechList);
     context.partyAndContactMechList = partyAndContactMechList;
 }

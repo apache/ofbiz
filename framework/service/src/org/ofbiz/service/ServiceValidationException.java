@@ -26,6 +26,7 @@ import org.ofbiz.base.util.UtilValidate;
 /**
  * ServiceValidationException
  */
+@SuppressWarnings("serial")
 public class ServiceValidationException extends GenericServiceException {
 
     protected List<String> messages = new ArrayList<String>();
@@ -105,8 +106,9 @@ public class ServiceValidationException extends GenericServiceException {
         return missingFields;
     }
 
+    @Override
     public List<String> getMessageList() {
-        if (this.messages == null || this.messages.size() == 0) {
+        if (UtilValidate.isEmpty(this.messages)) {
             return null;
         }
         return this.messages;
@@ -128,6 +130,7 @@ public class ServiceValidationException extends GenericServiceException {
         }
     }
 
+    @Override
     public String getMessage() {
         String msg = super.getMessage();
         if (UtilValidate.isNotEmpty(this.messages)) {

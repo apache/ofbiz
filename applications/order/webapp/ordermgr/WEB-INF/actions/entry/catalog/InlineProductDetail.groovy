@@ -27,6 +27,7 @@ import org.ofbiz.entity.condition.*;
 import org.ofbiz.entity.util.*;
 import org.ofbiz.webapp.taglib.*;
 import org.ofbiz.webapp.stats.VisitHandler;
+import org.ofbiz.webapp.website.WebSiteWorker
 import org.ofbiz.order.shoppingcart.ShoppingCartEvents;
 import org.ofbiz.product.catalog.*;
 import org.ofbiz.product.category.*;
@@ -46,7 +47,7 @@ catalogName = CatalogWorker.getCatalogName(request);
 currentCatalogId = CatalogWorker.getCurrentCatalogId(request);
 
 if (inlineProductId) {
-    inlineProduct = delegator.findByPrimaryKeyCache("Product", [productId : inlineProductId]);
+    inlineProduct = delegator.findOne("Product", [productId : inlineProductId], true);
     if (inlineProduct) {
         context.product = inlineProduct;
         contentWrapper = new ProductContentWrapper(inlineProduct, request);
@@ -122,7 +123,7 @@ if (inlineProduct) {
 
 
     // get the product price
-    webSiteId = CatalogWorker.getWebSiteId(request);
+    webSiteId = WebSiteWorker.getWebSiteId(request);
     autoUserLogin = request.getSession().getAttribute("autoUserLogin");
     if (cart.isSalesOrder()) {
         // sales order: run the "calculateProductPrice" service
@@ -150,7 +151,7 @@ if (inlineProduct) {
     context.variantSampleKeys = null;
     context.variantSampleSize = null;
     if ("Y".equals(inlineProduct.isVirtual)) {
-        if ("VV_FEATURETREE".equals(ProductWorker.getProductvirtualVariantMethod(delegator, inlineProductId))) {
+        if ("VV_FEATURETREE".equals(ProductWorker.getProductVirtualVariantMethod(delegator, inlineProductId))) {
             context.featureLists = ProductWorker.getSelectableProductFeaturesByTypesAndSeq(inlineProduct);
         } else {
             featureMap = dispatcher.runSync("getProductFeatureSet", [productId : inlineProductId]);
@@ -175,7 +176,7 @@ if (inlineProduct) {
                 if (variantTree) {
                     featureOrder = new LinkedList(featureSet);
                     featureOrder.each { featureKey ->
-                        featureValue = delegator.findByPrimaryKeyCache("ProductFeatureType", [productFeatureTypeId : featureKey]);
+                        featureValue = delegator.findOne("ProductFeatureType", [productFeatureTypeId : featureKey], true);
                         fValue = featureValue.get("description") ?: featureValue.productFeatureTypeId;
                         featureTypes[featureKey] = fValue;
                     }
@@ -188,7 +189,7 @@ if (inlineProduct) {
 
                 if (variantTree && imageMap) {
                     jsBuf = new StringBuffer();
-                    jsBuf.append("<script language=\"JavaScript\">");
+                    jsBuf.append("<script language=\"JavaScript\" type=\"text/javascript\">");
                     jsBuf.append("var DET" + inlineCounter + "= new Array(" + variantTree.size() + ");");
                     jsBuf.append("var IMG" + inlineCounter + " = new Array(" + variantTree.size() + ");");
                     jsBuf.append("var OPT" + inlineCounter + " = new Array(" + featureOrder.size() + ");");
@@ -283,7 +284,7 @@ if (inlineProduct) {
                         }
                         numberFormat = NumberFormat.getCurrencyInstance(locale);
                         variants.each { variantAssoc ->
-                            variant = variantAssoc.getRelatedOne("AssocProduct");
+                            variant = variantAssoc.getRelatedOne("AssocProduct", false);
                             // Get the price for each variant. Reuse the priceContext already setup for virtual product above and replace the product
                             if (cart.isSalesOrder()) {
                                 // sales order: run the "calculateProductPrice" service

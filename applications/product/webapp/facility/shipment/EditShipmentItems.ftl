@@ -64,7 +64,7 @@ under the License.
                     <td>${orderShipment.quantity?if_exists}</td>
                     <td>&nbsp;</td>
                     <td>&nbsp;</td>
-                    <td>&nbsp;<#-- don't allow a delete, need to implement a cancel issuance <a href="<@ofbizUrl>deleteShipmentItemIssuance?shipmentId=${shipmentId}&itemIssuanceId=${itemIssuance.itemIssuanceId}</@ofbizUrl>" class="buttontext">${uiLabelMap.CommonDelete}</a> --></td>
+                    <td>&nbsp;<#-- don't allow a delete, need to implement a cancel issuance <a href="<@ofbizUrl>deleteShipmentItemIssuance?shipmentId=${shipmentId}&amp;itemIssuanceId=${itemIssuance.itemIssuanceId}</@ofbizUrl>" class="buttontext">${uiLabelMap.CommonDelete}</a> --></td>
                 </tr>
             </#list>
             <#list itemIssuances as itemIssuance>
@@ -75,7 +75,7 @@ under the License.
                     <td>${itemIssuance.quantity?if_exists}</td>
                     <td>${itemIssuance.issuedDateTime?if_exists}</td>
                     <td class="label">${uiLabelMap.ProductFuturePartyRoleList}</td>
-                    <td>&nbsp;<#-- don't allow a delete, need to implement a cancel issuance <a href="<@ofbizUrl>deleteShipmentItemIssuance?shipmentId=${shipmentId}&itemIssuanceId=${itemIssuance.itemIssuanceId}</@ofbizUrl>" class="buttontext">${uiLabelMap.CommonDelete}</a> --></td>
+                    <td>&nbsp;<#-- don't allow a delete, need to implement a cancel issuance <a href="<@ofbizUrl>deleteShipmentItemIssuance?shipmentId=${shipmentId}&amp;itemIssuanceId=${itemIssuance.itemIssuanceId}</@ofbizUrl>" class="buttontext">${uiLabelMap.CommonDelete}</a> --></td>
                 </tr>
             </#list>
             <#list shipmentPackageContents as shipmentPackageContent>
@@ -131,7 +131,9 @@ under the License.
             <form action="<@ofbizUrl>createShipmentItem</@ofbizUrl>" method="post" name="createShipmentItemForm">
                 <input type="hidden" name="shipmentId" value="${shipmentId}"/>
                 <td><span class="label">${uiLabelMap.ProductNewItem}</span></td>
-                <td colspan="2"><span class="label">${uiLabelMap.ProductProductId}</span> <input type="text" name="productId" size="15" maxlength="20"/></td>
+                <td colspan="2"><span class="label">${uiLabelMap.ProductProductId}</span> 
+                  <@htmlTemplate.lookupField formName="createShipmentItemForm" name="productId" id="productId" fieldFormName="LookupProduct"/>
+                </td>
                 <td><input type="text" name="quantity" size="5" value="0"/></td>
                 <td colspan="2"><span class="label">${uiLabelMap.ProductProductDescription}</span> <input name="shipmentContentDescription" size="30" maxlength="255"/></td>
                 <td><a href="javascript:document.createShipmentItemForm.submit()" class="buttontext">${uiLabelMap.CommonCreate}</a></td>

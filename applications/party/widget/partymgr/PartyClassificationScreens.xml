@@ -61,21 +61,28 @@ under the License.
                 <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
                     <decorator-section name="pre-body">
                         <section>
+                            <condition>
+                                <if-service-permission service-name="partyBasePermissionCheck" main-action="VIEW"/>
+                            </condition>
                             <widgets>
-                                <platform-specific>
-                                    <html><html-template location="component://party/webapp/partymgr/party/ClassificationTabBar.ftl"/></html>
-                                </platform-specific>
+                                <include-menu location="component://party/widget/partymgr/PartyMenus.xml" name="PartyClassificationTabBar"/>
                             </widgets>
                         </section>
                     </decorator-section>
                     <decorator-section name="body">
                         <section>
+                            <condition>
+                                <if-service-permission service-name="partyBasePermissionCheck" main-action="VIEW"/>
+                            </condition>
                             <widgets>
                                 <screenlet id="AddPartyClassificationGroupPartiesPanel" title="${uiLabelMap.PartyClassificationGroups}" collapsible="true">
                                     <include-form name="AddPartyClassificationParty" location="component://party/widget/partymgr/PartyClassificationForms.xml"/>
                                 </screenlet>
                                 <include-form name="ListPartyClassificationGroupParties" location="component://party/widget/partymgr/PartyClassificationForms.xml"/>
                             </widgets>
+                            <fail-widgets>
+                                <label style="h3">${uiLabelMap.PartyMgrViewPermissionError}</label>
+                            </fail-widgets>
                         </section>
                     </decorator-section>
                 </decorator-screen>
@@ -97,23 +104,12 @@ under the License.
             <widgets>
                 <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
                     <decorator-section name="body">
-                        <container style="screenlet">
-                            <container style="screenlet-title-bar">
-                                <container style="h3">
-                                    <label text="${uiLabelMap.PartyClassificationGroups}"/>
-                                </container>
-                            </container>
+                        <screenlet title="${uiLabelMap.PartyClassificationGroups}">
+                            <container style="button-bar"><link target="EditPartyClassificationGroup" style="buttontext create" text="${uiLabelMap.PartyCreateNewPartyClassificationGroup}"/></container>
                             <container style="screenlet-body">
-                                <section>
-                                    <widgets>
-                                        <container><link target="EditPartyClassificationGroup" style="smallSubmit" text="${uiLabelMap.PartyCreateNewPartyClassificationGroup}"/></container>
-                                        <container style="screenlet-body">
-                                            <include-form name="ListPartyClassificationGroups" location="component://party/widget/partymgr/PartyClassificationForms.xml"/>
-                                        </container>
-                                    </widgets>
-                                </section>
+                                <include-form name="ListPartyClassificationGroups" location="component://party/widget/partymgr/PartyClassificationForms.xml"/>
                             </container>
-                        </container>
+                        </screenlet>
                     </decorator-section>
                 </decorator-screen>
             </widgets>
@@ -136,31 +132,27 @@ under the License.
                 <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
                     <decorator-section name="pre-body">
                         <section>
+                            <condition>
+                                <if-service-permission service-name="partyBasePermissionCheck" main-action="VIEW"/>
+                            </condition>
                             <widgets>
-                                <platform-specific>
-                                    <html><html-template location="component://party/webapp/partymgr/party/ClassificationTabBar.ftl"/></html>
-                                </platform-specific>
+                                <include-menu location="component://party/widget/partymgr/PartyMenus.xml" name="PartyClassificationTabBar"/>
                             </widgets>
                         </section>
                     </decorator-section>
                     <decorator-section name="body">
                         <section>
+                            <condition>
+                                <if-service-permission service-name="partyBasePermissionCheck" main-action="VIEW"/>
+                            </condition>
                             <widgets>
-                                <container style="screenlet">
-                                    <container style="screenlet-title-bar">
-                                        <container style="h3">
-                                            <label text="${uiLabelMap.PartyClassificationGroup}"/>
-                                        </container>
-                                    </container>
-                                    <container style="screenlet-body">
-                                        <section>
-                                            <widgets>
-                                                <include-form name="EditPartyClassificationGroup" location="component://party/widget/partymgr/PartyClassificationForms.xml"/>
-                                            </widgets>
-                                        </section>
-                                    </container>
-                                </container>
+                                <screenlet title="${uiLabelMap.PartyClassificationGroup}">
+                                    <include-form name="EditPartyClassificationGroup" location="component://party/widget/partymgr/PartyClassificationForms.xml"/>
+                                </screenlet>
                             </widgets>
+                            <fail-widgets>
+                                <label style="h3">${uiLabelMap.PartyMgrViewPermissionError}</label>
+                            </fail-widgets>
                         </section>
                     </decorator-section>
                 </decorator-screen>

@@ -19,14 +19,14 @@
 package org.ofbiz.marketing.tracking;
 
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+
+import javolution.util.FastList;
 
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilDateTime;
@@ -35,9 +35,10 @@ import org.ofbiz.base.util.UtilProperties;
 import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.webapp.stats.VisitHandler;
 import org.ofbiz.webapp.website.WebSiteWorker;
-import org.ofbiz.entity.GenericDelegator;
+import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
+import org.ofbiz.entity.util.EntityUtilProperties;
 import org.ofbiz.product.category.CategoryWorker;
 
 /**
@@ -57,10 +58,10 @@ public class TrackingCodeEvents {
 
         if (UtilValidate.isNotEmpty(trackingCodeId)) {
             //tracking code is specified on the request, get the TrackingCode value and handle accordingly
-            GenericDelegator delegator = (GenericDelegator) request.getAttribute("delegator");
+            Delegator delegator = (Delegator) request.getAttribute("delegator");
             GenericValue trackingCode;
             try {
-                trackingCode = delegator.findByPrimaryKeyCache("TrackingCode", UtilMisc.toMap("trackingCodeId", trackingCodeId));
+                trackingCode = delegator.findOne("TrackingCode", UtilMisc.toMap("trackingCodeId", trackingCodeId), true);
             } catch (GenericEntityException e) {
                 Debug.logError(e, "Error looking up TrackingCode with trackingCodeId [" + trackingCodeId + "], ignoring this trackingCodeId", module);
                 return "error";
@@ -72,7 +73,7 @@ public class TrackingCodeEvents {
                 return "error";
             }
 
-            return processTrackingCode(trackingCode, request, response);
+            return processTrackingCode(trackingCode, request, response, "TKCDSRC_URL_PARAM");
         } else {
             return "success";
         }
@@ -94,10 +95,10 @@ public class TrackingCodeEvents {
 
         if (UtilValidate.isNotEmpty(trackingCodeId)) {
             //partner managed tracking code is specified on the request
-            GenericDelegator delegator = (GenericDelegator) request.getAttribute("delegator");
+            Delegator delegator = (Delegator) request.getAttribute("delegator");
             GenericValue trackingCode;
             try {
-                trackingCode = delegator.findByPrimaryKeyCache("TrackingCode", UtilMisc.toMap("trackingCodeId", trackingCodeId));
+                trackingCode = delegator.findOne("TrackingCode", UtilMisc.toMap("trackingCodeId", trackingCodeId), true);
             } catch (GenericEntityException e) {
                 Debug.logError(e, "Error looking up TrackingCode with trackingCodeId [" + trackingCodeId + "], ignoring this trackingCodeId", module);
                 return "error";
@@ -108,12 +109,12 @@ public class TrackingCodeEvents {
 
                 String dtc = request.getParameter("dtc");
                 if (UtilValidate.isEmpty(dtc)) {
-                    dtc = UtilProperties.getPropertyValue("general", "partner.trackingCodeId.default");
+                    dtc = EntityUtilProperties.getPropertyValue("general", "partner.trackingCodeId.default", delegator);
                 }
                 if (UtilValidate.isNotEmpty(dtc)) {
                     GenericValue defaultTrackingCode = null;
                     try {
-                        defaultTrackingCode = delegator.findByPrimaryKeyCache("TrackingCode", UtilMisc.toMap("trackingCodeId", dtc));
+                        defaultTrackingCode = delegator.findOne("TrackingCode", UtilMisc.toMap("trackingCodeId", dtc), true);
                     } catch (GenericEntityException e) {
                         Debug.logError(e, "Error looking up Default values TrackingCode with trackingCodeId [" + dtc + "], not using the dtc value for new TrackingCode defaults", module);
                     }
@@ -164,14 +165,14 @@ public class TrackingCodeEvents {
                 }
             }
 
-            return processTrackingCode(trackingCode, request, response);
+            return processTrackingCode(trackingCode, request, response, "TKCDSRC_URL_PARAM");
         } else {
             return "success";
         }
     }
 
-    private static String processTrackingCode(GenericValue trackingCode, HttpServletRequest request, HttpServletResponse response) {
-        GenericDelegator delegator = (GenericDelegator) request.getAttribute("delegator");
+    public static String processTrackingCode(GenericValue trackingCode, HttpServletRequest request, HttpServletResponse response, String sourceEnumId) {
+        Delegator delegator = (Delegator) request.getAttribute("delegator");
         String trackingCodeId = trackingCode.getString("trackingCodeId");
 
         //check effective dates
@@ -187,12 +188,12 @@ public class TrackingCodeEvents {
 
         //persist that info by associating with the current visit
         GenericValue visit = VisitHandler.getVisit(request.getSession());
-        if (visit == null) {
+        if (visit == null && !UtilProperties.propertyValueEqualsIgnoreCase("serverstats", "stats.persist.visit", "false")) {
             Debug.logWarning("Could not get visit, not associating trackingCode [" + trackingCodeId + "] with visit", module);
         } else {
             GenericValue trackingCodeVisit = delegator.makeValue("TrackingCodeVisit",
                     UtilMisc.toMap("trackingCodeId", trackingCodeId, "visitId", visit.get("visitId"),
-                    "fromDate", UtilDateTime.nowTimestamp(), "sourceEnumId", "TKCDSRC_URL_PARAM"));
+                    "fromDate", UtilDateTime.nowTimestamp(), "sourceEnumId", sourceEnumId));
             try {
                 trackingCodeVisit.create();
             } catch (GenericEntityException e) {
@@ -210,7 +211,7 @@ public class TrackingCodeEvents {
         String webSiteId = WebSiteWorker.getWebSiteId(request);
         if (webSiteId != null) {
             try {
-                GenericValue webSite = delegator.findByPrimaryKeyCache("WebSite", UtilMisc.toMap("webSiteId", webSiteId));
+                GenericValue webSite = delegator.findOne("WebSite", UtilMisc.toMap("webSiteId", webSiteId), true);
                 if (webSite != null) {
                     cookieDomain = webSite.getString("cookieDomain");
                 }
@@ -246,7 +247,7 @@ public class TrackingCodeEvents {
         // if site id exist in cookies then it is not required to create it, if exist with different site then create it
         int siteIdCookieAge = (60 * 60 * 24 * 365); // should this be configurable?
         String siteId = request.getParameter("siteId");
-        if (siteId != null && siteId.length() > 0) {
+        if (UtilValidate.isNotEmpty(siteId)) {
             String visitorSiteIdCookieName = "Ofbiz.TKCD.SiteId";
             String visitorSiteId = null;
             // first try to get the current ID from the visitor cookie
@@ -260,7 +261,7 @@ public class TrackingCodeEvents {
                 }
             }
 
-            if ( visitorSiteId == null || (visitorSiteId != null && !visitorSiteId.equals(siteId)) ) {
+            if (visitorSiteId == null || (visitorSiteId != null && !visitorSiteId.equals(siteId))) {
                 // if trackingCode.siteId is  not null  write a trackable cookie with name in the form: Ofbiz.TKCSiteId and timeout will be 60 * 60 * 24 * 365
                 Cookie siteIdCookie = new Cookie("Ofbiz.TKCD.SiteId" ,siteId);
                 siteIdCookie.setMaxAge(siteIdCookieAge);
@@ -285,9 +286,9 @@ public class TrackingCodeEvents {
         if (overrideCss != null)
             session.setAttribute("overrideCss", overrideCss);
         String prodCatalogId = trackingCode.getString("prodCatalogId");
-        if (prodCatalogId != null && prodCatalogId.length() > 0) {
+        if (UtilValidate.isNotEmpty(prodCatalogId)) {
             session.setAttribute("CURRENT_CATALOG_ID", prodCatalogId);
-            CategoryWorker.setTrail(request, new ArrayList());
+            CategoryWorker.setTrail(request, FastList.<String>newInstance());
         }
 
         // if forward/redirect is needed, do a response.sendRedirect and return null to tell the control servlet to not do any other requests/views
@@ -308,10 +309,10 @@ public class TrackingCodeEvents {
      * of events that run on the first hit in a visit.
      */
     public static String checkTrackingCodeCookies(HttpServletRequest request, HttpServletResponse response) {
-        GenericDelegator delegator = (GenericDelegator) request.getAttribute("delegator");
+        Delegator delegator = (Delegator) request.getAttribute("delegator");
         java.sql.Timestamp nowStamp = UtilDateTime.nowTimestamp();
         GenericValue visit = VisitHandler.getVisit(request.getSession());
-        if (visit == null) {
+        if (visit == null && !UtilProperties.propertyValueEqualsIgnoreCase("serverstats", "stats.persist.visit", "false")) {
             Debug.logWarning("Could not get visit, not checking trackingCode cookies to associate with visit", module);
         } else {
             // loop through cookies and look for ones with a name that starts with TKCDT_ for trackable cookies
@@ -323,7 +324,7 @@ public class TrackingCodeEvents {
                         String trackingCodeId = cookies[i].getValue();
                         GenericValue trackingCode;
                         try {
-                            trackingCode = delegator.findByPrimaryKeyCache("TrackingCode", UtilMisc.toMap("trackingCodeId", trackingCodeId));
+                            trackingCode = delegator.findOne("TrackingCode", UtilMisc.toMap("trackingCodeId", trackingCodeId), true);
                         } catch (GenericEntityException e) {
                             Debug.logError(e, "Error looking up TrackingCode with trackingCodeId [" + trackingCodeId + "], ignoring this trackingCodeId", module);
                             continue;
@@ -365,7 +366,7 @@ public class TrackingCodeEvents {
     }
 
     public static String checkAccessTrackingCode(HttpServletRequest request, HttpServletResponse response) {
-        GenericDelegator delegator = (GenericDelegator) request.getAttribute("delegator");
+        Delegator delegator = (Delegator) request.getAttribute("delegator");
         java.sql.Timestamp nowStamp = UtilDateTime.nowTimestamp();
 
         String trackingCodeId = request.getParameter("autoTrackingCode");
@@ -385,7 +386,7 @@ public class TrackingCodeEvents {
             // find the tracking code object
             GenericValue trackingCode = null;
             try {
-                trackingCode = delegator.findByPrimaryKeyCache("TrackingCode", UtilMisc.toMap("trackingCodeId", trackingCodeId));
+                trackingCode = delegator.findOne("TrackingCode", UtilMisc.toMap("trackingCodeId", trackingCodeId), true);
             } catch (GenericEntityException e) {
                 Debug.logError(e, "Error looking up TrackingCode with trackingCodeId [" + trackingCodeId + "], ignoring this trackingCodeId", module);
             }
@@ -435,10 +436,10 @@ public class TrackingCodeEvents {
     }
 
     /** Makes a list of TrackingCodeOrder entities to be attached to the current order; called by the createOrder event; the values in the returned List will not have the orderId set */
-    public static List makeTrackingCodeOrders(HttpServletRequest request) {
-        GenericDelegator delegator = (GenericDelegator) request.getAttribute("delegator");
+    public static List<GenericValue> makeTrackingCodeOrders(HttpServletRequest request) {
+        Delegator delegator = (Delegator) request.getAttribute("delegator");
         java.sql.Timestamp nowStamp = UtilDateTime.nowTimestamp();
-        List trackingCodeOrders = new LinkedList();
+        List<GenericValue> trackingCodeOrders = FastList.newInstance();
 
         Cookie[] cookies = request.getCookies();
         Timestamp affiliateReferredTimeStamp = null;
@@ -449,8 +450,8 @@ public class TrackingCodeEvents {
             for (int i = 0; i < cookies.length; i++) {
                 String cookieName = cookies[i].getName();
 
-                Debug.logInfo(" cookieName is " + cookieName, module);
-                Debug.logInfo(" cookieValue is " + cookies[i].getValue(), module);
+                //Debug.logInfo(" cookieName is " + cookieName, module);
+                //Debug.logInfo(" cookieValue is " + cookies[i].getValue(), module);
                 // find the siteId cookie if it exists
                 if ("Ofbiz.TKCD.SiteId".equals(cookieName)) {
                     siteId = cookies[i].getValue();
@@ -483,7 +484,7 @@ public class TrackingCodeEvents {
         }
         GenericValue trackingCode = null;
         try {
-            trackingCode = delegator.findByPrimaryKeyCache("TrackingCode", UtilMisc.toMap("trackingCodeId", trackingCodeId));
+            trackingCode = delegator.findOne("TrackingCode", UtilMisc.toMap("trackingCodeId", trackingCodeId), true);
         } catch (GenericEntityException e) {
             Debug.logError(e, "Error looking up TrackingCode with trackingCodeId [" + trackingCodeId + "], ignoring this trackingCodeId", module);
         }
@@ -499,7 +500,7 @@ public class TrackingCodeEvents {
             GenericValue trackingCodeOrder = delegator.makeValue("TrackingCodeOrder",
                     UtilMisc.toMap("trackingCodeTypeId", trackingCode.get("trackingCodeTypeId"),
                     "trackingCodeId", trackingCodeId, "isBillable", isBillable, "siteId", siteId,
-                    "hasExported", "N", "affiliateReferredTimeStamp",affiliateReferredTimeStamp ));
+                    "hasExported", "N", "affiliateReferredTimeStamp",affiliateReferredTimeStamp));
 
             Debug.logInfo(" trackingCodeOrder is " + trackingCodeOrder, module);
             trackingCodeOrders.add(trackingCodeOrder);

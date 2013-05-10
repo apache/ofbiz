@@ -18,24 +18,24 @@
  *******************************************************************************/
 package org.ofbiz.accounting.thirdparty.gosoftware;
 
-import java.util.Map;
-import java.util.Properties;
-import java.util.List;
-import java.text.DecimalFormat;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Properties;
 
-import org.ofbiz.service.DispatchContext;
-import org.ofbiz.service.ServiceUtil;
+import org.ofbiz.accounting.payment.PaymentGatewayServices;
+import org.ofbiz.base.util.Debug;
+import org.ofbiz.base.util.GeneralException;
+import org.ofbiz.base.util.StringUtil;
+import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.base.util.UtilNumber;
 import org.ofbiz.base.util.UtilProperties;
 import org.ofbiz.base.util.UtilValidate;
-import org.ofbiz.base.util.Debug;
-import org.ofbiz.base.util.StringUtil;
-import org.ofbiz.base.util.GeneralException;
-import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.entity.GenericValue;
-import org.ofbiz.accounting.payment.PaymentGatewayServices;
+import org.ofbiz.service.DispatchContext;
+import org.ofbiz.service.ServiceUtil;
 
 
 public class PcChargeServices {
@@ -43,12 +43,15 @@ public class PcChargeServices {
     public static final String module = PcChargeServices.class.getName();
     private static int decimals = UtilNumber.getBigDecimalScale("invoice.decimals");
     private static int rounding = UtilNumber.getBigDecimalRoundingMode("invoice.rounding");
+    public final static String resource = "AccountingUiLabels";
 
-    public static Map ccAuth(DispatchContext dctx, Map context) {
+    public static Map<String, Object> ccAuth(DispatchContext dctx, Map<String, ? extends Object> context) {
+        Locale locale = (Locale) context.get("locale");
         Properties props = buildPccProperties(context);
         PcChargeApi api = getApi(props);
         if (api == null) {
-            return ServiceUtil.returnError("PCCharge is not configured properly");
+            return ServiceUtil.returnError(UtilProperties.getMessage(resource, 
+                    "AccountingPcChargeErrorGettingPaymentGatewayConfig", locale));
         }
 
         try {
@@ -85,7 +88,7 @@ public class PcChargeServices {
         }
 
         if (out != null) {
-            Map result = ServiceUtil.returnSuccess();
+            Map<String, Object> result = ServiceUtil.returnSuccess();
             String resultCode = out.get(PcChargeApi.RESULT);
             boolean passed = false;
             if ("CAPTURED".equals(resultCode)) {
@@ -126,12 +129,14 @@ public class PcChargeServices {
             return result;
 
         } else {
-            return ServiceUtil.returnError("Receive a null result from PcCharge");
+            return ServiceUtil.returnError(UtilProperties.getMessage(resource, 
+                    "AccountingPcChargeResultIsNull", locale));
         }
     }
 
-    public static Map ccCapture(DispatchContext dctx, Map context) {
+    public static Map<String, Object> ccCapture(DispatchContext dctx, Map<String, ? extends Object> context) {
         GenericValue orderPaymentPreference = (GenericValue) context.get("orderPaymentPreference");
+        Locale locale = (Locale) context.get("locale");
 
         //lets see if there is a auth transaction already in context
         GenericValue authTransaction = (GenericValue) context.get("authTrans");
@@ -141,14 +146,16 @@ public class PcChargeServices {
         }
 
         if (authTransaction == null) {
-            return ServiceUtil.returnError("No authorization transaction found for the OrderPaymentPreference; cannot capture");
+            return ServiceUtil.returnError(UtilProperties.getMessage(resource, 
+                    "AccountingPaymentTransactionAuthorizationNotFoundCannotCapture", locale));
         }
 
         // setup the PCCharge Interface
         Properties props = buildPccProperties(context);
         PcChargeApi api = getApi(props);
         if (api == null) {
-            return ServiceUtil.returnError("PCCharge is not configured properly");
+            return ServiceUtil.returnError(UtilProperties.getMessage(resource, 
+                    "AccountingPcChargeErrorGettingPaymentGatewayConfig", locale));
         }
 
         api.set(PcChargeApi.TROUTD, authTransaction.getString("referenceNum"));
@@ -167,7 +174,7 @@ public class PcChargeServices {
         }
 
         if (out != null) {
-            Map result = ServiceUtil.returnSuccess();
+            Map<String, Object> result = ServiceUtil.returnSuccess();
             String resultCode = out.get(PcChargeApi.RESULT);
             if ("CAPTURED".equals(resultCode)) {
                 result.put("captureResult", Boolean.TRUE);
@@ -182,29 +189,33 @@ public class PcChargeServices {
 
             return result;
         } else {
-            return ServiceUtil.returnError("Receive a null result from PcCharge");
+            return ServiceUtil.returnError(UtilProperties.getMessage(resource, 
+                    "AccountingPcChargeResultIsNull", locale));
         }
     }
 
-    public static Map ccRelease(DispatchContext dctx, Map context) {
+    public static Map<String, Object> ccRelease(DispatchContext dctx, Map<String, ? extends Object> context) {
         GenericValue orderPaymentPreference = (GenericValue) context.get("orderPaymentPreference");
 
         //lets see if there is a auth transaction already in context
         GenericValue authTransaction = (GenericValue) context.get("authTrans");
+        Locale locale = (Locale) context.get("locale");
 
         if (authTransaction == null) {
             authTransaction = PaymentGatewayServices.getAuthTransaction(orderPaymentPreference);
         }
 
         if (authTransaction == null) {
-            return ServiceUtil.returnError("No authorization transaction found for the OrderPaymentPreference; cannot release");
+            return ServiceUtil.returnError(UtilProperties.getMessage(resource, 
+                    "AccountingPaymentTransactionAuthorizationNotFoundCannotRelease", locale));
         }
 
         // setup the PCCharge Interface
         Properties props = buildPccProperties(context);
         PcChargeApi api = getApi(props);
         if (api == null) {
-            return ServiceUtil.returnError("PCCharge is not configured properly");
+            return ServiceUtil.returnError(UtilProperties.getMessage(resource, 
+                    "AccountingPcChargeErrorGettingPaymentGatewayConfig", locale));
         }
 
         api.set(PcChargeApi.TROUTD, authTransaction.getString("referenceNum"));
@@ -212,7 +223,8 @@ public class PcChargeServices {
 
         // check to make sure we are configured for SALE mode
         if (!"true".equalsIgnoreCase(props.getProperty("autoBill"))) {
-            return ServiceUtil.returnError("PCCharge does not support releasing pre-auths.");
+            return ServiceUtil.returnError(UtilProperties.getMessage(resource, 
+                    "AccountingPcChargeCannotSupportReleasingPreAuth", locale));
         }
 
         // send the transaction
@@ -228,7 +240,7 @@ public class PcChargeServices {
         }
 
         if (out != null) {
-            Map result = ServiceUtil.returnSuccess();
+            Map<String, Object> result = ServiceUtil.returnSuccess();
             String resultCode = out.get(PcChargeApi.RESULT);
             if ("VOIDED".equals(resultCode)) {
                 result.put("releaseResult", Boolean.TRUE);
@@ -243,29 +255,33 @@ public class PcChargeServices {
 
             return result;
         } else {
-            return ServiceUtil.returnError("Receive a null result from PcCharge");
+            return ServiceUtil.returnError(UtilProperties.getMessage(resource, 
+                "AccountingPcChargeResultIsNull", locale));
         }
     }
 
-    public static Map ccRefund(DispatchContext dctx, Map context) {
+    public static Map<String, Object> ccRefund(DispatchContext dctx, Map<String, ? extends Object> context) {
         GenericValue orderPaymentPreference = (GenericValue) context.get("orderPaymentPreference");
 
         //lets see if there is a auth transaction already in context
         GenericValue authTransaction = (GenericValue) context.get("authTrans");
+        Locale locale = (Locale) context.get("locale");
 
         if (authTransaction == null) {
             authTransaction = PaymentGatewayServices.getAuthTransaction(orderPaymentPreference);
         }
 
         if (authTransaction == null) {
-            return ServiceUtil.returnError("No authorization transaction found for the OrderPaymentPreference; cannot refund");
+            return ServiceUtil.returnError(UtilProperties.getMessage(resource, 
+                    "AccountingPaymentTransactionAuthorizationNotFoundCannotRefund", locale));
         }
 
         // setup the PCCharge Interface
         Properties props = buildPccProperties(context);
         PcChargeApi api = getApi(props);
         if (api == null) {
-            return ServiceUtil.returnError("PCCharge is not configured properly");
+            return ServiceUtil.returnError(UtilProperties.getMessage(resource, 
+                    "AccountingPcChargeErrorGettingPaymentGatewayConfig", locale));
         }
 
         api.set(PcChargeApi.TROUTD, authTransaction.getString("referenceNum"));
@@ -284,7 +300,7 @@ public class PcChargeServices {
         }
 
         if (out != null) {
-            Map result = ServiceUtil.returnSuccess();
+            Map<String, Object> result = ServiceUtil.returnSuccess();
             String resultCode = out.get(PcChargeApi.RESULT);
             if ("CAPTURED".equals(resultCode)) {
                 result.put("refundResult", Boolean.TRUE);
@@ -299,17 +315,18 @@ public class PcChargeServices {
 
             return result;
         } else {
-            return ServiceUtil.returnError("Receive a null result from PcCharge");
+            return ServiceUtil.returnError(UtilProperties.getMessage(resource, 
+                    "AccountingPcChargeResultIsNull", locale));
         }
     }
 
-    private static void setCreditCardInfo(PcChargeApi api, Map context) throws GeneralException {
+    private static void setCreditCardInfo(PcChargeApi api, Map<String, ? extends Object> context) throws GeneralException {
         GenericValue orderPaymentPreference = (GenericValue) context.get("orderPaymentPreference");
         GenericValue creditCard = (GenericValue) context.get("creditCard");
         if (creditCard != null) {
-            List expDateList = StringUtil.split(creditCard.getString("expireDate"), "/");
-            String month = (String) expDateList.get(0);
-            String year = (String) expDateList.get(1);
+            List<String> expDateList = StringUtil.split(creditCard.getString("expireDate"), "/");
+            String month = expDateList.get(0);
+            String year = expDateList.get(1);
             String y2d = year.substring(2);
             String expDate = month + y2d;
 
@@ -318,18 +335,18 @@ public class PcChargeServices {
             String mname = creditCard.getString("middleNameOnCard");
             String lname = creditCard.getString("lastNameOnCard");
             String sufix = creditCard.getString("suffixOnCard");
-            StringBuffer name = new StringBuffer();
+            StringBuilder name = new StringBuilder();
             if (UtilValidate.isNotEmpty(title)) {
-                name.append(title + " ");
+                name.append(title).append(" ");
             }
             if (UtilValidate.isNotEmpty(fname)) {
-                name.append(fname + " ");
+                name.append(fname).append(" ");
             }
             if (UtilValidate.isNotEmpty(mname)) {
-                name.append(mname + " ");
+                name.append(mname).append(" ");
             }
             if (UtilValidate.isNotEmpty(lname)) {
-                name.append(lname + " ");
+                name.append(lname).append(" ");
             }
             if (UtilValidate.isNotEmpty(sufix)) {
                 name.append(sufix);
@@ -386,7 +403,7 @@ public class PcChargeServices {
         return api;
     }
 
-    private static Properties buildPccProperties(Map context) {
+    private static Properties buildPccProperties(Map<String, ? extends Object> context) {
         String configString = (String) context.get("paymentConfig");
         if (configString == null) {
             configString = "payment.properties";
@@ -421,12 +438,12 @@ public class PcChargeServices {
         props.put("host", host);
         props.put("port", port);
         props.put("autoBill", autoBill);
-        Debug.log("Returning properties - " + props, module);
+        Debug.logInfo("Returning properties - " + props, module);
 
         return props;
     }
 
-    private static String getAmountString(Map context, String amountField) {
+    private static String getAmountString(Map<String, ? extends Object> context, String amountField) {
         BigDecimal processAmount = (BigDecimal) context.get(amountField);
         return processAmount.setScale(decimals, rounding).toPlainString();
     }

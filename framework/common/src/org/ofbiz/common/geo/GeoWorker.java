@@ -19,15 +19,15 @@
 package org.ofbiz.common.geo;
 
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
 
 import javolution.util.FastList;
-import javolution.util.FastSet;
+import javolution.util.FastMap;
 
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.base.util.UtilValidate;
-import org.ofbiz.entity.GenericDelegator;
+import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
 import org.ofbiz.entity.util.EntityUtil;
@@ -39,10 +39,10 @@ public class GeoWorker {
 
     public static final String module = GeoWorker.class.getName();
 
-    public static List<GenericValue> expandGeoGroup(String geoId, GenericDelegator delegator) {
+    public static List<GenericValue> expandGeoGroup(String geoId, Delegator delegator) {
         GenericValue geo = null;
         try {
-            geo = delegator.findByPrimaryKeyCache("Geo", UtilMisc.toMap("geoId", geoId));
+            geo = delegator.findOne("Geo", UtilMisc.toMap("geoId", geoId), true);
         } catch (GenericEntityException e) {
             Debug.logError(e, "Unable to look up Geo from geoId : " + geoId, module);
         }
@@ -57,12 +57,12 @@ public class GeoWorker {
             return UtilMisc.toList(geo);
         }
 
-        //Debug.log("Expanding geo : " + geo, module);
+        //Debug.logInfo("Expanding geo : " + geo, module);
 
         List<GenericValue> geoList = FastList.newInstance();
         List<GenericValue> thisGeoAssoc = null;
         try {
-            thisGeoAssoc = geo.getRelated("AssocGeoAssoc", UtilMisc.toMap("geoAssocTypeId", "GROUP_MEMBER"), null);
+            thisGeoAssoc = geo.getRelated("AssocGeoAssoc", UtilMisc.toMap("geoAssocTypeId", "GROUP_MEMBER"), null, false);
         } catch (GenericEntityException e) {
             Debug.logError(e, "Unable to get associated Geo GROUP_MEMBER relationship(s)", module);
         }
@@ -70,43 +70,45 @@ public class GeoWorker {
             for (GenericValue nextGeoAssoc: thisGeoAssoc) {
                 GenericValue nextGeo = null;
                 try {
-                    nextGeo = nextGeoAssoc.getRelatedOne("MainGeo");
+                    nextGeo = nextGeoAssoc.getRelatedOne("MainGeo", false);
                 } catch (GenericEntityException e) {
                     Debug.logError(e, "Unable to get related Geo", module);
                 }
                 geoList.addAll(expandGeoGroup(nextGeo));
             }
         } else {
-            //Debug.log("No associated geos with this group", module);
+            //Debug.logInfo("No associated geos with this group", module);
         }
 
-        //Debug.log("Expanded to : " + geoList, module);
+        //Debug.logInfo("Expanded to : " + geoList, module);
 
         return geoList;
     }
 
-    public static Set<String> expandGeoRegionDeep(Set<String> geoIdSet, GenericDelegator delegator) throws GenericEntityException {
-        if (geoIdSet == null || geoIdSet.size() == 0) {
-            return geoIdSet;
+    public static Map<String, String> expandGeoRegionDeep(Map<String, String> geoIdByTypeMapOrig, Delegator delegator) throws GenericEntityException {
+        if (UtilValidate.isEmpty(geoIdByTypeMapOrig)) {
+            return geoIdByTypeMapOrig;
         }
-        Set<String> geoIdSetTemp = FastSet.newInstance();
-        for (String curGeoId: geoIdSet) {
-            List<GenericValue> geoAssocList = delegator.findByAndCache("GeoAssoc", UtilMisc.toMap("geoIdTo", curGeoId, "geoAssocTypeId", "REGIONS"));
+        Map<String, String> geoIdByTypeMapTemp = FastMap.newInstance();
+        for (Map.Entry<String, String> geoIdByTypeEntry: geoIdByTypeMapOrig.entrySet()) {
+            List<GenericValue> geoAssocList = delegator.findByAnd("GeoAssoc", UtilMisc.toMap("geoIdTo", geoIdByTypeEntry.getValue(), "geoAssocTypeId", "REGIONS"), null, true);
             for (GenericValue geoAssoc: geoAssocList) {
-                geoIdSetTemp.add(geoAssoc.getString("geoId"));
+                GenericValue newGeo = delegator.findOne("Geo", true, "geoId", geoAssoc.getString("geoId"));
+                geoIdByTypeMapTemp.put(newGeo.getString("geoTypeId"), newGeo.getString("geoId"));
             }
         }
-        geoIdSetTemp = expandGeoRegionDeep(geoIdSetTemp, delegator);
-        Set<String> geoIdSetNew = FastSet.newInstance();
-        geoIdSetNew.addAll(geoIdSet);
-        geoIdSetNew.addAll(geoIdSetTemp);
-        return geoIdSetNew;
+        geoIdByTypeMapTemp = expandGeoRegionDeep(geoIdByTypeMapTemp, delegator);
+        Map<String, String> geoIdByTypeMapNew = FastMap.newInstance();
+        // add the temp Map first, then the original over top of it, ie give the original priority over the sub/expanded values
+        geoIdByTypeMapNew.putAll(geoIdByTypeMapTemp);
+        geoIdByTypeMapNew.putAll(geoIdByTypeMapOrig);
+        return geoIdByTypeMapNew;
     }
 
-    public static boolean containsGeo(List<GenericValue> geoList, String geoId, GenericDelegator delegator) {
+    public static boolean containsGeo(List<GenericValue> geoList, String geoId, Delegator delegator) {
         GenericValue geo = null;
         try {
-            geo = delegator.findByPrimaryKeyCache("Geo", UtilMisc.toMap("geoId", geoId));
+            geo = delegator.findOne("Geo", UtilMisc.toMap("geoId", geoId), true);
         } catch (GenericEntityException e) {
             Debug.logError(e, "Unable to look up Geo from geoId : " + geoId, module);
         }
@@ -117,21 +119,21 @@ public class GeoWorker {
         if (geoList == null || geo == null) {
             return false;
         }
-        //Debug.log("Contains Geo : " + geoList.contains(geo));
+        //Debug.logInfo("Contains Geo : " + geoList.contains(geo));
         return geoList.contains(geo);
     }
 
-    public static GenericValue findLatestGeoPoint(GenericDelegator delegator, String Entity, String mainId, String mainValueId, String secondId, String secondValueId) {
+    public static GenericValue findLatestGeoPoint(Delegator delegator, String entityName, String mainId, String mainValueId, String secondId, String secondValueId) {
         List<GenericValue> gptList = null;
         if (UtilValidate.isNotEmpty(secondId) && UtilValidate.isNotEmpty(secondValueId)) {
             try {
-                gptList = delegator.findByAnd(Entity, UtilMisc.toMap(mainId, mainValueId, secondId, secondValueId), UtilMisc.toList("-fromDate"));
+                gptList = delegator.findByAnd(entityName, UtilMisc.toMap(mainId, mainValueId, secondId, secondValueId), UtilMisc.toList("-fromDate"), false);
             } catch (GenericEntityException e) {
                 Debug.logError(e, "Error while finding latest GeoPoint for " + mainId + " with Id [" + mainValueId + "] and " + secondId + " Id [" + secondValueId + "] " + e.toString(), module);
             }
         } else {
             try {
-                gptList = delegator.findByAnd(Entity, UtilMisc.toMap(mainId, mainValueId), UtilMisc.toList("-fromDate"));
+                gptList = delegator.findByAnd(entityName, UtilMisc.toMap(mainId, mainValueId), UtilMisc.toList("-fromDate"), false);
             } catch (GenericEntityException e) {
                 Debug.logError(e, "Error while finding latest GeoPoint for " + mainId + " with Id [" + mainValueId + "] " + e.toString(), module);
             }

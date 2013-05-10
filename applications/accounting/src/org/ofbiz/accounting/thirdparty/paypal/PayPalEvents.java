@@ -27,13 +27,11 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -45,7 +43,7 @@ import org.ofbiz.base.util.UtilHttp;
 import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.base.util.UtilProperties;
 import org.ofbiz.base.util.UtilValidate;
-import org.ofbiz.entity.GenericDelegator;
+import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
 import org.ofbiz.entity.transaction.GenericTransactionException;
@@ -67,7 +65,7 @@ public class PayPalEvents {
     /** Initiate PayPal Request */
     public static String callPayPal(HttpServletRequest request, HttpServletResponse response) {
         Locale locale = UtilHttp.getLocale(request);
-        GenericDelegator delegator = (GenericDelegator) request.getAttribute("delegator");
+        Delegator delegator = (Delegator) request.getAttribute("delegator");
         GenericValue userLogin = (GenericValue) request.getSession().getAttribute("userLogin");
 
         // get the orderId
@@ -76,7 +74,7 @@ public class PayPalEvents {
         // get the order header
         GenericValue orderHeader = null;
         try {
-            orderHeader = delegator.findByPrimaryKey("OrderHeader", UtilMisc.toMap("orderId", orderId));
+            orderHeader = delegator.findOne("OrderHeader", UtilMisc.toMap("orderId", orderId), false);
         } catch (GenericEntityException e) {
             Debug.logError(e, "Cannot get the order header for order: " + orderId, module);
             request.setAttribute("_ERROR_MESSAGE_", UtilProperties.getMessage(resourceErr, "payPalEvents.problemsGettingOrderHeader", locale));
@@ -85,6 +83,7 @@ public class PayPalEvents {
 
         // get the order total
         String orderTotal = orderHeader.getBigDecimal("grandTotal").toPlainString();
+        String currencyUom = orderHeader.getString("currencyUom");
 
         // get the product store
         GenericValue productStore = ProductStoreWorker.getProductStore(request);
@@ -115,31 +114,30 @@ public class PayPalEvents {
         String itemName = UtilProperties.getMessage(resource, "AccountingOrderNr", locale) + orderId + " " +
                                  (company != null ? UtilProperties.getMessage(commonResource, "CommonFrom", locale) + " "+ company : "");
         String itemNumber = "0";
-        
+
         // get the redirect url
         String redirectUrl = getPaymentGatewayConfigValue(delegator, paymentGatewayConfigId, "redirectUrl", configString, "payment.paypal.redirect");
-        
+
         // get the notify url
         String notifyUrl = getPaymentGatewayConfigValue(delegator, paymentGatewayConfigId, "notifyUrl", configString, "payment.paypal.notify");
-        
+
         // get the return urls
         String returnUrl = getPaymentGatewayConfigValue(delegator, paymentGatewayConfigId, "returnUrl", configString, "payment.paypal.return");
-        
+
         // get the cancel return urls
         String cancelReturnUrl = getPaymentGatewayConfigValue(delegator, paymentGatewayConfigId, "cancelReturnUrl", configString, "payment.paypal.cancelReturn");
-        
+
         // get the image url
         String imageUrl = getPaymentGatewayConfigValue(delegator, paymentGatewayConfigId, "imageUrl", configString, "payment.paypal.image");
-        
+
         // get the paypal account
         String payPalAccount = getPaymentGatewayConfigValue(delegator, paymentGatewayConfigId, "businessEmail", configString, "payment.paypal.business");
-        
+
         if (UtilValidate.isEmpty(redirectUrl)
             || UtilValidate.isEmpty(notifyUrl)
             || UtilValidate.isEmpty(returnUrl)
-            || UtilValidate.isEmpty(cancelReturnUrl)
             || UtilValidate.isEmpty(imageUrl)
-            || UtilValidate.isEmpty(payPalAccount) ) {
+            || UtilValidate.isEmpty(payPalAccount)) {
             Debug.logError("Payment properties is not configured properly, some notify URL from PayPal is not correctly defined!", module);
             request.setAttribute("_ERROR_MESSAGE_", UtilProperties.getMessage(resourceErr, "payPalEvents.problemsGettingMerchantConfiguration", locale));
             return "error";
@@ -154,8 +152,9 @@ public class PayPalEvents {
         parameters.put("invoice", orderId);
         parameters.put("custom", userLogin.getString("userLoginId"));
         parameters.put("amount", orderTotal);
+        parameters.put("currency_code", currencyUom);
         parameters.put("return", returnUrl);
-        parameters.put("cancel_return", cancelReturnUrl);
+        if (UtilValidate.isNotEmpty(cancelReturnUrl)) parameters.put("cancel_return", cancelReturnUrl);
         parameters.put("notify_url", notifyUrl);
         parameters.put("image_url", imageUrl);
         parameters.put("no_note", "1");        // no notes allowed in paypal (not passed back)
@@ -182,7 +181,7 @@ public class PayPalEvents {
     /** PayPal Call-Back Event */
     public static String payPalIPN(HttpServletRequest request, HttpServletResponse response) {
         Locale locale = UtilHttp.getLocale(request);
-        GenericDelegator delegator = (GenericDelegator) request.getAttribute("delegator");
+        Delegator delegator = (Delegator) request.getAttribute("delegator");
         LocalDispatcher dispatcher = (LocalDispatcher) request.getAttribute("dispatcher");
 
         // get the product store
@@ -243,13 +242,10 @@ public class PayPalEvents {
         } catch (IOException e) {
             Debug.logError(e, "Problems sending verification message", module);
         }
-        
+
         Debug.logInfo("Got verification from PayPal, processing..", module);
         boolean verified = false;
-        Set <String> keySet = parametersMap.keySet();
-        Iterator <String> i = keySet.iterator();
-        while (i.hasNext()) {
-            String name = (String) i.next();
+        for(String name : parametersMap.keySet()) {
             String value = request.getParameter(name);
             Debug.logError("### Param: " + name + " => " + value, module);
             if (UtilValidate.isNotEmpty(name) && "payer_status".equalsIgnoreCase(name) &&
@@ -260,11 +256,11 @@ public class PayPalEvents {
         if (!verified) {
             Debug.logError("###### PayPal did not verify this request, need investigation!", module);
         }
-        
+
         // get the system user
         GenericValue userLogin = null;
         try {
-            userLogin = delegator.findByPrimaryKey("UserLogin", UtilMisc.toMap("userLoginId", "system"));
+            userLogin = delegator.findOne("UserLogin", UtilMisc.toMap("userLoginId", "system"), false);
         } catch (GenericEntityException e) {
             Debug.logError(e, "Cannot get UserLogin for: system; cannot continue", module);
             request.setAttribute("_ERROR_MESSAGE_", UtilProperties.getMessage(resourceErr, "payPalEvents.problemsGettingAuthenticationUser", locale));
@@ -278,7 +274,7 @@ public class PayPalEvents {
         GenericValue orderHeader = null;
         if (UtilValidate.isNotEmpty(orderId)) {
             try {
-                orderHeader = delegator.findByPrimaryKey("OrderHeader", UtilMisc.toMap("orderId", orderId));
+                orderHeader = delegator.findOne("OrderHeader", UtilMisc.toMap("orderId", orderId), false);
             } catch (GenericEntityException e) {
                 Debug.logError(e, "Cannot get the order header for order: " + orderId, module);
                 request.setAttribute("_ERROR_MESSAGE_", UtilProperties.getMessage(resourceErr, "payPalEvents.problemsGettingOrderHeader", locale));
@@ -405,20 +401,18 @@ public class PayPalEvents {
         return "success";
     }
 
-    private static boolean setPaymentPreferences(GenericDelegator delegator, LocalDispatcher dispatcher, GenericValue userLogin, String orderId, HttpServletRequest request) {
+    private static boolean setPaymentPreferences(Delegator delegator, LocalDispatcher dispatcher, GenericValue userLogin, String orderId, HttpServletRequest request) {
         Debug.logVerbose("Setting payment prefrences..", module);
         List <GenericValue> paymentPrefs = null;
         try {
             Map <String, String> paymentFields = UtilMisc.toMap("orderId", orderId, "statusId", "PAYMENT_NOT_RECEIVED");
-            paymentPrefs = delegator.findByAnd("OrderPaymentPreference", paymentFields);
+            paymentPrefs = delegator.findByAnd("OrderPaymentPreference", paymentFields, null, false);
         } catch (GenericEntityException e) {
             Debug.logError(e, "Cannot get payment preferences for order #" + orderId, module);
             return false;
         }
         if (paymentPrefs.size() > 0) {
-            Iterator <GenericValue> i = paymentPrefs.iterator();
-            while (i.hasNext()) {
-                GenericValue pref = (GenericValue) i.next();
+            for(GenericValue pref : paymentPrefs) {
                 boolean okay = setPaymentPreference(dispatcher, userLogin, pref, request);
                 if (!okay)
                     return false;
@@ -462,7 +456,7 @@ public class PayPalEvents {
         toStore.add(paymentPreference);
 
 
-        GenericDelegator delegator = paymentPreference.getDelegator();
+        Delegator delegator = paymentPreference.getDelegator();
 
         // create the PaymentGatewayResponse
         String responseId = delegator.getNextSeqId("PaymentGatewayResponse");
@@ -503,14 +497,14 @@ public class PayPalEvents {
 
         if ((results == null) || (results.get(ModelService.RESPONSE_MESSAGE).equals(ModelService.RESPOND_ERROR))) {
             Debug.logError((String) results.get(ModelService.ERROR_MESSAGE), module);
-            request.setAttribute("_ERROR_MESSAGE_", (String) results.get(ModelService.ERROR_MESSAGE));
+            request.setAttribute("_ERROR_MESSAGE_", results.get(ModelService.ERROR_MESSAGE));
             return false;
         }
 
         return true;
     }
-    
-    private static String getPaymentGatewayConfigValue(GenericDelegator delegator, String paymentGatewayConfigId, String paymentGatewayConfigParameterName,
+
+    private static String getPaymentGatewayConfigValue(Delegator delegator, String paymentGatewayConfigId, String paymentGatewayConfigParameterName,
                                                        String resource, String parameterName) {
         String returnValue = "";
         if (UtilValidate.isNotEmpty(paymentGatewayConfigId)) {

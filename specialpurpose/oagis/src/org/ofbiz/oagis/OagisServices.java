@@ -35,7 +35,6 @@ import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -46,16 +45,16 @@ import javolution.util.FastList;
 import javolution.util.FastMap;
 
 import org.ofbiz.base.util.Debug;
-import org.ofbiz.base.util.GeneralException;
 import org.ofbiz.base.util.HttpClient;
 import org.ofbiz.base.util.SSLUtil;
 import org.ofbiz.base.util.UtilDateTime;
+import org.ofbiz.base.util.UtilGenerics;
 import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.base.util.UtilProperties;
 import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.base.util.UtilXml;
 import org.ofbiz.base.util.collections.MapStack;
-import org.ofbiz.entity.GenericDelegator;
+import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
 import org.ofbiz.service.DispatchContext;
@@ -101,12 +100,12 @@ public class OagisServices {
         }
     }
 
-    public static Map oagisSendConfirmBod(DispatchContext ctx, Map context) {
-        GenericDelegator delegator = ctx.getDelegator();
+    public static Map<String, Object> oagisSendConfirmBod(DispatchContext ctx, Map<String, Object> context) {
+        Delegator delegator = ctx.getDelegator();
         LocalDispatcher dispatcher = ctx.getDispatcher();
-
+        Locale locale = (Locale) context.get("locale");
         String errorReferenceId = (String) context.get("referenceId");
-        List errorMapList = (List) context.get("errorMapList");
+        List<Map<String, String>> errorMapList = UtilGenerics.checkList(context.get("errorMapList"));
 
         String sendToUrl = (String) context.get("sendToUrl");
         if (UtilValidate.isEmpty(sendToUrl)) {
@@ -129,7 +128,7 @@ public class OagisServices {
 
         GenericValue userLogin = null;
         try {
-            userLogin = delegator.findByPrimaryKey("UserLogin", UtilMisc.toMap("userLoginId", "system"));
+            userLogin = delegator.findOne("UserLogin", UtilMisc.toMap("userLoginId", "system"), false);
         } catch (GenericEntityException e) {
             Debug.logError(e, "Error getting userLogin", module);
         }
@@ -137,7 +136,7 @@ public class OagisServices {
         String logicalId = UtilProperties.getPropertyValue("oagis.properties", "CNTROLAREA.SENDER.LOGICALID");
         String authId = UtilProperties.getPropertyValue("oagis.properties", "CNTROLAREA.SENDER.AUTHID");
 
-        MapStack bodyParameters =  MapStack.create();
+        MapStack<String> bodyParameters =  MapStack.create();
         bodyParameters.put("logicalId", logicalId);
         bodyParameters.put("authId", authId);
 
@@ -148,13 +147,13 @@ public class OagisServices {
         String sentDate = isoDateFormat.format(timestamp);
         bodyParameters.put("sentDate", sentDate);
 
-        Map omiPkMap = FastMap.newInstance();
+        Map<String, Object> omiPkMap = FastMap.newInstance();
         omiPkMap.put("logicalId", logicalId);
         omiPkMap.put("component", "EXCEPTION");
         omiPkMap.put("task", "RECIEPT");
         omiPkMap.put("referenceId", referenceId);
 
-        Map oagisMsgInfoContext = FastMap.newInstance();
+        Map<String, Object> oagisMsgInfoContext = FastMap.newInstance();
         oagisMsgInfoContext.putAll(omiPkMap);
         oagisMsgInfoContext.put("authId", authId);
         oagisMsgInfoContext.put("sentDate", timestamp);
@@ -167,16 +166,13 @@ public class OagisServices {
         oagisMsgInfoContext.put("userLogin", userLogin);
         try {
             dispatcher.runSync("createOagisMessageInfo", oagisMsgInfoContext, 60, true);
-            /*
-            if (ServiceUtil.isError(oagisMsgInfoResult)) return ServiceUtil.returnError("Error creating OagisMessageInfo");
-            */
         } catch (GenericServiceException e) {
             Debug.logError(e, "Saving message to database failed", module);
         }
 
         try {
             // call services createOagisMsgErrInfosFromErrMapList and for incoming messages oagisSendConfirmBod
-            Map saveErrorMapListCtx = FastMap.newInstance();
+            Map<String, Object> saveErrorMapListCtx = FastMap.newInstance();
             saveErrorMapListCtx.putAll(omiPkMap);
             saveErrorMapListCtx.put("errorMapList", errorMapList);
             saveErrorMapListCtx.put("userLogin", userLogin);
@@ -202,12 +198,13 @@ public class OagisServices {
             writer.close();
             outText = writer.toString();
         } catch (Exception e) {
-            String errMsg = "Error rendering message: " + e.toString();
-            Debug.logError(e, errMsg, module);
-            return ServiceUtil.returnError(errMsg);
+            Debug.logError(e, "Error rendering message: " + e.toString(), module);
+            return ServiceUtil.returnError(UtilProperties.getMessage(resource, "OagisErrorMessage", UtilMisc.toMap("errorString", e.toString()), locale));
         }
 
-        if (Debug.infoOn()) Debug.logInfo("Finished rendering oagisSendConfirmBod message for errorReferenceId [" + errorReferenceId + "]", module);
+        if (Debug.infoOn()) {
+            Debug.logInfo("Finished rendering oagisSendConfirmBod message for errorReferenceId [" + errorReferenceId + "]", module);
+        }
 
         try {
             oagisMsgInfoContext.put("processingStatusId", "OAGMP_OGEN_SUCCESS");
@@ -220,7 +217,7 @@ public class OagisServices {
             Debug.logError(e, errMsg, module);
         }
 
-        Map sendMessageReturn = OagisServices.sendMessageText(outText, out, sendToUrl, saveToDirectory, saveToFilename);
+        Map<String, Object> sendMessageReturn = OagisServices.sendMessageText(outText, out, sendToUrl, saveToDirectory, saveToFilename, locale);
         if (sendMessageReturn != null) {
             return sendMessageReturn;
         }
@@ -233,19 +230,18 @@ public class OagisServices {
             String errMsg = UtilProperties.getMessage(ServiceUtil.resource, "OagisErrorInCreatingDataForOagisMessageInfoEntity", (Locale) context.get("locale"));
             Debug.logError(e, errMsg, module);
         }
-
-        return ServiceUtil.returnSuccess("Service Completed Successfully");
+        return ServiceUtil.returnSuccess(UtilProperties.getMessage(resource, "OagisServiceCompletedSuccessfully", locale));
     }
 
-    public static Map oagisReceiveConfirmBod(DispatchContext ctx, Map context) {
-        GenericDelegator delegator = ctx.getDelegator();
+    public static Map<String, Object> oagisReceiveConfirmBod(DispatchContext ctx, Map<String, Object> context) {
+        Delegator delegator = ctx.getDelegator();
         LocalDispatcher dispatcher = ctx.getDispatcher();
         Document doc = (Document) context.get("document");
-        List errorMapList = FastList.newInstance();
-
+        List<Map<String, String>> errorMapList = FastList.newInstance();
+        Locale locale = (Locale) context.get("locale");
         GenericValue userLogin = null;
         try {
-            userLogin = delegator.findByPrimaryKey("UserLogin",UtilMisc.toMap("userLoginId", "system"));
+            userLogin = delegator.findOne("UserLogin",UtilMisc.toMap("userLoginId", "system"), false);
         } catch (GenericEntityException e) {
             String errMsg = "Error Getting UserLogin with userLoginId 'system':" + e.toString();
             Debug.logError(e, errMsg, module);
@@ -281,14 +277,13 @@ public class OagisServices {
         String dataAreaComponent = UtilXml.childElementValue(dataAreaSenderElement, "of:COMPONENT");
         String dataAreaTask = UtilXml.childElementValue(dataAreaSenderElement, "of:TASK");
         String dataAreaReferenceId = UtilXml.childElementValue(dataAreaSenderElement, "of:REFERENCEID");
-        String dataAreaDate = UtilXml.childElementValue(dataAreaCtrlElement, "os:DATETIMEISO");
         String origRef = UtilXml.childElementValue(dataAreaConfirmElement, "of:ORIGREF");
 
         Timestamp receivedTimestamp = UtilDateTime.nowTimestamp();
 
-        Map omiPkMap = UtilMisc.toMap("logicalId", logicalId, "component", component, "task", task, "referenceId", referenceId);
+        Map<String, Object> omiPkMap = UtilMisc.toMap("logicalId", (Object) logicalId, "component", component, "task", task, "referenceId", referenceId);
 
-        Map oagisMsgInfoCtx = FastMap.newInstance();
+        Map<String, Object> oagisMsgInfoCtx = FastMap.newInstance();
         oagisMsgInfoCtx.putAll(omiPkMap);
         oagisMsgInfoCtx.put("authId", authId);
         oagisMsgInfoCtx.put("receivedDate", receivedTimestamp);
@@ -316,61 +311,58 @@ public class OagisServices {
             /* running async for better error handling
             if (ServiceUtil.isError(oagisMsgInfoResult)) {
                 String errMsg = "Error creating OagisMessageInfo for the Incoming Message: "+ServiceUtil.getErrorMessage(oagisMsgInfoResult);
-                errorMapList.add(UtilMisc.toMap("description", errMsg, "reasonCode", "CreateOagisMessageInfoServiceError"));
+                errorMapList.add(UtilMisc.<String, String>toMap("description", (Object) errMsg, "reasonCode", "CreateOagisMessageInfoServiceError"));
                 Debug.logError(errMsg, module);
             }
             */
 
-            List dataAreaConfirmMsgList = UtilXml.childElementList(dataAreaConfirmElement, "ns:CONFIRMMSG");
+            List<? extends Element> dataAreaConfirmMsgList = UtilXml.childElementList(dataAreaConfirmElement, "ns:CONFIRMMSG");
             if (UtilValidate.isEmpty(dataAreaConfirmMsgList)) {
                 String errMsg = "No CONFIRMMSG elements found in Confirm BOD message: " + omiPkMap;
                 Debug.logWarning(errMsg, module);
-                errorMapList.add(UtilMisc.toMap("description", errMsg, "reasonCode", "NoCONFIRMMSGElements"));
+                errorMapList.add(UtilMisc.<String, String>toMap("description", errMsg, "reasonCode", "NoCONFIRMMSGElements"));
             } else {
-                Map originalOmiPkMap = UtilMisc.toMap("logicalId", dataAreaLogicalId, "component", dataAreaComponent, "task", dataAreaTask, "referenceId", dataAreaReferenceId);
-                GenericValue originalOagisMsgInfo = delegator.findByPrimaryKey("OagisMessageInfo", originalOmiPkMap);
+                Map<String, Object> originalOmiPkMap = UtilMisc.toMap("logicalId", (Object) dataAreaLogicalId, "component", dataAreaComponent,
+                        "task", dataAreaTask, "referenceId", dataAreaReferenceId);
+                GenericValue originalOagisMsgInfo = delegator.findOne("OagisMessageInfo", originalOmiPkMap, false);
                 if (originalOagisMsgInfo != null) {
-                    Iterator dataAreaConfirmMsgListItr = dataAreaConfirmMsgList.iterator();
-                    while (dataAreaConfirmMsgListItr.hasNext()) {
-                        Element dataAreaConfirmMsgElement = (Element) dataAreaConfirmMsgListItr.next();
+                    for (Element dataAreaConfirmMsgElement : dataAreaConfirmMsgList) {
                         String description = UtilXml.childElementValue(dataAreaConfirmMsgElement, "of:DESCRIPTN");
                         String reasonCode = UtilXml.childElementValue(dataAreaConfirmMsgElement, "of:REASONCODE");
 
-                        Map createOagisMessageErrorInfoForOriginal = FastMap.newInstance();
+                        Map<String, Object> createOagisMessageErrorInfoForOriginal = FastMap.newInstance();
                         createOagisMessageErrorInfoForOriginal.putAll(originalOmiPkMap);
                         createOagisMessageErrorInfoForOriginal.put("reasonCode", reasonCode);
                         createOagisMessageErrorInfoForOriginal.put("description", description);
                         createOagisMessageErrorInfoForOriginal.put("userLogin", userLogin);
 
                         // this will run in the same transaction
-                        Map oagisMsgErrorInfoResult = dispatcher.runSync("createOagisMessageErrorInfo", createOagisMessageErrorInfoForOriginal);
+                        Map<String, Object> oagisMsgErrorInfoResult = dispatcher.runSync("createOagisMessageErrorInfo", createOagisMessageErrorInfoForOriginal);
                         if (ServiceUtil.isError(oagisMsgErrorInfoResult)) {
                             String errMsg = "Error creating OagisMessageErrorInfo: " + ServiceUtil.getErrorMessage(oagisMsgErrorInfoResult);
-                            errorMapList.add(UtilMisc.toMap("description", errMsg, "reasonCode", "CreateOagisMessageErrorInfoServiceError"));
+                            errorMapList.add(UtilMisc.<String, String>toMap("description", errMsg, "reasonCode", "CreateOagisMessageErrorInfoServiceError"));
                             Debug.logError(errMsg, module);
                         }
                     }
                 } else {
                     String errMsg = "No such message with an error was found; Not creating OagisMessageErrorInfo record(s) for original message, but saving info for this message anyway; ID info: " + omiPkMap;
                     Debug.logWarning(errMsg, module);
-                    errorMapList.add(UtilMisc.toMap("description", errMsg, "reasonCode", "OriginalOagisMessageInfoNotFoundError"));
+                    errorMapList.add(UtilMisc.<String, String>toMap("description", errMsg, "reasonCode", "OriginalOagisMessageInfoNotFoundError"));
                 }
 
                 // now attach all of the messages to the CBOD OagisMessageInfo record
-                Iterator dataAreaConfirmMsgListItr = dataAreaConfirmMsgList.iterator();
-                while (dataAreaConfirmMsgListItr.hasNext()) {
-                    Element dataAreaConfirmMsgElement = (Element) dataAreaConfirmMsgListItr.next();
+                for (Element dataAreaConfirmMsgElement : dataAreaConfirmMsgList) {
                     String description = UtilXml.childElementValue(dataAreaConfirmMsgElement, "of:DESCRIPTN");
                     String reasonCode = UtilXml.childElementValue(dataAreaConfirmMsgElement, "of:REASONCODE");
 
-                    Map createOagisMessageErrorInfoForCbod = FastMap.newInstance();
+                    Map<String, Object> createOagisMessageErrorInfoForCbod = FastMap.newInstance();
                     createOagisMessageErrorInfoForCbod.putAll(omiPkMap);
                     createOagisMessageErrorInfoForCbod.put("reasonCode", reasonCode);
                     createOagisMessageErrorInfoForCbod.put("description", description);
                     createOagisMessageErrorInfoForCbod.put("userLogin", userLogin);
 
                     // this one will also go in another transaction as the create service for the base record did too
-                    Map oagisMsgErrorInfoResult = dispatcher.runSync("createOagisMessageErrorInfo", createOagisMessageErrorInfoForCbod, 60, true);
+                    Map<String, Object> oagisMsgErrorInfoResult = dispatcher.runSync("createOagisMessageErrorInfo", createOagisMessageErrorInfoForCbod, 60, true);
                     if (ServiceUtil.isError(oagisMsgErrorInfoResult)) {
                         String errMsg = "Error creating OagisMessageErrorInfo: " + ServiceUtil.getErrorMessage(oagisMsgErrorInfoResult);
                         Debug.logError(errMsg, module);
@@ -378,12 +370,11 @@ public class OagisServices {
                 }
             }
         } catch (Throwable t) {
-            String errMsg = "System Error processing Confirm BOD message: " + t.toString();
-            Debug.logError(t, errMsg, module);
-            return ServiceUtil.returnError(errMsg);
+            Debug.logError(t, "System Error processing Confirm BOD message: " + t.toString(), module);
+            return ServiceUtil.returnError(UtilProperties.getMessage(resource, "OagisErrorProcessingConfirmBOD", UtilMisc.toMap("errorString", t.toString()), locale));
         }
 
-        Map result = FastMap.newInstance();
+        Map<String, Object> result = FastMap.newInstance();
         result.put("logicalId", logicalId);
         result.put("component", component);
         result.put("task", task);
@@ -392,7 +383,7 @@ public class OagisServices {
 
         if (errorMapList.size() > 0) {
             // call services createOagisMsgErrInfosFromErrMapList and for incoming messages oagisSendConfirmBod
-            Map saveErrorMapListCtx = FastMap.newInstance();
+            Map<String, Object> saveErrorMapListCtx = FastMap.newInstance();
             saveErrorMapListCtx.put("logicalId", logicalId);
             saveErrorMapListCtx.put("component", component);
             saveErrorMapListCtx.put("task", task);
@@ -408,7 +399,7 @@ public class OagisServices {
 
             // TODO and NOTE DEJ20070813: should we really send back a Confirm BOD if there is an error with the Confirm BOD they send us? probably so... will do for now...
             try {
-                Map sendConfirmBodCtx = FastMap.newInstance();
+                Map<String, Object> sendConfirmBodCtx = FastMap.newInstance();
                 sendConfirmBodCtx.putAll(saveErrorMapListCtx);
                 // NOTE: this is different for each service, should be shipmentId or returnId or PO orderId or etc
                 // no such thing for confirm bod: sendConfirmBodCtx.put("origRefId", shipmentId);
@@ -421,7 +412,7 @@ public class OagisServices {
             }
 
             // return success here so that the message won't be retried and the Confirm BOD, etc won't be sent multiple times
-            result.putAll(ServiceUtil.returnSuccess("Errors found processing message; information saved and return error sent back"));
+            result.putAll(ServiceUtil.returnSuccess(UtilProperties.getMessage(resource, "OagisErrorProcessingMessage", locale)));
             return result;
         } else {
             oagisMsgInfoCtx.put("processingStatusId", "OAGMP_PROC_SUCCESS");
@@ -429,73 +420,73 @@ public class OagisServices {
                 dispatcher.runSync("updateOagisMessageInfo", oagisMsgInfoCtx, 60, true);
             } catch (GenericServiceException e) {
                 String errMsg = "Error updating OagisMessageInfo for the Incoming Message: " + e.toString();
-                // don't pass this back, nothing they can do about it: errorMapList.add(UtilMisc.toMap("description", errMsg, "reasonCode", "GenericServiceException"));
+                // don't pass this back, nothing they can do about it: errorMapList.add(UtilMisc.<String, String>toMap("description", errMsg, "reasonCode", "GenericServiceException"));
                 Debug.logError(e, errMsg, module);
             }
         }
-
-        result.putAll(ServiceUtil.returnSuccess("Service Completed Successfully"));
+        result.putAll(ServiceUtil.returnSuccess(UtilProperties.getMessage(resource, "OagisServiceCompletedSuccessfully", locale)));
+        
         return result;
     }
 
-    public static Map oagisReReceiveMessage(DispatchContext ctx, Map context) {
-        GenericDelegator delegator = ctx.getDelegator();
+    public static Map<String, Object> oagisReReceiveMessage(DispatchContext ctx, Map<String, Object> context) {
+        Delegator delegator = ctx.getDelegator();
         LocalDispatcher dispatcher = ctx.getDispatcher();
-
+        Locale locale = (Locale) context.get("locale");
         String logicalId = (String) context.get("logicalId");
         String component = (String) context.get("component");
         String task = (String) context.get("task");
         String referenceId = (String) context.get("referenceId");
-        Map oagisMessageInfoKey = UtilMisc.toMap("logicalId", logicalId, "component", component, "task", task, "referenceId", referenceId);
+        Map<String, Object> oagisMessageInfoKey = UtilMisc.toMap("logicalId", (Object) logicalId, "component", component, "task", task, "referenceId", referenceId);
 
         try {
             GenericValue oagisMessageInfo = null;
 
             if (UtilValidate.isNotEmpty(referenceId) && (UtilValidate.isEmpty(component) || UtilValidate.isEmpty(task) || UtilValidate.isEmpty(referenceId))) {
                 // try looking up by just the referenceId, those alone are often unique, return error if there is more than one result
-                List oagisMessageInfoList = delegator.findByAnd("OagisMessageInfo", UtilMisc.toMap("referenceId", referenceId));
+                List<GenericValue> oagisMessageInfoList = delegator.findByAnd("OagisMessageInfo", UtilMisc.toMap("referenceId", referenceId), null, false);
                 if (oagisMessageInfoList.size() == 1) {
-                    oagisMessageInfo = (GenericValue) oagisMessageInfoList.get(0);
+                    oagisMessageInfo = oagisMessageInfoList.get(0);
                 } else if (oagisMessageInfoList.size() > 1) {
-                    return ServiceUtil.returnError("Looked up by referenceId because logicalId, component, or task were not passed in but found more than one [" + oagisMessageInfoList.size() + "] record with referenceId [" + referenceId + "]");
+                    Integer messageSize = new Integer(oagisMessageInfoList.size());
+                    return ServiceUtil.returnError(UtilProperties.getMessage(resource, "OagisErrorLookupByReferenceError", UtilMisc.toMap("messageSize", messageSize.toString(), "referenceId", referenceId), locale));
                 }
             } else {
-                oagisMessageInfo = delegator.findByPrimaryKey("OagisMessageInfo", oagisMessageInfoKey);
+                oagisMessageInfo = delegator.findOne("OagisMessageInfo", oagisMessageInfoKey, false);
             }
 
             if (oagisMessageInfo == null) {
-                return ServiceUtil.returnError("Could not find OagisMessageInfo record with key [" + oagisMessageInfoKey + "], not rerunning message.");
+                return ServiceUtil.returnError(UtilProperties.getMessage(resource, "OagisErrorFindOagisMessageInfo", UtilMisc.toMap("oagisMessageInfoKey", oagisMessageInfoKey), locale));
             }
 
             String fullMessageXml = oagisMessageInfo.getString("fullMessageXml");
             if (UtilValidate.isEmpty(fullMessageXml)) {
-                return ServiceUtil.returnError("There was no fullMessageXml text in OagisMessageInfo record with key [" + oagisMessageInfoKey + "], not rerunning message.");
+                return ServiceUtil.returnError(UtilProperties.getMessage(resource, "OagisErrorNotFoundFullMessageXml", UtilMisc.toMap("oagisMessageInfoKey", oagisMessageInfoKey), locale));
             }
 
             // we know we have text now, run it!
             ByteArrayInputStream bis = new ByteArrayInputStream(fullMessageXml.getBytes("UTF-8"));
-            Map result = dispatcher.runSync("oagisMessageHandler", UtilMisc.toMap("inputStream", bis, "isErrorRetry", Boolean.TRUE));
+            Map<String, Object> result = dispatcher.runSync("oagisMessageHandler", UtilMisc.toMap("inputStream", bis, "isErrorRetry", Boolean.TRUE));
             if (ServiceUtil.isError(result)) {
-                return ServiceUtil.returnError("Error trying to re-receive message with ID [" + oagisMessageInfoKey + "]", null, null, result);
+                return ServiceUtil.returnError(UtilProperties.getMessage(resource, "OagisErrorReceivingAgainMessage", UtilMisc.toMap("oagisMessageInfoKey", oagisMessageInfoKey), locale), null, null, result);
             }
             return ServiceUtil.returnSuccess();
         } catch (Exception e) {
-            String errMsg = "Error re-receiving message with ID [" + oagisMessageInfoKey + "]: " + e.toString();
-            Debug.logError(e, errMsg, module);
-            return ServiceUtil.returnError(errMsg);
+            Debug.logError(e, "Error re-receiving message with ID [" + oagisMessageInfoKey + "]: " + e.toString(), module);
+            return ServiceUtil.returnError(UtilProperties.getMessage(resource, "OagisErrorReceivingAgainMessage", UtilMisc.toMap("oagisMessageInfoKey", oagisMessageInfoKey), locale) + e.toString());
         }
     }
 
-    public static Map oagisMessageHandler(DispatchContext ctx, Map context) {
-        GenericDelegator delegator = ctx.getDelegator();
+    public static Map<String, Object> oagisMessageHandler(DispatchContext ctx, Map<String, Object> context) {
+        Delegator delegator = ctx.getDelegator();
         LocalDispatcher dispatcher = ctx.getDispatcher();
         InputStream in = (InputStream) context.get("inputStream");
-        List errorList = FastList.newInstance();
+        List<Map<String, String>> errorList = FastList.newInstance();
         Boolean isErrorRetry = (Boolean) context.get("isErrorRetry");
-
+        Locale locale = (Locale) context.get("locale");
         GenericValue userLogin = null;
         try {
-            userLogin = delegator.findByPrimaryKey("UserLogin", UtilMisc.toMap("userLoginId", "system"));
+            userLogin = delegator.findOne("UserLogin", UtilMisc.toMap("userLoginId", "system"), false);
         } catch (GenericEntityException e) {
             String errMsg = "Error Getting UserLogin with userLoginId system: "+e.toString();
             Debug.logError(e, errMsg, module);
@@ -520,20 +511,20 @@ public class OagisServices {
             doc = UtilXml.readXmlDocument(bis, true, "OagisMessage");
         } catch (SAXException e) {
             String errMsg = "XML Error parsing the Received Message [" + e.toString() + "]; The text received we could not parse is: [" + xmlText + "]";
-            errorList.add(UtilMisc.toMap("description", errMsg, "reasonCode", "SAXException"));
+            errorList.add(UtilMisc.<String, String>toMap("description", errMsg, "reasonCode", "SAXException"));
             Debug.logError(e, errMsg, module);
         } catch (ParserConfigurationException e) {
             String errMsg = "Parser Configuration Error parsing the Received Message: " + e.toString();
-            errorList.add(UtilMisc.toMap("description", errMsg, "reasonCode", "ParserConfigurationException"));
+            errorList.add(UtilMisc.<String, String>toMap("description", errMsg, "reasonCode", "ParserConfigurationException"));
             Debug.logError(e, errMsg, module);
         } catch (IOException e) {
             String errMsg = "IO Error parsing the Received Message: " + e.toString();
-            errorList.add(UtilMisc.toMap("description", errMsg, "reasonCode", "IOException"));
+            errorList.add(UtilMisc.<String, String>toMap("description", errMsg, "reasonCode", "IOException"));
             Debug.logError(e, errMsg, module);
         }
 
         if (UtilValidate.isNotEmpty(errorList)) {
-            return ServiceUtil.returnError("Unable to parse received message");
+            return ServiceUtil.returnError(UtilProperties.getMessage(resource, "OagisErrorParsingMessage", locale));
         }
 
         Element rootElement = doc.getDocumentElement();
@@ -550,19 +541,18 @@ public class OagisServices {
         String referenceId = UtilXml.childElementValue(senderElement, "of:REFERENCEID");
 
         if (UtilValidate.isEmpty(bsrVerb) || UtilValidate.isEmpty(bsrNoun)) {
-            return ServiceUtil.returnError("Was able to receive and parse the XML message, but BSR->NOUN [" + bsrNoun + "] and/or BSR->VERB [" + bsrVerb + "] are empty");
+            return ServiceUtil.returnError(UtilProperties.getMessage(resource, "OagisErrorParsingXMLMessage", UtilMisc.toMap("bsrNoun", bsrNoun, "bsrVerb", bsrVerb), locale));
         }
 
         GenericValue oagisMessageInfo = null;
-        Map oagisMessageInfoKey = UtilMisc.toMap("logicalId", logicalId, "component", component, "task", task, "referenceId", referenceId);
+        Map<String, Object> oagisMessageInfoKey = UtilMisc.toMap("logicalId", (Object) logicalId, "component", component, "task", task, "referenceId", referenceId);
         try {
-            oagisMessageInfo = delegator.findByPrimaryKey("OagisMessageInfo", oagisMessageInfoKey);
+            oagisMessageInfo = delegator.findOne("OagisMessageInfo", oagisMessageInfoKey, false);
         } catch (GenericEntityException e) {
-            String errMsg = "Error Getting Entity OagisMessageInfo: " + e.toString();
-            Debug.logError(e, errMsg, module);
+            Debug.logError(e, "Error Getting Entity OagisMessageInfo: " + e.toString(), module);
         }
 
-        Map messageProcessContext = UtilMisc.toMap("document", doc, "userLogin", userLogin);
+        Map<String, Object> messageProcessContext = UtilMisc.toMap("document", doc, "userLogin", userLogin);
 
         // call async, no additional results to return: Map subServiceResult = FastMap.newInstance();
         if (UtilValidate.isNotEmpty(oagisMessageInfo)) {
@@ -573,9 +563,9 @@ public class OagisServices {
                 String responseMsg = "Message already received with ID: " + oagisMessageInfoKey;
                 Debug.logError(responseMsg, module);
 
-                List errorMapList = UtilMisc.toList(UtilMisc.toMap("reasonCode", "MessageAlreadyReceived", "description", responseMsg));
+                List<Map<String, String>> errorMapList = UtilMisc.toList(UtilMisc.<String, String>toMap("reasonCode", "MessageAlreadyReceived", "description", responseMsg));
 
-                Map sendConfirmBodCtx = FastMap.newInstance();
+                Map<String, Object> sendConfirmBodCtx = FastMap.newInstance();
                 sendConfirmBodCtx.put("logicalId", logicalId);
                 sendConfirmBodCtx.put("component", component);
                 sendConfirmBodCtx.put("task", task);
@@ -587,10 +577,9 @@ public class OagisServices {
                     // run async because this will send a message back to the other server and may take some time, and/or fail
                     dispatcher.runAsync("oagisSendConfirmBod", sendConfirmBodCtx, null, true, 60, true);
                 } catch (GenericServiceException e) {
-                    String errMsg = "Error sending Confirm BOD: " + e.toString();
-                    Debug.logError(e, errMsg, module);
+                    Debug.logError(e, "Error sending Confirm BOD: " + e.toString(), module);
                 }
-                Map result = ServiceUtil.returnSuccess(responseMsg);
+                Map<String, Object> result = ServiceUtil.returnSuccess(responseMsg);
                 result.put("contentType", "text/plain");
                 return result;
             }
@@ -604,7 +593,7 @@ public class OagisServices {
                 dispatcher.runAsync("oagisReceiveConfirmBod", messageProcessContext, true);
             } catch (GenericServiceException e) {
                 String errMsg = "Error running service oagisReceiveConfirmBod: " + e.toString();
-                errorList.add(UtilMisc.toMap("description", errMsg, "reasonCode", "GenericServiceException"));
+                errorList.add(UtilMisc.<String, String>toMap("description", errMsg, "reasonCode", "GenericServiceException"));
                 Debug.logError(e, errMsg, module);
             }
         } else if (bsrVerb.equalsIgnoreCase("SHOW") && bsrNoun.equalsIgnoreCase("SHIPMENT")) {
@@ -614,7 +603,7 @@ public class OagisServices {
                 dispatcher.runAsync("oagisReceiveShowShipment", messageProcessContext, true);
             } catch (GenericServiceException e) {
                 String errMsg = "Error running service oagisReceiveShowShipment: " + e.toString();
-                errorList.add(UtilMisc.toMap("description", errMsg, "reasonCode", "GenericServiceException"));
+                errorList.add(UtilMisc.<String, String>toMap("description", errMsg, "reasonCode", "GenericServiceException"));
                 Debug.logError(e, errMsg, module);
             }
         } else if (bsrVerb.equalsIgnoreCase("SYNC") && bsrNoun.equalsIgnoreCase("INVENTORY")) {
@@ -624,7 +613,7 @@ public class OagisServices {
                 dispatcher.runAsync("oagisReceiveSyncInventory", messageProcessContext, true);
             } catch (GenericServiceException e) {
                 String errMsg = "Error running service oagisReceiveSyncInventory: " + e.toString();
-                errorList.add(UtilMisc.toMap("description", errMsg, "reasonCode", "GenericServiceException"));
+                errorList.add(UtilMisc.<String, String>toMap("description", errMsg, "reasonCode", "GenericServiceException"));
                 Debug.logError(e, errMsg, module);
             }
         } else if (bsrVerb.equalsIgnoreCase("ACKNOWLEDGE") && bsrNoun.equalsIgnoreCase("DELIVERY")) {
@@ -641,7 +630,7 @@ public class OagisServices {
                     dispatcher.runAsync("oagisReceiveAcknowledgeDeliveryPo", messageProcessContext, true);
                 } catch (GenericServiceException e) {
                     String errMsg = "Error running service oagisReceiveAcknowledgeDeliveryPo: " + e.toString();
-                    errorList.add(UtilMisc.toMap("description", errMsg, "reasonCode", "GenericServiceException"));
+                    errorList.add(UtilMisc.<String, String>toMap("description", errMsg, "reasonCode", "GenericServiceException"));
                     Debug.logError(e, errMsg, module);
                 }
             } else if ("RMA".equals(docType)) {
@@ -650,7 +639,7 @@ public class OagisServices {
                     dispatcher.runAsync("oagisReceiveAcknowledgeDeliveryRma", messageProcessContext, true);
                 } catch (GenericServiceException e) {
                     String errMsg = "Error running service oagisReceiveAcknowledgeDeliveryRma: " + e.toString();
-                    errorList.add(UtilMisc.toMap("description", errMsg, "reasonCode", "GenericServiceException"));
+                    errorList.add(UtilMisc.<String, String>toMap("description", errMsg, "reasonCode", "GenericServiceException"));
                     Debug.logError(e, errMsg, module);
                 }
             } else if (UtilValidate.isEmpty(docType) && ("NotAvailableTOAvailable".equals(disposition) || "AvailableTONotAvailable".equals(disposition))) {
@@ -658,29 +647,28 @@ public class OagisServices {
                     dispatcher.runAsync("oagisReceiveAcknowledgeDeliveryStatus", messageProcessContext, true);
                 } catch (GenericServiceException e) {
                     String errMsg = "Error running service oagisReceiveAcknowledgeDeliveryStatus: " + e.toString();
-                    errorList.add(UtilMisc.toMap("description", errMsg, "reasonCode", "GenericServiceException"));
+                    errorList.add(UtilMisc.<String, String>toMap("description", errMsg, "reasonCode", "GenericServiceException"));
                     Debug.logError(e, errMsg, module);
                 }
             } else {
-                return ServiceUtil.returnError("For Acknowledge Delivery message could not determine if it is for a PO or RMA or Status Change. DOCTYPE from message is [" + docType + "], DISPOSITN is [" + disposition + "]");
+                return ServiceUtil.returnError(UtilProperties.getMessage(resource, "OagisErrorDeliveryMessage", UtilMisc.toMap("docType", docType, "disposition", disposition), locale));
             }
         } else {
-            String errMsg = "Unknown Message Type Received, verb/noun combination not supported: verb=[" + bsrVerb + "], noun=[" + bsrNoun + "]";
-            Debug.logError(errMsg, module);
-            return ServiceUtil.returnError(errMsg);
+            Debug.logError("Unknown Message Type Received, verb/noun combination not supported: verb=[" + bsrVerb + "], noun=[" + bsrNoun + "]", module);
+            return ServiceUtil.returnError(UtilProperties.getMessage(resource, "OagisErrorUnknownMessageType", UtilMisc.toMap("bsrVerb", bsrVerb, "bsrNoun", bsrNoun), locale));
         }
 
-        Map result = ServiceUtil.returnSuccess();
+        Map<String, Object> result = ServiceUtil.returnSuccess();
         result.put("contentType", "text/plain");
 
         /* no sub-service error processing to be done here, all handled in the sub-services:
         result.putAll(subServiceResult);
-        List errorMapList = (List) subServiceResult.get("errorMapList");
+        List<Map<String, String>> errorMapList = (List) subServiceResult.get("errorMapList");
         if (UtilValidate.isNotEmpty(errorList)) {
             Iterator errListItr = errorList.iterator();
             while (errListItr.hasNext()) {
                 Map errorMap = (Map) errListItr.next();
-                errorMapList.add(UtilMisc.toMap("description", errorMap.get("description"), "reasonCode", errorMap.get("reasonCode")));
+                errorMapList.add(UtilMisc.<String, String>toMap("description", errorMap.get("description"), "reasonCode", errorMap.get("reasonCode")));
             }
             result.put("errorMapList", errorMapList);
         }
@@ -689,16 +677,15 @@ public class OagisServices {
         return result;
     }
 
-    public static Map sendMessageText(String outText, OutputStream out, String sendToUrl, String saveToDirectory, String saveToFilename) {
+    public static Map<String, Object> sendMessageText(String outText, OutputStream out, String sendToUrl, String saveToDirectory, String saveToFilename, Locale locale) {
         if (out != null) {
             Writer outWriter = new OutputStreamWriter(out);
             try {
                 outWriter.write(outText);
                 outWriter.close();
             } catch (IOException e) {
-                String errMsg = "Error writing message to output stream: " + e.toString();
-                Debug.logError(e, errMsg, module);
-                return ServiceUtil.returnError(errMsg);
+                Debug.logError(e, "Error writing message to output stream: " + e.toString(), module);
+                return ServiceUtil.returnError(UtilProperties.getMessage(resource, "OagisErrorWritingMessage", UtilMisc.toMap("errorString", e.toString()), locale));
             }
         } else if (UtilValidate.isNotEmpty(saveToFilename) && UtilValidate.isNotEmpty(saveToDirectory)) {
             try {
@@ -710,9 +697,8 @@ public class OagisServices {
                 outWriter.write(outText);
                 outWriter.close();
             } catch (Exception e) {
-                String errMsg = "Error saving message to file [" + saveToFilename + "]: " + e.toString();
-                Debug.logError(e, errMsg, module);
-                return ServiceUtil.returnError(errMsg);
+                Debug.logError(e, "Error saving message to file [" + saveToFilename + "]: " + e.toString(), module);
+                return ServiceUtil.returnError(UtilProperties.getMessage(resource, "OagisErrorSavingMessage", UtilMisc.toMap("saveToFilename", saveToFilename, "errorString", e.toString()), locale));
             }
         } else if (UtilValidate.isNotEmpty(sendToUrl)) {
             HttpClient http = new HttpClient(sendToUrl);
@@ -735,19 +721,18 @@ public class OagisServices {
             try {
                 http.post(outText);
             } catch (Exception e) {
-                String errMsg = "Error posting message to server with URL [" + sendToUrl + "]: " + e.toString();
-                Debug.logError(e, errMsg, module);
-                return ServiceUtil.returnError(errMsg);
+                Debug.logError(e, "Error posting message to server with URL [" + sendToUrl + "]: " + e.toString(), module);
+                return ServiceUtil.returnError(UtilProperties.getMessage(resource, "OagisErrorPostingMessage", UtilMisc.toMap("sendToUrl", sendToUrl, "errorString", e.toString()), locale));
             }
         } else {
             if (Debug.infoOn()) Debug.logInfo("No send to information, so here is the message: " + outText, module);
-            return ServiceUtil.returnError("No send to information pass (url, file, or out stream)");
+            return ServiceUtil.returnError(UtilProperties.getMessage(resource, "OagisErrorSendingInformations", locale));
         }
 
         return null;
     }
 
-    public static Timestamp parseIsoDateString(String dateString, List errorMapList) {
+    public static Timestamp parseIsoDateString(String dateString, List<Map<String, String>> errorMapList) {
         if (UtilValidate.isEmpty(dateString)) return null;
 
         Date dateTimeInvReceived = null;
@@ -759,7 +744,7 @@ public class OagisServices {
                 dateTimeInvReceived = isoDateFormatNoTzValue.parse(dateString);
             } catch (ParseException e1) {
                 String errMsg = "Error parsing Date: " + e1.toString();
-                if (errorMapList != null) errorMapList.add(UtilMisc.toMap("reasonCode", "ParseException", "description", errMsg));
+                if (errorMapList != null) errorMapList.add(UtilMisc.<String, String>toMap("reasonCode", "ParseException", "description", errMsg));
                 Debug.logError(e, errMsg, module);
             }
         }

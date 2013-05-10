@@ -54,14 +54,14 @@ public class MessageString implements Serializable {
     }
     public static List<Object> getMessagesForField(String fieldName1, String fieldName2, String fieldName3, String fieldName4, boolean convertToStrings, List<Object> messageStringList) {
         Set<String> fieldSet = new TreeSet<String>();
-        if (fieldName1 != null && fieldName1.length() > 0) fieldSet.add(fieldName1);
-        if (fieldName2 != null && fieldName2.length() > 0) fieldSet.add(fieldName2);
-        if (fieldName3 != null && fieldName3.length() > 0) fieldSet.add(fieldName3);
-        if (fieldName4 != null && fieldName4.length() > 0) fieldSet.add(fieldName4);
+        if (UtilValidate.isNotEmpty(fieldName1)) fieldSet.add(fieldName1);
+        if (UtilValidate.isNotEmpty(fieldName2)) fieldSet.add(fieldName2);
+        if (UtilValidate.isNotEmpty(fieldName3)) fieldSet.add(fieldName3);
+        if (UtilValidate.isNotEmpty(fieldName4)) fieldSet.add(fieldName4);
         return getMessagesForField(fieldSet, convertToStrings, messageStringList);
     }
     public static List<Object> getMessagesForField(Set<String> fieldNameSet, boolean convertToStrings, List<Object> messageStringList) {
-        if (messageStringList == null || fieldNameSet == null || fieldNameSet.size() == 0) {
+        if (messageStringList == null || UtilValidate.isEmpty(fieldNameSet)) {
             return Collections.emptyList();
         }
         List<Object> outList = new ArrayList<Object>(messageStringList.size());
@@ -247,6 +247,7 @@ public class MessageString implements Serializable {
         this.isError = isError;
     }
 
+    @Override
     public String toString() {
         return this.message;
     }

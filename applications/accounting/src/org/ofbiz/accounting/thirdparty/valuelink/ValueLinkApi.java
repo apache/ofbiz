@@ -30,12 +30,8 @@ import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.spec.InvalidKeySpecException;
-import java.text.DecimalFormat;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -58,13 +54,16 @@ import javax.crypto.spec.DHPrivateKeySpec;
 import javax.crypto.spec.DHPublicKeySpec;
 import javax.crypto.spec.IvParameterSpec;
 
+import javolution.util.FastList;
+import javolution.util.FastMap;
+
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.HttpClient;
 import org.ofbiz.base.util.HttpClientException;
 import org.ofbiz.base.util.StringUtil;
 import org.ofbiz.base.util.UtilMisc;
-import org.ofbiz.base.util.UtilProperties;
-import org.ofbiz.entity.GenericDelegator;
+import org.ofbiz.base.util.UtilValidate;
+import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
 
@@ -76,10 +75,10 @@ public class ValueLinkApi {
     public static final String module = ValueLinkApi.class.getName();
 
     // static object cache
-    private static Map objectCache = new HashMap();
+    private static Map<String, Object> objectCache = FastMap.newInstance();
 
     // instance variables
-    protected GenericDelegator delegator = null;
+    protected Delegator delegator = null;
     protected Properties props = null;
     protected SecretKey kek = null;
     protected SecretKey mwk = null;
@@ -89,7 +88,7 @@ public class ValueLinkApi {
     protected boolean debug = false;
 
     protected ValueLinkApi() {}
-    protected ValueLinkApi(GenericDelegator delegator, Properties props) {
+    protected ValueLinkApi(Delegator delegator, Properties props) {
         String mId = (String) props.get("payment.valuelink.merchantId");
         String tId = (String) props.get("payment.valuelink.terminalId");
         this.delegator = delegator;
@@ -101,20 +100,20 @@ public class ValueLinkApi {
         }
 
         if (debug) {
-            Debug.log("New ValueLinkApi instance created", module);
-            Debug.log("Merchant ID : " + merchantId, module);
-            Debug.log("Terminal ID : " + terminalId, module);
+            Debug.logInfo("New ValueLinkApi instance created", module);
+            Debug.logInfo("Merchant ID : " + merchantId, module);
+            Debug.logInfo("Terminal ID : " + terminalId, module);
         }
     }
 
     /**
      * Obtain an instance of the ValueLinkApi
-     * @param delegator GenericDelegator used to query the encryption keys
+     * @param delegator Delegator used to query the encryption keys
      * @param props Properties to use for the Api (usually payment.properties)
      * @param reload When true, will replace an existing instance in the cache and reload all properties
      * @return ValueLinkApi reference
      */
-    public static ValueLinkApi getInstance(GenericDelegator delegator, Properties props, boolean reload) {
+    public static ValueLinkApi getInstance(Delegator delegator, Properties props, boolean reload) {
         String merchantId = (String) props.get("payment.valuelink.merchantId");
         if (props == null) {
             throw new IllegalArgumentException("Properties cannot be null");
@@ -140,11 +139,11 @@ public class ValueLinkApi {
 
     /**
      * Obtain an instance of the ValueLinkApi; this method will always return an existing reference if one is available
-     * @param delegator GenericDelegator used to query the encryption keys
+     * @param delegator Delegator used to query the encryption keys
      * @param props Properties to use for the Api (usually payment.properties)
-     * @return
+     * @return Obtain an instance of the ValueLinkApi
      */
-    public static ValueLinkApi getInstance(GenericDelegator delegator, Properties props) {
+    public static ValueLinkApi getInstance(Delegator delegator, Properties props) {
         return getInstance(delegator, props, false);
     }
 
@@ -191,7 +190,7 @@ public class ValueLinkApi {
         }
 
         if (debug) {
-            Debug.log("encryptPin : " + pin + " / " + encryptedEanHex, module);
+            Debug.logInfo("encryptPin : " + pin + " / " + encryptedEanHex, module);
         }
 
         return encryptedEanHex;
@@ -221,7 +220,7 @@ public class ValueLinkApi {
         }
 
         if (debug) {
-            Debug.log("decryptPin : " + pin + " / " + decryptedPinString, module);
+            Debug.logInfo("decryptPin : " + pin + " / " + decryptedPinString, module);
         }
 
         return decryptedPinString;
@@ -233,7 +232,7 @@ public class ValueLinkApi {
      * @return Map of response parameters
      * @throws HttpClientException
      */
-    public Map send(Map request) throws HttpClientException {
+    public Map<String, Object> send(Map<String, Object> request) throws HttpClientException {
         return send((String) props.get("payment.valuelink.url"), request);
     }
 
@@ -244,9 +243,9 @@ public class ValueLinkApi {
      * @return Map of response parameters
      * @throws HttpClientException
      */
-    public Map send(String url, Map request) throws HttpClientException {
+    public Map<String, Object> send(String url, Map<String, Object> request) throws HttpClientException {
         if (debug) {
-            Debug.log("Request : " + url + " / " + request, module);
+            Debug.logInfo("Request : " + url + " / " + request, module);
         }
 
         // read the timeout value
@@ -311,7 +310,7 @@ public class ValueLinkApi {
                     return this.outputKeyCreation(loop, kekOnly, kekTest);
                 }
             } else {
-                Debug.log("Returned a null KeyPair", module);
+                Debug.logInfo("Returned a null KeyPair", module);
                 return this.outputKeyCreation(loop, kekOnly, kekTest);
             }
         } else {
@@ -359,37 +358,37 @@ public class ValueLinkApi {
             BigInteger y = publicKey.getY();
             byte[] yBytes = y.toByteArray();
             String yHex = StringUtil.toHexString(yBytes);
-            buf.append("======== Begin Public Key (Y @ " + yBytes.length + " / " + yHex.length() + ") ========\n");
-            buf.append(yHex + "\n");
+            buf.append("======== Begin Public Key (Y @ ").append(yBytes.length).append(" / ").append(yHex.length()).append(") ========\n");
+            buf.append(yHex).append("\n");
             buf.append("======== End Public Key ========\n\n");
 
             // private key (just X)
             BigInteger x = privateKey.getX();
             byte[] xBytes = x.toByteArray();
             String xHex = StringUtil.toHexString(xBytes);
-            buf.append("======== Begin Private Key (X @ " + xBytes.length + " / " + xHex.length() + ") ========\n");
-            buf.append(xHex + "\n");
+            buf.append("======== Begin Private Key (X @ ").append(xBytes.length).append(" / ").append(xHex.length()).append(") ========\n");
+            buf.append(xHex).append("\n");
             buf.append("======== End Private Key ========\n\n");
 
             // private key (full)
             byte[] privateBytes = privateKey.getEncoded();
             String privateHex = StringUtil.toHexString(privateBytes);
-            buf.append("======== Begin Private Key (Full @ " + privateBytes.length + " / " + privateHex.length() + ") ========\n");
-            buf.append(privateHex + "\n");
+            buf.append("======== Begin Private Key (Full @ ").append(privateBytes.length).append(" / ").append(privateHex.length()).append(") ========\n");
+            buf.append(privateHex).append("\n");
             buf.append("======== End Private Key ========\n\n");
         }
 
         if (kekBytes != null) {
-            buf.append("======== Begin KEK (" + kekBytes.length + ") ========\n");
-            buf.append(StringUtil.toHexString(kekBytes) + "\n");
+            buf.append("======== Begin KEK (").append(kekBytes.length).append(") ========\n");
+            buf.append(StringUtil.toHexString(kekBytes)).append("\n");
             buf.append("======== End KEK ========\n\n");
 
-            buf.append("======== Begin KEK (DES) (" + loadKekBytes.length + ") ========\n");
-            buf.append(StringUtil.toHexString(loadKekBytes) + "\n");
+            buf.append("======== Begin KEK (DES) (").append(loadKekBytes.length).append(") ========\n");
+            buf.append(StringUtil.toHexString(loadKekBytes)).append("\n");
             buf.append("======== End KEK (DES) ========\n\n");
 
-            buf.append("======== Begin KEK Test (" + kekTestC.length + ") ========\n");
-            buf.append(StringUtil.toHexString(kekTestC) + "\n");
+            buf.append("======== Begin KEK Test (").append(kekTestC.length).append(") ========\n");
+            buf.append(StringUtil.toHexString(kekTestC)).append("\n");
             buf.append("======== End KEK Test ========\n\n");
         } else {
             Debug.logError("KEK came back empty", module);
@@ -408,7 +407,7 @@ public class ValueLinkApi {
         // initialize the parameter spec
         DHPublicKey publicKey = (DHPublicKey) this.getValueLinkPublicKey();
         DHParameterSpec dhParamSpec = publicKey.getParams();
-        //Debug.log(dhParamSpec.getP().toString() + " / " + dhParamSpec.getG().toString(), module);
+        //Debug.logInfo(dhParamSpec.getP().toString() + " / " + dhParamSpec.getG().toString(), module);
 
         // create the public/private key pair using parameters defined by valuelink
         KeyPairGenerator keyGen = KeyPairGenerator.getInstance("DH");
@@ -437,7 +436,7 @@ public class ValueLinkApi {
         byte[] secretKey = ka.generateSecret();
 
         if (debug) {
-            Debug.log("Secret Key : " + StringUtil.toHexString(secretKey) + " / " + secretKey.length,  module);
+            Debug.logInfo("Secret Key : " + StringUtil.toHexString(secretKey) + " / " + secretKey.length,  module);
         }
 
         // generate 3DES from secret key using VL algorithm (KEK)
@@ -448,7 +447,7 @@ public class ValueLinkApi {
         byte[] kek = copyBytes(des2, first8, 0);
 
         if (debug) {
-            Debug.log("Generated KEK : " + StringUtil.toHexString(kek) + " / " + kek.length, module);
+            Debug.logInfo("Generated KEK : " + StringUtil.toHexString(kek) + " / " + kek.length, module);
         }
 
         return kek;
@@ -529,7 +528,7 @@ public class ValueLinkApi {
             byte[] des3 = copyBytes(desByte1, copyBytes(desByte2, desByte3, 0), 0);
             return generateMwk(des3);
         } else {
-            Debug.log("Null DES keys returned", module);
+            Debug.logInfo("Null DES keys returned", module);
         }
 
         return null;
@@ -542,7 +541,7 @@ public class ValueLinkApi {
      */
     public byte[] generateMwk(byte[] desBytes) {
         if (debug) {
-            Debug.log("DES Key : " + StringUtil.toHexString(desBytes) + " / " + desBytes.length, module);
+            Debug.logInfo("DES Key : " + StringUtil.toHexString(desBytes) + " / " + desBytes.length, module);
         }
         SecretKeyFactory skf1 = null;
         SecretKey mwk = null;
@@ -606,10 +605,10 @@ public class ValueLinkApi {
         newMwk = copyBytes(random, newMwk, 0);
 
         if (debug) {
-            Debug.log("Random 8 byte : " + StringUtil.toHexString(random), module);
-            Debug.log("Encrypted 0's : " + StringUtil.toHexString(encryptedZeros), module);
-            Debug.log("Decrypted MWK : " + StringUtil.toHexString(mwkdes3.getEncoded()) + " / " + mwkdes3.getEncoded().length, module);
-            Debug.log("Encrypted MWK : " + StringUtil.toHexString(newMwk) + " / " + newMwk.length, module);
+            Debug.logInfo("Random 8 byte : " + StringUtil.toHexString(random), module);
+            Debug.logInfo("Encrypted 0's : " + StringUtil.toHexString(encryptedZeros), module);
+            Debug.logInfo("Decrypted MWK : " + StringUtil.toHexString(mwkdes3.getEncoded()) + " / " + mwkdes3.getEncoded().length, module);
+            Debug.logInfo("Encrypted MWK : " + StringUtil.toHexString(newMwk) + " / " + newMwk.length, module);
         }
 
         return newMwk;
@@ -657,7 +656,7 @@ public class ValueLinkApi {
         }
 
         if (debug) {
-            Debug.log("Current Working Key Index : " + this.mwkIndex, module);
+            Debug.logInfo("Current Working Key Index : " + this.mwkIndex, module);
         }
 
         return this.mwkIndex;
@@ -682,7 +681,7 @@ public class ValueLinkApi {
      */
     public BigDecimal getAmount(String amount) {
         if (amount == null) {
-            return new BigDecimal("0.00");
+            return BigDecimal.ZERO;
         }
         BigDecimal amountBd = new BigDecimal(amount);
         return amountBd.movePointLeft(2);
@@ -697,8 +696,8 @@ public class ValueLinkApi {
      * Note: For 2010 (assign working key) transaction, the EncryptID will need to be adjusted
      * @return Map containing the inital request values
      */
-    public Map getInitialRequestMap(Map context) {
-        Map request = new HashMap();
+    public Map<String, Object> getInitialRequestMap(Map<String, Object> context) {
+        Map<String, Object> request = FastMap.newInstance();
 
         // merchant information
         request.put("MerchID", merchantId + terminalId);
@@ -706,7 +705,7 @@ public class ValueLinkApi {
 
         // mode settings
         String modes = (String) props.get("payment.valuelink.modes");
-        if (modes != null && modes.length() > 0) {
+        if (UtilValidate.isNotEmpty(modes)) {
             request.put("Modes", modes);
         }
 
@@ -728,7 +727,7 @@ public class ValueLinkApi {
         request.put("EncryptID", this.getWorkingKeyIndex());
 
         if (debug) {
-            Debug.log("Created Initial Request Map : " + request, module);
+            Debug.logInfo("Created Initial Request Map : " + request, module);
         }
 
         return request;
@@ -741,7 +740,7 @@ public class ValueLinkApi {
     public GenericValue getGenericValue() {
         GenericValue value = null;
         try {
-            value = delegator.findByPrimaryKeyCache("ValueLinkKey", UtilMisc.toMap("merchantId", merchantId));
+            value = delegator.findOne("ValueLinkKey", UtilMisc.toMap("merchantId", merchantId), true);
         } catch (GenericEntityException e) {
             Debug.logError(e, module);
         }
@@ -840,8 +839,8 @@ public class ValueLinkApi {
         }
 
         if (debug) {
-            Debug.log("Raw MWK : " + StringUtil.toHexString(getMwk()), module);
-            Debug.log("MWK : " + StringUtil.toHexString(mwk.getEncoded()), module);
+            Debug.logInfo("Raw MWK : " + StringUtil.toHexString(getMwk()), module);
+            Debug.logInfo("MWK : " + StringUtil.toHexString(mwk.getEncoded()), module);
         }
 
         return mwk;
@@ -853,8 +852,8 @@ public class ValueLinkApi {
         }
 
         if (debug) {
-            Debug.log("Raw KEK : " + StringUtil.toHexString(getKek()), module);
-            Debug.log("KEK : " + StringUtil.toHexString(kek.getEncoded()), module);
+            Debug.logInfo("Raw KEK : " + StringUtil.toHexString(getKek()), module);
+            Debug.logInfo("KEK : " + StringUtil.toHexString(kek.getEncoded()), module);
         }
 
         return kek;
@@ -905,9 +904,9 @@ public class ValueLinkApi {
         return StringUtil.fromHexString(this.getGenericValue().getString("privateKey"));
     }
 
-    protected Map parseResponse(String response) {
+    protected Map<String, Object> parseResponse(String response) {
         if (debug) {
-            Debug.log("Raw Response : " + response, module);
+            Debug.logInfo("Raw Response : " + response, module);
         }
 
         // covert to all lowercase and trim off the html header
@@ -918,7 +917,7 @@ public class ValueLinkApi {
 
         // check for a history table
         String history = null;
-        List historyMapList = null;
+        List<Map<String, String>> historyMapList = null;
         if (subResponse.indexOf("<table") > -1) {
             int startHistory = subResponse.indexOf("<table");
             int endHistory = subResponse.indexOf("</table>") + 8;
@@ -943,7 +942,8 @@ public class ValueLinkApi {
         subResponse = StringUtil.replaceString(subResponse, "</td>", "");
 
         // make the map
-        Map responseMap = StringUtil.strToMap(subResponse, true);
+        Map<String, Object> responseMap = FastMap.newInstance();
+        responseMap.putAll(StringUtil.strToMap(subResponse, true));
 
         // add the raw html back in just in case we need it later
         responseMap.put("_rawHtmlResponse", response);
@@ -955,15 +955,15 @@ public class ValueLinkApi {
         }
 
         if (debug) {
-            Debug.log("Response Map : " + responseMap, module);
+            Debug.logInfo("Response Map : " + responseMap, module);
         }
 
         return responseMap;
     }
 
-    private List parseHistoryResponse(String response) {
+    private List<Map<String, String>> parseHistoryResponse(String response) {
         if (debug) {
-            Debug.log("Raw History : " + response, module);
+            Debug.logInfo("Raw History : " + response, module);
         }
 
         // covert to all lowercase and trim off the html header
@@ -983,7 +983,7 @@ public class ValueLinkApi {
         testResponse = testResponse.trim();
         if (testResponse.length() == 0) {
             if (debug) {
-                Debug.log("History did not contain any fields, returning null", module);
+                Debug.logInfo("History did not contain any fields, returning null", module);
             }
             return null;
         }
@@ -995,16 +995,16 @@ public class ValueLinkApi {
 
         // split sets of values up
         values = StringUtil.replaceString(values, "|</tr><tr>", "&");
-        List valueList = StringUtil.split(values, "&");
+        List<String> valueList = StringUtil.split(values, "&");
 
         // create a List of Maps for each set of values
-        List valueMap = new ArrayList();
+        List<Map<String, String>> valueMap = FastList.newInstance();
         for (int i = 0; i < valueList.size(); i++) {
-            valueMap.add(StringUtil.createMap(StringUtil.split(keys, "|"), StringUtil.split((String) valueList.get(i), "|")));
+            valueMap.add(StringUtil.createMap(StringUtil.split(keys, "|"), StringUtil.split(valueList.get(i), "|")));
         }
 
         if (debug) {
-            Debug.log("History Map : " + valueMap, module);
+            Debug.logInfo("History Map : " + valueMap, module);
         }
 
         return valueMap;

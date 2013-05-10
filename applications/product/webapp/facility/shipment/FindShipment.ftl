@@ -32,23 +32,23 @@ function lookupShipments() {
 <div id="findOrders" class="screenlet">
     <div class="screenlet-title-bar">
         <ul>
-            <li class="h3">${uiLabelMap.ProductFindShipment}</li>
+            <li class="h3">${uiLabelMap.ProductFindShipmentTitle}</li>
             <#if requestParameters.facilityId?has_content>
                 <li><a href="<@ofbizUrl>quickShipOrder?facilityId=${requestParameters.facilityId}</@ofbizUrl>">${uiLabelMap.ProductQuickShipOrder}</a></li>
             </#if>
             <li><a href="<@ofbizUrl>EditShipment</@ofbizUrl>">${uiLabelMap.ProductNewShipment}</a></li>
-            <li><a href="javascript:lookupShipments();">${uiLabelMap.ProductLookupShipment}</a></li>
+            <li><a href="javascript:lookupShipments();">${uiLabelMap.ProductFindShipment}</a></li>
         </ul>
         <br class="clear"/>
     </div>
     <div class="screenlet-body">
         <form method="post" name="lookupShipmentForm" action="<@ofbizUrl>FindShipment</@ofbizUrl>">
-            <input type="hidden" name="lookupFlag" value="Y">
+            <input type="hidden" name="lookupFlag" value="Y" />
             <table cellspacing="0" cellpadding="2" class="basic-table">
               <tr>
                 <td width="25%" align="right" class="label">${uiLabelMap.ProductShipmentId}</td>
                 <td width="5%">&nbsp;</td>
-                <td><input type="text" name="shipmentId" value="${shipmentId?if_exists}"></td>
+                <td><input type="text" name="shipmentId" value="${shipmentId?if_exists}" /></td>
               </tr>
               <tr>
                 <td width="25%" align="right" class="label">${uiLabelMap.ProductShipmentType}</td>
@@ -99,7 +99,7 @@ function lookupShipments() {
                 </td>
               </tr>
               <tr>
-                <td width="25%" align="right" class="label">${uiLabelMap.ProductStatus}</td>
+                <td width="25%" align="right" class="label">${uiLabelMap.CommonStatus}</td>
                 <td width="5%">&nbsp;</td>
                 <td>
                   <select name="statusId">
@@ -116,6 +116,13 @@ function lookupShipments() {
                     <#list purchaseShipmentStatuses as shipmentStatus>
                       <option value="${shipmentStatus.statusId}">${shipmentStatus.get("description",locale)}</option>
                     </#list>
+                    <option value="">---</option>
+                    <option value="">${uiLabelMap.ProductOrderReturnStatus}</option>
+                    <#list returnStatuses as returnStatus>
+                      <#if returnStatus.statusId != "RETURN_REQUESTED">
+                        <option value="${returnStatus.statusId}">${returnStatus.get("description",locale)}</option>
+                      </#if>
+                    </#list>
                   </select>
                 </td>
               </tr>
@@ -126,15 +133,13 @@ function lookupShipments() {
                   <table cellspacing="0" class="basic-table">
                     <tr>
                       <td>
-                        <input type="text" size="25" name="minDate" value="${requestParameters.minDate?if_exists}">
-                        <a href="javascript:call_cal(document.lookupShipmentForm.minDate, '${fromDateStr}');"><img src="<@ofbizContentUrl>/images/cal.gif</@ofbizContentUrl>" width="16" height="16" border="0" alt="Calendar"></a>
+                        <@htmlTemplate.renderDateTimeField name="minDate" event="" action="" className="" alert="" title="Format: yyyy-MM-dd HH:mm:ss.SSS" value="${requestParameters.minDate?if_exists}" size="25" maxlength="30" id="minDate1" dateType="date" shortDateInput=false timeDropdownParamName="" defaultDateTimeString="" localizedIconTitle="" timeDropdown="" timeHourName="" classString="" hour1="" hour2="" timeMinutesName="" minutes="" isTwelveHour="" ampmName="" amSelected="" pmSelected="" compositeType="" formName=""/>
                         <span class="label">${uiLabelMap.CommonFrom}</span>
                       </td>
                     </tr>
                     <tr>
                       <td>
-                        <input type="text" size="25" name="maxDate" value="${requestParameters.maxDate?if_exists}">
-                        <a href="javascript:call_cal(document.lookupShipmentForm.maxDate, '${thruDateStr}');"><img src="<@ofbizContentUrl>/images/cal.gif</@ofbizContentUrl>" width="16" height="16" border="0" alt="Calendar"></a>
+                        <@htmlTemplate.renderDateTimeField name="maxDate" event="" action="" className="" alert="" title="Format: yyyy-MM-dd HH:mm:ss.SSS" value="${requestParameters.maxDate?if_exists}" size="25" maxlength="30" id="maxDate1" dateType="date" shortDateInput=false timeDropdownParamName="" defaultDateTimeString="" localizedIconTitle="" timeDropdown="" timeHourName="" classString="" hour1="" hour2="" timeMinutesName="" minutes="" isTwelveHour="" ampmName="" amSelected="" pmSelected="" compositeType="" formName=""/>
                         <span class="label">${uiLabelMap.CommonThru}</span>
                       </td>
                     </tr>
@@ -146,7 +151,7 @@ function lookupShipments() {
     </div>
 </div>
 <#if shipmentList?exists>
-<div id="findOrders" class="screenlet">
+<div id="findOrders_2" class="screenlet">
     <div class="screenlet-title-bar">
         <ul>
             <li class="h3">${uiLabelMap.ProductShipmentsFound}</li>
@@ -171,7 +176,7 @@ function lookupShipments() {
         <tr class="header-row">
           <td width="5%">${uiLabelMap.ProductShipmentId}</td>
           <td width="15%">${uiLabelMap.ProductShipmentType}</td>
-          <td width="10%">${uiLabelMap.ProductStatus}</td>
+          <td width="10%">${uiLabelMap.CommonStatus}</td>
           <td width="25%">${uiLabelMap.ProductOriginFacility}</td>
           <td width="25%">${uiLabelMap.ProductDestFacility}</td>
           <td width="15%">${uiLabelMap.ProductShipDate}</td>
@@ -180,14 +185,14 @@ function lookupShipments() {
         <#if shipmentList?has_content>
           <#assign alt_row = false>
           <#list shipmentList as shipment>
-            <#assign originFacility = shipment.getRelatedOneCache("OriginFacility")?if_exists>
-            <#assign destinationFacility = shipment.getRelatedOneCache("DestinationFacility")?if_exists>
-            <#assign statusItem = shipment.getRelatedOneCache("StatusItem")>
-            <#assign shipmentType = shipment.getRelatedOneCache("ShipmentType")?if_exists>
+            <#assign originFacility = delegator.findOne("Facility", Static["org.ofbiz.base.util.UtilMisc"].toMap("facilityId", shipment.originFacilityId), true)?if_exists />
+            <#assign destinationFacility = delegator.findOne("Facility", Static["org.ofbiz.base.util.UtilMisc"].toMap("facilityId", shipment.destinationFacilityId), true)?if_exists />
+            <#assign statusItem = delegator.findOne("StatusItem", Static["org.ofbiz.base.util.UtilMisc"].toMap("statusId", shipment.statusId), true)?if_exists/>
+            <#assign shipmentType = delegator.findOne("ShipmentType", Static["org.ofbiz.base.util.UtilMisc"].toMap("shipmentTypeId", shipment.shipmentTypeId), true)?if_exists/>
             <tr valign="middle"<#if alt_row> class="alternate-row"</#if>>
               <td><a href="<@ofbizUrl>ViewShipment?shipmentId=${shipment.shipmentId}</@ofbizUrl>" class="buttontext">${shipment.shipmentId}</a></td>
-              <td>${shipmentType.get("description",locale)?default(shipmentType.shipmentTypeId?default(""))}</td>
-              <td>${statusItem.get("description",locale)?default(statusItem.statusId?default("N/A"))}</td>
+              <td>${(shipmentType.get("description",locale))?default(shipmentType.shipmentTypeId?default(""))}</td>
+              <td>${(statusItem.get("description",locale))?default(statusItem.statusId?default("N/A"))}</td>
               <td>${(originFacility.facilityName)?if_exists} [${shipment.originFacilityId?if_exists}]</td>
               <td>${(destinationFacility.facilityName)?if_exists} [${shipment.destinationFacilityId?if_exists}]</td>
               <td><span style="white-space: nowrap;">${(shipment.estimatedShipDate.toString())?if_exists}</span></td>

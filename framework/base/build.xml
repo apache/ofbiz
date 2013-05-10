@@ -25,6 +25,7 @@ under the License.
     <!-- Initialization of all property settings                            -->
     <!-- ================================================================== -->
 
+    <property name="desc" value="Base API"/>
     <property name="name" value="ofbiz-base"/>
     <property name="ofbiz.home.dir" value="../.."/>
 
@@ -35,50 +36,83 @@ under the License.
         <fileset dir="${lib.dir}/scripting" includes="*.jar"/>
         <fileset dir="../start/build/lib" includes="*.jar"/>
     </path>
+    <patternset id="src-dirs">
+        <include name="build/gen-src/javacc"/>
+    </patternset>
 
-    <!-- ================================================================== -->
-    <!-- Compilation of the source files                                    -->
-    <!-- ================================================================== -->
+    <filelist id="test.classes" dir="${src.dir}">
+        <file name="org/ofbiz/base/lang/test/ComparableRangeTests.java"/>
+        <file name="org/ofbiz/base/util/test/IndentingWriterTests.java"/>
+        <file name="org/ofbiz/base/util/test/ObjectTypeTests.java"/>
+        <file name="org/ofbiz/base/util/test/UtilObjectTests.java"/>
+        <file name="org/ofbiz/base/util/string/test/FlexibleStringExpanderTests.java"/>
+        <file name="org/ofbiz/base/util/collections/test/FlexibleMapAccessorTests.java"/>
+        <file name="org/ofbiz/base/util/test/TimeDurationTests.java"/>
+        <file name="org/ofbiz/base/util/test/StringUtilTests.java"/>
+        <file name="org/ofbiz/base/util/cache/test/UtilCacheTests.java"/>
+        <file name="org/ofbiz/base/json/test/JSONTests.java"/>
+        <file name="org/ofbiz/base/conversion/test/TestBooleanConverters.java"/>
+        <file name="org/ofbiz/base/conversion/test/DateTimeTests.java"/>
+        <file name="org/ofbiz/base/conversion/test/MiscTests.java"/>
+        <file name="org/ofbiz/base/util/test/UtilIOTests.java"/>
+        <file name="org/ofbiz/base/test/BaseUnitTests.java"/>
+        <file name="org/ofbiz/base/util/collections/test/GenericMapTest.java"/>
+        <file name="org/ofbiz/base/concurrent/test/DependencyPoolTests.java"/>
+        <file name="org/ofbiz/base/concurrent/test/SyncTTLObjectTest.java"/>
+        <file name="org/ofbiz/base/concurrent/test/AsyncTTLObjectTest.java"/>
+        <file name="org/ofbiz/base/concurrent/test/TTLCachedObjectTest.java"/>
+    </filelist>
 
-    <target name="classes" depends="prepare">
+    <target name="init">
         <!-- make sure we have crypto packages available -->
         <condition property="exclude.crypto" value="org/ofbiz/base/crypto/**">
             <not>
                 <available classname="javax.crypto.Cipher" classpathref="local.class.path"/>
             </not>
         </condition>
-
-        <!-- compile base -->
-    <javac15 destdir="${build.dir}/classes" srcdir="${src.dir}">
+        <condition property="exclude.cobertura" value="org/ofbiz/base/config/Cobertura*.java">
+            <not>
+                <available classname="net.sourceforge.cobertura.instrument.ClassInstrumenter" classpathref="local.class.path"/>
+            </not>
+        </condition>
+        <patternset id="src.exc.set">
+            <exclude name="${exclude.cobertura}"/>
             <exclude name="${exclude.crypto}"/>
             <exclude name="org/ofbiz/base/util/OfbizJsBsfEngine.java"/>
-        </javac15>
+        </patternset>
+    </target>
+
+    <target name="gen-src">
+        <ofbiz-javacc dir="org/ofbiz/base/json" file="JSON"/>
+    </target>
+
+    <target name="classes" depends="prepare,gen-src">
+        <javac16/>
     </target>
 
     <target name="jar" depends="classes">
-        <jar jarfile="${build.dir}/lib/${name}.jar">
-            <fileset dir="${build.dir}/classes"/>
-            <fileset dir="${src.dir}">
-                <include name="**/*.properties,**/*.xml,**/*.bsh,**/*.logic,**/*.js,**/*.jacl,**/*.py"/>
-                <include name="META-INF/**"/>
-            </fileset>
-            <!-- also put the DTDs in the jar file... -->
-            <fileset dir="${dtd.dir}" includes="*.dtd"/>
-            <!-- now add the NOTICE and LICENSE files to allow the jar file to be distributed alone -->
-            <zipfileset dir="${ofbiz.home.dir}" prefix="META-INF" includes="NOTICE,LICENSE"/>
-        </jar>
-    </target>
-
-    <!-- ================================================================== -->
-    <!-- Build JavaDoc                                                      -->
-    <!-- ================================================================== -->
-
-    <target name="docs" depends="prepare-docs">
-        <javadoc packagenames="org.ofbiz.base.*"
-                 classpathref="local.class.path"
-                 destdir="${build.dir}/javadocs"
-                 Windowtitle="Open for Business - Base API">
-            <sourcepath path="${src.dir}"/>
-        </javadoc>
+        <main-jar>
+            <main-elements>
+                <!-- also put the DTDs in the jar file... -->
+                <fileset dir="${dtd.dir}" includes="*.dtd"/>
+                <service type="org.ofbiz.base.conversion.ConverterLoader">
+                    <provider classname="org.ofbiz.base.conversion.BooleanConverters"/>
+                    <provider classname="org.ofbiz.base.conversion.CollectionConverters"/>
+                    <provider classname="org.ofbiz.base.conversion.DateTimeConverters"/>
+                    <provider classname="org.ofbiz.base.conversion.JSONConverters"/>
+                    <provider classname="org.ofbiz.base.conversion.MiscConverters"/>
+                    <provider classname="org.ofbiz.base.conversion.NetConverters"/>
+                    <provider classname="org.ofbiz.base.conversion.NumberConverters"/>
+                </service>
+            </main-elements>
+        </main-jar>
+        <test-jar>
+            <test-elements>
+                <service type="org.ofbiz.base.util.test.UtilObjectTests$TestFactoryIntf">
+                    <provider classname="org.ofbiz.base.util.test.UtilObjectTests$FirstTestFactory"/>
+                    <provider classname="org.ofbiz.base.util.test.UtilObjectTests$SecondTestFactory"/>
+                </service>
+            </test-elements>
+        </test-jar>
     </target>
 </project>

@@ -22,7 +22,7 @@ import java.util.Map;
 
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilMisc;
-import org.ofbiz.entity.GenericDelegator;
+import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericEntity;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericPK;
@@ -42,13 +42,13 @@ public class EntityCacheServices implements DistributedCacheClear {
 
     public static final String module = EntityCacheServices.class.getName();
 
-    protected GenericDelegator delegator = null;
+    protected Delegator delegator = null;
     protected LocalDispatcher dispatcher = null;
     protected String userLoginId = null;
 
     public EntityCacheServices() {}
 
-    public void setDelegator(GenericDelegator delegator, String userLoginId) {
+    public void setDelegator(Delegator delegator, String userLoginId) {
         this.delegator = delegator;
         this.dispatcher = EntityServiceFactory.getLocalDispatcher(delegator);
         this.userLoginId = userLoginId;
@@ -57,7 +57,7 @@ public class EntityCacheServices implements DistributedCacheClear {
     public GenericValue getAuthUserLogin() {
         GenericValue userLogin = null;
         try {
-            userLogin = delegator.findByPrimaryKeyCache("UserLogin", UtilMisc.toMap("userLoginId", userLoginId));
+            userLogin = delegator.findOne("UserLogin", UtilMisc.toMap("userLoginId", userLoginId), true);
         } catch (GenericEntityException e) {
             Debug.logError(e, "Error finding the userLogin for distributed cache clear", module);
         }
@@ -165,12 +165,12 @@ public class EntityCacheServices implements DistributedCacheClear {
 
     /**
      * Clear All Entity Caches Service
-     *@param ctx The DispatchContext that this service is operating in
-     *@param context Map containing the input parameters
-     *@return Map with the result of the service, the output parameters
+     * @param dctx The DispatchContext that this service is operating in
+     * @param context Map containing the input parameters
+     * @return Map with the result of the service, the output parameters
      */
-    public static Map clearAllEntityCaches(DispatchContext dctx, Map context) {
-        GenericDelegator delegator = dctx.getDelegator();
+    public static Map<String, Object> clearAllEntityCaches(DispatchContext dctx, Map<String, ? extends Object> context) {
+        Delegator delegator = dctx.getDelegator();
         Boolean distributeBool = (Boolean) context.get("distribute");
         boolean distribute = false;
         if (distributeBool != null) distribute = distributeBool.booleanValue();
@@ -182,12 +182,12 @@ public class EntityCacheServices implements DistributedCacheClear {
 
     /**
      * Clear Cache Line Service: one of the following context parameters is required: value, dummyPK or primaryKey
-     *@param ctx The DispatchContext that this service is operating in
-     *@param context Map containing the input parameters
-     *@return Map with the result of the service, the output parameters
+     * @param dctx The DispatchContext that this service is operating in
+     * @param context Map containing the input parameters
+     * @return Map with the result of the service, the output parameters
      */
-    public static Map clearCacheLine(DispatchContext dctx, Map context) {
-        GenericDelegator delegator = dctx.getDelegator();
+    public static Map<String, Object> clearCacheLine(DispatchContext dctx, Map<String, ? extends Object> context) {
+        Delegator delegator = dctx.getDelegator();
         Boolean distributeBool = (Boolean) context.get("distribute");
         boolean distribute = false;
         if (distributeBool != null) distribute = distributeBool.booleanValue();

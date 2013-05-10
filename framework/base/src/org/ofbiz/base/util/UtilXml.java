@@ -21,10 +21,13 @@ package org.ofbiz.base.util;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.Reader;
+import java.io.Writer;
 import java.net.URL;
 import java.util.List;
 import java.util.Set;
@@ -34,21 +37,42 @@ import java.util.regex.Pattern;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerConfigurationException;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+import javax.xml.transform.stream.StreamSource;
 
 import javolution.util.FastList;
 
-import org.apache.xml.serialize.OutputFormat;
-import org.apache.xml.serialize.XMLSerializer;
+import org.apache.xerces.parsers.DOMParser;
+import org.apache.xerces.xni.Augmentations;
+import org.apache.xerces.xni.NamespaceContext;
+import org.apache.xerces.xni.QName;
+import org.apache.xerces.xni.XMLAttributes;
+import org.apache.xerces.xni.XMLLocator;
+import org.apache.xerces.xni.XMLResourceIdentifier;
+import org.apache.xerces.xni.XMLString;
+import org.apache.xerces.xni.XNIException;
+import org.w3c.dom.DOMConfiguration;
 import org.w3c.dom.Document;
 import org.w3c.dom.DocumentFragment;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
+import org.w3c.dom.bootstrap.DOMImplementationRegistry;
+import org.w3c.dom.ls.DOMImplementationLS;
+import org.w3c.dom.ls.LSOutput;
+import org.w3c.dom.ls.LSSerializer;
 import org.xml.sax.EntityResolver;
 import org.xml.sax.ErrorHandler;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 import org.xml.sax.helpers.DefaultHandler;
+
+import com.thoughtworks.xstream.XStream;
 
 /**
  * Utilities methods to simplify dealing with JAXP & DOM XML parsing
@@ -57,102 +81,259 @@ import org.xml.sax.helpers.DefaultHandler;
 public class UtilXml {
 
     public static final String module = UtilXml.class.getName();
+    protected static final XStream xstream = new XStream();
 
-    public static String writeXmlDocument(Document document) throws java.io.IOException {
-        if (document == null) {
-            Debug.logWarning("[UtilXml.writeXmlDocument] Document was null, doing nothing", module);
-            return null;
-        }
-        return writeXmlDocument(document.getDocumentElement());
+    // ----- DOM Level 3 Load and Save Methods -- //
+
+    /** Returns a <code>DOMImplementationLS</code> instance.
+     * @return A <code>DOMImplementationLS</code> instance
+     * @see <a href="http://www.w3.org/TR/2004/REC-DOM-Level-3-LS-20040407/">DOM Level 3 Load and Save Specification</a>
+     * @throws ClassCastException
+     * @throws ClassNotFoundException
+     * @throws InstantiationException
+     * @throws IllegalAccessException
+     */
+    public static DOMImplementationLS getDomLsImplementation() throws ClassCastException, ClassNotFoundException, InstantiationException, IllegalAccessException {
+        DOMImplementationRegistry registry = DOMImplementationRegistry.newInstance();
+        return (DOMImplementationLS)registry.getDOMImplementation("LS");
     }
 
-    public static String writeXmlDocument(Element element) throws java.io.IOException {
-        if (element == null) {
-            Debug.logWarning("[UtilXml.writeXmlDocument] Element was null, doing nothing", module);
+    /** Returns a <code>LSOutput</code> instance.
+     * @param impl A <code>DOMImplementationLS</code> instance
+     * @param os Optional <code>OutputStream</code> instance
+     * @param encoding Optional character encoding, default is UTF-8
+     * @return A <code>LSOutput</code> instance
+     * @see <a href="http://www.w3.org/TR/2004/REC-DOM-Level-3-LS-20040407/">DOM Level 3 Load and Save Specification</a>
+     */
+    public static LSOutput createLSOutput(DOMImplementationLS impl, OutputStream os, String encoding) {
+        LSOutput out = impl.createLSOutput();
+        if (os != null) {
+            out.setByteStream(os);
+        }
+        if (encoding != null) {
+            out.setEncoding(encoding);
+        }
+        return out;
+    }
+
+    /** Returns a <code>LSSerializer</code> instance.
+     * @param impl A <code>DOMImplementationLS</code> instance
+     * @param includeXmlDeclaration If set to <code>true</code>,
+     * the xml declaration will be included in the output
+     * @param enablePrettyPrint If set to <code>true</code>, the
+     * output will be formatted in human-readable form. If set to
+     * <code>false</code>, the entire document will consist of a single line.
+     * @return A <code>LSSerializer</code> instance
+     * @see <a href="http://www.w3.org/TR/2004/REC-DOM-Level-3-LS-20040407/">DOM Level 3 Load and Save Specification</a>
+     */
+    public static LSSerializer createLSSerializer(DOMImplementationLS impl, boolean includeXmlDeclaration, boolean enablePrettyPrint) {
+        LSSerializer writer = impl.createLSSerializer();
+        DOMConfiguration domConfig = writer.getDomConfig();
+        domConfig.setParameter("xml-declaration", includeXmlDeclaration);
+        domConfig.setParameter("format-pretty-print", enablePrettyPrint);
+        return writer;
+    }
+
+    /** Serializes a DOM Node to an <code>OutputStream</code> using DOM 3.
+     * @param os The <code>OutputStream</code> instance to write to
+     * @param node The DOM <code>Node</code> object to be serialized
+     * @param encoding Optional character encoding
+     * @param includeXmlDeclaration If set to <code>true</code>,
+     * the xml declaration will be included in the output
+     * @param enablePrettyPrint If set to <code>true</code>, the
+     * output will be formatted in human-readable form. If set to
+     * <code>false</code>, the entire document will consist of a single line.
+     * @see <a href="http://www.w3.org/TR/2004/REC-DOM-Level-3-LS-20040407/">DOM Level 3 Load and Save Specification</a>
+     * @throws ClassCastException
+     * @throws ClassNotFoundException
+     * @throws InstantiationException
+     * @throws IllegalAccessException
+     */
+    public static void writeXmlDocument(OutputStream os, Node node, String encoding, boolean includeXmlDeclaration, boolean enablePrettyPrint) throws ClassCastException, ClassNotFoundException, InstantiationException, IllegalAccessException {
+        DOMImplementationLS impl = getDomLsImplementation();
+        LSOutput out = createLSOutput(impl, os, encoding);
+        LSSerializer writer = createLSSerializer(impl, includeXmlDeclaration, enablePrettyPrint);
+        writer.write(node, out);
+    }
+
+    // ----- TrAX Methods ----------------- //
+
+    /** Creates a JAXP TrAX Transformer suitable for pretty-printing an
+     * XML document. This method is provided as an alternative to the
+     * deprecated <code>org.apache.xml.serialize.OutputFormat</code> class.
+     * @param encoding Optional encoding, defaults to UTF-8
+     * @param omitXmlDeclaration If <code>true</code> the xml declaration
+     * will be omitted from the output
+     * @param indent If <code>true</code>, the output will be indented
+     * @param indentAmount If <code>indent</code> is <code>true</code>,
+     * the number of spaces to indent. Default is 4.
+     * @return A <code>Transformer</code> instance
+     * @see <a href="http://java.sun.com/javase/6/docs/api/javax/xml/transform/package-summary.html">JAXP TrAX</a>
+     * @throws TransformerConfigurationException
+     */
+    public static Transformer createOutputTransformer(String encoding, boolean omitXmlDeclaration, boolean indent, int indentAmount) throws TransformerConfigurationException {
+        // Developers: This stylesheet strips all formatting space characters from the XML,
+        // then indents the XML using the specified indentation.
+        StringBuilder sb = new StringBuilder();
+        sb.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
+        sb.append("<xsl:stylesheet xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\" xmlns:xalan=\"http://xml.apache.org/xslt\" version=\"1.0\">\n");
+        sb.append("<xsl:output method=\"xml\" encoding=\"");
+        sb.append(encoding == null ? "UTF-8" : encoding);
+        sb.append("\"");
+        if (omitXmlDeclaration) {
+            sb.append(" omit-xml-declaration=\"yes\"");
+        }
+        sb.append(" indent=\"");
+        sb.append(indent ? "yes" : "no");
+        sb.append("\"");
+        if (indent) {
+            sb.append(" xalan:indent-amount=\"");
+            sb.append(indentAmount <= 0 ? 4 : indentAmount);
+            sb.append("\"");
+        }
+        sb.append("/>\n<xsl:strip-space elements=\"*\"/>\n");
+        sb.append("<xsl:template match=\"@*|node()\">\n");
+        sb.append("<xsl:copy><xsl:apply-templates select=\"@*|node()\"/></xsl:copy>\n");
+        sb.append("</xsl:template>\n</xsl:stylesheet>\n");
+        ByteArrayInputStream bis = new ByteArrayInputStream(sb.toString().getBytes());
+        TransformerFactory transformerFactory = TransformerFactory.newInstance();
+        return transformerFactory.newTransformer(new StreamSource(bis));
+    }
+
+    /** Serializes a DOM <code>Node</code> to an <code>OutputStream</code>
+     * using JAXP TrAX.
+     * @param transformer A <code>Transformer</code> instance
+     * @param node The <code>Node</code> to serialize
+     * @param os The <code>OutputStream</code> to serialize to
+     * @see <a href="http://java.sun.com/javase/6/docs/api/javax/xml/transform/package-summary.html">JAXP TrAX</a>
+     * @throws TransformerException
+     */
+    public static void transformDomDocument(Transformer transformer, Node node, OutputStream os) throws TransformerException {
+        DOMSource source = new DOMSource(node);
+        StreamResult result = new StreamResult(os);
+        transformer.transform(source, result);
+    }
+
+    /** Serializes a DOM <code>Node</code> to an <code>OutputStream</code>
+     * using JAXP TrAX.
+     * @param node The <code>Node</code> to serialize
+     * @param os The <code>OutputStream</code> to serialize to
+     * @param encoding Optional encoding, defaults to UTF-8
+     * @param omitXmlDeclaration If <code>true</code> the xml declaration
+     * will be omitted from the output
+     * @param indent If <code>true</code>, the output will be indented
+     * @param indentAmount If <code>indent</code> is <code>true</code>,
+     * the number of spaces to indent. Default is 4.
+     * @see <a href="http://java.sun.com/javase/6/docs/api/javax/xml/transform/package-summary.html">JAXP TrAX</a>
+     * @throws TransformerException
+     */
+    public static void writeXmlDocument(Node node, OutputStream os, String encoding, boolean omitXmlDeclaration, boolean indent, int indentAmount) throws TransformerException {
+        Transformer transformer = createOutputTransformer(encoding, omitXmlDeclaration, indent, indentAmount);
+        transformDomDocument(transformer, node, os);
+    }
+
+    // ----- Java Object Marshalling/Unmarshalling ----- //
+
+    /** Deserialize an object from an <code>InputStream</code>.
+     * 
+     * @param input The <code>InputStream</code>
+     * @return The deserialized <code>Object</code>
+     */
+    public static Object fromXml(InputStream input) {
+        return xstream.fromXML(input);
+    }
+
+    /** Deserialize an object from a <code>Reader</code>.
+     * 
+     * @param reader The <code>Reader</code>
+     * @return The deserialized <code>Object</code>
+     */
+    public static Object fromXml(Reader reader) {
+        return xstream.fromXML(reader);
+    }
+
+    /** Deserialize an object from a <code>String</code>.
+     * 
+     * @param str The <code>String</code>
+     * @return The deserialized <code>Object</code>
+     */
+    public static Object fromXml(String str) {
+        return xstream.fromXML(str);
+    }
+
+    /** Serialize an object to an XML <code>String</code>.
+     * 
+     * @param obj The object to serialize
+     * @return An XML <code>String</code>
+     */
+    public static String toXml(Object obj) {
+        return xstream.toXML(obj);
+    }
+
+    /** Serialize an object to an <code>OutputStream</code>.
+     * 
+     * @param obj The object to serialize
+     * @param output The <code>OutputStream</code>
+     */
+    public static void toXml(Object obj, OutputStream output) {
+        xstream.toXML(obj, output);
+    }
+
+    /** Serialize an object to a <code>Writer</code>.
+     * 
+     * @param obj The object to serialize
+     * @param writer The <code>Writer</code>
+     */
+    public static void toXml(Object obj, Writer writer) {
+        xstream.toXML(obj, writer);
+    }
+
+    // ------------------------------------------------- //
+
+    public static String writeXmlDocument(Node node) throws java.io.IOException {
+        if (node == null) {
+            Debug.logWarning("[UtilXml.writeXmlDocument] Node was null, doing nothing", module);
             return null;
         }
-
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        writeXmlDocument(bos, element);
-        String outString = bos.toString("UTF-8");
-
-        if (bos != null) bos.close();
-        return outString;
+        writeXmlDocument(bos, node);
+        return bos.toString("UTF-8");
     }
 
-    public static String writeXmlDocument(DocumentFragment fragment) throws java.io.IOException {
-        if (fragment == null) {
-            Debug.logWarning("[UtilXml.writeXmlDocument] DocumentFragment was null, doing nothing", module);
-            return null;
-        }
-
-        ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        List<? extends Element> elementList = UtilXml.childElementList(fragment);
-        for (Element element: elementList) {
-            writeXmlDocument(bos, element);
-        }
-        String outString = bos.toString("UTF-8");
-
-        if (bos != null) bos.close();
-        return outString;
-    }
-
-    public static void writeXmlDocument(String filename, Document document)
-        throws java.io.FileNotFoundException, java.io.IOException {
-        if (document == null) {
-            Debug.logWarning("[UtilXml.writeXmlDocument] Document was null, doing nothing", module);
-            return;
-        }
-        writeXmlDocument(filename, document.getDocumentElement());
-    }
-
-    public static void writeXmlDocument(String filename, Element element)
-        throws java.io.FileNotFoundException, java.io.IOException {
-        if (element == null) {
-            Debug.logWarning("[UtilXml.writeXmlDocument] Element was null, doing nothing", module);
+    public static void writeXmlDocument(String filename, Node node) throws FileNotFoundException, IOException {
+        if (node == null) {
+            Debug.logWarning("[UtilXml.writeXmlDocument] Node was null, doing nothing", module);
             return;
         }
         if (filename == null) {
             Debug.logWarning("[UtilXml.writeXmlDocument] Filename was null, doing nothing", module);
             return;
         }
-
         File outFile = new File(filename);
         FileOutputStream fos = null;
-        fos = new FileOutputStream(outFile);
-
         try {
-            writeXmlDocument(fos, element);
+            fos = new FileOutputStream(outFile);
+            writeXmlDocument(fos, node);
         } finally {
-            if (fos != null) fos.close();
+            if (fos != null) {
+                fos.close();
+            }
         }
     }
 
-    public static void writeXmlDocument(OutputStream os, Document document) throws java.io.IOException {
-        if (document == null) {
-            Debug.logWarning("[UtilXml.writeXmlDocument] Document was null, doing nothing", module);
+    public static void writeXmlDocument(OutputStream os, Node node) throws java.io.IOException {
+        if (node == null) {
+            Debug.logWarning("[UtilXml.writeXmlDocument] Node was null, doing nothing", module);
             return;
         }
-        writeXmlDocument(os, document.getDocumentElement());
-    }
-    public static void writeXmlDocument(OutputStream os, Element element) throws java.io.IOException {
-        OutputFormat format = new OutputFormat(element.getOwnerDocument());
-        writeXmlDocument(os, element, format);
-    }
-
-    public static void writeXmlDocument(OutputStream os, Element element, OutputFormat format) throws java.io.IOException {
-        if (element == null) {
-            Debug.logWarning("[UtilXml.writeXmlDocument] Element was null, doing nothing", module);
-            return;
+        // OutputFormat defaults are: indent on, indent = 4, include XML declaration,
+        // charset = UTF-8, line width = 72
+        try {
+            writeXmlDocument(node, os, "UTF-8", false, true, 4);
+        } catch (TransformerException e) {
+            // Wrapping this exception for backwards compatibility
+            throw new IOException(e.getMessage());
         }
-        if (os == null) {
-            Debug.logWarning("[UtilXml.writeXmlDocument] OutputStream was null, doing nothing", module);
-            return;
-        }
-
-        XMLSerializer serializer = new XMLSerializer(os, format);
-        serializer.asDOMSerializer();
-        serializer.serialize(element);
     }
 
     public static Document readXmlDocument(String content)
@@ -170,6 +351,16 @@ public class UtilXml {
         return readXmlDocument(bis, validate, "Internal Content");
     }
 
+    public static Document readXmlDocument(String content, boolean validate, boolean withPosition)
+            throws SAXException, ParserConfigurationException, java.io.IOException {
+        if (content == null) {
+            Debug.logWarning("[UtilXml.readXmlDocument] content was null, doing nothing", module);
+            return null;
+        }
+        ByteArrayInputStream bis = new ByteArrayInputStream(content.getBytes("UTF-8"));
+        return readXmlDocument(bis, validate, "Internal Content", withPosition);
+    }
+
     public static Document readXmlDocument(URL url)
             throws SAXException, ParserConfigurationException, java.io.IOException {
         return readXmlDocument(url, true);
@@ -181,20 +372,32 @@ public class UtilXml {
             Debug.logWarning("[UtilXml.readXmlDocument] URL was null, doing nothing", module);
             return null;
         }
-        return readXmlDocument(url.openStream(), validate, url.toString());
+        InputStream is = url.openStream();
+        Document document = readXmlDocument(is, validate, url.toString());
+        is.close();
+        return document;
     }
 
-    /**
-     * @deprecated
-     */
-    public static Document readXmlDocument(InputStream is)
+    public static Document readXmlDocument(URL url, boolean validate, boolean withPosition)
             throws SAXException, ParserConfigurationException, java.io.IOException {
-        return readXmlDocument(is, true, null);
+        if (url == null) {
+            Debug.logWarning("[UtilXml.readXmlDocument] URL was null, doing nothing", module);
+            return null;
+        }
+        InputStream is = url.openStream();
+        Document document = readXmlDocument(is, validate, url.toString(), withPosition);
+        is.close();
+        return document;
     }
 
     public static Document readXmlDocument(InputStream is, String docDescription)
             throws SAXException, ParserConfigurationException, java.io.IOException {
         return readXmlDocument(is, true, docDescription);
+    }
+
+    public static Document readXmlDocument(InputStream is, String docDescription, boolean withPosition)
+            throws SAXException, ParserConfigurationException, java.io.IOException {
+        return readXmlDocument(is, true, docDescription, withPosition);
     }
 
     public static Document readXmlDocument(InputStream is, boolean validate, String docDescription)
@@ -249,6 +452,128 @@ public class UtilXml {
         return document;
     }
 
+    public static Document readXmlDocument(InputStream is, boolean validate, String docDescription, boolean withPosition)
+            throws SAXException, ParserConfigurationException, java.io.IOException {
+        if (!withPosition) {
+            return readXmlDocument(is, validate, docDescription);
+        }
+
+        if (is == null) {
+            Debug.logWarning("[UtilXml.readXmlDocument] InputStream was null, doing nothing", module);
+            return null;
+        }
+
+        long startTime = System.currentTimeMillis();
+
+        Document document = null;
+
+        DOMParser parser = new DOMParser() {
+            private XMLLocator locator;
+
+            private void setLineColumn(Node node) {
+                if (node.getUserData("startLine") != null) {
+                    return;
+                }
+                node.setUserData("systemId",locator.getLiteralSystemId(), null);
+                node.setUserData("startLine",locator.getLineNumber(), null);
+                node.setUserData("startColumn",locator.getColumnNumber(), null);
+            }
+
+            private void setLineColumn() {
+                try {
+                    Node node = (Node) getProperty("http://apache.org/xml/properties/dom/current-element-node");
+                    if (node != null) {
+                        setLineColumn(node);
+                    }
+                } catch (SAXException ex) {
+                    Debug.logWarning(ex, module);
+                }
+            }
+
+            private void setLastChildLineColumn() {
+                try {
+                    Node node = (Node) getProperty("http://apache.org/xml/properties/dom/current-element-node");
+                    if (node != null) {
+                       setLineColumn(node.getLastChild());
+                    }
+                } catch (SAXException ex) {
+                    Debug.logWarning(ex, module);
+                }
+            }
+
+            @Override
+            public void startGeneralEntity(String name, XMLResourceIdentifier identifier, String encoding, Augmentations augs) throws XNIException {
+                super.startGeneralEntity(name, identifier, encoding, augs);
+                setLineColumn();
+            }
+
+            @Override
+            public void comment(XMLString text, Augmentations augs) throws XNIException {
+                super.comment(text, augs);
+                setLastChildLineColumn();
+            }
+
+            @Override
+            public void processingInstruction(String target, XMLString data, Augmentations augs) throws XNIException {
+                super.processingInstruction(target, data, augs);
+                setLastChildLineColumn();
+            }
+
+            @Override
+            public void startDocument(XMLLocator locator, String encoding, NamespaceContext namespaceContext, Augmentations augs) throws XNIException {
+                super.startDocument(locator, encoding, namespaceContext, augs);
+                this.locator = locator;
+                setLineColumn();
+            }
+
+            @Override
+            public void doctypeDecl(String rootElement, String publicId, String systemId, Augmentations augs) throws XNIException {
+                super.doctypeDecl(rootElement, publicId, systemId, augs);
+            }
+
+            @Override
+            public void startElement(QName elementQName, XMLAttributes attrList, Augmentations augs) throws XNIException {
+                super.startElement(elementQName, attrList, augs);
+                setLineColumn();
+            }
+
+            @Override
+            public void characters(XMLString text, Augmentations augs) throws XNIException {
+                super.characters(text, augs);
+                setLastChildLineColumn();
+            }
+
+            @Override
+            public void ignorableWhitespace(XMLString text, Augmentations augs) throws XNIException {
+                super.ignorableWhitespace(text, augs);
+                setLastChildLineColumn();
+            }
+        };
+        parser.setFeature("http://xml.org/sax/features/namespaces", true);
+        parser.setFeature("http://xml.org/sax/features/validation", validate);
+        parser.setFeature("http://apache.org/xml/features/validation/schema", validate);
+        parser.setFeature("http://apache.org/xml/features/dom/defer-node-expansion", false);
+
+        // with a SchemaUrl, a URL object
+        //factory.setAttribute("http://java.sun.com/xml/jaxp/properties/schemaLanguage", "http://www.w3.org/2001/XMLSchema");
+        //factory.setAttribute("http://java.sun.com/xml/jaxp/properties/schemaSource", SchemaUrl);
+        if (validate) {
+            LocalResolver lr = new LocalResolver(new DefaultHandler());
+            ErrorHandler eh = new LocalErrorHandler(docDescription, lr);
+
+            parser.setEntityResolver(lr);
+            parser.setErrorHandler(eh);
+        }
+        InputSource inputSource = new InputSource(is);
+        inputSource.setSystemId(docDescription);
+        parser.parse(inputSource);
+        document = parser.getDocument();
+
+        double totalSeconds = (System.currentTimeMillis() - startTime)/1000.0;
+        if (Debug.verboseOn()) Debug.logVerbose("XML Read " + totalSeconds + "s: " + docDescription, module);
+        return document;
+    }
+
     public static Document makeEmptyXmlDocument() {
         return makeEmptyXmlDocument(null);
     }
@@ -294,6 +619,25 @@ public class UtilXml {
 
         newElement.appendChild(document.createTextNode(childElementValue));
         return newElement;
+    }
+
+    /** Creates a child element with the given namespace supportive name and appends it to the element child node list. */
+    public static Element addChildElementNSElement(Element element, String childElementName,
+            Document document, String nameSpaceUrl) {
+        Element newElement = document.createElementNS(nameSpaceUrl, childElementName);
+        element.appendChild(newElement);
+        return element;
+    }
+
+    /** Creates a child element with the given namespace supportive name and appends it to the element child node list.
+     *  Also creates a Text node with the given value and appends it to the new elements child node list.
+     */
+    public static Element addChildElementNSValue(Element element, String childElementName,
+            String childElementValue, Document document, String nameSpaceUrl) {
+        Element newElement = document.createElementNS(nameSpaceUrl, childElementName);
+        newElement.appendChild(document.createTextNode(childElementValue));
+        element.appendChild(newElement);
+        return element;
     }
 
     /** Creates a child element with the given name and appends it to the element child node list.
@@ -398,13 +742,11 @@ public class UtilXml {
 
         List<Node> nodes = FastList.newInstance();
 
-        if (node != null) {
-            do {
-                if (node.getNodeType() == Node.ELEMENT_NODE || node.getNodeType() == Node.COMMENT_NODE) {
-                    nodes.add(node);
-                }
-            } while ((node = node.getNextSibling()) != null);
-        }
+        do {
+            if (node.getNodeType() == Node.ELEMENT_NODE || node.getNodeType() == Node.COMMENT_NODE) {
+                nodes.add(node);
+            }
+        } while ((node = node.getNextSibling()) != null);
         return nodes;
     }
 
@@ -463,7 +805,7 @@ public class UtilXml {
         if (node != null) {
             do {
                 if (node.getNodeType() == Node.ELEMENT_NODE && (childElementName == null ||
-                        childElementName.equals(node.getNodeName()))) {
+                        childElementName.equals(node.getLocalName() != null ? node.getLocalName() : node.getNodeName()))) {
                     Element childElement = (Element) node;
                     return childElement;
                 }
@@ -482,7 +824,7 @@ public class UtilXml {
         if (node != null) {
             do {
                 if (node.getNodeType() == Node.ELEMENT_NODE && (childElementName == null ||
-                        childElementName.equals(node.getNodeName()))) {
+                        childElementName.equals(node.getLocalName() != null ? node.getLocalName() : node.getNodeName()))) {
                     Element childElement = (Element) node;
 
                     String value = childElement.getAttribute(attrName);
@@ -512,11 +854,25 @@ public class UtilXml {
         Element childElement = firstChildElement(element, childElementName);
         String elementValue = elementValue(childElement);
 
-        if (elementValue == null || elementValue.length() == 0)
+        if (UtilValidate.isEmpty(elementValue))
             return defaultValue;
         else
             return elementValue;
     }
+
+    /** Return a named attribute of a named child node or a default if null. */
+    public static String childElementAttribute(Element element, String childElementName, String attributeName, String defaultValue) {
+        if (element == null) return defaultValue;
+        // get the value of the first element with the given name
+        Element childElement = firstChildElement(element, childElementName);
+        String elementAttribute = elementAttribute(childElement, attributeName, defaultValue);
+
+        if (UtilValidate.isEmpty(elementAttribute))
+            return defaultValue;
+        else
+            return elementAttribute;
+    }
+
 
     /** Return the text (node value) of the first node under this, works best if normalized. */
     public static String elementValue(Element element) {
@@ -549,28 +905,34 @@ public class UtilXml {
         return valueBuffer.toString();
     }
 
+    public static String elementAttribute(Element element, String attrName, String defaultValue) {
+        if (element == null) return defaultValue;
+        String attrValue = element.getAttribute(attrName);
+        return UtilValidate.isNotEmpty(attrValue) ? attrValue : defaultValue;
+    }
+
     public static String checkEmpty(String string) {
-        if (string != null && string.length() > 0)
+        if (UtilValidate.isNotEmpty(string))
             return string;
         else
             return "";
     }
 
     public static String checkEmpty(String string1, String string2) {
-        if (string1 != null && string1.length() > 0)
+        if (UtilValidate.isNotEmpty(string1))
             return string1;
-        else if (string2 != null && string2.length() > 0)
+        else if (UtilValidate.isNotEmpty(string2))
             return string2;
         else
             return "";
     }
 
     public static String checkEmpty(String string1, String string2, String string3) {
-        if (string1 != null && string1.length() > 0)
+        if (UtilValidate.isNotEmpty(string1))
             return string1;
-        else if (string2 != null && string2.length() > 0)
+        else if (UtilValidate.isNotEmpty(string2))
             return string2;
-        else if (string3 != null && string3.length() > 0)
+        else if (UtilValidate.isNotEmpty(string3))
             return string3;
         else
             return "";
@@ -703,7 +1065,7 @@ public class UtilXml {
                     + String.valueOf(exception.getLineNumber())
                     + ". Error message: "
                     + exceptionMessage, module
-                );
+               );
             }
         }
 
@@ -715,7 +1077,7 @@ public class UtilXml {
                     + String.valueOf(exception.getLineNumber())
                     + ". Error message: "
                     + exception.getMessage(), module
-                );
+               );
             }
         }
 
@@ -727,7 +1089,7 @@ public class UtilXml {
                     + String.valueOf(exception.getLineNumber())
                     + ". Error message: "
                     + exception.getMessage(), module
-                );
+               );
             }
         }
     }

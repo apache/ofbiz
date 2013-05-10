@@ -19,6 +19,7 @@
 import org.ofbiz.base.util.cache.UtilCache;
 import org.ofbiz.base.util.cache.CacheLine;
 import org.ofbiz.base.util.UtilFormatOut;
+import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.security.Security;
 
 context.hasUtilCacheEdit = security.hasEntityPermission("UTIL_CACHE", "_EDIT", session);
@@ -33,27 +34,20 @@ cacheElementsList = [];
 if (cacheName) {
     utilCache = UtilCache.findCache(cacheName);
     if (utilCache) {
-        int keyNum = 0;
-        utilCache.cacheLineTable.keySet().each { key ->
-            cacheElement = [:];
-            line = utilCache.cacheLineTable.get(key);
-            expireTime = "";
-            if (line?.loadTime > 0) {
-                expireTime = (new Date(line.loadTime + utilCache.getExpireTime())).toString();
+        cacheElementsList = utilCache.getLineInfos()
+        cacheElementsList.each {
+            if (it.expireTimeMillis != null) {
+                it.expireTimeMillis = (it.expireTimeMillis / 1000) .toString();
             }
-            lineSize = line.getSizeInBytes();
-            totalSize += lineSize;
-
-            cacheElement.elementKey = key;
-            cacheElement.expireTime = expireTime;
-            cacheElement.lineSize = UtilFormatOut.formatQuantity(lineSize);
-            cacheElement.keyNum = keyNum;
-
-            cacheElementsList.add(cacheElement);
-
-            keyNum++;
+            totalSize += it.lineSize;
+            it.lineSize = UtilFormatOut.formatQuantity(it.lineSize);
         }
     }
 }
 context.totalSize = UtilFormatOut.formatQuantity(totalSize);
-context.cacheElementsList = cacheElementsList;
+sortField = parameters.sortField;
+if (sortField) { 
+    context.cacheElementsList = UtilMisc.sortMaps(cacheElementsList, UtilMisc.toList(sortField));
+} else {
+    context.cacheElementsList = cacheElementsList;
+}

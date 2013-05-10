@@ -18,43 +18,51 @@
  *******************************************************************************/
 
 package org.ofbiz.party.communication;
+import org.ofbiz.base.util.GeneralException;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.nio.ByteBuffer;
 import java.sql.Timestamp;
 import java.util.Enumeration;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.mail.Address;
+import javax.mail.BodyPart;
 import javax.mail.MessagingException;
-import javax.mail.Multipart;
-import javax.mail.Part;
 import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeMessage;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import javolution.util.FastList;
 import javolution.util.FastMap;
 
+import org.ofbiz.base.location.FlexibleLocation;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.StringUtil;
 import org.ofbiz.base.util.UtilDateTime;
+import org.ofbiz.base.util.UtilHttp;
 import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.base.util.UtilProperties;
 import org.ofbiz.base.util.UtilValidate;
-import org.ofbiz.entity.GenericDelegator;
+import org.ofbiz.common.email.NotificationServices;
+import org.ofbiz.content.data.DataResourceWorker;
+import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
 import org.ofbiz.entity.condition.EntityCondition;
 import org.ofbiz.entity.condition.EntityConditionList;
 import org.ofbiz.entity.condition.EntityOperator;
 import org.ofbiz.entity.util.EntityFindOptions;
+import org.ofbiz.entity.util.EntityListIterator;
 import org.ofbiz.entity.util.EntityUtil;
 import org.ofbiz.service.DispatchContext;
 import org.ofbiz.service.GenericServiceException;
@@ -68,7 +76,7 @@ public class CommunicationEventServices {
     public static final String resource = "PartyErrorUiLabels";
 
     public static Map<String, Object> sendCommEventAsEmail(DispatchContext ctx, Map<String, ? extends Object> context) {
-        GenericDelegator delegator = ctx.getDelegator();
+        Delegator delegator = ctx.getDelegator();
         LocalDispatcher dispatcher = ctx.getDispatcher();
         GenericValue userLogin = (GenericValue) context.get("userLogin");
         Locale locale = (Locale) context.get("locale");
@@ -80,7 +88,7 @@ public class CommunicationEventServices {
 
         try {
             // find the communication event and make sure that it is actually an email
-            GenericValue communicationEvent = delegator.findByPrimaryKey("CommunicationEvent", UtilMisc.toMap("communicationEventId", communicationEventId));
+            GenericValue communicationEvent = delegator.findOne("CommunicationEvent", UtilMisc.toMap("communicationEventId", communicationEventId), false);
             if (communicationEvent == null) {
                 String errMsg = UtilProperties.getMessage(resource,"commeventservices.communication_event_not_found_failure", locale);
                 return ServiceUtil.returnError(errMsg + " " + communicationEventId);
@@ -92,9 +100,9 @@ public class CommunicationEventServices {
             }
 
             // make sure the from contact mech is an email if it is specified
-            if ((communicationEvent.getRelatedOne("FromContactMech") == null) ||
-                 (!(communicationEvent.getRelatedOne("FromContactMech").getString("contactMechTypeId").equals("EMAIL_ADDRESS")) ||
-                 (communicationEvent.getRelatedOne("FromContactMech").getString("infoString") == null))) {
+            if ((communicationEvent.getRelatedOne("FromContactMech", false) == null) ||
+                 (!(communicationEvent.getRelatedOne("FromContactMech", false).getString("contactMechTypeId").equals("EMAIL_ADDRESS")) ||
+                 (communicationEvent.getRelatedOne("FromContactMech", false).getString("infoString") == null))) {
                 String errMsg = UtilProperties.getMessage(resource,"commeventservices.communication_event_from_contact_mech_must_be_email", locale);
                 return ServiceUtil.returnError(errMsg + " " + communicationEventId);
             }
@@ -109,11 +117,32 @@ public class CommunicationEventServices {
 
             // prepare the email
             Map<String, Object> sendMailParams = FastMap.newInstance();
-            sendMailParams.put("sendFrom", communicationEvent.getRelatedOne("FromContactMech").getString("infoString"));
+            sendMailParams.put("sendFrom", communicationEvent.getRelatedOne("FromContactMech", false).getString("infoString"));
             sendMailParams.put("subject", communicationEvent.getString("subject"));
-            sendMailParams.put("body", communicationEvent.getString("content"));
             sendMailParams.put("contentType", communicationEvent.getString("contentMimeTypeId"));
             sendMailParams.put("userLogin", userLogin);
+
+            Debug.logInfo("Sending communicationEvent: " + communicationEventId, module);
+
+            // check for attachments
+            boolean isMultiPart = false;
+            List <GenericValue> comEventContents = communicationEvent.getRelated("CommEventContentAssoc", null, null, false);
+            if (UtilValidate.isNotEmpty(comEventContents)) {
+                isMultiPart = true;
+                List<Map<String, ? extends Object>> bodyParts = FastList.newInstance();
+                if (UtilValidate.isNotEmpty(communicationEvent.getString("content"))) {
+                    bodyParts.add(UtilMisc.<String, Object>toMap("content", communicationEvent.getString("content"), "type", communicationEvent.getString("contentMimeTypeId")));
+                }
+                for (GenericValue comEventContent : comEventContents) {
+                    GenericValue content = comEventContent.getRelatedOne("FromContent", false);
+                    GenericValue dataResource = content.getRelatedOne("DataResource", false);
+                    ByteBuffer dataContent = DataResourceWorker.getContentAsByteBuffer(delegator, dataResource.getString("dataResourceId"), null, null, locale, null);
+                    bodyParts.add(UtilMisc.<String, Object>toMap("content", dataContent.array(), "type", dataResource.getString("mimeTypeId"), "filename", dataResource.getString("dataResourceName")));
+                }
+                sendMailParams.put("bodyParts", bodyParts);
+            } else {
+                sendMailParams.put("body", communicationEvent.getString("content"));
+            }
 
             // if there is no contact list, then send look for a contactMechIdTo and partyId
             if ((UtilValidate.isEmpty(communicationEvent.getString("contactListId")))) {
@@ -121,7 +150,7 @@ public class CommunicationEventServices {
                 String sendTo = communicationEvent.getString("toString");
 
                 if (UtilValidate.isEmpty(sendTo)) {
-                    GenericValue toContactMech = communicationEvent.getRelatedOne("ToContactMech");
+                    GenericValue toContactMech = communicationEvent.getRelatedOne("ToContactMech", false);
                     if (toContactMech != null && "EMAIL_ADDRESS".equals(toContactMech.getString("contactMechTypeId"))) {
                         sendTo = toContactMech.getString("infoString");
                     }
@@ -131,12 +160,54 @@ public class CommunicationEventServices {
                     return ServiceUtil.returnError(errMsg + " " + communicationEventId);
                 }
 
+                // add other parties from roles
+                String sendCc = null;
+                String sendBcc = null;
+                List <GenericValue> commRoles = communicationEvent.getRelated("CommunicationEventRole", null, null, false);
+                if (UtilValidate.isNotEmpty(commRoles)) {
+                    for (GenericValue commRole : commRoles) { // 'from' and 'to' already defined on communication event
+                        if (commRole.getString("partyId").equals(communicationEvent.getString("partyIdFrom")) || commRole.getString("partyId").equals(communicationEvent.getString("partyIdTo"))) {
+                            continue;
+                        }
+                        GenericValue contactMech = commRole.getRelatedOne("ContactMech", false);
+                        if (UtilValidate.isNotEmpty(contactMech) && UtilValidate.isNotEmpty(contactMech.getString("infoString"))) {
+                            if ("ADDRESSEE".equals(commRole.getString("roleTypeId"))) {
+                                sendTo += "," + contactMech.getString("infoString");
+                            } else if ("CC".equals(commRole.getString("roleTypeId"))) {
+                                if (sendCc != null) {
+                                    sendCc += "," + contactMech.getString("infoString");
+                                } else {
+                                    sendCc = contactMech.getString("infoString");
+                                }
+                            } else if ("BCC".equals(commRole.getString("roleTypeId"))) {
+                                if (sendBcc != null) {
+                                    sendBcc += "," + contactMech.getString("infoString");
+                                } else {
+                                    sendBcc = contactMech.getString("infoString");
+                                }
+                            }
+                        }
+                    }
+                }
+
                 sendMailParams.put("communicationEventId", communicationEventId);
                 sendMailParams.put("sendTo", sendTo);
+                if (sendCc != null) {
+                    sendMailParams.put("sendCc", sendCc);
+                }
+                if (sendBcc != null) {
+                    sendMailParams.put("sendBcc", sendBcc);
+                }
                 sendMailParams.put("partyId", communicationEvent.getString("partyIdTo"));  // who it's going to
 
                 // send it - using a new transaction
-                Map<String, Object> tmpResult = dispatcher.runSync("sendMail", sendMailParams, 360, true);
+                Map<String, Object> tmpResult = null;
+                if (isMultiPart) {
+                    tmpResult = dispatcher.runSync("sendMailMultiPart", sendMailParams, 360, true);
+                } else {
+                    tmpResult = dispatcher.runSync("sendMail", sendMailParams, 360, true);
+                }
+
                 if (ServiceUtil.isError(tmpResult)) {
                     if (ServiceUtil.getErrorMessage(tmpResult).startsWith("[ADDRERR]")) {
                         // address error; mark the communication event as BOUNCED
@@ -176,17 +247,17 @@ public class CommunicationEventServices {
                 sendEmailToContactListContext.put("userLogin", userLogin);
                 try {
                     dispatcher.runAsync("sendEmailToContactList", sendEmailToContactListContext);
-                } catch ( GenericServiceException e ) {
+                } catch (GenericServiceException e) {
                     String errMsg = UtilProperties.getMessage(resource, "commeventservices.errorCallingSendEmailToContactListService", locale);
                     Debug.logError(e, errMsg, module);
                     errorMessages.add(errMsg);
                     errorMessages.addAll(e.getMessageList());
                 }
             }
-        } catch (GenericEntityException eex) {
-            ServiceUtil.returnError(eex.getMessage());
-        } catch (GenericServiceException esx) {
-            ServiceUtil.returnError(esx.getMessage());
+        } catch (GeneralException eez) {
+            return ServiceUtil.returnError(eez.getMessage());
+        } catch (IOException eey) {
+            return ServiceUtil.returnError(eey.getMessage());
         }
 
         // If there were errors, then the result of this service should be error with the full list of messages
@@ -197,7 +268,7 @@ public class CommunicationEventServices {
     }
 
     public static Map<String, Object> sendEmailToContactList(DispatchContext ctx, Map<String, ? extends Object> context) {
-        GenericDelegator delegator = ctx.getDelegator();
+        Delegator delegator = ctx.getDelegator();
         LocalDispatcher dispatcher = ctx.getDispatcher();
         GenericValue userLogin = (GenericValue) context.get("userLogin");
         Locale locale = (Locale) context.get("locale");
@@ -212,15 +283,15 @@ public class CommunicationEventServices {
         String communicationEventId = (String) context.get("communicationEventId");
 
         // Any exceptions thrown in this block will cause the service to return error
+        EntityListIterator eli = null;
         try {
 
-            GenericValue communicationEvent = delegator.findByPrimaryKey("CommunicationEvent", UtilMisc.toMap("communicationEventId", communicationEventId));
-            GenericValue contactList = delegator.findByPrimaryKey("ContactList", UtilMisc.toMap("contactListId", contactListId));
+            GenericValue communicationEvent = delegator.findOne("CommunicationEvent", UtilMisc.toMap("communicationEventId", communicationEventId), false);
+            GenericValue contactList = delegator.findOne("ContactList", UtilMisc.toMap("contactListId", contactListId), false);
 
             Map<String, Object> sendMailParams = FastMap.newInstance();
-            sendMailParams.put("sendFrom", communicationEvent.getRelatedOne("FromContactMech").getString("infoString"));
+            sendMailParams.put("sendFrom", communicationEvent.getRelatedOne("FromContactMech", false).getString("infoString"));
             sendMailParams.put("subject", communicationEvent.getString("subject"));
-            sendMailParams.put("body", communicationEvent.getString("content"));
             sendMailParams.put("contentType", communicationEvent.getString("contentMimeTypeId"));
             sendMailParams.put("userLogin", userLogin);
 
@@ -230,18 +301,20 @@ public class CommunicationEventServices {
                         EntityCondition.makeCondition("contactListId", EntityOperator.EQUALS, contactList.get("contactListId")),
                         EntityCondition.makeCondition("statusId", EntityOperator.EQUALS, "CLPT_ACCEPTED"),
                         EntityCondition.makeCondition("preferredContactMechId", EntityOperator.NOT_EQUAL, null),
-                        EntityUtil.getFilterByDateExpr(), EntityUtil.getFilterByDateExpr("contactFromDate", "contactThruDate")
-                        );
-            EntityConditionList<EntityCondition> conditions = EntityCondition.makeCondition(conditionList, EntityOperator.AND);
-            Set<String> fieldsToSelect = UtilMisc.toSet("infoString");
+                        EntityUtil.getFilterByDateExpr(), EntityUtil.getFilterByDateExpr("contactFromDate", "contactThruDate"));
 
-            List<GenericValue> sendToEmails = delegator.findList("ContactListPartyAndContactMech", conditions, fieldsToSelect, null,
-                    new EntityFindOptions(true, EntityFindOptions.TYPE_SCROLL_INSENSITIVE, EntityFindOptions.CONCUR_READ_ONLY, true), false);
+            EntityConditionList<EntityCondition> conditions = EntityCondition.makeCondition(conditionList, EntityOperator.AND);
+            Set<String> fieldsToSelect = UtilMisc.toSet("partyId", "preferredContactMechId", "fromDate", "infoString");
+
+            eli = delegator.find("ContactListPartyAndContactMech", conditions, null, fieldsToSelect, null,
+                    new EntityFindOptions(true, EntityFindOptions.TYPE_SCROLL_INSENSITIVE, EntityFindOptions.CONCUR_READ_ONLY, true));
 
             // Send an email to each contact list member
-            // TODO: Contact lists for emails really should be written as an EntityListIterator for very large lists!
             List<String> orderBy = UtilMisc.toList("-fromDate");
-            for (GenericValue contactListPartyAndContactMech : sendToEmails) {
+
+            // loop through the list iterator
+            for (GenericValue contactListPartyAndContactMech; (contactListPartyAndContactMech = eli.next()) != null;) {
+                Debug.logInfo("Contact info: " + contactListPartyAndContactMech, module);
                 // Any exceptions thrown in this inner block will only relate to a single email of the list, so should
                 //  only be logged and not cause the service to return an error
                 try {
@@ -263,7 +336,7 @@ public class CommunicationEventServices {
                     //      only the most recent valid one via ContactListPartyAndContactMech.
                     List<EntityCondition> clpConditionList = UtilMisc.makeListWritable(conditionList);
                     clpConditionList.add(EntityCondition.makeCondition("infoString", EntityOperator.EQUALS, emailAddress));
-                    EntityConditionList clpConditions = EntityCondition.makeCondition(clpConditionList, EntityOperator.AND);
+                    EntityConditionList<EntityCondition> clpConditions = EntityCondition.makeCondition(clpConditionList, EntityOperator.AND);
 
                     List<GenericValue> emailCLPaCMs = delegator.findList("ContactListPartyAndContactMech", clpConditions, null, orderBy, null, true);
                     GenericValue lastContactListPartyACM = EntityUtil.getFirst(emailCLPaCMs);
@@ -273,37 +346,81 @@ public class CommunicationEventServices {
 
                     sendMailParams.put("sendTo", emailAddress);
                     sendMailParams.put("partyId", partyId);
+                    
 
                     // if it is a NEWSLETTER then we do not want the outgoing emails stored, so put a communicationEventId in the sendMail context to prevent storeEmailAsCommunicationEvent from running
+                    /*
                     if ("NEWSLETTER".equals(contactList.getString("contactListTypeId"))) {
                         sendMailParams.put("communicationEventId", communicationEventId);
                     }
+                    */
 
                     // Retrieve a record for this contactMechId from ContactListCommStatus
                     Map<String, String> contactListCommStatusRecordMap = UtilMisc.toMap("contactListId", contactListId, "communicationEventId", communicationEventId, "contactMechId", lastContactListPartyACM.getString("preferredContactMechId"));
-                    GenericValue contactListCommStatusRecord = delegator.findByPrimaryKey("ContactListCommStatus", contactListCommStatusRecordMap);
+                    GenericValue contactListCommStatusRecord = delegator.findOne("ContactListCommStatus", contactListCommStatusRecordMap, false);
                     if (contactListCommStatusRecord == null) {
 
                         // No attempt has been made previously to send to this address, so create a record to reflect
                         //  the beginning of the current attempt
                         Map<String, String> newContactListCommStatusRecordMap = UtilMisc.makeMapWritable(contactListCommStatusRecordMap);
                         newContactListCommStatusRecordMap.put("statusId", "COM_IN_PROGRESS");
+                        newContactListCommStatusRecordMap.put("partyId", partyId);
                         contactListCommStatusRecord = delegator.create("ContactListCommStatus", newContactListCommStatusRecordMap);
                     } else if (contactListCommStatusRecord.get("statusId") != null && contactListCommStatusRecord.getString("statusId").equals("COM_COMPLETE")) {
 
                         // There was a successful earlier attempt, so skip this address
                         continue;
                     }
-
+                    
+                    // Send e-mail
+                    Debug.logInfo("Sending email to contact list [" + contactListId + "] party [" + partyId + "] : " + emailAddress, module);
                     // Make the attempt to send the email to the address
-                    Map<String, Object> tmpResult = dispatcher.runSync("sendMail", sendMailParams, 360, true);
+                    
+                    Map<String, Object> tmpResult = null;
+                    
+                    // Retrieve a contact list party status
+                    List<GenericValue> contactListPartyStatuses = delegator.findByAnd("ContactListPartyStatus", UtilMisc.toMap("contactListId", contactListId, "partyId", contactListPartyAndContactMech.getString("partyId"), "fromDate", contactListPartyAndContactMech.getTimestamp("fromDate"), "statusId", "CLPT_ACCEPTED"), null, false);
+                    GenericValue contactListPartyStatus = EntityUtil.getFirst(contactListPartyStatuses);
+                    if (UtilValidate.isNotEmpty(contactListPartyStatus)) {
+                        // prepare body parameters
+                        Map<String, Object> bodyParameters = FastMap.newInstance();
+                        bodyParameters.put("contactListId", contactListId);
+                        bodyParameters.put("partyId", contactListPartyAndContactMech.getString("partyId"));
+                        bodyParameters.put("preferredContactMechId", contactListPartyAndContactMech.getString("preferredContactMechId"));
+                        bodyParameters.put("emailAddress", emailAddress);
+                        bodyParameters.put("fromDate", contactListPartyAndContactMech.getTimestamp("fromDate"));
+                        bodyParameters.put("optInVerifyCode", contactListPartyStatus.getString("optInVerifyCode"));
+                        bodyParameters.put("content", communicationEvent.getString("content"));
+                        NotificationServices.setBaseUrl(delegator, contactList.getString("verifyEmailWebSiteId"), bodyParameters);
+
+                        GenericValue webSite = delegator.findOne("WebSite", UtilMisc.toMap("webSiteId", contactList.getString("verifyEmailWebSiteId")), false);
+                        if (UtilValidate.isNotEmpty(webSite)) {
+                            GenericValue productStore = webSite.getRelatedOne("ProductStore", false);
+                            if (UtilValidate.isNotEmpty(productStore)) {
+                                List<GenericValue> productStoreEmailSettings = productStore.getRelated("ProductStoreEmailSetting", UtilMisc.toMap("emailType", "CONT_EMAIL_TEMPLATE"), null, false);
+                                GenericValue productStoreEmailSetting = EntityUtil.getFirst(productStoreEmailSettings);
+                                if (UtilValidate.isNotEmpty(productStoreEmailSetting)) {
+                                    // send e-mail using screen template
+                                    sendMailParams.put("bodyScreenUri", productStoreEmailSetting.getString("bodyScreenLocation"));
+                                    sendMailParams.put("bodyParameters", bodyParameters);
+                                    sendMailParams.remove("body");
+                                    tmpResult = dispatcher.runSync("sendMailFromScreen", sendMailParams, 360, true);
+                                }
+                            }
+                        }
+                    }
+                    
+                    // If the e-mail does not be sent then send normal e-mail
+                    if (UtilValidate.isEmpty(tmpResult)) {
+                        sendMailParams.put("body", communicationEvent.getString("content"));
+                        tmpResult = dispatcher.runSync("sendMail", sendMailParams, 360, true);
+                    }
+
                     if (tmpResult == null || ServiceUtil.isError(tmpResult)) {
                         if (ServiceUtil.getErrorMessage(tmpResult).startsWith("[ADDRERR]")) {
                             // address error; mark the communication event as BOUNCED
-                            communicationEvent.set("statusId", "COM_BOUNCED");
                             contactListCommStatusRecord.set("statusId", "COM_BOUNCED");
                             try {
-                                communicationEvent.store();
                                 contactListCommStatusRecord.store();
                             } catch (GenericEntityException e) {
                                 Debug.logError(e, module);
@@ -311,7 +428,7 @@ public class CommunicationEventServices {
                             }
                             // deactivate from the contact list
                             try {
-                                GenericValue contactListParty = contactListPartyAndContactMech.getRelatedOne("ContactListParty");
+                                GenericValue contactListParty = contactListPartyAndContactMech.getRelatedOne("ContactListParty", false);
                                 if (contactListParty != null) {
                                     contactListParty.set("statusId", "CLPT_INVALID");
                                     contactListParty.store();
@@ -327,6 +444,18 @@ public class CommunicationEventServices {
                             errorMessages.add(errorCallingSendMailService + ": " + ServiceUtil.getErrorMessage(tmpResult));
                             continue;
                         }
+                    } else {
+                        // attach the parent communication event to the new event created when sending the mail
+                        String thisCommEventId = (String) tmpResult.get("communicationEventId");
+                        GenericValue thisCommEvent = delegator.findOne("CommunicationEvent", false, "communicationEventId", thisCommEventId);
+                        if (thisCommEvent != null) {
+                            thisCommEvent.set("contactListId", contactListId);
+                            thisCommEvent.set("parentCommEventId", communicationEventId);
+                            thisCommEvent.store();
+                        }
+                        String messageId = (String) tmpResult.get("messageId");
+                        //contactListCommStatusRecord.set("communicationEventId", thisCommEventId);
+                        contactListCommStatusRecord.set("messageId", messageId);
                     }
 
                     if ("Y".equals(contactList.get("singleUse"))) {
@@ -359,7 +488,15 @@ public class CommunicationEventServices {
             }
 
         } catch (GenericEntityException fatalGEE) {
-            ServiceUtil.returnError(fatalGEE.getMessage());
+            return ServiceUtil.returnError(fatalGEE.getMessage());
+        } finally {
+            if (eli != null) {
+                try {
+                    eli.close();
+                } catch (GenericEntityException e) {
+                    Debug.logError(e, module);
+                }
+            }
         }
 
         return errorMessages.size() == 0 ? ServiceUtil.returnSuccess() : ServiceUtil.returnError(errorMessages);
@@ -383,48 +520,134 @@ public class CommunicationEventServices {
         return ServiceUtil.returnSuccess();
     }
 
-    /**
-     * Store email as communication event
-     *@param dctx The DispatchContext that this service is operating in
-     *@param serviceContext Map containing the input parameters
-     *@return Map with the result of the service, the output parameters
+    /*
+     * Store an outgoing email as a communication event;
+     * runs as a pre-invoke ECA on sendMail and sendMultipartMail services
+     * - service should run as the 'system' user
      */
-     public static Map<String, Object> storeEmailAsCommunication(DispatchContext dctx, Map<String, ? extends Object> serviceContext) {
+    public static Map<String, Object> createCommEventFromEmail(DispatchContext dctx, Map<String, ? extends Object> context) {
         LocalDispatcher dispatcher = dctx.getDispatcher();
-        GenericValue userLogin = (GenericValue) serviceContext.get("userLogin");
+        Delegator delegator = dctx.getDelegator();
 
-        String subject = (String) serviceContext.get("subject");
-        String body = (String) serviceContext.get("body");
-        String partyId = (String) serviceContext.get("partyId");
-        String communicationEventId = (String) serviceContext.get("communicationEventId");
-        String contentType = (String) serviceContext.get("contentType");
-        String emailType = (String) serviceContext.get("emailType");
+        GenericValue userLogin = (GenericValue) context.get("userLogin");
+        String subject = (String) context.get("subject");
+        String sendFrom = (String) context.get("sendFrom");
+        String sendTo = (String) context.get("sendTo");
+        String partyId = (String) context.get("partyId");
+        String contentType = (String) context.get("contentType");
+        String statusId = (String) context.get("statusId");
+        String orderId = (String) context.get("orderId");
+        if (statusId == null) {
+            statusId = "COM_PENDING";
+        }
 
-        // only create a new communication event if the email is not already associated with one
-        if (communicationEventId == null) {
-            String partyIdFrom = (String) userLogin.get("partyId");
-            Map<String, Object> commEventMap = FastMap.newInstance();
-            commEventMap.put("communicationEventTypeId", "EMAIL_COMMUNICATION");
-            commEventMap.put("statusId", "COM_COMPLETE");
-            commEventMap.put("contactMechTypeId", "EMAIL_ADDRESS");
-            commEventMap.put("partyIdFrom", partyIdFrom);
-            commEventMap.put("partyIdTo", partyId);
-            commEventMap.put("datetimeStarted", UtilDateTime.nowTimestamp());
-            commEventMap.put("datetimeEnded", UtilDateTime.nowTimestamp());
-            commEventMap.put("subject", subject);
-            commEventMap.put("content", body);
-            commEventMap.put("userLogin", userLogin);
-            commEventMap.put("contentMimeTypeId", contentType);
-            String runService = "createCommunicationEvent";
-            if ("PARTY_REGIS_CONFIRM".equals(emailType)) {
-                runService = "createCommunicationEventWithoutPermission"; // used to create a new Customer, Prospect or Employee
-            }
-            try {
-                dispatcher.runSync(runService, commEventMap);
-            } catch (Exception e) {
-                Debug.logError(e, "Cannot store email as communication event", module);
-                return ServiceUtil.returnError("Cannot store email as communication event; see logs");
-            }
+        // get the from contact mech info
+        String contactMechIdFrom = null;
+        String partyIdFrom = null;
+        GenericValue fromCm;
+        try {
+            List<GenericValue> fromCms = delegator.findByAnd("PartyAndContactMech", UtilMisc.toMap("infoString", sendFrom), UtilMisc.toList("-fromDate"), false);
+            fromCms = EntityUtil.filterByDate(fromCms);
+            fromCm = EntityUtil.getFirst(fromCms);
+        } catch (GenericEntityException e) {
+            Debug.logError(e, module);
+            return ServiceUtil.returnError(e.getMessage());
+        }
+        if (fromCm != null) {
+            contactMechIdFrom = fromCm.getString("contactMechId");
+            partyIdFrom = fromCm.getString("partyId");
+        }
+
+        // get the to contact mech info
+        String contactMechIdTo = null;
+        GenericValue toCm;
+        try {
+            List<GenericValue> toCms = delegator.findByAnd("PartyAndContactMech", UtilMisc.toMap("infoString", sendTo, "partyId", partyId), UtilMisc.toList("-fromDate"), false);
+            toCms = EntityUtil.filterByDate(toCms);
+            toCm = EntityUtil.getFirst(toCms);
+        } catch (GenericEntityException e) {
+            Debug.logError(e, module);
+            return ServiceUtil.returnError(e.getMessage());
+        }
+        if (toCm != null) {
+            contactMechIdTo = toCm.getString("contactMechId");
+        }
+
+        Timestamp now = UtilDateTime.nowTimestamp();
+
+        Map<String, Object> commEventMap = FastMap.newInstance();
+        commEventMap.put("communicationEventTypeId", "EMAIL_COMMUNICATION");
+        commEventMap.put("contactMechTypeId", "EMAIL_ADDRESS");
+        commEventMap.put("contactMechIdFrom", contactMechIdFrom);
+        commEventMap.put("contactMechIdTo", contactMechIdTo);
+        commEventMap.put("statusId", statusId);
+
+        commEventMap.put("partyIdFrom", partyIdFrom);
+        commEventMap.put("partyIdTo", partyId);
+        commEventMap.put("datetimeStarted", now);
+        commEventMap.put("entryDate", now);
+
+        commEventMap.put("subject", subject);
+        commEventMap.put("userLogin", userLogin);
+        commEventMap.put("contentMimeTypeId", contentType);
+        if (UtilValidate.isNotEmpty(orderId)) {
+            commEventMap.put("orderId", orderId);
+        }
+
+        Map<String, Object> createResult;
+        try {
+            createResult = dispatcher.runSync("createCommunicationEvent", commEventMap);
+        } catch (GenericServiceException e) {
+            Debug.logError(e, module);
+            return ServiceUtil.returnError(e.getMessage());
+        }
+        if (ServiceUtil.isError(createResult)) {
+            return ServiceUtil.returnError(ServiceUtil.getErrorMessage(createResult));
+        }
+        String communicationEventId = (String) createResult.get("communicationEventId");
+
+        Map<String, Object> result = ServiceUtil.returnSuccess();
+        result.put("communicationEventId", communicationEventId);
+        return result;
+    }
+
+    /*
+     * Update the communication event with information from the email;
+     * runs as a post-commit ECA on sendMail and sendMultiPartMail services
+     * - service should run as the 'system' user
+     */
+    public static Map<String, Object> updateCommEventAfterEmail(DispatchContext dctx, Map<String, ? extends Object> context) {
+        LocalDispatcher dispatcher = dctx.getDispatcher();
+
+        GenericValue userLogin = (GenericValue) context.get("userLogin");
+        String communicationEventId = (String) context.get("communicationEventId");
+        MimeMessageWrapper wrapper = (MimeMessageWrapper) context.get("messageWrapper");
+
+        Map<String, Object> commEventMap = FastMap.newInstance();
+        commEventMap.put("communicationEventId", communicationEventId);
+        commEventMap.put("subject", wrapper.getSubject());
+        commEventMap.put("statusId", "COM_COMPLETE");
+        commEventMap.put("datetimeEnded", UtilDateTime.nowTimestamp());
+        commEventMap.put("entryDate", wrapper.getSentDate());
+        commEventMap.put("messageId", wrapper.getMessageId());
+        commEventMap.put("userLogin", userLogin);
+        commEventMap.put("content", wrapper.getMessageBody());
+
+        // populate the address (to/from/cc/bcc) data
+        populateAddressesFromMessage(wrapper, commEventMap);
+
+        // save the communication event
+        try {
+            dispatcher.runSync("updateCommunicationEvent", commEventMap);
+        } catch (GenericServiceException e) {
+            return ServiceUtil.returnError(e.getMessage());
+        }
+
+        // attachments
+        try {
+            createAttachmentContent(dispatcher, wrapper, communicationEventId, userLogin);
+        } catch (GenericServiceException e) {
+            return ServiceUtil.returnError(e.getMessage());
         }
 
         return ServiceUtil.returnSuccess();
@@ -455,18 +678,17 @@ public class CommunicationEventServices {
      * However multiparts can contain multiparts. A recursive function has been added.
      *
      * -Al Byers - Hans Bakker
-     * @param dctx
-     * @param context
-     * @return
+     * @param dctx the dispatch context
+     * @param context the context
+     * @return returns the result of the service execution
      */
     public static Map<String, Object> storeIncomingEmail(DispatchContext dctx, Map<String, ? extends Object> context) {
-
-        GenericDelegator delegator = dctx.getDelegator();
+        Delegator delegator = dctx.getDelegator();
         LocalDispatcher dispatcher = dctx.getDispatcher();
         MimeMessageWrapper wrapper = (MimeMessageWrapper) context.get("messageWrapper");
-        MimeMessage message = wrapper.getMessage();
         Timestamp nowTimestamp = UtilDateTime.nowTimestamp();
         GenericValue userLogin = (GenericValue) context.get("userLogin");
+        Locale locale = (Locale) context.get("locale");
         String partyIdTo = null;
         String partyIdFrom = null;
         String contentType = null;
@@ -474,75 +696,74 @@ public class CommunicationEventServices {
         String contactMechIdFrom = null;
         String contactMechIdTo = null;
 
-        Map result = null;
+        Map<String, Object> result = null;
         try {
-            String contentTypeRaw = message.getContentType();
+            String contentTypeRaw = wrapper.getContentType();
             int idx = contentTypeRaw.indexOf(";");
             if (idx == -1) idx = contentTypeRaw.length();
             contentType = contentTypeRaw.substring(0, idx);
             if (contentType == null || contentType.equals("")) contentType = "text/html";
             contentType = contentType.toLowerCase();
-            Address[] addressesFrom = message.getFrom();
-            Address[] addressesTo = message.getRecipients(MimeMessage.RecipientType.TO);
-            Address[] addressesCC = message.getRecipients(MimeMessage.RecipientType.CC);
-            Address[] addressesBCC = message.getRecipients(MimeMessage.RecipientType.BCC);
-            String messageId = message.getMessageID();
+            Address[] addressesFrom = wrapper.getFrom();
+            Address[] addressesTo = wrapper.getTo();
+            Address[] addressesCC = wrapper.getCc();
+            Address[] addressesBCC = wrapper.getBcc();
+            String messageId = wrapper.getMessageId().replaceAll("[<>]", "");
 
             String aboutThisEmail = "message [" + messageId + "] from [" +
-                (addressesFrom[0] == null? "not found" : addressesFrom[0].toString()) + "] to [" +
-                (addressesTo[0] == null? "not found" : addressesTo[0].toString()) + "]";
+                    ((addressesFrom == null || addressesFrom[0] == null) ? "not found" : addressesFrom[0].toString()) + "] to [" +
+                    ((addressesTo == null || addressesTo[0] == null) ? "not found" : addressesTo[0].toString()) + "]";
+
             if (Debug.verboseOn()) Debug.logVerbose("Processing Incoming Email " + aboutThisEmail, module);
 
             // ignore the message when the spam status = yes
             String spamHeaderName = UtilProperties.getPropertyValue("general.properties", "mail.spam.name", "N");
             String configHeaderValue = UtilProperties.getPropertyValue("general.properties", "mail.spam.value");
             //          only execute when config file has been set && header variable found
-            if (!spamHeaderName.equals("N") && message.getHeader(spamHeaderName) != null && message.getHeader(spamHeaderName).length > 0) {
-                String msgHeaderValue = message.getHeader(spamHeaderName)[0];
+            if (!spamHeaderName.equals("N") && wrapper.getHeader(spamHeaderName) != null && wrapper.getHeader(spamHeaderName).length > 0) {
+                String msgHeaderValue = wrapper.getHeader(spamHeaderName)[0];
                 if (msgHeaderValue != null && msgHeaderValue.startsWith(configHeaderValue)) {
                     Debug.logInfo("Incoming Email message ignored, was detected by external spam checker", module);
-                    return ServiceUtil.returnSuccess(" Message Ignored: detected by external spam checker");
+                    return ServiceUtil.returnSuccess(UtilProperties.getMessage(resource, 
+                            "PartyCommEventMessageIgnoredDetectedByExternalSpamChecker", locale));
                 }
             }
 
             // if no 'from' addresses specified ignore the message
             if (addressesFrom == null) {
                 Debug.logInfo("Incoming Email message ignored, had not 'from' email address", module);
-                return ServiceUtil.returnSuccess(" Message Ignored: no 'From' address specified");
+                return ServiceUtil.returnSuccess(UtilProperties.getMessage(resource, 
+                        "PartyCommEventMessageIgnoredNoFromAddressSpecified", locale));
             }
 
             // make sure this isn't a duplicate
-            List commEvents;
+            List<GenericValue> commEvents;
             try {
-                commEvents = delegator.findByAnd("CommunicationEvent", UtilMisc.toMap("messageId", messageId));
+                commEvents = delegator.findByAnd("CommunicationEvent", UtilMisc.toMap("messageId", messageId), null, false);
             } catch (GenericEntityException e) {
                 Debug.logError(e, module);
                 return ServiceUtil.returnError(e.getMessage());
             }
             if (!commEvents.isEmpty()) {
                 Debug.logInfo("Ignoring Duplicate Email: " + aboutThisEmail, module);
-                return ServiceUtil.returnSuccess(" Message Ignored: deplicate messageId");
-            } else {
-                Debug.logInfo("Persisting New Email: " + aboutThisEmail, module);
+                return ServiceUtil.returnSuccess(UtilProperties.getMessage(resource, 
+                        "PartyCommEventMessageIgnoredDuplicateMessageId", locale));
             }
 
-
             // get the related partId's
-            List toParties = buildListOfPartyInfoFromEmailAddresses(addressesTo, userLogin, dispatcher);
-            List ccParties = buildListOfPartyInfoFromEmailAddresses(addressesCC, userLogin, dispatcher);
-            List bccParties = buildListOfPartyInfoFromEmailAddresses(addressesBCC, userLogin, dispatcher);
+            List<Map<String, Object>> toParties = buildListOfPartyInfoFromEmailAddresses(addressesTo, userLogin, dispatcher);
+            List<Map<String, Object>> ccParties = buildListOfPartyInfoFromEmailAddresses(addressesCC, userLogin, dispatcher);
+            List<Map<String, Object>> bccParties = buildListOfPartyInfoFromEmailAddresses(addressesBCC, userLogin, dispatcher);
 
             //Get the first address from the list - this is the partyIdTo field of the CommunicationEvent
             if (!toParties.isEmpty()) {
-                Iterator itr = toParties.iterator();
-                Map firstAddressTo = (Map) itr.next();
+                Map<String, Object> firstAddressTo = toParties.get(0);
                 partyIdTo = (String)firstAddressTo.get("partyId");
                 contactMechIdTo = (String)firstAddressTo.get("contactMechId");
             }
 
-            String deliveredTo = null;
-            if (message.getHeader("Delivered-To") != null) {
-                deliveredTo = message.getHeader("Delivered-To")[0];
+            String deliveredTo = wrapper.getFirstHeader("Delivered-To");
+            if (deliveredTo != null) {
                 // check if started with the domain name if yes remove including the dash.
                 String dn = deliveredTo.substring(deliveredTo.indexOf("@")+1, deliveredTo.length());
                 if (deliveredTo.startsWith(dn)) {
@@ -558,9 +779,7 @@ public class CommunicationEventServices {
             }
             if (userLogin.get("partyId") == null && partyIdTo != null) {
                 int ch = 0;
-                for (ch=partyIdTo.length(); ch > 0 && Character.isDigit(partyIdTo.charAt(ch-1)); ch--) {
-                    ;
-                }
+                for (ch=partyIdTo.length(); ch > 0 && Character.isDigit(partyIdTo.charAt(ch-1)); ch--) {}
                 userLogin.put("partyId", partyIdTo.substring(0,ch)); //allow services to be called to have prefix
             }
 
@@ -569,39 +788,54 @@ public class CommunicationEventServices {
             partyIdFrom = (String)result.get("partyId");
             contactMechIdFrom = (String)result.get("contactMechId");
 
-            Map commEventMap = FastMap.newInstance();
+            Map<String, Object> commEventMap = FastMap.newInstance();
             commEventMap.put("communicationEventTypeId", "AUTO_EMAIL_COMM");
             commEventMap.put("contactMechTypeId", "EMAIL_ADDRESS");
             commEventMap.put("messageId", messageId);
 
-            String subject = message.getSubject();
+            String subject = wrapper.getSubject();
             commEventMap.put("subject", subject);
 
             // Set sent and received dates
             commEventMap.put("entryDate", nowTimestamp);
-            commEventMap.put("datetimeStarted", UtilDateTime.toTimestamp(message.getSentDate()));
-            commEventMap.put("datetimeEnded", UtilDateTime.toTimestamp(message.getReceivedDate()));
+            commEventMap.put("datetimeStarted", UtilDateTime.toTimestamp(wrapper.getSentDate()));
+            commEventMap.put("datetimeEnded", UtilDateTime.toTimestamp(wrapper.getReceivedDate()));
 
             // default role types (_NA_)
             commEventMap.put("roleTypeIdFrom", "_NA_");
             commEventMap.put("roleTypeIdTo", "_NA_");
 
             // get the content(type) part
-            Object messageContent = message.getContent();
-            if (contentType.startsWith("text")) {
-                commEventMap.put("content", messageContent);
-                commEventMap.put("contentMimeTypeId", contentType);
-            } else if (messageContent instanceof Multipart) {
-                contentIndex = "";
-                commEventMap = addMessageBody(commEventMap, (Multipart) messageContent);
+            String messageBodyContentType = wrapper.getMessageBodyContentType();
+            if (messageBodyContentType.indexOf(";") > -1) {
+                messageBodyContentType = messageBodyContentType.substring(0, messageBodyContentType.indexOf(";"));
             }
 
+            // select the plain text bodypart
+            String messageBody = null;
+            if (wrapper.getMainPartCount() > 1) {
+                for (int ind=0; ind < wrapper.getMainPartCount(); ind++) {
+                    BodyPart p = wrapper.getPart(ind + "");
+                    if (p.getContentType().toLowerCase().indexOf("text/plain") > -1) {
+                        messageBody = (String) p.getContent();
+                        break;
+                    }
+                }
+            }
+
+            if (messageBody == null) {
+                messageBody = wrapper.getMessageBody();
+            }
+
+            commEventMap.put("content", messageBody);
+            commEventMap.put("contentMimeTypeId", messageBodyContentType.toLowerCase());
+
             // check for for a reply to communication event (using in-reply-to the parent messageID)
-            String[] inReplyTo = message.getHeader("In-Reply-To");
+            String[] inReplyTo = wrapper.getHeader("In-Reply-To");
             if (inReplyTo != null && inReplyTo[0] != null) {
                 GenericValue parentCommEvent = null;
                 try {
-                    List events = delegator.findByAnd("CommunicationEvent", UtilMisc.toMap("messageId", inReplyTo[0]));
+                    List<GenericValue> events = delegator.findByAnd("CommunicationEvent", UtilMisc.toMap("messageId", inReplyTo[0].replaceAll("[<>]", "")), null, false);
                     parentCommEvent = EntityUtil.getFirst(events);
                 } catch (GenericEntityException e) {
                     Debug.logError(e, module);
@@ -615,36 +849,8 @@ public class CommunicationEventServices {
                 }
             }
 
-            // Retrieve all the addresses from the email
-            Set emailAddressesFrom = new TreeSet();
-            Set emailAddressesTo = new TreeSet();
-            Set emailAddressesCC = new TreeSet();
-            Set emailAddressesBCC = new TreeSet();
-            for (int x = 0 ; x < addressesFrom.length ; x++) {
-                emailAddressesFrom.add(((InternetAddress) addressesFrom[x]).getAddress());
-            }
-            for (int x = 0 ; x < addressesTo.length ; x++) {
-                emailAddressesTo.add(((InternetAddress) addressesTo[x]).getAddress());
-            }
-            if (addressesCC != null) {
-                for (int x = 0 ; x < addressesCC.length ; x++) {
-                    emailAddressesCC.add(((InternetAddress) addressesCC[x]).getAddress());
-                }
-            }
-            if (addressesBCC != null) {
-                for (int x = 0 ; x < addressesBCC.length ; x++) {
-                    emailAddressesBCC.add(((InternetAddress) addressesBCC[x]).getAddress());
-                }
-            }
-            String fromString = StringUtil.join(UtilMisc.toList(emailAddressesFrom), ",");
-            String toString = StringUtil.join(UtilMisc.toList(emailAddressesTo), ",");
-            String ccString = StringUtil.join(UtilMisc.toList(emailAddressesCC), ",");
-            String bccString = StringUtil.join(UtilMisc.toList(emailAddressesBCC), ",");
-
-            if (UtilValidate.isNotEmpty(fromString)) commEventMap.put("fromString", fromString);
-            if (UtilValidate.isNotEmpty(toString)) commEventMap.put("toString", toString);
-            if (UtilValidate.isNotEmpty(ccString)) commEventMap.put("ccString", ccString);
-            if (UtilValidate.isNotEmpty(bccString)) commEventMap.put("bccString", bccString);
+            // populate the address (to/from/cc/bcc) data
+            populateAddressesFromMessage(wrapper, commEventMap);
 
             // store from/to parties, but when not found make a note of the email to/from address in the workEffort Note Section.
             String commNote = "";
@@ -683,29 +889,38 @@ public class CommunicationEventServices {
             commEventMap.put("userLogin", userLogin);
 
             // Populate the CommunicationEvent.headerString field with the email headers
-            String headerString = "";
-            Enumeration headerLines = message.getAllHeaderLines();
+            StringBuilder headerString = new StringBuilder();
+            Enumeration<?> headerLines = wrapper.getMessage().getAllHeaderLines();
             while (headerLines.hasMoreElements()) {
-                headerString += System.getProperty("line.separator");
-                headerString += headerLines.nextElement();
+                headerString.append(System.getProperty("line.separator"));
+                headerString.append(headerLines.nextElement());
             }
-            commEventMap.put("headerString", headerString);
+            String header = headerString.toString();
+            commEventMap.put("headerString", header.replaceAll("[<>]", ""));
 
             result = dispatcher.runSync("createCommunicationEvent", commEventMap);
             communicationEventId = (String)result.get("communicationEventId");
+            Debug.logInfo("Persisting New Email: " + aboutThisEmail + " into CommunicationEventId: " + communicationEventId, module);
 
-            if (messageContent instanceof Multipart) {
-                Debug.logInfo("===message has attachments=====", module);
-                int attachmentCount = addAttachmentsToCommEvent((Multipart) messageContent, subject, communicationEventId, dispatcher, userLogin);
-                if (Debug.infoOn()) Debug.logInfo(attachmentCount + " attachments added to CommunicationEvent:" + communicationEventId,module);
-            }
+            // handle the attachments
+            createAttachmentContent(dispatcher, wrapper, communicationEventId, userLogin);
 
             // For all addresses create a CommunicationEventRoles
             createCommEventRoles(userLogin, delegator, dispatcher, communicationEventId, toParties, "ADDRESSEE");
             createCommEventRoles(userLogin, delegator, dispatcher, communicationEventId, ccParties, "CC");
             createCommEventRoles(userLogin, delegator, dispatcher, communicationEventId, bccParties, "BCC");
 
-            Map results = ServiceUtil.returnSuccess();
+            // get the related work effort info
+            List<Map<String, Object>> toWorkEffortInfos = buildListOfWorkEffortInfoFromEmailAddresses(addressesTo, userLogin, dispatcher);
+            List<Map<String, Object>> ccWorkEffortInfos = buildListOfWorkEffortInfoFromEmailAddresses(addressesCC, userLogin, dispatcher);
+            List<Map<String, Object>> bccWorkEffortInfos = buildListOfWorkEffortInfoFromEmailAddresses(addressesBCC, userLogin, dispatcher);
+
+            // For all WorkEffort addresses create a CommunicationEventWorkEffs
+            createCommunicationEventWorkEffs(userLogin, dispatcher, toWorkEffortInfos, communicationEventId);
+            createCommunicationEventWorkEffs(userLogin, dispatcher, ccWorkEffortInfos, communicationEventId);
+            createCommunicationEventWorkEffs(userLogin, dispatcher, bccWorkEffortInfos, communicationEventId);
+
+            Map<String, Object> results = ServiceUtil.returnSuccess();
             results.put("communicationEventId", communicationEventId);
             results.put("statusId", commEventMap.get("statusId"));
             return results;
@@ -715,27 +930,110 @@ public class CommunicationEventServices {
         } catch (GenericServiceException e) {
             Debug.logError(e, module);
             return ServiceUtil.returnError(e.getMessage());
-        } catch (IOException e) {
-            Debug.logError(e, module);
-            return ServiceUtil.returnError(e.getMessage());
         } catch (Exception e) {
             Debug.logError(e, module);
             return ServiceUtil.returnError(e.getMessage());
         }
     }
 
-    private static void createCommEventRoles(GenericValue userLogin, GenericDelegator delegator, LocalDispatcher dispatcher, String communicationEventId, List parties, String roleTypeId) {
+    private static void populateAddressesFromMessage(MimeMessageWrapper wrapper, Map<String, Object> commEventMap) {
+        // Retrieve all the addresses from the email
+        Address[] addressesFrom = wrapper.getFrom();
+        Address[] addressesTo = wrapper.getTo();
+        Address[] addressesCC = wrapper.getCc();
+        Address[] addressesBCC = wrapper.getBcc();
+
+        Set<String> emailAddressesFrom = new TreeSet<String>();
+        Set<String> emailAddressesTo = new TreeSet<String>();
+        Set<String> emailAddressesCC = new TreeSet<String>();
+        Set<String> emailAddressesBCC = new TreeSet<String>();
+        for (int x = 0 ; x < addressesFrom.length ; x++) {
+            emailAddressesFrom.add(((InternetAddress) addressesFrom[x]).getAddress());
+        }
+        for (int x = 0 ; x < addressesTo.length ; x++) {
+            emailAddressesTo.add(((InternetAddress) addressesTo[x]).getAddress());
+        }
+        if (addressesCC != null) {
+            for (int x = 0 ; x < addressesCC.length ; x++) {
+                emailAddressesCC.add(((InternetAddress) addressesCC[x]).getAddress());
+            }
+        }
+        if (addressesBCC != null) {
+            for (int x = 0 ; x < addressesBCC.length ; x++) {
+                emailAddressesBCC.add(((InternetAddress) addressesBCC[x]).getAddress());
+            }
+        }
+        String fromString = StringUtil.join(UtilMisc.toList(emailAddressesFrom), ",");
+        String toString = StringUtil.join(UtilMisc.toList(emailAddressesTo), ",");
+        String ccString = StringUtil.join(UtilMisc.toList(emailAddressesCC), ",");
+        String bccString = StringUtil.join(UtilMisc.toList(emailAddressesBCC), ",");
+
+        if (UtilValidate.isNotEmpty(fromString)) commEventMap.put("fromString", fromString);
+        if (UtilValidate.isNotEmpty(toString)) commEventMap.put("toString", toString);
+        if (UtilValidate.isNotEmpty(ccString)) commEventMap.put("ccString", ccString);
+        if (UtilValidate.isNotEmpty(bccString)) commEventMap.put("bccString", bccString);
+    }
+
+    private static void createAttachmentContent(LocalDispatcher dispatcher, MimeMessageWrapper wrapper, String communicationEventId, GenericValue userLogin) throws GenericServiceException {
+        // handle the attachments
+        String subject = wrapper.getSubject();
+        List<String> attachmentIndexes = wrapper.getAttachmentIndexes();
+
+        if (attachmentIndexes.size() > 0) {
+            Debug.logInfo("=== message has attachments [" + attachmentIndexes.size() + "] =====", module);
+            for (String attachmentIdx : attachmentIndexes) {
+                Map<String, Object> attachmentMap = FastMap.newInstance();
+                attachmentMap.put("communicationEventId", communicationEventId);
+                attachmentMap.put("contentTypeId", "DOCUMENT");
+                attachmentMap.put("mimeTypeId", "text/html");
+                attachmentMap.put("userLogin", userLogin);
+                if (subject != null && subject.length() > 80) {
+                    subject = subject.substring(0,80); // make sure not too big for database field. (20 characters for filename)
+                }
+
+                String attFileName = wrapper.getPartFilename(attachmentIdx);
+                String attContentType = wrapper.getPartContentType(attachmentIdx);
+                if (attContentType != null && attContentType.indexOf(";") > -1) {
+                    attContentType = attContentType.toLowerCase().substring(0, attContentType.indexOf(";"));
+                }
+
+                if (!UtilValidate.isEmpty(attFileName)) {
+                    attachmentMap.put("contentName", attFileName);
+                    attachmentMap.put("description", subject + "-" + attachmentIdx);
+                } else {
+                    attachmentMap.put("contentName", subject + "-" + attachmentIdx);
+                }
+
+                attachmentMap.put("drMimeTypeId", attContentType);
+                if (attContentType.startsWith("text")) {
+                    String text = wrapper.getPartText(attachmentIdx);
+                    attachmentMap.put("drDataResourceTypeId", "ELECTRONIC_TEXT");
+                    attachmentMap.put("textData", text);
+                } else {
+                    ByteBuffer data = wrapper.getPartByteBuffer(attachmentIdx);
+                    if (Debug.infoOn()) Debug.logInfo("Binary attachment size: " + data.limit(), module);
+                    attachmentMap.put("drDataResourceName", attFileName);
+                    attachmentMap.put("imageData", data);
+                    attachmentMap.put("drDataResourceTypeId", "IMAGE_OBJECT"); // TODO: why always use IMAGE
+                    attachmentMap.put("_imageData_contentType", attContentType);
+                }
+
+                // save the content
+                dispatcher.runSync("createCommContentDataResource", attachmentMap);
+            }
+        }
+    }
+
+    private static void createCommEventRoles(GenericValue userLogin, Delegator delegator, LocalDispatcher dispatcher, String communicationEventId, List<Map<String, Object>> parties, String roleTypeId) {
         // It's not clear what the "role" of this communication event should be, so we'll just put _NA_
         // check and see if this role was already created and ignore if true
         try {
-            Iterator it = parties.iterator();
-            while (it.hasNext()) {
-                Map result = (Map) it.next();
+            for(Map<String, Object> result : parties) {
                 String partyId = (String) result.get("partyId");
-                GenericValue commEventRole = delegator.findByPrimaryKey("CommunicationEventRole",
-                        UtilMisc.toMap("communicationEventId", communicationEventId, "partyId", partyId, "roleTypeId", roleTypeId));
+                GenericValue commEventRole = delegator.findOne("CommunicationEventRole",
+                        UtilMisc.toMap("communicationEventId", communicationEventId, "partyId", partyId, "roleTypeId", roleTypeId), false);
                 if (commEventRole == null) {
-                    Map input = UtilMisc.toMap("communicationEventId", communicationEventId,
+                    Map<String, Object> input = UtilMisc.toMap("communicationEventId", communicationEventId,
                             "partyId", partyId, "roleTypeId", roleTypeId, "userLogin", userLogin,
                             "contactMechId", (String) result.get("contactMechId"),
                             "statusId", "COM_ROLE_CREATED");
@@ -749,13 +1047,27 @@ public class CommunicationEventServices {
         }
     }
 
+    private static void createCommunicationEventWorkEffs(GenericValue userLogin, LocalDispatcher dispatcher, List<Map<String, Object>> workEffortInfos, String communicationEventId) {
+        // create relationship between communication event and work efforts
+        try {
+            for(Map<String, Object> result : workEffortInfos) {
+                String workEffortId = (String) result.get("workEffortId");
+                dispatcher.runSync("createCommunicationEventWorkEff", UtilMisc.toMap("workEffortId", workEffortId, "communicationEventId", communicationEventId, "userLogin", userLogin));
+            }
+        } catch (GenericServiceException e) {
+            Debug.logError(e, module);
+        } catch (Exception e) {
+            Debug.logError(e, module);
+        }
+    }
+
     /*
      * Helper method to retrieve the party information from the first email address of the Address[] specified.
      */
-    private static Map getParyInfoFromEmailAddress(Address [] addresses, GenericValue userLogin, LocalDispatcher dispatcher) throws GenericServiceException {
+    private static Map<String, Object> getParyInfoFromEmailAddress(Address [] addresses, GenericValue userLogin, LocalDispatcher dispatcher) throws GenericServiceException {
         InternetAddress emailAddress = null;
-        Map map = null;
-        Map result = null;
+        Map<String, Object> map = null;
+        Map<String, Object> result = null;
 
         if (addresses == null) {
             return null;
@@ -768,7 +1080,7 @@ public class CommunicationEventServices {
             }
         }
 
-        if (!UtilValidate.isEmpty(emailAddress)) {
+        if (emailAddress != null) {
             map = FastMap.newInstance();
             map.put("address", emailAddress.getAddress());
             map.put("userLogin", userLogin);
@@ -781,22 +1093,19 @@ public class CommunicationEventServices {
     /*
      * Calls findPartyFromEmailAddress service and returns a List of the results for the array of addresses
      */
-    private static List buildListOfPartyInfoFromEmailAddresses(Address [] addresses, GenericValue userLogin, LocalDispatcher dispatcher) throws GenericServiceException {
+    private static List<Map<String, Object>> buildListOfPartyInfoFromEmailAddresses(Address [] addresses, GenericValue userLogin, LocalDispatcher dispatcher) throws GenericServiceException {
         InternetAddress emailAddress = null;
-        Address addr = null;
-        Map map = null;
-        Map result = null;
-        List tempResults = FastList.newInstance();
+        Map<String, Object> result = null;
+        List<Map<String, Object>> tempResults = FastList.newInstance();
 
         if (addresses != null) {
-            for (int i = 0; i < addresses.length; i++) {
-                addr = addresses[i];
+            for (Address addr: addresses) {
                 if (addr instanceof InternetAddress) {
                     emailAddress = (InternetAddress)addr;
 
-                    if (!UtilValidate.isEmpty(emailAddress)) {
+                    if (emailAddress != null) {
                         result = dispatcher.runSync("findPartyFromEmailAddress",
-                                UtilMisc.<String, Object>toMap("address", emailAddress.getAddress(), "userLogin", userLogin));
+                                UtilMisc.toMap("address", emailAddress.getAddress(), "userLogin", userLogin));
                         if (result.get("partyId") != null) {
                             tempResults.add(result);
                         }
@@ -807,145 +1116,254 @@ public class CommunicationEventServices {
         return tempResults;
     }
 
-    public static String contentIndex = "";
-    private static Map addMessageBody( Map commEventMap, Multipart multipart) throws MessagingException, IOException {
-        try {
-            int multipartCount = multipart.getCount();
-            for (int i=0; i < multipartCount  && i < 10; i++) {
-                Part part = multipart.getBodyPart(i);
-                String thisContentTypeRaw = part.getContentType();
-                String content = null;
-                int idx2 = thisContentTypeRaw.indexOf(";");
-                if (idx2 == -1) {
-                    idx2 = thisContentTypeRaw.length();
-                }
-                String thisContentType = thisContentTypeRaw.substring(0, idx2);
-                if (thisContentType == null || thisContentType.equals("")) thisContentType = "text/html";
-                thisContentType = thisContentType.toLowerCase();
-                String disposition = part.getDisposition();
+    /*
+     * Gets WorkEffort info from e-mail address and returns a List of the results for the array of addresses
+     */
+    private static List<Map<String, Object>> buildListOfWorkEffortInfoFromEmailAddresses(Address [] addresses, GenericValue userLogin, LocalDispatcher dispatcher) throws GenericServiceException {
+        InternetAddress emailAddress = null;
+        Map<String, Object> result = null;
+        List<Map<String, Object>> tempResults = FastList.newInstance();
+        String caseInsensitiveEmail = org.ofbiz.base.util.UtilProperties.getPropertyValue("general.properties", "mail.address.caseInsensitive", "N");
 
-                if (thisContentType.startsWith("multipart") || thisContentType.startsWith("Multipart")) {
-                    contentIndex = contentIndex.concat("." + i);
-                    return addMessageBody(commEventMap, (Multipart) part.getContent());
-                }
-                // See this case where the disposition of the inline text is null
-                else if ((disposition == null) && (i == 0) && thisContentType.startsWith("text")) {
-                    content = (String)part.getContent();
-                    if (UtilValidate.isNotEmpty(content)) {
-                        contentIndex = contentIndex.concat("." + i);
-                        commEventMap.put("content", content);
-                        commEventMap.put("contentMimeTypeId", thisContentType);
-                        return commEventMap;
-                    }
-                } else if ((disposition != null)
-                        && (disposition.equals(Part.ATTACHMENT) || disposition.equals(Part.INLINE))
-                        && thisContentType.startsWith("text")) {
-                    contentIndex = contentIndex.concat("." + i);
-                    commEventMap.put("content", part.getContent());
-                    commEventMap.put("contentMimeTypeId", thisContentType);
-                    return commEventMap;
-                }
-            }
-            return commEventMap;
-        } catch (MessagingException e) {
-            Debug.logError(e, module);
-            return ServiceUtil.returnError(e.getMessage());
-        } catch (IOException e) {
-            Debug.logError(e, module);
-            return ServiceUtil.returnError(e.getMessage());
-        }
-    }
+        if (addresses != null) {
+            for (Address addr: addresses) {
+                if (addr instanceof InternetAddress) {
+                    emailAddress = (InternetAddress)addr;
 
-    public String getForwardedField(MimeMessage message) {
-        String fieldValue = null;
-        return fieldValue;
-    }
+                    if (emailAddress != null) {
+                        Map<String, String> inputFields = FastMap.newInstance();
+                        inputFields.put("infoString", emailAddress.getAddress());
+                        inputFields.put("infoString_ic", caseInsensitiveEmail);
+                        result = dispatcher.runSync("performFind", UtilMisc.<String, Object>toMap("entityName", "WorkEffortContactMechView"
+                                ,"inputFields", inputFields, "userLogin", userLogin));
+                        EntityListIterator listIt = (EntityListIterator) result.get("listIt");
 
-    public static int addAttachmentsToCommEvent(Multipart messageContent, String subject, String communicationEventId, LocalDispatcher dispatcher, GenericValue userLogin)
-        throws MessagingException, IOException, GenericServiceException {
-        Map commEventMap = FastMap.newInstance();
-        commEventMap.put("communicationEventId", communicationEventId);
-        commEventMap.put("contentTypeId", "DOCUMENT");
-        commEventMap.put("mimeTypeId", "text/html");
-        commEventMap.put("userLogin", userLogin);
-        if (subject != null && subject.length() > 80) {
-            subject = subject.substring(0,80); // make sure not too big for database field. (20 characters for filename)
-        }
-        currentIndex = "";
-        attachmentCount = 0;
-        return addMultipartAttachementToComm(messageContent, commEventMap, subject, dispatcher, userLogin);
-    }
-    private static String currentIndex = "";
-    private static int attachmentCount = 0;
-    private static int addMultipartAttachementToComm(Multipart multipart, Map commEventMap, String subject, LocalDispatcher dispatcher, GenericValue userLogin)
-    throws MessagingException, IOException, GenericServiceException {
-        try {
-            int multipartCount = multipart.getCount();
-            // Debug.logInfo(currentIndex + "====number of attachments: " + multipartCount, module);
-            for (int i=0; i < multipartCount; i++) {
-                // Debug.logInfo(currentIndex + "====processing attachment: " + i, module);
-                Part part = multipart.getBodyPart(i);
-                String thisContentTypeRaw = part.getContentType();
-                // Debug.logInfo("====thisContentTypeRaw: " + thisContentTypeRaw, module);
-                int idx2 = thisContentTypeRaw.indexOf(";");
-                if (idx2 == -1) idx2 = thisContentTypeRaw.length();
-                String thisContentType = thisContentTypeRaw.substring(0, idx2);
-                String disposition = part.getDisposition();
-                ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                if (part instanceof Multipart) {
-                    currentIndex = currentIndex.concat("." + i);
-                    // Debug.logInfo("=====attachment contain attachment, index:" + currentIndex, module);
-                    return addMultipartAttachementToComm((Multipart) part.getContent(), commEventMap, subject, dispatcher, userLogin);
-                }
-                // Debug.logInfo("=====attachment not contains attachment, index:" + currentIndex, module);
-                // Debug.logInfo("=====check for currentIndex(" + currentIndex  + ") against master contentIndex(" + EmailServices.contentIndex + ")", module);
-                if (currentIndex.concat("." + i).equals(CommunicationEventServices.contentIndex)) continue;
-
-                // The first test should not pass, because if it exists, it should be the bodyContentIndex part
-                // Debug.logInfo("====check for disposition: " + disposition + " contentType: '" + thisContentType + "' variable i:" + i, module);
-                if ((disposition == null && thisContentType.startsWith("text"))
-                        || ((disposition != null)
-                                && (disposition.equals(Part.ATTACHMENT) || disposition.equals(Part.INLINE))
-                                ) )
-                {
-                    String attFileName = part.getFileName();
-                    Debug.logInfo("===processing attachment: " + attFileName, module);
-                    if (!UtilValidate.isEmpty(attFileName)) {
-                           commEventMap.put("contentName", attFileName);
-                           commEventMap.put("description", subject + "-" + attachmentCount);
-                    } else {
-                        commEventMap.put("contentName", subject + "-" + attachmentCount);
-                    }
-                    commEventMap.put("drMimeTypeId", thisContentType);
-                    if (thisContentType.startsWith("text")) {
-                        String content = (String)part.getContent();
-                        commEventMap.put("drDataResourceTypeId", "ELECTRONIC_TEXT");
-                        commEventMap.put("textData", content);
-                    } else {
-                        InputStream is = part.getInputStream();
-                        int c;
-                        while ((c = is.read()) > -1) {
-                            baos.write(c);
+                        try {
+                            List<GenericValue> list = listIt.getCompleteList();
+                            List<GenericValue> filteredList = EntityUtil.filterByDate(list);
+                            tempResults.addAll(filteredList);
+                        } catch (GenericEntityException e) {
+                            Debug.logError(e, module);
+                        } finally {
+                            try {
+                                listIt.close();
+                            } catch (GenericEntityException e) {
+                                Debug.logError(e, module);
+                            }
                         }
-                        ByteBuffer imageData = ByteBuffer.wrap(baos.toByteArray());
-                        int len = imageData.limit();
-                        if (Debug.infoOn()) Debug.logInfo("imageData length: " + len, module);
-                        commEventMap.put("drDataResourceName", part.getFileName());
-                        commEventMap.put("imageData", imageData);
-                        commEventMap.put("drDataResourceTypeId", "IMAGE_OBJECT");
-                        commEventMap.put("_imageData_contentType", thisContentType);
                     }
-                    dispatcher.runSync("createCommContentDataResource", commEventMap);
-                    attachmentCount++;
                 }
             }
-        } catch (MessagingException e) {
+        }
+        return tempResults;
+    }
+
+    /*
+     * Service to process incoming email and look for a bounce message. If the email is indeed a bounce message
+     * the CommunicationEvent will be updated with the proper COM_BOUNCED status.
+     */
+    public static Map<String,Object> processBouncedMessage(DispatchContext dctx, Map<String, ? extends Object> context) {
+        Debug.logInfo("Running process bounced message check...", module);
+        MimeMessageWrapper wrapper = (MimeMessageWrapper) context.get("messageWrapper");
+
+        LocalDispatcher dispatcher = dctx.getDispatcher();
+        Delegator delegator = dctx.getDelegator();
+
+        int parts = wrapper.getMainPartCount();
+
+        if (parts >= 3) { // it must have all three parts in order to process correctly
+            // get the second part (delivery report)
+            String contentType = wrapper.getPartContentType("1"); // index 1 should be the second part
+            if (contentType != null && "message/delivery-status".equalsIgnoreCase(contentType)) {
+                Debug.logInfo("Delivery status report part found; processing...", module);
+
+                // get the content of the part
+                String part2Text = wrapper.getPartRawText("1");
+                if (part2Text == null) {
+                    part2Text = "";
+                }
+                if (Debug.verboseOn())
+                    Debug.logVerbose("Part 2 Text :\n\n" + part2Text, module);
+
+                // find the "Action" element and obtain its value (looking for "failed")
+                Pattern p2 = Pattern.compile("^Action: (.*)$", Pattern.MULTILINE | Pattern.CASE_INSENSITIVE);
+                Matcher m2 = p2.matcher(part2Text);
+                String action = null;
+                if (m2.find()) {
+                    action = m2.group(1);
+                }
+
+                if (action != null && "failed".equalsIgnoreCase(action)) {
+                    // message bounced -- get the original message
+                    String part3Text = wrapper.getPartRawText("2"); // index 2 should be the third part
+                    if (part3Text == null) {
+                        part3Text = "";
+                    }
+                    if (Debug.verboseOn())
+                        Debug.logVerbose("Part 3 Text :\n\n" + part3Text, module);
+
+                    // find the "Message-Id" element and obtain its value (looking for "failed")
+                    Pattern p3 = Pattern.compile("^Message-Id: (.*)$", Pattern.MULTILINE | Pattern.CASE_INSENSITIVE);
+                    Matcher m3 = p3.matcher(part3Text);
+                    String messageId = null;
+                    if (m3.find()) {
+                        Debug.logInfo("Found message-id : " + m3.group(), module);
+                        messageId = m3.group(1);
+                    }
+
+                    // find the matching communication event
+                    if (messageId != null) {
+                        List<GenericValue> values;
+                        try {
+                            values = delegator.findByAnd("CommunicationEvent", UtilMisc.toMap("messageId", messageId), null, false);
+                        } catch (GenericEntityException e) {
+                            Debug.logError(e, module);
+                            return ServiceUtil.returnError(e.getMessage());
+                        }
+                        if (UtilValidate.isNotEmpty(values)) {
+                            // there should be only one; unique key
+                            GenericValue value = values.get(0);
+
+                            // update the communication event status
+                            Map<String, Object> updateCtx = FastMap.newInstance();
+                            updateCtx.put("communicationEventId", value.getString("communicationEventId"));
+                            updateCtx.put("statusId", "COM_BOUNCED");
+                            updateCtx.put("userLogin", context.get("userLogin"));
+                            Map<String, Object> result;
+                            try {
+                                result = dispatcher.runSync("updateCommunicationEvent", updateCtx);
+                            } catch (GenericServiceException e) {
+                                Debug.logError(e, module);
+                                return ServiceUtil.returnError(e.getMessage());
+                            }
+                            if (ServiceUtil.isError(result)) {
+                                return ServiceUtil.returnError(ServiceUtil.getErrorMessage(result));
+                            }
+                        } else {
+                            if (Debug.infoOn()) {
+                                Debug.logInfo("Unable to find CommunicationEvent with the matching messageId : " + messageId, module);
+                            }
+
+                            // no communication events found for that message ID; possible this is a NEWSLETTER
+                            try {
+                                values = delegator.findByAnd("ContactListCommStatus", UtilMisc.toMap("messageId",
+                                        messageId), null, false);
+                            } catch (GenericEntityException e) {
+                                Debug.logError(e, module);
+                                return ServiceUtil.returnError(e.getMessage());
+                            }
+                            if (UtilValidate.isNotEmpty(values)) {
+                                // there should be only one; unique key
+                                GenericValue value = values.get(0);
+
+                                Map<String, Object> updateCtx = FastMap.newInstance();
+                                updateCtx.put("communicationEventId", value.getString("communicationEventId"));
+                                updateCtx.put("contactListId", value.getString("contactListId"));
+                                updateCtx.put("contactMechId", value.getString("contactMechId"));
+                                updateCtx.put("partyId", value.getString("partyId"));
+                                updateCtx.put("statusId", "COM_BOUNCED");
+                                updateCtx.put("userLogin", context.get("userLogin"));
+                                Map<String, Object> result;
+                                try {
+                                    result = dispatcher.runSync("updateContactListCommStatus", updateCtx);
+                                } catch (GenericServiceException e) {
+                                    Debug.logError(e, module);
+                                    return ServiceUtil.returnError(e.getMessage());
+                                }
+                                if (ServiceUtil.isError(result)) {
+                                    return ServiceUtil.returnError(ServiceUtil.getErrorMessage(result));
+                                }
+                            } else {
+                                if (Debug.infoOn()) {
+                                    Debug.logInfo("Unable to find ContactListCommStatus with the matching messageId : "  + messageId, module);
+                                }
+                            }
+                        }
+                    } else {
+                        Debug.logWarning("No message ID attached to part", module);
+                    }
+                }
+            }
+        }
+
+        return ServiceUtil.returnSuccess();
+    }
+
+    public static Map<String,Object> logIncomingMessage(DispatchContext dctx, Map<String, ? extends Object> context) {
+        MimeMessageWrapper wrapper = (MimeMessageWrapper) context.get("messageWrapper");
+        Debug.logInfo("Message recevied         : " + wrapper.getSubject(), module);
+        Debug.logInfo("-- Content Type          : " + wrapper.getContentType(), module);
+        Debug.logInfo("-- Number of parts       : " + wrapper.getMainPartCount(), module);
+        Debug.logInfo("-- Number of attachments : " + wrapper.getAttachmentIndexes().size(), module);
+        Debug.logInfo("-- Message ID            : " + wrapper.getMessageId(), module);
+
+        Debug.logInfo("### MESSAGE ###\n\n" + wrapper.getMessageBody(), module);
+
+        List<String> attachmentIndexes = wrapper.getAttachmentIndexes();
+        if (attachmentIndexes.size() > 0) {
+            Debug.logInfo("### ATTACHMENTS ###", module);
+            for (String idx : attachmentIndexes) {
+                Debug.logInfo("### -- Filename          : " + wrapper.getPartFilename(idx), module);
+                Debug.logInfo("### -- Content Type      : " + wrapper.getPartContentType(idx), module);
+            }
+        }
+
+        return ServiceUtil.returnSuccess();
+
+    }
+
+    /*
+     * Event which marks a communication event as read, and returns a 1px image to the browser/mail client
+     * Is updated because the read status is now stored in the communicationEventRole
+     * This services is updated but could not be tested. assumed is "read" for partyIdTo on the commevent
+     */
+    public static String markCommunicationAsRead(HttpServletRequest request, HttpServletResponse response) {
+        String communicationEventId = null;
+
+        // pull the communication event from path info, so we can hide the process from the user
+        String pathInfo = request.getPathInfo();
+        String[] pathParsed = pathInfo.split("/", 3);
+        if (pathParsed != null && pathParsed.length > 2) {
+            pathInfo = pathParsed[2];
+        } else {
+            pathInfo = null;
+        }
+        if (pathInfo != null && pathInfo.indexOf("/") > -1) {
+            pathParsed = pathInfo.split("/");
+            communicationEventId = pathParsed[0];
+        }
+
+        // update the communication event
+        if (communicationEventId != null) {
+            Debug.logInfo("Marking communicationEventId [" + communicationEventId + "] from path info : " + request.getPathInfo() + " as read.", module);
+            Delegator delegator = (Delegator) request.getAttribute("delegator");
+            GenericValue communicationEvent = null;
+            try {
+                communicationEvent = delegator.findOne("CommunicationEvent", UtilMisc.toMap("communicationEventId", communicationEventId), true);
+            } catch (GenericEntityException e) {
+                Debug.logError(e, module);
+            }
+            LocalDispatcher dispatcher = (LocalDispatcher) request.getAttribute("dispatcher");
+            try {
+                dispatcher.runAsync("setCommEventRoleToRead", UtilMisc.toMap("communicationEventId", communicationEventId, "partyId", communicationEvent.getString("partyIdTo")));
+            } catch (GenericServiceException e) {
+                Debug.logError(e, module);
+            }
+        }
+
+        // return the 1px image (spacer.gif)
+        URL imageUrl;
+        try {
+            imageUrl = FlexibleLocation.resolveLocation("component://images/webapp/images/spacer.gif");
+            InputStream imageStream = imageUrl.openStream();
+            UtilHttp.streamContentToBrowser(response, imageStream, 43, "image/gif", null);
+        } catch (MalformedURLException e) {
             Debug.logError(e, module);
         } catch (IOException e) {
             Debug.logError(e, module);
-        } catch (GenericServiceException e) {
-            Debug.logError(e, module);
         }
-        return attachmentCount;
+
+        // return null to not return any view
+        return null;
     }
 }

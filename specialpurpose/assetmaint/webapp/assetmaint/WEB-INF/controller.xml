@@ -40,24 +40,19 @@
     </request-map>
     <request-map uri="createFixedAssetMaintUpdateWorkEffort">
         <security https="true" auth="true"/>
-        <event type="simple" path="component://assetmaint/script/org/ofbiz/assetmaint/FixedAssetMaintEvents.xml" invoke="createFixedAssetMaintUpdateWorkEffort"/>
+        <event type="service" invoke="createFixedAssetMaintUpdateWorkEffort"/>
         <response name="success" type="view" value="EditFixedAssetMaint"/>
         <response name="error" type="view" value="EditFixedAssetMaint"/>
     </request-map>
     <request-map uri="updateFixedAssetMaintAndWorkEffort">
         <security https="true" auth="true"/>
-        <event type="simple" path="component://assetmaint/script/org/ofbiz/assetmaint/FixedAssetMaintEvents.xml" invoke="updateFixedAssetMaintAndWorkEffort"/>
+        <event type="service" invoke="updateFixedAssetMaintAndWorkEffort"/>
         <response name="success" type="view" value="EditFixedAssetMaint"/>
         <response name="error" type="view" value="EditFixedAssetMaint"/>
     </request-map>
     <request-map uri="findFixedAssetMaints">
         <security https="true" auth="true"/>
         <response name="success" type="view" value="FindFixedAssetMaints"/>
-    </request-map>
-    <request-map uri="ListFixedAssetCalendar">
-        <security https="true" auth="true"/>
-        <response name="success" type="view" value="month"/>
-        <response name="error" type="view" value="month"/>
     </request-map>
 
     <!--  WorkEffort request mappings -->
@@ -92,7 +87,7 @@
 
     <request-map uri="createWorkEffortAndAssoc">
         <security https="true" auth="true"/>
-        <event type="simple" path="component://assetmaint/script/org/ofbiz/assetmaint/FixedAssetMaintEvents.xml" invoke="createWorkEffortAndAssoc"/>
+        <event type="service" invoke="createWorkEffortAndAssocWithParent"/>
         <response name="success" type="view" value="EditWorkEfforts"/>
         <response name="error" type="view" value="EditWorkEfforts"/>
     </request-map>

@@ -26,7 +26,10 @@ function lookupInventory() {
 </script>
 <div class="screenlet">
   <div class="screenlet-title-bar">
-    <h3>${uiLabelMap.PageTitleFindInventoryEventPlan}</h3>
+    <ul>
+      <li class="h3">${uiLabelMap.PageTitleFindInventoryEventPlan}</li>
+    </ul>
+    <br class="clear"/>
   </div>
   <div class="screenlet-body">
     <form method="post" name="lookupinventory" action="<@ofbizUrl>FindInventoryEventPlan</@ofbizUrl>">
@@ -46,7 +49,6 @@ function lookupInventory() {
                     <#if inventoryList?exists>
                         <a href="<@ofbizUrl>FindInventoryEventPlan?hideFields=Y${paramList}</@ofbizUrl>" class="smallSubmit">${uiLabelMap.CommonHideFields}</a>
                     </#if>
-                    <a href="javascript:lookupInventory();" class="smallSubmit">${uiLabelMap.CommonLookup}</a>
                   </#if>
                 </p>
               </td>
@@ -61,29 +63,22 @@ function lookupInventory() {
                     <td width='20%' align='right' class="label">${uiLabelMap.ManufacturingProductId}</td>
                     <td width='5%'>&nbsp;</td>
                     <td>
-                        <input type='text' size='25' name='productId' value='${requestParameters.productId?if_exists}'/>
-                        <span>
-                          <a href="javascript:call_fieldlookup2(document.lookupinventory.productId,'LookupProduct');">
-                            <a href="javascript:call_fieldlookup2(document.copyCategoryProductMembersForm.productCategoryIdTo,'LookupProductCategory');"><img src='/images/fieldlookup.gif' width='15' height='14' border='0' alt="${uiLabelMap.CommonClickHereForFieldLookup}"/></a>
-                          </a>
-                        </span>
-                        <input type='text' size='25' readonly name='productId_description' value=''/>
+                      <span>
+                        <@htmlTemplate.lookupField value='${requestParameters.productId?if_exists}' formName="lookupinventory" name="productId" id="productId" fieldFormName="LookupProduct"/>
+                      </span>
                      </td>
                   </tr>
                   <tr>
                     <td width='20%' align='right' class="label">${uiLabelMap.CommonFromDate}</td>
                     <td width='5%'>&nbsp;</td>
                     <td>
-                      <input type='text' size='25' name='eventDate' value='${requestParameters.eventDate?if_exists}'/>
-                        <a href="javascript:call_cal(document.lookupinventory.eventDate,'');">
-                           <img src='/images/cal.gif' width='16' height='16' border='0' alt='Calendar'/>
-                         </a>
+                      <@htmlTemplate.renderDateTimeField name="eventDate" event="" action="" className="" alert="" title="Format: yyyy-MM-dd HH:mm:ss.SSS" value="${requestParameters.eventDate?if_exists}" size="25" maxlength="30" id="fromDate_2" dateType="date" shortDateInput=false timeDropdownParamName="" defaultDateTimeString="" localizedIconTitle="" timeDropdown="" timeHourName="" classString="" hour1="" hour2="" timeMinutesName="" minutes="" isTwelveHour="" ampmName="" amSelected="" pmSelected="" compositeType="" formName=""/>
                     </td>
                   </tr>
                   <tr>
-                    <td width="25%" align="center" valign="top">
-                    <td width="5">&nbsp;</td>
-                    <td width="75%"> <a href="javascript:lookupInventory();" class="smallSubmit">&nbsp; ${uiLabelMap.CommonLookup} &nbsp;</a></td>
+                    <td width="20%" align="center" valign="top">&nbsp;</td>
+                    <td width="5%">&nbsp;</td>
+                    <td width="75%"> <a href="javascript:lookupInventory();" class="smallSubmit">&nbsp; ${uiLabelMap.CommonFind} &nbsp;</a></td>
                   </tr>
                 </table>
               </td>
@@ -118,7 +113,7 @@ document.lookupinventory.productId.focus();
              <div class="boxhead" align="right">
 
                 <#if 0 < viewIndex>
-                  <a href="<@ofbizUrl>FindInventoryEventPlan?VIEW_SIZE=${viewSize}&VIEW_INDEX=${viewIndex-1}&hideFields=${requestParameters.hideFields?default("N")}${paramList}</@ofbizUrl>" class="submenutext">${uiLabelMap.CommonPrevious}</a>
+                  <a href="<@ofbizUrl>FindInventoryEventPlan?VIEW_SIZE=${viewSize}&amp;VIEW_INDEX=${viewIndex-1}&amp;hideFields=${requestParameters.hideFields?default("N")}${paramList}</@ofbizUrl>" class="submenutext">${uiLabelMap.CommonPrevious}</a>
                 <#else>
                   <span class="submenutextdisabled">${uiLabelMap.CommonPrevious}</span>
                 </#if>
@@ -126,7 +121,7 @@ document.lookupinventory.productId.focus();
                   <span class="submenutextinfo">${lowIndex+1} - ${highIndex} ${uiLabelMap.CommonOf} ${listSize}</span>
                 </#if>
                 <#if highIndex < listSize>
-                  <a href="<@ofbizUrl>FindInventoryEventPlan?VIEW_SIZE=${viewSize}&VIEW_INDEX=${viewIndex+1}&hideFields=${requestParameters.hideFields?default("N")}${paramList}</@ofbizUrl>" class="submenutextright">${uiLabelMap.CommonNext}</a>
+                  <a href="<@ofbizUrl>FindInventoryEventPlan?VIEW_SIZE=${viewSize}&amp;VIEW_INDEX=${viewIndex+1}&amp;hideFields=${requestParameters.hideFields?default("N")}${paramList}</@ofbizUrl>" class="submenutextright">${uiLabelMap.CommonNext}</a>
                 <#else>
                   <span class="submenutextrightdisabled">${uiLabelMap.CommonNext}</span>
                 </#if>
@@ -140,38 +135,38 @@ document.lookupinventory.productId.focus();
       <table class="basic-table" cellspacing="0">
         <tr class="header-row">
           <td>${uiLabelMap.CommonType}</td>
-          <td align="center">&nbsp</td>
+          <td align="center">&nbsp;</td>
           <td>${uiLabelMap.CommonDescription}</td>
           <td>${uiLabelMap.CommonDate}</td>
-          <td align="center">&nbsp</td>
+          <td align="center">&nbsp;</td>
           <td align="right">${uiLabelMap.CommonQuantity}</td>
           <td align="right">${uiLabelMap.ManufacturingTotalQuantity}</td>
         </tr>
         <tr>
-          <td colspan="7"><hr/></td>
+          <td colspan="7"><hr /></td>
         </tr>
         <#assign count = lowIndex>
         <#assign productTmp = "">
         <#list inventoryList[lowIndex..highIndex-1] as inven>
-            <#assign product = inven.getRelatedOne("Product")>
+            <#assign product = inven.getRelatedOne("Product", false)>
             <#if facilityId?exists && facilityId?has_content>
             </#if>
             <#if ! product.equals( productTmp )>
                 <#assign quantityAvailableAtDate = 0>
-                <#assign errorEvents = delegator.findByAnd("MrpEvent", Static["org.ofbiz.base.util.UtilMisc"].toMap("mrpEventTypeId", "ERROR", "productId", inven.productId))>
-                <#assign qohEvents = delegator.findByAnd("MrpEvent", Static["org.ofbiz.base.util.UtilMisc"].toMap("mrpEventTypeId", "INITIAL_QOH", "productId", inven.productId))>
+                <#assign errorEvents = delegator.findByAnd("MrpEvent", Static["org.ofbiz.base.util.UtilMisc"].toMap("mrpEventTypeId", "ERROR", "productId", inven.productId), null, false)>
+                <#assign qohEvents = delegator.findByAnd("MrpEvent", Static["org.ofbiz.base.util.UtilMisc"].toMap("mrpEventTypeId", "INITIAL_QOH", "productId", inven.productId), null, false)>
                 <#assign additionalErrorMessage = "">
-                <#assign initialQohEvent = null>
-                <#assign productFacility = null>
+                <#assign initialQohEvent = "">
+                <#assign productFacility = "">
                 <#if qohEvents?has_content>
                     <#assign initialQohEvent = Static["org.ofbiz.entity.util.EntityUtil"].getFirst(qohEvents)>
                 </#if>
-                <#if initialQohEvent != null>
+                <#if initialQohEvent??>
                     <#if initialQohEvent.quantity?has_content>
                         <#assign quantityAvailableAtDate = initialQohEvent.quantity>
                     </#if>
                     <#if initialQohEvent.facilityId?has_content>
-                        <#assign productFacility = delegator.findByPrimaryKey("ProductFacility", Static["org.ofbiz.base.util.UtilMisc"].toMap("facilityId", initialQohEvent.facilityId, "productId", inven.productId))?if_exists>
+                        <#assign productFacility = delegator.findOne("ProductFacility", Static["org.ofbiz.base.util.UtilMisc"].toMap("facilityId", initialQohEvent.facilityId, "productId", inven.productId), false)?if_exists>
                     </#if>
                 <#else>
                     <#assign additionalErrorMessage = "No QOH information found, assuming 0.">
@@ -181,7 +176,7 @@ document.lookupinventory.productId.focus();
                       <b>[${inven.productId}]</b>&nbsp;&nbsp;${product.internalName?if_exists}
                   </th>
                   <td>
-                    <#if productFacility != null && productFacility?has_content>
+                    <#if productFacility?has_content>
                       <div>
                       <b>${uiLabelMap.ProductFacility}:</b>&nbsp;${productFacility.facilityId?if_exists}
                       </div>
@@ -213,13 +208,13 @@ document.lookupinventory.productId.focus();
             </#if>
             <#assign quantityAvailableAtDate = quantityAvailableAtDate?default(0) + inven.getBigDecimal("quantity")>
             <#assign productTmp = product>
-            <#assign MrpEventType = inven.getRelatedOne("MrpEventType")>
+            <#assign MrpEventType = inven.getRelatedOne("MrpEventType", false)>
             <tr class="${rowClass}">
               <td>${MrpEventType.get("description",locale)}</td>
-              <td>&nbsp</td>
+              <td>&nbsp;</td>
               <td>${inven.eventName?if_exists}</td>
               <td><font <#if inven.isLate?default("N") == "Y">color='red'</#if>>${inven.getString("eventDate")}</font></td>
-              <td>&nbsp</td>
+              <td>&nbsp;</td>
               <td align="right">${inven.getString("quantity")}</td>
               <td align="right">${quantityAvailableAtDate?if_exists}</td>
             </tr>
@@ -228,9 +223,9 @@ document.lookupinventory.productId.focus();
 
        </table>
       <#else>
-       <br/>
+       <br />
        <div align="center">${uiLabelMap.CommonNoElementFound}</div>
-       <br/>
+       <br />
       </#if>
     </#if>
     </td>

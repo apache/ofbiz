@@ -16,6 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 import org.ofbiz.base.util.UtilProperties;
 import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.product.store.ProductStoreWorker;
@@ -27,21 +28,6 @@ context.productStore = productStore;
 context.createAllowPassword = "Y".equals(productStore.allowPassword);
 context.getUsername = !"Y".equals(productStore.usePrimaryEmailUsername);
 
-// load the geo names for selected countries and states/regions
-if (parameters.CUSTOMER_COUNTRY) {
-    geoValue = delegator.findByPrimaryKeyCache("Geo", [geoId : parameters.CUSTOMER_COUNTRY]);
-    if (geoValue) {
-        context.selectedCountryName = geoValue.geoName;
-    }
-}
-
-if (parameters.CUSTOMER_STATE) {
-    geoValue = delegator.findByPrimaryKeyCache("Geo", [geoId : parameters.CUSTOMER_STATE]);
-    if (geoValue) {
-        context.selectedStateName = geoValue.geoName;
-    }
-}
-
 previousParams = parameters._PREVIOUS_PARAMS_;
 if (previousParams) {
     previousParams = "?" + previousParams;
@@ -49,3 +35,24 @@ if (previousParams) {
     previousParams = "";
 }
 context.previousParams = previousParams;
+
+//the parameters from janrain
+userInfoMap = request.getAttribute("userInfoMap");
+if (!userInfoMap) {
+    userInfoMap = request.getSession().getAttribute("userInfoMap");
+}
+if (userInfoMap) {
+    if (userInfoMap.givenName && userInfoMap.familyName) {
+        requestParameters.USER_FIRST_NAME = userInfoMap.givenName;
+        requestParameters.USER_LAST_NAME = userInfoMap.familyName;
+    } else if (userInfoMap.formatted) {
+        requestParameters.USER_FIRST_NAME = userInfoMap.formatted;
+    }
+    requestParameters.CUSTOMER_EMAIL = userInfoMap.email;
+    requestParameters.preferredUsername = userInfoMap.preferredUsername;
+    requestParameters.USERNAME = userInfoMap.preferredUsername;
+    request.getSession().setAttribute("userInfoMap", userInfoMap);
+}
+
+donePage = "main;" + parameters.visit.sessionId
+context.donePage = donePage;

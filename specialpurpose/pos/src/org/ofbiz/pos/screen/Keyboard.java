@@ -19,8 +19,7 @@
 package org.ofbiz.pos.screen;
 
 import java.awt.Color;
-
-import org.ofbiz.base.util.Debug;
+import java.util.Locale;
 
 import net.xoetrope.swing.XButton;
 import net.xoetrope.swing.XDialog;
@@ -28,26 +27,36 @@ import net.xoetrope.swing.XEdit;
 import net.xoetrope.xui.PageSupport;
 import net.xoetrope.xui.XPage;
 import net.xoetrope.xui.events.XEventHelper;
-import java.awt.Panel;
 
+import org.ofbiz.base.util.UtilProperties;
+import org.ofbiz.pos.PosTransaction;
+
+@SuppressWarnings("serial")
 public class Keyboard extends XPage {
     public static final String module = Keyboard.class.getName();
 
-    XEdit m_edit = null;
-    XDialog m_dialog = null;
-    PosScreen m_pos = null;
-    PageSupport m_pageSupport = null;
+    protected XEdit m_edit = null;
+    protected XDialog m_dialog = null;
+    protected PosScreen m_pos = null;
+    protected PageSupport m_pageSupport = null;
 
-    String originalText;
-    boolean m_shift = false;
-    boolean m_shiftLock = false;
+    private String originalText;
+    private boolean m_shift = false;
+    private boolean m_shiftLock = false;
+    private static Locale locale = Locale.getDefault();
+
 
     public Keyboard(PosScreen pos) {
         m_pos = pos;
-        m_pageSupport = pageMgr.loadPage(m_pos.getScreenLocation() + "/dialog/keyboard");
+        if (locale.toString().contains("fr")) {
+            m_pageSupport = pageMgr.loadPage(m_pos.getScreenLocation() + "/dialog/keyboard_fr");
+        } else {
+            m_pageSupport = pageMgr.loadPage(m_pos.getScreenLocation() + "/dialog/keyboard");
+        }
         m_dialog = (XDialog) m_pageSupport;
         m_edit = (XEdit) m_pageSupport.findComponent("keyboard_input");
         m_edit.setText("");
+        m_dialog.setCaption(UtilProperties.getMessage(PosTransaction.resource, "PosVirtualKeyboardTitle", Locale.getDefault()));
     }
 
     public String openDlg() {
@@ -55,8 +64,8 @@ public class Keyboard extends XPage {
         originalText = getText();
 //      XuiUtilities.getMaxCoordinates(m_dialog);
 //      Panel m_panel = m_dialog.PANEL;
-//      pageHelper.componentFactory.setParentComponent( this );
-//      contentPanel = ( XPanel )pageHelper.componentFactory.addComponent( XPage.PANEL, 0, 0, 800, 600 );
+//      pageHelper.componentFactory.setParentComponent(this);
+//      contentPanel = (XPanel)pageHelper.componentFactory.addComponent(XPage.PANEL, 0, 0, 800, 600);
 //      FIXME XUI dialog boxes are hardcoded to a 800*600 max ! https://issues.apache.org/jira/browse/OFBIZ-1606?focusedCommentId=12614469#action_12614469
 //      actually maxi seem to be 808*628 certainly due to margins(?)
         m_dialog.pack();
@@ -85,7 +94,7 @@ public class Keyboard extends XPage {
 
     private void setupEvents() {
         String[] keys = {"A" ,"B" ,"C" ,"D" ,"E" ,"F" ,"G" ,"H" ,"I" ,"J" ,"K" ,"L" ,"M" ,"N" ,"O" ,"P" ,"Q" ,"R" ,"S" ,"T" ,"U" ,"V" ,"W" ,"X" ,"Y" ,"Z",
-                "1" ,"2" ,"3" ,"4" ,"5" ,"6" ,"7" ,"8" ,"9" ,"0" ,
+                "1" ,"2" ,"3" ,"4" ,"5" ,"6" ,"7" ,"8" ,"9" ,"0" , "At",
                 "Dot", "Dash", "Del", "Space", "Clear", "Enter", "Cancel", "Shift", "ShiftLock"};
         XButton button = null;
         for(String key : keys) {
@@ -268,6 +277,10 @@ public class Keyboard extends XPage {
 
     public void triggerSpace() {
         triggerAndAppend(" ");
+    }
+
+    public void triggerAt() {
+        triggerAndAppend("@");
     }
 
     public void triggerClear() {

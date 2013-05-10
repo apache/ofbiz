@@ -26,8 +26,8 @@
                 <set field="titleProperty" value="HumanResFindPerfReview"/>
                 <set field="headerItem" value="PerfReview"/>
                 <set field="employeePartyId" from-field="parameters.partyId"/>
-                <set field="viewIndex" from-field="parameters.VIEW_INDEX" type="Integer"/>
-                <set field="viewSize" from-field="parameters.VIEW_SIZE" type="Integer" default-value="3"/>
+                <set field="viewIndex" from-field="parameters.VIEW_INDEX" type="Integer"  default-value="0"/>
+                <set field="viewSize" from-field="parameters.VIEW_SIZE" type="Integer" default-value="20"/>
             </actions>
             <widgets>
                 <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
@@ -35,7 +35,7 @@
                         <decorator-screen name="FindScreenDecorator" location="component://common/widget/CommonScreens.xml">
                             <decorator-section name="menu-bar">
                                 <container style="button-bar">
-                                    <link target="EditPerfReview" text="${uiLabelMap.HumanResNewPartyReview}" style="buttontext"/>
+                                    <link target="EditPerfReview" text="${uiLabelMap.HumanResNewPartyReview}" style="buttontext create"/>
                                 </container>
                             </decorator-section>
                             <decorator-section name="search-options">
@@ -62,7 +62,7 @@
                 <entity-one entity-name="PerfReview" value-field="perfReview"/>
             </actions>
             <widgets>
-                <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                <decorator-screen name="CommonPerfReviewDecorator" location="${parameters.mainDecoratorLocation}">
                     <decorator-section name="body">
                         <screenlet title="${uiLabelMap.CommonEdit} ${uiLabelMap.HumanResPerfReview}">
                             <section>
@@ -83,6 +83,8 @@
                 <set field="titleProperty" value="PageTitleEditPartyReviewItem"/>
                 <set field="tabButtonItem" value="EditPerfReviewItems"/>
                 <set field="perfReviewId" from-field="parameters.perfReviewId"/>
+                <set field="employeePartyId" from-field="parameters.employeePartyId"/>
+                <set field="employeeRoleTypeId" from-field="parameters.employeeRoleTypeId"/>
             </actions>
             <widgets>
                 <decorator-screen name="CommonPerfReviewDecorator" location="${parameters.mainDecoratorLocation}">

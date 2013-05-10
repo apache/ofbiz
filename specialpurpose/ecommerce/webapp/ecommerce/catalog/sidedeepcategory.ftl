@@ -23,41 +23,50 @@ under the License.
 <#-- looping macro -->
 <#macro categoryList parentCategory category wrapInBox>
   <#if catContentWrappers?exists && catContentWrappers[category.productCategoryId]?exists && catContentWrappers[category.productCategoryId].get("CATEGORY_NAME")?exists>
-      <#assign categoryName = catContentWrappers[category.productCategoryId].get("CATEGORY_NAME")>
+    <#assign categoryName = catContentWrappers[category.productCategoryId].get("CATEGORY_NAME")>
   <#else>
-      <#assign categoryName = category.categoryName?if_exists>
+    <#assign categoryName = category.categoryName?if_exists>
   </#if>
   <#if catContentWrappers?exists && catContentWrappers[category.productCategoryId]?exists && catContentWrappers[category.productCategoryId].get("DESCRIPTION")?exists>
-      <#assign categoryDescription = catContentWrappers[category.productCategoryId].get("DESCRIPTION")>
+    <#assign categoryDescription = catContentWrappers[category.productCategoryId].get("DESCRIPTION")>
   <#else>
-      <#assign categoryDescription = category.description?if_exists>
+    <#assign categoryDescription = category.description?if_exists>
   </#if>
   <#if curCategoryId?exists && curCategoryId == category.productCategoryId>
-      <#assign browseCategoryButtonClass = "browsecategorybuttondisabled">
+    <#assign browseCategoryButtonClass = "browsecategorybuttondisabled">
   <#else>
-      <#assign browseCategoryButtonClass = "browsecategorybutton">
+    <#assign browseCategoryButtonClass = "browsecategorybutton">
   </#if>
   <#if wrapInBox == "Y">
-  <div  id="sidedeepcategory" class="screenlet">
-    <div class="screenlet-header">
-      <div class="boxhead"><#if categoryDescription?has_content>${categoryDescription}<#else>${categoryName?default("")}</#if></div>
-    </div>
-    <div class="screenlet-body">
-      <div class="browsecategorylist">
+    <div  id="sidedeepcategory" class="screenlet">
+      <div class="screenlet-title-bar">
+        <ul>
+          <li class="h3"><#if categoryDescription?has_content>${categoryDescription}<#else>${categoryName?default("")}</#if></li>
+        </ul>
+        <br class="clear"/>
+      </div>
+      <div class="screenlet-body">
+        <div class="browsecategorylist">
   </#if>
-        <div class="browsecategorytext">
-          <a href="${Static["org.ofbiz.product.category.CatalogUrlServlet"].makeCatalogUrl(request, "", category.productCategoryId, parentCategory.productCategoryId)}" class="${browseCategoryButtonClass}"><#if categoryName?has_content>${categoryName}<#else>${categoryDescription?default("")}</#if></a>
-        </div>
+        <li class="browsecategorytext">
+          <#if parentCategory?has_content>
+            <#assign parentCategoryId = parentCategory.productCategoryId/>
+          <#else>
+            <#assign parentCategoryId = ""/>
+          </#if>
+          <a href="<@ofbizCatalogAltUrl productCategoryId=category.productCategoryId previousCategoryId=parentCategoryId/>" class="${browseCategoryButtonClass}"><#if categoryName?has_content>${categoryName}<#else>${categoryDescription?default("")}</#if></a>
+
   <#if (Static["org.ofbiz.product.category.CategoryWorker"].checkTrailItem(request, category.getString("productCategoryId"))) || (curCategoryId?exists && curCategoryId == category.productCategoryId)>
     <#local subCatList = Static["org.ofbiz.product.category.CategoryWorker"].getRelatedCategoriesRet(request, "subCatList", category.getString("productCategoryId"), true)>
     <#if subCatList?exists>
       <#list subCatList as subCat>
-        <div class="browsecategorylist">
+        <ul class="browsecategorylist">
           <@categoryList parentCategory=category category=subCat wrapInBox="N"/>
-        </div>
+        </ul>
       </#list>
     </#if>
   </#if>
+  </li>
   <#if wrapInBox == "Y">
       </div>
     </div>
@@ -67,15 +76,18 @@ under the License.
 
 <#if topLevelList?has_content>
 <div id="sidedeepcategory" class="screenlet">
-    <div class="screenlet-header">
-        <div class="boxhead">${uiLabelMap.ProductBrowseCategories}</div>
-    </div>
-    <div class="screenlet-body">
-        <div class="browsecategorylist">
-          <#list topLevelList as category>
-            <@categoryList parentCategory=category category=category wrapInBox="N"/>
-          </#list>
-        </div>
-    </div>
+  <div class="screenlet-title-bar">
+    <ul>
+      <li class="h3">${uiLabelMap.ProductBrowseCategories}</li>
+    </ul>
+    <br class="clear"/>
+  </div>
+  <div class="screenlet-body">
+    <ul class="browsecategorylist">
+      <#list topLevelList as category>
+        <@categoryList parentCategory="" category=category wrapInBox="N"/>
+      </#list>
+    </ul>
+  </div>
 </div>
 </#if>

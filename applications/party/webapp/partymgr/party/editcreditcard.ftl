@@ -22,11 +22,8 @@ under the License.
   <div class="screenlet-title-bar">
     <#if !creditCard?exists>
       <h3>${uiLabelMap.AccountingAddNewCreditCard}</h3>
-      <form method="post" action="<@ofbizUrl>createCreditCard?DONE_PAGE=${donePage}</@ofbizUrl>" name="editcreditcardform" style="margin: 0;">
     <#else>
       <h3>${uiLabelMap.AccountingEditCreditCard}</h3>
-      <form method="post" action="<@ofbizUrl>updateCreditCard?DONE_PAGE=${donePage}</@ofbizUrl>" name="editcreditcardform" style="margin: 0;">
-        <input type="hidden" name="paymentMethodId" value="${paymentMethodId}">
     </#if>
   </div>
   <div class="screenlet-body">
@@ -34,6 +31,12 @@ under the License.
           <a href="<@ofbizUrl>${donePage}?partyId=${partyId}</@ofbizUrl>" class="smallSubmit">${uiLabelMap.CommonCancelDone}</a>
           <a href="javascript:document.editcreditcardform.submit()" class="smallSubmit">${uiLabelMap.CommonSave}</a>
         </div>
+    <#if !creditCard?exists>
+      <form method="post" action="<@ofbizUrl>createCreditCard?DONE_PAGE=${donePage}</@ofbizUrl>" name="editcreditcardform" style="margin: 0;">
+    <#else>
+      <form method="post" action="<@ofbizUrl>updateCreditCard?DONE_PAGE=${donePage}</@ofbizUrl>" name="editcreditcardform" style="margin: 0;">
+        <input type="hidden" name="paymentMethodId" value="${paymentMethodId}" />
+    </#if>
         <input type="hidden" name="partyId" value="${partyId}"/>
         <table class="basic-table" cellspacing="0">
 
@@ -52,12 +55,12 @@ under the License.
               <#assign hasCurrent = true>
               <tr>
                 <td class="button-col">
-                  <input type="radio" name="contactMechId" value="${curContactMechId}" checked>
+                  <input type="radio" name="contactMechId" value="${curContactMechId}" checked="checked" />
                 </td>
                 <td>
                   <p><b>${uiLabelMap.PartyUseCurrentAddress}:</b></p>
                   <#list curPartyContactMechPurposes as curPartyContactMechPurpose>
-                    <#assign curContactMechPurposeType = curPartyContactMechPurpose.getRelatedOneCache("ContactMechPurposeType")>
+                    <#assign curContactMechPurposeType = curPartyContactMechPurpose.getRelatedOne("ContactMechPurposeType", true)>
                     <p>
                       <b>${curContactMechPurposeType.get("description",locale)?if_exists}</b>
                       <#if curPartyContactMechPurpose.thruDate?exists>
@@ -96,11 +99,11 @@ under the License.
                 <#assign partyContactMech = postalAddressInfo.partyContactMech>
                 <tr>
                   <td class="button-col">
-                    <input type="radio" name="contactMechId" value="${contactMech.contactMechId}">
+                    <input type="radio" name="contactMechId" value="${contactMech.contactMechId}" />
                   </td>
                   <td>
                     <#list partyContactMechPurposes as partyContactMechPurpose>
-                      <#assign contactMechPurposeType = partyContactMechPurpose.getRelatedOneCache("ContactMechPurposeType")>
+                      <#assign contactMechPurposeType = partyContactMechPurpose.getRelatedOne("ContactMechPurposeType", true)>
                       <p>
                         <b>${contactMechPurposeType.get("description",locale)?if_exists}</b>
                         <#if partyContactMechPurpose.thruDate?exists>(${uiLabelMap.CommonExpire}:${partyContactMechPurpose.thruDate})</#if>
@@ -123,7 +126,7 @@ under the License.
               <#-- not yet supported in party manager
               <tr>
                 <td align="right" valigh="top" width="1%">
-                  <input type="radio" name="contactMechId" value="_NEW_" <#if !hasCurrent>checked</#if>>
+                  <input type="radio" name="contactMechId" value="_NEW_" <#if !hasCurrent>checked="checked"</#if> />
                 </td>
                 <td valign="middle" width="80%">
                   ${uiLabelMap.PartyCreateNewBillingAddress}.

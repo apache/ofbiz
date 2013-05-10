@@ -24,16 +24,11 @@ import java.util.Map;
 
 import javolution.util.FastMap;
 
-import junit.framework.TestCase;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilGenerics;
 import org.ofbiz.base.util.UtilMisc;
-import org.ofbiz.entity.GenericDelegator;
-import org.ofbiz.service.GenericDispatcher;
-import org.ofbiz.service.LocalDispatcher;
 import org.ofbiz.service.ModelService;
 import org.ofbiz.service.testtools.OFBizTestCase;
-
 
 /**
  * Tests for USPS Webtools API services
@@ -48,39 +43,41 @@ public class UspsServicesTests extends OFBizTestCase {
         super(name);
     }
 
+    @Override
     protected void setUp() throws Exception {
     }
 
+    @Override
     protected void tearDown() throws Exception {
     }
 
     public void testUspsTrackConfirm() throws Exception {
 
         // run the service
-        Map<String, Object> result = dispatcher.runSync("uspsTrackConfirm", UtilMisc.toMap("trackingId", "EJ958083578US"));
+        Map<String, Object> result = dispatcher.runSync("uspsTrackConfirm", UtilMisc.toMap("trackingId", "EJ958083578US", "shipmentGatewayConfigId", "USPS_CONFIG", "configProps", "shipment.properties"));
 
         // verify the results
         String responseMessage = (String) result.get(ModelService.RESPONSE_MESSAGE);
-        Debug.log("[testUspsTrackConfirm] responseMessage: " + responseMessage, module);
+        Debug.logInfo("[testUspsTrackConfirm] responseMessage: " + responseMessage, module);
         assertEquals("Service result is success", ModelService.RESPOND_SUCCESS, responseMessage);
 
         String trackingSummary = (String) result.get("trackingSummary");
-        Debug.log("[testUspsTrackConfirm] trackingSummary: " + trackingSummary, module);
+        Debug.logInfo("[testUspsTrackConfirm] trackingSummary: " + trackingSummary, module);
         assertEquals("trackingSummary is correct",
                 "Your item was delivered at 8:10 am on June 1 in Wilmington DE 19801.", trackingSummary);
 
         List<String> trackingDetailList = UtilGenerics.checkList(result.get("trackingDetailList"));
         assertEquals("trackingDetailList has 3 elements", 3, trackingDetailList.size());
 
-        Debug.log("[testUspsTrackConfirm] trackingDetailList[0]: " + trackingDetailList.get(0), module);
+        Debug.logInfo("[testUspsTrackConfirm] trackingDetailList[0]: " + trackingDetailList.get(0), module);
         assertEquals("trackingDetailList element 0 is correct",
                 "May 30 11:07 am NOTICE LEFT WILMINGTON DE 19801.", trackingDetailList.get(0));
 
-        Debug.log("[testUspsTrackConfirm] trackingDetailList[1]: " + trackingDetailList.get(1), module);
+        Debug.logInfo("[testUspsTrackConfirm] trackingDetailList[1]: " + trackingDetailList.get(1), module);
         assertEquals("trackingDetailList element 0 is correct",
                 "May 30 10:08 am ARRIVAL AT UNIT WILMINGTON DE 19850.", trackingDetailList.get(1));
 
-        Debug.log("[testUspsTrackConfirm] trackingDetailList[2]: " + trackingDetailList.get(2), module);
+        Debug.logInfo("[testUspsTrackConfirm] trackingDetailList[2]: " + trackingDetailList.get(2), module);
         assertEquals("trackingDetailList element 0 is correct",
                 "May 29 9:55 am ACCEPT OR PICKUP EDGEWATER NJ 07020.", trackingDetailList.get(2));
     }
@@ -88,81 +85,83 @@ public class UspsServicesTests extends OFBizTestCase {
     public void testUspsAddressValidation() throws Exception {
 
         // run the service
-        Map<String, Object> result = dispatcher.runSync("uspsAddressValidation",
-                UtilMisc.toMap("address1", "6406 Ivy Lane", "city", "Greenbelt", "state", "MD"));
+        Map<String, String> paramInp = UtilMisc.toMap("address1", "6406 Ivy Lane", "city", "Greenbelt", "state", "MD");
+        paramInp.put("shipmentGatewayConfigId", "USPS_CONFIG");
+        paramInp.put("configProps", "shipment.properties");
+        Map<String, Object> result = dispatcher.runSync("uspsAddressValidation", paramInp);
 
         // verify the results
         String responseMessage = (String) result.get(ModelService.RESPONSE_MESSAGE);
-        Debug.log("[testUspsAddressValidation] responseMessage: " + responseMessage, module);
+        Debug.logInfo("[testUspsAddressValidation] responseMessage: " + responseMessage, module);
         assertEquals("Service result is success", ModelService.RESPOND_SUCCESS, responseMessage);
 
         String address1 = (String) result.get("address1");
-        Debug.log("[testUspsAddressValidation] address1: " + address1, module);
+        Debug.logInfo("[testUspsAddressValidation] address1: " + address1, module);
         assertEquals("address1 is correct", "6406 IVY LN", address1);
 
         String city = (String) result.get("city");
-        Debug.log("[testUspsAddressValidation] city: " + city, module);
+        Debug.logInfo("[testUspsAddressValidation] city: " + city, module);
         assertEquals("city is correct", "GREENBELT", city);
 
         String state = (String) result.get("state");
-        Debug.log("[testUspsAddressValidation] state: " + state, module);
+        Debug.logInfo("[testUspsAddressValidation] state: " + state, module);
         assertEquals("state is correct", "MD", state);
 
         String zip5 = (String) result.get("zip5");
-        Debug.log("[testUspsAddressValidation] zip5: " + zip5, module);
+        Debug.logInfo("[testUspsAddressValidation] zip5: " + zip5, module);
         assertEquals("zip5 is correct", "20770", zip5);
 
         String zip4 = (String) result.get("zip4");
-        Debug.log("[testUspsAddressValidation] zip4: " + zip4, module);
+        Debug.logInfo("[testUspsAddressValidation] zip4: " + zip4, module);
         assertEquals("zip4 is correct", "1440", zip4);
     }
 
     public void testUspsCityStateLookup() throws Exception {
 
         // run the service
-        Map<String, Object> result = dispatcher.runSync("uspsCityStateLookup", UtilMisc.toMap("zip5", "90210"));
-
+        Map<String, Object> result = dispatcher.runSync("uspsCityStateLookup", UtilMisc.toMap("zip5", "90210", "shipmentGatewayConfigId", "USPS_CONFIG", "configProps", "shipment.properties"));
+        
         // verify the results
         String responseMessage = (String) result.get(ModelService.RESPONSE_MESSAGE);
-        Debug.log("[testUspsCityStateLookup] responseMessage: " + responseMessage, module);
+        Debug.logInfo("[testUspsCityStateLookup] responseMessage: " + responseMessage, module);
         assertEquals("Service result is success", ModelService.RESPOND_SUCCESS, responseMessage);
 
         String city = (String) result.get("city");
-        Debug.log("[testUspsCityStateLookup] city: " + city, module);
+        Debug.logInfo("[testUspsCityStateLookup] city: " + city, module);
         assertEquals("city is correct", "BEVERLY HILLS", city);
 
         String state = (String) result.get("state");
-        Debug.log("[testUspsCityStateLookup] state: " + state, module);
+        Debug.logInfo("[testUspsCityStateLookup] state: " + state, module);
         assertEquals("state is correct", "CA", state);
     }
 
     public void testUspsPriorityMailStandard() throws Exception {
 
         // run the service
-        Map<String, Object> result = dispatcher.runSync("uspsPriorityMailStandard", UtilMisc.toMap("originZip", "4", "destinationZip", "4"));
+        Map<String, Object> result = dispatcher.runSync("uspsPriorityMailStandard", UtilMisc.toMap("originZip", "4", "destinationZip", "4", "shipmentGatewayConfigId", "USPS_CONFIG", "configProps", "shipment.properties"));
 
         // verify the results
         String responseMessage = (String) result.get(ModelService.RESPONSE_MESSAGE);
-        Debug.log("[testUspsPriorityMailStandard] responseMessage: " + responseMessage, module);
+        Debug.logInfo("[testUspsPriorityMailStandard] responseMessage: " + responseMessage, module);
         assertEquals("Service result is success", ModelService.RESPOND_SUCCESS, responseMessage);
 
         String days = (String) result.get("days");
-        Debug.log("[testUspsPriorityMailStandard] days: " + days, module);
+        Debug.logInfo("[testUspsPriorityMailStandard] days: " + days, module);
         assertEquals("days is correct", "1", days);
     }
 
     public void testUspsPackageServicesStandard() throws Exception {
 
         // run the service
-        Map<String, Object> result = dispatcher.runSync("uspsPackageServicesStandard", UtilMisc.toMap("originZip", "4", "destinationZip", "4"));
+        Map<String, Object> result = dispatcher.runSync("uspsPackageServicesStandard", UtilMisc.toMap("originZip", "4", "destinationZip", "4", "shipmentGatewayConfigId", "USPS_CONFIG", "configProps", "shipment.properties"));
 
         // verify the results
         String responseMessage = (String) result.get(ModelService.RESPONSE_MESSAGE);
-        Debug.log("[testUspsPackageServicesStandard] responseMessage: " + responseMessage, module);
+        Debug.logInfo("[testUspsPackageServicesStandard] responseMessage: " + responseMessage, module);
         assertEquals("Service result is success", ModelService.RESPOND_SUCCESS, responseMessage);
 
         String days = (String) result.get("days");
-        Debug.log("[testUspsPackageServicesStandard] days: " + days, module);
+        Debug.logInfo("[testUspsPackageServicesStandard] days: " + days, module);
         assertEquals("days is correct", "2", days);
     }
 
@@ -179,25 +178,27 @@ public class UspsServicesTests extends OFBizTestCase {
         context.put("container", "None");
         context.put("size", "Regular");
         context.put("machinable", "False");
+        context.put("shipmentGatewayConfigId", "USPS_CONFIG");
+        context.put("configProps", "shipment.properties");
 
         // run the service
         Map<String, Object> result = dispatcher.runSync("uspsDomesticRate", context);
 
         // verify the results
         String responseMessage = (String) result.get(ModelService.RESPONSE_MESSAGE);
-        Debug.log("[testUspsDomesticRate] responseMessage: " + responseMessage, module);
+        Debug.logInfo("[testUspsDomesticRate] responseMessage: " + responseMessage, module);
         assertEquals("Service result is success", ModelService.RESPOND_SUCCESS, responseMessage);
 
         String postage = (String) result.get("postage");
-        Debug.log("[testUspsDomesticRate] postage: " + postage, module);
+        Debug.logInfo("[testUspsDomesticRate] postage: " + postage, module);
         assertEquals("postage is correct", "7.90", postage);
 
         String restrictionCodes = (String) result.get("restrictionCodes");
-        Debug.log("[testUspsDomesticRate] restrictionCodes: " + restrictionCodes, module);
+        Debug.logInfo("[testUspsDomesticRate] restrictionCodes: " + restrictionCodes, module);
         assertEquals("restrictionCodes is correct", "B-B1-C-D-U", restrictionCodes);
 
         String restrictionDesc = (String) result.get("restrictionDesc");
-        Debug.log("[testUspsDomesticRate] restrictionDesc: " + restrictionDesc, module);
+        Debug.logInfo("[testUspsDomesticRate] restrictionDesc: " + restrictionDesc, module);
         assertEquals("restrictionDesc is correct", "B. Form 2976-A", restrictionDesc.substring(0,14));
     }
 }

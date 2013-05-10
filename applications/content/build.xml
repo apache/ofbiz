@@ -55,27 +55,16 @@ under the License.
         <exclude name="org/ofbiz/content/openoffice/*.java"/>
     </patternset>
 
-    <!-- ================================================================== -->
-    <!-- Compilation of the source files                                    -->
-    <!-- ================================================================== -->
-
-    <target name="classes" depends="prepare">
-        <javac15/>
+    <target name="jar" depends="classes">
+        <main-jar/>
+        <test-jar/>
     </target>
 
-    <!-- ================================================================== -->
-    <!-- Build JavaDoc                                                      -->
-    <!-- ================================================================== -->
-
-    <target name="docs" depends="prepare-docs">
-        <javadoc packagenames="org.ofbiz.content.*"
-                 classpathref="local.class.path"
-                 destdir="${build.dir}/javadocs"
-                 Windowtitle="Open for Business - ${desc}">
-            <fileset dir="${src.dir}" defaultexcludes="yes">
-                <patternset refid="src.inc.set"/>
-                <patternset refid="src.exc.set"/>
+    <target name="clean-lucene-index">
+        <delete verbose="on">
+            <fileset dir="index/" includes="*">
+                <exclude name="indexhere.txt"/>
             </fileset>
-        </javadoc>
+        </delete>
     </target>
 </project>

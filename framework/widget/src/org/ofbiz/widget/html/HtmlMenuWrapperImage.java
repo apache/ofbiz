@@ -20,20 +20,18 @@ package org.ofbiz.widget.html;
 
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.ofbiz.base.util.UtilMisc;
-import org.ofbiz.widget.menu.MenuStringRenderer;
-import org.ofbiz.widget.menu.ModelMenuItem;
-import org.ofbiz.entity.GenericDelegator;
+import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
-
+import org.ofbiz.widget.menu.MenuStringRenderer;
+import org.ofbiz.widget.menu.ModelMenuItem;
 import org.xml.sax.SAXException;
 
 /**
@@ -50,10 +48,12 @@ public class HtmlMenuWrapperImage extends HtmlMenuWrapper {
         super(resourceName, menuName, request, response);
     }
 
+    @Override
     public MenuStringRenderer getMenuRenderer() {
         return new HtmlMenuRendererImage(request, response);
     }
 
+    @Override
     public void init(String resourceName, String menuName, HttpServletRequest request, HttpServletResponse response)
             throws IOException, SAXException, ParserConfigurationException {
 
@@ -61,16 +61,13 @@ public class HtmlMenuWrapperImage extends HtmlMenuWrapper {
         //String pubPt = (String)request.getAttribute("pubPt");
         //if (Debug.infoOn()) Debug.logInfo("in init, pubPt:" + pubPt, module);
         Map<String, Object> dummyMap = new HashMap<String, Object>();
-        GenericDelegator delegator = (GenericDelegator)request.getAttribute("delegator");
+        Delegator delegator = (Delegator)request.getAttribute("delegator");
         //if (Debug.infoOn()) Debug.logInfo("in init, delegator:" + delegator, module);
         try {
-            List menuItemList = modelMenu.getMenuItemList();
-            Iterator iter = menuItemList.iterator();
-            while (iter.hasNext()) {
-               ModelMenuItem menuItem = (ModelMenuItem)iter.next();
+            for (ModelMenuItem menuItem : modelMenu.getMenuItemList()) {
                String contentId = menuItem.getAssociatedContentId(dummyMap);
                //if (Debug.infoOn()) Debug.logInfo("in init, contentId:" + contentId, module);
-               GenericValue webSitePublishPoint = delegator.findByPrimaryKeyCache("WebSitePublishPoint", UtilMisc.toMap("contentId", contentId));
+               GenericValue webSitePublishPoint = delegator.findOne("WebSitePublishPoint", UtilMisc.toMap("contentId", contentId), true);
                String menuItemName = menuItem.getName();
                //if (Debug.infoOn()) Debug.logInfo("in init, menuItemName:" + menuItemName, module);
                //if (Debug.infoOn()) Debug.logInfo("in init, webSitePublishPoint:" + webSitePublishPoint, module);

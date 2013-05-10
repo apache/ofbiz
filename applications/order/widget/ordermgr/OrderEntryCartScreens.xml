@@ -65,6 +65,7 @@ under the License.
             <actions>
                 <set field="titleProperty" value="PageTitleOrderShowCart"/>
                 <set field="productsummaryScreen" value="component://order/widget/ordermgr/OrderEntryCatalogScreens.xml#productsummary"/>
+                <property-to-field resource="order" property="orderPreference.giftEnable" field="giftEnable" default="Y"/>
                 <set field="promoUseDetailsInlineScreen" value="component://order/widget/ordermgr/OrderEntryCartScreens.xml#promoUseDetailsInline"/>
                 <script location="component://order/webapp/ordermgr/WEB-INF/actions/entry/ShowCart.groovy"/>
                 <script location="component://order/webapp/ordermgr/WEB-INF/actions/entry/ShowPromoText.groovy"/>
@@ -114,8 +115,6 @@ under the License.
     <screen name="showAllPromotions">
         <section>
             <actions>
-                <set field="leftbarScreenName" value="leftbar"/>
-                <set field="leftbarScreenLocation" value="component://order/widget/ordermgr/OrderEntryCommonScreens.xml"/>
                 <set field="titleProperty" value="PageTitleShowAllPromotions"/>
                 <set field="promoUseDetailsInlineScreen" value="component://order/widget/ordermgr/OrderEntryCartScreens.xml#promoUseDetailsInline"/>
                 <script location="component://order/webapp/ordermgr/WEB-INF/actions/entry/ShowCart.groovy"/>
@@ -133,9 +132,6 @@ under the License.
     <screen name="showPromotionDetails">
         <section>
             <actions>
-                <set field="leftbarScreenName" value="leftbar"/>
-                <set field="leftbarScreenLocation" value="component://order/widget/ordermgr/OrderEntryCommonScreens.xml"/>
-
                 <set field="titleProperty" value="PageTitleShowPromotionDetails"/>
                 <set field="productsummaryScreen" value="component://order/widget/ordermgr/OrderEntryCatalogScreens.xml#productsummary"/>
                 <script location="component://order/webapp/ordermgr/WEB-INF/actions/entry/cart/ShowPromotionDetails.groovy"/>
@@ -186,8 +182,6 @@ under the License.
             <actions>
                 <set field="titleProperty" value="PageTitleLookupBulkAddSupplierProduct"/>
                 <script location="component://order/webapp/ordermgr/WEB-INF/actions/entry/cart/LookupBulkAddSupplierProducts.groovy"/>
-                <set field="viewIndex" from-field="parameters.VIEW_INDEX" type="Integer" default-value="0"/>
-                <set field="viewSize" from-field="parameters.VIEW_SIZE" type="Integer" default-value="10"/>
             </actions>
             <widgets>
                 <decorator-screen name="CommonOrderCatalogDecorator" location="component://order/widget/ordermgr/OrderEntryCommonScreens.xml">
@@ -198,4 +192,39 @@ under the License.
             </widgets>
         </section>
     </screen>
+    <screen name="AddGiftCertificate">
+        <section>
+            <actions>
+                <set field="titleProperty" value="OrderAddGiftCertificate"/>
+                <script location="component://order/webapp/ordermgr/WEB-INF/actions/entry/AddGiftCertificates.groovy"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonOrderCatalogDecorator" location="component://order/widget/ordermgr/OrderEntryCommonScreens.xml">
+                    <decorator-section name="body">
+                        <platform-specific><html>
+                            <html-template location="component://order/webapp/ordermgr/order/GiftCertificates.ftl"/></html>
+                        </platform-specific>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="LookupAssociatedProducts">
+     <section>
+            <actions>
+                <set field="titleProperty" value="OrderAssociatedProducts"/>
+                <script location="component://order/webapp/ordermgr/WEB-INF/actions/lookup/LookupAssociatedProducts.groovy"/>
+                <set field="viewIndex" from-field="parameters.VIEW_INDEX" type="Integer" default-value="0"/>
+                <set field="viewSize" from-field="parameters.VIEW_SIZE" type="Integer" default-value="10"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonOrderCatalogDecorator" location="component://order/widget/ordermgr/OrderEntryCommonScreens.xml">
+                    <decorator-section name="body">
+                        <include-form name="LookupAssociatedProducts" location="component://order/widget/ordermgr/OrderEntryForms.xml"/>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
 </screens>

@@ -29,12 +29,16 @@ import java.io.FileWriter;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.Reader;
 import java.io.Writer;
+import java.net.MalformedURLException;
 import java.util.List;
 import java.util.Set;
 
 import javolution.util.FastList;
 import javolution.util.FastSet;
+
+import org.ofbiz.base.location.ComponentLocationResolver;
 
 import org.apache.commons.io.FileUtils;
 
@@ -51,8 +55,26 @@ public class FileUtil {
     }
 
     public static File getFile(File root, String path) {
-        String fileNameSeparator = ("\\".equals(File.separator)? "\\" + File.separator: File.separator);
-        return new File(root, path.replaceAll("/+|\\\\+", fileNameSeparator));
+        if (path.startsWith("component://")) {
+            try {
+                path = ComponentLocationResolver.getBaseLocation(path).toString();
+            } catch (MalformedURLException e) {
+                Debug.logError(e, module);
+                return null;
+            }
+        }
+        return new File(root, localizePath(path));
+    }
+
+    /**
+     * Converts a file path to one that is compatible with the host operating system.
+     *
+     * @param path The file path to convert.
+     * @return The converted file path.
+     */
+    public static String localizePath(String path) {
+        String fileNameSeparator = ("\\".equals(File.separator) ? "\\" + File.separator : File.separator);
+        return path.replaceAll("/+|\\\\+", fileNameSeparator);
     }
 
     public static void writeString(String fileName, String s) throws IOException {
@@ -203,6 +225,9 @@ public class FileUtil {
     public static void searchFiles(List<File> fileList, File path, FilenameFilter filter, boolean includeSubfolders) throws IOException {
         // Get filtered files in the current path
         File[] files = path.listFiles(filter);
+        if (files == null) {
+            return;
+        }
 
         // Process each filtered entry
         for (int i = 0; i < files.length; i++) {
@@ -288,6 +313,9 @@ public class FileUtil {
             }
 
             if (hasAllPathStrings && name.endsWith("." + fileExtension)) {
+                if (stringsToFindInFile.size() == 0) {
+                    return true;
+                }
                 StringBuffer xmlFileBuffer = null;
                 try {
                     xmlFileBuffer = FileUtil.readTextFile(file, true);
@@ -314,4 +342,57 @@ public class FileUtil {
             return false;
         }
     }
+
+    /**
+    *
+    *
+    * Search for the specified <code>searchString</code> in the given
+    * {@link Reader}.
+    *
+    * @param reader A Reader in which the String will be searched.
+    * @param searchString The String to search for
+    * @return <code>TRUE</code> if the <code>searchString</code> is found;
+    *         <code>FALSE</code> otherwise.
+    * @throws IOException
+    */
+   public static boolean containsString(Reader reader, final String searchString) throws IOException {
+       char[] buffer = new char[1024];
+       int numCharsRead;
+       int count = 0;
+       while((numCharsRead = reader.read(buffer)) > 0) {
+           for (int c = 0; c < numCharsRead; ++c) {
+               if (buffer[c] == searchString.charAt(count)) count++;
+               else count = 0;
+               if (count == searchString.length()) return true;
+           }
+       }
+       return false;
+   }
+
+   /**
+    *
+    *
+    * Search for the specified <code>searchString</code> in the given
+    * filename. If the specified file doesn't exist, <code>FALSE</code>
+    * returns.
+    *
+    * @param fileName A full path to a file in which the String will be searched.
+    * @param searchString The String to search for
+    * @return <code>TRUE</code> if the <code>searchString</code> is found;
+    *         <code>FALSE</code> otherwise.
+    * @throws IOException
+    */
+   public static boolean containsString(final String fileName, final String searchString) throws IOException {
+       File inFile = new File(fileName);
+       if (inFile.exists()) {
+           BufferedReader in = new BufferedReader(new FileReader(inFile));
+           try {
+               return containsString(in, searchString);
+           } finally {
+               if (in != null)in.close();
+           }
+       } else {
+           return false;
+       }
+   }
 }

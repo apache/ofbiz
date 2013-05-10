@@ -19,19 +19,19 @@ under the License.
 
 <#import "bloglib.ftl" as blog/>
 <div class="screenlet" >
-<h1>&nbsp;&nbsp;&nbsp;&nbsp;{${uiLabelMap.EcommerceFromSite}</h1><br/>
-<div style="margin:10px;" >
+<h1>{${uiLabelMap.EcommerceFromSite}</h1><br />
+<div>
 <@blog.renderAncestryPath trail=ancestorList?default([]) endIndexOffset=1 />
 <#-- Do this so that we don't have to find the content twice (again in renderSubContent) -->
 <#assign lastNode = globalNodeTrail?if_exists?last/>
 <#if lastNode?has_content>
   <#assign subContent=lastNode.value/>
 <#else>
-<#assign subContent = delegator.findByPrimaryKeyCache("Content", Static["org.ofbiz.base.util.UtilMisc"].toMap("contentId", subContentId))/>
+<#assign subContent = delegator.findOne("Content", Static["org.ofbiz.base.util.UtilMisc"].toMap("contentId", subContentId), true)/>
 <#assign dummy = globalNodeTrail.add(lastNode)/>
 </#if>
-<br/>
-<h1>${uiLabelMap.EcommerceContentFor} [${subContentId}] ${subContent.contentName?if_exists} - ${subContent.description?if_exists}:</h1><br/>
+<br />
+<h1>${uiLabelMap.EcommerceContentFor} [${subContentId}] ${subContent.contentName?if_exists} - ${subContent.description?if_exists}:</h1><br />
 
 <#assign thisContentId=subContentId?if_exists>
 <#if !thisContentId?has_content>
@@ -47,12 +47,12 @@ under the License.
 <@checkPermission subContentId=subContentId targetOperation="HAS_USER_ROLE" contentPurposeList="RESPONSE" >
 <a class="tabButton" href="<@ofbizUrl>createforumresponse?contentIdTo=${subContentId}&amp;nodeTrailCsv=${nodeTrailCsv?if_exists}</@ofbizUrl>" >${uiLabelMap.EcommerceRespond}</a>
 </@checkPermission>
-<br/>
+<br />
 
     </td>
     </tr>
 </table>
-<hr/>
+<hr />
 <#--
 <@checkPermission mode="not-equals" subContentId=subContentId targetOperation="CONTENT_CREATE|CONTENT_RESPOND" contentPurposeList="RESPONSE" >
             ${permissionErrorMsg?if_exists}
@@ -66,7 +66,7 @@ under the License.
      It is not convenient to have the traverseSubContent check or recheck the first node
      because the associated ContentAssoc entity is not known.
 -->
-        <h1>${uiLabelMap.EcommerceResponses}</h1><br/>
+        <h1>${uiLabelMap.EcommerceResponses}</h1><br />
 <@loopSubContent contentAssocTypeId="RESPONSE" contentId=subContentId mapKey=""
                 pickWhen="contentAssocTypeId != null && contentAssocTypeId.equals(\"RESPONSE\") && mapKey == null"
                 followWhen="contentAssocTypeId != null && contentAssocTypeId.equals(\"RESPONSE\")">
@@ -91,10 +91,10 @@ under the License.
         </#if>
         <#if content?exists>
   <tr>
-  <td class="tabletext">
+  <td>
         ${indentFill}
         <a class="tabButton" href="<@ofbizUrl>ViewBlog?contentId=${thisContentId}&amp;nodeTrailCsv=${nodeTrailCsv?if_exists}</@ofbizUrl>" >${uiLabelMap.CommonView}</a>
-                     ${content.contentId?if_exists}-${content.description?if_exists}<br/>
+                     ${content.contentId?if_exists}-${content.description?if_exists}<br />
   </td>
   </tr>
         </#if>
@@ -142,7 +142,7 @@ ${uiLabelMap.CommonDescription}[${currentValue.contentId?if_exists}]:${descripti
     <#assign csv = "">
     <#assign counter = 0>
     <#assign len = trail?size>
-    <table border="0" class="tabletext" cellspacing="4">
+    <table border="0" cellspacing="4">
     <#list trail as webSitePublishPoint>
         <#if counter < len && startIndex <= counter >
        <tr>

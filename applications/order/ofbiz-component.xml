@@ -24,18 +24,22 @@ under the License.
     <resource-loader name="main" type="component"/>
     <classpath type="jar" location="build/lib/*"/>
     <classpath type="dir" location="config"/>
-    <classpath type="dir" location="script"/>
     <classpath type="dir" location="email"/>
     <entity-resource type="model" reader-name="main" loader="main" location="entitydef/entitymodel.xml"/>
     <entity-resource type="model" reader-name="main" loader="main" location="entitydef/entitymodel_old.xml"/>
     <entity-resource type="model" reader-name="main" loader="main" location="entitydef/entitymodel_view.xml"/>
+    <entity-resource type="model" reader-name="main" loader="main" location="entitydef/entitymodel_olap.xml"/>
+    <entity-resource type="group" reader-name="main" loader="main" location="entitydef/entitygroup_olap.xml"/>
     <entity-resource type="eca" reader-name="main" loader="main" location="entitydef/eecas.xml"/>
     <entity-resource type="data" reader-name="seed" loader="main" location="data/OrderTypeData.xml"/>
     <entity-resource type="data" reader-name="seed" loader="main" location="data/OrderPortletData.xml"/>
     <entity-resource type="data" reader-name="seed-initial" loader="main" location="data/OrderScheduledServices.xml"/>
-    <entity-resource type="data" reader-name="seed" loader="main" location="data/OrderSecurityData.xml"/>
+    <entity-resource type="data" reader-name="seed" loader="main" location="data/OrderSecurityPermissionSeedData.xml"/>
+    <entity-resource type="data" reader-name="demo" loader="main" location="data/OrderSecurityGroupDemoData.xml"/>
+    <entity-resource type="data" reader-name="seed" loader="main" location="data/OrderHelpData.xml"/>
     <entity-resource type="data" reader-name="demo" loader="main" location="data/OrderDemoUser.xml"/>
     <entity-resource type="data" reader-name="demo" loader="main" location="data/OrderDemoData.xml"/>
+
     <service-resource type="model" loader="main" location="servicedef/services.xml"/>
     <service-resource type="model" loader="main" location="servicedef/services_cart.xml"/>
     <service-resource type="model" loader="main" location="servicedef/services_shoppinglist.xml"/>
@@ -43,14 +47,20 @@ under the License.
     <service-resource type="model" loader="main" location="servicedef/services_quote.xml"/>
     <service-resource type="model" loader="main" location="servicedef/services_requirement.xml"/>
     <service-resource type="model" loader="main" location="servicedef/services_return.xml"/>
-    <service-resource type="model" loader="main" location="servicedef/services_opportunity.xml"/>
     <service-resource type="model" loader="main" location="servicedef/services_upgrade.xml"/>
+    <service-resource type="model" loader="main" location="servicedef/services_checkout.xml"/>
+    <service-resource type="model" loader="main" location="servicedef/services_olap.xml"/>
     <service-resource type="eca" loader="main" location="servicedef/secas.xml"/>
 
     <test-suite loader="main" location="testdef/OrderTest.xml"/>
+    <test-suite loader="main" location="testdef/CustRequestTests.xml"/>
+    <test-suite loader="main" location="testdef/quotetests.xml"/>
+    <test-suite loader="main" location="testdef/ShoppingListTests.xml"/>
+    <test-suite loader="main" location="testdef/ShoppingCartTests.xml"/>
 
     <webapp name="order"
         title="Order"
+        description="OrderComponentDescription"
         server="default-server"
         location="webapp/ordermgr"
         base-permission="OFBTOOLS,ORDERMGR"

@@ -20,10 +20,11 @@ package org.ofbiz.entity.util;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
 
 import org.ofbiz.base.util.Debug;
+import org.ofbiz.base.util.UtilMisc;
+import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
 
@@ -38,7 +39,7 @@ public class EntityTypeUtil {
     public static boolean isType(Collection<GenericValue> thisCollection, String typeRelation, GenericValue targetType) {
         for (GenericValue value: thisCollection) {
             try {
-                GenericValue related = value.getRelatedOne(typeRelation);
+                GenericValue related = value.getRelatedOne(typeRelation, false);
                 if (isType(related, targetType)) {
                     return true;
                 } // else keep looking
@@ -71,7 +72,7 @@ public class EntityTypeUtil {
     private static GenericValue getParentType(GenericValue typeValue) {
         // assumes Parent relation is "Parent<entityName>"
         try {
-            return typeValue.getRelatedOneCache("Parent" + typeValue.getEntityName());
+            return typeValue.getRelatedOne("Parent" + typeValue.getEntityName(), true);
         } catch (GenericEntityException e) {
             Debug.logWarning(e, module);
             return null;
@@ -85,7 +86,7 @@ public class EntityTypeUtil {
         // first get all childrenTypes ...
         List<GenericValue> childrenTypes = null;
         try {
-            childrenTypes = typeValue.getRelatedCache("Child" + typeValue.getEntityName());
+            childrenTypes = typeValue.getRelated("Child" + typeValue.getEntityName(), null, null, true);
         } catch (GenericEntityException e) {
             Debug.logWarning(e, module);
             return null;
@@ -115,5 +116,39 @@ public class EntityTypeUtil {
         } else {
             return isType(getParentType(thisType), targetType);
         }
+    }
+
+    /**
+     * A generic method to be used on Type enities, e.g. ProductType.  Recurse to the root level in the type hierarchy
+     * and checks if the specified type childType has parentType as its parent somewhere in the hierarchy.
+     *
+     * @param delegator       The Delegator object.
+     * @param entityName      Name of the Type entity on which check is performed.
+     * @param primaryKey      Primary Key field of the Type entity.
+     * @param childType       Type value for which the check is performed.
+     * @param parentTypeField Field in Type entity which stores the parent type.
+     * @param parentType      Value of the parent type against which check is performed.
+     * @return boolean value based on the check results.
+     */
+    public static boolean hasParentType(Delegator delegator, String entityName, String primaryKey, String childType, String parentTypeField, String parentType) {
+        GenericValue childTypeValue = null;
+        try {
+            childTypeValue = delegator.findOne(entityName, UtilMisc.toMap(primaryKey, childType), true);
+        } catch (GenericEntityException e) {
+            Debug.logError("Error finding "+entityName+" record for type "+childType, module);
+        }
+        if (childTypeValue != null) {
+            if (parentType.equals(childTypeValue.getString(primaryKey))) return true;
+
+            if (childTypeValue.getString(parentTypeField) != null) {
+                if (parentType.equals(childTypeValue.getString(parentTypeField))) {
+                    return true;
+                } else {
+                    return hasParentType(delegator, entityName, primaryKey, childTypeValue.getString(parentTypeField), parentTypeField, parentType);
+                }
+            }
+        }
+
+        return false;
     }
 }

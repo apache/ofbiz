@@ -18,12 +18,21 @@
   -->
 
 <script type="text/javascript">
+    jQuery(document).ready(function() {
+        // override elRTE save action to make "save" toolbar button work
+        elRTE.prototype.save = function() {
+            this.beforeSave();
+            cmsSave();
+        }
+    });
+
     function cmsSave() {
         var simpleFormAction = '<@ofbizUrl>/updateContentCms</@ofbizUrl>';
-        var editor = dojo.widget.byId("w_editor");
-        if (editor) {
-            var cmsdata = dojo.byId("cmsdata");
-            cmsdata.value = editor.getEditorContent();
+        var editor = jQuery("#cmseditor");
+        if (editor.length) {
+            var cmsdata = jQuery("#cmsdata");
+            var data = editor.elrte('val');
+            cmsdata.val(data);
         }
 
         // get the cmsform
@@ -39,13 +48,23 @@
             if (uploadValue == null || uploadValue == "") {
                 form.action = simpleFormAction;
             }
+
+            // if we have a file upload make a 'real' form submit, ajax submits won't work in this cases
+            form.submit();
+            return false;
         }
 
         // submit the form
         if (form != null) {
-            form.submit();
+            <#if content?has_content>
+                ajaxSubmitForm(form, "${content.contentId!}");
+            <#else>
+                // for new content we need a real submit, so that the nav tree gets updated
+                // and because ajaxSubmitForm() cannot retrieve the new contentId, so subsequent saves would create more new contents
+                form.submit();
+            </#if>
         } else {
-            alert("Cannot find the cmsform!");
+            showErrorAlert("${uiLabelMap.CommonErrorMessage2}","${uiLabelMap.CannotFindCmsform}");
         }
 
         return false;
@@ -54,14 +73,14 @@
     function selectDataType(contentId) {
         var selectObject = document.forms['cmsdatatype'].elements['dataResourceTypeId'];
         var typeValue = selectObject.options[selectObject.selectedIndex].value;
-        callEditor(true, contentId, '', typeValue);
+        callDocument(true, contentId, '', typeValue);
     }
 </script>
 
 <#-- cms menu bar -->
 <div id="cmsmenu" style="margin-bottom: 8px;">
     <#if (content?has_content)>
-        <a href="javascript:void(0);" onclick="javascript:callEditor(true, '${content.contentId}', '', 'ELECTRONIC_TEXT');" class="tabButton">${uiLabelMap.ContentQuickSubContent}</a>
+        <a href="javascript:void(0);" onclick="javascript:callDocument(true, '${content.contentId}', '', 'ELECTRONIC_TEXT');" class="tabButton">${uiLabelMap.ContentQuickSubContent}</a>
         <a href="javascript:void(0);" onclick="javascript:callPathAlias('${content.contentId}');" class="tabButton">${uiLabelMap.ContentPathAlias}</a>
         <a href="javascript:void(0);" onclick="javascript:callMetaInfo('${content.contentId}');" class="tabButton">${uiLabelMap.ContentMetaTags}</a>
     </#if>
@@ -127,6 +146,9 @@
     <#if (!contentRoot?has_content)>
         <#assign contentRoot = parameters.contentRoot/>
     </#if>
+    <#if (currentPurposes?has_content)>
+        <#assign currentPurpose = Static["org.ofbiz.entity.util.EntityUtil"].getFirst(currentPurposes) />
+    </#if>
     <#if (content?has_content)>
         <#assign actionPrefix = "/update"/>
     <#else>
@@ -142,7 +164,6 @@
     <form name="cmsform" enctype="multipart/form-data" method="post" action="<@ofbizUrl>${formAction}</@ofbizUrl>" style="margin: 0;">
         <#if (content?has_content)>
             <input type="hidden" name="dataResourceId" value="${(dataResource.dataResourceId)?if_exists}"/>
-            <input type="hidden" name="mimeTypeId" value="${content.mimeTypeId?default(mimeTypeId)}"/>
             <input type="hidden" name="contentId" value="${content.contentId}"/>
 
             <#list requestParameters.keySet() as paramName>
@@ -154,10 +175,18 @@
             <input type="hidden" name="contentAssocTypeId" value="${contentAssocTypeId?default('SUBSITE')}"/>
             <input type="hidden" name="ownerContentId" value="${contentIdFrom?default(contentRoot)}"/>
             <input type="hidden" name="contentIdFrom" value="${contentIdFrom?default(contentRoot)}"/>
+        </#if>
+        <#if (dataResourceTypeId != 'IMAGE_OBJECT' && dataResourceTypeId != 'OTHER_OBJECT' && dataResourceTypeId != 'LOCAL_FILE' &&
+            dataResourceTypeId != 'OFBIZ_FILE' && dataResourceTypeId != 'VIDEO_OBJECT' && dataResourceTypeId != 'AUDIO_OBJECT')>
             <input type="hidden" name="mimeTypeId" value="${mimeTypeId}"/>
         </#if>
         <#if (dataResourceTypeId != 'NONE')>
+        <#if (dataResourceTypeId == 'IMAGE_OBJECT' || dataResourceTypeId == 'OTHER_OBJECT' || dataResourceTypeId == 'LOCAL_FILE' ||
+                dataResourceTypeId == 'OFBIZ_FILE' || dataResourceTypeId == 'VIDEO_OBJECT' || dataResourceTypeId == 'AUDIO_OBJECT')>
+            <input type="hidden" name="dataResourceTypeId" value="IMAGE_OBJECT"/>
+        <#else>
             <input type="hidden" name="dataResourceTypeId" value="${dataResourceTypeId}"/>
+        </#if>
         </#if>
         <input type="hidden" name="webSiteId" value="${webSiteId}"/>
         <input type="hidden" name="dataResourceName" value="${(dataResource.dataResourceName)?if_exists}"/>
@@ -191,8 +220,8 @@
             <td class="label">${uiLabelMap.CommonPurpose}</td>
             <td>
                 <select name="contentPurposeTypeId">
-                    <#if (currentPurposes?has_content)>
-                        <#assign purpose = currentPurposes[0].getRelatedOne("ContentPurposeType")/>
+                    <#if (currentPurpose?has_content)>
+                        <#assign purpose = currentPurpose.getRelatedOne("ContentPurposeType", false)/>
                         <option value="${purpose.contentPurposeTypeId}">${purpose.description?default(purpose.contentPurposeTypeId)}</option>
                         <option value="${purpose.contentPurposeTypeId}">----</option>
                     <#else>
@@ -206,12 +235,18 @@
             </td>
           </tr>
           <tr>
+            <td class="label">${uiLabelMap.CommonSequenceNum}</td>
+            <td>
+              <input type="text" name="sequenceNum" value="${(currentPurpose.sequenceNum)?if_exists}" size="5" />
+            </td>
+          </tr>
+          <tr>
             <td class="label">${uiLabelMap.ContentDataType}</td>
             <td>
                 <select name="dataTemplateTypeId">
                     <#if (dataResource?has_content)>
                         <#if (dataResource.dataTemplateTypeId?has_content)>
-                            <#assign thisType = dataResource.getRelatedOne("DataTemplateType")?if_exists/>
+                            <#assign thisType = dataResource.getRelatedOne("DataTemplateType", false)?if_exists/>
                             <option value="${thisType.dataTemplateTypeId}">${thisType.description}</option>
                             <option value="${thisType.dataTemplateTypeId}">----</option>
                         </#if>
@@ -228,7 +263,7 @@
                 <select name="decoratorContentId">
                     <#if (content?has_content)>
                         <#if (content.decoratorContentId?has_content)>
-                            <#assign thisDec = content.getRelatedOne("DecoratorContent")/>
+                            <#assign thisDec = content.getRelatedOne("DecoratorContent", false)/>
                             <option value="${thisDec.contentId}">${thisDec.contentName}</option>
                             <option value="${thisDec.contentId}">----</option>
                         </#if>
@@ -246,8 +281,8 @@
                 <select name="templateDataResourceId">
                     <#if (content?has_content)>
                         <#if (content.templateDataResourceId?has_content && content.templateDataResourceId != "NONE")>
-                            <#assign template = content.getRelatedOne("TemplateDataResource")/>
-                            <option value="${template.dataResourceId}">${template.dataResourceName}</option>
+                            <#assign template = content.getRelatedOne("TemplateDataResource", false)/>
+                            <option value="${template.dataResourceId}">${template.dataResourceName?if_exists}</option>
                             <option value="${template.dataResourceId}">----</option>
                         </#if>
                     </#if>
@@ -264,7 +299,7 @@
                 <select name="statusId">
                     <#if (content?has_content)>
                         <#if (content.statusId?has_content)>
-                            <#assign statusItem = content.getRelatedOne("StatusItem")/>
+                            <#assign statusItem = content.getRelatedOne("StatusItem", false)/>
                             <option value="${statusItem.statusId}">${statusItem.description}</option>
                             <option value="${statusItem.statusId}">----</option>
                         </#if>
@@ -296,17 +331,18 @@
             <td colspan="2">
               <textarea id="cmsdata" name="textData" cols="40" rows="6" style="display: none;">
                 <#if (dataText?has_content)>
-                    ${dataText.textData}
+                    ${StringUtil.wrapString(dataText.textData!)}
                 </#if>
               </textarea>
             </td>
           </tr>
 
           <#-- this all depends on the dataResourceTypeId which was selected -->
-          <#if (dataResourceTypeId == 'IMAGE_OBJECT' || dataResourceTypeId == 'OTHER_OBJECT' ||
-                dataResourceTypeId == 'VIDEO_OBJECT' || dataResourceTypeId == 'AUDIO_OBJECT')>
+          <#if (dataResourceTypeId == 'IMAGE_OBJECT' || dataResourceTypeId == 'OTHER_OBJECT' || dataResourceTypeId == 'LOCAL_FILE' ||
+                dataResourceTypeId == 'OFBIZ_FILE' || dataResourceTypeId == 'VIDEO_OBJECT' || dataResourceTypeId == 'AUDIO_OBJECT')>
             <tr>
-              <td colspan="2" align="right">
+              <td class="label"></td>
+              <td>
                 <#if ((content.contentId)?has_content)>
                     <@renderContentAsText contentId="${content.contentId}" ignoreTemplate="true"/>
                 </#if>
@@ -337,7 +373,11 @@
             <tr>
               <td colspan="2">
                 <div id="editorcontainer" class="nocolumns">
-                    <div id="cmseditor" style="margin: 0; width: 100%; border: 1px solid black;"></div>
+                    <div id="cmseditor" style="margin: 0; width: 100%; border: 1px solid black;">
+                    <#if (dataText?has_content)>
+                      ${StringUtil.wrapString(dataText.textData!)} 
+                    </#if>
+                    </div>
                 </div>
               </td>
             </tr>

@@ -18,14 +18,14 @@
  *******************************************************************************/
 package org.ofbiz.service.engine;
 
+import static org.ofbiz.base.util.UtilGenerics.cast;
+
 import java.util.Map;
 
 import org.ofbiz.base.util.BshUtil;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.GeneralException;
-import static org.ofbiz.base.util.UtilGenerics.cast;
 import org.ofbiz.base.util.UtilValidate;
-import org.ofbiz.base.util.cache.UtilCache;
 import org.ofbiz.service.GenericServiceException;
 import org.ofbiz.service.ModelService;
 import org.ofbiz.service.ServiceDispatcher;
@@ -36,8 +36,6 @@ import org.ofbiz.service.ServiceUtil;
  */
 public final class BeanShellEngine extends GenericAsyncEngine {
 
-    public static UtilCache<String, String> scriptCache = new UtilCache<String, String>("BeanShellScripts", 0, 0);
-
     public BeanShellEngine(ServiceDispatcher dispatcher) {
         super(dispatcher);
     }
@@ -45,6 +43,7 @@ public final class BeanShellEngine extends GenericAsyncEngine {
     /**
      * @see org.ofbiz.service.engine.GenericEngine#runSyncIgnore(java.lang.String, org.ofbiz.service.ModelService, java.util.Map)
      */
+    @Override
     public void runSyncIgnore(String localName, ModelService modelService, Map<String, Object> context) throws GenericServiceException {
         runSync(localName, modelService, context);
     }
@@ -52,6 +51,7 @@ public final class BeanShellEngine extends GenericAsyncEngine {
     /**
      * @see org.ofbiz.service.engine.GenericEngine#runSync(java.lang.String, org.ofbiz.service.ModelService, java.util.Map)
      */
+    @Override
     public Map<String, Object> runSync(String localName, ModelService modelService, Map<String, Object> context) throws GenericServiceException {
         return serviceInvoker(localName, modelService, context);
     }
@@ -68,10 +68,10 @@ public final class BeanShellEngine extends GenericAsyncEngine {
         try {
             Object resultObj = BshUtil.runBshAtLocation(location, context);
 
-            if (resultObj != null && resultObj instanceof Map) {
+            if (resultObj != null && resultObj instanceof Map<?, ?>) {
                 Debug.logInfo("Got result Map from script return: " + resultObj, module);
                 return cast(resultObj);
-            } else if (context.get("result") != null && context.get("result") instanceof Map) {
+            } else if (context.get("result") != null && context.get("result") instanceof Map<?, ?>) {
                 Debug.logInfo("Got result Map from context: " + resultObj, module);
                 return cast(context.get("result"));
             }

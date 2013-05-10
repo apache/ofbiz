@@ -19,9 +19,10 @@ under the License.
 -->
 
 <simple-methods xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/simple-methods.xsd">
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/simple-methods-v2.xsd">
     <simple-method method-name="getOrderedSummaryInformation" short-description="Get Summary Information About Orders for a Customer">
-        <if>
+        <!-- The permission checking is commented out to make this service work also when triggered from ecommerce -->
+        <!--if>
             <condition>
                 <and>
                     <not><if-has-permission permission="ORDERMGR" action="_VIEW"/></not>
@@ -33,13 +34,14 @@ under the License.
             </then>
         </if>
         <check-errors/>
-
+       -->
         <if-not-empty field="monthsToInclude">
             <now-timestamp field="nowTimestamp"/>
+            <!-- TODO: Change this to use the <set-calendar> operation -->
             <call-bsh><![CDATA[
-                calendar = java.util.Calendar.getInstance();
+                calendar = com.ibm.icu.util.Calendar.getInstance();
                 calendar.setTimeInMillis(nowTimestamp.getTime());
-                calendar.add(java.util.Calendar.MONTH, -monthsToInclude.intValue());
+                calendar.add(com.ibm.icu.util.Calendar.MONTH, -monthsToInclude.intValue());
                 parameters.put("fromDate", new Timestamp(calendar.getTimeInMillis()));
             ]]></call-bsh>
             <set from-field="nowTimestamp" field="parameters.thruDate"/>
@@ -181,11 +183,11 @@ under the License.
         <entity-one entity-name="Product" auto-field-map="true" value-field="product"/>
         <set from-field="product.requirementMethodEnumId" field="requirementMethodId"/>
         <if-empty field="requirementMethodId">
+            <set field="isMarketingPkg" value="${groovy: org.ofbiz.entity.util.EntityTypeUtil.hasParentType(delegator, 'ProductType', 'productTypeId', product.productTypeId, 'parentTypeId', 'MARKETING_PKG')}" type="Boolean"/>
             <if>
                 <condition>
                     <and>
-                        <if-compare field="product.productTypeId" operator="not-equals" value="MARKETING_PKG_AUTO"/>
-                        <if-compare field="product.productTypeId" operator="not-equals" value="MARKETING_PKG_PICK"/>
+                        <if-compare field="isMarketingPkg" operator="equals" value="false" type="Boolean"/>
                         <if-compare field="product.productTypeId" operator="not-equals" value="DIGITAL_GOOD"/>
                         <not><if-empty field="order"/></not>
                     </and>
@@ -317,6 +319,7 @@ under the License.
     </simple-method>
 
     <simple-method method-name="createRequirementFromItemATP" short-description="Create a Requirement for an item based on ATP inventory quantity and minimum">
+        <!-- NOTE DEJ20090902: this service is not called anywhere, instead the createATPRequirementsForOrder service (written in Java) is called; why this is the case I don't know... -->
         <check-permission permission="ORDERMGR" action="_CREATE">
             <fail-property resource="OrderErrorUiLabels" property="OrderSecurityErrorToRunCreateRequirementFromItemATP"/>
         </check-permission>
@@ -333,12 +336,17 @@ under the License.
             <!-- get the ATP, QOH quantities and the product facility's minimum stock -->
             <call-simple-method method-name="getProductFacilityAndQuantities"/>
 
-            <if-not-empty field="productFacility">
+            <if-empty field="productFacility">
+                <set field="minimumStock" value="0"/>
+                <else>
+                    <set field="minimumStock" from-field="productFacility.minimumStock"/>
+                </else>
+            </if-empty>
             <!-- are we below minimum stock?  this service is supposed to be called after inventory is reserved, so inventory should have been updated already -->
-            <if-compare-field field="availableToPromiseTotal" to-field="productFacility.minimumStock" operator="less" type="BigDecimal">
+            <if-compare-field field="availableToPromiseTotal" to-field="minimumStock" operator="less" type="BigDecimal">
                 <!-- what is the right quantity?  It is the lesser of the actual quantity and the quantity required to bring us back up to minimum stock -->
                 <calculate field="quantityShortfall">
-                    <calcop field="productFacility.minimumStock" operator="subtract">
+                    <calcop field="minimumStock" operator="subtract">
                         <calcop operator="get" field="availableToPromiseTotal"/>
                     </calcop>
                 </calculate>
@@ -360,7 +368,7 @@ under the License.
                     <condition-list combine="and">
                         <condition-expr field-name="productId" operator="equals" from-field="parameters.productId"/>
                         <condition-expr field-name="requirementTypeId" operator="equals" value="PRODUCT_REQUIREMENT"/>
-                        <condition-expr field-name="facilityId" operator="equals" from-field="productFacility.facilityId"/>
+                        <condition-expr field-name="facilityId" operator="equals" from-field="facilityId"/>
                         <condition-expr field-name="statusId" operator="not-equals" value="REQ_ORDERED"/>
                         <condition-expr field-name="statusId" operator="not-equals" value="REQ_REJECTED"/>
                     </condition-list>
@@ -386,7 +394,6 @@ under the License.
                 </if-compare>
 
             </if-compare-field>
-            </if-not-empty>
         </if-compare>
     </simple-method>
 
@@ -472,28 +479,32 @@ under the License.
         <!-- try to find PartyAcctgPreference for parameters.partyId, see if we need any special order number sequencing -->
         <entity-one entity-name="PartyAcctgPreference" value-field="partyAcctgPreference"/>
         <log level="info" message="In getNextOrderId partyId is [${parameters.partyId}], partyAcctgPreference: ${partyAcctgPreference}"/>
+ 
+        <if-not-empty field="partyAcctgPreference">
+           <get-related-one relation-name="OrderCustomMethod" value-field="partyAcctgPreference" to-value-field="customMethod"/>
+           <else>
+               <property-to-field field="errorPartyPerf" resource="AccountingErrorUiLabels" property="AccountingPartyAcctgPreferenceNotDefine"/>  
+               <log level="warning" message="errorPartyPerf" />
+           </else>
+        </if-not-empty>
 
-        <if>
-            <condition>
-                <if-compare field="partyAcctgPreference.orderSequenceEnumId" operator="equals" value="ODRSQ_ENF_SEQ"/>
-            </condition>
-            <then>
-                <!-- <log level="info" message="In getNextOrderId sequence enum ODRSQ_ENF_SEQ"/> -->
-                <!-- this is sequential sequencing, we can't skip a number, also it must be a unique sequence per partyIdFrom -->
-                <if-not-empty field="partyAcctgPreference.lastOrderNumber">
-                    <calculate field="partyAcctgPreference.lastOrderNumber" type="Long">
-                        <calcop operator="add" field="partyAcctgPreference.lastOrderNumber"/>
-                        <number value="1"/>
-                    </calculate>
-                    <else>
-                        <calculate field="partyAcctgPreference.lastOrderNumber" type="Long"><number value="1"/></calculate>
-                    </else>
-                </if-not-empty>
-                <store-value value-field="partyAcctgPreference"/>
-                <set from-field="partyAcctgPreference.lastOrderNumber" field="orderIdTemp"/>
-            </then>
+        <if-not-empty field="customMethod">
+            <set field="customMethodName" from-field="customMethod.customMethodName"/>
+            <else><!-- retreive service from deprecated enumeration -->
+                <if-compare operator="equals" value="ODRSQ_ENF_SEQ" field="partyAcctgPreference.oldOrderSequenceEnumId">
+                    <set field="customMethodName" value="orderSequence_enforced"/>
+                </if-compare>
+            </else>
+        </if-not-empty>
+
+        <if-not-empty field="customMethodName">
+            <set-service-fields service-name="${customMethodName}" map="parameters" to-map="customMethodMap"/>
+            <set field="customMethodMap.partyAcctgPreference" from-field="partyAcctgPreference"/>
+            <call-service service-name="${customMethodName}" in-map-name="customMethodMap">
+               <result-to-field result-name="orderId" field="orderIdTemp"/>
+            </call-service>
             <else>
-                <!-- <log level="info" message="In getNextOrderId sequence enum ODRSQ_STANDARD"/> -->
+                <!-- <log level="info" message="In getNextOrderId sequence by Standard"/> -->
                 <!-- default to the default sequencing: ODRSQ_STANDARD -->
                 <set from-field="parameters.orderId" field="orderIdTemp"/>
                 <if-empty field="orderIdTemp">
@@ -505,8 +516,8 @@ under the License.
                     </else>
                 </if-empty>
             </else>
-        </if>
-
+        </if-not-empty>
+        
         <if-not-empty field="parameters.productStoreId">
             <entity-one entity-name="ProductStore" value-field="productStore"/>
         </if-not-empty>
@@ -516,7 +527,29 @@ under the License.
         <field-to-result field="orderId" result-name="orderId"/>
     </simple-method>
 
+    <simple-method method-name="orderSequence_enforced" short-description="Enforced Sequence (no gaps, per organization)">
+        <log level="info" message="In getNextOrderId sequence enum Enforced"/> 
+        <set field="partyAcctgPreference" from-field="parameters.partyAcctgPreference"/>
+        <!-- this is sequential sequencing, we can't skip a number, also it must be a unique sequence per partyIdFrom -->
+
+        <if-not-empty field="partyAcctgPreference.lastOrderNumber">
+            <calculate field="partyAcctgPreference.lastOrderNumber" type="Long">
+                <calcop operator="add" field="partyAcctgPreference.lastOrderNumber"/>
+                <number value="1"/>
+            </calculate>
+            <else>
+                <calculate field="partyAcctgPreference.lastOrderNumber" type="Long"><number value="1"/></calculate>
+            </else>
+        </if-not-empty>
+
+        <store-value value-field="partyAcctgPreference"/>
+        <set from-field="partyAcctgPreference.lastOrderNumber" field="orderId"/>
+        <field-to-result field="orderId" result-name="orderId"/>
+    </simple-method> 
+
     <simple-method method-name="createOrderHeader" short-description="Create OrderHeader">
+        <now-timestamp field="nowTimestamp"/>
+
         <set value="Create OrderHeader" field="operationName"/>
         <check-permission permission="ORDERMGR" action="_CREATE">
             <fail-property resource="OrderErrorUiLabels" property="OrderSecurityErrorToRunCreateOrderShipment"/>
@@ -524,6 +557,7 @@ under the License.
         <check-errors/>
 
         <make-value value-field="newEntity" entity-name="OrderHeader"/>
+        
         <if-not-empty field="parameters.orderId">
             <set field="newEntity.orderId" from-field="parameters.orderId"/>
         <else>
@@ -531,8 +565,19 @@ under the License.
         </else>
         </if-not-empty>
         <field-to-result field="newEntity.orderId" result-name="orderId"/>
+        
         <set-nonpk-fields map="parameters" value-field="newEntity"/>
 
+        <if-empty field="newEntity.statusId">
+            <set field="newEntity.statusId" value="ORDER_CREATED"/>
+        </if-empty>
+        <if-empty field="newEntity.orderDate">
+            <set field="newEntity.orderDate" from-field="nowTimestamp"/>
+        </if-empty>
+        <if-empty field="newEntity.entryDate">
+            <set field="newEntity.entryDate" from-field="nowTimestamp"/>
+        </if-empty>
+        
         <create-value value-field="newEntity"/>
     </simple-method>
     <simple-method method-name="updateOrderHeader" short-description="Update OrderHeader">
@@ -544,7 +589,9 @@ under the License.
 
         <entity-one entity-name="OrderHeader" value-field="orderHeader"/>
         <if-empty field="orderHeader">
-            <add-error><fail-message message="ERROR: Cannot update specified contact info because it does not correspond to the specified work effort"/></add-error>
+            <add-error>
+                <fail-property resource="OrderErrorUiLabels" property="OrderOrderIdDoesNotExists"/>
+            </add-error>
         </if-empty>
         <check-errors/>
         <set-nonpk-fields value-field="orderHeader" map="parameters"/>
@@ -713,6 +760,20 @@ under the License.
      </simple-method>
 
     <!-- OrderItemShipGroup -->
+    <simple-method method-name="createOrderItemShipGroup" short-description="Create OrderItemShipGroup">
+        <check-permission permission="ORDERMGR" action="_CREATE">
+            <fail-property resource="OrderErrorUiLabels" property="OrderSecurityErrorToRunCreateOrderItemShipGroup"/>
+        </check-permission>
+        <check-errors/>
+        <make-value value-field="newEntity" entity-name="OrderItemShipGroup"/>
+        <set-pk-fields map="parameters" value-field="newEntity"/>
+        <set-nonpk-fields map="parameters" value-field="newEntity"/>
+        <if-empty field="newEntity.shipGroupSeqId">
+            <make-next-seq-id value-field="newEntity" seq-field-name="shipGroupSeqId"/> <!-- this finds the next sub-sequence ID -->
+            <field-to-result field="newEntity.shipGroupSeqId" result-name="shipGroupSeqId"/>
+        </if-empty>
+        <create-value value-field="newEntity"/>
+    </simple-method>
     <simple-method method-name="updateOrderItemShipGroup" short-description="Update OrderItemShipGroup">
         <check-permission permission="ORDERMGR" action="_UPDATE">
             <fail-property resource="OrderErrorUiLabels" property="OrderSecurityErrorToRunUpdateOrderItemShipGroup"/>
@@ -856,7 +917,9 @@ under the License.
     <simple-method method-name="getOrderStatus" short-description="Gets an order status" login-required="false">
         <entity-one entity-name="OrderHeader" value-field="order"/>
         <if-empty field="order">
-            <add-error><fail-message message="Order not found [{parameters.orderId}]"/></add-error>
+            <add-error>
+                <fail-property resource="OrderErrorUiLabels" property="OrderOrderIdDoesNotExists"/>
+            </add-error>
             <check-errors/>
         </if-empty>
         <field-to-result field="order.statusId" result-name="statusId"/>
@@ -897,7 +960,7 @@ under the License.
 
     <simple-method method-name="createUpdateShippingAddress" short-description="create and update Shipping address" login-required="false">
         <set field="keepAddressBook" from-field="parameters.keepAddressBook" default-value="Y"/>
-        <call-map-processor xml-resource="component://ecommerce/script/org/ofbiz/ecommerce/customer/CheckoutMapProcs.xml"
+        <call-map-processor xml-resource="component://order/script/org/ofbiz/order/customer/CheckoutMapProcs.xml"
             processor-name="shipToAddress" in-map-name="parameters" out-map-name="shipToAddressCtx"/>
         <check-errors/>
         <set field="shipToAddressCtx.partyId" from-field="parameters.partyId"/>
@@ -907,7 +970,7 @@ under the License.
             <call-service service-name="createPartyPostalAddress" in-map-name="shipToAddressCtx">
                 <result-to-field result-name="contactMechId" field="parameters.shipToContactMechId"/>
             </call-service>
-            <log level="info" message="Shipping address created with contactMechId ${shipToAddressCtx.shipToContactMechId}"/>
+            <log level="info" message="Shipping address created with contactMechId ${parameters.shipToContactMechId}"/>
         <else>
             <if-compare field="keepAddressBook" operator="equals" value="Y">
                 <make-value entity-name="PostalAddress" value-field="newValue"/>
@@ -915,6 +978,7 @@ under the License.
                 <find-by-primary-key entity-name="PostalAddress" map="newValue" value-field="oldValue"/>
                 <set-nonpk-fields map="shipToAddressCtx" value-field="newValue"/>
                 <if-compare-field field="oldValue" to-field="newValue" operator="not-equals" type="Object">
+                    <set field="shipToAddressCtx.contactMechId" from-field="nullField"/>
                     <call-service service-name="createPartyPostalAddress" in-map-name="shipToAddressCtx">
                         <result-to-field result-name="contactMechId" field="parameters.shipToContactMechId"/>
                     </call-service>
@@ -972,6 +1036,7 @@ under the License.
                             <call-service service-name="deletePartyContactMechPurposeIfExists" in-map-name="serviceInMap"/>
                         </if-not-empty>
                         <set field="shipToAddressCtx.contactMechPurposeTypeId" value="SHIPPING_LOCATION"/>
+                        <set field="shipToAddressCtx.contactMechId" from-field="nullField"/>
                         <call-service service-name="createPartyPostalAddress" in-map-name="shipToAddressCtx">
                             <result-to-field result-name="contactMechId" field="parameters.shipToContactMechId"/>
                         </call-service>
@@ -995,7 +1060,7 @@ under the License.
 
         <set field="keepAddressBook" from-field="parameters.keepAddressBook" default-value="Y"/>
         <if-compare field="parameters.useShippingAddressForBilling" operator="not-equals" value="Y">
-            <call-map-processor xml-resource="component://ecommerce/script/org/ofbiz/ecommerce/customer/CheckoutMapProcs.xml"
+            <call-map-processor xml-resource="component://order/script/org/ofbiz/order/customer/CheckoutMapProcs.xml"
                 processor-name="billToAddress" in-map-name="parameters" out-map-name="billToAddressCtx"/>
         </if-compare>
         <check-errors/>
@@ -1016,19 +1081,28 @@ under the License.
                         <field-map field-name="contactMechPurposeTypeId" value="BILLING_LOCATION"/>
                     </entity-and>
                     <first-from-list entry="pcmp" list="pcmpList"/>
-                    <set-service-fields service-name="deletePartyContactMechPurposeIfExists" map="pcmp" to-map="serviceInMap"/>
-                    <call-service service-name="deletePartyContactMechPurposeIfExists" in-map-name="serviceInMap"/>
-                    <clear-field field="serviceInMap"/>
+                    <if-not-empty field="pcmp">
+                        <set-service-fields service-name="deletePartyContactMechPurposeIfExists" map="pcmp" to-map="serviceInMap"/>
+                        <call-service service-name="deletePartyContactMechPurposeIfExists" in-map-name="serviceInMap"/>
+                        <clear-field field="serviceInMap"/>
+                    </if-not-empty>
                     <if-compare field="keepAddressBook" operator="equals" value="N">
-                        <set-service-fields service-name="deletePartyContactMech" map="pcmp" to-map="serviceInMap"/>
+                        <set field="serviceInMap.contactMechId" from-field="parameters.billToContactMechId"/>
                         <call-service service-name="deletePartyContactMech" in-map-name="serviceInMap"/>
                         <clear-field field="serviceInMap"/>
                     </if-compare>
-                    <set field="billToAddressCtx.contactMechPurposeTypeId" value="BILLING_LOCATION"/>
-                    <set-service-fields service-name="createPartyContactMechPurpose" map="billToAddressCtx" to-map="serviceInMap"/>
-                    <set field="serviceInMap.contactMechId" from-field="parameters.shipToContactMechId"/>
-                    <call-service service-name="createPartyContactMechPurpose" in-map-name="serviceInMap">
-                    </call-service>
+                    <!-- Check that the ship-to address doesn't already have a bill-to purpose -->
+                    <entity-and entity-name="PartyContactMechPurpose" list="pcmpList" filter-by-date="true">
+                        <field-map field-name="contactMechId" from-field="parameters.shipToContactMechId"/>
+                        <field-map field-name="partyId" from-field="partyId"/>
+                        <field-map field-name="contactMechPurposeTypeId" value="BILLING_LOCATION"/>
+                    </entity-and>
+                    <if-empty field="pcmpList">
+                        <set field="billToAddressCtx.contactMechPurposeTypeId" value="BILLING_LOCATION"/>
+                        <set-service-fields service-name="createPartyContactMechPurpose" map="billToAddressCtx" to-map="serviceInMap"/>
+                        <set field="serviceInMap.contactMechId" from-field="parameters.shipToContactMechId"/>
+                        <call-service service-name="createPartyContactMechPurpose" in-map-name="serviceInMap"/>
+                    </if-empty>
                     <log level="info" message="Billing address updated with contactMechId ${parameters.billToContactMechId}"/>
                 </if-compare-field>
             </else>
@@ -1044,6 +1118,7 @@ under the License.
                 <log level="info" message="Billing address created with contactmechId ${parameters.billToContactMechId}"/>
             <else>
                 <if-compare-field field="parameters.shipToContactMechId" operator="equals" to-field="parameters.billToContactMechId">
+                    <set field="billToAddressCtx.contactMechId" from-field="nullField"/>
                     <call-service service-name="createPartyPostalAddress" in-map-name="billToAddressCtx">
                         <result-to-field result-name="contactMechId" field="parameters.billToContactMechId"/>
                     </call-service>
@@ -1062,6 +1137,7 @@ under the License.
                             <field-map field-name="contactMechId" from-field="billToAddressCtx.contactMechId"/>
                         </entity-one>
                         <if-compare-field field="oldValue" to-field="newValue" operator="not-equals" type="Object">
+                            <set field="billToAddressCtx.contactMechId" from-field="nullField"/>
                             <call-service service-name="createPartyPostalAddress" in-map-name="billToAddressCtx">
                                 <result-to-field result-name="contactMechId" field="parameters.billToContactMechId"/>
                             </call-service>
@@ -1104,7 +1180,6 @@ under the License.
                     <set field="partyProfileDefaultsCtx.partyId" from-field="userLogin.partyId"/>
                     <call-service service-name="setPartyProfileDefaults" in-map-name="partyProfileDefaultsCtx"/>
                 </if-compare>
-
             </else>
             </if-empty>
         </if-compare>
@@ -1123,6 +1198,7 @@ under the License.
             <!-- call update Credit Card -->
             <entity-and entity-name="PaymentMethod" list="paymentMethodList" filter-by-date="true">
                 <field-map field-name="partyId" from-field="partyId"/>
+                <field-map field-name="paymentMethodTypeId" value="CREDIT_CARD"/>
                 <order-by field-name="-fromDate"/>
             </entity-and>
             <first-from-list list="paymentMethodList" entry="paymentMethod"/>
@@ -1158,20 +1234,26 @@ under the License.
                 </entity-and>
                 <iterate entry="supplierProduct" list="supplierProducts">
                     <now-timestamp field="nowTimestamp"/>
-                    <if>
-                        <condition>
-                            <if-compare-field field="parameters.unitCost" to-field="supplierProduct.lastPrice" operator="not-equals" type="BigDecimal"/>
-                        </condition>
-                        <then>
-                            <make-value value-field="newSupplierProduct" entity-name="SupplierProduct"/>
+                    <if-not-empty field="parameters.orderCurrencyUnitPrice">
+                        <if-compare-field field="parameters.orderCurrencyUnitPrice" operator="not-equals" to-field="supplierProduct.lastPrice" type="BigDecimal">
                             <clone-value value-field="supplierProduct" new-value-field="newSupplierProduct"/>
-                            <set from-field="nowTimestamp" field="newSupplierProduct.availableFromDate"/>
-                            <set from-field="parameters.unitCost" field="newSupplierProduct.lastPrice" type="BigDecimal"/>
+                            <set field="newSupplierProduct.availableFromDate" from-field="nowTimestamp"/>
+                            <set field="newSupplierProduct.lastPrice" from-field="parameters.orderCurrencyUnitPrice" type="BigDecimal"/>
                             <create-value value-field="newSupplierProduct"/>
-                            <set from-field="nowTimestamp" field="supplierProduct.availableThruDate"/>
+                            <set field="supplierProduct.availableThruDate" from-field="nowTimestamp"/>
                             <store-value value-field="supplierProduct"/>
-                        </then>
-                    </if>
+                        </if-compare-field>
+                    <else>
+                        <if-compare-field field="parameters.unitCost" operator="not-equals" to-field="supplierProduct.lastPrice" type="BigDecimal">
+                            <clone-value value-field="supplierProduct" new-value-field="newSupplierProduct"/>
+                            <set field="newSupplierProduct.availableFromDate" from-field="nowTimestamp"/>
+                            <set field="newSupplierProduct.lastPrice" from-field="parameters.unitCost" type="BigDecimal"/>
+                            <create-value value-field="newSupplierProduct"/>
+                            <set field="supplierProduct.availableThruDate" from-field="nowTimestamp"/>
+                            <store-value value-field="supplierProduct"/>
+                        </if-compare-field>
+                    </else>
+                    </if-not-empty>
                 </iterate>
             </then>
             <else>
@@ -1267,6 +1349,7 @@ under the License.
             <condition-list combine="and">
                 <condition-expr field-name="orderTypeId" operator="equals" value="PURCHASE_ORDER"/>
                 <condition-expr field-name="statusId" operator="not-equals" value="ORDER_CANCELLED"/>
+                <condition-expr field-name="statusId" operator="not-equals" value="ORDER_COMPLETED"/>
             </condition-list>
         </entity-condition>
         <iterate entry="currentOrder" list="orders">
@@ -1291,5 +1374,90 @@ under the License.
             </iterate>
         </iterate>
     </simple-method>
-
+    
+    <simple-method  method-name="updateShippingMethodAndCharges" short-description="Updates shipping method and shipping charges from Order View page when Shipment is in picked status and items of Order are packed">
+         <!-- splitting shipmentMethodAndAmount request parameter value that contains "*" symbol
+             into "shipmentMethod" and "newAmount".
+        -->
+         <!-- shipmentMethod request parameter value contains "@" symbol
+             between "shipmentMethodTypeId" and "carrierPartyId".This will be splitted in updateOrderItemShipGroup method
+        -->
+        
+        <call-bsh><![CDATA[
+            shipmentMethodAndAmount = parameters.get("shipmentMethodAndAmount");
+            if (shipmentMethodAndAmount != null) {
+               parameters.put("shipmentMethod", shipmentMethodAndAmount.substring(0, shipmentMethodAndAmount.indexOf("*")));
+               parameters.put("amount", shipmentMethodAndAmount.substring(shipmentMethodAndAmount.indexOf("*")+1));
+               parameters.put("shipmentMethodTypeId", shipmentMethodAndAmount.substring(0, shipmentMethodAndAmount.indexOf("@")));
+            }
+        ]]></call-bsh>
+        <set field="newAmount" from-field="parameters.amount" type="BigDecimal"/>
+        <set field="shippingAmount" from-field="parameters.shippingAmount" type="BigDecimal"/>
+        <property-to-field field="percentAllowed" resource="shipment" property="shipment.default.cost_actual_over_estimated_percent_allowed"/>
+        <if-compare-field field="newAmount" operator="greater" to-field="shippingAmount" type="BigDecimal">
+            <set field="diffPercentage" value="${(newAmount - shippingAmount/shippingAmount)*100}" type="BigDecimal"/>
+        <else>
+            <set field="diffPercentage" value="${(shippingAmount - newAmount/newAmount)*100}" type="BigDecimal"/>
+        </else>
+        </if-compare-field>
+        <if-compare-field field="diffPercentage" operator="greater" to-field="percentAllowed" type="BigDecimal">
+            <set-service-fields map="parameters" to-map="updateOrderItemShipGroupContext" service-name="updateOrderItemShipGroup"/>
+            <call-service service-name="updateOrderItemShipGroup" in-map-name="updateOrderItemShipGroupContext"/>
+            <set-service-fields map="parameters" to-map="updateOrderAdjustmentContext" service-name="updateOrderAdjustment"/>
+            <call-service service-name="updateOrderAdjustment" in-map-name="updateOrderAdjustmentContext"/>
+            <set-service-fields map="parameters" to-map="updateShipmentRouteSegmentContext" service-name="updateShipmentRouteSegment"/>
+            <clear-field field="updateShipmentRouteSegmentContext.trackingIdNumber"/>
+            <clear-field field="updateShipmentRouteSegmentContext.trackingDigest"/>
+            <clear-field field="updateShipmentRouteSegmentContext.carrierServiceStatusId"/>
+            <call-service service-name="updateShipmentRouteSegment" in-map-name="updateShipmentRouteSegmentContext"/>
+            <set-service-fields map="parameters" to-map="upsShipmentConfirmContext" service-name="upsShipmentConfirm"/>
+            <call-service service-name="upsShipmentConfirm" in-map-name="upsShipmentConfirmContext"/>
+        <else>
+            <set-service-fields map="parameters" to-map="updateOrderItemShipGroupContext" service-name="updateOrderItemShipGroup"/>
+            <call-service service-name="updateOrderItemShipGroup" in-map-name="updateOrderItemShipGroupContext"/>
+            <set-service-fields map="parameters" to-map="updateShipmentRouteSegmentContext" service-name="updateShipmentRouteSegment"/>
+            <clear-field field="updateShipmentRouteSegmentContext.trackingIdNumber"/>
+            <clear-field field="updateShipmentRouteSegmentContext.trackingDigest"/>
+            <clear-field field="updateShipmentRouteSegmentContext.carrierServiceStatusId"/>
+            <call-service service-name="updateShipmentRouteSegment" in-map-name="updateShipmentRouteSegmentContext"/>
+            <set-service-fields map="parameters" to-map="upsShipmentConfirmContext" service-name="upsShipmentConfirm"/>
+            <call-service service-name="upsShipmentConfirm" in-map-name="upsShipmentConfirmContext"/>
+        </else>
+        </if-compare-field>
+    </simple-method>
+    <simple-method method-name="productAvailabalityByFacility" short-description="Calculate ATP and Qoh According For each facility">
+        <set field="facilityMap.ownerPartyId" from-field="parameters.ownerPartyId"/>
+        <find-by-and map="facilityMap" list="facilityList" entity-name="Facility"/>
+        <iterate entry="facility" list="facilityList">
+            <set field="getInventoryAvailableByFacilityMap.facilityId" from-field="facility.facilityId"/>
+            <set field="getInventoryAvailableByFacilityMap.productId" from-field="parameters.productId"/>
+            <call-service service-name="getInventoryAvailableByFacility" in-map-name="getInventoryAvailableByFacilityMap">
+                <result-to-field result-name="quantityOnHandTotal"/>
+                <result-to-field result-name="availableToPromiseTotal"/>
+            </call-service>
+            <set field="availabalityMap.facilityId" from-field="facility.facilityId"/>
+            <set field="availabalityMap.quantityOnHandTotal" from-field="quantityOnHandTotal"/>
+            <set field="availabalityMap.availableToPromiseTotal" from-field="availableToPromiseTotal"/>
+            <field-to-list field="availabalityMap" list="availabalityList"/>
+            <clear-field field="availabalityMap"/>
+        </iterate>
+        <field-to-result field="availabalityList"/>
+    </simple-method>
+    
+    <simple-method method-name="createOrderPaymentApplication" short-description="Create Order Payment Application">
+        <entity-one value-field="paymentMap" entity-name="Payment"/>
+        <set field="createCtx.amountApplied" from-field="paymentMap.amount" type="BigDecimal"/>
+        <set field="createCtx.paymentId" from-field="paymentMap.paymentId"/>
+        <entity-one value-field="orderPaymentPreMap" entity-name="OrderPaymentPreference">
+            <field-map field-name="orderPaymentPreferenceId" from-field="paymentMap.paymentPreferenceId"/>
+        </entity-one>
+        <entity-and list="orderItemBilList" entity-name="OrderItemBilling">
+            <field-map field-name="orderId" from-field="orderPaymentPreMap.orderId"/>
+            <order-by field-name="invoiceId"/>
+        </entity-and>
+        <if-not-empty field="orderItemBilList">
+            <set field="createCtx.invoiceId" from-field="orderItemBilList[0].invoiceId"/>
+            <call-service service-name="createPaymentApplication" in-map-name="createCtx"/>
+        </if-not-empty>
+    </simple-method>
 </simple-methods>

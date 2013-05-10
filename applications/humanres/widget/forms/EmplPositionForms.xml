@@ -27,6 +27,8 @@ under the License.
                 <field-map field-name="inputFields" from-field="parameters"/>
                 <field-map field-name="entityName" value="EmplPosition"/>
                 <field-map field-name="orderBy" value="emplPositionId"/>
+                <field-map field-name="viewIndex" from-field="viewIndex"/>
+                <field-map field-name="viewSize" from-field="viewSize"/>
             </service>
         </actions>
         <auto-fields-entity entity-name="EmplPosition" default-field-type="display"/>
@@ -61,21 +63,21 @@ under the License.
         <field use-when="emplPosition!=null" name="emplPositionId" title="${uiLabelMap.HumanResEmplPositionId}" tooltip="${uiLabelMap.CommonNotModifRecreat}"><display/></field>
         <field use-when="emplPosition==null&amp;&amp;emplPositionId==null" name="emplPositionId" title="${uiLabelMap.HumanResEmplPositionId}"><lookup target-form-name="LookupEmplPosition"/></field>
         <field use-when="emplPosition==null&amp;&amp;emplPositionId!=null" name="emplPositionId" title="${uiLabelMap.HumanResEmplPositionId}" tooltip="${uiLabelMap.CommonCannotBeFound}: [${emplPositionId}]"><display/></field>
-        <field name="partyId" parameter-name="partyId">
+        <field name="partyId" use-when="emplPosition!=null" parameter-name="partyId" title="organization partyId">
             <drop-down allow-empty="false">
-                <entity-options description="${partyId}" entity-name="PartyRole" key-field-name="partyId">
+                <entity-options description="${groupName}" entity-name="PartyRoleAndPartyDetail" key-field-name="partyId">
                     <entity-constraint name="roleTypeId" value="INTERNAL_ORGANIZATIO"/>
                     <entity-order-by field-name="partyId"/>
                 </entity-options>
             </drop-down>
         </field>
-        <field name="partyId" use-when="emplPosition!=null" title="${uiLabelMap.PartyPartyId}">
+        <!--<field name="partyId" title="Organization PartyId">
             <display-entity description="${groupName}" entity-name="PartyNameView">
                 <sub-hyperlink target="viewprofile" link-style="smallSubmit" target-type="inter-app" description="${partyId}">
                     <parameter param-name="partyId"/>
                 </sub-hyperlink>
             </display-entity>
-        </field>
+        </field>-->
         <field name="statusId" title="${uiLabelMap.CommonStatus}">
             <drop-down allow-empty="false">
                 <entity-options description="${description}" key-field-name="statusId" entity-name="StatusItem">
@@ -296,11 +298,16 @@ under the License.
                 <option key="N" description="${uiLabelMap.CommonNo}"/>
             </drop-down>
         </field>
-        <field name="searchButton" widget-style="smallSubmit"><submit button-type="button"/></field>
+        <field name="searchButton" title="${uiLabelMap.CommonFind}" widget-style="smallSubmit"><submit button-type="button"/></field>
     </form>
     <form name="EmplPositionInfo" type="single" default-map-name="emplPosition" paginate-target="FindEmplPositions"
         header-row-style="header-row" default-table-style="basic-table">
         <auto-fields-service service-name="updateEmplPosition" default-field-type="display"/>
+        <field name="partyId"><display-entity entity-name="PartyGroup" description="${groupName}">
+            <sub-hyperlink target="EmployeeProfile" description="[${emplPosition.partyId}]">
+                <parameter param-name="partyId" from-field="emplPosition.partyId"/>
+            </sub-hyperlink>
+        </display-entity></field>
         <field name="emplPositionTypeId"><display-entity entity-name="EmplPositionType" description="${description}">
             <sub-hyperlink target="EditEmplPositionTypes" description="[${emplPosition.emplPositionTypeId}]">
                 <parameter param-name="emplPositionTypeId" from-field="emplPosition.emplPositionTypeId"/>
@@ -326,5 +333,19 @@ under the License.
         odd-row-style="alternate-row" default-table-style="basic-table hover-bar">
         <auto-fields-service service-name="updateEmplPositionReportingStruct" default-field-type="display"/>
         <field name="emplPositionIdReportingTo"><hidden/></field>
+    </form>
+    <form name="ListInternalOrg" type="single" target="createInternalOrg" default-map-name="partyRole"
+        header-row-style="header-row" default-table-style="basic-table">
+        <field name="headpartyId" parameter-name="headpartyId"><hidden /></field>
+        <field name="partyId">
+            <drop-down allow-empty="false">
+                <entity-options description="${partyId}" entity-name="PartyRole" key-field-name="partyId">
+                    <entity-constraint name="roleTypeId" value="INTERNAL_ORGANIZATIO"/>
+                    <entity-order-by field-name="partyId"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="dummy1" title=" " position="1"><display/></field>
+        <field name="submitButton" title="${uiLabelMap.CommonCreate}" widget-style="buttontext"><submit button-type="text-link"/></field>
     </form>
 </forms>

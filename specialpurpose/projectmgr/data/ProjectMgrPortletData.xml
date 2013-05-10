@@ -26,7 +26,14 @@
         screenLocation="component://projectmgr/widget/TimeSheetScreens.xml"
         description="My Current Timesheet" securityServiceName="portalPermissionIsEmployee" securityMainAction="VIEW"/>
     <PortletPortletCategory portalPortletId="mytimesheet" portletCategoryId="PROJECTMANAGER"/>
-
+    
+    <PortalPortlet portalPortletId="ProjectRequestList"
+        portletName="Project Customer Request List"
+        screenName="ProjectRequestList"
+        screenLocation="component://projectmgr/widget/CustRequestScreens.xml"
+        description="Project Customer Request List" securityServiceName="projectMgrRequestPermission" securityMainAction="VIEW"/>
+    <PortletPortletCategory portalPortletId="ProjectRequestList" portletCategoryId="PROJECTMANAGER"/>
+    
     <PortalPortlet
         portalPortletId="mytasks"
         portletName="MyTasks"
@@ -41,6 +48,13 @@
         screenLocation="component://projectmgr/widget/ProjectScreens.xml"
         description="List Projects For a certain Customer" securityServiceName="portalPermissionIsCustomer" securityMainAction="VIEW"/>
     <PortletPortletCategory portalPortletId="ListCustomerProjects" portletCategoryId="PROJECTMANAGER"/>
-
-
+    
+    <PortalPortlet portalPortletId="ViewProjectTask"
+        portletName="View a specific task of a project"
+        screenName="ViewProjectTask"
+        screenLocation="component://projectmgr/widget/TaskScreens.xml"
+        description="View a specific task of a project" securityServiceName="projectMgrPermission" securityMainAction="VIEW"/>
+    <PortletPortletCategory portalPortletId="ViewProjectTask" portletCategoryId="PROJECTMANAGER"/>
+    
+    
 </entity-engine-xml>

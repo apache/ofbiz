@@ -35,36 +35,36 @@ under the License.
       </table>
 
       <table width="100%" border='0' cellspacing='0' cellpadding='0' class='boxbottom'>
-        <tr><td colspan="3"><hr/></td></tr>
+        <tr><td colspan="3"><hr /></td></tr>
 
         <#-- postal addresses for chosen id -->
 
         <#if partyContactMechPurposes?exists>
           <#list partyContactMechPurposes as partyContactMechPurpose>
-            <#assign shippingAddress = partyContactMechPurpose.getRelatedOne("PostalAddress")/>
+            <#assign shippingAddress = partyContactMechPurpose.getRelatedOne("PostalAddress", false)/>
 
             <#-- skip non-postal addresses -->
 
             <#if shippingAddress.toName?exists>
               <tr>
-                <td valign="top" nowrap>
-                  <input type="radio" name="shipping_contact_mech_id" value="${partyContactMechPurpose.contactMechId}">
+                <td valign="top" nowrap="nowrap">
+                  <input type="radio" name="shipping_contact_mech_id" value="${partyContactMechPurpose.contactMechId}" />
                 </td>
-                <td nowrap>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+                <td nowrap="nowrap">&nbsp;&nbsp;&nbsp;&nbsp;</td>
                 <td width="100%">
                   <div>
-                    <#if shippingAddress.toName?has_content><b>${uiLabelMap.CommonToName}:</b>&nbsp;${shippingAddress.toName}<br/></#if>
-                    <#if shippingAddress.attnName?has_content><b>${uiLabelMap.CommonAttn}:</b>&nbsp;${shippingAddress.attnName}<br/></#if>
-                    <#if shippingAddress.address1?has_content>${shippingAddress.address1}<br/></#if>
-                    <#if shippingAddress.address2?has_content>${shippingAddress.address2}<br/></#if>
+                    <#if shippingAddress.toName?has_content><b>${uiLabelMap.CommonToName}:</b>&nbsp;${shippingAddress.toName}<br /></#if>
+                    <#if shippingAddress.attnName?has_content><b>${uiLabelMap.CommonAttn}:</b>&nbsp;${shippingAddress.attnName}<br /></#if>
+                    <#if shippingAddress.address1?has_content>${shippingAddress.address1}<br /></#if>
+                    <#if shippingAddress.address2?has_content>${shippingAddress.address2}<br /></#if>
                     <#if shippingAddress.city?has_content>${shippingAddress.city}</#if>
-                    <#if shippingAddress.stateProvinceGeoId?has_content><br/>${shippingAddress.stateProvinceGeoId}</#if>
-                    <#if shippingAddress.postalCode?has_content><br/>${shippingAddress.postalCode}</#if>
-                    <#if shippingAddress.countryGeoId?has_content><br/>${shippingAddress.countryGeoId}</#if>
+                    <#if shippingAddress.stateProvinceGeoId?has_content><br />${shippingAddress.stateProvinceGeoId}</#if>
+                    <#if shippingAddress.postalCode?has_content><br />${shippingAddress.postalCode}</#if>
+                    <#if shippingAddress.countryGeoId?has_content><br />${shippingAddress.countryGeoId}</#if>
                   </div>
                 </td>
               </tr>
-              <tr><td colspan="3"><hr/></td></tr>
+              <tr><td colspan="3"><hr /></td></tr>
             </#if>
           </#list>
         </#if>

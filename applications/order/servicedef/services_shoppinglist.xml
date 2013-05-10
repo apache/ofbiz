@@ -30,7 +30,7 @@ under the License.
         <auto-attributes mode="IN" entity-name="ShoppingList" include="nonpk" optional="true"/>
         <attribute name="shippingMethodString" type="String" mode="IN" optional="true"/>
     </service>
-    <service name="createShoppingList" engine="simple" auth="true"
+    <service name="createShoppingList" engine="simple" auth="false"
             location="component://order/script/org/ofbiz/order/shoppinglist/ShoppingListServices.xml" invoke="createShoppingList">
         <description>Create a shopping list entity</description>
         <implements service="createShoppingListRecurrence"/>
@@ -101,17 +101,18 @@ under the License.
         <attribute name="shoppingListId" type="String" mode="IN" optional="false"/>
         <attribute name="productId" type="String" mode="IN" optional="true"/>
         <attribute name="quantity" type="BigDecimal" mode="IN" optional="true"/>
+        <attribute name="modifiedPrice" type="BigDecimal" mode="IN" optional="true"/>
         <attribute name="reservStart" type="Timestamp" mode="IN" optional="true"/>
         <attribute name="reservLength" type="BigDecimal" mode="IN" optional="true"/>
         <attribute name="reservPersons" type="BigDecimal" mode="IN" optional="true"/>
         <attribute name="quantityPurchased" type="BigDecimal" mode="IN" optional="true"/>
         <attribute name="configId" type="String" mode="IN" optional="true"/>
     </service>
-    <service name="createShoppingListItem" engine="simple" auth="true"
+    <service name="createShoppingListItem" engine="simple" auth="false"
             location="component://order/script/org/ofbiz/order/shoppinglist/ShoppingListServices.xml" invoke="createShoppingListItem">
         <description>Create a shopping list item</description>
         <implements service="shoppingListItemInterface"/>
-        <attribute name="shoppingListId" type="String" mode="INOUT" optional="true"/>
+        <attribute name="shoppingListId" type="String" mode="IN" optional="true"/>
         <attribute name="productStoreId" type="String" mode="INOUT" optional="true"/>
         <attribute name="productId" type="String" mode="IN" optional="false"/>
         <attribute name="shoppingListItemSeqId" type="String" mode="OUT" optional="false"/>
@@ -141,5 +142,13 @@ under the License.
         <attribute name="productStoreId" type="String" mode="INOUT" optional="true"/>
         <attribute name="productId" type="String" mode="IN" optional="false"/>
         <attribute name="shoppingListItemSeqId" type="String" mode="OUT" optional="false"/>
+    </service>
+
+    <service name="autoDeleteAutoSaveShoppingList" engine="java" auth="true" max-retry="3" transaction-timeout="3600"
+            location="org.ofbiz.order.shoppinglist.ShoppingListServices" invoke="autoDeleteAutoSaveShoppingList">
+            <description>
+                Automatic delete auto save shopping list for anonymous users that are not updated in last 30 days.
+                Default to 30 days unless no configuration is specified.
+            </description>
     </service>
 </services>

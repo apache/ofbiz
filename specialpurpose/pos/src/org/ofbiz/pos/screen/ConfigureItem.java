@@ -18,18 +18,20 @@
  *******************************************************************************/
 package org.ofbiz.pos.screen;
 
-import java.util.Hashtable;
+import java.util.ArrayList;
+import java.util.EventObject;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
-import java.util.ArrayList;
-import java.util.EventObject;
+import java.util.Map;
+
 import javax.swing.DefaultListModel;
 import javax.swing.JList;
 import javax.swing.ListSelectionModel;
-import javax.swing.event.ListSelectionListener;
 import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 
+import javolution.util.FastMap;
 import net.xoetrope.swing.XButton;
 import net.xoetrope.swing.XDialog;
 import net.xoetrope.swing.XList;
@@ -46,6 +48,7 @@ import org.ofbiz.product.config.ProductConfigWrapper.ConfigItem;
 import org.ofbiz.product.config.ProductConfigWrapper.ConfigOption;
 
 
+@SuppressWarnings("serial")
 public class ConfigureItem extends XPage {
 
     /**
@@ -69,8 +72,8 @@ public class ConfigureItem extends XPage {
         { "r4c1", "r4c2", "r4c3", "r4c4" }
     };
     protected ProductConfigWrapper m_pcw = null;
-    protected ArrayList m_buttonList = null;
-    protected Hashtable questionHashMap = null;
+    protected List<XButton> m_buttonList = null;
+    protected Map<String, Question> questionHashMap = null;
 
     public ConfigureItem(ProductConfigWrapper pcw, PosTransaction trans, PosScreen page) {
         m_pcw = pcw;
@@ -123,7 +126,7 @@ public class ConfigureItem extends XPage {
         if (wasMouseClicked()) {
             EventObject eo = getCurrentEvent();
             XButton button = (XButton) eo.getSource();
-            Question question = (Question)questionHashMap.get(button.getName());
+            Question question = questionHashMap.get(button.getName());
             question.buttonClicked();
             showItem();
             m_dialog.repaint();
@@ -132,7 +135,6 @@ public class ConfigureItem extends XPage {
     }
 
     public synchronized void listPressed() {
-        EventObject eo = getCurrentEvent();
         showItem();
         m_dialog.repaint();
         return;
@@ -158,19 +160,12 @@ public class ConfigureItem extends XPage {
         GenericValue gv = m_pcw.getProduct();
         listModel.addElement(gv.get("description"));
 
-        List questions = m_pcw.getQuestions();
-        if (questions==null) ; // no questions, we shouldn't be here
-        else{
-            Iterator iter = questions.iterator();
-            while (iter.hasNext()) {
-                ConfigItem question = (ConfigItem)iter.next();
-                List options = question.getOptions();
-                Iterator itero = options.iterator();
-                while (itero.hasNext()) {
-                    ConfigOption configoption = (ConfigOption)itero.next();
-                    if (configoption.isSelected()) {
-                        listModel.addElement("  "+configoption.getDescription());
-                    }
+        List<ConfigItem> questions = m_pcw.getQuestions();
+        for (ConfigItem question : questions) {
+            List<ConfigOption> options = question.getOptions();
+            for (ConfigOption configoption : options) {
+                if (configoption.isSelected()) {
+                    listModel.addElement("  "+configoption.getDescription());
                 }
             }
         }
@@ -181,17 +176,17 @@ public class ConfigureItem extends XPage {
     private void displayQuestions() {
 
         QuestionFactory qf = new QuestionFactory();
-        questionHashMap = new Hashtable();
+        questionHashMap = FastMap.newInstance();
 
-        List questions = m_pcw.getQuestions();
-        if (questions==null) ; // no questions, we shouldn't be here
-        else{
-            Iterator iter = questions.iterator();
-            Iterator buttons = m_buttonList.iterator();
+        List<ConfigItem> questions = m_pcw.getQuestions();
+        
+        if (questions != null) {
+            Iterator<ConfigItem> iter = questions.iterator();
+            Iterator<XButton> buttons = m_buttonList.iterator();
             while (iter.hasNext()) {
-                Question buttonQuestion = qf.get((ConfigItem)iter.next());
-                XButton button = (XButton)buttons.next();
-                questionHashMap.put(button.getName(), buttonQuestion );
+                Question buttonQuestion = qf.get(iter.next());
+                XButton button = buttons.next();
+                questionHashMap.put(button.getName(), buttonQuestion);
                 buttonQuestion.setupButton(button);
                 if (buttonQuestion instanceof ListQuestion) {
                     ((ListQuestion)buttonQuestion).setupListPane(m_optionListPane);
@@ -203,8 +198,8 @@ public class ConfigureItem extends XPage {
     }
 
     private void getButtons() {
-        ArrayList buttonList = new ArrayList();
-        for(String[] buttonSingleArray : buttonArray ) {
+        ArrayList<XButton> buttonList = new ArrayList<XButton>();
+        for(String[] buttonSingleArray : buttonArray) {
             for(String buttonName : buttonSingleArray) {
                 //Debug.logInfo("ButtonName: "+buttonName, module);
                 XButton button = (XButton) m_dialog.findComponent(buttonName);
@@ -214,37 +209,37 @@ public class ConfigureItem extends XPage {
         m_buttonList = buttonList;
     }
 
-    private void debugQuestions() {
-        //Debug.logInfo("debugQuestions",module);
-        GenericValue gv = m_pcw.getProduct();
-
-        //Debug.logInfo("Product: " +gv.get("description"), module);
-
-        List questions = m_pcw.getQuestions();
-        if (questions==null) return; // no questions, return
-
-        Iterator iter = questions.iterator();
-        while (iter.hasNext()) {
-            ConfigItem question = (ConfigItem)iter.next();
-            /*Debug.logInfo("Question: " + question.getQuestion(), module);
-            Debug.logInfo("IsFirst: "+question.isFirst()+
-                    ", IsMandatory: "+question.isMandatory()+
-                    ", IsSelected: "+question.isSelected()+
-                    ", IsSingleChoice: "+question.isSingleChoice()+
-                    ", IsStandard: "+question.isStandard(), module);*/
-
-            List options = question.getOptions();
-            Iterator itero = options.iterator();
-
-            while (itero.hasNext()) {
-                ConfigOption configoption = (ConfigOption)itero.next();
-                /*Debug.logInfo("Found option " + configoption.getDescription(), module);
-                Debug.logInfo("IsAvailable: "+configoption.isAvailable()+
-                    ", IsSelected: "+configoption.isSelected(), module);*/
-                //configoption.getComponents()
-            }
-        }
-    }
+//    private void debugQuestions() {
+//        //Debug.logInfo("debugQuestions",module);
+//        GenericValue gv = m_pcw.getProduct();
+//
+//        //Debug.logInfo("Product: " +gv.get("description"), module);
+//
+//        List questions = m_pcw.getQuestions();
+//        if (questions==null) return; // no questions, return
+//
+//        Iterator iter = questions.iterator();
+//        while (iter.hasNext()) {
+//            ConfigItem question = (ConfigItem)iter.next();
+//            /*Debug.logInfo("Question: " + question.getQuestion(), module);
+//            Debug.logInfo("IsFirst: "+question.isFirst()+
+//                    ", IsMandatory: "+question.isMandatory()+
+//                    ", IsSelected: "+question.isSelected()+
+//                    ", IsSingleChoice: "+question.isSingleChoice()+
+//                    ", IsStandard: "+question.isStandard(), module);*/
+//
+//            List options = question.getOptions();
+//            Iterator itero = options.iterator();
+//
+//            while (itero.hasNext()) {
+//                ConfigOption configoption = (ConfigOption)itero.next();
+//                /*Debug.logInfo("Found option " + configoption.getDescription(), module);
+//                Debug.logInfo("IsAvailable: "+configoption.isAvailable()+
+//                    ", IsSelected: "+configoption.isSelected(), module);*/
+//                //configoption.getComponents()
+//            }
+//        }
+//    }
 
     /*
      *  What are the Question types?
@@ -271,7 +266,7 @@ public class ConfigureItem extends XPage {
 
         public Question get(ConfigItem question) {
 
-            List options = question.getOptions();
+            List<ConfigOption> options = question.getOptions();
             if (question.isSingleChoice()) {
                 if (options.size()>2) {
                    return new ListButtonQuestion(question);
@@ -310,12 +305,12 @@ public class ConfigureItem extends XPage {
 
         public void setupButton(XButton button) {
             this.button = button;
-            List options = question.getOptions();
+            List<ConfigOption> options = question.getOptions();
             if (question.isSelected()) {
                 ConfigOption selectedOption = question.getSelected();
                 showOption = options.indexOf(selectedOption);
             }
-            ConfigOption configoption = (ConfigOption)options.get(showOption);
+            ConfigOption configoption = options.get(showOption);
             button.setText(configoption.getDescription());
             return;
         }
@@ -326,11 +321,11 @@ public class ConfigureItem extends XPage {
 
         public void buttonClicked() {
             //only two choices, if the button is clicked, toggle
-            List options = question.getOptions();
-            ConfigOption unselectedoption = (ConfigOption)options.get(showOption);
+            List<ConfigOption> options = question.getOptions();
+            ConfigOption unselectedoption = options.get(showOption);
             unselectedoption.setSelected(false);
             showOption = (showOption+1)%2;
-            ConfigOption selectedoption = (ConfigOption)options.get(showOption);
+            ConfigOption selectedoption = options.get(showOption);
             selectedoption.setSelected(true);
             button.setText(selectedoption.getDescription());
             return;
@@ -338,19 +333,19 @@ public class ConfigureItem extends XPage {
 
         public void reset() {
             showOption = 0;
-            List options = question.getOptions();
+            List<ConfigOption> options = question.getOptions();
             if (question.isSelected()) {
                 ConfigOption selectedOption = question.getSelected();
                 showOption = options.indexOf(selectedOption);
             }
-            ConfigOption configoption = (ConfigOption)options.get(showOption);
+            ConfigOption configoption = options.get(showOption);
             button.setText(configoption.getDescription());
             return;
         }
     }
 
     protected class ListButtonQuestion implements Question, ListQuestion{
-        private XButton button = null;
+        private XButton button = null; // FIXME a bit weird, but I have no time to clean it up...
         private XScrollPane scrollpane = null;
         private ConfigItem question = null;
 
@@ -359,9 +354,12 @@ public class ConfigureItem extends XPage {
             return;
         }
 
+        public XButton getButton() {
+            return this.button;
+        }
+        
         public void setupButton(XButton button) {
             this.button = button;
-            int showOption = 0;
             button.setText(question.getQuestion());
             return;
         }
@@ -372,12 +370,10 @@ public class ConfigureItem extends XPage {
         }
 
         public void buttonClicked() {
-            Iterator options = question.getOptions().iterator();
-
             DefaultListModel listModel = new DefaultListModel();
+            List<ConfigOption> options = question.getOptions();
 
-            while (options.hasNext()) {
-                ConfigOption configoption = (ConfigOption)options.next();
+            for (ConfigOption configoption : options) {
                 listModel.addElement(configoption.getDescription());
                 //Debug.logInfo("Found option " + configoption.getDescription(), module);
                 //Debug.logInfo("IsAvailable: "+configoption.isAvailable()+
@@ -416,7 +412,7 @@ public class ConfigureItem extends XPage {
                     //for(int i: selected) {
                     //    Debug.logInfo(""+i, module);
                     //}
-                    List<ConfigOption> options = (List<ConfigOption>)question.getOptions();
+                    List<ConfigOption> options = question.getOptions();
                     for (ConfigOption option: options) {
                         option.setSelected(false);
                     }

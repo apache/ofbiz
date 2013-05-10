@@ -25,8 +25,6 @@ under the License.
   <!-- ========================================================= -->
     <title>Entity of an Open For Business Project Component</title>
     <description>None</description>
-    <copyright>Copyright 2001-2008 The Apache Software Foundation</copyright>
-    <author>None</author>
     <version>1.0</version>
 
   <!-- ========================================================= -->
@@ -42,7 +40,7 @@ under the License.
   <!-- ========================================================= -->
 
     <entity entity-name="JobSandbox" package-name="org.ofbiz.service.schedule" title="Job Scheduler Sandbox Entity"
-            sequence-bank-size="100">
+            sequence-bank-size="100" never-cache="true">
         <field name="jobId" type="id-ne"></field>
         <field name="jobName" type="name"></field>
         <field name="runTime" type="date-time"></field>
@@ -53,6 +51,7 @@ under the License.
         <field name="serviceName" type="name"></field>
         <field name="loaderName" type="name"></field>
         <field name="maxRetry" type="numeric"></field>
+        <field name="currentRetryCount" type="numeric"></field>
         <field name="authUserLoginId" type="id-vlong"></field>
         <field name="runAsUser" type="id-vlong"></field>
         <field name="runtimeDataId" type="id"></field>
@@ -64,6 +63,7 @@ under the License.
         <field name="startDateTime" type="date-time"></field>
         <field name="finishDateTime" type="date-time"></field>
         <field name="cancelDateTime" type="date-time"></field>
+        <field name="jobResult" type="value"></field>
         <prim-key field="jobId"/>
         <relation type="one" fk-name="JOB_SNDBX_RECINFO" rel-entity-name="RecurrenceInfo">
             <key-map field-name="recurrenceInfoId"/>
@@ -142,6 +142,7 @@ under the License.
             title="Temporal Expression">
       <field name="tempExprId" type="id-ne"></field>
       <field name="tempExprTypeId" type="id-ne"></field>
+      <field name="description" type="description"></field>
       <field name="date1" type="date-time"></field>
       <field name="date2" type="date-time"></field>
       <field name="integer1" type="numeric"></field>
@@ -156,7 +157,11 @@ under the License.
             title="Temporal Expression Association">
       <field name="fromTempExprId" type="id-ne"><description>The "parent" expression</description></field>
       <field name="toTempExprId" type="id-ne"><description>The "child" expression</description></field>
-      <field name="exprAssocType" type="id"><description>Expression association type. Applies to DIFFERENCE expression types only. Valid values are INCLUDED or EXCLUDED.</description></field>
+      <field name="exprAssocType" type="id"><description>Expression association type.
+         When applied to DIFFERENCE expression types, valid values are INCLUDED or EXCLUDED.
+         When applied to SUBSTITUTION expression types, valid values are INCLUDED, EXCLUDED, or SUBSTITUTE.
+         </description>
+      </field>
       <prim-key field="fromTempExprId"/>
       <prim-key field="toTempExprId"/>
       <relation type="one" fk-name="TEMP_EXPR_FROM" rel-entity-name="TemporalExpression" title="From">

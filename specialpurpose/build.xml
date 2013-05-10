@@ -22,6 +22,8 @@
     <import file="../macros.xml"/>
     <filelist id="specialpurpose-builds" dir="."
         files="
+        appserver/build.xml,
+        jetty/build.xml,
         ecommerce/build.xml,
         pos/build.xml,
         hhfacility/build.xml,
@@ -29,11 +31,15 @@
         oagis/build.xml,
         googlebase/build.xml,
         ebay/build.xml,
+        ebaystore/build.xml,
         projectmgr/build.xml,
+        scrum/build.xml,
         ldap/build.xml,
-        webpos/build.xml"/>
-    <!-- For the old OFBiz Workflow Engine add "workflow/build.xml" to the list above -->
-    <!-- For Shark add "shark/build.xml" to the list above, in the specialpurpose-builds list (after workflow) -->
+        webpos/build.xml
+        googlecheckout/build.xml,
+        birt/build.xml,
+        example/build.xml
+    "/>
 
     <!-- ================================================================== -->
     <!-- Removes all created files and directories                          -->

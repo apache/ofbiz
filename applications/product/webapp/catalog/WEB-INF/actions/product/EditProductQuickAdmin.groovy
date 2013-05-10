@@ -65,16 +65,16 @@ if (removeFeatureTypeId) {
 Iterator iter = addedFeatureTypes.values().iterator();
 while (iter) {
     GenericValue featureType = (GenericValue)iter.next();
-    featuresByType.put(featureType.productFeatureTypeId, featureType.getRelated("ProductFeature", ['description']));
+    featuresByType.put(featureType.productFeatureTypeId, featureType.getRelated("ProductFeature", null, ['description'], false));
 }
 
 context.addedFeatureTypeIds = addedFeatureTypes.keySet();
 context.addedFeatureTypes = addedFeatureTypes;
 context.featuresByType = featuresByType;
 
-productId = request.getParameter("productId");
+productId = parameters.get("productId");
 if (!productId) {
-    productId = request.getParameter("PRODUCT_ID");
+    productId = parameters.get("PRODUCT_ID");
 }
 if (!productId) {
     productId = request.getAttribute("productId");
@@ -111,12 +111,12 @@ if (product) {
             EntityCondition.makeCondition(EntityCondition.makeCondition("showInSelect", EntityOperator.EQUALS, null), EntityOperator.OR, EntityCondition.makeCondition("showInSelect", EntityOperator.NOT_EQUAL, "N")),
             null, ['description'], null, false);
 
-    categoryMembers = product.getRelated("ProductCategoryMember");
+    categoryMembers = product.getRelated("ProductCategoryMember", null, null, false);
     categoryMembers = EntityUtil.filterByDate(categoryMembers);
     context.allCategories = allCategories;
     context.productCategoryMembers = categoryMembers;
 
-    productFeatureAndAppls = product.getRelated("ProductFeatureAndAppl");
+    productFeatureAndAppls = product.getRelated("ProductFeatureAndAppl", null, null, false);
 
     // get standard features for this product
     standardFeatureAppls = EntityUtil.filterByAnd(productFeatureAndAppls, [productFeatureApplTypeId : "STANDARD_FEATURE"]);
@@ -125,7 +125,7 @@ if (product) {
     Iterator standardFeatureApplIter = standardFeatureAppls.iterator();
     while (standardFeatureApplIter) {
         GenericValue standardFeatureAndAppl = (GenericValue) standardFeatureApplIter.next();
-        GenericValue featureType = standardFeatureAndAppl.getRelatedOneCache("ProductFeatureType");
+        GenericValue featureType = standardFeatureAndAppl.getRelatedOne("ProductFeatureType", true);
         productFeatureTypeLookup.put(standardFeatureAndAppl.getString("productFeatureId"), featureType);
         standardFeatureLookup.put(standardFeatureAndAppl.getString("productFeatureId"), standardFeatureAndAppl);
     }
@@ -141,7 +141,7 @@ if (product) {
     Iterator selectableFeatureAndApplIter = selectableFeatureAppls.iterator();
     while (selectableFeatureAndApplIter) {
         GenericValue selectableFeatureAndAppl = (GenericValue) selectableFeatureAndApplIter.next();
-        GenericValue featureType = selectableFeatureAndAppl.getRelatedOneCache("ProductFeatureType");
+        GenericValue featureType = selectableFeatureAndAppl.getRelatedOne("ProductFeatureType", true);
         productFeatureTypeLookup.put(selectableFeatureAndAppl.productFeatureId, featureType);
         selectableFeatureLookup.put(selectableFeatureAndAppl.productFeatureId, selectableFeatureAndAppl);
         selectableFeatureTypes.add(featureType);
@@ -156,7 +156,7 @@ if (product) {
         Iterator distinguishingFeatureIter = distinguishingFeatures.iterator();
         while (distinguishingFeatureIter) {
             distFeature = (GenericValue) distinguishingFeatureIter.next();
-            featureType = distFeature.getRelatedOneCache("ProductFeatureType");
+            featureType = distFeature.getRelatedOne("ProductFeatureType", true);
             if (!productFeatureTypeLookup.containsKey(distFeature.productFeatureId)) {
                 productFeatureTypeLookup.put(distFeature.productFeatureId, featureType);
             }
@@ -218,25 +218,25 @@ if (product) {
     if (!salesThru) {
         salesthru = "[&nbsp;]";
     } else if (salesThru.after(new java.util.Date())) {
-        salesthru = "<div style='color: blue'>[x]</div>";
+        salesthru = "<span style='color: blue'>[x]</span>";
     } else {
-        salesthru = "<div style='color: red'>[x]</div>";
+        salesthru = "<span style='color: red'>[x]</span>";
     }
     context.salesthru = salesthru;
     thrudate = "";
     context.thrudate = thrudate;
 
     // get all variants - associations first
-    productAssocs = product.getRelatedByAnd("MainProductAssoc", [productAssocTypeId : 'PRODUCT_VARIANT']);
+    productAssocs = product.getRelated("MainProductAssoc", [productAssocTypeId : 'PRODUCT_VARIANT'], null, false);
     Iterator productAssocIter = productAssocs.iterator();
     // get shipping dimensions and weights for all the variants
     while (productAssocIter) {
         // now get the variant product
         productAssoc = (GenericValue)productAssocIter.next();
-        assocProduct = productAssoc.getRelatedOne("AssocProduct");
+        assocProduct = productAssoc.getRelatedOne("AssocProduct", false);
         if (assocProduct) {
             assocProducts.add(assocProduct);
-            assocProductFeatureAndAppls = assocProduct.getRelated("ProductFeatureAndAppl");
+            assocProductFeatureAndAppls = assocProduct.getRelated("ProductFeatureAndAppl", null, null, false);
             prodFeaturesFiltered = EntityUtil.filterByAnd(assocProductFeatureAndAppls, [productFeatureTypeId : 'AMOUNT', uomId : 'VLIQ_ozUS']);
             if (prodFeaturesFiltered) {
                 featureFloz.put(assocProduct.productId, ((GenericValue)prodFeaturesFiltered.get(0)).getBigDecimal("numberSpecified"));
@@ -262,19 +262,19 @@ if (product) {
             }
             salesThru = assocProduct.getTimestamp("salesDiscontinuationDate");
             if (!salesThru) {
-                featureSalesThru.put(assocProduct.productId, "<div style='color: blue'>[&nbsp;]</div>");
+                featureSalesThru.put(assocProduct.productId, "<span style='color: blue'>[&nbsp;]</span>");
             } else if (salesThru.after(new java.util.Date())) {
-                featureSalesThru.put(assocProduct.productId, "<div style='color: blue'>[x]</div>");
+                featureSalesThru.put(assocProduct.productId, "<span style='color: blue'>[x]</span>");
             } else {
-                featureSalesThru.put(assocProduct.productId, "<div style='color: red'>[x]</div>");
+                featureSalesThru.put(assocProduct.productId, "<span style='color: red'>[x]</span>");
             }
             java.sql.Timestamp thruDate = productAssoc.getTimestamp("thruDate");
             if (!thruDate) {
-                featureThruDate.put(assocProduct.productId, "<div style='color: blue'>[&nbsp;]</div>");
+                featureThruDate.put(assocProduct.productId, "<span style='color: blue'>[&nbsp;]</span>");
             } else if (thruDate.after(new java.util.Date())) {
-                featureThruDate.put(assocProduct.productId, "<div style='color: blue'>[x]</div>");
+                featureThruDate.put(assocProduct.productId, "<span style='color: blue'>[x]</span>");
             } else {
-                featureThruDate.put(assocProduct.productId, "<div style='color: red'>[x]</div>");
+                featureThruDate.put(assocProduct.productId, "<span style='color: red'>[x]</span>");
             }
 
             prodFeaturesFiltered = EntityUtil.filterByAnd(assocProductFeatureAndAppls, [productFeatureTypeId : productFeatureTypeId]);

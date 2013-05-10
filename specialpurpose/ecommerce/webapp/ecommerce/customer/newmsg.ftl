@@ -18,19 +18,22 @@ under the License.
 -->
 
 <div class="screenlet">
-    <div class="screenlet-header">
+    <div class="screenlet-title-bar">
         <div class="boxlink">
             <#if showMessageLinks?default("false")?upper_case == "TRUE">
                 <a href="<@ofbizUrl>messagelist</@ofbizUrl>" class="submenutextright">${uiLabelMap.EcommerceViewList}</a>
             </#if>
         </div>
-        <div class="boxhead">&nbsp;${pageHeader}</div>
+        <div class="h3">${pageHeader}</div>
     </div>
     <div class="screenlet-body">
       <form name="contactus" method="post" action="<@ofbizUrl>${submitRequest}</@ofbizUrl>" style="margin: 0;">
         <input type="hidden" name="partyIdFrom" value="${userLogin.partyId}"/>
         <input type="hidden" name="contactMechTypeId" value="WEB_ADDRESS"/>
         <input type="hidden" name="communicationEventTypeId" value="WEB_SITE_COMMUNICATI"/>
+        <#if productStore?has_content>
+          <input type="hidden" name="partyIdTo" value="${productStore.payToPartyId?if_exists}"/>
+        </#if>
         <input type="hidden" name="note" value="${Static["org.ofbiz.base.util.UtilHttp"].getFullRequestUrl(request).toString()}"/>
         <#if message?has_content>
           <input type="hidden" name="parentCommEventId" value="${communicationEvent.communicationEventId}"/>
@@ -48,7 +51,7 @@ under the License.
           <tr>
             <td width="5">&nbsp;</td>
             <td align="right"><div class="tableheadtext">${uiLabelMap.CommonFrom}:</div></td>
-            <td><div class="tabletext">&nbsp;${sessionAttributes.autoName?if_exists} [${userLogin.partyId}] (${uiLabelMap.CommonNotYou}?&nbsp;<a href="<@ofbizUrl>autoLogout</@ofbizUrl>" class="buttontext">${uiLabelMap.CommonClickHere}</a>)</div></td>
+            <td><div>&nbsp;${sessionAttributes.autoName?if_exists} [${userLogin.partyId}] (${uiLabelMap.CommonNotYou}?&nbsp;<a href="<@ofbizUrl>autoLogout</@ofbizUrl>" class="buttontext">${uiLabelMap.CommonClickHere}</a>)</div></td>
           </tr>
           <#if partyIdTo?has_content>
             <#assign partyToName = Static["org.ofbiz.party.party.PartyHelper"].getPartyName(delegator, partyIdTo, true)>
@@ -59,7 +62,7 @@ under the License.
             <tr>
               <td width="5">&nbsp;</td>
               <td align="right"><div class="tableheadtext">${uiLabelMap.CommonTo}:</div></td>
-              <td><div class="tabletext">&nbsp;${partyToName}</div></td>
+              <td><div>&nbsp;${partyToName}</div></td>
             </tr>
           </#if>
           <tr>

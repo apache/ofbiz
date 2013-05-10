@@ -21,6 +21,7 @@ package org.ofbiz.pos.component;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Component;
+import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import javax.swing.BorderFactory;
@@ -83,12 +84,7 @@ public class Operator {
         String fontName = titleStyle.getStyleAsString(XStyle.FONT_FACE);
         int fontStyle = titleStyle.getStyleAsInt(XStyle.FONT_WEIGHT);
         int fontSize = titleStyle.getStyleAsInt(XStyle.FONT_SIZE);
-        Font titleFont = null;
-        if (defaultLocale.getLanguage().equals("zh")) { // AWT bug reported at http://n4.nabble.com/Simplified-Chinese-characters-are-displayed-as-square-boxes-in-POS-td165505.html#a165506
-            titleFont = new Font(null, fontStyle, fontSize);
-        } else {
-            titleFont = new Font(fontName, fontStyle, fontSize);
-        }
+        Font titleFont = new Font(fontName, fontStyle, fontSize);
 
         Border base = BorderFactory.createEtchedBorder();
         TitledBorder border = BorderFactory.createTitledBorder(base, this.getFieldTitle(field.getName()),
@@ -106,11 +102,11 @@ public class Operator {
 
         String fieldName = field.getName();
         if (OPER_TOTAL[0].equals(fieldName)) {
-            String total = "0.00";
+            BigDecimal total = BigDecimal.ZERO;
             if (trans != null) {
-                total = UtilFormatOut.formatPrice(trans.getTotalDue());
+                total = trans.getTotalDue();
             }
-            field.setText(total);
+            field.setText(UtilFormatOut.formatPrice(total));
         } else if (OPER_DATE[0].equals(fieldName)) {
             field.setText(sdf.format(new Date()));
         } else if (OPER_EMPL[0].equals(fieldName)) {

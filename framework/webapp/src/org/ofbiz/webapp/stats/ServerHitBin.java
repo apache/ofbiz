@@ -19,11 +19,10 @@
 package org.ofbiz.webapp.stats;
 
 import java.net.InetAddress;
-import java.util.Calendar;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+
 import javax.servlet.http.HttpServletRequest;
 
 import javolution.util.FastList;
@@ -33,10 +32,14 @@ import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilHttp;
 import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.base.util.UtilProperties;
-import org.ofbiz.entity.GenericDelegator;
+import org.ofbiz.base.util.UtilValidate;
+import org.ofbiz.entity.Delegator;
+import org.ofbiz.entity.DelegatorFactory;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
 import org.ofbiz.entity.model.ModelEntity;
+
+import com.ibm.icu.util.Calendar;
 
 /**
  * <p>Counts server hits and tracks statistics for request, events and views
@@ -55,36 +58,30 @@ public class ServerHitBin {
     public static final String[] typeNames = {"", "Request", "Event", "View", "Entity", "Service"};
     public static final String[] typeIds = {"", "REQUEST", "EVENT", "VIEW", "ENTITY", "SERVICE"};
 
-    public static void countRequest(String id, HttpServletRequest request, long startTime, long runningTime, GenericValue userLogin,
-        GenericDelegator delegator) {
-        countHit(id, REQUEST, request, startTime, runningTime, userLogin, delegator);
+    public static void countRequest(String id, HttpServletRequest request, long startTime, long runningTime, GenericValue userLogin) {
+        countHit(id, REQUEST, request, startTime, runningTime, userLogin);
     }
 
-    public static void countEvent(String id, HttpServletRequest request, long startTime, long runningTime, GenericValue userLogin,
-        GenericDelegator delegator) {
-        countHit(id, EVENT, request, startTime, runningTime, userLogin, delegator);
+    public static void countEvent(String id, HttpServletRequest request, long startTime, long runningTime, GenericValue userLogin) {
+        countHit(id, EVENT, request, startTime, runningTime, userLogin);
     }
 
-    public static void countView(String id, HttpServletRequest request, long startTime, long runningTime, GenericValue userLogin,
-        GenericDelegator delegator) {
-        countHit(id, VIEW, request, startTime, runningTime, userLogin, delegator);
+    public static void countView(String id, HttpServletRequest request, long startTime, long runningTime, GenericValue userLogin) {
+        countHit(id, VIEW, request, startTime, runningTime, userLogin);
     }
 
-    public static void countEntity(String id, HttpServletRequest request, long startTime, long runningTime, GenericValue userLogin,
-        GenericDelegator delegator) {
-        countHit(id, ENTITY, request, startTime, runningTime, userLogin, delegator);
+    public static void countEntity(String id, HttpServletRequest request, long startTime, long runningTime, GenericValue userLogin) {
+        countHit(id, ENTITY, request, startTime, runningTime, userLogin);
     }
 
-    public static void countService(String id, HttpServletRequest request, long startTime, long runningTime, GenericValue userLogin,
-        GenericDelegator delegator) {
-        countHit(id, SERVICE, request, startTime, runningTime, userLogin, delegator);
+    public static void countService(String id, HttpServletRequest request, long startTime, long runningTime, GenericValue userLogin) {
+        countHit(id, SERVICE, request, startTime, runningTime, userLogin);
     }
 
-    public static void countHit(String id, int type, HttpServletRequest request, long startTime, long runningTime, GenericValue userLogin,
-        GenericDelegator delegator) {
+    public static void countHit(String id, int type, HttpServletRequest request, long startTime, long runningTime, GenericValue userLogin) {
         // only count hits if enabled, if not specified defaults to false
         if (!"true".equals(UtilProperties.getPropertyValue("serverstats", "stats.enable." + typeIds[type]))) return;
-        countHit(id, type, request, startTime, runningTime, userLogin, delegator, true);
+        countHit(id, type, request, startTime, runningTime, userLogin, true);
     }
 
     public static void advanceAllBins(long toTime) {
@@ -95,25 +92,35 @@ public class ServerHitBin {
         advanceAllBins(toTime, serviceHistory);
     }
 
-    static void advanceAllBins(long toTime, Map binMap) {
-        Iterator entries = binMap.entrySet().iterator();
-
-        while (entries.hasNext()) {
-            Map.Entry entry = (Map.Entry) entries.next();
-
+    static void advanceAllBins(long toTime, Map<String, List<ServerHitBin>> binMap) {
+        for (Map.Entry<String, List<ServerHitBin>> entry  :binMap.entrySet()) {
             if (entry.getValue() != null) {
-                ServerHitBin bin = (ServerHitBin) entry.getValue();
-
-                bin.advanceBin(toTime);
+                for (ServerHitBin bin: entry.getValue()) {
+                    bin.advanceBin(toTime);
+                }
             }
         }
     }
-
-    protected static void countHit(String id, int type, HttpServletRequest request, long startTime, long runningTime, GenericValue userLogin,
-        GenericDelegator delegator, boolean isOriginal) {
-        if (delegator == null) {
-            throw new IllegalArgumentException("The delegator passed to countHit cannot be null");
+    
+    private static String makeIdTenantAware(String id, Delegator delegator) {
+        if (UtilValidate.isNotEmpty(delegator.getDelegatorTenantId())) {
+            return id + "#" + delegator.getDelegatorTenantId();
+        } else {
+            return id;
         }
+    }
+
+    protected static void countHit(String baseId, int type, HttpServletRequest request, long startTime, long runningTime, GenericValue userLogin, boolean isOriginal) {
+        Delegator delegator = (Delegator) request.getAttribute("delegator");
+        if (delegator == null) {
+            String delegatorName = (String) request.getSession().getAttribute("delegatorName");
+            delegator = DelegatorFactory.getDelegator(delegatorName);
+        }
+        if (delegator == null) {
+            throw new IllegalArgumentException("In countHit could not find a delegator or delegatorName to work from");
+        }
+        
+        String id = makeIdTenantAware(baseId, delegator);
 
         ServerHitBin bin = null;
         List<ServerHitBin> binList = null;
@@ -200,57 +207,67 @@ public class ServerHitBin {
                 }
                 if (bin == null) {
                     bin = new ServerHitBin(id, type, true, delegator);
-                    binList.add(0, bin);
+                    if (binList.size() > 0) {
+                        binList.add(0, bin);
+                    } else {
+                        binList.add(bin);
+                    }
                 }
             }
         }
 
         bin.addHit(startTime, runningTime);
-        if (isOriginal && !"GLOBAL".equals(id)) {
-            bin.saveHit(request, startTime, runningTime, userLogin);
+        if (isOriginal && !id.startsWith("GLOBAL")) {
+            try {
+                bin.saveHit(request, startTime, runningTime, userLogin);
+            } catch (GenericEntityException e) {
+                Debug.logWarning("Error saving ServerHit: " + e.toString(), module);
+            }
         }
 
         // count since start global and per id hits
-        if (!"GLOBAL".equals(id))
+        if (!id.startsWith("GLOBAL"))
             countHitSinceStart(id, type, startTime, runningTime, isOriginal, delegator);
 
         // also count hits up the hierarchy if the id contains a '.'
         if (id.indexOf('.') > 0) {
-            countHit(id.substring(0, id.lastIndexOf('.')), type, request, startTime, runningTime, userLogin, delegator, false);
+            countHit(id.substring(0, id.lastIndexOf('.')), type, request, startTime, runningTime, userLogin, false);
         }
 
-        if (isOriginal && !"GLOBAL".equals(id))
-            countHit("GLOBAL", type, request, startTime, runningTime, userLogin, delegator, true);
+        if (isOriginal && !id.startsWith("GLOBAL"))
+            countHit("GLOBAL", type, request, startTime, runningTime, userLogin, true);
     }
 
-    static void countHitSinceStart(String id, int type, long startTime, long runningTime, boolean isOriginal,
-        GenericDelegator delegator) {
+    static void countHitSinceStart(String baseId, int type, long startTime, long runningTime, boolean isOriginal,
+        Delegator delegator) {
         if (delegator == null) {
             throw new IllegalArgumentException("The delegator passed to countHitSinceStart cannot be null");
         }
+
+        String id = makeIdTenantAware(baseId, delegator);
 
         ServerHitBin bin = null;
 
         // save in global, and try to get bin by id
         switch (type) {
         case REQUEST:
-            bin = (ServerHitBin) requestSinceStarted.get(id);
+            bin = requestSinceStarted.get(id);
             break;
 
         case EVENT:
-            bin = (ServerHitBin) eventSinceStarted.get(id);
+            bin = eventSinceStarted.get(id);
             break;
 
         case VIEW:
-            bin = (ServerHitBin) viewSinceStarted.get(id);
+            bin = viewSinceStarted.get(id);
             break;
 
         case ENTITY:
-            bin = (ServerHitBin) entitySinceStarted.get(id);
+            bin = entitySinceStarted.get(id);
             break;
 
         case SERVICE:
-            bin = (ServerHitBin) serviceSinceStarted.get(id);
+            bin = serviceSinceStarted.get(id);
             break;
         }
 
@@ -258,23 +275,23 @@ public class ServerHitBin {
             synchronized (ServerHitBin.class) {
                 switch (type) {
                 case REQUEST:
-                    bin = (ServerHitBin) requestSinceStarted.get(id);
+                    bin = requestSinceStarted.get(id);
                     break;
 
                 case EVENT:
-                    bin = (ServerHitBin) eventSinceStarted.get(id);
+                    bin = eventSinceStarted.get(id);
                     break;
 
                 case VIEW:
-                    bin = (ServerHitBin) viewSinceStarted.get(id);
+                    bin = viewSinceStarted.get(id);
                     break;
 
                 case ENTITY:
-                    bin = (ServerHitBin) entitySinceStarted.get(id);
+                    bin = entitySinceStarted.get(id);
                     break;
 
                 case SERVICE:
-                    bin = (ServerHitBin) serviceSinceStarted.get(id);
+                    bin = serviceSinceStarted.get(id);
                     break;
                 }
 
@@ -325,7 +342,7 @@ public class ServerHitBin {
     public static Map<String, ServerHitBin> entitySinceStarted = FastMap.newInstance();
     public static Map<String, ServerHitBin> serviceSinceStarted = FastMap.newInstance();
 
-    GenericDelegator delegator;
+    Delegator delegator;
     String delegatorName;
     String id;
     int type;
@@ -337,7 +354,7 @@ public class ServerHitBin {
     long minTime;
     long maxTime;
 
-    public ServerHitBin(String id, int type, boolean limitLength, GenericDelegator delegator) {
+    public ServerHitBin(String id, int type, boolean limitLength, Delegator delegator) {
         super();
         if (delegator == null) {
             throw new IllegalArgumentException("The delegator passed to countHitSinceStart cannot be null");
@@ -351,9 +368,9 @@ public class ServerHitBin {
         reset(getEvenStartingTime());
     }
 
-    public GenericDelegator getDelegator() {
+    public Delegator getDelegator() {
         if (this.delegator == null) {
-            this.delegator = GenericDelegator.getGenericDelegator(this.delegatorName);
+            this.delegator = DelegatorFactory.getDelegator(this.delegatorName);
         }
         // if still null, then we have a problem
         if (this.delegator == null) {
@@ -464,7 +481,7 @@ public class ServerHitBin {
 
     /** returns (endTime - startTime)/60000 */
     public double getBinLengthMinutes() {
-        return ((double) this.getBinLength()) / 60000.0;
+        return (this.getBinLength()) / 60000.0;
     }
 
     public long getNumberHits() {
@@ -480,7 +497,7 @@ public class ServerHitBin {
     }
 
     public double getMinTimeSeconds() {
-        return ((double) this.minTime) / 1000.0;
+        return (this.minTime) / 1000.0;
     }
 
     public long getMaxTime() {
@@ -488,7 +505,7 @@ public class ServerHitBin {
     }
 
     public double getMaxTimeSeconds() {
-        return ((double) this.maxTime) / 1000.0;
+        return (this.maxTime) / 1000.0;
     }
 
     public double getAvgTime() {
@@ -501,7 +518,7 @@ public class ServerHitBin {
 
     /** return the hits per minute using the entire length of the bin as returned by getBinLengthMinutes() */
     public double getHitsPerMinute() {
-        return ((double) this.numberHits) / this.getBinLengthMinutes();
+        return (this.numberHits) / this.getBinLengthMinutes();
     }
 
     synchronized void addHit(long startTime, long runningTime) {
@@ -584,7 +601,7 @@ public class ServerHitBin {
         }
     }
 
-    void saveHit(HttpServletRequest request, long startTime, long runningTime, GenericValue userLogin) {
+    void saveHit(HttpServletRequest request, long startTime, long runningTime, GenericValue userLogin) throws GenericEntityException {
         // persist record of hit in ServerHit entity if option turned on
         if (UtilProperties.propertyValueEqualsIgnoreCase("serverstats", "stats.persist." + ServerHitBin.typeIds[type] + ".hit", "true")) {
             // if the hit type is ENTITY and the name contains "ServerHit" don't
@@ -596,24 +613,48 @@ public class ServerHitBin {
             // check for type data before running.
             GenericValue serverHitType = null;
 
-            try {
-                serverHitType = delegator.findByPrimaryKeyCache("ServerHitType", UtilMisc.toMap("hitTypeId", ServerHitBin.typeIds[this.type]));
-            } catch (GenericEntityException e) {
-                Debug.logError(e, module);
-            }
+            serverHitType = delegator.findOne("ServerHitType", UtilMisc.toMap("hitTypeId", ServerHitBin.typeIds[this.type]), true);
             if (serverHitType == null) {
                 // datamodel data not loaded; not storing hit.
                 Debug.logWarning("The datamodel data has not been loaded; cannot find hitTypeId '" + ServerHitBin.typeIds[this.type] + " not storing ServerHit.", module);
                 return;
             }
 
-            String visitId = VisitHandler.getVisitId(request.getSession());
-
-            if (visitId == null || visitId.length() == 0) {
+            GenericValue visit = VisitHandler.getVisit(request.getSession());
+            if (visit == null) {
                 // no visit info stored, so don't store the ServerHit
-                Debug.logWarning("Could not find a visitId, so not storing ServerHit. This is probably a configuration error. If you turn of persistance of visits you should also turn off persistence of hits.", module);
+                Debug.logWarning("Could not find a visitId, so not storing ServerHit. This is probably a configuration error. If you turn off persistance of visits you should also turn off persistence of hits.", module);
                 return;
             }
+            String visitId = visit.getString("visitId");
+            visit = delegator.findOne("Visit", UtilMisc.toMap("visitId", visitId), false);
+            if (visit == null) {
+                // GenericValue stored in client session does not exist in database.
+                Debug.logInfo("The Visit GenericValue stored in the client session does not exist in the database, not storing server hit.", module);
+                return;
+            }
+            
+            Debug.logInfo("Visit delegatorName=" + visit.getDelegator().getDelegatorName() + ", ServerHitBin delegatorName=" + this.delegator.getDelegatorName(), module);
+            
+            /* this isn't needed, the problem was better solved elsewhere, and without adding another query; leaving it here because it might be useful for something in the future
+             * else {
+                try {
+                    // see if the error was caused by a bad visitId, and if so create a new visit and try again
+                    GenericValue freshVisit = delegator.findOne("Visit", false, "visitId", visitId);
+                    if (freshVisit == null) {
+                        Debug.logInfo("Visit with ID [" + visitId + "] does not exist in the database, removing from session and making a new one", module);
+                        // something happened, have a bad visit in the session so remove it and try again
+                        request.getSession().removeAttribute("visit");
+                        visitId = VisitHandler.getVisitId(request.getSession());
+                        Debug.logInfo("After making new Visit the ID is [" + visitId + "]", module);
+                    }
+                } catch (GenericEntityException e) {
+                    // this is an error on the retry and not part of the main flow, so log it and let it go
+                    Debug.logWarning(e, "Error retrying ServerHit: " + e.toString(), module);
+                }                
+                
+            }
+            */
 
             GenericValue serverHit = delegator.makeValue("ServerHit");
 
@@ -667,11 +708,7 @@ public class ServerHitBin {
             // every server hit even with equal startTimes but that could be
             // solved adding a counter to the ServerHit's PK (a counter
             // counting multiple hits at the same startTime).
-            try {
-                serverHit.create();
-            } catch (GenericEntityException e) {
-                Debug.logError(e, "Could not save ServerHit:", module);
-            }
+            serverHit.create();
         }
     }
 }

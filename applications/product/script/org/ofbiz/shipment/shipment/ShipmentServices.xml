@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8" ?>
+<?xml version="1.0" encoding="UTF-8"?>
 <!--
 Licensed to the Apache Software Foundation (ASF) under one
 or more contributor license agreements.  See the NOTICE file
@@ -19,14 +19,9 @@ under the License.
 -->
 
 <simple-methods xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/simple-methods.xsd">
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/simple-methods-v2.xsd">
     <!-- Shipment services -->
     <simple-method method-name="createShipment" short-description="Create Shipment">
-        <check-permission permission="FACILITY" action="_CREATE">
-            <fail-message message="Security Error: to run createShipment you must have the FACILITY_CREATE or FACILITY_ADMIN permission"/>
-        </check-permission>
-        <check-errors/>
-
         <make-value value-field="newEntity" entity-name="Shipment"/>
         <set-nonpk-fields map="parameters" value-field="newEntity"/>
 
@@ -48,48 +43,44 @@ under the License.
             estimatedShipDate: estimatedShipWorkEffId
             estimatedArrivalDate: estimatedArrivalWorkEffId
         -->
-        <!-- always create the WorkEfforts, even if dates aren't specified yet; when they are they will be set in the update service... -->
-
-        <!-- the Ship WorkEffort entity -->
-        <!-- SC 20070816 I am commenting out the shipment work efforts because there seems to be no code
-        <set value="Shipment #${newEntity.shipmentId} Ship" field="shipWorkEffortMap.workEffortName"/>
-        <set value="EVENT" field="shipWorkEffortMap.workEffortTypeId"/>
-        <set value="CAL_TENTATIVE" field="shipWorkEffortMap.currentStatusId"/>
-        <set from-field="parameters.estimatedShipDate" field="shipWorkEffortMap.estimatedStartDate"/>
-        <set from-field="parameters.estimatedShipDate" field="shipWorkEffortMap.estimatedCompletionDate"/>
-        <set from-field="parameters.originFacilityId" field="shipWorkEffortMap.facilityId"/>
-        <set from-field="userLogin.partyId" field="shipWorkEffortMap.quickAssignPartyId"/>
-        <call-service service-name="createWorkEffort" in-map-name="shipWorkEffortMap">
-            <result-to-field result-name="workEffortId" field="newEntity.estimatedShipWorkEffId"/>
-        </call-service>
-        <if-not-empty field="newEntity.partyIdFrom">
-            <set from-field="newEntity.estimatedShipWorkEffId" field="assignPartyToWorkEffortShip.workEffortId"/>
-            <set from-field="newEntity.partyIdFrom" field="assignPartyToWorkEffortShip.partyId"/>
-            <set value="CAL_ATTENDEE" field="assignPartyToWorkEffortShip.roleTypeId"/>
-            <set value="CAL_SENT" field="assignPartyToWorkEffortShip.statusId"/>
-            <call-service service-name="assignPartyToWorkEffort" in-map-name="assignPartyToWorkEffortShip"/>
+        <if-not-empty field="parameters.estimatedShipDate">
+            <set value="Shipment #${newEntity.shipmentId} ${newEntity.primaryOrderId} Ship" field="shipWorkEffortMap.workEffortName"/>
+            <set value="EVENT" field="shipWorkEffortMap.workEffortTypeId"/>
+            <set value="CAL_TENTATIVE" field="shipWorkEffortMap.currentStatusId"/>
+            <set from-field="parameters.estimatedShipDate" field="shipWorkEffortMap.estimatedStartDate"/>
+            <set from-field="parameters.estimatedShipDate" field="shipWorkEffortMap.estimatedCompletionDate"/>
+            <set from-field="parameters.originFacilityId" field="shipWorkEffortMap.facilityId"/>
+            <set from-field="userLogin.partyId" field="shipWorkEffortMap.quickAssignPartyId"/>
+            <call-service service-name="createWorkEffort" in-map-name="shipWorkEffortMap">
+                <result-to-field result-name="workEffortId" field="newEntity.estimatedShipWorkEffId"/>
+            </call-service>
+            <if-not-empty field="newEntity.partyIdFrom">
+                <set from-field="newEntity.estimatedShipWorkEffId" field="assignPartyToWorkEffortShip.workEffortId"/>
+                <set from-field="newEntity.partyIdFrom" field="assignPartyToWorkEffortShip.partyId"/>
+                <set value="CAL_ATTENDEE" field="assignPartyToWorkEffortShip.roleTypeId"/>
+                <set value="CAL_SENT" field="assignPartyToWorkEffortShip.statusId"/>
+                <call-service service-name="assignPartyToWorkEffort" in-map-name="assignPartyToWorkEffortShip"/>
+            </if-not-empty>
         </if-not-empty>
-        -->
-        <!-- the Arrival WorkEffort entity -->
-        <!--
-        <set value="Shipment #${newEntity.shipmentId} Arrival" field="arrivalWorkEffortMap.workEffortName"/>
-        <set value="EVENT" field="arrivalWorkEffortMap.workEffortTypeId"/>
-        <set value="CAL_TENTATIVE" field="arrivalWorkEffortMap.currentStatusId"/>
-        <set from-field="parameters.estimatedArrivalDate" field="arrivalWorkEffortMap.estimatedStartDate"/>
-        <set from-field="parameters.estimatedArrivalDate" field="arrivalWorkEffortMap.estimatedCompletionDate"/>
-        <set from-field="parameters.destinationFacilityId" field="arrivalWorkEffortMap.facilityId"/>
-        <set from-field="userLogin.partyId" field="arrivalWorkEffortMap.quickAssignPartyId"/>
-        <call-service service-name="createWorkEffort" in-map-name="arrivalWorkEffortMap">
-            <result-to-field result-name="workEffortId" field="newEntity.estimatedArrivalWorkEffId"/>
-        </call-service>
-        <if-not-empty field="newEntity.partyIdTo">
-            <set from-field="newEntity.estimatedArrivalWorkEffId" field="assignPartyToWorkEffortArrival.workEffortId"/>
-            <set from-field="newEntity.partyIdTo" field="assignPartyToWorkEffortArrival.partyId"/>
-            <set value="CAL_ATTENDEE" field="assignPartyToWorkEffortArrival.roleTypeId"/>
-            <set value="CAL_SENT" field="assignPartyToWorkEffortArrival.statusId"/>
-            <call-service service-name="assignPartyToWorkEffort" in-map-name="assignPartyToWorkEffortArrival"/>
+        <if-not-empty field="parameters.estimatedArrivalDate">
+            <set value="Shipment #${newEntity.shipmentId} ${newEntity.primaryOrderId} Arrival" field="arrivalWorkEffortMap.workEffortName"/>
+            <set value="EVENT" field="arrivalWorkEffortMap.workEffortTypeId"/>
+            <set value="CAL_TENTATIVE" field="arrivalWorkEffortMap.currentStatusId"/>
+            <set from-field="parameters.estimatedArrivalDate" field="arrivalWorkEffortMap.estimatedStartDate"/>
+            <set from-field="parameters.estimatedArrivalDate" field="arrivalWorkEffortMap.estimatedCompletionDate"/>
+            <set from-field="parameters.destinationFacilityId" field="arrivalWorkEffortMap.facilityId"/>
+            <set from-field="userLogin.partyId" field="arrivalWorkEffortMap.quickAssignPartyId"/>
+            <call-service service-name="createWorkEffort" in-map-name="arrivalWorkEffortMap">
+                <result-to-field result-name="workEffortId" field="newEntity.estimatedArrivalWorkEffId"/>
+            </call-service>
+            <if-not-empty field="newEntity.partyIdTo">
+                <set from-field="newEntity.estimatedArrivalWorkEffId" field="assignPartyToWorkEffortArrival.workEffortId"/>
+                <set from-field="newEntity.partyIdTo" field="assignPartyToWorkEffortArrival.partyId"/>
+                <set value="CAL_ATTENDEE" field="assignPartyToWorkEffortArrival.roleTypeId"/>
+                <set value="CAL_SENT" field="assignPartyToWorkEffortArrival.statusId"/>
+                <call-service service-name="assignPartyToWorkEffort" in-map-name="assignPartyToWorkEffortArrival"/>
+            </if-not-empty>
         </if-not-empty>
-        -->
 
         <create-value value-field="newEntity"/>
 
@@ -103,9 +94,6 @@ under the License.
         </if-not-empty>
     </simple-method>
     <simple-method method-name="updateShipment" short-description="Update Shipment">
-        <check-permission permission="FACILITY" action="_UPDATE">
-            <fail-message message="Security Error: to run updateShipment you must have the FACILITY_UPDATE or FACILITY_ADMIN permission"/>
-        </check-permission>
         <set value="Update Shipment" field="operationName"/>
         <call-simple-method method-name="checkCanChangeShipmentStatusDelivered"/>
 
@@ -126,12 +114,29 @@ under the License.
                 <if-empty field="checkStatusValidChange">
                     <string-to-list string="ERROR: Changing the status from ${lookedUpValue.statusId} to ${parameters.statusId} is not allowed." list="error_list"/>
                 </if-empty>
-
-                <make-value entity-name="ShipmentStatus" value-field="newStatusValue"/>
-                <set from-field="parameters.statusId" field="newStatusValue.statusId"/>
-                <set from-field="parameters.shipmentId" field="newStatusValue.shipmentId"/>
-                <now-timestamp field="newStatusValue.statusDate"/>
-                <create-value value-field="newStatusValue"/>
+                <entity-one entity-name="ShipmentStatus" value-field="shipmentStatus"/>
+                <if-empty field="shipmentStatus">
+                    <make-value entity-name="ShipmentStatus" value-field="newStatusValue"/>
+                    <set from-field="parameters.statusId" field="newStatusValue.statusId"/>
+                    <set from-field="parameters.shipmentId" field="newStatusValue.shipmentId"/>
+                    <now-timestamp field="newStatusValue.statusDate"/>
+                    <if-empty field="parameters.eventDate">
+                        <now-timestamp field="newStatusValue.statusDate"/>
+                    <else>
+                        <set field="newStatusValue.statusDate" from-field="parameters.eventDate"/> 
+                    </else>
+                    </if-empty>
+                    <create-value value-field="newStatusValue"/>
+                <else>
+                    <if-empty field="parameters.eventDate">
+                        <now-timestamp field="shipmentStatus.statusDate"/>
+                    <else>
+                        <set field="shipmentStatus.statusDate" from-field="parameters.eventDate"/> 
+                    </else>
+                    </if-empty>
+                    <store-value value-field="shipmentStatus"/>
+                </else>
+                </if-empty>
             </if-compare-field>
         </if-not-empty>
 
@@ -139,7 +144,6 @@ under the License.
         <check-errors/>
 
         <!-- Check the pickup and delivery dates for changes and update the corresponding WorkEfforts -->
-        <!--
         <if>
             <condition>
                 <or>
@@ -151,17 +155,47 @@ under the License.
                         <not><if-empty field="parameters.originFacilityId"/></not>
                         <if-compare-field field="parameters.originFacilityId" to-field="lookedUpValue.originFacilityId" operator="not-equals"/>
                     </and>
+                    <and>
+                        <not><if-empty field="parameters.statusId"/></not>
+                        <if-compare-field field="parameters.statusId" to-field="lookedUpValue.statusId" operator="not-equals"/>
+                        <or>
+                            <if-compare field="parameters.statusId" value="SHIPMENT_CANCELLED" operator="equals"/>
+                            <if-compare field="parameters.statusId" value="SHIPMENT_PACKED" operator="equals"/>
+                            <if-compare field="parameters.statusId" value="SHIPMENT_SHIPPED" operator="equals"/>
+                        </or>
+                    </and>
                 </or>
             </condition>
             <then>
                 <entity-one entity-name="WorkEffort" value-field="estShipWe" auto-field-map="false">
                     <field-map field-name="workEffortId" from-field="lookedUpValue.estimatedShipWorkEffId"/>
                 </entity-one>
-                <set from-field="parameters.estimatedShipDate" field="estShipWe.estimatedStartDate"/>
-                <set from-field="parameters.estimatedShipDate" field="estShipWe.estimatedCompletionDate"/>
-                <set from-field="parameters.originFacilityId" field="estShipWe.facilityId"/>
-                <set-service-fields service-name="updateWorkEffort" map="estShipWe" to-map="estShipWeUpdMap"/>
-                <call-service service-name="updateWorkEffort" in-map-name="estShipWeUpdMap"/>
+                <if-not-empty field="estShipWe">
+                    <set from-field="parameters.estimatedShipDate" field="estShipWe.estimatedStartDate"/>
+                    <set from-field="parameters.estimatedShipDate" field="estShipWe.estimatedCompletionDate"/>
+                    <set from-field="parameters.originFacilityId" field="estShipWe.facilityId"/>
+                    <if>
+                        <condition>
+                            <and>
+                                <not><if-empty field="parameters.statusId"/></not>
+                                <if-compare-field field="parameters.statusId" to-field="lookedUpValue.statusId" operator="not-equals"/>
+                            </and>
+                        </condition>
+                        <then>
+                            <if-compare field="parameters.statusId" value="SHIPMENT_CANCELLED" operator="equals">
+                                <set value="CAL_CANCELLED" field="estShipWe.currentStatusId"/>
+                            </if-compare>
+                            <if-compare field="parameters.statusId" value="SHIPMENT_PACKED" operator="equals">
+                                <set value="CAL_CONFIRMED" field="estShipWe.currentStatusId"/>
+                            </if-compare>
+                            <if-compare field="parameters.statusId" value="SHIPMENT_SHIPPED" operator="equals">
+                                <set value="CAL_COMPLETED" field="estShipWe.currentStatusId"/>
+                            </if-compare>
+                        </then>
+                    </if>
+                    <set-service-fields service-name="updateWorkEffort" map="estShipWe" to-map="estShipWeUpdMap"/>
+                    <call-service service-name="updateWorkEffort" in-map-name="estShipWeUpdMap"/>
+                </if-not-empty>
             </then>
         </if>
         <if>
@@ -178,16 +212,19 @@ under the License.
                 </or>
             </condition>
             <then>
-                <set from-field="lookedUpValue.estimatedArrivalWorkEffId" field="estimatedArrivalWorkEffortMap.workEffortId"/>
                 <find-by-primary-key entity-name="WorkEffort" map="estimatedArrivalWorkEffortMap" value-field="estimatedArrivalWorkEffort"/>
-                <set from-field="parameters.estimatedArrivalDate" field="estimatedArrivalWorkEffort.estimatedStartDate"/>
-                <set from-field="parameters.estimatedArrivalDate" field="estimatedArrivalWorkEffort.estimatedCompletionDate"/>
-                <set from-field="parameters.destinationFacilityId" field="estimatedArrivalWorkEffort.facilityId"/>
-                <set-service-fields service-name="updateWorkEffort" map="estimatedArrivalWorkEffort" to-map="estimatedArrivalWorkEffortUpdMap"/>
-                <call-service service-name="updateWorkEffort" in-map-name="estimatedArrivalWorkEffortUpdMap"/>
+                <entity-one entity-name="WorkEffort" value-field="estimatedArrivalWorkEffort" auto-field-map="false">
+                    <field-map field-name="workEffortId" from-field="lookedUpValue.estimatedArrivalWorkEffId"/>
+                </entity-one>
+                <if-not-empty field="estimatedArrivalWorkEffort">
+                    <set from-field="parameters.estimatedArrivalDate" field="estimatedArrivalWorkEffort.estimatedStartDate"/>
+                    <set from-field="parameters.estimatedArrivalDate" field="estimatedArrivalWorkEffort.estimatedCompletionDate"/>
+                    <set from-field="parameters.destinationFacilityId" field="estimatedArrivalWorkEffort.facilityId"/>
+                    <set-service-fields service-name="updateWorkEffort" map="estimatedArrivalWorkEffort" to-map="estimatedArrivalWorkEffortUpdMap"/>
+                    <call-service service-name="updateWorkEffort" in-map-name="estimatedArrivalWorkEffortUpdMap"/>
+                </if-not-empty>
             </then>
         </if>
-        -->
 
         <!-- if the partyIdTo or partyIdFrom has changed, add WEPAs -->
         <if>
@@ -244,14 +281,11 @@ under the License.
         <field-to-result field="lookedUpValue.shipmentId" result-name="shipmentId"/>
         <store-value value-field="lookedUpValue"/>
     </simple-method>
+
     <simple-method method-name="deleteShipment" short-description="Delete Shipment">
-        <check-permission permission="FACILITY" action="_DELETE">
-            <fail-message message="Security Error: to run deleteShipment you must have the FACILITY_DELETE or FACILITY_ADMIN permission"/>
-        </check-permission>
         <set value="Delete Shipment" field="operationName"/>
         <call-simple-method method-name="checkCanChangeShipmentStatusPacked"/>
         <check-errors/>
-
         <entity-one entity-name="Shipment" value-field="lookedUpValue"/>
         <remove-value value-field="lookedUpValue"/>
     </simple-method>
@@ -269,7 +303,7 @@ under the License.
         <!-- later different behavior for customer vs. returns would happen here -->
         <if>
             <condition>
-                <if-compare value="CUSTOMER_RETURN" field="returnHeader.returnHeaderTypeId" operator="equals"/>
+                <if-compare field="returnHeader.returnHeaderTypeId" operator="contains" value="CUSTOMER_"/>
             </condition>
             <then>
                 <set field="shipmentCtx.shipmentTypeId" value="SALES_RETURN"/>
@@ -277,7 +311,7 @@ under the License.
             </then>
         <else-if>
             <condition>
-                <if-compare value="VENDOR_RETURN" field="returnHeader.returnHeaderTypeId" operator="equals"/>
+                <if-compare field="returnHeader.returnHeaderTypeId" operator="equals" value="VENDOR_RETURN"/>
             </condition>
             <then>
                 <set field="shipmentCtx.shipmentTypeId" value="PURCHASE_RETURN"/>
@@ -286,7 +320,7 @@ under the License.
         </else-if>
         <else>
              <add-error>
-                <fail-message message="${returnHeader.returnHeaderTypeId} is not supported"/>
+                <fail-property resource="ProductUiLabels" property="FacilityReturnHeaderTypeNotSupported"/>
             </add-error>
             <check-errors/>
         </else>
@@ -364,12 +398,6 @@ under the License.
     </simple-method>
 
     <simple-method method-name="setShipmentSettingsFromPrimaryOrder" short-description="Set Shipment Settings From Primary Order">
-        <check-permission permission="FACILITY" action="_CREATE">
-            <fail-message message="Security Error: to run setShipmentSettingsFromPrimaryOrder you must have the FACILITY_CREATE or FACILITY_ADMIN permission"/>
-        </check-permission>
-        <check-permission permission="FACILITY" action="_UPDATE">
-            <fail-message message="Security Error: to run setShipmentSettingsFromPrimaryOrder you must have the FACILITY_UPDATE or FACILITY_ADMIN permission"/>
-        </check-permission>
         <set value="Set Shipment Settings From Primary Order" field="operationName"/>
         <call-simple-method method-name="checkCanChangeShipmentStatusPacked"/>
         <check-errors/>
@@ -612,12 +640,6 @@ under the License.
     </simple-method>
 
     <simple-method method-name="setShipmentSettingsFromFacilities" short-description="Set Shipment Settings From Facilities">
-        <check-permission permission="FACILITY" action="_CREATE">
-            <fail-message message="Security Error: to run setShipmentSettingsFromFacilities you must have the FACILITY_CREATE or FACILITY_ADMIN permission"/>
-        </check-permission>
-        <check-permission permission="FACILITY" action="_UPDATE">
-            <fail-message message="Security Error: to run setShipmentSettingsFromFacilities you must have the FACILITY_UPDATE or FACILITY_ADMIN permission"/>
-        </check-permission>
         <set value="Set Shipment Settings From Facilities" field="operationName"/>
         <call-simple-method method-name="checkCanChangeShipmentStatusPacked"/>
         <check-errors/>
@@ -679,12 +701,6 @@ under the License.
     </simple-method>
 
     <simple-method method-name="sendShipmentScheduledNotification" short-description="Send Shipment Scheduled Notification">
-        <check-permission permission="FACILITY" action="_CREATE">
-            <alt-permission permission="FACILITY" action="_UPDATE"/>
-            <fail-message message="Security Error: to run createShipmentItem you must have the FACILITY_CREATE, FACILITY_UPDATE or FACILITY_ADMIN permission"/>
-        </check-permission>
-        <check-errors/>
-
         <entity-one entity-name="Shipment" value-field="shipment"/>
 
         <!-- find email address for currently logged in user, set as sendFrom -->
@@ -749,12 +765,6 @@ under the License.
     </simple-method>
 
     <simple-method method-name="balanceItemIssuancesForShipment" short-description="Release the purchase order's items assigned to the shipment but not actually received">
-        <check-permission permission="FACILITY" action="_CREATE">
-            <alt-permission permission="FACILITY" action="_UPDATE"/>
-            <fail-message message="Security Error: to run balanceItemIssuancesForShipment you must have the FACILITY_CREATE, FACILITY_UPDATE or FACILITY_ADMIN permission"/>
-        </check-permission>
-        <check-errors/>
-
         <entity-one entity-name="Shipment" value-field="shipment"/>
         <get-related value-field="shipment" relation-name="ItemIssuance" list="issuances"/>
         <iterate list="issuances" entry="issuance">
@@ -778,9 +788,6 @@ under the License.
 
     <!-- ShipmentItem services -->
     <simple-method method-name="createShipmentItem" short-description="Create ShipmentItem">
-        <check-permission permission="FACILITY" action="_CREATE">
-            <fail-message message="Security Error: to run createShipmentItem you must have the FACILITY_CREATE or FACILITY_ADMIN permission"/>
-        </check-permission>
         <set value="Create ShipmentItem" field="operationName"/>
         <call-simple-method method-name="checkCanChangeShipmentStatusPacked"/>
         <check-errors/>
@@ -794,9 +801,6 @@ under the License.
         <create-value value-field="newEntity"/>
     </simple-method>
     <simple-method method-name="updateShipmentItem" short-description="Update ShipmentItem">
-        <check-permission permission="FACILITY" action="_UPDATE">
-            <fail-message message="Security Error: to run updateShipmentItem you must have the FACILITY_UPDATE or FACILITY_ADMIN permission"/>
-        </check-permission>
         <set value="Update ShipmentItem" field="operationName"/>
         <call-simple-method method-name="checkCanChangeShipmentStatusPacked"/>
         <check-errors/>
@@ -808,17 +812,27 @@ under the License.
         <store-value value-field="lookedUpValue"/>
     </simple-method>
     <simple-method method-name="deleteShipmentItem" short-description="Delete ShipmentItem">
-        <check-permission permission="FACILITY" action="_DELETE">
-            <fail-message message="Security Error: to run deleteShipmentItem you must have the FACILITY_DELETE or FACILITY_ADMIN permission"/>
-        </check-permission>
         <set value="Delete ShipmentItem" field="operationName"/>
         <call-simple-method method-name="checkCanChangeShipmentStatusPacked"/>
         <check-errors/>
-
-        <make-value value-field="lookupPKMap" entity-name="ShipmentItem"/>
-        <set-pk-fields map="parameters" value-field="lookupPKMap"/>
-        <find-by-primary-key entity-name="ShipmentItem" map="lookupPKMap" value-field="lookedUpValue"/>
-        <remove-value value-field="lookedUpValue"/>
+        <!-- If there is any Shipment Package Content available for this Shipment Item then it cannot be deleted as it require 
+                Shipment Package content to be deleted first -->
+        <entity-and entity-name="ShipmentPackageContent" list="shipmentPackageContents">
+            <field-map field-name="shipmentId" from-field="parameters.shipmentId"/>
+            <field-map field-name="shipmentItemSeqId" from-field="parameters.shipmentItemSeqId"/>
+        </entity-and>
+        <if-not-empty field="shipmentPackageContents">
+            <add-error>
+                <fail-property property="ProductErrorShipmentItemCannotBeDeleted" resource="ProductErrorUiLabels"/>
+            </add-error>
+            <check-errors/>
+        <else>
+            <make-value value-field="lookupPKMap" entity-name="ShipmentItem"/>
+            <set-pk-fields map="parameters" value-field="lookupPKMap"/>
+            <find-by-primary-key entity-name="ShipmentItem" map="lookupPKMap" value-field="lookedUpValue"/>
+            <remove-value value-field="lookedUpValue"/>
+        </else>
+        </if-not-empty>
     </simple-method>
 
     <simple-method method-name="splitShipmentItemByQuantity" short-description="splitShipmentItemByQuantity">
@@ -902,9 +916,6 @@ under the License.
 
     <!-- ShipmentPackage services -->
     <simple-method method-name="createShipmentPackage" short-description="Create ShipmentPackage">
-        <check-permission permission="FACILITY" action="_CREATE">
-            <fail-message message="Security Error: to run createShipmentPackage you must have the FACILITY_CREATE or FACILITY_ADMIN permission"/>
-        </check-permission>
         <set value="Create ShipmentPackage" field="operationName"/>
         <call-simple-method method-name="checkCanChangeShipmentStatusPacked"/>
         <check-errors/>
@@ -930,9 +941,6 @@ under the License.
         <call-simple-method method-name="ensurePackageRouteSeg"/>
     </simple-method>
     <simple-method method-name="updateShipmentPackage" short-description="Update ShipmentPackage">
-        <check-permission permission="FACILITY" action="_UPDATE">
-            <fail-message message="Security Error: to run updateShipmentPackage you must have the FACILITY_UPDATE or FACILITY_ADMIN permission"/>
-        </check-permission>
         <set value="Update ShipmentPackage" field="operationName"/>
         <call-simple-method method-name="checkCanChangeShipmentStatusShipped"/>
         <check-errors/>
@@ -948,15 +956,25 @@ under the License.
         <call-simple-method method-name="ensurePackageRouteSeg"/>
     </simple-method>
     <simple-method method-name="deleteShipmentPackage" short-description="Delete ShipmentPackage">
-        <check-permission permission="FACILITY" action="_DELETE">
-            <fail-message message="Security Error: to run deleteShipmentPackage you must have the FACILITY_DELETE or FACILITY_ADMIN permission"/>
-        </check-permission>
         <set value="Delete ShipmentPackage" field="operationName"/>
         <call-simple-method method-name="checkCanChangeShipmentStatusPacked"/>
         <check-errors/>
-
-        <entity-one entity-name="ShipmentPackage" value-field="lookedUpValue"/>
-        <remove-value value-field="lookedUpValue"/>
+        <!-- If there is any Shipment Package Content available for this shipment than Shipment Package cannot be deleted as it require
+             Shipment Package Content to be deleted first -->
+        <entity-and entity-name="ShipmentPackageContent" list="shipmentPackageContents">
+            <field-map field-name="shipmentId" from-field="parameters.shipmentId"/>
+            <field-map field-name="shipmentPackageSeqId" from-field="parameters.shipmentPackageSeqId"/>
+        </entity-and>
+        <if-not-empty field="shipmentPackageContents">
+            <add-error>
+                <fail-property property="ProductErrorShipmentPackageCannotBeDeleted" resource="ProductErrorUiLabels"/>
+            </add-error>
+            <check-errors/>
+        <else>
+            <entity-one entity-name="ShipmentPackage" value-field="lookedUpValue"/>
+            <remove-value value-field="lookedUpValue"/>
+        </else>
+        </if-not-empty>
     </simple-method>
     <simple-method method-name="ensurePackageRouteSeg" short-description="Ensure ShipmentPackageRouteSeg exists for all RouteSegments for this Package">
         <entity-and entity-name="ShipmentRouteSegment" list="shipmentRouteSegments">
@@ -982,9 +1000,6 @@ under the License.
 
     <!-- ShipmentPackageContent services -->
     <simple-method method-name="createShipmentPackageContent" short-description="Create ShipmentPackageContent">
-        <check-permission permission="FACILITY" action="_CREATE">
-            <fail-message message="Security Error: to run createShipmentPackageContent you must have the FACILITY_CREATE or FACILITY_ADMIN permission"/>
-        </check-permission>
         <set value="Create ShipmentPackageContent" field="operationName"/>
         <call-simple-method method-name="checkCanChangeShipmentStatusPacked"/>
         <check-errors/>
@@ -997,9 +1012,6 @@ under the License.
         <field-to-result field="newEntity.shipmentPackageSeqId" result-name="shipmentPackageSeqId"/>
     </simple-method>
     <simple-method method-name="updateShipmentPackageContent" short-description="Update ShipmentPackageContent">
-        <check-permission permission="FACILITY" action="_UPDATE">
-            <fail-message message="Security Error: to run updateShipmentPackageContent you must have the FACILITY_UPDATE or FACILITY_ADMIN permission"/>
-        </check-permission>
         <set value="Update ShipmentPackageContent" field="operationName"/>
         <call-simple-method method-name="checkCanChangeShipmentStatusPacked"/>
         <check-errors/>
@@ -1011,9 +1023,6 @@ under the License.
         <store-value value-field="lookedUpValue"/>
     </simple-method>
     <simple-method method-name="deleteShipmentPackageContent" short-description="Delete ShipmentPackageContent">
-        <check-permission permission="FACILITY" action="_DELETE">
-            <fail-message message="Security Error: to run deleteShipmentPackageContent you must have the FACILITY_DELETE or FACILITY_ADMIN permission"/>
-        </check-permission>
         <set value="Delete ShipmentPackageContent" field="operationName"/>
         <call-simple-method method-name="checkCanChangeShipmentStatusPacked"/>
         <check-errors/>
@@ -1024,9 +1033,6 @@ under the License.
         <remove-value value-field="lookedUpValue"/>
     </simple-method>
     <simple-method method-name="addShipmentContentToPackage" short-description="Add Shipment Content To Package">
-        <check-permission permission="FACILITY" action="_CREATE">
-            <fail-message message="Security Error: to run addShipmentContentToPackage you must have the FACILITY_CREATE or FACILITY_ADMIN permission"/>
-        </check-permission>
         <set value="Create ShipmentPackageContent" field="operationName"/>
         <call-simple-method method-name="checkCanChangeShipmentStatusPacked"/>
         <check-errors/>
@@ -1055,11 +1061,6 @@ under the License.
 
     <!-- ShipmentPackageRouteSeg services -->
     <simple-method method-name="createShipmentPackageRouteSeg" short-description="Create ShipmentPackageRouteSeg">
-        <check-permission permission="FACILITY" action="_CREATE">
-            <fail-message message="Security Error: to run createShipmentPackageRouteSeg you must have the FACILITY_CREATE or FACILITY_ADMIN permission"/>
-        </check-permission>
-        <check-errors/>
-
         <make-value value-field="newEntity" entity-name="ShipmentPackageRouteSeg"/>
         <set-pk-fields map="parameters" value-field="newEntity"/>
         <set-nonpk-fields map="parameters" value-field="newEntity"/>
@@ -1067,11 +1068,6 @@ under the License.
         <create-value value-field="newEntity"/>
     </simple-method>
     <simple-method method-name="updateShipmentPackageRouteSeg" short-description="Update ShipmentPackageRouteSeg">
-        <check-permission permission="FACILITY" action="_UPDATE">
-            <fail-message message="Security Error: to run updateShipmentPackageRouteSeg you must have the FACILITY_UPDATE or FACILITY_ADMIN permission"/>
-        </check-permission>
-        <check-errors/>
-
         <make-value value-field="lookupPKMap" entity-name="ShipmentPackageRouteSeg"/>
         <set-pk-fields map="parameters" value-field="lookupPKMap"/>
         <find-by-primary-key entity-name="ShipmentPackageRouteSeg" map="lookupPKMap" value-field="lookedUpValue"/>
@@ -1079,9 +1075,6 @@ under the License.
         <store-value value-field="lookedUpValue"/>
     </simple-method>
     <simple-method method-name="deleteShipmentPackageRouteSeg" short-description="Delete ShipmentPackageRouteSeg">
-        <check-permission permission="FACILITY" action="_DELETE">
-            <fail-message message="Security Error: to run deleteShipmentPackageRouteSeg you must have the FACILITY_DELETE or FACILITY_ADMIN permission"/>
-        </check-permission>
         <set value="Delete ShipmentPackageRouteSeg" field="operationName"/>
         <call-simple-method method-name="checkCanChangeShipmentStatusPacked"/>
         <check-errors/>
@@ -1094,11 +1087,6 @@ under the License.
 
     <!-- ShipmentContactMech services -->
     <simple-method method-name="createShipmentContactMech" short-description="Create ShipmentContactMech">
-        <check-permission permission="FACILITY" action="_CREATE">
-            <fail-message message="Security Error: to run createShipmentContactMech you must have the FACILITY_CREATE or FACILITY_ADMIN permission"/>
-        </check-permission>
-        <check-errors/>
-
         <make-value value-field="newEntity" entity-name="ShipmentContactMech"/>
         <set-pk-fields map="parameters" value-field="newEntity"/>
         <set-nonpk-fields map="parameters" value-field="newEntity"/>
@@ -1106,11 +1094,6 @@ under the License.
         <create-value value-field="newEntity"/>
     </simple-method>
     <simple-method method-name="updateShipmentContactMech" short-description="Update ShipmentContactMech">
-        <check-permission permission="FACILITY" action="_UPDATE">
-            <fail-message message="Security Error: to run updateShipmentContactMech you must have the FACILITY_UPDATE or FACILITY_ADMIN permission"/>
-        </check-permission>
-        <check-errors/>
-
         <make-value value-field="lookupPKMap" entity-name="ShipmentContactMech"/>
         <set-pk-fields map="parameters" value-field="lookupPKMap"/>
         <find-by-primary-key entity-name="ShipmentContactMech" map="lookupPKMap" value-field="lookedUpValue"/>
@@ -1118,9 +1101,6 @@ under the License.
         <store-value value-field="lookedUpValue"/>
     </simple-method>
     <simple-method method-name="deleteShipmentContactMech" short-description="Delete ShipmentContactMech">
-        <check-permission permission="FACILITY" action="_DELETE">
-            <fail-message message="Security Error: to run deleteShipmentContactMech you must have the FACILITY_DELETE or FACILITY_ADMIN permission"/>
-        </check-permission>
         <set value="Delete ShipmentContactMech" field="operationName"/>
         <call-simple-method method-name="checkCanChangeShipmentStatusPacked"/>
         <check-errors/>
@@ -1133,9 +1113,6 @@ under the License.
 
     <!-- ShipmentRouteSegment services -->
     <simple-method method-name="createShipmentRouteSegment" short-description="Create ShipmentRouteSegment">
-        <check-permission permission="FACILITY" action="_CREATE">
-            <fail-message message="Security Error: to run createShipmentRouteSegment you must have the FACILITY_CREATE or FACILITY_ADMIN permission"/>
-        </check-permission>
         <set value="Create ShipmentRouteSegment" field="operationName"/>
         <call-simple-method method-name="checkCanChangeShipmentStatusPacked"/>
         <check-errors/>
@@ -1159,9 +1136,6 @@ under the License.
         <call-simple-method method-name="ensureRouteSegPackage"/>
     </simple-method>
     <simple-method method-name="updateShipmentRouteSegment" short-description="Update ShipmentRouteSegment">
-        <check-permission permission="FACILITY" action="_UPDATE">
-            <fail-message message="Security Error: to run updateShipmentRouteSegment you must have the FACILITY_UPDATE or FACILITY_ADMIN permission"/>
-        </check-permission>
         <set value="Update ShipmentRouteSegment" field="operationName"/>
         <call-simple-method method-name="checkCanChangeShipmentStatusDelivered"/>
         <check-errors/>
@@ -1183,9 +1157,6 @@ under the License.
         <call-simple-method method-name="ensureRouteSegPackage"/>
     </simple-method>
     <simple-method method-name="deleteShipmentRouteSegment" short-description="Delete ShipmentRouteSegment">
-        <check-permission permission="FACILITY" action="_DELETE">
-            <fail-message message="Security Error: to run deleteShipmentRouteSegment you must have the FACILITY_DELETE or FACILITY_ADMIN permission"/>
-        </check-permission>
         <set value="Delete ShipmentRouteSegment" field="operationName"/>
         <call-simple-method method-name="checkCanChangeShipmentStatusPacked"/>
         <check-errors/>
@@ -1301,7 +1272,9 @@ under the License.
         <entity-one entity-name="OrderHeader" value-field="orderHeader"/>
         <if-empty field="orderHeader.productStoreId">
             <!-- no store cannot use quick ship; throw error -->
-            <add-error><fail-message message="No ProductStore associated with order; cannot use Quick Ship"/></add-error>
+            <add-error>
+                <fail-property resource="ProductUiLabels" property="FacilityShipmentMissingProductStore"/>
+            </add-error>
             <check-errors/>
         </if-empty>
 
@@ -1312,11 +1285,15 @@ under the License.
 
         <if-compare field="productStore.reserveInventory" operator="not-equals" value="Y">
             <!-- no reservations; no shipment; cannot use quick ship -->
-            <add-error><fail-message message="ProductStore [${productStore.productStoreId}] does not reserve inventory; cannot use Quick Ship for Multiple Facilities"/></add-error>
+            <add-error>
+                <fail-property resource="ProductUiLabels" property="FacilityShipmentNotCreatedForNotReserveInventory"/>
+            </add-error>
         </if-compare>
         <if-compare field="productStore.explodeOrderItems" operator="equals" value="Y">
             <!-- can't insert duplicate rows in shipmentPackageContent -->
-            <add-error><fail-message message="ProductStore [${productStore.productStoreId}] explodes order items; cannot use Quick Ship for Multiple Facilities"/></add-error>
+            <add-error>
+                <fail-property resource="ProductUiLabels" property="FacilityShipmentNotCreatedForExplodesOrderItems"/>
+            </add-error>
         </if-compare>
         <check-errors/>
 
@@ -1344,6 +1321,7 @@ under the License.
             </entity-one>
             <!-- should never be empty - referential integrity enforced -->
 
+            <set field="eventDate" from-field="parameters.eventDate"/>
             <call-simple-method method-name="createShipmentForFacilityAndShipGroup"/>
         </iterate>
 
@@ -1352,7 +1330,9 @@ under the License.
         <field-to-result field="successMessageList"/>
 
         <if-empty field="shipmentShipGroupFacilityList">
-            <add-error><fail-message message="Warning: no shipments created; could not find anything ready and needing to be shipped."/></add-error>
+            <add-error>
+                <fail-property resource="ProductUiLabels" property="FacilityShipmentNotCreated"/>
+            </add-error>
         </if-empty>
         <check-errors/>
     </simple-method>
@@ -1426,7 +1406,9 @@ under the License.
 
         <!-- make sure we have something to ship -->
         <if-empty field="orderItemAndShipGroupAssocList">
-            <add-error><fail-message message="No items available to ship at this time"/></add-error>
+            <add-error>
+                <fail-property resource="ProductUiLabels" property="FacilityNoItemsAvailableToShip"/>
+            </add-error>
             <check-errors/>
         </if-empty>
 
@@ -1454,7 +1436,8 @@ under the License.
 
             <!-- make sure we have something to ship -->
             <if-empty field="perShipGroupItemList">
-                <string-to-list string="No items available to ship at this time for ship group ID [${orderItemShipGroup.shipGroupSeqId}]" list="successMessageList"/>
+                <set field="argListNames[]" from-field="orderItemShipGroup.shipGroupSeqId"/>
+                <property-to-field property="FacilityShipmentNoItemsAvailableToShip" resource="ProductUiLabels" field="successMessage" arg-list-name="argListNames"/>
             <else>
                 <!-- create the shipment for this facility and ship group combination -->
                 <set from-field="orderHeader.orderId" field="shipmentContext.primaryOrderId"/>
@@ -1463,6 +1446,36 @@ under the License.
                      for Purchase Shipment, the facilityId parameter is the destinationFacilityId, and the initial status is "CREATED" -->
                 <if><condition><if-compare field="orderHeader.orderTypeId" operator="equals" value="SALES_ORDER"/></condition>
                   <then>
+                    <if-not-empty field="orderItemShipGroup.vendorPartyId">
+                      <set field="partyIdFrom" from-field="orderItemShipGroup.vendorPartyId"/>
+                    <else>
+                      <entity-one entity-name="Facility" value-field="facility" auto-field-map="false">
+                        <field-map field-name="facilityId" from-field="orderItemShipGrpInvResFacilityId"/>
+                      </entity-one>
+                      <if-not-empty field="facility.ownerPartyId">
+                        <set field="partyIdFrom" from-field="facility.ownerPartyId"/>
+                      </if-not-empty>
+                      <if-empty field="partyIdFrom">
+                        <entity-and entity-name="OrderRole" list="orderRoles">
+                          <field-map field-name="orderId" from-field="orderHeader.orderId"/>
+                          <field-map field-name="roleTypeId" value="SHIP_FROM_VENDOR"/>
+                        </entity-and>
+                        <if-not-empty field="orderRoles">
+                          <first-from-list list="orderRoles" entry="orderRole"/>
+                          <set field="partyIdFrom" from-field="orderRole.partyId"/>
+                        <else>
+                          <entity-and entity-name="OrderRole" list="orderRoles">
+                            <field-map field-name="orderId" from-field="orderHeader.orderId"/>
+                            <field-map field-name="roleTypeId" value="BILL_FROM_VENDOR"/>
+                          </entity-and>
+                          <first-from-list list="orderRoles" entry="orderRole"/>
+                          <set field="partyIdFrom" from-field="orderRole.partyId"/>
+                        </else>
+                        </if-not-empty>
+                      </if-empty>
+                    </else>
+                    </if-not-empty>
+                    <set field="shipmentContext.partyIdFrom" from-field="partyIdFrom"/>
                     <set from-field="orderItemShipGrpInvResFacilityId" field="shipmentContext.originFacilityId"/>
                     <set value="SHIPMENT_INPUT" field="shipmentContext.statusId"/>
                   </then>
@@ -1490,6 +1503,7 @@ under the License.
                         <set from-field="itemRes.shipGroupSeqId" field="issueContext.shipGroupSeqId"/>
                         <set from-field="itemRes.inventoryItemId" field="issueContext.inventoryItemId"/>
                         <set from-field="itemRes.quantity" field="issueContext.quantity"/>
+                        <set from-field="eventDate" field="issueContext.eventDate"/>
                         <call-service service-name="issueOrderItemShipGrpInvResToShipment" in-map-name="issueContext"/>
                       </iterate>
                     </iterate>
@@ -1532,6 +1546,7 @@ under the License.
                   <then>
                     <!-- update the shipment status to packed -->
                     <set from-field="shipment.shipmentId" field="packedContext.shipmentId"/>
+                    <set from-field="eventDate" field="packedContext.eventDate"/>
                     <set value="SHIPMENT_PACKED" field="packedContext.statusId"/>
                     <call-service service-name="updateShipment" in-map-name="packedContext"/>
                     <!-- update the shipment status to shipped -->
@@ -1553,7 +1568,10 @@ under the License.
                 <set from-field="facility.facilityId" field="shipmentShipGroupFacility.facilityId"/>
                 <set from-field="orderItemShipGroup.shipGroupSeqId" field="shipmentShipGroupFacility.shipGroupSeqId"/>
                 <field-to-list field="shipmentShipGroupFacility" list="shipmentShipGroupFacilityList"/>
-                <string-to-list string="Created shipment with ID [${shipmentShipGroupFacility.shipmentId}] for ship group ID [${shipmentShipGroupFacility.shipGroupSeqId}] for facility ID [${shipmentShipGroupFacility.facilityId}]" list="successMessageList"/>
+                <set field="argListNames[]" from-field="shipmentShipGroupFacility.shipmentId"/>
+                <set field="argListNames[]" from-field="shipmentShipGroupFacility.shipGroupSeqId"/>
+                <set field="argListNames[]" from-field="shipmentShipGroupFacility.facilityId"/>
+                <property-to-field property="FacilityShipmentIdCreated" resource="ProductUiLabels" field="successMessage" arg-list-name="argListNames"/>
                 <clear-field field="shipmentShipGroupFacility"/>
             </else>
             </if-empty>
@@ -1565,7 +1583,9 @@ under the License.
         <entity-one entity-name="OrderHeader" value-field="orderHeader"/>
         <if-empty field="orderHeader.productStoreId">
             <!-- no store cannot use quick ship; throw error -->
-            <add-error><fail-message message="No ProductStore associated with order; cannot use Quick Ship"/></add-error>
+            <add-error>
+                <fail-property resource="ProductUiLabels" property="FacilityNoQuickShip"/>
+            </add-error>
             <check-errors/>
         </if-empty>
 
@@ -1715,7 +1735,9 @@ under the License.
         <if-empty field="parameters.originFacilityId">
             <if-empty field="orderHeader.productStoreId">
                 <!-- no store cannot use quick ship; throw error -->
-                <add-error><fail-message message="No ProductStore associated with order; cannot use Quick Ship"/></add-error>
+                <add-error>
+                    <fail-property resource="ProductUiLabels" property="FacilityNoQuickShip"/>
+                </add-error>
                 <check-errors/>
             </if-empty>
             <if-not-empty field="orderHeader.productStoreId">
@@ -1726,15 +1748,21 @@ under the License.
 
                 <if-compare field="productStore.reserveInventory" operator="not-equals" value="Y">
                     <!-- no reservations; no shipment; cannot use quick ship -->
-                    <add-error><fail-message message="ProductStore [${productStore.productStoreId}] does not reserve inventory; cannot use Quick Ship"/></add-error>
+                    <add-error>
+                        <fail-property resource="ProductUiLabels" property="FacilityNoQuickShipForNotReserveInventory"/>
+                    </add-error>
                 </if-compare>
                 <if-compare field="productStore.oneInventoryFacility" operator="not-equals" value="Y">
                     <!-- if we allow multiple facilities we cannot use quick ship; throw error -->
-                    <add-error><fail-message message="ProductStore [${productStore.productStoreId}] allows multiple facilities; cannot use Quick Ship"/></add-error>
+                    <add-error>
+                        <fail-property resource="ProductUiLabels" property="FacilityNoQuickShipForMultipleFacilities"/>
+                    </add-error>
                 </if-compare>
                 <if-empty field="productStore.inventoryFacilityId">
                     <!-- if no inventoryFacility is defined we cannot use quick ship; throw error -->
-                    <add-error><fail-message message="No inventory facility associated with ProductStore [${productStore.productStoreId}]; cannot use Quick Ship"/></add-error>
+                    <add-error>
+                        <fail-property resource="ProductUiLabels" property="FacilityNoQuickShipForNotInventoryFacility"/>
+                    </add-error>
                 </if-empty>
                 <check-errors/>
             </if-not-empty>
@@ -1742,7 +1770,9 @@ under the License.
 
         <!-- make sure we have items to issue -->
         <if-empty field="parameters.itemShipList">
-            <add-error><fail-message message="No items available to ship at this time"/></add-error>
+            <add-error>
+                <fail-property resource="ProductUiLabels" property="FacilityNoItemsAvailableToShip"/>
+            </add-error>
             <check-errors/>
         </if-empty>
 
@@ -1835,13 +1865,6 @@ under the License.
     </simple-method>
 
     <simple-method method-name="removeOrderShipmentFromShipment" short-description="Delete an OrderShipment and updates the ShipmentItem">
-        <set value="Delete OrderShipment entry" field="operationName"/>
-        <check-permission permission="FACILITY" action="_CREATE">
-            <fail-message message="Security Error: to run ${operationName} you must have the FACILITY_CREATE or FACILITY_ADMIN permission"/>
-        </check-permission>
-        <check-permission permission="FACILITY" action="_UPDATE">
-            <fail-message message="Security Error: to run ${operationName} you must have the FACILITY_UPDATE or FACILITY_ADMIN permission"/>
-        </check-permission>
         <make-value entity-name="OrderShipment" value-field="lookupPk"/>
         <set-pk-fields value-field="lookupPk" map="parameters"/>
         <find-by-primary-key entity-name="OrderShipment" map="lookupPk" value-field="orderShipment"/>
@@ -1855,6 +1878,7 @@ under the License.
         <set from-field="parameters.shipmentItemSeqId" field="inMap.shipmentItemSeqId"/>
         <set from-field="parameters.orderId" field="inMap.orderId"/>
         <set from-field="parameters.orderItemSeqId" field="inMap.orderItemSeqId"/>
+        <set from-field="parameters.shipGroupSeqId" field="inMap.shipGroupSeqId"/>
         <call-service service-name="deleteOrderShipment" in-map-name="inMap"/>
 
         <calculate field="shipmentItem.quantity">
@@ -1881,14 +1905,6 @@ under the License.
     <!-- for a given order item and quantity it creates (or updates if already exists) an -->
     <!-- entry in the ShipmentPlan. -->
     <simple-method method-name="addOrderShipmentToShipment" short-description="Add or update a ShipmentPlan entry">
-        <set value="Put Ordered Quantity to Shipment Plan" field="operationName"/>
-        <check-permission permission="FACILITY" action="_CREATE">
-            <fail-message message="Security Error: to run ${operationName} you must have the FACILITY_CREATE or FACILITY_ADMIN permission"/>
-        </check-permission>
-        <check-permission permission="FACILITY" action="_UPDATE">
-            <fail-message message="Security Error: to run ${operationName} you must have the FACILITY_UPDATE or FACILITY_ADMIN permission"/>
-        </check-permission>
-
         <!-- if quantity is greater than 0 we add or update the ShipmentPlan -->
         <if-compare field="parameters.quantity" operator="greater" value="0" type="BigDecimal">
 
@@ -1896,11 +1912,6 @@ under the License.
             <make-value entity-name="OrderHeader" value-field="orderHeaderLookupPk"/>
             <set-pk-fields value-field="orderHeaderLookupPk" map="parameters"/>
             <find-by-primary-key map="orderHeaderLookupPk" value-field="orderHeader"/>
-
-            <!-- make sure the order is of orderTypeId: SALES_ORDER -->
-            <if-compare field="orderHeader.orderTypeId" operator="not-equals" value="SALES_ORDER">
-                <string-to-list string="Not adding Order Item to plan for shipment [${parameters.shipmentId}] because the order is not a Sales Order for order [${parameters.orderId}] order item [${parameters.orderItemSeqId}]" list="error_list"/>
-            </if-compare>
 
             <!-- get orderItem -->
             <make-value entity-name="OrderItem" value-field="orderItemLookupPk"/>
@@ -1983,11 +1994,6 @@ under the License.
     </simple-method>
 
     <simple-method method-name="checkCancelItemIssuanceAndOrderShipmentFromShipment" short-description="Check Shipment Items and Cancel Item Issuance and Order Shipment">
-        <set value="Cancel Item Issuance and Order Shipment from a Sales Shipment" field="operationName"/>
-        <check-permission permission="FACILITY" action="_UPDATE">
-            <fail-message message="Security Error: to run ${operationName} you must have the FACILITY_UPDATE or FACILITY_ADMIN permission"/>
-        </check-permission>
-
         <entity-and entity-name="OrderShipment" list="orderShipmentList">
             <field-map field-name="shipmentId" from-field="parameters.shipmentId"/>
         </entity-and>
@@ -2009,10 +2015,6 @@ under the License.
     <!-- QuantityBreak services -->
     <!-- create a new QuantityBreak -->
     <simple-method method-name="createQuantityBreak" short-description="Create a QuoteAttribute">
-        <check-permission permission="FACILITY" action="_CREATE">
-            <fail-property resource="OrderErrorUiLabels" property="OrderSecurityErrorToRunCreateQuantityBreak"/>
-        </check-permission>
-        <check-errors/>
         <make-value value-field="quantityBreak" entity-name="QuantityBreak"/>
         <set-nonpk-fields map="parameters" value-field="quantityBreak"/>
         <sequenced-id sequence-name="QuantityBreak" field="quantityBreak.quantityBreakId"/>
@@ -2022,10 +2024,6 @@ under the License.
 
     <!-- update an existing QuantityBreak -->
     <simple-method method-name="updateQuantityBreak" short-description="Update an existing QuantityBreak">
-        <check-permission permission="FACILITY" action="_CREATE">
-            <fail-property resource="OrderErrorUiLabels" property="OrderSecurityErrorToRunUpdateQuantityBreak"/>
-        </check-permission>
-        <check-errors/>
         <entity-one entity-name="QuantityBreak" value-field="quantityBreak" auto-field-map="true"/>
         <check-errors/>
         <set-nonpk-fields map="parameters" value-field="quantityBreak"/>
@@ -2035,36 +2033,9 @@ under the License.
 
     <!-- remove an existing QuantityBreak -->
     <simple-method method-name="deleteQuantityBreak" short-description="Remove an existing QuantityBreak">
-        <check-permission permission="FACILITY" action="_CREATE">
-            <fail-property resource="OrderErrorUiLabels" property="OrderSecurityErrorToRunRemoveQuantityBreak"/>
-        </check-permission>
-        <check-errors/>
         <entity-one entity-name="QuantityBreak" value-field="quantityBreak" auto-field-map="true"/>
         <check-errors/>
         <remove-value value-field="quantityBreak"/>
-        <check-errors/>
-    </simple-method>
-
-     <!--Service for test Shipment Service -->
-    <simple-method method-name="testCreateShipmentRouteSegment" short-description="Test to create Shipment Route Segment" login-required="false">
-        <log level="info" message="====================Create a Shipment Route Segment test case=========================================="/>
-        <set field="shipRouteSegMap.shipmentId" value="10000"/>
-
-        <entity-one entity-name="UserLogin" value-field="shipRouteSegMap.userLogin">
-            <field-map field-name="userLoginId" value="system"/>
-        </entity-one>
-        <call-service service-name="createShipmentRouteSegment" in-map-name="shipRouteSegMap">
-            <result-to-field result-name="shipmentRouteSegmentId" field="routeSegMap.shipmentRouteSegmentId"/>
-        </call-service>
-        <entity-one entity-name="ShipmentRouteSegment" value-field="shipmentRouteSegment">
-            <field-map field-name="shipmentId" from-field="shipRouteSegMap.shipmentId"/>
-            <field-map field-name="shipmentRouteSegmentId" from-field="routeSegMap.shipmentRouteSegmentId"/>
-        </entity-one>
-        <assert>
-            <not><if-empty field="shipmentRouteSegment"/></not>
-            <if-compare-field field="shipmentRouteSegment.shipmentId" to-field="shipRouteSegMap.shipmentId" operator="equals"/>
-            <if-compare-field field="shipmentRouteSegment.shipmentRouteSegmentId" to-field="routeSegMap.shipmentRouteSegmentId" operator="equals"/>
-        </assert>
         <check-errors/>
     </simple-method>
 </simple-methods>

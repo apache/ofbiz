@@ -29,16 +29,17 @@ import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
+
 import javax.net.ssl.SSLServerSocket;
 
+import org.ofbiz.base.config.GenericConfigException;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.SSLUtil;
-import org.ofbiz.base.util.UtilProperties;
-import org.ofbiz.base.config.GenericConfigException;
 
 /**
  * RMI SSL Server Socket Factory
  */
+@SuppressWarnings("serial")
 public class SSLServerSocketFactory implements RMIServerSocketFactory, Serializable {
 
     public static final String module =  SSLServerSocketFactory.class.getName();
@@ -56,7 +57,6 @@ public class SSLServerSocketFactory implements RMIServerSocketFactory, Serializa
         this.keystore = location;
         this.ksType = type;
         this.ksPass = password;
-        this.alias = alias;
     }
 
     public void setKeyStoreAlias(String alias) {

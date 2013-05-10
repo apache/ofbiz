@@ -19,17 +19,20 @@
 import javolution.util.FastList;
 
 import org.ofbiz.base.util.UtilValidate;
-import org.ofbiz.entity.GenericDelegator;
+import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.model.ModelGroupReader;
 import org.ofbiz.entity.model.ModelReader;
 import org.ofbiz.entity.model.ModelEntity;
 import org.ofbiz.entity.model.ModelViewEntity;
 
 mgr = delegator.getModelGroupReader();
-entityGroups = mgr.getGroupNames(delegator.getDelegatorName()).iterator();
+entityGroups = mgr.getGroupNames(delegator.getDelegatorBaseName()).iterator();
 
 filterByGroupName = parameters.filterByGroupName;
 context.filterByGroupName = filterByGroupName;
+
+filterByEntityName = parameters.filterByEntityName;
+context.filterByEntityName = filterByEntityName;
 
 reader = delegator.getModelReader();
 entities = new TreeSet(reader.getEntityNames());
@@ -41,6 +44,9 @@ entities.each { entityName ->
     entity = reader.getModelEntity(entityName);
 
     if (filterByGroupName && !filterByGroupName.equals(delegator.getEntityGroupName(entity.getEntityName()))) {
+        return;
+    }
+    if (filterByEntityName && !((String)entity.getEntityName()).toUpperCase().contains(filterByEntityName.toUpperCase())) {
         return;
     }
 

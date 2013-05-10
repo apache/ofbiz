@@ -32,10 +32,11 @@ import javax.servlet.http.HttpServletResponse;
 import javolution.util.FastMap;
 
 import org.ofbiz.base.util.Debug;
-import org.ofbiz.entity.GenericDelegator;
-import org.ofbiz.service.GenericDispatcher;
+import org.ofbiz.entity.Delegator;
+import org.ofbiz.entity.DelegatorFactory;
 import org.ofbiz.service.GenericServiceException;
 import org.ofbiz.service.LocalDispatcher;
+import org.ofbiz.service.ServiceContainer;
 import org.ofbiz.service.ServiceUtil;
 import org.ofbiz.webapp.control.ConfigXMLReader.Event;
 import org.ofbiz.webapp.control.ConfigXMLReader.RequestMap;
@@ -46,14 +47,13 @@ import org.ofbiz.webapp.control.ConfigXMLReader.RequestMap;
 public class ServiceStreamHandler implements EventHandler {
 
     public static final String module = ServiceStreamHandler.class.getName();
-    public static final String dispatcherName = "sstream-dispatcher";
     protected LocalDispatcher dispatcher;
-    protected GenericDelegator delegator;
+    protected Delegator delegator;
 
     public void init(ServletContext context) throws EventHandlerException {
         String delegatorName = context.getInitParameter("entityDelegatorName");
-        this.delegator = GenericDelegator.getGenericDelegator(delegatorName);
-        this.dispatcher = GenericDispatcher.getLocalDispatcher(dispatcherName, delegator);
+        this.delegator = DelegatorFactory.getDelegator(delegatorName);
+        this.dispatcher = ServiceContainer.getLocalDispatcher(this.delegator.getDelegatorName(), delegator);
     }
 
     public String invoke(Event event, RequestMap requestMap, HttpServletRequest request, HttpServletResponse response) throws EventHandlerException {
@@ -83,7 +83,7 @@ public class ServiceStreamHandler implements EventHandler {
             outputError(out, e, "Exception thrown in runSync()");
             throw new EventHandlerException(e.getMessage(), e);
         }
-        Debug.log("Received respone: " + resp, module);
+        Debug.logInfo("Received respone: " + resp, module);
         if (ServiceUtil.isError(resp)) {
             outputError(out, null, ServiceUtil.getErrorMessage(resp));
             throw new EventHandlerException(ServiceUtil.getErrorMessage(resp));

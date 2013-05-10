@@ -24,10 +24,11 @@ import java.sql.Timestamp;
 
 import javolution.util.FastList;
 import javolution.util.FastMap;
+import javolution.util.FastSet;
 
 import org.ofbiz.base.util.*;
 import org.ofbiz.entity.condition.*;
-import org.ofbiz.entity.GenericDelegator;
+import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
 import org.ofbiz.entity.util.EntityUtil;
@@ -45,61 +46,61 @@ public class RequirementServices {
     public static final String module = RequirementServices.class.getName();
     public static final String resource_error = "OrderErrorUiLabels";
 
-    public static Map getRequirementsForSupplier(DispatchContext ctx, Map context) {
-        GenericDelegator delegator = ctx.getDelegator();
+    public static Map<String, Object> getRequirementsForSupplier(DispatchContext ctx, Map<String, ? extends Object> context) {
+        Delegator delegator = ctx.getDelegator();
         LocalDispatcher dispatcher = ctx.getDispatcher();
         Locale locale = (Locale) context.get("locale");
 
         EntityCondition requirementConditions = (EntityCondition) context.get("requirementConditions");
         String partyId = (String) context.get("partyId");
         String unassignedRequirements = (String) context.get("unassignedRequirements");
-        String currencyUomId = (String) context.get("currencyUomId");
-        List statusIds = (List) context.get("statusIds");
+        List<String> statusIds = UtilGenerics.checkList(context.get("statusIds"));
+        //TODO currencyUomId still not used
+        //String currencyUomId = (String) context.get("currencyUomId");
         try {
-            List orderBy = UtilMisc.toList("partyId", "requirementId");
+            List<String> orderBy = UtilMisc.toList("partyId", "requirementId");
             List<EntityCondition> conditions = UtilMisc.toList(
                     EntityCondition.makeCondition("requirementTypeId", EntityOperator.EQUALS, "PRODUCT_REQUIREMENT"),
                     EntityUtil.getFilterByDateExpr()
-                    );
+                   );
             if (UtilValidate.isNotEmpty(statusIds)) {
-                conditions.add( EntityCondition.makeCondition("statusId", EntityOperator.IN, statusIds) );
+                conditions.add(EntityCondition.makeCondition("statusId", EntityOperator.IN, statusIds));
             } else {
-                conditions.add( EntityCondition.makeCondition("statusId", EntityOperator.EQUALS, "REQ_APPROVED") );
+                conditions.add(EntityCondition.makeCondition("statusId", EntityOperator.EQUALS, "REQ_APPROVED"));
             }
             if (requirementConditions != null) conditions.add(requirementConditions);
 
             // we're either getting the requirements for a given supplier, unassigned requirements, or requirements for all suppliers
             if (UtilValidate.isNotEmpty(partyId)) {
-                conditions.add( EntityCondition.makeCondition("partyId", EntityOperator.EQUALS, partyId) );
-                conditions.add( EntityCondition.makeCondition("roleTypeId", EntityOperator.EQUALS, "SUPPLIER") );
+                conditions.add(EntityCondition.makeCondition("partyId", EntityOperator.EQUALS, partyId));
+                conditions.add(EntityCondition.makeCondition("roleTypeId", EntityOperator.EQUALS, "SUPPLIER"));
             } else if (UtilValidate.isNotEmpty(unassignedRequirements)) {
-                conditions.add( EntityCondition.makeCondition("partyId", EntityOperator.EQUALS, null) );
+                conditions.add(EntityCondition.makeCondition("partyId", EntityOperator.EQUALS, null));
             } else {
-                conditions.add( EntityCondition.makeCondition("roleTypeId", EntityOperator.EQUALS, "SUPPLIER") );
+                conditions.add(EntityCondition.makeCondition("roleTypeId", EntityOperator.EQUALS, "SUPPLIER"));
             }
 
             EntityConditionList<EntityCondition> ecl = EntityCondition.makeCondition(conditions, EntityOperator.AND);
-            List requirementAndRoles = delegator.findList("RequirementAndRole", ecl, null, orderBy, null, false);
+            List<GenericValue> requirementAndRoles = delegator.findList("RequirementAndRole", ecl, null, orderBy, null, false);
 
             // maps to cache the associated suppliers and products data, so we don't do redundant DB and service requests
             Map<String, GenericValue> suppliers = FastMap.newInstance();
-            Map gids = FastMap.newInstance();
-            Map inventories = FastMap.newInstance();
-            Map productsSold = FastMap.newInstance();
+            Map<String, GenericValue> gids = FastMap.newInstance();
+            Map<String, Map<String, Object>> inventories = FastMap.newInstance();
+            Map<String, BigDecimal> productsSold = FastMap.newInstance();
 
             // to count quantity, running total, and distinct products in list
             BigDecimal quantity = BigDecimal.ZERO;
             BigDecimal amountTotal = BigDecimal.ZERO;
-            Set products = new HashSet();
+            Set<String> products = FastSet.newInstance();
 
             // time period to count products ordered from, six months ago and the 1st of that month
             Timestamp timePeriodStart = UtilDateTime.getMonthStart(UtilDateTime.nowTimestamp(), 0, -6);
 
             // join in fields with extra data about the suppliers and products
-            List requirements = FastList.newInstance();
-            for (Iterator iter = requirementAndRoles.iterator(); iter.hasNext(); ) {
-                Map union = FastMap.newInstance();
-                GenericValue requirement = (GenericValue) iter.next();
+            List<Map<String, Object>> requirements = FastList.newInstance();
+            for(GenericValue requirement : requirementAndRoles) {
+                Map<String, Object> union = FastMap.newInstance();
                 String productId = requirement.getString("productId");
                 partyId = requirement.getString("partyId");
                 String facilityId = requirement.getString("facilityId");
@@ -107,14 +108,14 @@ public class RequirementServices {
 
                 // get an available supplier product, preferably the one with the smallest minimum quantity to order, followed by price
                 String supplierKey =  partyId + "^" + productId;
-                GenericValue supplierProduct = (GenericValue) suppliers.get(supplierKey);
+                GenericValue supplierProduct = suppliers.get(supplierKey);
                 if (supplierProduct == null) {
                     conditions = UtilMisc.toList(
                             // TODO: it is possible to restrict to quantity > minimumOrderQuantity, but then the entire requirement must be skipped
                             EntityCondition.makeCondition("partyId", EntityOperator.EQUALS, partyId),
                             EntityCondition.makeCondition("productId", EntityOperator.EQUALS, productId),
                             EntityUtil.getFilterByDateExpr("availableFromDate", "availableThruDate")
-                            );
+                           );
                     ecl = EntityCondition.makeCondition(conditions, EntityOperator.AND);
                     List<GenericValue> supplierProducts = delegator.findList("SupplierProduct", ecl, null, UtilMisc.toList("minimumOrderQuantity", "lastPrice"), null, false);
 
@@ -130,9 +131,9 @@ public class RequirementServices {
                 }
 
                 // for good identification, get the UPCA type (UPC code)
-                GenericValue gid = (GenericValue) gids.get(productId);
+                GenericValue gid = gids.get(productId);
                 if (gid == null) {
-                    gid = delegator.findByPrimaryKey("GoodIdentification", UtilMisc.toMap("goodIdentificationTypeId", "UPCA", "productId", requirement.get("productId")));
+                    gid = delegator.findOne("GoodIdentification", UtilMisc.toMap("goodIdentificationTypeId", "UPCA", "productId", requirement.get("productId")), false);
                     gids.put(productId, gid);
                 }
                 if (gid != null) union.put("idValue", gid.get("idValue"));
@@ -140,7 +141,7 @@ public class RequirementServices {
                 // the ATP and QOH quantities
                 if (UtilValidate.isNotEmpty(facilityId)) {
                     String inventoryKey = facilityId + "^" + productId;
-                    Map inventory = (Map) inventories.get(inventoryKey);
+                    Map<String, Object> inventory = inventories.get(inventoryKey);
                     if (inventory == null) {
                         inventory = dispatcher.runSync("getInventoryAvailableByFacility", UtilMisc.toMap("productId", productId, "facilityId", facilityId));
                         if (ServiceUtil.isError(inventory)) {
@@ -155,16 +156,16 @@ public class RequirementServices {
                 }
 
                 // how many of the products were sold (note this is for a fixed time period across all product stores)
-                BigDecimal sold = (BigDecimal) productsSold.get(productId);
+                BigDecimal sold = productsSold.get(productId);
                 if (sold == null) {
-                    EntityCondition prodConditions = EntityCondition.makeCondition( UtilMisc.toList(
+                    EntityCondition prodConditions = EntityCondition.makeCondition(UtilMisc.toList(
                                 EntityCondition.makeCondition("productId", EntityOperator.EQUALS, productId),
                                 EntityCondition.makeCondition("orderTypeId", EntityOperator.EQUALS, "SALES_ORDER"),
                                 EntityCondition.makeCondition("orderStatusId", EntityOperator.NOT_IN, UtilMisc.toList("ORDER_REJECTED", "ORDER_CANCELLED")),
                                 EntityCondition.makeCondition("orderItemStatusId", EntityOperator.NOT_IN, UtilMisc.toList("ITEM_REJECTED", "ITEM_CANCELLED")),
                                 EntityCondition.makeCondition("orderDate", EntityOperator.GREATER_THAN_EQUAL_TO, timePeriodStart)
-                                ), EntityOperator.AND);
-                    GenericValue count = EntityUtil.getFirst( delegator.findList("OrderItemQuantityReportGroupByProduct", prodConditions, UtilMisc.toSet("quantityOrdered"), null, null, false));
+                               ), EntityOperator.AND);
+                    GenericValue count = EntityUtil.getFirst(delegator.findList("OrderItemQuantityReportGroupByProduct", prodConditions, UtilMisc.toSet("quantityOrdered"), null, null, false));
                     if (count != null) {
                         sold = count.getBigDecimal("quantityOrdered");
                         if (sold != null) productsSold.put(productId, sold);
@@ -184,9 +185,9 @@ public class RequirementServices {
                 requirements.add(union);
             }
 
-            Map results = ServiceUtil.returnSuccess();
+            Map<String, Object> results = ServiceUtil.returnSuccess();
             results.put("requirementsForSupplier", requirements);
-            results.put("distinctProductCount", new Integer(products.size()));
+            results.put("distinctProductCount", Integer.valueOf(products.size()));
             results.put("quantityTotal", quantity);
             results.put("amountTotal", amountTotal);
             return results;
@@ -200,30 +201,35 @@ public class RequirementServices {
     }
 
     // note that this service is designed to work only when a sales order status changes from CREATED -> APPROVED because HOLD -> APPROVED is too complex
-    public static Map createAutoRequirementsForOrder(DispatchContext ctx, Map context) {
-        GenericDelegator delegator = ctx.getDelegator();
+    public static Map<String, Object> createAutoRequirementsForOrder(DispatchContext ctx, Map<String, ? extends Object> context) {
+        Delegator delegator = ctx.getDelegator();
         LocalDispatcher dispatcher = ctx.getDispatcher();
         GenericValue userLogin = (GenericValue) context.get("userLogin");
 
         String orderId = (String) context.get("orderId");
         try {
-            GenericValue order = delegator.findByPrimaryKey("OrderHeader", UtilMisc.toMap("orderId", orderId));
-            GenericValue productStore = order.getRelatedOneCache("ProductStore");
+            GenericValue order = delegator.findOne("OrderHeader", UtilMisc.toMap("orderId", orderId), false);
+            GenericValue productStore = order.getRelatedOne("ProductStore", true);
+            if (productStore == null) {
+                Debug.logInfo("ProductStore for order ID " + orderId + " not found, requirements not created", module);
+                return ServiceUtil.returnSuccess();
+            }
             String facilityId = productStore.getString("inventoryFacilityId");
-            List orderItems = order.getRelated("OrderItem");
-            for (Iterator iter = orderItems.iterator(); iter.hasNext(); ) {
-                GenericValue item = (GenericValue) iter.next();
-                GenericValue product = item.getRelatedOne("Product");
+            List<GenericValue> orderItems = order.getRelated("OrderItem", null, null, false);
+            for(GenericValue item : orderItems) {
+                GenericValue product = item.getRelatedOne("Product", false);
                 if (product == null) continue;
-                if (! "PRODRQM_AUTO".equals(product.get("requirementMethodEnumId"))) continue;
-
+                if ((!"PRODRQM_AUTO".equals(product.get("requirementMethodEnumId")) &&
+                        !"PRODRQM_AUTO".equals(productStore.get("requirementMethodEnumId"))) ||
+                        (product.get("requirementMethodEnumId") == null &&
+                           !"PRODRQM_AUTO".equals(productStore.get("requirementMethodEnumId")))) continue;
                 BigDecimal quantity = item.getBigDecimal("quantity");
                 BigDecimal cancelQuantity = item.getBigDecimal("cancelQuantity");
                 BigDecimal required = quantity.subtract(cancelQuantity == null ? BigDecimal.ZERO : cancelQuantity);
                 if (required.compareTo(BigDecimal.ZERO) <= 0) continue;
 
-                Map input = UtilMisc.toMap("userLogin", userLogin, "facilityId", facilityId, "productId", product.get("productId"), "quantity", required, "requirementTypeId", "PRODUCT_REQUIREMENT");
-                Map results = dispatcher.runSync("createRequirement", input);
+                Map<String, Object> input = UtilMisc.toMap("userLogin", userLogin, "facilityId", facilityId, "productId", product.get("productId"), "quantity", required, "requirementTypeId", "PRODUCT_REQUIREMENT");
+                Map<String, Object> results = dispatcher.runSync("createRequirement", input);
                 if (ServiceUtil.isError(results)) return results;
                 String requirementId = (String) results.get("requirementId");
 
@@ -240,8 +246,8 @@ public class RequirementServices {
     }
 
     // note that this service is designed to work only when a sales order status changes from CREATED -> APPROVED because HOLD -> APPROVED is too complex
-    public static Map createATPRequirementsForOrder(DispatchContext ctx, Map context) {
-        GenericDelegator delegator = ctx.getDelegator();
+    public static Map<String, Object> createATPRequirementsForOrder(DispatchContext ctx, Map<String, ? extends Object> context) {
+        Delegator delegator = ctx.getDelegator();
         LocalDispatcher dispatcher = ctx.getDispatcher();
         GenericValue userLogin = (GenericValue) context.get("userLogin");
 
@@ -261,28 +267,35 @@ public class RequirementServices {
          */
         String orderId = (String) context.get("orderId");
         try {
-            GenericValue order = delegator.findByPrimaryKey("OrderHeader", UtilMisc.toMap("orderId", orderId));
-            GenericValue productStore = order.getRelatedOneCache("ProductStore");
+            GenericValue order = delegator.findOne("OrderHeader", UtilMisc.toMap("orderId", orderId), false);
+            GenericValue productStore = order.getRelatedOne("ProductStore", true);
+            if (productStore == null) {
+                Debug.logInfo("ProductStore for order ID " + orderId + " not found, ATP requirements not created", module);
+                return ServiceUtil.returnSuccess();
+            }
             String facilityId = productStore.getString("inventoryFacilityId");
-            List orderItems = order.getRelated("OrderItem");
-            for (Iterator iter = orderItems.iterator(); iter.hasNext(); ) {
-                GenericValue item = (GenericValue) iter.next();
-                GenericValue product = item.getRelatedOne("Product");
+            List<GenericValue> orderItems = order.getRelated("OrderItem", null, null, false);
+            for(GenericValue item : orderItems) {
+                GenericValue product = item.getRelatedOne("Product", false);
                 if (product == null) continue;
-                if (! "PRODRQM_ATP".equals(product.get("requirementMethodEnumId"))) continue;
+
+                if (!("PRODRQM_ATP".equals(product.get("requirementMethodEnumId")) ||
+                        ("PRODRQM_ATP".equals(productStore.get("requirementMethodEnumId")) && product.get("requirementMethodEnumId") == null))) continue;
 
                 BigDecimal quantity = item.getBigDecimal("quantity");
                 BigDecimal cancelQuantity = item.getBigDecimal("cancelQuantity");
                 BigDecimal ordered = quantity.subtract(cancelQuantity == null ? BigDecimal.ZERO : cancelQuantity);
                 if (ordered.compareTo(BigDecimal.ZERO) <= 0) continue;
 
-                // get the minimum stock for this facility (don't do anything if not configured)
-                GenericValue productFacility = delegator.findByPrimaryKey("ProductFacility", UtilMisc.toMap("facilityId", facilityId, "productId", product.get("productId")));
-                if (productFacility == null || productFacility.get("minimumStock") == null) continue;
-                BigDecimal minimumStock = productFacility.getBigDecimal("minimumStock");
+                // get the minimum stock for this facility (if not configured assume a minimum of zero, ie create requirements when it goes into backorder)
+                GenericValue productFacility = delegator.findOne("ProductFacility", UtilMisc.toMap("facilityId", facilityId, "productId", product.get("productId")), false);
+                BigDecimal minimumStock = BigDecimal.ZERO;
+                if (productFacility != null && productFacility.get("minimumStock") != null) {
+                    minimumStock = productFacility.getBigDecimal("minimumStock");
+                }
 
                 // get the facility ATP for product, which should be updated for this item's reservation
-                Map results = dispatcher.runSync("getInventoryAvailableByFacility", UtilMisc.toMap("userLogin", userLogin, "productId", product.get("productId"), "facilityId", facilityId));
+                Map<String, Object> results = dispatcher.runSync("getInventoryAvailableByFacility", UtilMisc.toMap("userLogin", userLogin, "productId", product.get("productId"), "facilityId", facilityId));
                 if (ServiceUtil.isError(results)) return results;
                 BigDecimal atp = ((BigDecimal) results.get("availableToPromiseTotal")); // safe since this is a required OUT param
 
@@ -295,9 +308,8 @@ public class RequirementServices {
                         EntityCondition.makeCondition("statusId", EntityOperator.NOT_EQUAL, "REQ_ORDERED"),
                         EntityCondition.makeCondition("statusId", EntityOperator.NOT_EQUAL, "REQ_REJECTED")),
                         EntityOperator.AND);
-                List requirements = delegator.findList("Requirement", ecl, null, null, null, false);
-                for (Iterator riter = requirements.iterator(); riter.hasNext(); ) {
-                    GenericValue requirement = (GenericValue) riter.next();
+                List<GenericValue> requirements = delegator.findList("Requirement", ecl, null, null, null, false);
+                for(GenericValue requirement : requirements) {
                     pendingRequirements = pendingRequirements.add(requirement.get("quantity") == null ? BigDecimal.ZERO : requirement.getBigDecimal("quantity"));
                 }
 
@@ -306,7 +318,7 @@ public class RequirementServices {
                 BigDecimal required = ordered.compareTo(shortfall) < 0 ? ordered : shortfall;
                 if (required.compareTo(BigDecimal.ZERO) <= 0) continue;
 
-                Map input = UtilMisc.toMap("userLogin", userLogin, "facilityId", facilityId, "productId", product.get("productId"), "quantity", required, "requirementTypeId", "PRODUCT_REQUIREMENT");
+                Map<String, Object> input = UtilMisc.toMap("userLogin", userLogin, "facilityId", facilityId, "productId", product.get("productId"), "quantity", required, "requirementTypeId", "PRODUCT_REQUIREMENT");
                 results = dispatcher.runSync("createRequirement", input);
                 if (ServiceUtil.isError(results)) return results;
                 String requirementId = (String) results.get("requirementId");

@@ -25,13 +25,14 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
+
+import com.ibm.icu.util.Calendar;
 
 /**
  * Utility class for handling java.util.Date, the java.sql data/time classes and related
@@ -75,7 +76,7 @@ public class UtilDateTime {
     }
 
     public static int getIntervalInDays(Timestamp from, Timestamp thru) {
-        return thru != null ? (int) (thru.getTime() - from.getTime()) / (24*60*60*1000) : 0;
+        return thru != null ? (int) ((thru.getTime() - from.getTime()) / (24*60*60*1000)) : 0;
     }
 
     public static Timestamp addDaysToTimestamp(Timestamp start, int days) {
@@ -131,10 +132,10 @@ public class UtilDateTime {
 
         StringBuilder sb = new StringBuilder();
         for (int i = parts.size() - 1; i >= 0 && count > 0; i--) {
-            if (sb.length() > 0) sb.append(", ");
             Double D = parts.get(i);
             double d = D.doubleValue();
             if (d < 1) continue;
+            if (sb.length() > 0) sb.append(", ");
             count--;
             sb.append(count == 0 ? df.format(d) : Integer.toString(D.intValue()));
             sb.append(' ');
@@ -298,7 +299,7 @@ public class UtilDateTime {
         return getWeekEnd(stamp, TimeZone.getDefault(), Locale.getDefault());
     }
 
-    public static java.util.Calendar toCalendar(java.sql.Timestamp stamp) {
+    public static Calendar toCalendar(java.sql.Timestamp stamp) {
         Calendar cal = Calendar.getInstance();
         if (stamp != null) {
             cal.setTimeInMillis(stamp.getTime());
@@ -758,6 +759,10 @@ public class UtilDateTime {
 
     // ----- New methods that take a timezone and locale -- //
 
+    public static Calendar getCalendarInstance(TimeZone timeZone, Locale locale) {
+        return Calendar.getInstance(com.ibm.icu.util.TimeZone.getTimeZone(timeZone.getID()), locale);
+    }
+
     /**
      * Returns a Calendar object initialized to the specified date/time, time zone,
      * and locale.
@@ -769,7 +774,7 @@ public class UtilDateTime {
      * @see java.util.Calendar
      */
     public static Calendar toCalendar(Date date, TimeZone timeZone, Locale locale) {
-        Calendar cal = Calendar.getInstance(timeZone, locale);
+        Calendar cal = getCalendarInstance(timeZone, locale);
         if (date != null) {
             cal.setTime(date);
         }
@@ -822,7 +827,9 @@ public class UtilDateTime {
         tempCal.set(tempCal.get(Calendar.YEAR), tempCal.get(Calendar.MONTH), tempCal.get(Calendar.DAY_OF_MONTH), 23, 59, 59);
         tempCal.add(Calendar.DAY_OF_MONTH, daysLater.intValue());
         Timestamp retStamp = new Timestamp(tempCal.getTimeInMillis());
-        retStamp.setNanos(999999999);
+        retStamp.setNanos(0);
+        //MSSQL datetime field has accuracy of 3 milliseconds and setting the nano seconds cause the date to be rounded to next day
+        //retStamp.setNanos(999999999);
         return retStamp;
     }
 
@@ -846,7 +853,7 @@ public class UtilDateTime {
     }
 
     public static Timestamp getWeekEnd(Timestamp stamp, TimeZone timeZone, Locale locale) {
-    	Timestamp weekStart = getWeekStart(stamp, timeZone, locale);
+        Timestamp weekStart = getWeekStart(stamp, timeZone, locale);
         Calendar tempCal = toCalendar(weekStart, timeZone, locale);
         tempCal.add(Calendar.DAY_OF_MONTH, 6);
         return getDayEnd(new Timestamp(tempCal.getTimeInMillis()), timeZone, locale);
@@ -962,7 +969,7 @@ public class UtilDateTime {
      */
     public static DateFormat toDateFormat(String dateFormat, TimeZone tz, Locale locale) {
         DateFormat df = null;
-        if (dateFormat == null) {
+        if (UtilValidate.isEmpty(dateFormat)) {
             df = DateFormat.getDateInstance(DateFormat.SHORT, locale);
         } else {
             df = new SimpleDateFormat(dateFormat);
@@ -980,7 +987,7 @@ public class UtilDateTime {
      */
     public static DateFormat toDateTimeFormat(String dateTimeFormat, TimeZone tz, Locale locale) {
         DateFormat df = null;
-        if (dateTimeFormat == null) {
+        if (UtilValidate.isEmpty(dateTimeFormat)) {
             df = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.MEDIUM, locale);
         } else {
             df = new SimpleDateFormat(dateTimeFormat);
@@ -998,7 +1005,7 @@ public class UtilDateTime {
      */
     public static DateFormat toTimeFormat(String timeFormat, TimeZone tz, Locale locale) {
         DateFormat df = null;
-        if (timeFormat == null) {
+        if (UtilValidate.isEmpty(timeFormat)) {
             df = DateFormat.getTimeInstance(DateFormat.MEDIUM, locale);
         } else {
             df = new SimpleDateFormat(timeFormat);
@@ -1050,7 +1057,7 @@ public class UtilDateTime {
                     availableTimeZoneList = new LinkedList<TimeZone>();
                     List<String> idList = null;
                     String tzString = UtilProperties.getPropertyValue("general", "timeZones.available");
-                    if (tzString != null && tzString.length() > 0) {
+                    if (UtilValidate.isNotEmpty(tzString)) {
                         idList = StringUtil.split(tzString, ",");
                     } else {
                         idList = Arrays.asList(TimeZone.getAvailableIDs());
@@ -1131,5 +1138,29 @@ public class UtilDateTime {
     public static int getYear(Timestamp stamp, TimeZone timeZone, Locale locale) {
         Calendar cal = UtilDateTime.toCalendar(stamp, timeZone, locale);
         return cal.get(Calendar.YEAR);
+    }
+
+    public static Date getEarliestDate() {
+        Calendar cal = getCalendarInstance(TimeZone.getTimeZone("GMT"), Locale.getDefault());
+        cal.set(Calendar.YEAR, cal.getActualMinimum(Calendar.YEAR));
+        cal.set(Calendar.MONTH, cal.getActualMinimum(Calendar.MONTH));
+        cal.set(Calendar.DAY_OF_MONTH, 1);
+        cal.set(Calendar.HOUR_OF_DAY, 0);
+        cal.set(Calendar.MINUTE, 0);
+        cal.set(Calendar.SECOND, 0);
+        cal.set(Calendar.MILLISECOND, 0);
+        return cal.getTime();
+    }
+
+    public static Date getLatestDate() {
+        Calendar cal = getCalendarInstance(TimeZone.getTimeZone("GMT"), Locale.getDefault());
+        cal.set(Calendar.YEAR, cal.getActualMaximum(Calendar.YEAR));
+        cal.set(Calendar.MONTH, cal.getActualMaximum(Calendar.MONTH));
+        cal.set(Calendar.DAY_OF_MONTH, cal.getActualMaximum(Calendar.DAY_OF_MONTH));
+        cal.set(Calendar.HOUR_OF_DAY, 23);
+        cal.set(Calendar.MINUTE, 59);
+        cal.set(Calendar.SECOND, 59);
+        cal.set(Calendar.MILLISECOND, 999);
+        return cal.getTime();
     }
 }

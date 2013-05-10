@@ -37,7 +37,7 @@ under the License.
         <field name="workReqFulfTypeDescription"><display/></field>
         <field name="statusItemDescription"><display/></field>
         <field name="requirementDescription"><display/></field>
-        <field name="deleteLink" title="${uiLabelMap.CommonEmptyHeader}" widget-style="buttontext">
+        <field name="deleteLink" title=" " widget-style="buttontext">
             <hyperlink target="deleteWorkEffortRequirement" also-hidden="false" description="${uiLabelMap.CommonDelete}">
                 <parameter param-name="workEffortId"/>
                 <parameter param-name="requirementId"/>
@@ -45,7 +45,7 @@ under the License.
         </field>
     </form>
     <form name="AddWorkEffortRequirement" default-map-name="workRequirementFulfillment" target="createWorkEffortRequirement" title="" type="single" extends="EditRequirement"
-        extends-resource="component://order/webapp/ordermgr/requirement/RequirementForms.xml" header-row-style="header-row" default-table-style="basic-table">
+        extends-resource="component://order/widget/ordermgr/RequirementForms.xml" header-row-style="header-row" default-table-style="basic-table">
         <field name="workEffortId"><hidden/></field>
         <field name="requirementId"><lookup target-form-name="/ordermgr/control/LookupRequirement"/></field>
         <field name="workReqFulfTypeId">
@@ -57,9 +57,9 @@ under the License.
         </field>
         <field name="submitButton" title="${uiLabelMap.CommonSave}" widget-style="buttontext"><submit button-type="text-link"/></field>
         <sort-order>
-            <banner left-text-style="tabletext" left-text="${uiLabelMap.WorkEffortBanner5}"/>
+            <banner left-text="${uiLabelMap.WorkEffortBanner5}"/>
             <sort-field name="requirementId"/>
-            <banner left-text-style="tabletext" left-text="${uiLabelMap.WorkEffortBanner6}"/>
+            <banner left-text="${uiLabelMap.WorkEffortBanner6}"/>
             <sort-field name="workReqFulfTypeId"/>
         </sort-order>
     </form>

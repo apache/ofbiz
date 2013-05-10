@@ -47,13 +47,10 @@ under the License.
         <fileset dir="../content/lib" includes="*.jar"/>
         <fileset dir="../content/build/lib" includes="*.jar"/>
         <fileset dir="../party/build/lib" includes="*.jar"/>
+        <fileset dir="lib" includes="*.jar"/>
     </path>
 
-    <!-- ================================================================== -->
-    <!-- Compilation of the source files                                                                                                                         -->
-    <!-- ================================================================== -->
-
-    <target name="classes" depends="prepare">
+    <target name="init">
         <!-- check for applet required classes -->
         <condition property="noapplet" value="ShipmentScaleApplet.java">
             <not>
@@ -64,21 +61,13 @@ under the License.
             </not>
         </condition>
 
-        <javac15>
+        <patternset id="src.exc.set">
             <exclude name="${noapplet}"/>
-        </javac15>
+        </patternset>
     </target>
 
-    <!-- ================================================================== -->
-    <!-- Build JavaDoc                                                      -->
-    <!-- ================================================================== -->
-
-    <target name="docs" depends="prepare-docs">
-        <javadoc packagenames="org.ofbiz.product.*,org.ofbiz.shipment.*"
-                 classpathref="local.class.path"
-                 destdir="${build.dir}/javadocs"
-                 Windowtitle="Open for Business - ${desc}">
-            <sourcepath path="${src.dir}"/>
-        </javadoc>
+    <target name="jar" depends="classes">
+        <main-jar/>
+        <test-jar/>
     </target>
 </project>

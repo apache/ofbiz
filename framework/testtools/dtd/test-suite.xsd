@@ -39,7 +39,7 @@ under the License.
             <xs:choice minOccurs="1" maxOccurs="unbounded">
                 <xs:element ref="test-case"/>
                 <xs:element ref="test-group"/>
-	    </xs:choice>
+        </xs:choice>
             <xs:attributeGroup ref="attlist.test-suite"/>
         </xs:complexType>
     </xs:element>
@@ -77,7 +77,12 @@ under the License.
     </xs:element>
     <xs:attributeGroup name="attlist.junit-test-suite">
         <xs:attribute type="xs:string" name="class-name" use="required">
-            <xs:annotation><xs:documentation>Should extend the junit.framework.TestCase class.</xs:documentation></xs:annotation>
+            <xs:annotation>
+                <xs:documentation>
+                    At minimum should extend the junit.framework.TestCase class. If you want to use a GenericDelegator or 
+                    LocalDispatcher you should extend the OFBizTestCase class and use the ones provided by it.
+                </xs:documentation>
+            </xs:annotation>
         </xs:attribute>
     </xs:attributeGroup>
 
@@ -97,7 +102,14 @@ under the License.
     </xs:element>
     <xs:attributeGroup name="attlist.simple-method-test">
         <xs:attribute type="xs:string" name="location" use="required"/>
-        <xs:attribute type="xs:string" name="name" use="required"/>
+        <xs:attribute type="xs:string" name="name">
+            <xs:annotation>
+                <xs:documentation>
+                    The method-name of the simple-method to execute.  If no name is supplied then all simple-methods from
+                    location with a method-name beginning with "test" will be added as individual tests.
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
     </xs:attributeGroup>
 
     <xs:element name="entity-xml" substitutionGroup="TestCaseTypes">
@@ -117,12 +129,4 @@ under the License.
         </xs:attribute>
     </xs:attributeGroup>
 
-    <xs:element name="jython-test" substitutionGroup="TestCaseTypes">
-        <xs:complexType>
-            <xs:attributeGroup ref="attlist.jython-test"/>
-        </xs:complexType>
-    </xs:element>
-    <xs:attributeGroup name="attlist.jython-test">
-        <xs:attribute type="xs:string" name="script-location" use="required"/>
-    </xs:attributeGroup>
 </xs:schema>

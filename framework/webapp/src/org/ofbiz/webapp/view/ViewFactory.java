@@ -28,6 +28,7 @@ import javolution.util.FastMap;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.GeneralRuntimeException;
 import org.ofbiz.base.util.ObjectType;
+import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.webapp.control.RequestHandler;
 
 /**
@@ -56,7 +57,7 @@ public class ViewFactory {
     }
 
     private void preLoadAll() throws ViewHandlerException {
-        Set<String> handlers = this.requestHandler.getControllerConfig().viewHandlerMap.keySet();
+        Set<String> handlers = this.requestHandler.getControllerConfig().getViewHandlerMap().keySet();
         if (handlers != null) {
             for (String type: handlers) {
                 this.handlers.put(type, this.loadViewHandler(type));
@@ -76,7 +77,7 @@ public class ViewFactory {
     }
 
     public ViewHandler getViewHandler(String type) throws ViewHandlerException {
-        if (type == null || type.length() == 0) {
+        if (UtilValidate.isEmpty(type)) {
             type = "default";
         }
 
@@ -110,7 +111,7 @@ public class ViewFactory {
 
     private ViewHandler loadViewHandler(String type) throws ViewHandlerException {
         ViewHandler handler = null;
-        String handlerClass = this.requestHandler.getControllerConfig().viewHandlerMap.get(type);
+        String handlerClass = this.requestHandler.getControllerConfig().getViewHandlerMap().get(type);
         if (handlerClass == null) {
             throw new ViewHandlerException("Unknown handler type: " + type);
         }

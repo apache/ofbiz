@@ -31,7 +31,7 @@ import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.HttpClient;
 import org.ofbiz.base.util.HttpClientException;
 import org.ofbiz.base.util.UtilGenerics;
-import org.ofbiz.entity.GenericDelegator;
+import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.serialize.XmlSerializer;
 import org.ofbiz.service.DispatchContext;
 import org.ofbiz.service.GenericServiceException;
@@ -54,6 +54,7 @@ public class HttpEngine extends GenericAsyncEngine {
     /**
      * @see org.ofbiz.service.engine.GenericEngine#runSync(java.lang.String, org.ofbiz.service.ModelService, java.util.Map)
      */
+    @Override
     public Map<String, Object> runSync(String localName, ModelService modelService, Map<String, Object> context) throws GenericServiceException {
         DispatchContext dctx = dispatcher.getLocalContext(localName);
         String xmlContext = null;
@@ -81,7 +82,7 @@ public class HttpEngine extends GenericAsyncEngine {
         Map<String, Object> result = null;
         try {
             Object res = XmlSerializer.deserialize(postResult, dctx.getDelegator());
-            if (res instanceof Map)
+            if (res instanceof Map<?, ?>)
                 result = UtilGenerics.checkMap(res);
             else
                 throw new GenericServiceException("Result not an instance of Map.");
@@ -95,8 +96,9 @@ public class HttpEngine extends GenericAsyncEngine {
     /**
      * @see org.ofbiz.service.engine.GenericEngine#runSyncIgnore(java.lang.String, org.ofbiz.service.ModelService, java.util.Map)
      */
+    @Override
     public void runSyncIgnore(String localName, ModelService modelService, Map<String, Object> context) throws GenericServiceException {
-        Map<String, Object> result = runSync(localName, modelService, context);
+        runSync(localName, modelService, context);
     }
 
     /**
@@ -107,7 +109,7 @@ public class HttpEngine extends GenericAsyncEngine {
      */
     public static String httpEngine(HttpServletRequest request, HttpServletResponse response) {
         LocalDispatcher dispatcher = (LocalDispatcher) request.getAttribute("dispatcher");
-        GenericDelegator delegator = (GenericDelegator) request.getAttribute("delegator");
+        Delegator delegator = (Delegator) request.getAttribute("delegator");
 
         String serviceName = request.getParameter("serviceName");
         String serviceMode = request.getParameter("serviceMode");
@@ -127,7 +129,7 @@ public class HttpEngine extends GenericAsyncEngine {
             if (xmlContext != null) {
                 try {
                     Object o = XmlSerializer.deserialize(xmlContext, delegator);
-                    if (o instanceof Map)
+                    if (o instanceof Map<?, ?>)
                         context = UtilGenerics.checkMap(o);
                     else {
                         Debug.logError("Context not an instance of Map error", module);

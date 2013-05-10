@@ -28,11 +28,11 @@ under the License.
     </div>
     <div class="screenlet-body">
         <form name="createProductInCategoryCheckExistingForm" method="post" action="<@ofbizUrl>CreateProductInCategoryCheckExisting</@ofbizUrl>" style="margin: 0;">
-            <input type="hidden" name="productCategoryId" value="${productCategoryId}">
+            <input type="hidden" name="productCategoryId" value="${productCategoryId}" />
             <table cellspacing="0" class="basic-table">
             <#list productFeaturesByTypeMap.keySet() as productFeatureTypeId>
                 <#assign findPftMap = Static["org.ofbiz.base.util.UtilMisc"].toMap("productFeatureTypeId", productFeatureTypeId)>
-                <#assign productFeatureType = delegator.findByPrimaryKeyCache("ProductFeatureType", findPftMap)>
+                <#assign productFeatureType = delegator.findOne("ProductFeatureType", findPftMap, true)>
                 <#assign productFeatures = productFeaturesByTypeMap[productFeatureTypeId]>
                 <tr>
                     <td width="15%">${productFeatureType.description}:</td>
@@ -63,7 +63,18 @@ under the License.
                 </tr>
                 <tr>
                     <td width="15%">${uiLabelMap.ProductDefaultPrice}:</td>
-                    <td><input type="text" name="defaultPrice" size="8"/></td>
+                    <td><input type="text" name="defaultPrice" size="8"/>
+                    <#assign findCurrenciesMap = Static["org.ofbiz.base.util.UtilMisc"].toMap("uomTypeId", "CURRENCY_MEASURE")>
+                    <#assign currencies = delegator.findByAnd('Uom', findCurrenciesMap, null, true) />
+                    <#if currencies?has_content && (currencies?size > 0)>
+                        <select name="currencyUomId">
+                            <option value=""></option>
+                            <#list currencies as currency>
+                                <option value="${currency.uomId}">${currency.get("description",locale)} [${currency.uomId}]</option>
+                            </#list>
+                        </select>
+                    </#if>
+                    </td>
                 </tr>
                 <tr>
                     <td width="15%">${uiLabelMap.ProductAverageCost}:</td>

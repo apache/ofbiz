@@ -21,8 +21,9 @@ package org.ofbiz.product.inventory;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.sql.Timestamp;
-import java.util.Calendar;
+import com.ibm.icu.util.Calendar;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
@@ -33,8 +34,9 @@ import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilDateTime;
 import org.ofbiz.base.util.UtilGenerics;
 import org.ofbiz.base.util.UtilMisc;
+import org.ofbiz.base.util.UtilProperties;
 import org.ofbiz.base.util.UtilValidate;
-import org.ofbiz.entity.GenericDelegator;
+import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
 import org.ofbiz.entity.condition.EntityCondition;
@@ -44,6 +46,7 @@ import org.ofbiz.entity.condition.EntityOperator;
 import org.ofbiz.entity.model.DynamicViewEntity;
 import org.ofbiz.entity.model.ModelKeyMap;
 import org.ofbiz.entity.util.EntityListIterator;
+import org.ofbiz.entity.util.EntityTypeUtil;
 import org.ofbiz.service.DispatchContext;
 import org.ofbiz.service.GenericServiceException;
 import org.ofbiz.service.LocalDispatcher;
@@ -55,25 +58,28 @@ import org.ofbiz.service.ServiceUtil;
 public class InventoryServices {
 
     public final static String module = InventoryServices.class.getName();
-
+    public static final String resource = "ProductUiLabels";
     public static final MathContext generalRounding = new MathContext(10);
 
     public static Map<String, Object> prepareInventoryTransfer(DispatchContext dctx, Map<String, ? extends Object> context) {
-        GenericDelegator delegator = dctx.getDelegator();
+        Delegator delegator = dctx.getDelegator();
         String inventoryItemId = (String) context.get("inventoryItemId");
         BigDecimal xferQty = (BigDecimal) context.get("xferQty");
         GenericValue inventoryItem = null;
         GenericValue newItem = null;
         GenericValue userLogin = (GenericValue) context.get("userLogin");
+        Locale locale = (Locale) context.get("locale");
 
         try {
-            inventoryItem = delegator.findByPrimaryKey("InventoryItem", UtilMisc.toMap("inventoryItemId", inventoryItemId));
+            inventoryItem = delegator.findOne("InventoryItem", UtilMisc.toMap("inventoryItemId", inventoryItemId), false);
         } catch (GenericEntityException e) {
-            return ServiceUtil.returnError("Inventory item lookup problem [" + e.getMessage() + "]");
+            return ServiceUtil.returnError(UtilProperties.getMessage(resource, 
+                    "ProductNotFindInventoryItemWithId", locale) + inventoryItemId);
         }
 
         if (inventoryItem == null) {
-            return ServiceUtil.returnError("Cannot locate inventory item.");
+            return ServiceUtil.returnError(UtilProperties.getMessage(resource, 
+                    "ProductNotFindInventoryItemWithId", locale) + inventoryItemId);
         }
 
         try {
@@ -85,7 +91,9 @@ public class InventoryServices {
                 BigDecimal qoh = inventoryItem.getBigDecimal("quantityOnHandTotal");
 
                 if (atp == null) {
-                    return ServiceUtil.returnError("The request transfer amount is not available, there is no available to promise on the Inventory Item with ID " + inventoryItem.getString("inventoryItemId"));
+                    return ServiceUtil.returnError(UtilProperties.getMessage(resource, 
+                            "ProductInventoryItemATPNotAvailable",
+                            UtilMisc.toMap("inventoryItemId", inventoryItem.getString("inventoryItemId")), locale));
                 }
                 if (qoh == null) {
                     qoh = atp;
@@ -93,7 +101,10 @@ public class InventoryServices {
 
                 // first make sure we have enough to cover the request transfer amount
                 if (xferQty.compareTo(atp) > 0) {
-                    return ServiceUtil.returnError("The request transfer amount is not available, the available to promise [" + atp + "] is not sufficient for the desired transfer quantity [" + xferQty + "] on the Inventory Item with ID " + inventoryItem.getString("inventoryItemId"));
+                    return ServiceUtil.returnError(UtilProperties.getMessage(resource, 
+                            "ProductInventoryItemATPIsNotSufficient",
+                            UtilMisc.toMap("inventoryItemId", inventoryItem.getString("inventoryItemId"),
+                                    "atp", atp, "xferQty", xferQty), locale));
                 }
 
                 /*
@@ -129,21 +140,28 @@ public class InventoryServices {
                     try {
                         Map<String, Object> resultNew = dctx.getDispatcher().runSync("createInventoryItemDetail", createNewDetailMap);
                         if (ServiceUtil.isError(resultNew)) {
-                            return ServiceUtil.returnError("Inventory Item Detail create problem in prepare inventory transfer", null, null, resultNew);
+                            return ServiceUtil.returnError(UtilProperties.getMessage(resource, 
+                                    "ProductInventoryItemDetailCreateProblem", 
+                                    UtilMisc.toMap("errorString", ""), locale), null, null, resultNew);
                         }
                         Map<String, Object> resultUpdate = dctx.getDispatcher().runSync("createInventoryItemDetail", createUpdateDetailMap);
-                        if (ServiceUtil.isError(resultNew)) {
-                            return ServiceUtil.returnError("Inventory Item Detail create problem in prepare inventory transfer", null, null, resultUpdate);
+                        if (ServiceUtil.isError(resultUpdate)) {
+                            return ServiceUtil.returnError(UtilProperties.getMessage(resource, 
+                                    "ProductInventoryItemDetailCreateProblem", 
+                                    UtilMisc.toMap("errorString", ""), locale), null, null, resultUpdate);
                         }
                     } catch (GenericServiceException e1) {
-                        return ServiceUtil.returnError("Inventory Item Detail create problem in prepare inventory transfer: [" + e1.getMessage() + "]");
+                        return ServiceUtil.returnError(UtilProperties.getMessage(resource, 
+                                "ProductInventoryItemDetailCreateProblem", 
+                                UtilMisc.toMap("errorString", e1.getMessage()), locale));
                     }
                 } else {
                     results.put("inventoryItemId", inventoryItem.get("inventoryItemId"));
                 }
             } else if (inventoryType.equals("SERIALIZED_INV_ITEM")) {
                 if (!"INV_AVAILABLE".equals(inventoryItem.getString("statusId"))) {
-                    return ServiceUtil.returnError("Serialized inventory is not available for transfer.");
+                    return ServiceUtil.returnError(UtilProperties.getMessage(resource, 
+                            "ProductSerializedInventoryNotAvailable", locale));
                 }
             }
 
@@ -161,10 +179,14 @@ public class InventoryServices {
                     try {
                         Map<String, Object> result = dctx.getDispatcher().runSync("createInventoryItemDetail", createDetailMap);
                         if (ServiceUtil.isError(result)) {
-                            return ServiceUtil.returnError("Inventory Item Detail create problem in complete inventory transfer", null, null, result);
+                            return ServiceUtil.returnError(UtilProperties.getMessage(resource, 
+                                    "ProductInventoryItemDetailCreateProblem", 
+                                    UtilMisc.toMap("errorString", ""), locale), null, null, result);
                         }
                     } catch (GenericServiceException e1) {
-                        return ServiceUtil.returnError("Inventory Item Detail create problem in complete inventory transfer: [" + e1.getMessage() + "]");
+                        return ServiceUtil.returnError(UtilProperties.getMessage(resource, 
+                                "ProductInventoryItemDetailCreateProblem", 
+                                UtilMisc.toMap("errorString", e1.getMessage()), locale));
                     }
                 }
             } else if (inventoryType.equals("SERIALIZED_INV_ITEM")) {
@@ -184,36 +206,48 @@ public class InventoryServices {
 
             return results;
         } catch (GenericEntityException e) {
-            return ServiceUtil.returnError("Inventory store/create problem [" + e.getMessage() + "]");
+            return ServiceUtil.returnError(UtilProperties.getMessage(resource, 
+                    "ProductInventoryItemStoreProblem", 
+                    UtilMisc.toMap("errorString", e.getMessage()), locale));
         }
     }
 
     public static Map<String, Object> completeInventoryTransfer(DispatchContext dctx, Map<String, ? extends Object> context) {
-        GenericDelegator delegator = dctx.getDelegator();
+        Delegator delegator = dctx.getDelegator();
         String inventoryTransferId = (String) context.get("inventoryTransferId");
+        Timestamp receiveDate = (Timestamp) context.get("receiveDate");
         GenericValue inventoryTransfer = null;
         GenericValue inventoryItem = null;
         GenericValue destinationFacility = null;
         GenericValue userLogin = (GenericValue) context.get("userLogin");
+        Locale locale = (Locale) context.get("locale");
 
         try {
-            inventoryTransfer = delegator.findByPrimaryKey("InventoryTransfer",
-                    UtilMisc.toMap("inventoryTransferId", inventoryTransferId));
-            inventoryItem = inventoryTransfer.getRelatedOne("InventoryItem");
-            destinationFacility = inventoryTransfer.getRelatedOne("ToFacility");
+            inventoryTransfer = delegator.findOne("InventoryTransfer",
+                    UtilMisc.toMap("inventoryTransferId", inventoryTransferId), false);
+            inventoryItem = inventoryTransfer.getRelatedOne("InventoryItem", false);
+            destinationFacility = inventoryTransfer.getRelatedOne("ToFacility", false);
         } catch (GenericEntityException e) {
-            return ServiceUtil.returnError("Inventory Item/Transfer lookup problem [" + e.getMessage() + "]");
+            return ServiceUtil.returnError(UtilProperties.getMessage(resource, 
+                    "ProductInventoryItemLookupProblem", 
+                    UtilMisc.toMap("errorString", e.getMessage()), locale));
         }
 
         if (inventoryTransfer == null || inventoryItem == null) {
-            return ServiceUtil.returnError("ERROR: Lookup of InventoryTransfer and/or InventoryItem failed!");
+            return ServiceUtil.returnError(UtilProperties.getMessage(resource, 
+                    "ProductInventoryItemLookupProblem", 
+                    UtilMisc.toMap("errorString", ""), locale));
         }
 
         String inventoryType = inventoryItem.getString("inventoryItemTypeId");
 
         // set the fields on the transfer record
         if (inventoryTransfer.get("receiveDate") == null) {
-            inventoryTransfer.set("receiveDate", UtilDateTime.nowTimestamp());
+            if (receiveDate != null) {
+                inventoryTransfer.set("receiveDate", receiveDate);
+            } else {
+                inventoryTransfer.set("receiveDate", UtilDateTime.nowTimestamp());
+            }
         }
 
         if (inventoryType.equals("NON_SERIAL_INV_ITEM")) {
@@ -225,15 +259,21 @@ public class InventoryServices {
             try {
                 Map<String, Object> result = dctx.getDispatcher().runSync("createInventoryItemDetail", createDetailMap);
                 if (ServiceUtil.isError(result)) {
-                    return ServiceUtil.returnError("Inventory Item Detail create problem in complete inventory transfer", null, null, result);
+                    return ServiceUtil.returnError(UtilProperties.getMessage(resource, 
+                            "ProductInventoryItemDetailCreateProblem", 
+                            UtilMisc.toMap("errorString", ""), locale), null, null, result);
                 }
             } catch (GenericServiceException e1) {
-                return ServiceUtil.returnError("Inventory Item Detail create problem in complete inventory transfer: [" + e1.getMessage() + "]");
+                return ServiceUtil.returnError(UtilProperties.getMessage(resource, 
+                        "ProductInventoryItemDetailCreateProblem", 
+                        UtilMisc.toMap("errorString", e1.getMessage()), locale));
             }
             try {
                 inventoryItem.refresh();
             } catch (GenericEntityException e) {
-                return ServiceUtil.returnError("Inventory refresh problem [" + e.getMessage() + "]");
+                return ServiceUtil.returnError(UtilProperties.getMessage(resource, 
+                        "ProductInventoryItemRefreshProblem", 
+                        UtilMisc.toMap("errorString", e.getMessage()), locale));
             }
         }
 
@@ -262,10 +302,14 @@ public class InventoryServices {
         try {
             Map<String, Object> result = dctx.getDispatcher().runSync("updateInventoryItem", updateInventoryItemMap);
             if (ServiceUtil.isError(result)) {
-                return ServiceUtil.returnError("Inventory item store problem", null, null, result);
+                return ServiceUtil.returnError(UtilProperties.getMessage(resource, 
+                        "ProductInventoryItemStoreProblem", 
+                        UtilMisc.toMap("errorString", ""), locale), null, null, result);
             }
         } catch (GenericServiceException exc) {
-            return ServiceUtil.returnError("Inventory item store problem [" + exc.getMessage() + "]");
+            return ServiceUtil.returnError(UtilProperties.getMessage(resource, 
+                    "ProductInventoryItemStoreProblem", 
+                    UtilMisc.toMap("errorString", exc.getMessage()), locale));
         }
 
         // set the inventory transfer record to complete
@@ -275,32 +319,41 @@ public class InventoryServices {
         try {
             inventoryTransfer.store();
         } catch (GenericEntityException e) {
-            return ServiceUtil.returnError("Inventory store problem [" + e.getMessage() + "]");
+            return ServiceUtil.returnError(UtilProperties.getMessage(resource, 
+                    "ProductInventoryItemStoreProblem", 
+                    UtilMisc.toMap("errorString", e.getMessage()), locale));
         }
 
         return ServiceUtil.returnSuccess();
     }
 
     public static Map<String, Object> cancelInventoryTransfer(DispatchContext dctx, Map<String, ? extends Object> context) {
-        GenericDelegator delegator = dctx.getDelegator();
+        Delegator delegator = dctx.getDelegator();
         String inventoryTransferId = (String) context.get("inventoryTransferId");
         GenericValue inventoryTransfer = null;
         GenericValue inventoryItem = null;
         GenericValue userLogin = (GenericValue) context.get("userLogin");
+        Locale locale = (Locale) context.get("locale");
 
         try {
-            inventoryTransfer = delegator.findByPrimaryKey("InventoryTransfer",
-                    UtilMisc.toMap("inventoryTransferId", inventoryTransferId));
+            inventoryTransfer = delegator.findOne("InventoryTransfer",
+                    UtilMisc.toMap("inventoryTransferId", inventoryTransferId), false);
             if (UtilValidate.isEmpty(inventoryTransfer)) {
-                return ServiceUtil.returnError("Inventory transfer [" + inventoryTransferId + "] not found");
+                return ServiceUtil.returnError(UtilProperties.getMessage(resource, 
+                        "ProductInventoryItemTransferNotFound", 
+                        UtilMisc.toMap("inventoryTransferId", inventoryTransferId), locale));
             }
-            inventoryItem = inventoryTransfer.getRelatedOne("InventoryItem");
+            inventoryItem = inventoryTransfer.getRelatedOne("InventoryItem", false);
         } catch (GenericEntityException e) {
-            return ServiceUtil.returnError("Inventory Item/Transfer lookup problem [" + e.getMessage() + "]");
+            return ServiceUtil.returnError(UtilProperties.getMessage(resource, 
+                    "ProductInventoryItemLookupProblem", 
+                    UtilMisc.toMap("errorString", e.getMessage()), locale));
         }
 
         if (inventoryTransfer == null || inventoryItem == null) {
-            return ServiceUtil.returnError("ERROR: Lookup of InventoryTransfer and/or InventoryItem failed!");
+            return ServiceUtil.returnError(UtilProperties.getMessage(resource, 
+                    "ProductInventoryItemLookupProblem", 
+                    UtilMisc.toMap("errorString", ""), locale));
         }
 
         String inventoryType = inventoryItem.getString("inventoryItemTypeId");
@@ -316,10 +369,14 @@ public class InventoryServices {
             try {
                 Map<String, Object> result = dctx.getDispatcher().runSync("createInventoryItemDetail", createDetailMap);
                 if (ServiceUtil.isError(result)) {
-                    return ServiceUtil.returnError("Inventory Item Detail create problem in cancel inventory transfer", null, null, result);
+                    return ServiceUtil.returnError(UtilProperties.getMessage(resource, 
+                            "ProductInventoryItemDetailCreateProblem", 
+                            UtilMisc.toMap("errorString", ""), locale), null, null, result);
                 }
             } catch (GenericServiceException e1) {
-                return ServiceUtil.returnError("Inventory Item Detail create problem in cancel inventory transfer: [" + e1.getMessage() + "]");
+                return ServiceUtil.returnError(UtilProperties.getMessage(resource, 
+                        "ProductInventoryItemDetailCreateProblem", 
+                        UtilMisc.toMap("errorString", e1.getMessage()), locale));
             }
         } else if (inventoryType.equals("SERIALIZED_INV_ITEM")) {
             inventoryItem.set("statusId", "INV_AVAILABLE");
@@ -327,7 +384,9 @@ public class InventoryServices {
             try {
                 inventoryItem.store();
             } catch (GenericEntityException e) {
-                return ServiceUtil.returnError("Inventory item store problem in cancel inventory transfer: [" + e.getMessage() + "]");
+                return ServiceUtil.returnError(UtilProperties.getMessage(resource, 
+                        "ProductInventoryItemStoreProblem", 
+                        UtilMisc.toMap("errorString", e.getMessage()), locale));
             }
         }
 
@@ -338,7 +397,9 @@ public class InventoryServices {
         try {
             inventoryTransfer.store();
         } catch (GenericEntityException e) {
-            return ServiceUtil.returnError("Inventory store problem [" + e.getMessage() + "]");
+            return ServiceUtil.returnError(UtilProperties.getMessage(resource, 
+                    "ProductInventoryItemStoreProblem", 
+                    UtilMisc.toMap("errorString", e.getMessage()), locale));
         }
 
         return ServiceUtil.returnSuccess();
@@ -346,9 +407,10 @@ public class InventoryServices {
 
     /** In spite of the generic name this does the very specific task of checking availability of all back-ordered items and sends notices, etc */
     public static Map<String, Object> checkInventoryAvailability(DispatchContext dctx, Map<String, ? extends Object> context) {
-        GenericDelegator delegator = dctx.getDelegator();
+        Delegator delegator = dctx.getDelegator();
         LocalDispatcher dispatcher = dctx.getDispatcher();
         GenericValue userLogin = (GenericValue) context.get("userLogin");
+        Locale locale = (Locale) context.get("locale");
 
         /* TODO: NOTE: This method has been updated, but testing requires many eyes. See http://jira.undersunconsulting.com/browse/OFBIZ-662
         boolean skipThisNeedsUpdating = true;
@@ -368,7 +430,8 @@ public class InventoryServices {
             inventoryItems = delegator.findList("InventoryItem", ee, null, null, null, false);
         } catch (GenericEntityException e) {
             Debug.logError(e, "Trouble getting inventory items", module);
-            return ServiceUtil.returnError("Problem getting InventoryItem records");
+            return ServiceUtil.returnError(UtilProperties.getMessage(resource, 
+                    "ProductPriceCannotRetrieveInventoryItem", locale));
         }
 
         if (inventoryItems == null) {
@@ -376,7 +439,7 @@ public class InventoryServices {
             return ServiceUtil.returnSuccess();
         }
 
-        Debug.log("OOS Inventory Items: " + inventoryItems.size(), module);
+        Debug.logInfo("OOS Inventory Items: " + inventoryItems.size(), module);
 
         for (GenericValue inventoryItem: inventoryItems) {
             // get the incomming shipment information for the item
@@ -392,16 +455,18 @@ public class InventoryServices {
                 shipmentAndItems = delegator.findList("ShipmentAndItem", ecl, null, UtilMisc.toList("estimatedArrivalDate"), null, false);
             } catch (GenericEntityException e) {
                 Debug.logError(e, "Problem getting ShipmentAndItem records", module);
-                return ServiceUtil.returnError("Problem getting ShipmentAndItem records");
+                return ServiceUtil.returnError(UtilProperties.getMessage(resource, 
+                        "ProductPriceCannotRetrieveShipmentAndItem", locale));
             }
 
             // get the reservations in order of newest first
             List<GenericValue> reservations = null;
             try {
-                reservations = inventoryItem.getRelated("OrderItemShipGrpInvRes", null, UtilMisc.toList("-reservedDatetime"));
+                reservations = inventoryItem.getRelated("OrderItemShipGrpInvRes", null, UtilMisc.toList("-reservedDatetime"), false);
             } catch (GenericEntityException e) {
                 Debug.logError(e, "Problem getting related reservations", module);
-                return ServiceUtil.returnError("Problem getting related reservations");
+                return ServiceUtil.returnError(UtilProperties.getMessage(resource, 
+                        "ProductPriceCannotRetrieveRelativeReservation", locale));
             }
 
             if (reservations == null) {
@@ -409,7 +474,7 @@ public class InventoryServices {
                 continue;
             }
 
-            Debug.log("Reservations for item: " + reservations.size(), module);
+            Debug.logInfo("Reservations for item: " + reservations.size(), module);
 
             // available at the time of order
             BigDecimal availableBeforeReserved = inventoryItem.getBigDecimal("availableToPromiseTotal");
@@ -430,7 +495,7 @@ public class InventoryServices {
                     }
                 }
 
-                Debug.log("Promised Date: " + actualPromiseDate, module);
+                Debug.logInfo("Promised Date: " + actualPromiseDate, module);
 
                 // find the next possible ship date
                 Timestamp nextShipDate = null;
@@ -443,7 +508,7 @@ public class InventoryServices {
                     }
                 }
 
-                Debug.log("Next Ship Date: " + nextShipDate, module);
+                Debug.logInfo("Next Ship Date: " + nextShipDate, module);
 
                 // create a modified promise date (promise date - 1 day)
                 Calendar pCal = Calendar.getInstance();
@@ -452,17 +517,17 @@ public class InventoryServices {
                 Timestamp modifiedPromisedDate = new Timestamp(pCal.getTimeInMillis());
                 Timestamp now = UtilDateTime.nowTimestamp();
 
-                Debug.log("Promised Date + 1: " + modifiedPromisedDate, module);
-                Debug.log("Now: " + now, module);
+                Debug.logInfo("Promised Date + 1: " + modifiedPromisedDate, module);
+                Debug.logInfo("Now: " + now, module);
 
                 // check the promised date vs the next ship date
                 if (nextShipDate == null || nextShipDate.after(actualPromiseDate)) {
                     if (nextShipDate == null && modifiedPromisedDate.after(now)) {
                         // do nothing; we are okay to assume it will be shipped on time
-                        Debug.log("No ship date known yet, but promised date hasn't approached, assuming it will be here on time", module);
+                        Debug.logInfo("No ship date known yet, but promised date hasn't approached, assuming it will be here on time", module);
                     } else {
                         // we cannot ship by the promised date; need to notify the customer
-                        Debug.log("We won't ship on time, getting notification info", module);
+                        Debug.logInfo("We won't ship on time, getting notification info", module);
                         Map<String, Timestamp> notifyItems = ordersToUpdate.get(orderId);
                         if (notifyItems == null) {
                             notifyItems = FastMap.newInstance();
@@ -480,7 +545,7 @@ public class InventoryServices {
                         boolean needToCancel = false;
                         if (nextShipDate == null || nextShipDate.after(farPastPromised)) {
                             // we cannot ship until >30 days after promised; using cancel rule
-                            Debug.log("Ship date is >30 past the promised date", module);
+                            Debug.logInfo("Ship date is >30 past the promised date", module);
                             needToCancel = true;
                         } else if (currentPromiseDate != null && actualPromiseDate.equals(currentPromiseDate)) {
                             // this is the second notification; using cancel rule
@@ -490,7 +555,7 @@ public class InventoryServices {
                         // add the info to the cancel map if we need to schedule a cancel
                         if (needToCancel) {
                             // queue the item to be cancelled
-                            Debug.log("Flagging the item to auto-cancel", module);
+                            Debug.logInfo("Flagging the item to auto-cancel", module);
                             Map<String, Timestamp> cancelItems = ordersToCancel.get(orderId);
                             if (cancelItems == null) {
                                 cancelItems = FastMap.newInstance();
@@ -526,7 +591,7 @@ public class InventoryServices {
             List<GenericValue> orderItemShipGroups = null;
             try {
                 orderItemShipGroups= delegator.findByAnd("OrderItemShipGroup",
-                        UtilMisc.toMap("orderId", orderId));
+                        UtilMisc.toMap("orderId", orderId), null, false);
             } catch (GenericEntityException e) {
                 Debug.logError(e, "Cannot get OrderItemShipGroups from orderId" + orderId, module);
             }
@@ -540,10 +605,10 @@ public class InventoryServices {
                                 UtilMisc.toMap("shipGroupSeqId",
                                         orderItemShipGroup.get("shipGroupSeqId"),
                                         "orderId",
-                                        orderId));
+                                        orderId), null, false);
 
                     for (GenericValue assoc: orderItemShipGroupAssoc) {
-                        GenericValue orderItem = assoc.getRelatedOne("OrderItem");
+                        GenericValue orderItem = assoc.getRelatedOne("OrderItem", false);
                         if (orderItem != null) {
                             orderItems.add(orderItem);
                         }
@@ -575,11 +640,11 @@ public class InventoryServices {
                     List<GenericValue> toBeStored = FastList.newInstance();
                     for (GenericValue orderItem: orderItems) {
                         String orderItemSeqId = orderItem.getString("orderItemSeqId");
-                        Timestamp shipDate = (Timestamp) backOrderedItems.get(orderItemSeqId);
-                        Timestamp cancelDate = (Timestamp) cancelItems.get(orderItemSeqId);
+                        Timestamp shipDate = backOrderedItems.get(orderItemSeqId);
+                        Timestamp cancelDate = cancelItems.get(orderItemSeqId);
                         Timestamp currentCancelDate = orderItem.getTimestamp("autoCancelDate");
 
-                        Debug.logError("OI: " + orderId + " SEQID: "+ orderItemSeqId + " cancelAll: " + cancelAll + " cancelDate: " + cancelDate, module);
+                        Debug.logInfo("OI: " + orderId + " SEQID: "+ orderItemSeqId + " cancelAll: " + cancelAll + " cancelDate: " + cancelDate, module);
                         if (backOrderedItems.containsKey(orderItemSeqId)) {
                             orderItem.set("estimatedShipDate", shipDate);
 
@@ -672,8 +737,8 @@ public class InventoryServices {
                // Figure out what the QOH and ATP inventory would be with this associated product
                BigDecimal currentQuantityOnHandTotal = (BigDecimal) resultOutput.get("quantityOnHandTotal");
                BigDecimal currentAvailableToPromiseTotal = (BigDecimal) resultOutput.get("availableToPromiseTotal");
-               BigDecimal tmpQuantityOnHandTotal = currentQuantityOnHandTotal.divide(assocQuantity, generalRounding);
-               BigDecimal tmpAvailableToPromiseTotal = currentAvailableToPromiseTotal.divide(assocQuantity, generalRounding);
+               BigDecimal tmpQuantityOnHandTotal = currentQuantityOnHandTotal.divideToIntegralValue(assocQuantity, generalRounding);
+               BigDecimal tmpAvailableToPromiseTotal = currentAvailableToPromiseTotal.divideToIntegralValue(assocQuantity, generalRounding);
 
                // reset the minimum QOH and ATP quantities if those quantities for this product are less
                if (minQuantityOnHandTotal == null || tmpQuantityOnHandTotal.compareTo(minQuantityOnHandTotal) < 0) {
@@ -701,10 +766,11 @@ public class InventoryServices {
 
 
     public static Map<String, Object> getProductInventorySummaryForItems(DispatchContext dctx, Map<String, ? extends Object> context) {
-        GenericDelegator delegator = dctx.getDelegator();
+        Delegator delegator = dctx.getDelegator();
         LocalDispatcher dispatcher = dctx.getDispatcher();
         List<GenericValue> orderItems = UtilGenerics.checkList(context.get("orderItems"));
         String facilityId = (String) context.get("facilityId");
+        Locale locale = (Locale) context.get("");
         Map<String, BigDecimal> atpMap = FastMap.newInstance();
         Map<String, BigDecimal> qohMap = FastMap.newInstance();
         Map<String, BigDecimal> mktgPkgAtpMap = FastMap.newInstance();
@@ -715,12 +781,14 @@ public class InventoryServices {
         List<GenericValue> facilities = null;
         try {
             if (facilityId != null) {
-                facilities = delegator.findByAnd("Facility", UtilMisc.toMap("facilityId", facilityId));
+                facilities = delegator.findByAnd("Facility", UtilMisc.toMap("facilityId", facilityId), null, false);
             } else {
                 facilities = delegator.findList("Facility", null, null, null, null, false);
             }
         } catch (GenericEntityException e) {
-            return ServiceUtil.returnError("Unable to locate facilities." + e.getMessage());
+            return ServiceUtil.returnError(UtilProperties.getMessage(resource, 
+                    "ProductErrorFacilityIdNotFound", 
+                    UtilMisc.toMap("facilityId", facilityId), locale));
         }
 
         // loop through all the order items
@@ -731,10 +799,11 @@ public class InventoryServices {
 
             GenericValue product = null;
             try {
-                product = orderItem.getRelatedOneCache("Product");
+                product = orderItem.getRelatedOne("Product", true);
             } catch (GenericEntityException e) {
                 Debug.logError(e, "Couldn't get product.", module);
-                return ServiceUtil.returnError("Unable to retrive product with id [" + productId + "]");
+                return ServiceUtil.returnError(UtilProperties.getMessage(resource, 
+                        "ProductProductNotFound", locale) + productId);
             }
 
             BigDecimal atp = BigDecimal.ZERO;
@@ -749,15 +818,15 @@ public class InventoryServices {
 
                 // get both the real ATP/QOH available and the quantities available from marketing packages
                 try {
-                    if ("MARKETING_PKG_AUTO".equals(product.getString("productTypeId")) ||
-                            "MARKETING_PKG_PICK".equals(product.getString("productTypeId"))) {
+                    if (EntityTypeUtil.hasParentType(delegator, "ProductType", "productTypeId", product.getString("productTypeId"), "parentTypeId", "MARKETING_PKG")) {
                         mktgPkgInvResult = dispatcher.runSync("getMktgPackagesAvailable", UtilMisc.toMap("productId", productId, "facilityId", facility.getString("facilityId")));
                     }
                     invResult = dispatcher.runSync("getInventoryAvailableByFacility", UtilMisc.toMap("productId", productId, "facilityId", facility.getString("facilityId")));
                 } catch (GenericServiceException e) {
-                    String msg = "Could not find inventory for facility [" + facility.getString("facilityId") + "]";
-                    Debug.logError(e, msg, module);
-                    return ServiceUtil.returnError(msg);
+                    Debug.logError(e, "Could not find inventory for facility " + facility.getString("facilityId"), module);
+                    return ServiceUtil.returnError(UtilProperties.getMessage(resource, 
+                            "ProductInventoryNotAvailableForFacility", 
+                            UtilMisc.toMap("facilityId", facility.getString("facilityId")), locale));
                 }
 
                 // add the results for this facility to the ATP/QOH counter for all facilities
@@ -767,7 +836,7 @@ public class InventoryServices {
                     if (fatp != null) atp = atp.add(fatp);
                     if (fqoh != null) qoh = qoh.add(fqoh);
                 }
-                if (("MARKETING_PKG_AUTO".equals(product.getString("productTypeId")) || "MARKETING_PKG_PICK".equals(product.getString("productTypeId"))) && (!ServiceUtil.isError(mktgPkgInvResult))) {
+                if (EntityTypeUtil.hasParentType(delegator, "ProductType", "productTypeId", product.getString("productTypeId"), "parentTypeId", "MARKETING_PKG") && !ServiceUtil.isError(mktgPkgInvResult)) {
                     BigDecimal fatp = (BigDecimal) mktgPkgInvResult.get("availableToPromiseTotal");
                     BigDecimal fqoh = (BigDecimal) mktgPkgInvResult.get("quantityOnHandTotal");
                     if (fatp != null) mktgPkgAtp = mktgPkgAtp.add(fatp);
@@ -790,7 +859,7 @@ public class InventoryServices {
 
 
     public static Map<String, Object> getProductInventoryAndFacilitySummary(DispatchContext dctx, Map<String, ? extends Object> context) {
-        GenericDelegator delegator = dctx.getDelegator();
+        Delegator delegator = dctx.getDelegator();
         LocalDispatcher dispatcher = dctx.getDispatcher();
         Timestamp checkTime = (Timestamp)context.get("checkTime");
         String facilityId = (String)context.get("facilityId");
@@ -804,13 +873,12 @@ public class InventoryServices {
         Map<String, String> contextInput = UtilMisc.toMap("productId", productId, "facilityId", facilityId, "statusId", statusId);
         GenericValue product = null;
         try {
-            product = delegator.findByPrimaryKey("Product", UtilMisc.toMap("productId", productId));
+            product = delegator.findOne("Product", UtilMisc.toMap("productId", productId), false);
         } catch (GenericEntityException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
-        if ("MARKETING_PKG_AUTO".equals(product.getString("productTypeId")) ||
-                "MARKETING_PKG_PICK".equals(product.getString("productTypeId"))) {
+        if (EntityTypeUtil.hasParentType(delegator, "ProductType", "productTypeId", product.getString("productTypeId"), "parentTypeId", "MARKETING_PKG")) {
             try {
                 resultOutput = dispatcher.runSync("getMktgPackagesAvailable", contextInput);
             } catch (GenericServiceException e) {
@@ -853,7 +921,7 @@ public class InventoryServices {
 
         List<GenericValue> productPrices = null;
         try {
-            productPrices = delegator.findByAndCache("ProductPrice", UtilMisc.toMap("productId",productId), UtilMisc.toList("-fromDate"));
+            productPrices = delegator.findByAnd("ProductPrice", UtilMisc.toMap("productId",productId), UtilMisc.toList("-fromDate"), true);
         } catch (GenericEntityException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
@@ -919,7 +987,7 @@ public class InventoryServices {
                                 EntityCondition.makeCondition("statusId", EntityOperator.IN, UtilMisc.toList("ORDER_COMPLETED", "ORDER_APPROVED", "ORDER_HELD")),
                                 EntityCondition.makeCondition("orderTypeId", EntityOperator.EQUALS, "SALES_ORDER"),
                                 EntityCondition.makeCondition("orderDate", EntityOperator.GREATER_THAN_EQUAL_TO, checkTime)
-                            ),
+                           ),
                         EntityOperator.AND),
                     null, null, null, null);
             } catch (GenericEntityException e2) {
@@ -956,7 +1024,7 @@ public class InventoryServices {
                                 EntityCondition.makeCondition("productId", EntityOperator.EQUALS, productId),
                                 EntityCondition.makeCondition("workEffortTypeId", EntityOperator.EQUALS, "PROD_ORDER_TASK"),
                                 EntityCondition.makeCondition("actualCompletionDate", EntityOperator.GREATER_THAN_EQUAL_TO, checkTime)
-                            ),
+                           ),
                         EntityOperator.AND),
                     null, null, null, null);
             } catch (GenericEntityException e1) {

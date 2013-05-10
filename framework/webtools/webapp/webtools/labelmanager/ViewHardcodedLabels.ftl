@@ -28,7 +28,7 @@ under the License.
     <#assign rowNum = "2">
     <#list referencesList as reference>
       <#assign labelFound = 'N'>
-      <#assign refNum = Static["org.ofbiz.webtools.labelmanager.LabelManagerFactory"].getLabelReferenceFile(reference)>
+      <#assign refNum = factory.getLabelReferenceFile(reference)>
       <#if (refNum > 0)>
         <tr <#if rowNum == "1">class="alternate-row"</#if>>
           <td>${rowNumber}</td>

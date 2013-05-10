@@ -43,6 +43,7 @@ under the License.
                 <xs:element minOccurs="0" maxOccurs="1" ref="permission-service"/>
                 <xs:element minOccurs="0" maxOccurs="unbounded" ref="required-permissions"/>
                 <xs:element minOccurs="0" maxOccurs="unbounded" ref="implements"/>
+                <xs:element minOccurs="0" ref="metric"/>
                 <xs:choice maxOccurs="1" minOccurs="0">
                     <xs:choice minOccurs="0" maxOccurs="unbounded">
                         <xs:element ref="auto-attributes"/>
@@ -86,6 +87,12 @@ under the License.
         </xs:attribute>
         <xs:attribute name="default-entity-name" type="xs:string"/>
         <xs:attribute name="use-transaction" default="true">
+            <xs:annotation>
+                <xs:documentation>
+                    If set to true and there is no transaction already in place the Service Engine will begin one.
+                    If set to false or there is a transaction already in place the Service Engine will do nothing (this also means that if set to false and a transaction is already in place it will do nothing).
+                </xs:documentation>
+            </xs:annotation>
             <xs:simpleType>
                 <xs:restriction base="xs:token">
                     <xs:enumeration value="true"/>
@@ -94,6 +101,13 @@ under the License.
             </xs:simpleType>
         </xs:attribute>
         <xs:attribute name="require-new-transaction" default="false">
+            <xs:annotation>
+                <xs:documentation>
+                    If set to true and there is a transaction already in place the Service Engine will suspend that transaction, begin a new one just for this service, commit or rollback the local transaction when the service is complete, and will resume the original transaction.
+                    If set to true and there is no transaction already in place it will just begin a transaction and manage it as would be done for a normal user-transaction=true.
+                    If use-transaction=false this setting is ignored.
+                </xs:documentation>
+            </xs:annotation>
             <xs:simpleType>
                 <xs:restriction base="xs:token">
                     <xs:enumeration value="true"/>
@@ -101,7 +115,29 @@ under the License.
                 </xs:restriction>
             </xs:simpleType>
         </xs:attribute>
-        <xs:attribute name="transaction-timeout" type="xs:int" default="0"/>
+        <xs:attribute name="hideResultInLog" default="false">
+            <xs:annotation>
+                <xs:documentation>
+                    If set to true the result will be hidden from possible exposition in LocalDispatcher.runSync()
+                </xs:documentation>
+            </xs:annotation>
+            <xs:simpleType>
+                <xs:restriction base="xs:token">
+                    <xs:enumeration value="true"/>
+                    <xs:enumeration value="false"/>
+                </xs:restriction>
+            </xs:simpleType>
+        </xs:attribute>        
+        <xs:attribute name="transaction-timeout" type="xs:int" default="0">
+            <xs:annotation>
+                <xs:documentation>
+                    Defines the timeout for the transaction, in seconds.
+                    Defaults to the value set in the TransactionFactory being used (typically 60 seconds).
+                    This value is only used if this service begins a transaction (either require-new-transaction=true, or use-transaction=true and there is no other transaction already in place).
+                    If use-transaction=false this setting is ignored.
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
         <xs:attribute name="max-retry" type="xs:int" default="-1"/>
         <xs:attribute name="debug" default="false">
             <xs:simpleType>
@@ -166,6 +202,7 @@ under the License.
             <xs:sequence>
                 <xs:element minOccurs="0" maxOccurs="unbounded" ref="check-permission"/>
                 <xs:element minOccurs="0" maxOccurs="unbounded" ref="check-role-member"/>
+                <xs:element minOccurs="0" maxOccurs="unbounded" ref="permission-service"/>
             </xs:sequence>
             <xs:attributeGroup ref="attlist.required-permissions"/>
         </xs:complexType>
@@ -224,6 +261,48 @@ under the License.
 
         </xs:attribute>
     </xs:attributeGroup>
+    <xs:element name="metric">
+        <xs:annotation>
+            <xs:documentation>
+                Calculate and maintain an average response time for this service. Service metrics can be used
+                for monitoring and reporting.
+                
+                The metric works by gathering statistics until a configurable maximum is reached (number of
+                requests or elapsed time), then the average is calculated. A smoothing factor is used to
+                smooth differences between calculations.
+            </xs:documentation>
+        </xs:annotation>
+        <xs:complexType>
+            <xs:attribute name="name" type="xs:string" use="required">
+                <xs:annotation>
+                    <xs:documentation>
+                        Each metric must have a unique name. 
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="estimation-size" type="xs:string">
+                <xs:annotation>
+                    <xs:documentation>
+                        Positive integer number of requests to include in the metrics calculation. Defaults to "100". 
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="estimation-time" type="xs:string">
+                <xs:annotation>
+                    <xs:documentation>
+                        Positive integer number of milliseconds to include in the metrics calculation. Defaults to "1000". 
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="smoothing" type="xs:string">
+                <xs:annotation>
+                    <xs:documentation>
+                        Positive decimal smoothing factor - used to smooth the differences between calculations. A value of "1" disables smoothing. Defaults to "0.7". 
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
+        </xs:complexType>
+    </xs:element>
     <xs:element name="auto-attributes">
         <xs:complexType>
             <xs:sequence>
@@ -291,6 +370,7 @@ under the License.
         <xs:complexType>
             <xs:sequence>
                 <xs:element minOccurs="0" maxOccurs="unbounded" ref="type-validate"/>
+                <xs:element minOccurs="0" ref="description" />
             </xs:sequence>
             <xs:attributeGroup ref="attlist.attribute"/>
         </xs:complexType>

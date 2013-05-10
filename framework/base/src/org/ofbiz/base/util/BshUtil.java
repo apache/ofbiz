@@ -24,10 +24,9 @@ import java.io.Reader;
 import java.io.StringReader;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
-import java.util.Set;
+
+import javolution.util.FastMap;
 
 import org.ofbiz.base.location.FlexibleLocation;
 import org.ofbiz.base.util.cache.UtilCache;
@@ -46,8 +45,8 @@ public final class BshUtil {
 
     public static final String module = BshUtil.class.getName();
 
-    protected static Map<ClassLoader, BshClassManager> masterClassManagers = new HashMap<ClassLoader, BshClassManager>();
-    public static UtilCache<String, Interpreter.ParsedScript> parsedScripts = new UtilCache<String, Interpreter.ParsedScript>("script.BshLocationParsedCache", 0, 0, false);
+    protected static FastMap<ClassLoader, BshClassManager> masterClassManagers = FastMap.newInstance();
+    private static final UtilCache<String, Interpreter.ParsedScript> parsedScripts = UtilCache.createUtilCache("script.BshLocationParsedCache", 0, 0, false);
 
     /**
      * Evaluate a BSH condition or expression
@@ -111,14 +110,10 @@ public final class BshUtil {
         //find the "master" BshClassManager for this classpath
         BshClassManager master = BshUtil.masterClassManagers.get(classLoader);
         if (master == null) {
-            synchronized (OfbizBshBsfEngine.class) {
-                master = BshUtil.masterClassManagers.get(classLoader);
-                if (master == null) {
-                    master = BshClassManager.createClassManager();
-                    master.setClassLoader(classLoader);
-                    BshUtil.masterClassManagers.put(classLoader, master);
-                }
-            }
+            master = BshClassManager.createClassManager();
+            master.setClassLoader(classLoader);
+            BshUtil.masterClassManagers.putIfAbsent(classLoader, master);
+            master = BshUtil.masterClassManagers.get(classLoader);
         }
 
         if (master != null) {
@@ -139,19 +134,14 @@ public final class BshUtil {
             Interpreter.ParsedScript script = null;
             script = parsedScripts.get(location);
             if (script == null) {
-                synchronized (OfbizBshBsfEngine.class) {
-                    script = parsedScripts.get(location);
-                    if (script == null) {
-                        URL scriptUrl = FlexibleLocation.resolveLocation(location);
-                        if (scriptUrl == null) {
-                            throw new GeneralException("Could not find bsh script at [" + location + "]");
-                        }
-                        Reader scriptReader = new InputStreamReader(scriptUrl.openStream());
-                        script = interpreter.parseScript(location, scriptReader);
-                        if (Debug.verboseOn()) Debug.logVerbose("Caching BSH script at: " + location, module);
-                        parsedScripts.put(location, script);
-                    }
+                URL scriptUrl = FlexibleLocation.resolveLocation(location);
+                if (scriptUrl == null) {
+                    throw new GeneralException("Could not find bsh script at [" + location + "]");
                 }
+                Reader scriptReader = new InputStreamReader(scriptUrl.openStream());
+                script = interpreter.parseScript(location, scriptReader);
+                if (Debug.verboseOn()) Debug.logVerbose("Caching BSH script at: " + location, module);
+                script = parsedScripts.putIfAbsentAndGet(location, script);
             }
 
             return interpreter.evalParsedScript(script);

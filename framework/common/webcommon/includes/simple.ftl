@@ -54,9 +54,9 @@ under the License.
 
 <body id="column-container" style="background: white;">
 <form name="printPage">
-<input type="button" value="${uiLabelMap.CommonPrint}" onClick="window.print()" class="smallSubmit"/>
+<input type="button" value="${uiLabelMap.CommonPrint}" onclick="window.print()" class="smallSubmit"/>
 </form>
-<br/>
+<br />
 ${sections.render("body")}
 </body>
 </html>

@@ -36,7 +36,7 @@ import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.base.util.UtilDateTime;
 import org.ofbiz.base.util.UtilProperties;
-import org.ofbiz.entity.GenericDelegator;
+import org.ofbiz.entity.Delegator;
 import org.ofbiz.service.DispatchContext;
 import org.ofbiz.service.ServiceUtil;
 
@@ -68,7 +68,7 @@ public class OpenOfficeServices {
     public static Map<String, Object> convertDocumentByteBuffer(DispatchContext dctx, Map<String, ? extends Object> context) {
 
         Map results = ServiceUtil.returnSuccess();
-        GenericDelegator delegator = dctx.getDelegator();
+        Delegator delegator = dctx.getDelegator();
         XMultiComponentFactory xmulticomponentfactory = null;
         //String uniqueSeqNum = delegator.getNextSeqId("OOTempDir");
         Timestamp ts = UtilDateTime.nowTimestamp();
@@ -365,7 +365,9 @@ public class OpenOfficeServices {
             return results;
         } catch (Exception e) {
             Debug.logError(e, "Error in OpenOffice operation: ", module);
-            return ServiceUtil.returnError("Error converting document: " + e.toString());
+            return ServiceUtil.returnError(UtilProperties.getMessage(resource,
+                    "ContentConvertingDocumentError", 
+                    UtilMisc.toMap("errorString", e.toString()), locale));
         }
     }
 }

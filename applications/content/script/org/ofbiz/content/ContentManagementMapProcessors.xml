@@ -19,7 +19,7 @@ under the License.
 -->
 
 <simple-map-processors xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/simple-methods.xsd">
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/simple-methods-v2.xsd">
   <simple-map-processor name="contentIn">
       <process field="contentId"><copy to-field="contentId" replace="true" set-if-null="false"/></process>
       <process field="contentTypeId"><copy to-field="contentTypeId" replace="true" set-if-null="false"/></process>
@@ -27,6 +27,7 @@ under the License.
       <process field="dataResourceId"><copy to-field="dataResourceId" replace="true" set-if-null="false"/></process>
       <process field="dataSourceId"><copy to-field="dataSourceId" replace="true" set-if-null="false"/></process>
       <process field="statusId"><copy to-field="statusId" replace="true" set-if-null="false"/></process>
+      <process field="customMethodId"><copy to-field="customMethodId" replace="true" set-if-null="false"/></process>
       <process field="serviceName"><copy to-field="serviceName" replace="true" set-if-null="false"/></process>
       <process field="contentName"><copy to-field="contentName" replace="true" set-if-null="false"/></process>
       <process field="description"><copy to-field="description" replace="true" set-if-null="false"/></process>
@@ -35,13 +36,13 @@ under the License.
       <process field="characterSetId"><copy to-field="characterSetId" replace="true" set-if-null="false"/></process>
       <process field="createdDate">
         <convert to-field="createdDate" replace="true" set-if-null="false" type="Timestamp">
-          <fail-message message="createdDate not a valid date format"/>
+          <fail-property resource="ContentUiLabels" property="ContentCreateDateInvalidFormat"/>
         </convert>
       </process>
       <process field="createdByUserLogin"><copy to-field="createdByUserLogin" replace="true" set-if-null="false"/></process>
       <process field="lastModifiedDate">
         <convert to-field="lastModifiedDate" replace="true" set-if-null="false" type="Timestamp">
-          <fail-message message="lastModifiedDate not a valid date format"/>
+          <fail-property resource="ContentUiLabels" property="ContentLastModifiedDateInvalidFormat"/>
         </convert>
       </process>
       <process field="lastModifiedByUserLogin"><copy to-field="lastModifiedByUserLogin" replace="true" set-if-null="false"/></process>
@@ -60,13 +61,13 @@ under the License.
       <process field="drObjectInfo"><copy to-field="objectInfo" replace="true" set-if-null="false"/></process>
       <process field="drCreatedDate">
         <convert to-field="createdDate" replace="true" set-if-null="false" type="Timestamp">
-          <fail-message message="drCreatedDate not a valid date format"/>
+          <fail-property resource="ContentUiLabels" property="ContentCreateDateInvalidFormat"/>
         </convert>
       </process>
       <process field="drCreatedByUserLogin"><copy to-field="createdByUserLogin" replace="true" set-if-null="false"/></process>
       <process field="drLastModifiedDate">
         <convert to-field="lastModifiedDate" replace="true" set-if-null="false" type="Timestamp">
-          <fail-message message="drLastModifiedDate not a valid date format"/>
+          <fail-property resource="ContentUiLabels" property="ContentLastModifiedDateInvalidFormat"/>
         </convert>
       </process>
       <process field="drLastModifiedByUserLogin"><copy to-field="lastModifiedByUserLogin" replace="true" set-if-null="false"/></process>
@@ -77,12 +78,12 @@ under the License.
       <process field="caContentAssocTypeId"><copy to-field="contentAssocTypeId" replace="true" set-if-null="false"/></process>
       <process field="caFromDate">
         <convert to-field="fromDate" replace="true" set-if-null="false" type="Timestamp">
-          <fail-message message="fromDate not a valid date format"/>
+          <fail-property resource="ContentUiLabels" property="ContentFromDateInvalidFormat"/>
         </convert>
       </process>
       <process field="caThruDate">
         <convert to-field="thruDate" replace="true" set-if-null="false" type="Timestamp">
-          <fail-message message="thruDate not a valid date format"/>
+          <fail-property resource="ContentUiLabels" property="ContentThruDateInvalidFormat"/>
         </convert>
       </process>
       <process field="caContentAssocPredicateId"><copy to-field="contentAssocPredicateId" replace="true" set-if-null="false"/></process>
@@ -93,13 +94,13 @@ under the License.
       <process field="caLeftCoordinate"><copy to-field="leftCoordinate" replace="true" set-if-null="false"/></process>
       <process field="caCreatedDate">
         <convert to-field="createdDate" replace="true" set-if-null="false" type="Timestamp">
-          <fail-message message="caCreatedDate not a valid date format"/>
+          <fail-property resource="ContentUiLabels" property="ContentCreateDateInvalidFormat"/>
         </convert>
       </process>
       <process field="caCreatedByUserLogin"><copy to-field="createdByUserLogin" replace="true" set-if-null="false"/></process>
       <process field="caLastModifiedDate">
         <convert to-field="lastModifiedDate" replace="true" set-if-null="false" type="Timestamp">
-          <fail-message message="caLastModifiedDate not a valid date format"/>
+          <fail-property resource="ContentUiLabels" property="ContentLastModifiedDateInvalidFormat"/>
         </convert>
       </process>
       <process field="caLastModifiedByUserLogin"><copy to-field="lastModifiedByUserLogin" replace="true" set-if-null="false"/></process>
@@ -112,6 +113,7 @@ under the License.
       <process field="dataResourceId"><copy to-field="dataResourceId" replace="true" set-if-null="false"/></process>
       <process field="dataSourceId"><copy to-field="dataSourceId" replace="true" set-if-null="false"/></process>
       <process field="statusId"><copy to-field="statusId" replace="true" set-if-null="false"/></process>
+      <process field="customMethodId"><copy to-field="customMethodId" replace="true" set-if-null="false"/></process>
       <process field="serviceName"><copy to-field="serviceName" replace="true" set-if-null="false"/></process>
       <process field="contentName"><copy to-field="contentName" replace="true" set-if-null="false"/></process>
       <process field="description"><copy to-field="description" replace="true" set-if-null="false"/></process>
@@ -120,13 +122,13 @@ under the License.
       <process field="characterSetId"><copy to-field="characterSetId" replace="true" set-if-null="false"/></process>
       <process field="createdDate">
         <convert to-field="createdDate" replace="true" set-if-null="false" type="Timestamp">
-          <fail-message message="createdDate not a valid date format"/>
+          <fail-property resource="ContentUiLabels" property="ContentCreateDateInvalidFormat"/>
         </convert>
       </process>
       <process field="createdByUserLogin"><copy to-field="createdByUserLogin" replace="true" set-if-null="false"/></process>
       <process field="lastModifiedDate">
         <convert to-field="lastModifiedDate" replace="true" set-if-null="false" type="Timestamp">
-          <fail-message message="lastModifiedDate not a valid date format"/>
+          <fail-property resource="ContentUiLabels" property="ContentLastModifiedDateInvalidFormat"/>
         </convert>
       </process>
       <process field="lastModifiedByUserLogin"><copy to-field="lastModifiedByUserLogin" replace="true" set-if-null="false"/></process>
@@ -145,13 +147,13 @@ under the License.
       <process field="objectInfo"><copy to-field="drObjectInfo" replace="true" set-if-null="false"/></process>
       <process field="createdDate">
         <convert to-field="drCreatedDate" replace="true" set-if-null="false" type="Timestamp">
-          <fail-message message="createdDate not a valid date format"/>
+          <fail-property resource="ContentUiLabels" property="ContentCreateDateInvalidFormat"/>
         </convert>
       </process>
       <process field="createdByUserLogin"><copy to-field="drCreatedByUserLogin" replace="true" set-if-null="false"/></process>
       <process field="lastModifiedDate">
         <convert to-field="drLastModifiedDate" replace="true" set-if-null="false" type="Timestamp">
-          <fail-message message="lastModifiedDate not a valid date format"/>
+          <fail-property resource="ContentUiLabels" property="ContentLastModifiedDateInvalidFormat"/>
         </convert>
       </process>
       <process field="lastModifiedByUserLogin"><copy to-field="drLastModifiedByUserLogin" replace="true" set-if-null="false"/></process>
@@ -162,12 +164,12 @@ under the License.
       <process field="contentAssocTypeId"><copy to-field="caContentAssocTypeId" replace="true" set-if-null="false"/></process>
       <process field="fromDate">
         <convert to-field="caFromDate" replace="true" set-if-null="false" type="Timestamp">
-          <fail-message message="fromDate not a valid date format"/>
+          <fail-property resource="ContentUiLabels" property="ContentFromDateInvalidFormat"/>
         </convert>
       </process>
       <process field="thruDate">
         <convert to-field="caThruDate" replace="true" set-if-null="false" type="Timestamp">
-          <fail-message message="thruDate not a valid date format"/>
+          <fail-property resource="ContentUiLabels" property="ContentThruDateInvalidFormat"/>
         </convert>
       </process>
       <process field="contentAssocPredicateId"><copy to-field="caContentAssocPredicateId" replace="true" set-if-null="false"/></process>
@@ -178,13 +180,13 @@ under the License.
       <process field="leftCoordinate"><copy to-field="caLeftCoordinate" replace="true" set-if-null="false"/></process>
       <process field="createdDate">
         <convert to-field="caCreatedDate" replace="true" set-if-null="false" type="Timestamp">
-          <fail-message message="createdDate not a valid date format"/>
+          <fail-property resource="ContentUiLabels" property="ContentCreateDateInvalidFormat"/>
         </convert>
       </process>
       <process field="createdByUserLogin"><copy to-field="caCreatedByUserLogin" replace="true" set-if-null="false"/></process>
       <process field="lastModifiedDate">
         <convert to-field="caLastModifiedDate" replace="true" set-if-null="false" type="Timestamp">
-          <fail-message message="lastModifiedDate not a valid date format"/>
+          <fail-property resource="ContentUiLabels" property="ContentLastModifiedDateInvalidFormat"/>
         </convert>
       </process>
       <process field="lastModifiedByUserLogin"><copy to-field="caLastModifiedByUserLogin" replace="true" set-if-null="false"/></process>

@@ -258,15 +258,17 @@ under the License.
     <Uom abbreviation="st" description="Stone" uomId="WT_st" uomTypeId="WEIGHT_MEASURE"/>
     <Uom abbreviation="lt" description="Ton (long or British)" uomId="WT_lt" uomTypeId="WEIGHT_MEASURE"/>
     <Uom abbreviation="mt" description="Ton (metric)" uomId="WT_mt" uomTypeId="WEIGHT_MEASURE"/>
-    <Uom abbreviation="sh t" description="Ton (short)" uomId="WT_sh_t" uomTypeId="WEIGHT_MEASURE"/>
+    <Uom abbreviation="sh t" description="Ton (short or US)" uomId="WT_sh_t" uomTypeId="WEIGHT_MEASURE"/>
 
     <UomConversion uomId="WT_dr_avdp" uomIdTo="WT_oz" conversionFactor="0.0625"/>
     <UomConversion uomId="WT_gr" uomIdTo="WT_oz" conversionFactor="0.00229"/>
     <UomConversion uomId="WT_gr" uomIdTo="WT_g" conversionFactor="0.0648"/>
     <UomConversion uomId="WT_kg" uomIdTo="WT_g" conversionFactor="1000"/>
     <UomConversion uomId="WT_kg" uomIdTo="WT_lb" conversionFactor="2.2"/>
+    <UomConversion uomId="WT_g" uomIdTo="WT_kg" conversionFactor="0.001"/>
     <UomConversion uomId="WT_g" uomIdTo="WT_mg" conversionFactor="1000"/>
     <UomConversion uomId="WT_g" uomIdTo="WT_oz" conversionFactor="0.03527"/>
+    <UomConversion uomId="WT_g" uomIdTo="WT_lb" conversionFactor="0.00220462247604"/>
     <UomConversion uomId="WT_oz" uomIdTo="WT_lb" conversionFactor="0.0625"/>
     <UomConversion uomId="WT_oz" uomIdTo="WT_g" conversionFactor="28"/>
     <UomConversion uomId="WT_oz_tr" uomIdTo="WT_g" conversionFactor="30"/>
@@ -313,4 +315,6 @@ under the License.
 
     <Uom abbreviation="ea" description="Each" uomId="OTH_ea" uomTypeId="OTHER_MEASURE"/>
     <Uom abbreviation="pp" description="Per Person" uomId="OTH_pp" uomTypeId="OTHER_MEASURE"/>
+    <Uom abbreviation="bx" description="Box" uomId="OTH_box" uomTypeId="OTHER_MEASURE"/>
+    <Uom abbreviation="pk" description="Package" uomId="OTH_pk" uomTypeId="OTHER_MEASURE"/>
 </entity-engine-xml>

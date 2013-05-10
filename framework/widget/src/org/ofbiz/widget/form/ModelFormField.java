@@ -20,8 +20,10 @@ package org.ofbiz.widget.form;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.NumberFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -33,6 +35,9 @@ import java.util.TimeZone;
 import javolution.util.FastList;
 import javolution.util.FastMap;
 
+import org.ofbiz.base.conversion.ConversionException;
+import org.ofbiz.base.conversion.DateTimeConverters;
+import org.ofbiz.base.conversion.DateTimeConverters.StringToTimestamp;
 import org.ofbiz.base.util.BshUtil;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.GeneralException;
@@ -42,12 +47,13 @@ import org.ofbiz.base.util.UtilDateTime;
 import org.ofbiz.base.util.UtilFormatOut;
 import org.ofbiz.base.util.UtilGenerics;
 import org.ofbiz.base.util.UtilMisc;
+import org.ofbiz.base.util.UtilProperties;
 import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.base.util.UtilXml;
 import org.ofbiz.base.util.collections.FlexibleMapAccessor;
 import org.ofbiz.base.util.collections.MapStack;
 import org.ofbiz.base.util.string.FlexibleStringExpander;
-import org.ofbiz.entity.GenericDelegator;
+import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericEntity;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
@@ -159,9 +165,7 @@ public class ModelFormField {
 
         String positionStr = fieldElement.getAttribute("position");
         try {
-            if (positionStr != null && positionStr.length() > 0) {
-                position = Integer.valueOf(positionStr);
-            }
+            if (UtilValidate.isNotEmpty(positionStr)) position = Integer.valueOf(positionStr);
         } catch (Exception e) {
             Debug.logError(
                 e,
@@ -173,164 +177,97 @@ public class ModelFormField {
         List<? extends Element> subElements = UtilXml.childElementList(fieldElement);
         for (Element subElement : subElements) {
             String subElementName = subElement.getTagName();
-            if (Debug.verboseOn())
-                Debug.logVerbose("Processing field " + this.name + " with type info tag " + subElementName, module);
+            if (Debug.verboseOn())  Debug.logVerbose("Processing field " + this.name + " with type info tag " + subElementName, module);
 
             if (UtilValidate.isEmpty(subElementName)) {
                 this.fieldInfo = null;
                 this.induceFieldInfo(null); //no defaultFieldType specified here, will default to edit
-            } else if ("display".equals(subElementName)) {
-                this.fieldInfo = new DisplayField(subElement, this);
-            } else if ("display-entity".equals(subElementName)) {
-                this.fieldInfo = new DisplayEntityField(subElement, this);
-            } else if ("hyperlink".equals(subElementName)) {
-                this.fieldInfo = new HyperlinkField(subElement, this);
-            } else if ("text".equals(subElementName)) {
-                this.fieldInfo = new TextField(subElement, this);
-            } else if ("textarea".equals(subElementName)) {
-                this.fieldInfo = new TextareaField(subElement, this);
-            } else if ("date-time".equals(subElementName)) {
-                this.fieldInfo = new DateTimeField(subElement, this);
-            } else if ("drop-down".equals(subElementName)) {
-                this.fieldInfo = new DropDownField(subElement, this);
-            } else if ("check".equals(subElementName)) {
-                this.fieldInfo = new CheckField(subElement, this);
-            } else if ("radio".equals(subElementName)) {
-                this.fieldInfo = new RadioField(subElement, this);
-            } else if ("submit".equals(subElementName)) {
-                this.fieldInfo = new SubmitField(subElement, this);
-            } else if ("reset".equals(subElementName)) {
-                this.fieldInfo = new ResetField(subElement, this);
-            } else if ("hidden".equals(subElementName)) {
-                this.fieldInfo = new HiddenField(subElement, this);
-            } else if ("ignored".equals(subElementName)) {
-                this.fieldInfo = new IgnoredField(subElement, this);
-            } else if ("text-find".equals(subElementName)) {
-                this.fieldInfo = new TextFindField(subElement, this);
-            } else if ("date-find".equals(subElementName)) {
-                this.fieldInfo = new DateFindField(subElement, this);
-            } else if ("range-find".equals(subElementName)) {
-                this.fieldInfo = new RangeFindField(subElement, this);
-            } else if ("lookup".equals(subElementName)) {
-                this.fieldInfo = new LookupField(subElement, this);
-            } else if ("file".equals(subElementName)) {
-                this.fieldInfo = new FileField(subElement, this);
-            } else if ("password".equals(subElementName)) {
-                this.fieldInfo = new PasswordField(subElement, this);
-            } else if ("image".equals(subElementName)) {
-                this.fieldInfo = new ImageField(subElement, this);
-            } else if ("on-field-event-update-area".equals(subElementName)) {
-                addOnEventUpdateArea(new UpdateArea(subElement));
-            } else {
-                throw new IllegalArgumentException("The field sub-element with name " + subElementName + " is not supported");
-            }
+            } else if ("display".equals(subElementName)) this.fieldInfo = new DisplayField(subElement, this);
+            else if ("display-entity".equals(subElementName)) this.fieldInfo = new DisplayEntityField(subElement, this);
+            else if ("hyperlink".equals(subElementName)) this.fieldInfo = new HyperlinkField(subElement, this);
+            else if ("text".equals(subElementName)) this.fieldInfo = new TextField(subElement, this);
+            else if ("textarea".equals(subElementName)) this.fieldInfo = new TextareaField(subElement, this);
+            else if ("date-time".equals(subElementName)) this.fieldInfo = new DateTimeField(subElement, this);
+            else if ("drop-down".equals(subElementName)) this.fieldInfo = new DropDownField(subElement, this);
+            else if ("check".equals(subElementName)) this.fieldInfo = new CheckField(subElement, this);
+            else if ("radio".equals(subElementName)) this.fieldInfo = new RadioField(subElement, this);
+            else if ("submit".equals(subElementName)) this.fieldInfo = new SubmitField(subElement, this);
+            else if ("reset".equals(subElementName)) this.fieldInfo = new ResetField(subElement, this);
+            else if ("hidden".equals(subElementName)) this.fieldInfo = new HiddenField(subElement, this);
+            else if ("ignored".equals(subElementName)) this.fieldInfo = new IgnoredField(subElement, this);
+            else if ("text-find".equals(subElementName)) this.fieldInfo = new TextFindField(subElement, this);
+            else if ("date-find".equals(subElementName)) this.fieldInfo = new DateFindField(subElement, this);
+            else if ("range-find".equals(subElementName)) this.fieldInfo = new RangeFindField(subElement, this);
+            else if ("lookup".equals(subElementName)) this.fieldInfo = new LookupField(subElement, this);
+            else if ("file".equals(subElementName)) this.fieldInfo = new FileField(subElement, this);
+            else if ("password".equals(subElementName)) this.fieldInfo = new PasswordField(subElement, this);
+            else if ("image".equals(subElementName)) this.fieldInfo = new ImageField(subElement, this);
+            else if ("container".equals(subElementName)) this.fieldInfo = new ContainerField(subElement, this);
+            else if ("on-field-event-update-area".equals(subElementName)) addOnEventUpdateArea(new UpdateArea(subElement));
+            else throw new IllegalArgumentException("The field sub-element with name " + subElementName + " is not supported");
         }
     }
 
     public void addOnEventUpdateArea(UpdateArea updateArea) {
         // Event types are sorted as a convenience for the rendering classes
         Debug.logInfo(this.modelForm.getName() + ":" + this.name + " adding UpdateArea type " + updateArea.getEventType(), module);
-        if ("change".equals(updateArea.getEventType())) {
-            addOnChangeUpdateArea(updateArea);
-        } else if ("click".equals(updateArea.getEventType())) {
-            addOnClickUpdateArea(updateArea);
-        }
+        if ("change".equals(updateArea.getEventType()))  addOnChangeUpdateArea(updateArea);
+        else if ("click".equals(updateArea.getEventType())) addOnClickUpdateArea(updateArea);
     }
 
     protected void addOnChangeUpdateArea(UpdateArea updateArea) {
-        if (onChangeUpdateAreas == null) {
-            onChangeUpdateAreas = FastList.newInstance();
-        }
+        if (onChangeUpdateAreas == null) onChangeUpdateAreas = FastList.newInstance();        
         onChangeUpdateAreas.add(updateArea);
         Debug.logInfo(this.modelForm.getName() + ":" + this.name + " onChangeUpdateAreas size = " + onChangeUpdateAreas.size(), module);
     }
 
     protected void addOnClickUpdateArea(UpdateArea updateArea) {
-        if (onClickUpdateAreas == null) {
-            onClickUpdateAreas = FastList.newInstance();
-        }
+        if (onClickUpdateAreas == null) onClickUpdateAreas = FastList.newInstance();        
         onClickUpdateAreas.add(updateArea);
     }
 
     public void mergeOverrideModelFormField(ModelFormField overrideFormField) {
-        if (overrideFormField == null)
-            return;
+        if (overrideFormField == null) return;
+        
         // incorporate updates for values that are not empty in the overrideFormField
-        if (UtilValidate.isNotEmpty(overrideFormField.name))
-            this.name = overrideFormField.name;
-        if (overrideFormField.mapAcsr != null && !overrideFormField.mapAcsr.isEmpty()) {
-            //Debug.logInfo("overriding mapAcsr, old=" + (this.mapAcsr==null?"null":this.mapAcsr.getOriginalName()) + ", new=" + overrideFormField.mapAcsr.getOriginalName(), module);
-            this.mapAcsr = overrideFormField.mapAcsr;
-        }
-        if (UtilValidate.isNotEmpty(overrideFormField.entityName))
-            this.entityName = overrideFormField.entityName;
-        if (UtilValidate.isNotEmpty(overrideFormField.serviceName))
-            this.serviceName = overrideFormField.serviceName;
-        if (overrideFormField.entryAcsr != null && !overrideFormField.entryAcsr.isEmpty())
-            this.entryAcsr = overrideFormField.entryAcsr;
-        if (UtilValidate.isNotEmpty(overrideFormField.parameterName))
-            this.parameterName = overrideFormField.parameterName;
-        if (UtilValidate.isNotEmpty(overrideFormField.fieldName))
-            this.fieldName = overrideFormField.fieldName;
-        if (UtilValidate.isNotEmpty(overrideFormField.attributeName))
-            this.attributeName = overrideFormField.attributeName;
-        if (overrideFormField.title != null && overrideFormField.title.getOriginal() != null) // title="" can be used to override the original value
-            this.title = overrideFormField.title;
-        if (overrideFormField.tooltip != null && !overrideFormField.tooltip.isEmpty())
-            this.tooltip = overrideFormField.tooltip;
-        if (overrideFormField.requiredField != null)
-            this.requiredField = overrideFormField.requiredField;
-        if (overrideFormField.sortField != null)
-            this.sortField = overrideFormField.sortField;
-        if (UtilValidate.isNotEmpty(overrideFormField.titleAreaStyle))
-            this.titleAreaStyle = overrideFormField.titleAreaStyle;
-        if (UtilValidate.isNotEmpty(overrideFormField.widgetAreaStyle))
-            this.widgetAreaStyle = overrideFormField.widgetAreaStyle;
-        if (UtilValidate.isNotEmpty(overrideFormField.titleStyle))
-            this.titleStyle = overrideFormField.titleStyle;
-        if (UtilValidate.isNotEmpty(overrideFormField.widgetStyle))
-            this.widgetStyle = overrideFormField.widgetStyle;
-        if (overrideFormField.position != null)
-            this.position = overrideFormField.position;
-        if (UtilValidate.isNotEmpty(overrideFormField.redWhen))
-            this.redWhen = overrideFormField.redWhen;
-        if (UtilValidate.isNotEmpty(overrideFormField.event))
-            this.event = overrideFormField.event;
-        if (overrideFormField.action != null && !overrideFormField.action.isEmpty())
-            this.action = overrideFormField.action;
-        if (overrideFormField.useWhen != null && !overrideFormField.useWhen.isEmpty())
-            this.useWhen = overrideFormField.useWhen;
-        if (overrideFormField.fieldInfo != null) {
-            this.setFieldInfo(overrideFormField.fieldInfo);
-        }
-        if (overrideFormField.fieldInfo != null) {
-            this.setHeaderLink(overrideFormField.headerLink);
-        }
-        if (UtilValidate.isNotEmpty(overrideFormField.idName)) {
-            this.idName = overrideFormField.idName;
-        }
-        if (overrideFormField.onChangeUpdateAreas != null) {
-            this.onChangeUpdateAreas = overrideFormField.onChangeUpdateAreas;
-        }
-        if (overrideFormField.onClickUpdateAreas != null) {
-            this.onClickUpdateAreas = overrideFormField.onClickUpdateAreas;
-        }
+        if (UtilValidate.isNotEmpty(overrideFormField.name)) this.name = overrideFormField.name;
+        if (UtilValidate.isNotEmpty(overrideFormField.mapAcsr)) this.mapAcsr = overrideFormField.mapAcsr; //Debug.logInfo("overriding mapAcsr, old=" + (this.mapAcsr==null?"null":this.mapAcsr.getOriginalName()) + ", new=" + overrideFormField.mapAcsr.getOriginalName(), module);
+        if (UtilValidate.isNotEmpty(overrideFormField.entityName)) this.entityName = overrideFormField.entityName;
+        if (UtilValidate.isNotEmpty(overrideFormField.serviceName)) this.serviceName = overrideFormField.serviceName;
+        if (UtilValidate.isNotEmpty(overrideFormField.entryAcsr)) this.entryAcsr = overrideFormField.entryAcsr;
+        if (UtilValidate.isNotEmpty(overrideFormField.parameterName)) this.parameterName = overrideFormField.parameterName;
+        if (UtilValidate.isNotEmpty(overrideFormField.fieldName)) this.fieldName = overrideFormField.fieldName;
+        if (UtilValidate.isNotEmpty(overrideFormField.attributeName)) this.attributeName = overrideFormField.attributeName;
+        if (UtilValidate.isNotEmpty(overrideFormField.title)) this.title = overrideFormField.title; // title="" can be used to override the original value
+        if (UtilValidate.isNotEmpty(overrideFormField.tooltip)) this.tooltip = overrideFormField.tooltip;
+        if (overrideFormField.requiredField != null) this.requiredField = overrideFormField.requiredField;
+        if (overrideFormField.sortField != null) this.sortField = overrideFormField.sortField;
+        if (UtilValidate.isNotEmpty(overrideFormField.titleAreaStyle)) this.titleAreaStyle = overrideFormField.titleAreaStyle;
+        if (UtilValidate.isNotEmpty(overrideFormField.widgetAreaStyle)) this.widgetAreaStyle = overrideFormField.widgetAreaStyle;
+        if (UtilValidate.isNotEmpty(overrideFormField.titleStyle)) this.titleStyle = overrideFormField.titleStyle;
+        if (UtilValidate.isNotEmpty(overrideFormField.widgetStyle)) this.widgetStyle = overrideFormField.widgetStyle;
+        if (overrideFormField.position != null) this.position = overrideFormField.position;
+        if (UtilValidate.isNotEmpty(overrideFormField.redWhen)) this.redWhen = overrideFormField.redWhen;
+        if (UtilValidate.isNotEmpty(overrideFormField.event)) this.event = overrideFormField.event;
+        if (UtilValidate.isNotEmpty(overrideFormField.action)) this.action = overrideFormField.action;
+        if (UtilValidate.isNotEmpty(overrideFormField.useWhen))this.useWhen = overrideFormField.useWhen;
+        if (overrideFormField.fieldInfo != null) this.setFieldInfo(overrideFormField.fieldInfo);
+        if (overrideFormField.headerLink != null) this.setHeaderLink(overrideFormField.headerLink);
+        if (UtilValidate.isNotEmpty(overrideFormField.idName)) this.idName = overrideFormField.idName;
+        if (overrideFormField.onChangeUpdateAreas != null) this.onChangeUpdateAreas = overrideFormField.onChangeUpdateAreas;
+        if (overrideFormField.onClickUpdateAreas != null) this.onClickUpdateAreas = overrideFormField.onClickUpdateAreas;
+        this.encodeOutput = overrideFormField.encodeOutput;
     }
 
     public boolean induceFieldInfo(String defaultFieldType) {
-        if (this.induceFieldInfoFromEntityField(defaultFieldType)) {
-            return true;
-        }
-        if (this.induceFieldInfoFromServiceParam(defaultFieldType)) {
-            return true;
-        }
+        if (this.induceFieldInfoFromEntityField(defaultFieldType)) return true;
+        if (this.induceFieldInfoFromServiceParam(defaultFieldType)) return true;
         return false;
     }
 
     public boolean induceFieldInfoFromServiceParam(String defaultFieldType) {
-        if (UtilValidate.isEmpty(this.getServiceName()) || UtilValidate.isEmpty(this.getAttributeName())) {
-            return false;
-        }
+        if (UtilValidate.isEmpty(this.getServiceName()) || UtilValidate.isEmpty(this.getAttributeName()))  return false;
+
         DispatchContext dispatchContext = this.getModelForm().dispatchContext;
         try {
             ModelService modelService = dispatchContext.getModelService(this.getServiceName());
@@ -356,9 +293,7 @@ public class ModelFormField {
     }
 
     public boolean induceFieldInfoFromServiceParam(ModelService modelService, ModelParam modelParam, String defaultFieldType) {
-        if (modelService == null || modelParam == null) {
-            return false;
-        }
+        if (modelService == null || modelParam == null) return false;
 
         this.serviceName = modelService.name;
         this.attributeName = modelParam.name;
@@ -421,9 +356,8 @@ public class ModelFormField {
     }
 
     public boolean induceFieldInfoFromEntityField(String defaultFieldType) {
-        if (UtilValidate.isEmpty(this.getEntityName()) || UtilValidate.isEmpty(this.getFieldName())) {
-            return false;
-        }
+        if (UtilValidate.isEmpty(this.getEntityName()) || UtilValidate.isEmpty(this.getFieldName())) return false;
+        
         ModelReader entityModelReader = this.getModelForm().entityModelReader;
         try {
             ModelEntity modelEntity = entityModelReader.getModelEntity(this.getEntityName());
@@ -442,9 +376,7 @@ public class ModelFormField {
     }
 
     public boolean induceFieldInfoFromEntityField(ModelEntity modelEntity, ModelField modelField, String defaultFieldType) {
-        if (modelEntity == null || modelField == null) {
-            return false;
-        }
+        if (modelEntity == null || modelField == null) return false;
 
         this.entityName = modelEntity.getEntityName();
         this.fieldName = modelField.getName();
@@ -611,8 +543,7 @@ public class ModelFormField {
      * @param fieldInfo
      */
     public void setFieldInfo(FieldInfo fieldInfo) {
-        if (fieldInfo == null)
-            return;
+        if (fieldInfo == null)  return;
 
         // field info is a little different, check source for priority
         if (this.fieldInfo == null || (fieldInfo.getFieldSource() <= this.fieldInfo.getFieldSource())) {
@@ -626,30 +557,21 @@ public class ModelFormField {
      * with this field. This can be used to get additional information about the field.
      * Use the getServiceName() method to get the Entity name that the field is in.
      *
-     * @return
+     * @return returns the name of the Service Attribute 
      */
     public String getAttributeName() {
-        if (UtilValidate.isNotEmpty(this.attributeName)) {
-            return this.attributeName;
-        } else {
-            return this.name;
-        }
+        if (UtilValidate.isNotEmpty(this.attributeName)) return this.attributeName;
+        return this.name;
     }
 
     public String getEntityName() {
-        if (UtilValidate.isNotEmpty(this.entityName)) {
-            return this.entityName;
-        } else {
-            return this.modelForm.getDefaultEntityName();
-        }
+        if (UtilValidate.isNotEmpty(this.entityName)) return this.entityName;
+        return this.modelForm.getDefaultEntityName();
     }
 
     public String getEntryName() {
-        if (this.entryAcsr != null && !this.entryAcsr.isEmpty()) {
-            return this.entryAcsr.getOriginalName();
-        } else {
-            return this.name;
-        }
+        if (UtilValidate.isNotEmpty(this.entryAcsr)) return this.entryAcsr.getOriginalName();
+        return this.name;
     }
 
     /**
@@ -658,15 +580,14 @@ public class ModelFormField {
      * is true) then the value will be retreived from the parameters Map in
      * the context.
      *
-     * @param context
-     * @param encoder
-     * @return
+     * @param context the context
+     * @return returns the entry from the context that corresponds to this field
      */
-    public String getEntry(Map<String, Object> context) {
+    public String getEntry(Map<String, ? extends Object> context) {
         return this.getEntry(context, "");
     }
 
-    public String getEntry(Map<String, Object> context , String defaultValue) {
+    public String getEntry(Map<String, ? extends Object> context , String defaultValue) {
         Boolean isError = (Boolean) context.get("isError");
         Boolean useRequestParameters = (Boolean) context.get("useRequestParameters");
 
@@ -705,7 +626,7 @@ public class ModelFormField {
                 dataMapIsContext = true;
             }
             Object retVal = null;
-            if (this.entryAcsr != null && !this.entryAcsr.isEmpty()) {
+            if (UtilValidate.isNotEmpty(this.entryAcsr)) {
                 //Debug.logInfo("Getting entry, using entryAcsr for field " + this.getName() + " of form " + this.modelForm.getName(), module);
                 if (dataMap instanceof GenericEntity) {
                     GenericEntity genEnt = (GenericEntity) dataMap;
@@ -727,11 +648,8 @@ public class ModelFormField {
             if (dataMapIsContext && retVal == null && !Boolean.FALSE.equals(useRequestParameters)) {
                 Map<String, ? extends Object> parameters = UtilGenerics.checkMap(context.get("parameters"));
                 if (parameters != null) {
-                    if (this.entryAcsr != null && !this.entryAcsr.isEmpty()) {
-                        retVal = this.entryAcsr.get(parameters);
-                    } else {
-                        retVal = parameters.get(this.name);
-                    }
+                    if (UtilValidate.isNotEmpty(this.entryAcsr))  retVal = this.entryAcsr.get(parameters);
+                    else retVal = parameters.get(this.name);
                 }
             }
 
@@ -763,21 +681,24 @@ public class ModelFormField {
 
         if (this.getEncodeOutput() && returnValue != null) {
             StringUtil.SimpleEncoder simpleEncoder = (StringUtil.SimpleEncoder) context.get("simpleEncoder");
-            if (simpleEncoder != null) {
-                returnValue = simpleEncoder.encode(returnValue);
-            }
+            if (simpleEncoder != null)  returnValue = simpleEncoder.encode(returnValue);
         }
         return returnValue;
     }
 
     public Map<String, ? extends Object> getMap(Map<String, ? extends Object> context) {
-        if (this.mapAcsr == null || this.mapAcsr.isEmpty()) {
-            //Debug.logInfo("Getting Map from default of the form because of no mapAcsr for field " + this.getName(), module);
-            return this.modelForm.getDefaultMap(context);
-        } else {
-            //Debug.logInfo("Getting Map from mapAcsr for field " + this.getName(), module);
-            return mapAcsr.get(context);
+        if (UtilValidate.isEmpty(this.mapAcsr)) return this.modelForm.getDefaultMap(context); //Debug.logInfo("Getting Map from default of the form because of no mapAcsr for field " + this.getName(), module);
+            
+        // Debug.logInfo("Getting Map from mapAcsr for field " + this.getName() + ", map-name=" + mapAcsr.getOriginalName() + ", context type=" + context.getClass().toString(), module);
+        Map<String, ? extends Object> result = null;
+        try {
+            result = mapAcsr.get(context);
+        } catch (java.lang.ClassCastException e) {
+            String errMsg = "Got an unexpected object type (not a Map) for map-name [" + mapAcsr.getOriginalName() + "] in field with name [" + this.getName() + "]: " + e.getMessage();
+            Debug.logError(errMsg, module);
+            throw new ClassCastException(errMsg);
         }
+        return result;
     }
 
     /**
@@ -785,14 +706,11 @@ public class ModelFormField {
      * with this field. This can be used to get additional information about the field.
      * Use the getEntityName() method to get the Entity name that the field is in.
      *
-     * @return
+     * @return return the name of the Entity Field that corresponds with this field
      */
     public String getFieldName() {
-        if (UtilValidate.isNotEmpty(this.fieldName)) {
-            return this.fieldName;
-        } else {
+        if (UtilValidate.isNotEmpty(this.fieldName)) return this.fieldName;
             return this.name;
-        }
     }
 
     /** Get the name of the Map in the form context that contains the entry,
@@ -801,14 +719,11 @@ public class ModelFormField {
      * error condition the parameter name is used to get the value from the
      * parameters Map.
      *
-     * @return
+     * @return returns the name of the Map in the form context that contains the entry
      */
     public String getMapName() {
-        if (this.mapAcsr != null && !this.mapAcsr.isEmpty()) {
-            return this.mapAcsr.getOriginalName();
-        } else {
-            return this.modelForm.getDefaultMapName();
-        }
+        if (UtilValidate.isNotEmpty(this.mapAcsr)) return this.mapAcsr.getOriginalName();
+        return this.modelForm.getDefaultMapName();
     }
 
     public String getName() {
@@ -819,15 +734,12 @@ public class ModelFormField {
      * Get the name to use for the parameter for this field in the form interpreter.
      * For HTML forms this is the request parameter name.
      *
-     * @return
+     * @return returns the name to use for the parameter for this field in the form interpreter
      */
-    public String getParameterName(Map<String, Object> context) {
+    public String getParameterName(Map<String, ? extends Object> context) {
         String baseName;
-        if (UtilValidate.isNotEmpty(this.parameterName)) {
-            baseName = this.parameterName;
-        } else {
-            baseName = this.name;
-        }
+        if (UtilValidate.isNotEmpty(this.parameterName)) baseName = this.parameterName;
+        else baseName = this.name;
 
         Integer itemIndex = (Integer) context.get("itemIndex");
         if (itemIndex != null && "multi".equals(this.modelForm.getType())) {
@@ -838,11 +750,8 @@ public class ModelFormField {
     }
 
     public int getPosition() {
-        if (this.position == null) {
-            return 1;
-        } else {
-            return position.intValue();
-        }
+        if (this.position == null) return 1;
+        return position.intValue();
     }
 
     public String getRedWhen() {
@@ -854,31 +763,26 @@ public class ModelFormField {
         return event;
     }
 
-    public String getAction(Map<String, Object> context) {
-        if (this.action != null && this.action.getOriginal() != null) {
-            return action.expandString(context);
-        } else {
-            return null;
-        }
+    public String getAction(Map<String, ? extends Object> context) {
+        if (UtilValidate.isNotEmpty(this.action)) return action.expandString(context);
+        return null;
     }
 
-/**
+    /**
      * the widget/interaction part will be red if the date value is
      *  before-now (for ex. thruDate), after-now (for ex. fromDate), or by-name (if the
      *  field's name or entry-name or fromDate or thruDate the corresponding
      *  action will be done); only applicable when the field is a timestamp
      *
-     * @param context
-     * @return
+     * @param context the context
+     * @return true if the field should be read otherwise false
      */
     public boolean shouldBeRed(Map<String, Object> context) {
-        // red-when ( never | before-now | after-now | by-name ) "by-name"
+        // red-when (never | before-now | after-now | by-name) "by-name"
 
         String redCondition = this.redWhen;
 
-        if ("never".equals(redCondition)) {
-            return false;
-        }
+        if ("never".equals(redCondition)) return false;
 
         // for performance resaons we check this first, most fields will be eliminated here and the valueOfs will not be necessary
         if (UtilValidate.isEmpty(redCondition) || "by-name".equals(redCondition)) {
@@ -978,113 +882,89 @@ public class ModelFormField {
     }
 
     public String getServiceName() {
-        if (UtilValidate.isNotEmpty(this.serviceName)) {
-            return this.serviceName;
-        } else {
-            return this.modelForm.getDefaultServiceName();
-        }
+        if (UtilValidate.isNotEmpty(this.serviceName)) return this.serviceName;
+        return this.modelForm.getDefaultServiceName();
     }
 
     public String getTitle(Map<String, Object> context) {
-        if (this.title != null && this.title.getOriginal() != null) {
-            return title.expandString(context);
+        if (UtilValidate.isNotEmpty(this.title)) return title.expandString(context);
+        
+        // create a title from the name of this field; expecting a Java method/field style name, ie productName or productCategoryId
+        if (UtilValidate.isEmpty(this.name)) return ""; // this should never happen, ie name is required
+
+        // search for a localized label for the field's name
+        Map<String, String> uiLabelMap = UtilGenerics.checkMap(context.get("uiLabelMap"));
+        if (uiLabelMap != null) {
+            String titleFieldName = "FormFieldTitle_" + this.name;
+            String localizedName = uiLabelMap.get(titleFieldName);
+            if (!localizedName.equals(titleFieldName)) {
+                return localizedName;
+            }
         } else {
-            // create a title from the name of this field; expecting a Java method/field style name, ie productName or productCategoryId
-            if (this.name == null || this.name.length() == 0) {
-                // this should never happen, ie name is required
-                return "";
-            }
-
-            // search for a localized label for the field's name
-            Map<String, String> uiLabelMap = UtilGenerics.checkMap(context.get("uiLabelMap"));
-            if (uiLabelMap != null) {
-                String titleFieldName = "FormFieldTitle_" + this.name;
-                String localizedName = (String) uiLabelMap.get(titleFieldName);
-                if (!localizedName.equals(titleFieldName)) {
-                    return localizedName;
-                }
-            } else {
-                Debug.logWarning("Could not find uiLabelMap in context while rendering form " + this.modelForm.getName(), module);
-            }
-
-            // create a title from the name of this field; expecting a Java method/field style name, ie productName or productCategoryId
-            StringBuffer autoTitlewriter = new StringBuffer();
-
-            // always use upper case first letter...
-            autoTitlewriter.append(Character.toUpperCase(this.name.charAt(0)));
-
-            // just put spaces before the upper case letters
-            for (int i = 1; i < this.name.length(); i++) {
-                char curChar = this.name.charAt(i);
-                if (Character.isUpperCase(curChar)) {
-                    autoTitlewriter.append(' ');
-                }
-                autoTitlewriter.append(curChar);
-            }
-
-            return autoTitlewriter.toString();
+            Debug.logWarning("Could not find uiLabelMap in context while rendering form " + this.modelForm.getName(), module);
         }
+
+        // create a title from the name of this field; expecting a Java method/field style name, ie productName or productCategoryId
+        StringBuilder autoTitlewriter = new StringBuilder();
+
+        // always use upper case first letter...
+        autoTitlewriter.append(Character.toUpperCase(this.name.charAt(0)));
+
+        // just put spaces before the upper case letters
+        for (int i = 1; i < this.name.length(); i++) {
+            char curChar = this.name.charAt(i);
+            if (Character.isUpperCase(curChar)) {
+                autoTitlewriter.append(' ');
+            }
+            autoTitlewriter.append(curChar);
+        }
+
+        return autoTitlewriter.toString();
     }
 
     public String getTitleAreaStyle() {
-        if (UtilValidate.isNotEmpty(this.titleAreaStyle)) {
-            return this.titleAreaStyle;
-        } else {
-            return this.modelForm.getDefaultTitleAreaStyle();
-        }
+        if (UtilValidate.isNotEmpty(this.titleAreaStyle)) return this.titleAreaStyle;
+        return this.modelForm.getDefaultTitleAreaStyle();
     }
 
     public String getTitleStyle() {
-        if (UtilValidate.isNotEmpty(this.titleStyle)) {
-            return this.titleStyle;
-        } else {
-            return this.modelForm.getDefaultTitleStyle();
-        }
+        if (UtilValidate.isNotEmpty(this.titleStyle)) return this.titleStyle;
+        return this.modelForm.getDefaultTitleStyle();
     }
 
     public String getRequiredFieldStyle() {
-        if (UtilValidate.isNotEmpty(this.requiredFieldStyle)) {
-            return this.requiredFieldStyle;
-        } else {
-            return this.modelForm.getDefaultRequiredFieldStyle();
-        }
+        if (UtilValidate.isNotEmpty(this.requiredFieldStyle)) return this.requiredFieldStyle;
+        return this.modelForm.getDefaultRequiredFieldStyle();
     }
 
     public String getSortFieldStyle() {
-        if (UtilValidate.isNotEmpty(this.sortFieldStyle)) {
-            return this.sortFieldStyle;
-        }
+        if (UtilValidate.isNotEmpty(this.sortFieldStyle)) return this.sortFieldStyle;
         return this.modelForm.getDefaultSortFieldStyle();
     }
 
     public String getSortFieldStyleAsc() {
-        if (UtilValidate.isNotEmpty(this.sortFieldAscStyle)) {
-            return this.sortFieldAscStyle;
-        }
+        if (UtilValidate.isNotEmpty(this.sortFieldAscStyle)) return this.sortFieldAscStyle;
         return this.modelForm.getDefaultSortFieldAscStyle();
     }
 
     public String getSortFieldStyleDesc() {
-        if (UtilValidate.isNotEmpty(this.sortFieldDescStyle)) {
-            return this.sortFieldDescStyle;
-        }
+        if (UtilValidate.isNotEmpty(this.sortFieldDescStyle)) return this.sortFieldDescStyle;
         return this.modelForm.getDefaultSortFieldDescStyle();
     }
 
     public String getTooltip(Map<String, Object> context) {
-        if (tooltip != null && !tooltip.isEmpty()) {
-            return tooltip.expandString(context);
-        } else {
-            return "";
+        String tooltipString = "";
+        if (UtilValidate.isNotEmpty(tooltip)) tooltipString = tooltip.expandString(context);
+        if (this.getEncodeOutput()) {            
+            StringUtil.SimpleEncoder simpleEncoder = (StringUtil.SimpleEncoder) context.get("simpleEncoder");
+            if (simpleEncoder != null) tooltipString = simpleEncoder.encode(tooltipString);
         }
+        return tooltipString;        
     }
-
+    
     public String getUseWhen(Map<String, Object> context) {
-        if (this.useWhen != null && !this.useWhen.isEmpty()) {
-            return this.useWhen.expandString(context);
-        } else {
-            return "";
-        }
+        if (UtilValidate.isNotEmpty(this.useWhen)) return this.useWhen.expandString(context);
+        return "";
     }
 
     public boolean getEncodeOutput() {
@@ -1092,11 +972,23 @@ public class ModelFormField {
     }
 
     public String getIdName() {
-        if (UtilValidate.isNotEmpty(idName)) {
-            return idName;
-        } else {
-            return this.modelForm.getName() + "_" + this.getFieldName();
+        if (UtilValidate.isNotEmpty(idName)) return idName;
+        return this.modelForm.getName() + "_" + this.getFieldName();
+    }
+
+    public String getCurrentContainerId(Map<String, Object> context) {
+        ModelForm modelForm = this.getModelForm();
+        String idName = FlexibleStringExpander.expandString(this.getIdName(), context);
+
+        if (modelForm != null) {
+            Integer itemIndex = (Integer) context.get("itemIndex");
+            if ("list".equals(modelForm.getType()) || "multi".equals(modelForm.getType() )) {
+                if (itemIndex != null) {
+                    return idName + modelForm.getItemIndexSeparator() + itemIndex.intValue();
+                }
+            }
         }
+        return idName;
     }
 
     public String getHeaderLink() {
@@ -1126,30 +1018,28 @@ public class ModelFormField {
 
     public boolean shouldUse(Map<String, Object> context) {
         String useWhenStr = this.getUseWhen(context);
-        if (UtilValidate.isEmpty(useWhenStr)) {
-            return true;
-        } else {
-            try {
-                Interpreter bsh = this.modelForm.getBshInterpreter(context);
-                Object retVal = bsh.eval(useWhenStr);
-                boolean condTrue = false;
-                // retVal should be a Boolean, if not something weird is up...
-                if (retVal instanceof Boolean) {
-                    Boolean boolVal = (Boolean) retVal;
-                    condTrue = boolVal.booleanValue();
-                } else {
-                    throw new IllegalArgumentException("Return value from use-when condition eval was not a Boolean: "
-                            + retVal.getClass().getName() + " [" + retVal + "] on the field " + this.name + " of form " + this.modelForm.getName());
-                }
-
-                return condTrue;
-            } catch (EvalError e) {
-                String errMsg = "Error evaluating BeanShell use-when condition [" + useWhenStr + "] on the field "
-                        + this.name + " of form " + this.modelForm.getName() + ": " + e.toString();
-                Debug.logError(e, errMsg, module);
-                //Debug.logError("For use-when eval error context is: " + context, module);
-                throw new IllegalArgumentException(errMsg);
+        if (UtilValidate.isEmpty(useWhenStr)) return true;
+        
+        try {
+            Interpreter bsh = this.modelForm.getBshInterpreter(context);
+            Object retVal = bsh.eval(StringUtil.convertOperatorSubstitutions(useWhenStr));
+            boolean condTrue = false;
+            // retVal should be a Boolean, if not something weird is up...
+            if (retVal instanceof Boolean) {
+                Boolean boolVal = (Boolean) retVal;
+                condTrue = boolVal.booleanValue();
+            } else {
+                throw new IllegalArgumentException("Return value from use-when condition eval was not a Boolean: "
+                        + (retVal != null ? retVal.getClass().getName() : "null") + " [" + retVal + "] on the field " + this.name + " of form " + this.modelForm.getName());
             }
+
+            return condTrue;
+        } catch (EvalError e) {
+            String errMsg = "Error evaluating BeanShell use-when condition [" + useWhenStr + "] on the field "
+                    + this.name + " of form " + this.modelForm.getName() + ": " + e.toString();
+            Debug.logError(e, errMsg, module);
+            //Debug.logError("For use-when eval error context is: " + context, module);
+            throw new IllegalArgumentException(errMsg);
         }
     }
 
@@ -1164,27 +1054,18 @@ public class ModelFormField {
     }
 
     public String getWidgetAreaStyle() {
-        if (UtilValidate.isNotEmpty(this.widgetAreaStyle)) {
-            return this.widgetAreaStyle;
-        } else {
-            return this.modelForm.getDefaultWidgetAreaStyle();
-        }
+        if (UtilValidate.isNotEmpty(this.widgetAreaStyle)) return this.widgetAreaStyle;
+        return this.modelForm.getDefaultWidgetAreaStyle();
     }
 
     public String getWidgetStyle() {
-        if (UtilValidate.isNotEmpty(this.widgetStyle)) {
-            return this.widgetStyle;
-        } else {
-            return this.modelForm.getDefaultWidgetStyle();
-        }
+        if (UtilValidate.isNotEmpty(this.widgetStyle)) return this.widgetStyle;
+        return this.modelForm.getDefaultWidgetStyle();
     }
 
     public String getTooltipStyle() {
-        if (UtilValidate.isNotEmpty(this.tooltipStyle)) {
-            return this.tooltipStyle;
-        } else {
-            return this.modelForm.getDefaultTooltipStyle();
-        }
+        if (UtilValidate.isNotEmpty(this.tooltipStyle)) return this.tooltipStyle;
+        return this.modelForm.getDefaultTooltipStyle();
     }
 
     /**
@@ -1356,25 +1237,25 @@ public class ModelFormField {
     }
 
     /**
-     * @param boolean
+     * @param required the field is required 
      */
     public void setRequiredField(boolean required) {
         this.requiredField = required;
     }
 
     public boolean isSortField() {
-        return this.sortField != null ? this.sortField.booleanValue() : false;
+        return this.sortField != null && this.sortField.booleanValue();
     }
 
     /**
-     * @param boolean
+     * @param sort set as sort field
      */
     public void setSortField(boolean sort) {
         this.sortField = Boolean.valueOf(sort);
     }
 
     /**
-     * @param ModelForm
+     * @param modelForm the model form
      */
     public void setModelForm(ModelForm modelForm) {
         this.modelForm = modelForm;
@@ -1435,6 +1316,7 @@ public class ModelFormField {
             fieldTypeByName.put("password", Integer.valueOf(18));
             fieldTypeByName.put("image", Integer.valueOf(19));
             fieldTypeByName.put("display-entity", Integer.valueOf(20));
+            fieldTypeByName.put("container", Integer.valueOf(21));
         }
 
         protected int fieldType;
@@ -1471,7 +1353,7 @@ public class ModelFormField {
         }
 
         public static int findFieldTypeFromName(String name) {
-            Integer fieldTypeInt = (Integer) FieldInfo.fieldTypeByName.get(name);
+            Integer fieldTypeInt = FieldInfo.fieldTypeByName.get(name);
             if (fieldTypeInt != null) {
                 return fieldTypeInt.intValue();
             } else {
@@ -1517,7 +1399,7 @@ public class ModelFormField {
             }
         }
 
-        public List<OptionValue> getAllOptionValues(Map<String, Object> context, GenericDelegator delegator) {
+        public List<OptionValue> getAllOptionValues(Map<String, Object> context, Delegator delegator) {
             List<OptionValue> optionValues = new LinkedList<OptionValue>();
             for (OptionSource optionSource: this.optionSources) {
                 optionSource.addOptionValues(optionValues, context, delegator);
@@ -1526,13 +1408,9 @@ public class ModelFormField {
         }
 
         public static String getDescriptionForOptionKey(String key, List<OptionValue> allOptionValues) {
-            if (UtilValidate.isEmpty(key)) {
-                return "";
-            }
+            if (UtilValidate.isEmpty(key)) return "";
 
-            if (UtilValidate.isEmpty(allOptionValues)) {
-                return key;
-            }
+            if (UtilValidate.isEmpty(allOptionValues)) return key;
 
             for (OptionValue optionValue: allOptionValues) {
                 if (key.equals(optionValue.getKey())) {
@@ -1581,7 +1459,7 @@ public class ModelFormField {
     public static abstract class OptionSource {
         protected FieldInfo fieldInfo;
 
-        public abstract void addOptionValues(List<OptionValue> optionValues, Map<String, Object> context, GenericDelegator delegator);
+        public abstract void addOptionValues(List<OptionValue> optionValues, Map<String, Object> context, Delegator delegator);
     }
 
     public static class SingleOption extends OptionSource {
@@ -1600,7 +1478,8 @@ public class ModelFormField {
             this.fieldInfo = fieldInfo;
         }
 
-        public void addOptionValues(List<OptionValue> optionValues, Map<String, Object> context, GenericDelegator delegator) {
+        @Override
+        public void addOptionValues(List<OptionValue> optionValues, Map<String, Object> context, Delegator delegator) {
             optionValues.add(new OptionValue(key.expandString(context), description.expandString(context)));
         }
     }
@@ -1608,7 +1487,7 @@ public class ModelFormField {
     public static class ListOptions extends OptionSource {
         protected FlexibleMapAccessor<List<? extends Object>> listAcsr;
         protected String listEntryName;
-        protected FlexibleMapAccessor<String> keyAcsr;
+        protected FlexibleMapAccessor<Object> keyAcsr;
         protected FlexibleStringExpander description;
 
         public ListOptions(String listName, String listEntryName, String keyName, String description, FieldInfo fieldInfo) {
@@ -1628,7 +1507,8 @@ public class ModelFormField {
             this.fieldInfo = fieldInfo;
         }
 
-        public void addOptionValues(List<OptionValue> optionValues, Map<String, Object> context, GenericDelegator delegator) {
+        @Override
+        public void addOptionValues(List<OptionValue> optionValues, Map<String, Object> context, Delegator delegator) {
             List<? extends Object> dataList = UtilGenerics.checkList(this.listAcsr.get(context));
             if (dataList != null && dataList.size() != 0) {
                 for (Object data: dataList) {
@@ -1640,7 +1520,19 @@ public class ModelFormField {
                         Map<String, Object> dataMap = UtilGenerics.checkMap(data);
                         localContext.putAll(dataMap);
                     }
-                    optionValues.add(new OptionValue((String) keyAcsr.get(localContext), description.expandString(localContext)));
+                    Object keyObj = keyAcsr.get(localContext);
+                    String key = null;
+                    if (keyObj instanceof String) {
+                        key = (String) keyObj;
+                    } else {
+                        try {
+                            key = (String) ObjectType.simpleTypeConvert(keyObj, "String", null, null);
+                        } catch (GeneralException e) {
+                            String errMsg = "Could not convert field value for the field: [" + this.keyAcsr.toString() + "] to String for the value [" + keyObj + "]: " + e.toString();
+                            Debug.logError(e, errMsg, module);
+                        }
+                    }
+                    optionValues.add(new OptionValue(key, description.expandString(localContext)));
                 }
             }
         }
@@ -1687,21 +1579,25 @@ public class ModelFormField {
         }
 
         public String getKeyFieldName() {
-            if (UtilValidate.isNotEmpty(this.keyFieldName)) {
-                return this.keyFieldName;
-            } else {
-                // get the modelFormField fieldName
-                return this.fieldInfo.getModelFormField().getFieldName();
-            }
+            if (UtilValidate.isNotEmpty(this.keyFieldName)) return this.keyFieldName;
+            return this.fieldInfo.getModelFormField().getFieldName(); // get the modelFormField fieldName
         }
 
-        public void addOptionValues(List<OptionValue> optionValues, Map<String, Object> context, GenericDelegator delegator) {
+        @Override
+        public void addOptionValues(List<OptionValue> optionValues, Map<String, Object> context, Delegator delegator) {
             // first expand any conditions that need expanding based on the current context
             EntityCondition findCondition = null;
             if (UtilValidate.isNotEmpty(this.constraintList)) {
                 List<EntityCondition> expandedConditionList = new LinkedList<EntityCondition>();
                 for (EntityFinderUtil.Condition condition: constraintList) {
-                    expandedConditionList.add(condition.createCondition(context, this.entityName, delegator));
+                    ModelEntity modelEntity = delegator.getModelEntity(this.entityName);
+                    if (modelEntity == null) {
+                        throw new IllegalArgumentException("Error in entity-options: could not find entity [" + this.entityName + "]");
+                    }
+                    EntityCondition createdCondition = condition.createCondition(context, modelEntity, delegator.getModelFieldTypeReader(modelEntity));
+                    if (createdCondition!=null) {
+                        expandedConditionList.add(createdCondition);
+                    }
                 }
                 findCondition = EntityCondition.makeCondition(expandedConditionList);
             }
@@ -1733,7 +1629,7 @@ public class ModelFormField {
 
                     Object keyFieldObject = value.get(this.getKeyFieldName());
                     if (keyFieldObject == null) {
-                        throw new IllegalArgumentException("The value found for key-name [" + this.getKeyFieldName() + "], may not be a valid key field name.");
+                        throw new IllegalArgumentException("The entity-options identifier (from key-name attribute, or default to the field name) [" + this.getKeyFieldName() + "], may not be a valid key field name for the entity [" + this.entityName + "].");
                     }
                     String keyFieldValue = keyFieldObject.toString();
                     optionValues.add(new OptionValue(keyFieldValue, optionDesc));
@@ -2013,9 +1909,12 @@ public class ModelFormField {
         protected boolean alsoHidden = true;
         protected FlexibleStringExpander description;
         protected String type;  // matches type of field, currently text or currency
+        protected String size;  // maximum number of characters to display
+        protected FlexibleStringExpander imageLocation;
         protected FlexibleStringExpander currency;
         protected FlexibleStringExpander date;
         protected InPlaceEditor inPlaceEditor;
+        protected FlexibleStringExpander defaultValue;
 
         protected DisplayField() {
             super();
@@ -2032,10 +1931,13 @@ public class ModelFormField {
         public DisplayField(Element element, ModelFormField modelFormField) {
             super(element, modelFormField);
             this.type = element.getAttribute("type");
+            this.size = element.getAttribute("size");
+            this.setImageLocation(element.getAttribute("image-location"));
             this.setCurrency(element.getAttribute("currency"));
             this.setDescription(element.getAttribute("description"));
             this.setDate(element.getAttribute("date"));
             this.alsoHidden = !"false".equals(element.getAttribute("also-hidden"));
+            this.setDefaultValue(element.getAttribute("default-value"));
 
             Element inPlaceEditorElement = UtilXml.firstChildElement(element, "in-place-editor");
             if (inPlaceEditorElement != null) {
@@ -2043,6 +1945,7 @@ public class ModelFormField {
             }
         }
 
+        @Override
         public void renderFieldString(Appendable writer, Map<String, Object> context, FormStringRenderer formStringRenderer) throws IOException {
             formStringRenderer.renderDisplayField(writer, context, this);
         }
@@ -2050,30 +1953,36 @@ public class ModelFormField {
         public boolean getAlsoHidden() {
             return alsoHidden;
         }
+        public String getType(){
+            return this.type;
+        }
+
+        public String getSize(){
+            return this.size;
+        }
+        public String setSize(String size){
+            return this.size = size;
+        }
+
+        public String getImageLocation(Map<String, Object> context){
+            if (this.imageLocation != null) return this.imageLocation.expandString(context);
+            return "";
+        }
 
         public String getDescription(Map<String, Object> context) {
             String retVal = null;
-            if (this.description != null && !this.description.isEmpty()) {
-                retVal = this.description.expandString(context);
-                if (retVal != null) {
-                    StringUtil.SimpleEncoder simpleEncoder = (StringUtil.SimpleEncoder) context.get("simpleEncoder");
-                    if (simpleEncoder != null) {
-                        retVal = simpleEncoder.encode(retVal);
-                    }
-                }
-            } else {
-                retVal = modelFormField.getEntry(context);
-            }
-            if (retVal == null || retVal.length() == 0) {
-                retVal = "";
+            if (UtilValidate.isNotEmpty(this.description)) retVal = this.description.expandString(context);
+            else retVal = this.modelFormField.getEntry(context);
+
+            if (UtilValidate.isEmpty(retVal)) {
+                retVal = this.getDefaultValue(context);
             } else if ("currency".equals(type)) {
                 retVal = retVal.replaceAll("&nbsp;", " "); // FIXME : encoding currency is a problem for some locale, we should not have any &nbsp; in retVal other case may arise in future...
                 Locale locale = (Locale) context.get("locale");
                 if (locale == null) locale = Locale.getDefault();
                 String isoCode = null;
-                if (this.currency != null && !this.currency.isEmpty()) {
-                    isoCode = this.currency.expandString(context);
-                }
+                if (UtilValidate.isNotEmpty(this.currency)) isoCode = this.currency.expandString(context);
+
                 try {
                     BigDecimal parsedRetVal = (BigDecimal) ObjectType.simpleTypeConvert(retVal, "BigDecimal", null, null, locale, true);
                     retVal = UtilFormatOut.formatCurrency(parsedRetVal, isoCode, locale, 10); // we set the max to 10 digits as an hack to not round numbers in the ui
@@ -2082,8 +1991,73 @@ public class ModelFormField {
                     Debug.logError(e, errMsg, module);
                     throw new IllegalArgumentException(errMsg);
                 }
-            } else if ("date".equals(type) && retVal.length() > 10) {
-                retVal = retVal.substring(0,10);
+            } else if ("date".equals(this.type) && retVal.length() > 10) {
+                Locale locale = (Locale) context.get("locale");
+                if (locale == null) {
+                    locale = Locale.getDefault();
+                }
+
+                StringToTimestamp stringToTimestamp = new DateTimeConverters.StringToTimestamp();
+                Timestamp timestamp = null;
+                try {
+                    timestamp = stringToTimestamp.convert(retVal);
+                    Date date = new Date(timestamp.getTime());
+
+                    DateFormat dateFormatter = DateFormat.getDateInstance(DateFormat.SHORT, locale);
+                    retVal = dateFormatter.format(date);
+                }
+                catch (ConversionException e) {
+                    String errMsg = "Error formatting date using default instead [" + retVal + "]: " + e.toString();
+                    Debug.logError(e, errMsg, module);
+                    // create default date value from timestamp string
+                    retVal = retVal.substring(0,10);
+                }
+
+            } else if ("date-time".equals(this.type) && retVal.length() > 16) {
+                Locale locale = (Locale) context.get("locale");
+                TimeZone timeZone = (TimeZone) context.get("timeZone");
+                if (locale == null) {
+                    locale = Locale.getDefault();
+                }
+                if (timeZone == null) {
+                    timeZone = TimeZone.getDefault();
+                }
+
+                StringToTimestamp stringToTimestamp = new DateTimeConverters.StringToTimestamp();
+                Timestamp timestamp = null;
+                try {
+                    timestamp = stringToTimestamp.convert(retVal);
+                    Date date = new Date(timestamp.getTime());
+
+                    DateFormat dateFormatter = UtilDateTime.toDateTimeFormat(null, timeZone, locale);
+                    retVal = dateFormatter.format(date);
+                }
+                catch (ConversionException e) {
+                    String errMsg = "Error formatting date/time using default instead [" + retVal + "]: " + e.toString();
+                    Debug.logError(e, errMsg, module);
+                    // create default date/time value from timestamp string
+                    retVal = retVal.substring(0,16);
+                }
+            } else if ("accounting-number".equals(this.type)) {
+                Locale locale = (Locale) context.get("locale");
+                if (locale == null) {
+                    locale = Locale.getDefault();
+                }
+                try {
+                    Double parsedRetVal = (Double) ObjectType.simpleTypeConvert(retVal, "Double", null, locale, false);
+                    String template = UtilProperties.getPropertyValue("arithmetic", "accounting-number.format", "#,##0.00;(#,##0.00)");
+                    retVal = UtilFormatOut.formatDecimalNumber(parsedRetVal.doubleValue(), template, locale);
+                } catch (GeneralException e) {
+                    String errMsg = "Error formatting number [" + retVal + "]: " + e.toString();
+                    Debug.logError(e, errMsg, module);
+                    throw new IllegalArgumentException(errMsg);
+                }
+            }
+            if (UtilValidate.isNotEmpty(this.description) && retVal != null && this.getModelFormField().getEncodeOutput()) {
+                StringUtil.SimpleEncoder simpleEncoder = (StringUtil.SimpleEncoder) context.get("simpleEncoder");
+                if (simpleEncoder != null) {
+                    retVal = simpleEncoder.encode(retVal);
+                }
             }
             return retVal;
         }
@@ -2093,27 +2067,34 @@ public class ModelFormField {
         }
 
         /**
-         * @param b
+         * @param b the field is also hidden true/false
          */
         public void setAlsoHidden(boolean b) {
             alsoHidden = b;
         }
 
         /**
-         * @param Description
+         * @param value the value of the image location
+         */
+        public void setImageLocation(String value) {
+            this.imageLocation = FlexibleStringExpander.getInstance(value);
+        }
+
+        /**
+         * @param string the description of the field
          */
         public void setDescription(String string) {
             description = FlexibleStringExpander.getInstance(string);
         }
 
         /**
-         * @param string
+         * @param string the currency of the field
          */
         public void setCurrency(String string) {
             currency = FlexibleStringExpander.getInstance(string);
         }
         /**
-         * @param date
+         * @param string the date of the field
          */
         public void setDate(String string) {
             date = FlexibleStringExpander.getInstance(string);
@@ -2121,6 +2102,21 @@ public class ModelFormField {
 
         public void setInPlaceEditor(InPlaceEditor newInPlaceEditor) {
             this.inPlaceEditor = newInPlaceEditor;
+        }
+
+        /**
+         * @param str the default value
+         */
+        public void setDefaultValue(String str) {
+            this.defaultValue = FlexibleStringExpander.getInstance(str);
+        }
+
+        public String getDefaultValue(Map<String, Object> context) {
+            if (this.defaultValue != null) {
+                return this.defaultValue.expandString(context);
+            } else {
+                return "";
+            }
         }
     }
 
@@ -2150,10 +2146,9 @@ public class ModelFormField {
             this.entityName = element.getAttribute("entity-name");
             this.keyFieldName = element.getAttribute("key-field-name");
             this.cache = !"false".equals(element.getAttribute("cache"));
+            this.size = element.getAttribute("size");
 
-            if (this.description == null || this.description.isEmpty()) {
-                this.setDescription("${description}");
-            }
+            if (UtilValidate.isEmpty(this.description))  this.setDescription("${description}");
 
             Element subHyperlinkElement = UtilXml.firstChildElement(element, "sub-hyperlink");
             if (subHyperlinkElement != null) {
@@ -2161,16 +2156,16 @@ public class ModelFormField {
             }
         }
 
+        @Override
         public String getDescription(Map<String, Object> context) {
             Locale locale = UtilMisc.ensureLocale(context.get("locale"));
 
             // rather than using the context to expand the string, lookup the given entity and use it to expand the string
             GenericValue value = null;
             String fieldKey = this.keyFieldName;
-            if (UtilValidate.isEmpty(fieldKey)) {
-                fieldKey = this.modelFormField.fieldName;
-            }
-            GenericDelegator delegator = this.modelFormField.modelForm.getDelegator(context);
+            if (UtilValidate.isEmpty(fieldKey))  fieldKey = this.modelFormField.fieldName;
+            
+            Delegator delegator = WidgetWorker.getDelegator(context);
             String fieldValue = modelFormField.getEntry(context);
             try {
                 value = delegator.findOne(this.entityName, this.cache, fieldKey, fieldValue);
@@ -2190,12 +2185,8 @@ public class ModelFormField {
                 retVal = this.description.expandString(localContext, locale);
             }
             // try to get the entry for the field if description doesn't expand to anything
-            if (retVal == null || retVal.length() == 0) {
-                retVal = fieldValue;
-            }
-            if (retVal == null || retVal.length() == 0) {
-                retVal = "";
-            }
+            if (UtilValidate.isEmpty(retVal)) retVal = fieldValue;
+            if (UtilValidate.isEmpty(retVal)) retVal = "";
             return retVal;
         }
 
@@ -2213,12 +2204,18 @@ public class ModelFormField {
         protected boolean alsoHidden = true;
         protected String linkType;
         protected String targetType;
-        protected String image;
+        protected String size;
         protected FlexibleStringExpander target;
         protected FlexibleStringExpander description;
+        protected FlexibleStringExpander alternate;
+        protected FlexibleStringExpander imageLocation;
+        protected FlexibleStringExpander imageTitle;
         protected FlexibleStringExpander targetWindowExdr;
+        protected FlexibleMapAccessor<Map<String, String>> parametersMapAcsr;
         protected List<WidgetWorker.Parameter> parameterList = FastList.newInstance();
 
+        protected boolean requestConfirmation = false;
+        protected FlexibleStringExpander confirmationMsgExdr;
         protected HyperlinkField() {
             super();
         }
@@ -2235,19 +2232,25 @@ public class ModelFormField {
             super(element, modelFormField);
 
             this.setDescription(element.getAttribute("description"));
+            this.setAlternate(element.getAttribute("alternate"));
+            this.setImageLocation(element.getAttribute("image-location"));
+            this.setImageTitle(element.getAttribute("image-title"));
             this.setTarget(element.getAttribute("target"));
             this.alsoHidden = !"false".equals(element.getAttribute("also-hidden"));
             this.linkType = element.getAttribute("link-type");
             this.targetType = element.getAttribute("target-type");
             this.targetWindowExdr = FlexibleStringExpander.getInstance(element.getAttribute("target-window"));
-            this.image = element.getAttribute("image-location");
-
+            this.parametersMapAcsr = FlexibleMapAccessor.getInstance(element.getAttribute("parameters-map"));
+            this.size = element.getAttribute("size");
+            this.setRequestConfirmation("true".equals(element.getAttribute("request-confirmation")));
+            this.setConfirmationMsg(element.getAttribute("confirmation-message"));
             List<? extends Element> parameterElementList = UtilXml.childElementList(element, "parameter");
             for (Element parameterElement: parameterElementList) {
                 this.parameterList.add(new WidgetWorker.Parameter(parameterElement));
             }
         }
 
+        @Override
         public void renderFieldString(Appendable writer, Map<String, Object> context, FormStringRenderer formStringRenderer) throws IOException {
             formStringRenderer.renderHyperlinkField(writer, context, this);
         }
@@ -2256,16 +2259,33 @@ public class ModelFormField {
             return this.alsoHidden;
         }
 
+        public boolean getRequestConfirmation() {
+            return this.requestConfirmation;
+        }
+
+        public String getConfirmation(Map<String, Object> context) {
+            String message = getConfirmationMsg(context);
+            if (UtilValidate.isNotEmpty(message)) return message;            
+            
+            if (getRequestConfirmation()) {
+                String defaultMessage = UtilProperties.getPropertyValue("general", "default.confirmation.message", "${uiLabelMap.CommonConfirm}");
+                setConfirmationMsg(defaultMessage);
+                return getConfirmationMsg(context);
+            }
+            return "";
+        }
+
+        public String getConfirmationMsg(Map<String, Object> context) {
+            return this.confirmationMsgExdr.expandString(context);
+        }
+
         public String getLinkType() {
             return this.linkType;
         }
 
         public String getTargetType() {
-            if (UtilValidate.isNotEmpty(this.targetType)) {
-                return this.targetType;
-            } else {
-                return HyperlinkField.DEFAULT_TARGET_TYPE;
-            }
+            if (UtilValidate.isNotEmpty(this.targetType)) return this.targetType;
+            return HyperlinkField.DEFAULT_TARGET_TYPE;
         }
 
         public String getTargetWindow(Map<String, Object> context) {
@@ -2277,16 +2297,43 @@ public class ModelFormField {
             return this.description.expandString(context);
         }
 
+        public String getAlternate(Map<String, Object> context) {
+            return this.alternate.expandString(context);
+        }
+        
+        public String getImageLocation(Map<String, Object> context) {
+            return this.imageLocation.expandString(context);
+        }
+
+        public String getImageTitle(Map<String, Object> context) {
+            return this.imageTitle.expandString(context);
+        }
+
         public String getTarget(Map<String, Object> context) {
             return this.target.expandString(context);
         }
 
-        public List<WidgetWorker.Parameter> getParameterList() {
-            return this.parameterList;
+        public Map<String, String> getParameterMap(Map<String, Object> context) {
+            Map<String, String> fullParameterMap = FastMap.newInstance();
+            
+            Map<String, String> addlParamMap = this.parametersMapAcsr.get(context);
+            if (addlParamMap != null) {
+                fullParameterMap.putAll(addlParamMap);
+            }
+            
+            for (WidgetWorker.Parameter parameter: this.parameterList) {
+                fullParameterMap.put(parameter.getName(), parameter.getValue(context));
+            }
+            
+            return fullParameterMap;
         }
 
-        public String getImage() {
-            return this.image;
+        public String getSize() {
+            return this.size;
+        }
+
+        public String setSize(String size) {
+            return this.size = size;
         }
 
         /**
@@ -2313,8 +2360,37 @@ public class ModelFormField {
         /**
          * @param string
          */
+        public void setImageLocation(String string) {
+            this.imageLocation = FlexibleStringExpander.getInstance(string);
+        }
+        
+        /**
+         * @param string
+         */
+        public void setImageTitle(String string) {
+            this.imageTitle = FlexibleStringExpander.getInstance(string);
+        }
+
+        /**
+         * @param string
+         */
+        public void setAlternate(String string) {
+            this.alternate = FlexibleStringExpander.getInstance(string);
+        }
+
+        /**
+         * @param string
+         */
         public void setTarget(String string) {
             this.target = FlexibleStringExpander.getInstance(string);
+        }
+
+        public void setRequestConfirmation(boolean val) {
+            this.requestConfirmation = val;
+        }
+
+        public void setConfirmationMsg(String val) {
+            this.confirmationMsgExdr = FlexibleStringExpander.getInstance(val);
         }
     }
 
@@ -2327,6 +2403,8 @@ public class ModelFormField {
         protected FlexibleStringExpander description;
         protected FlexibleStringExpander targetWindowExdr;
         protected List<WidgetWorker.Parameter> parameterList = FastList.newInstance();
+        protected boolean requestConfirmation = false;
+        protected FlexibleStringExpander confirmationMsgExdr;
         protected ModelFormField modelFormField;
 
         public SubHyperlink(Element element, ModelFormField modelFormField) {
@@ -2337,11 +2415,12 @@ public class ModelFormField {
             this.linkStyle = element.getAttribute("link-style");
             this.targetType = element.getAttribute("target-type");
             this.targetWindowExdr = FlexibleStringExpander.getInstance(element.getAttribute("target-window"));
-
             List<? extends Element> parameterElementList = UtilXml.childElementList(element, "parameter");
             for (Element parameterElement: parameterElementList) {
                 this.parameterList.add(new WidgetWorker.Parameter(parameterElement));
             }
+            setRequestConfirmation("true".equals(element.getAttribute("request-confirmation")));
+            setConfirmationMsg(element.getAttribute("confirmation-message"));
 
             this.modelFormField = modelFormField;
         }
@@ -2351,11 +2430,8 @@ public class ModelFormField {
         }
 
         public String getTargetType() {
-            if (UtilValidate.isNotEmpty(this.targetType)) {
-                return this.targetType;
-            } else {
-                return HyperlinkField.DEFAULT_TARGET_TYPE;
-            }
+            if (UtilValidate.isNotEmpty(this.targetType)) return this.targetType;
+            return HyperlinkField.DEFAULT_TARGET_TYPE;
         }
 
         public String getDescription(Map<String, Object> context) {
@@ -2383,8 +2459,21 @@ public class ModelFormField {
             return this.linkType;
         }
 
-        public List<WidgetWorker.Parameter> getParameterList() {
-            return this.parameterList;
+        public Map<String, String> getParameterMap(Map<String, Object> context) {
+            Map<String, String> fullParameterMap = FastMap.newInstance();
+
+            /* leaving this here... may want to add it at some point like the hyperlink element:
+            Map<String, String> addlParamMap = this.parametersMapAcsr.get(context);
+            if (addlParamMap != null) {
+                fullParameterMap.putAll(addlParamMap);
+            }
+            */
+            
+            for (WidgetWorker.Parameter parameter: this.parameterList) {
+                fullParameterMap.put(parameter.getName(), parameter.getValue(context));
+            }
+            
+            return fullParameterMap;
         }
 
         public String getUseWhen(Map<String, Object> context) {
@@ -2393,6 +2482,26 @@ public class ModelFormField {
             } else {
                 return "";
             }
+        }
+
+        public boolean getRequestConfirmation() {
+            return this.requestConfirmation;
+        }
+
+        public String getConfirmationMsg(Map<String, Object> context) {
+            return this.confirmationMsgExdr.expandString(context);
+        }
+
+        public String getConfirmation(Map<String, Object> context) {
+            String message = getConfirmationMsg(context);
+            if (UtilValidate.isNotEmpty(message)) return message;
+            
+            if (getRequestConfirmation()) {
+                String defaultMessage = UtilProperties.getPropertyValue("general", "default.confirmation.message", "${uiLabelMap.CommonConfirm}");
+                setConfirmationMsg(defaultMessage);
+                return getConfirmationMsg(context);
+            }
+            return "";
         }
 
         public ModelFormField getModelFormField() {
@@ -2410,7 +2519,7 @@ public class ModelFormField {
                         context.put("bshInterpreter", bsh);
                     }
 
-                    Object retVal = bsh.eval(useWhen);
+                    Object retVal = bsh.eval(StringUtil.convertOperatorSubstitutions(useWhen));
 
                     // retVal should be a Boolean, if not something weird is up...
                     if (retVal instanceof Boolean) {
@@ -2462,6 +2571,14 @@ public class ModelFormField {
          */
         public void setUseWhen(String string) {
             this.useWhen = FlexibleStringExpander.getInstance(string);
+        }
+
+        public void setRequestConfirmation(boolean val) {
+            this.requestConfirmation = val;
+        }
+
+        public void setConfirmationMsg(String val) {
+            this.confirmationMsgExdr = FlexibleStringExpander.getInstance(val);
         }
     }
 
@@ -2557,7 +2674,9 @@ public class ModelFormField {
         protected FlexibleStringExpander defaultValue;
         protected SubHyperlink subHyperlink;
         protected boolean disabled;
+        protected boolean readonly;
         protected boolean clientAutocompleteField;
+        protected String mask;
 
         protected TextField() {
             super();
@@ -2574,12 +2693,13 @@ public class ModelFormField {
         public TextField(Element element, ModelFormField modelFormField) {
             super(element, modelFormField);
             this.setDefaultValue(element.getAttribute("default-value"));
+            this.mask = element.getAttribute("mask");
 
             String sizeStr = element.getAttribute("size");
             try {
                 size = Integer.parseInt(sizeStr);
             } catch (Exception e) {
-                if (sizeStr != null && sizeStr.length() > 0) {
+                if (UtilValidate.isNotEmpty(sizeStr)) {
                     Debug.logError("Could not parse the size value of the text element: [" + sizeStr + "], setting to the default of " + size, module);
                 }
             }
@@ -2589,12 +2709,13 @@ public class ModelFormField {
                 maxlength = Integer.valueOf(maxlengthStr);
             } catch (Exception e) {
                 maxlength = null;
-                if (maxlengthStr != null && maxlengthStr.length() > 0) {
+                if (UtilValidate.isNotEmpty(maxlengthStr)) {
                     Debug.logError("Could not parse the max-length value of the text element: [" + maxlengthStr + "], setting to null; default of no maxlength will be used", module);
                 }
             }
 
             this.disabled = "true".equals(element.getAttribute("disabled"));
+            this.readonly = "true".equals(element.getAttribute("read-only"));
 
             this.clientAutocompleteField = !"false".equals(element.getAttribute("client-autocomplete-field"));
 
@@ -2604,6 +2725,7 @@ public class ModelFormField {
             }
         }
 
+        @Override
         public void renderFieldString(Appendable writer, Map<String, Object> context, FormStringRenderer formStringRenderer) throws IOException {
             formStringRenderer.renderTextField(writer, context, this);
         }
@@ -2622,6 +2744,14 @@ public class ModelFormField {
 
         public void setDisabled(boolean b) {
             this.disabled = b;
+        }
+
+        public boolean getReadonly() {
+            return this.readonly;
+        }
+
+        public void setReadonly(boolean b) {
+            this.readonly = b;
         }
 
         public boolean getClientAutocompleteField() {
@@ -2667,6 +2797,10 @@ public class ModelFormField {
         public void setSubHyperlink(SubHyperlink newSubHyperlink) {
             this.subHyperlink = newSubHyperlink;
         }
+
+        public String getMask() {
+            return this.mask;
+        }
     }
 
     public static class TextareaField extends FieldInfo {
@@ -2701,7 +2835,7 @@ public class ModelFormField {
             try {
                 cols = Integer.parseInt(colsStr);
             } catch (Exception e) {
-                if (colsStr != null && colsStr.length() > 0) {
+                if (UtilValidate.isNotEmpty(colsStr)) {
                     Debug.logError("Could not parse the size value of the text element: [" + colsStr + "], setting to default of " + cols, module);
                 }
             }
@@ -2710,12 +2844,13 @@ public class ModelFormField {
             try {
                 rows = Integer.parseInt(rowsStr);
             } catch (Exception e) {
-                if (rowsStr != null && rowsStr.length() > 0) {
+                if (UtilValidate.isNotEmpty(rowsStr)) {
                     Debug.logError("Could not parse the size value of the text element: [" + rowsStr + "], setting to default of " + rows, module);
                 }
             }
         }
 
+        @Override
         public void renderFieldString(Appendable writer, Map<String, Object> context, FormStringRenderer formStringRenderer) throws IOException {
             formStringRenderer.renderTextareaField(writer, context, this);
         }
@@ -2770,21 +2905,21 @@ public class ModelFormField {
         }
 
         /**
-         * @param str
+         * @param str the default value of the field
          */
         public void setDefaultValue(String str) {
             this.defaultValue = FlexibleStringExpander.getInstance(str);
         }
 
         /**
-         * @param i
+         * @param visualEditorEnable is visualEditor enabled
          */
         public void setVisualEditorEnable(boolean visualEditorEnable) {
             this.visualEditorEnable = visualEditorEnable;
         }
 
         /**
-         * @param i
+         * @param eb set the visualEditor Buttons
          */
         public void setVisualEditorButtons(String eb) {
             this.visualEditorButtons = FlexibleStringExpander.getInstance(eb);
@@ -2796,6 +2931,8 @@ public class ModelFormField {
         protected FlexibleStringExpander defaultValue;
         protected String inputMethod;
         protected String clock;
+        protected String step;
+        protected String mask;
 
         protected DateTimeField() {
             super();
@@ -2815,8 +2952,12 @@ public class ModelFormField {
             type = element.getAttribute("type");
             inputMethod = element.getAttribute("input-method");
             clock = element.getAttribute("clock");
+            mask = element.getAttribute("mask");
+            if (UtilValidate.isNotEmpty(element.getAttribute("step"))) this.setStep(element.getAttribute("step"));
+            else this.setStep("1");
         }
 
+        @Override
         public void renderFieldString(Appendable writer, Map<String, Object> context, FormStringRenderer formStringRenderer) throws IOException {
             formStringRenderer.renderDateTimeField(writer, context, this);
         }
@@ -2839,6 +2980,17 @@ public class ModelFormField {
 
         public String getClock() {
             return this.clock;
+        }
+
+        public String getMask() {
+            return this.mask;
+        }
+
+        public String getStep() {
+            return this.step;
+        }
+        public void setStep(String step) {
+            this.step = step;
         }
 
         /**
@@ -2870,17 +3022,11 @@ public class ModelFormField {
          * @return Default value string for date-time
          */
         public String getDefaultDateTimeString(Map<String, Object> context) {
-            if (this.defaultValue != null && !this.defaultValue.isEmpty()) {
-                return this.getDefaultValue(context);
-            }
+            if (UtilValidate.isNotEmpty(this.defaultValue)) return this.getDefaultValue(context);
 
-            if ("date".equals(this.type)) {
-                return (new java.sql.Date(System.currentTimeMillis())).toString();
-            } else if ("time".equals(this.type)) {
-                return (new java.sql.Time(System.currentTimeMillis())).toString();
-            } else {
-                return UtilDateTime.nowTimestamp().toString();
-            }
+            if ("date".equals(this.type))  return (new java.sql.Date(System.currentTimeMillis())).toString();
+            else if ("time".equals(this.type)) return (new java.sql.Time(System.currentTimeMillis())).toString();
+            else return UtilDateTime.nowTimestamp().toString();
         }
     }
 
@@ -2889,6 +3035,7 @@ public class ModelFormField {
         protected boolean allowMulti = false;
         protected String current;
         protected String size;
+        protected String textSize;
         protected FlexibleStringExpander currentDescription;
         protected SubHyperlink subHyperlink;
         protected int otherFieldSize = 0;
@@ -2911,6 +3058,7 @@ public class ModelFormField {
 
             this.current = element.getAttribute("current");
             this.size = element.getAttribute("size");
+            this.textSize = element.getAttribute("text-size");
             this.allowEmpty = "true".equals(element.getAttribute("allow-empty"));
             this.allowMulti = "true".equals(element.getAttribute("allow-multiple"));
             this.currentDescription = FlexibleStringExpander.getInstance(element.getAttribute("current-description"));
@@ -2919,12 +3067,15 @@ public class ModelFormField {
             if (size == null) {
                 size = "1";
             }
+            if (textSize == null) {
+                textSize = "0";
+            }
 
             String sizeStr = element.getAttribute("other-field-size");
             try {
                 this.otherFieldSize = Integer.parseInt(sizeStr);
             } catch (Exception e) {
-                if (sizeStr != null && sizeStr.length() > 0) {
+                if (UtilValidate.isNotEmpty(sizeStr)) {
                     Debug.logError("Could not parse the size value of the text element: [" + sizeStr + "], setting to the default of " + this.otherFieldSize, module);
                 }
             }
@@ -2940,6 +3091,7 @@ public class ModelFormField {
             }
         }
 
+        @Override
         public void renderFieldString(Appendable writer, Map<String, Object> context, FormStringRenderer formStringRenderer) throws IOException {
             formStringRenderer.renderDropDownField(writer, context, this);
         }
@@ -2953,18 +3105,13 @@ public class ModelFormField {
         }
 
         public String getCurrent() {
-            if (UtilValidate.isEmpty(this.current)) {
-                return "first-in-list";
-            } else {
-                return this.current;
-            }
+            if (UtilValidate.isEmpty(this.current)) return "first-in-list";
+            return this.current;
         }
 
         public String getCurrentDescription(Map<String, Object> context) {
-            if (this.currentDescription == null)
-                return null;
-            else
-                return this.currentDescription.expandString(context);
+            if (this.currentDescription == null) return null;
+            return this.currentDescription.expandString(context);
         }
 
         public void setAllowEmpty(boolean b) {
@@ -3002,19 +3149,20 @@ public class ModelFormField {
             return this.size;
         }
 
+        public String getTextSize() {
+            return this.textSize;
+        }
+
         /**
          * Get the name to use for the parameter for this field in the form interpreter.
          * For HTML forms this is the request parameter name.
-         *
-         * @return
+         * @param context the context
+         * @return returns the name to use for the parameter for this field in the form interpreter.
          */
         public String getParameterNameOther(Map<String, Object> context) {
             String baseName;
-            if (UtilValidate.isNotEmpty(this.modelFormField.parameterName)) {
-                baseName = this.modelFormField.parameterName;
-            } else {
-                baseName = this.modelFormField.name;
-            }
+            if (UtilValidate.isNotEmpty(this.modelFormField.parameterName)) baseName = this.modelFormField.parameterName;
+            else baseName = this.modelFormField.name;
 
             baseName += "_OTHER";
             Integer itemIndex = (Integer) context.get("itemIndex");
@@ -3044,6 +3192,7 @@ public class ModelFormField {
             super(element, modelFormField);
         }
 
+        @Override
         public void renderFieldString(Appendable writer, Map<String, Object> context, FormStringRenderer formStringRenderer) throws IOException {
             formStringRenderer.renderRadioField(writer, context, this);
         }
@@ -3070,24 +3219,24 @@ public class ModelFormField {
             allChecked = FlexibleStringExpander.getInstance(element.getAttribute("all-checked"));
         }
 
+        @Override
         public void renderFieldString(Appendable writer, Map<String, Object> context, FormStringRenderer formStringRenderer) throws IOException {
             formStringRenderer.renderCheckField(writer, context, this);
         }
 
         public Boolean isAllChecked(Map<String, Object> context) {
             String allCheckedStr = this.allChecked.expandString(context);
-            if (UtilValidate.isNotEmpty(allCheckedStr)) {
-                return Boolean.valueOf("true".equals(allCheckedStr));
-            } else {
-                return null;
-            }
+            if (UtilValidate.isNotEmpty(allCheckedStr)) return Boolean.valueOf("true".equals(allCheckedStr));
+            else return null;
         }
     }
 
     public static class SubmitField extends FieldInfo {
         protected String buttonType;
-        protected String imageLocation;
+        protected FlexibleStringExpander imageLocation;
         protected FlexibleStringExpander backgroundSubmitRefreshTargetExdr;
+        protected boolean requestConfirmation = false;
+        protected FlexibleStringExpander confirmationMsgExdr;
 
         protected SubmitField() {
             super();
@@ -3104,10 +3253,13 @@ public class ModelFormField {
         public SubmitField(Element element, ModelFormField modelFormField) {
             super(element, modelFormField);
             this.buttonType = element.getAttribute("button-type");
-            this.imageLocation = element.getAttribute("image-location");
+            setImageLocation(element.getAttribute("image-location"));
             this.backgroundSubmitRefreshTargetExdr = FlexibleStringExpander.getInstance(element.getAttribute("background-submit-refresh-target"));
+            setRequestConfirmation("true".equals(element.getAttribute("request-confirmation")));
+            setConfirmationMsg(element.getAttribute("confirmation-message"));
         }
 
+        @Override
         public void renderFieldString(Appendable writer, Map<String, Object> context, FormStringRenderer formStringRenderer) throws IOException {
             formStringRenderer.renderSubmitField(writer, context, this);
         }
@@ -3116,8 +3268,27 @@ public class ModelFormField {
             return buttonType;
         }
 
-        public String getImageLocation() {
-            return imageLocation;
+        public String getImageLocation(Map<String, Object> context) {
+            return this.imageLocation.expandString(context);
+        }
+
+        public boolean getRequestConfirmation() {
+            return this.requestConfirmation;
+        }
+
+        public String getConfirmationMsg(Map<String, Object> context) {
+            return this.confirmationMsgExdr.expandString(context);
+        }
+
+        public String getConfirmation(Map<String, Object> context) {
+            String message = getConfirmationMsg(context);
+            if (UtilValidate.isNotEmpty(message)) return message;
+            else if (getRequestConfirmation()) {
+                String defaultMessage = UtilProperties.getPropertyValue("general", "default.confirmation.message", "${uiLabelMap.CommonConfirm}");
+                setConfirmationMsg(defaultMessage);
+                return getConfirmationMsg(context);
+            }
+            return "";
         }
 
         /**
@@ -3128,15 +3299,24 @@ public class ModelFormField {
         }
 
         /**
-         * @param string
+         * @param val the value of the image location
          */
-        public void setImageLocation(String string) {
-            imageLocation = string;
+        public void setImageLocation(String val) {
+            imageLocation = FlexibleStringExpander.getInstance(val);
         }
 
         public String getBackgroundSubmitRefreshTarget(Map<String, Object> context) {
             return this.backgroundSubmitRefreshTargetExdr.expandString(context);
         }
+
+        public void setRequestConfirmation(boolean val) {
+            this.requestConfirmation = val;
+        }
+
+        public void setConfirmationMsg(String val) {
+            this.confirmationMsgExdr = FlexibleStringExpander.getInstance(val);
+        }
+
     }
 
     public static class ResetField extends FieldInfo {
@@ -3156,6 +3336,7 @@ public class ModelFormField {
             super(element, modelFormField);
         }
 
+        @Override
         public void renderFieldString(Appendable writer, Map<String, Object> context, FormStringRenderer formStringRenderer) throws IOException {
             formStringRenderer.renderResetField(writer, context, this);
         }
@@ -3181,12 +3362,13 @@ public class ModelFormField {
             this.setValue(element.getAttribute("value"));
         }
 
+        @Override
         public void renderFieldString(Appendable writer, Map<String, Object> context, FormStringRenderer formStringRenderer) throws IOException {
             formStringRenderer.renderHiddenField(writer, context, this);
         }
 
         public String getValue(Map<String, Object> context) {
-            if (this.value != null && !this.value.isEmpty()) {
+            if (UtilValidate.isNotEmpty(this.value)) {
                 String valueEnc = this.value.expandString(context);
                 StringUtil.SimpleEncoder simpleEncoder = (StringUtil.SimpleEncoder) context.get("simpleEncoder");
                 if (simpleEncoder != null) {
@@ -3220,6 +3402,7 @@ public class ModelFormField {
             super(element, modelFormField);
         }
 
+        @Override
         public void renderFieldString(Appendable writer, Map<String, Object> context, FormStringRenderer formStringRenderer) throws IOException {
             formStringRenderer.renderIgnoredField(writer, context, this);
         }
@@ -3236,7 +3419,11 @@ public class ModelFormField {
             this.ignoreCase = "true".equals(element.getAttribute("ignore-case"));
             this.hideIgnoreCase = "true".equals(element.getAttribute("hide-options")) ||
                 "ignore-case".equals(element.getAttribute("hide-options")) ? true : false;
-            this.defaultOption = element.getAttribute("default-option");
+            if(element.hasAttribute("default-option")) {
+                this.defaultOption = element.getAttribute("default-option");
+            } else {
+                this.defaultOption = UtilProperties.getPropertyValue("widget", "widget.form.defaultTextFindOption", "like");
+            }
             this.hideOptions = "true".equals(element.getAttribute("hide-options")) ||
                 "options".equals(element.getAttribute("hide-options")) ? true : false;
         }
@@ -3261,6 +3448,7 @@ public class ModelFormField {
             return this.hideOptions;
         }
 
+        @Override
         public void renderFieldString(Appendable writer, Map<String, Object> context, FormStringRenderer formStringRenderer) throws IOException {
             formStringRenderer.renderTextFindField(writer, context, this);
         }
@@ -3280,6 +3468,7 @@ public class ModelFormField {
             super(fieldSource, modelFormField);
         }
 
+        @Override
         public void renderFieldString(Appendable writer, Map<String, Object> context, FormStringRenderer formStringRenderer) throws IOException {
             formStringRenderer.renderDateFindField(writer, context, this);
         }
@@ -3307,6 +3496,7 @@ public class ModelFormField {
             super(fieldSource, modelFormField);
         }
 
+        @Override
         public void renderFieldString(Appendable writer, Map<String, Object> context, FormStringRenderer formStringRenderer) throws IOException {
             formStringRenderer.renderRangeFindField(writer, context, this);
         }
@@ -3324,13 +3514,24 @@ public class ModelFormField {
         protected FlexibleStringExpander formName;
         protected String descriptionFieldName;
         protected String targetParameter;
-        protected SubHyperlink subHyperlink;
+        protected String lookupPresentation;
+        protected String lookupWidth;
+        protected String lookupHeight;
+        protected String lookupPosition;
+        protected String fadeBackground;
+        protected String initiallyCollapsed;
 
         public LookupField(Element element, ModelFormField modelFormField) {
             super(element, modelFormField);
             this.formName = FlexibleStringExpander.getInstance(element.getAttribute("target-form-name"));
             this.descriptionFieldName = element.getAttribute("description-field-name");
             this.targetParameter = element.getAttribute("target-parameter");
+            this.lookupPresentation = element.getAttribute("presentation");
+            this.lookupHeight = element.getAttribute("height");
+            this.lookupWidth = element.getAttribute("width");
+            this.lookupPosition = element.getAttribute("position");
+            this.fadeBackground = element.getAttribute("fade-background");            
+            this.initiallyCollapsed = element.getAttribute("initially-collapsed");
 
             Element subHyperlinkElement = UtilXml.firstChildElement(element, "sub-hyperlink");
             if (subHyperlinkElement != null) {
@@ -3342,6 +3543,7 @@ public class ModelFormField {
             super(fieldSource, modelFormField);
         }
 
+        @Override
         public void renderFieldString(Appendable writer, Map<String, Object> context, FormStringRenderer formStringRenderer) throws IOException {
             formStringRenderer.renderLookupField(writer, context, this);
         }
@@ -3373,8 +3575,53 @@ public class ModelFormField {
             this.descriptionFieldName = str;
         }
 
+        @Override
         public SubHyperlink getSubHyperlink() {
             return this.subHyperlink;
+        }
+
+        public String getLookupPresentation() {
+            return this.lookupPresentation;
+        }
+
+        public void setLookupPresentation(String str) {
+            this.lookupPresentation = str;
+        }
+
+        public String getLookupWidth() {
+            return this.lookupWidth;
+        }
+
+        public void setLookupWidth(String str) {
+            this.lookupWidth = str;
+        }
+
+        public String getLookupHeight() {
+            return this.lookupHeight;
+        }
+
+        public void setLookupHeight(String str) {
+            this.lookupHeight = str;
+        }
+
+        public String getLookupPosition() {
+            return this.lookupPosition;
+        }
+
+        public void setLookupPosition(String str) {
+            this.lookupPosition = str;
+        }
+
+        public String getFadeBackground() {
+            return this.fadeBackground;
+        }
+
+        public void setFadeBackground(String str) {
+            this.fadeBackground = str;
+        }
+        //initially-collapsed status
+        public boolean getInitiallyCollapsed() {
+            return "true".equals(this.initiallyCollapsed);
         }
     }
 
@@ -3388,6 +3635,7 @@ public class ModelFormField {
             super(fieldSource, modelFormField);
         }
 
+        @Override
         public void renderFieldString(Appendable writer, Map<String, Object> context, FormStringRenderer formStringRenderer) throws IOException {
             formStringRenderer.renderFileField(writer, context, this);
         }
@@ -3403,18 +3651,19 @@ public class ModelFormField {
             super(fieldSource, modelFormField);
         }
 
+        @Override
         public void renderFieldString(Appendable writer, Map<String, Object> context, FormStringRenderer formStringRenderer) throws IOException {
             formStringRenderer.renderPasswordField(writer, context, this);
         }
     }
 
     public static class ImageField extends FieldInfo {
-        protected int border = 0;
-        protected Integer width;
-        protected Integer height;
         protected FlexibleStringExpander defaultValue;
         protected FlexibleStringExpander value;
         protected SubHyperlink subHyperlink;
+        protected FlexibleStringExpander description;
+        protected FlexibleStringExpander alternate;
+        protected FlexibleStringExpander style;
 
         protected ImageField() {
             super();
@@ -3431,39 +3680,9 @@ public class ModelFormField {
         public ImageField(Element element, ModelFormField modelFormField) {
             super(element, modelFormField);
             this.setValue(element.getAttribute("value"));
-
-            String borderStr = element.getAttribute("border");
-            try {
-                border = Integer.parseInt(borderStr);
-            } catch (Exception e) {
-                if (borderStr != null && borderStr.length() > 0) {
-                    Debug.logError("Could not parse the border value of the text element: [" + borderStr + "], setting to the default of " + border, module);
-                }
-            }
-
-            String widthStr = element.getAttribute("width");
-            try {
-                width = Integer.valueOf(widthStr);
-            } catch (Exception e) {
-                width = null;
-                if (widthStr != null && widthStr.length() > 0) {
-                    Debug.logError(
-                        "Could not parse the size value of the text element: [" + widthStr + "], setting to null; default of no width will be used",
-                        module);
-                }
-            }
-
-            String heightStr = element.getAttribute("height");
-            try {
-                height = Integer.valueOf(heightStr);
-            } catch (Exception e) {
-                height = null;
-                if (heightStr != null && heightStr.length() > 0) {
-                    Debug.logError(
-                        "Could not parse the size value of the text element: [" + heightStr + "], setting to null; default of no height will be used",
-                        module);
-                }
-            }
+            this.setDescription(element.getAttribute("description"));
+            this.setAlternate(element.getAttribute("alternate"));
+            this.setStyle(element.getAttribute("style"));
 
             Element subHyperlinkElement = UtilXml.firstChildElement(element, "sub-hyperlink");
             if (subHyperlinkElement != null) {
@@ -3471,6 +3690,7 @@ public class ModelFormField {
             }
         }
 
+        @Override
         public void renderFieldString(Appendable writer, Map<String, Object> context, FormStringRenderer formStringRenderer) throws IOException {
             formStringRenderer.renderImageField(writer, context, this);
         }
@@ -3489,16 +3709,6 @@ public class ModelFormField {
         public void setSubHyperlink(SubHyperlink newSubHyperlink) {
             this.subHyperlink = newSubHyperlink;
         }
-        public Integer getWidth() {
-            return width;
-        }
-        public Integer getHeight() {
-            return height;
-        }
-
-        public int getBorder() {
-            return border;
-        }
 
         public String getDefaultValue(Map<String, Object> context) {
             if (this.defaultValue != null) {
@@ -3509,16 +3719,71 @@ public class ModelFormField {
         }
 
         public String getValue(Map<String, Object> context) {
-            if (this.value != null && !this.value.isEmpty()) {
-                return this.value.expandString(context);
-            } else {
-                return modelFormField.getEntry(context);
-            }
+            if (UtilValidate.isNotEmpty(this.value)) return this.value.expandString(context);
+            return modelFormField.getEntry(context);
         }
 
         public void setValue(String string) {
             this.value = FlexibleStringExpander.getInstance(string);
         }
 
+        public String getDescription(Map<String, Object> context) {
+            if (UtilValidate.isNotEmpty(this.description)) return this.description.expandString(context);
+            return "";
+        }
+
+        public void setDescription(String description) {
+            this.description = FlexibleStringExpander.getInstance(description);
+        }
+
+        public String getAlternate(Map<String, Object> context) {
+            if (UtilValidate.isNotEmpty(this.alternate)) return this.alternate.expandString(context);
+            return "";
+        }
+
+        public void setAlternate(String alternate) {
+            this.alternate = FlexibleStringExpander.getInstance(alternate);
+        }
+
+        public String getStyle(Map<String, Object> context) {
+            if (UtilValidate.isNotEmpty(this.style)) return this.style.expandString(context);
+            return "";
+        }
+
+        public void setStyle(String style) {
+            this.style = FlexibleStringExpander.getInstance(style);
+        }
+    }
+
+    public static class ContainerField extends FieldInfo {
+        @Deprecated
+        protected String id;
+
+        public ContainerField() {
+            super();
+        }
+
+        public ContainerField(Element element, ModelFormField modelFormField) {
+            super(element, modelFormField);
+        }
+
+        public ContainerField(int fieldSource, int fieldType, ModelFormField modelFormField) {
+            super(fieldSource, fieldType, modelFormField);
+        }
+
+        @Override
+        public void renderFieldString(Appendable writer, Map<String, Object> context, FormStringRenderer formStringRenderer) throws IOException {
+            formStringRenderer.renderContainerFindField(writer, context, this);
+        }
+
+        @Deprecated
+        public String getId() {
+            return id;
+        }
+
+        @Deprecated
+        public void setId(String id) {
+            this.id = id;
+        }
     }
 }

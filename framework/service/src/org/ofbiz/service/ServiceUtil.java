@@ -18,28 +18,40 @@
  *******************************************************************************/
 package org.ofbiz.service;
 
+import java.math.BigDecimal;
+import java.sql.Timestamp;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.TimeZone;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.transaction.Transaction;
+
 import javolution.util.FastList;
 import javolution.util.FastMap;
-import org.ofbiz.base.util.*;
-import org.ofbiz.entity.GenericDelegator;
+
+import org.ofbiz.base.util.Debug;
+import org.ofbiz.base.util.UtilDateTime;
+import org.ofbiz.base.util.UtilGenerics;
+import org.ofbiz.base.util.UtilMisc;
+import org.ofbiz.base.util.UtilProperties;
+import org.ofbiz.base.util.UtilValidate;
+import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
 import org.ofbiz.entity.condition.EntityCondition;
-import org.ofbiz.entity.condition.EntityConditionList;
 import org.ofbiz.entity.condition.EntityExpr;
 import org.ofbiz.entity.condition.EntityOperator;
 import org.ofbiz.entity.transaction.GenericTransactionException;
 import org.ofbiz.entity.transaction.TransactionUtil;
 import org.ofbiz.entity.util.EntityFindOptions;
 import org.ofbiz.entity.util.EntityListIterator;
-import org.ofbiz.entity.util.EntityUtil;
 import org.ofbiz.security.Security;
 import org.ofbiz.service.config.ServiceConfigUtil;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.transaction.Transaction;
-import java.sql.Timestamp;
-import java.util.*;
+import com.ibm.icu.util.Calendar;
 
 /**
  * Generic Service Utility Class
@@ -62,6 +74,14 @@ public class ServiceUtil {
             return false;
         }
         return ModelService.RESPOND_FAIL.equals(results.get(ModelService.RESPONSE_MESSAGE));
+    }
+
+    /** A little short-cut method to check to see if a service was successful (neither error or failed) */
+    public static boolean isSuccess(Map<String, ? extends Object> results) {
+        if (ServiceUtil.isError(results) || ServiceUtil.isFailure(results)) {
+            return false;
+        }
+        return true;
     }
 
     /** A small routine used all over to improve code efficiency, make a result map with the message and the error response code */
@@ -144,6 +164,13 @@ public class ServiceUtil {
         return returnMessage(ModelService.RESPOND_SUCCESS, null);
     }
 
+    /** A small routine used all over to improve code efficiency, make a result map with the message and the success response code */
+    public static Map<String, Object> returnSuccess(List<String> successMessageList) {
+        Map<String, Object> result = returnMessage(ModelService.RESPOND_SUCCESS, null);
+        result.put(ModelService.SUCCESS_MESSAGE_LIST, successMessageList);
+        return result;
+    }
+
     /** A small routine to make a result map with the message and the response code
      * NOTE: This brings out some bad points to our message convention: we should be using a single message or message list
      *  and what type of message that is should be determined by the RESPONSE_MESSAGE (and there's another annoyance, it should be RESPONSE_CODE)
@@ -159,23 +186,26 @@ public class ServiceUtil {
      *<b>security check</b>: userLogin partyId must equal partyId, or must have [secEntity][secOperation] permission
      */
     public static String getPartyIdCheckSecurity(GenericValue userLogin, Security security, Map<String, ? extends Object> context, Map<String, Object> result, String secEntity, String secOperation) {
+        return getPartyIdCheckSecurity(userLogin, security, context, result, secEntity, secOperation, null, null);
+    }
+    public static String getPartyIdCheckSecurity(GenericValue userLogin, Security security, Map<String, ? extends Object> context, Map<String, Object> result, String secEntity, String secOperation, String adminSecEntity, String adminSecOperation) {
         String partyId = (String) context.get("partyId");
         Locale locale = getLocale(context);
-        if (partyId == null || partyId.length() == 0) {
+        if (UtilValidate.isEmpty(partyId)) {
             partyId = userLogin.getString("partyId");
         }
 
         // partyId might be null, so check it
-        if (partyId == null || partyId.length() == 0) {
+        if (UtilValidate.isEmpty(partyId)) {
             result.put(ModelService.RESPONSE_MESSAGE, ModelService.RESPOND_ERROR);
             String errMsg = UtilProperties.getMessage(ServiceUtil.resource, "serviceUtil.party_id_missing", locale) + ".";
             result.put(ModelService.ERROR_MESSAGE, errMsg);
             return partyId;
         }
 
-        // <b>security check</b>: userLogin partyId must equal partyId, or must have PARTYMGR_CREATE permission
+        // <b>security check</b>: userLogin partyId must equal partyId, or must have either of the two permissions
         if (!partyId.equals(userLogin.getString("partyId"))) {
-            if (!security.hasEntityPermission(secEntity, secOperation, userLogin)) {
+            if (!security.hasEntityPermission(secEntity, secOperation, userLogin) && !(adminSecEntity != null && adminSecOperation != null && security.hasEntityPermission(adminSecEntity, adminSecOperation, userLogin))) {
                 result.put(ModelService.RESPONSE_MESSAGE, ModelService.RESPOND_ERROR);
                 String errMsg = UtilProperties.getMessage(ServiceUtil.resource, "serviceUtil.no_permission_to_operation", locale) + ".";
                 result.put(ModelService.ERROR_MESSAGE, errMsg);
@@ -318,13 +348,13 @@ public class ServiceUtil {
      * @param targetMap The Map to add any Map error messages to
      * @param callResult The result from an invocation
      */
-    public static void addErrors(List<Object> targetList, Map<String, Object> targetMap, Map<String, ? extends Object> callResult) {
-        List<? extends Object> newList;
-        Map<String, ? extends Object> errorMsgMap;
+    public static void addErrors(List<String> targetList, Map<String, Object> targetMap, Map<String, ? extends Object> callResult) {
+        List<String> newList;
+        Map<String, Object> errorMsgMap;
 
         //See if there is a single message
         if (callResult.containsKey(ModelService.ERROR_MESSAGE)) {
-            targetList.add(callResult.get(ModelService.ERROR_MESSAGE));
+            targetList.add((String) callResult.get(ModelService.ERROR_MESSAGE));
         }
 
         //See if there is a message list
@@ -341,9 +371,10 @@ public class ServiceUtil {
     }
 
     public static Map<String, Object> purgeOldJobs(DispatchContext dctx, Map<String, ? extends Object> context) {
+        Debug.logWarning("WARNING: purgeOldJobs service invoked. This service is obsolete - the Job Scheduler will purge old jobs automatically.", module);
         String sendPool = ServiceConfigUtil.getSendPool();
         int daysToKeep = ServiceConfigUtil.getPurgeJobDays();
-        GenericDelegator delegator = dctx.getDelegator();
+        Delegator delegator = dctx.getDelegator();
 
         Timestamp now = UtilDateTime.nowTimestamp();
         Calendar cal = Calendar.getInstance();
@@ -389,10 +420,12 @@ public class ServiceUtil {
                     // begin this transaction
                     beganTx1 = TransactionUtil.begin();
 
-                    EntityListIterator foundJobs = delegator.find("JobSandbox", mainCond, null, null, null, findOptions);
-                    curList = foundJobs.getPartialList(1, 1000);
-                    foundJobs.close();
-
+                    EntityListIterator foundJobs = delegator.find("JobSandbox", mainCond, null, UtilMisc.toSet("jobId"), null, findOptions);
+                    try {
+                        curList = foundJobs.getPartialList(1, 1000);
+                    } finally {
+                        foundJobs.close();
+                    }
                 } catch (GenericEntityException e) {
                     Debug.logError(e, "Cannot obtain job data from datasource", module);
                     try {
@@ -408,20 +441,14 @@ public class ServiceUtil {
                         Debug.logWarning(e, module);
                     }
                 }
-
                 // remove each from the list in its own transaction
                 if (UtilValidate.isNotEmpty(curList)) {
-                    // list of runtime data IDs to attempt to delete
-                    List<String> runtimeToDelete = FastList.newInstance();
-
                     for (GenericValue job: curList) {
-                        String runtimeId = job.getString("runtimeDataId");
                         String jobId = job.getString("jobId");
                         boolean beganTx2 = false;
                         try {
                             beganTx2 = TransactionUtil.begin();
                             job.remove();
-                            runtimeToDelete.add(runtimeId);
                         } catch (GenericEntityException e) {
                             Debug.logInfo("Cannot remove job data for ID: " + jobId, module);
                             try {
@@ -437,35 +464,49 @@ public class ServiceUtil {
                             }
                         }
                     }
-
-                    // delete the runtime data - in a new transaction for each delete
-                    // we do this so that the ones which cannot be deleted to not cause
-                    // the entire group to rollback; some may be attached to multiple jobs.
-                    if (runtimeToDelete.size() > 0) {
-                        for (String runtimeId: runtimeToDelete) {
-                            boolean beganTx3 = false;
-                            try {
-                                beganTx3 = TransactionUtil.begin();
-                                delegator.removeByAnd("RuntimeData", "runtimeDataId", runtimeId);
-
-                            } catch (GenericEntityException e) {
-                                Debug.logInfo("Cannot remove runtime data for ID: " + runtimeId, module);
-                                try {
-                                    TransactionUtil.rollback(beganTx3, e.getMessage(), e);
-                                } catch (GenericTransactionException e1) {
-                                    Debug.logWarning(e1, module);
-                                }
-                            } finally {
-                                try {
-                                    TransactionUtil.commit(beganTx3);
-                                } catch (GenericTransactionException e) {
-                                    Debug.logWarning(e, module);
-                                }
-                            }
-                        }
-                    }
                 } else {
                     noMoreResults = true;
+                }
+            }
+
+            // Now JobSandbox data is cleaned up. Now process Runtime data and remove the whole data in single shot that is of no need.
+            boolean beganTx3 = false;
+            GenericValue runtimeData = null;
+            EntityListIterator runTimeDataIt = null;
+            List<GenericValue> runtimeDataToDelete = FastList.newInstance();
+            long jobsandBoxCount = 0;
+            try {
+                // begin this transaction
+                beganTx3 = TransactionUtil.begin();
+
+                runTimeDataIt = delegator.find("RuntimeData", null, null, UtilMisc.toSet("runtimeDataId"), null, null);
+                try {
+                    while ((runtimeData = runTimeDataIt.next()) != null) {
+                        EntityCondition whereCondition = EntityCondition.makeCondition(UtilMisc.toList(EntityCondition.makeCondition("runtimeDataId", EntityOperator.NOT_EQUAL, null),
+                                EntityCondition.makeCondition("runtimeDataId", EntityOperator.EQUALS, runtimeData.getString("runtimeDataId"))), EntityOperator.AND);
+                        jobsandBoxCount = delegator.findCountByCondition("JobSandbox", whereCondition, null, null);
+                        if (BigDecimal.ZERO.compareTo(BigDecimal.valueOf(jobsandBoxCount)) == 0) {
+                            runtimeDataToDelete.add(runtimeData);
+                        }
+                    }
+                } finally {
+                    runTimeDataIt.close();
+                }
+                // Now we are ready to delete runtimeData, we can safely delete complete list that we have recently fetched i.e runtimeDataToDelete.
+                delegator.removeAll(runtimeDataToDelete);
+            } catch (GenericEntityException e) {
+                Debug.logError(e, "Cannot obtain runtime data from datasource", module);
+                try {
+                    TransactionUtil.rollback(beganTx3, e.getMessage(), e);
+                } catch (GenericTransactionException e1) {
+                    Debug.logWarning(e1, module);
+                }
+                return ServiceUtil.returnError(e.getMessage());
+            } finally {
+                try {
+                    TransactionUtil.commit(beganTx3);
+                } catch (GenericTransactionException e) {
+                    Debug.logWarning(e, module);
                 }
             }
         } catch (GenericTransactionException e) {
@@ -485,7 +526,7 @@ public class ServiceUtil {
     }
 
     public static Map<String, Object> cancelJob(DispatchContext dctx, Map<String, ? extends Object> context) {
-        GenericDelegator delegator = dctx.getDelegator();
+        Delegator delegator = dctx.getDelegator();
         Security security = dctx.getSecurity();
         GenericValue userLogin = (GenericValue) context.get("userLogin");
         Locale locale = getLocale(context);
@@ -516,6 +557,7 @@ public class ServiceUtil {
         if (cancelDate != null) {
             Map<String, Object> result = ServiceUtil.returnSuccess();
             result.put("cancelDateTime", cancelDate);
+            result.put("statusId", "SERVICE_PENDING"); // To more easily see current pending jobs and possibly cancel some others
             return result;
         } else {
             String errMsg = UtilProperties.getMessage(ServiceUtil.resource, "serviceUtil.unable_to_cancel_job", locale) + " : " + job;
@@ -524,7 +566,7 @@ public class ServiceUtil {
     }
 
     public static Map<String, Object> cancelJobRetries(DispatchContext dctx, Map<String, ? extends Object> context) {
-        GenericDelegator delegator = dctx.getDelegator();
+        Delegator delegator = dctx.getDelegator();
         Security security = dctx.getSecurity();
         GenericValue userLogin = (GenericValue) context.get("userLogin");
         Locale locale = getLocale(context);
@@ -574,10 +616,10 @@ public class ServiceUtil {
 
     public static GenericValue getUserLogin(DispatchContext dctx, Map<String, ? extends Object> context, String runAsUser) {
         GenericValue userLogin = (GenericValue) context.get("userLogin");
-        GenericDelegator delegator = dctx.getDelegator();
+        Delegator delegator = dctx.getDelegator();
         if (UtilValidate.isNotEmpty(runAsUser)) {
             try {
-                GenericValue runAs = delegator.findByPrimaryKeyCache("UserLogin", "userLoginId", runAsUser);
+                GenericValue runAs = delegator.findOne("UserLogin", true, "userLoginId", runAsUser);
                 if (runAs != null) {
                     userLogin = runAs;
                 }
@@ -606,7 +648,7 @@ public class ServiceUtil {
     }
 
     public static Map<String, Object> resetJob(DispatchContext dctx, Map<String, Object> context) {
-        GenericDelegator delegator = dctx.getDelegator();
+        Delegator delegator = dctx.getDelegator();
         Security security = dctx.getSecurity();
         GenericValue userLogin = (GenericValue) context.get("userLogin");
         Locale locale = getLocale(context);
@@ -644,5 +686,41 @@ public class ServiceUtil {
         }
 
         return ServiceUtil.returnSuccess();
+    }
+
+    /**
+     * Checks all incoming service attributes and look for fields with the same
+     * name in the incoming map and copy those onto the outgoing map. Also
+     * includes a userLogin if service requires one.
+     *
+     * @param dispatcher
+     * @param serviceName
+     * @param fromMap
+     * @param userLogin
+     *            (optional) - will be added to the map if is required
+     * @param timeZone
+     * @param locale
+     * @return filled Map or null on error
+     * @throws GeneralServiceException
+     */
+    public static Map<String, Object> setServiceFields(LocalDispatcher dispatcher, String serviceName, Map<String, Object> fromMap, GenericValue userLogin,
+            TimeZone timeZone, Locale locale) throws GeneralServiceException {
+        Map<String, Object> outMap = FastMap.newInstance();
+
+        ModelService modelService = null;
+        try {
+            modelService = dispatcher.getDispatchContext().getModelService(serviceName);
+        } catch (GenericServiceException e) {
+            String errMsg = "Could not get service definition for service name [" + serviceName + "]: ";
+            Debug.logError(e, errMsg, module);
+            throw new GeneralServiceException(e);
+        }
+        outMap.putAll(modelService.makeValid(fromMap, "IN", true, null, timeZone, locale));
+
+        if (userLogin != null && modelService.auth) {
+            outMap.put("userLogin", userLogin);
+        }
+
+        return outMap;
     }
 }

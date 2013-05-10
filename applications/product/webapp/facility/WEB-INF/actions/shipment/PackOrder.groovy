@@ -40,6 +40,7 @@ if (!shipmentId) {
 context.shipmentId = shipmentId;
 
 // If a shipment exists, provide the IDs of any related invoices
+invoiceIds = null;
 if (shipmentId) {
     // Get the primaryOrderId from the shipment
     shipment = delegator.findOne("Shipment",  [shipmentId : shipmentId], false);
@@ -97,8 +98,8 @@ if (picklistBinId) {
     if (bin) {
         orderId = bin.primaryOrderId;
         shipGroupSeqId = bin.primaryShipGroupSeqId;
-        packSession.addItemInfo(bin.getRelatedByAnd("PicklistItem", [itemStatusId : 'PICKITEM_PENDING']));
-        //context.put("picklistItemInfos", bin.getRelatedByAnd("PicklistItem", UtilMisc.toMap("itemStatusId", "PICKITEM_PENDING")));
+        packSession.addItemInfo(bin.getRelated("PicklistItem", [itemStatusId : 'PICKITEM_PENDING'], null, false));
+        //context.put("picklistItemInfos", bin.getRelated("PicklistItem", UtilMisc.toMap("itemStatusId", "PICKITEM_PENDING"), null, false));
     }
 } else {
     picklistBinId = null;
@@ -109,6 +110,12 @@ packSession.setPrimaryShipGroupSeqId(shipGroupSeqId);
 packSession.setPrimaryOrderId(orderId);
 packSession.setPicklistBinId(picklistBinId);
 packSession.setFacilityId(facilityId);
+
+if (invoiceIds) {
+    orderId = null;
+}
+shipment = EntityUtil.getFirst(delegator.findByAnd("Shipment", [primaryOrderId : orderId, statusId : "SHIPMENT_PICKED"], null, false));
+context.shipment = shipment;
 
 context.packingSession = packSession;
 context.orderId = orderId;
@@ -125,9 +132,15 @@ if (orderId) {
         context.orderReadHelper = orh;
         orderItemShipGroup = orh.getOrderItemShipGroup(shipGroupSeqId);
         context.orderItemShipGroup = orderItemShipGroup;
+        carrierPartyId = orderItemShipGroup.carrierPartyId;
+        if ("USPS".equals(carrierPartyId)) {
+            carrierShipmentBoxTypes = delegator.findList("CarrierShipmentBoxType", EntityCondition.makeCondition([partyId : carrierPartyId]), null, null, null, false);
+            context.carrierShipmentBoxTypes = carrierShipmentBoxTypes;
+        }
 
         if ("ORDER_APPROVED".equals(orderHeader.statusId)) {
             if (shipGroupSeqId) {
+            if (!shipment) {
 
                 // Generate the shipment cost estimate for the ship group
                 productStoreId = orh.getProductStoreId();
@@ -144,6 +157,9 @@ if (orderId) {
                     packSession.addItemInfo(shippableItems);
                     //context.put("itemInfos", shippableItemInfo);
                 }
+            } else {
+                request.setAttribute("_ERROR_MESSAGE_", UtilProperties.getMessage("OrderErrorUiLabels", "OrderErrorOrderHasBeenAlreadyVerified", [orderId : orderId], locale));
+            }
             } else {
                 request.setAttribute("errorMessageList", ['No ship group sequence ID. Cannot process.']);
             }

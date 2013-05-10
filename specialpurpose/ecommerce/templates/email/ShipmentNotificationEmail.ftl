@@ -20,8 +20,8 @@ under the License.
 <#if baseEcommerceSecureUrl?exists><#assign urlPrefix = baseEcommerceSecureUrl/></#if>
 <#if shipment?has_content>
   <div class="screenlet">
-    <div class="screenlet-header">
-      <div class="boxhead">${title?if_exists}<br/><br/></div>
+    <div class="screenlet-title-bar">
+      <div class="h3">${title?if_exists}<br /><br /></div>
     </div>
     <table border="0" cellpadding="0" cellspacing="0">
       <tbody>
@@ -38,9 +38,9 @@ under the License.
         </#list>
       </tbody>
     </table>
-    <br/>
-    <div class="screenlet-header">
-      <div class="boxhead"><b>${uiLabelMap.EcommerceShipmentItems}</b></div>
+    <br />
+    <div class="screenlet-title-bar">
+      <div class="h3"><b>${uiLabelMap.EcommerceShipmentItems}</b></div>
     </div>
     <div class="screenlet-body">
       <table width="100%" border="0" cellpadding="0">
@@ -48,16 +48,16 @@ under the License.
           <td width="35%"><span class="tableheadtext"><b>${uiLabelMap.OrderProduct}</b></span></td>
           <td width="10%" align="right"><span class="tableheadtext"><b>${uiLabelMap.OrderQuantity}</b></span></td>
         </tr>
-      <tr><td colspan="10"><hr/></td></tr>
+      <tr><td colspan="10"><hr /></td></tr>
       <#list shipmentItems as shipmentItem>
         <#assign productId = shipmentItem.productId>
-        <#assign product = shipmentItem.getRelatedOne("Product")>
+        <#assign product = shipmentItem.getRelatedOne("Product", false)>
         <tr>
           <td colspan="1" valign="top"> ${productId?if_exists} - ${product.internalName?if_exists}</td>
           <td align="right" valign="top"> ${shipmentItem.quantity?if_exists}</td>
         </tr>
       </#list>
-      <tr><td colspan="10"><hr/></td></tr>
+      <tr><td colspan="10"><hr /></td></tr>
     </table>
   </div>
 </#if>

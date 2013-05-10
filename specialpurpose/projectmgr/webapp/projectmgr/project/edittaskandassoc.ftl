@@ -33,7 +33,7 @@ under the License.
     <#if task?has_content>
       <form name="addTaskAndAssocForm" method="get" action="<@ofbizUrl>updateTaskAndAssoc</@ofbizUrl>">
     <#else>
-      <br/>
+      <br />
       <form name="addTaskAndAssocForm" method="get" action="<@ofbizUrl>createTaskAndAssoc</@ofbizUrl>">
     </#if>
         <table width="100%" cellpadding="2" cellspacing="0">
@@ -58,8 +58,8 @@ under the License.
         </tr>
         <tr>
           <td class="label" >${uiLabelMap.ProjectMgrQuickAssignPartyId}</td>
-          <td><input type="text" name="quickAssignPartyId" value=""/>
-            <a href="javascript:call_fieldlookup2(document.addTaskAndAssocForm.quickAssignPartyId,'LookupPartyName');"><img src='/images/fieldlookup.gif' width='15' height='14' border='0' alt="${uiLabelMap.CommonClickHereForFieldLookup}"/></a></td>
+          <td>
+            <@htmlTemplate.lookupField formName="addTaskAndAssocForm" name="quickAssignPartyId" id="quickAssignPartyId" fieldFormName="LookupPartyName"/>
           </td>
         </tr>
         <tr>
@@ -90,15 +90,15 @@ under the License.
             <select name="currentStatusId">
               <#if task?exists>
                 <#assign currentStatus = task.geRelatedOne("CurrentStatusItem")?if_exists>
-                <option SELECTED value="${currentStatus.currentStatusId}">${currentStatus.description}</option>
-                <#assign statusValidChangeToDetailList = delegator.findByAnd("StatusValidChangeToDetail", Static["org.ofbiz.base.util.UtilMisc"].toMap("statusId", currentStatus.currentStatusId))>
+                <option selected="selected" value="${currentStatus.currentStatusId}">${currentStatus.description}</option>
+                <#assign statusValidChangeToDetailList = delegator.findByAnd("StatusValidChangeToDetail", Static["org.ofbiz.base.util.UtilMisc"].toMap("statusId", currentStatus.currentStatusId), null, false)>
                 <#list statusValidChangeToDetailList as statusValidChangeToDetail>
                   <option value=${statusValidChangeToDetail.statusId}>[${uiLabelMap.WorkEffortGeneral}]${statusValidChangeToDetail.description}</option>
                 </#list>
               <#else>
-                <#assign statusItemGenrals = delegator.findByAnd("StatusItem", Static["org.ofbiz.base.util.UtilMisc"].toMap("statusTypeId", "CALENDAR_STATUS"))>
-                <#assign statusItemTasks = delegator.findByAnd("StatusItem", Static["org.ofbiz.base.util.UtilMisc"].toMap("statusTypeId", "TASK_STATUS"))>
-                <#assign statusItemEvents = delegator.findByAnd("StatusItem", Static["org.ofbiz.base.util.UtilMisc"].toMap("statusTypeId", "EVENT_STATUS"))>
+                <#assign statusItemGenrals = delegator.findByAnd("StatusItem", Static["org.ofbiz.base.util.UtilMisc"].toMap("statusTypeId", "CALENDAR_STATUS"), null, false)>
+                <#assign statusItemTasks = delegator.findByAnd("StatusItem", Static["org.ofbiz.base.util.UtilMisc"].toMap("statusTypeId", "TASK_STATUS"), null, false)>
+                <#assign statusItemEvents = delegator.findByAnd("StatusItem", Static["org.ofbiz.base.util.UtilMisc"].toMap("statusTypeId", "EVENT_STATUS"), null, false)>
                 <#list statusItemGenrals as statusItem>
                   <option value="${statusItem.statusId?if_exists}">[${uiLabelMap.WorkEffortGeneral}]${statusItem.description}</option>
                 </#list>
@@ -120,7 +120,7 @@ under the License.
             </#if>
             <select name="priority" size="1">
               <#if priority?exists>
-                <option SELECTED value="${priority}">${priority}</option>
+                <option selected="selected" value="${priority}">${priority}</option>
                 <option></option>
                 <option value=1>${uiLabelMap.WorkEffortPriorityOne}</option>
                 <option value=2>${uiLabelMap.WorkEffortPriorityTwo}</option>
@@ -149,7 +149,7 @@ under the License.
         <tr>
           <td class="label">${uiLabelMap.ProjectMgrWorkEffortScopeEnumId}</td>
           <td>
-            <#assign enumerations = delegator.findByAnd("Enumeration", Static["org.ofbiz.base.util.UtilMisc"].toMap("enumTypeId", "WORK_EFF_SCOPE"))>
+            <#assign enumerations = delegator.findByAnd("Enumeration", Static["org.ofbiz.base.util.UtilMisc"].toMap("enumTypeId", "WORK_EFF_SCOPE"), null, false)>
             <select name="scopeEnumId">
               <#if task?exists>
                 <#assign scopeEnumId = task.scopeEnumId?if_exists>
@@ -168,44 +168,43 @@ under the License.
           <td class="label">${uiLabelMap.WorkEffortEstimatedStartDate}</td>
           <td>
             <#if task?exists>
-              <input type="text" name="estimatedStartDate" value="${task.estimatedStartDate?if_exists}"/>
+              <@htmlTemplate.renderDateTimeField name="estimatedStartDate" className="" event="" action="" alert="" title="Format: yyyy-MM-dd HH:mm:ss.SSS" value="${task.estimatedStartDate?if_exists}" size="25" maxlength="30" id="estimatedStartDate1" dateType="date" shortDateInput=false timeDropdownParamName="" defaultDateTimeString="" localizedIconTitle="" timeDropdown="" timeHourName="" classString="" hour1="" hour2="" timeMinutesName="" minutes="" isTwelveHour="" ampmName="" amSelected="" pmSelected="" compositeType="" formName=""/>
             <#else>
-              <input type="text" name="estimatedStartDate" value=""/>
+              <@htmlTemplate.renderDateTimeField name="estimatedStartDate" className="" event="" action="" alert="" title="Format: yyyy-MM-dd HH:mm:ss.SSS" value="" size="25" maxlength="30" id="estimatedStartDate1" dateType="date" shortDateInput=false timeDropdownParamName="" defaultDateTimeString="" localizedIconTitle="" timeDropdown="" timeHourName="" classString="" hour1="" hour2="" timeMinutesName="" minutes="" isTwelveHour="" ampmName="" amSelected="" pmSelected="" compositeType="" formName=""/>
             </#if>
-            <a href="javascript:call_cal(document.addTaskAndAssocForm.estimatedStartDate,'${nowTimestamp?string}');"><img src="<@ofbizContentUrl>/images/cal.gif</@ofbizContentUrl>" width="16" height="16" border="0" alt="Calendar"/></a>
           </td>
          </tr>
          <tr>
            <td class="label">${uiLabelMap.WorkEffortEstimatedCompletionDate}</td>
            <td>
              <#if task?exists>
-               <input type="text" name="estimatedCompletionDate" value="${task.estimatedCompletionDate?if_exists}"/>
+               <@htmlTemplate.renderDateTimeField name="estimatedCompletionDate" className="" event="" action="" alert="" title="Format: yyyy-MM-dd HH:mm:ss.SSS" value="${task.estimatedCompletionDate?if_exists}" size="25" maxlength="30" id="estimatedCompletionDate1" dateType="date" shortDateInput=false timeDropdownParamName="" defaultDateTimeString="" localizedIconTitle="" timeDropdown="" timeHourName="" classString="" hour1="" hour2="" timeMinutesName="" minutes="" isTwelveHour="" ampmName="" amSelected="" pmSelected="" compositeType="" formName=""/>
              <#else>
-               <input type="text" name="estimatedCompletionDate" value=""/>
+               <@htmlTemplate.renderDateTimeField name="estimatedCompletionDate" className="" event="" action="" alert="" title="Format: yyyy-MM-dd HH:mm:ss.SSS" value="" size="25" maxlength="30" id="estimatedCompletionDate1" dateType="date" shortDateInput=false timeDropdownParamName="" defaultDateTimeString="" localizedIconTitle="" timeDropdown="" timeHourName="" classString="" hour1="" hour2="" timeMinutesName="" minutes="" isTwelveHour="" ampmName="" amSelected="" pmSelected="" compositeType="" formName=""/>
              </#if>
-             <a href="javascript:call_cal(document.addTaskAndAssocForm.estimatedCompletionDate,'${nowTimestamp?string}');"><img src="<@ofbizContentUrl>/images/cal.gif</@ofbizContentUrl>" width="16" height="16" border="0" alt="Calendar"/></a>
            </td>
          </tr>
          <tr>
            <td class="label">${uiLabelMap.FormFieldTitle_actualStartDate}</td>
            <td>
+
+
              <#if task?exists>
-               <input type="text" name="actualStartDate" value="${task.actualStartDate?if_exists}"/>
+               <@htmlTemplate.renderDateTimeField name="actualStartDate" event="" action="" className="" alert="" title="Format: yyyy-MM-dd HH:mm:ss.SSS" value="${task.actualStartDate?if_exists}" size="25" maxlength="30" id="actualStartDate1" dateType="date" shortDateInput=false timeDropdownParamName="" defaultDateTimeString="" localizedIconTitle="" timeDropdown="" timeHourName="" classString="" hour1="" hour2="" timeMinutesName="" minutes="" isTwelveHour="" ampmName="" amSelected="" pmSelected="" compositeType="" formName=""/>
              <#else>
-               <input type="text" name="actualStartDate" value=""/>
+               <@htmlTemplate.renderDateTimeField name="actualStartDate" event="" action="" className="" alert="" title="Format: yyyy-MM-dd HH:mm:ss.SSS" value="" size="25" maxlength="30" id="actualStartDate1" dateType="date" shortDateInput=false timeDropdownParamName="" defaultDateTimeString="" localizedIconTitle="" timeDropdown="" timeHourName="" classString="" hour1="" hour2="" timeMinutesName="" minutes="" isTwelveHour="" ampmName="" amSelected="" pmSelected="" compositeType="" formName=""/>
              </#if>
-             <a href="javascript:call_cal(document.addTaskAndAssocForm.actualStartDate,'${nowTimestamp?string}');"><img src="<@ofbizContentUrl>/images/cal.gif</@ofbizContentUrl>" width="16" height="16" border="0" alt="Calendar"/></a>
            </td>
          </tr>
          <tr>
            <td class="label">${uiLabelMap.FormFieldTitle_actualCompletionDate}</td>
            <td>
+
              <#if task?exists>
-               <input type="text" name="actualCompletionDate" value="${task.actualCompletionDate?if_exists}"/>
+               <@htmlTemplate.renderDateTimeField name="actualCompletionDate" event="" action="" className="" alert="" title="Format: yyyy-MM-dd HH:mm:ss.SSS" value="${task.actualCompletionDate?if_exists}" size="25" maxlength="30" id="actualCompletionDate2" dateType="date" shortDateInput=false timeDropdownParamName="" defaultDateTimeString="" localizedIconTitle="" timeDropdown="" timeHourName="" classString="" hour1="" hour2="" timeMinutesName="" minutes="" isTwelveHour="" ampmName="" amSelected="" pmSelected="" compositeType="" formName=""/>
              <#else>
-               <input type="text" name="actualCompletionDate" value=""/>
+               <@htmlTemplate.renderDateTimeField name="actualCompletionDate" event="" action="" className="" alert="" title="Format: yyyy-MM-dd HH:mm:ss.SSS" value="" size="25" maxlength="30" id="actualCompletionDate2" dateType="date" shortDateInput=false timeDropdownParamName="" defaultDateTimeString="" localizedIconTitle="" timeDropdown="" timeHourName="" classString="" hour1="" hour2="" timeMinutesName="" minutes="" isTwelveHour="" ampmName="" amSelected="" pmSelected="" compositeType="" formName=""/>
              </#if>
-             <a href="javascript:call_cal(document.addTaskAndAssocForm.actualCompletionDate,'${nowTimestamp?string}');"><img src="<@ofbizContentUrl>/images/cal.gif</@ofbizContentUrl>" width="16" height="16" border="0" alt="Calendar"/></a>
            </td>
          </tr>
          <tr>

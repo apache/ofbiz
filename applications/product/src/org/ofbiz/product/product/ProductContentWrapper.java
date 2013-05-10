@@ -39,7 +39,7 @@ import org.ofbiz.base.util.GeneralRuntimeException;
 import org.ofbiz.base.util.cache.UtilCache;
 import org.ofbiz.content.content.ContentWorker;
 import org.ofbiz.content.content.ContentWrapper;
-import org.ofbiz.entity.GenericDelegator;
+import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericValue;
 import org.ofbiz.entity.model.ModelEntity;
 import org.ofbiz.entity.model.ModelUtil;
@@ -54,7 +54,7 @@ public class ProductContentWrapper implements ContentWrapper {
     public static final String module = ProductContentWrapper.class.getName();
     public static final String SEPARATOR = "::";    // cache key separator
 
-    public static UtilCache<String, String> productContentCache = new UtilCache<String, String>("product.content.rendered", true);
+    private static final UtilCache<String, String> productContentCache = UtilCache.createUtilCache("product.content.rendered", true);
 
     public static ProductContentWrapper makeProductContentWrapper(GenericValue product, HttpServletRequest request) {
         return new ProductContentWrapper(product, request);
@@ -84,19 +84,19 @@ public class ProductContentWrapper implements ContentWrapper {
             Debug.logWarning("Tried to get ProductContent for type [" + productContentTypeId + "] but the product field in the ProductContentWrapper is null", module);
             return null;
         }
-        return StringUtil.makeStringWrapper(getProductContentAsText(this.product, productContentTypeId, locale, mimeTypeId, this.product.getDelegator(), dispatcher));
+        return StringUtil.makeStringWrapper(getProductContentAsText(this.product, productContentTypeId, locale, mimeTypeId, null, null, this.product.getDelegator(), dispatcher));
     }
 
     public static String getProductContentAsText(GenericValue product, String productContentTypeId, HttpServletRequest request) {
         LocalDispatcher dispatcher = (LocalDispatcher) request.getAttribute("dispatcher");
-        return getProductContentAsText(product, productContentTypeId, UtilHttp.getLocale(request), "text/html", product.getDelegator(), dispatcher);
+        return getProductContentAsText(product, productContentTypeId, UtilHttp.getLocale(request), "text/html", null, null, product.getDelegator(), dispatcher);
     }
 
     public static String getProductContentAsText(GenericValue product, String productContentTypeId, Locale locale, LocalDispatcher dispatcher) {
-        return getProductContentAsText(product, productContentTypeId, locale, null, null, dispatcher);
+        return getProductContentAsText(product, productContentTypeId, locale, null, null, null, null, dispatcher);
     }
 
-    public static String getProductContentAsText(GenericValue product, String productContentTypeId, Locale locale, String mimeTypeId, GenericDelegator delegator, LocalDispatcher dispatcher) {
+    public static String getProductContentAsText(GenericValue product, String productContentTypeId, Locale locale, String mimeTypeId, String partyId, String roleTypeId, Delegator delegator, LocalDispatcher dispatcher) {
         if (product == null) {
             return null;
         }
@@ -107,18 +107,16 @@ public class ProductContentWrapper implements ContentWrapper {
          */
         String cacheKey = productContentTypeId + SEPARATOR + locale + SEPARATOR + mimeTypeId + SEPARATOR + product.get("productId");
         try {
-            if (productContentCache.get(cacheKey) != null) {
-                return productContentCache.get(cacheKey);
+            String cachedValue = productContentCache.get(cacheKey);
+            if (cachedValue != null) {
+                return cachedValue;
             }
 
             Writer outWriter = new StringWriter();
-            getProductContentAsText(null, product, productContentTypeId, locale, mimeTypeId, delegator, dispatcher, outWriter);
+            getProductContentAsText(null, product, productContentTypeId, locale, mimeTypeId, partyId, roleTypeId, delegator, dispatcher, outWriter);
             String outString = outWriter.toString();
             if (outString.length() > 0) {
-                if (productContentCache != null) {
-                    productContentCache.put(cacheKey, outString);
-                }
-                return outString;
+                return productContentCache.putIfAbsentAndGet(cacheKey, outString);
             } else {
                 String candidateOut = product.getModelEntity().isField(candidateFieldName) ? product.getString(candidateFieldName): "";
                 return candidateOut == null? "" : candidateOut;
@@ -134,7 +132,7 @@ public class ProductContentWrapper implements ContentWrapper {
         }
     }
 
-    public static void getProductContentAsText(String productId, GenericValue product, String productContentTypeId, Locale locale, String mimeTypeId, GenericDelegator delegator, LocalDispatcher dispatcher, Writer outWriter) throws GeneralException, IOException {
+    public static void getProductContentAsText(String productId, GenericValue product, String productContentTypeId, Locale locale, String mimeTypeId, String partyId, String roleTypeId, Delegator delegator, LocalDispatcher dispatcher, Writer outWriter) throws GeneralException, IOException {
         if (productId == null && product != null) {
             productId = product.getString("productId");
         }
@@ -153,11 +151,15 @@ public class ProductContentWrapper implements ContentWrapper {
 
         String candidateFieldName = ModelUtil.dbNameToVarName(productContentTypeId);
         ModelEntity productModel = delegator.getModelEntity("Product");
+        if (product == null) {
+            product = delegator.findOne("Product", UtilMisc.toMap("productId", productId), true);
+        }
+        if (UtilValidate.isEmpty(product)) {
+            Debug.logWarning("No Product entity found for productId: " + productId, module);
+            return;
+        }
+        
         if (productModel.isField(candidateFieldName)) {
-            if (product == null) {
-                product = delegator.findByPrimaryKeyCache("Product", UtilMisc.toMap("productId", productId));
-            }
-            if (product != null) {
                 String candidateValue = product.getString(candidateFieldName);
                 if (UtilValidate.isNotEmpty(candidateValue)) {
                     outWriter.write(candidateValue);
@@ -173,18 +175,24 @@ public class ProductContentWrapper implements ContentWrapper {
                         }
                     }
                 }
-            }
         }
 
-        List<GenericValue> productContentList = delegator.findByAndCache("ProductContent", UtilMisc.toMap("productId", productId, "productContentTypeId", productContentTypeId), UtilMisc.toList("-fromDate"));
+        List<GenericValue> productContentList = delegator.findByAnd("ProductContent", UtilMisc.toMap("productId", productId, "productContentTypeId", productContentTypeId), UtilMisc.toList("-fromDate"), true);
         productContentList = EntityUtil.filterByDate(productContentList);
+        if (UtilValidate.isEmpty(productContentList) && ("Y".equals(product.getString("isVariant")))) {
+            GenericValue parent = ProductWorker.getParentProduct(productId, delegator);
+            if (UtilValidate.isNotEmpty(parent)) {
+                productContentList = delegator.findByAnd("ProductContent", UtilMisc.toMap("productId", parent.get("productId"), "productContentTypeId", productContentTypeId), UtilMisc.toList("-fromDate"), true);
+                productContentList = EntityUtil.filterByDate(productContentList);
+            }
+        }
         GenericValue productContent = EntityUtil.getFirst(productContentList);
         if (productContent != null) {
             // when rendering the product content, always include the Product and ProductContent records that this comes from
             Map<String, Object> inContext = FastMap.newInstance();
             inContext.put("product", product);
             inContext.put("productContent", productContent);
-            ContentWorker.renderContentAsText(dispatcher, delegator, productContent.getString("contentId"), outWriter, inContext, locale, mimeTypeId, false);
+            ContentWorker.renderContentAsText(dispatcher, delegator, productContent.getString("contentId"), outWriter, inContext, locale, mimeTypeId, partyId, roleTypeId, true);
         }
     }
 }

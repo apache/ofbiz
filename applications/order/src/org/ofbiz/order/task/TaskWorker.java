@@ -49,11 +49,11 @@ public class TaskWorker {
         }
     }
 
-    static Map statusMapping = UtilMisc.toMap("WF_NOT_STARTED", "Waiting", "WF_RUNNING", "Active", "WF_COMPLETE", "Complete", "WF_SUSPENDED", "Hold");
+    static Map<String, String> statusMapping = UtilMisc.toMap("WF_NOT_STARTED", "Waiting", "WF_RUNNING", "Active", "WF_COMPLETE", "Complete", "WF_SUSPENDED", "Hold");
 
     public static String getPrettyStatus(GenericValue orderTaskList) {
         String statusId = orderTaskList.getString("currentStatusId");
-        String prettyStatus = (String) statusMapping.get(statusId);
+        String prettyStatus = statusMapping.get(statusId);
         if (prettyStatus == null)
             prettyStatus = "?";
         return prettyStatus;
@@ -63,8 +63,8 @@ public class TaskWorker {
     public static String getRoleDescription(GenericValue orderTaskList) {
         GenericValue role = null;
         try {
-            Map pkFields = UtilMisc.toMap("roleTypeId", orderTaskList.getString("roleTypeId"));
-            role = orderTaskList.getDelegator().findByPrimaryKey("RoleType", pkFields);
+            Map<String, ? extends Object> pkFields = UtilMisc.toMap("roleTypeId", orderTaskList.getString("roleTypeId"));
+            role = orderTaskList.getDelegator().findOne("RoleType", pkFields, false);
         } catch (GenericEntityException e) {
             Debug.logError(e, "Cannot get RoleType entity value", module);
             return orderTaskList.getString("roleTypeId");

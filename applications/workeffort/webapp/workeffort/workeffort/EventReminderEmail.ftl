@@ -47,7 +47,7 @@ under the License.
       <tr><td class="label">${uiLabelMap.CommonType}</td><td>${(workEffortType.description)?default("&nbsp;")}</td></tr>
       <tr><td class="label">${uiLabelMap.CommonPurpose}</td><td>${(workEffortPurposeType.description)?default("&nbsp;")}</td></tr>
       <tr><td class="label">${uiLabelMap.CommonStatus}</td><td>${(currentStatusItem.description)?default("&nbsp;")}</td></tr>
-      <tr><td colspan="2"><hr/></td>
+      <tr><td colspan="2"><hr /></td>
     </table>
     <#if partyAssignments?has_content>
       <div><b>${uiLabelMap.PageTitleListWorkEffortPartyAssigns}</b></div>
@@ -64,11 +64,11 @@ under the License.
           <#list partyAssignments as wepa>
             <tr>
               <td>${wepa.groupName?if_exists}${wepa.firstName?if_exists} ${wepa.lastName?if_exists}</td>
-              <td>${(wepa.getRelatedOne("RoleType").description)?default("&nbsp;")}</td>
+              <td>${(wepa.getRelatedOne("RoleType", false).description)?default("&nbsp;")}</td>
               <td>${wepa.fromDate?default("&nbsp;")}</td>
               <td>${wepa.thruDate?default("&nbsp;")}</td>
-              <td>${(wepa.getRelatedOne("AssignmentStatusItem").description)?default("&nbsp;")}</td>
-              <td>${(wepa.getRelatedOne("DelegateReasonEnumeration").description)?default("&nbsp;")}</td>
+              <td>${(wepa.getRelatedOne("AssignmentStatusItem", false).description)?default("&nbsp;")}</td>
+              <td>${(wepa.getRelatedOne("DelegateReasonEnumeration", false).description)?default("&nbsp;")}</td>
             </tr>
           </#list>
         </tbody>
@@ -92,8 +92,8 @@ under the License.
               <td>${wefa.fixedAssetName?default("&nbsp;")}</td>
               <td>${wefa.fromDate?default("&nbsp;")}</td>
               <td>${wefa.thruDate?default("&nbsp;")}</td>
-              <td>${(wefa.getRelatedOne("StatusItem").description)?default("&nbsp;")}</td>
-              <td>${(wefa.getRelatedOne("AvailabilityStatusItem").description)?default("&nbsp;")}</td>
+              <td>${(wefa.getRelatedOne("StatusItem", false).description)?default("&nbsp;")}</td>
+              <td>${(wefa.getRelatedOne("AvailabilityStatusItem", false).description)?default("&nbsp;")}</td>
               <td>${wefa.allocatedCost?default("&nbsp;")}</td>
               <td>${wefa.comments?default("&nbsp;")}</td>
             </tr>

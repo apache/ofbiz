@@ -29,7 +29,7 @@
 <#-- cms menu bar -->
 <div id="cmsmenu" style="margin-bottom: 8px;">
     <#if (content?has_content)>
-        <a href="javascript:void(0);" onclick="javascript:callEditor(true, '${content.contentId}', '', 'ELECTRONIC_TEXT');" class="tabButton">Quick Sub-Content</a>
+        <a href="javascript:void(0);" onclick="javascript:callDocument(true, '${content.contentId}', '', 'ELECTRONIC_TEXT');" class="tabButton">Quick Sub-Content</a>
         <a href="javascript:void(0);" onclick="javascript:callPathAlias('${content.contentId}');" class="tabButton">Path Alias</a>
         <a href="javascript:void(0);" onclick="javascript:callMetaInfo('${content.contentId}');" class="selected">Meta Tags</a>
     </#if>
@@ -107,19 +107,19 @@
     <table>
         <tr>
             <td class="label">Page Title</td>
-            <td><input type="text" name="title" value="${(title.objectInfo)?if_exists}" size="40"></td>
+            <td><input type="text" name="title" value="${(title.objectInfo)?if_exists}" size="40" /></td>
         </tr>
         <tr>
             <td class="label">Title Property</td>
-            <td><input type="text" name="titleProperty" value="${(titleProperty.objectInfo)?if_exists}" size="40"></td>
+            <td><input type="text" name="titleProperty" value="${(titleProperty.objectInfo)?if_exists}" size="40" /></td>
         </tr>
         <tr>
             <td class="label">Meta-Description</td>
-            <td><input type="text" name="metaDescription" value="${(metaDescription.objectInfo)?if_exists}" size="40"></td>
+            <td><input type="text" name="metaDescription" value="${(metaDescription.objectInfo)?if_exists}" size="40" /></td>
         </tr>
         <tr>
             <td class="label">Meta-Keywords</td>
-            <td><input type="text" name="metaKeywords" value="${(metaKeywords.objectInfo)?if_exists}" size="40"></td>
+            <td><input type="text" name="metaKeywords" value="${(metaKeywords.objectInfo)?if_exists}" size="40" /></td>
         </tr>
         <tr><td colspan="2">&nbsp;</td></tr>
         <tr>

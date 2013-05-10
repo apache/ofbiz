@@ -19,36 +19,41 @@
 
 package org.ofbiz.accounting.period;
 
+import java.sql.Date;
 import java.sql.Timestamp;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import org.ofbiz.base.util.UtilDateTime;
 import org.ofbiz.base.util.UtilMisc;
-import org.ofbiz.entity.GenericDelegator;
+import org.ofbiz.base.util.UtilProperties;
+import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
 import org.ofbiz.entity.condition.EntityCondition;
-import org.ofbiz.entity.condition.EntityExpr;
 import org.ofbiz.entity.condition.EntityOperator;
 import org.ofbiz.service.DispatchContext;
 import org.ofbiz.service.ServiceUtil;
 
 public class PeriodServices {
+    
     public static String module = PeriodServices.class.getName();
+    public static final String resource = "AccountingUiLabels";
 
     /* find the date of the last closed CustomTimePeriod, or, if none available, the earliest date available of any
      * CustomTimePeriod
      */
     public static Map<String, Object> findLastClosedDate(DispatchContext dctx, Map<String, ?> context) {
-        GenericDelegator delegator = dctx.getDelegator();
+        Delegator delegator = dctx.getDelegator();
         String organizationPartyId = (String) context.get("organizationPartyId"); // input parameters
         String periodTypeId = (String) context.get("periodTypeId");
-        Timestamp findDate = (Timestamp) context.get("findDate");
+        Date findDate = (Date) context.get("findDate");
+        Locale locale = (Locale) context.get("locale");
 
         // default findDate to now
         if (findDate == null) {
-            findDate = UtilDateTime.nowTimestamp();
+            findDate = new Date(UtilDateTime.nowTimestamp().getTime());
         }
 
         Timestamp lastClosedDate = null;          // return parameters
@@ -78,11 +83,12 @@ public class PeriodServices {
                 if ((periodTypeId != null) && !(periodTypeId.equals(""))) {
                     findParams.put("periodTypeId", periodTypeId);
                 }
-                List<GenericValue> timePeriods = delegator.findByAnd("CustomTimePeriod", findParams, UtilMisc.toList("fromDate ASC"));
+                List<GenericValue> timePeriods = delegator.findByAnd("CustomTimePeriod", findParams, UtilMisc.toList("fromDate ASC"), false);
                 if ((timePeriods != null) && (timePeriods.size() > 0) && (timePeriods.get(0).get("fromDate") != null)) {
                     lastClosedDate = UtilDateTime.toTimestamp(timePeriods.get(0).getDate("fromDate"));
                 } else {
-                    return ServiceUtil.returnError("Cannot get a starting date for net income");
+                    return ServiceUtil.returnError(UtilProperties.getMessage(resource, 
+                            "AccountingPeriodCannotGet", locale));
                 }
             }
 

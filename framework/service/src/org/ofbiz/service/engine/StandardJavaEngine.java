@@ -20,6 +20,7 @@ package org.ofbiz.service.engine;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.Map;
 
 import org.ofbiz.service.DispatchContext;
@@ -43,17 +44,19 @@ public final class StandardJavaEngine extends GenericAsyncEngine {
     /**
      * @see org.ofbiz.service.engine.GenericEngine#runSyncIgnore(java.lang.String, org.ofbiz.service.ModelService, java.util.Map)
      */
+    @Override
     public void runSyncIgnore(String localName, ModelService modelService, Map<String, Object> context) throws GenericServiceException {
-        Map result = runSync(localName, modelService, context);
+        runSync(localName, modelService, context);
     }
 
     /**
      * @see org.ofbiz.service.engine.GenericEngine#runSync(java.lang.String, org.ofbiz.service.ModelService, java.util.Map)
      */
+    @Override
     public Map<String, Object> runSync(String localName, ModelService modelService, Map<String, Object> context) throws GenericServiceException {
         Object result = serviceInvoker(localName, modelService, context);
 
-        if (result == null || !(result instanceof Map)) {
+        if (result == null || !(result instanceof Map<?, ?>)) {
             throw new GenericServiceException("Service [" + modelService.name + "] did not return a Map object");
         }
         return UtilGenerics.checkMap(result);
@@ -93,7 +96,11 @@ public final class StandardJavaEngine extends GenericAsyncEngine {
         try {
             Class<?> c = cl.loadClass(this.getLocation(modelService));
             Method m = c.getMethod(modelService.invoke, DispatchContext.class, Map.class);
-            result = m.invoke(null, dctx, context);
+            if (Modifier.isStatic(m.getModifiers())) {
+                result = m.invoke(null, dctx, context);
+            } else {
+                result = m.invoke(c.newInstance(), dctx, context);
+            }
         } catch (ClassNotFoundException cnfe) {
             throw new GenericServiceException("Cannot find service [" + modelService.name + "] location class", cnfe);
         } catch (NoSuchMethodException nsme) {

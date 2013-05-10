@@ -21,12 +21,13 @@ package org.ofbiz.order.order;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
+
+import javolution.util.FastMap;
 
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.GeneralException;
@@ -35,7 +36,7 @@ import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.base.util.cache.UtilCache;
 import org.ofbiz.content.content.ContentWorker;
-import org.ofbiz.entity.GenericDelegator;
+import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericValue;
 import org.ofbiz.entity.util.EntityUtil;
 import org.ofbiz.service.LocalDispatcher;
@@ -49,7 +50,7 @@ public class OrderContentWrapper {
     public static final String module = OrderContentWrapper.class.getName();
     public static final String SEPARATOR = "::";    // cache key separator
 
-    public static UtilCache orderContentCache;
+    private static final UtilCache<String, String> orderContentCache = UtilCache.createUtilCache("order.content", true); // use soft reference to free up memory if needed
 
     public static OrderContentWrapper makeOrderContentWrapper(GenericValue order, HttpServletRequest request) {
         return new OrderContentWrapper(order, request);
@@ -65,9 +66,6 @@ public class OrderContentWrapper {
         this.order = order;
         this.locale = locale;
         this.mimeTypeId = mimeTypeId;
-        if (orderContentCache == null) {
-            orderContentCache = new UtilCache("order.content", true);     // use soft reference to free up memory if needed
-        }
     }
 
     public OrderContentWrapper(GenericValue order, HttpServletRequest request) {
@@ -75,9 +73,6 @@ public class OrderContentWrapper {
         this.order = order;
         this.locale = UtilHttp.getLocale(request);
         this.mimeTypeId = "text/html";
-        if (orderContentCache == null) {
-            orderContentCache = new UtilCache("order.content", true);     // use soft reference to free up memory if needed
-        }
     }
 
     public String get(String orderContentTypeId) {
@@ -93,7 +88,7 @@ public class OrderContentWrapper {
         return getOrderContentAsText(order, orderContentTypeId, locale, null, null, dispatcher);
     }
 
-    public static String getOrderContentAsText(GenericValue order, String orderContentTypeId, Locale locale, String mimeTypeId, GenericDelegator delegator, LocalDispatcher dispatcher) {
+    public static String getOrderContentAsText(GenericValue order, String orderContentTypeId, Locale locale, String mimeTypeId, Delegator delegator, LocalDispatcher dispatcher) {
         /* caching: there is one cache created, "order.content"  Each order's content is cached with a key of
          * contentTypeId::locale::mimeType::orderId::orderItemSeqId, or whatever the SEPARATOR is defined above to be.
          */
@@ -101,17 +96,16 @@ public class OrderContentWrapper {
 
         String cacheKey = orderContentTypeId + SEPARATOR + locale + SEPARATOR + mimeTypeId + SEPARATOR + order.get("orderId") + SEPARATOR + orderItemSeqId;
         try {
-            if (orderContentCache != null && orderContentCache.get(cacheKey) != null) {
-                return (String) orderContentCache.get(cacheKey);
+            String cachedValue = orderContentCache.get(cacheKey);
+            if (cachedValue != null) {
+                return cachedValue;
             }
 
             Writer outWriter = new StringWriter();
             getOrderContentAsText(null, null, order, orderContentTypeId, locale, mimeTypeId, delegator, dispatcher, outWriter);
             String outString = outWriter.toString();
             if (outString.length() > 0) {
-                if (orderContentCache != null) {
-                    orderContentCache.put(cacheKey, outString);
-                }
+                outString = orderContentCache.putIfAbsentAndGet(cacheKey, outString);
             }
             return outString;
 
@@ -124,7 +118,7 @@ public class OrderContentWrapper {
         }
     }
 
-    public static void getOrderContentAsText(String orderId, String orderItemSeqId, GenericValue order, String orderContentTypeId, Locale locale, String mimeTypeId, GenericDelegator delegator, LocalDispatcher dispatcher, Writer outWriter) throws GeneralException, IOException {
+    public static void getOrderContentAsText(String orderId, String orderItemSeqId, GenericValue order, String orderContentTypeId, Locale locale, String mimeTypeId, Delegator delegator, LocalDispatcher dispatcher, Writer outWriter) throws GeneralException, IOException {
         if (orderId == null && order != null) {
             orderId = order.getString("orderId");
         }
@@ -140,15 +134,15 @@ public class OrderContentWrapper {
             mimeTypeId = "text/html";
         }
 
-        List orderContentList = delegator.findByAndCache("OrderContent", UtilMisc.toMap("orderId", orderId, "orderItemSeqId", orderItemSeqId, "orderContentTypeId", orderContentTypeId), UtilMisc.toList("-fromDate"));
+        List<GenericValue> orderContentList = delegator.findByAnd("OrderContent", UtilMisc.toMap("orderId", orderId, "orderItemSeqId", orderItemSeqId, "orderContentTypeId", orderContentTypeId), UtilMisc.toList("-fromDate"), true);
         orderContentList = EntityUtil.filterByDate(orderContentList);
         GenericValue orderContent = EntityUtil.getFirst(orderContentList);
         if (orderContent != null) {
             // when rendering the order content, always include the OrderHeader/OrderItem and OrderContent records that this comes from
-            Map inContext = new HashMap();
+            Map<String, Object> inContext = FastMap.newInstance();
             inContext.put("order", order);
             inContext.put("orderContent", orderContent);
-            ContentWorker.renderContentAsText(dispatcher, delegator, orderContent.getString("contentId"), outWriter, inContext, locale, mimeTypeId, false);
+            ContentWorker.renderContentAsText(dispatcher, delegator, orderContent.getString("contentId"), outWriter, inContext, locale, mimeTypeId, null, null, false);
         }
     }
 }
