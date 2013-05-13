@@ -58,22 +58,21 @@ ofbiz/trunk/framework/base/lib/j2eespecs/geronimo-jms_1.1_spec-1.0.jar
 ofbiz/trunk/framework/base/lib/j2eespecs/geronimo-jta_1.1_spec-1.1.1.jar
 ofbiz/trunk/framework/base/lib/j2eespecs/geronimo-qname_1.1_spec-1.0.jar
 ofbiz/trunk/framework/base/lib/j2eespecs/geronimo-saaj_1.1_spec-1.0.jar
-ofbiz/trunk/framework/base/lib/j2eespecs/tomcat-6.0.36-annotations-api.jar
-ofbiz/trunk/framework/base/lib/j2eespecs/tomcat-6.0.36-el-api.jar
-ofbiz/trunk/framework/base/lib/j2eespecs/tomcat-6.0.36-jsp-api.jar
-ofbiz/trunk/framework/base/lib/j2eespecs/tomcat-6.0.36-servlet-api.jar
+ofbiz/trunk/framework/base/lib/j2eespecs/tomcat-6.0.37-annotations-api.jar
+ofbiz/trunk/framework/base/lib/j2eespecs/tomcat-6.0.37-el-api.jar
+ofbiz/trunk/framework/base/lib/j2eespecs/tomcat-6.0.37-jsp-api.jar
+ofbiz/trunk/framework/base/lib/j2eespecs/tomcat-6.0.37-servlet-api.jar
 ofbiz/trunk/framework/base/lib/scripting/bsf-2.4.0.jar
 ofbiz/trunk/framework/base/lib/scripting/jakarta-oro-2.0.8.jar
 ofbiz/trunk/framework/base/lib/scripting/groovy-1.7-rc-2.jar
-ofbiz/trunk/framework/catalina/lib/tomcat-6.0.36-catalina-ha.jar
-ofbiz/trunk/framework/catalina/lib/tomcat-6.0.36-catalina-tribes.jar
-ofbiz/trunk/framework/catalina/lib/tomcat-6.0.36-catalina.jar
-ofbiz/trunk/framework/catalina/lib/tomcat-6.0.36-jasper-el.jar
-ofbiz/trunk/framework/catalina/lib/tomcat-6.0.36-jasper.jar
-ofbiz/trunk/framework/catalina/lib/tomcat-6.0.36-tomcat-coyote.jar
-ofbiz/trunk/framework/catalina/lib/tomcat-6.0.36-tomcat-dbcp.jar
-ofbiz/trunk/framework/catalina/lib/tomcat-6.0.36-tomcat-juli.jar
-ofbiz/trunk/framework/catalina/lib/tomcat-6.0.36-tomcat-juli-adapters.jar
+ofbiz/trunk/framework/catalina/lib/tomcat-6.0.37-catalina-ha.jar
+ofbiz/trunk/framework/catalina/lib/tomcat-6.0.37-catalina-tribes.jar
+ofbiz/trunk/framework/catalina/lib/tomcat-6.0.37-catalina.jar
+ofbiz/trunk/framework/catalina/lib/tomcat-6.0.37-jasper-el.jar
+ofbiz/trunk/framework/catalina/lib/tomcat-6.0.37-jasper.jar
+ofbiz/trunk/framework/catalina/lib/tomcat-6.0.37-tomcat-coyote.jar
+ofbiz/trunk/framework/catalina/lib/tomcat-6.0.37-tomcat-dbcp.jar
+ofbiz/trunk/framework/catalina/lib/tomcat-6.0.37-tomcat-juli.jar
 ofbiz/trunk/framework/entity/lib/commons-dbcp-1.4.jar
 ofbiz/trunk/framework/entity/lib/jdbc/derby-10.5.3.0.jar
 ofbiz/trunk/framework/jetty/lib/ant-1.6.5.jar
@@ -2302,7 +2301,7 @@ questions or comments regarding the usage of this material.
 =========================================================================
 The following libraries distributed with Apache OFBiz are licensed under the
 Eclipse Public License - v 1.0:
-ofbiz/trunk/framework/catalina/lib/ecj-3.7.2.jar
+ofbiz/trunk/framework/catalina/lib/ecj-4.2.2.jar
 ofbiz/trunk/framework/birt/lib/chartengineapi.jar
 ofbiz/trunk/framework/birt/lib/coreapi.jar
 ofbiz/trunk/framework/birt/lib/crosstabcoreapi.jar
