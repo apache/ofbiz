@@ -46,6 +46,7 @@ under the License.
         <!-- find all CreditCard and EftAccount instances that use the current oldContactMechId and update them
             through the updateCreditCard or updateEftAccount services to use the new contactMechId -->
         <set field="lookupMap.contactMechId" from-field="parameters.oldContactMechId"/>
+        <now-timestamp field="now"/> 
 
         <find-by-and entity-name="CreditCard" map="lookupMap" list="creditCards"/>
         <iterate entry="creditCard" list="creditCards">
