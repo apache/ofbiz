@@ -161,6 +161,7 @@ public interface Delegator {
      *            cache entries related to this operation. This should always be
      *            <code>true</code> - otherwise you will lose data integrity.
      * @return GenericValue instance containing the new instance
+     * @deprecated
      */
     public GenericValue create(GenericPK primaryKey, boolean doCacheClear) throws GenericEntityException;
 
@@ -185,6 +186,7 @@ public interface Delegator {
      *            cache entries related to this operation. This should always be
      *            <code>true</code> - otherwise you will lose data integrity.
      * @return GenericValue instance containing the new instance
+     * @deprecated
      */
     public GenericValue create(GenericValue value, boolean doCacheClear) throws GenericEntityException;
 
@@ -225,6 +227,7 @@ public interface Delegator {
      *            cache entries related to this operation. This should always be
      *            <code>true</code> - otherwise you will lose data integrity.
      * @return GenericValue instance containing the new or updated instance
+     * @deprecated
      */
     public GenericValue createOrStore(GenericValue value, boolean doCacheClear) throws GenericEntityException;
 
@@ -869,6 +872,7 @@ public interface Delegator {
      *            boolean that specifies whether or not to automatically clear
      *            cache entries related to this operation. This should always be
      *            <code>true</code> - otherwise you will lose data integrity.
+     * @deprecated
      */
     public void refresh(GenericValue value, boolean doCacheClear) throws GenericEntityException;
 
@@ -920,6 +924,7 @@ public interface Delegator {
      *            cache entries related to this operation. This should always be
      *            <code>true</code> - otherwise you will lose data integrity.
      * @return int representing number of rows effected by this operation
+     * @deprecated
      */
     public int removeAll(List<? extends GenericEntity> dummyPKs, boolean doCacheClear) throws GenericEntityException;
 
@@ -939,6 +944,7 @@ public interface Delegator {
      *            The fields of the named entity to query by with their
      *            corresponding values
      * @return int representing number of rows effected by this operation
+     * @deprecated
      */
     public int removeByAnd(String entityName, boolean doCacheClear, Object... fields) throws GenericEntityException;
 
@@ -969,6 +975,7 @@ public interface Delegator {
      *            cache entries related to this operation. This should always be
      *            <code>true</code> - otherwise you will lose data integrity.
      * @return int representing number of rows effected by this operation
+     * @deprecated
      */
     public int removeByAnd(String entityName, Map<String, ? extends Object> fields, boolean doCacheClear) throws GenericEntityException;
 
@@ -1008,6 +1015,7 @@ public interface Delegator {
      *            cache entries related to this operation. This should always be
      *            <code>true</code> - otherwise you will lose data integrity.
      * @return int representing number of rows effected by this operation
+     * @deprecated
      */
     public int removeByCondition(String entityName, EntityCondition condition, boolean doCacheClear) throws GenericEntityException;
 
@@ -1030,6 +1038,7 @@ public interface Delegator {
      *            cache entries related to this operation. This should always be
      *            <code>true</code> - otherwise you will lose data integrity.
      * @return int representing number of rows effected by this operation
+     * @deprecated
      */
     public int removeByPrimaryKey(GenericPK primaryKey, boolean doCacheClear) throws GenericEntityException;
 
@@ -1062,6 +1071,7 @@ public interface Delegator {
      *            cache entries related to this operation. This should always be
      *            <code>true</code> - otherwise you will lose data integrity.
      * @return int representing number of rows effected by this operation
+     * @deprecated
      */
     public int removeRelated(String relationName, GenericValue value, boolean doCacheClear) throws GenericEntityException;
 
@@ -1084,6 +1094,7 @@ public interface Delegator {
      *            cache entries related to this operation. This should always be
      *            <code>true</code> - otherwise you will lose data integrity.
      * @return int representing number of rows effected by this operation
+     * @deprecated
      */
     public int removeValue(GenericValue value, boolean doCacheClear) throws GenericEntityException;
 
@@ -1127,6 +1138,7 @@ public interface Delegator {
      *            cache entries related to this operation. This should always be
      *            <code>true</code> - otherwise you will lose data integrity.
      * @return int representing number of rows effected by this operation
+     * @deprecated
      */
     public int store(GenericValue value, boolean doCacheClear) throws GenericEntityException;
 
@@ -1165,6 +1177,7 @@ public interface Delegator {
      *            cache entries related to this operation. This should always be
      *            <code>true</code> - otherwise you will lose data integrity.
      * @return int representing number of rows effected by this operation
+     * @deprecated
      */
     public int storeAll(List<GenericValue> values, boolean doCacheClear) throws GenericEntityException;
 
@@ -1189,6 +1202,7 @@ public interface Delegator {
      *            boolean that specifies whether or not to automatically create
      *            "dummy" place holder FKs
      * @return int representing number of rows effected by this operation
+     * @deprecated
      */
     public int storeAll(List<GenericValue> values, boolean doCacheClear, boolean createDummyFks) throws GenericEntityException;
 
@@ -1221,6 +1235,7 @@ public interface Delegator {
      *            <code>true</code> - otherwise you will lose data integrity.
      * @return int representing number of rows effected by this operation
      * @throws GenericEntityException
+     * @deprecated
      */
     public int storeByCondition(String entityName, Map<String, ? extends Object> fieldsToSet, EntityCondition condition, boolean doCacheClear) throws GenericEntityException;
    
