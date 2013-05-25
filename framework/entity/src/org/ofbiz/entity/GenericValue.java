@@ -23,6 +23,7 @@ package org.ofbiz.entity;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Collections;
 
 import javolution.context.ObjectFactory;
 import javolution.lang.Reusable;
@@ -61,11 +62,9 @@ public class GenericValue extends GenericEntity implements Reusable {
     /** Map to cache various related cardinality one entity collections */
     public transient Map<String, GenericValue> relatedOneCache = null;
 
-    /** This Map will contain the original field values from the database iff
-     * this GenericValue came from the database. If it was made manually it will
-     * no have this Map, ie it will be null to not take up memory.
+    /** A Map containing the original field values from the database.
      */
-    protected Map<String, Object> originalDbValues = null;
+    private Map<String, Object> originalDbValues = null;
 
     protected GenericValue() { }
 
@@ -118,7 +117,7 @@ public class GenericValue extends GenericEntity implements Reusable {
     @Override
     public void synchronizedWithDatasource() {
         super.synchronizedWithDatasource();
-        this.copyOriginalDbValues();
+        this.originalDbValues = Collections.unmodifiableMap(getAllFields());
     }
 
     public GenericValue create() throws GenericEntityException {
@@ -147,19 +146,10 @@ public class GenericValue extends GenericEntity implements Reusable {
 
     public Object getOriginalDbValue(String name) {
         if (getModelEntity().getField(name) == null) {
-            throw new IllegalArgumentException("[GenericEntity.get] \"" + name + "\" is not a field of " + entityName);
+            throw new IllegalArgumentException("[GenericEntity.get] \"" + name + "\" is not a field of " + getEntityName());
         }
         if (originalDbValues == null) return null;
         return originalDbValues.get(name);
-    }
-
-    /** This should only be called by the Entity Engine once a GenericValue has
-     * been read from the database so that we have a copy of the original field
-     * values from the Db.
-     */
-    public void copyOriginalDbValues() {
-        this.originalDbValues = FastMap.newInstance();
-        this.originalDbValues.putAll(this.fields);
     }
 
     /** Get the named Related Entity for the GenericValue from the persistent store

@@ -1011,7 +1011,7 @@ public class GenericDelegator implements Delegator {
 
             GenericValue removedEntity = null;
             if (testMode) {
-                removedEntity = this.findOne(primaryKey.entityName, primaryKey, false);
+                removedEntity = this.findOne(primaryKey.getEntityName(), primaryKey, false);
             }
             int num = helper.removeByPrimaryKey(primaryKey);
             this.saveEntitySyncRemoveInfo(primaryKey);
@@ -1083,6 +1083,8 @@ public class GenericDelegator implements Delegator {
             }
 
             int num = helper.removeByPrimaryKey(value.getPrimaryKey());
+            // Need to call removedFromDatasource() here because the helper calls removedFromDatasource() on the PK instead of the GenericEntity.
+            value.removedFromDatasource();
 
             if (testMode) {
                 if (removedValue != null) {
@@ -1345,7 +1347,7 @@ public class GenericDelegator implements Delegator {
             GenericValue updatedEntity = null;
 
             if (testMode) {
-                updatedEntity = this.findOne(value.entityName, value.getPrimaryKey(), false);
+                updatedEntity = this.findOne(value.getEntityName(), value.getPrimaryKey(), false);
             }
 
             int retVal = helper.store(value);

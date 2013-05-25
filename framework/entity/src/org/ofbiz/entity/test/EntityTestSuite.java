@@ -110,7 +110,6 @@ public class EntityTestSuite extends EntityTestCase {
         assertEquals("Retrieved value has the correct description", "Testing Type #4", testValue.getString("description"));
         testValue.remove();
         // Test immutable
-        /* Requires revision 1471283
         try {
             testValue.put("description", "New Testing Type #4");
             fail("Modified an immutable GenericValue");
@@ -121,7 +120,6 @@ public class EntityTestSuite extends EntityTestCase {
             fail("Modified an immutable GenericValue");
         } catch (UnsupportedOperationException e) {
         }
-         */
         testValue = delegator.findOne("TestingType", false, "testingTypeId", "TEST-4");
         assertEquals("Finding removed value returns null", null, testValue);
     }
@@ -139,13 +137,11 @@ public class EntityTestSuite extends EntityTestCase {
             fail("Modified an immutable GenericValue");
         } catch (IllegalStateException e) {
         }
-        /* Requires revision 1471283
         try {
             testValue.remove("description");
             fail("Modified an immutable GenericValue");
         } catch (UnsupportedOperationException e) {
         }
-        */
         // Test entity value update operation updates the cache
         /* Requires revision 1471284, 1476296
         testValue = (GenericValue) testValue.clone();
