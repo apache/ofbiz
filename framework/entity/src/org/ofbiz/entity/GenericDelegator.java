@@ -996,12 +996,6 @@ public class GenericDelegator implements Delegator {
 
             GenericHelper helper = getEntityHelper(primaryKey.getEntityName());
 
-            if (doCacheClear) {
-                // always clear cache before the operation
-                ecaRunner.evalRules(EntityEcaHandler.EV_CACHE_CLEAR, EntityEcaHandler.OP_REMOVE, primaryKey, false);
-                this.clearCacheLine(primaryKey);
-            }
-
             ecaRunner.evalRules(EntityEcaHandler.EV_RUN, EntityEcaHandler.OP_REMOVE, primaryKey, false);
 
             // if audit log on for any fields, save old value before removing so it's still there
@@ -1014,6 +1008,11 @@ public class GenericDelegator implements Delegator {
                 removedEntity = this.findOne(primaryKey.getEntityName(), primaryKey, false);
             }
             int num = helper.removeByPrimaryKey(primaryKey);
+            if (doCacheClear) {
+                ecaRunner.evalRules(EntityEcaHandler.EV_CACHE_CLEAR, EntityEcaHandler.OP_REMOVE, primaryKey, false);
+                this.clearCacheLine(primaryKey);
+            }
+
             this.saveEntitySyncRemoveInfo(primaryKey);
 
             if (testMode) {
@@ -1065,11 +1064,6 @@ public class GenericDelegator implements Delegator {
 
             GenericHelper helper = getEntityHelper(value.getEntityName());
 
-            if (doCacheClear) {
-                ecaRunner.evalRules(EntityEcaHandler.EV_CACHE_CLEAR, EntityEcaHandler.OP_REMOVE, value, false);
-                this.clearCacheLine(value);
-            }
-
             ecaRunner.evalRules(EntityEcaHandler.EV_RUN, EntityEcaHandler.OP_REMOVE, value, false);
 
             // if audit log on for any fields, save old value before actual remove
@@ -1085,6 +1079,11 @@ public class GenericDelegator implements Delegator {
             int num = helper.removeByPrimaryKey(value.getPrimaryKey());
             // Need to call removedFromDatasource() here because the helper calls removedFromDatasource() on the PK instead of the GenericEntity.
             value.removedFromDatasource();
+            if (doCacheClear) {
+                ecaRunner.evalRules(EntityEcaHandler.EV_CACHE_CLEAR, EntityEcaHandler.OP_REMOVE, value, false);
+                this.clearCacheLine(value);
+            }
+
 
             if (testMode) {
                 if (removedValue != null) {
@@ -1330,12 +1329,6 @@ public class GenericDelegator implements Delegator {
             ecaRunner.evalRules(EntityEcaHandler.EV_VALIDATE, EntityEcaHandler.OP_STORE, value, false);
             GenericHelper helper = getEntityHelper(value.getEntityName());
 
-            if (doCacheClear) {
-                // always clear cache before the operation
-                ecaRunner.evalRules(EntityEcaHandler.EV_CACHE_CLEAR, EntityEcaHandler.OP_STORE, value, false);
-                this.clearCacheLine(value);
-            }
-
             ecaRunner.evalRules(EntityEcaHandler.EV_RUN, EntityEcaHandler.OP_STORE, value, false);
             this.encryptFields(value);
 
@@ -1351,6 +1344,10 @@ public class GenericDelegator implements Delegator {
             }
 
             int retVal = helper.store(value);
+            if (doCacheClear) {
+                ecaRunner.evalRules(EntityEcaHandler.EV_CACHE_CLEAR, EntityEcaHandler.OP_STORE, value, false);
+                this.clearCacheLine(value);
+            }
 
             if (testMode) {
                 storeForTestRollback(new TestOperation(OperationType.UPDATE, updatedEntity));
@@ -2176,11 +2173,6 @@ public class GenericDelegator implements Delegator {
      * @see org.ofbiz.entity.Delegator#clearCacheLine(org.ofbiz.entity.GenericValue, boolean)
      */
     public void clearCacheLine(GenericValue value, boolean distribute) {
-        // TODO: make this a bit more intelligent by passing in the operation being done (create, update, remove) so we can not do unnecessary cache clears...
-        // for instance:
-        // on create don't clear by primary cache (and won't clear original values because there won't be any)
-        // on remove don't clear by and for new values, but do for original values
-
         // Debug.logInfo("running clearCacheLine for value: " + value + ", distribute: " + distribute, module);
         if (value == null) {
             return;

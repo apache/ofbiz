@@ -143,7 +143,6 @@ public class EntityTestSuite extends EntityTestCase {
         } catch (UnsupportedOperationException e) {
         }
         // Test entity value update operation updates the cache
-        /* Requires revision 1471284, 1476296
         testValue = (GenericValue) testValue.clone();
         testValue.put("description", "New Testing Type #3");
         testValue.store();
@@ -188,9 +187,7 @@ public class EntityTestSuite extends EntityTestCase {
         testValue.remove();
         testList = delegator.findList("TestingType", testCondition, null, null, null, true);
         assertEquals("Delegator findList returned empty list", 0, testList.size());
-        */
         // Test view entities in the pk cache - updating an entity should clear pk caches for all view entities containing that entity.
-        /* Requires revision 1484279
         testValue = delegator.create("TestingSubtype", "testingTypeId", "TEST-9", "subtypeDescription", "Testing Subtype #9");
         assertNotNull("TestingSubtype created", testValue);
         // Confirm member entity appears in the view
@@ -204,7 +201,6 @@ public class EntityTestSuite extends EntityTestCase {
         // Check if cached view contains the modification
         testValue = delegator.findOne("TestingViewPks", true, "testingTypeId", "TEST-9");
         assertEquals("View retrieved from cache has the correct member description", "New Testing Subtype #9", testValue.getString("subtypeDescription"));
-        */
     }
 
     /*
