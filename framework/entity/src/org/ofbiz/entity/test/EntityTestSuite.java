@@ -104,6 +104,105 @@ public class EntityTestSuite extends EntityTestCase {
         assertEquals("Retrieved value has the correct description", "New Testing Type #1", testValue.getString("description"));
     }
 
+    public void testRemoveValue() throws Exception {
+        // Retrieve a sample GenericValue, make sure it's correct
+        GenericValue testValue = delegator.findOne("TestingType", false, "testingTypeId", "TEST-4");
+        assertEquals("Retrieved value has the correct description", "Testing Type #4", testValue.getString("description"));
+        testValue.remove();
+        // Test immutable
+        try {
+            testValue.put("description", "New Testing Type #4");
+            fail("Modified an immutable GenericValue");
+        } catch (IllegalStateException e) {
+        }
+        try {
+            testValue.remove("description");
+            fail("Modified an immutable GenericValue");
+        } catch (UnsupportedOperationException e) {
+        }
+        testValue = delegator.findOne("TestingType", false, "testingTypeId", "TEST-4");
+        assertEquals("Finding removed value returns null", null, testValue);
+    }
+
+    /*
+     * Tests the entity cache
+     */
+    public void testEntityCache() throws Exception {
+        // Test primary key cache
+        GenericValue testValue = delegator.findOne("TestingType", true, "testingTypeId", "TEST-3");
+        assertEquals("Retrieved from cache value has the correct description", "Testing Type #3", testValue.getString("description"));
+        // Test immutable
+        try {
+            testValue.put("description", "New Testing Type #3");
+            fail("Modified an immutable GenericValue");
+        } catch (IllegalStateException e) {
+        }
+        try {
+            testValue.remove("description");
+            fail("Modified an immutable GenericValue");
+        } catch (UnsupportedOperationException e) {
+        }
+        // Test entity value update operation updates the cache
+        testValue = (GenericValue) testValue.clone();
+        testValue.put("description", "New Testing Type #3");
+        testValue.store();
+        testValue = delegator.findOne("TestingType", true, "testingTypeId", "TEST-3");
+        assertEquals("Retrieved from cache value has the correct description", "New Testing Type #3", testValue.getString("description"));
+        // Test entity value remove operation updates the cache
+        testValue = (GenericValue) testValue.clone();
+        testValue.remove();
+        testValue = delegator.findOne("TestingType", true, "testingTypeId", "TEST-3");
+        assertEquals("Retrieved from cache value is null", null, testValue);
+        // Test entity condition cache
+        EntityCondition testCondition = EntityCondition.makeCondition("description", EntityOperator.EQUALS, "Testing Type #2");
+        List<GenericValue> testList = delegator.findList("TestingType", testCondition, null, null, null, true);
+        assertEquals("Delegator findList returned one value", 1, testList.size());
+        testValue = testList.get(0);
+        assertEquals("Retrieved from cache value has the correct description", "Testing Type #2", testValue.getString("description"));
+        // Test immutable
+        try {
+            testValue.put("description", "New Testing Type #2");
+            fail("Modified an immutable GenericValue");
+        } catch (IllegalStateException e) {
+        }
+        try {
+            testValue.remove("description");
+            fail("Modified an immutable GenericValue");
+        } catch (UnsupportedOperationException e) {
+        }
+        // Test entity value create operation updates the cache
+        testValue = (GenericValue) testValue.clone();
+        testValue.put("testingTypeId", "TEST-9");
+        testValue.create();
+        testList = delegator.findList("TestingType", testCondition, null, null, null, true);
+        assertEquals("Delegator findList returned two values", 2, testList.size());
+        // Test entity value update operation updates the cache
+        testValue.put("description", "New Testing Type #2");
+        testValue.store();
+        testList = delegator.findList("TestingType", testCondition, null, null, null, true);
+        assertEquals("Delegator findList returned one value", 1, testList.size());
+        // Test entity value remove operation updates the cache
+        testValue = testList.get(0);
+        testValue = (GenericValue) testValue.clone();
+        testValue.remove();
+        testList = delegator.findList("TestingType", testCondition, null, null, null, true);
+        assertEquals("Delegator findList returned empty list", 0, testList.size());
+        // Test view entities in the pk cache - updating an entity should clear pk caches for all view entities containing that entity.
+        testValue = delegator.create("TestingSubtype", "testingTypeId", "TEST-9", "subtypeDescription", "Testing Subtype #9");
+        assertNotNull("TestingSubtype created", testValue);
+        // Confirm member entity appears in the view
+        testValue = delegator.findOne("TestingViewPks", true, "testingTypeId", "TEST-9");
+        assertEquals("View retrieved from cache has the correct member description", "Testing Subtype #9", testValue.getString("subtypeDescription"));
+        testValue = delegator.findOne("TestingSubtype", true, "testingTypeId", "TEST-9");
+        // Modify member entity
+        testValue = (GenericValue) testValue.clone();
+        testValue.put("subtypeDescription", "New Testing Subtype #9");
+        testValue.store();
+        // Check if cached view contains the modification
+        testValue = delegator.findOne("TestingViewPks", true, "testingTypeId", "TEST-9");
+        assertEquals("View retrieved from cache has the correct member description", "New Testing Subtype #9", testValue.getString("subtypeDescription"));
+    }
+
     /*
      * Tests XML serialization by serializing/deserializing a GenericValue
      */

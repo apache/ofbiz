@@ -21,6 +21,7 @@ package org.ofbiz.widget.form;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
@@ -47,6 +48,7 @@ import org.ofbiz.base.util.collections.FlexibleMapAccessor;
 import org.ofbiz.base.util.collections.MapStack;
 import org.ofbiz.base.util.string.FlexibleStringExpander;
 import org.ofbiz.entity.Delegator;
+import org.ofbiz.entity.GenericEntity;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.model.ModelEntity;
 import org.ofbiz.entity.model.ModelField;
@@ -1450,7 +1452,13 @@ public class ModelForm extends ModelWidget {
                 if (UtilValidate.isNotEmpty(this.getListEntryName())) {
                     localContext.put(this.getListEntryName(), item);
                 } else {
-                    localContext.push(itemMap);
+                    if (itemMap instanceof GenericEntity) {
+                        // Rendering code might try to modify the GenericEntity instance,
+                        // so we make a copy of it.
+                        localContext.push(new HashMap<String, Object>(itemMap));
+                    } else {
+                        localContext.push(itemMap);
+                    }
                 }
 
                 localContext.push();
