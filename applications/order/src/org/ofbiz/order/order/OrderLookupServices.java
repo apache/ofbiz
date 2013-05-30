@@ -22,6 +22,7 @@ package org.ofbiz.order.order;
 import java.math.BigDecimal;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import javolution.util.FastList;
@@ -32,6 +33,7 @@ import org.ofbiz.base.util.ObjectType;
 import org.ofbiz.base.util.StringUtil;
 import org.ofbiz.base.util.UtilGenerics;
 import org.ofbiz.base.util.UtilMisc;
+import org.ofbiz.base.util.UtilProperties;
 import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericEntityException;
@@ -68,6 +70,7 @@ public class OrderLookupServices {
         Integer viewSize = (Integer) context.get("viewSize");
         String showAll = (String) context.get("showAll");
         String useEntryDate = (String) context.get("useEntryDate");
+        Locale locale = (Locale) context.get("locale");
         if (showAll == null) {
             showAll = "N";
         }
@@ -407,6 +410,9 @@ public class OrderLookupServices {
                     } else {
                         conditions.add(EntityCondition.makeCondition("productId", EntityOperator.EQUALS, productId));
                     }
+                } else {
+                    String failMsg = UtilProperties.getMessage("OrderErrorUiLabels", "OrderFindOrderProductInvalid", UtilMisc.toMap("productId", productId), locale);
+                    return ServiceUtil.returnFailure(failMsg);
                 }
             }
         }
