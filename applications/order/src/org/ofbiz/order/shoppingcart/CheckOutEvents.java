@@ -892,10 +892,6 @@ public class CheckOutEvents {
                 selectedPaymentMethods.put("EXT_BILLACT", UtilMisc.<String, Object>toMap("amount", billingAccountAmt, "securityCode", null));
             }
 
-            if (UtilValidate.isEmpty(selectedPaymentMethods)) {
-                return "error";
-            }
-
             // If the user has just created a new payment method, add it to the map with a null amount, so that
             //  it becomes the sole payment method for the order.
             String newPaymentMethodId = (String) request.getAttribute("paymentMethodId");
