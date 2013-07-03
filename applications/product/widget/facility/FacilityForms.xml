@@ -469,7 +469,7 @@ under the License.
         <field name="offsetQOHQtyAvailable" title="${uiLabelMap.ProductQtyOffsetQOH}"><display/></field>
         <field name="offsetATPQtyAvailable" title="${uiLabelMap.ProductQtyOffsetATP}"><display/></field>
         <field name="usageQuantity" title="${uiLabelMap.ProductUsage}"><display/></field>
-        <field name="defaultPrice" title="${uiLabelMap.ProductDefaultPrice}"><display/></field>
+        <field name="defultPrice" title="${uiLabelMap.ProductDefaultPrice}"><display/></field>
         <field name="listPrice" title="${uiLabelMap.ProductListPrice}"><display/></field>
         <field name="wholeSalePrice" title="${uiLabelMap.ProductWholeSalePrice}"><display/></field>
         <field name="fromDateSellThrough" entry-name="parameters.fromDateSellThrough"><display/></field>
