@@ -21,25 +21,7 @@
 <project name="OFBiz Special Purpose Applications Build" default="build" basedir=".">
     <import file="../macros.xml"/>
     <filelist id="specialpurpose-builds" dir="."
-        files="
-        appserver/build.xml,
-        jetty/build.xml,
-        ecommerce/build.xml,
-        pos/build.xml,
-        hhfacility/build.xml,
-        assetmaint/build.xml,
-        oagis/build.xml,
-        googlebase/build.xml,
-        ebay/build.xml,
-        ebaystore/build.xml,
-        projectmgr/build.xml,
-        scrum/build.xml,
-        ldap/build.xml,
-        webpos/build.xml
-        googlecheckout/build.xml,
-        birt/build.xml,
-        example/build.xml
-    "/>
+        files="ecommerce/build.xml"/>
 
     <!-- ================================================================== -->
     <!-- Removes all created files and directories                          -->
