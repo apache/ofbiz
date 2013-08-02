@@ -68,14 +68,17 @@ public final class GroovyEngine extends GenericAsyncEngine {
         }
         Map<String, Object> params = FastMap.newInstance();
         params.putAll(context);
-        context.put("parameters", params);
+
+        Map<String, Object> gContext = FastMap.newInstance();
+        gContext.putAll(context);
+        gContext.put("parameters", params);
 
         DispatchContext dctx = dispatcher.getLocalContext(localName);
-        context.put("dctx", dctx);
-        context.put("dispatcher", dctx.getDispatcher());
-        context.put("delegator", dispatcher.getDelegator());
+        gContext.put("dctx", dctx);
+        gContext.put("dispatcher", dctx.getDispatcher());
+        gContext.put("delegator", dispatcher.getDelegator());
         try {
-            Script script = InvokerHelper.createScript(GroovyUtil.getScriptClassFromLocation(this.getLocation(modelService)), GroovyUtil.getBinding(context));
+            Script script = InvokerHelper.createScript(GroovyUtil.getScriptClassFromLocation(this.getLocation(modelService)), GroovyUtil.getBinding(gContext));
             Object resultObj = null;
             if (UtilValidate.isEmpty(modelService.invoke)) {
                 resultObj = script.run();
@@ -84,8 +87,8 @@ public final class GroovyEngine extends GenericAsyncEngine {
             }
             if (resultObj != null && resultObj instanceof Map<?, ?>) {
                 return cast(resultObj);
-            } else if (context.get("result") != null && context.get("result") instanceof Map<?, ?>) {
-                return cast(context.get("result"));
+            } else if (gContext.get("result") != null && gContext.get("result") instanceof Map<?, ?>) {
+                return cast(gContext.get("result"));
             }
         } catch (GeneralException e) {
             throw new GenericServiceException(e);
