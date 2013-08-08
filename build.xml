@@ -874,7 +874,6 @@ under the License.
             <jvmarg value="${memory.max.param}"/>
             <jvmarg value="${memory.maxpermsize.param}"/>
             <arg value="test"/>
-            <arg value="-portoffset=${portoffset}"/>
             <env key="LC_ALL" value="C"/>
         </java>
         <mkdir dir="runtime/logs/test-results/html"/>

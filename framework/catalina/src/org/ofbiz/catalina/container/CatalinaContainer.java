@@ -235,13 +235,6 @@ public class CatalinaContainer implements Container {
     public boolean start() throws ContainerException {
         // Start the Tomcat server
         try {
-            if (ClassLoaderContainer.portOffset != null) {            
-                for (Connector con: tomcat.getService().findConnectors()) {
-                    int port = con.getPort();
-                    port += ClassLoaderContainer.portOffset;
-                    con.setPort(port);
-                }
-            }            
             tomcat.getServer().start();
         } catch (LifecycleException e) {
             throw new ContainerException(e);
@@ -251,9 +244,6 @@ public class CatalinaContainer implements Container {
         loadComponents();
 
         for (Connector con: tomcat.getService().findConnectors()) {
-            int port = con.getPort();
-            port += ClassLoaderContainer.portOffset;
-            con.setPort(port);
             ProtocolHandler ph = con.getProtocolHandler();
             if (ph instanceof Http11Protocol) {
                 Http11Protocol hph = (Http11Protocol) ph;
@@ -493,10 +483,6 @@ public class CatalinaContainer implements Container {
         String protocol = ContainerConfig.getPropertyValue(connectorProp, "protocol", "HTTP/1.1");
         String address = ContainerConfig.getPropertyValue(connectorProp, "address", "0.0.0.0");
         int port = ContainerConfig.getPropertyValue(connectorProp, "port", 0);
-        if (ClassLoaderContainer.portOffset != null) {
-            port += ClassLoaderContainer.portOffset;
-        }
-        
         boolean secure = ContainerConfig.getPropertyValue(connectorProp, "secure", false);
         if (protocol.toLowerCase().startsWith("ajp")) {
             protocol = "ajp";
