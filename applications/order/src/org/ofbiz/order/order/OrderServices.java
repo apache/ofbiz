@@ -610,7 +610,7 @@ public class OrderServices {
         // set the order item attributes
         List<GenericValue> orderItemAttributes = UtilGenerics.checkList(context.get("orderItemAttributes"));
         if (UtilValidate.isNotEmpty(orderItemAttributes)) {
-            for(GenericValue oiatt : orderAttributes) {
+            for(GenericValue oiatt : orderItemAttributes) {
                 oiatt.set("orderId", orderId);
                 toBeStored.add(oiatt);
             }

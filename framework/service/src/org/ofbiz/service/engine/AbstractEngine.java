@@ -18,21 +18,21 @@
  *******************************************************************************/
 package org.ofbiz.service.engine;
 
-import java.util.Map;
-import java.util.List;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 import javolution.util.FastMap;
 
-import org.ofbiz.service.ServiceDispatcher;
-import org.ofbiz.service.ModelService;
-import org.ofbiz.service.GenericServiceException;
-import org.ofbiz.service.GenericServiceCallback;
-import org.ofbiz.service.config.ServiceConfigUtil;
 import org.ofbiz.base.config.GenericConfigException;
+import org.ofbiz.base.container.ClassLoaderContainer;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilXml;
-
+import org.ofbiz.service.GenericServiceCallback;
+import org.ofbiz.service.GenericServiceException;
+import org.ofbiz.service.ModelService;
+import org.ofbiz.service.ServiceDispatcher;
+import org.ofbiz.service.config.ServiceConfigUtil;
 import org.w3c.dom.Element;
 
 /**
@@ -66,7 +66,12 @@ public abstract class AbstractEngine implements GenericEngine {
                 List<? extends Element> locationElements = UtilXml.childElementList(root, "service-location");
                 if (locationElements != null) {
                     for (Element e: locationElements) {
-                        locationMap.put(e.getAttribute("name"), e.getAttribute("location"));
+                        String location = e.getAttribute("location");
+                        if (location.contains("localhost") && ClassLoaderContainer.portOffset != null) {
+                            Integer port = 8080 + ClassLoaderContainer.portOffset; 
+                            location.replace("8080", port.toString());
+                        }                    
+                        locationMap.put(e.getAttribute("name"), location);
                     }
                 }
             }
