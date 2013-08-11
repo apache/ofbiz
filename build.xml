@@ -381,7 +381,7 @@ under the License.
             description="Start OFBiz">
         <java jar="ofbiz.jar" fork="true">
             <jvmarg value="${memory.initial.param}"/>
-            <jvmarg value="${memory.memory.max.param}"/>
+            <jvmarg value="${memory.max.param}"/>
             <jvmarg value="${memory.maxpermsize.param}"/>
         </java>
     </target>
@@ -389,7 +389,7 @@ under the License.
             description="Start OFBiz as a separate process">
         <java jar="ofbiz.jar" fork="true" spawn="true">
             <jvmarg value="${memory.initial.param}"/>
-            <jvmarg value="${memory.memory.max.param}"/>
+            <jvmarg value="${memory.max.param}"/>
             <jvmarg value="${memory.maxpermsize.param}"/>
         </java>
     </target>
