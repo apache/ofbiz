@@ -319,7 +319,7 @@ under the License.
             description="This will start OFBiz">
         <java jar="ofbiz.jar" fork="true">
             <jvmarg value="${memory.initial.param}"/>
-            <jvmarg value="${pos.memory.max.param}"/>
+            <jvmarg value="${memory.max.param}"/>
             <jvmarg value="${memory.maxpermsize.param}"/>
         </java>
     </target>
