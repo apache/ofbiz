@@ -19,65 +19,11 @@ under the License.
 -->
 
 <project name="OFBiz Applications Build" default="build" basedir=".">
-    <import file="../macros.xml"/>
-
-    <filelist id="application-builds" dir="."
-        files="content/build.xml,party/build.xml,
+    <filelist id="application-builds" dir="applications"
+              files="content/build.xml,party/build.xml,
                workeffort/build.xml,product/build.xml,marketing/build.xml,
                order/build.xml,manufacturing/build.xml,
                accounting/build.xml,
                securityext/build.xml, humanres/build.xml"/>
 
-    <!-- ================================================================== -->
-    <!-- Removes all created files and directories                          -->
-    <!-- ================================================================== -->
-
-    <target name="refresh">
-        <antcall target="clean-all"/>
-        <antcall target="build"/>
-    </target>
-
-    <target name="clean-all">
-        <antcall target="clean-xtra"/>
-        <antcall target="clean"/>
-    </target>
-
-    <target name="clean-xtra" depends="">
-        <delete verbose="on">
-            <fileset dir="." includes="**/.nbattrs,**/*~,**/.#*,**/.DS_Store,**/*.rej,**/*.orig"/>
-        </delete>
-    </target>
-
-    <target name="tests">
-    </target>
-
-    <target name="clean">
-        <iterate target="clean" filelist="application-builds"/>
-        <delete file="ofbiz.jar"/>
-        <echo message="[clean] ========== Done Cleaning Applications =========="/>
-    </target>
-
-    <!-- ================================================================== -->
-    <!-- Build Components                                                   -->
-    <!-- ================================================================== -->
-
-    <target name="build" depends="">
-        <echo message="[build] ========== Start Building Applications (Compile) =========="/>
-
-        <iterate inheritall="false" filelist="application-builds"/>
-
-        <echo message="[build] ========== Done Building Applications (Compile) =========="/>
-    </target>
-
-    <!-- ================================================================== -->
-    <!-- Build JavaDocs                                                     -->
-    <!-- ================================================================== -->
-
-    <target name="docs" depends="">
-        <echo message="[docs] ========== Start Building Applications (JavaDoc) =========="/>
-
-        <iterate target="docs" filelist="application-builds"/>
-
-        <echo message="[docs] ========== Done Building Applications (JavaDocs) =========="/>
-    </target>
 </project>
