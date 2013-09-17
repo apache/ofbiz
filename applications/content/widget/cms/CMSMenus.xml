@@ -33,46 +33,5 @@ under the License.
                 <parameter param-name="forumId" from-field="subsites.forumId"/>
             </link>
         </menu-item>
-
-        <menu-item name="index" title="${uiLabelMap.ContentIndex}" >
-            <link id="index" target="AdminIndex">
-            </link>
-        </menu-item>
-
-        <menu-item name="search" title="${uiLabelMap.CommonFind}" >
-            <link id="search" target="AdminSearch">
-            </link>
-        </menu-item>
-
-
     </menu>
-
-    <menu name="content" default-menu-item-name="content" default-permission-operation="HAS_AUTHOR_ROLE|CONTENT_ADMIN"
-        default-permission-entity-action="_ADMIN" default-associated-content-id="${userLogin.userLoginId}" selected-menuitem-context-field-name="tabButtonItem"
-        title="" type="simple">
-
-
-       <menu-item name="contentfind" title="${uiLabelMap.ContentContent}" >
-            <link id="CMSContentFind" target="CMSContentFind" >
-                <parameter param-name="listSize" from-field="content.listSize"/>
-                <parameter param-name="highIndex" from-field="content.highIndex"/>
-                <parameter param-name="lowIndex" from-field="content.lowIndex"/>
-                <parameter param-name="viewSize" from-field="content.viewSize"/>
-                <parameter param-name="viewIndex" from-field="content.viewIndex"/>
-                <parameter param-name="queryString" from-field="content.queryString"/>
-            </link>
-       </menu-item>
-       <menu-item name="contentedit" title="${uiLabelMap.CommonEdit}" >
-            <link id="CMSContentEdit" target="CMSContentEdit">
-                <parameter param-name="contentId" from-field="content.currentValue.contentId"/>
-                <parameter param-name="dataResourceId" from-field="content.currentValue.dataResourceId"/>
-            </link>
-       </menu-item>
-       <menu-item name="contentadd" title="${uiLabelMap.CommonAdd}" >
-            <link id="CMSContentAdd" target="CMSContentAdd">
-            </link>
-       </menu-item>
-
-    </menu>
-
 </menus>
