@@ -25,6 +25,8 @@ under the License.
     <screen name="InventoryReports">
         <section>
             <actions>
+                <property-map resource="BirtUiLabels" map-name="uiLabelMap" global="true"/>
+                
                 <set field="titleProperty" value="CommonReports"/>
                 <set field="headerItem" value="reports"/>
                 <set field="tabButtonItem" value="EditFacilityInventoryItems"/>
