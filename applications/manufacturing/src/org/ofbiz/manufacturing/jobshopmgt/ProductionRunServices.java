@@ -1692,6 +1692,7 @@ public class ProductionRunServices {
                             "statusId", "INV_AVAILABLE");
                     serviceContext.put("facilityId", productionRun.getGenericValue().getString("facilityId"));
                     serviceContext.put("datetimeReceived", UtilDateTime.nowTimestamp());
+                    serviceContext.put("datetimeManufactured", UtilDateTime.nowTimestamp());
                     serviceContext.put("comments", "Created by production run " + productionRunId);
                     if (unitCost.compareTo(ZERO) != 0) {
                         serviceContext.put("unitCost", unitCost);
@@ -1729,6 +1730,7 @@ public class ProductionRunServices {
                         "inventoryItemTypeId", "NON_SERIAL_INV_ITEM");
                 serviceContext.put("facilityId", productionRun.getGenericValue().getString("facilityId"));
                 serviceContext.put("datetimeReceived", UtilDateTime.nowTimestamp());
+                serviceContext.put("datetimeManufactured", UtilDateTime.nowTimestamp());
                 serviceContext.put("comments", "Created by production run " + productionRunId);
                 serviceContext.put("lotId", lotId);
                 if (unitCost.compareTo(ZERO) != 0) {
@@ -1884,7 +1886,8 @@ public class ProductionRunServices {
                             "inventoryItemTypeId", "SERIALIZED_INV_ITEM",
                             "statusId", "INV_AVAILABLE");
                     serviceContext.put("facilityId", facilityId);
-                    serviceContext.put("datetimeReceived", UtilDateTime.nowDate());
+                    serviceContext.put("datetimeReceived", UtilDateTime.nowTimestamp());
+                    serviceContext.put("datetimeManufactured", UtilDateTime.nowTimestamp());
                     serviceContext.put("comments", "Created by production run task " + productionRunTaskId);
                     if (unitCost != null) {
                         serviceContext.put("unitCost", unitCost);
@@ -1921,6 +1924,7 @@ public class ProductionRunServices {
                         "inventoryItemTypeId", "NON_SERIAL_INV_ITEM");
                 serviceContext.put("facilityId", facilityId);
                 serviceContext.put("datetimeReceived", UtilDateTime.nowTimestamp());
+                serviceContext.put("datetimeManufactured", UtilDateTime.nowTimestamp());
                 serviceContext.put("comments", "Created by production run task " + productionRunTaskId);
                 if (unitCost != null) {
                     serviceContext.put("unitCost", unitCost);
