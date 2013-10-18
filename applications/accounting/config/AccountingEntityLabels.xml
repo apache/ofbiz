@@ -2330,8 +2330,8 @@
     </property>
     <property key="InvoiceItemType.description.FEE">
         <value xml:lang="de">Gebühr</value>
-        <value xml:lang="en">Invoice Fee</value>
-        <value xml:lang="fr">Frais de facturation</value>
+        <value xml:lang="en">Invoice Fee (Sales)</value>
+        <value xml:lang="fr">Frais de facturation (ventes)</value>
         <value xml:lang="hi_IN">चालान शुल्क</value>
         <value xml:lang="it">Fattura Onorario</value>
         <value xml:lang="pt">Taxa de fatura</value>
@@ -2369,8 +2369,8 @@
     </property>
     <property key="InvoiceItemType.description.INV_ADD_FEATURE">
         <value xml:lang="de">Sonderanpassung</value>
-        <value xml:lang="en">Invoice Additional Feature</value>
-        <value xml:lang="fr">Facturation d'option supplémentaire</value>
+        <value xml:lang="en">Invoice Additional Feature (Sales)</value>
+        <value xml:lang="fr">Facturation d'option supplémentaire (ventes)</value>
         <value xml:lang="hi_IN">चालान अतिरिक्त सुविधा</value>
         <value xml:lang="it">Fattura Caratteristica Addizionale</value>
         <value xml:lang="pt">Fatura de recursos adicionais</value>
@@ -2382,8 +2382,8 @@
     </property>
     <property key="InvoiceItemType.description.INV_DISCOUNT_ADJ">
         <value xml:lang="de">Rechnungsrabatt</value>
-        <value xml:lang="en">Invoice Discount</value>
-        <value xml:lang="fr">Remise sur facture</value>
+        <value xml:lang="en">Invoice Discount (Sales)</value>
+        <value xml:lang="fr">Remise sur facture (ventes)</value>
         <value xml:lang="hi_IN">चालान डिस्काउंट</value>
         <value xml:lang="it">Fattura Sconto</value>
         <value xml:lang="pt">Desconto de Fatura</value>
@@ -2395,8 +2395,8 @@
     </property>
     <property key="InvoiceItemType.description.INV_DPROD_ITEM">
         <value xml:lang="de">Digitales Produkt</value>
-        <value xml:lang="en">Invoice Digital Good Item</value>
-        <value xml:lang="fr">Facturation de service digital</value>
+        <value xml:lang="en">Invoice Digital Good Item (Sales)</value>
+        <value xml:lang="fr">Facturation de service digital (ventes)</value>
         <value xml:lang="hi_IN">चालान डिजिटल सामग्री मद</value>
         <value xml:lang="it">Fattura Riga Bene Digitale</value>
         <value xml:lang="pt">Nota Fiscal de item digital</value>
@@ -2408,8 +2408,8 @@
     </property>
     <property key="InvoiceItemType.description.INV_FDPROD_ITEM">
         <value xml:lang="de">Artikel/Digitales Produkt</value>
-        <value xml:lang="en">Invoice Finished/Digital Good Item</value>
-        <value xml:lang="fr">Facturation produit fini/ digital</value>
+        <value xml:lang="en">Invoice Finished/Digital Good Item (Sales)</value>
+        <value xml:lang="fr">Facturation produit fini/ digital (ventes)</value>
         <value xml:lang="hi_IN">चालान तैयार/डिजिटल सामग्री मद</value>
         <value xml:lang="it">Fattura Riga Bene Finito/Digitale</value>
         <value xml:lang="pt">Fatura do item de protduto final/digital</value>
@@ -2421,8 +2421,8 @@
     </property>
     <property key="InvoiceItemType.description.INV_FPROD_ITEM">
         <value xml:lang="de">Artikel</value>
-        <value xml:lang="en">Invoice Finished Good Item</value>
-        <value xml:lang="fr">Facturation produit fini</value>
+        <value xml:lang="en">Invoice Finished Good Item (Sales)</value>
+        <value xml:lang="fr">Facturation produit fini (ventes)</value>
         <value xml:lang="hi_IN">चालान संपूर्ण सामग्री मद</value>
         <value xml:lang="it">Fattura Riga Bene Finito</value>
         <value xml:lang="pt">Fatura de item de produto final</value>
@@ -2443,8 +2443,8 @@
     </property>
     <property key="InvoiceItemType.description.INV_MISC_CHARGE">
         <value xml:lang="de">Sonstige Gebühren</value>
-        <value xml:lang="en">Invoice Miscellaneous Charges</value>
-        <value xml:lang="fr">Facturation charges diverses</value>
+        <value xml:lang="en">Invoice Miscellaneous Charges (Sales)</value>
+        <value xml:lang="fr">Facturation charges diverses (ventes)</value>
         <value xml:lang="hi_IN">चालान विविध प्रभार</value>
         <value xml:lang="it">Fattura Commissioni Varie</value>
         <value xml:lang="pt">Encargos Diversos da fatura</value>
@@ -2456,8 +2456,8 @@
     </property>
     <property key="InvoiceItemType.description.INV_PROD_FEATR_ITEM">
         <value xml:lang="de">Produkterweiterung</value>
-        <value xml:lang="en">Invoice Product-Feature Item</value>
-        <value xml:lang="fr">Facturation d'option de produit</value>
+        <value xml:lang="en">Invoice Product-Feature Item (Sales)</value>
+        <value xml:lang="fr">Facturation d'option de produit (ventes)</value>
         <value xml:lang="hi_IN">चालान उत्पाद फ़ीचर मद</value>
         <value xml:lang="it">Fattura Riga Prodotto-Caratteristica</value>
         <value xml:lang="pt">Fatura de itens por produto-características</value>
@@ -2469,8 +2469,8 @@
     </property>
     <property key="InvoiceItemType.description.INV_PROD_ITEM">
         <value xml:lang="de">Artikel</value>
-        <value xml:lang="en">Invoice Product Item</value>
-        <value xml:lang="fr">Facturation de produit</value>
+        <value xml:lang="en">Invoice Product Item (Sales)</value>
+        <value xml:lang="fr">Facturation de produit (ventes)</value>
         <value xml:lang="hi_IN">चालान उत्पाद मद</value>
         <value xml:lang="it">Fattura Riga Prodotto</value>
         <value xml:lang="pt">Fatura do Item de Produto</value>
@@ -2482,8 +2482,8 @@
     </property>
     <property key="InvoiceItemType.description.INV_PROMOTION_ADJ">
         <value xml:lang="de">Promotion</value>
-        <value xml:lang="en">Invoice Promotion</value>
-        <value xml:lang="fr">Remise promotionnelle sur facture</value>
+        <value xml:lang="en">Invoice Promotion (Sales)</value>
+        <value xml:lang="fr">Remise promotionnelle sur facture (ventes)</value>
         <value xml:lang="hi_IN">चालान संवर्धन</value>
         <value xml:lang="it">Fattura Promozione</value>
         <value xml:lang="pt">Fatura de Promoção</value>
@@ -2495,8 +2495,8 @@
     </property>
     <property key="InvoiceItemType.description.INV_SALES_TAX">
         <value xml:lang="de">MwSt.</value>
-        <value xml:lang="en">Invoice Sales Tax</value>
-        <value xml:lang="fr">Taxes sur vente facturées</value>
+        <value xml:lang="en">Invoice Sales Tax (Sales)</value>
+        <value xml:lang="fr">Taxes sur vente facturées (ventes)</value>
         <value xml:lang="hi_IN">चालान बिक्री टैक्स</value>
         <value xml:lang="it">Fattura Tasse Vendita</value>
         <value xml:lang="pt">Fatura de impostos de Vendas</value>
@@ -2508,8 +2508,8 @@
     </property>
     <property key="InvoiceItemType.description.INV_SHIPPING_CHARGES">
         <value xml:lang="de">Versandkosten</value>
-        <value xml:lang="en">Invoice Shipping and Handling</value>
-        <value xml:lang="fr">Frais d'expédition facturés</value>
+        <value xml:lang="en">Invoice Shipping and Handling (Sales)</value>
+        <value xml:lang="fr">Frais d'expédition facturés (ventes)</value>
         <value xml:lang="hi_IN">चालान शिपिंग और हैंडलिंग</value>
         <value xml:lang="it">Fattura Spese di Spedizione e Imballaggio</value>
         <value xml:lang="pt">Fatura de Envio e manuseio</value>
@@ -2521,8 +2521,8 @@
     </property>
     <property key="InvoiceItemType.description.INV_SPROD_ITEM">
         <value xml:lang="de">Dienstleistung</value>
-        <value xml:lang="en">Invoice Service Product Item</value>
-        <value xml:lang="fr">Facturation de service/ produit</value>
+        <value xml:lang="en">Invoice Service Product Item (Sales)</value>
+        <value xml:lang="fr">Facturation de service/ produit (ventes)</value>
         <value xml:lang="hi_IN">चालान सेवा उत्पाद मद</value>
         <value xml:lang="it">Fattura Riga Prodotto Servizio</value>
         <value xml:lang="pt">Fatura de Item de serviço produto</value>
@@ -2534,8 +2534,8 @@
     </property>
     <property key="InvoiceItemType.description.INV_SURCHARGE_ADJ">
         <value xml:lang="de">Zuschlag</value>
-        <value xml:lang="en">Invoice Surcharge</value>
-        <value xml:lang="fr">Facturation de surcoût</value>
+        <value xml:lang="en">Invoice Surcharge (Sales)</value>
+        <value xml:lang="fr">Facturation de surcoût (ventes)</value>
         <value xml:lang="hi_IN">चालान अधिभार</value>
         <value xml:lang="it">Fattura Supplementare</value>
         <value xml:lang="pt">Sobretaxa da Fatura</value>
@@ -2547,8 +2547,8 @@
     </property>
     <property key="InvoiceItemType.description.INV_TE_ITEM">
         <value xml:lang="de">Zeiteintrag</value>
-        <value xml:lang="en">Invoice Time-Entry Item</value>
-        <value xml:lang="fr">Facturation de prestation horaire</value>
+        <value xml:lang="en">Invoice Time-Entry Item (Sales)</value>
+        <value xml:lang="fr">Facturation de prestation horaire (ventes)</value>
         <value xml:lang="hi_IN">चालान समय-प्रवेश मद</value>
         <value xml:lang="it">Fattura Riga Voce-Tempo</value>
         <value xml:lang="pt">Fatura de item por registro-tempo</value>
@@ -2560,8 +2560,8 @@
     </property>
     <property key="InvoiceItemType.description.INV_WARRANTY_ADJ">
         <value xml:lang="de">Garantie</value>
-        <value xml:lang="en">Invoice Warranty</value>
-        <value xml:lang="fr">Facturation de garantie</value>
+        <value xml:lang="en">Invoice Warranty (Sales)</value>
+        <value xml:lang="fr">Facturation de garantie (ventes)</value>
         <value xml:lang="hi_IN">चालान वारंटी</value>
         <value xml:lang="it">Fattura Garanzia</value>
         <value xml:lang="pt">Fatura de Garantia</value>
@@ -2573,8 +2573,8 @@
     </property>
     <property key="InvoiceItemType.description.INV_WE_ITEM">
         <value xml:lang="de">Arbeitseinsatz</value>
-        <value xml:lang="en">Invoice Work-Effort Item</value>
-        <value xml:lang="fr">Facturation de prestation</value>
+        <value xml:lang="en">Invoice Work-Effort Item (Sales)</value>
+        <value xml:lang="fr">Facturation de prestation (ventes)</value>
         <value xml:lang="hi_IN">चालान कार्य-प्रयास मद</value>
         <value xml:lang="it">Fattura Riga Impegno di Lavoro</value>
         <value xml:lang="pt">Fatura de Item de esforço de trabalho,</value>
@@ -2586,8 +2586,8 @@
     </property>
     <property key="InvoiceItemType.description.ITM_ADD_FEATURE">
         <value xml:lang="de">Sonderanpassung</value>
-        <value xml:lang="en">Invoice Item Additional Feature</value>
-        <value xml:lang="fr">Facturation d'options additionnelles</value>
+        <value xml:lang="en">Invoice Item Additional Feature (Sales)</value>
+        <value xml:lang="fr">Facturation d'options additionnelles (ventes)</value>
         <value xml:lang="hi_IN">चालान मद अतिरिक्त फ़ीचर</value>
         <value xml:lang="it">Invoice Riga Caratteristica Addizionale</value>
         <value xml:lang="pt">Fatura de itens com recursos adicionais</value>
@@ -2599,8 +2599,8 @@
     </property>
     <property key="InvoiceItemType.description.ITM_DISCOUNT_ADJ">
         <value xml:lang="de">Positionsrabatt</value>
-        <value xml:lang="en">Invoice Item Discount</value>
-        <value xml:lang="fr">Remise sur ligne de facturation</value>
+        <value xml:lang="en">Invoice Item Discount (Sales)</value>
+        <value xml:lang="fr">Remise sur ligne de facturation (ventes)</value>
         <value xml:lang="hi_IN">चालान मद डिस्काउंट</value>
         <value xml:lang="it">Fattura Riga Sconto</value>
         <value xml:lang="pt">Fatura de Desconto de Item</value>
@@ -2612,8 +2612,8 @@
     </property>
     <property key="InvoiceItemType.description.ITM_FEE">
         <value xml:lang="de">Rechnungsposten Gebühr</value>
-        <value xml:lang="en">Invoice Item Fee</value>
-        <value xml:lang="fr">Frais sur ligne de facturation</value>
+        <value xml:lang="en">Invoice Item Fee (Sales)</value>
+        <value xml:lang="fr">Frais sur ligne de facturation (ventes)</value>
         <value xml:lang="hi_IN">चालान मद शुल्क</value>
         <value xml:lang="it">Fattura Riga Onorario</value>
         <value xml:lang="pt">Fatura de Taxa sobre Item</value>
@@ -2625,8 +2625,8 @@
     </property>
     <property key="InvoiceItemType.description.ITM_MISC_CHARGE">
         <value xml:lang="de">Rechnungsposten zusätzliche Gebühren</value>
-        <value xml:lang="en">Invoice Item Miscellaneous Charges</value>
-        <value xml:lang="fr">Frais divers sur ligne de facturation</value>
+        <value xml:lang="en">Invoice Item Miscellaneous Charges (Sales)</value>
+        <value xml:lang="fr">Frais divers sur ligne de facturation (ventes)</value>
         <value xml:lang="hi_IN">चालान मद विविध व्यय</value>
         <value xml:lang="it">Fattura Riga Commissioni Varie</value>
         <value xml:lang="pt">Item de Fatura de Encargos Diversos</value>
@@ -2638,8 +2638,8 @@
     </property>
     <property key="InvoiceItemType.description.ITM_PROMOTION_ADJ">
         <value xml:lang="de">Rechnungsposten Aktion</value>
-        <value xml:lang="en">Invoice Item Promotion</value>
-        <value xml:lang="fr">Promotion sur ligne de facturation</value>
+        <value xml:lang="en">Invoice Item Promotion (Sales)</value>
+        <value xml:lang="fr">Promotion sur ligne de facturation (ventes)</value>
         <value xml:lang="hi_IN">चालान मद संवर्धन</value>
         <value xml:lang="it">Fattura Riga Promozione</value>
         <value xml:lang="pt">Item de Fatura de promoção</value>
@@ -2651,8 +2651,8 @@
     </property>
     <property key="InvoiceItemType.description.ITM_REPLACE_ADJ">
         <value xml:lang="de">Rechnungsposten Ersatzartikel</value>
-        <value xml:lang="en">Invoice Item Replacement</value>
-        <value xml:lang="fr">Echange sur ligne de facturation</value>
+        <value xml:lang="en">Invoice Item Replacement (Sales)</value>
+        <value xml:lang="fr">Echange sur ligne de facturation (ventes)</value>
         <value xml:lang="hi_IN">चालान मद प्रतिस्थापन</value>
         <value xml:lang="it">Fattura Riga Sostituzione</value>
         <value xml:lang="pt">Substituição de Item de fatura</value>
@@ -2664,8 +2664,8 @@
     </property>
     <property key="InvoiceItemType.description.ITM_SALES_TAX">
         <value xml:lang="de">Rechnungsposten MwSt.</value>
-        <value xml:lang="en">Invoice Item Sales Tax</value>
-        <value xml:lang="fr">Ligne de TVA</value>
+        <value xml:lang="en">Invoice Item Sales Tax (Sales)</value>
+        <value xml:lang="fr">Ligne de TVA (ventes)</value>
         <value xml:lang="hi_IN">चालान मद बिक्री टैक्स</value>
         <value xml:lang="it">Fattura Riga Tasse Vendita</value>
         <value xml:lang="pt">Item de fatura de impostos de venda</value>
@@ -2677,8 +2677,8 @@
     </property>
     <property key="InvoiceItemType.description.ITM_SHIPPING_CHARGES">
         <value xml:lang="de">Rechnungsposten Versandkosten</value>
-        <value xml:lang="en">Invoice Item Shipping and Handling</value>
-        <value xml:lang="fr">Frais d'expédition sur ligne de facturation</value>
+        <value xml:lang="en">Invoice Item Shipping and Handling (Sales)</value>
+        <value xml:lang="fr">Frais d'expédition sur ligne de facturation (ventes)</value>
         <value xml:lang="hi_IN">चालान मद शिपिंग और हैंडलिंग</value>
         <value xml:lang="it">Fattura Riga Spese di Spedizione e Imballaggio</value>
         <value xml:lang="pt">Item de fatura de envio e manuseio</value>
@@ -2690,8 +2690,8 @@
     </property>
     <property key="InvoiceItemType.description.ITM_SURCHARGE_ADJ">
         <value xml:lang="de">Rechnungsposten Zuschlag</value>
-        <value xml:lang="en">Invoice Item Surcharge</value>
-        <value xml:lang="fr">Surcoût sur ligne de facturation</value>
+        <value xml:lang="en">Invoice Item Surcharge (Sales)</value>
+        <value xml:lang="fr">Surcoût sur ligne de facturation (ventes)</value>
         <value xml:lang="hi_IN">चालान मद अधिभार</value>
         <value xml:lang="it">Fattura Riga Supplementare</value>
         <value xml:lang="pt">Item de Fatura de Sobretaxa</value>
@@ -2703,8 +2703,8 @@
     </property>
     <property key="InvoiceItemType.description.ITM_WARRANTY_ADJ">
         <value xml:lang="de">Rechnungsposten Garantie</value>
-        <value xml:lang="en">Invoice Item Warranty</value>
-        <value xml:lang="fr">Garantie sur ligne de facturation</value>
+        <value xml:lang="en">Invoice Item Warranty (Sales)</value>
+        <value xml:lang="fr">Garantie sur ligne de facturation (ventes)</value>
         <value xml:lang="hi_IN">चालान मद वारंटी</value>
         <value xml:lang="it">Fattura Riga Garanzia</value>
         <value xml:lang="pt">Item de Fatura de Garantia</value>
@@ -3019,8 +3019,8 @@
     </property>
     <property key="InvoiceItemType.description.PINV_ADD_FEATURE">
         <value xml:lang="de">Zusätzliches Merkmal</value>
-        <value xml:lang="en">Invoice Additional Feature</value>
-        <value xml:lang="fr">Facturation d'option supplémentaire</value>
+        <value xml:lang="en">Invoice Additional Feature (Purchase)</value>
+        <value xml:lang="fr">Facturation d'option supplémentaire (achat)</value>
         <value xml:lang="hi_IN">चालान अतिरिक्त फ़ीचर</value>
         <value xml:lang="it">Fattura Caratteristica Addizionale</value>
         <value xml:lang="pt">Recurso adicional de fatura</value>
@@ -3032,8 +3032,8 @@
     </property>
     <property key="InvoiceItemType.description.PINV_DISCOUNT_ADJ">
         <value xml:lang="de">Rechnungsrabatt</value>
-        <value xml:lang="en">Invoice Discount</value>
-        <value xml:lang="fr">Remise sur facture</value>
+        <value xml:lang="en">Invoice Discount (Purchase)</value>
+        <value xml:lang="fr">Remise sur facture (achat)</value>
         <value xml:lang="hi_IN">चालान डिस्काउंट</value>
         <value xml:lang="it">Fattura Sconto</value>
         <value xml:lang="pt">Desconto sobre Fatura</value>
@@ -3045,8 +3045,8 @@
     </property>
     <property key="InvoiceItemType.description.PINV_DPROD_ITEM">
         <value xml:lang="de">Digitales Produkt</value>
-        <value xml:lang="en">Invoice Digital Good Item</value>
-        <value xml:lang="fr">Facturation de service digital</value>
+        <value xml:lang="en">Invoice Digital Good Item (Purchase)</value>
+        <value xml:lang="fr">Facturation de service digital (achat)</value>
         <value xml:lang="hi_IN">चालान डिजिटल सामग्री मद</value>
         <value xml:lang="it">Fattura Riga Bene Digitale</value>
         <value xml:lang="pt">Fatura de item de Bem eletrônico</value>
@@ -3058,8 +3058,8 @@
     </property>
     <property key="InvoiceItemType.description.PINV_FDPROD_ITEM">
         <value xml:lang="de">Fertigprodukt/Digitales Produkt</value>
-        <value xml:lang="en">Invoice Finished/Digital Good Item</value>
-        <value xml:lang="fr">Facturation de service digital</value>
+        <value xml:lang="en">Invoice Finished/Digital Good Item (Purchase)</value>
+        <value xml:lang="fr">Facturation de service digital (achat)</value>
         <value xml:lang="hi_IN">चालान तैयार/डिजिटल सामग्री मद</value>
         <value xml:lang="it">Fattura Riga Bene Finito/Digitale</value>
         <value xml:lang="pt">Item da fatura de produto final/digital</value>
@@ -3071,8 +3071,8 @@
     </property>
     <property key="InvoiceItemType.description.PINV_FPROD_ITEM">
         <value xml:lang="de">Rechnung Fertigprodukt</value>
-        <value xml:lang="en">Invoice Finished Good Item</value>
-        <value xml:lang="fr">Facturation produit fini</value>
+        <value xml:lang="en">Invoice Finished Good Item (Purchase)</value>
+        <value xml:lang="fr">Facturation produit fini (achat)</value>
         <value xml:lang="hi_IN">चालान संपूर्ण सामग्री मद</value>
         <value xml:lang="it">Fattura Riga Bene Finito</value>
         <value xml:lang="pt">Item de Fatura de bens acabados</value>
@@ -3110,8 +3110,8 @@
     </property>
     <property key="InvoiceItemType.description.PINV_MISC_CHARGE">
         <value xml:lang="de">Sonstige Gebühren</value>
-        <value xml:lang="en">Invoice Miscellaneous Charges</value>
-        <value xml:lang="fr">Facturation de charges diverses</value>
+        <value xml:lang="en">Invoice Miscellaneous Charges (Purchase)</value>
+        <value xml:lang="fr">Facturation de charges diverses (achat)</value>
         <value xml:lang="hi_IN">चालान विविध प्रभार</value>
         <value xml:lang="it">Fattura Commissioni Varie</value>
         <value xml:lang="pt">Encargos Diversos da fatura</value>
@@ -3123,8 +3123,8 @@
     </property>
     <property key="InvoiceItemType.description.PINV_PROD_FEATR_ITEM">
         <value xml:lang="de">Produktmerkmal</value>
-        <value xml:lang="en">Invoice Product-Feature Item</value>
-        <value xml:lang="fr">Facturation d'option de produit</value>
+        <value xml:lang="en">Invoice Product-Feature Item (Purchase)</value>
+        <value xml:lang="fr">Facturation d'option de produit (achat)</value>
         <value xml:lang="hi_IN">चालान उत्पाद फ़ीचर मद</value>
         <value xml:lang="it">Fattura Riga Prodotto-Caratteristica</value>
         <value xml:lang="pt">Item de Fatura de recursos do produto</value>
@@ -3136,8 +3136,8 @@
     </property>
     <property key="InvoiceItemType.description.PINV_PROD_ITEM">
         <value xml:lang="de">Produkt</value>
-        <value xml:lang="en">Invoice Product Item</value>
-        <value xml:lang="fr">Facturation de produit</value>
+        <value xml:lang="en">Invoice Product Item (Purchase)</value>
+        <value xml:lang="fr">Facturation de produit (achat)</value>
         <value xml:lang="hi_IN">चालान उत्पाद मद</value>
         <value xml:lang="it">Fattura Riga Prodotto</value>
         <value xml:lang="pt">Item de Fatura de Produto</value>
@@ -3149,8 +3149,8 @@
     </property>
     <property key="InvoiceItemType.description.PINV_PROMOTION_ADJ">
         <value xml:lang="de">Promotion</value>
-        <value xml:lang="en">Invoice Promotion</value>
-        <value xml:lang="fr">Promotion sur ligne de facturation</value>
+        <value xml:lang="en">Invoice Promotion (Purchase)</value>
+        <value xml:lang="fr">Promotion sur ligne de facturation (achat)</value>
         <value xml:lang="hi_IN">चालान संवर्धन</value>
         <value xml:lang="it">Fattura Promozione</value>
         <value xml:lang="pt">Fatura de Promoção</value>
@@ -3162,8 +3162,8 @@
     </property>
     <property key="InvoiceItemType.description.PINV_SALES_TAX">
         <value xml:lang="de">MwSt.</value>
-        <value xml:lang="en">Invoice Sales Tax</value>
-        <value xml:lang="fr">Taxes sur vente facturées</value>
+        <value xml:lang="en">Invoice Sales Tax (Purchase)</value>
+        <value xml:lang="fr">Taxes sur vente facturées (achat)</value>
         <value xml:lang="hi_IN">चालान बिक्री टैक्स</value>
         <value xml:lang="it">Fattura Tasse Vendita</value>
         <value xml:lang="pt">Fatura impostos de Vendas</value>
@@ -3175,8 +3175,8 @@
     </property>
     <property key="InvoiceItemType.description.PINV_SHIP_CHARGES">
         <value xml:lang="de">Versandkosten</value>
-        <value xml:lang="en">Invoice Shipping and Handling</value>
-        <value xml:lang="fr">Frais d'expédition facturés</value>
+        <value xml:lang="en">Invoice Shipping and Handling (Purchase)</value>
+        <value xml:lang="fr">Frais d'expédition facturés (achat)</value>
         <value xml:lang="hi_IN">चालान शिपिंग और हैंडलिंग</value>
         <value xml:lang="it">Fattura Spese di Spedizione e Imballaggio</value>
         <value xml:lang="pt">Fatura de Envio e Manuseio</value>
@@ -3188,8 +3188,8 @@
     </property>
     <property key="InvoiceItemType.description.PINV_SPROD_ITEM">
         <value xml:lang="de">Dienstleistung</value>
-        <value xml:lang="en">Invoice Service Product Item</value>
-        <value xml:lang="fr">Facturation de service/ produit</value>
+        <value xml:lang="en">Invoice Service Product Item (Purchase)</value>
+        <value xml:lang="fr">Facturation de service/ produit (achat)</value>
         <value xml:lang="hi_IN">चालान सेवा उत्पाद मद</value>
         <value xml:lang="it">Fattura Riga Prodotto Servizio</value>
         <value xml:lang="pt">Item de Fatura de Produto de serviço</value>
@@ -3214,8 +3214,8 @@
     </property>
     <property key="InvoiceItemType.description.PINV_SURCHARGE_ADJ">
         <value xml:lang="de">Zuschlag</value>
-        <value xml:lang="en">Invoice Surcharge</value>
-        <value xml:lang="fr">Facturation de surcoût</value>
+        <value xml:lang="en">Invoice Surcharge (Purchase)</value>
+        <value xml:lang="fr">Facturation de surcoût (achat)</value>
         <value xml:lang="hi_IN">चालान अधिभार</value>
         <value xml:lang="it">Fattura Supplementare</value>
         <value xml:lang="pt">Fatura de Sobretaxa</value>
@@ -3227,8 +3227,8 @@
     </property>
     <property key="InvoiceItemType.description.PINV_TE_ITEM">
         <value xml:lang="de">Geleistete Stunden</value>
-        <value xml:lang="en">Invoice Time-Entry Item</value>
-        <value xml:lang="fr">Facturation de prestation horaire</value>
+        <value xml:lang="en">Invoice Time-Entry Item (Purchase)</value>
+        <value xml:lang="fr">Facturation de prestation horaire (achat)</value>
         <value xml:lang="hi_IN">चालान समय-प्रवेश मद</value>
         <value xml:lang="it">Fattura Riga Voce-Tempo</value>
         <value xml:lang="pt">Item de fatura de registro-data</value>
@@ -3240,8 +3240,8 @@
     </property>
     <property key="InvoiceItemType.description.PINV_WARRANTY_ADJ">
         <value xml:lang="de">Garantie</value>
-        <value xml:lang="en">Invoice Warranty</value>
-        <value xml:lang="fr">Facturation de garantie</value>
+        <value xml:lang="en">Invoice Warranty (Purchase)</value>
+        <value xml:lang="fr">Facturation de garantie (achat)</value>
         <value xml:lang="hi_IN">चालान वारंटी</value>
         <value xml:lang="it">Fattura Garanzia</value>
         <value xml:lang="pt">Fatura de Garantia</value>
@@ -3253,8 +3253,8 @@
     </property>
     <property key="InvoiceItemType.description.PINV_WE_ITEM">
         <value xml:lang="de">Arbeitseinsatz</value>
-        <value xml:lang="en">Invoice Work-Effort Item</value>
-        <value xml:lang="fr">Facturation de prestation</value>
+        <value xml:lang="en">Invoice Work-Effort Item (Purchase)</value>
+        <value xml:lang="fr">Facturation de prestation (achat)</value>
         <value xml:lang="hi_IN">चालान कार्य-प्रयास मद</value>
         <value xml:lang="it">Fattura Riga Impegno di Lavoro</value>
         <value xml:lang="pt">Item de Fatura de esforço de trabalho,</value>
@@ -3266,8 +3266,8 @@
     </property>
     <property key="InvoiceItemType.description.PITM_ADD_FEATURE">
         <value xml:lang="de">Sonderanpassung</value>
-        <value xml:lang="en">Invoice Item Additional Feature</value>
-        <value xml:lang="fr">Facturation d'options additionnelles</value>
+        <value xml:lang="en">Invoice Item Additional Feature (Purchase)</value>
+        <value xml:lang="fr">Facturation d'options additionnelles (achat)</value>
         <value xml:lang="hi_IN">चालान मद अतिरिक्त फ़ीचर</value>
         <value xml:lang="it">Fattura Riga Caratteristica Addizionale</value>
         <value xml:lang="pt">Característica adicional do item de fatura</value>
@@ -3279,8 +3279,8 @@
     </property>
     <property key="InvoiceItemType.description.PITM_DISCOUNT_ADJ">
         <value xml:lang="de">Rabatt</value>
-        <value xml:lang="en">Invoice Item Discount</value>
-        <value xml:lang="fr">Remise sur ligne de facturation</value>
+        <value xml:lang="en">Invoice Item Discount (Purchase)</value>
+        <value xml:lang="fr">Remise sur ligne de facturation (achat)</value>
         <value xml:lang="hi_IN">चालान मद डिस्काउंट</value>
         <value xml:lang="it">Fattura Riga Sconto</value>
         <value xml:lang="pt">Desconto sobre o Item da Fatura</value>
@@ -3292,8 +3292,8 @@
     </property>
     <property key="InvoiceItemType.description.PITM_FEE">
         <value xml:lang="de">Rechnungsposten Gebühr</value>
-        <value xml:lang="en">Invoice Item Fee</value>
-        <value xml:lang="fr">Frais sur ligne de facturation</value>
+        <value xml:lang="en">Invoice Item Fee (Purchase)</value>
+        <value xml:lang="fr">Frais sur ligne de facturation (achat)</value>
         <value xml:lang="hi_IN">चालान मद शुल्क</value>
         <value xml:lang="it">Fattura Riga Onorario</value>
         <value xml:lang="pt">Taxa sobre o Item da Fatura</value>
@@ -3305,8 +3305,8 @@
     </property>
     <property key="InvoiceItemType.description.PITM_MISC_CHARGE">
         <value xml:lang="de">Rechnungsposten zusätzliche Gebühren</value>
-        <value xml:lang="en">Invoice Item Miscellaneous Charges</value>
-        <value xml:lang="fr">Frais divers sur ligne de facturation</value>
+        <value xml:lang="en">Invoice Item Miscellaneous Charges (Purchase)</value>
+        <value xml:lang="fr">Frais divers sur ligne de facturation (achat)</value>
         <value xml:lang="hi_IN">चालान मद विविध व्यय</value>
         <value xml:lang="it">Fattura Riga Commissioni Varie</value>
         <value xml:lang="pt">Encargos Diversos sobre o item da fatura</value>
@@ -3318,8 +3318,8 @@
     </property>
     <property key="InvoiceItemType.description.PITM_PROMOTION_ADJ">
         <value xml:lang="de">Rechnungsposten Promotion</value>
-        <value xml:lang="en">Invoice Item Promotion</value>
-        <value xml:lang="fr">Remise promotionnelle sur facture</value>
+        <value xml:lang="en">Invoice Item Promotion (Purchase)</value>
+        <value xml:lang="fr">Remise promotionnelle sur facture (achat)</value>
         <value xml:lang="hi_IN">चालान मद संवर्धन</value>
         <value xml:lang="it">Fattura Riga Promozione</value>
         <value xml:lang="pt">Promoção do item da fatura</value>
@@ -3331,8 +3331,8 @@
     </property>
     <property key="InvoiceItemType.description.PITM_REPLACE_ADJ">
         <value xml:lang="de">Rechnungsposten Ersatzartikel</value>
-        <value xml:lang="en">Invoice Item Replacement</value>
-        <value xml:lang="fr">Echange sur ligne de facturation</value>
+        <value xml:lang="en">Invoice Item Replacement (Purchase)</value>
+        <value xml:lang="fr">Echange sur ligne de facturation (achat)</value>
         <value xml:lang="hi_IN">चालान मद प्रतिस्थापन</value>
         <value xml:lang="it">Fattura Riga Sostituzione</value>
         <value xml:lang="pt">Substituição do Item da Fatura</value>
@@ -3344,8 +3344,8 @@
     </property>
     <property key="InvoiceItemType.description.PITM_SALES_TAX">
         <value xml:lang="de">Rechnungsposten MwSt.</value>
-        <value xml:lang="en">Invoice Item Sales Tax</value>
-        <value xml:lang="fr">ligne de TVA</value>
+        <value xml:lang="en">Invoice Item Sales Tax (Purchase)</value>
+        <value xml:lang="fr">ligne de TVA (achat)</value>
         <value xml:lang="hi_IN">चालान मद बिक्री टैक्स</value>
         <value xml:lang="it">Fattura Riga Tasse Vendita</value>
         <value xml:lang="pt">Imposto de venda do item da fatura</value>
@@ -3357,8 +3357,8 @@
     </property>
     <property key="InvoiceItemType.description.PITM_SHIP_CHARGES">
         <value xml:lang="de">Rechnungsposten Versandkosten</value>
-        <value xml:lang="en">Invoice Item Shipping and Handling</value>
-        <value xml:lang="fr">Frais d'expédition facturés</value>
+        <value xml:lang="en">Invoice Item Shipping and Handling (Purchase)</value>
+        <value xml:lang="fr">Frais d'expédition facturés (achat)</value>
         <value xml:lang="hi_IN">चालान मद शिपिंग और हैंडलिंग</value>
         <value xml:lang="it">Fattura Riga Spese di Spedizione e Imballaggio</value>
         <value xml:lang="pt">Envio e manuseio do Item da fatura</value>
@@ -3370,8 +3370,8 @@
     </property>
     <property key="InvoiceItemType.description.PITM_SURCHARGE_ADJ">
         <value xml:lang="de">Rechnungsposten Zuschlag</value>
-        <value xml:lang="en">Invoice Item Surcharge</value>
-        <value xml:lang="fr">Surcoût sur ligne de facturation</value>
+        <value xml:lang="en">Invoice Item Surcharge (Purchase)</value>
+        <value xml:lang="fr">Surcoût sur ligne de facturation (achat)</value>
         <value xml:lang="hi_IN">चालान मद अधिभार</value>
         <value xml:lang="it">Fattura Riga Supplementare</value>
         <value xml:lang="pt">Sobretaxa sobre o Item da fatura</value>
@@ -3383,8 +3383,8 @@
     </property>
     <property key="InvoiceItemType.description.PITM_WARRANTY_ADJ">
         <value xml:lang="de">Rechnungsposten Garantie</value>
-        <value xml:lang="en">Invoice Item Warranty</value>
-        <value xml:lang="fr">Garantie sur ligne de facturation</value>
+        <value xml:lang="en">Invoice Item Warranty (Purchase)</value>
+        <value xml:lang="fr">Garantie sur ligne de facturation (achat)</value>
         <value xml:lang="hi_IN">चालान मद वारंटी</value>
         <value xml:lang="it">Fattura Riga Garanzia</value>
         <value xml:lang="pt">Garantia do Item da fatura</value>
@@ -3396,8 +3396,8 @@
     </property>
     <property key="InvoiceItemType.description.P_FEE">
         <value xml:lang="de">Gebühr</value>
-        <value xml:lang="en">Invoice Fee</value>
-        <value xml:lang="fr">Frais sur facturation</value>
+        <value xml:lang="en">Invoice Fee (Purchase)</value>
+        <value xml:lang="fr">Frais sur facturation (achat)</value>
         <value xml:lang="hi_IN">चालान शुल्क</value>
         <value xml:lang="it">Fattura Onorario</value>
         <value xml:lang="pt">Taxa da Fatura</value>
