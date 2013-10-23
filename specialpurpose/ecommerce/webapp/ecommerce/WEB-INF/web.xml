@@ -52,17 +52,23 @@ under the License.
             frequently switch between http and https.
         </description>
     </context-param>
+    <context-param>
+        <param-name>defaultPage</param-name>
+        <param-value>/main</param-value>
+        <description>Default page uri. Important: please DO add or remove /control to match url-pattern of SeoControlServlet.
+        </description>
+    </context-param>
 
     <filter>
-        <filter-name>CatalogUrlFilter</filter-name>
-        <display-name>CatalogUrlFilter</display-name>
-        <filter-class>org.ofbiz.product.category.CatalogUrlFilter</filter-class>
+        <filter-name>SeoCatalogUrlFilter</filter-name>
+        <display-name>SeoCatalogUrlFilter</display-name>
+        <filter-class>org.ofbiz.product.category.SeoCatalogUrlFilter</filter-class>
         <init-param><param-name>defaultLocaleString</param-name><param-value>en_US</param-value></init-param>
     </filter>
     <filter>
-        <filter-name>ContentUrlFilter</filter-name>
-        <display-name>ContentUrlFilter</display-name>
-        <filter-class>org.ofbiz.content.content.ContentUrlFilter</filter-class>
+        <filter-name>SeoContentUrlFilter</filter-name>
+        <display-name>SeoContentUrlFilter</display-name>
+        <filter-class>org.ofbiz.product.category.SeoContentUrlFilter</filter-class>
         <init-param>
             <param-name>defaultLocaleString</param-name>
             <param-value>en_US</param-value>
@@ -70,9 +76,9 @@ under the License.
         <init-param><param-name>viewRequest</param-name><param-value>ViewBlogArticle</param-value></init-param>
     </filter>
     <filter>
-        <filter-name>ContextFilter</filter-name>
-        <display-name>ContextFilter</display-name>
-        <filter-class>org.ofbiz.webapp.control.ContextFilter</filter-class>
+        <filter-name>SeoContextFilter</filter-name>
+        <display-name>SeoContextFilter</display-name>
+        <filter-class>org.ofbiz.product.category.SeoContextFilter</filter-class>
         <init-param>
             <param-name>disableContextSecurity</param-name>
             <param-value>N</param-value>
@@ -83,15 +89,15 @@ under the License.
         </init-param>
     </filter>
     <filter-mapping>
-        <filter-name>CatalogUrlFilter</filter-name>
+        <filter-name>SeoCatalogUrlFilter</filter-name>
         <url-pattern>/*</url-pattern>
     </filter-mapping>
     <filter-mapping>
-        <filter-name>ContentUrlFilter</filter-name>
+        <filter-name>SeoContentUrlFilter</filter-name>
         <url-pattern>/*</url-pattern>
     </filter-mapping>
     <filter-mapping>
-        <filter-name>ContextFilter</filter-name>
+        <filter-name>SeoContextFilter</filter-name>
         <url-pattern>/*</url-pattern>
     </filter-mapping>
 
@@ -105,10 +111,10 @@ under the License.
     <listener><listener-class>org.ofbiz.webapp.control.LoginEventListener</listener-class></listener>
 
     <servlet>
-        <servlet-name>ControlServlet</servlet-name>
-        <display-name>ControlServlet</display-name>
-        <description>Main Control Servlet</description>
-        <servlet-class>org.ofbiz.webapp.control.ControlServlet</servlet-class>
+        <servlet-name>SeoControlServlet</servlet-name>
+        <display-name>SeoControlServlet</display-name>
+        <description>Main SEO Control Servlet</description>
+        <servlet-class>org.ofbiz.product.category.SeoControlServlet</servlet-class>
         <load-on-startup>1</load-on-startup>
     </servlet>
     <!-- un-comment for Worldpay
@@ -121,16 +127,16 @@ under the License.
     </servlet>
     -->
     <servlet>
-        <servlet-name>CatalogUrlServlet</servlet-name>
-        <display-name>CatalogUrlServlet</display-name>
-        <description>Catalog (Category/Product) URL Servlet</description>
-        <servlet-class>org.ofbiz.product.category.CatalogUrlServlet</servlet-class>
+        <servlet-name>SeoCatalogUrlServlet</servlet-name>
+        <display-name>SeoCatalogUrlServlet</display-name>
+        <description>SEO Catalog (Category/Product) URL Servlet</description>
+        <servlet-class>org.ofbiz.product.category.SeoCatalogUrlServlet</servlet-class>
         <load-on-startup>1</load-on-startup>
     </servlet>
 
     <servlet-mapping>
-        <servlet-name>ControlServlet</servlet-name>
-        <url-pattern>/control/*</url-pattern>
+        <servlet-name>SeoControlServlet</servlet-name>
+        <url-pattern>/*</url-pattern>
     </servlet-mapping>
     <!-- un-comment for Worldpay
     <servlet-mapping>
@@ -139,7 +145,7 @@ under the License.
     </servlet-mapping>
     -->
     <servlet-mapping>
-        <servlet-name>CatalogUrlServlet</servlet-name>
+        <servlet-name>SeoCatalogUrlServlet</servlet-name>
         <url-pattern>/products/*</url-pattern>
     </servlet-mapping>
 

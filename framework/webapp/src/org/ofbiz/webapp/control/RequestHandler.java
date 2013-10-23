@@ -58,6 +58,7 @@ import org.ofbiz.webapp.stats.ServerHitBin;
 import org.ofbiz.webapp.view.ViewFactory;
 import org.ofbiz.webapp.view.ViewHandler;
 import org.ofbiz.webapp.view.ViewHandlerException;
+import org.ofbiz.webapp.website.WebSiteProperties;
 import org.ofbiz.webapp.website.WebSiteWorker;
 import org.owasp.esapi.errors.EncodingException;
 
@@ -857,7 +858,7 @@ public class RequestHandler {
     }
     private void renderView(String view, boolean allowExtView, HttpServletRequest req, HttpServletResponse resp, String saveName) throws RequestHandlerException {
         GenericValue userLogin = (GenericValue) req.getSession().getAttribute("userLogin");
-        // workaraound if we are in the root webapp
+        // workaround if we are in the root webapp
         String cname = UtilHttp.getApplicationName(req);
         String oldView = view;
 
@@ -868,7 +869,10 @@ public class RequestHandler {
         // if the view name starts with the control servlet name and a /, then it was an
         // attempt to override the default view with a call back into the control servlet,
         // so just get the target view name and use that
-        String servletName = req.getServletPath().substring(1);
+        String servletName = req.getServletPath();
+        if (UtilValidate.isNotEmpty(servletName) && servletName.length() > 1) {
+            servletName = servletName.substring(1);
+        }
 
         if (Debug.infoOn()) Debug.logInfo("Rendering View [" + view + "], sessionId=" + UtilHttp.getSessionId(req), module);
         if (view.startsWith(servletName + "/")) {

@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified">
+    <xs:element name="seo-config">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element minOccurs="0" maxOccurs="1" ref="regexpifmatch"/>
+                <xs:element minOccurs="0" maxOccurs="1" ref="debug"/>
+                <xs:element minOccurs="0" maxOccurs="unbounded" ref="config"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="regexpifmatch"/>
+    <xs:element name="debug"/>
+    <xs:element name="config">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element minOccurs="0" maxOccurs="1" ref="description"/>
+                <xs:element minOccurs="1" maxOccurs="1" ref="seo"/>
+                <xs:element minOccurs="0" maxOccurs="1" ref="forward"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="description"/>
+    <xs:element name="seo">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element minOccurs="1" maxOccurs="1" ref="url-pattern"/>
+                <xs:element minOccurs="1" maxOccurs="1" ref="replacement"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="forward">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element minOccurs="1" maxOccurs="1" ref="url-pattern"/>
+                <xs:element minOccurs="1" maxOccurs="1" ref="replacement"/>
+                <xs:element minOccurs="0" maxOccurs="1" ref="responsecode"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="url-pattern"/>
+    <xs:element name="replacement"/>
+    <xs:element name="responsecode" default="301"/>
+</xs:schema>
