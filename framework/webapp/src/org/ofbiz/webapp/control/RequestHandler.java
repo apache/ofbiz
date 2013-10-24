@@ -20,7 +20,6 @@ package org.ofbiz.webapp.control;
 
 import static org.ofbiz.base.util.UtilGenerics.checkMap;
 
-import java.io.IOException;
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
@@ -50,7 +49,6 @@ import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
-import org.ofbiz.webapp.OfbizUrlBuilder;
 import org.ofbiz.webapp.event.EventFactory;
 import org.ofbiz.webapp.event.EventHandler;
 import org.ofbiz.webapp.event.EventHandlerException;
@@ -870,10 +868,11 @@ public class RequestHandler {
         // attempt to override the default view with a call back into the control servlet,
         // so just get the target view name and use that
         String servletName = req.getServletPath();
-        if (UtilValidate.isNotEmpty(servletName) && servletName.length() > 1) {
+        if (UtilValidate.isNotEmpty(servletName) && servletName.length() > 1
+                || servletName.startsWith("/")) {
             servletName = servletName.substring(1);
         }
-
+        
         if (Debug.infoOn()) Debug.logInfo("Rendering View [" + view + "], sessionId=" + UtilHttp.getSessionId(req), module);
         if (view.startsWith(servletName + "/")) {
             view = view.substring(servletName.length() + 1);
@@ -1011,6 +1010,15 @@ public class RequestHandler {
         }
     }
 
+    /**
+     * Returns a URL String that contains only the scheme and host parts. This method
+     * should not be used because it ignores settings in the WebSite entity.
+     * 
+     * @param request
+     * @param secure
+     * @deprecated Use OfbizUrlBuilder
+     */
+    @Deprecated
     public static String getDefaultServerRootUrl(HttpServletRequest request, boolean secure) {
         String httpsPort = UtilProperties.getPropertyValue("url.properties", "port.https", "443");
         String httpsServer = UtilProperties.getPropertyValue("url.properties", "force.https.host");
@@ -1117,40 +1125,55 @@ public class RequestHandler {
     }
 
     public String makeLink(HttpServletRequest request, HttpServletResponse response, String url, boolean fullPath, boolean secure, boolean encode) {
-        OfbizUrlBuilder builder = (OfbizUrlBuilder) request.getAttribute("_OFBIZ_URL_BUILDER_");
-        if (builder == null) {
+        WebSiteProperties webSiteProps = (WebSiteProperties) request.getAttribute("_WEBSITE_PROPS_");
+        if (webSiteProps == null) {
             try {
-                builder = OfbizUrlBuilder.from(request);
-                request.setAttribute("_OFBIZ_URL_BUILDER_", builder);
+                webSiteProps = WebSiteProperties.from(request);
+                request.setAttribute("_WEBSITE_PROPS_", webSiteProps);
             } catch (GenericEntityException e) {
                 // If the entity engine is throwing exceptions, then there is no point in continuing.
                 Debug.logError(e, "Exception thrown while getting web site properties: ", module);
                 return null;
+            }
+        }
+        String requestUri = RequestHandler.getRequestUri(url);
+        ConfigXMLReader.RequestMap requestMap = null;
+        if (requestUri != null) {
+            try {
+                requestMap = getControllerConfig().getRequestMapMap().get(requestUri);
             } catch (WebAppConfigurationException e) {
                 // If we can't read the controller.xml file, then there is no point in continuing.
                 Debug.logError(e, "Exception thrown while parsing controller.xml file: ", module);
                 return null;
             }
         }
+        StringBuilder newURL = new StringBuilder();
         boolean didFullSecure = false;
         boolean didFullStandard = false;
-        StringBuilder newURL = new StringBuilder(250);
-        if (fullPath) {
-            try {
-                boolean usesHttps = builder.buildHostPart(newURL, url, secure);
-                if (usesHttps) {
-                    didFullSecure = true;
-                } else {
-                    didFullStandard = true;
+        if (requestMap != null && (webSiteProps.getEnableHttps() || fullPath || secure)) {
+            if (Debug.verboseOn()) Debug.logVerbose("In makeLink requestUri=" + requestUri, module);
+            if (secure || (webSiteProps.getEnableHttps() && requestMap.securityHttps && !request.isSecure())) {
+                String server = webSiteProps.getHttpsHost();
+                if (server.isEmpty()) {
+                    server = request.getServerName();
                 }
-            } catch (WebAppConfigurationException e) {
-                // If we can't read the controller.xml file, then there is no point in continuing.
-                Debug.logError(e, "Exception thrown while parsing controller.xml file: ", module);
-                return null;
-            } catch (IOException e) {
-                // If we can't write to the buffer, then there is no point in continuing.
-                Debug.logError(e, "Exception thrown while appending to StringBuilder: ", module);
-                return null;
+                newURL.append("https://");
+                newURL.append(server);
+                if (!webSiteProps.getHttpsPort().isEmpty()) {
+                    newURL.append(":").append(webSiteProps.getHttpsPort());
+                }
+                didFullSecure = true;
+            } else if (fullPath || (webSiteProps.getEnableHttps() && !requestMap.securityHttps && request.isSecure())) {
+                String server = webSiteProps.getHttpHost();
+                if (server.isEmpty()) {
+                    server = request.getServerName();
+                }
+                newURL.append("http://");
+                newURL.append(server);
+                if (!webSiteProps.getHttpPort().isEmpty()) {
+                    newURL.append(":").append(webSiteProps.getHttpPort());
+                }
+                didFullStandard = true;
             }
         }
         // create the path to the control servlet
