@@ -62,7 +62,7 @@ under the License.
     <filter>
         <filter-name>SeoCatalogUrlFilter</filter-name>
         <display-name>SeoCatalogUrlFilter</display-name>
-        <filter-class>org.ofbiz.product.category.SeoCatalogUrlFilter</filter-class>
+        <filter-class>org.ofbiz.product.category.CatalogUrlSeoFilter</filter-class>
         <init-param><param-name>defaultLocaleString</param-name><param-value>en_US</param-value></init-param>
     </filter>
     <filter>

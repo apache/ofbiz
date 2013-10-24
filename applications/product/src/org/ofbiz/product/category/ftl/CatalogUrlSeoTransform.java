@@ -51,6 +51,7 @@ import org.ofbiz.entity.condition.EntityOperator;
 import org.ofbiz.product.category.CatalogUrlServlet;
 import org.ofbiz.product.category.CategoryContentWrapper;
 import org.ofbiz.product.category.CategoryWorker;
+import org.ofbiz.product.category.SeoUrlUtil;
 import org.ofbiz.product.category.UrlRegexpConfigUtil;
 import org.ofbiz.product.category.UrlUtil;
 import org.ofbiz.product.product.ProductContentWrapper;
@@ -509,6 +510,10 @@ public class CatalogUrlSeoTransform implements TemplateTransformModel {
         if (UtilValidate.isEmpty(pathElements)) {
             return false;
         }
+        // remove context path
+        pathInfo = SeoUrlUtil.removeContextPath(pathInfo, contextPath);
+        // remove servlet path
+        pathInfo = SeoUrlUtil.removeContextPath(pathInfo, request.getServletPath());
         if (pathInfo.startsWith("/" + CatalogUrlServlet.CATEGORY_REQUEST + "/")) {
             return forwardCategoryUri(request, response, delegator, controlServlet);
         }
