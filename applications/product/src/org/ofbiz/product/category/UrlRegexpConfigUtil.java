@@ -93,7 +93,7 @@ public class UrlRegexpConfigUtil {
     public static final String ELEMENT_NAME_FILTERS = "name-filters";
     public static final String ELEMENT_FILTER = "filter";
     public static final String ELEMENT_CHARACTER_PATTERN = "character-pattern";
-    public static final String URL_REGEXP_CONFIG_FILENAME = "urlregexp.xml";
+    public static final String URL_REGEXP_CONFIG_FILENAME = "SeoConfig.xml";
     public static final int DEFAULT_RESPONSECODE = HttpServletResponse.SC_MOVED_PERMANENTLY;
     public static final String DEFAULT_ANONYMOUS_VALUE = "disable";
     public static final String DEFAULT_USER_VALUE = "disable";
