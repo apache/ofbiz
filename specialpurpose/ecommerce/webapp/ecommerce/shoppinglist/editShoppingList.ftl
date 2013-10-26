@@ -54,12 +54,12 @@ under the License.
 </script>
 <br />
 <#macro paginationControls>
-    <#assign viewIndexMax = Static["java.lang.Math"].ceil((listSize)?double / viewSize?double)>
-      <#if (viewIndexMax?int >= 1)>
-        <div class="product-prevnext">
-            <#-- Start Page Select Drop-Down -->
-            <select name="pageSelect" onchange="callDocumentByPaginate(this[this.selectedIndex].value);">
-                <option value="#">${uiLabelMap.CommonPage} ${viewIndex?int} ${uiLabelMap.CommonOf} ${viewIndexMax}</option>
+  <#assign viewIndexMax = Static["java.lang.Math"].ceil((listSize)?double / viewSize?double)>
+  <#if (viewIndexMax?int > 0)>
+    <div class="product-prevnext">
+        <#-- Start Page Select Drop-Down -->
+        <select name="pageSelect" onchange="callDocumentByPaginate(this[this.selectedIndex].value);">
+            <option value="#">${uiLabelMap.CommonPage} ${viewIndex?int} ${uiLabelMap.CommonOf} ${viewIndexMax}</option>
                 <#if (viewIndex?int > 1)>
                     <#list 0..viewIndexMax as curViewNum>
                          <option value="${shoppingListId?if_exists}~${viewSize}~${curViewNum?int + 1}">${uiLabelMap.CommonGotoPage} ${curViewNum + 1}</option>
