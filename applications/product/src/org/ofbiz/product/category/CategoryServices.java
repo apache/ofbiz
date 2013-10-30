@@ -31,7 +31,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import javolution.util.FastList;
 import javolution.util.FastMap;
-
 import net.sf.json.JSONObject;
 
 import org.ofbiz.base.util.Debug;
@@ -500,7 +499,7 @@ public class CategoryServices {
                 }
             }
         } catch (GenericEntityException e) {
-            e.printStackTrace();
+            Debug.logWarning(e, module);
         }
     }
 

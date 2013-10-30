@@ -120,7 +120,7 @@ public class SeoConfigUtil {
                 regexpIfMatch = perlCompiler.compile(regexIfMatch,
                         Perl5Compiler.DEFAULT_MASK);
             } catch (MalformedPatternException e1) {
-                // do nothing
+                Debug.logWarning(e1, module);
             }
             debug = Boolean.parseBoolean(UtilXml.childElementValue(
                     rootElement, ELEMENT_DEBUG, "false"));
@@ -160,7 +160,7 @@ public class SeoConfigUtil {
                                                 urlpattern, Perl5Compiler.DEFAULT_MASK);
                                         userExceptionPatterns.add(pattern);
                                     } catch (MalformedPatternException e) {
-                                        // skip this url replacement if any error happened
+                                        Debug.logWarning(e, "skip this url replacement if any error happened", module);
                                     }
                                 }
                             }
@@ -168,7 +168,7 @@ public class SeoConfigUtil {
                     }
                 }
             } catch (NullPointerException e) {
-                // no "jsessionid" element
+                Debug.logWarning(e, "no \"jsessionid\" element", module);
             }
             
             // parse name-filters elements
@@ -189,12 +189,12 @@ public class SeoConfigUtil {
                             nameFilters.put(charaterPattern,
                                     replacement);
                         } catch (MalformedPatternException e) {
-                            // skip this filter (character-pattern replacement) if any error happened
+                            Debug.logWarning(e, "skip this filter (character-pattern replacement) if any error happened", module);
                         }
                     }
                 }
             } catch (NullPointerException e) {
-                // no "name-filters" element
+                Debug.logWarning(e, "no \"name-filters\" element", module);
             }
 
             // parse config elements
@@ -217,7 +217,7 @@ public class SeoConfigUtil {
                                     replacement);
                             seoPatterns.put(urlpattern, pattern);
                         } catch (MalformedPatternException e) {
-                            // skip this url replacement if any error happened
+                            Debug.logWarning(e, "skip this url replacement if any error happened", module);
                         }
                     }
                 }
@@ -246,18 +246,18 @@ public class SeoConfigUtil {
                                 try {
                                     responseCodeInt = Integer.valueOf(responseCode);
                                 } catch (NumberFormatException nfe) {
-                                    // do nothing
+                                    Debug.logWarning(nfe, module);
                                 }
                                 forwardResponseCodes.put(urlpattern, responseCodeInt);
                             }
                         } catch (MalformedPatternException e) {
-                            // skip this url replacement if any error happened
+                            Debug.logWarning(e, "skip this url replacement if any error happened", module);
                         }
                     }
                 }
 
             } catch (NullPointerException e) {
-                // no "config" element
+                Debug.logWarning(e, "no \"config\" element", module);
             }
         } catch (SAXException e) {
             result = "error";

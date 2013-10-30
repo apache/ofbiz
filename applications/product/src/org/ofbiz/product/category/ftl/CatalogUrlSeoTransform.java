@@ -81,7 +81,7 @@ public class CatalogUrlSeoTransform implements TemplateTransformModel {
         try {
             m_asciiPattern = m_perlCompiler.compile(m_asciiRegexp, Perl5Compiler.DEFAULT_MASK);
         } catch (MalformedPatternException e1) {
-            // do nothing
+            Debug.logWarning(e1, module);
         }
     }
     
