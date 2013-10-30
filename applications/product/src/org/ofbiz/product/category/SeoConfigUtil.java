@@ -56,7 +56,6 @@ public class SeoConfigUtil {
     private static boolean categoryUrlEnabled = true;
     private static boolean categoryNameEnabled = false;
     private static String categoryUrlSuffix = null;
-    public static final String DEFAULT_REGEXP = "^.*/.*$";
     private static Pattern regexpIfMatch = null;
     private static boolean useUrlRegexp = false;
     private static boolean jSessionIdAnonEnabled = false;
@@ -70,6 +69,7 @@ public class SeoConfigUtil {
     private static List<Pattern> userExceptionPatterns = null;
     private static Set<String> allowedContextPaths = null;
     private static Map<String, String> specialProductIds = null;
+    public static final String DEFAULT_REGEXP = "^.*/.*$";
     public static final String ELEMENT_REGEXPIFMATCH = "regexpifmatch";
     public static final String ELEMENT_DEBUG = "debug";
     public static final String ELEMENT_CONFIG = "config";
@@ -114,21 +114,17 @@ public class SeoConfigUtil {
             Document configDoc = UtilXml.readXmlDocument(UtilURL.fromResource(SEO_CONFIG_FILENAME), false);
             Element rootElement = configDoc.getDocumentElement();
 
-            String regexIfMatch = UtilXml.childElementValue(rootElement,
-                    ELEMENT_REGEXPIFMATCH, DEFAULT_REGEXP);
+            String regexIfMatch = UtilXml.childElementValue(rootElement, ELEMENT_REGEXPIFMATCH, DEFAULT_REGEXP);
             try {
-                regexpIfMatch = perlCompiler.compile(regexIfMatch,
-                        Perl5Compiler.DEFAULT_MASK);
+                regexpIfMatch = perlCompiler.compile(regexIfMatch, Perl5Compiler.DEFAULT_MASK);
             } catch (MalformedPatternException e1) {
                 Debug.logWarning(e1, module);
             }
-            debug = Boolean.parseBoolean(UtilXml.childElementValue(
-                    rootElement, ELEMENT_DEBUG, "false"));
+            debug = Boolean.parseBoolean(UtilXml.childElementValue(rootElement, ELEMENT_DEBUG, "false"));
 
             // parse jsessionid element
             try {
-                Element jSessionId = UtilXml.firstChildElement(rootElement,
-                        ELEMENT_JSESSIONID);
+                Element jSessionId = UtilXml.firstChildElement(rootElement, ELEMENT_JSESSIONID);
                 if (jSessionId != null) {
                     Element anonymous = UtilXml.firstChildElement(jSessionId, ELEMENT_ANONYMOUS);
                     if (anonymous != null) {
@@ -156,8 +152,7 @@ public class SeoConfigUtil {
                                 String urlpattern = element.getTextContent();
                                 if (UtilValidate.isNotEmpty(urlpattern)) {
                                     try {
-                                        Pattern pattern = perlCompiler.compile(
-                                                urlpattern, Perl5Compiler.DEFAULT_MASK);
+                                        Pattern pattern = perlCompiler.compile(urlpattern, Perl5Compiler.DEFAULT_MASK);
                                         userExceptionPatterns.add(pattern);
                                     } catch (MalformedPatternException e) {
                                         Debug.logWarning(e, "skip this url replacement if any error happened", module);
@@ -173,21 +168,15 @@ public class SeoConfigUtil {
             
             // parse name-filters elements
             try {
-                NodeList nameFilterNodes = rootElement
-                        .getElementsByTagName(ELEMENT_FILTER);
+                NodeList nameFilterNodes = rootElement.getElementsByTagName(ELEMENT_FILTER);
                 for (int i = 0; i < nameFilterNodes.getLength(); i++) {
                     Element element = (Element) nameFilterNodes.item(i);
-                    String charaterPattern = UtilXml.childElementValue(element,
-                            ELEMENT_CHARACTER_PATTERN, null);
-                    String replacement = UtilXml.childElementValue(element,
-                            ELEMENT_REPLACEMENT, null);
-                    if (UtilValidate.isNotEmpty(charaterPattern)
-                            && UtilValidate.isNotEmpty(replacement)) {
+                    String charaterPattern = UtilXml.childElementValue(element, ELEMENT_CHARACTER_PATTERN, null);
+                    String replacement = UtilXml.childElementValue(element, ELEMENT_REPLACEMENT, null);
+                    if (UtilValidate.isNotEmpty(charaterPattern) && UtilValidate.isNotEmpty(replacement)) {
                         try {
-                            perlCompiler.compile(
-                                    charaterPattern, Perl5Compiler.DEFAULT_MASK);
-                            nameFilters.put(charaterPattern,
-                                    replacement);
+                            perlCompiler.compile(charaterPattern, Perl5Compiler.DEFAULT_MASK);
+                            nameFilters.put(charaterPattern,replacement);
                         } catch (MalformedPatternException e) {
                             Debug.logWarning(e, "skip this filter (character-pattern replacement) if any error happened", module);
                         }
@@ -200,21 +189,15 @@ public class SeoConfigUtil {
             // parse config elements
             try {
                 // construct seo patterns
-                NodeList seos = rootElement
-                        .getElementsByTagName(ELEMENT_SEO);
+                NodeList seos = rootElement.getElementsByTagName(ELEMENT_SEO);
                 for (int i = 0; i < seos.getLength(); i++) {
                     Element element = (Element) seos.item(i);
-                    String urlpattern = UtilXml.childElementValue(element,
-                            ELEMENT_URLPATTERN, null);
-                    String replacement = UtilXml.childElementValue(element,
-                            ELEMENT_REPLACEMENT, null);
-                    if (UtilValidate.isNotEmpty(urlpattern)
-                            && UtilValidate.isNotEmpty(replacement)) {
+                    String urlpattern = UtilXml.childElementValue(element, ELEMENT_URLPATTERN, null);
+                    String replacement = UtilXml.childElementValue(element, ELEMENT_REPLACEMENT, null);
+                    if (UtilValidate.isNotEmpty(urlpattern) && UtilValidate.isNotEmpty(replacement)) {
                         try {
-                            Pattern pattern = perlCompiler.compile(
-                                    urlpattern, Perl5Compiler.DEFAULT_MASK);
-                            seoReplacements.put(urlpattern,
-                                    replacement);
+                            Pattern pattern = perlCompiler.compile(urlpattern, Perl5Compiler.DEFAULT_MASK);
+                            seoReplacements.put(urlpattern, replacement);
                             seoPatterns.put(urlpattern, pattern);
                         } catch (MalformedPatternException e) {
                             Debug.logWarning(e, "skip this url replacement if any error happened", module);
@@ -223,23 +206,16 @@ public class SeoConfigUtil {
                 }
 
                 // construct forward patterns
-                NodeList forwards = rootElement
-                        .getElementsByTagName(ELEMENT_FORWARD);
+                NodeList forwards = rootElement.getElementsByTagName(ELEMENT_FORWARD);
                 for (int i = 0; i < forwards.getLength(); i++) {
                     Element element = (Element) forwards.item(i);
-                    String urlpattern = UtilXml.childElementValue(element,
-                            ELEMENT_URLPATTERN, null);
-                    String replacement = UtilXml.childElementValue(element,
-                            ELEMENT_REPLACEMENT, null);
-                    String responseCode = UtilXml.childElementValue(element,
-                            ELEMENT_RESPONSECODE, String.valueOf(DEFAULT_RESPONSECODE));
-                    if (UtilValidate.isNotEmpty(urlpattern)
-                            && UtilValidate.isNotEmpty(replacement)) {
+                    String urlpattern = UtilXml.childElementValue(element, ELEMENT_URLPATTERN, null);
+                    String replacement = UtilXml.childElementValue(element, ELEMENT_REPLACEMENT, null);
+                    String responseCode = UtilXml.childElementValue(element, ELEMENT_RESPONSECODE, String.valueOf(DEFAULT_RESPONSECODE));
+                    if (UtilValidate.isNotEmpty(urlpattern) && UtilValidate.isNotEmpty(replacement)) {
                         try {
-                            Pattern pattern = perlCompiler.compile(
-                                    urlpattern, Perl5Compiler.DEFAULT_MASK);
-                            forwardReplacements.put(urlpattern,
-                                    replacement);
+                            Pattern pattern = perlCompiler.compile(urlpattern, Perl5Compiler.DEFAULT_MASK);
+                            forwardReplacements.put(urlpattern, replacement);
                             forwardPatterns.put(urlpattern, pattern);
                             if (UtilValidate.isNotEmpty(responseCode)) {
                                 Integer responseCodeInt = DEFAULT_RESPONSECODE;

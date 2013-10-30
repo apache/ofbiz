@@ -232,7 +232,6 @@ public class UrlRegexpConfigUtil {
                             m_nameFilters.put(charaterPattern, replacement);
                         } catch (MalformedPatternException e) {
                             Debug.logWarning(e, "skip this filter (character-pattern replacement) if any error happened", module);
-                            
                         }
                     }
                 }
