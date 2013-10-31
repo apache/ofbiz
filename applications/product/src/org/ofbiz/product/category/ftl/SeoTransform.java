@@ -174,8 +174,8 @@ public class SeoTransform implements TemplateTransformModel {
                     break;
                 }
             }
-            if (!foundMatch && SeoConfigUtil.isDebugEnabled()) {
-                Debug.logInfo("Can NOT find a seo transform pattern for this url: " + url, module);
+            if (!foundMatch) {
+                Debug.logVerbose("Can NOT find a seo transform pattern for this url: " + url, module);
             }
         }
         return url;

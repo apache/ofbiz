@@ -32,7 +32,7 @@ import org.apache.oro.text.regex.Pattern;
 import org.apache.oro.text.regex.Perl5Matcher;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.entity.GenericValue;
-import org.ofbiz.product.category.UrlRegexpConfigUtil;
+import org.ofbiz.product.category.SeoConfigUtil;
 import org.ofbiz.webapp.control.RequestHandler;
 
 import freemarker.core.Environment;
@@ -137,24 +137,24 @@ public class UrlRegexpTransform implements TemplateTransformModel {
      */
     public static String seoUrl(String url, boolean isAnon) {
         Perl5Matcher matcher = new Perl5Matcher();
-        if (UrlRegexpConfigUtil.checkUseUrlRegexp() && matcher.matches(url, UrlRegexpConfigUtil.getGeneralRegexpPattern())) {
-            Iterator<String> keys = UrlRegexpConfigUtil.getSeoPatterns().keySet().iterator();
+        if (SeoConfigUtil.checkUseUrlRegexp() && matcher.matches(url, SeoConfigUtil.getGeneralRegexpPattern())) {
+            Iterator<String> keys = SeoConfigUtil.getSeoPatterns().keySet().iterator();
             boolean foundMatch = false;
             while (keys.hasNext()) {
                 String key = keys.next();
-                Pattern pattern = UrlRegexpConfigUtil.getSeoPatterns().get(key);
+                Pattern pattern = SeoConfigUtil.getSeoPatterns().get(key);
                 if (pattern.getPattern().contains(";jsessionid=")) {
                     if (isAnon) {
-                        if (UrlRegexpConfigUtil.isJSessionIdAnonEnabled()) {
+                        if (SeoConfigUtil.isJSessionIdAnonEnabled()) {
                             continue;
                         }
                     } else {
-                        if (UrlRegexpConfigUtil.isJSessionIdUserEnabled()) {
+                        if (SeoConfigUtil.isJSessionIdUserEnabled()) {
                             continue;
                         } else {
                             boolean foundException = false;
-                            for (int i = 0; i < UrlRegexpConfigUtil.getUserExceptionPatterns().size(); i++) {
-                                if (matcher.matches(url, UrlRegexpConfigUtil.getUserExceptionPatterns().get(i))) {
+                            for (int i = 0; i < SeoConfigUtil.getUserExceptionPatterns().size(); i++) {
+                                if (matcher.matches(url, SeoConfigUtil.getUserExceptionPatterns().get(i))) {
                                     foundException = true;
                                     break;
                                 }
@@ -165,7 +165,7 @@ public class UrlRegexpTransform implements TemplateTransformModel {
                         }
                     }
                 }
-                String replacement = UrlRegexpConfigUtil.getSeoReplacements().get(key);
+                String replacement = SeoConfigUtil.getSeoReplacements().get(key);
                 if (matcher.matches(url, pattern)) {
                     for (int i = 1; i < matcher.getMatch().groups(); i++) {
                         replacement = replacement.replaceAll("\\$" + i, matcher.getMatch().group(i));
@@ -176,15 +176,15 @@ public class UrlRegexpTransform implements TemplateTransformModel {
                     break;
                 }
             }
-            if (!foundMatch && UrlRegexpConfigUtil.isDebugEnabled()) {
-                Debug.logInfo("Can NOT find a seo transform pattern for this url: " + url, module);
+            if (!foundMatch) {
+                Debug.logVerbose("Can NOT find a seo transform pattern for this url: " + url, module);
             }
         }
         return url;
     }
 
     static {
-        UrlRegexpConfigUtil.init();
+        SeoConfigUtil.init();
     }
 
     /**
@@ -198,19 +198,19 @@ public class UrlRegexpTransform implements TemplateTransformModel {
         Perl5Matcher matcher = new Perl5Matcher();
         boolean foundMatch = false;
         Integer responseCodeInt = null;
-        if (UrlRegexpConfigUtil.checkUseUrlRegexp() && UrlRegexpConfigUtil.getForwardPatterns() != null && UrlRegexpConfigUtil.getForwardReplacements() != null) {
-            Iterator<String> keys = UrlRegexpConfigUtil.getForwardPatterns().keySet().iterator();
+        if (SeoConfigUtil.checkUseUrlRegexp() && SeoConfigUtil.getSeoPatterns() != null && SeoConfigUtil.getForwardReplacements() != null) {
+            Iterator<String> keys = SeoConfigUtil.getSeoPatterns().keySet().iterator();
             while (keys.hasNext()) {
                 String key = keys.next();
-                Pattern pattern = UrlRegexpConfigUtil.getForwardPatterns().get(key);
-                String replacement = UrlRegexpConfigUtil.getForwardReplacements().get(key);
+                Pattern pattern = SeoConfigUtil.getSeoPatterns().get(key);
+                String replacement = SeoConfigUtil.getForwardReplacements().get(key);
                 if (matcher.matches(uri, pattern)) {
                     for (int i = 1; i < matcher.getMatch().groups(); i++) {
                         replacement = replacement.replaceAll("\\$" + i, matcher.getMatch().group(i));
                     }
                     // break if found any matcher
                     uri = replacement;
-                    responseCodeInt = UrlRegexpConfigUtil.getForwardResponseCodes().get(key);
+                    responseCodeInt = SeoConfigUtil.getForwardResponseCodes().get(key);
                     foundMatch = true;
                     break;
                 }
@@ -218,12 +218,12 @@ public class UrlRegexpTransform implements TemplateTransformModel {
         }
         if (foundMatch) {
             if (responseCodeInt == null) {
-                response.setStatus(UrlRegexpConfigUtil.DEFAULT_RESPONSECODE);
+                response.setStatus(SeoConfigUtil.DEFAULT_RESPONSECODE);
             } else {
                 response.setStatus(responseCodeInt.intValue());
             }
             response.setHeader("Location", uri);
-        } else if (UrlRegexpConfigUtil.isDebugEnabled()) {
+        } else {
             Debug.logInfo("Can NOT forward this url: " + uri, module);
         }
         return foundMatch;

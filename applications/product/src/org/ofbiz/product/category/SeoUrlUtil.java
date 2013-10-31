@@ -25,8 +25,8 @@ public class SeoUrlUtil {
         if (UtilValidate.isEmpty(url)) {
             url = "";
         }
-        for (String characterPattern : SeoConfigUtil.getNameFilters().keySet()) {
-            url = url.replaceAll(characterPattern, SeoConfigUtil.getNameFilters().get(characterPattern));
+        for (String characterPattern : SeoConfigUtil.getCharFilters().keySet()) {
+            url = url.replaceAll(characterPattern, SeoConfigUtil.getCharFilters().get(characterPattern));
         }
         return url;
     }

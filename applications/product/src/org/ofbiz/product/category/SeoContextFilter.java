@@ -337,11 +337,11 @@ public class SeoContextFilter extends ContextFilter {
         boolean foundMatch = false;
         Integer responseCodeInt = null;
 
-        if (SeoConfigUtil.checkUseUrlRegexp() && SeoConfigUtil.getForwardPatterns() != null && SeoConfigUtil.getForwardReplacements() != null) {
-            Iterator<String> keys = SeoConfigUtil.getForwardPatterns().keySet().iterator();
+        if (SeoConfigUtil.checkUseUrlRegexp() && SeoConfigUtil.getSeoPatterns() != null && SeoConfigUtil.getForwardReplacements() != null) {
+            Iterator<String> keys = SeoConfigUtil.getSeoPatterns().keySet().iterator();
             while (keys.hasNext()) {
                 String key = keys.next();
-                Pattern pattern = SeoConfigUtil.getForwardPatterns().get(key);
+                Pattern pattern = SeoConfigUtil.getSeoPatterns().get(key);
                 String replacement = SeoConfigUtil.getForwardReplacements().get(key);
                 if (matcher.matches(uri, pattern)) {
                     for (int i = matcher.getMatch().groups(); i > 0; i--) {
@@ -362,7 +362,7 @@ public class SeoContextFilter extends ContextFilter {
                 response.setStatus(responseCodeInt.intValue());
             }
             response.setHeader("Location", uri);
-        } else if (SeoConfigUtil.isDebugEnabled()) {
+        } else {
             Debug.logInfo("Can NOT forward this url: " + uri, module);
         }
         return foundMatch;

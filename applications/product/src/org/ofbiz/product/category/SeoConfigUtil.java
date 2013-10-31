@@ -20,6 +20,7 @@ package org.ofbiz.product.category;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -30,11 +31,13 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import javolution.util.FastList;
 import javolution.util.FastMap;
+import javolution.util.FastSet;
 
 import org.apache.oro.text.regex.MalformedPatternException;
 import org.apache.oro.text.regex.Pattern;
 import org.apache.oro.text.regex.Perl5Compiler;
 import org.ofbiz.base.util.Debug;
+import org.ofbiz.base.util.StringUtil;
 import org.ofbiz.base.util.UtilURL;
 import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.base.util.UtilXml;
@@ -48,14 +51,13 @@ import org.xml.sax.SAXException;
  * 
  */
 public class SeoConfigUtil {
-
     private static final String module = SeoConfigUtil.class.getName();
     private static Perl5Compiler perlCompiler = new Perl5Compiler();
     private static boolean isInitialed = false;
-    private static boolean debug = false;
     private static boolean categoryUrlEnabled = true;
     private static boolean categoryNameEnabled = false;
     private static String categoryUrlSuffix = null;
+    public static final String DEFAULT_REGEXP = "^.*/.*$";
     private static Pattern regexpIfMatch = null;
     private static boolean useUrlRegexp = false;
     private static boolean jSessionIdAnonEnabled = false;
@@ -63,16 +65,13 @@ public class SeoConfigUtil {
     private static Map<String, String> seoReplacements = null;
     private static Map<String, Pattern> seoPatterns = null;
     private static Map<String, String> forwardReplacements = null;
-    private static Map<String, Pattern> forwardPatterns = null;
     private static Map<String, Integer> forwardResponseCodes = null;
-    private static Map<String, String> nameFilters = null;
+    private static Map<String, String> charFilters = null;
     private static List<Pattern> userExceptionPatterns = null;
     private static Set<String> allowedContextPaths = null;
     private static Map<String, String> specialProductIds = null;
-    public static final String DEFAULT_REGEXP = "^.*/.*$";
     public static final String ELEMENT_REGEXPIFMATCH = "regexpifmatch";
-    public static final String ELEMENT_DEBUG = "debug";
-    public static final String ELEMENT_CONFIG = "config";
+    public static final String ELEMENT_URL_CONFIG = "url-config";
     public static final String ELEMENT_DESCRIPTION = "description";
     public static final String ELEMENT_FORWARD = "forward";
     public static final String ELEMENT_SEO = "seo";
@@ -84,9 +83,13 @@ public class SeoConfigUtil {
     public static final String ELEMENT_VALUE = "value";
     public static final String ELEMENT_USER = "user";
     public static final String ELEMENT_EXCEPTIONS = "exceptions";
-    public static final String ELEMENT_NAME_FILTERS = "name-filters";
-    public static final String ELEMENT_FILTER = "filter";
+    public static final String ELEMENT_CHAR_FILTERS = "char-filters";
+    public static final String ELEMENT_CHAR_FILTER = "char-filter";
     public static final String ELEMENT_CHARACTER_PATTERN = "character-pattern";
+    public static final String ELEMENT_CATEGORY_URL = "category-url";
+    public static final String ELEMENT_ALLOWED_CONTEXT_PATHS = "allowed-context-paths";
+    public static final String ELEMENT_CATEGORY_NAME = "category-name";
+    public static final String ELEMENT_CATEGORY_URL_SUFFIX = "category-url-suffix";
     public static final String SEO_CONFIG_FILENAME = "SeoConfig.xml";
     public static final int DEFAULT_RESPONSECODE = HttpServletResponse.SC_MOVED_PERMANENTLY;
     public static final String DEFAULT_ANONYMOUS_VALUE = "disable";
@@ -94,6 +97,7 @@ public class SeoConfigUtil {
     public static final String DEFAULT_CATEGORY_URL_VALUE = "enable";
     public static final String DEFAULT_CATEGORY_NAME_VALUE = "disable";
     public static final String ALLOWED_CONTEXT_PATHS_SEPERATOR = ":";
+
     /**
      * Initialize url regular express configuration.
      * 
@@ -105,26 +109,78 @@ public class SeoConfigUtil {
         seoPatterns = new HashMap<String, Pattern>();
         seoReplacements = new HashMap<String, String>();
         forwardReplacements = new HashMap<String, String>();
-        forwardPatterns = new HashMap<String, Pattern>();
         forwardResponseCodes = new HashMap<String, Integer>();
         userExceptionPatterns = FastList.newInstance();
         specialProductIds = FastMap.newInstance();
-        nameFilters = FastMap.newInstance();
+        charFilters = FastMap.newInstance();
         try {
-            Document configDoc = UtilXml.readXmlDocument(UtilURL.fromResource(SEO_CONFIG_FILENAME), false);
+            URL seoConfigFilename = UtilURL.fromResource(SEO_CONFIG_FILENAME);
+            Document configDoc = UtilXml.readXmlDocument(seoConfigFilename, false);
             Element rootElement = configDoc.getDocumentElement();
 
             String regexIfMatch = UtilXml.childElementValue(rootElement, ELEMENT_REGEXPIFMATCH, DEFAULT_REGEXP);
+            Debug.logInfo("Parsing " + regexIfMatch, module);
             try {
-                regexpIfMatch = perlCompiler.compile(regexIfMatch, Perl5Compiler.DEFAULT_MASK);
+                regexpIfMatch = perlCompiler.compile(regexIfMatch, Perl5Compiler.READ_ONLY_MASK);
             } catch (MalformedPatternException e1) {
-                Debug.logWarning(e1, module);
+                Debug.logWarning(e1, "Error while parsing " + regexIfMatch, module);
             }
-            debug = Boolean.parseBoolean(UtilXml.childElementValue(rootElement, ELEMENT_DEBUG, "false"));
+
+            // parse category-url element
+            try {
+                Element categoryUrlElement = UtilXml.firstChildElement(rootElement, ELEMENT_CATEGORY_URL);
+                Debug.logInfo("Parsing " + ELEMENT_CATEGORY_URL + " [" + (categoryUrlElement != null) + "]:", module);
+                if (categoryUrlElement != null) {
+                    String enableCategoryUrlValue = UtilXml.childElementValue(categoryUrlElement, ELEMENT_VALUE, DEFAULT_CATEGORY_URL_VALUE);
+                    if (DEFAULT_CATEGORY_URL_VALUE.equalsIgnoreCase(enableCategoryUrlValue)) {
+                        categoryUrlEnabled = true;
+                    } else {
+                        categoryUrlEnabled = false;
+                    }
+                    
+                    if (categoryUrlEnabled) {
+                        String allowedContextValue = UtilXml.childElementValue(categoryUrlElement, ELEMENT_ALLOWED_CONTEXT_PATHS, null);
+                        allowedContextPaths = FastSet.newInstance();
+                        if (UtilValidate.isNotEmpty(allowedContextValue)) {
+                            List<String> allowedContextPathList = StringUtil.split(allowedContextValue, ALLOWED_CONTEXT_PATHS_SEPERATOR);
+                            for (String path : allowedContextPathList) {
+                                if (UtilValidate.isNotEmpty(path)) {
+                                    path = path.trim();
+                                    if (!allowedContextPaths.contains(path)) {
+                                        allowedContextPaths.add(path);
+                                        Debug.logInfo("  " + ELEMENT_ALLOWED_CONTEXT_PATHS + ": " + path, module);
+                                    }
+                                }
+                            }
+                        }
+                        
+                        String categoryNameValue = UtilXml.childElementValue(categoryUrlElement, ELEMENT_CATEGORY_NAME, DEFAULT_CATEGORY_NAME_VALUE);
+                        if (DEFAULT_CATEGORY_NAME_VALUE.equalsIgnoreCase(categoryNameValue)) {
+                            categoryNameEnabled = false;
+                        } else {
+                            categoryNameEnabled = true;
+                        }
+                        Debug.logInfo("  " + ELEMENT_CATEGORY_NAME + ": " + categoryNameEnabled, module);
+
+                        categoryUrlSuffix = UtilXml.childElementValue(categoryUrlElement, ELEMENT_CATEGORY_URL_SUFFIX, null);
+                        if (UtilValidate.isNotEmpty(categoryUrlSuffix)) {
+                            categoryUrlSuffix = categoryUrlSuffix.trim();
+                            if (categoryUrlSuffix.contains("/")) {
+                                categoryUrlSuffix = null;
+                            }
+                        }
+                        Debug.logInfo("  " + ELEMENT_CATEGORY_URL_SUFFIX + ": " + categoryUrlSuffix, module);
+                    }
+                }
+            } catch (NullPointerException e) {
+                // no "category-url" element
+                Debug.logWarning("No category-url element found in " + seoConfigFilename.toString(), module);
+            }
 
             // parse jsessionid element
             try {
                 Element jSessionId = UtilXml.firstChildElement(rootElement, ELEMENT_JSESSIONID);
+                Debug.logInfo("Parsing " + ELEMENT_JSESSIONID + " [" + (jSessionId != null) + "]:", module);
                 if (jSessionId != null) {
                     Element anonymous = UtilXml.firstChildElement(jSessionId, ELEMENT_ANONYMOUS);
                     if (anonymous != null) {
@@ -134,7 +190,10 @@ public class SeoConfigUtil {
                         } else {
                             jSessionIdAnonEnabled = true;
                         }
+                    } else {
+                        jSessionIdAnonEnabled = Boolean.valueOf(DEFAULT_ANONYMOUS_VALUE).booleanValue();
                     }
+                    Debug.logInfo("  " + ELEMENT_ANONYMOUS + ": " + jSessionIdAnonEnabled, module);
                     
                     Element user = UtilXml.firstChildElement(jSessionId, ELEMENT_USER);
                     if (user != null) {
@@ -144,96 +203,116 @@ public class SeoConfigUtil {
                         } else {
                             jSessionIdUserEnabled = true;
                         }
+
                         Element exceptions = UtilXml.firstChildElement(user, ELEMENT_EXCEPTIONS);
                         if (exceptions != null) {
+                            Debug.logInfo("  " + ELEMENT_EXCEPTIONS + ": ", module);
                             List<? extends Element> exceptionUrlPatterns = UtilXml.childElementList(exceptions, ELEMENT_URLPATTERN);
                             for (int i = 0; i < exceptionUrlPatterns.size(); i++) {
                                 Element element = (Element) exceptionUrlPatterns.get(i);
                                 String urlpattern = element.getTextContent();
                                 if (UtilValidate.isNotEmpty(urlpattern)) {
                                     try {
-                                        Pattern pattern = perlCompiler.compile(urlpattern, Perl5Compiler.DEFAULT_MASK);
+                                        Pattern pattern = perlCompiler.compile(urlpattern, Perl5Compiler.READ_ONLY_MASK);
                                         userExceptionPatterns.add(pattern);
+                                        Debug.logInfo("    " + ELEMENT_URLPATTERN + ": " + urlpattern, module);
                                     } catch (MalformedPatternException e) {
-                                        Debug.logWarning(e, "skip this url replacement if any error happened", module);
+                                        Debug.logWarning("Can NOT parse " + urlpattern + " in element " + ELEMENT_URLPATTERN + " of " + ELEMENT_EXCEPTIONS + ". Error: " + e.getMessage(), module);
                                     }
                                 }
                             }
                         }
+                    } else {
+                        jSessionIdUserEnabled = Boolean.valueOf(DEFAULT_USER_VALUE).booleanValue();
                     }
+                    Debug.logInfo("  " + ELEMENT_USER + ": " + jSessionIdUserEnabled, module);
                 }
             } catch (NullPointerException e) {
-                Debug.logWarning(e, "no \"jsessionid\" element", module);
+                Debug.logWarning("No jsessionid element found in " + seoConfigFilename.toString(), module);
             }
             
-            // parse name-filters elements
+            // parse url-config elements
             try {
-                NodeList nameFilterNodes = rootElement.getElementsByTagName(ELEMENT_FILTER);
-                for (int i = 0; i < nameFilterNodes.getLength(); i++) {
-                    Element element = (Element) nameFilterNodes.item(i);
-                    String charaterPattern = UtilXml.childElementValue(element, ELEMENT_CHARACTER_PATTERN, null);
-                    String replacement = UtilXml.childElementValue(element, ELEMENT_REPLACEMENT, null);
-                    if (UtilValidate.isNotEmpty(charaterPattern) && UtilValidate.isNotEmpty(replacement)) {
-                        try {
-                            perlCompiler.compile(charaterPattern, Perl5Compiler.DEFAULT_MASK);
-                            nameFilters.put(charaterPattern,replacement);
-                        } catch (MalformedPatternException e) {
-                            Debug.logWarning(e, "skip this filter (character-pattern replacement) if any error happened", module);
-                        }
+                NodeList configs = rootElement.getElementsByTagName(ELEMENT_URL_CONFIG);
+                Debug.logInfo("Parsing " + ELEMENT_URL_CONFIG, module);
+                for (int j = 0; j < configs.getLength(); j++) {
+                    Element config = (Element) configs.item(j);
+                    String urlpattern = UtilXml.childElementValue(config, ELEMENT_URLPATTERN, null);
+                    if (UtilValidate.isEmpty(urlpattern)) {
+                        continue;
                     }
-                }
-            } catch (NullPointerException e) {
-                Debug.logWarning(e, "no \"name-filters\" element", module);
-            }
-
-            // parse config elements
-            try {
-                // construct seo patterns
-                NodeList seos = rootElement.getElementsByTagName(ELEMENT_SEO);
-                for (int i = 0; i < seos.getLength(); i++) {
-                    Element element = (Element) seos.item(i);
-                    String urlpattern = UtilXml.childElementValue(element, ELEMENT_URLPATTERN, null);
-                    String replacement = UtilXml.childElementValue(element, ELEMENT_REPLACEMENT, null);
-                    if (UtilValidate.isNotEmpty(urlpattern) && UtilValidate.isNotEmpty(replacement)) {
-                        try {
-                            Pattern pattern = perlCompiler.compile(urlpattern, Perl5Compiler.DEFAULT_MASK);
+                    Debug.logInfo("  " + ELEMENT_URLPATTERN + ": " + urlpattern, module);
+                    Pattern pattern;
+                    try {
+                        pattern = perlCompiler.compile(urlpattern, Perl5Compiler.READ_ONLY_MASK);
+                        seoPatterns.put(urlpattern, pattern);
+                    } catch (MalformedPatternException e) {
+                        Debug.logWarning("Error while creating parttern for seo url-pattern: " + urlpattern, module);
+                        continue;
+                    }
+                    
+                    // construct seo patterns
+                    Element seo = UtilXml.firstChildElement(config, ELEMENT_SEO);
+                    if (UtilValidate.isNotEmpty(seo)) {
+                        String replacement = UtilXml.childElementValue(seo, ELEMENT_REPLACEMENT, null);
+                        if (UtilValidate.isNotEmpty(replacement)) {
                             seoReplacements.put(urlpattern, replacement);
-                            seoPatterns.put(urlpattern, pattern);
-                        } catch (MalformedPatternException e) {
-                            Debug.logWarning(e, "skip this url replacement if any error happened", module);
+                            Debug.logInfo("    " + ELEMENT_SEO + " " + ELEMENT_REPLACEMENT + ": " + replacement, module);
                         }
                     }
-                }
 
-                // construct forward patterns
-                NodeList forwards = rootElement.getElementsByTagName(ELEMENT_FORWARD);
-                for (int i = 0; i < forwards.getLength(); i++) {
-                    Element element = (Element) forwards.item(i);
-                    String urlpattern = UtilXml.childElementValue(element, ELEMENT_URLPATTERN, null);
-                    String replacement = UtilXml.childElementValue(element, ELEMENT_REPLACEMENT, null);
-                    String responseCode = UtilXml.childElementValue(element, ELEMENT_RESPONSECODE, String.valueOf(DEFAULT_RESPONSECODE));
-                    if (UtilValidate.isNotEmpty(urlpattern) && UtilValidate.isNotEmpty(replacement)) {
-                        try {
-                            Pattern pattern = perlCompiler.compile(urlpattern, Perl5Compiler.DEFAULT_MASK);
+                    // construct forward patterns
+                    Element forward = UtilXml.firstChildElement(config, ELEMENT_FORWARD);
+                    if (UtilValidate.isNotEmpty(forward)) {
+                        String replacement = UtilXml.childElementValue(forward, ELEMENT_REPLACEMENT, null);
+                        String responseCode = UtilXml.childElementValue(forward,
+                                ELEMENT_RESPONSECODE, String.valueOf(DEFAULT_RESPONSECODE));
+                        if (UtilValidate.isNotEmpty(replacement)) {
                             forwardReplacements.put(urlpattern, replacement);
-                            forwardPatterns.put(urlpattern, pattern);
+                            Debug.logInfo("    " + ELEMENT_FORWARD + " " + ELEMENT_REPLACEMENT + ": " + replacement, module);
                             if (UtilValidate.isNotEmpty(responseCode)) {
                                 Integer responseCodeInt = DEFAULT_RESPONSECODE;
                                 try {
                                     responseCodeInt = Integer.valueOf(responseCode);
                                 } catch (NumberFormatException nfe) {
-                                    Debug.logWarning(nfe, module);
+                                    Debug.logWarning(nfe, "Error while parsing response code number: " + responseCode, module);
                                 }
                                 forwardResponseCodes.put(urlpattern, responseCodeInt);
+                                Debug.logInfo("    " + ELEMENT_FORWARD + " " + ELEMENT_RESPONSECODE + ": " + responseCodeInt, module);
                             }
-                        } catch (MalformedPatternException e) {
-                            Debug.logWarning(e, "skip this url replacement if any error happened", module);
                         }
                     }
                 }
-
             } catch (NullPointerException e) {
-                Debug.logWarning(e, "no \"config\" element", module);
+                // no "url-config" element
+                Debug.logWarning("No " + ELEMENT_URL_CONFIG + " element found in " + seoConfigFilename.toString(), module);
+            }
+
+            // parse char-filters elements
+            try {
+                NodeList nameFilterNodes = rootElement
+                        .getElementsByTagName(ELEMENT_CHAR_FILTER);
+                Debug.logInfo("Parsing " + ELEMENT_CHAR_FILTER + ": ", module);
+                for (int i = 0; i < nameFilterNodes.getLength(); i++) {
+                    Element element = (Element) nameFilterNodes.item(i);
+                    String charaterPattern = UtilXml.childElementValue(element, ELEMENT_CHARACTER_PATTERN, null);
+                    String replacement = UtilXml.childElementValue(element, ELEMENT_REPLACEMENT, null);
+                    if (UtilValidate.isNotEmpty(charaterPattern)
+                            && UtilValidate.isNotEmpty(replacement)) {
+                        try {
+                            perlCompiler.compile(charaterPattern, Perl5Compiler.READ_ONLY_MASK);
+                            charFilters.put(charaterPattern, replacement);
+                            Debug.logInfo("  " + ELEMENT_CHARACTER_PATTERN + ": " + charaterPattern, module);
+                            Debug.logInfo("  " + ELEMENT_REPLACEMENT + ": " + replacement, module);
+                        } catch (MalformedPatternException e) {
+                            // skip this filter (character-pattern replacement) if any error happened
+                            Debug.logWarning(e, "Error while parsing " + ELEMENT_CHARACTER_PATTERN + ": " + charaterPattern, module);
+                        }
+                    }
+                }
+            } catch (NullPointerException e) {
+                // no "char-filters" element
+                Debug.logWarning("No " + ELEMENT_CHAR_FILTER + " element found in " + seoConfigFilename.toString(), module);
             }
         } catch (SAXException e) {
             result = "error";
@@ -271,15 +350,6 @@ public class SeoConfigUtil {
      */
     public static boolean isInitialed() {
         return isInitialed;
-    }
-
-    /**
-     * Check whether debug is enabled.
-     * 
-     * @return a boolean value to indicate whether debug is enabled.
-     */
-    public static boolean isDebugEnabled() {
-        return debug;
     }
 
     /**
@@ -377,12 +447,12 @@ public class SeoConfigUtil {
     }
 
     /**
-     * Get name filters.
+     * Get char filters.
      * 
-     * @return name filters (java.util.Map<String, String>)
+     * @return char filters (java.util.Map<String, String>)
      */
-    public static Map<String, String> getNameFilters() {
-        return nameFilters;
+    public static Map<String, String> getCharFilters() {
+        return charFilters;
     }
 
     /**
@@ -401,15 +471,6 @@ public class SeoConfigUtil {
      */
     public static Map<String, String> getSeoReplacements() {
         return seoReplacements;
-    }
-
-    /**
-     * Get forward url pattern configures.
-     * 
-     * @return forward url pattern configures (java.util.Map<String, Pattern>)
-     */
-    public static Map<String, Pattern> getForwardPatterns() {
-        return forwardPatterns;
     }
 
     /**
@@ -470,5 +531,4 @@ public class SeoConfigUtil {
     public static String getSpecialProductId(String productId) {
         return specialProductIds.get(productId);
     }
-
 }
