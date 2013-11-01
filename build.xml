@@ -408,13 +408,11 @@ under the License.
     <!-- ================================================================== -->
 
     <target name="start"
-            description="Start OFBiz (use -Dportoffset=portNumber to shift all ports with the portNumber value)">
+            description="Start OFBiz">
         <java jar="ofbiz.jar" fork="true">
             <jvmarg value="${memory.initial.param}"/>
             <jvmarg value="${memory.max.param}"/>
             <jvmarg value="${memory.maxpermsize.param}"/>
-            <arg value="start"/>
-            <arg value="-portoffset=${portoffset}"/>
         </java>
     </target>
     <target name="start-batch"
@@ -438,23 +436,21 @@ under the License.
         </java>
     </target>
     <target name="start-pos"
-            description="Start OFBiz POS (Point of sale). Use -Dportoffset=portNumber to shift all ports with the portNumber value.">
+            description="Start OFBiz POS (Point of sale)">
         <java jar="ofbiz.jar" fork="true">
             <jvmarg value="${memory.initial.param}"/>
             <jvmarg value="${memory.max.param}"/>
             <jvmarg value="${memory.maxpermsize.param}"/>
             <arg value="pos"/>
-          <arg value="-portoffset=${portoffset}"/>
         </java>
     </target>
     <target name="start-both"
-            description="Start OFBiz in both Web and POS (Point of sale) modes. Use -Dportoffset=portNumber to shift all ports with the portNumber value.">
+            description="Start OFBiz in both Web and POS (Point of sale) modes">
         <java jar="ofbiz.jar" fork="true">
             <jvmarg value="${memory.initial.param}"/>
             <jvmarg value="${memory.max.param}"/>
             <jvmarg value="${memory.maxpermsize.param}"/>
             <arg value="both"/>
-            <arg value="-portoffset=${portoffset}"/>
         </java>
     </target>
     <target name="stop"
