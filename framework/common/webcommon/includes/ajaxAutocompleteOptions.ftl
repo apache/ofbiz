@@ -46,7 +46,7 @@ under the License.
                   <#if (key == context.returnField)>
                       <#assign returnField = field/>
                   <#else>
-                      <#assign displayString = displayString + field + " ">
+                      <#assign displayString = displayString + StringUtil.wrapString(field?string) + " ">
                   </#if>
               </#if>
             </#list>
