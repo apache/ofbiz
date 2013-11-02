@@ -1,8 +1,0 @@
-"Applied fix from trunk for revision: 1538096 " 
-------------------------------------------------------------------------
-r1538096 | jleroux | 2013-11-02 01:07:10 +0100 (sam. 02 nov. 2013) | 2 lignes
-
-Fixes a bug I found in CheckInits.groovy while trying to create an new order from Order View screen
-Fixes the same kind of bug in CheckoutOptions.groovy
-------------------------------------------------------------------------
-
