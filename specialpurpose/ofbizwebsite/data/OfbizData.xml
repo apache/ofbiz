@@ -32,9 +32,6 @@ under the License.
     <Content contentId="OFBIZ_FOOT" contentTypeId="DECORATOR" contentName="OFBiz footer" dataResourceId="OFBIZ_FOOT"/>
     <Content contentId="OFBIZ_HOME_EN" localeString="en" contentTypeId="DOCUMENT" decoratorContentId="OFBIZ_DEC" contentName="OFBiz home page" dataResourceId="OFBIZ_HOME_EN"/>
 
-    <WebSite webSiteId="OFBIZ" siteName="OFBiz Website"/>
-    <WebSiteContent webSiteId="OFBIZ" contentId="OFBIZ_POINT" webSiteContentTypeId="PUBLISH_POINT" fromDate="2009-04-27 13:33:05.29"/>
-    <WebSiteContent webSiteId="OFBIZ" contentId="OFBIZ_HOME" webSiteContentTypeId="DEFAULT_PAGE" fromDate="2001-01-01 00:00:00"/>
 
     <ContentPurpose contentId="OFBIZ_DEC" contentPurposeTypeId="SECTION"/>
     <ContentPurpose contentId="OFBIZ_HHEAD" contentPurposeTypeId="SECTION"/>
@@ -50,6 +47,7 @@ under the License.
     <!-- Website -->
     <WebSite webSiteId="OFBIZ" siteName="OFBiz Website"/>
     <WebSiteContent webSiteId="OFBIZ" contentId="OFBIZ_POINT" webSiteContentTypeId="PUBLISH_POINT" fromDate="2009-04-27 13:33:05.29"/>
+    <WebSiteContent webSiteId="OFBIZ" contentId="OFBIZ_HOME" webSiteContentTypeId="DEFAULT_PAGE" fromDate="2001-01-01 00:00:00"/>
     <WebSiteContent webSiteId="OFBIZ" contentId="OFBIZ_HOME_EN" webSiteContentTypeId="DEFAULT_PAGE" fromDate="2001-01-01 00:00:00"/>
 
     <!-- ElectronicText English -->
