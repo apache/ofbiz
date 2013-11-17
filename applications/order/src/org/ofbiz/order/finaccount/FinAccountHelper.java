@@ -135,7 +135,6 @@ public class FinAccountHelper {
       * @throws GenericEntityException
       */
      public static GenericValue getFinAccountFromCode(String finAccountCode, Delegator delegator) throws GenericEntityException {
-         // regex magic to turn all letters in code to uppercase and then remove all non-alphanumeric letters
          if (finAccountCode == null) {
              return null;
          }
