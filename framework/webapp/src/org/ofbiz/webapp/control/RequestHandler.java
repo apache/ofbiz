@@ -954,7 +954,7 @@ public class RequestHandler {
             Integer httpsPortValue = Integer.valueOf(httpsPort);
             httpsPortValue += ClassLoaderContainer.portOffset;
             httpsPort = httpsPortValue.toString();
-        }                
+        }
         
         StringBuilder newURL = new StringBuilder();
 
