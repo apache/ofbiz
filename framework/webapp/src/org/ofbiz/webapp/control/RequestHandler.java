@@ -57,7 +57,6 @@ import org.ofbiz.webapp.stats.ServerHitBin;
 import org.ofbiz.webapp.view.ViewFactory;
 import org.ofbiz.webapp.view.ViewHandler;
 import org.ofbiz.webapp.view.ViewHandlerException;
-import org.ofbiz.webapp.website.WebSiteProperties;
 import org.ofbiz.webapp.website.WebSiteWorker;
 import org.owasp.esapi.errors.EncodingException;
 
@@ -67,7 +66,7 @@ import org.owasp.esapi.errors.EncodingException;
 public class RequestHandler {
 
     public static final String module = RequestHandler.class.getName();
-    private boolean throwRequestHandlerExceptionOnMissingLocalRequest = UtilProperties.propertyValueEqualsIgnoreCase(
+    private final boolean throwRequestHandlerExceptionOnMissingLocalRequest = UtilProperties.propertyValueEqualsIgnoreCase(
             "requestHandler.properties", "throwRequestHandlerExceptionOnMissingLocalRequest", "Y");
     private String statusCodeString = UtilProperties.getPropertyValue("requestHandler.properties", "status-code", "302");
     public static RequestHandler getRequestHandler(ServletContext servletContext) {
