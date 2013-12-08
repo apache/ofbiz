@@ -36,6 +36,7 @@ import javax.servlet.http.HttpSession;
 
 import javolution.util.FastMap;
 
+import org.ofbiz.base.container.ClassLoaderContainer;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.SSLUtil;
 import org.ofbiz.base.util.StringUtil;
@@ -56,6 +57,7 @@ import org.ofbiz.webapp.stats.ServerHitBin;
 import org.ofbiz.webapp.view.ViewFactory;
 import org.ofbiz.webapp.view.ViewHandler;
 import org.ofbiz.webapp.view.ViewHandlerException;
+import org.ofbiz.webapp.website.WebSiteProperties;
 import org.ofbiz.webapp.website.WebSiteWorker;
 import org.owasp.esapi.errors.EncodingException;
 
@@ -945,6 +947,15 @@ public class RequestHandler {
         String httpServer = UtilProperties.getPropertyValue("url.properties", "force.http.host");
         boolean useHttps = UtilProperties.propertyValueEqualsIgnoreCase("url.properties", "port.https.enabled", "Y");
 
+        if (ClassLoaderContainer.portOffset != 0) {
+            Integer httpPortValue = Integer.valueOf(httpPort);
+            httpPortValue += ClassLoaderContainer.portOffset;
+            httpPort = httpPortValue.toString();
+            Integer httpsPortValue = Integer.valueOf(httpsPort);
+            httpsPortValue += ClassLoaderContainer.portOffset;
+            httpsPort = httpsPortValue.toString();
+        }                
+        
         StringBuilder newURL = new StringBuilder();
 
         if (secure && useHttps) {
