@@ -1097,6 +1097,15 @@ public class RequestHandler {
             enableHttps = UtilProperties.propertyValueEqualsIgnoreCase("url.properties", "port.https.enabled", "Y");
         }
 
+        if (ClassLoaderContainer.portOffset != 0) {
+            Integer httpPortValue = Integer.valueOf(httpPort);
+            httpPortValue += ClassLoaderContainer.portOffset;
+            httpPort = httpPortValue.toString();
+            Integer httpsPortValue = Integer.valueOf(httpsPort);
+            httpsPortValue += ClassLoaderContainer.portOffset;
+            httpsPort = httpsPortValue.toString();
+        }
+        
         // create the path the the control servlet
         String controlPath = (String) request.getAttribute("_CONTROL_PATH_");
 

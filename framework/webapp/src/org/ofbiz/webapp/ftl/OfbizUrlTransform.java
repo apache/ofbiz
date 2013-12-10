@@ -32,6 +32,7 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import org.ofbiz.base.component.ComponentConfig;
 import org.ofbiz.base.component.ComponentConfig.WebappInfo;
+import org.ofbiz.base.container.ClassLoaderContainer;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.base.util.UtilProperties;
@@ -75,6 +76,7 @@ public class OfbizUrlTransform implements TemplateTransformModel {
         }
     }
 
+    @Override
     @SuppressWarnings("unchecked")
     public Writer getWriter(final Writer out, Map args) {
         final StringBuilder buf = new StringBuilder();
@@ -139,6 +141,16 @@ public class OfbizUrlTransform implements TemplateTransformModel {
                         if (enableHttps == null) {
                             enableHttps = UtilProperties.propertyValueEqualsIgnoreCase("url.properties", "port.https.enabled", "Y");
                         }
+                        
+                        if (ClassLoaderContainer.portOffset != 0) {
+                            Integer httpPortValue = Integer.valueOf(httpPort);
+                            httpPortValue += ClassLoaderContainer.portOffset;
+                            httpPort = httpPortValue.toString();
+                            Integer httpsPortValue = Integer.valueOf(httpsPort);
+                            httpsPortValue += ClassLoaderContainer.portOffset;
+                            httpsPort = httpsPortValue.toString();
+                        }
+
                         if (secure && enableHttps) {
                             String server = httpsServer;
                             if (UtilValidate.isEmpty(server)) {

@@ -29,6 +29,7 @@ import java.util.Map;
 
 import javolution.util.FastMap;
 
+import org.ofbiz.base.container.ClassLoaderContainer;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilGenerics;
 import org.ofbiz.base.util.UtilMisc;
@@ -307,6 +308,15 @@ public class NotificationServices {
             }
             if (UtilValidate.isEmpty(enableHttps)) {
                 enableHttps = (UtilProperties.propertyValueEqualsIgnoreCase("url.properties", "port.https.enabled", "Y")) ? Boolean.TRUE : Boolean.FALSE;
+            }
+
+            if (ClassLoaderContainer.portOffset != 0) {
+                Integer httpPortValue = Integer.valueOf(httpPort);
+                httpPortValue += ClassLoaderContainer.portOffset;
+                httpPort = httpPortValue.toString();
+                Integer httpsPortValue = Integer.valueOf(httpsPort);
+                httpsPortValue += ClassLoaderContainer.portOffset;
+                httpsPort = httpsPortValue.toString();
             }
 
             // prepare the (non-secure) URL
