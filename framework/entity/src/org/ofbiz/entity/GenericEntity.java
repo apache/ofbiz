@@ -26,24 +26,23 @@ import java.sql.Blob;
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.MissingResourceException;
-import java.util.Observable;
 import java.util.ResourceBundle;
 import java.util.TreeSet;
-
-import javolution.lang.Reusable;
-import javolution.util.FastList;
-import javolution.util.FastMap;
 
 import org.ofbiz.base.crypto.HashCrypt;
 import org.ofbiz.base.util.Base64;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.GeneralException;
 import org.ofbiz.base.util.ObjectType;
+import org.ofbiz.base.util.Observable;
+import org.ofbiz.base.util.Observer;
 import org.ofbiz.base.util.TimeDuration;
 import org.ofbiz.base.util.UtilDateTime;
 import org.ofbiz.base.util.UtilGenerics;
@@ -52,10 +51,13 @@ import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.base.util.UtilXml;
 import org.ofbiz.base.util.collections.LocalizedMap;
 import org.ofbiz.entity.condition.EntityCondition;
+import org.ofbiz.entity.condition.EntityFieldMap;
 import org.ofbiz.entity.jdbc.SqlJdbcUtil;
 import org.ofbiz.entity.model.ModelEntity;
 import org.ofbiz.entity.model.ModelField;
 import org.ofbiz.entity.model.ModelFieldType;
+import org.ofbiz.entity.model.ModelKeyMap;
+import org.ofbiz.entity.model.ModelRelation;
 import org.ofbiz.entity.model.ModelViewEntity;
 import org.ofbiz.entity.model.ModelViewEntity.ModelAlias;
 import org.w3c.dom.Document;
@@ -65,21 +67,30 @@ import org.w3c.dom.Element;
  * <p>Note that this class extends <code>Observable</code> to achieve change notification for
  * <code>Observer</code>s. Whenever a field changes the name of the field will be passed to
  * the <code>notifyObservers()</code> method, and through that to the <code>update()</code> method of each
- * <code>Observer</code>.
+ * <code>Observer</code>.</p>
+ * <p>This class is not thread-safe. If an instance of this class is shared between threads,
+ * then it should be made immutable by calling the <code>setImmutable()</code> method.</p>
  *
  */
 @SuppressWarnings("serial")
-public class GenericEntity extends Observable implements Map<String, Object>, LocalizedMap<Object>, Serializable, Comparable<GenericEntity>, Cloneable, Reusable {
+public class GenericEntity implements Map<String, Object>, LocalizedMap<Object>, Serializable, Comparable<GenericEntity>, Cloneable {
 
     public static final String module = GenericEntity.class.getName();
     public static final GenericEntity NULL_ENTITY = new NullGenericEntity();
     public static final NullField NULL_FIELD = new NullField();
 
+    // Do not restore observers during deserialization. Instead, client code must add observers.
+    private transient Observable observable = new Observable();
+
     /** Name of the GenericDelegator, used to re-get the GenericDelegator when deserialized */
-    protected String delegatorName = null;
+    private String delegatorName = null;
 
     /** Reference to an instance of GenericDelegator used to do some basic operations on this entity value. If null various methods in this class will fail. This is automatically set by the GenericDelegator for all GenericValue objects instantiated through it. You may set this manually for objects you instantiate manually, but it is optional. */
-    protected transient Delegator internalDelegator = null;
+    private transient Delegator internalDelegator = null;
+
+    /** A Map containing the original field values from the database.
+     */
+    private Map<String, Object> originalDbValues = null;
 
     /** Contains the fields for this entity. Note that this should always be a
      *  HashMap to allow for two things: non-synchronized reads (synchronized
@@ -88,24 +99,22 @@ public class GenericEntity extends Observable implements Map<String, Object>, Lo
      *  between desiring to set a value to null and desiring to not modify the
      *  current value on an update.
      */
-    protected Map<String, Object> fields = FastMap.newInstance();
+    private Map<String, Object> fields = new HashMap<String, Object>();
 
     /** Contains the entityName of this entity, necessary for efficiency when creating EJBs */
-    protected String entityName = null;
+    private String entityName = null;
 
     /** Contains the ModelEntity instance that represents the definition of this entity, not to be serialized */
-    protected transient ModelEntity modelEntity = null;
+    private transient ModelEntity modelEntity = null;
 
-    /** Denotes whether or not this entity has been modified, or is known to be out of sync with the persistent record */
-    protected boolean modified = false;
-    protected boolean generateHashCode = true;
-    protected int cachedHashCode = 0;
+    private boolean generateHashCode = true;
+    private int cachedHashCode = 0;
 
     /** Used to specify whether or not this representation of the entity can be changed; generally cleared when this object comes from a cache */
-    protected boolean mutable = true;
+    private boolean mutable = true;
 
     /** This is an internal field used to specify that a value has come from a sync process and that the auto-stamps should not be over-written */
-    protected boolean isFromEntitySync = false;
+    private boolean isFromEntitySync = false;
 
     /** Creates new GenericEntity - Should never be used, prefer the other options. */
     protected GenericEntity() { }
@@ -143,13 +152,31 @@ public class GenericEntity extends Observable implements Map<String, Object>, Lo
         return newEntity;
     }
 
+    protected void assertIsMutable() {
+        if (!this.mutable) {
+            String msg = "This object has been flagged as immutable (unchangeable), probably because it came from an Entity Engine cache. Cannot modify an immutable entity object. Use the clone method to create a mutable copy of this object.";
+            IllegalStateException toBeThrown = new IllegalStateException(msg);
+            Debug.logError(toBeThrown, module);
+            throw toBeThrown;
+        }
+    }
+
+    private Observable getObservable() {
+        if (this.observable == null) {
+            this.observable = new Observable();
+        }
+        return this.observable;
+    }
+
     /** Creates new GenericEntity */
     protected void init(ModelEntity modelEntity) {
+        assertIsMutable();
         if (modelEntity == null) {
             throw new IllegalArgumentException("Cannot create a GenericEntity with a null modelEntity parameter");
         }
         this.modelEntity = modelEntity;
         this.entityName = modelEntity.getEntityName();
+        this.observable = new Observable();
 
         // check some things
         if (this.entityName == null) {
@@ -159,6 +186,7 @@ public class GenericEntity extends Observable implements Map<String, Object>, Lo
 
     /** Creates new GenericEntity from existing Map */
     protected void init(Delegator delegator, ModelEntity modelEntity, Map<String, ? extends Object> fields) {
+        assertIsMutable();
         if (modelEntity == null) {
             throw new IllegalArgumentException("Cannot create a GenericEntity with a null modelEntity parameter");
         }
@@ -166,6 +194,7 @@ public class GenericEntity extends Observable implements Map<String, Object>, Lo
         this.entityName = modelEntity.getEntityName();
         this.delegatorName = delegator.getDelegatorName();
         this.internalDelegator = delegator;
+        this.observable = new Observable();
         setFields(fields);
 
         // check some things
@@ -176,6 +205,7 @@ public class GenericEntity extends Observable implements Map<String, Object>, Lo
 
     /** Creates new GenericEntity from existing Map */
     protected void init(Delegator delegator, ModelEntity modelEntity, Object singlePkValue) {
+        assertIsMutable();
         if (modelEntity == null) {
             throw new IllegalArgumentException("Cannot create a GenericEntity with a null modelEntity parameter");
         }
@@ -186,6 +216,7 @@ public class GenericEntity extends Observable implements Map<String, Object>, Lo
         this.entityName = modelEntity.getEntityName();
         this.delegatorName = delegator.getDelegatorName();
         this.internalDelegator = delegator;
+        this.observable = new Observable();
         set(modelEntity.getOnlyPk().getName(), singlePkValue);
 
         // check some things
@@ -196,6 +227,7 @@ public class GenericEntity extends Observable implements Map<String, Object>, Lo
 
     /** Copy Constructor: Creates new GenericEntity from existing GenericEntity */
     protected void init(GenericEntity value) {
+        assertIsMutable();
         // check some things
         if (value.entityName == null) {
             throw new IllegalArgumentException("Cannot create a GenericEntity with a null entityName in the modelEntity parameter");
@@ -206,23 +238,27 @@ public class GenericEntity extends Observable implements Map<String, Object>, Lo
         if (value.fields != null) this.fields.putAll(value.fields);
         this.delegatorName = value.delegatorName;
         this.internalDelegator = value.internalDelegator;
+        this.observable = new Observable(value.observable);
     }
 
     public void reset() {
+        assertIsMutable();
         // from GenericEntity
         this.delegatorName = null;
         this.internalDelegator = null;
-        this.fields = FastMap.newInstance();
+        this.originalDbValues = null;
+        this.fields = new HashMap<String, Object>();
         this.entityName = null;
         this.modelEntity = null;
-        this.modified = false;
         this.generateHashCode = true;
         this.cachedHashCode = 0;
         this.mutable = true;
         this.isFromEntitySync = false;
+        this.observable = new Observable();
     }
 
     public void refreshFromValue(GenericEntity newValue) throws GenericEntityException {
+        assertIsMutable();
         if (newValue == null) {
             throw new GenericEntityException("Could not refresh value, new value not found for: " + this);
         }
@@ -231,24 +267,42 @@ public class GenericEntity extends Observable implements Map<String, Object>, Lo
         if (!thisPK.equals(newPK)) {
             throw new GenericEntityException("Could not refresh value, new value did not have the same primary key; this PK=" + thisPK + ", new value PK=" + newPK);
         }
-        this.fields = newValue.fields;
+        this.fields = new HashMap<String, Object>(newValue.fields);
         this.setDelegator(newValue.getDelegator());
         this.generateHashCode = newValue.generateHashCode;
         this.cachedHashCode = newValue.cachedHashCode;
-        this.modified = false;
+        this.observable = new Observable(newValue.observable);
     }
 
+    /**
+     * 
+     * @deprecated Use hasChanged()
+     */
     public boolean isModified() {
-        return this.modified;
+        return this.hasChanged();
     }
 
+    /**
+     * Flags this object as being synchronized with the data source.
+     * The entity engine will call this method immediately after
+     * populating this object with data from the data source.
+     */
     public void synchronizedWithDatasource() {
-        this.modified = false;
+        assertIsMutable();
+        this.originalDbValues = Collections.unmodifiableMap(getAllFields());
+        this.clearChanged();
     }
 
+    /**
+     * Flags this object as being removed from the data source.
+     * The entity engine will call this method immediately after
+     * removing this value from the data source. Once this method is
+     * called, the object is immutable.
+     */
     public void removedFromDatasource() {
-        // seems kind of minimal, but should do for now...
-        this.modified = true;
+        assertIsMutable();
+        this.hasChanged();
+        this.setImmutable();
     }
 
     public boolean isMutable() {
@@ -256,7 +310,10 @@ public class GenericEntity extends Observable implements Map<String, Object>, Lo
     }
 
     public void setImmutable() {
-        this.mutable = false;
+        if (this.mutable) {
+            this.mutable = false;
+            this.fields = Collections.unmodifiableMap(this.fields);
+        }
     }
 
     /**
@@ -270,6 +327,7 @@ public class GenericEntity extends Observable implements Map<String, Object>, Lo
      * @param isFromEntitySync The isFromEntitySync to set.
      */
     public void setIsFromEntitySync(boolean isFromEntitySync) {
+        assertIsMutable();
         this.isFromEntitySync = isFromEntitySync;
     }
 
@@ -304,6 +362,7 @@ public class GenericEntity extends Observable implements Map<String, Object>, Lo
 
     /** Set the GenericDelegator instance that created this value object and that is responsible for it. */
     public void setDelegator(Delegator internalDelegator) {
+        assertIsMutable();
         if (internalDelegator == null) return;
         this.delegatorName = internalDelegator.getDelegatorName();
         this.internalDelegator = internalDelegator;
@@ -381,12 +440,8 @@ public class GenericEntity extends Observable implements Map<String, Object>, Lo
      * @param value The value to set
      * @param setIfNull Specifies whether or not to set the value if it is null
      */
-    public synchronized Object set(String name, Object value, boolean setIfNull) {
-        if (!this.mutable) {
-            // comment this out to disable the mutable check
-            throw new IllegalStateException("This object has been flagged as immutable (unchangeable), probably because it came from an Entity Engine cache. Cannot set a value in an immutable entity object.");
-        }
-
+    public Object set(String name, Object value, boolean setIfNull) {
+        assertIsMutable();
         ModelField modelField = getModelEntity().getField(name);
         if (modelField == null) {
             throw new IllegalArgumentException("[GenericEntity.set] \"" + name + "\" is not a field of " + entityName + ", must be one of: " + getModelEntity().fieldNameString());
@@ -430,7 +485,6 @@ public class GenericEntity extends Observable implements Map<String, Object>, Lo
             Object old = fields.put(name, value);
 
             generateHashCode = true;
-            modified = true;
             this.setChanged();
             this.notifyObservers(name);
             return old;
@@ -440,9 +494,12 @@ public class GenericEntity extends Observable implements Map<String, Object>, Lo
     }
 
     public void dangerousSetNoCheckButFast(ModelField modelField, Object value) {
+        assertIsMutable();
         if (modelField == null) throw new IllegalArgumentException("Cannot set field with a null modelField");
         generateHashCode = true;
         this.fields.put(modelField.getName(), value);
+        this.setChanged();
+        this.notifyObservers(modelField.getName());
     }
 
     public Object dangerousGetNoCheckButFast(ModelField modelField) {
@@ -619,14 +676,8 @@ public class GenericEntity extends Observable implements Map<String, Object>, Lo
     }
 
     public String getString(String name) {
-        // might be nice to add some ClassCastException handling... and auto conversion? hmmm...
         Object object = get(name);
-        if (object == null) return null;
-        if (object instanceof java.lang.String) {
-            return (String) object;
-        } else {
-            return object.toString();
-        }
+        return object == null ? null : object.toString();
     }
 
     public java.sql.Timestamp getTimestamp(String name) {
@@ -657,10 +708,9 @@ public class GenericEntity extends Observable implements Map<String, Object>, Lo
         // this "hack" is needed for now until the Double/BigDecimal issues are all resolved
         Object value = get(name);
         if (value instanceof BigDecimal) {
-            return Double.valueOf(((BigDecimal) value).doubleValue());
-        } else {
-            return (Double) value;
+            return new Double(((BigDecimal) value).doubleValue());
         }
+        return (Double) value;
     }
 
     public BigDecimal getBigDecimal(String name) {
@@ -668,10 +718,9 @@ public class GenericEntity extends Observable implements Map<String, Object>, Lo
         // NOTE: for things to generally work properly BigDecimal should really be used as the java-type in the field type def XML files
         Object value = get(name);
         if (value instanceof Double) {
-            return BigDecimal.valueOf(((Double) value).doubleValue());
-        } else {
-            return (BigDecimal) value;
+            return new BigDecimal(((Double) value).doubleValue());
         }
+        return (BigDecimal) value;
     }
 
     @SuppressWarnings("deprecation")
@@ -817,7 +866,7 @@ public class GenericEntity extends Observable implements Map<String, Object>, Lo
         if (modelEntity instanceof ModelViewEntity){
             // retrieve pkNames of realEntity
             ModelViewEntity modelViewEntity = (ModelViewEntity) modelEntity;
-            List<String> pkNamesToUse = FastList.newInstance();
+            List<String> pkNamesToUse = new LinkedList<String>();
             // iterate on realEntity for pkField
             Iterator<ModelField> iter = modelEntityToUse.getPksIterator();
             while (iter != null && iter.hasNext()) {
@@ -866,7 +915,7 @@ public class GenericEntity extends Observable implements Map<String, Object>, Lo
     }
 
     public GenericPK getPrimaryKey() {
-        Collection<String> pkNames = FastList.newInstance();
+        Collection<String> pkNames = new LinkedList<String>();
         Iterator<ModelField> iter = this.getModelEntity().getPksIterator();
         while (iter != null && iter.hasNext()) {
             ModelField curField = iter.next();
@@ -968,9 +1017,7 @@ public class GenericEntity extends Observable implements Map<String, Object>, Lo
      * @return java.util.Map
      */
     public Map<String, Object> getAllFields() {
-        Map<String, Object> newMap = FastMap.newInstance();
-        newMap.putAll(this.fields);
-        return newMap;
+        return new HashMap<String, Object>(this.fields);
     }
 
     /** Used by clients to specify exactly the fields they are interested in
@@ -979,7 +1026,7 @@ public class GenericEntity extends Observable implements Map<String, Object>, Lo
      */
     public Map<String, Object> getFields(Collection<String> keysofFields) {
         if (keysofFields == null) return null;
-        Map<String, Object> aMap = FastMap.newInstance();
+        Map<String, Object> aMap = new HashMap<String, Object>();
 
         for (String aKey: keysofFields) {
             aMap.put(aKey, this.fields.get(aKey));
@@ -1104,7 +1151,7 @@ public class GenericEntity extends Observable implements Map<String, Object>, Lo
         writer.print(this.getEntityName());
 
         // write attributes immediately and if a CDATA element is needed, put those in a Map for now
-        Map<String, String> cdataMap = FastMap.newInstance();
+        Map<String, String> cdataMap = new HashMap<String, String>();
 
         Iterator<ModelField> modelFields = this.getModelEntity().getFieldsIterator();
         while (modelFields.hasNext()) {
@@ -1454,11 +1501,114 @@ public class GenericEntity extends Observable implements Map<String, Object>, Lo
         return condition.entityMatches(this);
     }
 
+    public void addObserver(Observer observer) {
+        getObservable().addObserver(observer);
+    }
+
+    public void clearChanged() {
+        getObservable().clearChanged();
+    }
+
+    public void deleteObserver(Observer observer) {
+        getObservable().deleteObserver(observer);
+    }
+
+    public void deleteObservers() {
+        getObservable().deleteObservers();
+    }
+
+    public boolean hasChanged() {
+        return getObservable().hasChanged();
+    }
+
+    public void notifyObservers() {
+        getObservable().notifyObservers();
+    }
+
+    public void notifyObservers(Object arg) {
+        getObservable().notifyObservers(arg);
+    }
+
+    public void setChanged() {
+        getObservable().setChanged();
+    }
+
+    public boolean originalDbValuesAvailable() {
+        return this.originalDbValues != null ? true : false;
+    }
+
+    public Object getOriginalDbValue(String name) {
+        if (getModelEntity().getField(name) == null) {
+            throw new IllegalArgumentException("[GenericEntity.get] \"" + name + "\" is not a field of " + getEntityName());
+        }
+        if (originalDbValues == null) return null;
+        return originalDbValues.get(name);
+    }
+
+    /**
+     * Checks to see if all foreign key records exist in the database. Will create a dummy value for
+     * those missing when specified.
+     *
+     * @param insertDummy Create a dummy record using the provided fields
+     * @return true if all FKs exist (or when all missing are created)
+     * @throws GenericEntityException
+     */
+    public boolean checkFks(boolean insertDummy) throws GenericEntityException {
+        ModelEntity model = this.getModelEntity();
+        Iterator<ModelRelation> relItr = model.getRelationsIterator();
+        while (relItr.hasNext()) {
+            ModelRelation relation = relItr.next();
+            if ("one".equalsIgnoreCase(relation.getType())) {
+                // see if the related value exists
+                Map<String, Object> fields = new HashMap<String, Object>();
+                for (ModelKeyMap keyMap : relation.getKeyMaps()) {
+                    fields.put(keyMap.getRelFieldName(), this.get(keyMap.getFieldName()));
+                }
+                EntityFieldMap ecl = EntityCondition.makeCondition(fields);
+                long count = this.getDelegator().findCountByCondition(relation.getRelEntityName(), ecl, null, null);
+                if (count == 0) {
+                    if (insertDummy) {
+                        // create the new related value (dummy)
+                        GenericValue newValue = this.getDelegator().makeValue(relation.getRelEntityName());
+                        boolean allFieldsSet = true;
+                        for (ModelKeyMap mkm : relation.getKeyMaps()) {
+                            if (this.get(mkm.getFieldName()) != null) {
+                                newValue.set(mkm.getRelFieldName(), this.get(mkm.getFieldName()));
+                                if (Debug.infoOn()) Debug.logInfo("Set [" + mkm.getRelFieldName() + "] to - " + this.get(mkm.getFieldName()), module);
+                            } else {
+                                allFieldsSet = false;
+                            }
+                        }
+                        if (allFieldsSet) {
+                            if (Debug.infoOn()) Debug.logInfo("Creating place holder value : " + newValue, module);
+
+                            // inherit create and update times from this value in order to make this not seem like new/fresh data
+                            newValue.put(ModelEntity.CREATE_STAMP_FIELD, this.get(ModelEntity.CREATE_STAMP_FIELD));
+                            newValue.put(ModelEntity.CREATE_STAMP_TX_FIELD, this.get(ModelEntity.CREATE_STAMP_TX_FIELD));
+                            newValue.put(ModelEntity.STAMP_FIELD, this.get(ModelEntity.STAMP_FIELD));
+                            newValue.put(ModelEntity.STAMP_TX_FIELD, this.get(ModelEntity.STAMP_TX_FIELD));
+                            // set isFromEntitySync so that create/update stamp fields set above will be preserved
+                            newValue.setIsFromEntitySync(true);
+                            // check the FKs for the newly created entity
+                            newValue.checkFks(true);
+                            newValue.create();
+                        }
+                    } else {
+                        return false;
+                    }
+                }
+            }
+        }
+        return true;
+    }
+
     public static interface NULL {
     }
 
     public static class NullGenericEntity extends GenericEntity implements NULL {
-        protected NullGenericEntity() { }
+        protected NullGenericEntity() {
+            this.setImmutable();
+        }
 
         @Override
         public String getEntityName() {

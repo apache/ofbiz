@@ -19,14 +19,14 @@
 package org.ofbiz.widget.screen;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.ListIterator;
+import java.util.Map;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import javax.xml.parsers.ParserConfigurationException;
 
 import javolution.util.FastList;
@@ -45,16 +45,15 @@ import org.ofbiz.base.util.string.FlexibleStringExpander;
 import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
+import org.ofbiz.entity.condition.EntityCondition;
 import org.ofbiz.widget.ModelWidget;
 import org.ofbiz.widget.ModelWidgetAction;
+import org.ofbiz.widget.PortalPageWorker;
 import org.ofbiz.widget.WidgetFactory;
 import org.ofbiz.widget.WidgetWorker;
-import org.ofbiz.widget.PortalPageWorker;
 import org.ofbiz.widget.form.FormFactory;
 import org.ofbiz.widget.form.FormStringRenderer;
 import org.ofbiz.widget.form.ModelForm;
-import org.ofbiz.widget.html.HtmlFormRenderer;
-import org.ofbiz.widget.html.HtmlMenuRenderer;
 import org.ofbiz.widget.menu.MenuFactory;
 import org.ofbiz.widget.menu.MenuStringRenderer;
 import org.ofbiz.widget.menu.ModelMenu;
@@ -63,7 +62,6 @@ import org.ofbiz.widget.tree.TreeFactory;
 import org.ofbiz.widget.tree.TreeStringRenderer;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
-import org.ofbiz.entity.condition.*;
 
 
 /**
@@ -229,12 +227,84 @@ public abstract class ModelScreenWidget extends ModelWidget {
         }
     }
 
+    public static class ColumnContainer extends ModelScreenWidget {
+        public static final String TAG_NAME = "column-container";
+        private final FlexibleStringExpander idExdr;
+        private final FlexibleStringExpander styleExdr;
+        private final List<Column> columns;
+
+        public ColumnContainer(ModelScreen modelScreen, Element containerElement) {
+            super(modelScreen, containerElement);
+            this.idExdr = FlexibleStringExpander.getInstance(containerElement.getAttribute("id"));
+            this.styleExdr = FlexibleStringExpander.getInstance(containerElement.getAttribute("style"));
+            List<? extends Element> subElementList = UtilXml.childElementList(containerElement, "column");
+            List<Column> columns = new ArrayList<Column>(subElementList.size());
+            for (Element element : subElementList) {
+                columns.add(new Column(modelScreen, element));
+            }
+            this.columns = Collections.unmodifiableList(columns);
+        }
+
+        @Override
+        public void renderWidgetString(Appendable writer, Map<String, Object> context, ScreenStringRenderer screenStringRenderer) throws GeneralException, IOException {
+            try {
+                screenStringRenderer.renderColumnContainer(writer, context, this);
+            } catch (IOException e) {
+                String errMsg = "Error rendering container in screen named [" + this.modelScreen.getName() + "]: " + e.toString();
+                Debug.logError(e, errMsg, module);
+                throw new RuntimeException(errMsg);
+            }
+        }
+
+        public List<Column> getColumns() {
+            return this.columns;
+        }
+
+        public String getId(Map<String, Object> context) {
+            return this.idExdr.expandString(context);
+        }
+
+        public String getStyle(Map<String, Object> context) {
+            return this.styleExdr.expandString(context);
+        }
+
+        @Override
+        public String rawString() {
+            return "<column-container id=\"" + this.idExdr.getOriginal() + "\" style=\"" + this.styleExdr.getOriginal() + "\">";
+        }
+    }
+
+    public static class Column {
+        private final FlexibleStringExpander idExdr;
+        private final FlexibleStringExpander styleExdr;
+        private final List<ModelScreenWidget> subWidgets;
+
+        public Column(ModelScreen modelScreen, Element columnElement) {
+            this.idExdr = FlexibleStringExpander.getInstance(columnElement.getAttribute("id"));
+            this.styleExdr = FlexibleStringExpander.getInstance(columnElement.getAttribute("style"));
+            List<? extends Element> subElementList = UtilXml.childElementList(columnElement);
+            this.subWidgets = Collections.unmodifiableList(readSubWidgets(modelScreen, subElementList));
+        }
+
+        public List<ModelScreenWidget> getSubWidgets() {
+            return this.subWidgets;
+        }
+
+        public String getId(Map<String, Object> context) {
+            return this.idExdr.expandString(context);
+        }
+
+        public String getStyle(Map<String, Object> context) {
+            return this.styleExdr.expandString(context);
+        }
+    }
+
     public static class Container extends ModelScreenWidget {
         public static final String TAG_NAME = "container";
         protected FlexibleStringExpander idExdr;
         protected FlexibleStringExpander styleExdr;
         protected FlexibleStringExpander autoUpdateTargetExdr;
-        protected String autoUpdateInterval = "2";
+        protected FlexibleStringExpander autoUpdateInterval;
         protected List<ModelScreenWidget> subWidgets;
 
         public Container(ModelScreen modelScreen, Element containerElement) {
@@ -242,10 +312,11 @@ public abstract class ModelScreenWidget extends ModelWidget {
             this.idExdr = FlexibleStringExpander.getInstance(containerElement.getAttribute("id"));
             this.styleExdr = FlexibleStringExpander.getInstance(containerElement.getAttribute("style"));
             this.autoUpdateTargetExdr = FlexibleStringExpander.getInstance(containerElement.getAttribute("auto-update-target"));
-            if (containerElement.hasAttribute("auto-update-interval")) {
-                this.autoUpdateInterval = containerElement.getAttribute("auto-update-interval");
+            String autoUpdateInterval = containerElement.getAttribute("auto-update-interval");
+            if (autoUpdateInterval.isEmpty()) {
+                autoUpdateInterval = "2";
             }
-
+            this.autoUpdateInterval = FlexibleStringExpander.getInstance(autoUpdateInterval);
             // read sub-widgets
             List<? extends Element> subElementList = UtilXml.childElementList(containerElement);
             this.subWidgets = ModelScreenWidget.readSubWidgets(this.modelScreen, subElementList);
@@ -279,8 +350,15 @@ public abstract class ModelScreenWidget extends ModelWidget {
             return this.autoUpdateTargetExdr.expandString(context);
         }
 
+        /**
+         * @deprecated Use the version that takes a context parameter.
+         */
         public String getAutoUpdateInterval() {
-            return this.autoUpdateInterval;
+            return this.autoUpdateInterval.getOriginal();
+        }
+
+        public String getAutoUpdateInterval(Map<String, Object> context) {
+            return this.autoUpdateInterval.expandString(context);
         }
 
         @Override
@@ -415,7 +493,12 @@ public abstract class ModelScreenWidget extends ModelWidget {
         }
 
         public String getTitle(Map<String, Object> context) {
-            return this.titleExdr.expandString(context);
+            String title = this.titleExdr.expandString(context);
+            StringUtil.SimpleEncoder simpleEncoder = (StringUtil.SimpleEncoder) context.get("simpleEncoder");
+            if (simpleEncoder != null) {
+                title = simpleEncoder.encode(title);
+            }
+            return title;
         }
 
         public Menu getNavigationMenu() {
@@ -724,6 +807,12 @@ public abstract class ModelScreenWidget extends ModelWidget {
 
         @Override
         public void renderWidgetString(Appendable writer, Map<String, Object> context, ScreenStringRenderer screenStringRenderer) {
+            // Output format might not support forms, so make form rendering optional.
+            FormStringRenderer formStringRenderer = (FormStringRenderer) context.get("formStringRenderer");
+            if (formStringRenderer == null) {
+                Debug.logVerbose("FormStringRenderer instance not found in rendering context, form not rendered.", module);
+                return;
+            }
             boolean protectScope = !shareScope(context);
             if (protectScope) {
                 if (!(context instanceof MapStack<?>)) {
@@ -731,22 +820,6 @@ public abstract class ModelScreenWidget extends ModelWidget {
                 }
                 UtilGenerics.<MapStack<String>>cast(context).push();
             }
-
-            // try finding the formStringRenderer by name in the context in case one was prepared and put there
-            FormStringRenderer formStringRenderer = (FormStringRenderer) context.get("formStringRenderer");
-            // if there was no formStringRenderer put in place, now try finding the request/response in the context and creating a new one
-            if (formStringRenderer == null) {
-                HttpServletRequest request = (HttpServletRequest) context.get("request");
-                HttpServletResponse response = (HttpServletResponse) context.get("response");
-                if (request != null && response != null) {
-                    formStringRenderer = new HtmlFormRenderer(request, response);
-                }
-            }
-            // still null, throw an error
-            if (formStringRenderer == null) {
-                throw new IllegalArgumentException("Could not find a formStringRenderer in the context, and could not find HTTP request/response objects need to create one.");
-            }
-
             ModelForm modelForm = getModelForm(context);
             //Debug.logInfo("before renderFormString, context:" + context, module);
             try {
@@ -812,6 +885,12 @@ public abstract class ModelScreenWidget extends ModelWidget {
 
         @Override
         public void renderWidgetString(Appendable writer, Map<String, Object> context, ScreenStringRenderer screenStringRenderer) throws GeneralException, IOException {
+            // Output format might not support trees, so make tree rendering optional.
+            TreeStringRenderer treeStringRenderer = (TreeStringRenderer) context.get("treeStringRenderer");
+            if (treeStringRenderer == null) {
+                Debug.logVerbose("TreeStringRenderer instance not found in rendering context, tree not rendered.", module);
+                return;
+            }
             boolean protectScope = !shareScope(context);
             if (protectScope) {
                 if (!(context instanceof MapStack<?>)) {
@@ -838,12 +917,6 @@ public abstract class ModelScreenWidget extends ModelWidget {
                 Debug.logError(e, errMsg, module);
                 throw new RuntimeException(errMsg);
             }
-
-            TreeStringRenderer treeStringRenderer = (TreeStringRenderer) context.get("treeStringRenderer");
-            if (treeStringRenderer == null) {
-                throw new IllegalArgumentException("Could not find a treeStringRenderer in the context");
-            }
-
             StringBuffer renderBuffer = new StringBuffer();
             modelTree.renderTreeString(renderBuffer, context, treeStringRenderer);
             try {
@@ -1235,21 +1308,12 @@ public abstract class ModelScreenWidget extends ModelWidget {
 
         @Override
         public void renderWidgetString(Appendable writer, Map<String, Object> context, ScreenStringRenderer screenStringRenderer) throws IOException {
-            // try finding the menuStringRenderer by name in the context in case one was prepared and put there
+            // Output format might not support menus, so make menu rendering optional.
             MenuStringRenderer menuStringRenderer = (MenuStringRenderer) context.get("menuStringRenderer");
-            // if there was no menuStringRenderer put in place, now try finding the request/response in the context and creating a new one
             if (menuStringRenderer == null) {
-                HttpServletRequest request = (HttpServletRequest) context.get("request");
-                HttpServletResponse response = (HttpServletResponse) context.get("response");
-                if (request != null && response != null) {
-                    menuStringRenderer = new HtmlMenuRenderer(request, response);
-                }
+                Debug.logVerbose("MenuStringRenderer instance not found in rendering context, menu not rendered.", module);
+                return;
             }
-            // still null, throw an error
-            if (menuStringRenderer == null) {
-                throw new IllegalArgumentException("Could not find a menuStringRenderer in the context, and could not find HTTP request/response objects need to create one.");
-            }
-
             ModelMenu modelMenu = getModelMenu(context);
             modelMenu.renderMenuString(writer, context, menuStringRenderer);
         }
@@ -1300,7 +1364,8 @@ public abstract class ModelScreenWidget extends ModelWidget {
         protected String width;
         protected String height;
         protected List<WidgetWorker.Parameter> parameterList = FastList.newInstance();
-
+        protected WidgetWorker.AutoServiceParameters autoServiceParameters;
+        protected WidgetWorker.AutoEntityParameters autoEntityParameters;
 
         public Link(ModelScreen modelScreen, Element linkElement) {
             super(modelScreen, linkElement);
@@ -1325,6 +1390,15 @@ public abstract class ModelScreenWidget extends ModelWidget {
             List<? extends Element> parameterElementList = UtilXml.childElementList(linkElement, "parameter");
             for (Element parameterElement: parameterElementList) {
                 this.parameterList.add(new WidgetWorker.Parameter(parameterElement));
+            }
+
+            Element autoServiceParamsElement = UtilXml.firstChildElement(linkElement, "auto-parameters-service");
+            if (autoServiceParamsElement != null) {
+                autoServiceParameters = new WidgetWorker.AutoServiceParameters(autoServiceParamsElement);
+            }
+            Element autoEntityParamsElement = UtilXml.firstChildElement(linkElement, "auto-parameters-entity");
+            if (autoEntityParamsElement != null) {
+                autoEntityParameters = new WidgetWorker.AutoEntityParameters(autoEntityParamsElement);
             }
 
             this.width = linkElement.getAttribute("width");
@@ -1425,7 +1499,14 @@ public abstract class ModelScreenWidget extends ModelWidget {
             for (WidgetWorker.Parameter parameter: this.parameterList) {
                 fullParameterMap.put(parameter.getName(), parameter.getValue(context));
             }
-            
+
+            if (autoServiceParameters != null) {
+                fullParameterMap.putAll(autoServiceParameters.getParametersMap(context, null));
+            }
+            if (autoEntityParameters != null) {
+                fullParameterMap.putAll(autoEntityParameters.getParametersMap(context, null));
+            }
+
             return fullParameterMap;
         }
 
@@ -1549,7 +1630,12 @@ public abstract class ModelScreenWidget extends ModelWidget {
         }
 
         public String getAlt(Map<String, Object> context) {
-            return this.alt.expandString(context);
+            String alt = this.alt.expandString(context);
+            StringUtil.SimpleEncoder simpleEncoder = (StringUtil.SimpleEncoder) context.get("simpleEncoder");
+            if (simpleEncoder != null) {
+                alt = simpleEncoder.encode(alt);
+            }
+            return alt;
         }
 
         public String getUrlMode() {

@@ -37,16 +37,16 @@ import org.ofbiz.base.config.GenericConfigException;
 import org.ofbiz.base.config.MainResourceHandler;
 import org.ofbiz.base.config.ResourceHandler;
 import org.ofbiz.base.util.Debug;
-import org.ofbiz.base.util.UtilXml;
 import org.ofbiz.base.util.cache.UtilCache;
 import org.ofbiz.entity.Delegator;
-import org.ofbiz.entity.config.DelegatorInfo;
+import org.ofbiz.entity.GenericEntityConfException;
 import org.ofbiz.entity.config.EntityConfigUtil;
+import org.ofbiz.entity.config.model.DelegatorElement;
 import org.ofbiz.security.Security;
 import org.ofbiz.service.config.ServiceConfigUtil;
+import org.ofbiz.service.config.model.GlobalServices;
 import org.ofbiz.service.eca.ServiceEcaUtil;
 import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 
 /**
  * Dispatcher Context
@@ -82,9 +82,14 @@ public class DispatchContext implements Serializable {
         if (this.dispatcher != null) {
             Delegator delegator = dispatcher.getDelegator();
             if (delegator != null) {
-                DelegatorInfo delegatorInfo = EntityConfigUtil.getDelegatorInfo(delegator.getDelegatorBaseName());
+                DelegatorElement delegatorInfo = null;
+                try {
+                    delegatorInfo = EntityConfigUtil.getDelegator(delegator.getDelegatorBaseName());
+                } catch (GenericEntityConfException e) {
+                    Debug.logWarning(e, "Exception thrown while getting delegator config: ", module);
+                }
                 if (delegatorInfo != null) {
-                    modelName = delegatorInfo.entityModelReader;
+                    modelName = delegatorInfo.getEntityModelReader();
                 }
             }
         }
@@ -242,20 +247,17 @@ public class DispatchContext implements Serializable {
         if (serviceMap == null) {
             serviceMap = FastMap.newInstance();
 
-            Element rootElement;
-
-            try {
-                rootElement = ServiceConfigUtil.getXmlRootElement();
-            } catch (GenericConfigException e) {
-                Debug.logError(e, "Error getting Service Engine XML root element", module);
-                return null;
-            }
-
             List<Future<Map<String, ModelService>>> futures = FastList.newInstance();
-            for (Element globalServicesElement: UtilXml.childElementList(rootElement, "global-services")) {
-                ResourceHandler handler = new MainResourceHandler(
-                        ServiceConfigUtil.SERVICE_ENGINE_XML_FILENAME, globalServicesElement);
-
+            List<GlobalServices> globalServicesList = null;
+            try {
+                globalServicesList = ServiceConfigUtil.getServiceEngine().getGlobalServices();
+            } catch (GenericConfigException e) {
+                // FIXME: Refactor API so exceptions can be thrown and caught.
+                Debug.logError(e, module);
+                throw new RuntimeException(e.getMessage());
+            }
+            for (GlobalServices globalServices : globalServicesList) {
+                ResourceHandler handler = new MainResourceHandler(ServiceConfigUtil.SERVICE_ENGINE_XML_FILENAME, globalServices.getLoader(), globalServices.getLocation());
                 futures.add(ExecutionPool.GLOBAL_EXECUTOR.submit(createServiceReaderCallable(handler)));
             }
 

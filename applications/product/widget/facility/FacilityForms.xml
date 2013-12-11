@@ -435,8 +435,8 @@ under the License.
         </field>
         <field name="VIEW_SIZE" entry-name="viewSize" title="${uiLabelMap.ProductShowProductsPerPage}"><text/></field>
         <field name="monthsInPastLimit" entry-name="monthsInPastLimit"><text/></field>
-        <field name="fromDateSellThrough"><date-time/></field>
-        <field name="thruDateSellThrough"><date-time/></field>
+        <field name="fromDateSellThrough" title="${uiLabelMap.ProductFromDateSellThrough}"><date-time/></field>
+        <field name="thruDateSellThrough" title="${uiLabelMap.ProductThruDateSellThrough}"><date-time/></field>
         <field name="submitButton" title="${uiLabelMap.CommonFind}" widget-style="smallSubmit">
             <submit button-type="button"/>
         </field>
@@ -808,7 +808,7 @@ under the License.
     </form>
 
     <form name="FromFacilityTransfersComplete" type="multi" target="CompleteRequestedTransfers?completeRequested=true&amp;facilityId=${facilityId}" title="" list-name="fromTransfers"
-        odd-row-style="alternate-row" default-table-style="basic-table hover-bar">
+        odd-row-style="alternate-row" default-table-style="basic-table hover-bar" use-row-submit="true">
         <row-actions>
             <entity-one entity-name="InventoryItem" value-field="inventoryItem">
                 <field-map field-name="inventoryItemId"/>
@@ -927,5 +927,20 @@ under the License.
         </field>
         <field name="information"><text size="50" maxlength="60"/></field>
         <field name="selectButton" title="${uiLabelMap.CommonSubmit}"><submit button-type="button"/></field>
+    </form>
+
+    <form name="ListFacilityAgreements" type="list" list-name="facilityAgreements"
+        odd-row-style="alternate-row" default-table-style="basic-table">
+        <field name="agreementId" widget-style="buttontext">
+            <hyperlink target="/accounting/control/EditAgreementItemFacility" target-type="inter-app" description="${agreementId}/${agreementItemSeqId}" also-hidden="false">
+                <parameter param-name="agreementId"/>
+                <parameter param-name="agreementItemSeqId"/>
+                <parameter param-name="faclityId"/>
+            </hyperlink>
+        </field>
+        <field name="agreementText"><display/></field>
+        <field name="description"><display/></field>
+        <field name="fromDate"><display/></field>
+        <field name="thruDate"><display/></field>
     </form>
 </forms>

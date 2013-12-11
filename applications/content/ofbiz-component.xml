@@ -64,12 +64,18 @@ under the License.
     <service-resource type="eca" loader="main" location="servicedef/secas.xml"/>
     <service-resource type="mca" loader="main" location="servicedef/mca.xml"/>
 
-    <test-suite loader="main" location="testdef/lucenetests.xml"/>
-
     <webapp name="content"
         title="Content"
         server="default-server"
         location="webapp/content"
         base-permission="CONTENTMGR"
         mount-point="/content"/>
+    
+    <webapp name="contentimages"
+        title="Content Images"
+        server="default-server"
+        location="webapp/content/images"
+        mount-point="/contentimages/"
+        app-bar-display="false"/>
+
 </ofbiz-component>

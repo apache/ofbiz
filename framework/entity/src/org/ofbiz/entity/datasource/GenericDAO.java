@@ -23,6 +23,8 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -30,12 +32,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.Callable;
-import java.util.concurrent.Future;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
-
-import javolution.util.FastList;
-import javolution.util.FastMap;
-import javolution.util.FastSet;
+import java.util.concurrent.Future;
 
 import org.ofbiz.base.concurrent.ExecutionPool;
 import org.ofbiz.base.util.Debug;
@@ -43,16 +42,17 @@ import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.EntityLockedException;
 import org.ofbiz.entity.GenericDataSourceException;
-import org.ofbiz.entity.GenericEntityNotFoundException;
 import org.ofbiz.entity.GenericEntity;
+import org.ofbiz.entity.GenericEntityConfException;
 import org.ofbiz.entity.GenericEntityException;
+import org.ofbiz.entity.GenericEntityNotFoundException;
 import org.ofbiz.entity.GenericModelException;
 import org.ofbiz.entity.GenericNotImplementedException;
 import org.ofbiz.entity.GenericValue;
 import org.ofbiz.entity.condition.EntityCondition;
 import org.ofbiz.entity.condition.EntityConditionParam;
 import org.ofbiz.entity.condition.EntityOperator;
-import org.ofbiz.entity.config.DatasourceInfo;
+import org.ofbiz.entity.config.model.*;
 import org.ofbiz.entity.config.EntityConfigUtil;
 import org.ofbiz.entity.jdbc.DatabaseUtil;
 import org.ofbiz.entity.jdbc.SQLProcessor;
@@ -75,19 +75,19 @@ public class GenericDAO {
 
     public static final String module = GenericDAO.class.getName();
 
-    private static final FastMap<String, GenericDAO> genericDAOs = FastMap.newInstance();
+    private static final ConcurrentHashMap<String, GenericDAO> genericDAOs = new ConcurrentHashMap<String, GenericDAO>();
     private static final ThreadGroup GENERIC_DAO_THREAD_GROUP = new ThreadGroup("GenericDAO");
     private final GenericHelperInfo helperInfo;
     private final ModelFieldTypeReader modelFieldTypeReader;
-    private final DatasourceInfo datasourceInfo;
+    private final Datasource datasource;
     private final ExecutorService executor;
 
     public static GenericDAO getGenericDAO(GenericHelperInfo helperInfo) {
-        GenericDAO newGenericDAO = genericDAOs.get(helperInfo.getHelperFullName());
-
+        String cacheKey = helperInfo.getHelperFullName();
+        GenericDAO newGenericDAO = genericDAOs.get(cacheKey);
         if (newGenericDAO == null) {
-            genericDAOs.putIfAbsent(helperInfo.getHelperFullName(), new GenericDAO(helperInfo));
-            newGenericDAO = genericDAOs.get(helperInfo.getHelperFullName());
+            genericDAOs.putIfAbsent(cacheKey, new GenericDAO(helperInfo));
+            newGenericDAO = genericDAOs.get(cacheKey);
         }
         return newGenericDAO;
     }
@@ -95,8 +95,8 @@ public class GenericDAO {
     public GenericDAO(GenericHelperInfo helperInfo) {
         this.helperInfo = helperInfo;
         this.modelFieldTypeReader = ModelFieldTypeReader.getModelFieldTypeReader(helperInfo.getHelperBaseName());
-        this.datasourceInfo = EntityConfigUtil.getDatasourceInfo(helperInfo.getHelperBaseName());
-        this.executor = ExecutionPool.getExecutor(GENERIC_DAO_THREAD_GROUP, "OFBiz-entity-datasource(" + helperInfo.getHelperFullName() + ")", datasourceInfo.maxWorkerPoolSize, false);
+        this.datasource = EntityConfigUtil.getDatasource(helperInfo.getHelperBaseName());
+        this.executor = ExecutionPool.getExecutor(GENERIC_DAO_THREAD_GROUP, "OFBiz-entity-datasource(" + helperInfo.getHelperFullName() + ")", datasource.getMaxWorkerPoolSize(), false);
     }
 
     public <T> Future<T> submitWork(Callable<T> callable) throws GenericEntityException {
@@ -171,7 +171,7 @@ public class GenericDAO {
             }
         }
 
-        StringBuilder sqlB = new StringBuilder("INSERT INTO ").append(modelEntity.getTableName(datasourceInfo)).append(" (");
+        StringBuilder sqlB = new StringBuilder("INSERT INTO ").append(modelEntity.getTableName(datasource)).append(" (");
 
         modelEntity.colNameString(fieldsToSave, sqlB, "");
         sqlB.append(") VALUES (");
@@ -210,7 +210,7 @@ public class GenericDAO {
         }
 
         // we don't want to update ALL fields, just the nonpk fields that are in the passed GenericEntity
-        List<ModelField> partialFields = FastList.newInstance();
+        List<ModelField> partialFields = new LinkedList<ModelField>();
         Collection<String> keys = entity.getAllKeys();
 
         Iterator<ModelField> nopkIter = modelEntity.getNopksIterator();
@@ -277,7 +277,7 @@ public class GenericDAO {
             addFieldIfMissing(fieldsToSave, ModelEntity.STAMP_FIELD, modelEntity);
         }
 
-        StringBuilder sql = new StringBuilder().append("UPDATE ").append(modelEntity.getTableName(datasourceInfo)).append(" SET ");
+        StringBuilder sql = new StringBuilder().append("UPDATE ").append(modelEntity.getTableName(datasource)).append(" SET ");
         modelEntity.colNameString(fieldsToSave, sql, "", "=?, ", "=?", false);
         sql.append(" WHERE ");
         SqlJdbcUtil.makeWhereStringFromFields(sql, modelEntity.getPkFieldsUnmodifiable(), entity, "AND");
@@ -309,7 +309,7 @@ public class GenericDAO {
             return updateByCondition(modelEntity, fieldsToSet, condition, sqlP);
         } catch (GenericDataSourceException e) {
             sqlP.rollback();
-            throw new GenericDataSourceException("Generic Entity Exception occured in updateByCondition", e);
+            throw new GenericDataSourceException("Generic Entity Exception occurred in updateByCondition", e);
         } finally {
             sqlP.close();
         }
@@ -322,7 +322,7 @@ public class GenericDAO {
             throw new org.ofbiz.entity.GenericNotImplementedException("Operation updateByCondition not supported yet for view entities");
         }
 
-        StringBuilder sql = new StringBuilder("UPDATE ").append(modelEntity.getTableName(datasourceInfo));
+        StringBuilder sql = new StringBuilder("UPDATE ").append(modelEntity.getTableName(datasource));
         sql.append(" SET ");
         List<EntityConditionParam> params = new LinkedList<EntityConditionParam>();
         for (Map.Entry<String, ? extends Object> entry: fieldsToSet.entrySet()) {
@@ -336,7 +336,7 @@ public class GenericDAO {
                 params.add(new EntityConditionParam(field, entry.getValue()));
             }
         }
-        sql.append(" WHERE ").append(condition.makeWhereString(modelEntity, params, this.datasourceInfo));
+        sql.append(" WHERE ").append(condition.makeWhereString(modelEntity, params, this.datasource));
 
         try {
             sqlP.prepareStatement(sql.toString());
@@ -385,7 +385,7 @@ public class GenericDAO {
                 throw new GenericEntityException("Failed to get model entity for " + meName, e);
             }
 
-            Map<String, Object> findByMap = FastMap.newInstance();
+            Map<String, Object> findByMap = new HashMap<String, Object>();
 
             // Now iterate the ModelViewLinks to construct the "WHERE" part for update/insert
             Iterator<ModelViewEntity.ModelViewLink> linkIter = modelViewEntity.getViewLinksIterator();
@@ -455,7 +455,7 @@ public class GenericDAO {
             }
 
             // Construct fieldsToSave list for this member entity
-            List<ModelField> meFieldsToSave = FastList.newInstance();
+            List<ModelField> meFieldsToSave = new LinkedList<ModelField>();
             for (ModelField modelField: fieldsToSave) {
                 if (memberModelEntity.isField(modelField.getName())) {
                     ModelField meModelField = memberModelEntity.getField(modelField.getName());
@@ -520,13 +520,13 @@ public class GenericDAO {
         StringBuilder sqlBuffer = new StringBuilder("SELECT ");
 
         if (modelEntity.getNopksSize() > 0) {
-            modelEntity.colNameString(modelEntity.getNopksCopy(), sqlBuffer, "", ", ", "", datasourceInfo.aliasViews);
+            modelEntity.colNameString(modelEntity.getNopksCopy(), sqlBuffer, "", ", ", "", datasource.getAliasViewColumns());
         } else {
             sqlBuffer.append("*");
         }
 
-        sqlBuffer.append(SqlJdbcUtil.makeFromClause(modelEntity, modelFieldTypeReader, datasourceInfo));
-        sqlBuffer.append(SqlJdbcUtil.makeWhereClause(modelEntity, modelEntity.getPkFieldsUnmodifiable(), entity, "AND", datasourceInfo.joinStyle));
+        sqlBuffer.append(SqlJdbcUtil.makeFromClause(modelEntity, modelFieldTypeReader, datasource));
+        sqlBuffer.append(SqlJdbcUtil.makeWhereClause(modelEntity, modelEntity.getPkFieldsUnmodifiable(), entity, "AND", datasource.getJoinStyle()));
 
         try {
             sqlP.prepareStatement(sqlBuffer.toString(), true, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
@@ -570,7 +570,7 @@ public class GenericDAO {
          }
          */
         // we don't want to select ALL fields, just the nonpk fields that are in the passed GenericEntity
-        List<ModelField> partialFields = FastList.newInstance();
+        List<ModelField> partialFields = new LinkedList<ModelField>();
 
         Set<String> tempKeys = new TreeSet<String>(keys);
 
@@ -590,12 +590,12 @@ public class GenericDAO {
         StringBuilder sqlBuffer = new StringBuilder("SELECT ");
 
         if (partialFields.size() > 0) {
-            modelEntity.colNameString(partialFields, sqlBuffer, "", ", ", "", datasourceInfo.aliasViews);
+            modelEntity.colNameString(partialFields, sqlBuffer, "", ", ", "", datasource.getAliasViewColumns());
         } else {
             sqlBuffer.append("*");
         }
-        sqlBuffer.append(SqlJdbcUtil.makeFromClause(modelEntity, modelFieldTypeReader, datasourceInfo));
-        sqlBuffer.append(SqlJdbcUtil.makeWhereClause(modelEntity, modelEntity.getPkFieldsUnmodifiable(), entity, "AND", datasourceInfo.joinStyle));
+        sqlBuffer.append(SqlJdbcUtil.makeFromClause(modelEntity, modelFieldTypeReader, datasource));
+        sqlBuffer.append(SqlJdbcUtil.makeWhereClause(modelEntity, modelEntity.getPkFieldsUnmodifiable(), entity, "AND", datasource.getJoinStyle()));
 
         SQLProcessor sqlP = new SQLProcessor(helperInfo);
 
@@ -656,12 +656,12 @@ public class GenericDAO {
         }
 
         // make two ArrayLists of fields, one for fields to select and the other for where clause fields (to find by)
-        List<ModelField> selectFields = FastList.newInstance();
+        List<ModelField> selectFields = new LinkedList<ModelField>();
         if (UtilValidate.isNotEmpty(fieldsToSelect)) {
-            Set<String> tempKeys = FastSet.newInstance();
+            Set<String> tempKeys = new HashSet<String>();
             tempKeys.addAll(fieldsToSelect);
-            Set<String> fieldSetsToInclude = FastSet.newInstance();
-            Set<String> addedFields = FastSet.newInstance();
+            Set<String> fieldSetsToInclude = new HashSet<String>();
+            Set<String> addedFields = new HashSet<String>();
             for (String fieldToSelect : fieldsToSelect) {
                 if (tempKeys.contains(fieldToSelect)) {
                     ModelField curField = modelEntity.getField(fieldToSelect);
@@ -683,8 +683,8 @@ public class GenericDAO {
             }
             if (UtilValidate.isNotEmpty(fieldSetsToInclude)) {
                 Iterator<ModelField> fieldIter = modelEntity.getFieldsIterator();
-                Set<String> extraFields = FastSet.newInstance();
-                Set<String> reasonSets = FastSet.newInstance();
+                Set<String> extraFields = new HashSet<String>();
+                Set<String> reasonSets = new HashSet<String>();
                 while (fieldIter.hasNext()) {
                     ModelField curField = fieldIter.next();
                     String fieldSet = curField.getFieldSet();
@@ -719,7 +719,7 @@ public class GenericDAO {
         }
 
         if (selectFields.size() > 0) {
-            modelEntity.colNameString(selectFields, sqlBuffer, "", ", ", "", datasourceInfo.aliasViews);
+            modelEntity.colNameString(selectFields, sqlBuffer, "", ", ", "", datasource.getAliasViewColumns());
         } else {
             sqlBuffer.append("*");
         }
@@ -729,17 +729,17 @@ public class GenericDAO {
         List<EntityCondition> viewHavingConditions = null;
         List<String> viewOrderByList = null;
         if (modelViewEntity != null) {
-            viewWhereConditions = FastList.newInstance();
-            viewHavingConditions = FastList.newInstance();
-            viewOrderByList = FastList.newInstance();
+            viewWhereConditions = new LinkedList<EntityCondition>();
+            viewHavingConditions = new LinkedList<EntityCondition>();
+            viewOrderByList = new LinkedList<String>();
             modelViewEntity.populateViewEntityConditionInformation(modelFieldTypeReader, viewWhereConditions, viewHavingConditions, viewOrderByList, null);
         }
 
         // FROM clause and when necessary the JOIN or LEFT JOIN clause(s) as well
-        sqlBuffer.append(SqlJdbcUtil.makeFromClause(modelEntity, modelFieldTypeReader, datasourceInfo));
+        sqlBuffer.append(SqlJdbcUtil.makeFromClause(modelEntity, modelFieldTypeReader, datasource));
 
         // WHERE clause
-        List<EntityConditionParam> whereEntityConditionParams = FastList.newInstance();
+        List<EntityConditionParam> whereEntityConditionParams = new LinkedList<EntityConditionParam>();
         makeConditionWhereString(sqlBuffer, " WHERE ", modelEntity, whereEntityCondition, viewWhereConditions, whereEntityConditionParams);
 
         // GROUP BY clause for view-entity
@@ -748,11 +748,11 @@ public class GenericDAO {
         }
 
         // HAVING clause
-        List<EntityConditionParam> havingEntityConditionParams = FastList.newInstance();
+        List<EntityConditionParam> havingEntityConditionParams = new LinkedList<EntityConditionParam>();
         makeConditionHavingString(sqlBuffer, " HAVING ", modelEntity, havingEntityCondition, viewHavingConditions, havingEntityConditionParams);
 
         // ORDER BY clause
-        List<String> orderByExpanded = FastList.<String>newInstance();
+        List<String> orderByExpanded = new LinkedList<String>();
         // add the manually specified ones, then the ones in the view entity's entity-condition
         if (orderBy != null) {
             orderByExpanded.addAll(orderBy);
@@ -761,8 +761,11 @@ public class GenericDAO {
             // add to end of other order by so that those in method call will override those in view
             orderByExpanded.addAll(viewOrderByList);
         }
-        sqlBuffer.append(SqlJdbcUtil.makeOrderByClause(modelEntity, orderByExpanded, datasourceInfo));
+        sqlBuffer.append(SqlJdbcUtil.makeOrderByClause(modelEntity, orderByExpanded, datasource));
 
+        // OFFSET clause
+        makeOffsetString(sqlBuffer, findOptions);
+        
         // make the final SQL String
         String sql = sqlBuffer.toString();
 
@@ -813,7 +816,7 @@ public class GenericDAO {
             modelViewEntity = (ModelViewEntity) modelEntity;
         }
 
-        List<EntityCondition> conditions = FastList.newInstance();
+        List<EntityCondition> conditions = new LinkedList<EntityCondition>();
         if (UtilValidate.isNotEmpty(whereEntityCondition)) {
             conditions.add(whereEntityCondition);
         }
@@ -825,7 +828,7 @@ public class GenericDAO {
             }
         }
 
-        String viewClause = SqlJdbcUtil.makeViewWhereClause(modelEntity, datasourceInfo.joinStyle);
+        String viewClause = SqlJdbcUtil.makeViewWhereClause(modelEntity, datasource.getJoinStyle());
 
         if (viewClause.length() > 0) {
             conditions.add(EntityCondition.makeConditionWhere(viewClause));
@@ -833,7 +836,7 @@ public class GenericDAO {
 
         if (!conditions.isEmpty()) {
             whereString.append(prefix);
-            whereString.append(EntityCondition.makeCondition(conditions, EntityOperator.AND).makeWhereString(modelEntity, whereEntityConditionParams, this.datasourceInfo));
+            whereString.append(EntityCondition.makeCondition(conditions, EntityOperator.AND).makeWhereString(modelEntity, whereEntityConditionParams, this.datasource));
         }
 
         return whereString;
@@ -852,14 +855,14 @@ public class GenericDAO {
 
         String entityCondHavingString = "";
         if (havingEntityCondition != null) {
-            entityCondHavingString = havingEntityCondition.makeWhereString(modelEntity, havingEntityConditionParams, this.datasourceInfo);
+            entityCondHavingString = havingEntityCondition.makeWhereString(modelEntity, havingEntityConditionParams, this.datasource);
         }
 
         String viewEntityCondHavingString = null;
         if (modelViewEntity != null) {
             EntityCondition viewHavingEntityCondition = EntityCondition.makeCondition(viewHavingConditions);
             if (viewHavingEntityCondition != null) {
-                viewEntityCondHavingString = viewHavingEntityCondition.makeWhereString(modelEntity, havingEntityConditionParams, this.datasourceInfo);
+                viewEntityCondHavingString = viewHavingEntityCondition.makeWhereString(modelEntity, havingEntityConditionParams, this.datasource);
             }
         }
 
@@ -884,18 +887,41 @@ public class GenericDAO {
         return havingString;
     }
 
+    protected StringBuilder makeOffsetString(StringBuilder offsetString, EntityFindOptions findOptions) {
+        if (UtilValidate.isNotEmpty(datasource.getOffsetStyle())) {
+            if (datasource.getOffsetStyle().equals("limit")) {
+                // use the LIMIT/OFFSET style
+                if (findOptions.getLimit() > -1) {
+                    offsetString.append(" LIMIT " + findOptions.getLimit());
+                    if (findOptions.getOffset() > -1) {
+                        offsetString.append(" OFFSET " + findOptions.getOffset());
+                    }
+                }
+            } else if (datasource.getOffsetStyle().equals("fetch")) {
+                // use SQL2008 OFFSET/FETCH style by default
+                if (findOptions.getOffset() > -1) {
+                    offsetString.append(" OFFSET ").append(findOptions.getOffset()).append(" ROWS");
+                    if (findOptions.getLimit() > -1) {
+                        offsetString.append(" FETCH FIRST ").append(findOptions.getLimit()).append(" ROWS ONLY");
+                    }
+                }
+            }
+        }
+        return offsetString;
+    }
+
     public List<GenericValue> selectByMultiRelation(GenericValue value, ModelRelation modelRelationOne, ModelEntity modelEntityOne,
         ModelRelation modelRelationTwo, ModelEntity modelEntityTwo, List<String> orderBy) throws GenericEntityException {
         SQLProcessor sqlP = new SQLProcessor(helperInfo);
 
         // get the tables names
-        String atable = modelEntityOne.getTableName(datasourceInfo);
-        String ttable = modelEntityTwo.getTableName(datasourceInfo);
+        String atable = modelEntityOne.getTableName(datasource);
+        String ttable = modelEntityTwo.getTableName(datasource);
 
         // get the column name string to select
         StringBuilder selsb = new StringBuilder();
-        List<String> collist = FastList.newInstance();
-        List<String> fldlist = FastList.newInstance();
+        List<String> collist = new LinkedList<String>();
+        List<String> fldlist = new LinkedList<String>();
 
         for (Iterator<ModelField> iterator = modelEntityTwo.getFieldsIterator(); iterator.hasNext();) {
             ModelField mf = iterator.next();
@@ -911,11 +937,8 @@ public class GenericDAO {
         }
 
         // construct assoc->target relation string
-        int kmsize = modelRelationTwo.getKeyMapsSize();
         StringBuilder wheresb = new StringBuilder();
-
-        for (int i = 0; i < kmsize; i++) {
-            ModelKeyMap mkm = modelRelationTwo.getKeyMap(i);
+        for (ModelKeyMap mkm : modelRelationTwo.getKeyMaps()) {
             String lfname = mkm.getFieldName();
             String rfname = mkm.getRelFieldName();
 
@@ -927,12 +950,9 @@ public class GenericDAO {
 
         // construct the source entity qualifier
         // get the fields from relation description
-        kmsize = modelRelationOne.getKeyMapsSize();
-        Map<ModelField, Object> bindMap = FastMap.newInstance();
-
-        for (int i = 0; i < kmsize; i++) {
+        Map<ModelField, Object> bindMap = new HashMap<ModelField, Object>();
+        for (ModelKeyMap mkm : modelRelationOne.getKeyMaps()) {
             // get the equivalent column names in the relation
-            ModelKeyMap mkm = modelRelationOne.getKeyMap(i);
             String sfldname = mkm.getFieldName();
             String lfldname = mkm.getRelFieldName();
             ModelField amf = modelEntityOne.getField(lfldname);
@@ -956,10 +976,10 @@ public class GenericDAO {
         sqlsb.append(atable).append(", ").append(ttable);
         sqlsb.append(" WHERE ");
         sqlsb.append(wheresb.toString());
-        sqlsb.append(SqlJdbcUtil.makeOrderByClause(modelEntityTwo, orderBy, true, datasourceInfo));
+        sqlsb.append(SqlJdbcUtil.makeOrderByClause(modelEntityTwo, orderBy, true, datasource));
 
         // now execute the query
-        List<GenericValue> retlist = FastList.newInstance();
+        List<GenericValue> retlist = new LinkedList<GenericValue>();
         Delegator gd = value.getDelegator();
 
         try {
@@ -1047,7 +1067,7 @@ public class GenericDAO {
                     sqlBuffer.append("COUNT(DISTINCT ");
                     // this only seems to support a single column, which is not desirable but seems a lot better than no columns or in certain cases all columns
                     sqlBuffer.append(firstSelectField.getColValue());
-                    // sqlBuffer.append(modelEntity.colNameString(selectFields, ", ", "", datasourceInfo.aliasViews));
+                    // sqlBuffer.append(modelEntity.colNameString(selectFields, ", ", "", datasource.aliasViews));
                     sqlBuffer.append(")");
                 }
             } else {
@@ -1063,17 +1083,17 @@ public class GenericDAO {
         List<EntityCondition> viewHavingConditions = null;
         List<String> viewOrderByList = null;
         if (modelViewEntity != null) {
-            viewWhereConditions = FastList.newInstance();
-            viewHavingConditions = FastList.newInstance();
-            viewOrderByList = FastList.newInstance();
+            viewWhereConditions = new LinkedList<EntityCondition>();
+            viewHavingConditions = new LinkedList<EntityCondition>();
+            viewOrderByList = new LinkedList<String>();
             modelViewEntity.populateViewEntityConditionInformation(modelFieldTypeReader, viewWhereConditions, viewHavingConditions, viewOrderByList, null);
         }
 
         // FROM clause and when necessary the JOIN or LEFT JOIN clause(s) as well
-        sqlBuffer.append(SqlJdbcUtil.makeFromClause(modelEntity, modelFieldTypeReader, datasourceInfo));
+        sqlBuffer.append(SqlJdbcUtil.makeFromClause(modelEntity, modelFieldTypeReader, datasource));
 
         // WHERE clause
-        List<EntityConditionParam> whereEntityConditionParams = FastList.newInstance();
+        List<EntityConditionParam> whereEntityConditionParams = new LinkedList<EntityConditionParam>();
         makeConditionWhereString(sqlBuffer, " WHERE ", modelEntity, whereEntityCondition, viewWhereConditions, whereEntityConditionParams);
 
         // GROUP BY clause for view-entity
@@ -1082,7 +1102,7 @@ public class GenericDAO {
         }
 
         // HAVING clause
-        List<EntityConditionParam> havingEntityConditionParams = FastList.newInstance();
+        List<EntityConditionParam> havingEntityConditionParams = new LinkedList<EntityConditionParam>();
         makeConditionHavingString(sqlBuffer, " HAVING ", modelEntity, havingEntityCondition, viewHavingConditions, havingEntityConditionParams);
 
         if (isGroupBy) {
@@ -1155,7 +1175,7 @@ public class GenericDAO {
             throw new org.ofbiz.entity.GenericNotImplementedException("Operation delete not supported yet for view entities");
         }
 
-        StringBuilder sql = new StringBuilder().append("DELETE FROM ").append(modelEntity.getTableName(datasourceInfo)).append(" WHERE ");
+        StringBuilder sql = new StringBuilder().append("DELETE FROM ").append(modelEntity.getTableName(datasource)).append(" WHERE ");
         SqlJdbcUtil.makeWhereStringFromFields(sql, modelEntity.getPkFieldsUnmodifiable(), entity, "AND");
 
         int retVal;
@@ -1178,7 +1198,7 @@ public class GenericDAO {
             return deleteByCondition(modelEntity, condition, sqlP);
         } catch (GenericDataSourceException e) {
             sqlP.rollback();
-            throw new GenericDataSourceException("Generic Entity Exception occured in deleteByCondition", e);
+            throw new GenericDataSourceException("Generic Entity Exception occurred in deleteByCondition", e);
         } finally {
             sqlP.close();
         }
@@ -1191,9 +1211,9 @@ public class GenericDAO {
             throw new org.ofbiz.entity.GenericNotImplementedException("Operation deleteByCondition not supported yet for view entities");
         }
 
-        StringBuilder sql = new StringBuilder("DELETE FROM ").append(modelEntity.getTableName(this.datasourceInfo));
+        StringBuilder sql = new StringBuilder("DELETE FROM ").append(modelEntity.getTableName(this.datasource));
 
-        String whereCondition = condition.makeWhereString(modelEntity, null, this.datasourceInfo);
+        String whereCondition = condition.makeWhereString(modelEntity, null, this.datasource);
         if (UtilValidate.isNotEmpty(whereCondition)) {
             sql.append(" WHERE ").append(whereCondition);
         }

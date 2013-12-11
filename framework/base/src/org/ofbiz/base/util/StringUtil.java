@@ -28,7 +28,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javolution.context.ObjectFactory;
@@ -165,10 +164,20 @@ public class StringUtil {
      * @return a String of all values in the list seperated by the delimiter
      */
     public static String join(List<?> list, String delim) {
-        if (list == null || list.size() < 1)
+        return join ((Collection<?>) list, delim);
+    }
+
+    /**
+     * Creates a single string from a Collection of strings seperated by a delimiter.
+     * @param col a collection of strings to join
+     * @param delim the delimiter character(s) to use. (null value will join with no delimiter)
+     * @return a String of all values in the collection seperated by the delimiter
+     */
+    public static String join(Collection<?> col, String delim) {
+        if (UtilValidate.isEmpty(col))
             return null;
         StringBuilder buf = new StringBuilder();
-        Iterator<?> i = list.iterator();
+        Iterator<?> i = col.iterator();
 
         while (i.hasNext()) {
             buf.append(i.next());
@@ -218,15 +227,15 @@ public class StringUtil {
         if (delim != null) st = Pattern.compile(delim).split(str, limit);
         else               st = str.split("\\s");
 
-        
+
         if (st != null && st.length > 0) {
             splitList = FastList.newInstance();
             for (int i=0; i < st.length; i++) splitList.add(st[i]);
         }
-        
+
         return splitList;
     }
-    
+
     /**
      * Encloses each of a List of Strings in quotes.
      * @param list List of String(s) to quote.
@@ -251,7 +260,7 @@ public class StringUtil {
      */
     public static Map<String, String> strToMap(String str, String delim, boolean trim) {
         return strToMap(str, delim, trim, null);
-        
+
     }
 
     /**
@@ -259,7 +268,7 @@ public class StringUtil {
      * @param str The string to decode and format
      * @param delim the delimiter character(s) to join on (null will split on whitespace)
      * @param trim Trim whitespace off fields
-     * @param pairsSeparator in case you use not encoded name/value pairs strings 
+     * @param pairsSeparator in case you use not encoded name/value pairs strings
      *        and want to replace "=" to avoid clashes with parameters values in a not encoded URL, default to "="
      * @return a Map of name/value pairs
      */
@@ -324,7 +333,7 @@ public class StringUtil {
         return strToMap(str, null, false);
     }
 
-    
+
     /**
      * Creates an encoded String from a Map of name/value pairs (MUST BE STRINGS!)
      * @param map The Map of name/value pairs
@@ -365,9 +374,11 @@ public class StringUtil {
         }
         return buf.toString();
     }
-    
+
     /**
-     * Reads a String version of a Map (should contain only strings) and creates a new Map
+     * Reads a String version of a Map (should contain only strings) and creates a new Map.
+     * Partial Map elements are skipped: <code>{foo=fooValue, bar=}</code> will contain only
+     * the foo element.
      *
      * @param s String value of a Map ({n1=v1, n2=v2})
      * @return new Map
@@ -379,7 +390,9 @@ public class StringUtil {
             String[] entries = s.split("\\,\\s");
             for (String entry: entries) {
                 String[] nv = entry.split("\\=");
-                newMap.put(nv[0], nv[1]);
+                if (nv.length == 2) {
+                    newMap.put(nv[0], nv[1]);
+                }
             }
         } else {
             throw new IllegalArgumentException("String is not from Map.toString()");
@@ -532,9 +545,7 @@ public class StringUtil {
      * Removes all matches of regex from a str
      */
     public static String removeRegex(String str, String regex) {
-        Pattern pattern = Pattern.compile(regex);
-        Matcher matcher = pattern.matcher(str);
-        return matcher.replaceAll("");
+        return str.replaceAll(regex, "");
     }
 
     /**

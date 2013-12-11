@@ -19,17 +19,16 @@
 package org.ofbiz.entity.model;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
-
-import javolution.util.FastList;
-import javolution.util.FastMap;
-import javolution.util.FastSet;
 
 import org.ofbiz.base.component.ComponentConfig;
 import org.ofbiz.base.config.GenericConfigException;
@@ -43,9 +42,10 @@ import org.ofbiz.base.util.cache.UtilCache;
 import org.ofbiz.entity.GenericEntityConfException;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericModelException;
-import org.ofbiz.entity.config.DelegatorInfo;
 import org.ofbiz.entity.config.EntityConfigUtil;
-import org.ofbiz.entity.config.EntityModelReaderInfo;
+import org.ofbiz.entity.config.model.DelegatorElement;
+import org.ofbiz.entity.config.model.EntityModelReader;
+import org.ofbiz.entity.config.model.Resource;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -80,13 +80,13 @@ public class ModelReader implements Serializable {
     protected Map<String, ResourceHandler> entityResourceHandlerMap;
 
     public static ModelReader getModelReader(String delegatorName) throws GenericEntityException {
-        DelegatorInfo delegatorInfo = EntityConfigUtil.getDelegatorInfo(delegatorName);
+        DelegatorElement delegatorInfo = EntityConfigUtil.getDelegator(delegatorName);
 
         if (delegatorInfo == null) {
             throw new GenericEntityConfException("Could not find a delegator with the name " + delegatorName);
         }
 
-        String tempModelName = delegatorInfo.entityModelReader;
+        String tempModelName = delegatorInfo.getEntityModelReader();
         ModelReader reader = readers.get(tempModelName);
 
         if (reader == null) {
@@ -100,19 +100,19 @@ public class ModelReader implements Serializable {
 
     private ModelReader(String modelName) throws GenericEntityException {
         this.modelName = modelName;
-        entityResourceHandlers = FastList.newInstance();
-        resourceHandlerEntities = FastMap.newInstance();
-        entityResourceHandlerMap = FastMap.newInstance();
+        entityResourceHandlers = new LinkedList<ResourceHandler>();
+        resourceHandlerEntities = new HashMap<ResourceHandler, Collection<String>>();
+        entityResourceHandlerMap = new HashMap<String, ResourceHandler>();
 
-        EntityModelReaderInfo entityModelReaderInfo = EntityConfigUtil.getEntityModelReaderInfo(modelName);
+        EntityModelReader entityModelReaderInfo = EntityConfigUtil.getEntityModelReader(modelName);
 
         if (entityModelReaderInfo == null) {
             throw new GenericEntityConfException("Cound not find an entity-model-reader with the name " + modelName);
         }
 
         // get all of the main resource model stuff, ie specified in the entityengine.xml file
-        for (Element resourceElement: entityModelReaderInfo.resourceElements) {
-            ResourceHandler handler = new MainResourceHandler(EntityConfigUtil.ENTITY_ENGINE_XML_FILENAME, resourceElement);
+        for (Resource resourceElement : entityModelReaderInfo.getResourceList()) {
+            ResourceHandler handler = new MainResourceHandler(EntityConfigUtil.ENTITY_ENGINE_XML_FILENAME, resourceElement.getLoader(), resourceElement.getLocation());
             entityResourceHandlers.add(handler);
         }
 
@@ -133,7 +133,7 @@ public class ModelReader implements Serializable {
         Collection<String> resourceHandlerEntityNames = resourceHandlerEntities.get(entityResourceHandler);
 
         if (resourceHandlerEntityNames == null) {
-            resourceHandlerEntityNames = FastList.newInstance();
+            resourceHandlerEntityNames = new LinkedList<String>();
             resourceHandlerEntities.put(entityResourceHandler, resourceHandlerEntityNames);
         }
         resourceHandlerEntityNames.add(entityName);
@@ -196,8 +196,8 @@ public class ModelReader implements Serializable {
                     numAutoRelations = 0;
 
                     entityCache = new HashMap<String, ModelEntity>();
-                    List<ModelViewEntity> tempViewEntityList = FastList.newInstance();
-                    List<Element> tempExtendEntityElementList = FastList.newInstance();
+                    List<ModelViewEntity> tempViewEntityList = new LinkedList<ModelViewEntity>();
+                    List<Element> tempExtendEntityElementList = new LinkedList<Element>();
 
                     UtilTimer utilTimer = new UtilTimer();
 
@@ -224,8 +224,7 @@ public class ModelReader implements Serializable {
                         docElement.normalize();
                         Node curChild = docElement.getFirstChild();
 
-                        ModelInfo def = new ModelInfo();
-                        def.populateFromElements(docElement);
+                        ModelInfo def = ModelInfo.createFromElements(ModelInfo.DEFAULT, docElement);
                         int i = 0;
 
                         if (curChild != null) {
@@ -278,7 +277,7 @@ TEMP_VIEW_LOOP:
                             mveIt.remove();
                             curViewEntity.populateFields(this);
                             for (ModelViewEntity.ModelMemberEntity mve: curViewEntity.getAllModelMemberEntities()) {
-                                ModelEntity me = (ModelEntity) entityCache.get(mve.getEntityName());
+                                ModelEntity me = entityCache.get(mve.getEntityName());
                                 me.addViewEntity(curViewEntity);
                             }
                             entityCache.put(curViewEntity.getEntityName(), curViewEntity);
@@ -292,12 +291,12 @@ TEMP_VIEW_LOOP:
                     }
                     if (!tempViewEntityList.isEmpty()) {
                         StringBuilder sb = new StringBuilder("View entities reference non-existant members:\n");
-                        Set<String> allViews = FastSet.newInstance();
+                        Set<String> allViews = new HashSet<String>();
                         for (ModelViewEntity curViewEntity: tempViewEntityList) {
                             allViews.add(curViewEntity.getEntityName());
                         }
                         for (ModelViewEntity curViewEntity: tempViewEntityList) {
-                            Set<String> perViewMissingEntities = FastSet.newInstance();
+                            Set<String> perViewMissingEntities = new HashSet<String>();
                             Iterator<ModelViewEntity.ModelMemberEntity> mmeIt = curViewEntity.getAllModelMemberEntities().iterator();
                             while (mmeIt.hasNext()) {
                                 ModelViewEntity.ModelMemberEntity mme = mmeIt.next();
@@ -330,7 +329,7 @@ TEMP_VIEW_LOOP:
                             // for entities auto-create many relationships for all type one relationships
 
                             // just in case we add a new relation to the same entity, keep in a separate list and add them at the end
-                            List<ModelRelation> newSameEntityRelations = FastList.newInstance();
+                            List<ModelRelation> newSameEntityRelations = new LinkedList<ModelRelation>();
 
                             Iterator<ModelRelation> relationsIter = curModelEntity.getRelationsIterator();
                             while (relationsIter.hasNext()) {
@@ -343,35 +342,31 @@ TEMP_VIEW_LOOP:
                                         throw new GenericModelException("Error getting related entity [" + modelRelation.getRelEntityName() + "] definition from entity [" + curEntityName + "]", e);
                                     }
                                     if (relatedEnt != null) {
-                                        // don't do relationship to the same entity, unless title is "Parent", then do a "Child" automatically
-                                        String targetTitle = modelRelation.getTitle();
-                                        if (curModelEntity.getEntityName().equals(relatedEnt.getEntityName()) && "Parent".equals(targetTitle)) {
-                                            targetTitle = "Child";
-                                        }
-
                                         // create the new relationship even if one exists so we can show what we are looking for in the info message
-                                        ModelRelation newRel = new ModelRelation();
-                                        newRel.setModelEntity(relatedEnt);
-                                        newRel.setRelEntityName(curModelEntity.getEntityName());
-                                        newRel.setTitle(targetTitle);
-                                        newRel.setAutoRelation(true);
-                                        Set<String> curEntityKeyFields = FastSet.newInstance();
-                                        for (int kmn = 0; kmn < modelRelation.getKeyMapsSize(); kmn++) {
-                                            ModelKeyMap curkm = modelRelation.getKeyMap(kmn);
-                                            ModelKeyMap newkm = new ModelKeyMap();
-                                            newRel.addKeyMap(newkm);
-                                            newkm.setFieldName(curkm.getRelFieldName());
-                                            newkm.setRelFieldName(curkm.getFieldName());
+                                        // don't do relationship to the same entity, unless title is "Parent", then do a "Child" automatically
+                                        String title = modelRelation.getTitle();
+                                        if (curModelEntity.getEntityName().equals(relatedEnt.getEntityName()) && "Parent".equals(title)) {
+                                            title = "Child";
+                                        }
+                                        String description = "";
+                                        String type = "";
+                                        String relEntityName = curModelEntity.getEntityName();
+                                        String fkName = "";
+                                        ArrayList<ModelKeyMap> keyMaps = new ArrayList<ModelKeyMap>();
+                                        boolean isAutoRelation = true;
+                                        Set<String> curEntityKeyFields = new HashSet<String>();
+                                        for (ModelKeyMap curkm : modelRelation.getKeyMaps()) {
+                                            keyMaps.add(new ModelKeyMap(curkm.getRelFieldName(), curkm.getFieldName()));
                                             curEntityKeyFields.add(curkm.getFieldName());
                                         }
+                                        keyMaps.trimToSize();
                                         // decide whether it should be one or many by seeing if the key map represents the complete pk of the relEntity
                                         if (curModelEntity.containsAllPkFieldNames(curEntityKeyFields)) {
                                             // always use one-nofk, we don't want auto-fks getting in for these automatic ones
-                                            newRel.setType("one-nofk");
-
+                                            type = "one-nofk";
                                             // to keep it clean, remove any additional keys that aren't part of the PK
                                             List<String> curPkFieldNames = curModelEntity.getPkFieldNames();
-                                            Iterator<ModelKeyMap> nrkmIter = newRel.getKeyMapsIterator();
+                                            Iterator<ModelKeyMap> nrkmIter = keyMaps.iterator();
                                             while (nrkmIter.hasNext()) {
                                                 ModelKeyMap nrkm =nrkmIter.next();
                                                 String checkField = nrkm.getRelFieldName();
@@ -380,10 +375,11 @@ TEMP_VIEW_LOOP:
                                                 }
                                             }
                                         } else {
-                                            newRel.setType("many");
+                                            type= "many";
                                         }
+                                        ModelRelation newRel = ModelRelation.create(relatedEnt, description, type, title, relEntityName, fkName, keyMaps, isAutoRelation);
 
-                                        ModelRelation existingRelation = relatedEnt.getRelation(targetTitle + curModelEntity.getEntityName());
+                                        ModelRelation existingRelation = relatedEnt.getRelation(title + curModelEntity.getEntityName());
                                         if (existingRelation == null) {
                                             numAutoRelations++;
                                             if (curModelEntity.getEntityName().equals(relatedEnt.getEntityName())) {
@@ -394,16 +390,16 @@ TEMP_VIEW_LOOP:
                                         } else {
                                             if (newRel.equals(existingRelation)) {
                                                 // don't warn if the target title+entity = current title+entity
-                                                if (!(targetTitle + curModelEntity.getEntityName()).equals(modelRelation.getTitle() + modelRelation.getRelEntityName())) {
+                                                if (Debug.infoOn() && !(title + curModelEntity.getEntityName()).equals(modelRelation.getTitle() + modelRelation.getRelEntityName())) {
                                                     //String errorMsg = "Relation already exists to entity [] with title [" + targetTitle + "],from entity []";
                                                     String message = "Entity [" + relatedEnt.getPackageName() + ":" + relatedEnt.getEntityName() + "] already has identical relationship to entity [" +
-                                                            curModelEntity.getEntityName() + "] title [" + targetTitle + "]; would auto-create: type [" +
+                                                            curModelEntity.getEntityName() + "] title [" + title + "]; would auto-create: type [" +
                                                             newRel.getType() + "] and fields [" + newRel.keyMapString(",", "") + "]";
                                                     orderedMessages.add(message);
                                                 }
                                             } else {
                                                 String message = "Existing relationship with the same name, but different specs found from what would be auto-created for Entity [" + relatedEnt.getEntityName() + "] and relationship to entity [" +
-                                                        curModelEntity.getEntityName() + "] title [" + targetTitle + "]; would auto-create: type [" +
+                                                        curModelEntity.getEntityName() + "] title [" + title + "]; would auto-create: type [" +
                                                         newRel.getType() + "] and fields [" + newRel.keyMapString(",", "") + "]";
                                                 Debug.logVerbose(message, module);
                                             }
@@ -423,13 +419,12 @@ TEMP_VIEW_LOOP:
                             }
                         }
                     }
-
-                    for (String message: orderedMessages) {
-                        Debug.logInfo(message, module);
+                    if (Debug.infoOn()) {
+                        for (String message : orderedMessages) {
+                            Debug.logInfo(message, module);
+                        }
+                        Debug.logInfo("FINISHED LOADING ENTITIES - ALL FILES; #Entities=" + numEntities + " #ViewEntities=" + numViewEntities + " #Fields=" + numFields + " #Relationships=" + numRelations + " #AutoRelationships=" + numAutoRelations, module);
                     }
-
-                    Debug.log("FINISHED LOADING ENTITIES - ALL FILES; #Entities=" + numEntities + " #ViewEntities=" +
-                        numViewEntities + " #Fields=" + numFields + " #Relationships=" + numRelations + " #AutoRelationships=" + numAutoRelations, module);
                 }
             }
         }
@@ -441,7 +436,7 @@ TEMP_VIEW_LOOP:
      *  entityResourceHandlerMap Map after the initial load to make them consistent again.
      */
     public void rebuildResourceHandlerEntities() {
-        resourceHandlerEntities = FastMap.newInstance();
+        resourceHandlerEntities = new HashMap<ResourceHandler, Collection<String>>();
         Iterator<Map.Entry<String, ResourceHandler>> entityResourceIter = entityResourceHandlerMap.entrySet().iterator();
 
         while (entityResourceIter.hasNext()) {
@@ -450,7 +445,7 @@ TEMP_VIEW_LOOP:
             Collection<String> resourceHandlerEntityNames = resourceHandlerEntities.get(entry.getValue());
 
             if (resourceHandlerEntityNames == null) {
-                resourceHandlerEntityNames = FastList.newInstance();
+                resourceHandlerEntityNames = new LinkedList<String>();
                 resourceHandlerEntities.put(entry.getValue(), resourceHandlerEntityNames);
             }
             resourceHandlerEntityNames.add(entry.getKey());
@@ -535,7 +530,7 @@ TEMP_VIEW_LOOP:
 
     /** Get all entities, organized by package */
     public Map<String, TreeSet<String>> getEntitiesByPackage(Set<String> packageFilterSet, Set<String> entityFilterSet) throws GenericEntityException {
-        Map<String, TreeSet<String>> entitiesByPackage = FastMap.newInstance();
+        Map<String, TreeSet<String>> entitiesByPackage = new HashMap<String, TreeSet<String>>();
 
         //put the entityNames TreeSets in a HashMap by packageName
         Iterator<String> ecIter = this.getEntityNames().iterator();
@@ -558,7 +553,7 @@ TEMP_VIEW_LOOP:
                 }
             }
             if (UtilValidate.isNotEmpty(entityFilterSet) && !entityFilterSet.contains(entityName)) {
-                //Debug.logInfo("Not including entity " + entityName + " becuase it is not in the entity set: " + entityFilterSet, module);
+                //Debug.logInfo("Not including entity " + entityName + " because it is not in the entity set: " + entityFilterSet, module);
                 continue;
             }
 
@@ -605,32 +600,11 @@ TEMP_VIEW_LOOP:
 
     public ModelRelation createRelation(ModelEntity entity, Element relationElement) {
         this.numRelations++;
-        ModelRelation relation = new ModelRelation(entity, relationElement);
+        ModelRelation relation = ModelRelation.create(entity, relationElement, false);
         return relation;
     }
 
-    public ModelField findModelField(ModelEntity entity, String fieldName) {
-        for (ModelField field: entity.fields) {
-            if (field.name.compareTo(fieldName) == 0) {
-                return field;
-            }
-        }
-        return null;
-    }
-
-    public ModelField createModelField(String name, String type, String colName, boolean isPk) {
-        this.numFields++;
-        ModelField field = new ModelField(name, type, colName, isPk);
-        return field;
-    }
-
-    public ModelField createModelField(Element fieldElement) {
-        if (fieldElement == null) {
-            return null;
-        }
-
-        this.numFields++;
-        ModelField field = new ModelField(fieldElement);
-        return field;
+    public void incrementFieldCount(int amount) {
+        this.numFields += amount;
     }
 }

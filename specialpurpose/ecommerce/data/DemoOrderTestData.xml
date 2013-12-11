@@ -55,7 +55,7 @@ under the License.
     <OrderContactMech orderId="DEMO10090" contactMechPurposeTypeId="ORDER_EMAIL" contactMechId="9026" lastUpdatedStamp="2008-04-23 16:49:32.173" lastUpdatedTxStamp="2008-04-23 16:49:32.164" createdStamp="2008-04-23 16:49:32.173" createdTxStamp="2008-04-23 16:49:32.164"/>
     <OrderContactMech orderId="DEMO10090" contactMechPurposeTypeId="SHIPPING_LOCATION" contactMechId="9015" lastUpdatedStamp="2008-04-23 16:49:28.332" lastUpdatedTxStamp="2008-04-23 16:49:27.349" createdStamp="2008-04-23 16:49:28.332" createdTxStamp="2008-04-23 16:49:27.349"/>
 
-    <Shipment shipmentId="9998" shipmentTypeId="SALES_SHIPMENT" statusId="SHIPMENT_INPUT" primaryOrderId="DEMO10090" primaryShipGroupSeqId="00001" estimatedShipCost="12.45" originFacilityId="WebStoreWarehouse" originContactMechId="9200" originTelecomNumberId="9201" destinationContactMechId="9015" destinationTelecomNumberId="9025" partyIdTo="DemoCustomer"/>
+    <Shipment shipmentId="9998" shipmentTypeId="SALES_SHIPMENT" statusId="SHIPMENT_INPUT" primaryOrderId="DEMO10090" primaryShipGroupSeqId="00001" estimatedShipCost="12.45" originFacilityId="WebStoreWarehouse" originContactMechId="9200" originTelecomNumberId="9201" destinationContactMechId="9015" destinationTelecomNumberId="9025" partyIdTo="DemoCustomer" createdDate="2008-06-10 12:59:26.8"/>
 
     <!-- Purchase order test data -->
     <!--for jira issue - 1782-->
@@ -74,7 +74,7 @@ under the License.
     <OrderItemShipGroupAssoc orderId="DEMO10091" orderItemSeqId="00001" shipGroupSeqId="00001" quantity="5.0" lastUpdatedStamp="2008-06-10 13:27:07.363" lastUpdatedTxStamp="2008-06-10 13:27:07.022" createdStamp="2008-06-10 13:27:07.363" createdTxStamp="2008-06-10 13:27:07.022"/>
 
     <!-- for jira issue - 1784 -->
-    <Payment paymentId="9000" paymentTypeId="VENDOR_PAYMENT" paymentMethodTypeId="EFT_ACCOUNT" partyIdFrom="Company" partyIdTo="DemoSupplier" statusId="PMNT_NOT_PAID" effectiveDate="2006-04-25 12:56:54.292" amount="190.97" currencyUomId="USD" lastUpdatedStamp="2008-06-10 12:59:10.96" lastUpdatedTxStamp="2008-06-10 12:59:10.661" createdStamp="2008-06-10 12:59:10.96" createdTxStamp="2008-06-10 12:59:10.661"/>
+    <Payment paymentId="9000" paymentTypeId="VENDOR_PAYMENT" paymentMethodId="SC_CHECKING" paymentMethodTypeId="EFT_ACCOUNT" partyIdFrom="Company" partyIdTo="DemoSupplier" statusId="PMNT_NOT_PAID" effectiveDate="2006-04-25 12:56:54.292" amount="190.97" currencyUomId="USD" lastUpdatedStamp="2008-06-10 12:59:10.96" lastUpdatedTxStamp="2008-06-10 12:59:10.661" createdStamp="2008-06-10 12:59:10.96" createdTxStamp="2008-06-10 12:59:10.661"/>
 
     <OrderStatus orderStatusId="9007" statusId="ORDER_CREATED" orderId="DEMO10091" statusDatetime="2008-06-10 13:27:07.024" statusUserLogin="admin" lastUpdatedStamp="2008-06-10 13:27:07.221" lastUpdatedTxStamp="2008-06-10 13:27:07.022" createdStamp="2008-06-10 13:27:07.221" createdTxStamp="2008-06-10 13:27:07.022"/>
     <OrderStatus orderStatusId="9008" statusId="ITEM_CREATED" orderId="DEMO10091" orderItemSeqId="00001" statusDatetime="2008-06-10 13:27:07.024" statusUserLogin="admin" lastUpdatedStamp="2008-06-10 13:27:07.279" lastUpdatedTxStamp="2008-06-10 13:27:07.022" createdStamp="2008-06-10 13:27:07.279" createdTxStamp="2008-06-10 13:27:07.022"/>
@@ -106,7 +106,7 @@ under the License.
     <OrderStatus orderStatusId="9014" statusId="ORDER_COMPLETED" orderId="Demo1001" statusDatetime="2009-08-13 17:47:47.344" statusUserLogin="admin"/>
     <OrderContactMech orderId="Demo1001" contactMechPurposeTypeId="SHIPPING_LOCATION" contactMechId="9200"/>
     
-    <Shipment shipmentId="9997" shipmentTypeId="PURCHASE_SHIPMENT" statusId="PURCH_SHIP_RECEIVED" primaryOrderId="Demo1001" primaryShipGroupSeqId="00001" estimatedShipCost="0.00" destinationFacilityId="WebStoreWarehouse" destinationContactMechId="9200" destinationTelecomNumberId="9201" partyIdFrom="DemoSupplier"/>
+    <Shipment shipmentId="9997" shipmentTypeId="PURCHASE_SHIPMENT" statusId="PURCH_SHIP_RECEIVED" primaryOrderId="Demo1001" primaryShipGroupSeqId="00001" estimatedShipCost="0.00" destinationFacilityId="WebStoreWarehouse" destinationContactMechId="9200" destinationTelecomNumberId="9201" partyIdFrom="DemoSupplier" createdDate="2008-06-10 12:59:26.8"/>
     <ShipmentItem shipmentId="9997" shipmentItemSeqId="00001" productId="GZ-2644" quantity="2.000000"/>
     <ShipmentRouteSegment shipmentId="9997" shipmentRouteSegmentId="00001" destFacilityId="WebStoreWarehouse" destContactMechId="9200" destTelecomNumberId="9201" carrierPartyId="_NA_" shipmentMethodTypeId="NO_SHIPPING" carrierServiceStatusId="SHRSCS_NOT_STARTED"/>
     <ShipmentPackage shipmentId="9997" shipmentPackageSeqId="00001" dateCreated="2009-08-13 17:46:29.751"/>

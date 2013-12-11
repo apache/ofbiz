@@ -26,7 +26,9 @@ import java.util.Enumeration;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+
+import org.apache.log4j.Logger;
+import org.apache.log4j.Appender;
 
 import org.ofbiz.base.component.ComponentConfig;
 import org.ofbiz.base.start.Config;
@@ -35,7 +37,6 @@ import org.ofbiz.base.start.StartupLoader;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.StringUtil;
 import org.ofbiz.base.util.UtilValidate;
-import org.ofbiz.base.util.UtilXml;
 
 /**
  * An object that loads containers (background processes).
@@ -67,7 +68,7 @@ public class ContainerLoader implements StartupLoader {
 
         List<String> loaders = null;
         for (Map loaderMap: config.loaders) {
-            if (module.equals((String)loaderMap.get("class"))) {
+            if (module.equals(loaderMap.get("class"))) {
                 loaders = StringUtil.split((String)loaderMap.get("profiles"), ",");
             }
         }
@@ -266,6 +267,11 @@ public class ContainerLoader implements StartupLoader {
                     }
                     Debug.logInfo("Stopped container " + container.getName(), module);
                 }
+            }
+            Enumeration<Appender> en = Logger.getRootLogger().getAllAppenders();
+            while (en.hasMoreElements()) {
+                Appender appender = en.nextElement();
+                appender.close();
             }
         }
     }

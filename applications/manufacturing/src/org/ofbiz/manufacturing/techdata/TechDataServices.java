@@ -20,7 +20,6 @@ package org.ofbiz.manufacturing.techdata;
 
 import java.sql.Time;
 import java.sql.Timestamp;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -132,7 +131,7 @@ public class TechDataServices {
         }
 
         if (listRoutingTaskAssoc != null) {
-            for(GenericValue routingTaskAssoc : listRoutingTaskAssoc) {
+            for (GenericValue routingTaskAssoc : listRoutingTaskAssoc) {
                 if (! workEffortIdFrom.equals(routingTaskAssoc.getString("workEffortIdFrom")) ||
                 ! workEffortIdTo.equals(routingTaskAssoc.getString("workEffortIdTo")) ||
                 ! workEffortAssocTypeId.equals(routingTaskAssoc.getString("workEffortAssocTypeId")) ||

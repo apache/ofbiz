@@ -21,6 +21,7 @@ package org.ofbiz.order.order;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import javax.servlet.ServletContext;
@@ -40,6 +41,7 @@ import org.ofbiz.entity.GenericValue;
 import org.ofbiz.service.GenericServiceException;
 import org.ofbiz.service.LocalDispatcher;
 import org.ofbiz.service.ServiceUtil;
+import org.ofbiz.webapp.website.WebSiteWorker;
 
 import javolution.util.FastMap;
 
@@ -75,7 +77,7 @@ public class OrderEvents {
                 response.setContentType(orderRoleAndProductContentInfo.getString("mimeTypeId"));
             }
             OutputStream os = response.getOutputStream();
-            DataResourceWorker.streamDataResource(os, delegator, dataResourceId, "", application.getInitParameter("webSiteId"), UtilHttp.getLocale(request), application.getRealPath("/"));
+            DataResourceWorker.streamDataResource(os, delegator, dataResourceId, "", WebSiteWorker.getWebSiteId(request), UtilHttp.getLocale(request), application.getRealPath("/"));
             os.flush();
         } catch (GenericEntityException e) {
             String errMsg = "Error downloading digital product content: " + e.toString();
@@ -102,6 +104,7 @@ public class OrderEvents {
         Delegator delegator = (Delegator) request.getAttribute("delegator");
         HttpSession session = request.getSession();
         GenericValue userLogin = (GenericValue) session.getAttribute("userLogin");
+        Locale locale = UtilHttp.getLocale(request);
 
         Map<String, Object> resultMap = FastMap.newInstance();
         String  orderId = request.getParameter("orderId");
@@ -121,6 +124,7 @@ public class OrderEvents {
                         contextMap.put("orderItemSeqId", orderItemSeqId);
                         contextMap.put("shipGroupSeqId", shipGroupSeqId);
                         contextMap.put("userLogin", userLogin);
+                        contextMap.put("locale", locale);
                         try {
                             resultMap = dispatcher.runSync("cancelOrderItem", contextMap);
 
@@ -133,7 +137,7 @@ public class OrderEvents {
 
                         } catch (GenericServiceException e) {
                             Debug.logError(e, module);
-                            request.setAttribute("_ERROR_MESSAGE_", resultMap.get("errorMessage"));
+                            request.setAttribute("_ERROR_MESSAGE_", e.getMessage());
                             return "error";
                         }
                     }

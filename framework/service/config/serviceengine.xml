@@ -25,15 +25,16 @@ under the License.
         <!-- Name of the service to use for authorization -->
         <authorization service-name="userLogin"/>
 
-        <!-- Thread pool configuration (max/min threads, uses to live and time to live) -->
+        <!-- Job poller configuration. Many of these attributes are set to the job poller defaults, but they are included here for convenience. -->
         <thread-pool send-to-pool="pool"
                      purge-job-days="4"
                      failed-retry-min="3"
-                     ttl="18000000"
-                     min-threads="5"
-                     max-threads="15"
+                     ttl="120000"
+                     jobs="100"
+                     min-threads="2"
+                     max-threads="5"
                      poll-enabled="true"
-                     poll-db-millis="20000">
+                     poll-db-millis="30000">
             <run-from-pool name="pool"/>
         </thread-pool>
 
@@ -58,21 +59,19 @@ under the License.
         <engine name="jms" class="org.ofbiz.service.jms.JmsServiceEngine"/>
         <engine name="rmi" class="org.ofbiz.service.rmi.RmiServiceEngine"/>
         <engine name="soap" class="org.ofbiz.service.engine.SOAPClientEngine"/>
-        <engine name="ofbiz-workflow" class="org.ofbiz.workflow.WorkflowEngine"/>
-        <!-- The engine xml-rpc-local is only used by a test service and for
-             this reason it is configured to run on port 8081 (see test-containers.xml);
-             in order to use this in OFBiz change the port accordingly (for demo the default
-             value is 8080)
+        <!-- The engine xml-rpc-local is only used by a test service and for this reason it is configured to run on port 8080.
+             In order to use this in OFBiz change the port accordingly (for demo the default value is 8080)
         -->
         <engine name="xml-rpc-local" class="org.ofbiz.service.engine.XMLRPCClientEngine">
-            <parameter name="url" value="http://localhost:8081/webtools/control/xmlrpc"/>
+            <parameter name="url" value="http://localhost:8080/webtools/control/xmlrpc"/>
             <parameter name="login" value="admin"/>
             <parameter name="password" value="ofbiz"/>
         </engine>
 
         <service-location name="main-rmi" location="rmi://localhost:1099/RMIDispatcher"/>
         <service-location name="main-http" location="http://localhost:8080/webtools/control/httpService"/>
-
+        <service-location name="main-soap" location="http://localhost:8080/webtools/control/SOAPService"/>
+        
         <service-location name="entity-sync-rmi" location="rmi://localhost:1099/RMIDispatcher"/>
         <service-location name="entity-sync-http" location="http://localhost:8080/webtools/control/httpService"/>
 

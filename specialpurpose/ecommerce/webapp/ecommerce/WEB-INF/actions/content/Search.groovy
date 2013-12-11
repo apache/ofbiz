@@ -20,17 +20,17 @@
 import org.apache.lucene.analysis.Analyzer
 import org.apache.lucene.analysis.standard.StandardAnalyzer
 import org.apache.lucene.document.Document
-import org.apache.lucene.index.IndexReader
 import org.apache.lucene.index.Term
-import org.apache.lucene.queryParser.QueryParser
+import org.apache.lucene.queryparser.classic.QueryParser
 import org.apache.lucene.store.FSDirectory
-import org.apache.lucene.util.Version
 import org.ofbiz.base.util.Debug
 import org.ofbiz.base.util.UtilHttp
 import org.ofbiz.content.search.SearchWorker
 import org.ofbiz.product.feature.ParametricSearch
 import org.ofbiz.widget.html.HtmlFormWrapper
 import org.apache.lucene.search.*
+import org.apache.lucene.index.DirectoryReader
+import org.apache.lucene.store.Directory
 
 paramMap = UtilHttp.getParameterMap(request);
 queryLine = paramMap.queryLine.toString();
@@ -52,12 +52,14 @@ featureIdByType = ParametricSearch.makeFeatureIdByTypeMap(paramMap);
 //Debug.logInfo("in search, featureIdByType:" + featureIdByType, "");
 
 combQuery = new BooleanQuery();
-IndexReader reader = IndexReader.open(FSDirectory.open(new File(SearchWorker.getIndexPath(null))), true); // only searching, so read-only=true
-Searcher searcher = null;
+Directory directory = FSDirectory.open(new File(SearchWorker.getIndexPath("content")));
+DirectoryReader reader = DirectoryReader.open(directory);
+IndexSearcher searcher = null;
 Analyzer analyzer = null;
+
 try {
     searcher = new IndexSearcher(reader);
-    analyzer = new StandardAnalyzer(Version.LUCENE_30);
+    analyzer = new StandardAnalyzer(SearchWorker.LUCENE_VERSION);
 } catch (java.io.FileNotFoundException e) {
     Debug.logError(e, "Search.groovy");
     request.setAttribute("errorMsgReq", "No index file exists.");
@@ -69,7 +71,7 @@ combQuery.add(termQuery, BooleanClause.Occur.MUST);
 //Debug.logInfo("in search, combQuery(1):" + combQuery, "");
 if (queryLine && analyzer) {
     Query query = null;
-    QueryParser parser = new QueryParser(Version.LUCENE_30, "content", analyzer);
+    QueryParser parser = new QueryParser(SearchWorker.LUCENE_VERSION, "content", analyzer);
     query = parser.parse(queryLine);
     combQuery.add(query, BooleanClause.Occur.MUST);
 }

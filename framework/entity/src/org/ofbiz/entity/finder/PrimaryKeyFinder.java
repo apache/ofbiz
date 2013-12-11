@@ -18,15 +18,14 @@
  */
 package org.ofbiz.entity.finder;
 
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javolution.util.FastMap;
-
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.GeneralException;
-import org.ofbiz.base.util.UtilGenerics;
 import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.base.util.collections.FlexibleMapAccessor;
 import org.ofbiz.base.util.string.FlexibleStringExpander;
@@ -35,6 +34,7 @@ import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericPK;
 import org.ofbiz.entity.GenericValue;
 import org.ofbiz.entity.model.ModelEntity;
+import org.ofbiz.entity.model.ModelField;
 import org.w3c.dom.Element;
 
 /**
@@ -100,20 +100,25 @@ public class PrimaryKeyFinder extends Finder {
             Map<FlexibleMapAccessor<Object>, Object> fieldMap, List<FlexibleStringExpander> selectFieldExpanderList) throws GeneralException {
 
         // assemble the field map
-        Map<String, Object> entityContext = FastMap.newInstance();
+        Map<String, Object> entityContext = new HashMap<String, Object>();
         if (autoFieldMap) {
-            GenericValue tempVal = delegator.makeValue(modelEntity.getEntityName());
-
             // try a map called "parameters", try it first so values from here are overridden by values in the main context
             Object parametersObj = context.get("parameters");
-            if (parametersObj != null && parametersObj instanceof Map<?, ?>) {
-                tempVal.setAllFields(UtilGenerics.checkMap(parametersObj), true, null, Boolean.TRUE);
+            Boolean parametersObjExists = parametersObj != null && parametersObj instanceof Map<?, ?>;
+            // only need PK fields
+            Iterator<ModelField> iter = modelEntity.getPksIterator();
+            while (iter.hasNext()) {
+                ModelField curField = iter.next();
+                String fieldName = curField.getName();
+                Object fieldValue = null;
+                if (parametersObjExists) {        
+                    fieldValue = ((Map<?, ?>) parametersObj).get(fieldName);
+                }
+                if (context.containsKey(fieldName)) {
+                    fieldValue = context.get(fieldName);
+                }
+                entityContext.put(fieldName, fieldValue);
             }
-
-            // just get the primary keys, and hopefully will get all of them, if not they must be manually filled in below in the field-maps
-            tempVal.setAllFields(context, true, null, Boolean.TRUE);
-
-            entityContext.putAll(tempVal);
         }
         EntityFinderUtil.expandFieldMapToContext(fieldMap, context, entityContext);
         //Debug.logInfo("PrimaryKeyFinder: entityContext=" + entityContext, module);
@@ -161,4 +166,3 @@ public class PrimaryKeyFinder extends Finder {
         }
     }
 }
-

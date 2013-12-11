@@ -22,7 +22,6 @@ package org.ofbiz.manufacturing.bom;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -115,7 +114,7 @@ public class BOMNode {
         children.addAll(rows);
         childrenNodes = FastList.newInstance();
         BOMNode oneChildNode = null;
-        for(GenericValue oneChild : children) {
+        for (GenericValue oneChild : children) {
             // Configurator
             oneChildNode = configurator(oneChild, productFeatures, getRootNode().getProductForRules(), inDate);
             // If the node is null this means that the node has been discarded by the rules.
@@ -161,7 +160,7 @@ public class BOMNode {
                     if (productFeatures != null) {
                         for (int j = 0; j < productFeatures.size(); j++) {
                             feature = productFeatures.get(j);
-                            if (ruleCondition.equals((String)feature.get("productFeatureId"))) {
+                            if (ruleCondition.equals(feature.get("productFeatureId"))) {
                                 ruleSatisfied = true;
                                 break;
                             }
@@ -341,7 +340,7 @@ public class BOMNode {
         childrenNodes = FastList.newInstance();
 
         BOMNode oneChildNode = null;
-        for(GenericValue oneChild : children) {
+        for (GenericValue oneChild : children) {
             oneChildNode = new BOMNode(oneChild.getString("productId"), delegator, dispatcher, userLogin);
             // Configurator
             //oneChildNode = configurator(oneChild, productFeatures, getRootNode().getProductForRules(), delegator);

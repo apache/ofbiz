@@ -46,6 +46,7 @@ import org.ofbiz.base.util.UtilXml;
 import org.ofbiz.base.util.collections.FlexibleMapAccessor;
 import org.ofbiz.base.util.collections.MapStack;
 import org.ofbiz.base.util.string.FlexibleStringExpander;
+import org.ofbiz.entity.GenericEntity;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.model.ModelEntity;
 import org.ofbiz.entity.model.ModelField;
@@ -196,11 +197,14 @@ public class ModelForm extends ModelWidget {
     protected FlexibleStringExpander rowCountExdr;
     protected List<ModelFormField> multiSubmitFields = FastList.newInstance();
     protected int rowCount = 0;
+    private String sortFieldParameterName = "sortField";
 
     /** On Submit areas to be updated. */
     protected List<UpdateArea> onSubmitUpdateAreas;
     /** On Paginate areas to be updated. */
     protected List<UpdateArea> onPaginateUpdateAreas;
+    /** On Sort Column areas to be updated. */
+    protected List<UpdateArea> onSortColumnUpdateAreas;
 
     // ===== CONSTRUCTORS =====
     /** Default Constructor */
@@ -303,6 +307,7 @@ public class ModelForm extends ModelWidget {
                 this.defaultViewSize = parent.defaultViewSize;
                 this.onSubmitUpdateAreas = parent.onSubmitUpdateAreas;
                 this.onPaginateUpdateAreas = parent.onPaginateUpdateAreas;
+                this.onSortColumnUpdateAreas = parent.onSortColumnUpdateAreas;
                 this.altRowStyles = parent.altRowStyles;
 
                 this.useWhenFields = parent.useWhenFields;
@@ -322,6 +327,7 @@ public class ModelForm extends ModelWidget {
                 this.fieldGroupMap = parent.fieldGroupMap;
                 this.fieldGroupList = parent.fieldGroupList;
                 this.lastOrderFields = parent.lastOrderFields;
+                this.sortFieldParameterName = parent.sortFieldParameterName;
 
             }
         }
@@ -460,7 +466,10 @@ public class ModelForm extends ModelWidget {
         if (this.paginate == null || formElement.hasAttribute("paginate")) {
             this.paginate = FlexibleStringExpander.getInstance(formElement.getAttribute("paginate"));
         }
-
+        String sortFieldParameterName = formElement.getAttribute("sort-field-parameter-name");
+        if (!sortFieldParameterName.isEmpty()) {
+            this.sortFieldParameterName = sortFieldParameterName;
+        }
         this.skipStart = "true".equals(formElement.getAttribute("skip-start"));
         this.skipEnd = "true".equals(formElement.getAttribute("skip-end"));
         this.hideHeader = "true".equals(formElement.getAttribute("hide-header"));
@@ -504,6 +513,9 @@ public class ModelForm extends ModelWidget {
             UpdateArea updateArea = new UpdateArea(updateAreaElement);
             this.addOnEventUpdateArea(updateArea);
         }
+        //propagate defaultEntityName on updateAreas
+        if (UtilValidate.isNotEmpty(this.defaultEntityName)) this.setDefaultEntityNameOnUpdateAreas();
+        if (UtilValidate.isNotEmpty(this.defaultServiceName)) this.setDefaultServiceNameOnUpdateAreas();
 
         // auto-fields-service
         for (Element autoFieldsServiceElement: UtilXml.childElementList(formElement, "auto-fields-service")) {
@@ -684,6 +696,8 @@ public class ModelForm extends ModelWidget {
             addOnPaginateUpdateArea(updateArea);
         } else if ("submit".equals(updateArea.getEventType())) {
             addOnSubmitUpdateArea(updateArea);
+        } else if ("sort-column".equals(updateArea.getEventType())) {
+            addOnSortColumnUpdateArea(updateArea);
         }
     }
 
@@ -713,6 +727,23 @@ public class ModelForm extends ModelWidget {
             }
         } else {
             onPaginateUpdateAreas.add(updateArea);
+        }
+    }
+
+    protected void addOnSortColumnUpdateArea(UpdateArea updateArea) {
+        if (onSortColumnUpdateAreas == null) {
+            onSortColumnUpdateAreas = FastList.newInstance();
+        }
+        int index = onSortColumnUpdateAreas.indexOf(updateArea);
+        if (index != -1) {
+            if (UtilValidate.isNotEmpty(updateArea.areaTarget)) {
+                onSortColumnUpdateAreas.set(index, updateArea);
+            } else {
+                // blank target indicates a removing override
+                onSortColumnUpdateAreas.remove(index);
+            }
+        } else {
+            onSortColumnUpdateAreas.add(updateArea);
         }
     }
 
@@ -1518,7 +1549,14 @@ public class ModelForm extends ModelWidget {
                 if (UtilValidate.isNotEmpty(this.getListEntryName())) {
                     localContext.put(this.getListEntryName(), item);
                 } else {
-                    localContext.push(itemMap);
+                    if (itemMap instanceof GenericEntity) {
+                        // Rendering code might try to modify the GenericEntity instance,
+                        // so we make a copy of it.
+                        Map<String, Object> genericEntityClone = UtilGenerics.cast(((GenericEntity)itemMap).clone());
+                        localContext.push(genericEntityClone);
+                    } else {
+                        localContext.push(itemMap);
+                    }
                 }
 
                 // reset/remove the BshInterpreter now as well as later because chances are there is an interpreter at this level of the stack too
@@ -2327,6 +2365,10 @@ public class ModelForm extends ModelWidget {
         this.type = string;
     }
 
+    public List<UpdateArea> getOnSortColumnUpdateAreas() {
+        return this.onSortColumnUpdateAreas;
+    }
+
     public List<UpdateArea> getOnPaginateUpdateAreas() {
         return this.onPaginateUpdateAreas;
     }
@@ -2750,28 +2792,51 @@ public class ModelForm extends ModelWidget {
     }
 
     public String getSortField(Map<String, Object> context) {
-        String field = "sortField";
         String value = null;
-
         try {
-            value = (String)context.get(field);
+            value = (String)context.get(this.sortFieldParameterName);
             if (value == null) {
                 Map<String, String> parameters = UtilGenerics.cast(context.get("parameters"));
                 if (parameters != null) {
-                    value = parameters.get(field);
+                    value = parameters.get(this.sortFieldParameterName);
                 }
             }
         } catch (Exception e) {
             Debug.logWarning(e, "Error getting sortField: " + e.toString(), module);
         }
-
         return value;
+    }
+
+    public String getSortFieldParameterName() {
+        return this.sortFieldParameterName;
     }
 
     /* Returns the list of ModelForm.UpdateArea objects.
      */
     public List<UpdateArea> getOnSubmitUpdateAreas() {
         return this.onSubmitUpdateAreas;
+    }
+
+    public void setDefaultEntityNameOnUpdateAreas() {
+        List<UpdateArea> allUpdateAreas = FastList.newInstance();
+        if (UtilValidate.isNotEmpty(this.onSubmitUpdateAreas)) allUpdateAreas.addAll(this.onSubmitUpdateAreas);
+        if (UtilValidate.isNotEmpty(this.onPaginateUpdateAreas)) allUpdateAreas.addAll(this.onPaginateUpdateAreas);
+        for (UpdateArea updateArea : allUpdateAreas) {
+            if (UtilValidate.isEmpty(updateArea.defaultEntityName)) {
+                updateArea.defaultEntityName = this.defaultEntityName;
+            }
+        }
+    }
+
+    public void setDefaultServiceNameOnUpdateAreas() {
+        List<UpdateArea> allUpdateAreas = FastList.newInstance();
+        if (UtilValidate.isNotEmpty(this.onSubmitUpdateAreas)) allUpdateAreas.addAll(this.onSubmitUpdateAreas);
+        if (UtilValidate.isNotEmpty(this.onPaginateUpdateAreas)) allUpdateAreas.addAll(this.onPaginateUpdateAreas);
+        for (UpdateArea updateArea : allUpdateAreas) {
+            if (UtilValidate.isEmpty(updateArea.defaultServiceName)) {
+                updateArea.defaultServiceName = this.defaultServiceName;
+            }
+        }
     }
 
     public static class AltRowStyle {
@@ -2838,7 +2903,11 @@ public class ModelForm extends ModelWidget {
         protected String eventType;
         protected String areaId;
         protected String areaTarget;
-        List<WidgetWorker.Parameter> parameterList =FastList.newInstance();
+        protected String defaultServiceName;
+        protected String defaultEntityName;
+        protected WidgetWorker.AutoEntityParameters autoEntityParameters;
+        protected WidgetWorker.AutoEntityParameters autoServiceParameters;
+        List<WidgetWorker.Parameter> parameterList = FastList.newInstance();
         /** XML constructor.
          * @param updateAreaElement The <code>&lt;on-xxx-update-area&gt;</code>
          * XML element.
@@ -2850,6 +2919,14 @@ public class ModelForm extends ModelWidget {
             List<? extends Element> parameterElementList = UtilXml.childElementList(updateAreaElement, "parameter");
             for (Element parameterElement: parameterElementList) {
                 this.parameterList.add(new WidgetWorker.Parameter(parameterElement));
+            }
+            Element autoServiceParamsElement = UtilXml.firstChildElement(updateAreaElement, "auto-parameters-service");
+            if (autoServiceParamsElement != null) {
+                autoServiceParameters = new WidgetWorker.AutoEntityParameters(autoServiceParamsElement);
+            }
+            Element autoEntityParamsElement = UtilXml.firstChildElement(updateAreaElement, "auto-parameters-entity");
+            if (autoEntityParamsElement != null) {
+                autoEntityParameters = new WidgetWorker.AutoEntityParameters(autoEntityParamsElement);
             }
         }
         /** String constructor.
@@ -2880,10 +2957,16 @@ public class ModelForm extends ModelWidget {
         }
         public Map<String, String> getParameterMap(Map<String, Object> context) {
             Map<String, String> fullParameterMap = FastMap.newInstance();
+            if (autoServiceParameters != null) {
+                fullParameterMap.putAll(autoServiceParameters.getParametersMap(context, defaultServiceName));
+            }
+            if (autoEntityParameters != null) {
+                fullParameterMap.putAll(autoEntityParameters.getParametersMap(context, defaultEntityName));
+            }
             for (WidgetWorker.Parameter parameter: this.parameterList) {
                 fullParameterMap.put(parameter.getName(), parameter.getValue(context));
             }
-            
+
             return fullParameterMap;
         }
     }
@@ -3028,17 +3111,38 @@ public class ModelForm extends ModelWidget {
         }
 
         public void renderStartString(Appendable writer, Map<String, Object> context, FormStringRenderer formStringRenderer) throws IOException {
-            if (modelForm.fieldGroupList.size() > 0) {
-                formStringRenderer.renderFieldGroupOpen(writer, context, this);
+            if (!modelForm.fieldGroupList.isEmpty()) {
+                if (shouldUse(context)) {
+                    formStringRenderer.renderFieldGroupOpen(writer, context, this);
+                }
             }
             formStringRenderer.renderFormatSingleWrapperOpen(writer, context, modelForm);
         }
 
         public void renderEndString(Appendable writer, Map<String, Object> context, FormStringRenderer formStringRenderer) throws IOException {
             formStringRenderer.renderFormatSingleWrapperClose(writer, context, modelForm);
-            if (modelForm.fieldGroupList.size() > 0) {
-                formStringRenderer.renderFieldGroupClose(writer, context, this);
+            if (!modelForm.fieldGroupList.isEmpty()) {
+                if (shouldUse(context)) {
+                    formStringRenderer.renderFieldGroupClose(writer, context, this);
+                }
             }
+        }
+
+        public boolean shouldUse(Map<String, Object> context) {
+            for (String fieldName : modelForm.fieldGroupMap.keySet()) {
+                FieldGroupBase group = modelForm.fieldGroupMap.get(fieldName);
+                if (group instanceof FieldGroup) {
+                    FieldGroup fieldgroup =(FieldGroup) group;
+                    if (this.id.equals(fieldgroup.getId())) {
+                        for (ModelFormField modelField : modelForm.fieldList) {
+                            if (fieldName.equals(modelField.getName()) && modelField.shouldUse(context)) {
+                                return true;
+                            }
+                        }
+                    }
+                }
+            }
+            return false;
         }
     }
 

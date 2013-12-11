@@ -22,8 +22,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-import javolution.context.ObjectFactory;
-
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.ObjectType;
 import org.ofbiz.base.util.UtilGenerics;
@@ -33,7 +31,7 @@ import org.ofbiz.entity.EntityCryptoException;
 import org.ofbiz.entity.GenericEntity;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericModelException;
-import org.ofbiz.entity.config.DatasourceInfo;
+import org.ofbiz.entity.config.model.Datasource;
 import org.ofbiz.entity.model.ModelEntity;
 import org.ofbiz.entity.model.ModelField;
 import org.ofbiz.entity.model.ModelFieldType;
@@ -46,18 +44,9 @@ import org.ofbiz.entity.model.ModelFieldType;
 public class EntityExpr extends EntityCondition {
     public static final String module = EntityExpr.class.getName();
 
-    protected static final ObjectFactory<EntityExpr> entityExprFactory = new ObjectFactory<EntityExpr>() {
-        @Override
-        protected EntityExpr create() {
-            return new EntityExpr();
-        }
-    };
-
     private Object lhs = null;
     private EntityOperator<Object, Object, ?> operator = null;
     private Object rhs = null;
-
-    protected EntityExpr() {}
 
     public <L,R,LL,RR> void init(L lhs, EntityComparisonOperator<LL,RR> operator, R rhs) {
         if (lhs == null) {
@@ -130,7 +119,7 @@ public class EntityExpr extends EntityCondition {
     }
 
     @Override
-    public String makeWhereString(ModelEntity modelEntity, List<EntityConditionParam> entityConditionParams, DatasourceInfo datasourceInfo) {
+    public String makeWhereString(ModelEntity modelEntity, List<EntityConditionParam> entityConditionParams, Datasource datasourceInfo) {
         // if (Debug.verboseOn()) Debug.logVerbose("makeWhereString for entity " + modelEntity.getEntityName(), module);
 
         this.checkRhsType(modelEntity, null);

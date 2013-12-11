@@ -20,11 +20,11 @@ package org.ofbiz.service;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
-import com.ibm.icu.util.Calendar;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.TimeZone;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.transaction.Transaction;
@@ -32,6 +32,7 @@ import javax.transaction.Transaction;
 import javolution.util.FastList;
 import javolution.util.FastMap;
 
+import org.ofbiz.base.config.GenericConfigException;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilDateTime;
 import org.ofbiz.base.util.UtilGenerics;
@@ -50,6 +51,8 @@ import org.ofbiz.entity.util.EntityFindOptions;
 import org.ofbiz.entity.util.EntityListIterator;
 import org.ofbiz.security.Security;
 import org.ofbiz.service.config.ServiceConfigUtil;
+
+import com.ibm.icu.util.Calendar;
 
 /**
  * Generic Service Utility Class
@@ -369,14 +372,19 @@ public class ServiceUtil {
     }
 
     public static Map<String, Object> purgeOldJobs(DispatchContext dctx, Map<String, ? extends Object> context) {
-        String sendPool = ServiceConfigUtil.getSendPool();
-        int daysToKeep = ServiceConfigUtil.getPurgeJobDays();
+        Debug.logWarning("WARNING: purgeOldJobs service invoked. This service is obsolete - the Job Scheduler will purge old jobs automatically.", module);
+        String sendPool = null;
+        Calendar cal = Calendar.getInstance();
+        try {
+            sendPool = ServiceConfigUtil.getServiceEngine().getThreadPool().getSendToPool();
+            int daysToKeep = ServiceConfigUtil.getServiceEngine().getThreadPool().getPurgeJobDays();
+            cal.add(Calendar.DAY_OF_YEAR, -daysToKeep);
+        } catch (GenericConfigException e) {
+            Debug.logWarning(e, "Exception thrown while getting service configuration: ", module);
+            return returnError("Exception thrown while getting service configuration: " + e);
+        }
         Delegator delegator = dctx.getDelegator();
 
-        Timestamp now = UtilDateTime.nowTimestamp();
-        Calendar cal = Calendar.getInstance();
-        cal.setTimeInMillis(now.getTime());
-        cal.add(Calendar.DAY_OF_YEAR, daysToKeep * -1);
         Timestamp purgeTime = new Timestamp(cal.getTimeInMillis());
 
         // create the conditions to query
@@ -465,7 +473,7 @@ public class ServiceUtil {
                     noMoreResults = true;
                 }
             }
-            
+
             // Now JobSandbox data is cleaned up. Now process Runtime data and remove the whole data in single shot that is of no need.
             boolean beganTx3 = false;
             GenericValue runtimeData = null;
@@ -475,7 +483,7 @@ public class ServiceUtil {
             try {
                 // begin this transaction
                 beganTx3 = TransactionUtil.begin();
-                
+
                 runTimeDataIt = delegator.find("RuntimeData", null, null, UtilMisc.toSet("runtimeDataId"), null, null);
                 try {
                     while ((runtimeData = runTimeDataIt.next()) != null) {
@@ -683,5 +691,41 @@ public class ServiceUtil {
         }
 
         return ServiceUtil.returnSuccess();
+    }
+
+    /**
+     * Checks all incoming service attributes and look for fields with the same
+     * name in the incoming map and copy those onto the outgoing map. Also
+     * includes a userLogin if service requires one.
+     *
+     * @param dispatcher
+     * @param serviceName
+     * @param fromMap
+     * @param userLogin
+     *            (optional) - will be added to the map if is required
+     * @param timeZone
+     * @param locale
+     * @return filled Map or null on error
+     * @throws GeneralServiceException
+     */
+    public static Map<String, Object> setServiceFields(LocalDispatcher dispatcher, String serviceName, Map<String, Object> fromMap, GenericValue userLogin,
+            TimeZone timeZone, Locale locale) throws GeneralServiceException {
+        Map<String, Object> outMap = FastMap.newInstance();
+
+        ModelService modelService = null;
+        try {
+            modelService = dispatcher.getDispatchContext().getModelService(serviceName);
+        } catch (GenericServiceException e) {
+            String errMsg = "Could not get service definition for service name [" + serviceName + "]: ";
+            Debug.logError(e, errMsg, module);
+            throw new GeneralServiceException(e);
+        }
+        outMap.putAll(modelService.makeValid(fromMap, "IN", true, null, timeZone, locale));
+
+        if (userLogin != null && modelService.auth) {
+            outMap.put("userLogin", userLogin);
+        }
+
+        return outMap;
     }
 }

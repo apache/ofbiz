@@ -57,7 +57,7 @@ under the License.
   <pathelement location="${ofbiz.home.dir}/framework/base/lib/commons/commons-cli-1.0.jar"/>
   <pathelement location="${ofbiz.home.dir}/framework/base/lib/scripting/antlr-2.7.6.jar"/>
   <pathelement location="${ofbiz.home.dir}/framework/base/lib/scripting/asm-3.2.jar"/>
-  <pathelement location="${ofbiz.home.dir}/framework/base/lib/scripting/groovy-all-1.8.6.jar"/>
+  <pathelement location="${ofbiz.home.dir}/framework/base/lib/scripting/groovy-all-2.1.9.jar"/>
  </path>
  <path id="rhino.class.path">
   <pathelement location="${ofbiz.home.dir}/extension/rhino/lib/js-1.7.R1.jar"/>
@@ -90,7 +90,7 @@ under the License.
  <presetdef name="default-javadoc">
     <javadoc classpathref="local.class.path"
              destdir="${build.dir}/javadocs"
-             windowtitle="Open for Business - ${desc}"
+             windowtitle="Apache Open for Business - ${desc}"
              useexternalfile="yes"
              maxmemory="512M"
              encoding="UTF-8"
@@ -258,17 +258,11 @@ under the License.
   </sequential>
  </macrodef>
 
- <macrodef name="yuicompressor" description="Runs the YUI JS/CSS compressor on the specified inFile and saves the output to outFile">
-  <attribute name="inFile"/>
-  <attribute name="outFile"/>
-  <sequential>
-    <echo message="Minify @{inFile}"/>
-      <java jar="${ofbiz.home.dir}/framework/base/lib/yuicompressor-2.4.6.jar" fork="true">
-        <arg value="-o"/>
-        <arg value="@{outFile}"/>
-        <arg value="@{inFile}"/>
-    </java>
-   </sequential>
- </macrodef>
-
+ <presetdef name="externalsubant">
+  <subant inheritall="false">
+   <propertyset>
+    <propertyref name="ofbiz.home.dir"/>
+   </propertyset>
+  </subant>
+ </presetdef>
 </project>

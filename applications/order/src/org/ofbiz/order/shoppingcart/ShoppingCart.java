@@ -18,10 +18,39 @@
  *******************************************************************************/
 package org.ofbiz.order.shoppingcart;
 
+import java.io.Serializable;
+import java.math.BigDecimal;
+import java.math.MathContext;
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.TreeMap;
+
 import javolution.util.FastList;
 import javolution.util.FastMap;
 
-import org.ofbiz.base.util.*;
+import org.ofbiz.base.util.Debug;
+import org.ofbiz.base.util.GeneralException;
+import org.ofbiz.base.util.GeneralRuntimeException;
+import org.ofbiz.base.util.UtilDateTime;
+import org.ofbiz.base.util.UtilFormatOut;
+import org.ofbiz.base.util.UtilGenerics;
+import org.ofbiz.base.util.UtilMisc;
+import org.ofbiz.base.util.UtilNumber;
+import org.ofbiz.base.util.UtilProperties;
+import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.DelegatorFactory;
 import org.ofbiz.entity.GenericEntityException;
@@ -45,13 +74,6 @@ import org.ofbiz.product.product.ProductWorker;
 import org.ofbiz.product.store.ProductStoreWorker;
 import org.ofbiz.service.LocalDispatcher;
 import org.ofbiz.service.ServiceUtil;
-
-import java.io.Serializable;
-import java.math.BigDecimal;
-import java.math.MathContext;
-import java.sql.Timestamp;
-import java.util.*;
-import java.util.Map.Entry;
 
 /**
  * Shopping Cart Object
@@ -214,11 +236,11 @@ public class ShoppingCart implements Iterable<ShoppingCartItem>, Serializable {
         // clone the additionalPartyRoleMap
         this.additionalPartyRole = new HashMap<String, List<String>>();
         for (Map.Entry<String, List<String>> me : cart.additionalPartyRole.entrySet()) {
-            this.additionalPartyRole.put(me.getKey(), new LinkedList<String>((Collection<String>) me.getValue()));
+            this.additionalPartyRole.put(me.getKey(), new LinkedList<String>(me.getValue()));
         }
 
         // clone the groups
-        for(ShoppingCartItemGroup itemGroup : cart.itemGroupByNumberMap.values()) {
+        for (ShoppingCartItemGroup itemGroup : cart.itemGroupByNumberMap.values()) {
             // get the new parent group by number from the existing set; as before the parent must come before all children to work...
             ShoppingCartItemGroup parentGroup = null;
             if (itemGroup.getParentGroup() != null) parentGroup = this.getItemGroupByNumber(itemGroup.getParentGroup().getGroupNumber());
@@ -227,7 +249,7 @@ public class ShoppingCart implements Iterable<ShoppingCartItem>, Serializable {
         }
 
         // clone the items
-        for(ShoppingCartItem item : cart.items()) {
+        for (ShoppingCartItem item : cart.items()) {
             cartLines.add(new ShoppingCartItem(item));
         }
 
@@ -425,7 +447,7 @@ public class ShoppingCart implements Iterable<ShoppingCartItem>, Serializable {
         String previousCurrency = this.currencyUom;
         this.currencyUom = currencyUom;
         if (!previousCurrency.equals(this.currencyUom)) {
-            for(ShoppingCartItem item : this) {
+            for (ShoppingCartItem item : this) {
                 item.updatePrice(dispatcher, this);
             }
         }
@@ -752,14 +774,14 @@ public class ShoppingCart implements Iterable<ShoppingCartItem>, Serializable {
         localList.addAll(multipleItems);
         // the ones to keep...
         for (int i=0; i<maxItems; i++) localList.remove(0);
-        for(ShoppingCartItem item : localList) {
+        for (ShoppingCartItem item : localList) {
             this.removeCartItem(item, dispatcher);
         }
     }
 
     public static BigDecimal getItemsTotalQuantity(List<ShoppingCartItem> cartItems) {
         BigDecimal totalQuantity = BigDecimal.ZERO;
-        for(ShoppingCartItem item : cartItems) {
+        for (ShoppingCartItem item : cartItems) {
             totalQuantity = totalQuantity.add(item.getQuantity());
         }
         return totalQuantity;
@@ -767,7 +789,7 @@ public class ShoppingCart implements Iterable<ShoppingCartItem>, Serializable {
 
     public static List<GenericValue> getItemsProducts(List<ShoppingCartItem> cartItems) {
         List<GenericValue> productList = FastList.newInstance();
-        for(ShoppingCartItem item : cartItems) {
+        for (ShoppingCartItem item : cartItems) {
             GenericValue product = item.getProduct();
             if (product != null) {
                 productList.add(product);
@@ -777,7 +799,7 @@ public class ShoppingCart implements Iterable<ShoppingCartItem>, Serializable {
     }
 
     public void ensureItemsQuantity(List<ShoppingCartItem> cartItems, LocalDispatcher dispatcher, BigDecimal quantity) throws CartItemModifyException {
-        for(ShoppingCartItem item : cartItems) {
+        for (ShoppingCartItem item : cartItems) {
             if (item.getQuantity() != quantity) {
                 item.setQuantity(quantity, dispatcher, this);
             }
@@ -788,7 +810,7 @@ public class ShoppingCart implements Iterable<ShoppingCartItem>, Serializable {
         BigDecimal quantityRemoved = BigDecimal.ZERO;
         // go through the items and reduce quantityToKeep by the item quantities until it is 0, then remove the remaining...
         BigDecimal quantityToKeep = quantity;
-        for(ShoppingCartItem item : cartItems) {
+        for (ShoppingCartItem item : cartItems) {
             if (quantityToKeep.compareTo(item.getQuantity()) >= 0) {
                 // quantityToKeep sufficient to keep it all... just reduce quantityToKeep and move on
                 quantityToKeep = quantityToKeep.subtract(item.getQuantity());
@@ -812,7 +834,7 @@ public class ShoppingCart implements Iterable<ShoppingCartItem>, Serializable {
     // ============== WorkEffort related methods ===============
     public boolean containAnyWorkEffortCartItems() {
         // Check for existing cart item.
-        for(ShoppingCartItem cartItem : this.cartLines) {
+        for (ShoppingCartItem cartItem : this.cartLines) {
             if (cartItem.getItemType().equals("RENTAL_ORDER_ITEM")) {  // create workeffort items?
                 return true;
             }
@@ -822,7 +844,7 @@ public class ShoppingCart implements Iterable<ShoppingCartItem>, Serializable {
 
     public boolean containAllWorkEffortCartItems() {
         // Check for existing cart item.
-        for(ShoppingCartItem cartItem : this.cartLines) {
+        for (ShoppingCartItem cartItem : this.cartLines) {
             if (!cartItem.getItemType().equals("RENTAL_ORDER_ITEM")) { // not a item to create workefforts?
                 return false;
             }
@@ -835,7 +857,7 @@ public class ShoppingCart implements Iterable<ShoppingCartItem>, Serializable {
      * This is determined by making sure no Product has a type where ProductType.isPhysical!=N.
      */
     public boolean containOnlyDigitalGoods() {
-        for(ShoppingCartItem cartItem : this.cartLines) {
+        for (ShoppingCartItem cartItem : this.cartLines) {
             GenericValue product = cartItem.getProduct();
             try {
                 GenericValue productType = product.getRelatedOne("ProductType", true);
@@ -1004,12 +1026,12 @@ public class ShoppingCart implements Iterable<ShoppingCartItem>, Serializable {
         if (itemGroup != null) {
             // go through all cart items and remove from group if they are in it
             List<ShoppingCartItem> cartItemList = this.getCartItemsInGroup(groupNumber);
-            for(ShoppingCartItem cartItem : cartItemList) {
+            for (ShoppingCartItem cartItem : cartItemList) {
                 cartItem.setItemGroup(null);
             }
 
             // if this is a parent of any set them to this group's parent (or null)
-            for(ShoppingCartItemGroup otherItemGroup : this.itemGroupByNumberMap.values()) {
+            for (ShoppingCartItemGroup otherItemGroup : this.itemGroupByNumberMap.values()) {
                 if (itemGroup.equals(otherItemGroup.getParentGroup())) {
                     otherItemGroup.inheritParentsParent();
                 }
@@ -1065,7 +1087,7 @@ public class ShoppingCart implements Iterable<ShoppingCartItem>, Serializable {
         String partyId = this.getPartyId();
         if (UtilValidate.isNotEmpty(partyId)) {
             // recalculate all prices
-            for(ShoppingCartItem cartItem : this) {
+            for (ShoppingCartItem cartItem : this) {
                 cartItem.updatePrice(dispatcher, this);
             }
 
@@ -1550,7 +1572,7 @@ public class ShoppingCart implements Iterable<ShoppingCartItem>, Serializable {
     /** Returns the CartPaymentInfo objects which have matching fields */
     public List<CartPaymentInfo> getPaymentInfos(boolean isPaymentMethod, boolean isPaymentMethodType, boolean hasRefNum) {
         List<CartPaymentInfo> foundRecords = new LinkedList<CartPaymentInfo>();
-        for(CartPaymentInfo inf : paymentInfo) {
+        for (CartPaymentInfo inf : paymentInfo) {
             if (isPaymentMethod && inf.paymentMethodId != null) {
                 if (hasRefNum && inf.refNum != null) {
                     foundRecords.add(inf);
@@ -1576,7 +1598,7 @@ public class ShoppingCart implements Iterable<ShoppingCartItem>, Serializable {
     /** Locates an existing (or creates a new) CartPaymentInfo object */
     public CartPaymentInfo getPaymentInfo(String id, String refNum, String authCode, BigDecimal amount, boolean update) {
         CartPaymentInfo thisInf = this.makePaymentInfo(id, refNum, authCode, amount);
-        for(CartPaymentInfo inf : paymentInfo) {
+        for (CartPaymentInfo inf : paymentInfo) {
             if (inf.compareTo(thisInf) == 0) {
                 // update the info
                 if (update) {
@@ -1612,7 +1634,7 @@ public class ShoppingCart implements Iterable<ShoppingCartItem>, Serializable {
                 // this payment method will set the billing address for the order;
                 // before it is set we have to verify if the billing address is
                 // compatible with the ProductGeos
-                for(GenericValue product : ShoppingCart.getItemsProducts(this.cartLines)) {
+                for (GenericValue product : ShoppingCart.getItemsProducts(this.cartLines)) {
                     if (!ProductWorker.isBillableToAddress(product, billingAddress)) {
                         throw new IllegalArgumentException("The billing address is not compatible with ProductGeos rules.");
                     }
@@ -1655,7 +1677,7 @@ public class ShoppingCart implements Iterable<ShoppingCartItem>, Serializable {
     }
 
     public String getPaymentRef(String id) {
-        for(CartPaymentInfo inf : paymentInfo) {
+        for (CartPaymentInfo inf : paymentInfo) {
             if (inf.paymentMethodId.equals(id) || inf.paymentMethodTypeId.equals(id)) {
                 return inf.refNum[0];
             }
@@ -1666,7 +1688,7 @@ public class ShoppingCart implements Iterable<ShoppingCartItem>, Serializable {
     /** returns the total payment amounts */
     public BigDecimal getPaymentTotal() {
         BigDecimal total = BigDecimal.ZERO;
-        for(CartPaymentInfo inf : paymentInfo) {
+        for (CartPaymentInfo inf : paymentInfo) {
             if (inf.amount != null) {
                 total = total.add(inf.amount);
             }
@@ -1719,7 +1741,7 @@ public class ShoppingCart implements Iterable<ShoppingCartItem>, Serializable {
                 List<GenericValue> declinedPaymentMethods = delegator.findByAnd("OrderPaymentPreference", UtilMisc.toMap("orderId", orderId, "statusId", "PAYMENT_DECLINED"), null, false);
                 if (!UtilValidate.isEmpty(declinedPaymentMethods)) {
                     List<String> paymentMethodIdsToRemove = new ArrayList<String>();
-                    for(GenericValue opp : declinedPaymentMethods) {
+                    for (GenericValue opp : declinedPaymentMethods) {
                         paymentMethodIdsToRemove.add(opp.getString("paymentMethodId"));
                     }
                     clearPaymentMethodsById(paymentMethodIdsToRemove);
@@ -1733,7 +1755,7 @@ public class ShoppingCart implements Iterable<ShoppingCartItem>, Serializable {
 
     private void expireSingleUsePayments() {
         Timestamp now = UtilDateTime.nowTimestamp();
-        for(CartPaymentInfo inf : paymentInfo) {
+        for (CartPaymentInfo inf : paymentInfo) {
             if (inf.paymentMethodId == null || !inf.singleUse) {
                 continue;
             }
@@ -1760,7 +1782,7 @@ public class ShoppingCart implements Iterable<ShoppingCartItem>, Serializable {
     /** Returns the Payment Method Ids */
     public List<String> getPaymentMethodIds() {
         List<String> pmi = new LinkedList<String>();
-        for(CartPaymentInfo inf : paymentInfo) {
+        for (CartPaymentInfo inf : paymentInfo) {
             if (inf.paymentMethodId != null) {
                 pmi.add(inf.paymentMethodId);
             }
@@ -1771,7 +1793,7 @@ public class ShoppingCart implements Iterable<ShoppingCartItem>, Serializable {
     /** Returns the Payment Method Ids */
     public List<String> getPaymentMethodTypeIds() {
         List<String> pmt = FastList.newInstance();
-        for(CartPaymentInfo inf : paymentInfo) {
+        for (CartPaymentInfo inf : paymentInfo) {
             if (inf.paymentMethodTypeId != null) {
                 pmt.add(inf.paymentMethodTypeId);
             }
@@ -1783,7 +1805,7 @@ public class ShoppingCart implements Iterable<ShoppingCartItem>, Serializable {
     public List<GenericValue> getPaymentMethods() {
         List<GenericValue> methods = FastList.newInstance();
         if (UtilValidate.isNotEmpty(paymentInfo)) {
-            for(String paymentMethodId : getPaymentMethodIds()) {
+            for (String paymentMethodId : getPaymentMethodIds()) {
                 try {
                     GenericValue paymentMethod = this.getDelegator().findOne("PaymentMethod", UtilMisc.toMap("paymentMethodId", paymentMethodId), true);
                     if (paymentMethod != null) {
@@ -1804,7 +1826,7 @@ public class ShoppingCart implements Iterable<ShoppingCartItem>, Serializable {
     public List<GenericValue> getPaymentMethodTypes() {
         List<GenericValue> types = new LinkedList<GenericValue>();
         if (UtilValidate.isNotEmpty(paymentInfo)) {
-            for(String id : getPaymentMethodIds()) {
+            for (String id : getPaymentMethodIds()) {
                 try {
                     types.add(this.getDelegator().findOne("PaymentMethodType", UtilMisc.toMap("paymentMethodTypeId", id), true));
                 } catch (GenericEntityException e) {
@@ -1820,7 +1842,7 @@ public class ShoppingCart implements Iterable<ShoppingCartItem>, Serializable {
         List<GenericValue> paymentMethods = this.getPaymentMethods();
         List<GenericValue> creditCards = new LinkedList<GenericValue>();
         if (paymentMethods != null) {
-            for(GenericValue pm : paymentMethods) {
+            for (GenericValue pm : paymentMethods) {
                 if ("CREDIT_CARD".equals(pm.getString("paymentMethodTypeId"))) {
                     try {
                         GenericValue cc = pm.getRelatedOne("CreditCard", false);
@@ -1839,7 +1861,7 @@ public class ShoppingCart implements Iterable<ShoppingCartItem>, Serializable {
         List<GenericValue> paymentMethods = this.getPaymentMethods();
         List<GenericValue> giftCards = new LinkedList<GenericValue>();
         if (paymentMethods != null) {
-            for(GenericValue pm : paymentMethods) {
+            for (GenericValue pm : paymentMethods) {
                 if ("GIFT_CARD".equals(pm.getString("paymentMethodTypeId"))) {
                     try {
                         GenericValue gc = pm.getRelatedOne("GiftCard", false);
@@ -1871,7 +1893,7 @@ public class ShoppingCart implements Iterable<ShoppingCartItem>, Serializable {
 
     public GenericValue getBillingAddress() {
         GenericValue billingAddress = null;
-        for(CartPaymentInfo inf : paymentInfo) {
+        for (CartPaymentInfo inf : paymentInfo) {
             billingAddress = inf.getBillingAddress(this.getDelegator());
             if (billingAddress != null) {
                 break;
@@ -2024,7 +2046,7 @@ public class ShoppingCart implements Iterable<ShoppingCartItem>, Serializable {
     public Map<ShoppingCartItem, BigDecimal> getShipGroupItems(int idx) {
         CartShipInfo csi = this.getShipInfo(idx);
         Map<ShoppingCartItem, BigDecimal> qtyMap = FastMap.newInstance();
-        for(ShoppingCartItem item : csi.shipItemInfo.keySet()) {
+        for (ShoppingCartItem item : csi.shipItemInfo.keySet()) {
             CartShipInfo.CartShipItemInfo csii = csi.shipItemInfo.get(item);
             qtyMap.put(item, csii.quantity);
         }
@@ -2056,7 +2078,7 @@ public class ShoppingCart implements Iterable<ShoppingCartItem>, Serializable {
         Map<Integer, BigDecimal> shipGroups = this.getShipGroups(item);
 
         if ((shipGroups != null) && (shipGroups.keySet() != null)) {
-            for(Integer shipGroup : shipGroups.keySet()) {
+            for (Integer shipGroup : shipGroups.keySet()) {
                 CartShipInfo cartShipInfo = this.getShipInfo(shipGroup.intValue());
 
                 cartShipInfo.resetShipAfterDateIfBefore(item.getShipAfterDate());
@@ -2204,7 +2226,7 @@ public class ShoppingCart implements Iterable<ShoppingCartItem>, Serializable {
             if (shippingAddress != null) {
                 Set<ShoppingCartItem> shipItems = csi.getShipItems();
                 if (UtilValidate.isNotEmpty(shipItems)) {
-                    for(ShoppingCartItem cartItem : shipItems) {
+                    for (ShoppingCartItem cartItem : shipItems) {
                         GenericValue product = cartItem.getProduct();
                         if (UtilValidate.isNotEmpty(product)) {
                             if (!ProductWorker.isShippableToAddress(product, shippingAddress)) {
@@ -2217,11 +2239,19 @@ public class ShoppingCart implements Iterable<ShoppingCartItem>, Serializable {
         }
         csi.setContactMechId(shippingContactMechId);
     }
-
-    public void setShippingContactMechId(String shippingContactMechId) {
-        this.setShippingContactMechId(0, shippingContactMechId);
+    
+    /**
+     * Sets @param shippingContactMechId in all ShipInfo(ShipGroups) associated
+     * with this ShoppingCart
+     * <p>
+     * @param shippingContactMechId
+     */
+    public void setAllShippingContactMechId(String shippingContactMechId) {
+        for (int x=0; x < shipInfo.size(); x++) {
+            this.setShippingContactMechId(x, shippingContactMechId);
+        }
     }
-
+    
     /** Returns the shipping contact mech id. */
     public String getShippingContactMechId(int idx) {
         CartShipInfo csi = this.getShipInfo(idx);
@@ -2237,11 +2267,19 @@ public class ShoppingCart implements Iterable<ShoppingCartItem>, Serializable {
         CartShipInfo csi = this.getShipInfo(idx);
         csi.shipmentMethodTypeId = shipmentMethodTypeId;
     }
-
-    public void setShipmentMethodTypeId(String shipmentMethodTypeId) {
-        this.setShipmentMethodTypeId(0, shipmentMethodTypeId);
+    
+    /**
+     * Sets @param shipmentMethodTypeId in all ShipInfo(ShipGroups) associated
+     * with this ShoppingCart
+     * <p>
+     * @param shipmentMethodTypeId
+     */
+    public void setAllShipmentMethodTypeId(String shipmentMethodTypeId) {
+        for (int x=0; x < shipInfo.size(); x++) {
+            this.setShipmentMethodTypeId(x, shipmentMethodTypeId);
+        }
     }
-
+    
     /** Returns the shipment method type ID */
     public String getShipmentMethodTypeId(int idx) {
         CartShipInfo csi = this.getShipInfo(idx);
@@ -2285,9 +2323,17 @@ public class ShoppingCart implements Iterable<ShoppingCartItem>, Serializable {
         CartShipInfo csi = this.getShipInfo(idx);
         csi.shippingInstructions = shippingInstructions;
     }
-
-    public void setShippingInstructions(String shippingInstructions) {
-        this.setShippingInstructions(0, shippingInstructions);
+    
+    /**
+     * Sets @param shippingInstructions in all ShipInfo(ShipGroups) associated
+     * with this ShoppingCart
+     * <p>
+     * @param shippingInstructions
+     */
+    public void setAllShippingInstructions(String shippingInstructions) {
+        for (int x=0; x < shipInfo.size(); x++) {
+            this.setShippingInstructions(x, shippingInstructions);
+        }
     }
 
     /** Returns the shipping instructions. */
@@ -2306,10 +2352,19 @@ public class ShoppingCart implements Iterable<ShoppingCartItem>, Serializable {
             csi.setMaySplit(maySplit);
         }
     }
-
-    public void setMaySplit(Boolean maySplit) {
-        this.setMaySplit(0, maySplit);
+    
+    /**
+     * Sets @param maySplit in all ShipInfo(ShipGroups) associated
+     * with this ShoppingCart
+     * <p>
+     * @param maySplit
+     */
+    public void setAllMaySplit(Boolean maySplit) {
+        for (int x=0; x < shipInfo.size(); x++) {
+            this.setMaySplit(x, maySplit);
+        }
     }
+    
 
     /** Returns Boolean.TRUE if the order may be split (null if unspecified) */
     public String getMaySplit(int idx) {
@@ -2326,10 +2381,18 @@ public class ShoppingCart implements Iterable<ShoppingCartItem>, Serializable {
         csi.giftMessage = giftMessage;
     }
 
-    public void setGiftMessage(String giftMessage) {
-        this.setGiftMessage(0, giftMessage);
+    /**
+     * Sets @param giftMessage in all ShipInfo(ShipGroups) associated
+     * with this ShoppingCart
+     * <p>
+     * @param giftMessage
+     */
+    public void setAllGiftMessage(String giftMessage) {
+        for (int x=0; x < shipInfo.size(); x++) {
+            this.setGiftMessage(x, giftMessage);
+        }
     }
-
+    
     public String getGiftMessage(int idx) {
         CartShipInfo csi = this.getShipInfo(idx);
         return csi.giftMessage;
@@ -2346,10 +2409,18 @@ public class ShoppingCart implements Iterable<ShoppingCartItem>, Serializable {
         }
     }
 
-    public void setIsGift(Boolean isGift) {
-        this.setIsGift(0, isGift);
+    /**
+     * Sets @param isGift in all ShipInfo(ShipGroups) associated
+     * with this ShoppingCart
+     * <p>
+     * @param isGift
+     */
+    public void setAllIsGift(Boolean isGift) {
+        for (int x=0; x < shipInfo.size(); x++) {
+            this.setIsGift(x, isGift);
+        }
     }
-
+    
     public String getIsGift(int idx) {
         CartShipInfo csi = this.getShipInfo(idx);
         return csi.isGift;
@@ -2363,11 +2434,19 @@ public class ShoppingCart implements Iterable<ShoppingCartItem>, Serializable {
         CartShipInfo csi = this.getShipInfo(idx);
         csi.carrierPartyId = carrierPartyId;
     }
-
-    public void setCarrierPartyId(String carrierPartyId) {
-        this.setCarrierPartyId(0, carrierPartyId);
+    
+    /**
+     * Sets @param carrierPartyId in all ShipInfo(ShipGroups) associated
+     * with this ShoppingCart
+     * <p>
+     * @param carrierPartyId
+     */
+    public void setAllCarrierPartyId(String carrierPartyId) {
+        for (int x=0; x < shipInfo.size(); x++) {
+            this.setCarrierPartyId(x, carrierPartyId);
+        }
     }
-
+    
     public String getCarrierPartyId(int idx) {
         CartShipInfo csi = this.getShipInfo(idx);
         return csi.carrierPartyId;
@@ -2390,9 +2469,17 @@ public class ShoppingCart implements Iterable<ShoppingCartItem>, Serializable {
         CartShipInfo csi = this.getShipInfo(idx);
         csi.productStoreShipMethId = productStoreShipMethId;
     }
-
-    public void setProductStoreShipMethId(String productStoreShipMethId) {
-        this.setProductStoreShipMethId(0, productStoreShipMethId);
+    
+    /**
+     * Sets @param productStoreShipMethId in all ShipInfo(ShipGroups) associated
+     * with this ShoppingCart
+     * <p>
+     * @param productStoreShipMethId
+     */
+    public void setAllProductStoreShipMethId(String productStoreShipMethId) {
+        for (int x=0; x < shipInfo.size(); x++) {
+            this.setProductStoreShipMethId(x, productStoreShipMethId);
+        }
     }
 
     public void setShipGroupFacilityId(int idx, String facilityId) {
@@ -2490,7 +2577,7 @@ public class ShoppingCart implements Iterable<ShoppingCartItem>, Serializable {
                     Collection<GenericValue> shippingContactMechList = ContactHelper.getContactMech(orderParty, "SHIPPING_LOCATION", "POSTAL_ADDRESS", false);
                     if (UtilValidate.isNotEmpty(shippingContactMechList)) {
                         GenericValue shippingContactMech = (shippingContactMechList.iterator()).next();
-                        this.setShippingContactMechId(shippingContactMech.getString("contactMechId"));
+                        this.setAllShippingContactMechId(shippingContactMech.getString("contactMechId"));
                     }
                 } catch (GenericEntityException e) {
                     Debug.logError(e, "Error setting shippingContactMechId in setDefaultCheckoutOptions() method.", module);
@@ -2500,8 +2587,8 @@ public class ShoppingCart implements Iterable<ShoppingCartItem>, Serializable {
             ShippingEstimateWrapper shipEstimateWrapper = org.ofbiz.order.shoppingcart.shipping.ShippingEstimateWrapper.getWrapper(dispatcher, this, 0);
             GenericValue carrierShipmentMethod = EntityUtil.getFirst(shipEstimateWrapper.getShippingMethods());
             if (carrierShipmentMethod != null) {
-                this.setShipmentMethodTypeId(carrierShipmentMethod.getString("shipmentMethodTypeId"));
-                this.setCarrierPartyId(carrierShipmentMethod.getString("partyId"));
+                this.setAllShipmentMethodTypeId(carrierShipmentMethod.getString("shipmentMethodTypeId"));
+                this.setAllCarrierPartyId(carrierShipmentMethod.getString("partyId"));
             }
         } else {
             // checkout options for purchase orders
@@ -2521,12 +2608,12 @@ public class ShoppingCart implements Iterable<ShoppingCartItem>, Serializable {
                 }
             }
             // shipping options
-            this.setShipmentMethodTypeId(0, "NO_SHIPPING");
-            this.setCarrierPartyId(0, "_NA_");
-            this.setShippingInstructions(0, "");
-            this.setGiftMessage(0, "");
-            this.setMaySplit(0, Boolean.TRUE);
-            this.setIsGift(0, Boolean.FALSE);
+            this.setAllShipmentMethodTypeId("NO_SHIPPING");
+            this.setAllCarrierPartyId("_NA_");
+            this.setAllShippingInstructions("");
+            this.setAllGiftMessage("");
+            this.setAllMaySplit(Boolean.TRUE);
+            this.setAllIsGift(Boolean.FALSE);
             //this.setInternalCode(internalCode);
         }
     }
@@ -2551,7 +2638,7 @@ public class ShoppingCart implements Iterable<ShoppingCartItem>, Serializable {
     public BigDecimal getTotalShipping() {
         BigDecimal tempShipping = BigDecimal.ZERO;
 
-        for(CartShipInfo csi : this.shipInfo) {
+        for (CartShipInfo csi : this.shipInfo) {
             tempShipping = tempShipping.add(csi.shipEstimate);
         }
 
@@ -2561,7 +2648,7 @@ public class ShoppingCart implements Iterable<ShoppingCartItem>, Serializable {
     /** Returns the item-total in the cart (not including discount/tax/shipping). */
     public BigDecimal getItemTotal() {
         BigDecimal itemTotal = BigDecimal.ZERO;
-        for(ShoppingCartItem cartItem : this.cartLines) {
+        for (ShoppingCartItem cartItem : this.cartLines) {
             itemTotal = itemTotal.add(cartItem.getBasePrice());
         }
         return itemTotal;
@@ -2570,7 +2657,7 @@ public class ShoppingCart implements Iterable<ShoppingCartItem>, Serializable {
     /** Returns the sub-total in the cart (item-total - discount). */
     public BigDecimal getSubTotal() {
         BigDecimal itemsTotal = BigDecimal.ZERO;
-        for(ShoppingCartItem cartItem : this.cartLines) {
+        for (ShoppingCartItem cartItem : this.cartLines) {
             itemsTotal = itemsTotal.add(cartItem.getItemSubTotal());
         }
         return itemsTotal;
@@ -2588,7 +2675,7 @@ public class ShoppingCart implements Iterable<ShoppingCartItem>, Serializable {
 
     public BigDecimal getDisplaySubTotal() {
         BigDecimal itemsTotal = BigDecimal.ZERO;
-        for(ShoppingCartItem cartItem : this.cartLines) {
+        for (ShoppingCartItem cartItem : this.cartLines) {
             itemsTotal = itemsTotal.add(cartItem.getDisplayItemSubTotal());
         }
         return itemsTotal;
@@ -2601,7 +2688,7 @@ public class ShoppingCart implements Iterable<ShoppingCartItem>, Serializable {
 
     public BigDecimal getDisplayRecurringSubTotal() {
         BigDecimal itemsTotal = BigDecimal.ZERO;
-        for(ShoppingCartItem cartItem : this.cartLines) {
+        for (ShoppingCartItem cartItem : this.cartLines) {
             itemsTotal = itemsTotal.add(cartItem.getDisplayItemRecurringSubTotal());
         }
         return itemsTotal;
@@ -2619,7 +2706,7 @@ public class ShoppingCart implements Iterable<ShoppingCartItem>, Serializable {
     /** Returns the sub-total in the cart (item-total - discount). */
     public BigDecimal getSubTotalForPromotions() {
         BigDecimal itemsTotal = BigDecimal.ZERO;
-        for(ShoppingCartItem cartItem : this.cartLines) {
+        for (ShoppingCartItem cartItem : this.cartLines) {
             GenericValue product = cartItem.getProduct();
             if (product != null && "N".equals(product.getString("includeInPromotions"))) {
                 // don't include in total if this is the case...
@@ -2637,7 +2724,7 @@ public class ShoppingCart implements Iterable<ShoppingCartItem>, Serializable {
     public BigDecimal getOrderPaymentPreferenceTotalByType(String paymentMethodTypeId) {
         BigDecimal total = BigDecimal.ZERO;
         String thisPaymentMethodTypeId = null;
-        for(CartPaymentInfo payment : paymentInfo) {
+        for (CartPaymentInfo payment : paymentInfo) {
             if (payment.amount == null) continue;
             if (payment.paymentMethodId != null) {
                 try {
@@ -2783,7 +2870,7 @@ public class ShoppingCart implements Iterable<ShoppingCartItem>, Serializable {
         if (termTypeId == null) {
             return false;
         }
-        for(GenericValue orderTerm : orderTerms) {
+        for (GenericValue orderTerm : orderTerms) {
             if (termTypeId.equals(orderTerm.getString("termTypeId"))) {
                 return true;
             }
@@ -2808,7 +2895,7 @@ public class ShoppingCart implements Iterable<ShoppingCartItem>, Serializable {
 
         adjsLists.add(this.getAdjustments());
 
-        for(ShoppingCartItem item : this) {
+        for (ShoppingCartItem item : this) {
             if (item.getAdjustments() != null) {
                 adjsLists.add(item.getAdjustments());
             }
@@ -2834,7 +2921,7 @@ public class ShoppingCart implements Iterable<ShoppingCartItem>, Serializable {
     public BigDecimal getTotalWeight() {
         BigDecimal weight = BigDecimal.ZERO;
 
-        for(ShoppingCartItem item : this.cartLines) {
+        for (ShoppingCartItem item : this.cartLines) {
             weight = weight.add(item.getWeight().multiply(item.getQuantity()));
         }
         return weight;
@@ -2844,7 +2931,7 @@ public class ShoppingCart implements Iterable<ShoppingCartItem>, Serializable {
     public BigDecimal getTotalQuantity() {
         BigDecimal count = BigDecimal.ZERO;
 
-        for(ShoppingCartItem item : this.cartLines) {
+        for (ShoppingCartItem item : this.cartLines) {
             count = count.add(item.getQuantity());
         }
         return count;
@@ -2940,7 +3027,7 @@ public class ShoppingCart implements Iterable<ShoppingCartItem>, Serializable {
     /** Returns true when there are shippable items in the cart */
     public boolean shippingApplies() {
         boolean shippingApplies = false;
-        for(ShoppingCartItem item : this) {
+        for (ShoppingCartItem item : this) {
             if (item.shippingApplies()) {
                 shippingApplies = true;
                 break;
@@ -2952,7 +3039,7 @@ public class ShoppingCart implements Iterable<ShoppingCartItem>, Serializable {
     /** Returns true when there are taxable items in the cart */
     public boolean taxApplies() {
         boolean taxApplies = false;
-        for(ShoppingCartItem item : this) {
+        for (ShoppingCartItem item : this) {
             if (item.taxApplies()) {
                 taxApplies = true;
                 break;
@@ -3063,6 +3150,21 @@ public class ShoppingCart implements Iterable<ShoppingCartItem>, Serializable {
         this.productPromoUseInfoList.add(new ProductPromoUseInfo(productPromoId, productPromoCodeId, totalDiscountAmount, quantityLeftInActions));
     }
 
+    public void removeProductPromoUse(String productPromoId) {
+        if (!productPromoId.isEmpty()) {
+            int index = -1;
+            for (ProductPromoUseInfo productPromoUseInfo : this.productPromoUseInfoList) {
+                if (productPromoId.equals(productPromoUseInfo.productPromoId)) {
+                    index = this.productPromoUseInfoList.indexOf(productPromoUseInfo);
+                    break;
+                }
+            }
+            if (index != -1) {
+                this.productPromoUseInfoList.remove(index);
+            }
+        }
+    }
+
     public void clearProductPromoUseInfo() {
         // clear out info for general promo use
         this.productPromoUseInfoList.clear();
@@ -3070,7 +3172,7 @@ public class ShoppingCart implements Iterable<ShoppingCartItem>, Serializable {
 
     public void clearCartItemUseInPromoInfo() {
         // clear out info about which cart items have been used in promos
-        for(ShoppingCartItem cartLine : this) {
+        for (ShoppingCartItem cartLine : this) {
             cartLine.clearPromoRuleUseInfo();
         }
     }
@@ -3083,7 +3185,7 @@ public class ShoppingCart implements Iterable<ShoppingCartItem>, Serializable {
         BigDecimal totalDiscount = BigDecimal.ZERO;
         List<GenericValue> cartAdjustments = this.getAdjustments();
         if (cartAdjustments != null) {
-            for(GenericValue checkOrderAdjustment : cartAdjustments) {
+            for (GenericValue checkOrderAdjustment : cartAdjustments) {
                 if (UtilValidate.isNotEmpty(checkOrderAdjustment.getString("productPromoId")) &&
                         UtilValidate.isNotEmpty(checkOrderAdjustment.getString("productPromoRuleId")) &&
                         UtilValidate.isNotEmpty(checkOrderAdjustment.getString("productPromoActionSeqId"))) {
@@ -3095,7 +3197,7 @@ public class ShoppingCart implements Iterable<ShoppingCartItem>, Serializable {
         }
 
         // add cart line adjustments from promo actions
-        for(ShoppingCartItem checkItem : this) {
+        for (ShoppingCartItem checkItem : this) {
             Iterator<GenericValue> checkOrderAdjustments = UtilMisc.toIterator(checkItem.getAdjustments());
             while (checkOrderAdjustments != null && checkOrderAdjustments.hasNext()) {
                 GenericValue checkOrderAdjustment = checkOrderAdjustments.next();
@@ -3199,13 +3301,13 @@ public class ShoppingCart implements Iterable<ShoppingCartItem>, Serializable {
         // remove all cart adjustments
         this.adjustments.clear();
         // remove all cart item adjustments
-        for(ShoppingCartItem checkItem : this) {
+        for (ShoppingCartItem checkItem : this) {
             checkItem.getAdjustments().clear();
         }
     }
 
     public void clearAllItemStatus() {
-        for(ShoppingCartItem item : this) {
+        for (ShoppingCartItem item : this) {
             item.setStatusId(null);
         }
     }
@@ -3239,13 +3341,13 @@ public class ShoppingCart implements Iterable<ShoppingCartItem>, Serializable {
     }
 
     public synchronized void resetPromoRuleUse(String productPromoId, String productPromoRuleId) {
-        for(ShoppingCartItem cartItem : this) {
+        for (ShoppingCartItem cartItem : this) {
             cartItem.resetPromoRuleUse(productPromoId, productPromoRuleId);
         }
     }
 
     public synchronized void confirmPromoRuleUse(String productPromoId, String productPromoRuleId) {
-        for(ShoppingCartItem cartItem : this) {
+        for (ShoppingCartItem cartItem : this) {
             cartItem.confirmPromoRuleUse(productPromoId, productPromoRuleId);
         }
     }
@@ -3259,7 +3361,7 @@ public class ShoppingCart implements Iterable<ShoppingCartItem>, Serializable {
         // search if there is an existing entry
         List<String> parties = additionalPartyRole.get(roleTypeId);
         if (parties != null) {
-            for(String pi : parties) {
+            for (String pi : parties) {
                 if (pi.equals(partyId)) {
                     return;
                 }
@@ -3396,7 +3498,7 @@ public class ShoppingCart implements Iterable<ShoppingCartItem>, Serializable {
 
     public List<GenericValue> makeOrderItemGroups() {
         List<GenericValue> result = FastList.newInstance();
-        for(ShoppingCart.ShoppingCartItemGroup itemGroup : this.itemGroupByNumberMap.values()) {
+        for (ShoppingCart.ShoppingCartItemGroup itemGroup : this.itemGroupByNumberMap.values()) {
             result.add(itemGroup.makeOrderItemGroup(this.getDelegator()));
         }
         return result;
@@ -3406,7 +3508,7 @@ public class ShoppingCart implements Iterable<ShoppingCartItem>, Serializable {
         if (dispatcher == null) return;
         synchronized (cartLines) {
             List<ShoppingCartItem> cartLineItems = new LinkedList<ShoppingCartItem>(cartLines);
-            for(ShoppingCartItem item : cartLineItems) {
+            for (ShoppingCartItem item : cartLineItems) {
                 //Debug.logInfo("Item qty: " + item.getQuantity(), module);
                 try {
                     item.explodeItem(this, dispatcher);
@@ -3427,7 +3529,7 @@ public class ShoppingCart implements Iterable<ShoppingCartItem>, Serializable {
     public void explodeItems(List<ShoppingCartItem> shoppingCartItems, LocalDispatcher dispatcher) {
         if (dispatcher == null) return;
         synchronized (cartLines) {
-            for(ShoppingCartItem item : shoppingCartItems) {
+            for (ShoppingCartItem item : shoppingCartItems) {
                 //Debug.logInfo("Item qty: " + item.getQuantity(), module);
                 try {
                     item.explodeItem(this, dispatcher);
@@ -3701,7 +3803,7 @@ public class ShoppingCart implements Iterable<ShoppingCartItem>, Serializable {
                 remainingAmount = BigDecimal.ZERO;
             }
         }
-        for(CartPaymentInfo inf : paymentInfo) {
+        for (CartPaymentInfo inf : paymentInfo) {
             if (inf.amount == null) {
                 inf.amount = remainingAmount;
                 remainingAmount = BigDecimal.ZERO;
@@ -3720,7 +3822,7 @@ public class ShoppingCart implements Iterable<ShoppingCartItem>, Serializable {
             Collection<GenericValue> infos = item.getOrderItemPriceInfos();
 
             if (infos != null) {
-                for(GenericValue orderItemPriceInfo : infos) {
+                for (GenericValue orderItemPriceInfo : infos) {
                     orderItemPriceInfo.set("orderItemSeqId", item.getOrderItemSeqId());
                     allInfos.add(orderItemPriceInfo);
                 }
@@ -3751,11 +3853,11 @@ public class ShoppingCart implements Iterable<ShoppingCartItem>, Serializable {
     /** make a list of SurveyResponse object to update with order information set */
     public List<GenericValue> makeAllOrderItemSurveyResponses() {
         List<GenericValue> allInfos = new LinkedList<GenericValue>();
-        for(ShoppingCartItem item : this) {
+        for (ShoppingCartItem item : this) {
             List<String> responses = UtilGenerics.checkList(item.getAttribute("surveyResponses"));
             GenericValue response = null;
             if (responses != null) {
-                for(String responseId : responses) {
+                for (String responseId : responses) {
                     try {
                         response = this.getDelegator().findOne("SurveyResponse", UtilMisc.toMap("surveyResponseId", responseId), false);
                     } catch (GenericEntityException e) {
@@ -3822,7 +3924,7 @@ public class ShoppingCart implements Iterable<ShoppingCartItem>, Serializable {
     public List<GenericValue> makeAllShipGroupInfos() {
         List<GenericValue> groups = new LinkedList<GenericValue>();
         long seqId = 1;
-        for(CartShipInfo csi : this.shipInfo) {
+        for (CartShipInfo csi : this.shipInfo) {
             groups.addAll(csi.makeItemShipGroupAndAssoc(this.getDelegator(), this, seqId));
             seqId++;
         }
@@ -3845,7 +3947,7 @@ public class ShoppingCart implements Iterable<ShoppingCartItem>, Serializable {
 
             for (ShoppingCartItem item : cartLines) {
                 Map<String, String> orderItemAttributes = item.getOrderItemAttributes();
-                for(String key : orderItemAttributes.keySet()) {
+                for (String key : orderItemAttributes.keySet()) {
                     String value = orderItemAttributes.get(key);
 
                     GenericValue orderItemAttribute = getDelegator().makeValue("OrderItemAttribute");
@@ -4082,7 +4184,7 @@ public class ShoppingCart implements Iterable<ShoppingCartItem>, Serializable {
             Set<ShoppingCartItem> shipItems = shipInfo.getShipItems();
             if (UtilValidate.isEmpty(shipItems)) continue;
 
-            for(ShoppingCartItem cartItem : shipItems) {
+            for (ShoppingCartItem cartItem : shipItems) {
                 BigDecimal itemQuantity = cartItem.getQuantity();
                 BigDecimal dropShipQuantity = BigDecimal.ZERO;
 
@@ -4171,9 +4273,9 @@ public class ShoppingCart implements Iterable<ShoppingCartItem>, Serializable {
             shipInfo.supplierPartyId = supplierPartyId;
             
             Map<ShoppingCartItem, Map<Integer, BigDecimal>> supplierCartItems = UtilGenerics.checkMap(dropShipItems.get(supplierPartyId));
-            for(ShoppingCartItem cartItem : supplierCartItems.keySet()) {
+            for (ShoppingCartItem cartItem : supplierCartItems.keySet()) {
                 Map<Integer, BigDecimal> cartItemGroupQuantities = UtilGenerics.checkMap(supplierCartItems.get(cartItem));
-                for(Integer previousShipGroupIndex : cartItemGroupQuantities.keySet()) {
+                for (Integer previousShipGroupIndex : cartItemGroupQuantities.keySet()) {
                     BigDecimal dropShipQuantity = cartItemGroupQuantities.get(previousShipGroupIndex);
                     positionItemToGroup(cartItem, dropShipQuantity, previousShipGroupIndex.intValue(), newShipGroupIndex, true);
                 }
@@ -4200,6 +4302,7 @@ public class ShoppingCart implements Iterable<ShoppingCartItem>, Serializable {
             }
         }
 
+        @Override
         public boolean equals(java.lang.Object obj) {
             if (obj instanceof BasePriceOrderComparator) {
                 return this.ascending == ((BasePriceOrderComparator) obj).ascending;
@@ -4271,6 +4374,7 @@ public class ShoppingCart implements Iterable<ShoppingCartItem>, Serializable {
             }
         }
 
+        @Override
         public boolean equals(Object obj) {
             if (obj == null) return false;
             ShoppingCartItemGroup that = (ShoppingCartItemGroup) obj;
@@ -4377,7 +4481,7 @@ public class ShoppingCart implements Iterable<ShoppingCartItem>, Serializable {
 
         public void clearAllTaxInfo() {
             this.shipTaxAdj.clear();
-            for(CartShipItemInfo itemInfo : shipItemInfo.values()) {
+            for (CartShipItemInfo itemInfo : shipItemInfo.values()) {
                 itemInfo.itemTaxAdj.clear();
             }
         }
@@ -4462,13 +4566,13 @@ public class ShoppingCart implements Iterable<ShoppingCartItem>, Serializable {
             }
 
             // create the top level tax adjustments
-            for(GenericValue taxAdj : shipTaxAdj) {
+            for (GenericValue taxAdj : shipTaxAdj) {
                 taxAdj.set("shipGroupSeqId", shipGroupSeqId);
                 values.add(taxAdj);
             }
 
             // create the ship group item associations
-            for(ShoppingCartItem item : shipItemInfo.keySet()) {
+            for (ShoppingCartItem item : shipItemInfo.keySet()) {
                 CartShipItemInfo itemInfo = shipItemInfo.get(item);
 
                 GenericValue assoc = delegator.makeValue("OrderItemShipGroupAssoc");
@@ -4478,7 +4582,7 @@ public class ShoppingCart implements Iterable<ShoppingCartItem>, Serializable {
                 values.add(assoc);
 
                 // create the item tax adjustment
-                for(GenericValue taxAdj : itemInfo.itemTaxAdj) {
+                for (GenericValue taxAdj : itemInfo.itemTaxAdj) {
                     taxAdj.set("orderItemSeqId", item.getOrderItemSeqId());
                     taxAdj.set("shipGroupSeqId", shipGroupSeqId);
                     values.add(taxAdj);
@@ -4732,7 +4836,7 @@ public class ShoppingCart implements Iterable<ShoppingCartItem>, Serializable {
                     throw new GeneralRuntimeException("Split Payment Preference per Ship Group does not yet support multiple Payment Methods");
                 }
                 if ("Y".equals(splitPayPrefPerShpGrp)  && cart.paymentInfo.size() == 1) {
-                    for(CartShipInfo csi : cart.getShipGroups()) {
+                    for (CartShipInfo csi : cart.getShipGroups()) {
                         maxAmount = csi.getTotal().add(cart.getOrderOtherAdjustmentTotal().divide(new BigDecimal(cart.getShipGroupSize()), generalRounding)).add(csi.getShipEstimate().add(csi.getTotalTax(cart)));
                         maxAmount = maxAmount.setScale(scale, rounding);
 
@@ -4876,11 +4980,13 @@ public class ShoppingCart implements Iterable<ShoppingCartItem>, Serializable {
             }
         }
 
+        @Override
         public String toString() {
             return "Pm: " + paymentMethodId + " / PmType: " + paymentMethodTypeId + " / Amt: " + amount + " / Ref: " + refNum[0] + "!" + refNum[1];
         }
     }
 
+    @Override
     protected void finalize() throws Throwable {
         // DEJ20050518 we should not call clear because it kills the auto-save shopping list and is unnecessary given that when this object is GC'ed it will cause everything it points to that isn't referenced anywhere else to be GC'ed too: this.clear();
         super.finalize();
@@ -4925,7 +5031,7 @@ public class ShoppingCart implements Iterable<ShoppingCartItem>, Serializable {
         if (itemBasePrice == null) {
             List<GenericValue> productPriceList = EntityUtil.filterByDate(delegator.findList("ProductPrice", EntityCondition.makeCondition("productId", itemProductId), null, null, null, false));
             Map<String, BigDecimal> productPriceMap = FastMap.newInstance();
-            for(GenericValue productPrice : productPriceList) {
+            for (GenericValue productPrice : productPriceList) {
                 productPriceMap.put(productPrice.getString("productPriceTypeId"), productPrice.getBigDecimal("price"));
             }
             if (UtilValidate.isNotEmpty(productPriceMap.get("SPECIAL_PROMO_PRICE"))) {

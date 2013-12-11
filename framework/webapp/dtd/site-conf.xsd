@@ -25,6 +25,7 @@ under the License.
                 <xs:element minOccurs="0" ref="description"/>
                 <xs:element minOccurs="0" ref="owner"/>
                 <xs:element minOccurs="0" ref="errorpage"/>
+                <xs:element minOccurs="0" ref="status-code"/>
                 <xs:element minOccurs="0" maxOccurs="unbounded" ref="handler"/>
                 <xs:element minOccurs="0" ref="protect"/>
                 <xs:element minOccurs="0" ref="firstvisit"/>
@@ -58,6 +59,17 @@ under the License.
     <xs:element name="description" type="xs:string"/>
     <xs:element name="owner" type="xs:string"/>
     <xs:element name="errorpage" type="xs:string"/>
+    <xs:element name="status-code" type="xs:string">
+        <xs:annotation>
+            <xs:documentation>
+                A redirection HTTP status-code
+                If set it will override, for this whole controller, the default status-code sets in requestHandler.properties 
+                
+                Most possible redirection status-codes are 301, 303 and 307. 
+                302 (the Java default) is not recommended for SEO reasons, 301 is preferred.
+            </xs:documentation>
+        </xs:annotation>
+    </xs:element>
     <xs:element name="handler">
         <xs:annotation>
             <xs:documentation>
@@ -340,10 +352,10 @@ under the License.
     <xs:element name="metric">
         <xs:annotation>
             <xs:documentation>
-                Calculate and maintain an average response time for this request. Request metrics can be used
-                for monitoring and reporting. Metrics can also be used to trigger an alternate
+                Calculate and maintain a moving average response time for a Request or Event. Request Metrics can be used
+                for monitoring and reporting, Event Metrics only for reporting. Request Metrics can also be used to trigger an alternate
                 response if the optional threshold attribute is used.
-                &lt;br/&gt;&lt;br/&gt;
+                
                 The metric works by gathering statistics until a configurable maximum is reached (number of
                 requests or elapsed time), then the average is calculated. A smoothing factor is used to
                 smooth differences between calculations.
@@ -400,6 +412,9 @@ under the License.
             </xs:documentation>
         </xs:annotation>
         <xs:complexType>
+            <xs:sequence>
+                <xs:element minOccurs="0" ref="metric"/>
+            </xs:sequence>
             <xs:attributeGroup ref="attlist.event"/>
         </xs:complexType>
     </xs:element>
@@ -639,6 +654,18 @@ under the License.
                 </xs:restriction>
             </xs:simpleType>
         </xs:attribute>
+        <xs:attribute name="status-code" type="xs:string">
+            <xs:annotation>
+                <xs:documentation>
+                    A redirection HTTP status-code
+                    If set it will override, for this request, the default status-code sets in requestHandler.properties
+                    and the possible status-code sets at the controller level (included controllers inclusive)
+                    
+                    Most possible redirection status-codes are 301, 303 and 307. 
+                    302 (the Java default) is not recommended for SEO reasons, 301 is preferred.
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>        
     </xs:attributeGroup>
     <xs:element name="redirect-parameter">
         <xs:annotation>

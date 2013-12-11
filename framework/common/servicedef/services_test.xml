@@ -57,16 +57,6 @@ under the License.
         <implements service="testScv"/>
     </service>
 
-    <service name="testWorkflow" engine="workflow" location="TEST-PKG" invoke="TestWorkflow">
-        <attribute name="orderId" type="String" mode="IN"/>
-        <attribute name="partyId" type="String" mode="IN"/>
-        <attribute name="orderStatusId" type="String" mode="OUT"/>
-    </service>
-    <service name="testWorkflowCondition" engine="java"
-            location="org.ofbiz.common.CommonServices" invoke="testWorkflowCondition">
-        <attribute name="serviceName" type="String" mode="IN" optional="true"/>
-        <attribute name="evaluationResult" type="Boolean" mode="OUT"/>
-    </service>
     <service name="testRollback" engine="java" export="true" validate="false"
             location="org.ofbiz.common.CommonServices" invoke="testRollbackListener">
         <description>Test service</description>
@@ -82,21 +72,18 @@ under the License.
 
     <service name="groupTest" engine="group" location="testGroup" invoke=""/>
 
-    <service name="testHttp" engine="http"
-            location="http://localhost:8081/webtools/control/httpService" invoke="testScv">
+    <service name="testHttp" engine="http" location="main-http" invoke="testScv">
         <description>HTTP service wrapper around the test service</description>
         <attribute name="message" type="String" mode="IN" optional="true"/>
         <attribute name="resp" type="String" mode="OUT"/>
     </service>
 
-    <service name="testSoap" engine="soap" export="true"
-            location="http://localhost:8081/webtools/control/SOAPService" invoke="testSOAPScv">
+    <service name="testSoap" engine="soap" export="true" location="main-soap" invoke="testSOAPScv">
         <description>SOAP service; calls the OFBiz test SOAP service</description>
         <implements service="testSOAPScv"/>
     </service>
     
-    <service name="testSoapSimple" engine="soap" export="true"
-            location="http://localhost:8081/webtools/control/SOAPService" invoke="testScv">
+    <service name="testSoapSimple" engine="soap" export="true" location="main-soap" invoke="testScv">
         <description>simple SOAP service; calls the OFBiz test service</description>
         <implements service="testScv"/>
     </service>

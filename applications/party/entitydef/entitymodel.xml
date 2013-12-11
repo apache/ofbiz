@@ -281,6 +281,26 @@ under the License.
         <key-map field-name="agreementItemSeqId"/>
       </relation>
     </entity>
+    <entity entity-name="AgreementFacilityAppl"
+            package-name="org.ofbiz.party.agreement"
+            title="Agreement Facility Application Entity">
+      <field name="agreementId" type="id-ne"></field>
+      <field name="agreementItemSeqId" type="id-ne"></field>
+      <field name="facilityId" type="id-ne"></field>
+      <prim-key field="agreementId"/>
+      <prim-key field="agreementItemSeqId"/>
+      <prim-key field="facilityId"/>
+      <relation type="one-nofk" rel-entity-name="Agreement">
+        <key-map field-name="agreementId"/>
+      </relation>
+      <relation type="one" fk-name="AGRMNT_FACLT_AITM" rel-entity-name="AgreementItem">
+        <key-map field-name="agreementId"/>
+        <key-map field-name="agreementItemSeqId"/>
+      </relation>
+      <relation type="one" fk-name="AGRMNT_FACLT_PRD" rel-entity-name="Facility">
+        <key-map field-name="facilityId"/>
+      </relation>
+    </entity>
     <entity entity-name="AgreementRole"
             package-name="org.ofbiz.party.agreement"
             title="Agreement Role Entity">
@@ -491,6 +511,26 @@ under the License.
             <exclude field="productId"/>
         </alias-all>
         <view-link entity-alias="AGI" rel-entity-alias="AGPA">
+            <key-map field-name="agreementId"/>
+            <key-map field-name="agreementItemSeqId"/>
+        </view-link>
+        <view-link entity-alias="AGI" rel-entity-alias="AG">
+            <key-map field-name="agreementId"/>
+        </view-link>
+        <relation type="one-nofk" rel-entity-name="Agreement">
+            <key-map field-name="agreementId"/>
+        </relation>
+    </view-entity>
+    <view-entity entity-name="AgreementItemAndFacilityAppl"
+        package-name="org.ofbiz.party.agreement"
+        title="Agreement Item and Agreement Facility Applicability View Entity">
+        <member-entity entity-alias="AGI" entity-name="AgreementItem"/>
+        <member-entity entity-alias="AGFA" entity-name="AgreementFacilityAppl"/>
+        <member-entity entity-alias="AG" entity-name="Agreement"/>
+        <alias-all entity-alias="AGI"/>
+        <alias-all entity-alias="AGFA"/>
+        <alias-all entity-alias="AG"/>
+        <view-link entity-alias="AGI" rel-entity-alias="AGFA">
             <key-map field-name="agreementId"/>
             <key-map field-name="agreementItemSeqId"/>
         </view-link>
@@ -1665,16 +1705,16 @@ under the License.
     <view-entity entity-name="PartyIdentificationAndParty"
                 package-name="org.ofbiz.party.party"
                 title="PartyIdentification and Party View Entity">
-      <member-entity entity-alias="PI" entity-name="PartyIdentification"/>
+      <member-entity entity-alias="PIN" entity-name="PartyIdentification"/>
       <member-entity entity-alias="PIT" entity-name="PartyIdentificationType"/>
       <member-entity entity-alias="PA" entity-name="Party"/>
-      <alias-all entity-alias="PI" />
+      <alias-all entity-alias="PIN" />
       <alias-all entity-alias="PA" />
       <alias name="partyIdentTypeDesc" field="description"  entity-alias="PIT"/>
-      <view-link entity-alias="PI" rel-entity-alias="PA">
+      <view-link entity-alias="PIN" rel-entity-alias="PA">
         <key-map field-name="partyId"/>
       </view-link>
-      <view-link entity-alias="PI" rel-entity-alias="PIT">
+      <view-link entity-alias="PIN" rel-entity-alias="PIT">
         <key-map field-name="partyIdentificationTypeId"/>
       </view-link>
     </view-entity>
@@ -2442,12 +2482,8 @@ under the License.
       <member-entity entity-alias="PR" entity-name="PartyRole"/>
       <member-entity entity-alias="PERSON" entity-name="Person"/>
       <member-entity entity-alias="PTYGRP" entity-name="PartyGroup"/>
-      <member-entity entity-alias="PS" entity-name="PartyStatus"/>
       <alias-all entity-alias="PTY"/>
       <alias-all entity-alias="PR"/>
-      <alias-all entity-alias="PS">
-        <exclude field="statusId"/>
-      </alias-all>
       <alias-all entity-alias="PERSON">
         <exclude field="comments"/>
       </alias-all>
@@ -2456,7 +2492,6 @@ under the License.
       </alias-all>
       <alias entity-alias="PERSON" name="personComments" field="comments"/>
       <alias entity-alias="PTYGRP" name="partyGroupComments" field="comments"/>
-      <alias entity-alias="PS" name="previousStatusId" field="statusId"/>
       <view-link entity-alias="PTY" rel-entity-alias="PR">
         <key-map field-name="partyId"/>
       </view-link>
@@ -2464,9 +2499,6 @@ under the License.
         <key-map field-name="partyId"/>
       </view-link>
       <view-link entity-alias="PTY" rel-entity-alias="PTYGRP" rel-optional="true">
-        <key-map field-name="partyId"/>
-      </view-link>
-      <view-link entity-alias="PTY" rel-entity-alias="PS" rel-optional="true">
         <key-map field-name="partyId"/>
       </view-link>
     </view-entity>
@@ -2897,4 +2929,80 @@ under the License.
             <key-map field-name="partyId"/>
         </relation>
     </extend-entity>
+    <view-entity entity-name="PartyExport" package-name="org.ofbiz.accounting.reports">
+        <member-entity entity-alias="PRT" entity-name="Party"/>
+        <member-entity entity-alias="GRP" entity-name="PartyGroup"/>
+        <member-entity entity-alias="PER" entity-name="Person"/>
+        <member-entity entity-alias="PR" entity-name="PartyRelationship"/>
+        <member-entity entity-alias="CGRP" entity-name="PartyGroup"/>
+        <member-entity entity-alias="PRL" entity-name="PartyRole"/>
+        <member-entity entity-alias="PCM" entity-name="PartyContactMech"/>
+        <member-entity entity-alias="PCP" entity-name="PartyContactMechPurpose"/>
+        <member-entity entity-alias="CM" entity-name="ContactMech"/>
+        <member-entity entity-alias="TN" entity-name="TelecomNumber"/>
+        <member-entity entity-alias="PA" entity-name="PostalAddress"/>
+        <alias entity-alias="PRT" name="partyId" />
+        <alias entity-alias="PRT" name="statusId" />
+        <alias entity-alias="PRT" name="preferredCurrencyUomId" />
+        <alias entity-alias="GRP" name="groupName"/>
+        <alias entity-alias="PER" name="firstName"/>
+        <alias entity-alias="PER" name="middleName"/>
+        <alias entity-alias="PER" name="lastName"/>
+        <alias entity-alias="PR" name="companyPartyId" field="partyIdFrom"/>
+        <alias entity-alias="CGRP" name="companyName" field="groupName"/>
+        <alias entity-alias="PRL" name="roleTypeId"/>
+        <alias entity-alias="CM" name="contactMechTypeId"/>
+        <alias entity-alias="PCP" name="contactMechPurposeTypeId"/>
+        <alias entity-alias="CM" name="emailAddress" field="infoString"/>
+        <alias entity-alias="TN" name="telCountryCode" field="countryCode"/>
+        <alias entity-alias="TN" name="telAreaCode"  field="areaCode"/>
+        <alias entity-alias="TN" name="telContactNumber" field="contactNumber"/>
+        <alias entity-alias="PA" name="address1"/>
+        <alias entity-alias="PA" name="address2"/>
+        <alias entity-alias="PA" name="city"/>
+        <alias entity-alias="PA" name="stateProvinceGeoId"/>
+        <alias entity-alias="PA" name="postalCode"/>
+        <alias entity-alias="PA" name="countryGeoId"/>
+        <view-link entity-alias="PRT" rel-entity-alias="GRP" rel-optional="true">
+            <key-map field-name="partyId"/>
+        </view-link>
+        <view-link entity-alias="PRT" rel-entity-alias="PER" rel-optional="true">
+            <key-map field-name="partyId"/>
+        </view-link>
+        <view-link entity-alias="PRT" rel-entity-alias="PR" rel-optional="true">
+            <key-map field-name="partyId" rel-field-name="partyIdTo"/>
+            <entity-condition>
+                <condition-list combine="and">
+                    <condition-expr field-name="roleTypeIdFrom" entity-alias="PR" value="ACCOUNT"/>
+                    <condition-expr field-name="partyRelationshipTypeId" entity-alias="PR" value="EMPLOYMENT"/>
+                </condition-list>
+            </entity-condition>
+        </view-link>
+        <view-link entity-alias="PR" rel-entity-alias="CGRP" rel-optional="true">
+            <key-map field-name="partyIdFrom" rel-field-name="partyId"/>
+        </view-link>
+        <view-link entity-alias="PRT" rel-entity-alias="PRL" rel-optional="true">
+            <key-map field-name="partyId"/>
+        </view-link>
+        <view-link entity-alias="PRT" rel-entity-alias="PCM" rel-optional="true">
+            <key-map field-name="partyId"/>
+            <entity-condition filter-by-date="true"/>
+        </view-link>
+        <view-link entity-alias="PCM" rel-entity-alias="PA" rel-optional="true">
+            <key-map field-name="contactMechId"/>
+        </view-link>
+        <view-link entity-alias="PCM" rel-entity-alias="CM" rel-optional="true">
+            <key-map field-name="contactMechId"/>
+        </view-link>
+        <view-link entity-alias="PCM" rel-entity-alias="TN" rel-optional="true">
+            <key-map field-name="contactMechId"/>
+        </view-link>
+        <view-link entity-alias="PCM" rel-entity-alias="PCP" rel-optional="true">
+            <key-map field-name="contactMechId"/>
+            <key-map field-name="partyId"/>
+            <entity-condition filter-by-date="true"/>
+        </view-link>
+    </view-entity>
+    
+    
 </entitymodel>

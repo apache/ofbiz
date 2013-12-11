@@ -301,7 +301,7 @@ public class PosTransaction implements Serializable {
             ProductConfigWrapper pcw = null;
             pcw = item.getConfigWrapper();
             List<ConfigOption> selected = pcw.getSelectedOptions();
-            for(ConfigOption configoption : selected) {
+            for (ConfigOption configoption : selected) {
                 Map<String, Object> itemInfo = FastMap.newInstance();
                 if (configoption.isSelected() && !configoption.isDefault()) {
                     itemInfo.put("productId", "");
@@ -615,7 +615,7 @@ public class PosTransaction implements Serializable {
             cart.removeAdjustment(cartDiscount);
             cartDiscount = -1;
         }
-        for(String productId : skuDiscounts.keySet()) {
+        for (String productId : skuDiscounts.keySet()) {
             ShoppingCartItem item = cart.findCartItem(productId, null, null, null, BigDecimal.ZERO);
             Integer itemAdj = skuDiscounts.remove(productId);
             if (itemAdj != null) {
@@ -820,8 +820,8 @@ public class PosTransaction implements Serializable {
         // attach the party ID to the cart
         cart.setOrderPartyId(partyId);
         // Set the shipping type
-        cart.setShipmentMethodTypeId("NO_SHIPPING");
-       // cart.setCarrierPartyId();
+        cart.setAllShipmentMethodTypeId("NO_SHIPPING");
+       // cart.setAllCarrierPartyId();
 
         // validate payment methods
         output.print(UtilProperties.getMessage(resource, "PosValidating", locale));
@@ -1502,7 +1502,7 @@ public class PosTransaction implements Serializable {
         }
 
         String selectedCartItems[] = new String[cart.size()];
-        for(int i = 0; i < cart.size(); i++) {
+        for (int i = 0; i < cart.size(); i++) {
             Integer integer = i;
             selectedCartItems[i] = integer.toString();
         }

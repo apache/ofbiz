@@ -31,12 +31,14 @@ import org.ofbiz.base.config.GenericConfigException;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.GeneralRuntimeException;
 import org.ofbiz.base.util.UtilMisc;
+import org.ofbiz.base.util.UtilProperties;
 import org.ofbiz.base.util.UtilTimer;
 import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.base.util.UtilXml;
 import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.DelegatorFactory;
 import org.ofbiz.entity.GenericDelegator;
+import org.ofbiz.entity.GenericEntityConfException;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
 import org.ofbiz.entity.transaction.DebugXaResource;
@@ -46,6 +48,7 @@ import org.ofbiz.security.Security;
 import org.ofbiz.security.SecurityConfigurationException;
 import org.ofbiz.security.SecurityFactory;
 import org.ofbiz.service.config.ServiceConfigUtil;
+import org.ofbiz.service.config.model.*;
 import org.ofbiz.service.eca.ServiceEcaRule;
 import org.ofbiz.service.eca.ServiceEcaUtil;
 import org.ofbiz.service.engine.GenericEngine;
@@ -70,6 +73,8 @@ public class ServiceDispatcher {
 
     protected static final Map<RunningService, ServiceDispatcher> runLog = new ConcurrentLinkedHashMap.Builder<RunningService, ServiceDispatcher>().maximumWeightedCapacity(lruLogSize).build();
     protected static Map<String, ServiceDispatcher> dispatchers = FastMap.newInstance();
+    // FIXME: These fields are not thread-safe. They are modified by EntityDataLoadContainer.
+    // We need a better design - like have this class query EntityDataLoadContainer if data is being loaded.
     protected static boolean enableJM = true;
     protected static boolean enableJMS = true;
     protected static boolean enableSvcs = true;
@@ -297,7 +302,7 @@ public class ServiceDispatcher {
                     beganTrans = TransactionUtil.begin(modelService.transactionTimeout);
                 }
                 // enlist for XAResource debugging
-                if (beganTrans && TransactionUtil.debugResources) {
+                if (beganTrans && TransactionUtil.debugResources()) {
                     DebugXaResource dxa = new DebugXaResource(modelService.name);
                     try {
                         dxa.enlist();
@@ -418,7 +423,7 @@ public class ServiceDispatcher {
 
                             beganTrans = TransactionUtil.begin(modelService.transactionTimeout);
                             // enlist for XAResource debugging
-                            if (beganTrans && TransactionUtil.debugResources) {
+                            if (beganTrans && TransactionUtil.debugResources()) {
                                 DebugXaResource dxa = new DebugXaResource(modelService.name);
                                 try {
                                     dxa.enlist();
@@ -544,6 +549,9 @@ public class ServiceDispatcher {
         } catch (GenericTransactionException te) {
             Debug.logError(te, "Problems with the transaction", module);
             throw new GenericServiceException("Problems with the transaction.", te.getNested());
+        } catch (GenericEntityConfException e) {
+            Debug.logError(e, "Problems with the transaction", module);
+            throw new GenericServiceException("Problems with the transaction.", e);
         } finally {
             if (lock != null) {
                 // release the semaphore lock
@@ -571,10 +579,13 @@ public class ServiceDispatcher {
         rs.setEndStamp();
 
         long timeToRun = System.currentTimeMillis() - serviceStartTime;
-        if (Debug.timingOn() && timeToRun > 50) {
+        long showServiceDurationThreshold = UtilProperties.getPropertyAsLong("service", "showServiceDurationThreshold", 0);
+        long showSlowServiceThreshold = UtilProperties.getPropertyAsLong("service", "showSlowServiceThreshold", 1000);
+                
+        if (Debug.timingOn() && timeToRun > showServiceDurationThreshold) {
+            Debug.logTiming("Sync service [" + localName + "/" + modelService.name + "] finished in [" + timeToRun + "] milliseconds", module);
+        } else if (Debug.infoOn() && timeToRun > showSlowServiceThreshold) {
             Debug.logTiming("Slow sync service execution detected: service [" + localName + "/" + modelService.name + "] finished in [" + timeToRun + "] milliseconds", module);
-        } else if (Debug.infoOn() && timeToRun > 200) {
-            Debug.logInfo("Very slow sync service execution detected: service [" + localName + "/" + modelService.name + "] finished in [" + timeToRun + "] milliseconds", module);
         }
         if ((Debug.verboseOn() || modelService.debug) && timeToRun > 50 && !modelService.hideResultInLog) {
             // Sanity check - some service results can be multiple MB in size. Limit message size to 10K.
@@ -647,7 +658,7 @@ public class ServiceDispatcher {
                     beganTrans = TransactionUtil.begin(service.transactionTimeout);
                 }
                 // enlist for XAResource debugging
-                if (beganTrans && TransactionUtil.debugResources) {
+                if (beganTrans && TransactionUtil.debugResources()) {
                     DebugXaResource dxa = new DebugXaResource(service.name);
                     try {
                         dxa.enlist();
@@ -734,6 +745,9 @@ public class ServiceDispatcher {
         } catch (GenericTransactionException se) {
             Debug.logError(se, "Problems with the transaction", module);
             throw new GenericServiceException("Problems with the transaction: " + se.getMessage() + "; See logs for more detail");
+        } catch (GenericEntityConfException e) {
+            Debug.logError(e, "Problems with the transaction", module);
+            throw new GenericServiceException("Problems with the transaction: " + e.getMessage() + "; See logs for more detail");
         } finally {
             // resume the parent transaction
             if (parentTransaction != null) {
@@ -834,13 +848,16 @@ public class ServiceDispatcher {
             // shutdown JMS listeners
             jlf.closeListeners();
         }
-        // shutdown the job scheduler
-        jm.shutdown();
     }
 
     // checks if parameters were passed for authentication
     private Map<String, Object> checkAuth(String localName, Map<String, Object> context, ModelService origService) throws ServiceAuthException, GenericServiceException {
-        String service = ServiceConfigUtil.getElementAttr("authorization", "service-name");
+        String service = null;
+        try {
+            service = ServiceConfigUtil.getServiceEngine().getAuthorization().getServiceName();
+        } catch (GenericConfigException e) {
+            throw new GenericServiceException(e.getMessage(), e);
+        }
 
         if (service == null) {
             throw new GenericServiceException("No Authentication Service Defined");
@@ -964,43 +981,34 @@ public class ServiceDispatcher {
 
     // run startup services
     private synchronized int runStartupServices() {
-        if (jm == null) return 0;
-
-        Element root;
+        if (jm == null)
+            return 0;
+        int servicesScheduled = 0;
+        List<StartupService> startupServices = null;
         try {
-            root = ServiceConfigUtil.getXmlRootElement();
+            startupServices = ServiceConfigUtil.getServiceEngine().getStartupServices();
         } catch (GenericConfigException e) {
-            Debug.logError(e, module);
+            Debug.logWarning(e, "Exception thrown while getting service config: ", module);
             return 0;
         }
-
-        int servicesScheduled = 0;
-        List<? extends Element> startupServices = UtilXml.childElementList(root, "startup-service");
-        if (UtilValidate.isNotEmpty(startupServices)) {
-            for (Element ss: startupServices) {
-                String serviceName = ss.getAttribute("name");
-                String runtimeDataId = ss.getAttribute("runtime-data-id");
-                String delayStr = ss.getAttribute("runtime-delay");
-                String sendToPool = ss.getAttribute("run-in-pool");
-                if (UtilValidate.isEmpty(sendToPool)) {
-                    sendToPool = ServiceConfigUtil.getSendPool();
-                }
-
-                long runtimeDelay;
+        for (StartupService startupService : startupServices) {
+            String serviceName = startupService.getName();
+            String runtimeDataId = startupService.getRuntimeDataId();
+            int runtimeDelay = startupService.getRuntimeDelay();
+            String sendToPool = startupService.getRunInPool();
+            if (UtilValidate.isEmpty(sendToPool)) {
                 try {
-                    runtimeDelay = Long.parseLong(delayStr);
-                } catch (Exception e) {
-                    Debug.logError(e, "Unable to parse runtime-delay value; using 0", module);
-                    runtimeDelay = 0;
+                    sendToPool = ServiceConfigUtil.getServiceEngine().getThreadPool().getSendToPool();
+                } catch (GenericConfigException e) {
+                    Debug.logError(e, "Unable to get send pool in service [" + serviceName + "]: ", module);
                 }
-
-                // current time + 1 sec delay + extended delay
-                long runtime = System.currentTimeMillis() + 1000 + runtimeDelay;
-                try {
-                    jm.schedule(sendToPool, serviceName, runtimeDataId, runtime);
-                } catch (JobManagerException e) {
-                    Debug.logError(e, "Unable to schedule service [" + serviceName + "]", module);
-                }
+            }
+            // current time + 1 sec delay + extended delay
+            long runtime = System.currentTimeMillis() + 1000 + runtimeDelay;
+            try {
+                jm.schedule(sendToPool, serviceName, runtimeDataId, runtime);
+            } catch (JobManagerException e) {
+                Debug.logError(e, "Unable to schedule service [" + serviceName + "]", module);
             }
         }
 

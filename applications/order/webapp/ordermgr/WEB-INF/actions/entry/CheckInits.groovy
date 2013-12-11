@@ -49,7 +49,7 @@ context.productStores = productStores;
 suppliers = delegator.findByAnd("PartyRoleAndPartyDetail", [roleTypeId : "SUPPLIER"], ["groupName", "partyId"], false);
 context.suppliers = suppliers;
 
-organizations = delegator.findByAnd("PartyRole", [roleTypeId : "INTERNAL_ORGANIZATIO"], null, false);
+organizations = delegator.findByAnd("PartyAcctgPrefAndGroup", null, null, false);
 context.organizations = organizations;
 
 // Set Shipping From the Party 
@@ -60,6 +60,6 @@ if (partyId) {
     contactMech = EntityUtil.getFirst(ContactHelper.getContactMech(party, "SHIPPING_LOCATION", "POSTAL_ADDRESS", false));
     if (contactMech) {
         ShoppingCart shoppingCart = ShoppingCartEvents.getCartObject(request);
-        shoppingCart.setShippingContactMechId(contactMech.contactMechId);
+        shoppingCart.setAllShippingContactMechId(contactMech.contactMechId);
     }
 }

@@ -51,8 +51,8 @@ under the License.
     <entity-resource type="data" reader-name="demo" loader="main" location="data/DemoTaxAuthority.xml"/>
     <entity-resource type="data" reader-name="demo" loader="main" location="data/DemoAcctgTransactionData.xml"/>
     <entity-resource type="data" reader-name="demo" loader="main" location="data/DemoPaymentsInvoices.xml"/>
-
     <entity-resource type="data" reader-name="demo" loader="main" location="data/DemoAccountingUserData.xml"/>
+    <entity-resource type="data" reader-name="demo" loader="main" location="data/DemoAssetMaintData.xml"/>
 
     <!-- General Payment Service Definitions -->
     <service-resource type="model" loader="main" location="servicedef/services_agreement.xml"/>
@@ -101,6 +101,7 @@ under the License.
     <test-suite loader="main" location="testdef/paymentappltests.xml"/>
     <test-suite loader="main" location="testdef/invoicetests.xml"/>
     <test-suite loader="main" location="testdef/fixedassettests.xml"/>
+    <test-suite loader="main" location="testdef/taxauthoritytests.xml"/>
 
     <webapp name="accounting"
         title="Accounting"
@@ -110,14 +111,14 @@ under the License.
         mount-point="/accounting"/>
 
     <webapp name="ar"
-        title="AR"
+        title="Accounting - AR"
         server="default-server"
         location="webapp/ar"
         base-permission="OFBTOOLS,ACCOUNTING"
         mount-point="/ar"/>
 
     <webapp name="ap"
-        title="AP"
+        title="Accounting - AP"
         server="default-server"
         location="webapp/ap"
         base-permission="OFBTOOLS,ACCOUNTING"

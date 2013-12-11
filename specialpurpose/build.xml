@@ -19,9 +19,11 @@
 -->
 
 <project name="OFBiz Special Purpose Applications Build" default="build" basedir=".">
-    <import file="../macros.xml"/>
-    <filelist id="specialpurpose-builds" dir="."
+    <filelist id="specialpurpose-builds" dir="specialpurpose"
         files="
+        appserver/build.xml,
+        jetty/build.xml,
+        lucene/build.xml,
         ecommerce/build.xml,
         pos/build.xml,
         hhfacility/build.xml,
@@ -33,64 +35,9 @@
         projectmgr/build.xml,
         scrum/build.xml,
         ldap/build.xml,
-        crowd/build.xml,
         webpos/build.xml
         googlecheckout/build.xml,
         birt/build.xml,
         example/build.xml
     "/>
-    <!-- For the old OFBiz Workflow Engine add "workflow/build.xml" to the list above -->
-
-    <!-- ================================================================== -->
-    <!-- Removes all created files and directories                          -->
-    <!-- ================================================================== -->
-
-    <target name="refresh">
-        <antcall target="clean-all"/>
-        <antcall target="build"/>
-    </target>
-
-    <target name="clean-all">
-        <antcall target="clean-xtra"/>
-        <antcall target="clean"/>
-    </target>
-
-    <target name="clean-xtra" depends="">
-        <delete verbose="on">
-            <fileset dir="." includes="**/.nbattrs,**/*~,**/.#*,**/.DS_Store,**/*.rej,**/*.orig"/>
-        </delete>
-    </target>
-
-    <target name="tests">
-    </target>
-
-    <target name="clean">
-        <iterate target="clean" filelist="specialpurpose-builds"/>
-        <delete file="ofbiz.jar"/>
-        <echo message="[clean] ========== Done Cleaning Special purpose =========="/>
-    </target>
-
-    <!-- ================================================================== -->
-    <!-- Build Components                                                   -->
-    <!-- ================================================================== -->
-
-    <target name="build" depends="">
-        <echo message="[build] ========== Start Building Special Purpose (Compile) =========="/>
-
-        <iterate inheritall="false" filelist="specialpurpose-builds"/>
-
-        <echo message="[build] ========== Done Building Special Purpose (Compile) =========="/>
-    </target>
-
-    <!-- ================================================================== -->
-    <!-- Build JavaDocs                                                     -->
-    <!-- ================================================================== -->
-
-    <target name="docs" depends="">
-        <echo message="[docs] ========== Start Building Special Purpose (JavaDoc) =========="/>
-
-        <iterate target="docs" filelist="specialpurpose-builds"/>
-
-        <echo message="[docs] ========== Done Building Special Purpose (JavaDocs) =========="/>
-    </target>
 </project>

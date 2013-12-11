@@ -19,7 +19,6 @@
 package org.ofbiz.content.content;
 
 import java.sql.Timestamp;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -256,7 +255,7 @@ public class ContentServicesComplex {
         String contentAssocTypeId = null;
         List<GenericValue> contentAssocsTypeFiltered = FastList.newInstance();
         if (assocTypes != null && assocTypes.size() > 1) {
-            for(GenericValue contentAssoc : contentAssocsDateFiltered) {
+            for (GenericValue contentAssoc : contentAssocsDateFiltered) {
                 contentAssocTypeId = (String)contentAssoc.get("contentAssocTypeId");
                 if (assocTypes.contains(contentAssocTypeId)) {
                     contentAssocsTypeFiltered.add(contentAssoc);
@@ -278,7 +277,7 @@ public class ContentServicesComplex {
         GenericValue dataResource = null;
         List<GenericValue> contentAssocDataResourceList = FastList.newInstance();
         Locale locale = Locale.getDefault(); // TODO: this needs to be passed in
-        for(GenericValue contentAssoc : contentAssocsTypeFiltered) {
+        for (GenericValue contentAssoc : contentAssocsTypeFiltered) {
             content = contentAssoc.getRelatedOne(assocRelationName, true);
             if (UtilValidate.isNotEmpty(contentTypes)) {
                 String contentTypeId = (String)content.get("contentTypeId");

@@ -21,10 +21,9 @@ package org.ofbiz.minilang.method.callops;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import javolution.util.FastMap;
 
 import org.ofbiz.base.location.FlexibleLocation;
 import org.ofbiz.base.util.Debug;
@@ -44,7 +43,7 @@ import org.w3c.dom.Element;
 /**
  * Implements the &lt;call-simple-method&gt; element.
  * 
- * @see <a href="https://cwiki.apache.org/OFBADMIN/mini-language-reference.html#Mini-languageReference-{{%3Ccallsimplemethod%3E}}">Mini-language Reference</a>
+ * @see <a href="https://cwiki.apache.org/confluence/display/OFBADMIN/Mini-language+Reference#Mini-languageReference-{{%3Ccallsimplemethod%3E}}">Mini-language Reference</a>
  */
 public final class CallSimpleMethod extends MethodOperation {
 
@@ -104,7 +103,7 @@ public final class CallSimpleMethod extends MethodOperation {
         }
         MethodContext localContext = methodContext;
         if ("function".equals(this.scope)) {
-            Map<String, Object> localEnv = FastMap.newInstance();
+            Map<String, Object> localEnv = new HashMap<String, Object>();
             localEnv.putAll(methodContext.getEnvMap());
             localEnv.remove(this.simpleMethod.getEventResponseCodeName());
             localEnv.remove(this.simpleMethod.getServiceResponseMessageName());

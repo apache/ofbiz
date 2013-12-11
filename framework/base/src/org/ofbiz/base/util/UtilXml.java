@@ -805,7 +805,7 @@ public class UtilXml {
         if (node != null) {
             do {
                 if (node.getNodeType() == Node.ELEMENT_NODE && (childElementName == null ||
-                        childElementName.equals(node.getNodeName()))) {
+                        childElementName.equals(node.getLocalName() != null ? node.getLocalName() : node.getNodeName()))) {
                     Element childElement = (Element) node;
                     return childElement;
                 }
@@ -824,7 +824,7 @@ public class UtilXml {
         if (node != null) {
             do {
                 if (node.getNodeType() == Node.ELEMENT_NODE && (childElementName == null ||
-                        childElementName.equals(node.getNodeName()))) {
+                        childElementName.equals(node.getLocalName() != null ? node.getLocalName() : node.getNodeName()))) {
                     Element childElement = (Element) node;
 
                     String value = childElement.getAttribute(attrName);
@@ -950,6 +950,29 @@ public class UtilXml {
             //default to false, ie anything but true is false
             return "true".equals(str);
         }
+    }
+
+    public static String nodeNameToJavaName(String nodeName, boolean capitalizeFirst) {
+        boolean capitalize = capitalizeFirst;
+        StringBuilder sb = new StringBuilder();
+        for (int index = 0; index < nodeName.length(); index++) {
+            char character = nodeName.charAt(index);
+            if ((sb.length() == 0 && !Character.isJavaIdentifierStart(character)) || (sb.length() != 0 && !Character.isJavaIdentifierPart(character))) {
+                capitalize = true;
+                continue;
+            }
+            if (sb.length() == 0 && !capitalizeFirst) {
+                sb.append(Character.toLowerCase(character));
+            } else {
+                if (capitalize) {
+                    sb.append(Character.toUpperCase(character));
+                    capitalize = false;
+                } else {
+                    sb.append(character);
+                }
+            }
+        }
+        return sb.toString();
     }
 
     /**

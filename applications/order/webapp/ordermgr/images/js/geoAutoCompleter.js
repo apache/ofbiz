@@ -31,7 +31,7 @@ function getCountryList() {
 
 function callCountryAutocompleter(data) {
     countryList = data.countryList;
-    countryTargetField.autcomplete({source: countryList, select: setKeyAsParameterAndGetStateList});
+    countryTargetField.autocomplete({source: countryList, select: setKeyAsParameterAndGetStateList});
 }
 
 function setKeyAsParameterAndGetStateList(event, ui) {
@@ -90,7 +90,7 @@ function getAssociatedStateList(countryId, stateId, errorId, divId) {
         data: {countryGeoId: countryGeoId},
         success: function(data) {
             if (data._ERROR_MESSAGE_ ) {
-                // no data found/ error occured
+                // no data found/ error occurred
                 return;
             }
             stateList = data.stateList;

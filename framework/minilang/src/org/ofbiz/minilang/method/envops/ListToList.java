@@ -18,9 +18,8 @@
  *******************************************************************************/
 package org.ofbiz.minilang.method.envops;
 
+import java.util.LinkedList;
 import java.util.List;
-
-import javolution.util.FastList;
 
 import org.ofbiz.base.util.collections.FlexibleMapAccessor;
 import org.ofbiz.minilang.MiniLangException;
@@ -33,7 +32,7 @@ import org.w3c.dom.Element;
 /**
  * Implements the &lt;list-to-list&gt; element.
  * 
- * @see <a href="https://cwiki.apache.org/OFBADMIN/mini-language-reference.html#Mini-languageReference-{{%3Clisttolist%3E}}">Mini-language Reference</a>
+ * @see <a href="https://cwiki.apache.org/confluence/display/OFBADMIN/Mini-language+Reference#Mini-languageReference-{{%3Clisttolist%3E}}">Mini-language Reference</a>
  */
 public final class ListToList extends MethodOperation {
 
@@ -58,7 +57,7 @@ public final class ListToList extends MethodOperation {
         if (fromList != null) {
             List<Object> toList = toListFma.get(methodContext.getEnvMap());
             if (toList == null) {
-                toList = FastList.newInstance();
+                toList = new LinkedList<Object>();
                 toListFma.put(methodContext.getEnvMap(), toList);
             }
             toList.addAll(fromList);

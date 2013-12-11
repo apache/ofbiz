@@ -43,7 +43,7 @@ import org.ofbiz.base.util.GeneralException;
 import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.base.util.cache.UtilCache;
 import org.ofbiz.entity.GenericEntityException;
-import org.ofbiz.entity.config.DelegatorInfo;
+import org.ofbiz.entity.config.model.DelegatorElement;
 import org.ofbiz.entity.config.EntityConfigUtil;
 import org.ofbiz.entity.model.ModelEntity;
 import org.ofbiz.entity.model.ModelReader;
@@ -53,6 +53,7 @@ import org.ofbiz.service.ModelService;
 import org.ofbiz.service.eca.ServiceEcaRule;
 import org.ofbiz.webapp.control.ConfigXMLReader;
 import org.ofbiz.webapp.control.ConfigXMLReader.ControllerConfig;
+import org.ofbiz.webapp.control.WebAppConfigurationException;
 import org.ofbiz.widget.form.FormFactory;
 import org.ofbiz.widget.form.ModelForm;
 import org.ofbiz.widget.screen.ModelScreen;
@@ -127,10 +128,10 @@ public class ArtifactInfoFactory {
     protected ArtifactInfoFactory(String delegatorName) throws GeneralException {
         this.delegatorName = delegatorName;
         this.entityModelReader = ModelReader.getModelReader(delegatorName);
-        DelegatorInfo delegatorInfo = EntityConfigUtil.getDelegatorInfo(delegatorName);
+        DelegatorElement delegatorInfo = EntityConfigUtil.getDelegator(delegatorName);
         String modelName;
         if (delegatorInfo != null) {
-            modelName = delegatorInfo.entityModelReader;
+            modelName = delegatorInfo.getEntityModelReader();
         } else {
             modelName = "main";
         }
@@ -193,12 +194,23 @@ public class ArtifactInfoFactory {
     }
 
     public ConfigXMLReader.RequestMap getControllerRequestMap(URL controllerXmlUrl, String requestUri) {
-        return ConfigXMLReader.getControllerConfig(controllerXmlUrl).getRequestMapMap().get(requestUri);
+        try {
+            return ConfigXMLReader.getControllerConfig(controllerXmlUrl).getRequestMapMap().get(requestUri);
+        } catch (WebAppConfigurationException e) {
+            Debug.logError(e, "Exception thrown while parsing controller.xml file: ", module);
+        }
+        return null;
     }
 
     public ConfigXMLReader.ViewMap getControllerViewMap(URL controllerXmlUrl, String viewUri) {
-        ControllerConfig cc = ConfigXMLReader.getControllerConfig(controllerXmlUrl);
-        return cc.getViewMapMap().get(viewUri);
+        ControllerConfig cc;
+        try {
+            cc = ConfigXMLReader.getControllerConfig(controllerXmlUrl);
+            return cc.getViewMapMap().get(viewUri);
+        } catch (WebAppConfigurationException e) {
+            Debug.logError(e, "Exception thrown while parsing controller.xml file: ", module);
+        }
+        return null;
     }
 
     public EntityArtifactInfo getEntityArtifactInfo(String entityName) throws GeneralException {

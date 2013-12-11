@@ -21,19 +21,22 @@ package org.ofbiz.base.util;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.io.PrintWriter;
-import java.text.DateFormat;
 import java.util.Enumeration;
 import java.util.Formatter;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
+import java.util.TimeZone;
 
 import org.apache.avalon.util.exception.ExceptionHelper;
+import org.apache.log4j.Appender;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PatternLayout;
 import org.apache.log4j.RollingFileAppender;
-import org.apache.log4j.Appender;
 import org.apache.log4j.spi.LoggerRepository;
+import org.ofbiz.base.conversion.ConversionException;
+import org.ofbiz.base.conversion.DateTimeConverters.DateToString;
 
 /**
  * Configurable Debug logging wrapper class
@@ -59,8 +62,6 @@ public final class Debug {
     public static final String[] levels = {"Always", "Verbose", "Timing", "Info", "Important", "Warning", "Error", "Fatal", "Notify"};
     public static final String[] levelProps = {"", "print.verbose", "print.timing", "print.info", "print.important", "print.warning", "print.error", "print.fatal", "print.notify"};
     public static final Level[] levelObjs = {Level.INFO, Level.DEBUG, Level.INFO, Level.INFO, Level.INFO, Level.WARN, Level.ERROR, Level.FATAL, NotifyLevel.NOTIFY};
-
-    private static final DateFormat dateFormat = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.MEDIUM);
 
     protected static Map<String, Integer> levelStringMap = new HashMap<String, Integer>();
 
@@ -160,7 +161,55 @@ public final class Debug {
     }
 
     public static void log(int level, Throwable t, String msg, String module, String callingClass, Object... params) {
-        if (isOn(level)) {
+        Logger logger = null;
+        boolean offSetInLogConfig = false; 
+        boolean fatalSetInLogConfig = false; 
+        boolean errorSetInLogConfig = false; 
+        boolean warnSetInLogConfig = false; 
+        boolean infoSetInLogConfig = false; 
+        boolean traceSetInLogConfig = false; 
+        boolean debugSetInLogConfig = false; 
+        boolean allSetInLogConfig = false;
+        boolean setInLogConfig = false;
+
+        if (useLog4J) {
+            logger = getLogger(module);
+                        
+            // Class
+            if (logger != null) {
+                Level loggerLevel = logger.getLevel();
+                offSetInLogConfig = Level.OFF.equals(loggerLevel);
+                fatalSetInLogConfig = Level.FATAL.equals(loggerLevel);
+                errorSetInLogConfig = Level.ERROR.equals(loggerLevel);
+                warnSetInLogConfig = Level.WARN.equals(loggerLevel);
+                infoSetInLogConfig = Level.INFO.equals(loggerLevel);
+                traceSetInLogConfig = Level.TRACE.equals(loggerLevel);
+                debugSetInLogConfig = Level.DEBUG.equals(loggerLevel);
+                allSetInLogConfig = Level.ALL.equals(loggerLevel);
+            }                
+            setInLogConfig = offSetInLogConfig || fatalSetInLogConfig || errorSetInLogConfig || warnSetInLogConfig || infoSetInLogConfig 
+                            ||  traceSetInLogConfig || debugSetInLogConfig || allSetInLogConfig;
+            // Package
+            // !setInLogConfig : for a Class logger, Class setting takes precedence on Package if both are used
+            if (!noModuleModule.equals(module) && module != null && !module.isEmpty() && !setInLogConfig) { 
+                Logger packageLogger = getLogger(module.substring(0, module.lastIndexOf(".")));
+                if (packageLogger != null) {
+                    Level packageLoggerLevel = packageLogger.getLevel();
+                    offSetInLogConfig |= Level.OFF.equals(packageLoggerLevel);
+                    fatalSetInLogConfig |= Level.FATAL.equals(packageLoggerLevel);
+                    errorSetInLogConfig |= Level.ERROR.equals(packageLoggerLevel);
+                    warnSetInLogConfig |= Level.WARN.equals(packageLoggerLevel);
+                    infoSetInLogConfig |= Level.INFO.equals(packageLoggerLevel);
+                    traceSetInLogConfig |= Level.TRACE.equals(packageLoggerLevel);
+                    debugSetInLogConfig |= Level.DEBUG.equals(packageLoggerLevel);
+                    allSetInLogConfig |= Level.ALL.equals(packageLoggerLevel);
+                }
+            }
+            setInLogConfig = offSetInLogConfig || fatalSetInLogConfig || errorSetInLogConfig || warnSetInLogConfig || infoSetInLogConfig 
+                            ||  traceSetInLogConfig || debugSetInLogConfig || allSetInLogConfig;
+        }
+
+        if (isOn(level) || setInLogConfig) {
             if (msg != null && params.length > 0) {
                 StringBuilder sb = new StringBuilder();
                 Formatter formatter = new Formatter(sb);
@@ -175,15 +224,33 @@ public final class Debug {
 
             // log
             if (useLog4J) {
-                Logger logger = getLogger(module);
                 if (SYS_DEBUG != null) {
                     logger.setLevel(Level.DEBUG);
                 }
-                logger.log(callingClass, levelObjs[level], msg, t);
+                if (offSetInLogConfig) {
+                    // Not printing anything
+                } else if (fatalSetInLogConfig && Level.FATAL.equals(levelObjs[level])
+                        || errorSetInLogConfig && Level.ERROR.equals(levelObjs[level])
+                        || warnSetInLogConfig && Level.WARN.equals(levelObjs[level])
+                        || infoSetInLogConfig && Level.INFO.equals(levelObjs[level])
+                        || debugSetInLogConfig && Level.DEBUG.equals(levelObjs[level])
+                        || traceSetInLogConfig && Level.DEBUG.equals(levelObjs[level])) {
+                    logger.log(callingClass, levelObjs[level], msg, t);
+                } else if (allSetInLogConfig) {
+                    logger.log(callingClass, Level.INFO, msg, t);
+                } else {
+                    logger.log(callingClass, levelObjs[level], msg, t);
+                }
             } else {
                 StringBuilder prefixBuf = new StringBuilder();
 
-                prefixBuf.append(dateFormat.format(new java.util.Date()));
+                DateToString dateToString = new DateToString(); 
+                try {
+                    prefixBuf.append(dateToString.convert(new java.util.Date(), Locale.getDefault(), 
+                            TimeZone.getDefault(), UtilDateTime.DATE_TIME_FORMAT));
+                } catch (ConversionException e) {
+                    logFatal(e, Debug.class.getName());
+                }
                 prefixBuf.append(" [OFBiz");
                 if (module != null) {
                     prefixBuf.append(":");
@@ -438,6 +505,12 @@ public final class Debug {
         if (!useLevelOnCache)
             return;
         levelOnCache[level] = on;
+    }
+
+    public static boolean get(int level) {
+        if (!useLevelOnCache)
+            return true;
+        return levelOnCache[level];
     }
 
     public static synchronized Appender getNewFileAppender(String name, String logFile, long maxSize, int backupIdx, String pattern) {

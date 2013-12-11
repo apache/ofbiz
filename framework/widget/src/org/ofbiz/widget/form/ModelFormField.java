@@ -114,6 +114,7 @@ public class ModelFormField {
     protected boolean separateColumn = false;
     protected Boolean requiredField = null;
     protected Boolean sortField = null;
+    protected String sortFieldHelpText = "";
     protected String headerLink;
     protected String headerLinkStyle;
 
@@ -159,6 +160,7 @@ public class ModelFormField {
         this.separateColumn = "true".equals(fieldElement.getAttribute("separate-column"));
         this.requiredField = fieldElement.hasAttribute("required-field") ? "true".equals(fieldElement.getAttribute("required-field")) : null;
         this.sortField = fieldElement.hasAttribute("sort-field") ? "true".equals(fieldElement.getAttribute("sort-field")) : null;
+        this.sortFieldHelpText = fieldElement.getAttribute("sort-field-help-text");
         this.headerLink = fieldElement.getAttribute("header-link");
         this.headerLinkStyle = fieldElement.getAttribute("header-link-style");
 
@@ -216,13 +218,13 @@ public class ModelFormField {
     }
 
     protected void addOnChangeUpdateArea(UpdateArea updateArea) {
-        if (onChangeUpdateAreas == null) onChangeUpdateAreas = FastList.newInstance();        
+        if (onChangeUpdateAreas == null) onChangeUpdateAreas = FastList.newInstance();
         onChangeUpdateAreas.add(updateArea);
         Debug.logInfo(this.modelForm.getName() + ":" + this.name + " onChangeUpdateAreas size = " + onChangeUpdateAreas.size(), module);
     }
 
     protected void addOnClickUpdateArea(UpdateArea updateArea) {
-        if (onClickUpdateAreas == null) onClickUpdateAreas = FastList.newInstance();        
+        if (onClickUpdateAreas == null) onClickUpdateAreas = FastList.newInstance();
         onClickUpdateAreas.add(updateArea);
     }
 
@@ -242,6 +244,7 @@ public class ModelFormField {
         if (UtilValidate.isNotEmpty(overrideFormField.tooltip)) this.tooltip = overrideFormField.tooltip;
         if (overrideFormField.requiredField != null) this.requiredField = overrideFormField.requiredField;
         if (overrideFormField.sortField != null) this.sortField = overrideFormField.sortField;
+        if (UtilValidate.isNotEmpty(overrideFormField.sortFieldHelpText)) this.sortFieldHelpText = overrideFormField.sortFieldHelpText;
         if (UtilValidate.isNotEmpty(overrideFormField.titleAreaStyle)) this.titleAreaStyle = overrideFormField.titleAreaStyle;
         if (UtilValidate.isNotEmpty(overrideFormField.widgetAreaStyle)) this.widgetAreaStyle = overrideFormField.widgetAreaStyle;
         if (UtilValidate.isNotEmpty(overrideFormField.titleStyle)) this.titleStyle = overrideFormField.titleStyle;
@@ -953,10 +956,15 @@ public class ModelFormField {
     }
 
     public String getTooltip(Map<String, Object> context) {
-        if (UtilValidate.isNotEmpty(tooltip)) return tooltip.expandString(context);
-        return "";
+        String tooltipString = "";
+        if (UtilValidate.isNotEmpty(tooltip)) tooltipString = tooltip.expandString(context);
+        if (this.getEncodeOutput()) {            
+            StringUtil.SimpleEncoder simpleEncoder = (StringUtil.SimpleEncoder) context.get("simpleEncoder");
+            if (simpleEncoder != null) tooltipString = simpleEncoder.encode(tooltipString);
+        }
+        return tooltipString;        
     }
-
+    
     public String getUseWhen(Map<String, Object> context) {
         if (UtilValidate.isNotEmpty(this.useWhen)) return this.useWhen.expandString(context);
         return "";
@@ -973,15 +981,17 @@ public class ModelFormField {
 
     public String getCurrentContainerId(Map<String, Object> context) {
         ModelForm modelForm = this.getModelForm();
+        String idName = FlexibleStringExpander.expandString(this.getIdName(), context);
+
         if (modelForm != null) {
             Integer itemIndex = (Integer) context.get("itemIndex");
             if ("list".equals(modelForm.getType()) || "multi".equals(modelForm.getType() )) {
                 if (itemIndex != null) {
-                    return this.getIdName() + modelForm.getItemIndexSeparator() + itemIndex.intValue();
+                    return idName + modelForm.getItemIndexSeparator() + itemIndex.intValue();
                 }
             }
         }
-        return this.getIdName();
+        return idName;
     }
 
     public String getHeaderLink() {
@@ -1234,6 +1244,10 @@ public class ModelFormField {
      */
     public void setRequiredField(boolean required) {
         this.requiredField = required;
+    }
+
+    public String getSortFieldHelpText(Map<String, Object> context) {
+        return FlexibleStringExpander.expandString(this.sortFieldHelpText, context);
     }
 
     public boolean isSortField() {
@@ -1615,7 +1629,10 @@ public class ModelFormField {
                 for (GenericValue value: values) {
                     // add key and description with string expansion, ie expanding ${} stuff, passing locale explicitly to expand value string because it won't be found in the Entity
                     MapStack<String> localContext = MapStack.create(context);
-                    localContext.push(value);
+                    // Rendering code might try to modify the GenericEntity instance,
+                    // so we make a copy of it.
+                    Map<String, Object> genericEntityClone = UtilGenerics.cast(value.clone());
+                    localContext.push(genericEntityClone);
 
                     // expand with the new localContext, which is locale aware
                     String optionDesc = this.description.expandString(localContext, locale);
@@ -1964,7 +1981,6 @@ public class ModelFormField {
 
         public String getDescription(Map<String, Object> context) {
             String retVal = null;
-            // Don't replace by UtilValidate.isNotEmpty: this.description is a FlexibleStringExpander and issues occur
             if (UtilValidate.isNotEmpty(this.description)) retVal = this.description.expandString(context);
             else retVal = this.modelFormField.getEntry(context);
 
@@ -2047,7 +2063,6 @@ public class ModelFormField {
                     throw new IllegalArgumentException(errMsg);
                 }
             }
-         // Don't replace by UtilValidate.isNotEmpty: this.description is a FlexibleStringExpander and issues occur
             if (UtilValidate.isNotEmpty(this.description) && retVal != null && this.getModelFormField().getEncodeOutput()) {
                 StringUtil.SimpleEncoder simpleEncoder = (StringUtil.SimpleEncoder) context.get("simpleEncoder");
                 if (simpleEncoder != null) {
@@ -2143,10 +2158,7 @@ public class ModelFormField {
             this.cache = !"false".equals(element.getAttribute("cache"));
             this.size = element.getAttribute("size");
 
-         // Don't replace by UtilValidate.isNotEmpty: this.description is a FlexibleStringExpander and issues occur
-            if (this.description == null || this.description.isEmpty()) {
-                this.setDescription("${description}");
-            }
+            if (UtilValidate.isEmpty(this.description))  this.setDescription("${description}");
 
             Element subHyperlinkElement = UtilXml.firstChildElement(element, "sub-hyperlink");
             if (subHyperlinkElement != null) {
@@ -2177,7 +2189,10 @@ public class ModelFormField {
             if (value != null) {
                 // expanding ${} stuff, passing locale explicitly to expand value string because it won't be found in the Entity
                 MapStack<String> localContext = MapStack.create(context);
-                localContext.push(value);
+                // Rendering code might try to modify the GenericEntity instance,
+                // so we make a copy of it.
+                Map<String, Object> genericEntityClone = UtilGenerics.cast(value.clone());
+                localContext.push(genericEntityClone);
 
                 // expand with the new localContext, which is locale aware
                 retVal = this.description.expandString(localContext, locale);
@@ -2211,6 +2226,8 @@ public class ModelFormField {
         protected FlexibleStringExpander targetWindowExdr;
         protected FlexibleMapAccessor<Map<String, String>> parametersMapAcsr;
         protected List<WidgetWorker.Parameter> parameterList = FastList.newInstance();
+        protected WidgetWorker.AutoServiceParameters autoServiceParameters;
+        protected WidgetWorker.AutoEntityParameters autoEntityParameters;
 
         protected boolean requestConfirmation = false;
         protected FlexibleStringExpander confirmationMsgExdr;
@@ -2246,6 +2263,14 @@ public class ModelFormField {
             for (Element parameterElement: parameterElementList) {
                 this.parameterList.add(new WidgetWorker.Parameter(parameterElement));
             }
+            Element autoServiceParamsElement = UtilXml.firstChildElement(element, "auto-parameters-service");
+            if (autoServiceParamsElement != null) {
+                autoServiceParameters = new WidgetWorker.AutoServiceParameters(autoServiceParamsElement);
+            }
+            Element autoEntityParamsElement = UtilXml.firstChildElement(element, "auto-parameters-entity");
+            if (autoEntityParamsElement != null) {
+                autoEntityParameters = new WidgetWorker.AutoEntityParameters(autoEntityParamsElement);
+            }
         }
 
         @Override
@@ -2263,8 +2288,8 @@ public class ModelFormField {
 
         public String getConfirmation(Map<String, Object> context) {
             String message = getConfirmationMsg(context);
-            if (UtilValidate.isNotEmpty(message)) return message;            
-            
+            if (UtilValidate.isNotEmpty(message)) return message;
+
             if (getRequestConfirmation()) {
                 String defaultMessage = UtilProperties.getPropertyValue("general", "default.confirmation.message", "${uiLabelMap.CommonConfirm}");
                 setConfirmationMsg(defaultMessage);
@@ -2318,11 +2343,19 @@ public class ModelFormField {
             if (addlParamMap != null) {
                 fullParameterMap.putAll(addlParamMap);
             }
-            
+
             for (WidgetWorker.Parameter parameter: this.parameterList) {
                 fullParameterMap.put(parameter.getName(), parameter.getValue(context));
             }
-            
+
+            if (autoServiceParameters != null) {
+                fullParameterMap.putAll(autoServiceParameters.getParametersMap(context, this.getModelFormField().getModelForm().getDefaultServiceName()));
+            }
+
+            if (autoEntityParameters != null) {
+                fullParameterMap.putAll(autoEntityParameters.getParametersMap(context, this.getModelFormField().getModelForm().getDefaultEntityName()));
+            }
+
             return fullParameterMap;
         }
 
@@ -2404,6 +2437,8 @@ public class ModelFormField {
         protected boolean requestConfirmation = false;
         protected FlexibleStringExpander confirmationMsgExdr;
         protected ModelFormField modelFormField;
+        protected WidgetWorker.AutoServiceParameters autoServiceParameters;
+        protected WidgetWorker.AutoEntityParameters autoEntityParameters;
 
         public SubHyperlink(Element element, ModelFormField modelFormField) {
             this.setDescription(element.getAttribute("description"));
@@ -2419,7 +2454,14 @@ public class ModelFormField {
             }
             setRequestConfirmation("true".equals(element.getAttribute("request-confirmation")));
             setConfirmationMsg(element.getAttribute("confirmation-message"));
-
+            Element autoServiceParamsElement = UtilXml.firstChildElement(element, "auto-parameters-service");
+            if (autoServiceParamsElement != null) {
+                autoServiceParameters = new WidgetWorker.AutoServiceParameters(autoServiceParamsElement);
+            }
+            Element autoEntityParamsElement = UtilXml.firstChildElement(element, "auto-parameters-entity");
+            if (autoEntityParamsElement != null) {
+                autoEntityParameters = new WidgetWorker.AutoEntityParameters(autoEntityParamsElement);
+            }
             this.modelFormField = modelFormField;
         }
 
@@ -2470,7 +2512,14 @@ public class ModelFormField {
             for (WidgetWorker.Parameter parameter: this.parameterList) {
                 fullParameterMap.put(parameter.getName(), parameter.getValue(context));
             }
-            
+
+            if (autoServiceParameters != null) {
+                fullParameterMap.putAll(autoServiceParameters.getParametersMap(context, this.getModelFormField().getModelForm().getDefaultServiceName()));
+            }
+            if (autoEntityParameters != null) {
+                fullParameterMap.putAll(autoEntityParameters.getParametersMap(context, this.getModelFormField().getModelForm().getDefaultEntityName()));
+            }
+
             return fullParameterMap;
         }
 
@@ -2675,6 +2724,7 @@ public class ModelFormField {
         protected boolean readonly;
         protected boolean clientAutocompleteField;
         protected String mask;
+        protected FlexibleStringExpander placeholder = FlexibleStringExpander.getInstance(null);
 
         protected TextField() {
             super();
@@ -2692,7 +2742,7 @@ public class ModelFormField {
             super(element, modelFormField);
             this.setDefaultValue(element.getAttribute("default-value"));
             this.mask = element.getAttribute("mask");
-
+            this.placeholder = FlexibleStringExpander.getInstance(element.getAttribute("placeholder"));
             String sizeStr = element.getAttribute("size");
             try {
                 size = Integer.parseInt(sizeStr);
@@ -2798,6 +2848,10 @@ public class ModelFormField {
 
         public String getMask() {
             return this.mask;
+        }
+
+        public String getPlaceholder(Map<String, Object> context) {
+            return this.placeholder.expandString(context);
         }
     }
 
@@ -3518,6 +3572,7 @@ public class ModelFormField {
         protected String lookupPosition;
         protected String fadeBackground;
         protected String initiallyCollapsed;
+        protected String showDescription;
 
         public LookupField(Element element, ModelFormField modelFormField) {
             super(element, modelFormField);
@@ -3530,6 +3585,7 @@ public class ModelFormField {
             this.lookupPosition = element.getAttribute("position");
             this.fadeBackground = element.getAttribute("fade-background");            
             this.initiallyCollapsed = element.getAttribute("initially-collapsed");
+            this.showDescription = element.getAttribute("show-description");
 
             Element subHyperlinkElement = UtilXml.firstChildElement(element, "sub-hyperlink");
             if (subHyperlinkElement != null) {
@@ -3617,6 +3673,15 @@ public class ModelFormField {
         public void setFadeBackground(String str) {
             this.fadeBackground = str;
         }
+
+        public Boolean getShowDescription() {
+            return UtilValidate.isEmpty(this.showDescription) ? null : "true".equals(this.showDescription);
+        }
+
+        public void setShowDescription(String str) {
+            this.showDescription = str;
+        }
+
         //initially-collapsed status
         public boolean getInitiallyCollapsed() {
             return "true".equals(this.initiallyCollapsed);
@@ -3726,7 +3791,6 @@ public class ModelFormField {
         }
 
         public String getDescription(Map<String, Object> context) {
-         // Don't replace by UtilValidate.isNotEmpty: this.description is a FlexibleStringExpander and issues occur
             if (UtilValidate.isNotEmpty(this.description)) return this.description.expandString(context);
             return "";
         }

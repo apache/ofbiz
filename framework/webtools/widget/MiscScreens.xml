@@ -20,22 +20,6 @@ under the License.
 <screens xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/widget-screen.xsd">
 
-    <screen name="ViewComponents">
-        <section>
-            <actions>
-                <set field="headerItem" value="main"/>
-                <set field="titleProperty" value="WebtoolsViewComponents"/>
-                <set field="tabButtonItem" value="viewents"/>
-            </actions>
-            <widgets>
-                <decorator-screen name="CommonArtifactDecorator" location="component://webtools/widget/CommonScreens.xml">
-                    <decorator-section name="body">
-                        <platform-specific><html><html-template location="component://webtools/webapp/webtools/component/viewComponents.ftl"/></html></platform-specific>
-                    </decorator-section>
-                </decorator-screen>
-            </widgets>
-        </section>
-    </screen>
 
     <screen name="viewdatafile">
         <section>
@@ -46,7 +30,7 @@ under the License.
                 <script location="component://webtools/webapp/webtools/WEB-INF/actions/datafile/viewdatafile.groovy"/>
             </actions>
             <widgets>
-                <decorator-screen name="CommonImportExportDecorator" location="component://webtools/widget/CommonScreens.xml">
+                <decorator-screen name="CommonImportExportDecorator" location="${parameters.mainDecoratorLocation}">
                     <decorator-section name="body">
                         <screenlet>
                             <platform-specific><html><html-template location="component://webtools/webapp/webtools/datafile/viewdatafile.ftl"/></html></platform-specific>
@@ -74,6 +58,9 @@ under the License.
                 <set field="errorMessage" from-field="demoText" global="true"/>
                 <set field="eventMessage" from-field="demoText" global="true"/>
                 <set field="demoTargetUrl" value="WebtoolsLayoutDemo"/>
+                <set field="demoParam1" value="one"/>
+                <set field="demoParam2" value="two"/>
+                <set field="demoParam3" value="three"/>
                 <set field="demoMap.name" value="${uiLabelMap.WebtoolsLayoutDemo}"/>
                 <set field="demoMap.description" value="${uiLabelMap.WebtoolsLayoutDemoText}"/>
                 <set field="demoMap.dropDown" value="Y"/>
@@ -113,7 +100,7 @@ under the License.
                                         </container>
                                         <container style="button-bar button-style-1">
                                             <!-- Typically used for intra-app links -->
-                                            <link target="${demoTargetUrl}" text="${uiLabelMap.CommonNew}" style="create"/>
+                                            <link target="${demoTargetUrl}" text="${uiLabelMap.CommonNew}" style="create" />
                                             <link target="${demoTargetUrl}" text="${uiLabelMap.CommonDelete}" style="delete"/>
                                             <link target="${demoTargetUrl}" text="${uiLabelMap.CommonRefresh}" style="refresh"/>
                                             <link target="${demoTargetUrl}" text="${uiLabelMap.CommonSearch}" style="search"/>
@@ -123,13 +110,41 @@ under the License.
                                         </container>
                                         <container style="button-bar button-style-2">
                                             <!-- Typically used for inter-app links -->
-                                            <link target="${demoTargetUrl}" text="${uiLabelMap.CommonNew}" style="create"/>
-                                            <link target="${demoTargetUrl}" text="${uiLabelMap.CommonDelete}" style="delete"/>
-                                            <link target="${demoTargetUrl}" text="${uiLabelMap.CommonRefresh}" style="refresh"/>
-                                            <link target="${demoTargetUrl}" text="${uiLabelMap.CommonSearch}" style="search"/>
-                                            <link target="${demoTargetUrl}" text="${uiLabelMap.CommonSelected}" style="selected"/>
-                                            <link target="${demoTargetUrl}" text="${uiLabelMap.CommonEnabled}"/>
-                                            <link text="${uiLabelMap.CommonDisabled}" style="disabled"/>
+                                            <link target="${demoTargetUrl}" text="${uiLabelMap.CommonNew}" style="create" link-type="auto">
+                                                <parameter param-name="demoParam1"/>
+                                                <parameter param-name="demoParam2"/>
+                                                <parameter param-name="demoParam3"/>
+                                            </link>
+                                            <link target="${demoTargetUrl}" text="${uiLabelMap.CommonDelete}" style="delete" link-type="anchor">
+                                                <parameter param-name="demoParam1"/>
+                                                <parameter param-name="demoParam2"/>
+                                                <parameter param-name="demoParam3"/>
+                                            </link>
+                                            <link target="${demoTargetUrl}" text="${uiLabelMap.CommonRefresh}" style="refresh" link-type="hidden-form">
+                                                <parameter param-name="demoParam1"/>
+                                                <parameter param-name="demoParam2"/>
+                                                <parameter param-name="demoParam3"/>
+                                            </link>
+                                            <link target="${demoTargetUrl}" text="${uiLabelMap.CommonSearch}" style="search">
+                                                <parameter param-name="demoParam1"/>
+                                                <parameter param-name="demoParam2"/>
+                                                <parameter param-name="demoParam3"/>
+                                            </link>
+                                            <link target="${demoTargetUrl}" text="${uiLabelMap.CommonSelected}" style="selected">
+                                                <parameter param-name="demoParam1"/>
+                                                <parameter param-name="demoParam2"/>
+                                                <parameter param-name="demoParam3"/>
+                                            </link>
+                                            <link target="${demoTargetUrl}" text="${uiLabelMap.CommonEnabled}">
+                                                <parameter param-name="demoParam1"/>
+                                                <parameter param-name="demoParam2"/>
+                                                <parameter param-name="demoParam3"/>
+                                            </link>
+                                            <link text="${uiLabelMap.CommonDisabled}" style="disabled">
+                                                <parameter param-name="demoParam1"/>
+                                                <parameter param-name="demoParam2"/>
+                                                <parameter param-name="demoParam3"/>
+                                            </link>
                                         </container>
                                     </widgets>
                                 </section>

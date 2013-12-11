@@ -1670,6 +1670,18 @@ under the License.
         </view-link>
     </view-entity>
 
+    <view-entity entity-name="InvItemAndOrdItem" package-name="org.ofbiz.accounting.invoice">
+        <member-entity entity-alias="INVITM" entity-name="InvoiceItem"/>
+        <member-entity entity-alias="ORDBIL" entity-name="OrderItemBilling"/>
+        <alias-all entity-alias="INVITM"/>
+        <alias name="orderId" entity-alias="ORDBIL"/>
+        <alias name="orderItemSeqId" entity-alias="ORDBIL"/>
+        <view-link entity-alias="INVITM" rel-entity-alias="ORDBIL" rel-optional="true">
+            <key-map field-name="invoiceId"/>
+            <key-map field-name="invoiceItemSeqId"/>
+        </view-link>
+    </view-entity>
+
     <view-entity entity-name="InvoiceContentAndInfo"
             package-name="org.ofbiz.accounting.invoice"
             title="InvoiceContent Content and DataResource View Entity">
@@ -1732,7 +1744,9 @@ under the License.
       <field name="receiptId" type="id"></field>
       <field name="workEffortId" type="id"></field>
       <field name="theirAcctgTransId" type="id-long"></field>
+      <field name="createdDate" type="date-time"></field>      
       <field name="createdByUserLogin" type="id-vlong"></field>
+      <field name="lastModifiedDate" type="date-time"></field>
       <field name="lastModifiedByUserLogin" type="id-vlong"></field>
       <prim-key field="acctgTransId"/>
       <relation type="one" fk-name="ACCTTX_TYPE" rel-entity-name="AcctgTransType">
@@ -2033,7 +2047,6 @@ under the License.
       <field name="description" type="description"></field>
       <field name="productId" type="id"></field>
       <field name="externalId" type="id"><description>id of the account in an external system where the accounts are imported/exported</description></field>
-      <field name="postedBalance" type="currency-amount"></field>
       <prim-key field="glAccountId"/>
       <relation type="one" fk-name="GLACCT_TYPE" rel-entity-name="GlAccountType">
         <key-map field-name="glAccountTypeId"/>
@@ -2109,6 +2122,7 @@ under the License.
       <field name="glAccountId" type="id-ne"></field>
       <field name="organizationPartyId" type="id-ne"></field>
       <field name="customTimePeriodId" type="id-ne"></field>
+      <field name="openingBalance" type="currency-amount"></field>
       <field name="postedDebits" type="currency-amount"></field>
       <field name="postedCredits" type="currency-amount"></field>
       <field name="endingBalance" type="currency-amount"></field>
@@ -2182,7 +2196,6 @@ under the License.
       <field name="roleTypeId" type="id-ne"></field>
       <field name="fromDate" type="date-time"></field>
       <field name="thruDate" type="date-time"></field>
-      <field name="postedBalance" type="currency-amount"></field>
       <prim-key field="glAccountId"/>
       <prim-key field="organizationPartyId"/>
       <relation type="one" fk-name="GLACCT_ORG_GLA" rel-entity-name="GlAccount">
@@ -2205,10 +2218,7 @@ under the License.
       <member-entity entity-alias="GLAO" entity-name="GlAccountOrganization"/>
       <member-entity entity-alias="GLA" entity-name="GlAccount"/>
       <alias-all entity-alias="GLAO"/>
-      <alias-all entity-alias="GLA">
-        <exclude field="postedBalance"/>
-      </alias-all>
-      <alias entity-alias="GLA" name="accountPostedBalance" field="postedBalance"/>
+      <alias-all entity-alias="GLA"/>
       <view-link entity-alias="GLAO" rel-entity-alias="GLA">
         <key-map field-name="glAccountId"/>
       </view-link>
@@ -2322,7 +2332,9 @@ under the License.
       <field name="glReconciliationId" type="id-ne"></field>
       <field name="glReconciliationName" type="name"></field>
       <field name="description" type="description"></field>
+      <field name="createdDate" type="date-time"></field>
       <field name="createdByUserLogin" type="id-vlong"></field>
+      <field name="lastModifiedDate" type="date-time"></field>
       <field name="lastModifiedByUserLogin" type="id-vlong"></field>
       <field name="glAccountId" type="id-ne"></field>
       <field name="statusId" type="id-ne"></field>
@@ -3069,6 +3081,72 @@ under the License.
         <key-map field-name="paymentId"/>
       </relation>
     </entity>
+    <entity entity-name="PaymentContent" 
+            package-name="org.ofbiz.accounting.payment" 
+            title="Payment Content Entity">
+        <field name="paymentId" type="id-ne"></field>
+        <field name="paymentContentTypeId" type="id-ne"></field>
+        <field name="contentId" type="id-ne"></field>
+        <field name="fromDate" type="date-time"></field>
+        <field name="thruDate" type="date-time"></field>
+        <prim-key field="contentId"/>
+        <prim-key field="paymentId"/>
+        <prim-key field="paymentContentTypeId"/>
+        <prim-key field="fromDate"/>
+        <relation type="one" fk-name="PAYMENT_CNT_PROD" rel-entity-name="Payment">
+            <key-map field-name="paymentId"/>
+        </relation>
+        <relation type="one" fk-name="PAYMENT_CNT_CNT" rel-entity-name="Content">
+            <key-map field-name="contentId"/>
+        </relation>
+        <relation type="one" fk-name="PAYMENT_CNT_TYPE" rel-entity-name="PaymentContentType">
+            <key-map field-name="paymentContentTypeId"/>
+        </relation>
+    </entity>
+    <entity entity-name="PaymentContentType" 
+            package-name="org.ofbiz.accounting.payment"
+            title="Payment Content Type Entity">
+        <field name="paymentContentTypeId" type="id-ne"></field>
+        <field name="parentTypeId" type="id"></field>
+        <field name="hasTable" type="indicator"></field>
+        <field name="description" type="description"></field>
+        <prim-key field="paymentContentTypeId"/>
+        <relation type="one" fk-name="PAYCT_TYP_PARENT" title="Parent" rel-entity-name="PaymentContentType">
+            <key-map field-name="parentTypeId" rel-field-name="paymentContentTypeId"/>
+        </relation>
+    </entity>
+    <view-entity entity-name="PaymentContentAndInfo"
+            package-name="org.ofbiz.accounting.payment"
+            title="PaymentContent Content and DataResource View Entity">
+      <member-entity entity-alias="PAYC" entity-name="PaymentContent"/>
+      <member-entity entity-alias="CO" entity-name="Content"/>
+      <member-entity entity-alias="DR" entity-name="DataResource"/>
+      <alias-all entity-alias="PAYC"/>
+      <alias-all entity-alias="CO"/>
+      <alias-all entity-alias="DR" prefix="dr"/>
+      <view-link entity-alias="PAYC" rel-entity-alias="CO">
+        <key-map field-name="contentId"/>
+      </view-link>
+      <view-link entity-alias="CO" rel-entity-alias="DR">
+        <key-map field-name="dataResourceId"/>
+      </view-link>
+      <relation type="one-nofk" rel-entity-name="ElectronicText">
+        <key-map field-name="dataResourceId"/>
+      </relation>
+      <relation type="one-nofk" rel-entity-name="ImageDataResource">
+        <key-map field-name="dataResourceId"/>
+      </relation>
+      <relation type="one-nofk" rel-entity-name="OtherDataResource">
+        <key-map field-name="dataResourceId"/>
+      </relation>
+      <relation type="many" rel-entity-name="ContentAssocDataResourceViewFrom">
+        <key-map field-name="contentId" rel-field-name="contentIdStart"/>
+      </relation>
+      <relation type="many" rel-entity-name="ContentAssocDataResourceViewTo">
+        <key-map field-name="contentId" rel-field-name="contentIdStart"/>
+      </relation>
+    </view-entity>
+
     <entity entity-name="PaymentMethod"
             package-name="org.ofbiz.accounting.payment"
             title="Payment Method Entity">
@@ -3679,6 +3757,9 @@ under the License.
       <field name="workingKey" type="very-long"></field>
       <field name="workingKeyIndex" type="numeric"></field>
       <field name="lastWorkingKey" type="very-long"></field>
+      <field name="createdDate" type="date-time"></field>
+      <field name="createdByTerminal" type="short-varchar"></field>
+      <field name="createdByUserLogin" type="id-vlong"></field>
       <field name="lastModifiedDate" type="date-time"></field>
       <field name="lastModifiedByTerminal" type="short-varchar"></field>
       <field name="lastModifiedByUserLogin" type="id-vlong"></field>

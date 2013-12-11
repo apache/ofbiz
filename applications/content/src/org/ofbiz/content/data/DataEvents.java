@@ -42,6 +42,7 @@ import org.ofbiz.entity.GenericValue;
 import org.ofbiz.service.GenericServiceException;
 import org.ofbiz.service.LocalDispatcher;
 import org.ofbiz.service.ServiceUtil;
+import org.ofbiz.webapp.website.WebSiteWorker;
 
 /**
  * DataEvents Class
@@ -60,6 +61,7 @@ public class DataEvents {
         Delegator delegator = (Delegator) request.getAttribute("delegator");
         LocalDispatcher dispatcher = (LocalDispatcher) request.getAttribute("dispatcher");
         HttpSession session = request.getSession();
+        Locale locale = UtilHttp.getLocale(request);
 
         GenericValue userLogin = (GenericValue) session.getAttribute("userLogin");
         String userAgent = request.getHeader("User-Agent");
@@ -130,7 +132,7 @@ public class DataEvents {
         // not public check security
         if (!"Y".equalsIgnoreCase(isPublic)) {
             // do security check
-            Map<String, Object> permSvcCtx = UtilMisc.toMap("userLogin", userLogin, "mainAction", "VIEW", "contentId", contentId);
+            Map<String, ? extends Object> permSvcCtx = UtilMisc.toMap("userLogin", userLogin, "locale", locale, "mainAction", "VIEW", "contentId", contentId);
             Map<String, Object> permSvcResp;
             try {
                 permSvcResp = dispatcher.runSync(permissionService, permSvcCtx);
@@ -160,7 +162,6 @@ public class DataEvents {
         String contextRoot = (String) request.getAttribute("_CONTEXT_ROOT_");
         String webSiteId = (String) session.getAttribute("webSiteId");
         String dataName = dataResource.getString("dataResourceName");
-        Locale locale = UtilHttp.getLocale(request);
 
         // get the mime type
         String mimeType = DataResourceWorker.getMimeType(dataResource);
@@ -279,7 +280,7 @@ public class DataEvents {
                 response.setContentType(mimeType);
             }
             OutputStream os = response.getOutputStream();
-            DataResourceWorker.streamDataResource(os, delegator, dataResourceId, "", application.getInitParameter("webSiteId"), UtilHttp.getLocale(request), application.getRealPath("/"));
+            DataResourceWorker.streamDataResource(os, delegator, dataResourceId, "", WebSiteWorker.getWebSiteId(request), UtilHttp.getLocale(request), application.getRealPath("/"));
             os.flush();
         } catch (GenericEntityException e) {
             String errMsg = "Error downloading digital product content: " + e.toString();

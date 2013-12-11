@@ -20,11 +20,9 @@ package org.ofbiz.content.webapp.ftl;
 
 import java.io.IOException;
 import java.io.Writer;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -167,7 +165,7 @@ public class EditRenderSubContentCacheTransform implements TemplateTransformMode
 
                     templateRoot.put("context", templateCtx);
                     if (Debug.verboseOn()) {
-                        for(Object ky : templateCtx.keySet()) {
+                        for (Object ky : templateCtx.keySet()) {
                             Object val = templateCtx.get(ky);
                             Debug.logVerbose("context key: " + ky + " val: " + val, module);
                         }

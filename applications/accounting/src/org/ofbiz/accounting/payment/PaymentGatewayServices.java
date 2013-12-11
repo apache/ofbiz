@@ -365,7 +365,7 @@ public class PaymentGatewayServices {
         int finished = 0;
         int hadError = 0;
         List<String> messages = FastList.newInstance();
-        for(GenericValue paymentPref : paymentPrefs) {
+        for (GenericValue paymentPref : paymentPrefs) {
             if (reAuth && "PAYMENT_AUTHORIZED".equals(paymentPref.getString("statusId"))) {
                 String paymentConfig = null;
                 // get the payment settings i.e. serviceName and config properties file name
@@ -588,8 +588,8 @@ public class PaymentGatewayServices {
                 }
             }
         } catch (GenericServiceException e) {
-            Debug.logError(e, "Error occurred on: " + serviceName + " => " + processContext, module);
-            throw new GeneralException("Problems invoking payment processor! Will retry later. Order ID is: [" + orh.getOrderId() + "", e);
+            Debug.logError(e, "Error occurred on: " + serviceName + ", Order ID is: [" + orh.getOrderId() + "]", module);
+            throw new GeneralException("Problems invoking payment processor! Will retry later. Order ID is: [" + orh.getOrderId() + "]", e);
         }
 
         if (processorResult != null) {
@@ -761,7 +761,7 @@ public class PaymentGatewayServices {
 
         // iterate over the prefs and release each one
         List<GenericValue> finished = FastList.newInstance();
-        for(GenericValue pPref : paymentPrefs) {
+        for (GenericValue pPref : paymentPrefs) {
             Map<String, Object> releaseContext = UtilMisc.toMap("userLogin", userLogin, "orderPaymentPreferenceId", pPref.getString("orderPaymentPreferenceId"));
             Map<String, Object> releaseResult = null;
             try {
@@ -820,7 +820,7 @@ public class PaymentGatewayServices {
         List<GenericValue> messageEntities = FastList.newInstance();
         List<String> messages = UtilGenerics.cast(context.get("internalRespMsgs"));
         if (UtilValidate.isNotEmpty(messages)) {
-            for(String message : messages) {
+            for (String message : messages) {
                 GenericValue respMsg = delegator.makeValue("PaymentGatewayRespMsg");
                 String respMsgId = delegator.getNextSeqId("PaymentGatewayRespMsg");
                 respMsg.set("paymentGatewayRespMsgId", respMsgId);
@@ -1970,9 +1970,9 @@ public class PaymentGatewayServices {
             }
 
             // set the status of the OrderPaymentPreference
-            if (context != null && authResult.booleanValue()) {
+            if (authResult.booleanValue()) {
                 orderPaymentPreference.set("statusId", "PAYMENT_AUTHORIZED");
-            } else if (context != null && !authResult.booleanValue()) {
+            } else if (!authResult.booleanValue()) {
                 orderPaymentPreference.set("statusId", "PAYMENT_DECLINED");
             } else {
                 orderPaymentPreference.set("statusId", "PAYMENT_ERROR");
@@ -3212,7 +3212,7 @@ public class PaymentGatewayServices {
             requestContext.put("paymentGatewayConfigId", paymentGatewayConfigId);
         }
         // check the service name
-        if (paymentService == null || (paymentGatewayConfigId == null && paymentConfig == null)) {
+        if (paymentService == null || paymentGatewayConfigId == null) {
             return ServiceUtil.returnError(UtilProperties.getMessage(resource, 
                     "AccountingPaymentSettingNotValid", locale));
         }
@@ -3569,7 +3569,7 @@ public class PaymentGatewayServices {
         String lastNumberStr = expireDate.substring(expireDate.length() - 1);
         int lastNumber = Integer.parseInt(lastNumberStr);
 
-        if (lastNumber / 2.0 == 0.0) {
+        if (lastNumber % 2.0 == 0.0) {
             return alwaysBadExpireProcessor(dctx, context);
         } else {
             return alwaysApproveProcessor(dctx, context);

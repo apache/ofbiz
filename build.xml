@@ -26,18 +26,38 @@ under the License.
     <property name="site.dir" value="../site"/>
     <property name="memory.initial.param" value="-Xms128M"/>
     <property name="memory.max.param" value="-Xmx512M"/>
-    <property name="pos.memory.max.param" value="-Xmx512M"/>
     <property name="memory.maxpermsize.param" value="-XX:MaxPermSize=512M"/>
 
+    <import file="framework/build.xml" optional="false"/>
     <available file="applications/build.xml" property="applications.present"/>
+    <import file="applications/build.xml" optional="true"/>
     <available file="specialpurpose/build.xml" property="specialpurpose.present"/>
+    <import file="specialpurpose/build.xml" optional="true"/>
 
     <!-- ================================================================== -->
     <!-- Initialization of all property settings                            -->
     <!-- ================================================================== -->
 
-    <target name="ofbiz-init">
+    <target name="ofbiz-init" depends="dir-init">
         <property environment="env"/>
+    </target>
+
+    <target name="dir-init">
+        <mkdir dir="runtime"/>
+        <mkdir dir="runtime/output"/>
+        <mkdir dir="runtime/logs"/>
+        <mkdir dir="runtime/logs/test-results"/>
+        <mkdir dir="runtime/data"/>
+        <mkdir dir="runtime/data/derby"/>
+
+        <condition property="isMac">
+            <os family="mac"/>
+        </condition>
+        <antcall target="copy-derby-props" inheritall="true"/>
+    </target>
+
+    <target name="copy-derby-props" if="isMac">
+        <copy file="runtime/data/derby.properties" todir="runtime/data/derby"/>
     </target>
 
     <target name="ivy-init">
@@ -75,10 +95,10 @@ under the License.
         <antcall target="clean-catalina"/>
         <antcall target="clean-cache"/>
         <antcall target="clean-tempfiles"/>
-        <antcall target="clean-lucene-index"/>
-        <!-- FIXME: clean-downloads introduces some issues: with cobertura (on Windows can't be deleted, not sure why), 
+        <antcall target="clean-search-indexes"/>
+        <!-- FIXME: clean-downloads introduces some issues: with cobertura (on Windows can't be deleted, not sure why),
                     but especially with postgresql drivers -->
-        <!-- antcall target="clean-downloads"/ -->   
+        <!-- antcall target="clean-downloads"/ -->
         <antcall target="clean"/>
     </target>
 
@@ -86,33 +106,36 @@ under the License.
           description="Clean all downloaded files">
         <delete>
             <fileset dir="framework/base/lib" includes="cobertura-*.jar"/>
-            <fileset dir="framework/base/lib" includes="asm*.jar"/>
-            <fileset dir="framework/base/lib" includes="oro*.jar"/>
             <fileset dir="framework/base/lib" includes="sonar-*.jar"/>
             <fileset dir="framework/entity/lib/jdbc" includes="postgresql-*.jar"/>
         </delete>
     </target>
     <target name="clean-data"
           description="Clean all DB data (Derby) under runtime/data">
-        <subant target="clean-data">
-            <filelist dir="." files="framework/build.xml"/>
-        </subant>
+        <delete verbose="on" includeemptydirs="true">
+            <fileset dir="runtime/data" includes="**/*">
+                <exclude name="README"/>
+                <exclude name="derby.properties"/>
+            </fileset>
+        </delete>
         <delete file="runtime/data.zip"/>
         <delete file="runtime/test-list-build.xml"/>
     </target>
 
     <target name="clean-logs"
           description="Clean all logs in runtime/logs">
-        <subant target="clean-logs">
-            <filelist dir="." files="framework/build.xml"/>
-        </subant>
+        <delete verbose="on" includeemptydirs="true">
+            <fileset dir="runtime/logs" includes="**/*">
+                <exclude name="README"/>
+            </fileset>
+        </delete>
     </target>
 
     <target name="clean-output"
           description="Clean runtime/output directory">
-        <subant target="clean-output">
-            <filelist dir="." files="framework/build.xml"/>
-        </subant>
+        <delete verbose="on" includeemptydirs="true">
+            <fileset dir="runtime/output" includes="**/*"/>
+        </delete>
     </target>
 
     <target name="clean-xtra"
@@ -124,9 +147,7 @@ under the License.
 
     <target name="clean-catalina"
           description="Clean Catalina data in runtime/catalina/work">
-        <subant target="clean-catalina">
-            <filelist dir="." files="framework/build.xml"/>
-        </subant>
+        <delete dir="runtime/catalina/work"/>
     </target>
 
    <target name="clean-cache"
@@ -138,44 +159,39 @@ under the License.
 
     <target name="clean-tempfiles"
           description="Remove files located in runtime/tempfiles (captcha, etc...)">
-        <subant target="clean-tempfiles">
-            <filelist dir="." files="framework/build.xml"/>
-        </subant>
+        <delete includeemptydirs="true">
+            <fileset dir="./runtime/tempfiles" includes="**/*"/>
+        </delete>
     </target>
 
-    <target name="clean-lucene-index"
-          description="Remove lucene indexes created in applications/content/index">
-        <subant target="clean-lucene-index">
-            <filelist dir="." files="applications/content/build.xml"/>
-        </subant>
+    <target name="clean-search-indexes"
+            description="Remove search indexes (e.g. Lucene indexes) created under runtime/indexes">
+        <delete includeemptydirs="true">
+            <fileset dir="./runtime/indexes" includes="**/*" erroronmissingdir="false" />
+        </delete>
     </target>
 
     <target name="tests" depends="ofbiz-init">
-        <subant target="tests">
-            <filelist dir="." files="framework/build.xml"/>
-        </subant>
+        <iterate target="tests" filelist="test-builds"/>
     </target>
 
     <target name="clean">
-        <subant target="clean">
-            <fileset dir="${basedir}/hot-deploy" casesensitive="no">
-                <include name="*/build.xml"/>
-            </fileset>
-        </subant>
-
-        <subant target="clean"  failonerror="${specialpurpose.present}"
-          description="Use failonerror=false in case the specialpurpose directory is not there">
-            <filelist dir="." files="specialpurpose/build.xml"/>
-        </subant>
-        <subant target="clean" failonerror="${applications.present}"
-          description="Use failonerror=false in case the applications directory is not there">
-            <filelist dir="." files="applications/build.xml"/>
-        </subant>
-        <subant target="clean">
-            <filelist dir="." files="framework/build.xml"/>
-        </subant>
+        <hotdeployant target="clean"/>
+        <antcall target="clean-specialpurpose"/>
+        <antcall target="clean-applications"/>
+        <antcall target="clean-framework"/>
         <delete file="ofbiz.jar"/>
         <echo message="[clean] ========== Done Cleaning =========="/>
+    </target>
+
+    <target name="clean-framework">
+        <iterate target="clean" filelist="framework-builds"/>
+    </target>
+    <target name="clean-applications" if="${applications.present}">
+        <iterate target="clean" filelist="application-builds"/>
+    </target>
+    <target name="clean-specialpurpose" if="${specialpurpose.present}">
+        <iterate target="clean" filelist="specialpurpose-builds"/>
     </target>
 
     <target name="svninfo"
@@ -206,40 +222,58 @@ under the License.
     <target name="build" depends="ofbiz-init">
         <echo message="[build] ========== Start Building (Compile) =========="/>
 
-        <subant inheritall="false">
-            <filelist dir="." files="framework/build.xml"/>
-        </subant>
-        <subant inheritall="false" failonerror="${applications.present}">
-            <filelist dir="." files="applications/build.xml"/>
-        </subant>
-        <subant inheritall="false" failonerror="${specialpurpose.present}">
-            <filelist dir="." files="specialpurpose/build.xml"/>
-        </subant>
+        <antcall target="build-framework"/>
+        <antcall target="build-applications"/>
+        <antcall target="build-specialpurpose"/>
+        <externalsubant>
+            <fileset dir="${basedir}/themes">
+                <include name="*/build.xml" />
+            </fileset>
+        </externalsubant>
 
-        <!-- a check is done, if no build.xml file is present in hot-deploy dir,
-            then the build.xml files - if present - in hot-deploy sub-dirs will be used.
-            So the previous, simpler, behaviour is kept as long as you don't need 
-            to build hot-deploy components in a specific order. -->
-        <if>
-          <available file="hot-deploy/build.xml" property="useHotDeployBuild"/>
-          <then>
-            <subant inheritall="false">
-              <filelist dir="." files="hot-deploy/build.xml"/>
-            </subant>
-          </then>
-          <else>
-            <subant inheritall="false">
-              <fileset dir="${basedir}/hot-deploy" casesensitive="no">
-                <exclude name="disabled/**"/>
-                <include name="*/build.xml"/>
-              </fileset>
-            </subant>
-          </else>
-        </if>
+        <hotdeployant/>
         <antcall target="clean-svninfo"/>
 
         <echo message="[build] ========== Done Building (Compile) =========="/>
     </target>
+
+    <target name="build-framework">
+        <iterate target="jar" filelist="framework-builds"/>
+    </target>
+
+    <target name="build-applications" if="${applications.present}">
+        <iterate target="jar" filelist="application-builds"/>
+    </target>
+
+    <target name="build-specialpurpose" if="${specialpurpose.present}">
+        <iterate target="jar" filelist="specialpurpose-builds"/>
+    </target>
+
+    <macrodef name="hotdeployant">
+      <attribute name="target" default=""/>
+      <sequential>
+        <!-- a check is done, if no build.xml file is present in hot-deploy dir,
+            then the build.xml files - if present - in hot-deploy sub-dirs will be used.
+            So the previous, simpler, behaviour is kept as long as you don't need
+            to build hot-deploy components in a specific order. -->
+        <if>
+          <available file="hot-deploy/build.xml" property="useHotDeployBuild"/>
+          <then>
+            <externalsubant target="@{target}">
+              <filelist dir="." files="hot-deploy/build.xml"/>
+            </externalsubant>
+          </then>
+          <else>
+            <externalsubant target="@{target}">
+              <fileset dir="${basedir}/hot-deploy" casesensitive="no">
+                <exclude name="disabled/**"/>
+                <include name="*/build.xml"/>
+              </fileset>
+            </externalsubant>
+          </else>
+        </if>
+      </sequential>
+    </macrodef>
 
     <!-- ================================================================== -->
     <!-- Build JavaDocs                                                     -->
@@ -247,23 +281,24 @@ under the License.
 
     <target name="docs" depends="ofbiz-init">
         <echo message="[docs] ========== Start Building (JavaDoc) =========="/>
-
-        <subant target="docs">
-            <filelist dir="." files="framework/build.xml"/>
-        </subant>
-        <subant target="docs" failonerror="${applications.present}">
-            <filelist dir="." files="applications/build.xml"/>
-        </subant>
-        <subant target="docs" failonerror="${specialpurpose.present}">
-            <filelist dir="." files="specialpurpose/build.xml"/>
-        </subant>
-        <subant target="docs">
-            <fileset dir="${basedir}/hot-deploy" casesensitive="no">
-                <include name="*/build.xml"/>
-            </fileset>
-        </subant>
+        <antcall target="docs-framework"/>
+        <antcall target="docs-applications"/>
+        <antcall target="docs-specialpurpose"/>
+        <hotdeployant target="docs"/>
 
         <echo message="[docs] ========== Done Building (JavaDocs) =========="/>
+    </target>
+
+    <target name="docs-framework">
+        <iterate target="docs" filelist="framework-builds"/>
+    </target>
+
+    <target name="docs-applications" if="${applications.present}">
+        <iterate target="docs" filelist="application-builds"/>
+    </target>
+
+    <target name="docs-specialpurpose" if="${specialpurpose.present}">
+        <iterate target="docs" filelist="specialpurpose-builds"/>
     </target>
 
     <target name="docs-all" depends="build,ofbiz-init"
@@ -272,7 +307,7 @@ under the License.
         <echo message="[docs-all] ========== Start Building (JavaDoc) =========="/>
 
         <mkdir dir="${site.dir}/javadocs"/>
-        
+
         <path id="local.class.path">
           <fileset dir="${ofbiz.home.dir}/framework/base/lib" includes="*.jar"/>
           <fileset dir="${ofbiz.home.dir}/framework/base/lib/commons" includes="*.jar"/>
@@ -281,7 +316,6 @@ under the License.
           <fileset dir="${ofbiz.home.dir}/framework/catalina/lib" includes="*.jar"/>
           <fileset dir="${ofbiz.home.dir}/framework/entity/lib" includes="*.jar"/>
           <fileset dir="${ofbiz.home.dir}/framework/geronimo/lib" includes="*.jar"/>
-          <fileset dir="${ofbiz.home.dir}/framework/jetty/lib" includes="*.jar"/>
           <fileset dir="${ofbiz.home.dir}/framework/service/lib" includes="*.jar"/>
           <fileset dir="${ofbiz.home.dir}/framework/testtools/lib" includes="*.jar"/>
           <fileset dir="${ofbiz.home.dir}/framework/webapp/lib" includes="*.jar"/>
@@ -291,15 +325,16 @@ under the License.
           <fileset dir="${ofbiz.home.dir}/specialpurpose/googlecheckout/lib" includes="*.jar"/>
           <fileset dir="${ofbiz.home.dir}/specialpurpose/ldap/lib" includes="*.jar"/>
           <fileset dir="${ofbiz.home.dir}/specialpurpose/pos/lib" includes="*.jar"/>
+          <fileset dir="${ofbiz.home.dir}/specialpurpose/jetty/lib" includes="*.jar"/>
           <fileset dir="${ofbiz.home.dir}/applications/content/lib" includes="*.jar"/>
           <fileset dir="${ofbiz.home.dir}/applications/product/lib" includes="*.jar"/>
         </path>
-        
+
         <property name="desc" value="API"/>
         <property name="build.dir" value="${site.dir}"/>
-        
+
         <default-javadoc/>
-        
+
         <echo message="[docs-all] ========== Done Building (JavaDocs) =========="/>
    </target>
 
@@ -322,7 +357,7 @@ under the License.
     <target name="build-website"
             description="For committers : Update dtds from OFBiz instance to site">
         <antcall target="copy-dtds"/>
-        <!-- now deprecated since Builbot creates and updates those automatically 
+        <!-- now deprecated since Buildbot creates and updates those automatically
         <antcall target="docs"/>
         <antcall target="copy-apis"/-->
     </target>
@@ -373,11 +408,13 @@ under the License.
     <!-- ================================================================== -->
 
     <target name="start"
-            description="Start OFBiz">
+            description="Start OFBiz (use -Dportoffset=portNumber to shift all ports with the portNumber value)">
         <java jar="ofbiz.jar" fork="true">
             <jvmarg value="${memory.initial.param}"/>
             <jvmarg value="${memory.max.param}"/>
             <jvmarg value="${memory.maxpermsize.param}"/>
+            <arg value="start"/>
+            <arg value="-portoffset=${portoffset}"/>
         </java>
     </target>
     <target name="start-batch"
@@ -401,12 +438,23 @@ under the License.
         </java>
     </target>
     <target name="start-pos"
-            description="Start OFBiz POS (Point of sale)">
+            description="Start OFBiz POS (Point of sale). Use -Dportoffset=portNumber to shift all ports with the portNumber value.">
         <java jar="ofbiz.jar" fork="true">
             <jvmarg value="${memory.initial.param}"/>
             <jvmarg value="${memory.max.param}"/>
             <jvmarg value="${memory.maxpermsize.param}"/>
             <arg value="pos"/>
+          <arg value="-portoffset=${portoffset}"/>
+        </java>
+    </target>
+    <target name="start-both"
+            description="Start OFBiz in both Web and POS (Point of sale) modes. Use -Dportoffset=portNumber to shift all ports with the portNumber value.">
+        <java jar="ofbiz.jar" fork="true">
+            <jvmarg value="${memory.initial.param}"/>
+            <jvmarg value="${memory.max.param}"/>
+            <jvmarg value="${memory.maxpermsize.param}"/>
+            <arg value="both"/>
+            <arg value="-portoffset=${portoffset}"/>
         </java>
     </target>
     <target name="stop"
@@ -825,7 +873,7 @@ under the License.
     <target name="load-tenant-data-readers"
         description="Load data of given data-readers in the tenant database. Example: ./ant load-tenant-data-readers -Ddata-readers=seed,seed-initial -DtenantId=demo">
         <echo>------------------------------------</echo>
-        <echo message="Loading selected data-readers in tenant databaset"/>
+        <echo message="Loading selected data-readers in tenant database"/>
         <echo message="Delegator = default#${tenantId}"/>
         <echo message="Data-readers = ${data-readers}"/>
         <echo>------------------------------------</echo>
@@ -862,7 +910,7 @@ under the License.
     </target>
 
     <target name="run-tests"
-          description="Run OFBiz default tests; you have to manually execute 'ant load-demo' before and see results in runtime/logs/test-results/html/all-tests.html.">
+        description="Run OFBiz default tests; you have to manually execute 'ant load-demo' before (and if needed even clear your data before) and see results in runtime/logs/test-results/html/all-tests.html.">
         <java jar="ofbiz.jar" fork="true" resultproperty="test.result">
             <jvmarg value="${memory.initial.param}"/>
             <jvmarg value="${memory.max.param}"/>
@@ -994,8 +1042,9 @@ under the License.
             <classpath>
                 <fileset dir="framework/base/lib">
                     <include name="cobertura-1.9.4.1.jar" />
-                    <include name="log4j-1.2.16.jar" />
+                    <include name="log4j-1.2.17.jar" />
                     <include name="scripting/asm*.jar" />
+                    <include name="scripting/jakarta-oro-2.0.8.jar" />
                 </fileset>
             </classpath>
         </taskdef>
@@ -1022,8 +1071,9 @@ under the License.
             <classpath>
                 <fileset dir="framework/base/lib">
                     <include name="cobertura-1.9.4.1.jar" />
-                    <include name="log4j-1.2.16.jar" />
+                    <include name="log4j-1.2.17.jar" />
                     <include name="scripting/asm*.jar" />
+                    <include name="scripting/jakarta-oro-2.0.8.jar" />
                 </fileset>
             </classpath>
         </taskdef>
@@ -1049,7 +1099,7 @@ under the License.
         </exec>
         <xmlproperty file="runtime/svninfo_tmp.xml"/>
 
-        <property name="sonar.sources" value="framework/appserver/src, framework/base/src, framework/bi/src,
+        <property name="sonar.sources" value="specialpurpose/appserver/src, framework/base/src, framework/bi/src,
             framework/catalina/src, framework/common/src, framework/datafile/src, framework/entity/src, framework/entityext/src,
             framework/example/src, framework/geronimo/src, framework/jetty/src,
             framework/minilang/src, framework/security/src, framework/service/src, framework/sql/src, framework/start/src,
@@ -1190,7 +1240,10 @@ under the License.
         <copy file="${basedir}/framework/resources/templates/TypeData.xml" tofile="${basedir}/hot-deploy/${component-name}/data/${component-resource-name}TypeData.xml" encoding="utf-8">
             <filterset refid="replacePlaceholders"/>
         </copy>
-        <copy file="${basedir}/framework/resources/templates/SecurityData.xml" tofile="${basedir}/hot-deploy/${component-name}/data/${component-resource-name}SecurityData.xml" encoding="utf-8">
+        <copy file="${basedir}/framework/resources/templates/SecurityPermissionSeedData.xml" tofile="${basedir}/hot-deploy/${component-name}/data/${component-resource-name}SecurityPermissionSeedData.xml" encoding="utf-8">
+            <filterset refid="replacePlaceholders"/>
+        </copy>
+        <copy file="${basedir}/framework/resources/templates/SecurityGroupDemoData.xml" tofile="${basedir}/hot-deploy/${component-name}/data/${component-resource-name}SecurityGroupDemoData.xml" encoding="utf-8">
             <filterset refid="replacePlaceholders"/>
         </copy>
         <copy file="${basedir}/framework/resources/templates/DemoData.xml" tofile="${basedir}/hot-deploy/${component-name}/data/${component-resource-name}DemoData.xml" encoding="utf-8">
@@ -1244,19 +1297,10 @@ under the License.
     </target>
 
     <!-- ================================================================== -->
-    <!-- Minify js and css files target.                                    -->
-    <!-- ================================================================== -->
-
-    <target name="minifyJsCss" description="Creates a minified version of JS/CSS files">
-        <!-- Needs more work (more files, use of them) just used as an example -->
-        <!--yuicompressor inFile="themes/tomahawk/webapp/tomahawk/css/style.css" outFile="themes/tomahawk/webapp/tomahawk/css/style-min.css"/-->
-    </target>
-
-    <!-- ================================================================== -->
     <!-- kek helper                                                         -->
     <!-- ================================================================== -->
 
-    <target name="gen-kek" 
+    <target name="gen-kek"
             description="Generate a new key-encrypting-key for use in entityengine.xml">
         <java classname="org.ofbiz.base.crypto.Main" fork="false">
             <arg value="-kek"/>

@@ -28,12 +28,13 @@
  */
 package org.ofbiz.base.metrics;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
+import java.util.TreeSet;
 
 import org.ofbiz.base.lang.LockedBy;
 import org.ofbiz.base.lang.ThreadSafe;
 import org.ofbiz.base.util.Assert;
+import org.ofbiz.base.util.UtilProperties;
 import org.ofbiz.base.util.cache.UtilCache;
 import org.w3c.dom.Element;
 
@@ -42,7 +43,6 @@ import org.w3c.dom.Element;
  */
 @ThreadSafe
 public final class MetricsFactory {
-
     private static final UtilCache<String, Metrics> METRICS_CACHE = UtilCache.createUtilCache("base.metrics", 0, 0);
     /**
      * A "do-nothing" <code>Metrics</code> instance.
@@ -73,17 +73,17 @@ public final class MetricsFactory {
         Assert.notEmpty("name attribute", name);
         Metrics result = METRICS_CACHE.get(name);
         if (result == null) {
-            int estimationSize = Metrics.ESTIMATION_SIZE;
+            int estimationSize = UtilProperties.getPropertyAsInteger("serverstats", "metrics.estimation.size", 100); 
             String attributeValue = element.getAttribute("estimation-size");
             if (!attributeValue.isEmpty()) {
                 estimationSize = Integer.parseInt(attributeValue);
             }
-            long estimationTime = Metrics.ESTIMATION_TIME;
+            long estimationTime = UtilProperties.getPropertyAsLong("serverstats", "metrics.estimation.time", 1000);
             attributeValue = element.getAttribute("estimation-time");
             if (!attributeValue.isEmpty()) {
                 estimationTime = Long.parseLong(attributeValue);
             }
-            double smoothing = Metrics.SMOOTHING;
+            double smoothing = UtilProperties.getPropertyNumber("serverstats", "metrics.smoothing.factor", 0.7);
             attributeValue = element.getAttribute("smoothing");
             if (!attributeValue.isEmpty()) {
                 smoothing = Double.parseDouble(attributeValue);
@@ -131,13 +131,13 @@ public final class MetricsFactory {
     }
 
     /**
-     * Returns all <code>Metric</code> instances.
+     * Returns all <code>Metric</code> instances, sorted by name.
      */
-    public static List<Metrics> getMetrics() {
-        return new ArrayList<Metrics>(METRICS_CACHE.values());
+    public static Collection<Metrics> getMetrics() {
+        return new TreeSet<Metrics>(METRICS_CACHE.values());
     }
 
-    private static final class MetricsImpl implements Metrics {
+    private static final class MetricsImpl implements Metrics, Comparable<Metrics> {
         @LockedBy("this")
         private int count = 0;
         @LockedBy("this")
@@ -162,6 +162,11 @@ public final class MetricsFactory {
             this.estimationTime = estimationTime;
             this.smoothing = smoothing;
             this.threshold = threshold;
+        }
+
+        @Override
+        public int compareTo(Metrics other) {
+            return this.name.compareTo(other.getName());
         }
 
         @Override

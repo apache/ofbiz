@@ -19,15 +19,17 @@
 package org.ofbiz.widget;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.GeneralException;
-import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.base.util.UtilMisc;
+import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.entity.Delegator;
-import org.ofbiz.entity.GenericValue;
 import org.ofbiz.entity.GenericEntityException;
+import org.ofbiz.entity.GenericValue;
 import org.ofbiz.entity.condition.EntityCondition;
 import org.ofbiz.entity.condition.EntityOperator;
 import org.ofbiz.entity.util.EntityUtil;
@@ -66,6 +68,7 @@ public class PortalPageWorker {
                                 EntityOperator.OR)),
                         EntityOperator.AND);
                 portalPages = delegator.findList("PortalPage", cond, null, null, null, false);
+                List<GenericValue> userPortalPages = new ArrayList<GenericValue>();
                 if (UtilValidate.isNotEmpty(context.get("userLogin"))) { // check if a user is logged in
                     String userLoginId = ((GenericValue)context.get("userLogin")).getString("userLoginId");
                     // replace with private pages
@@ -76,8 +79,9 @@ public class PortalPageWorker {
                                 EntityOperator.AND);
                         List <GenericValue> privatePortalPages = delegator.findList("PortalPage", cond, null, null, null, false);
                         if (UtilValidate.isNotEmpty(privatePortalPages)) {
-                            portalPages.remove(portalPage);
-                            portalPages.add(privatePortalPages.get(0));
+                            userPortalPages.add(privatePortalPages.get(0));
+                        } else {
+                            userPortalPages.add(portalPage);
                         }
                     }
                     // add any other created private pages
@@ -86,9 +90,9 @@ public class PortalPageWorker {
                             EntityCondition.makeCondition("originalPortalPageId", EntityOperator.EQUALS, null),
                             EntityCondition.makeCondition("parentPortalPageId", EntityOperator.EQUALS, parentPortalPageId)),
                             EntityOperator.AND);
-                    portalPages.addAll(delegator.findList("PortalPage", cond, null, null, null, false));
+                    userPortalPages.addAll(delegator.findList("PortalPage", cond, null, null, null, false));
                 }
-                portalPages = EntityUtil.orderBy(portalPages, UtilMisc.toList("sequenceNum"));
+                portalPages = EntityUtil.orderBy(userPortalPages, UtilMisc.toList("sequenceNum"));
             } catch (GenericEntityException e) {
                 Debug.logError("Could not retrieve portalpages:" + e.getMessage(), module);
             }

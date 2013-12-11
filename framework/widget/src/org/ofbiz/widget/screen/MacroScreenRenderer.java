@@ -59,6 +59,7 @@ import org.ofbiz.widget.form.MacroFormRenderer;
 import org.ofbiz.widget.form.ModelForm;
 import org.ofbiz.widget.html.HtmlScreenRenderer.ScreenletMenuRenderer;
 import org.ofbiz.widget.menu.MenuStringRenderer;
+import org.ofbiz.widget.screen.ModelScreenWidget.*;
 import org.xml.sax.SAXException;
 
 import freemarker.core.Environment;
@@ -74,6 +75,7 @@ public class MacroScreenRenderer implements ScreenStringRenderer {
     private int elementId = 999;
     protected boolean widgetCommentsEnabled = false;
     private static final String formrenderer = UtilProperties.getPropertyValue("widget", "screen.formrenderer");
+    private int screenLetsIdCounter = 1;
 
     public MacroScreenRenderer(String name, String macroLibraryPath) throws TemplateException, IOException {
         macroLibrary = FreeMarkerWorker.getTemplate(macroLibraryPath);
@@ -192,7 +194,7 @@ public class MacroScreenRenderer implements ScreenStringRenderer {
         parameters.put("id", containerId);
         parameters.put("style", container.getStyle(context));
         parameters.put("autoUpdateLink", autoUpdateLink);
-        parameters.put("autoUpdateInterval", container.getAutoUpdateInterval());
+        parameters.put("autoUpdateInterval", container.getAutoUpdateInterval(context));
         executeMacro(writer, "renderContainerBegin", parameters);
     }
 
@@ -627,11 +629,17 @@ public class MacroScreenRenderer implements ScreenStringRenderer {
         }
 
         Map<String, Object> parameters = FastMap.newInstance();
-        parameters.put("id", screenlet.getId(context));
         parameters.put("title", title);
         parameters.put("collapsible", collapsible);
         parameters.put("saveCollapsed", screenlet.saveCollapsed());
-        parameters.put("collapsibleAreaId", screenlet.getId(context) + "_col");
+        if (UtilValidate.isNotEmpty (screenlet.getId(context))) {
+            parameters.put("id", screenlet.getId(context));
+            parameters.put("collapsibleAreaId", screenlet.getId(context) + "_col");
+        } else {
+            parameters.put("id", "screenlet_" + screenLetsIdCounter);
+            parameters.put("collapsibleAreaId","screenlet_" + screenLetsIdCounter + "_col");
+            screenLetsIdCounter++;
+        }
         parameters.put("expandToolTip", expandToolTip);
         parameters.put("collapseToolTip", collapseToolTip);
         parameters.put("fullUrlString", fullUrlString);
@@ -1000,5 +1008,38 @@ public class MacroScreenRenderer implements ScreenStringRenderer {
             }
         }
         modelScreen.renderScreenString(writer, context, this);
+    }
+
+    @Override
+    public void renderColumnContainer(Appendable writer, Map<String, Object> context, ColumnContainer columnContainer) throws IOException {
+        String id = columnContainer.getId(context);
+        String style = columnContainer.getStyle(context);
+        StringBuilder sb = new StringBuilder("<@renderColumnContainerBegin");
+        sb.append(" id=\"");
+        sb.append(id);
+        sb.append("\" style=\"");
+        sb.append(style);
+        sb.append("\" />");
+        executeMacro(writer, sb.toString());
+        for (Column column : columnContainer.getColumns()) {
+            id = column.getId(context);
+            style = column.getStyle(context);
+            sb = new StringBuilder("<@renderColumnBegin");
+            sb.append(" id=\"");
+            sb.append(id);
+            sb.append("\" style=\"");
+            sb.append(style);
+            sb.append("\" />");
+            executeMacro(writer, sb.toString());
+            for (ModelScreenWidget subWidget : column.getSubWidgets()) {
+                try {
+                    subWidget.renderWidgetString(writer, context, this);
+                } catch (GeneralException e) {
+                    throw new IOException(e);
+                }
+            }
+            executeMacro(writer, "<@renderColumnEnd />");
+        }
+        executeMacro(writer, "<@renderColumnContainerEnd />");
     }
 }

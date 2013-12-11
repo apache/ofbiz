@@ -20,9 +20,9 @@ package org.ofbiz.order.shoppinglist;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
-import java.util.Date;
 import java.util.Map;
 
 import javolution.util.FastMap;
@@ -325,7 +325,7 @@ public class ShoppingListServices {
             }
 
             List<GenericValue> orderItems = orh.getOrderItems();
-            for(GenericValue orderItem : orderItems) {
+            for (GenericValue orderItem : orderItems) {
                 String productId = orderItem.getString("productId");
                 if (UtilValidate.isNotEmpty(productId)) {
                     Map<String, Object> ctx = UtilMisc.<String, Object>toMap("userLogin", userLogin, "shoppingListId", shoppingListId, "productId",
@@ -468,7 +468,7 @@ public class ShoppingListServices {
 
 
                 ProductConfigWrapper configWrapper = null;
-                for(GenericValue shoppingListItem : items) {
+                for (GenericValue shoppingListItem : items) {
                     String productId = shoppingListItem.getString("productId");
                     BigDecimal quantity = shoppingListItem.getBigDecimal("quantity");
                     Timestamp reservStart = shoppingListItem.getTimestamp("reservStart");
@@ -515,13 +515,13 @@ public class ShoppingListServices {
                         listCart.addPayment(shoppingList.getString("paymentMethodId"));
                     }
                     if (UtilValidate.isNotEmpty(shoppingList.get("contactMechId"))) {
-                        listCart.setShippingContactMechId(0, shoppingList.getString("contactMechId"));
+                        listCart.setAllShippingContactMechId(shoppingList.getString("contactMechId"));
                     }
                     if (UtilValidate.isNotEmpty(shoppingList.get("shipmentMethodTypeId"))) {
-                        listCart.setShipmentMethodTypeId(0, shoppingList.getString("shipmentMethodTypeId"));
+                        listCart.setAllShipmentMethodTypeId(shoppingList.getString("shipmentMethodTypeId"));
                     }
                     if (UtilValidate.isNotEmpty(shoppingList.get("carrierPartyId"))) {
-                        listCart.setCarrierPartyId(0, shoppingList.getString("carrierPartyId"));
+                        listCart.setAllCarrierPartyId(shoppingList.getString("carrierPartyId"));
                     }
                     if (UtilValidate.isNotEmpty(shoppingList.getString("productPromoCodeId"))) {
                         listCart.addProductPromoCode(shoppingList.getString("productPromoCodeId"), dispatcher);
@@ -559,7 +559,7 @@ public class ShoppingListServices {
         String orderId = (String) context.get("orderId");
         try {
             List<GenericValue> orderItems = delegator.findByAnd("OrderItem", UtilMisc.toMap("orderId", orderId), null, false);
-            for(GenericValue orderItem : orderItems) {
+            for (GenericValue orderItem : orderItems) {
                 String shoppingListId = orderItem.getString("shoppingListId");
                 String shoppingListItemSeqId = orderItem.getString("shoppingListItemSeqId");
                 if (UtilValidate.isNotEmpty(shoppingListId)) {

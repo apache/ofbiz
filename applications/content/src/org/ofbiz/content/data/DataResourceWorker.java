@@ -520,7 +520,7 @@ public class DataResourceWorker  implements org.ofbiz.widget.DataResourceWorkerI
             File[] subs = parent.listFiles();
             for (int i = 0; i < subs.length; i++) {
                 if (subs[i].isDirectory()) {
-                    dirMap.put(Long.valueOf(subs[0].lastModified()), subs[i]);
+                    dirMap.put(Long.valueOf(subs[i].lastModified()), subs[i]);
                 }
             }
         } else {
@@ -818,8 +818,10 @@ public class DataResourceWorker  implements org.ofbiz.widget.DataResourceWorkerI
             writeText(dataResource, text, templateContext, mimeTypeId, locale, out);
         } else if ("ELECTRONIC_TEXT".equals(dataResourceTypeId)) {
             GenericValue electronicText = delegator.findOne("ElectronicText", UtilMisc.toMap("dataResourceId", dataResourceId), cache);
-            String text = electronicText.getString("textData");
-            writeText(dataResource, text, templateContext, mimeTypeId, locale, out);
+            if (electronicText != null) {
+                String text = electronicText.getString("textData");
+                writeText(dataResource, text, templateContext, mimeTypeId, locale, out);
+            }
 
         // object types
         } else if (dataResourceTypeId.endsWith("_OBJECT")) {

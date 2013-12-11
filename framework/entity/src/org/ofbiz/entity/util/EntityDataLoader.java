@@ -25,20 +25,23 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.StringTokenizer;
 
-import javolution.util.FastList;
-
 import org.ofbiz.base.component.ComponentConfig;
 import org.ofbiz.base.config.GenericConfigException;
 import org.ofbiz.base.config.MainResourceHandler;
 import org.ofbiz.base.config.ResourceHandler;
 import org.ofbiz.base.util.Debug;
+import org.ofbiz.base.util.UtilProperties;
 import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.entity.Delegator;
+import org.ofbiz.entity.GenericEntityConfException;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
-import org.ofbiz.entity.config.DatasourceInfo;
 import org.ofbiz.entity.config.EntityConfigUtil;
-import org.ofbiz.entity.config.EntityDataReaderInfo;
+import org.ofbiz.entity.config.model.Datasource;
+import org.ofbiz.entity.config.model.EntityDataReader;
+import org.ofbiz.entity.config.model.ReadData;
+import org.ofbiz.entity.config.model.Resource;
+import org.ofbiz.entity.config.model.SqlLoadPath;
 import org.ofbiz.entity.model.ModelEntity;
 import org.ofbiz.entity.model.ModelReader;
 import org.ofbiz.entity.model.ModelUtil;
@@ -55,28 +58,28 @@ public class EntityDataLoader {
     public static String getPathsString(String helperName) {
         StringBuilder pathBuffer = new StringBuilder();
         if (UtilValidate.isNotEmpty(helperName)) {
-            DatasourceInfo datasourceInfo = EntityConfigUtil.getDatasourceInfo(helperName);
-            for (Element sqlLoadPathElement: datasourceInfo.sqlLoadPaths) {
-                String prependEnv = sqlLoadPathElement.getAttribute("prepend-env");
+            Datasource datasourceInfo = EntityConfigUtil.getDatasource(helperName);
+            for (SqlLoadPath sqlLoadPath : datasourceInfo.getSqlLoadPathList()) {
+                String prependEnv = sqlLoadPath.getPrependEnv();
                 pathBuffer.append(pathBuffer.length() == 0 ? "" : ";");
                 if (UtilValidate.isNotEmpty(prependEnv)) {
                     pathBuffer.append(System.getProperty(prependEnv));
                     pathBuffer.append("/");
                 }
-                pathBuffer.append(sqlLoadPathElement.getAttribute("path"));
+                pathBuffer.append(sqlLoadPath.getPath());
             }
         }
         return pathBuffer.toString();
     }
 
     public static List<URL> getUrlList(String helperName) {
-        DatasourceInfo datasourceInfo = EntityConfigUtil.getDatasourceInfo(helperName);
-        return getUrlList(helperName, null, datasourceInfo.readDatas);
+        Datasource datasourceInfo = EntityConfigUtil.getDatasource(helperName);
+        return getUrlList(helperName, null, datasourceInfo.getReadDataList());
     }
 
     public static List<URL> getUrlList(String helperName, String componentName) {
-        DatasourceInfo datasourceInfo = EntityConfigUtil.getDatasourceInfo(helperName);
-        return getUrlList(helperName, componentName, datasourceInfo.readDatas);
+        Datasource datasourceInfo = EntityConfigUtil.getDatasource(helperName);
+        return getUrlList(helperName, componentName, datasourceInfo.getReadDataList());
     }
 
     public static <E> List<URL> getUrlList(String helperName, List<E> readerNames) {
@@ -93,24 +96,35 @@ public class EntityDataLoader {
                 String readerName = null;
                 if (readerInfo instanceof String) {
                     readerName = (String) readerInfo;
+                } else if (readerInfo instanceof ReadData) {
+                    readerName = ((ReadData) readerInfo).getReaderName();
                 } else if (readerInfo instanceof Element) {
                     readerName = ((Element) readerInfo).getAttribute("reader-name");
                 } else {
                     throw new IllegalArgumentException("Reader name list does not contain String(s) or Element(s)");
                 }
                 readerName = readerName.trim();
-
-                // get all of the main resource model stuff, ie specified in the entityengine.xml file
-                EntityDataReaderInfo entityDataReaderInfo = EntityConfigUtil.getEntityDataReaderInfo(readerName);
-
-                if (entityDataReaderInfo == null) {
-                    Debug.logInfo("Could not find entity-data-reader named: " + readerName + ". Creating a new reader with this name. ", module);
-                    entityDataReaderInfo = new EntityDataReaderInfo(readerName);
+                
+                // ignore the "tenant" reader if the multitenant property is "N"
+                if ("tenant".equals(readerName) && "N".equals(UtilProperties.getPropertyValue("general.properties", "multitenant"))) {
+                    continue;
                 }
 
+                // get all of the main resource model stuff, ie specified in the entityengine.xml file
+                EntityDataReader entityDataReaderInfo = null;
+                try {
+                    entityDataReaderInfo = EntityConfigUtil.getEntityDataReader(readerName);
+                    if (entityDataReaderInfo == null) {
+                        // create a reader name defined at runtime
+                        Debug.logInfo("Could not find entity-data-reader named: " + readerName + ". Creating a new reader with this name. ", module);
+                        entityDataReaderInfo = new EntityDataReader(readerName);
+                    }
+                } catch (GenericEntityConfException e) {
+                    Debug.logWarning(e, "Exception thrown while getting entity data reader config: ", module);
+                }
                 if (entityDataReaderInfo != null) {
-                    for (Element resourceElement: entityDataReaderInfo.resourceElements) {
-                        ResourceHandler handler = new MainResourceHandler(EntityConfigUtil.ENTITY_ENGINE_XML_FILENAME, resourceElement);
+                    for (Resource resourceElement: entityDataReaderInfo.getResourceList()) {
+                        ResourceHandler handler = new MainResourceHandler(EntityConfigUtil.ENTITY_ENGINE_XML_FILENAME, resourceElement.getLoader(), resourceElement.getLocation());
                         try {
                             urlList.add(handler.getURL());
                         } catch (GenericConfigException e) {
@@ -181,7 +195,7 @@ public class EntityDataLoader {
     public static List<URL> getUrlByComponentList(String helperName, List<String> components, List<String> readerNames) {
         List<URL> urlList = new LinkedList<URL>();
         for (String readerName:  readerNames) {
-            List<String> loadReaderNames = FastList.newInstance();
+            List<String> loadReaderNames = new LinkedList<String>();
             loadReaderNames.add(readerName);
             for (String component : components) {
                 urlList.addAll(getUrlList(helperName, component, loadReaderNames));
@@ -191,15 +205,15 @@ public class EntityDataLoader {
     }
 
     public static List<URL> getUrlByComponentList(String helperName, List<String> components) {
-        DatasourceInfo datasourceInfo = EntityConfigUtil.getDatasourceInfo(helperName);
-        List<String> readerNames = FastList.newInstance();
-        for (Object readerInfo :  datasourceInfo.readDatas) {
-            String readerName = null;
-            if (readerInfo instanceof Element) {
-                readerName = ((Element) readerInfo).getAttribute("reader-name");
-            } else {
-                throw new IllegalArgumentException("Reader name list does not contain String(s) or Element(s)");
+        Datasource datasourceInfo = EntityConfigUtil.getDatasource(helperName);
+        List<String> readerNames = new LinkedList<String>();
+        for (ReadData readerInfo :  datasourceInfo.getReadDataList()) {
+            String readerName = readerInfo.getReaderName();
+            // ignore the "tenant" reader if the multitenant property is "N"
+            if ("tenant".equals(readerName) && "N".equals(UtilProperties.getPropertyValue("general.properties", "multitenant"))) {
+                continue;
             }
+            
             readerNames.add(readerName);
         }
         return getUrlByComponentList(helperName, components, readerNames);

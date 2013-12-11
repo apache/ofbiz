@@ -37,6 +37,7 @@ import javax.servlet.http.HttpSession;
 
 import javolution.util.FastMap;
 
+import org.ofbiz.base.container.ClassLoaderContainer;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.SSLUtil;
 import org.ofbiz.base.util.StringUtil;
@@ -50,6 +51,7 @@ import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
+import org.ofbiz.webapp.OfbizUrlBuilder;
 import org.ofbiz.webapp.event.EventFactory;
 import org.ofbiz.webapp.event.EventHandler;
 import org.ofbiz.webapp.event.EventHandlerException;
@@ -57,7 +59,9 @@ import org.ofbiz.webapp.stats.ServerHitBin;
 import org.ofbiz.webapp.view.ViewFactory;
 import org.ofbiz.webapp.view.ViewHandler;
 import org.ofbiz.webapp.view.ViewHandlerException;
+import org.ofbiz.webapp.website.WebSiteProperties;
 import org.ofbiz.webapp.website.WebSiteWorker;
+import org.owasp.esapi.errors.EncodingException;
 
 /**
  * RequestHandler - Request Processor Object
@@ -65,7 +69,9 @@ import org.ofbiz.webapp.website.WebSiteWorker;
 public class RequestHandler {
 
     public static final String module = RequestHandler.class.getName();
-
+    private boolean throwRequestHandlerExceptionOnMissingLocalRequest = UtilProperties.propertyValueEqualsIgnoreCase(
+            "requestHandler.properties", "throwRequestHandlerExceptionOnMissingLocalRequest", "Y");
+    private String statusCodeString = UtilProperties.getPropertyValue("requestHandler.properties", "status-code", "302");
     public static RequestHandler getRequestHandler(ServletContext servletContext) {
         RequestHandler rh = (RequestHandler) servletContext.getAttribute("_REQUEST_HANDLER_");
         if (rh == null) {
@@ -87,16 +93,27 @@ public class RequestHandler {
 
         // init the ControllerConfig, but don't save it anywhere
         this.controllerConfigURL = ConfigXMLReader.getControllerConfigURL(context);
-        ConfigXMLReader.getControllerConfig(this.controllerConfigURL);
+        try {
+            ConfigXMLReader.getControllerConfig(this.controllerConfigURL);
+        } catch (WebAppConfigurationException e) {
+            // FIXME: controller.xml errors should throw an exception.
+            Debug.logError(e, "Exception thrown while parsing controller.xml file: ", module);
+        }
         this.viewFactory = new ViewFactory(this);
         this.eventFactory = new EventFactory(this);
     }
 
     public ConfigXMLReader.ControllerConfig getControllerConfig() {
-        return ConfigXMLReader.getControllerConfig(this.controllerConfigURL);
+        try {
+            return ConfigXMLReader.getControllerConfig(this.controllerConfigURL);
+        } catch (WebAppConfigurationException e) {
+            // FIXME: controller.xml errors should throw an exception.
+            Debug.logError(e, "Exception thrown while parsing controller.xml file: ", module);
+        }
+        return null;
     }
 
-    public void doRequest(HttpServletRequest request, HttpServletResponse response, String requestUri) throws RequestHandlerException {
+    public void doRequest(HttpServletRequest request, HttpServletResponse response, String requestUri) throws RequestHandlerException, RequestHandlerExceptionAllowExternalRequests {
         HttpSession session = request.getSession();
         Delegator delegator = (Delegator) request.getAttribute("delegator");
         GenericValue userLogin = (GenericValue) session.getAttribute("userLogin");
@@ -104,14 +121,24 @@ public class RequestHandler {
     }
 
     public void doRequest(HttpServletRequest request, HttpServletResponse response, String chain,
-            GenericValue userLogin, Delegator delegator) throws RequestHandlerException {
+            GenericValue userLogin, Delegator delegator) throws RequestHandlerException, RequestHandlerExceptionAllowExternalRequests {
 
         long startTime = System.currentTimeMillis();
         HttpSession session = request.getSession();
 
         // get the controllerConfig once for this method so we don't have to get it over and over inside the method
         ConfigXMLReader.ControllerConfig controllerConfig = this.getControllerConfig();
-        Map<String, ConfigXMLReader.RequestMap> requestMapMap = controllerConfig.getRequestMapMap();
+        Map<String, ConfigXMLReader.RequestMap> requestMapMap = null;
+        String controllerStatusCodeString = null;
+        try {
+            requestMapMap = controllerConfig.getRequestMapMap();
+            controllerStatusCodeString = controllerConfig.getStatusCode();
+        } catch (WebAppConfigurationException e) {
+            Debug.logError(e, "Exception thrown while parsing controller.xml file: ", module);
+            throw new RequestHandlerException(e);
+        }
+        if(UtilValidate.isNotEmpty(controllerStatusCodeString != null)) 
+            statusCodeString = controllerStatusCodeString;
 
         // workaround if we are in the root webapp
         String cname = UtilHttp.getApplicationName(request);
@@ -135,7 +162,13 @@ public class RequestHandler {
         }
         // check for default request
         if (requestMap == null) {
-            String defaultRequest = controllerConfig.getDefaultRequest();
+            String defaultRequest;
+            try {
+                defaultRequest = controllerConfig.getDefaultRequest();
+            } catch (WebAppConfigurationException e) {
+                Debug.logError(e, "Exception thrown while parsing controller.xml file: ", module);
+                throw new RequestHandlerException(e);
+            }
             if (defaultRequest != null) { // required! to avoid a null pointer exception and generate a requesthandler exception if default request not found.
                 requestMap = requestMapMap.get(defaultRequest);
             }
@@ -143,23 +176,34 @@ public class RequestHandler {
 
         // check for override view
         if (overrideViewUri != null) {
-            ConfigXMLReader.ViewMap viewMap = getControllerConfig().getViewMapMap().get(overrideViewUri);
-            if (viewMap == null) {
-                String defaultRequest = controllerConfig.getDefaultRequest();
-                if (defaultRequest != null) { // required! to avoid a null pointer exception and generate a requesthandler exception if default request not found.
-                    requestMap = requestMapMap.get(defaultRequest);
+            ConfigXMLReader.ViewMap viewMap;
+            try {
+                viewMap = getControllerConfig().getViewMapMap().get(overrideViewUri);
+                if (viewMap == null) {
+                    String defaultRequest = controllerConfig.getDefaultRequest();
+                    if (defaultRequest != null) { // required! to avoid a null pointer exception and generate a requesthandler exception if default request not found.
+                        requestMap = requestMapMap.get(defaultRequest);
+                    }
                 }
+            } catch (WebAppConfigurationException e) {
+                Debug.logError(e, "Exception thrown while parsing controller.xml file: ", module);
+                throw new RequestHandlerException(e);
             }
         }
 
-        // still not found so stop
+        // if no matching request is found in the controller, depending on throwRequestHandlerExceptionOnMissingLocalRequest
+        //  we throw a RequestHandlerException or RequestHandlerExceptionAllowExternalRequests
         if (requestMap == null) {
-            throw new RequestHandlerException(requestMissingErrorMessage);
-        }
+            if (throwRequestHandlerExceptionOnMissingLocalRequest) throw new RequestHandlerException(requestMissingErrorMessage);
+            else throw new RequestHandlerExceptionAllowExternalRequests();
+         }
+
         String eventReturn = null;
         if (requestMap.metrics != null && requestMap.metrics.getThreshold() != 0.0 && requestMap.metrics.getTotalEvents() > 3 && requestMap.metrics.getThreshold() < requestMap.metrics.getServiceRate()) {
             eventReturn = "threshold-exceeded";
         }
+        ConfigXMLReader.RequestMap originalRequestMap = requestMap; // Save this so we can update the correct performance metrics.
+
 
         boolean interruptRequest = false;
 
@@ -190,7 +234,13 @@ public class RequestHandler {
             // Check to make sure we are allowed to access this request directly. (Also checks if this request is defined.)
             // If the request cannot be called, or is not defined, check and see if there is a default-request we can process
             if (!requestMap.securityDirectRequest) {
-                String defaultRequest = controllerConfig.getDefaultRequest();
+                String defaultRequest;
+                try {
+                    defaultRequest = controllerConfig.getDefaultRequest();
+                } catch (WebAppConfigurationException e) {
+                    Debug.logError(e, "Exception thrown while parsing controller.xml file: ", module);
+                    throw new RequestHandlerException(e);
+                }
                 if (defaultRequest == null || !requestMapMap.get(defaultRequest).securityDirectRequest) {
                     // use the same message as if it was missing for security reasons, ie so can't tell if it is missing or direct request is not allowed
                     throw new RequestHandlerException(requestMissingErrorMessage);
@@ -239,7 +289,7 @@ public class RequestHandler {
                     String newUrl = RequestHandler.makeUrl(request, response, urlBuf.toString());
                     if (newUrl.toUpperCase().startsWith("HTTPS")) {
                         // if we are supposed to be secure, redirect secure.
-                        callRedirect(newUrl, response, request);
+                        callRedirect(newUrl, response, request, statusCodeString);
                         return;
                     }
                 }
@@ -254,7 +304,7 @@ public class RequestHandler {
                 }
                 String newUrl = RequestHandler.makeUrl(request, response, urlBuf.toString(), true, false, false);
                 if (newUrl.toUpperCase().startsWith("HTTP")) {
-                    callRedirect(newUrl, response, request);
+                    callRedirect(newUrl, response, request, statusCodeString);
                     return;
                 }
             }
@@ -298,53 +348,63 @@ public class RequestHandler {
                 if (Debug.infoOn())
                     Debug.logInfo("This is the first request in this visit." + " sessionId=" + UtilHttp.getSessionId(request), module);
                 session.setAttribute("_FIRST_VISIT_EVENTS_", "complete");
-                for (ConfigXMLReader.Event event: controllerConfig.getFirstVisitEventList().values()) {
+                try {
+                    for (ConfigXMLReader.Event event: controllerConfig.getFirstVisitEventList().values()) {
+                        try {
+                            String returnString = this.runEvent(request, response, event, null, "firstvisit");
+                            if (returnString == null || "none".equalsIgnoreCase(returnString)) {
+                                interruptRequest = true;
+                            } else if (!returnString.equalsIgnoreCase("success")) {
+                                throw new EventHandlerException("First-Visit event did not return 'success'.");
+                            }
+                        } catch (EventHandlerException e) {
+                            Debug.logError(e, module);
+                        }
+                    }
+                } catch (WebAppConfigurationException e) {
+                    Debug.logError(e, "Exception thrown while parsing controller.xml file: ", module);
+                    throw new RequestHandlerException(e);
+                }
+            }
+
+            // Invoke the pre-processor (but NOT in a chain)
+            try {
+                for (ConfigXMLReader.Event event: controllerConfig.getPreprocessorEventList().values()) {
                     try {
-                        String returnString = this.runEvent(request, response, event, null, "firstvisit");
-                        if (returnString != null && !returnString.equalsIgnoreCase("success")) {
-                            throw new EventHandlerException("First-Visit event did not return 'success'.");
-                        } else if (returnString == null) {
+                        String returnString = this.runEvent(request, response, event, null, "preprocessor");
+                        if (returnString == null || "none".equalsIgnoreCase(returnString)) {
                             interruptRequest = true;
+                        } else if (!returnString.equalsIgnoreCase("success")) {
+                            if (!returnString.contains(":_protect_:")) {
+                                throw new EventHandlerException("Pre-Processor event [" + event.invoke + "] did not return 'success'.");
+                            } else { // protect the view normally rendered and redirect to error response view
+                                returnString = returnString.replace(":_protect_:", "");
+                                if (returnString.length() > 0) {
+                                    request.setAttribute("_ERROR_MESSAGE_", returnString);
+                                }
+                                eventReturn = null;
+                                // check to see if there is a "protect" response, if so it's ok else show the default_error_response_view
+                                if (!requestMap.requestResponseMap.containsKey("protect")) {
+                                    String protectView = controllerConfig.getProtectView();
+                                    if (protectView != null) {
+                                        overrideViewUri = protectView;
+                                    } else {
+                                        overrideViewUri = UtilProperties.getPropertyValue("security.properties", "default.error.response.view");
+                                        overrideViewUri = overrideViewUri.replace("view:", "");
+                                        if ("none:".equals(overrideViewUri)) {
+                                            interruptRequest = true;
+                                        }
+                                    }
+                                }
+                            }
                         }
                     } catch (EventHandlerException e) {
                         Debug.logError(e, module);
                     }
                 }
-            }
-
-            // Invoke the pre-processor (but NOT in a chain)
-            for (ConfigXMLReader.Event event: controllerConfig.getPreprocessorEventList().values()) {
-                try {
-                    String returnString = this.runEvent(request, response, event, null, "preprocessor");
-                    if (returnString != null && !returnString.equalsIgnoreCase("success")) {
-                        if (!returnString.contains(":_protect_:")) {
-                            throw new EventHandlerException("Pre-Processor event [" + event.invoke + "] did not return 'success'.");
-                        } else { // protect the view normally rendered and redirect to error response view
-                            returnString = returnString.replace(":_protect_:", "");
-                            if (returnString.length() > 0) {
-                                request.setAttribute("_ERROR_MESSAGE_", returnString);
-                            }
-                            eventReturn = null;
-                            // check to see if there is a "protect" response, if so it's ok else show the default_error_response_view
-                            if (!requestMap.requestResponseMap.containsKey("protect")) {
-                                String protectView = controllerConfig.getProtectView();
-                                if (protectView != null) {
-                                    overrideViewUri = protectView;
-                                } else {
-                                    overrideViewUri = UtilProperties.getPropertyValue("security.properties", "default.error.response.view");
-                                    overrideViewUri = overrideViewUri.replace("view:", "");
-                                    if ("none:".equals(overrideViewUri)) {
-                                        interruptRequest = true;
-                                    }
-                                }
-                            }
-                        }
-                    } else if (returnString == null) {
-                        interruptRequest = true;
-                    }
-                } catch (EventHandlerException e) {
-                    Debug.logError(e, module);
-                }
+            } catch (WebAppConfigurationException e) {
+                Debug.logError(e, "Exception thrown while parsing controller.xml file: ", module);
+                throw new RequestHandlerException(e);
             }
         }
 
@@ -407,6 +467,10 @@ public class RequestHandler {
 
                     // run the request event
                     eventReturn = this.runEvent(request, response, requestMap.event, requestMap, "request");
+                                        
+                    if (requestMap.event.metrics != null) {
+                        requestMap.event.metrics.recordServiceRate(1, System.currentTimeMillis() - startTime);
+                    }                    
 
                     // save the server hit for the request event
                     if (this.trackStats(request)) {
@@ -434,7 +498,15 @@ public class RequestHandler {
 
         // Process the eventReturn
         // at this point eventReturnString is finalized, so get the RequestResponse
-        ConfigXMLReader.RequestResponse eventReturnBasedRequestResponse = eventReturn == null ? null : requestMap.requestResponseMap.get(eventReturn);
+        ConfigXMLReader.RequestResponse eventReturnBasedRequestResponse;
+        if (eventReturn == null) {
+            eventReturnBasedRequestResponse = null;
+        } else {
+            eventReturnBasedRequestResponse = requestMap.requestResponseMap.get(eventReturn);
+            if (eventReturnBasedRequestResponse == null && eventReturn.equals("none")) {
+                eventReturnBasedRequestResponse = ConfigXMLReader.emptyNoneRequestResponse;
+            }
+        }
         if (eventReturnBasedRequestResponse != null) {
             //String eventReturnBasedResponse = requestResponse.value;
             if (Debug.verboseOn()) Debug.logVerbose("[Response Qualified]: " + eventReturnBasedRequestResponse.name + ", " + eventReturnBasedRequestResponse.type + ":" + eventReturnBasedRequestResponse.value + " sessionId=" + UtilHttp.getSessionId(request), module);
@@ -501,7 +573,8 @@ public class RequestHandler {
                 if (UtilValidate.isNotEmpty(queryString)) {
                     redirectTarget += "?" + queryString;
                 }
-                callRedirect(makeLink(request, response, redirectTarget), response, request);
+                
+                callRedirect(makeLink(request, response, redirectTarget), response, request, statusCodeString);
 
                 // the old/uglier way: doRequest(request, response, previousRequest, userLogin, delegator);
 
@@ -552,31 +625,41 @@ public class RequestHandler {
             // ======== handle views ========
 
             // first invoke the post-processor events.
-            for (ConfigXMLReader.Event event: controllerConfig.getPostprocessorEventList().values()) {
-                try {
-                    String returnString = this.runEvent(request, response, event, requestMap, "postprocessor");
-                    if (returnString != null && !returnString.equalsIgnoreCase("success")) {
-                        throw new EventHandlerException("Post-Processor event did not return 'success'.");
+            try {
+                for (ConfigXMLReader.Event event: controllerConfig.getPostprocessorEventList().values()) {
+                    try {
+                        String returnString = this.runEvent(request, response, event, requestMap, "postprocessor");
+                        if (returnString != null && !returnString.equalsIgnoreCase("success")) {
+                            throw new EventHandlerException("Post-Processor event did not return 'success'.");
+                        }
+                    } catch (EventHandlerException e) {
+                        Debug.logError(e, module);
                     }
-                } catch (EventHandlerException e) {
-                    Debug.logError(e, module);
                 }
+            } catch (WebAppConfigurationException e) {
+                Debug.logError(e, "Exception thrown while parsing controller.xml file: ", module);
+                throw new RequestHandlerException(e);
             }
 
+            String responseStatusCode  = nextRequestResponse.statusCode;
+            if(UtilValidate.isNotEmpty(responseStatusCode))
+                statusCodeString = responseStatusCode;            
+            
+            
             if ("url".equals(nextRequestResponse.type)) {
                 if (Debug.verboseOn()) Debug.logVerbose("[RequestHandler.doRequest]: Response is a URL redirect." + " sessionId=" + UtilHttp.getSessionId(request), module);
-                callRedirect(nextRequestResponse.value, response, request);
+                callRedirect(nextRequestResponse.value, response, request, statusCodeString);
             } else if ("cross-redirect".equals(nextRequestResponse.type)) {
                 // check for a cross-application redirect
                 if (Debug.verboseOn()) Debug.logVerbose("[RequestHandler.doRequest]: Response is a Cross-Application redirect." + " sessionId=" + UtilHttp.getSessionId(request), module);
                 String url = nextRequestResponse.value.startsWith("/") ? nextRequestResponse.value : "/" + nextRequestResponse.value;
-                callRedirect(url + this.makeQueryString(request, nextRequestResponse), response, request);
+                callRedirect(url + this.makeQueryString(request, nextRequestResponse), response, request, statusCodeString);
             } else if ("request-redirect".equals(nextRequestResponse.type)) {
                 if (Debug.verboseOn()) Debug.logVerbose("[RequestHandler.doRequest]: Response is a Request redirect." + " sessionId=" + UtilHttp.getSessionId(request), module);
-                callRedirect(makeLinkWithQueryString(request, response, "/" + nextRequestResponse.value, nextRequestResponse), response, request);
+                callRedirect(makeLinkWithQueryString(request, response, "/" + nextRequestResponse.value, nextRequestResponse), response, request, statusCodeString);
             } else if ("request-redirect-noparam".equals(nextRequestResponse.type)) {
                 if (Debug.verboseOn()) Debug.logVerbose("[RequestHandler.doRequest]: Response is a Request redirect with no parameters." + " sessionId=" + UtilHttp.getSessionId(request), module);
-                callRedirect(makeLink(request, response, nextRequestResponse.value), response, request);
+                callRedirect(makeLink(request, response, nextRequestResponse.value), response, request, statusCodeString);
             } else if ("view".equals(nextRequestResponse.type)) {
                 if (Debug.verboseOn()) Debug.logVerbose("[RequestHandler.doRequest]: Response is a view." + " sessionId=" + UtilHttp.getSessionId(request), module);
 
@@ -654,8 +737,8 @@ public class RequestHandler {
                 if (Debug.verboseOn()) Debug.logVerbose("[RequestHandler.doRequest]: Response is handled by the event." + " sessionId=" + UtilHttp.getSessionId(request), module);
             }
         }
-        if (requestMap.metrics != null) {
-            requestMap.metrics.recordServiceRate(1, System.currentTimeMillis() - startTime);
+        if (originalRequestMap.metrics != null) {
+            originalRequestMap.metrics.recordServiceRate(1, System.currentTimeMillis() - startTime);
         }
     }
 
@@ -670,9 +753,26 @@ public class RequestHandler {
 
     /** Returns the default error page for this request. */
     public String getDefaultErrorPage(HttpServletRequest request) {
-        String errorpage = getControllerConfig().getErrorpage();
+        String errorpage = null;
+        try {
+            errorpage = getControllerConfig().getErrorpage();
+        } catch (WebAppConfigurationException e) {
+            Debug.logError(e, "Exception thrown while parsing controller.xml file: ", module);
+        }
         if (UtilValidate.isNotEmpty(errorpage)) return errorpage;
         return "/error/error.jsp";
+    }
+
+    /** Returns the default status-code for this request. */
+    public String getStatusCode(HttpServletRequest request) {
+        String statusCode = null;
+        try {
+            statusCode = getControllerConfig().getStatusCode();
+        } catch (WebAppConfigurationException e) {
+            Debug.logError(e, "Exception thrown while parsing controller.xml file: ", module);
+        }
+        if (UtilValidate.isNotEmpty(statusCode)) return statusCode;
+        return null;
     }
 
     /** Returns the ServletContext Object. */
@@ -722,11 +822,17 @@ public class RequestHandler {
         return nextPage;
     }
 
-    private void callRedirect(String url, HttpServletResponse resp, HttpServletRequest req) throws RequestHandlerException {
+    private void callRedirect(String url, HttpServletResponse resp, HttpServletRequest req, String statusCodeString) throws RequestHandlerException {
         if (Debug.infoOn()) Debug.logInfo("Sending redirect to: [" + url + "], sessionId=" + UtilHttp.getSessionId(req), module);
         // set the attributes in the session so we can access it.
         Enumeration<String> attributeNameEnum = UtilGenerics.cast(req.getAttributeNames());
         Map<String, Object> reqAttrMap = FastMap.newInstance();
+        Integer statusCode;
+        try {
+            statusCode = Integer.valueOf(statusCodeString);
+        } catch (NumberFormatException e) {
+            statusCode = 303;
+        } 
         while (attributeNameEnum.hasMoreElements()) {
             String name = attributeNameEnum.nextElement();
             Object obj = req.getAttribute(name);
@@ -743,10 +849,10 @@ public class RequestHandler {
         }
 
         // send the redirect
-        try {
-            resp.sendRedirect(url);
-        } catch (IOException ioe) {
-            throw new RequestHandlerException(ioe.getMessage(), ioe);
+        try {            
+            resp.setStatus(statusCode);
+            resp.setHeader("Location", url);
+            resp.setHeader("Connection", "close");
         } catch (IllegalStateException ise) {
             throw new RequestHandlerException(ise.getMessage(), ise);
         }
@@ -764,7 +870,11 @@ public class RequestHandler {
         // if the view name starts with the control servlet name and a /, then it was an
         // attempt to override the default view with a call back into the control servlet,
         // so just get the target view name and use that
-        String servletName = req.getServletPath().substring(1);
+        
+        String servletName = req.getServletPath();
+        if (servletName.startsWith("/")) {
+            servletName = servletName.substring(1);
+        }
 
         if (Debug.infoOn()) Debug.logInfo("Rendering View [" + view + "], sessionId=" + UtilHttp.getSessionId(req), module);
         if (view.startsWith(servletName + "/")) {
@@ -804,7 +914,13 @@ public class RequestHandler {
             req.getSession().removeAttribute("_SAVED_VIEW_PARAMS_");
         }
 
-        ConfigXMLReader.ViewMap viewMap = (view == null ? null : getControllerConfig().getViewMapMap().get(view));
+        ConfigXMLReader.ViewMap viewMap = null;
+        try {
+            viewMap = (view == null ? null : getControllerConfig().getViewMapMap().get(view));
+        } catch (WebAppConfigurationException e) {
+            Debug.logError(e, "Exception thrown while parsing controller.xml file: ", module);
+            throw new RequestHandlerException(e);
+        }
         if (viewMap == null) {
             throw new RequestHandlerException("No definition found for view with name [" + view + "]");
         }
@@ -897,6 +1013,15 @@ public class RequestHandler {
         }
     }
 
+    /**
+     * Returns a URL String that contains only the scheme and host parts. This method
+     * should not be used because it ignores settings in the WebSite entity.
+     * 
+     * @param request
+     * @param secure
+     * @deprecated Use OfbizUrlBuilder
+     */
+    @Deprecated
     public static String getDefaultServerRootUrl(HttpServletRequest request, boolean secure) {
         String httpsPort = UtilProperties.getPropertyValue("url.properties", "port.https", "443");
         String httpsServer = UtilProperties.getPropertyValue("url.properties", "force.https.host");
@@ -904,6 +1029,15 @@ public class RequestHandler {
         String httpServer = UtilProperties.getPropertyValue("url.properties", "force.http.host");
         boolean useHttps = UtilProperties.propertyValueEqualsIgnoreCase("url.properties", "port.https.enabled", "Y");
 
+        if (ClassLoaderContainer.portOffset != 0) {
+            Integer httpPortValue = Integer.valueOf(httpPort);
+            httpPortValue += ClassLoaderContainer.portOffset;
+            httpPort = httpPortValue.toString();
+            Integer httpsPortValue = Integer.valueOf(httpsPort);
+            httpsPortValue += ClassLoaderContainer.portOffset;
+            httpsPort = httpsPortValue.toString();
+        }
+        
         StringBuilder newURL = new StringBuilder();
 
         if (secure && useHttps) {
@@ -962,29 +1096,33 @@ public class RequestHandler {
                     value = request.getParameter(from);
                 }
 
-                if (UtilValidate.isNotEmpty(value)) {
-                    if (queryString.length() > 1) {
-                        queryString.append("&");
-                    }
-                    queryString.append(name);
-                    queryString.append("=");
-                    queryString.append(value);
-                }
+                addNameValuePairToQueryString(queryString, name, (String) value);
             }
+
             for (Map.Entry<String, String> entry: requestResponse.redirectParameterValueMap.entrySet()) {
                 String name = entry.getKey();
                 String value = entry.getValue();
 
-                if (UtilValidate.isNotEmpty(value)) {
-                    if (queryString.length() > 1) {
-                        queryString.append("&");
-                    }
-                    queryString.append(name);
-                    queryString.append("=");
-                    queryString.append(value);
-                }
+                addNameValuePairToQueryString(queryString, name, value);
             }
+
             return queryString.toString();
+        }
+    }
+
+    private void addNameValuePairToQueryString(StringBuilder queryString, String name, String value) {
+        if (UtilValidate.isNotEmpty(value)) {
+            if (queryString.length() > 1) {
+                queryString.append("&");
+            }
+
+            try {
+                queryString.append(StringUtil.defaultWebEncoder.encodeForURL(name));
+                queryString.append("=");
+                queryString.append(StringUtil.defaultWebEncoder.encodeForURL(value));
+            } catch (EncodingException e) {
+                Debug.logError(e, module);
+            }
         }
     }
 
@@ -999,93 +1137,57 @@ public class RequestHandler {
     }
 
     public String makeLink(HttpServletRequest request, HttpServletResponse response, String url, boolean fullPath, boolean secure, boolean encode) {
-        Delegator delegator = (Delegator) request.getAttribute("delegator");
-        String webSiteId = WebSiteWorker.getWebSiteId(request);
-
-        String httpsPort = null;
-        String httpsServer = null;
-        String httpPort = null;
-        String httpServer = null;
-        Boolean enableHttps = null;
-
-        // load the properties from the website entity
-        GenericValue webSite;
-        if (webSiteId != null) {
-            try {
-                webSite = delegator.findOne("WebSite", UtilMisc.toMap("webSiteId", webSiteId), true);
-                if (webSite != null) {
-                    httpsPort = webSite.getString("httpsPort");
-                    httpsServer = webSite.getString("httpsHost");
-                    httpPort = webSite.getString("httpPort");
-                    httpServer = webSite.getString("httpHost");
-                    enableHttps = webSite.getBoolean("enableHttps");
-                }
-            } catch (GenericEntityException e) {
-                Debug.logWarning(e, "Problems with WebSite entity; using global defaults", module);
-            }
+        WebSiteProperties webSiteProps = null;
+        try {
+            webSiteProps = WebSiteProperties.from(request);
+        } catch (GenericEntityException e) {
+            // If the entity engine is throwing exceptions, then there is no point in continuing.
+            Debug.logError(e, "Exception thrown while getting web site properties: ", module);
+            return null;
         }
-
-        // fill in any missing properties with fields from the global file
-        if (UtilValidate.isEmpty(httpsPort)) {
-            httpsPort = UtilProperties.getPropertyValue("url.properties", "port.https", "443");
-        }
-        if (UtilValidate.isEmpty(httpsServer)) {
-            httpsServer = UtilProperties.getPropertyValue("url.properties", "force.https.host");
-        }
-        if (UtilValidate.isEmpty(httpPort)) {
-            httpPort = UtilProperties.getPropertyValue("url.properties", "port.http", "80");
-        }
-        if (UtilValidate.isEmpty(httpServer)) {
-            httpServer = UtilProperties.getPropertyValue("url.properties", "force.http.host");
-        }
-        if (enableHttps == null) {
-            enableHttps = UtilProperties.propertyValueEqualsIgnoreCase("url.properties", "port.https.enabled", "Y");
-        }
-
-        // create the path the the control servlet
-        String controlPath = (String) request.getAttribute("_CONTROL_PATH_");
-
         String requestUri = RequestHandler.getRequestUri(url);
         ConfigXMLReader.RequestMap requestMap = null;
         if (requestUri != null) {
-            requestMap = getControllerConfig().getRequestMapMap().get(requestUri);
+            try {
+                requestMap = getControllerConfig().getRequestMapMap().get(requestUri);
+            } catch (WebAppConfigurationException e) {
+                // If we can't read the controller.xml file, then there is no point in continuing.
+                Debug.logError(e, "Exception thrown while parsing controller.xml file: ", module);
+                return null;
+            }
         }
-
-        StringBuilder newURL = new StringBuilder();
-
         boolean didFullSecure = false;
         boolean didFullStandard = false;
-        if (requestMap != null && (enableHttps || fullPath || secure)) {
+        if (requestMap != null && (webSiteProps.getEnableHttps() || fullPath || secure)) {
             if (Debug.verboseOn()) Debug.logVerbose("In makeLink requestUri=" + requestUri, module);
-            if (secure || (enableHttps && requestMap.securityHttps && !request.isSecure())) {
-                String server = httpsServer;
-                if (UtilValidate.isEmpty(server)) {
-                    server = request.getServerName();
-                }
-
-                newURL.append("https://");
-                newURL.append(server);
-                if (!httpsPort.equals("443")) {
-                    newURL.append(":").append(httpsPort);
-                }
-
+            if (secure || (webSiteProps.getEnableHttps() && requestMap.securityHttps && !request.isSecure())) {
                 didFullSecure = true;
-            } else if (fullPath || (enableHttps && !requestMap.securityHttps && request.isSecure())) {
-                String server = httpServer;
-                if (UtilValidate.isEmpty(server)) {
-                    server = request.getServerName();
-                }
-
-                newURL.append("http://");
-                newURL.append(server);
-                if (!httpPort.equals("80")) {
-                    newURL.append(":").append(httpPort);
-                }
-
+            } else if (fullPath || (webSiteProps.getEnableHttps() && !requestMap.securityHttps && request.isSecure())) {
                 didFullStandard = true;
             }
         }
-
+        StringBuilder newURL = new StringBuilder(250);
+        if (didFullSecure || didFullStandard) {
+            // Build the scheme and host part
+            try {
+                OfbizUrlBuilder builder = OfbizUrlBuilder.from(request);
+                builder.buildHostPart(newURL, url, didFullSecure);
+            } catch (GenericEntityException e) {
+                // If the entity engine is throwing exceptions, then there is no point in continuing.
+                Debug.logError(e, "Exception thrown while getting web site properties: ", module);
+                return null;
+            } catch (WebAppConfigurationException e) {
+                // If we can't read the controller.xml file, then there is no point in continuing.
+                Debug.logError(e, "Exception thrown while parsing controller.xml file: ", module);
+                return null;
+            } catch (IOException e) {
+                // If we can't write to StringBuilder, then there is no point in continuing.
+                Debug.logError(e, "Exception thrown while writing to StringBuilder: ", module);
+                return null;
+            }
+        }
+        // create the path to the control servlet
+        String controlPath = (String) request.getAttribute("_CONTROL_PATH_");
         newURL.append(controlPath);
 
         // now add the actual passed url, but if it doesn't start with a / add one first
@@ -1127,8 +1229,11 @@ public class RequestHandler {
                         newURL.insert(questionIndex, sessionId);
                     }
                 }
-
-                encodedUrl = newURL.toString();
+                if (response != null) {
+                    encodedUrl = response.encodeURL(newURL.toString());
+                } else {
+                    encodedUrl = newURL.toString();
+                }
             }
         } else {
             encodedUrl = newURL.toString();
@@ -1154,28 +1259,36 @@ public class RequestHandler {
     }
 
     public void runAfterLoginEvents(HttpServletRequest request, HttpServletResponse response) {
-        for (ConfigXMLReader.Event event: getControllerConfig().getAfterLoginEventList().values()) {
-            try {
-                String returnString = this.runEvent(request, response, event, null, "after-login");
-                if (returnString != null && !returnString.equalsIgnoreCase("success")) {
-                    throw new EventHandlerException("Pre-Processor event did not return 'success'.");
+        try {
+            for (ConfigXMLReader.Event event: getControllerConfig().getAfterLoginEventList().values()) {
+                try {
+                    String returnString = this.runEvent(request, response, event, null, "after-login");
+                    if (returnString != null && !returnString.equalsIgnoreCase("success")) {
+                        throw new EventHandlerException("Pre-Processor event did not return 'success'.");
+                    }
+                } catch (EventHandlerException e) {
+                    Debug.logError(e, module);
                 }
-            } catch (EventHandlerException e) {
-                Debug.logError(e, module);
             }
+        } catch (WebAppConfigurationException e) {
+            Debug.logError(e, "Exception thrown while parsing controller.xml file: ", module);
         }
     }
 
     public void runBeforeLogoutEvents(HttpServletRequest request, HttpServletResponse response) {
-        for (ConfigXMLReader.Event event: getControllerConfig().getBeforeLogoutEventList().values()) {
-            try {
-                String returnString = this.runEvent(request, response, event, null, "before-logout");
-                if (returnString != null && !returnString.equalsIgnoreCase("success")) {
-                    throw new EventHandlerException("Pre-Processor event did not return 'success'.");
+        try {
+            for (ConfigXMLReader.Event event: getControllerConfig().getBeforeLogoutEventList().values()) {
+                try {
+                    String returnString = this.runEvent(request, response, event, null, "before-logout");
+                    if (returnString != null && !returnString.equalsIgnoreCase("success")) {
+                        throw new EventHandlerException("Pre-Processor event did not return 'success'.");
+                    }
+                } catch (EventHandlerException e) {
+                    Debug.logError(e, module);
                 }
-            } catch (EventHandlerException e) {
-                Debug.logError(e, module);
             }
+        } catch (WebAppConfigurationException e) {
+            Debug.logError(e, "Exception thrown while parsing controller.xml file: ", module);
         }
     }
 
@@ -1185,7 +1298,12 @@ public class RequestHandler {
             if (uriString == null) {
                 uriString="";
             }
-            ConfigXMLReader.RequestMap requestMap = getControllerConfig().getRequestMapMap().get(uriString);
+            ConfigXMLReader.RequestMap requestMap = null;
+            try {
+                requestMap = getControllerConfig().getRequestMapMap().get(uriString);
+            } catch (WebAppConfigurationException e) {
+                Debug.logError(e, "Exception thrown while parsing controller.xml file: ", module);
+            }
             if (requestMap == null) return false;
             return requestMap.trackServerHit;
         } else {
@@ -1199,7 +1317,12 @@ public class RequestHandler {
             if (uriString == null) {
                 uriString="";
             }
-            ConfigXMLReader.RequestMap requestMap = getControllerConfig().getRequestMapMap().get(uriString);
+            ConfigXMLReader.RequestMap requestMap = null;
+            try {
+                requestMap = getControllerConfig().getRequestMapMap().get(uriString);
+            } catch (WebAppConfigurationException e) {
+                Debug.logError(e, "Exception thrown while parsing controller.xml file: ", module);
+            }
             if (requestMap == null) return false;
             return requestMap.trackVisit;
         } else {

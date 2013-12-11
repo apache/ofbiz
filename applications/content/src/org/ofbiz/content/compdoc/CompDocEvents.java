@@ -21,10 +21,8 @@ package org.ofbiz.content.compdoc;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Set;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
@@ -48,6 +46,7 @@ import org.ofbiz.service.ModelService;
 import org.ofbiz.service.ServiceAuthException;
 import org.ofbiz.service.ServiceUtil;
 import org.ofbiz.webapp.event.CoreEvents;
+import org.ofbiz.webapp.website.WebSiteWorker;
 
 
 /**
@@ -104,7 +103,7 @@ public class CompDocEvents {
             Map<String, Object> persistResult = dispatcher.runSync("persistContentAndAssoc", persistMap);
             contentId = (String)persistResult.get("contentId");
             //request.setAttribute("contentId", contentId);
-            for(Object obj : persistResult.keySet()) {
+            for (Object obj : persistResult.keySet()) {
                 Object val = persistResult.get(obj);
                 request.setAttribute(obj.toString(), val);
             }
@@ -114,7 +113,7 @@ public class CompDocEvents {
             contentRevisionMap.put("contentId", contentId);
             contentRevisionMap.put("userLogin", userLogin);
             Map<String, Object> result = dispatcher.runSync("persistContentRevisionAndItem", contentRevisionMap);
-            for(Object obj : result.keySet()) {
+            for (Object obj : result.keySet()) {
                 Object val = result.get(obj);
                 request.setAttribute(obj.toString(), val);
             }
@@ -151,14 +150,11 @@ public class CompDocEvents {
         String contentId = (String)paramMap.get("contentId");
         Locale locale = UtilHttp.getLocale(request);
         String rootDir = null;
-        String webSiteId = null;
+        String webSiteId = WebSiteWorker.getWebSiteId(request);
         String https = null;
 
         if (UtilValidate.isEmpty(rootDir)) {
             rootDir = servletContext.getRealPath("/");
-        }
-        if (UtilValidate.isEmpty(webSiteId)) {
-            webSiteId = (String) servletContext.getAttribute("webSiteId");
         }
         if (UtilValidate.isEmpty(https)) {
             https = (String) servletContext.getAttribute("https");
@@ -225,14 +221,11 @@ public class CompDocEvents {
         String contentId = (String)paramMap.get("contentId");
         Locale locale = UtilHttp.getLocale(request);
         String rootDir = null;
-        String webSiteId = null;
+        String webSiteId = WebSiteWorker.getWebSiteId(request);
         String https = null;
 
         if (UtilValidate.isEmpty(rootDir)) {
             rootDir = servletContext.getRealPath("/");
-        }
-        if (UtilValidate.isEmpty(webSiteId)) {
-            webSiteId = (String) servletContext.getAttribute("webSiteId");
         }
         if (UtilValidate.isEmpty(https)) {
             https = (String) servletContext.getAttribute("https");

@@ -401,73 +401,73 @@ under the License.
     <InvoiceItemType description="Supplier Return Adjustment" hasTable="N" invoiceItemTypeId="SRETURN_ADJ" parentTypeId="INVOICE_ADJ"/>
 
     <!-- invoice item types for sales (AR) invoices -->
-    <InvoiceItemType description="Invoice Promotion" hasTable="N" invoiceItemTypeId="INV_PROMOTION_ADJ" parentTypeId="SINVOICE_HEAD_ADJ"/>
-    <InvoiceItemType description="Invoice Discount" hasTable="N" invoiceItemTypeId="INV_DISCOUNT_ADJ" parentTypeId="SINVOICE_HEAD_ADJ"/>
-    <InvoiceItemType description="Invoice Fee" hasTable="N" invoiceItemTypeId="FEE" parentTypeId="SINVOICE_HEAD_ADJ"/>
-    <InvoiceItemType description="Invoice Miscellaneous Charges" hasTable="N" invoiceItemTypeId="INV_MISC_CHARGE" parentTypeId="SINVOICE_HEAD_ADJ"/>
-    <InvoiceItemType description="Invoice Sales Tax" hasTable="N" invoiceItemTypeId="INV_SALES_TAX" parentTypeId="SINVOICE_HEAD_ADJ"/>
-    <InvoiceItemType description="Invoice Shipping and Handling" hasTable="N" invoiceItemTypeId="INV_SHIPPING_CHARGES" parentTypeId="SINVOICE_HEAD_ADJ"/>
-    <InvoiceItemType description="Invoice Surcharge" hasTable="N" invoiceItemTypeId="INV_SURCHARGE_ADJ" parentTypeId="SINVOICE_HEAD_ADJ"/>
-    <InvoiceItemType description="Invoice Additional Feature" hasTable="N" invoiceItemTypeId="INV_ADD_FEATURE" parentTypeId="SINVOICE_HEAD_ADJ"/>
-    <InvoiceItemType description="Invoice Warranty" hasTable="N" invoiceItemTypeId="INV_WARRANTY_ADJ" parentTypeId="SINVOICE_HEAD_ADJ"/>
+    <InvoiceItemType description="Invoice Promotion(Sales)" hasTable="N" invoiceItemTypeId="INV_PROMOTION_ADJ" parentTypeId="SINVOICE_HEAD_ADJ"/>
+    <InvoiceItemType description="Invoice Discount(Sales)" hasTable="N" invoiceItemTypeId="INV_DISCOUNT_ADJ" parentTypeId="SINVOICE_HEAD_ADJ"/>
+    <InvoiceItemType description="Invoice Fee(Sales)" hasTable="N" invoiceItemTypeId="FEE" parentTypeId="SINVOICE_HEAD_ADJ"/>
+    <InvoiceItemType description="Invoice Miscellaneous Charges(Sales)" hasTable="N" invoiceItemTypeId="INV_MISC_CHARGE" parentTypeId="SINVOICE_HEAD_ADJ"/>
+    <InvoiceItemType description="Invoice Sales Tax(Sales)" hasTable="N" invoiceItemTypeId="INV_SALES_TAX" parentTypeId="SINVOICE_HEAD_ADJ"/>
+    <InvoiceItemType description="Invoice Shipping and Handling(Sales)" hasTable="N" invoiceItemTypeId="INV_SHIPPING_CHARGES" parentTypeId="SINVOICE_HEAD_ADJ"/>
+    <InvoiceItemType description="Invoice Surcharge(Sales)" hasTable="N" invoiceItemTypeId="INV_SURCHARGE_ADJ" parentTypeId="SINVOICE_HEAD_ADJ"/>
+    <InvoiceItemType description="Invoice Additional Feature(Sales)" hasTable="N" invoiceItemTypeId="INV_ADD_FEATURE" parentTypeId="SINVOICE_HEAD_ADJ"/>
+    <InvoiceItemType description="Invoice Warranty(Sales)" hasTable="N" invoiceItemTypeId="INV_WARRANTY_ADJ" parentTypeId="SINVOICE_HEAD_ADJ"/>
     <InvoiceItemType description="Invoice Interest Charge" hasTable="N" invoiceItemTypeId="INV_INTRST_CHRG" parentTypeId="SINVOICE_HEAD_ADJ"/>
 
-    <InvoiceItemType description="Invoice Item Promotion" hasTable="N" invoiceItemTypeId="ITM_PROMOTION_ADJ" parentTypeId="SINVOICE_ITM_ADJ"/>
-    <InvoiceItemType description="Invoice Item Replacement" hasTable="N" invoiceItemTypeId="ITM_REPLACE_ADJ" parentTypeId="SINVOICE_ITM_ADJ"/>
-    <InvoiceItemType description="Invoice Item Discount" hasTable="N" invoiceItemTypeId="ITM_DISCOUNT_ADJ" parentTypeId="SINVOICE_ITM_ADJ"/>
-    <InvoiceItemType description="Invoice Item Fee" hasTable="N" invoiceItemTypeId="ITM_FEE" parentTypeId="SINVOICE_ITM_ADJ"/>
-    <InvoiceItemType description="Invoice Item Miscellaneous Charges" hasTable="N" invoiceItemTypeId="ITM_MISC_CHARGE" parentTypeId="SINVOICE_ITM_ADJ"/>
-    <InvoiceItemType description="Invoice Item Sales Tax" hasTable="N" invoiceItemTypeId="ITM_SALES_TAX" parentTypeId="SINVOICE_ITM_ADJ"/>
-    <InvoiceItemType description="Invoice Item Shipping and Handling" hasTable="N" invoiceItemTypeId="ITM_SHIPPING_CHARGES" parentTypeId="SINVOICE_ITM_ADJ"/>
-    <InvoiceItemType description="Invoice Item Surcharge" hasTable="N" invoiceItemTypeId="ITM_SURCHARGE_ADJ" parentTypeId="SINVOICE_ITM_ADJ"/>
-    <InvoiceItemType description="Invoice Item Additional Feature" hasTable="N" invoiceItemTypeId="ITM_ADD_FEATURE" parentTypeId="SINVOICE_ITM_ADJ"/>
-    <InvoiceItemType description="Invoice Item Warranty" hasTable="N" invoiceItemTypeId="ITM_WARRANTY_ADJ" parentTypeId="SINVOICE_ITM_ADJ"/>
+    <InvoiceItemType description="Invoice Item Promotion(Sales)" hasTable="N" invoiceItemTypeId="ITM_PROMOTION_ADJ" parentTypeId="SINVOICE_ITM_ADJ"/>
+    <InvoiceItemType description="Invoice Item Replacement(Sales)" hasTable="N" invoiceItemTypeId="ITM_REPLACE_ADJ" parentTypeId="SINVOICE_ITM_ADJ"/>
+    <InvoiceItemType description="Invoice Item Discount(Sales)" hasTable="N" invoiceItemTypeId="ITM_DISCOUNT_ADJ" parentTypeId="SINVOICE_ITM_ADJ"/>
+    <InvoiceItemType description="Invoice Item Fee(Sales)" hasTable="N" invoiceItemTypeId="ITM_FEE" parentTypeId="SINVOICE_ITM_ADJ"/>
+    <InvoiceItemType description="Invoice Item Miscellaneous Charges(Sales)" hasTable="N" invoiceItemTypeId="ITM_MISC_CHARGE" parentTypeId="SINVOICE_ITM_ADJ"/>
+    <InvoiceItemType description="Invoice Item Sales Tax(Sales)" hasTable="N" invoiceItemTypeId="ITM_SALES_TAX" parentTypeId="SINVOICE_ITM_ADJ"/>
+    <InvoiceItemType description="Invoice Item Shipping and Handling(Sales)" hasTable="N" invoiceItemTypeId="ITM_SHIPPING_CHARGES" parentTypeId="SINVOICE_ITM_ADJ"/>
+    <InvoiceItemType description="Invoice Item Surcharge(Sales)" hasTable="N" invoiceItemTypeId="ITM_SURCHARGE_ADJ" parentTypeId="SINVOICE_ITM_ADJ"/>
+    <InvoiceItemType description="Invoice Item Additional Feature(Sales)" hasTable="N" invoiceItemTypeId="ITM_ADD_FEATURE" parentTypeId="SINVOICE_ITM_ADJ"/>
+    <InvoiceItemType description="Invoice Item Warranty(Sales)" hasTable="N" invoiceItemTypeId="ITM_WARRANTY_ADJ" parentTypeId="SINVOICE_ITM_ADJ"/>
 
-    <InvoiceItemType description="Invoice Product Item" hasTable="N" invoiceItemTypeId="INV_PROD_ITEM" parentTypeId=""/>
-    <InvoiceItemType description="Invoice Finished Good Item" hasTable="N" invoiceItemTypeId="INV_FPROD_ITEM" parentTypeId="INV_PROD_ITEM"/>
-    <InvoiceItemType description="Invoice Digital Good Item" hasTable="N" invoiceItemTypeId="INV_DPROD_ITEM" parentTypeId="INV_PROD_ITEM"/>
-    <InvoiceItemType description="Invoice Finished/Digital Good Item" hasTable="N" invoiceItemTypeId="INV_FDPROD_ITEM" parentTypeId="INV_PROD_ITEM"/>
-    <InvoiceItemType description="Invoice Product-Feature Item" hasTable="N" invoiceItemTypeId="INV_PROD_FEATR_ITEM" parentTypeId="INV_PROD_ITEM"/>
-    <InvoiceItemType description="Invoice Service Product Item" hasTable="N" invoiceItemTypeId="INV_SPROD_ITEM" parentTypeId="INV_PROD_ITEM"/>
+    <InvoiceItemType description="Invoice Product Item(Sales)" hasTable="N" invoiceItemTypeId="INV_PROD_ITEM" parentTypeId=""/>
+    <InvoiceItemType description="Invoice Finished Good Item(Sales)" hasTable="N" invoiceItemTypeId="INV_FPROD_ITEM" parentTypeId="INV_PROD_ITEM"/>
+    <InvoiceItemType description="Invoice Digital Good Item(Sales)" hasTable="N" invoiceItemTypeId="INV_DPROD_ITEM" parentTypeId="INV_PROD_ITEM"/>
+    <InvoiceItemType description="Invoice Finished/Digital Good Item(Sales)" hasTable="N" invoiceItemTypeId="INV_FDPROD_ITEM" parentTypeId="INV_PROD_ITEM"/>
+    <InvoiceItemType description="Invoice Product-Feature Item(Sales)" hasTable="N" invoiceItemTypeId="INV_PROD_FEATR_ITEM" parentTypeId="INV_PROD_ITEM"/>
+    <InvoiceItemType description="Invoice Service Product Item(Sales)" hasTable="N" invoiceItemTypeId="INV_SPROD_ITEM" parentTypeId="INV_PROD_ITEM"/>
 
-    <InvoiceItemType description="Invoice Work-Effort Item" hasTable="N" invoiceItemTypeId="INV_WE_ITEM" parentTypeId=""/>
-    <InvoiceItemType description="Invoice Time-Entry Item" hasTable="N" invoiceItemTypeId="INV_TE_ITEM" parentTypeId=""/>
+    <InvoiceItemType description="Invoice Work-Effort Item(Sales)" hasTable="N" invoiceItemTypeId="INV_WE_ITEM" parentTypeId=""/>
+    <InvoiceItemType description="Invoice Time-Entry Item(Sales)" hasTable="N" invoiceItemTypeId="INV_TE_ITEM" parentTypeId=""/>
 
     <!-- invoice item types for purchase (AP) invoices -->
-    <InvoiceItemType description="Invoice Promotion" hasTable="N" invoiceItemTypeId="PINV_PROMOTION_ADJ" parentTypeId="PINVOICE_ADJ"/>
-    <InvoiceItemType description="Invoice Discount" hasTable="N" invoiceItemTypeId="PINV_DISCOUNT_ADJ" parentTypeId="PINVOICE_ADJ"/>
-    <InvoiceItemType description="Invoice Fee" hasTable="N" invoiceItemTypeId="P_FEE" parentTypeId="PINVOICE_ADJ"/>
-    <InvoiceItemType description="Invoice Miscellaneous Charges" hasTable="N" invoiceItemTypeId="PINV_MISC_CHARGE" parentTypeId="PINVOICE_ADJ"/>
-    <InvoiceItemType description="Invoice Sales Tax" hasTable="N" invoiceItemTypeId="PINV_SALES_TAX" parentTypeId="PINVOICE_ADJ"/>
-    <InvoiceItemType description="Invoice Shipping and Handling" hasTable="N" invoiceItemTypeId="PINV_SHIP_CHARGES" parentTypeId="PINVOICE_ADJ"/>
-    <InvoiceItemType description="Invoice Surcharge" hasTable="N" invoiceItemTypeId="PINV_SURCHARGE_ADJ" parentTypeId="PINVOICE_ADJ"/>
-    <InvoiceItemType description="Invoice Additional Feature" hasTable="N" invoiceItemTypeId="PINV_ADD_FEATURE" parentTypeId="PINVOICE_ADJ"/>
-    <InvoiceItemType description="Invoice Warranty" hasTable="N" invoiceItemTypeId="PINV_WARRANTY_ADJ" parentTypeId="PINVOICE_ADJ"/>
+    <InvoiceItemType description="Invoice Promotion(Purchase)" hasTable="N" invoiceItemTypeId="PINV_PROMOTION_ADJ" parentTypeId="PINVOICE_ADJ"/>
+    <InvoiceItemType description="Invoice Discount(Purchase)" hasTable="N" invoiceItemTypeId="PINV_DISCOUNT_ADJ" parentTypeId="PINVOICE_ADJ"/>
+    <InvoiceItemType description="Invoice Fee(Purchase)" hasTable="N" invoiceItemTypeId="P_FEE" parentTypeId="PINVOICE_ADJ"/>
+    <InvoiceItemType description="Invoice Miscellaneous Charges(Purchase)" hasTable="N" invoiceItemTypeId="PINV_MISC_CHARGE" parentTypeId="PINVOICE_ADJ"/>
+    <InvoiceItemType description="Invoice Sales Tax(Purchase)" hasTable="N" invoiceItemTypeId="PINV_SALES_TAX" parentTypeId="PINVOICE_ADJ"/>
+    <InvoiceItemType description="Invoice Shipping and Handling(Purchase)" hasTable="N" invoiceItemTypeId="PINV_SHIP_CHARGES" parentTypeId="PINVOICE_ADJ"/>
+    <InvoiceItemType description="Invoice Surcharge(Purchase)" hasTable="N" invoiceItemTypeId="PINV_SURCHARGE_ADJ" parentTypeId="PINVOICE_ADJ"/>
+    <InvoiceItemType description="Invoice Additional Feature(Purchase)" hasTable="N" invoiceItemTypeId="PINV_ADD_FEATURE" parentTypeId="PINVOICE_ADJ"/>
+    <InvoiceItemType description="Invoice Warranty(Purchase)" hasTable="N" invoiceItemTypeId="PINV_WARRANTY_ADJ" parentTypeId="PINVOICE_ADJ"/>
 
-    <InvoiceItemType description="Invoice Item Promotion" hasTable="N" invoiceItemTypeId="PITM_PROMOTION_ADJ" parentTypeId="PINVOICE_ITM_ADJ"/>
-    <InvoiceItemType description="Invoice Item Replacement" hasTable="N" invoiceItemTypeId="PITM_REPLACE_ADJ" parentTypeId="PINVOICE_ITM_ADJ"/>
-    <InvoiceItemType description="Invoice Item Discount" hasTable="N" invoiceItemTypeId="PITM_DISCOUNT_ADJ" parentTypeId="PINVOICE_ITM_ADJ"/>
-    <InvoiceItemType description="Invoice Item Fee" hasTable="N" invoiceItemTypeId="PITM_FEE" parentTypeId="PINVOICE_ITM_ADJ"/>
-    <InvoiceItemType description="Invoice Item Miscellaneous Charges" hasTable="N" invoiceItemTypeId="PITM_MISC_CHARGE" parentTypeId="PINVOICE_ITM_ADJ"/>
-    <InvoiceItemType description="Invoice Item Sales Tax" hasTable="N" invoiceItemTypeId="PITM_SALES_TAX" parentTypeId="PINVOICE_ITM_ADJ"/>
-    <InvoiceItemType description="Invoice Item Shipping and Handling" hasTable="N" invoiceItemTypeId="PITM_SHIP_CHARGES" parentTypeId="PINVOICE_ITM_ADJ"/>
-    <InvoiceItemType description="Invoice Item Surcharge" hasTable="N" invoiceItemTypeId="PITM_SURCHARGE_ADJ" parentTypeId="PINVOICE_ITM_ADJ"/>
-    <InvoiceItemType description="Invoice Item Additional Feature" hasTable="N" invoiceItemTypeId="PITM_ADD_FEATURE" parentTypeId="PINVOICE_ITM_ADJ"/>
-    <InvoiceItemType description="Invoice Item Warranty" hasTable="N" invoiceItemTypeId="PITM_WARRANTY_ADJ" parentTypeId="PINVOICE_ITM_ADJ"/>
+    <InvoiceItemType description="Invoice Item Promotion(Purchase)" hasTable="N" invoiceItemTypeId="PITM_PROMOTION_ADJ" parentTypeId="PINVOICE_ITM_ADJ"/>
+    <InvoiceItemType description="Invoice Item Replacement(Purchase)" hasTable="N" invoiceItemTypeId="PITM_REPLACE_ADJ" parentTypeId="PINVOICE_ITM_ADJ"/>
+    <InvoiceItemType description="Invoice Item Discount(Purchase)" hasTable="N" invoiceItemTypeId="PITM_DISCOUNT_ADJ" parentTypeId="PINVOICE_ITM_ADJ"/>
+    <InvoiceItemType description="Invoice Item Fee(Purchase)" hasTable="N" invoiceItemTypeId="PITM_FEE" parentTypeId="PINVOICE_ITM_ADJ"/>
+    <InvoiceItemType description="Invoice Item Miscellaneous Charges(Purchase)" hasTable="N" invoiceItemTypeId="PITM_MISC_CHARGE" parentTypeId="PINVOICE_ITM_ADJ"/>
+    <InvoiceItemType description="Invoice Item Sales Tax(Purchase)" hasTable="N" invoiceItemTypeId="PITM_SALES_TAX" parentTypeId="PINVOICE_ITM_ADJ"/>
+    <InvoiceItemType description="Invoice Item Shipping and Handling(Purchase)" hasTable="N" invoiceItemTypeId="PITM_SHIP_CHARGES" parentTypeId="PINVOICE_ITM_ADJ"/>
+    <InvoiceItemType description="Invoice Item Surcharge(Purchase)" hasTable="N" invoiceItemTypeId="PITM_SURCHARGE_ADJ" parentTypeId="PINVOICE_ITM_ADJ"/>
+    <InvoiceItemType description="Invoice Item Additional Feature(Purchase)" hasTable="N" invoiceItemTypeId="PITM_ADD_FEATURE" parentTypeId="PINVOICE_ITM_ADJ"/>
+    <InvoiceItemType description="Invoice Item Warranty(Purchase)" hasTable="N" invoiceItemTypeId="PITM_WARRANTY_ADJ" parentTypeId="PINVOICE_ITM_ADJ"/>
 
-    <InvoiceItemType description="Invoice Product Item" hasTable="N" invoiceItemTypeId="PINV_PROD_ITEM" parentTypeId=""/>
-    <InvoiceItemType description="Invoice Finished Good Item" hasTable="N" invoiceItemTypeId="PINV_FPROD_ITEM" parentTypeId="PINV_PROD_ITEM"/>
-    <InvoiceItemType description="Invoice Digital Good Item" hasTable="N" invoiceItemTypeId="PINV_DPROD_ITEM" parentTypeId="PINV_PROD_ITEM"/>
-    <InvoiceItemType description="Invoice Finished/Digital Good Item" hasTable="N" invoiceItemTypeId="PINV_FDPROD_ITEM" parentTypeId="PINV_PROD_ITEM"/>
-    <InvoiceItemType description="Invoice Product-Feature Item" hasTable="N" invoiceItemTypeId="PINV_PROD_FEATR_ITEM" parentTypeId="PINV_PROD_ITEM"/>
-    <InvoiceItemType description="Invoice Service Product Item" hasTable="N" invoiceItemTypeId="PINV_SPROD_ITEM" parentTypeId="PINV_PROD_ITEM"/>
+    <InvoiceItemType description="Invoice Product Item(Purchase)" hasTable="N" invoiceItemTypeId="PINV_PROD_ITEM" parentTypeId=""/>
+    <InvoiceItemType description="Invoice Finished Good Item(Purchase)" hasTable="N" invoiceItemTypeId="PINV_FPROD_ITEM" parentTypeId="PINV_PROD_ITEM"/>
+    <InvoiceItemType description="Invoice Digital Good Item(Purchase)" hasTable="N" invoiceItemTypeId="PINV_DPROD_ITEM" parentTypeId="PINV_PROD_ITEM"/>
+    <InvoiceItemType description="Invoice Finished/Digital Good Item(Purchase)" hasTable="N" invoiceItemTypeId="PINV_FDPROD_ITEM" parentTypeId="PINV_PROD_ITEM"/>
+    <InvoiceItemType description="Invoice Product-Feature Item(Purchase)" hasTable="N" invoiceItemTypeId="PINV_PROD_FEATR_ITEM" parentTypeId="PINV_PROD_ITEM"/>
+    <InvoiceItemType description="Invoice Service Product Item(Purchase)" hasTable="N" invoiceItemTypeId="PINV_SPROD_ITEM" parentTypeId="PINV_PROD_ITEM"/>
 
     <InvoiceItemType description="Invoice Inventory Product Item" hasTable="N" invoiceItemTypeId="PINV_INVPRD_ITEM" parentTypeId="PINV_PROD_ITEM"/>
     <InvoiceItemType description="Invoice Supplies (to Expense) Product Item" hasTable="N" invoiceItemTypeId="PINV_SUPLPRD_ITEM" parentTypeId="PINV_PROD_ITEM"/>
     <InvoiceItemType description="Invoice Fixed Asset Product Item" hasTable="N" invoiceItemTypeId="PINV_FXASTPRD_ITEM" parentTypeId="PINV_PROD_ITEM"/>
 
-    <InvoiceItemType description="Invoice Work-Effort Item" hasTable="N" invoiceItemTypeId="PINV_WE_ITEM" parentTypeId=""/>
-    <InvoiceItemType description="Invoice Time-Entry Item" hasTable="N" invoiceItemTypeId="PINV_TE_ITEM" parentTypeId=""/>
+    <InvoiceItemType description="Invoice Work-Effort Item(Purchase)" hasTable="N" invoiceItemTypeId="PINV_WE_ITEM" parentTypeId=""/>
+    <InvoiceItemType description="Invoice Time-Entry Item(Purchase)" hasTable="N" invoiceItemTypeId="PINV_TE_ITEM" parentTypeId=""/>
 
     <!-- invoice items for customer returns -->
     <InvoiceItemType description="Return Product Item" hasTable="N" invoiceItemTypeId="CRT_PROD_ITEM" parentTypeId=""/>
@@ -564,6 +564,7 @@ under the License.
     <InvoiceItemTypeMap invoiceTypeId="PURCHASE_INVOICE" invoiceItemMapKey="FINISHED_GOOD" invoiceItemTypeId="PINV_FPROD_ITEM"/>
     <InvoiceItemTypeMap invoiceTypeId="PURCHASE_INVOICE" invoiceItemMapKey="DIGITAL_GOOD" invoiceItemTypeId="PINV_DPROD_ITEM"/>
     <InvoiceItemTypeMap invoiceTypeId="PURCHASE_INVOICE" invoiceItemMapKey="FINDIG_GOOD" invoiceItemTypeId="PINV_FDPROD_ITEM"/>
+    <InvoiceItemTypeMap invoiceTypeId="PURCHASE_INVOICE" invoiceItemMapKey="SERVICE" invoiceItemTypeId="PINV_SPROD_ITEM"/>
 
     <!-- orderAdjustmentTypeId -->
     <InvoiceItemTypeMap invoiceTypeId="PURCHASE_INVOICE" invoiceItemMapKey="PROMOTION_ADJUSTMENT" invoiceItemTypeId="PITM_PROMOTION_ADJ"/>
@@ -728,11 +729,13 @@ under the License.
     <CustomMethodType customMethodTypeId="FIN_CAPTURE" parentTypeId="" hasTable="N" description="FIN account capture methods"/>
     <CustomMethodType customMethodTypeId="FIN_REFUND" parentTypeId="" hasTable="N" description="FIN account refund methods"/>
     <CustomMethodType customMethodTypeId="FIN_RELEASE" parentTypeId="" hasTable="N" description="FIN account release methods"/>
+    <CustomMethodType customMethodTypeId="FIN_PURCHASE" parentTypeId="" hasTable="N" description="FIN account purchase methods"/>
 
     <CustomMethodType customMethodTypeId="GIFT_AUTH" parentTypeId="" hasTable="N" description="GIFT card authorize methods"/>
     <CustomMethodType customMethodTypeId="GIFT_CAPTURE" parentTypeId="" hasTable="N" description="GIFT card capture methods"/>
     <CustomMethodType customMethodTypeId="GIFT_REFUND" parentTypeId="" hasTable="N" description="GIFT card refund methods"/>
     <CustomMethodType customMethodTypeId="GIFT_RELEASE" parentTypeId="" hasTable="N" description="GIFT card release methods"/>
+    <CustomMethodType customMethodTypeId="GIFT_PURCHASE" parentTypeId="" hasTable="N" description="GIFT card purchase methods"/>
 
     <CustomMethodType customMethodTypeId="PAYPAL_AUTH" parentTypeId="" hasTable="N" description="PayPal authorize methods"/>
     <CustomMethodType customMethodTypeId="PAYPAL_CAPTURE" parentTypeId="" hasTable="N" description="PayPal capture methods"/>
@@ -809,6 +812,7 @@ under the License.
     <CustomMethod customMethodId="FIN_CAPTURE_OFBIZ" customMethodTypeId="FIN_CAPTURE" customMethodName="ofbFaCapture" description="FIN account capture"/>
     <CustomMethod customMethodId="FIN_REFUND_OFBIZ" customMethodTypeId="FIN_REFUND" customMethodName="ofbFaRefund" description="FIN account refund"/>
     <CustomMethod customMethodId="FIN_RELEASE_OFBIZ" customMethodTypeId="FIN_RELEASE" customMethodName="ofbFaRelease" description="FIN account release"/>
+    <CustomMethod customMethodId="FIN_PURCH_OFBIZ" customMethodTypeId="FIN_PURCHASE" customMethodName="createPartyFinAccountFromPurchase" description="FIN account purchase"/>
 
     <CustomMethod customMethodId="GIFT_AUTH_OFBIZ" customMethodTypeId="GIFT_AUTH" customMethodName="ofbGcAuthorize" description="GIFT card authorize"/>
     <CustomMethod customMethodId="GIFT_AUTH_ALWAYSAPPR" customMethodTypeId="GIFT_AUTH" customMethodName="alwaysApproveGCProcessor" description="GIFT card always authorize"/>
@@ -820,6 +824,7 @@ under the License.
     <CustomMethod customMethodId="GIFT_RELEASE_OFBIZ" customMethodTypeId="GIFT_RELEASE" customMethodName="ofbGcRelease" description="GIFT card release"/>
     <CustomMethod customMethodId="GIFT_RELEASE_TEST" customMethodTypeId="GIFT_RELEASE" customMethodName="testGCRelease" description="GIFT card test release"/>
     <CustomMethod customMethodId="GIFT_RELEASE_VALUEL" customMethodTypeId="GIFT_RELEASE" customMethodName="valueLinkRelease" description="GIFT card ValueLink release"/>
+    <CustomMethod customMethodId="GIFT_PURCH_OFBIZ" customMethodTypeId="GIFT_PURCHASE" customMethodName="ofbGcPurchase" description="GIFT card Purchase Fulfillment Service"/>
 
     <CustomMethod customMethodId="PAYPAL_AUTH_PFP" customMethodTypeId="PAYPAL_AUTH" customMethodName="payflowPayPalProcessor" description="Payflow PayPal payment authorize"/>
     <CustomMethod customMethodId="PAYPAL_AUTH" customMethodTypeId="PAYPAL_AUTH" customMethodName="payPalProcessor" description="PayPal payment authorize"/>
@@ -947,14 +952,14 @@ under the License.
     <!-- inventory sequencing mode for accounting preferences -->
     <CustomMethodType customMethodTypeId="HOOK" parentTypeId="HOOK" hasTable="N" description="Custom Methode Type define HOOK method to resolve specific sequence"/>
     <CustomMethodType customMethodTypeId="INVOICE_HOOK" parentTypeId="HOOK" hasTable="N" description="Invoice Sequence methods"/>
-    <CustomMethod customMethodId="INV_HOOK_ENF_SEQ" customMethodTypeId="INVOICE_HOOK" customMethodName="invoiceSequence-enforced" description="Enforced Sequence (no gaps, per organization)"/>
-    <CustomMethod customMethodId="INV_HOOK_RES_YR" customMethodTypeId="INVOICE_HOOK" customMethodName="invoiceSequence-restart" description="Restart on Fiscal Year (no gaps, per org, reset to 1 each year)"/>
+    <CustomMethod customMethodId="INV_HOOK_ENF_SEQ" customMethodTypeId="INVOICE_HOOK" customMethodName="invoiceSequenceEnforced" description="Enforced Sequence (no gaps, per organization)"/>
+    <CustomMethod customMethodId="INV_HOOK_RES_YR" customMethodTypeId="INVOICE_HOOK" customMethodName="invoiceSequenceRestart" description="Restart on Fiscal Year (no gaps, per org, reset to 1 each year)"/>
     <!-- quote sequencing mode for accounting preferences -->
     <CustomMethodType customMethodTypeId="QUOTE_HOOK" parentTypeId="HOOK" hasTable="N" description="Quote Sequence methods"/>
-    <CustomMethod customMethodId="QUOTE_HOOK_ENF_SEQ" customMethodTypeId="QUOTE_HOOK" customMethodName="quoteSequence-enforced" description="Enforced Sequence (no gaps, per organization)"/>
+    <CustomMethod customMethodId="QUOTE_HOOK_ENF_SEQ" customMethodTypeId="QUOTE_HOOK" customMethodName="quoteSequenceEnforced" description="Enforced Sequence (no gaps, per organization)"/>
     <!-- order sequencing mode for accounting preferences -->
     <CustomMethodType customMethodTypeId="ORDER_HOOK" parentTypeId="HOOK" hasTable="N" description="Order Sequence methods"/>
-    <CustomMethod customMethodId="ORDER_HOOK_ENF_SEQ" customMethodTypeId="ORDER_HOOK" customMethodName="orderSequence-enforced" description="Enforced Sequence (no gaps, per organization)"/>
+    <CustomMethod customMethodId="ORDER_HOOK_ENF_SEQ" customMethodTypeId="ORDER_HOOK" customMethodName="orderSequence_enforced" description="Enforced Sequence (no gaps, per organization)"/>
     <!-- Deprecated sequencing mode by enumeration -->
     <EnumerationType description="Invoice Sequence Mode" enumTypeId="INVOICE_SEQMD" hasTable="N" parentTypeId=""/>
     <Enumeration description="Standard (faster, may have gaps, per system)" enumCode="STANDARD" enumId="INVSQ_STANDARD" sequenceId="01" enumTypeId="INVOICE_SEQMD"/>
@@ -1082,4 +1087,7 @@ under the License.
     <CustomMethod customMethodId="STR_LINE_DEP_FORMULA" customMethodTypeId="DEPRECIATION_FORMULA" customMethodName="straightLineDepreciation" description="Straight Line depreciatiion algorithm for fixed asset((purchaseCost - salvageCost)/expectedLifeInYears)"/>
     <CustomMethod customMethodId="DBL_DECL_DEP_FORMULA" customMethodTypeId="DEPRECIATION_FORMULA" customMethodName="doubleDecliningBalanceDepreciation" description="Double decline depreciatiion algorithm for fixed asset((NetBookValue - salvageCost)*2/remainingLifeInYears)"/>
 
+    <!-- invoice export replacement Id types -->
+    <GoodIdentificationType description="replacement value for partyId in the invoice export function in accounting" goodIdentificationTypeId="INVOICE_EXPORT"/>
+    <PartyIdentificationType description="replacement value for partyId in the invoice export function in accounting" partyIdentificationTypeId="INVOICE_EXPORT"/>
 </entity-engine-xml>

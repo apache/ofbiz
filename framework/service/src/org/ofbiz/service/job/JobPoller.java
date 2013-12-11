@@ -19,206 +19,238 @@
 package org.ofbiz.service.job;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.RejectedExecutionException;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
+import org.ofbiz.base.config.GenericConfigException;
+import org.ofbiz.base.start.Start;
+import org.ofbiz.base.util.Assert;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.service.config.ServiceConfigUtil;
-
-import org.apache.commons.lang.math.NumberUtils;
+import org.ofbiz.service.config.ServiceConfigListener;
+import org.ofbiz.service.config.model.ServiceConfig;
+import org.ofbiz.service.config.model.ThreadPool;
 
 /**
  * Job poller. Queues and runs jobs.
  */
-public final class JobPoller implements Runnable {
+public final class JobPoller implements ServiceConfigListener {
 
     public static final String module = JobPoller.class.getName();
-    public static final int MIN_THREADS = 1;
-    public static final int MAX_THREADS = 15;
-    public static final int POLL_WAIT = 20000;
-    public static final long THREAD_TTL = 18000000;
-
-    private final JobManager jm;
-    private final ThreadPoolExecutor executor;
-    private final String name;
-    private boolean enabled = false;
+    private static final AtomicInteger created = new AtomicInteger();
+    private static final ConcurrentHashMap<String, JobManager> jobManagers = new ConcurrentHashMap<String, JobManager>();
+    private static final ThreadPoolExecutor executor = createThreadPoolExecutor();
+    private static final JobPoller instance = new JobPoller();
 
     /**
-     * Creates a new JobScheduler
-     * 
-     * @param jm
-     *            JobManager associated with this scheduler
+     * Returns the <code>JobPoller</code> instance.
      */
-    public JobPoller(JobManager jm) {
-        this.name = jm.getDelegator().getDelegatorName();
-        this.jm = jm;
-        this.executor = new ThreadPoolExecutor(minThreads(), maxThreads(), getTTL(), TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>(),
-                new JobInvokerThreadFactory(this.name), new ThreadPoolExecutor.AbortPolicy());
+    public static JobPoller getInstance() {
+        return instance;
     }
 
-    public synchronized void enable() {
-        if (!enabled) {
-            enabled = true;
-            // start the thread only if polling is enabled
-            if (pollEnabled()) {
-                // create the poller thread
-                Thread thread = new Thread(this, "OFBiz-JobPoller-" + this.name);
-                thread.setDaemon(false);
-                // start the poller
-                thread.start();
-            }
+    private static ThreadPoolExecutor createThreadPoolExecutor() {
+        try {
+            ThreadPool threadPool = ServiceConfigUtil.getServiceEngine(ServiceConfigUtil.engine).getThreadPool();
+            return new ThreadPoolExecutor(threadPool.getMinThreads(), threadPool.getMaxThreads(), threadPool.getTtl(),
+                    TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>(threadPool.getJobs()), new JobInvokerThreadFactory(), new ThreadPoolExecutor.AbortPolicy());
+        } catch (GenericConfigException e) {
+            Debug.logError(e, "Exception thrown while getting <thread-pool> model, using default <thread-pool> values: ", module);
+            return new ThreadPoolExecutor(ThreadPool.MIN_THREADS, ThreadPool.MAX_THREADS, ThreadPool.THREAD_TTL,
+                    TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>(ThreadPool.QUEUE_SIZE), new JobInvokerThreadFactory(), new ThreadPoolExecutor.AbortPolicy());
+        }
+    }
+
+    private static int pollWaitTime() {
+        try {
+            ThreadPool threadPool = ServiceConfigUtil.getServiceEngine(ServiceConfigUtil.engine).getThreadPool();
+            return threadPool.getPollDbMillis();
+        } catch (GenericConfigException e) {
+            Debug.logError(e, "Exception thrown while getting <thread-pool> model, using default <thread-pool> values: ", module);
+            return ThreadPool.POLL_WAIT;
         }
     }
 
     /**
-     * Returns the JobManager
+     * Register a {@link JobManager} with the job poller.
+     * 
+     * @param jm The <code>JobManager</code> to register.
+     * @throws IllegalArgumentException if <code>jm</code> is null
      */
-    public JobManager getManager() {
-        return jm;
+    public static void registerJobManager(JobManager jm) {
+        Assert.notNull("jm", jm);
+        jobManagers.putIfAbsent(jm.getDelegator().getDelegatorName(), jm);
     }
 
+    // -------------------------------------- //
+
+    private final Thread jobManagerPollerThread;
+
+    private JobPoller() {
+        if (pollEnabled()) {
+            jobManagerPollerThread = new Thread(new JobManagerPoller(), "OFBiz-JobPoller");
+            jobManagerPollerThread.setDaemon(false);
+            jobManagerPollerThread.start();
+        } else {
+            jobManagerPollerThread = null;
+        }
+        ServiceConfigUtil.registerServiceConfigListener(this);
+    }
+
+    /**
+     * Returns a <code>Map</code> containing <code>JobPoller</code> statistics.
+     */
     public Map<String, Object> getPoolState() {
         Map<String, Object> poolState = new HashMap<String, Object>();
-        poolState.put("pollerName", this.name);
-        poolState.put("pollerThreadName", "OFBiz-JobPoller-" + this.name);
-        poolState.put("invokerThreadNameFormat", "OFBiz-JobInvoker-" + this.name + "-<SEQ>");
-        poolState.put("keepAliveTimeInSeconds", this.executor.getKeepAliveTime(TimeUnit.SECONDS));
-        poolState.put("numberOfCoreInvokerThreads", this.executor.getCorePoolSize());
-        poolState.put("currentNumberOfInvokerThreads", this.executor.getPoolSize());
-        poolState.put("numberOfActiveInvokerThreads", this.executor.getActiveCount());
-        poolState.put("maxNumberOfInvokerThreads", this.executor.getMaximumPoolSize());
-        poolState.put("greatestNumberOfInvokerThreads", this.executor.getLargestPoolSize());
-        poolState.put("numberOfCompletedTasks", this.executor.getCompletedTaskCount());
-        BlockingQueue<Runnable> queue = this.executor.getQueue();
+        poolState.put("keepAliveTimeInSeconds", executor.getKeepAliveTime(TimeUnit.SECONDS));
+        poolState.put("numberOfCoreInvokerThreads", executor.getCorePoolSize());
+        poolState.put("currentNumberOfInvokerThreads", executor.getPoolSize());
+        poolState.put("numberOfActiveInvokerThreads", executor.getActiveCount());
+        poolState.put("maxNumberOfInvokerThreads", executor.getMaximumPoolSize());
+        poolState.put("greatestNumberOfInvokerThreads", executor.getLargestPoolSize());
+        poolState.put("numberOfCompletedTasks", executor.getCompletedTaskCount());
+        BlockingQueue<Runnable> queue = executor.getQueue();
         List<Map<String, Object>> taskList = new ArrayList<Map<String, Object>>();
         Map<String, Object> taskInfo = null;
         for (Runnable task : queue) {
-            JobInvoker jobInvoker = (JobInvoker) task;
+            Job job = (Job) task;
             taskInfo = new HashMap<String, Object>();
-            taskInfo.put("id", jobInvoker.getJobId());
-            taskInfo.put("name", jobInvoker.getJobName());
-            taskInfo.put("serviceName", jobInvoker.getServiceName());
-            taskInfo.put("time", jobInvoker.getTime());
-            taskInfo.put("runtime", jobInvoker.getCurrentRuntime());
+            taskInfo.put("id", job.getJobId());
+            taskInfo.put("name", job.getJobName());
+            String serviceName = "";
+            if (job instanceof GenericServiceJob) {
+                serviceName = ((GenericServiceJob) job).getServiceName();
+            }
+            taskInfo.put("serviceName", serviceName);
+            taskInfo.put("time", job.getStartTime());
+            taskInfo.put("runtime", job.getRuntime());
             taskList.add(taskInfo);
         }
         poolState.put("taskList", taskList);
         return poolState;
     }
 
-    private long getTTL() {
-        long ttl = THREAD_TTL;
-        try {
-            ttl = NumberUtils.toLong(ServiceConfigUtil.getElementAttr("thread-pool", "ttl"));
-        } catch (NumberFormatException nfe) {
-            Debug.logError("Problems reading value from attribute [ttl] of element [thread-pool] in serviceengine.xml file [" + nfe.toString() + "]. Using default (" + THREAD_TTL + ").", module);
+    @Override
+    public void onServiceConfigChange(ServiceConfig serviceConfig) {
+        if (!executor.isShutdown()) {
+            ThreadPool threadPool = serviceConfig.getServiceEngine(ServiceConfigUtil.engine).getThreadPool();
+            executor.setCorePoolSize(threadPool.getMinThreads());
+            executor.setMaximumPoolSize(threadPool.getMaxThreads());
+            executor.setKeepAliveTime(threadPool.getTtl(), TimeUnit.MILLISECONDS);
         }
-        return ttl;
-    }
-
-    private int maxThreads() {
-        int max = MAX_THREADS;
-        try {
-            max = Integer.parseInt(ServiceConfigUtil.getElementAttr("thread-pool", "max-threads"));
-        } catch (NumberFormatException nfe) {
-            Debug.logError("Problems reading values from serviceengine.xml file [" + nfe.toString() + "]. Using defaults.", module);
-        }
-        return max;
-    }
-
-    private int minThreads() {
-        int min = MIN_THREADS;
-        try {
-            min = Integer.parseInt(ServiceConfigUtil.getElementAttr("thread-pool", "min-threads"));
-        } catch (NumberFormatException nfe) {
-            Debug.logError("Problems reading values from serviceengine.xml file [" + nfe.toString() + "]. Using defaults.", module);
-        }
-        return min;
     }
 
     private boolean pollEnabled() {
-        String enabled = ServiceConfigUtil.getElementAttr("thread-pool", "poll-enabled");
-        if (enabled.equalsIgnoreCase("false"))
-            return false;
-        return true;
-    }
-
-    private int pollWaitTime() {
-        int poll = POLL_WAIT;
         try {
-            poll = Integer.parseInt(ServiceConfigUtil.getElementAttr("thread-pool", "poll-db-millis"));
-        } catch (NumberFormatException nfe) {
-            Debug.logError("Problems reading values from serviceengine.xml file [" + nfe.toString() + "]. Using defaults.", module);
+            return ServiceConfigUtil.getServiceEngine().getThreadPool().getPollEnabled();
+        } catch (GenericConfigException e) {
+            Debug.logWarning(e, "Exception thrown while getting configuration: ", module);
+            return false;
         }
-        return poll;
     }
 
     /**
-     * Adds a job to the RUN queue.
+     * Adds a job to the job queue.
      * @throws InvalidJobException if the job is in an invalid state.
      * @throws RejectedExecutionException if the poller is stopped.
      */
     public void queueNow(Job job) throws InvalidJobException {
         job.queue();
-        this.executor.execute(new JobInvoker(job));
-    }
-
-    public synchronized void run() {
         try {
-            // wait 30 seconds before the first poll
-            java.lang.Thread.sleep(30000);
-        } catch (InterruptedException e) {
+            executor.execute(job);
+        } catch (Exception e) {
+            job.deQueue();
         }
-        while (!executor.isShutdown()) {
-            try {
-                // grab a list of jobs to run.
-                List<Job> pollList = jm.poll();
-                for (Job job : pollList) {
-                    try {
-                        queueNow(job);
-                    } catch (InvalidJobException e) {
-                        Debug.logError(e, module);
-                    }
-                }
-                // NOTE: using sleep instead of wait for stricter locking
-                java.lang.Thread.sleep(pollWaitTime());
-            } catch (InterruptedException e) {
-                Debug.logError(e, module);
-                stop();
-            }
-        }
-        Debug.logInfo("JobPoller " + this.name + " thread terminated.", module);
     }
 
     /**
-     * Stops the JobPoller
+     * Stops the <code>JobPoller</code>. This method is called when OFBiz shuts down.
+     * The <code>JobPoller</code> cannot be restarted.
      */
-    void stop() {
-        Debug.logInfo("Shutting down thread pool for JobPoller " + this.name, module);
-        this.executor.shutdown();
-        try {
-            // Wait 60 seconds for existing tasks to terminate
-            if (!this.executor.awaitTermination(60, TimeUnit.SECONDS)) {
-                // abrupt shutdown (cancel currently executing tasks)
-                Debug.logInfo("Attempting abrupt shut down of thread pool for JobPoller " + this.name, module);
-                this.executor.shutdownNow();
-                // Wait 60 seconds for tasks to respond to being cancelled
-                if (!this.executor.awaitTermination(60, TimeUnit.SECONDS)) {
-                    Debug.logWarning("Unable to shutdown the thread pool for JobPoller " + this.name, module);
-                }
-            }
-        } catch (InterruptedException ie) {
-            // re cancel if current thread was also interrupted
-            this.executor.shutdownNow();
-            // preserve interrupt status
-            Thread.currentThread().interrupt();
+    public void stop() {
+        Debug.logInfo("Shutting down JobPoller.", module);
+        if (jobManagerPollerThread != null) {
+            jobManagerPollerThread.interrupt();
         }
-        Debug.logInfo("Shutdown completed of thread pool for JobPoller " + this.name, module);
+        List<Runnable> queuedJobs = executor.shutdownNow();
+        for (Runnable task : queuedJobs) {
+            try {
+                Job queuedJob = (Job) task;
+                queuedJob.deQueue();
+            } catch (Exception e) {
+                Debug.logWarning(e, module);
+            }
+        }
+        Debug.logInfo("JobPoller shutdown completed.", module);
+    }
+
+    private static class JobInvokerThreadFactory implements ThreadFactory {
+
+        public Thread newThread(Runnable runnable) {
+            return new Thread(runnable, "OFBiz-JobQueue-" + created.getAndIncrement());
+        }
+    }
+
+    // Polls all registered JobManagers for jobs to queue.
+    private class JobManagerPoller implements Runnable {
+
+        // Do not check for interrupts in this method. The design requires the
+        // thread to complete the job manager poll uninterrupted.
+        public void run() {
+            Debug.logInfo("JobPoller thread started.", module);
+            try {
+                while (Start.getInstance().getCurrentState() != Start.ServerState.RUNNING) {
+                    Thread.sleep(1000);
+                }
+                while (!executor.isShutdown()) {
+                    int remainingCapacity = executor.getQueue().remainingCapacity();
+                    if (remainingCapacity > 0) {
+                        // Build "list of lists"
+                        Collection<JobManager> jmCollection = jobManagers.values();
+                        List<Iterator<Job>> pollResults = new ArrayList<Iterator<Job>>();
+                        for (JobManager jm : jmCollection) {
+                            pollResults.add(jm.poll(remainingCapacity).iterator());
+                        }
+                        // Create queue candidate list from "list of lists"
+                        List<Job> queueCandidates = new ArrayList<Job>();
+                        boolean addingJobs = true;
+                        while (addingJobs) {
+                            addingJobs = false;
+                            for (Iterator<Job> jobIterator : pollResults) {
+                                if (jobIterator.hasNext()) {
+                                    queueCandidates.add(jobIterator.next());
+                                    addingJobs = true;
+                                }
+                            }
+                        }
+                        // The candidate list might be larger than the queue remaining capacity,
+                        // but that is okay - the excess jobs will be dequeued and rescheduled.
+                        for (Job job : queueCandidates) {
+                            try {
+                                queueNow(job);
+                            } catch (InvalidJobException e) {
+                                Debug.logError(e, module);
+                            }
+                        }
+                    }
+                    Thread.sleep(pollWaitTime());
+                }
+            } catch (InterruptedException e) {
+                // Happens when JobPoller shuts down - nothing to do.
+                Thread.currentThread().interrupt();
+            }
+            Debug.logInfo("JobPoller thread stopped.", module);
+        }
     }
 }

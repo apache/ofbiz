@@ -24,11 +24,13 @@ under the License.
     <screen name="InventoryReports">
         <section>
             <actions>
+                <property-map resource="BirtUiLabels" map-name="uiLabelMap" global="true"/>
                 <set field="titleProperty" value="CommonReports"/>
                 <set field="headerItem" value="reports"/>
                 <set field="tabButtonItem" value="EditFacilityInventoryItems"/>
                 <set field="viewIndex" from-field="parameters.VIEW_INDEX" type="Integer" default-value="0"/>
-                <set field="viewSize" from-field="parameters.VIEW_SIZE" type="Integer" default-value="50"/>
+                <property-to-field resource="widget" property="widget.form.defaultViewSize" field="viewSizeDefaultValue"/>
+                <set field="viewSize" from-field="parameters.VIEW_SIZE" type="Integer" default-value="${viewSizeDefaultValue}"/>
 
                 <!-- This is the target of the search form-->
                 <set field="facilityInventoryByProductScreen" value="InventoryReports"/>
@@ -55,7 +57,7 @@ under the License.
                         <container>
                             <link target="ViewFacilityInventoryByProductReport?${searchParameterString}" text="${uiLabelMap.CommonPrint}" style="buttontext"/>
                             <link target="ViewFacilityInventoryByProductExport?${searchParameterString}" text="${uiLabelMap.CommonExport}" style="buttontext"/>
-                            <link target="ViewFacilityInventoryHistoryReport?${searchParameterString}" text="${uiLabelMap.FacilityInventoryHistoryReport}" style="buttontext"/>
+                            <link target="ViewFacilityInventoryHistoryReport?${searchParameterString}" text="${uiLabelMap.BirtFacilityReportInventoryHistoryReport}" style="buttontext"/>
                         </container>
                         <screenlet title="${uiLabelMap.PageTitleFindFacilityInventoryItemsByProduct}">
                             <include-form name="FindFacilityInventoryByProduct" location="component://product/widget/facility/FacilityForms.xml"/>
@@ -72,6 +74,7 @@ under the License.
     <screen name="ViewFacilityInventoryHistoryReport">
         <section>
             <actions>
+                <property-map resource="BirtUiLabels" map-name="uiLabelMap" global="true"/>
                 <set field="headerItem" value="reports"/>
                 <set field="facilityId" from-field="parameters.facilityId"/>
                 <entity-one entity-name="Facility" value-field="facility" use-cache="true"/>
@@ -85,9 +88,9 @@ under the License.
                         <container>
                             <link target="ViewFacilityInventoryByProductReport?facilityId=${parameters.facilityId}" text="${uiLabelMap.CommonPrint}" style="buttontext"/>
                             <link target="ViewFacilityInventoryByProductExport?facilityId=${parameters.facilityId}" text="${uiLabelMap.CommonExport}" style="buttontext"/>
-                            <link target="ViewFacilityInventoryHistoryReport?facilityId=${parameters.facilityId}" text="${uiLabelMap.FacilityInventoryHistoryReport}" style="buttontext"/>
+                            <link target="ViewFacilityInventoryHistoryReport?facilityId=${parameters.facilityId}" text="${uiLabelMap.BirtFacilityReportInventoryHistoryReport}" style="buttontext"/>
                         </container>
-                        <screenlet title="${uiLabelMap.FacilityInventoryHistoryReport}">
+                        <screenlet title="${uiLabelMap.BirtFacilityReportInventoryHistoryReport}">
                             <include-form name="ViewFacilityInventoryHistoryReportForm" location="component://birt/widget/facility/FacilityForms.xml"/>
                         </screenlet>
                     </decorator-section>

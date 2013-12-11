@@ -18,9 +18,8 @@
  *******************************************************************************/
 package org.ofbiz.minilang.method.envops;
 
+import java.util.HashMap;
 import java.util.Map;
-
-import javolution.util.FastMap;
 
 import org.ofbiz.base.util.collections.FlexibleMapAccessor;
 import org.ofbiz.minilang.MiniLangException;
@@ -33,7 +32,7 @@ import org.w3c.dom.Element;
 /**
  * Implements the &lt;map-to-map&gt; element.
  * 
- * @see <a href="https://cwiki.apache.org/OFBADMIN/mini-language-reference.html#Mini-languageReference-{{%3Cmaptomap%3E}}">Mini-language Reference</a>
+ * @see <a href="https://cwiki.apache.org/confluence/display/OFBADMIN/Mini-language+Reference#Mini-languageReference-{{%3Cmaptomap%3E}}">Mini-language Reference</a>
  */
 public final class MapToMap extends MethodOperation {
 
@@ -59,10 +58,10 @@ public final class MapToMap extends MethodOperation {
             if (!toMapFma.isEmpty()) {
                 Map<String, Object> toMap = toMapFma.get(methodContext.getEnvMap());
                 if (toMap == null) {
-                    toMap = FastMap.newInstance();
+                    toMap = new HashMap<String, Object>();
                     toMapFma.put(methodContext.getEnvMap(), toMap);
-                    toMap.putAll(fromMap);
                 }
+               toMap.putAll(fromMap);
             } else {
                 methodContext.putAllEnv(fromMap);
             }

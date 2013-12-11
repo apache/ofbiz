@@ -457,25 +457,25 @@ under the License.
             <drop-down allow-empty="true"><option key="Y" description="${uiLabelMap.CommonY}"/><option key="N" description="${uiLabelMap.CommonN}"/></drop-down>
         </field>
         <field name="HomePhoneTitle" title="${uiLabelMap.PartyHomePhone}" title-area-style="group-label" widget-style="tooltip"><display description="${uiLabelMap.PartyPhoneNumberRequired}" also-hidden="false"/></field>
-        <field name="USER_HOME_COUNTRY" title="${uiLabelMap.PartyCountryCode}"><text size="4" maxlength="10"/></field>
+        <field name="USER_HOME_COUNTRY" title="${uiLabelMap.CommonCountryCode}"><text size="4" maxlength="10"/></field>
         <field name="USER_HOME_AREA" title="${uiLabelMap.PartyAreaCode}"><text size="4" maxlength="10"/></field>
         <field name="USER_HOME_CONTACT" title="${uiLabelMap.PartyPhoneNumber}"><text size="15" maxlength="15"/></field>
         <field name="USER_HOME_EXT" title="${uiLabelMap.PartyContactExt}"><text size="6" maxlength="10"/></field>
         <field name="USER_HOME_ALLOW_SOL" title="${uiLabelMap.PartyContactAllowSolicitation}?"><drop-down allow-empty="true"><option key="Y" description="${uiLabelMap.CommonY}"/><option key="N" description="${uiLabelMap.CommonN}"/></drop-down></field>
         <field name="WorkPhoneTitle" title="${uiLabelMap.PartyContactWorkPhoneNumber}" title-area-style="group-label"><display description=" " also-hidden="false"/></field>
-        <field name="USER_WORK_COUNTRY" title="${uiLabelMap.PartyCountryCode}"><text size="4" maxlength="10"/></field>
+        <field name="USER_WORK_COUNTRY" title="${uiLabelMap.CommonCountryCode}"><text size="4" maxlength="10"/></field>
         <field name="USER_WORK_AREA" title="${uiLabelMap.PartyAreaCode}"><text size="4" maxlength="10"/></field>
         <field name="USER_WORK_CONTACT" title="${uiLabelMap.PartyPhoneNumber}"><text size="15" maxlength="15"/></field>
         <field name="USER_WORK_EXT" title="${uiLabelMap.PartyContactExt}"><text size="6" maxlength="10"/></field>
         <field name="USER_WORK_ALLOW_SOL" title="${uiLabelMap.PartyContactAllowSolicitation}?"><drop-down allow-empty="true"><option key="Y" description="${uiLabelMap.CommonY}"/><option key="N" description="${uiLabelMap.CommonN}"/></drop-down></field>
         <field name="FaxPhoneTitle" title="${uiLabelMap.PartyContactFaxPhoneNumber}" title-area-style="group-label"><display description=" " also-hidden="false"/></field>
-        <field name="USER_FAX_COUNTRY" title="${uiLabelMap.PartyCountryCode}"><text size="4" maxlength="10"/></field>
+        <field name="USER_FAX_COUNTRY" title="${uiLabelMap.CommonCountryCode}"><text size="4" maxlength="10"/></field>
         <field name="USER_FAX_AREA" title="${uiLabelMap.PartyAreaCode}"><text size="4" maxlength="10"/></field>
         <field name="USER_FAX_CONTACT" title="${uiLabelMap.PartyPhoneNumber}"><text size="15" maxlength="15"/></field>
         <field name="USER_FAX_EXT" title="${uiLabelMap.PartyContactExt}"><text size="6" maxlength="10"/></field>
         <field name="USER_FAX_ALLOW_SOL" title="${uiLabelMap.PartyContactAllowSolicitation}?"><drop-down allow-empty="true"><option key="Y" description="${uiLabelMap.CommonY}"/><option key="N" description="${uiLabelMap.CommonN}"/></drop-down></field>
         <field name="MobilePhoneTitle" title="${uiLabelMap.PartyContactMobilePhoneNumber}" title-area-style="group-label"><display description=" " also-hidden="false"/></field>
-        <field name="USER_MOBILE_COUNTRY" title="${uiLabelMap.PartyCountryCode}"><text size="4" maxlength="10"/></field>
+        <field name="USER_MOBILE_COUNTRY" title="${uiLabelMap.CommonCountryCode}"><text size="4" maxlength="10"/></field>
         <field name="USER_MOBILE_AREA" title="${uiLabelMap.PartyAreaCode}"><text size="4" maxlength="10"/></field>
         <field name="USER_MOBILE_CONTACT" title="${uiLabelMap.PartyPhoneNumber}"><text size="15" maxlength="15"/></field>
         <field name="USER_MOBILE_ALLOW_SOL" title="${uiLabelMap.PartyContactAllowSolicitation}?"><drop-down allow-empty="true"><option key="Y" description="${uiLabelMap.CommonY}"/><option key="N" description="${uiLabelMap.CommonN}"/></drop-down></field>
@@ -553,6 +553,11 @@ under the License.
         <auto-fields-service service-name="updatePartyAttribute" map-name="attribute"/>
         <field name="partyId"><hidden value="${partyId}"/></field>
         <field name="submitButton" title="${uiLabelMap.CommonUpdate}"><submit button-type="button"/></field>
+        <field name="cancelLink" title=" " widget-style="smallSubmit">
+            <hyperlink target="${cancelPage}" also-hidden="false" description="${uiLabelMap.CommonCancelDone}">
+                <parameter param-name="partyId"/>
+            </hyperlink>
+        </field>
     </form>
 
     <!-- Party Content Form -->
@@ -1193,4 +1198,56 @@ under the License.
             </hyperlink>
         </field>
     </form>
+
+    <form name="ExportParty" type="single" target="ExportPartyCsv.csv" title="" >
+        <field name="partyId" tooltip="blank for all"><lookup target-form-name="LookupPartyName"/></field>
+        <field name="submitButton" title="${uiLabelMap.CommonSubmit}"><submit button-type="button"/></field>
+    </form>
+
+    <form name="ExportPartyCsv" list-name="listIt" target="" title="" type="list" view-size="99999"
+        odd-row-style="alternate-row" header-row-style="header-row-2" default-table-style="basic-table hover-bar" paginate="false">
+        <actions>
+            <entity-condition entity-name="PartyExport">
+                <condition-list combine="and">
+                    <condition-list combine="or">
+                        <condition-expr field-name="roleTypeId" value="CUSTOMER" operator="equals"/>
+                        <condition-expr field-name="roleTypeId" value="SUPPLIER" operator="equals"/>
+                        <condition-expr field-name="roleTypeId" value="EMPLOYEE" operator="equals"/>
+                    </condition-list>
+                    <condition-expr field-name="statusId" value="PARTY_DISABLED" operator="not-equals"/>
+                    <condition-expr field-name="partyId" from-field="partyId" operator="equals" value="${parameters.partyId}" ignore-if-empty="true"/>
+                </condition-list>
+                <order-by field-name="partyId"/>
+            </entity-condition>
+        </actions>
+        <field name="partyId" title="partyId"><display/></field>
+        <field name="preferredCurrencyUomId" title="preferredCurrencyUomId"><display/></field>
+        <field name="groupName" title="groupName"><display/></field>
+        <field name="firstName" title="firstName"><display/></field>
+        <field name="middleName" title="middleName"><display/></field>
+        <field name="lastName" title="lastName"><display/></field>
+        <field name="companyPartyId" title="companyPartyId"><display/></field>
+        <field name="companyName" title="companyName"><display/></field>
+        <field name="roleTypeId" title="roleTypeId"><display/></field>
+        <field name="contactMechPurposeTypeId" title="contactMechPurposeTypeId"><display/></field>
+        <field name="contactMechTypeId" title="contactMechTypeId"><display/></field>
+        <field name="emailAddress" title="emailAddress"><display/></field>
+        <field name="telCountryCode" title="telCountryCode"><display/></field>
+        <field name="telAreaCode" title="telAreaCode"><display/></field>
+        <field name="telContactNumber" title="telContactNumber"><display/></field>
+        <field name="address1" title="address1"><display/></field>
+        <field name="address2" title="address2"><display/></field>
+        <field name="city" title="city"><display/></field>
+        <field name="stateProvinceGeoId" title="stateProvinceGeoId"><display/></field>
+        <field name="postalCode" title="postalCode"><display/></field>
+        <field name="countryGeoId" title="countryGeoId"><display/></field>
+    </form>
+    
+    <form name="ImportParty" type="upload" target="uploadParty" title="" >
+        <field name="uploadedFile"><file/></field>
+        <field name="submitButton" title="${uiLabelMap.CommonUpload}"><submit button-type="button"/></field>
+    </form>
+    
+
+    
 </forms>

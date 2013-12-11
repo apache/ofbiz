@@ -20,7 +20,6 @@
 package org.ofbiz.content.blog;
 
 import java.io.IOException;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -115,7 +114,7 @@ public class BlogRssServices {
         }
 
         if (contentRecs != null) {
-            for(GenericValue v : contentRecs) {
+            for (GenericValue v : contentRecs) {
                 String sub = null;
                 try {
                     Map<String, Object> dummy = FastMap.newInstance();

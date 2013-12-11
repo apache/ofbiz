@@ -36,12 +36,12 @@ import org.w3c.dom.Element;
 /**
  * Implements the &lt;store-list&gt; element.
  * 
- * @see <a href="https://cwiki.apache.org/OFBADMIN/mini-language-reference.html#Mini-languageReference-{{%3Cstorelist%3E}}">Mini-language Reference</a>
+ * @see <a href="https://cwiki.apache.org/confluence/display/OFBADMIN/Mini-language+Reference#Mini-languageReference-{{%3Cstorelist%3E}}">Mini-language Reference</a>
  */
 public final class StoreList extends MethodOperation {
 
     public static final String module = StoreList.class.getName();
-
+    @Deprecated
     private final FlexibleStringExpander doCacheClearFse;
     private final FlexibleMapAccessor<List<GenericValue>> listFma;
 
@@ -63,6 +63,7 @@ public final class StoreList extends MethodOperation {
         if (values == null) {
             throw new MiniLangRuntimeException("Entity value list not found with name: " + listFma, this);
         }
+        @Deprecated
         boolean doCacheClear = !"false".equals(doCacheClearFse.expandString(methodContext.getEnvMap()));
         try {
             methodContext.getDelegator().storeAll(values, doCacheClear);

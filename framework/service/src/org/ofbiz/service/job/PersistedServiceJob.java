@@ -20,7 +20,6 @@ package org.ofbiz.service.job;
 
 import java.io.IOException;
 import java.sql.Timestamp;
-import com.ibm.icu.util.Calendar;
 import java.util.Date;
 import java.util.Map;
 
@@ -28,14 +27,12 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import javolution.util.FastMap;
 
+import org.apache.commons.lang.StringUtils;
+import org.ofbiz.base.config.GenericConfigException;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilDateTime;
 import org.ofbiz.base.util.UtilGenerics;
-import org.ofbiz.base.util.UtilProperties;
 import org.ofbiz.base.util.UtilValidate;
-import org.ofbiz.service.calendar.RecurrenceInfoException;
-import org.ofbiz.service.calendar.TemporalExpression;
-import org.ofbiz.service.calendar.TemporalExpressionWorker;
 import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
@@ -47,10 +44,13 @@ import org.ofbiz.service.DispatchContext;
 import org.ofbiz.service.GenericRequester;
 import org.ofbiz.service.ServiceUtil;
 import org.ofbiz.service.calendar.RecurrenceInfo;
+import org.ofbiz.service.calendar.RecurrenceInfoException;
+import org.ofbiz.service.calendar.TemporalExpression;
+import org.ofbiz.service.calendar.TemporalExpressionWorker;
 import org.ofbiz.service.config.ServiceConfigUtil;
 import org.xml.sax.SAXException;
 
-import org.apache.commons.lang.StringUtils;
+import com.ibm.icu.util.Calendar;
 
 /**
  * A {@link Job} that is backed by the entity engine. Job data is stored
@@ -68,6 +68,7 @@ public class PersistedServiceJob extends GenericServiceJob {
     private final long maxRetry;
     private final long currentRetryCount;
     private final GenericValue jobValue;
+    private final long startTime;
 
     /**
      * Creates a new PersistedServiceJob
@@ -80,7 +81,7 @@ public class PersistedServiceJob extends GenericServiceJob {
         this.delegator = dctx.getDelegator();
         this.jobValue = jobValue;
         Timestamp storedDate = jobValue.getTimestamp("runTime");
-        this.runtime = storedDate.getTime();
+        this.startTime = storedDate.getTime();
         this.maxRetry = jobValue.get("maxRetry") != null ? jobValue.getLong("maxRetry").longValue() : -1;
         Long retryCount = jobValue.getLong("currentRetryCount");
         if (retryCount != null) {
@@ -94,19 +95,28 @@ public class PersistedServiceJob extends GenericServiceJob {
     @Override
     public void queue() throws InvalidJobException {
         super.queue();
+        try {
+            jobValue.refresh();
+        } catch (GenericEntityException e) {
+            throw new InvalidJobException("Unable to refresh JobSandbox value", e);
+        }
+        if (!JobManager.instanceId.equals(jobValue.getString("runByInstanceId"))) {
+            throw new InvalidJobException("Job has been accepted by a different instance");
+        }
         Timestamp cancelTime = jobValue.getTimestamp("cancelDateTime");
         Timestamp startTime = jobValue.getTimestamp("startDateTime");
         if (cancelTime != null || startTime != null) {
             // job not available
             throw new InvalidJobException("Job [" + getJobId() + "] is not available");
         } else {
-            // set the start time to now
-            jobValue.set("startDateTime", UtilDateTime.nowTimestamp());
-            jobValue.set("statusId", "SERVICE_RUNNING");
+            jobValue.set("statusId", "SERVICE_QUEUED");
             try {
                 jobValue.store();
             } catch (GenericEntityException e) {
                 throw new InvalidJobException("Unable to set the startDateTime and statusId on the current job [" + getJobId() + "]; not running!", e);
+            }
+            if (Debug.verboseOn()) {
+                Debug.logVerbose("Placing job [" + getJobId() + "] in queue", module);
             }
         }
     }
@@ -115,19 +125,26 @@ public class PersistedServiceJob extends GenericServiceJob {
     protected void init() throws InvalidJobException {
         super.init();
         try {
-            // Job might have been canceled after it was placed in the queue.
             jobValue.refresh();
         } catch (GenericEntityException e) {
             throw new InvalidJobException("Unable to refresh JobSandbox value", e);
+        }
+        if (!JobManager.instanceId.equals(jobValue.getString("runByInstanceId"))) {
+            throw new InvalidJobException("Job has been accepted by a different instance");
         }
         if (jobValue.getTimestamp("cancelDateTime") != null) {
             // Job cancelled
             throw new InvalidJobException("Job [" + getJobId() + "] was cancelled");
         }
-        String instanceId = UtilProperties.getPropertyValue("general.properties", "unique.instanceId", "ofbiz0");
-        if (!instanceId.equals(jobValue.getString("runByInstanceId"))) {
-            // This condition isn't possible, but we will leave it here.
-            throw new InvalidJobException("Job has been accepted by a different instance!");
+        jobValue.set("startDateTime", UtilDateTime.nowTimestamp());
+        jobValue.set("statusId", "SERVICE_RUNNING");
+        try {
+            jobValue.store();
+        } catch (GenericEntityException e) {
+            throw new InvalidJobException("Unable to set the startDateTime and statusId on the current job [" + getJobId() + "]; not running!", e);
+        }
+        if (Debug.verboseOn()) {
+            Debug.logVerbose("Job [" + getJobId() + "] running", module);
         }
         // configure any additional recurrences
         long maxRecurrenceCount = -1;
@@ -174,7 +191,7 @@ public class PersistedServiceJob extends GenericServiceJob {
 
     private void createRecurrence(long next, boolean isRetryOnFailure) throws GenericEntityException {
         if (Debug.verboseOn()) Debug.logVerbose("Next runtime returned: " + next, module);
-        if (next > runtime) {
+        if (next > startTime) {
             String pJobId = jobValue.getString("parentJobId");
             if (pJobId == null) {
                 pJobId = jobValue.getString("jobId");
@@ -228,16 +245,20 @@ public class PersistedServiceJob extends GenericServiceJob {
             if (this.canRetry()) {
                 // create a recurrence
                 Calendar cal = Calendar.getInstance();
-                cal.add(Calendar.MINUTE, ServiceConfigUtil.getFailedRetryMin());
+                try {
+                    cal.add(Calendar.MINUTE, ServiceConfigUtil.getServiceEngine().getThreadPool().getFailedRetryMin());
+                } catch (GenericConfigException e) {
+                    Debug.logWarning(e, "Unable to get retry minutes for job [" + getJobId() + "], defaulting to now: ", module);
+                }
                 long next = cal.getTimeInMillis();
                 try {
                     createRecurrence(next, true);
                 } catch (GenericEntityException e) {
                     Debug.logError(e, "Unable to re-schedule job [" + getJobId() + "]: ", module);
                 }
-                Debug.logInfo("Persisted Job [" + getJobId() + "] Failed Re-Scheduling : " + next, module);
+                Debug.logInfo("Persisted Job [" + getJobId() + "] Failed. Re-Scheduling : " + next, module);
             } else {
-                Debug.logWarning("Persisted Job [" + getJobId() + "] Failed - Max Retry Hit; not re-scheduling", module);
+                Debug.logWarning("Persisted Job [" + getJobId() + "] Failed. Max Retry Hit, not re-scheduling", module);
             }
         }
         // set the failed status
@@ -252,7 +273,7 @@ public class PersistedServiceJob extends GenericServiceJob {
     }
 
     @Override
-    protected String getServiceName() throws InvalidJobException {
+    protected String getServiceName() {
         if (jobValue == null || jobValue.get("serviceName") == null) {
             return null;
         }
@@ -330,5 +351,30 @@ public class PersistedServiceJob extends GenericServiceJob {
             Debug.logError(re, "Problem creating RecurrenceInfo instance: " + re.getMessage(), module);
         }
         return null;
+    }
+
+    @Override
+    public void deQueue() throws InvalidJobException {
+        if (currentState != State.QUEUED) {
+            throw new InvalidJobException("Illegal state change");
+        }
+        currentState = State.CREATED;
+        try {
+            jobValue.refresh();
+            jobValue.set("startDateTime", null);
+            jobValue.set("runByInstanceId", null);
+            jobValue.set("statusId", "SERVICE_PENDING");
+            jobValue.store();
+        } catch (GenericEntityException e) {
+            throw new InvalidJobException("Unable to dequeue job [" + getJobId() + "]", e);
+        }
+        if (Debug.verboseOn()) {
+            Debug.logVerbose("Job [" + getJobId() + "] not queued, rescheduling", module);
+        }
+    }
+
+    @Override
+    public Date getStartTime() {
+        return new Date(startTime);
     }
 }

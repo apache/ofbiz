@@ -20,7 +20,6 @@ package org.ofbiz.accounting.payment;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -799,7 +798,7 @@ public class GiftCertificateServices {
         // make a map of answer info
         Map<String, Object> answerMap = FastMap.newInstance();
         if (responseAnswers != null) {
-            for(GenericValue answer : responseAnswers) {
+            for (GenericValue answer : responseAnswers) {
                 GenericValue question = null;
                 try {
                     question = answer.getRelatedOne("SurveyQuestion", false);
@@ -1035,7 +1034,7 @@ public class GiftCertificateServices {
         // make a map of answer info
         Map<String, Object> answerMap = FastMap.newInstance();
         if (responseAnswers != null) {
-            for(GenericValue answer : responseAnswers) {
+            for (GenericValue answer : responseAnswers) {
                 GenericValue question = null;
                 try {
                     question = answer.getRelatedOne("SurveyQuestion", false);

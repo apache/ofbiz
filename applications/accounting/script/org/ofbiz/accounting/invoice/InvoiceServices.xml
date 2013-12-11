@@ -40,10 +40,10 @@ under the License.
             <set field="customMethodName" from-field="customMethod.customMethodName"/>
             <else><!-- retreive service from deprecated enumeration -->
                 <if-compare operator="equals" value="INVSQ_ENF_SEQ" field="partyAcctgPreference.oldInvoiceSequenceEnumId">
-                    <set field="customMethodName" value="invoiceSequence-enforced"/>
+                    <set field="customMethodName" value="invoiceSequenceEnforced"/>
                 </if-compare>
                 <if-compare operator="equals" value="INVSQ_RESTARTYR" field="partyAcctgPreference.oldInvoiceSequenceEnumId">
-                    <set field="customMethodName" value="invoiceSequence-restart"/>
+                    <set field="customMethodName" value="invoiceSequenceRestart"/>
                 </if-compare>
             </else>
         </if-not-empty>        
@@ -74,7 +74,7 @@ under the License.
         <field-to-result field="invoiceId" result-name="invoiceId"/>
     </simple-method>
 
-    <simple-method method-name="invoiceSequence-enforced" short-description="Enforced Sequence (no gaps, per organization)">
+    <simple-method method-name="invoiceSequenceEnforced" short-description="Enforced Sequence (no gaps, per organization)">
         <log level="info" message="In createInvoice sequence enum Enforced"/>
         <set field="partyAcctgPreference" from-field="parameters.partyAcctgPreference"/>
         <!-- this is sequential sequencing, we can't skip a number, also it must be a unique sequence per partyIdFrom -->
@@ -93,7 +93,7 @@ under the License.
         <field-to-result field="invoiceId" result-name="invoiceId"/>
    </simple-method>
 
-    <simple-method method-name="invoiceSequence-restart" short-description="Restart on Fiscal Year (no gaps, per org, reset to 1 each year)">
+    <simple-method method-name="invoiceSequenceRestart" short-description="Restart on Fiscal Year (no gaps, per org, reset to 1 each year)">
         <log level="info" message="In createInvoice sequence enum Restart"/>
         <set field="partyAcctgPreference" from-field="parameters.partyAcctgPreference"/>
         <!-- this is sequential sequencing, we can't skip a number; except that it is restarted each fiscal year -->
@@ -161,6 +161,11 @@ under the License.
         <!-- set the invoice date if not provided -->
         <if-empty field="parameters.invoiceDate">
             <set from-field="nowTimestamp" field="parameters.invoiceDate"/>
+        </if-empty>
+
+        <!-- set the invoice status if not provided -->
+        <if-empty field="parameters.statusId">
+            <set field="parameters.statusId" value="INVOICE_IN_PROCESS"/>
         </if-empty>
 
         <!-- use currency of receiving company -->
@@ -480,7 +485,7 @@ under the License.
             <else>
                 <!-- if new status is paid check if the complete invoice is applied. -->
                 <if-compare field="parameters.statusId" operator="equals" value="INVOICE_PAID">
-                    <set field="notApplied" type="BigDecimal" value="${bsh:org.ofbiz.accounting.invoice.InvoiceWorker.getInvoiceNotApplied(invoice)}"/>
+                    <set field="notApplied" type="BigDecimal" value="${groovy:org.ofbiz.accounting.invoice.InvoiceWorker.getInvoiceNotApplied(invoice)}"/>
                     <if-compare field="notApplied" operator="not-equals" value="0.00" type="BigDecimal">
                         <add-error>
                             <fail-property resource="AccountingUiLabels" property="AccountingInvoiceCannotChangeStatusToPaid"/>
@@ -997,4 +1002,30 @@ under the License.
         <call-service service-name="updateSimpleTextContent" in-map-name="updateSimpleText"/>
     </simple-method>
     
+    <simple-method method-name="isInvoiceInForeignCurrency" short-description="check if a invoice is in a foreign currency related to the accounting company.">
+        <entity-one value-field="invoice" entity-name="InvoiceAndType">
+            <field-map field-name="invoiceId" from-field="parameters.invoiceId"/>
+        </entity-one>
+        <if-empty field="invoice">
+            <log level="error" message="Invoice not found"/>
+            <return/>
+        </if-empty>
+        <if-compare field="invoice.parentTypeId" operator="equals" value="PURCHASE_INVOICE">
+            <set field="pref.organizationPartyId" from-field="invoice.partyId"/>
+        </if-compare>          
+        <if-compare field="invoice.parentTypeId" operator="equals" value="SALES_INVOICE">
+            <set field="pref.organizationPartyId" from-field="invoice.partyIdFrom"/>
+        </if-compare>          
+        <call-service service-name="getPartyAccountingPreferences" in-map-name="pref">
+            <result-to-field result-name="partyAccountingPreference"/>
+        </call-service>
+        <if-compare-field to-field="partyAccountingPreference.baseCurrencyUomId" operator="equals" field="invoice.currencyUomId">
+            <set field="isForeign" value="false" type="Boolean"/>
+            <else>
+                <set field="isForeign" value="true" type="Boolean"/>
+            </else>
+        </if-compare-field>
+        <field-to-result field="isForeign"/>
+    </simple-method>
+       
 </simple-methods>

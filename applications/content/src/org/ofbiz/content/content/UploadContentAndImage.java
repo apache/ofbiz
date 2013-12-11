@@ -18,7 +18,6 @@
  *******************************************************************************/
 package org.ofbiz.content.content;
 
-import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -465,7 +464,7 @@ public class UploadContentAndImage {
         List<String> fieldNames = modelEntity.getAllFieldNames();
         Map<String, Object> ftlContext2 = FastMap.newInstance();
         Map<String, Object> ftlContext3 = FastMap.newInstance();
-        for(String keyName : fieldNames) {
+        for (String keyName : fieldNames) {
             Object obj = passedParams.get(keyName + suffix);
             ftlContext2.put(keyName, obj);
         }

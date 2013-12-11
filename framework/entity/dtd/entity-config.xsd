@@ -399,6 +399,15 @@ under the License.
                 </xs:restriction>
             </xs:simpleType>
         </xs:attribute>
+        <xs:attribute name="offset-style" default="none">
+            <xs:simpleType>
+                <xs:restriction base="xs:token">
+                    <xs:enumeration value="none"/>
+                    <xs:enumeration value="fetch"/>
+                    <xs:enumeration value="limit"/>
+                </xs:restriction>
+            </xs:simpleType>
+        </xs:attribute>
         <xs:attribute type="xs:string" name="table-type"/>
         <xs:attribute type="xs:string" name="character-set"/>
         <xs:attribute type="xs:string" name="collate"/>
@@ -430,7 +439,8 @@ under the License.
         <xs:attribute type="xs:string" name="jdbc-driver" use="required"/>
         <xs:attribute type="xs:string" name="jdbc-uri" use="required"/>
         <xs:attribute type="xs:string" name="jdbc-username" use="required"/>
-        <xs:attribute type="xs:string" name="jdbc-password" use="required"/>
+        <xs:attribute type="xs:string" name="jdbc-password"/>
+        <xs:attribute type="xs:string" name="jdbc-password-lookup"/>
         <xs:attribute name="isolation-level">
             <xs:simpleType>
                 <xs:restriction base="xs:token">
@@ -452,12 +462,48 @@ under the License.
             </xs:annotation>
         </xs:attribute>
         <xs:attribute type="xs:nonNegativeInteger" name="time-between-eviction-runs-millis" default="600000"/>
-        <xs:attribute type="xs:nonNegativeInteger" name="pool-sleeptime" default="300000"/>
-        <xs:attribute type="xs:nonNegativeInteger" name="pool-lifetime" default="600000"/>
-        <xs:attribute type="xs:nonNegativeInteger" name="pool-deadlock-maxwait" default="300000"/>
-        <xs:attribute type="xs:nonNegativeInteger" name="pool-deadlock-retrywait" default="10000"/>
-        <xs:attribute type="xs:string" name="pool-jdbc-test-stmt"/>
-        <xs:attribute type="xs:string" name="pool-xa-wrapper-class"/>
+        <xs:attribute type="xs:nonNegativeInteger" name="pool-sleeptime" default="300000">
+            <xs:annotation>
+                <xs:documentation>
+                    This parameter is currently not implemented
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+        <xs:attribute type="xs:nonNegativeInteger" name="pool-lifetime" default="600000">
+            <xs:annotation>
+                <xs:documentation>
+                    This parameter is currently not implemented
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+        <xs:attribute type="xs:nonNegativeInteger" name="pool-deadlock-maxwait" default="300000">
+            <xs:annotation>
+                <xs:documentation>
+                    This parameter is currently not implemented
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+        <xs:attribute type="xs:nonNegativeInteger" name="pool-deadlock-retrywait" default="10000">
+            <xs:annotation>
+                <xs:documentation>
+                    This parameter is currently not implemented
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+        <xs:attribute type="xs:string" name="pool-jdbc-test-stmt">
+            <xs:annotation>
+                <xs:documentation>
+                    This parameter is currently not implemented
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+        <xs:attribute type="xs:string" name="pool-xa-wrapper-class">
+            <xs:annotation>
+                <xs:documentation>
+                    This parameter is currently not implemented
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
     </xs:attributeGroup>
     <xs:element name="jndi-jdbc">
         <xs:complexType>

@@ -31,6 +31,7 @@ under the License.
 
     <path id="local.class.path">
         <fileset dir="${lib.dir}" includes="*.jar"/>
+        <fileset dir="../.." includes="ofbiz.jar"/>
         <fileset dir="../base/lib" includes="*.jar"/>
         <fileset dir="../base/lib/commons" includes="*.jar"/>
         <fileset dir="../base/lib/j2eespecs" includes="*.jar"/>
@@ -55,7 +56,8 @@ under the License.
     </target>
 
     <target name="rmi-jar" depends="stubs">
-        <jar jarfile="${build.dir}/lib/${name}-rmi.raj">
+        <mkdir dir="${build.dir}/rmi"/>
+        <jar jarfile="${build.dir}/rmi/${name}-rmi.jar">
             <fileset dir="${build.dir}/classes" includes="**/GenericServiceException.class"/>
             <fileset dir="${build.dir}/classes" includes="**/GenericResultWaiter.class"/>
             <fileset dir="${build.dir}/classes" includes="**/GenericRequester.class"/>

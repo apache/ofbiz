@@ -19,6 +19,7 @@
 package org.ofbiz.base.util;
 
 import java.io.BufferedInputStream;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -302,6 +303,12 @@ public class UtilProperties implements Serializable {
 
                 if (url == null)
                     return null;
+                String fileName = url.getFile();
+                File file = new File(fileName);
+                if (file.isDirectory()) {
+                    Debug.logError(fileName + " is (also?) a directory! No properties assigned.", module);
+                    return null;
+                }
                 properties = resourceCache.putIfAbsentAndGet(cacheKey, getProperties(url));
             } catch (MissingResourceException e) {
                 Debug.logInfo(e, module);
@@ -584,8 +591,8 @@ public class UtilProperties implements Serializable {
      * to the given locale and replacing argument place holders with the given arguments using the MessageFormat class
      * @param resource The name of the resource - can be a file, class, or URL
      * @param name The name of the property in the properties file
-     * @param locale The locale that the given resource will correspond to
      * @param arguments An array of Objects to insert into the message argument place holders
+     * @param locale The locale that the given resource will correspond to
      * @return The value of the property in the properties file
      */
     public static String getMessage(String resource, String name, Object[] arguments, Locale locale) {
@@ -605,8 +612,8 @@ public class UtilProperties implements Serializable {
      * to the given locale and replacing argument place holders with the given arguments using the MessageFormat class
      * @param resource The name of the resource - can be a file, class, or URL
      * @param name The name of the property in the properties file
-     * @param locale The locale that the given resource will correspond to
      * @param arguments A List of Objects to insert into the message argument place holders
+     * @param locale The locale that the given resource will correspond to
      * @return The value of the property in the properties file
      */
     public static <E> String getMessage(String resource, String name, List<E> arguments, Locale locale) {
@@ -630,8 +637,8 @@ public class UtilProperties implements Serializable {
      * to the given locale and replacing argument place holders with the given arguments using the FlexibleStringExpander class
      * @param resource The name of the resource - can be a file, class, or URL
      * @param name The name of the property in the properties file
-     * @param locale The locale that the given resource will correspond to
      * @param context A Map of Objects to insert into the message place holders using the ${} syntax of the FlexibleStringExpander
+     * @param locale The locale that the given resource will correspond to
      * @return The value of the property in the properties file
      */
     public static String getMessage(String resource, String name, Map<String, ? extends Object> context, Locale locale) {

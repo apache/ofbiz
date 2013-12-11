@@ -44,14 +44,12 @@ import javax.transaction.xa.XAException;
 import javax.transaction.xa.XAResource;
 import javax.transaction.xa.Xid;
 
-import javolution.util.FastList;
-import javolution.util.FastMap;
-
 import org.apache.commons.collections.map.ListOrderedMap;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilDateTime;
 import org.ofbiz.base.util.UtilGenerics;
 import org.ofbiz.base.util.UtilValidate;
+import org.ofbiz.entity.GenericEntityConfException;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.config.EntityConfigUtil;
 
@@ -63,14 +61,13 @@ public class TransactionUtil implements Status {
     // Debug module name
     public static final String module = TransactionUtil.class.getName();
     public static Map<Xid, DebugXaResource> debugResMap = Collections.<Xid, DebugXaResource>synchronizedMap(new HashMap<Xid, DebugXaResource>());
-    public static boolean debugResources = EntityConfigUtil.isDebugXAResource();
 
     private static ThreadLocal<List<Transaction>> suspendedTxStack = new ThreadLocal<List<Transaction>>();
     private static ThreadLocal<List<Exception>> suspendedTxLocationStack = new ThreadLocal<List<Exception>>();
     private static ThreadLocal<Exception> transactionBeginStack = new ThreadLocal<Exception>();
     private static ThreadLocal<List<Exception>> transactionBeginStackSave = new ThreadLocal<List<Exception>>();
-    private static Map<Long, Exception> allThreadsTransactionBeginStack = Collections.<Long, Exception>synchronizedMap(FastMap.<Long, Exception>newInstance());
-    private static Map<Long, List<Exception>> allThreadsTransactionBeginStackSave = Collections.<Long, List<Exception>>synchronizedMap(FastMap.<Long, List<Exception>>newInstance());
+    private static Map<Long, Exception> allThreadsTransactionBeginStack = Collections.<Long, Exception>synchronizedMap(new HashMap<Long, Exception>());
+    private static Map<Long, List<Exception>> allThreadsTransactionBeginStackSave = Collections.<Long, List<Exception>>synchronizedMap(new HashMap<Long, List<Exception>>());
     private static ThreadLocal<RollbackOnlyCause> setRollbackOnlyCause = new ThreadLocal<RollbackOnlyCause>();
     private static ThreadLocal<List<RollbackOnlyCause>> setRollbackOnlyCauseSave = new ThreadLocal<List<RollbackOnlyCause>>();
     private static ThreadLocal<Timestamp> transactionStartStamp = new ThreadLocal<Timestamp>();
@@ -172,7 +169,7 @@ public class TransactionUtil implements Status {
                 setTransactionBeginStack();
 
                 // initialize the debug resource
-                if (debugResources) {
+                if (EntityConfigUtil.isDebugXAResource()) {
                     DebugXaResource dxa = new DebugXaResource();
                     try {
                         dxa.enlist();
@@ -188,6 +185,8 @@ public class TransactionUtil implements Status {
             } catch (SystemException e) {
                 //This is Java 1.4 only, but useful for certain debuggins: Throwable t = e.getCause() == null ? e : e.getCause();
                 throw new GenericTransactionException("System error, could not begin transaction", e);
+            } catch (GenericEntityConfException e) {
+                throw new GenericTransactionException("Configuration error, could not begin transaction", e);
             }
         } else {
             if (Debug.infoOn()) Debug.logInfo("[TransactionUtil.begin] no user transaction, so no transaction begun", module);
@@ -539,13 +538,21 @@ public class TransactionUtil implements Status {
         }
     }
 
+    public static boolean debugResources() throws GenericEntityConfException {
+        return EntityConfigUtil.isDebugXAResource();
+    }
+
     public static void logRunningTx() {
-        if (debugResources) {
-            if (UtilValidate.isNotEmpty(debugResMap)) {
-                for (DebugXaResource dxa: debugResMap.values()) {
-                    dxa.log();
+        try {
+            if (EntityConfigUtil.isDebugXAResource()) {
+                if (UtilValidate.isNotEmpty(debugResMap)) {
+                    for (DebugXaResource dxa: debugResMap.values()) {
+                        dxa.log();
+                    }
                 }
             }
+        } catch (GenericEntityConfException e) {
+            Debug.logWarning("Exception thrown while logging: " + e, module);
         }
     }
 
@@ -654,7 +661,7 @@ public class TransactionUtil implements Status {
         // use the ThreadLocal one because it is more reliable than the all threads Map
         List<Exception> el = transactionBeginStackSave.get();
         if (el == null) {
-            el = FastList.newInstance();
+            el = new LinkedList<Exception>();
             transactionBeginStackSave.set(el);
         }
         el.add(0, e);
@@ -662,7 +669,7 @@ public class TransactionUtil implements Status {
         Long curThreadId = Thread.currentThread().getId();
         List<Exception> ctEl = allThreadsTransactionBeginStackSave.get(curThreadId);
         if (ctEl == null) {
-            ctEl = FastList.newInstance();
+            ctEl = new LinkedList<Exception>();
             allThreadsTransactionBeginStackSave.put(curThreadId, ctEl);
         }
         ctEl.add(0, e);
@@ -696,14 +703,14 @@ public class TransactionUtil implements Status {
 
     public static List<Exception> getTransactionBeginStackSave() {
         List<Exception> el = transactionBeginStackSave.get();
-        List<Exception> elClone = FastList.newInstance();
+        List<Exception> elClone = new LinkedList<Exception>();
         elClone.addAll(el);
         return elClone;
     }
 
     public static Map<Long, List<Exception>> getAllThreadsTransactionBeginStackSave() {
         Map<Long, List<Exception>> attbssMap = allThreadsTransactionBeginStackSave;
-        Map<Long, List<Exception>> attbssMapClone = FastMap.newInstance();
+        Map<Long, List<Exception>> attbssMapClone = new HashMap<Long, List<Exception>>();
         attbssMapClone.putAll(attbssMap);
         return attbssMapClone;
     }
@@ -976,15 +983,22 @@ public class TransactionUtil implements Status {
         public V call() throws GenericEntityException {
             Transaction suspended = TransactionUtil.suspend();
             try {
-                return callable.call();
+                try {
+                    return callable.call();
+                } catch (Throwable t) {
+                    while (t.getCause() != null) {
+                        t = t.getCause();
+                    }
+                    throw t;
+                }
+            } catch (GenericEntityException e) {
+                throw e;
             } catch (Error e) {
                 throw e;
             } catch (RuntimeException e) {
                 throw e;
-            } catch (GenericEntityException e) {
-                throw e;
-            } catch (Exception e) {
-                throw new GenericEntityException(e);
+            } catch (Throwable t) {
+                throw new GenericEntityException(t);
             } finally {
                 TransactionUtil.resume(suspended);
             }

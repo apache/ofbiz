@@ -28,7 +28,7 @@ under the License.
             <link target="FindUtilCache"/>
         </menu-item>
         <menu-item name="artifact" title="${uiLabelMap.WebtoolsArtifactInfo}">
-            <link target="ArtifactInfo"/>
+            <link target="ViewComponents"/>
         </menu-item>
         <menu-item name="entity" title="${uiLabelMap.WebtoolsEntityEngine}">
             <link target="entitymaint"/>
@@ -90,6 +90,9 @@ under the License.
         <menu-item name="entityExportAll" title="${uiLabelMap.PageTitleEntityExportAll}">
             <link target="EntityExportAll"/>
         </menu-item>
+        <menu-item name="programExport" title="${uiLabelMap.PageTitleProgramExport}">
+            <link target="ProgramExport"/>
+        </menu-item>
         <menu-item name="entityImport" title="${uiLabelMap.PageTitleEntityImport}">
             <link target="EntityImport"/>
         </menu-item>
@@ -142,11 +145,11 @@ under the License.
 
     <menu name="artifactTabBar" extends="CommonTabBarMenu" extends-resource="component://common/widget/CommonMenus.xml"
           selected-menuitem-context-field-name="tabButtonItem">
-        <menu-item name="artifactInfo" title="${uiLabelMap.WebtoolsArtifactInfo}">
-            <link target="ArtifactInfo"/>
-        </menu-item>
         <menu-item name="viewents" title="${uiLabelMap.WebtoolsViewComponents}">
             <link target="ViewComponents"/>
+        </menu-item>
+        <menu-item name="artifactInfo" title="${uiLabelMap.WebtoolsArtifactInfo} ${uiLabelMap.CommonSearch} ${uiLabelMap.WebtoolsArtifactInfoTimeToLoad}">
+            <link target="ArtifactInfo"/>
         </menu-item>
         <menu-item name="labels" title="${uiLabelMap.WebtoolsLabelManager}">
             <link target="SearchLabels"/>
@@ -291,10 +294,18 @@ under the License.
     
     <menu name="LayoutDemo" extends="CommonTabBarMenu" extends-resource="component://common/widget/CommonMenus.xml">
         <menu-item name="Selected" title="${uiLabelMap.CommonSelected}" widget-style="selected">
-            <link target="${demoTargetUrl}"/>
+            <link target="${demoTargetUrl}">
+                <parameter param-name="demoParam1"/>
+                <parameter param-name="demoParam2"/>
+                <parameter param-name="demoParam3"/>
+            </link>
         </menu-item>
         <menu-item name="Enabled" title="${uiLabelMap.CommonEnabled}">
-            <link target="${demoTargetUrl}"/>
+            <link target="${demoTargetUrl}" link-type="hidden-form">
+                <parameter param-name="demoParam1"/>
+                <parameter param-name="demoParam2"/>
+                <parameter param-name="demoParam3"/>
+            </link>
         </menu-item>
         <menu-item name="Disabled" title="${uiLabelMap.CommonDisabled}" widget-style="disabled">
         </menu-item>

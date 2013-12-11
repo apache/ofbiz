@@ -19,7 +19,6 @@
 package org.ofbiz.accounting.thirdparty.valuelink;
 
 import java.math.BigDecimal;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -1159,7 +1158,7 @@ public class ValueLinkServices {
         // make a map of answer info
         Map<String, Object> answerMap = FastMap.newInstance();
         if (responseAnswers != null) {
-            for(GenericValue answer : responseAnswers) {
+            for (GenericValue answer : responseAnswers) {
                 GenericValue question = null;
                 try {
                     question = answer.getRelatedOne("SurveyQuestion", false);
@@ -1414,7 +1413,7 @@ public class ValueLinkServices {
         // make a map of answer info
         Map<String, Object> answerMap = FastMap.newInstance();
         if (responseAnswers != null) {
-            for(GenericValue answer : responseAnswers) {
+            for (GenericValue answer : responseAnswers) {
                 GenericValue question = null;
                 try {
                     question = answer.getRelatedOne("SurveyQuestion", false);

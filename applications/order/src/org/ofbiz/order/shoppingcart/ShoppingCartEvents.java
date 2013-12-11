@@ -23,6 +23,7 @@ import java.math.MathContext;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -53,6 +54,7 @@ import org.ofbiz.entity.GenericValue;
 import org.ofbiz.entity.condition.EntityCondition;
 import org.ofbiz.entity.condition.EntityOperator;
 import org.ofbiz.entity.util.EntityUtil;
+import org.ofbiz.order.shoppingcart.ShoppingCart.ProductPromoUseInfo;
 import org.ofbiz.order.shoppingcart.product.ProductPromoWorker;
 import org.ofbiz.product.catalog.CatalogWorker;
 import org.ofbiz.product.config.ProductConfigWorker;
@@ -94,6 +96,58 @@ public class ShoppingCartEvents {
             }
         }
         return "success";
+    }
+
+    public static String removePromotion(HttpServletRequest request,HttpServletResponse response) {
+        LocalDispatcher dispatcher = (LocalDispatcher) request.getAttribute("dispatcher");
+        ShoppingCart cart = getCartObject(request);
+        String promoCodeId = (String) request.getParameter("promoCode");
+        String result = "error";
+
+        if (!promoCodeId.isEmpty()) {
+            cart.getProductPromoCodesEntered().clear();
+            GenericValue productPromoCode = null;
+            try {
+                productPromoCode = dispatcher.getDelegator().findOne("ProductPromoCode", UtilMisc.toMap("productPromoCodeId", promoCodeId), false);
+                if (!productPromoCode.isEmpty()) {
+                    String productPromoId = productPromoCode.getString("productPromoId");
+                    GenericValue productPromoAction = null;
+                    Map<String, String> productPromoActionMap = new HashMap<String, String>();
+                    productPromoActionMap.put("productPromoId", productPromoId);
+                    productPromoActionMap.put("productPromoRuleId", "01");
+                    productPromoActionMap.put("productPromoActionSeqId", "01");
+
+                    productPromoAction = dispatcher.getDelegator().findOne("ProductPromoAction", productPromoActionMap, false);
+                    if (!productPromoAction.isEmpty()) {
+                        int index = cart.getAdjustmentPromoIndex(productPromoId);
+                        /*Remove order adjustment*/
+                        if (index != -1) {
+                            cart.removeAdjustment(index);
+                            result = "success";
+                        }
+
+                        /*Remove product  adjustment*/
+                        for (ShoppingCartItem checkItem : cart) {
+                            List<GenericValue> itemAdjustments = checkItem.getAdjustments();
+                            if (!itemAdjustments.isEmpty()) {
+                                index = 0;
+                                for (GenericValue adjustment : itemAdjustments ) {
+                                    if(adjustment.get("productPromoId").equals(productPromoId)) {
+                                        checkItem.getAdjustments().remove(index);
+                                        result = "success";
+                                    }
+                                    index++;
+                                }
+                            }
+                        }
+                        cart.removeProductPromoUse(productPromoId);
+                    }
+                }
+            } catch (GenericEntityException e) {
+                Debug.logError(e.getMessage(), module);
+            }
+        }
+        return result;
     }
 
     public static String addItemGroup(HttpServletRequest request, HttpServletResponse response) {
@@ -522,7 +576,7 @@ public class ShoppingCartEvents {
                     productAssocs = delegator.findList("ProductAssoc", cond, null, null, null, false);
                     productAssocs = EntityUtil.filterByDate(productAssocs);
                     List<String> productList = FastList.newInstance();
-                    for(GenericValue productAssoc : productAssocs) {
+                    for (GenericValue productAssoc : productAssocs) {
                         if (productId.equals(productAssoc.getString("productId"))) {
                             productList.add(productAssoc.getString("productIdTo"));
                             continue;
@@ -532,7 +586,7 @@ public class ShoppingCartEvents {
                             continue;
                         }
                     }
-                    for(ShoppingCartItem sci : cart) {
+                    for (ShoppingCartItem sci : cart) {
                         if (productList.contains(sci.getProductId())) {
                             try {
                                 cart.removeCartItem(sci, dispatcher);
@@ -549,7 +603,7 @@ public class ShoppingCartEvents {
                             EntityCondition.makeCondition("productAssocTypeId", EntityOperator.EQUALS, "PRODUCT_UPGRADE")), EntityOperator.AND);
                     productList = delegator.findList("ProductAssoc", cond, UtilMisc.toSet("productId"), null, null, false);
                     if (productList != null) {
-                        for(ShoppingCartItem sci : cart) {
+                        for (ShoppingCartItem sci : cart) {
                             if (productList.contains(sci.getProductId())) {
                                 try {
                                     cart.removeCartItem(sci, dispatcher);
@@ -1349,6 +1403,10 @@ public class ShoppingCartEvents {
                     UtilMisc.<String, Object>toMap("quoteId", quoteId,
                             "applyQuoteAdjustments", "true",
                             "userLogin", userLogin));
+            if (!ServiceUtil.isSuccess(outMap)) {
+                request.setAttribute("_ERROR_MESSAGE_", ServiceUtil.getErrorMessage(outMap));
+                return "error";
+            }
             cart = (ShoppingCart) outMap.get("shoppingCart");
         } catch (GenericServiceException exc) {
             request.setAttribute("_ERROR_MESSAGE_", exc.getMessage());
@@ -1819,7 +1877,8 @@ public class ShoppingCartEvents {
         // set the agreement if specified otherwise set the currency
         if (UtilValidate.isNotEmpty(agreementId)) {
             result = cartHelper.selectAgreement(agreementId);
-        } else if (UtilValidate.isNotEmpty(currencyUomId)) {
+        } 
+        if (UtilValidate.isNotEmpty(cart.getCurrency()) && UtilValidate.isNotEmpty(currencyUomId)) {
             result = cartHelper.setCurrency(currencyUomId);
         }
         if (ServiceUtil.isError(result)) {
@@ -1986,7 +2045,7 @@ public class ShoppingCartEvents {
                     appendOrderItemMap.put("shipGroupSeqId", shipGroupSeqId);
                     try {
                         Map<String, Object> result = dispatcher.runSync("appendOrderItem", appendOrderItemMap);
-                        request.setAttribute("shoppingCart", (ShoppingCart) result.get("shoppingCart"));
+                        request.setAttribute("shoppingCart", result.get("shoppingCart"));
                         ShoppingCartEvents.destroyCart(request, response);
                     } catch (GenericServiceException e) {
                         Debug.logError(e, "Failed to execute service appendOrderItem", module);

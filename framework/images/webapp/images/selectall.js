@@ -240,6 +240,11 @@ function confirmActionFormLink(msg, formName) {
 */
 
 function ajaxUpdateArea(areaId, target, targetParams) {
+    if (areaId == "window") {
+        targetUrl = target + "?" + targetParams.replace('?','');
+        window.location.assign(targetUrl);
+        return;
+    }
     waitSpinnerShow();
     jQuery.ajax({
         url: target,
@@ -258,28 +263,17 @@ function ajaxUpdateArea(areaId, target, targetParams) {
   * form of: areaId, target, target parameters [, areaId, target, target parameters...].
 */
 function ajaxUpdateAreas(areaCsvString) {
-    waitSpinnerShow();
     var areaArray = areaCsvString.split(",");
     var numAreas = parseInt(areaArray.length / 3);
     for (var i = 0; i < numAreas * 3; i = i + 3) {
         var areaId = areaArray[i];
         var target = areaArray[i + 1];
         var targetParams = areaArray[i + 2];
-        // that was done by the prototype updater internally, remove the ? and the anchor flag from the parameters
+        // Remove the ? and the anchor flag from the parameters
         // not nice but works
         targetParams = targetParams.replace('#','');
         targetParams = targetParams.replace('?','');
-        jQuery.ajax({
-            url: target,
-            async: false,
-            type: "POST",
-            data: targetParams,
-            success: function(data) {
-                jQuery("#" + areaId).html(data);
-                waitSpinnerHide();
-            },
-            error: function(data) {waitSpinnerHide()}
-        });
+        ajaxUpdateArea(areaId, target, targetParams);
     }
 }
 
@@ -290,8 +284,9 @@ function ajaxUpdateAreas(areaCsvString) {
   * @param interval The update interval, in seconds.
 */
 function ajaxUpdateAreaPeriodic(areaId, target, targetParams, interval) {
+    var intervalMillis = interval * 1000;
     jQuery.fjTimer({
-        interval: interval,
+        interval: intervalMillis,
         repeat: true,
         tick: function(container, timerId){
             jQuery.ajax({
@@ -352,11 +347,12 @@ function submitFormInBackground(form, areaId, submitUrl) {
 function ajaxSubmitFormUpdateAreas(form, areaCsvString) {
    waitSpinnerShow();
    hideErrorContainer = function() {
+       jQuery('#content-messages').html('');
        jQuery('#content-messages').removeClass('errorMessage').fadeIn('fast');
    }
    updateFunction = function(data) {
        if (data._ERROR_MESSAGE_LIST_ != undefined || data._ERROR_MESSAGE_ != undefined) {
-           if(!jQuery('#content-messages')) {
+           if (!jQuery('#content-messages').length) {
               //add this div just after app-navigation
               if(jQuery('#content-main-section')){
                   jQuery('#content-main-section' ).before('<div id="content-messages" onclick="hideErrorContainer()"></div>');
@@ -371,8 +367,9 @@ function ajaxSubmitFormUpdateAreas(form, areaCsvString) {
               jQuery('#content-messages' ).html(data._ERROR_MESSAGE_);
           }
           jQuery('#content-messages').fadeIn('fast');
-       }else {
-           if(jQuery('#content-messages')) {
+       } else {
+           if (jQuery('#content-messages').length) {
+               jQuery('#content-messages').html('');
                jQuery('#content-messages').removeClass('errorMessage').fadeIn("fast");
            }
            ajaxUpdateAreas(areaCsvString);

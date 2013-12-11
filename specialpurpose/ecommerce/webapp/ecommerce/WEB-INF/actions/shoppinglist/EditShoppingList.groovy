@@ -29,15 +29,22 @@ import org.ofbiz.party.contact.*;
 import org.ofbiz.product.catalog.*;
 import org.ofbiz.product.store.*;
 import org.ofbiz.service.calendar.*;
+import org.ofbiz.webapp.website.WebSiteWorker;
 
-party = userLogin.getRelatedOne("Party", false);
+if (userLogin) 
+{
+    party = userLogin.getRelatedOne("Party", false);
+}  else {
+    return; // session ended, prevents a NPE
+}
+
 
 cart = ShoppingCartEvents.getCartObject(request);
 currencyUomId = cart.getCurrency();
 
 productStoreId = ProductStoreWorker.getProductStoreId(request);
 prodCatalogId = CatalogWorker.getCurrentCatalogId(request);
-webSiteId = CatalogWorker.getWebSiteId(request);
+webSiteId = WebSiteWorker.getWebSiteId(request);
 
 context.productStoreId = productStoreId;
 context.currencyUomId = currencyUomId;
@@ -138,16 +145,14 @@ if (shoppingListId) {
             context.shoppingListItemDatas = shoppingListItemDatas;
             // pagination for the shopping list
             viewIndex = Integer.valueOf(parameters.VIEW_INDEX  ?: 1);
-            viewSize = Integer.valueOf(parameters.VIEW_SIZE ?: 20);
-            listSize = 0;
-            if (shoppingListItemDatas)
-                listSize = shoppingListItemDatas.size();
-            
-            lowIndex = (((viewIndex - 1) * viewSize) + 1);
+            viewSize = Integer.valueOf(parameters.VIEW_SIZE ?: UtilProperties.getPropertyValue("widget", "widget.form.defaultViewSize", "20"));
+            listSize = shoppingListItemDatas ? shoppingListItemDatas.size() : 0;
+
+            lowIndex = ((viewIndex - 1) * viewSize) + 1;
             highIndex = viewIndex * viewSize;
-            if (highIndex > listSize) {
-                highIndex = listSize;
-            }
+            highIndex = highIndex > listSize ? listSize : highIndex;
+            lowIndex = lowIndex > highIndex ? highIndex : lowIndex; 
+
             context.viewIndex = viewIndex;
             context.viewSize = viewSize;
             context.listSize = listSize;

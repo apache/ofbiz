@@ -20,10 +20,9 @@ package org.ofbiz.entity.model;
 
 import java.io.Serializable;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import javolution.util.FastMap;
 
 import org.ofbiz.base.config.GenericConfigException;
 import org.ofbiz.base.config.MainResourceHandler;
@@ -33,10 +32,10 @@ import org.ofbiz.base.util.UtilTimer;
 import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.base.util.UtilXml;
 import org.ofbiz.base.util.cache.UtilCache;
-import org.ofbiz.entity.config.DatasourceInfo;
+import org.ofbiz.entity.GenericEntityConfException;
 import org.ofbiz.entity.config.EntityConfigUtil;
-import org.ofbiz.entity.config.FieldTypeInfo;
-
+import org.ofbiz.entity.config.model.Datasource;
+import org.ofbiz.entity.config.model.FieldType;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -52,7 +51,7 @@ public class ModelFieldTypeReader implements Serializable {
 
     protected static Map<String, ModelFieldType> createFieldTypeCache(Element docElement, String location) {
         docElement.normalize();
-        Map<String, ModelFieldType> fieldTypeMap = FastMap.newInstance();
+        Map<String, ModelFieldType> fieldTypeMap = new HashMap<String, ModelFieldType>();
         List<? extends Element> fieldTypeList = UtilXml.childElementList(docElement, "field-type-def");
         for (Element curFieldType: fieldTypeList) {
             String fieldTypeName = curFieldType.getAttribute("type");
@@ -67,18 +66,23 @@ public class ModelFieldTypeReader implements Serializable {
     }
 
     public static ModelFieldTypeReader getModelFieldTypeReader(String helperName) {
-        DatasourceInfo datasourceInfo = EntityConfigUtil.getDatasourceInfo(helperName);
+        Datasource datasourceInfo = EntityConfigUtil.getDatasource(helperName);
         if (datasourceInfo == null) {
             throw new IllegalArgumentException("Could not find a datasource/helper with the name " + helperName);
         }
-        String tempModelName = datasourceInfo.fieldTypeName;
+        String tempModelName = datasourceInfo.getFieldTypeName();
         ModelFieldTypeReader reader = readers.get(tempModelName);
         while (reader == null) {
-            FieldTypeInfo fieldTypeInfo = EntityConfigUtil.getFieldTypeInfo(tempModelName);
+            FieldType fieldTypeInfo = null;
+            try {
+                fieldTypeInfo = EntityConfigUtil.getFieldType(tempModelName);
+            } catch (GenericEntityConfException e) {
+                Debug.logWarning(e, "Exception thrown while getting field type config: ", module);
+            }
             if (fieldTypeInfo == null) {
                 throw new IllegalArgumentException("Could not find a field-type definition with name \"" + tempModelName + "\"");
             }
-            ResourceHandler fieldTypeResourceHandler = new MainResourceHandler(EntityConfigUtil.ENTITY_ENGINE_XML_FILENAME, fieldTypeInfo.resourceElement);
+            ResourceHandler fieldTypeResourceHandler = new MainResourceHandler(EntityConfigUtil.ENTITY_ENGINE_XML_FILENAME, fieldTypeInfo.getLoader(), fieldTypeInfo.getLocation());
             UtilTimer utilTimer = new UtilTimer();
             utilTimer.timerString("[ModelFieldTypeReader.getModelFieldTypeReader] Reading field types from " + fieldTypeResourceHandler.getLocation());
             Document document = null;

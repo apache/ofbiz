@@ -21,10 +21,10 @@ package org.ofbiz.content.layout;
 import java.nio.ByteBuffer;
 import java.sql.Timestamp;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -593,7 +593,7 @@ public class LayoutEvents {
         GenericValue v = delegator.makeValue(entityName);
         GenericPK passedPK = v.getPrimaryKey();
         Collection<String> keyColl = passedPK.getAllKeys();
-        for(String attrName : keyColl) {
+        for (String attrName : keyColl) {
             String attrVal = (String)request.getAttribute(attrName);
             if (attrVal == null) {
                 attrVal = (String) paramMap.get(attrName);

@@ -47,13 +47,13 @@ import org.ofbiz.entity.util.EntityUtil;
 import org.ofbiz.marketing.tracking.TrackingCodeEvents;
 import org.ofbiz.order.order.OrderReadHelper;
 import org.ofbiz.party.party.PartyWorker;
-import org.ofbiz.product.catalog.CatalogWorker;
 import org.ofbiz.product.store.ProductStoreWorker;
 import org.ofbiz.service.GenericServiceException;
 import org.ofbiz.service.LocalDispatcher;
 import org.ofbiz.service.ModelService;
 import org.ofbiz.service.ServiceUtil;
 import org.ofbiz.webapp.stats.VisitHandler;
+import org.ofbiz.webapp.website.WebSiteWorker;
 
 /**
  * Events used for processing checkout and orders.
@@ -234,8 +234,8 @@ public class CheckOutEvents {
 
         // if no shipping applies, set the no shipment method and skip to payment
         if (!cart.shippingApplies()) {
-            cart.setShipmentMethodTypeId("NO_SHIPPING");
-            cart.setCarrierPartyId("_NA_");
+            cart.setAllShipmentMethodTypeId("NO_SHIPPING");
+            cart.setAllCarrierPartyId("_NA_");
             page = "payment";
         }
 
@@ -273,7 +273,7 @@ public class CheckOutEvents {
         ShoppingCart cart = (ShoppingCart) request.getSession().getAttribute("shoppingCart");
         String shipToCustomerPartyId = request.getParameter("shipToCustomerPartyId");
         cart.setShipToCustomerPartyId(shipToCustomerPartyId);
-        cart.setShippingContactMechId(null);
+        cart.setAllShippingContactMechId(null);
         return "success";
     }
 
@@ -446,7 +446,7 @@ public class CheckOutEvents {
         String distributorId = (String) session.getAttribute("_DISTRIBUTOR_ID_");
         String affiliateId = (String) session.getAttribute("_AFFILIATE_ID_");
         String visitId = VisitHandler.getVisitId(session);
-        String webSiteId = CatalogWorker.getWebSiteId(request);
+        String webSiteId = WebSiteWorker.getWebSiteId(request);
 
         callResult = checkOutHelper.createOrder(userLogin, distributorId, affiliateId, trackingCodeOrders, areOrderItemsExploded, visitId, webSiteId);
         if (callResult != null) {
@@ -795,11 +795,17 @@ public class CheckOutEvents {
                 // set the shipping method
                 if (mode.equals("ship")) {
                     shippingContactMechId = request.getParameter(shipGroupIndex + "_shipping_contact_mech_id");
+                    String facilityId = request.getParameter(shipGroupIndex + "_shipGroupFacilityId");
                     if (shippingContactMechId == null) {
-                        shippingContactMechId = (String) request.getAttribute("contactMechId"); // FIXME
+                        shippingContactMechId = (String) request.getAttribute("contactMechId");
+                    } else if(cart.getOrderType().equals("PURCHASE_ORDER")){
+                        String[] shipInfo = shippingContactMechId.split("_@_");
+                        if(shipInfo.length > 1){
+                            shippingContactMechId = shipInfo[0];
+                            facilityId = shipInfo[1];   
+                        }
                     }
                     String supplierPartyId = request.getParameter(shipGroupIndex + "_supplierPartyId");
-                    String facilityId = request.getParameter(shipGroupIndex + "_shipGroupFacilityId");
                     if (UtilValidate.isNotEmpty(facilityId)) {
                         cart.setShipGroupFacilityId(shipGroupIndex, facilityId);
                     }
@@ -828,7 +834,8 @@ public class CheckOutEvents {
                     if (UtilValidate.isNotEmpty(request.getParameter(shipGroupIndex + "_ship_estimate"))) {
                         shipEstimate = new BigDecimal(request.getParameter(shipGroupIndex + "_ship_estimate"));
                     }
-                    
+                    cart.clearOrderNotes();
+                    cart.clearInternalOrderNotes();
                     if (shipEstimate == null) {  // allow ship estimate to be set manually if a purchase order
                         callResult = checkOutHelper.finalizeOrderEntryOptions(shipGroupIndex, shippingMethod, shippingInstructions, maySplit, giftMessage, isGift, internalCode, shipBeforeDate, shipAfterDate, internalOrderNotes, shippingNotes);
                     } else {
@@ -889,10 +896,6 @@ public class CheckOutEvents {
                     return "error";
                 }
                 selectedPaymentMethods.put("EXT_BILLACT", UtilMisc.<String, Object>toMap("amount", billingAccountAmt, "securityCode", null));
-            }
-
-            if (UtilValidate.isEmpty(selectedPaymentMethods)) {
-                return "error";
             }
 
             // If the user has just created a new payment method, add it to the map with a null amount, so that

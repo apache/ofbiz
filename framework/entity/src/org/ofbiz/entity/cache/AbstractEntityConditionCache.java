@@ -24,8 +24,6 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-import javolution.util.FastMap;
-
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.base.util.UtilValidate;
@@ -59,6 +57,21 @@ public abstract class AbstractEntityConditionCache<K, V> extends AbstractCache<E
 
         Map<K, V> conditionCache = getOrCreateConditionCache(entityName, condition);
         return conditionCache.put(key, value);
+    }
+
+    /**
+     * Removes all condition caches that include the specified entity.
+     */
+    public void remove(GenericEntity entity) {
+        UtilCache.clearCache(getCacheName(entity.getEntityName()));
+        ModelEntity model = entity.getModelEntity();
+        if (model != null) {
+            Iterator<String> it = model.getViewConvertorsIterator();
+            while (it.hasNext()) {
+                String targetEntityName = it.next();
+                UtilCache.clearCache(getCacheName(targetEntityName));
+            }
+        }
     }
 
     public void remove(String entityName, EntityCondition condition) {

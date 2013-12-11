@@ -24,11 +24,6 @@ under the License.
     <description>Facility Handheld Application</description>
 
     <context-param>
-        <param-name>webSiteId</param-name>
-        <param-value>HHFACILITY</param-value>
-        <description>A unique ID used to look up the WebSite entity</description>
-    </context-param>
-    <context-param>
         <param-name>localDispatcherName</param-name>
         <param-value>hhfacility</param-value>
         <description>A unique name used to identify/recognize the local dispatcher for the Service Engine</description>
@@ -37,6 +32,18 @@ under the License.
         <param-name>entityDelegatorName</param-name>
         <param-value>default</param-value>
         <description>The Name of the Entity Delegator to use, defined in entityengine.xml</description>
+    </context-param>
+    <!-- This parameter should be set to true for production. -->
+    <context-param>
+        <param-name>compressHTML</param-name>
+        <param-value>false</param-value>
+        <description>Remove unnecessary whitespace from HTML output.</description>
+    </context-param>
+    <!-- This parameter should be set to false for production. -->
+    <context-param>
+        <param-name>widgetVerbose</param-name>
+        <param-value>true</param-value>
+        <description>Enable widget boundary comments.</description>
     </context-param>
 
     <filter>

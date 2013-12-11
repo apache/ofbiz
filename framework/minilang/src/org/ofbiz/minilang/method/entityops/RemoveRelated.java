@@ -35,12 +35,12 @@ import org.w3c.dom.Element;
 /**
  * Implements the &lt;remove-related&gt; element.
  * 
- * @see <a href="https://cwiki.apache.org/OFBADMIN/mini-language-reference.html#Mini-languageReference-{{%3Cremoverelated%3E}}">Mini-language Reference</a>
+ * @see <a href="https://cwiki.apache.org/confluence/display/OFBADMIN/Mini-language+Reference#Mini-languageReference-{{%3Cremoverelated%3E}}">Mini-language Reference</a>
  */
 public final class RemoveRelated extends MethodOperation {
 
     public static final String module = RemoveRelated.class.getName();
-
+    @Deprecated
     private final FlexibleStringExpander doCacheClearFse;
     private final FlexibleStringExpander relationNameFse;
     private final FlexibleMapAccessor<GenericValue> valueFma;
@@ -65,6 +65,7 @@ public final class RemoveRelated extends MethodOperation {
             throw new MiniLangRuntimeException("Entity value not found with name: " + valueFma, this);
         }
         String relationName = relationNameFse.expandString(methodContext.getEnvMap());
+        @Deprecated
         boolean doCacheClear = !"false".equals(doCacheClearFse.expandString(methodContext.getEnvMap()));
         try {
             methodContext.getDelegator().removeRelated(relationName, value, doCacheClear);

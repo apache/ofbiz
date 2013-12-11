@@ -335,16 +335,6 @@ under the License.
     <ProductCategory categoryName="Toys &amp; Games"
         primaryParentCategoryId="GOOGLE_BASE" productCategoryId="GB_TYS_GMS" productCategoryTypeId="GOOGLE_BASE_CATEGORY"/>
 
-    <!--Catalog specific to eBay-->
-    <ProdCatalog prodCatalogId="eBayCatalog" catalogName="eBay Catalog" useQuickAdd="Y"/>
-    <ProductStoreCatalog productStoreId="9000" prodCatalogId="eBayCatalog" fromDate="2009-11-05 12:00:00.0" sequenceNum="4"/>
-
-    <!-- Category specific to eBay -->
-    <ProductCategory categoryName="15064" productCategoryId="eBay_Category" productCategoryTypeId="EBAY_CATEGORY"/>
-    <ProdCatalogCategory prodCatalogId="eBayCatalog" productCategoryId="eBay_Category" fromDate="2009-11-05 12:00:00.0" sequenceNum="1" prodCatalogCategoryTypeId="PCCT_EBAY_ROOT"/>
-    
-    <ProductCategory productCategoryId="eBay_ECom_Category" categoryName="15064" productCategoryTypeId="EBAY_CATEGORY"/>
-
     <ProdCatalogCategory prodCatalogId="GoogleCatalog" productCategoryId="GOOGLE_BASE" fromDate="2001-05-13 12:00:00.0"
         sequenceNum="1" prodCatalogCategoryTypeId="PCCT_BROWSE_ROOT"/>
         
@@ -403,7 +393,8 @@ under the License.
     <Product productId="GZ-1006-2" productTypeId="FINISHED_GOOD" primaryProductCategoryId="102" productName="Open Gizmo (GPL)" internalName="Open Gizmo (GPL)" description="Gizmo based on open standards" longDescription="Highest quality gizmo around." taxable="Y" chargeShipping="Y" autoCreateKeywords="Y" isVirtual="N" isVariant="Y" createdDate="2001-05-13 12:00:00.0" createdByUserLogin="admin" lastModifiedDate="2001-05-13 12:00:00.0" lastModifiedByUserLogin="admin"/>
     <Product productId="GZ-1006-3" productTypeId="FINISHED_GOOD" primaryProductCategoryId="102" productName="Open Gizmo (BSD)" internalName="Open Gizmo (BSD)" description="Gizmo based on open standards" longDescription="Highest quality gizmo around." taxable="Y" chargeShipping="Y" autoCreateKeywords="Y" isVirtual="N" isVariant="Y" createdDate="2001-05-13 12:00:00.0" createdByUserLogin="admin" lastModifiedDate="2001-05-13 12:00:00.0" lastModifiedByUserLogin="admin"/>
     <Product productId="GZ-1006-4" productTypeId="FINISHED_GOOD" primaryProductCategoryId="102" productName="Open Gizmo (MIT)" internalName="Open Gizmo (MIT)" description="Gizmo based on open standards" longDescription="Highest quality gizmo around." taxable="Y" chargeShipping="Y" autoCreateKeywords="Y" isVirtual="N" isVariant="Y" createdDate="2001-05-13 12:00:00.0" createdByUserLogin="admin" lastModifiedDate="2001-05-13 12:00:00.0" lastModifiedByUserLogin="admin"/>
-
+    <Product productId="GZ-1006-5" productTypeId="FINISHED_GOOD" primaryProductCategoryId="102" productName="Open Gizmo (ASL2)" internalName="Open Gizmo (ASL)" description="Gizmo based on open standards" longDescription="Highest quality gizmo around." taxable="Y" chargeShipping="Y" autoCreateKeywords="Y" isVirtual="N" isVariant="Y" createdDate="2001-05-13 12:00:00.0" createdByUserLogin="admin" lastModifiedDate="2001-05-13 12:00:00.0" lastModifiedByUserLogin="admin"/>
+    
     <Product productId="GZ-2002" productTypeId="FINISHED_GOOD" primaryProductCategoryId="101" productName="Square Gizmo" internalName="Square Gizmo" description="A square gizmo" taxable="Y" chargeShipping="Y" autoCreateKeywords="Y" isVirtual="N" isVariant="N" createdDate="2001-05-13 12:00:00.0" createdByUserLogin="admin" lastModifiedDate="2001-05-13 12:00:00.0" lastModifiedByUserLogin="admin"/>
     <Product productId="GZ-2644" productTypeId="FINISHED_GOOD" primaryProductCategoryId="101" internalName="Round Gizmo" longDescription="A small round gizmo with multi-colored lights. Works great in the dark. Small and compact." isVirtual="N" isVariant="N" quantityIncluded="100.0" weight="7.0"/>
     <Product productId="GZ-5005" productTypeId="FINISHED_GOOD" primaryProductCategoryId="101" productName="Purple Gizmo" internalName="Purple Gizmo" description="The stylish gizmo" taxable="Y" chargeShipping="Y" autoCreateKeywords="Y" isVirtual="N" isVariant="N" createdDate="2001-05-13 12:00:00.0" createdByUserLogin="admin" lastModifiedDate="2001-05-13 12:00:00.0" lastModifiedByUserLogin="admin"/>
@@ -432,6 +423,8 @@ under the License.
     <DataResource dataResourceTypeId="ELECTRONIC_TEXT" dataResourceId="DRGZ-1006-3-ALTEN" localeString="en_US"/>
     <DataResource dataResourceTypeId="ELECTRONIC_TEXT" dataResourceId="GZ-1006-4-ALT" localeString="en"/>
     <DataResource dataResourceTypeId="ELECTRONIC_TEXT" dataResourceId="DRGZ-1006-4-ALTEN" localeString="en_US"/>
+    <DataResource dataResourceTypeId="ELECTRONIC_TEXT" dataResourceId="GZ-1006-5-ALT" localeString="en"/>
+    <DataResource dataResourceTypeId="ELECTRONIC_TEXT" dataResourceId="DRGZ-1006-5-ALTEN" localeString="en_US"/>
     <DataResource dataResourceTypeId="ELECTRONIC_TEXT" dataResourceId="GZ-2002-ALT" localeString="en"/>
     <DataResource dataResourceTypeId="ELECTRONIC_TEXT" dataResourceId="DRGZ-2002-ALTEN" localeString="en_US"/>
     <DataResource dataResourceTypeId="ELECTRONIC_TEXT" dataResourceId="GZ-2644-ALT" localeString="en"/>
@@ -511,6 +504,8 @@ under the License.
     <Content contentId="CGZ-1006-3-ALTEN" contentTypeId="DOCUMENT" dataResourceId="DRGZ-1006-3-ALTEN" localeString="en_US"/>
     <Content contentId="GZ-1006-4-ALT" contentTypeId="DOCUMENT" dataResourceId="GZ-1006-4-ALT" localeString="en"/>
     <Content contentId="CGZ-1006-4-ALTEN" contentTypeId="DOCUMENT" dataResourceId="DRGZ-1006-4-ALTEN" localeString="en_US"/>
+    <Content contentId="GZ-1006-5-ALT" contentTypeId="DOCUMENT" dataResourceId="GZ-1006-5-ALT" localeString="en"/>
+    <Content contentId="CGZ-1006-5-ALTEN" contentTypeId="DOCUMENT" dataResourceId="DRGZ-1006-5-ALTEN" localeString="en_US"/>
     <Content contentId="GZ-2002-ALT" contentTypeId="DOCUMENT" dataResourceId="GZ-2002-ALT" localeString="en"/>
     <Content contentId="CGZ-2002-ALTEN" contentTypeId="DOCUMENT" dataResourceId="DRGZ-2002-ALTEN" localeString="en_US"/>
     <Content contentId="GZ-2644-ALT" contentTypeId="DOCUMENT" dataResourceId="GZ-2644-ALT" localeString="en"/>
@@ -545,6 +540,7 @@ under the License.
     <ContentAssoc contentId="GZ-1006-2-ALT" contentIdTo="CGZ-1006-2-ALTEN" contentAssocTypeId="ALTERNATE_LOCALE" fromDate="2011-04-26 12:00:00.0"/>
     <ContentAssoc contentId="GZ-1006-3-ALT" contentIdTo="CGZ-1006-3-ALTEN" contentAssocTypeId="ALTERNATE_LOCALE" fromDate="2011-04-26 12:00:00.0"/>
     <ContentAssoc contentId="GZ-1006-4-ALT" contentIdTo="CGZ-1006-4-ALTEN" contentAssocTypeId="ALTERNATE_LOCALE" fromDate="2011-04-26 12:00:00.0"/>
+    <ContentAssoc contentId="GZ-1006-5-ALT" contentIdTo="CGZ-1006-5-ALTEN" contentAssocTypeId="ALTERNATE_LOCALE" fromDate="2011-04-26 12:00:00.0"/>
     <ContentAssoc contentId="GZ-2002-ALT" contentIdTo="CGZ-2002-ALTEN" contentAssocTypeId="ALTERNATE_LOCALE" fromDate="2011-04-26 12:00:00.0"/>
     <ContentAssoc contentId="GZ-2644-ALT" contentIdTo="CGZ-2644-ALTEN" contentAssocTypeId="ALTERNATE_LOCALE" fromDate="2011-04-26 12:00:00.0"/>
     <ContentAssoc contentId="GZ-5005-ALT" contentIdTo="CGZ-5005-ALTEN" contentAssocTypeId="ALTERNATE_LOCALE" fromDate="2011-04-26 12:00:00.0"/>
@@ -565,6 +561,7 @@ under the License.
     <ProductContent productId="GZ-1006-2" contentId="GZ-1006-2-ALT" productContentTypeId="ALTERNATIVE_URL" fromDate="2001-05-13 12:00:00.0"/>
     <ProductContent productId="GZ-1006-3" contentId="GZ-1006-3-ALT" productContentTypeId="ALTERNATIVE_URL" fromDate="2001-05-13 12:00:00.0"/>
     <ProductContent productId="GZ-1006-4" contentId="GZ-1006-4-ALT" productContentTypeId="ALTERNATIVE_URL" fromDate="2001-05-13 12:00:00.0"/>
+    <ProductContent productId="GZ-1006-5" contentId="GZ-1006-5-ALT" productContentTypeId="ALTERNATIVE_URL" fromDate="2001-05-13 12:00:00.0"/>
     
     <ProductContent productId="GZ-2002" contentId="GZ-2002-ALT" productContentTypeId="ALTERNATIVE_URL" fromDate="2001-05-13 12:00:00.0"/>
     <ProductContent productId="GZ-2644" contentId="GZ-2644-ALT" productContentTypeId="ALTERNATIVE_URL" fromDate="2001-05-13 12:00:00.0"/>
@@ -618,13 +615,6 @@ under the License.
     <ProductPrice productId="WG-9944" productPricePurposeId="PURCHASE" productPriceTypeId="LIST_PRICE" currencyUomId="USD" productStoreGroupId="_NA_" fromDate="2001-05-13 12:00:00.0" price="594.0" createdDate="2001-05-13 12:00:00.0" createdByUserLogin="admin" lastModifiedDate="2001-05-13 12:00:00.0" lastModifiedByUserLogin="admin"/>
     <ProductPrice productId="WG-9944" productPricePurposeId="PURCHASE" productPriceTypeId="AVERAGE_COST" currencyUomId="USD" productStoreGroupId="_NA_" fromDate="2001-05-13 12:00:00.0" price="320.0" createdDate="2001-05-13 12:00:00.0" createdByUserLogin="admin" lastModifiedDate="2001-05-13 12:00:00.0" lastModifiedByUserLogin="admin"/>
 
-    <!-- ProductPrice specific to eBay -->
-    <ProductPrice productId="GZ-1000" productPricePurposeId="EBAY" productPriceTypeId="MINIMUM_PRICE" currencyUomId="USD" productStoreGroupId="_NA_" fromDate="2001-05-13 12:00:00.0" price="15.0" createdDate="2001-05-13 12:00:00.0" createdByUserLogin="admin" lastModifiedDate="2001-05-13 12:00:00.0" lastModifiedByUserLogin="admin"/>
-    <ProductPrice productId="GZ-1000" productPricePurposeId="EBAY" productPriceTypeId="MAXIMUM_PRICE" currencyUomId="USD" productStoreGroupId="_NA_" fromDate="2001-05-13 12:00:00.0" price="18.0" createdDate="2001-05-13 12:00:00.0" createdByUserLogin="admin" lastModifiedDate="2001-05-13 12:00:00.0" lastModifiedByUserLogin="admin"/>    
-    <ProductPrice productId="GZ-1001" productPricePurposeId="EBAY" productPriceTypeId="MINIMUM_PRICE" currencyUomId="USD" productStoreGroupId="_NA_" fromDate="2001-05-13 12:00:00.0" price="25.99" createdDate="2001-05-13 12:00:00.0" createdByUserLogin="admin" lastModifiedDate="2001-05-13 12:00:00.0" lastModifiedByUserLogin="admin"/>
-    <ProductPrice productId="GZ-2644" productPricePurposeId="EBAY" productPriceTypeId="MINIMUM_PRICE" currencyUomId="USD" productStoreGroupId="_NA_" fromDate="2001-05-13 12:00:00.0" price="48.0" createdDate="2001-05-13 12:00:00.0" createdByUserLogin="admin" lastModifiedDate="2001-05-13 12:00:00.0" lastModifiedByUserLogin="admin"/>
-    <ProductPrice productId="GZ-2644" productPricePurposeId="EBAY" productPriceTypeId="MAXIMUM_PRICE" currencyUomId="USD" productStoreGroupId="_NA_" fromDate="2001-05-13 12:00:00.0" price="55.0" createdDate="2001-05-13 12:00:00.0" createdByUserLogin="admin" lastModifiedDate="2001-05-13 12:00:00.0" lastModifiedByUserLogin="admin"/>    
-    
     <!-- test Subscription product, a Gizmo Newsletter -->
     <Product productId="GZ-NEWS-1MO" productTypeId="DIGITAL_GOOD" primaryProductCategoryId="101" productName="Gizmo Newsletter 1 Month" internalName="Gizmo Newsletter 1 Month Subscription" description="A 1 month subscription to the Gizmo Newsletter: can be used immediately after purchase." longDescription="This newsletter will give you regular updates on the wonderful world of Gizmos!" taxable="Y" chargeShipping="N" autoCreateKeywords="Y" isVirtual="N" isVariant="N" createdDate="2001-05-13 12:00:00.0" createdByUserLogin="admin" lastModifiedDate="2001-05-13 12:00:00.0" lastModifiedByUserLogin="admin"/>
     <SubscriptionResource subscriptionResourceId="GZ-NEWS" description="Gizmo Newsletter"/>
@@ -832,7 +822,8 @@ under the License.
     <ProductFeature productFeatureId="8001" productFeatureCategoryId="8000" productFeatureTypeId="LICENSE" description="GPL"/>
     <ProductFeature productFeatureId="8002" productFeatureCategoryId="8000" productFeatureTypeId="LICENSE" description="BSD"/>
     <ProductFeature productFeatureId="8003" productFeatureCategoryId="8000" productFeatureTypeId="LICENSE" description="MIT"/>
-
+    <ProductFeature productFeatureId="8004" productFeatureCategoryId="8000" productFeatureTypeId="LICENSE" description="ASL2"/>
+    
     <ProductFeatureCategory productFeatureCategoryId="9000" description="Widget Features"/>
     <ProductFeatureCategoryAppl productFeatureCategoryId="9000" productCategoryId="CATALOG1_SEARCH" fromDate="2001-05-13 12:00:00.0"/>
 
@@ -856,8 +847,10 @@ under the License.
     <ProductFeatureAppl productId="GZ-1006" productFeatureId="8002"
         productFeatureApplTypeId="SELECTABLE_FEATURE" fromDate="2001-05-13 12:00:00.0" sequenceNum="3"/>
     <ProductFeatureAppl productId="GZ-1006" productFeatureId="8003"
+        productFeatureApplTypeId="SELECTABLE_FEATURE" fromDate="2001-05-13 12:00:00.0" sequenceNum="4"/>    
+    <ProductFeatureAppl productId="GZ-1006" productFeatureId="8004"
         productFeatureApplTypeId="SELECTABLE_FEATURE" fromDate="2001-05-13 12:00:00.0" sequenceNum="4"/>
-
+    
     <ProductFeatureAppl productId="GZ-1006-1" productFeatureId="8000"
         productFeatureApplTypeId="STANDARD_FEATURE" fromDate="2001-05-13 12:00:00.0" sequenceNum="1"/>
     <ProductFeatureAppl productId="GZ-1006-2" productFeatureId="8001"
@@ -866,7 +859,9 @@ under the License.
         productFeatureApplTypeId="STANDARD_FEATURE" fromDate="2001-05-13 12:00:00.0" sequenceNum="1"/>
     <ProductFeatureAppl productId="GZ-1006-4" productFeatureId="8003"
         productFeatureApplTypeId="STANDARD_FEATURE" fromDate="2001-05-13 12:00:00.0" sequenceNum="1"/>
-
+    <ProductFeatureAppl productId="GZ-1006-5" productFeatureId="8004"
+        productFeatureApplTypeId="STANDARD_FEATURE" fromDate="2001-05-13 12:00:00.0" sequenceNum="1"/>
+    
     <ProductFeatureAppl productId="WG-9943" productFeatureId="9000"
         productFeatureApplTypeId="SELECTABLE_FEATURE" fromDate="2001-05-13 12:00:00.0" sequenceNum="1"/>
     <ProductFeatureAppl productId="WG-9943" productFeatureId="9001"
@@ -909,7 +904,9 @@ under the License.
         productIdTo="GZ-1006-3" quantity="1.0" reason=""/>
     <ProductAssoc fromDate="2001-05-13 12:00:00.0" productAssocTypeId="PRODUCT_VARIANT" productId="GZ-1006"
         productIdTo="GZ-1006-4" quantity="1.0" reason=""/>
-
+    <ProductAssoc fromDate="2001-05-13 12:00:00.0" productAssocTypeId="PRODUCT_VARIANT" productId="GZ-1006"
+        productIdTo="GZ-1006-5" quantity="1.0" reason=""/>
+    
     <ProductAssoc fromDate="2001-05-13 12:00:00.0" productAssocTypeId="PRODUCT_VARIANT" productId="WG-9943"
         productIdTo="WG-9943-B3" quantity="1.0" reason=""/>
     <ProductAssoc fromDate="2001-05-13 12:00:00.0" productAssocTypeId="PRODUCT_VARIANT" productId="WG-9943"
@@ -1049,12 +1046,7 @@ under the License.
     <ProductCategoryRollup fromDate="2001-05-13 12:00:00.0" parentProductCategoryId="GOOGLE_BASE" productCategoryId="GB_SOFTWARE"/>
     <ProductCategoryRollup fromDate="2001-05-13 12:00:00.0" parentProductCategoryId="GOOGLE_BASE" productCategoryId="GB_SPRTNG_GDS"/>
     <ProductCategoryRollup fromDate="2001-05-13 12:00:00.0" parentProductCategoryId="GOOGLE_BASE" productCategoryId="GB_TYS_GMS"/>
-    
-    <!-- ProductCategoryMember record specific to eBay -->
-    <ProductCategoryMember productCategoryId="eBay_ECom_Category" productId="GZ-1000" fromDate="2009-11-05 12:15:00.0"/>
-    <ProductCategoryMember productCategoryId="eBay_ECom_Category" productId="GZ-1001" fromDate="2009-11-05 12:15:00.0"/>
-    <ProductCategoryMember productCategoryId="eBay_ECom_Category" productId="GZ-2644" fromDate="2009-11-05 12:15:00.0"/>
-    
+
     <ProductCategoryRollup fromDate="2001-05-13 12:00:00.0" parentProductCategoryId="CATALOG1" productCategoryId="100"/>
     <ProductCategoryRollup fromDate="2001-05-13 12:00:00.0" parentProductCategoryId="100" productCategoryId="101"/>
     <ProductCategoryRollup fromDate="2001-05-13 12:00:00.0" parentProductCategoryId="100" productCategoryId="102"/>
@@ -1064,9 +1056,6 @@ under the License.
     <ProductCategoryRollup fromDate="2001-05-13 12:00:00.0" parentProductCategoryId="201" productCategoryId="2011"/>
     <ProductCategoryRollup fromDate="2001-05-13 12:00:00.0" parentProductCategoryId="201" productCategoryId="2012"/>
     <ProductCategoryRollup fromDate="2001-05-13 12:00:00.0" parentProductCategoryId="2011" productCategoryId="20111"/>
-
-    <!-- ProductCategoryRollup record specific to eBay -->
-    <ProductCategoryRollup parentProductCategoryId="eBay_Category" productCategoryId="eBay_ECom_Category" fromDate="2009-11-05 12:00:00.0"/>
 
     <!-- some default product facility settings -->
     <ProductFacility productId="GZ-2644" facilityId="WebStoreWarehouse" minimumStock="2" reorderQuantity="10" daysToShip="15"/>
@@ -1135,6 +1124,8 @@ under the License.
     <InventoryItemDetail inventoryItemId="9023" inventoryItemDetailSeqId="0001" effectiveDate="2001-05-13 12:00:00.0" availableToPromiseDiff="8" quantityOnHandDiff="8" accountingQuantityDiff="8"/>
     <InventoryItem facilityId="WebStoreWarehouse" inventoryItemId="9024" inventoryItemTypeId="NON_SERIAL_INV_ITEM" datetimeReceived="2008-08-01 08:00:00.000" productId="GZ-1006-4" ownerPartyId="Company" currencyUomId="USD" unitCost="2.4"/>
     <InventoryItemDetail inventoryItemId="9024" inventoryItemDetailSeqId="0001" effectiveDate="2001-05-13 12:00:00.0" availableToPromiseDiff="8" quantityOnHandDiff="8" accountingQuantityDiff="8"/>
+    <InventoryItem facilityId="WebStoreWarehouse" inventoryItemId="9031" inventoryItemTypeId="NON_SERIAL_INV_ITEM" datetimeReceived="2008-08-01 08:00:00.000" productId="GZ-1006-5" ownerPartyId="Company" currencyUomId="USD" unitCost="2.4"/>
+    <InventoryItemDetail inventoryItemId="9031" inventoryItemDetailSeqId="0001" effectiveDate="2001-05-13 12:00:00.0" availableToPromiseDiff="8" quantityOnHandDiff="8" accountingQuantityDiff="8"/>
     
     <InventoryItem facilityId="WebStoreWarehouse" inventoryItemId="9026" inventoryItemTypeId="NON_SERIAL_INV_ITEM" datetimeReceived="2008-08-01 08:00:00.000" productId="GZ-1000" ownerPartyId="Company" currencyUomId="USD" unitCost="2.4"/>
     <InventoryItemDetail inventoryItemId="9026" inventoryItemDetailSeqId="0001" effectiveDate="2001-05-13 12:00:00.0" availableToPromiseDiff="8" quantityOnHandDiff="8" accountingQuantityDiff="8"/>

@@ -47,6 +47,10 @@ under the License.
         </if-empty>
         <field-to-result field="payment.paymentId" result-name="paymentId"/>
 
+        <if-empty field="parameters.statusId">
+            <set field="parameters.statusId" value="PMNT_NOT_PAID"/>
+        </if-empty>
+
         <if-not-empty field="parameters.paymentMethodId">
             <entity-one entity-name="PaymentMethod" value-field="paymentMethod">
                 <field-map field-name="paymentMethodId" from-field="parameters.paymentMethodId"/>
@@ -294,6 +298,9 @@ under the License.
         </check-permission>
 
         <entity-one entity-name="Payment" value-field="payment"/>
+        <entity-one entity-name="StatusItem" value-field="statusItem">
+            <field-map field-name="statusId" from-field="parameters.statusId"/>
+        </entity-one>
         <field-to-result field="payment.statusId" result-name="oldStatusId"/>
 
         <if-compare-field field="payment.statusId" to-field="parameters.statusId" operator="not-equals">
@@ -308,10 +315,30 @@ under the License.
                 <log level="error" message="Cannot change from ${payment.statusId} to ${parameters.statusId}"/>
                 <check-errors/>
                 <else>
+                    <!-- payment method is mandatory when set to sent or received. -->
+                    <if>
+                        <condition>
+                            <and>
+                                <or>
+                                    <if-compare field="parameters.statusId" operator="equals" value="PMNT_RECEIVED"/>
+                                    <if-compare field="parameters.statusId" operator="equals" value="PMNT_SENT"/>
+                                </or>
+                                <if-empty field="payment.paymentMethodId"/>
+                            </and>
+                        </condition>
+                        <then>
+                            <add-error>
+                                <fail-property resource="AccountingUiLabels" property="AccountingMissingPaymentMethod"/>
+                            </add-error>
+                            <log level="error" message="Cannot set status to ${parameters.statusId} on payment ${payment.paymentId}: payment method is missing"/>
+                            <check-errors/>
+                        </then>
+                    </if>
+
 
                     <!-- check if the payment fully applied when set to confirmed-->
                     <if-compare field="parameters.statusId" operator="equals" value="PMNT_CONFIRMED">
-                        <set field="notYetApplied" value="${bsh:org.ofbiz.accounting.payment.PaymentWorker.getPaymentNotApplied(payment)}"/>
+                        <set field="notYetApplied" value="${groovy:org.ofbiz.accounting.payment.PaymentWorker.getPaymentNotApplied(payment)}"/>
                         <if-compare field="notYetApplied" operator="greater" value="0.00" type="BigDecimal">
                             <add-error>
                                 <fail-property resource="AccountingUiLabels" property="AccountingPSNotConfirmedNotFullyApplied"/>
@@ -870,15 +897,38 @@ under the License.
         </iterate>
     </simple-method>
 
-    <simple-method method-name="createPaymentFromOrder" short-description="Service auto create Payment from Order">
-    
-        <property-to-field resource="AccountingConfig" property="accounting.payment.purchaseorder.autocreate" field="autoCreate" default="Y"/>
-        <if-compare operator="not-equals" value="Y" field="autoCreate">
-            <log level="info" message="payment not created from approved order because config is not set to Y (AccountingConfig.properties)"/>
-            <return/>
-        </if-compare>
-    
+    <simple-method method-name="createPaymentFromOrder" short-description="Service auto create Payment from Order when payment does exist yet and not diabled by accountingconfig">
+        
         <entity-one value-field="orderHeader" entity-name="OrderHeader"/>
+
+        <if-compare operator="equals" value="PURCHASE_ORDER" field="orderHeader.orderTypeId">
+            <property-to-field resource="AccountingConfig" property="accounting.payment.purchaseorder.autocreate" field="purchaseAutoCreate" default="Y"/>
+            <if-compare operator="not-equals" value="Y" field="purchaseAutoCreate">
+                <log level="info" message="payment not created from approved order because config (accounting.payment.purchaseorder.autocreate) is not set to Y (AccountingConfig.properties)"/>
+                <return/>
+            </if-compare>
+        </if-compare>
+
+        <if-compare operator="equals" value="SALES_ORDER" field="orderHeader.orderTypeId">
+            <property-to-field resource="AccountingConfig" property="accounting.payment.salesorder.autocreate" field="salesAutoCreate" default="Y"/>
+            <if-compare operator="not-equals" value="Y" field="salesAutoCreate">
+                <log level="info" message="payment not created from approved order because config (accounting.payment.salesorder.autocreate) is not set to Y (AccountingConfig.properties)"/>
+                <return/>
+            </if-compare>
+        </if-compare>
+        <!-- check if orderPaymentPreference with payment already exist, if yes do not re-create -->
+        <entity-condition entity-name="OrderPaymentPrefAndPayment" list="orderPaymentPrefAndPayments">
+            <condition-list combine="and">
+                <condition-expr field-name="orderId" operator="equals" from-field="orderHeader.orderId"/>
+                <condition-expr field-name="statusId" operator="not-equals" value="PAYMENT_CANCELLED"/>
+            </condition-list>
+        </entity-condition>
+
+        <if-not-empty field="orderPaymentPrefAndPayments">
+            <log level="info" message="Payment not created for order ${orderHeader.orderId}, at least a single payment already exists"/>
+            <return/>
+        </if-not-empty>
+
         <entity-and list="orderRoleToList" entity-name="OrderRole">
             <field-map field-name="orderId" from-field="orderHeader.orderId"/>
             <field-map field-name="roleTypeId" value="BILL_FROM_VENDOR"/>
@@ -896,6 +946,7 @@ under the License.
                 <field-map field-name="agreementTypeId" value="PURCHASE_AGREEMENT"/>
             </entity-and>
             <set field="parameters.paymentTypeId" value="VENDOR_PAYMENT"/>
+            <set field="organizationPartyId" from-field="orderRoleFrom.partyId"/>
             <else>
                <entity-and list="agreementList" entity-name="Agreement" filter-by-date="true">
                     <field-map field-name="partyIdFrom" from-field="orderRoleFrom.partyId"/>
@@ -903,6 +954,7 @@ under the License.
                     <field-map field-name="agreementTypeId" value="SALES_AGREEMENT"/>
                 </entity-and>
                 <set field="parameters.paymentTypeId" value="CUSTOMER_PAYMENT"/>
+                <set field="organizationPartyId" from-field="orderRoleTo.partyId"/>
             </else>
         </if-compare>
         <first-from-list entry="agreement" list="agreementList"/>
@@ -924,10 +976,53 @@ under the License.
         <if-empty field="parameters.effectiveDate">
             <now-timestamp field="parameters.effectiveDate"/>
         </if-empty>
+        
+        <!-- check currency and when required use invoice currency rate or convert when invoice not available -->
+        <set field="partyAccountingPreferencesMap.organizationPartyId" from-field="organizationPartyId"/>
+        <call-service service-name="getPartyAccountingPreferences" in-map-name="partyAccountingPreferencesMap">
+             <result-to-field result-name="partyAccountingPreference" field="partyAcctgPreference"/>
+        </call-service>
+        <if>
+            <condition>
+                <and>
+                    <not>
+                        <if-empty field="partyAcctgPreference.baseCurrencyUomId" />
+                    </not>
+                    <if-compare-field to-field="partyAcctgPreference.baseCurrencyUomId" operator="equals" field="orderHeader.currencyUom" />
+                </and>
+            </condition>
+            <then>
+                <set field="parameters.currencyUomId" from-field="orderHeader.currencyUom" />
+                <set field="parameters.amount" from-field="orderHeader.grandTotal" />
+                <!-- get conversion rate from related invoice when exists -->
+                <entity-and list="invoices" entity-name="OrderItemBillingAndInvoiceAndItem">
+                    <field-map field-name="orderId" from-field="orderId" />
+                </entity-and>
+                <if-not-empty field="invoices">
+                    <entity-one entity-name="Invoice" value-field="invoice">
+                        <field-map field-name="invoiceId" from-field="invoices[0].invoiceId" />
+                    </entity-one>
+                    <set field="convertUomInMap.asOfDate" from-field="invoice.invoiceDate" />
+                </if-not-empty>
+                <set field="convertUomInMap.originalValue" from-field="orderHeader.grandTotal" />
+                <set field="convertUomInMap.uomId" from-field="orderHeader.currencyUom" />
+                <set field="convertUomInMap.uomIdTo" from-field="partyAcctgPreference.baseCurrencyUomId" />
+                <log message="convertUomInMap = ${convertUomInMap}" level="info" />
+                <call-service service-name="convertUom" in-map-name="convertUomInMap">
+                    <result-to-field result-name="convertedValue" field="parameters.amount" />
+                </call-service>
+                <set field="parameters.actualCurrencyAmount" from-field="orderHeader.grandTotal" />
+                <set field="parameters.actualCurrencyUomId" from-field="orderHeader.currencyUom" />
+                <set field="parameters.currencyUomId" from-field="partyAcctgPreference.baseCurrencyUomId" />
+            </then>
+            <else>
+                <set field="parameters.currencyUomId" from-field="orderHeader.currencyUom" />
+                <set field="parameters.amount" from-field="orderHeader.grandTotal" />
+            </else>
+        </if>
+        
         <set field="parameters.partyIdFrom" from-field="orderRoleFrom.partyId"/>
         <set field="parameters.partyIdTo" from-field="orderRoleTo.partyId"/>
-        <set field="parameters.amount" from-field="orderHeader.grandTotal"/>
-        <set field="parameters.currencyUomId" from-field="orderHeader.currencyUom"/>
         <set field="parameters.paymentMethodTypeId" value="COMPANY_ACCOUNT"/>
         <set field="parameters.statusId" value="PMNT_NOT_PAID"/>
         <set-service-fields service-name="createPayment" to-map="createPayment" map="parameters"/>
@@ -936,6 +1031,7 @@ under the License.
         </call-service>
         <set field="parameters.orderId" from-field="orderHeader.orderId"/>
         <set field="parameters.maxAmount" from-field="orderHeader.grandTotal"/>
+
         <set-service-fields service-name="createOrderPaymentPreference" to-map="newOrderPaymentPreference" map="parameters"/>
         <call-service service-name="createOrderPaymentPreference" in-map-name="newOrderPaymentPreference">
             <result-to-field result-name="orderPaymentPreferenceId" field="parameters.paymentPreferenceId"/>
@@ -960,15 +1056,36 @@ under the License.
                 <call-class-method method-name="getInvoiceTotal" class-name="org.ofbiz.accounting.invoice.InvoiceWorker" ret-field="invoiceTotal">
                     <field field="invoice" type="GenericValue"/>
                 </call-class-method>
-                <entity-condition list="payments" entity-name="Payment">
-                    <condition-list combine="and">
-                        <condition-expr field-name="statusId" value="PMNT_CONFIRMED" operator="not-equals"/>
-                        <condition-expr field-name="partyIdFrom" from-field="invoice.partyId" operator="equals"/>
-                        <condition-expr field-name="partyIdTo" from-field="invoice.partyIdFrom" operator="equals"/>
-                        <condition-expr field-name="amount" from-field="invoiceTotal" operator="equals"/>
-                    </condition-list>
-                    <order-by field-name="effectiveDate"/>
-                </entity-condition>
+                
+                <set field="checkInvoice.invoiceId" from="invoice.invoiceId"/>
+                <call-service service-name="isInvoiceInForeignCurrency" in-map-name="checkInvoice">
+                    <result-to-field result-name="isForeign"/>
+                </call-service>
+                <if-compare operator="equals" value="true" field="isForeign">
+                    <entity-condition list="payments" entity-name="Payment">
+                        <condition-list combine="and">
+                            <condition-expr field-name="statusId" value="PMNT_CONFIRMED" operator="not-equals"/>
+                            <condition-expr field-name="partyIdFrom" from-field="invoice.partyId" operator="equals"/>
+                            <condition-expr field-name="partyIdTo" from-field="invoice.partyIdFrom" operator="equals"/>
+                            <condition-expr field-name="actualCurrencyAmount" from-field="invoiceTotal" operator="equals"/>
+                            <condition-expr field-name="actualCurrencyUomId" from-field="invoice.currencyUomId" operator="equals"/>
+                        </condition-list>
+                        <order-by field-name="effectiveDate"/>
+                    </entity-condition>
+                    <else>
+                        <entity-condition list="payments" entity-name="Payment">
+                            <condition-list combine="and">
+                                <condition-expr field-name="statusId" value="PMNT_CONFIRMED" operator="not-equals"/>
+                                <condition-expr field-name="partyIdFrom" from-field="invoice.partyId" operator="equals"/>
+                                <condition-expr field-name="partyIdTo" from-field="invoice.partyIdFrom" operator="equals"/>
+                                <condition-expr field-name="amount" from-field="invoiceTotal" operator="equals"/>
+                                <condition-expr field-name="currencyUomId" from-field="invoice.currencyUomId" operator="equals"/>
+                            </condition-list>
+                            <order-by field-name="effectiveDate"/>
+                        </entity-condition>
+                    </else>
+                </if-compare>
+
                 <if-not-empty field="payments">
                     <!-- check if already applied -->
                     <entity-and list="paymentAppls" entity-name="PaymentApplication">
@@ -977,7 +1094,12 @@ under the License.
                     <if-empty field="paymentAppls">
                         <set field="createAppl.paymentId" from-field="payments[0].paymentId"/>
                         <set field="createAppl.invoiceId" from-field="parameters.invoiceId"/>
-                        <set field="createAppl.amountApplied" from-field="invoiceTotal"/>
+                        <if-compare operator="equals" value="true" field="isForeign">
+                            <set field="createAppl.amountApplied" from-field="payments[0].actualCurrencyAmount"/>
+                            <else>
+                                <set field="createAppl.amountApplied" from-field="payments[0].amount"/>
+                            </else>
+                        </if-compare>
                     </if-empty>
                 </if-not-empty>
             </if-not-empty>
@@ -986,6 +1108,7 @@ under the License.
         <if-not-empty field="parameters.paymentId">
             <entity-one value-field="payment" entity-name="Payment"/>
             <if-not-empty field="payment">
+                        
                 <entity-condition list="invoices" entity-name="Invoice">
                     <condition-list combine="and">
                         <condition-expr field-name="statusId" value="INVOICE_READY" operator="not-equals"/>
@@ -1001,9 +1124,27 @@ under the License.
                     <call-class-method method-name="getInvoiceTotal" class-name="org.ofbiz.accounting.invoice.InvoiceWorker" ret-field="invoiceTotal">
                         <field field="invoice" type="GenericValue"/>
                     </call-class-method>
-                    <if-compare-field operator="equals" field="invoiceTotal" to-field="payment.amount">
-                        <set field="invoiceId" from-field="invoice.invoiceId"/>
-                    </if-compare-field>                
+
+                    <set field="checkInvoice.invoiceId" from="invoice.invoiceId"/>
+                    <call-service service-name="isInvoiceInForeignCurrency" in-map-name="checkInvoice">
+                        <result-to-field result-name="isForeign"/>
+                    </call-service>                    
+                    <if-compare operator="equals" value="true" field="isForeign">
+                        <if-compare-field operator="equals" field="invoiceTotal" to-field="payment.actualCurrencyAmount">
+                            <if-compare-field operator="equals" field="invoice.currencyUomId" to-field="payment.actualCurrencyUomId">
+                                <set field="invoiceId" from-field="invoice.invoiceId"/>
+                                <set field="amountApplied" from-field="payment.actualCurrencyAmount"/>
+                            </if-compare-field>                
+                        </if-compare-field>                
+                        <else>
+                            <if-compare-field operator="equals" field="invoiceTotal" to-field="payment.amount">
+                                <if-compare-field operator="equals" field="invoice.currencyUomId" to-field="payment.currencyUomId">
+                                    <set field="invoiceId" from-field="invoice.invoiceId"/>
+                                    <set field="amountApplied" from-field="payment.amount"/>
+                                </if-compare-field>                
+                            </if-compare-field>                
+                        </else>
+                    </if-compare>
                 </iterate>
                 <if-not-empty field="invoiceId">
                     <entity-and list="paymentAppls" entity-name="PaymentApplication">
@@ -1012,7 +1153,7 @@ under the License.
                     <if-empty field="paymentAppls">
                         <set field="createAppl.paymentId" from-field="parameters.paymentId"/>
                         <set field="createAppl.invoiceId" from-field="invoiceId"/>
-                        <set field="createAppl.amountApplied" from-field="payment.amount"/>
+                        <set field="createAppl.amountApplied" from-field="amountApplied"/>
                     </if-empty>
                 </if-not-empty>
             </if-not-empty>
@@ -1027,4 +1168,40 @@ under the License.
         </if-not-empty>
     </simple-method>
     
+    <!-- PaymentContent -->
+    <simple-method method-name="createPaymentContent" short-description="Create Content For Payment">
+        <make-value value-field="newEntity" entity-name="PaymentContent"/>
+        <set-pk-fields map="parameters" value-field="newEntity"/>
+        <set-nonpk-fields map="parameters" value-field="newEntity"/>
+
+        <if-empty field="newEntity.fromDate">
+            <now-timestamp field="nowTimestamp"/>
+            <set field="newEntity.fromDate" from-field="nowTimestamp"/>
+        </if-empty>
+
+        <create-value value-field="newEntity"/>
+
+        <set-service-fields service-name="updateContent" map="parameters" to-map="updateContent"/>
+        <call-service service-name="updateContent" in-map-name="updateContent"/>
+
+        <field-to-result field="newEntity.contentId" result-name="contentId"/>
+        <field-to-result field="newEntity.paymentId" result-name="paymentId"/>
+        <field-to-result field="newEntity.paymentContentTypeId" result-name="paymentContentTypeId"/>
+    </simple-method>
+    <simple-method method-name="updatePaymentContent" short-description="Update Content For Payment">
+        <make-value value-field="lookupPKMap" entity-name="PaymentContent"/>
+        <set-pk-fields map="parameters" value-field="lookupPKMap"/>
+        <find-by-primary-key map="lookupPKMap" value-field="lookedUpValue"/>
+        <set-nonpk-fields map="parameters" value-field="lookedUpValue"/>
+        <store-value value-field="lookedUpValue"/>
+
+        <set-service-fields service-name="updateContent" map="parameters" to-map="updateContent"/>
+        <call-service service-name="updateContent" in-map-name="updateContent"/>
+    </simple-method>
+    <simple-method method-name="removePaymentContent" short-description="Remove Content From Payment">
+        <make-value value-field="lookupPKMap" entity-name="PaymentContent"/>
+        <set-pk-fields map="parameters" value-field="lookupPKMap"/>
+        <find-by-primary-key map="lookupPKMap" value-field="lookedUpValue"/>
+        <remove-value value-field="lookedUpValue"/>
+    </simple-method>
 </simple-methods>

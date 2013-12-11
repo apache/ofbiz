@@ -229,17 +229,17 @@ under the License.
             <drop-down allow-empty="true"><option key="Y" description="${uiLabelMap.CommonY}"/><option key="N" description="${uiLabelMap.CommonN}"/></drop-down>
         </field>
 
-        <field position="1" name="returnable" title="${uiLabelMap.ProductReturnable}">
+        <field position="1" name="returnable" title="${uiLabelMap.ProductReturnable}" use-when="product==null">
             <drop-down allow-empty="true"><option key="Y" description="${uiLabelMap.CommonY}"/><option key="N" description="${uiLabelMap.CommonN}"/></drop-down>
         </field>
-        <field position="2" name="includeInPromotions" title="${uiLabelMap.ProductIncludePromotions}">
+        <field position="2" name="includeInPromotions" title="${uiLabelMap.ProductIncludePromotions}" use-when="product==null">
             <drop-down allow-empty="true"><option key="Y" description="${uiLabelMap.CommonY}"/><option key="N" description="${uiLabelMap.CommonN}"/></drop-down>
         </field>
 
-        <field position="3" name="taxable" title="${uiLabelMap.ProductTaxable}">
+        <field position="3" name="taxable" title="${uiLabelMap.ProductTaxable}" use-when="product==null">
             <drop-down allow-empty="true"><option key="Y" description="${uiLabelMap.CommonY}"/><option key="N" description="${uiLabelMap.CommonN}"/></drop-down>
         </field>
-        <field position="4" name="autoCreateKeywords" title="${uiLabelMap.ProductAutoCreateKeywords}">
+        <field position="4" name="autoCreateKeywords" title="${uiLabelMap.ProductAutoCreateKeywords}" use-when="product==null">
             <drop-down allow-empty="true"><option key="Y" description="${uiLabelMap.CommonY}"/><option key="N" description="${uiLabelMap.CommonN}"/></drop-down>
         </field>
 
@@ -265,7 +265,7 @@ under the License.
         <field use-when="product!=null" position="2" name="createdByText" title="${uiLabelMap.CommonCreatedBy}:">
             <display description="[${product.createdByUserLogin}] ${uiLabelMap.CommonOn} ${product.createdDate}" also-hidden="false"/>
         </field>
-        <field name="orderDecimalQuantity" >
+        <field name="orderDecimalQuantity" use-when="product==null">
             <drop-down allow-empty="true" ><option key="Y" description="${uiLabelMap.CommonY}"/><option key="N" description="${uiLabelMap.CommonN}"/></drop-down>
         </field>
         <sort-order>
@@ -1884,7 +1884,7 @@ under the License.
             <entity-one entity-name="Enumeration" value-field="locationType">
                 <field-map field-name="enumId" from-field="facilityLocation.locationTypeEnumId"/>
             </entity-one>
-            <set field="showPosition1" value="${bsh:String prev=(String)previousItem.get(&quot;facilityId&quot;);return new Boolean(!(prev!=null&amp;&amp;prev.equals(facilityId)));}" type="Boolean"/>
+            <set field="showPosition1" value="${groovy:String prev=(String)previousItem.get(&quot;facilityId&quot;);return new Boolean(!(prev!=null&amp;&amp;prev.equals(facilityId)));}" type="Boolean"/>
         </row-actions>
         <auto-fields-service service-name="updateProductFacilityLocation" default-position="2"/>
         <field name="productId" position="2"><hidden/></field>
@@ -2028,14 +2028,14 @@ under the License.
         </field>
     </form>
     <!-- GlAccount-->
-    <form name="ListProductGlAccounts" type="list" target="updateProductGlAccount" title=""
+    <form name="ListProductGlAccounts" type="list" target="updateProductGlAccount" title="" list-name="productGlAccounts"
         odd-row-style="alternate-row" default-table-style="basic-table">
-        <actions>
-            <entity-condition entity-name="ProductGlAccount" list="productGlAccounts">
-                <condition-expr field-name="productId" from-field="productId"/>
-                <order-by field-name="productId"/>
+        <row-actions>
+            <entity-condition entity-name="GlAccountOrganizationAndClass" list="organizationGlAccounts">
+                <condition-expr field-name="organizationPartyId" from-field="organizationPartyId"/>
+                <order-by field-name="glAccountId"/>
             </entity-condition>
-        </actions>
+        </row-actions>
         <field name="productId"><hidden/></field>
         <field name="glAccountTypeId" title="${uiLabelMap.ProductAccountType}">
             <display-entity entity-name="GlAccountType" key-field-name="glAccountTypeId" description="${description}"/>
@@ -2045,7 +2045,7 @@ under the License.
         </field>
         <field name="glAccountId" title="${uiLabelMap.ProductGlAccount}">
             <drop-down allow-empty="false">
-                <list-options key-name="accountCode" list-name="glAccounts" description="${accountCode} ${accountName}"/>
+                <list-options key-name="accountCode" list-name="organizationGlAccounts" description="${accountCode} ${accountName}"/>
             </drop-down>
         </field>
         <field name="submitButton" title="${uiLabelMap.CommonUpdate}"><submit button-type="button"/></field>
@@ -2063,17 +2063,17 @@ under the License.
                 <list-options key-name="glAccountTypeId" list-name="productGlAccountTypes" description="${description}"/>
             </drop-down>
         </field>
-        <field name="glAccountId" title="${uiLabelMap.ProductGlAccount}">
-            <drop-down allow-empty="false">
-                <list-options key-name="accountCode" list-name="glAccounts" description="${accountCode} ${accountName}"/>
-            </drop-down>
-        </field>
         <field name="organizationPartyId" title="${uiLabelMap.ProductOrganization}">
             <drop-down allow-empty="false">
                 <entity-options entity-name="PartyRoleAndPartyDetail" key-field-name="partyId" description="${groupName} [${partyId}]">
                     <entity-constraint name="roleTypeId" operator="equals" value="INTERNAL_ORGANIZATIO"/>
                     <entity-order-by field-name="partyId"/>
                 </entity-options>
+            </drop-down>
+        </field>
+        <field name="glAccountId" title="${uiLabelMap.ProductGlAccount}">
+            <drop-down allow-empty="false">
+                <list-options key-name="accountCode" list-name="glAccounts" description="${accountCode} ${accountName}"/>
             </drop-down>
         </field>
         <field name="submitButton" title="${uiLabelMap.CommonAdd}"><submit button-type="button"/></field>

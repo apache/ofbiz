@@ -20,8 +20,9 @@
 package org.ofbiz.accounting.util;
 
 import java.math.BigDecimal;
-import java.util.Iterator;
 import java.util.List;
+
+import javolution.util.FastList;
 
 import org.ofbiz.accounting.AccountingException;
 import org.ofbiz.base.util.Debug;
@@ -29,8 +30,6 @@ import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
-
-import javolution.util.FastList;
 
 
 public class UtilAccounting {
@@ -92,31 +91,6 @@ public class UtilAccounting {
         return getProductOrgGlAccountId(null, glAccountTypeId, organizationPartyId, delegator);
     }
 
-    /**
-     * Little method to figure out the net or ending balance of a GlAccountHistory or GlAccountAndHistory value, based on what kind
-     * of account (DEBIT or CREDIT) it is
-     * @param account - GlAccountHistory or GlAccountAndHistory value
-     * @return balance - a BigDecimal
-     */
-    public static BigDecimal getNetBalance(GenericValue account, String debugModule) {
-        try {
-            return getNetBalance(account);
-        } catch (GenericEntityException ex) {
-            Debug.logError(ex.getMessage(), debugModule);
-            return null;
-        }
-    }
-    public static BigDecimal getNetBalance(GenericValue account) throws GenericEntityException {
-        GenericValue glAccount = account.getRelatedOne("GlAccount", false);
-        BigDecimal balance = BigDecimal.ZERO;
-        if (isDebitAccount(glAccount)) {
-            balance = account.getBigDecimal("postedDebits").subtract(account.getBigDecimal("postedCredits"));
-        } else if (isCreditAccount(glAccount)) {
-            balance = account.getBigDecimal("postedCredits").subtract(account.getBigDecimal("postedDebits"));
-        }
-        return balance;
-    }
-
     public static List<String> getDescendantGlAccountClassIds(GenericValue glAccountClass) throws GenericEntityException {
         List<String> glAccountClassIds = FastList.newInstance();
         getGlAccountClassChildren(glAccountClass, glAccountClassIds);
@@ -125,7 +99,7 @@ public class UtilAccounting {
     private static void getGlAccountClassChildren(GenericValue glAccountClass, List<String> glAccountClassIds) throws GenericEntityException {
         glAccountClassIds.add(glAccountClass.getString("glAccountClassId"));
         List<GenericValue> glAccountClassChildren = glAccountClass.getRelated("ChildGlAccountClass", null, null, true);
-        for(GenericValue glAccountClassChild : glAccountClassChildren) {
+        for (GenericValue glAccountClassChild : glAccountClassChildren) {
             getGlAccountClassChildren(glAccountClassChild, glAccountClassIds);
         }
     }

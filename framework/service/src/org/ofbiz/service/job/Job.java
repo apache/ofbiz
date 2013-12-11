@@ -18,6 +18,8 @@
  *******************************************************************************/
 package org.ofbiz.service.job;
 
+import java.util.Date;
+
 /**
  * A scheduled job.
  * <p>A job starts out in the created state. When the job is queued for execution, it
@@ -25,7 +27,7 @@ package org.ofbiz.service.job;
  * When the job execution ends, it transitions to the finished or failed state - depending
  * on the outcome of the task that was performed.</p>
  */
-public interface Job {
+public interface Job extends Runnable {
 
     public static enum State {CREATED, QUEUED, RUNNING, FINISHED, FAILED};
 
@@ -33,11 +35,6 @@ public interface Job {
      * Returns the current state of this job.
      */
     State currentState();
-
-    /**
-     *  Executes this Job.
-     */
-    void exec() throws InvalidJobException;
 
     /**
      * Returns the ID of this Job.
@@ -50,7 +47,8 @@ public interface Job {
     String getJobName();
 
     /**
-     *  Returns the time to run in milliseconds.
+     *  Returns the job execution time in milliseconds.
+     *  Returns zero if the job has not run.
      */
     long getRuntime();
 
@@ -60,8 +58,19 @@ public interface Job {
     boolean isValid();
 
     /**
-     * Transitions the job to the queued state.
+     * Transitions this job to the pre-queued (created) state. The job manager
+     * will call this method when there was a problem adding this job to the queue.
+     */
+    void deQueue() throws InvalidJobException;
+
+    /**
+     * Transitions this job to the queued state.
      */
     void queue() throws InvalidJobException;
+
+    /**
+     * Returns the time this job is scheduled to start.
+     */
+    Date getStartTime();
 }
 

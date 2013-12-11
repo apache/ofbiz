@@ -575,18 +575,12 @@ public class ModelService extends AbstractMap<String, Object> implements Seriali
         // required and type validation complete, do allow-html validation
         if ("IN".equals(mode)) {
             List<String> errorMessageList = FastList.newInstance();
-            for (ModelParam modelParam: this.contextInfo.values()) {
-                if (context.get(modelParam.name) != null &&
-                        ("String".equals(modelParam.type) || "java.lang.String".equals(modelParam.type)) &&
-                        !"any".equals(modelParam.allowHtml) &&
-                        ("INOUT".equals(modelParam.mode) || "IN".equals(modelParam.mode))) {
-                    // the param is a String, allow-html is none or safe, and we are looking at an IN parameter during input parameter validation
+            for (ModelParam modelParam : this.contextInfo.values()) {
+                // the param is a String, allow-html is not any, and we are looking at an IN parameter during input parameter validation
+                if (context.get(modelParam.name) != null && ("String".equals(modelParam.type) || "java.lang.String".equals(modelParam.type)) 
+                        && !"any".equals(modelParam.allowHtml) && ("INOUT".equals(modelParam.mode) || "IN".equals(modelParam.mode))) {
                     String value = (String) context.get(modelParam.name);
-                    if ("none".equals(modelParam.allowHtml)) {
-                        StringUtil.checkStringForHtmlStrictNone(modelParam.name, value, errorMessageList);
-                    } else if ("safe".equals(modelParam.allowHtml)) {
-                        StringUtil.checkStringForHtmlSafeOnly(modelParam.name, value, errorMessageList);
-                    }
+                    StringUtil.checkStringForHtmlStrictNone(modelParam.name, value, errorMessageList);
                 }
             }
             if (errorMessageList.size() > 0) {
@@ -1374,6 +1368,7 @@ public class ModelService extends AbstractMap<String, Object> implements Seriali
         /* null Element */
         Element stdNullElement = document.createElement("xsd:element");
         stdNullElement.setAttribute("name", "null");
+        stdNullElement.setAttribute("nillable", "true");
         Element stdNullElement0 = document.createElement("xsd:complexType");
         stdNullElement.appendChild(stdNullElement0);
         Element stdNullElement1 = document.createElement("xsd:attribute");
@@ -1381,7 +1376,6 @@ public class ModelService extends AbstractMap<String, Object> implements Seriali
         stdNullElement1.setAttribute("name", "value");
         stdNullElement1.setAttribute("type", "xsd:string");
         stdNullElement1.setAttribute("use", "required");
-        stdNullElement1.setAttribute("nillable", "true");
         schema.appendChild(stdNullElement);
         /* std-String Element */
         Element stdStringElement = document.createElement("xsd:element");
@@ -1685,7 +1679,6 @@ public class ModelService extends AbstractMap<String, Object> implements Seriali
         mapValueComplexTypeNull.setAttribute("ref", "tns:null");
         mapValueComplexTypeNull.setAttribute("minOccurs", "1");
         mapValueComplexTypeNull.setAttribute("maxOccurs", "1");
-        mapValueComplexTypeNull.setAttribute("nillable", "true");
         mapValueComplexType0.appendChild(mapValueComplexTypeNull);
         Element mapValueComplexType1 = document.createElement("xsd:element");
         mapValueComplexType1.setAttribute("ref", "tns:std-String");
@@ -1829,7 +1822,6 @@ public class ModelService extends AbstractMap<String, Object> implements Seriali
         colCollectionComplexTypeNull.setAttribute("ref", "tns:null");
         colCollectionComplexTypeNull.setAttribute("minOccurs", "0");
         colCollectionComplexTypeNull.setAttribute("maxOccurs", "unbounded");
-        colCollectionComplexTypeNull.setAttribute("nillable", "true");
         colCollectionComplexType0.appendChild(colCollectionComplexTypeNull);
         Element colCollectionComplexType1 = document.createElement("xsd:element");
         colCollectionComplexType1.setAttribute("ref", "tns:std-String");
