@@ -101,8 +101,8 @@
     <classpathentry kind="lib" path="framework/base/lib/scripting/groovy-all-2.1.9.jar"/>
     <classpathentry kind="lib" path="framework/base/lib/scripting/jakarta-oro-2.0.8.jar"/>
     <classpathentry kind="lib" path="framework/base/lib/scripting/jython-nooro.jar"/>
-    <classpathentry kind="lib" path="specialpurpose/birt/lib/org.eclipse.birt.runtime_3.7.2.v20120214-1408.jar"/>
-    <classpathentry kind="lib" path="specialpurpose/birt/lib/viewservlets.jar"/>
+    <!--  classpathentry kind="lib" path="specialpurpose/birt/lib/org.eclipse.birt.runtime_3.7.2.v20120214-1408.jar"/>
+    <classpathentry kind="lib" path="specialpurpose/birt/lib/viewservlets.jar"/>-->
     <classpathentry kind="lib" path="framework/catalina/lib/ecj-4.2.2.jar"/>
     <classpathentry kind="lib" path="framework/catalina/lib/tomcat-7.0.47-catalina-ha.jar"/>
     <classpathentry kind="lib" path="framework/catalina/lib/tomcat-7.0.47-catalina-tribes.jar"/>
@@ -147,7 +147,7 @@
     <classpathentry kind="lib" path="framework/webapp/lib/json-lib-2.2.3-jdk15.jar"/>
     <classpathentry kind="lib" path="framework/webapp/lib/rome-0.9.jar"/>
     <classpathentry kind="lib" path="framework/webapp/lib/velocity-1.6.1.jar"/>
-    <classpathentry kind="lib" path="specialpurpose/googlecheckout/lib/checkout-sdk-0.8.8.jar"/>
+    <!--  classpathentry kind="lib" path="specialpurpose/googlecheckout/lib/checkout-sdk-0.8.8.jar"/>
     <classpathentry kind="lib" path="specialpurpose/ldap/lib/cas-server-core-3.3.jar"/>
     <classpathentry kind="lib" path="specialpurpose/pos/lib/XuiCoreSwing-v3.2rc2b.jar"/>
     <classpathentry kind="lib" path="specialpurpose/pos/lib/XuiOptional-v3.2rc2b.jar"/>
@@ -157,7 +157,7 @@
     <classpathentry kind="lib" path="specialpurpose/ebaystore/lib/attributes.jar"/>
     <classpathentry kind="lib" path="specialpurpose/ebaystore/lib/ebaycalls.jar"/>
     <classpathentry kind="lib" path="specialpurpose/ebaystore/lib/ebaysdkcore.jar"/>
-    <classpathentry kind="lib" path="specialpurpose/ebaystore/lib/helper.jar"/>
+    <classpathentry kind="lib" path="specialpurpose/ebaystore/lib/helper.jar"/>--> 
     <classpathentry excluding="org/ofbiz/accounting/thirdparty/cybersource/**|org/ofbiz/accounting/thirdparty/verisign/**|org/ofbiz/accounting/thirdparty/worldpay/**|org/ofbiz/accounting/thirdparty/paypal/PayPalServices.java|org/ofbiz/accounting/thirdparty/orbital/**|org/ofbiz/accounting/thirdparty/securepay/**|org/ofbiz/accounting/thirdparty/ideal/**" kind="src" path="applications/accounting/src"/>
     <classpathentry excluding="org/ofbiz/content/openoffice/|org/ofbiz/content/report/" kind="src" path="applications/content/src"/>
     <classpathentry kind="src" path="applications/manufacturing/src"/>
@@ -168,11 +168,11 @@
     <classpathentry excluding="org/ofbiz/securityext/thirdparty/truition/TruitionCoReg.java" kind="src" path="applications/securityext/src"/>
     <classpathentry kind="src" path="applications/humanres/src"/>
     <classpathentry kind="src" path="applications/workeffort/src"/>
-    <classpathentry kind="src" path="specialpurpose/appserver/src"/>
+    <!--  classpathentry kind="src" path="specialpurpose/appserver/src"/> -->
     <classpathentry kind="src" path="framework/base/build/gen-src/javacc"/>
     <classpathentry excluding="org/ofbiz/base/config/CoberturaInstrumenter.java" kind="src" path="framework/base/src"/>
     <classpathentry kind="src" path="framework/bi/src"/>
-    <classpathentry kind="src" path="specialpurpose/birt/src"/>
+    <!--  classpathentry kind="src" path="specialpurpose/birt/src"/>-->
     <classpathentry kind="src" path="framework/catalina/src"/>
     <classpathentry kind="src" path="framework/common/src"/>
     <classpathentry kind="src" path="framework/datafile/src"/>
