@@ -101,8 +101,8 @@
     <classpathentry kind="lib" path="framework/base/lib/scripting/groovy-all-2.1.9.jar"/>
     <classpathentry kind="lib" path="framework/base/lib/scripting/jakarta-oro-2.0.8.jar"/>
     <classpathentry kind="lib" path="framework/base/lib/scripting/jython-nooro.jar"/>
-    <classpathentry kind="lib" path="specialpurpose/birt/lib/org.eclipse.birt.runtime_3.7.2.v20120214-1408.jar"/>
-    <classpathentry kind="lib" path="specialpurpose/birt/lib/viewservlets.jar"/>
+    <!--  classpathentry kind="lib" path="specialpurpose/birt/lib/org.eclipse.birt.runtime_3.7.2.v20120214-1408.jar"/>
+    <classpathentry kind="lib" path="specialpurpose/birt/lib/viewservlets.jar"/>-->
     <classpathentry kind="lib" path="framework/catalina/lib/ecj-4.2.2.jar"/>
     <classpathentry kind="lib" path="framework/catalina/lib/tomcat-7.0.47-catalina-ha.jar"/>
     <classpathentry kind="lib" path="framework/catalina/lib/tomcat-7.0.47-catalina-tribes.jar"/>
@@ -112,7 +112,7 @@
     <classpathentry kind="lib" path="framework/entity/lib/commons-dbcp-1.4.jar"/>
     <classpathentry kind="lib" path="framework/geronimo/lib/geronimo-connector-2.1.1.jar"/>
     <classpathentry kind="lib" path="framework/geronimo/lib/geronimo-transaction-2.1.1.jar"/>
-    <classpathentry kind="lib" path="specialpurpose/jetty/lib/com.sun.el-2.2.0.v201108011116.jar"/>
+    <!-- classpathentry kind="lib" path="specialpurpose/jetty/lib/com.sun.el-2.2.0.v201108011116.jar"/>
     <classpathentry kind="lib" path="specialpurpose/jetty/lib/javax.servlet.jsp.jstl-1.2.0.v201105211821.jar"/>
     <classpathentry kind="lib" path="specialpurpose/jetty/lib/jetty-ajp-8.1.2.v20120308.jar"/>
     <classpathentry kind="lib" path="specialpurpose/jetty/lib/jetty-continuation-8.1.2.v20120308.jar"/>
@@ -128,7 +128,7 @@
     <classpathentry kind="lib" path="specialpurpose/jetty/lib/org.apache.taglibs.standard.glassfish-1.2.0.v201112081803.jar"/>
     <classpathentry kind="lib" path="specialpurpose/jetty/lib/org.eclipse.jdt.core-3.7.1.jar"/>
     <classpathentry kind="lib" path="specialpurpose/birt/lib/axis-1.4.jar"/>
-    <classpathentry kind="lib" path="specialpurpose/birt/lib/axis-ant-1.4.jar"/>
+    <classpathentry kind="lib" path="specialpurpose/birt/lib/axis-ant-1.4.jar"/ -->
     <classpathentry kind="lib" path="framework/service/lib/wsdl4j-1.6.2.jar"/>
     <classpathentry kind="lib" path="framework/service/lib/axiom-api-1.2.9.jar"/>
     <classpathentry kind="lib" path="framework/service/lib/axiom-impl-1.2.9.jar"/>
@@ -147,7 +147,7 @@
     <classpathentry kind="lib" path="framework/webapp/lib/json-lib-2.2.3-jdk15.jar"/>
     <classpathentry kind="lib" path="framework/webapp/lib/rome-0.9.jar"/>
     <classpathentry kind="lib" path="framework/webapp/lib/velocity-1.6.1.jar"/>
-    <classpathentry kind="lib" path="specialpurpose/googlecheckout/lib/checkout-sdk-0.8.8.jar"/>
+    <!-- classpathentry kind="lib" path="specialpurpose/googlecheckout/lib/checkout-sdk-0.8.8.jar"/>
     <classpathentry kind="lib" path="specialpurpose/ldap/lib/cas-server-core-3.3.jar"/>
     <classpathentry kind="lib" path="specialpurpose/pos/lib/XuiCoreSwing-v3.2rc2b.jar"/>
     <classpathentry kind="lib" path="specialpurpose/pos/lib/XuiOptional-v3.2rc2b.jar"/>
@@ -157,7 +157,7 @@
     <classpathentry kind="lib" path="specialpurpose/ebaystore/lib/attributes.jar"/>
     <classpathentry kind="lib" path="specialpurpose/ebaystore/lib/ebaycalls.jar"/>
     <classpathentry kind="lib" path="specialpurpose/ebaystore/lib/ebaysdkcore.jar"/>
-    <classpathentry kind="lib" path="specialpurpose/ebaystore/lib/helper.jar"/>
+    <classpathentry kind="lib" path="specialpurpose/ebaystore/lib/helper.jar"/-->
     <classpathentry excluding="org/ofbiz/accounting/thirdparty/cybersource/**|org/ofbiz/accounting/thirdparty/verisign/**|org/ofbiz/accounting/thirdparty/worldpay/**|org/ofbiz/accounting/thirdparty/paypal/PayPalServices.java|org/ofbiz/accounting/thirdparty/orbital/**|org/ofbiz/accounting/thirdparty/securepay/**|org/ofbiz/accounting/thirdparty/ideal/**" kind="src" path="applications/accounting/src"/>
     <classpathentry excluding="org/ofbiz/content/openoffice/|org/ofbiz/content/report/" kind="src" path="applications/content/src"/>
     <classpathentry kind="src" path="applications/manufacturing/src"/>
@@ -168,18 +168,18 @@
     <classpathentry excluding="org/ofbiz/securityext/thirdparty/truition/TruitionCoReg.java" kind="src" path="applications/securityext/src"/>
     <classpathentry kind="src" path="applications/humanres/src"/>
     <classpathentry kind="src" path="applications/workeffort/src"/>
-    <classpathentry kind="src" path="specialpurpose/appserver/src"/>
+    <!-- classpathentry kind="src" path="specialpurpose/appserver/src"/-->
     <classpathentry kind="src" path="framework/base/build/gen-src/javacc"/>
     <classpathentry excluding="org/ofbiz/base/config/CoberturaInstrumenter.java" kind="src" path="framework/base/src"/>
     <classpathentry kind="src" path="framework/bi/src"/>
-    <classpathentry kind="src" path="specialpurpose/birt/src"/>
+    <!-- classpathentry kind="src" path="specialpurpose/birt/src"/-->
     <classpathentry kind="src" path="framework/catalina/src"/>
     <classpathentry kind="src" path="framework/common/src"/>
     <classpathentry kind="src" path="framework/datafile/src"/>
     <classpathentry kind="src" path="framework/entity/src"/>
     <classpathentry kind="src" path="framework/entityext/src"/>
     <classpathentry kind="src" path="framework/geronimo/src"/>
-    <classpathentry kind="src" path="specialpurpose/jetty/src"/>
+    <!-- classpathentry kind="src" path="specialpurpose/jetty/src"/-->
     <classpathentry kind="src" path="framework/minilang/src"/>
     <classpathentry kind="src" path="framework/security/src"/>
     <classpathentry kind="src" path="framework/service/src"/>
@@ -190,11 +190,11 @@
     <classpathentry excluding="org/ofbiz/webapp/ftl/FreeMarkerViewRenderer.java|org/ofbiz/webapp/ftl/JpCacheIncludeTransform.java|org/ofbiz/webapp/view/FopPdfViewHandler.java|org/ofbiz/webapp/view/GenericViewRenderer.java|org/ofbiz/webapp/view/JPublishViewHandler.java|org/ofbiz/webapp/view/JPublishWrapper.java|org/ofbiz/webapp/view/JasperReportsPdfViewHandler.java|org/ofbiz/webapp/view/JasperReportsXmlViewHandler.java|org/ofbiz/webapp/view/JasperReportsJXlsViewHandler.java|org/ofbiz/webapp/view/JasperReportsPoiXlsViewHandler.java" kind="src" path="framework/webapp/src"/>
     <classpathentry kind="src" path="framework/webtools/src"/>
     <classpathentry kind="src" path="framework/widget/src"/>
-    <classpathentry kind="src" path="specialpurpose/assetmaint/src"/>
+    <!-- classpathentry kind="src" path="specialpurpose/assetmaint/src"/>
     <classpathentry kind="src" path="specialpurpose/ebay/src"/>
-    <classpathentry kind="src" path="specialpurpose/ebaystore/src"/>
+    <classpathentry kind="src" path="specialpurpose/ebaystore/src"/-->
     <classpathentry kind="src" path="specialpurpose/ecommerce/src"/>
-    <classpathentry kind="src" path="specialpurpose/example/src"/>
+    <!-- classpathentry kind="src" path="specialpurpose/example/src"/>
     <classpathentry kind="src" path="specialpurpose/googlebase/src"/>
     <classpathentry kind="src" path="specialpurpose/googlecheckout/src"/>
     <classpathentry kind="src" path="specialpurpose/hhfacility/src"/>
@@ -202,7 +202,7 @@
     <classpathentry kind="src" path="specialpurpose/oagis/src"/>
     <classpathentry kind="src" path="specialpurpose/pos/src"/>
     <classpathentry kind="src" path="specialpurpose/projectmgr/src"/>
-    <classpathentry kind="src" path="specialpurpose/webpos/src"/>
+    <classpathentry kind="src" path="specialpurpose/webpos/src"/-->
     <classpathentry exported="true" kind="con" path="GROOVY_DSL_SUPPORT"/>
     <classpathentry kind="output" path="bin"/>
 </classpath>
