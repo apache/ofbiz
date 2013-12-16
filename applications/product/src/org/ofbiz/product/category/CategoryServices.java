@@ -503,7 +503,6 @@ public class CategoryServices {
         }
     }
 
-    @SuppressWarnings("unchecked")
     public static void toJsonObjectList(List attrList, HttpServletResponse response){
         StringBuilder jsonBuilder = new StringBuilder("[");
         for (Object attrMap : attrList) {

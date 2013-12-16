@@ -84,7 +84,6 @@ public class CatalogUrlSeoTransform implements TemplateTransformModel {
         }
     }
     
-    @SuppressWarnings("unchecked")
     public String getStringArg(Map args, String key) {
         Object o = args.get(key);
         if (o instanceof SimpleScalar) {
@@ -96,7 +95,6 @@ public class CatalogUrlSeoTransform implements TemplateTransformModel {
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public Writer getWriter(final Writer out, final Map args)
             throws TemplateModelException, IOException {
         final StringBuilder buf = new StringBuilder();

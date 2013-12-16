@@ -40,7 +40,6 @@ if ("SALES_INVOICE".equals(invoice.invoiceTypeId)) {
         EQUALS(invoiceItemTypeId: "INV_PROD_ITEM")
         EQUALS(parentTypeId: "INV_PROD_ITEM")
     }
-    invoiceItemTypes = delegator.findList("InvoiceItemType", itemTypesCond, null, ["parentTypeId", "invoiceItemTypeId"], null, false);
     glAccountOrganizationAndClassList = delegator.findByAnd("GlAccountOrganizationAndClass", [organizationPartyId : invoice.partyIdFrom], null, false);
 } else if ("PURCHASE_INVOICE".equals(invoice.invoiceTypeId)) {
     itemTypesCond = exprBldr.OR() {
@@ -51,7 +50,6 @@ if ("SALES_INVOICE".equals(invoice.invoiceTypeId)) {
         EQUALS(invoiceItemTypeId: "PINV_PROD_ITEM")
         EQUALS(parentTypeId: "PINV_PROD_ITEM")
     }
-    invoiceItemTypes = delegator.findList("InvoiceItemType", itemTypesCond, null, ["parentTypeId", "invoiceItemTypeId"], null, false);
     glAccountOrganizationAndClassList = delegator.findByAnd("GlAccountOrganizationAndClass", [organizationPartyId : invoice.partyId], null, false);
 } else if ("PAYROL_INVOICE".equals(invoice.invoiceTypeId)) {
     itemTypesCond = exprBldr.OR() {
@@ -62,7 +60,6 @@ if ("SALES_INVOICE".equals(invoice.invoiceTypeId)) {
         EQUALS(invoiceItemTypeId: "PAYROL_TAXES")
         EQUALS(parentTypeId: "PAYROL_TAXES")
     }
-    invoiceItemTypes = delegator.findList("InvoiceItemType", itemTypesCond, null, ["parentTypeId", "invoiceItemTypeId"], null, false);
     glAccountOrganizationAndClassList = delegator.findByAnd("GlAccountOrganizationAndClass", [organizationPartyId : invoice.partyId], null, false);
 } else if ("COMMISSION_INVOICE".equals(invoice.invoiceTypeId)) {
     itemTypesCond = exprBldr.OR() {
@@ -71,12 +68,6 @@ if ("SALES_INVOICE".equals(invoice.invoiceTypeId)) {
         EQUALS(invoiceItemTypeId: "COMM_INV_ADJ")
         EQUALS(parentTypeId: "COMM_INV_ADJ")
     }
-    invoiceItemTypes = delegator.findList("InvoiceItemType", itemTypesCond, null, ["parentTypeId", "invoiceItemTypeId"], null, false);
     glAccountOrganizationAndClassList = delegator.findByAnd("GlAccountOrganizationAndClass", [organizationPartyId : invoice.partyId], null, false);
-} else {
-    map = delegator.findByAnd("InvoiceItemTypeMap", [invoiceTypeId : invoice.invoiceTypeId], null, true);
-    invoiceItemTypes = EntityUtil.getRelated("InvoiceItemType", map, null, false);
 }
-context.invoiceItemTypes = invoiceItemTypes;
-
 context.glAccountOrganizationAndClassList = glAccountOrganizationAndClassList;
