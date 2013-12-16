@@ -25,6 +25,7 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.base.util.template.FreeMarkerWorker;
@@ -35,7 +36,8 @@ import org.ofbiz.product.category.CatalogUrlFilter;
 import org.ofbiz.product.category.CategoryContentWrapper;
 import org.ofbiz.product.product.ProductContentWrapper;
 import org.ofbiz.service.LocalDispatcher;
-import org.ofbiz.webapp.control.RequestHandler;
+import org.ofbiz.webapp.OfbizUrlBuilder;
+import org.ofbiz.webapp.control.WebAppConfigurationException;
 
 import freemarker.core.Environment;
 import freemarker.ext.beans.BeanModel;
@@ -120,8 +122,12 @@ public class OfbizCatalogAltUrlTransform implements TemplateTransformModel {
                         }
                         // make the link
                         if (fullPath){
-                            String serverRootUrl = RequestHandler.getDefaultServerRootUrl(request, secure);
-                            newURL.append(serverRootUrl);
+                            try {
+                                OfbizUrlBuilder builder = OfbizUrlBuilder.from(request);
+                                builder.buildHostPart(newURL, "", secure);
+                            } catch (WebAppConfigurationException e) {
+                                Debug.logError(e.getMessage(), module);
+                            }
                         }
                         newURL.append(url);
                         out.write(newURL.toString());
