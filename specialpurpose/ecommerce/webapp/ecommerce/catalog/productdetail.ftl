@@ -726,8 +726,8 @@ ${virtualVariantJavaScript?if_exists}
                       <#assign imageUrl = "/images/defaultImage.jpg" />
                     </#if>
                       <a href="javascript:getList('FT${featureOrderFirst}','${indexer}',1);"><img src="<@ofbizContentUrl>${contentPathPrefix?if_exists}${imageUrl}</@ofbizContentUrl>" width="60" height="60" alt="" /></a>
-                      <br />
                       <a href="javascript:getList('FT${featureOrderFirst}','${indexer}',1);" class="linktext">${key}</a>
+                      <br />
                   </#if>
                   <#assign indexer = indexer + 1 />
                 </#list>
