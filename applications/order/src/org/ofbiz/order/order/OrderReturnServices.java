@@ -2359,6 +2359,9 @@ public class OrderReturnServices {
         if ((returnAmountByOrder != null) && (returnAmountByOrder.keySet() != null)) {
             for (String orderId : returnAmountByOrder.keySet()) {
                 BigDecimal returnAmount = returnAmountByOrder.get(orderId);
+                if (returnAmount == null) {
+                    return ServiceUtil.returnError("No returnAmount found for order:" + orderId);
+                }
                 if (returnAmount.abs().compareTo(new BigDecimal("0.000001")) < 0) {
                     Debug.logError("Order [" + orderId + "] refund amount[ " + returnAmount + "] less than zero", module);
                     return ServiceUtil.returnError(UtilProperties.getMessage(resource_error,
@@ -2366,14 +2369,10 @@ public class OrderReturnServices {
                 }
                 OrderReadHelper helper = new OrderReadHelper(delegator, orderId);
                 BigDecimal grandTotal = helper.getOrderGrandTotal();
-                if (returnAmount == null) {
-                    Debug.logInfo("No returnAmount found for order:" + orderId, module);
-                } else {
-                    if (returnAmount.subtract(grandTotal).compareTo(new BigDecimal("0.01")) > 0) {
-                        Debug.logError("Order [" + orderId + "] refund amount[ " + returnAmount + "] exceeds order total [" + grandTotal + "]", module);
-                        return ServiceUtil.returnError(UtilProperties.getMessage(resource_error,
-                                "OrderRefundAmountExceedsOrderTotal", locale));
-                    }
+                if (returnAmount.subtract(grandTotal).compareTo(new BigDecimal("0.01")) > 0) {
+                    Debug.logError("Order [" + orderId + "] refund amount[ " + returnAmount + "] exceeds order total [" + grandTotal + "]", module);
+                    return ServiceUtil.returnError(UtilProperties.getMessage(resource_error,
+                            "OrderRefundAmountExceedsOrderTotal", locale));
                 }
             }
         }
@@ -2387,6 +2386,7 @@ public class OrderReturnServices {
         String returnId = (String) context.get("returnId");
         String returnItemSeqId = (String) context.get("returnItemSeqId");
         String description = (String) context.get("description");
+        BigDecimal amount = (BigDecimal) context.get("amount");
         Locale locale = (Locale) context.get("locale");
 
         GenericValue returnItemTypeMap = null;
@@ -2396,13 +2396,15 @@ public class OrderReturnServices {
         GenericValue returnItem = null;
         GenericValue returnHeader = null;
 
-        BigDecimal amount;
-
         // if orderAdjustment is not empty, then copy most return adjustment information from orderAdjustment's
         if (orderAdjustmentId != null) {
             try {
                 orderAdjustment = delegator.findOne("OrderAdjustment", UtilMisc.toMap("orderAdjustmentId", orderAdjustmentId), false);
-
+                if (orderAdjustment == null) {
+                    return ServiceUtil.returnError(UtilProperties.getMessage(resource, 
+                            "OrderCreateReturnAdjustmentNotFoundOrderAdjustment", 
+                            UtilMisc.toMap("orderAdjustmentId", orderAdjustmentId), locale));
+                }
                 // get returnHeaderTypeId from ReturnHeader and then use it to figure out return item type mapping
                 returnHeader = delegator.findOne("ReturnHeader", UtilMisc.toMap("returnId", returnId), false);
                 String returnHeaderTypeId = ((returnHeader != null) && (returnHeader.getString("returnHeaderTypeId") != null)) ? returnHeader.getString("returnHeaderTypeId") : "CUSTOMER_RETURN";
@@ -2437,6 +2439,9 @@ public class OrderReturnServices {
                 throw new GeneralRuntimeException(e.getMessage());
             }
             context.putAll(orderAdjustment.getAllFields());
+            if (UtilValidate.isNotEmpty(amount)) {
+                context.put("amount", amount);
+            }
         }
 
         // if orderAdjustmentTypeId is empty, ie not found from orderAdjustmentId, then try to get returnAdjustmentTypeId from returnItemTypeMap,
@@ -2449,12 +2454,6 @@ public class OrderReturnServices {
         if (returnItem != null) {  // returnAdjustment for returnItem
             if (needRecalculate(returnAdjustmentTypeId)) {
                 Debug.logInfo("returnPrice:" + returnItem.getBigDecimal("returnPrice") + ",returnQuantity:" + returnItem.getBigDecimal("returnQuantity") + ",sourcePercentage:" + orderAdjustment.getBigDecimal("sourcePercentage"), module);
-                if (orderAdjustment == null) {
-                    Debug.logError("orderAdjustment [" + orderAdjustmentId + "] not found", module);
-                    return ServiceUtil.returnError(UtilProperties.getMessage(resource, 
-                            "OrderCreateReturnAdjustmentNotFoundOrderAdjustment", 
-                            UtilMisc.toMap("orderAdjustmentId", orderAdjustmentId), locale));
-                }
                 BigDecimal returnTotal = returnItem.getBigDecimal("returnPrice").multiply(returnItem.getBigDecimal("returnQuantity"));
                 BigDecimal orderTotal = orderItem.getBigDecimal("quantity").multiply(orderItem.getBigDecimal("unitPrice"));
                 amount = getAdjustmentAmount("RET_SALES_TAX_ADJ".equals(returnAdjustmentTypeId), returnTotal, orderTotal, orderAdjustment.getBigDecimal("amount"));

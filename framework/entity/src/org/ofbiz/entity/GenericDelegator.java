@@ -32,6 +32,7 @@ import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -105,7 +106,7 @@ public class GenericDelegator implements Delegator {
     protected DistributedCacheClear distributedCacheClear = null;
     protected boolean warnNoEcaHandler = false;
     protected EntityEcaHandler<?> entityEcaHandler = null;
-    protected SequenceUtil sequencer = null;
+    protected final AtomicReference<SequenceUtil> AtomicRefSequencer = new AtomicReference<SequenceUtil>(null);
     protected EntityCrypto crypto = null;
 
     /** A ThreadLocal variable to allow other methods to specify a user identifier (usually the userLoginId, though technically the Entity Engine doesn't know anything about the UserLogin entity) */
@@ -287,6 +288,7 @@ public class GenericDelegator implements Delegator {
 
     protected Callable<Void> createHelperCallable(final String groupName) {
         return new Callable<Void>() {
+            @Override
             public Void call() {
                 initializeOneGenericHelper(groupName);
                 return null;
@@ -309,6 +311,7 @@ public class GenericDelegator implements Delegator {
     /* (non-Javadoc)
      * @see org.ofbiz.entity.Delegator#initEntityEcaHandler()
      */
+    @Override
     public synchronized void initEntityEcaHandler() {
         // Nothing to do if already assigned: the class loader has already been called, the class instantiated and casted to EntityEcaHandler
         if (this.entityEcaHandler != null || this.warnNoEcaHandler) {
@@ -343,6 +346,7 @@ public class GenericDelegator implements Delegator {
     /* (non-Javadoc)
      * @see org.ofbiz.entity.Delegator#getDelegatorName()
      */
+    @Override
     public String getDelegatorName() {
         return this.delegatorFullName;
     }
@@ -350,6 +354,7 @@ public class GenericDelegator implements Delegator {
     /* (non-Javadoc)
      * @see org.ofbiz.entity.Delegator#getDelegatorBaseName()
      */
+    @Override
     public String getDelegatorBaseName() {
         return this.delegatorBaseName;
     }
@@ -357,6 +362,7 @@ public class GenericDelegator implements Delegator {
     /* (non-Javadoc)
      * @see org.ofbiz.entity.Delegator#getDelegatorBaseName()
      */
+    @Override
     public String getDelegatorTenantId() {
         return this.delegatorTenantId;
     }
@@ -364,6 +370,7 @@ public class GenericDelegator implements Delegator {
     /* (non-Javadoc)
      * @see org.ofbiz.entity.Delegator#getOriginalDelegatorName()
      */
+    @Override
     public String getOriginalDelegatorName() {
         return this.originalDelegatorName == null ? this.delegatorFullName : this.originalDelegatorName;
     }
@@ -371,6 +378,7 @@ public class GenericDelegator implements Delegator {
     /* (non-Javadoc)
      * @see org.ofbiz.entity.Delegator#getModelReader()
      */
+    @Override
     public ModelReader getModelReader() {
         return this.modelReader;
     }
@@ -378,6 +386,7 @@ public class GenericDelegator implements Delegator {
     /* (non-Javadoc)
      * @see org.ofbiz.entity.Delegator#getModelGroupReader()
      */
+    @Override
     public ModelGroupReader getModelGroupReader() {
         return this.modelGroupReader;
     }
@@ -385,6 +394,7 @@ public class GenericDelegator implements Delegator {
     /* (non-Javadoc)
      * @see org.ofbiz.entity.Delegator#getModelEntity(java.lang.String)
      */
+    @Override
     public ModelEntity getModelEntity(String entityName) {
         try {
             return getModelReader().getModelEntity(entityName);
@@ -397,6 +407,7 @@ public class GenericDelegator implements Delegator {
     /* (non-Javadoc)
      * @see org.ofbiz.entity.Delegator#getEntityGroupName(java.lang.String)
      */
+    @Override
     public String getEntityGroupName(String entityName) {
         return getModelGroupReader().getEntityGroupName(entityName, this.delegatorBaseName);
     }
@@ -404,6 +415,7 @@ public class GenericDelegator implements Delegator {
     /* (non-Javadoc)
      * @see org.ofbiz.entity.Delegator#getModelEntityMapByGroup(java.lang.String)
      */
+    @Override
     public Map<String, ModelEntity> getModelEntityMapByGroup(String groupName) throws GenericEntityException {
         Set<String> entityNameSet = getModelGroupReader().getEntityNamesByGroup(groupName);
 
@@ -447,10 +459,12 @@ public class GenericDelegator implements Delegator {
     /* (non-Javadoc)
      * @see org.ofbiz.entity.Delegator#getGroupHelperName(java.lang.String)
      */
+    @Override
     public String getGroupHelperName(String groupName) {
         return this.delegatorInfo.getGroupDataSource(groupName);
     }
 
+    @Override
     public GenericHelperInfo getGroupHelperInfo(String entityGroupName) {
         if (entityGroupName == null) {
             return null;
@@ -480,7 +494,7 @@ public class GenericDelegator implements Delegator {
                     if (Debug.warningOn()) {
                         Debug.logWarning("Could not find TenantDataSource information for tenantId=[" + this.delegatorTenantId + "] and entityGroupName=[" + entityGroupName + "] in delegator [" + this.delegatorFullName + "]; will be defaulting to settings for the base delegator name [" + this.delegatorBaseName + "]", module);
                     }
-                    */
+                     */
                 }
             } catch (GenericEntityException e) {
                 // don't complain about this too much, just log the error if there is one
@@ -498,6 +512,7 @@ public class GenericDelegator implements Delegator {
     /* (non-Javadoc)
      * @see org.ofbiz.entity.Delegator#getEntityHelperName(java.lang.String)
      */
+    @Override
     public String getEntityHelperName(String entityName) {
         return this.getGroupHelperName(this.getEntityGroupName(entityName));
     }
@@ -505,6 +520,7 @@ public class GenericDelegator implements Delegator {
     /* (non-Javadoc)
      * @see org.ofbiz.entity.Delegator#getEntityHelperName(org.ofbiz.entity.model.ModelEntity)
      */
+    @Override
     public String getEntityHelperName(ModelEntity entity) {
         if (entity == null) {
             return null;
@@ -515,6 +531,7 @@ public class GenericDelegator implements Delegator {
     /* (non-Javadoc)
      * @see org.ofbiz.entity.Delegator#getEntityHelper(java.lang.String)
      */
+    @Override
     public GenericHelper getEntityHelper(String entityName) throws GenericEntityException {
         GenericHelperInfo helperInfo = getEntityHelperInfo(entityName);
 
@@ -528,6 +545,7 @@ public class GenericDelegator implements Delegator {
     /* (non-Javadoc)
      * @see org.ofbiz.entity.Delegator#getEntityHelper(org.ofbiz.entity.model.ModelEntity)
      */
+    @Override
     public GenericHelper getEntityHelper(ModelEntity entity) throws GenericEntityException {
         return getEntityHelper(entity.getEntityName());
     }
@@ -535,6 +553,7 @@ public class GenericDelegator implements Delegator {
     /* (non-Javadoc)
      * @see org.ofbiz.entity.Delegator#getEntityFieldType(org.ofbiz.entity.model.ModelEntity, java.lang.String)
      */
+    @Override
     public ModelFieldType getEntityFieldType(ModelEntity entity, String type) throws GenericEntityException {
         return this.getModelFieldTypeReader(entity).getModelFieldType(type);
     }
@@ -542,6 +561,7 @@ public class GenericDelegator implements Delegator {
     /* (non-Javadoc)
      * @see org.ofbiz.entity.Delegator#getModelFieldTypeReader(org.ofbiz.entity.model.ModelEntity)
      */
+    @Override
     public ModelFieldTypeReader getModelFieldTypeReader(ModelEntity entity) {
         String helperName = getEntityHelperName(entity);
         if (helperName == null || helperName.length() <= 0) {
@@ -557,6 +577,7 @@ public class GenericDelegator implements Delegator {
     /* (non-Javadoc)
      * @see org.ofbiz.entity.Delegator#getEntityFieldTypeNames(org.ofbiz.entity.model.ModelEntity)
      */
+    @Override
     public Collection<String> getEntityFieldTypeNames(ModelEntity entity) throws GenericEntityException {
         String helperName = getEntityHelperName(entity);
 
@@ -574,6 +595,7 @@ public class GenericDelegator implements Delegator {
     /* (non-Javadoc)
      * @see org.ofbiz.entity.Delegator#makeValue(java.lang.String)
      */
+    @Override
     public GenericValue makeValue(String entityName) {
         ModelEntity entity = this.getModelEntity(entityName);
         if (entity == null) {
@@ -587,6 +609,7 @@ public class GenericDelegator implements Delegator {
     /* (non-Javadoc)
      * @see org.ofbiz.entity.Delegator#makeValue(java.lang.String, java.lang.Object)
      */
+    @Override
     public GenericValue makeValue(String entityName, Object... fields) {
         return makeValue(entityName, UtilMisc.<String, Object>toMap(fields));
     }
@@ -594,6 +617,7 @@ public class GenericDelegator implements Delegator {
     /* (non-Javadoc)
      * @see org.ofbiz.entity.Delegator#makeValue(java.lang.String, java.util.Map)
      */
+    @Override
     public GenericValue makeValue(String entityName, Map<String, ? extends Object> fields) {
         ModelEntity entity = this.getModelEntity(entityName);
         if (entity == null) {
@@ -605,6 +629,7 @@ public class GenericDelegator implements Delegator {
     /* (non-Javadoc)
      * @see org.ofbiz.entity.Delegator#makeValueSingle(java.lang.String, java.lang.Object)
      */
+    @Override
     public GenericValue makeValueSingle(String entityName, Object singlePkValue) {
         ModelEntity entity = this.getModelEntity(entityName);
         if (entity == null) {
@@ -616,6 +641,7 @@ public class GenericDelegator implements Delegator {
     /* (non-Javadoc)
      * @see org.ofbiz.entity.Delegator#makeValidValue(java.lang.String, java.lang.Object)
      */
+    @Override
     public GenericValue makeValidValue(String entityName, Object... fields) {
         return makeValidValue(entityName, UtilMisc.<String, Object>toMap(fields));
     }
@@ -623,6 +649,7 @@ public class GenericDelegator implements Delegator {
     /* (non-Javadoc)
      * @see org.ofbiz.entity.Delegator#makeValidValue(java.lang.String, java.util.Map)
      */
+    @Override
     public GenericValue makeValidValue(String entityName, Map<String, ? extends Object> fields) {
         ModelEntity entity = this.getModelEntity(entityName);
         if (entity == null) {
@@ -637,6 +664,7 @@ public class GenericDelegator implements Delegator {
     /* (non-Javadoc)
      * @see org.ofbiz.entity.Delegator#makePK(java.lang.String)
      */
+    @Override
     public GenericPK makePK(String entityName) {
         return this.makePK(entityName, (Map<String, Object>) null);
     }
@@ -644,6 +672,7 @@ public class GenericDelegator implements Delegator {
     /* (non-Javadoc)
      * @see org.ofbiz.entity.Delegator#makePK(java.lang.String, java.lang.Object)
      */
+    @Override
     public GenericPK makePK(String entityName, Object... fields) {
         return makePK(entityName, UtilMisc.<String, Object>toMap(fields));
     }
@@ -651,6 +680,7 @@ public class GenericDelegator implements Delegator {
     /* (non-Javadoc)
      * @see org.ofbiz.entity.Delegator#makePK(java.lang.String, java.util.Map)
      */
+    @Override
     public GenericPK makePK(String entityName, Map<String, ? extends Object> fields) {
         ModelEntity entity = this.getModelEntity(entityName);
         if (entity == null) {
@@ -662,6 +692,7 @@ public class GenericDelegator implements Delegator {
     /* (non-Javadoc)
      * @see org.ofbiz.entity.Delegator#makePKSingle(java.lang.String, java.lang.Object)
      */
+    @Override
     public GenericPK makePKSingle(String entityName, Object singlePkValue) {
         ModelEntity entity = this.getModelEntity(entityName);
         if (entity == null) {
@@ -673,6 +704,7 @@ public class GenericDelegator implements Delegator {
     /* (non-Javadoc)
      * @see org.ofbiz.entity.Delegator#create(org.ofbiz.entity.GenericPK)
      */
+    @Override
     public GenericValue create(GenericPK primaryKey) throws GenericEntityException {
         return this.create(primaryKey, true);
     }
@@ -681,6 +713,7 @@ public class GenericDelegator implements Delegator {
      * @see org.ofbiz.entity.Delegator#create(org.ofbiz.entity.GenericPK, boolean)
      * @deprecated use {@link #create(GenericPK primaryKey)}
      */
+    @Override
     @Deprecated
     public GenericValue create(GenericPK primaryKey, boolean doCacheClear) throws GenericEntityException {
         if (primaryKey == null) {
@@ -693,6 +726,7 @@ public class GenericDelegator implements Delegator {
     /* (non-Javadoc)
      * @see org.ofbiz.entity.Delegator#create(java.lang.String, java.lang.Object)
      */
+    @Override
     public GenericValue create(String entityName, Object... fields) throws GenericEntityException {
         return create(entityName, UtilMisc.<String, Object>toMap(fields));
     }
@@ -700,6 +734,7 @@ public class GenericDelegator implements Delegator {
     /* (non-Javadoc)
      * @see org.ofbiz.entity.Delegator#create(java.lang.String, java.util.Map)
      */
+    @Override
     public GenericValue create(String entityName, Map<String, ? extends Object> fields) throws GenericEntityException {
         if (entityName == null || fields == null) {
             return null;
@@ -713,6 +748,7 @@ public class GenericDelegator implements Delegator {
     /* (non-Javadoc)
      * @see org.ofbiz.entity.Delegator#createSingle(java.lang.String, java.lang.Object)
      */
+    @Override
     public GenericValue createSingle(String entityName, Object singlePkValue) throws GenericEntityException {
         if (entityName == null || singlePkValue == null) {
             return null;
@@ -726,6 +762,7 @@ public class GenericDelegator implements Delegator {
     /* (non-Javadoc)
      * @see org.ofbiz.entity.Delegator#create(org.ofbiz.entity.GenericValue)
      */
+    @Override
     public GenericValue create(GenericValue value) throws GenericEntityException {
         return this.create(value, true);
     }
@@ -733,6 +770,7 @@ public class GenericDelegator implements Delegator {
     /* (non-Javadoc)
      * @see org.ofbiz.entity.Delegator#createSetNextSeqId(org.ofbiz.entity.GenericValue)
      */
+    @Override
     public GenericValue createSetNextSeqId(GenericValue value) throws GenericEntityException {
         @Deprecated
         boolean doCacheClear = true;
@@ -791,7 +829,7 @@ public class GenericDelegator implements Delegator {
                     }
 
                     // found an existing value... was probably a duplicate key, so clean things up and try again
-                    this.sequencer.forceBankRefresh(value.getEntityName(), 1);
+                    this.AtomicRefSequencer.get().forceBankRefresh(value.getEntityName(), 1);
 
                     value.setNextSeqId();
                     value = helper.create(value);
@@ -830,8 +868,9 @@ public class GenericDelegator implements Delegator {
 
     /* (non-Javadoc)
      * @see org.ofbiz.entity.Delegator#create(org.ofbiz.entity.GenericValue, boolean)
-     * @deprecated use {@link #create(GenericValue value)} 
+     * @deprecated use {@link #create(GenericValue value)}
      */
+    @Override
     @Deprecated
     public GenericValue create(GenericValue value, boolean doCacheClear) throws GenericEntityException {
         boolean beganTransaction = false;
@@ -889,8 +928,9 @@ public class GenericDelegator implements Delegator {
 
     /* (non-Javadoc)
      * @see org.ofbiz.entity.Delegator#createOrStore(org.ofbiz.entity.GenericValue, boolean)
-     * @deprecated use {@link #createOrStore(GenericValue value)} 
+     * @deprecated use {@link #createOrStore(GenericValue value)}
      */
+    @Override
     @Deprecated
     public GenericValue createOrStore(GenericValue value, boolean doCacheClear) throws GenericEntityException {
         boolean beganTransaction = false;
@@ -921,9 +961,10 @@ public class GenericDelegator implements Delegator {
     /* (non-Javadoc)
      * @see org.ofbiz.entity.Delegator#createOrStore(org.ofbiz.entity.GenericValue)
      */
+    @Override
     public GenericValue createOrStore(GenericValue value) throws GenericEntityException {
         return createOrStore(value, true);
-            }
+    }
 
     protected void saveEntitySyncRemoveInfo(GenericEntity dummyPK) throws GenericEntityException {
         // don't store remove info on entities where it is disabled
@@ -957,6 +998,7 @@ public class GenericDelegator implements Delegator {
     /* (non-Javadoc)
      * @see org.ofbiz.entity.Delegator#removeByPrimaryKey(org.ofbiz.entity.GenericPK)
      */
+    @Override
     public int removeByPrimaryKey(GenericPK primaryKey) throws GenericEntityException {
         int retVal = this.removeByPrimaryKey(primaryKey, true);
         return retVal;
@@ -964,8 +1006,9 @@ public class GenericDelegator implements Delegator {
 
     /* (non-Javadoc)
      * @see org.ofbiz.entity.Delegator#removeByPrimaryKey(org.ofbiz.entity.GenericPK, boolean)
-     * @deprecated use {@link #removeByPrimaryKey(GenericPK primaryKey)} 
+     * @deprecated use {@link #removeByPrimaryKey(GenericPK primaryKey)}
      */
+    @Override
     @Deprecated
     public int removeByPrimaryKey(GenericPK primaryKey, boolean doCacheClear) throws GenericEntityException {
         boolean beganTransaction = false;
@@ -1018,14 +1061,16 @@ public class GenericDelegator implements Delegator {
     /* (non-Javadoc)
      * @see org.ofbiz.entity.Delegator#removeValue(org.ofbiz.entity.GenericValue)
      */
+    @Override
     public int removeValue(GenericValue value) throws GenericEntityException {
         return this.removeValue(value, true);
     }
 
     /* (non-Javadoc)
      * @see org.ofbiz.entity.Delegator#removeValue(org.ofbiz.entity.GenericValue, boolean)
-     * @deprecated use {@link #removeValue(GenericValue value)} 
+     * @deprecated use {@link #removeValue(GenericValue value)}
      */
+    @Override
     @Deprecated
     public int removeValue(GenericValue value, boolean doCacheClear) throws GenericEntityException {
         // NOTE: this does not call the GenericDelegator.removeByPrimaryKey method because it has more information to pass to the ECA rule hander
@@ -1083,6 +1128,7 @@ public class GenericDelegator implements Delegator {
     /* (non-Javadoc)
      * @see org.ofbiz.entity.Delegator#removeByAnd(java.lang.String, java.lang.Object)
      */
+    @Override
     public int removeByAnd(String entityName, Object... fields) throws GenericEntityException {
         return removeByAnd(entityName, UtilMisc.<String, Object>toMap(fields));
     }
@@ -1090,14 +1136,16 @@ public class GenericDelegator implements Delegator {
     /* (non-Javadoc)
      * @see org.ofbiz.entity.Delegator#removeByAnd(java.lang.String, java.util.Map)
      */
+    @Override
     public int removeByAnd(String entityName, Map<String, ? extends Object> fields) throws GenericEntityException {
         return this.removeByAnd(entityName, fields, true);
     }
 
     /* (non-Javadoc)
      * @see org.ofbiz.entity.Delegator#removeByAnd(java.lang.String, boolean, java.lang.Object)
-     * @deprecated use {@link #removeByAnd(String entityName, Object... fields)} 
+     * @deprecated use {@link #removeByAnd(String entityName, Object... fields)}
      */
+    @Override
     @Deprecated
     public int removeByAnd(String entityName, boolean doCacheClear, Object... fields) throws GenericEntityException {
         return removeByAnd(entityName, UtilMisc.<String, Object>toMap(fields), doCacheClear);
@@ -1107,6 +1155,7 @@ public class GenericDelegator implements Delegator {
      * @see org.ofbiz.entity.Delegator#removeByAnd(java.lang.String, java.util.Map, boolean)
      * @deprecated use {@link #removeByAnd(String entityName, Map<String, ? extends Object> fields)}}
      */
+    @Override
     @Deprecated
     public int removeByAnd(String entityName, Map<String, ? extends Object> fields, boolean doCacheClear) throws GenericEntityException {
         EntityCondition ecl = EntityCondition.makeCondition(fields);
@@ -1116,6 +1165,7 @@ public class GenericDelegator implements Delegator {
     /* (non-Javadoc)
      * @see org.ofbiz.entity.Delegator#removeByCondition(java.lang.String, org.ofbiz.entity.condition.EntityCondition)
      */
+    @Override
     public int removeByCondition(String entityName, EntityCondition condition) throws GenericEntityException {
         return this.removeByCondition(entityName, condition, true);
     }
@@ -1124,6 +1174,7 @@ public class GenericDelegator implements Delegator {
      * @see org.ofbiz.entity.Delegator#removeByCondition(java.lang.String, org.ofbiz.entity.condition.EntityCondition, boolean)
      * @deprecated use {@link #removeByCondition(String entityName, EntityCondition condition)}
      */
+    @Override
     @Deprecated
     public int removeByCondition(String entityName, EntityCondition condition, boolean doCacheClear) throws GenericEntityException {
         boolean beganTransaction = false;
@@ -1164,14 +1215,16 @@ public class GenericDelegator implements Delegator {
     /* (non-Javadoc)
      * @see org.ofbiz.entity.Delegator#removeRelated(java.lang.String, org.ofbiz.entity.GenericValue)
      */
+    @Override
     public int removeRelated(String relationName, GenericValue value) throws GenericEntityException {
         return this.removeRelated(relationName, value, true);
     }
 
     /* (non-Javadoc)
      * @see org.ofbiz.entity.Delegator#removeRelated(java.lang.String, org.ofbiz.entity.GenericValue, boolean)
-     * @deprecated use {@link #removeRelated(String relationName, GenericValue value)} 
+     * @deprecated use {@link #removeRelated(String relationName, GenericValue value)}
      */
+    @Override
     @Deprecated
     public int removeRelated(String relationName, GenericValue value, boolean doCacheClear) throws GenericEntityException {
         ModelEntity modelEntity = value.getModelEntity();
@@ -1192,6 +1245,7 @@ public class GenericDelegator implements Delegator {
     /* (non-Javadoc)
      * @see org.ofbiz.entity.Delegator#refresh(org.ofbiz.entity.GenericValue)
      */
+    @Override
     public void refresh(GenericValue value) throws GenericEntityException {
         this.refresh(value, true);
     }
@@ -1200,6 +1254,7 @@ public class GenericDelegator implements Delegator {
      * @see org.ofbiz.entity.Delegator#refresh(org.ofbiz.entity.GenericValue, boolean)
      * @deprecated use {@link #refresh(GenericValue value)}
      */
+    @Override
     @Deprecated
     public void refresh(GenericValue value, boolean doCacheClear) throws GenericEntityException {
         if (doCacheClear) {
@@ -1214,6 +1269,7 @@ public class GenericDelegator implements Delegator {
     /* (non-Javadoc)
      * @see org.ofbiz.entity.Delegator#refreshFromCache(org.ofbiz.entity.GenericValue)
      */
+    @Override
     public void refreshFromCache(GenericValue value) throws GenericEntityException {
         GenericPK pk = value.getPrimaryKey();
         GenericValue newValue = findOne(pk.getEntityName(), pk, true);
@@ -1223,14 +1279,16 @@ public class GenericDelegator implements Delegator {
     /* (non-Javadoc)
      * @see org.ofbiz.entity.Delegator#storeByCondition(java.lang.String, java.util.Map, org.ofbiz.entity.condition.EntityCondition)
      */
+    @Override
     public int storeByCondition(String entityName, Map<String, ? extends Object> fieldsToSet, EntityCondition condition) throws GenericEntityException {
         return storeByCondition(entityName, fieldsToSet, condition, true);
     }
 
     /* (non-Javadoc)
      * @see org.ofbiz.entity.Delegator#storeByCondition(java.lang.String, java.util.Map, org.ofbiz.entity.condition.EntityCondition, boolean)
-     * @deprecated use {@link #storeByCondition(String entityName, Map<String, ? extends Object> fieldsToSet, EntityCondition condition)} 
+     * @deprecated use {@link #storeByCondition(String entityName, Map<String, ? extends Object> fieldsToSet, EntityCondition condition)}
      */
+    @Override
     @Deprecated
     public int storeByCondition(String entityName, Map<String, ? extends Object> fieldsToSet, EntityCondition condition, boolean doCacheClear) throws GenericEntityException {
         boolean beganTransaction = false;
@@ -1271,14 +1329,16 @@ public class GenericDelegator implements Delegator {
     /* (non-Javadoc)
      * @see org.ofbiz.entity.Delegator#store(org.ofbiz.entity.GenericValue)
      */
+    @Override
     public int store(GenericValue value) throws GenericEntityException {
         return this.store(value, true);
     }
 
     /* (non-Javadoc)
      * @see org.ofbiz.entity.Delegator#store(org.ofbiz.entity.GenericValue, boolean)
-     * @deprecated use {@link #store(GenericValue value)} 
+     * @deprecated use {@link #store(GenericValue value)}
      */
+    @Override
     @Deprecated
     public int store(GenericValue value, boolean doCacheClear) throws GenericEntityException {
         boolean beganTransaction = false;
@@ -1333,6 +1393,7 @@ public class GenericDelegator implements Delegator {
     /* (non-Javadoc)
      * @see org.ofbiz.entity.Delegator#storeAll(java.util.List)
      */
+    @Override
     public int storeAll(List<GenericValue> values) throws GenericEntityException {
         return this.storeAll(values, true);
     }
@@ -1342,6 +1403,7 @@ public class GenericDelegator implements Delegator {
      * @deprecated use {@link #storeAll(List<GenericValue> values)}
      * TODO: JLR 2013-09-19 - doCacheClear refactoring: to be removed and replaced by  storeAll(List<GenericValue> values, boolean createDummyFks)
      */
+    @Override
     @Deprecated
     public int storeAll(List<GenericValue> values, boolean doCacheClear) throws GenericEntityException {
         return this.storeAll(values, doCacheClear, false);
@@ -1351,6 +1413,7 @@ public class GenericDelegator implements Delegator {
      * @see org.ofbiz.entity.Delegator#storeAll(java.util.List, boolean, boolean)
      * TODO: JLR 2013-09-19 - doCacheClear refactoring: to be changed to storeAll(List<GenericValue> values, boolean createDummyFks)
      */
+    @Override
     public int storeAll(List<GenericValue> values, boolean doCacheClear, boolean createDummyFks) throws GenericEntityException {
         if (values == null) {
             return 0;
@@ -1426,6 +1489,7 @@ public class GenericDelegator implements Delegator {
     /* (non-Javadoc)
      * @see org.ofbiz.entity.Delegator#removeAll(java.lang.String)
      */
+    @Override
     public int removeAll(String entityName) throws GenericEntityException {
         return removeByAnd(entityName, (Map<String, Object>) null);
     }
@@ -1433,6 +1497,7 @@ public class GenericDelegator implements Delegator {
     /* (non-Javadoc)
      * @see org.ofbiz.entity.Delegator#removeAll(java.util.List)
      */
+    @Override
     public int removeAll(List<? extends GenericEntity> dummyPKs) throws GenericEntityException {
         return this.removeAll(dummyPKs, true);
     }
@@ -1441,6 +1506,7 @@ public class GenericDelegator implements Delegator {
      * @see org.ofbiz.entity.Delegator#removeAll(java.util.List, boolean)
      * @deprecated use {@link #removeAll(List<? extends GenericEntity> dummyPKs)}
      */
+    @Override
     @Deprecated
     public int removeAll(List<? extends GenericEntity> dummyPKs, boolean doCacheClear) throws GenericEntityException {
         if (dummyPKs == null) {
@@ -1475,6 +1541,7 @@ public class GenericDelegator implements Delegator {
     /* (non-Javadoc)
      * @see org.ofbiz.entity.Delegator#findOne(java.lang.String, boolean, java.lang.Object)
      */
+    @Override
     public GenericValue findOne(String entityName, boolean useCache, Object... fields) throws GenericEntityException {
         return findOne(entityName, UtilMisc.toMap(fields), useCache);
     }
@@ -1482,6 +1549,7 @@ public class GenericDelegator implements Delegator {
     /* (non-Javadoc)
      * @see org.ofbiz.entity.Delegator#findOne(java.lang.String, java.util.Map, boolean)
      */
+    @Override
     public GenericValue findOne(String entityName, Map<String, ? extends Object> fields, boolean useCache) throws GenericEntityException {
         GenericPK primaryKey = this.makePK(entityName, fields);
         if (!primaryKey.isPrimaryKey()) {
@@ -1544,6 +1612,7 @@ public class GenericDelegator implements Delegator {
      * @see org.ofbiz.entity.Delegator#findByPrimaryKey(java.lang.String, java.util.Map)
      * @deprecated use {@link #findOne(String, Map, boolean)}
      */
+    @Override
     @Deprecated
     public GenericValue findByPrimaryKey(String entityName, Map<String, ? extends Object> fields) throws GenericEntityException {
         return findOne(entityName, fields, false);
@@ -1553,6 +1622,7 @@ public class GenericDelegator implements Delegator {
      * @see org.ofbiz.entity.Delegator#findByPrimaryKeyCache(java.lang.String, java.lang.Object)
      * @deprecated use {@link #findOne(String, boolean, Object...)}
      */
+    @Override
     @Deprecated
     public GenericValue findByPrimaryKeyCache(String entityName, Object... fields) throws GenericEntityException {
         return findByPrimaryKeyCache(entityName, UtilMisc.<String, Object>toMap(fields));
@@ -1562,6 +1632,7 @@ public class GenericDelegator implements Delegator {
      * @see org.ofbiz.entity.Delegator#findByPrimaryKeyCache(java.lang.String, java.util.Map)
      * @deprecated use {@link #findOne(String, Map, boolean)}
      */
+    @Override
     @Deprecated
     public GenericValue findByPrimaryKeyCache(String entityName, Map<String, ? extends Object> fields) throws GenericEntityException {
         return findOne(entityName, fields, true);
@@ -1570,6 +1641,7 @@ public class GenericDelegator implements Delegator {
     /* (non-Javadoc)
      * @see org.ofbiz.entity.Delegator#findByPrimaryKeyPartial(org.ofbiz.entity.GenericPK, java.util.Set)
      */
+    @Override
     public GenericValue findByPrimaryKeyPartial(GenericPK primaryKey, Set<String> keys) throws GenericEntityException {
         boolean beganTransaction = false;
         try {
@@ -1604,19 +1676,21 @@ public class GenericDelegator implements Delegator {
             throw new GenericEntityException(e);
         }
     }
-    
+
     /** Finds all Generic entities
      *@param entityName The Name of the Entity as defined in the entity XML file
      * @see org.ofbiz.entity.Delegator#findAll(java.lang.String, boolean)
      */
+    @Override
     public List<GenericValue> findAll(String entityName, boolean useCache) throws GenericEntityException {
         return this.findList(entityName, null, null, null, null, useCache);
     }
-    
+
     /* (non-Javadoc)
      * @see org.ofbiz.entity.Delegator#findByAnd(java.lang.String, java.lang.Object)
      * @deprecated use {@link #findByAnd(String, Map, List, boolean)}
      */
+    @Override
     @Deprecated
     public List<GenericValue> findByAnd(String entityName, Object... fields) throws GenericEntityException {
         EntityCondition ecl = EntityCondition.makeCondition(UtilMisc.<String, Object>toMap(fields));
@@ -1627,6 +1701,7 @@ public class GenericDelegator implements Delegator {
      * @see org.ofbiz.entity.Delegator#findByAnd(java.lang.String, java.util.Map)
      * @deprecated use {@link #findByAnd(String, Map, List, boolean)}
      */
+    @Override
     @Deprecated
     public List<GenericValue> findByAnd(String entityName, Map<String, ? extends Object> fields) throws GenericEntityException {
         EntityCondition ecl = EntityCondition.makeCondition(fields);
@@ -1637,6 +1712,7 @@ public class GenericDelegator implements Delegator {
      * @see org.ofbiz.entity.Delegator#findByAnd(java.lang.String, java.util.Map, java.util.List)
      * @deprecated use {@link #findByAnd(String, Map, List, boolean)}
      */
+    @Override
     @Deprecated
     public List<GenericValue> findByAnd(String entityName, Map<String, ? extends Object> fields, List<String> orderBy) throws GenericEntityException {
         EntityCondition ecl = EntityCondition.makeCondition(fields);
@@ -1647,6 +1723,7 @@ public class GenericDelegator implements Delegator {
      * @see org.ofbiz.entity.Delegator#findByAndCache(java.lang.String, java.util.Map)
      * @deprecated use {@link #findByAnd(String, Map, List, boolean)}
      */
+    @Override
     @Deprecated
     public List<GenericValue> findByAndCache(String entityName, Map<String, ? extends Object> fields) throws GenericEntityException {
         return this.findList(entityName, EntityCondition.makeCondition(fields), null, null, null, true);
@@ -1656,6 +1733,7 @@ public class GenericDelegator implements Delegator {
      * @see org.ofbiz.entity.Delegator#findByAndCache(java.lang.String, java.util.Map, java.util.List)
      * @deprecated use {@link #findByAnd(String, Map, List, boolean)}
      */
+    @Override
     @Deprecated
     public List<GenericValue> findByAndCache(String entityName, Map<String, ? extends Object> fields, List<String> orderBy) throws GenericEntityException {
         return this.findList(entityName, EntityCondition.makeCondition(fields), null, orderBy, null, true);
@@ -1664,6 +1742,7 @@ public class GenericDelegator implements Delegator {
     /* (non-Javadoc)
      * @see org.ofbiz.entity.Delegator#findByAnd(java.lang.String, java.util.Map, java.util.List, boolean)
      */
+    @Override
     public List<GenericValue> findByAnd(String entityName, Map<String, ? extends Object> fields, List<String> orderBy, boolean useCache) throws GenericEntityException {
         return this.findList(entityName, EntityCondition.makeCondition(fields), null, orderBy, null, useCache);
     }
@@ -1671,6 +1750,7 @@ public class GenericDelegator implements Delegator {
     /* (non-Javadoc)
      * @see org.ofbiz.entity.Delegator#find(java.lang.String, org.ofbiz.entity.condition.EntityCondition, org.ofbiz.entity.condition.EntityCondition, java.util.Set, java.util.List, org.ofbiz.entity.util.EntityFindOptions)
      */
+    @Override
     public EntityListIterator find(String entityName, EntityCondition whereEntityCondition, EntityCondition havingEntityCondition, Set<String> fieldsToSelect, List<String> orderBy, EntityFindOptions findOptions) throws GenericEntityException {
 
         // if there is no transaction throw an exception, we don't want to create a transaction here since closing it would mess up the ELI
@@ -1708,6 +1788,7 @@ public class GenericDelegator implements Delegator {
     /* (non-Javadoc)
      * @see org.ofbiz.entity.Delegator#findList(java.lang.String, org.ofbiz.entity.condition.EntityCondition, java.util.Set, java.util.List, org.ofbiz.entity.util.EntityFindOptions, boolean)
      */
+    @Override
     public List<GenericValue> findList(String entityName, EntityCondition entityCondition, Set<String> fieldsToSelect, List<String> orderBy, EntityFindOptions findOptions, boolean useCache) throws GenericEntityException {
 
         EntityEcaRuleRunner<?> ecaRunner = null;
@@ -1752,6 +1833,7 @@ public class GenericDelegator implements Delegator {
     /* (non-Javadoc)
      * @see org.ofbiz.entity.Delegator#findListIteratorByCondition(org.ofbiz.entity.model.DynamicViewEntity, org.ofbiz.entity.condition.EntityCondition, org.ofbiz.entity.condition.EntityCondition, java.util.Collection, java.util.List, org.ofbiz.entity.util.EntityFindOptions)
      */
+    @Override
     public EntityListIterator findListIteratorByCondition(DynamicViewEntity dynamicViewEntity, EntityCondition whereEntityCondition, EntityCondition havingEntityCondition, Collection<String> fieldsToSelect, List<String> orderBy, EntityFindOptions findOptions) throws GenericEntityException {
 
         // if there is no transaction throw an exception, we don't want to create a transaction here since closing it would mess up the ELI
@@ -1778,6 +1860,7 @@ public class GenericDelegator implements Delegator {
     /* (non-Javadoc)
      * @see org.ofbiz.entity.Delegator#findCountByCondition(java.lang.String, org.ofbiz.entity.condition.EntityCondition, org.ofbiz.entity.condition.EntityCondition, org.ofbiz.entity.util.EntityFindOptions)
      */
+    @Override
     public long findCountByCondition(String entityName, EntityCondition whereEntityCondition,
             EntityCondition havingEntityCondition, EntityFindOptions findOptions) throws GenericEntityException {
 
@@ -1819,6 +1902,7 @@ public class GenericDelegator implements Delegator {
     /* (non-Javadoc)
      * @see org.ofbiz.entity.Delegator#getMultiRelation(org.ofbiz.entity.GenericValue, java.lang.String, java.lang.String, java.util.List)
      */
+    @Override
     public List<GenericValue> getMultiRelation(GenericValue value, String relationNameOne, String relationNameTwo, List<String> orderBy) throws GenericEntityException {
         boolean beganTransaction = false;
         try {
@@ -1850,6 +1934,7 @@ public class GenericDelegator implements Delegator {
      * @see org.ofbiz.entity.Delegator#getRelated(java.lang.String, java.util.Map, java.util.List, org.ofbiz.entity.GenericValue)
      * @deprecated use {@link #getRelated(String, Map, List, GenericValue, boolean)}
      */
+    @Override
     @Deprecated
     public List<GenericValue> getRelated(String relationName, Map<String, ? extends Object> byAndFields, List<String> orderBy, GenericValue value) throws GenericEntityException {
         return getRelated(relationName, byAndFields, orderBy, value, false);
@@ -1858,6 +1943,7 @@ public class GenericDelegator implements Delegator {
     /* (non-Javadoc)
      * @see org.ofbiz.entity.Delegator#getRelated(java.lang.String, java.util.Map, java.util.List, org.ofbiz.entity.GenericValue, boolean)
      */
+    @Override
     public List<GenericValue> getRelated(String relationName, Map<String, ? extends Object> byAndFields, List<String> orderBy, GenericValue value, boolean useCache) throws GenericEntityException {
         ModelEntity modelEntity = value.getModelEntity();
         ModelRelation relation = modelEntity.getRelation(relationName);
@@ -1882,6 +1968,7 @@ public class GenericDelegator implements Delegator {
     /* (non-Javadoc)
      * @see org.ofbiz.entity.Delegator#getRelatedDummyPK(java.lang.String, java.util.Map, org.ofbiz.entity.GenericValue)
      */
+    @Override
     public GenericPK getRelatedDummyPK(String relationName, Map<String, ? extends Object> byAndFields, GenericValue value) throws GenericEntityException {
         ModelEntity modelEntity = value.getModelEntity();
         ModelRelation relation = modelEntity.getRelation(relationName);
@@ -1908,6 +1995,7 @@ public class GenericDelegator implements Delegator {
      * @see org.ofbiz.entity.Delegator#getRelatedCache(java.lang.String, org.ofbiz.entity.GenericValue)
      * @deprecated use {@link #getRelated(String, Map, List, GenericValue, boolean)}
      */
+    @Override
     @Deprecated
     public List<GenericValue> getRelatedCache(String relationName, GenericValue value) throws GenericEntityException {
         return getRelated(relationName, null, null, value, true);
@@ -1917,6 +2005,7 @@ public class GenericDelegator implements Delegator {
      * @see org.ofbiz.entity.Delegator#getRelatedOne(java.lang.String, org.ofbiz.entity.GenericValue, boolean)
      * @deprecated use {@link #getRelatedOne(String, GenericValue, boolean)}
      */
+    @Override
     @Deprecated
     public GenericValue getRelatedOne(String relationName, GenericValue value) throws GenericEntityException {
         return this.getRelatedOne(relationName, value, false);
@@ -1926,6 +2015,7 @@ public class GenericDelegator implements Delegator {
      * @see org.ofbiz.entity.Delegator#getRelatedOneCache(java.lang.String, org.ofbiz.entity.GenericValue, boolean)
      * @deprecated use {@link #getRelatedOne(String, GenericValue, boolean)}
      */
+    @Override
     @Deprecated
     public GenericValue getRelatedOneCache(String relationName, GenericValue value) throws GenericEntityException {
         return this.getRelatedOne(relationName, value, true);
@@ -1934,6 +2024,7 @@ public class GenericDelegator implements Delegator {
     /* (non-Javadoc)
      * @see org.ofbiz.entity.Delegator#getRelatedOne(java.lang.String, org.ofbiz.entity.GenericValue, boolean)
      */
+    @Override
     public GenericValue getRelatedOne(String relationName, GenericValue value, boolean useCache) throws GenericEntityException {
         ModelRelation relation = value.getModelEntity().getRelation(relationName);
 
@@ -1960,6 +2051,7 @@ public class GenericDelegator implements Delegator {
     /* (non-Javadoc)
      * @see org.ofbiz.entity.Delegator#clearAllCaches()
      */
+    @Override
     public void clearAllCaches() {
         this.clearAllCaches(true);
     }
@@ -1967,6 +2059,7 @@ public class GenericDelegator implements Delegator {
     /* (non-Javadoc)
      * @see org.ofbiz.entity.Delegator#clearAllCaches(boolean)
      */
+    @Override
     public void clearAllCaches(boolean distribute) {
         cache.clear();
 
@@ -1978,6 +2071,7 @@ public class GenericDelegator implements Delegator {
     /* (non-Javadoc)
      * @see org.ofbiz.entity.Delegator#clearCacheLine(java.lang.String)
      */
+    @Override
     public void clearCacheLine(String entityName) {
         cache.remove(entityName);
     }
@@ -1985,6 +2079,7 @@ public class GenericDelegator implements Delegator {
     /* (non-Javadoc)
      * @see org.ofbiz.entity.Delegator#clearCacheLine(java.lang.String, java.lang.Object)
      */
+    @Override
     public void clearCacheLine(String entityName, Object... fields) {
         clearCacheLine(entityName, UtilMisc.<String, Object>toMap(fields));
     }
@@ -1992,6 +2087,7 @@ public class GenericDelegator implements Delegator {
     /* (non-Javadoc)
      * @see org.ofbiz.entity.Delegator#clearCacheLine(java.lang.String, java.util.Map)
      */
+    @Override
     public void clearCacheLine(String entityName, Map<String, ? extends Object> fields) {
         // if no fields passed, do the all cache quickly and return
         if (fields == null) {
@@ -2015,6 +2111,7 @@ public class GenericDelegator implements Delegator {
     /* (non-Javadoc)
      * @see org.ofbiz.entity.Delegator#clearCacheLineFlexible(org.ofbiz.entity.GenericEntity)
      */
+    @Override
     public void clearCacheLineFlexible(GenericEntity dummyPK) {
         this.clearCacheLineFlexible(dummyPK, true);
     }
@@ -2022,6 +2119,7 @@ public class GenericDelegator implements Delegator {
     /* (non-Javadoc)
      * @see org.ofbiz.entity.Delegator#clearCacheLineFlexible(org.ofbiz.entity.GenericEntity, boolean)
      */
+    @Override
     public void clearCacheLineFlexible(GenericEntity dummyPK, boolean distribute) {
         if (dummyPK != null) {
             //if never cached, then don't bother clearing
@@ -2038,6 +2136,7 @@ public class GenericDelegator implements Delegator {
     /* (non-Javadoc)
      * @see org.ofbiz.entity.Delegator#clearCacheLineByCondition(java.lang.String, org.ofbiz.entity.condition.EntityCondition)
      */
+    @Override
     public void clearCacheLineByCondition(String entityName, EntityCondition condition) {
         clearCacheLineByCondition(entityName, condition, true);
     }
@@ -2045,6 +2144,7 @@ public class GenericDelegator implements Delegator {
     /* (non-Javadoc)
      * @see org.ofbiz.entity.Delegator#clearCacheLineByCondition(java.lang.String, org.ofbiz.entity.condition.EntityCondition, boolean)
      */
+    @Override
     public void clearCacheLineByCondition(String entityName, EntityCondition condition, boolean distribute) {
         if (entityName != null) {
             //if never cached, then don't bother clearing
@@ -2063,6 +2163,7 @@ public class GenericDelegator implements Delegator {
     /* (non-Javadoc)
      * @see org.ofbiz.entity.Delegator#clearCacheLine(org.ofbiz.entity.GenericPK)
      */
+    @Override
     public void clearCacheLine(GenericPK primaryKey) {
         this.clearCacheLine(primaryKey, true);
     }
@@ -2070,6 +2171,7 @@ public class GenericDelegator implements Delegator {
     /* (non-Javadoc)
      * @see org.ofbiz.entity.Delegator#clearCacheLine(org.ofbiz.entity.GenericPK, boolean)
      */
+    @Override
     public void clearCacheLine(GenericPK primaryKey, boolean distribute) {
         if (primaryKey == null) {
             return;
@@ -2090,6 +2192,7 @@ public class GenericDelegator implements Delegator {
     /* (non-Javadoc)
      * @see org.ofbiz.entity.Delegator#clearCacheLine(org.ofbiz.entity.GenericValue)
      */
+    @Override
     public void clearCacheLine(GenericValue value) {
         this.clearCacheLine(value, true);
     }
@@ -2097,6 +2200,7 @@ public class GenericDelegator implements Delegator {
     /* (non-Javadoc)
      * @see org.ofbiz.entity.Delegator#clearCacheLine(org.ofbiz.entity.GenericValue, boolean)
      */
+    @Override
     public void clearCacheLine(GenericValue value, boolean distribute) {
         // Debug.logInfo("running clearCacheLine for value: " + value + ", distribute: " + distribute, module);
         if (value == null) {
@@ -2118,6 +2222,7 @@ public class GenericDelegator implements Delegator {
     /* (non-Javadoc)
      * @see org.ofbiz.entity.Delegator#clearAllCacheLinesByDummyPK(java.util.Collection)
      */
+    @Override
     public void clearAllCacheLinesByDummyPK(Collection<GenericPK> dummyPKs) {
         if (dummyPKs == null) {
             return;
@@ -2130,6 +2235,7 @@ public class GenericDelegator implements Delegator {
     /* (non-Javadoc)
      * @see org.ofbiz.entity.Delegator#clearAllCacheLinesByValue(java.util.Collection)
      */
+    @Override
     public void clearAllCacheLinesByValue(Collection<GenericValue> values) {
         if (values == null) {
             return;
@@ -2142,6 +2248,7 @@ public class GenericDelegator implements Delegator {
     /* (non-Javadoc)
      * @see org.ofbiz.entity.Delegator#getFromPrimaryKeyCache(org.ofbiz.entity.GenericPK)
      */
+    @Override
     public GenericValue getFromPrimaryKeyCache(GenericPK primaryKey) {
         if (primaryKey == null) {
             return null;
@@ -2156,6 +2263,7 @@ public class GenericDelegator implements Delegator {
     /* (non-Javadoc)
      * @see org.ofbiz.entity.Delegator#putInPrimaryKeyCache(org.ofbiz.entity.GenericPK, org.ofbiz.entity.GenericValue)
      */
+    @Override
     public void putInPrimaryKeyCache(GenericPK primaryKey, GenericValue value) {
         if (primaryKey == null) {
             return;
@@ -2176,6 +2284,7 @@ public class GenericDelegator implements Delegator {
     /* (non-Javadoc)
      * @see org.ofbiz.entity.Delegator#putAllInPrimaryKeyCache(java.util.List)
      */
+    @Override
     public void putAllInPrimaryKeyCache(List<GenericValue> values) {
         if (values == null) {
             return;
@@ -2188,6 +2297,7 @@ public class GenericDelegator implements Delegator {
     /* (non-Javadoc)
      * @see org.ofbiz.entity.Delegator#setDistributedCacheClear(org.ofbiz.entity.util.DistributedCacheClear)
      */
+    @Override
     public void setDistributedCacheClear(DistributedCacheClear distributedCacheClear) {
         this.distributedCacheClear = distributedCacheClear;
     }
@@ -2196,6 +2306,7 @@ public class GenericDelegator implements Delegator {
     /* (non-Javadoc)
      * @see org.ofbiz.entity.Delegator#readXmlDocument(java.net.URL)
      */
+    @Override
     public List<GenericValue> readXmlDocument(URL url) throws SAXException, ParserConfigurationException, java.io.IOException {
         if (url == null) {
             return null;
@@ -2206,6 +2317,7 @@ public class GenericDelegator implements Delegator {
     /* (non-Javadoc)
      * @see org.ofbiz.entity.Delegator#makeValues(org.w3c.dom.Document)
      */
+    @Override
     public List<GenericValue> makeValues(Document document) {
         if (document == null) {
             return null;
@@ -2245,6 +2357,7 @@ public class GenericDelegator implements Delegator {
     /* (non-Javadoc)
      * @see org.ofbiz.entity.Delegator#makePK(org.w3c.dom.Element)
      */
+    @Override
     public GenericPK makePK(Element element) {
         GenericValue value = makeValue(element);
 
@@ -2254,6 +2367,7 @@ public class GenericDelegator implements Delegator {
     /* (non-Javadoc)
      * @see org.ofbiz.entity.Delegator#makeValue(org.w3c.dom.Element)
      */
+    @Override
     public GenericValue makeValue(Element element) {
         if (element == null) {
             return null;
@@ -2335,6 +2449,7 @@ public class GenericDelegator implements Delegator {
     /* (non-Javadoc)
      * @see org.ofbiz.entity.Delegator#setEntityEcaHandler(org.ofbiz.entity.eca.EntityEcaHandler)
      */
+    @Override
     public <T> void setEntityEcaHandler(EntityEcaHandler<T> entityEcaHandler) {
         this.entityEcaHandler = entityEcaHandler;
         this.warnNoEcaHandler = false;
@@ -2343,6 +2458,7 @@ public class GenericDelegator implements Delegator {
     /* (non-Javadoc)
      * @see org.ofbiz.entity.Delegator#getEntityEcaHandler()
      */
+    @Override
     public <T> EntityEcaHandler<T> getEntityEcaHandler() {
         return UtilGenerics.cast(this.entityEcaHandler);
     }
@@ -2350,6 +2466,7 @@ public class GenericDelegator implements Delegator {
     /* (non-Javadoc)
      * @see org.ofbiz.entity.Delegator#getNextSeqId(java.lang.String)
      */
+    @Override
     public String getNextSeqId(String seqName) {
         return this.getNextSeqId(seqName, 1);
     }
@@ -2357,6 +2474,7 @@ public class GenericDelegator implements Delegator {
     /* (non-Javadoc)
      * @see org.ofbiz.entity.Delegator#getNextSeqId(java.lang.String, long)
      */
+    @Override
     public String getNextSeqId(String seqName, long staggerMax) {
         Long nextSeqLong = this.getNextSeqIdLong(seqName, staggerMax);
 
@@ -2375,6 +2493,7 @@ public class GenericDelegator implements Delegator {
     /* (non-Javadoc)
      * @see org.ofbiz.entity.Delegator#getNextSeqIdLong(java.lang.String)
      */
+    @Override
     public Long getNextSeqIdLong(String seqName) {
         return this.getNextSeqIdLong(seqName, 1);
     }
@@ -2382,6 +2501,7 @@ public class GenericDelegator implements Delegator {
     /* (non-Javadoc)
      * @see org.ofbiz.entity.Delegator#getNextSeqIdLong(java.lang.String, long)
      */
+    @Override
     public Long getNextSeqIdLong(String seqName, long staggerMax) {
         boolean beganTransaction = false;
         try {
@@ -2389,13 +2509,16 @@ public class GenericDelegator implements Delegator {
                 beganTransaction = TransactionUtil.begin();
             }
 
-            // FIXME: Replace DCL code with AtomicReference
+            SequenceUtil sequencer = this.AtomicRefSequencer.get();
             if (sequencer == null) {
-                synchronized (this) {
-                    if (sequencer == null) {
-                        ModelEntity seqEntity = this.getModelEntity("SequenceValueItem");
-                        sequencer = new SequenceUtil(this, this.getEntityHelperInfo("SequenceValueItem"), seqEntity, "seqName", "seqId");
+                ModelEntity seqEntity = this.getModelEntity("SequenceValueItem");
+                sequencer = new SequenceUtil(this, this.getEntityHelperInfo("SequenceValueItem"), seqEntity, "seqName", "seqId");
+                try {
+                    if (!AtomicRefSequencer.compareAndSet(null, sequencer)) {
+                        sequencer = this.AtomicRefSequencer.get();
                     }
+                } catch (Exception e) {
+                    throw new IllegalStateException("Error thrown while creating AtomicReference<SequenceUtil> in getNextSeqIdLong()" + e);
                 }
             }
 
@@ -2420,21 +2543,24 @@ public class GenericDelegator implements Delegator {
     /* (non-Javadoc)
      * @see org.ofbiz.entity.Delegator#setSequencer(org.ofbiz.entity.util.SequenceUtil)
      */
+    @Override
     public void setSequencer(SequenceUtil sequencer) {
-        this.sequencer = sequencer;
+        this.AtomicRefSequencer.set(sequencer);
     }
 
     /* (non-Javadoc)
      * @see org.ofbiz.entity.Delegator#refreshSequencer()
      */
+    @Override
     public void refreshSequencer() {
-        this.sequencer = null;
+        this.AtomicRefSequencer.set(null);
     }
 
 
     /* (non-Javadoc)
      * @see org.ofbiz.entity.Delegator#setNextSubSeqId(org.ofbiz.entity.GenericValue, java.lang.String, int, int)
      */
+    @Override
     public void setNextSubSeqId(GenericValue value, String seqFieldName, int numericPadding, int incrementBy) {
         if (value != null && UtilValidate.isEmpty(value.getString(seqFieldName))) {
             String sequencedIdPrefix = this.delegatorInfo.getSequencedIdPrefix();
@@ -2497,6 +2623,7 @@ public class GenericDelegator implements Delegator {
     /* (non-Javadoc)
      * @see org.ofbiz.entity.Delegator#encryptFields(java.util.List)
      */
+    @Override
     public void encryptFields(List<? extends GenericEntity> entities) throws GenericEntityException {
         if (entities != null) {
             for (GenericEntity entity: entities) {
@@ -2508,6 +2635,7 @@ public class GenericDelegator implements Delegator {
     /* (non-Javadoc)
      * @see org.ofbiz.entity.Delegator#encryptFields(org.ofbiz.entity.GenericEntity)
      */
+    @Override
     public void encryptFields(GenericEntity entity) throws GenericEntityException {
         ModelEntity model = entity.getModelEntity();
         String entityName = model.getEntityName();
@@ -2530,6 +2658,7 @@ public class GenericDelegator implements Delegator {
     /* (non-Javadoc)
      * @see org.ofbiz.entity.Delegator#encryptFieldValue(java.lang.String, java.lang.Object)
      */
+    @Override
     public Object encryptFieldValue(String entityName, Object fieldValue) throws EntityCryptoException {
         if (fieldValue != null) {
             if (fieldValue instanceof String && UtilValidate.isEmpty(fieldValue)) {
@@ -2543,6 +2672,7 @@ public class GenericDelegator implements Delegator {
     /* (non-Javadoc)
      * @see org.ofbiz.entity.Delegator#decryptFields(java.util.List)
      */
+    @Override
     public void decryptFields(List<? extends GenericEntity> entities) throws GenericEntityException {
         if (entities != null) {
             for (GenericEntity entity: entities) {
@@ -2554,6 +2684,7 @@ public class GenericDelegator implements Delegator {
     /* (non-Javadoc)
      * @see org.ofbiz.entity.Delegator#decryptFields(org.ofbiz.entity.GenericEntity)
      */
+    @Override
     public void decryptFields(GenericEntity entity) throws GenericEntityException {
         ModelEntity model = entity.getModelEntity();
         String entityName = model.getEntityName();
@@ -2586,6 +2717,7 @@ public class GenericDelegator implements Delegator {
     /* (non-Javadoc)
      * @see org.ofbiz.entity.Delegator#setEntityCrypto(org.ofbiz.entity.util.EntityCrypto)
      */
+    @Override
     public void setEntityCrypto(EntityCrypto crypto) {
         this.crypto = crypto;
     }
@@ -2602,6 +2734,7 @@ public class GenericDelegator implements Delegator {
     /* (non-Javadoc)
      * @see org.ofbiz.entity.Delegator#getCache()
      */
+    @Override
     public Cache getCache() {
         return cache;
     }
@@ -2680,6 +2813,7 @@ public class GenericDelegator implements Delegator {
     /* (non-Javadoc)
      * @see org.ofbiz.entity.Delegator#cloneDelegator(java.lang.String)
      */
+    @Override
     public GenericDelegator cloneDelegator(String delegatorFullName) {
         // creates an exact clone of the delegator; except for the sequencer
         // note that this will not be cached and should be used only when
@@ -2688,7 +2822,7 @@ public class GenericDelegator implements Delegator {
         newDelegator.modelReader = this.modelReader;
         newDelegator.modelGroupReader = this.modelGroupReader;
         newDelegator.setDelegatorNames(UtilValidate.isNotEmpty(delegatorFullName) ? delegatorFullName : this.delegatorFullName);
-        // set the delegatorBaseName to be the same so that configuration settings all work the same as the current 
+        // set the delegatorBaseName to be the same so that configuration settings all work the same as the current
         //   delegator, allowing the new delegatorFullName to not match a delegator name in the entityengine.xml file
         newDelegator.delegatorBaseName = this.delegatorBaseName;
         newDelegator.delegatorInfo = this.delegatorInfo;
@@ -2709,6 +2843,7 @@ public class GenericDelegator implements Delegator {
     /* (non-Javadoc)
      * @see org.ofbiz.entity.Delegator#cloneDelegator()
      */
+    @Override
     public GenericDelegator cloneDelegator() {
         return this.cloneDelegator(this.delegatorFullName);
     }
@@ -2716,6 +2851,7 @@ public class GenericDelegator implements Delegator {
     /* (non-Javadoc)
      * @see org.ofbiz.entity.Delegator#makeTestDelegator(java.lang.String)
      */
+    @Override
     public GenericDelegator makeTestDelegator(String delegatorName) {
         GenericDelegator testDelegator = this.cloneDelegator(delegatorName);
         testDelegator.entityEcaHandler = null;
@@ -2743,6 +2879,7 @@ public class GenericDelegator implements Delegator {
     /* (non-Javadoc)
      * @see org.ofbiz.entity.Delegator#rollback()
      */
+    @Override
     public void rollback() {
         if (!this.testMode) {
             Debug.logError("Rollback requested outside of testmode", module);
@@ -2795,6 +2932,7 @@ public class GenericDelegator implements Delegator {
     /* (non-Javadoc)
      * @see org.ofbiz.entity.Delegator#initDistributedCacheClear()
      */
+    @Override
     public void initDistributedCacheClear() {
         // Nothing to do if already assigned: the class loader has already been called, the class instantiated and casted to DistributedCacheClear
         if (this.distributedCacheClear != null) {
@@ -2825,9 +2963,9 @@ public class GenericDelegator implements Delegator {
             Debug.logVerbose("Distributed Cache Clear System disabled for delegator [" + delegatorFullName + "]", module);
         }
     }
-    
+
+    @Override
     public boolean useDistributedCacheClear() {
         return this.delegatorInfo.getDistributedCacheClearEnabled();
     }
-    
 }
