@@ -39,7 +39,7 @@ under the License.
         <fileset dir="../../framework/entity/build/lib" includes="*.jar"/>
         <fileset dir="../../framework/service/build/lib" includes="*.jar"/>
         <fileset dir="../../framework/security/build/lib" includes="*.jar"/>
-        <fileset dir="../../framework/jetty/lib" includes="*.jar"/>
+        <fileset dir="../../specialpurpose/jetty/lib" includes="*.jar"/>
     </path>
 
     <target name="jar" depends="classes">

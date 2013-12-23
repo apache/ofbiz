@@ -82,7 +82,7 @@ under the License.
                                         </widgets>
                                     </section>
                                 </container>
-                                <container style="screenlet-body">                                    
+                                <container style="screenlet-body">
                                     <container style="button-bar"><label style="h2">${uiLabelMap.ExampleLookupFieldsTitle}</label></container>
                                         <container style="screenlet-body">
                                             <label style="h3">${uiLabelMap.ExampleSourceCode}</label>
