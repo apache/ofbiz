@@ -43,6 +43,7 @@ import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
 import org.ofbiz.webapp.view.AbstractViewHandler;
 import org.ofbiz.webapp.view.ViewHandlerException;
+import org.ofbiz.webapp.website.WebSiteWorker;
 
 /**
  * Uses XSL-FO formatted templates to generate PDF views
@@ -71,14 +72,11 @@ public class SimpleContentViewHandler extends AbstractViewHandler {
         String mimeTypeId = request.getParameter("mimeTypeId");
         Locale locale = UtilHttp.getLocale(request);
         String rootDir = null;
-        String webSiteId = null;
+        String webSiteId = WebSiteWorker.getWebSiteId(request);
         String https = null;
 
         if (UtilValidate.isEmpty(rootDir)) {
             rootDir = servletContext.getRealPath("/");
-        }
-        if (UtilValidate.isEmpty(webSiteId)) {
-            webSiteId = (String) servletContext.getAttribute("webSiteId");
         }
         if (UtilValidate.isEmpty(https)) {
             https = (String) servletContext.getAttribute("https");
@@ -90,7 +88,7 @@ public class SimpleContentViewHandler extends AbstractViewHandler {
                 if (UtilValidate.isEmpty(contentRevisionSeqId)) {
                     if (UtilValidate.isEmpty(mapKey) && UtilValidate.isEmpty(contentAssocTypeId)) {
                         if (UtilValidate.isNotEmpty(contentId)) {
-                            GenericValue content = delegator.findByPrimaryKeyCache("Content", UtilMisc.toMap("contentId", contentId));
+                            GenericValue content = delegator.findOne("Content", UtilMisc.toMap("contentId", contentId), true);
                             dataResourceId = content.getString("dataResourceId");
                         }
                         if (Debug.verboseOn()) Debug.logVerbose("SCVH(0b)- dataResourceId:" + dataResourceId, module);
@@ -112,7 +110,7 @@ public class SimpleContentViewHandler extends AbstractViewHandler {
                         if (Debug.verboseOn()) Debug.logVerbose("SCVH(0b)- dataResourceId:" + dataResourceId, module);
                     }
                 } else {
-                    GenericValue contentRevisionItem = delegator.findByPrimaryKeyCache("ContentRevisionItem", UtilMisc.toMap("contentId", rootContentId, "itemContentId", contentId, "contentRevisionSeqId", contentRevisionSeqId));
+                    GenericValue contentRevisionItem = delegator.findOne("ContentRevisionItem", UtilMisc.toMap("contentId", rootContentId, "itemContentId", contentId, "contentRevisionSeqId", contentRevisionSeqId), true);
                     if (contentRevisionItem == null) {
                         throw new ViewHandlerException("ContentRevisionItem record not found for contentId=" + rootContentId
                                                        + ", contentRevisionSeqId=" + contentRevisionSeqId + ", itemContentId=" + contentId);
@@ -124,14 +122,14 @@ public class SimpleContentViewHandler extends AbstractViewHandler {
                 }
             }
             if (UtilValidate.isNotEmpty(dataResourceId)) {
-                GenericValue dataResource = delegator.findByPrimaryKeyCache("DataResource", UtilMisc.toMap("dataResourceId", dataResourceId));
+                GenericValue dataResource = delegator.findOne("DataResource", UtilMisc.toMap("dataResourceId", dataResourceId), true);
                 // DEJ20080717: why are we rendering the DataResource directly instead of rendering the content?
                 ByteBuffer byteBuffer = DataResourceWorker.getContentAsByteBuffer(delegator, dataResourceId, https, webSiteId, locale, rootDir);
                 ByteArrayInputStream bais = new ByteArrayInputStream(byteBuffer.array());
                 // hack for IE and mime types
                 //String userAgent = request.getHeader("User-Agent");
                 //if (userAgent.indexOf("MSIE") > -1) {
-                //    Debug.log("Found MSIE changing mime type from - " + mimeTypeId, module);
+                //    Debug.logInfo("Found MSIE changing mime type from - " + mimeTypeId, module);
                 //    mimeTypeId = "application/octet-stream";
                 //}
                 // setup chararcter encoding and content type

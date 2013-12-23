@@ -18,7 +18,7 @@ under the License.
 -->
 
 <#macro renderScreenBegin>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE html>
 </#macro>
 
 <#macro renderScreenEnd>
@@ -319,4 +319,22 @@ ${menuString}
   <#if confMode == "true">
     </div>
   </#if>
+</#macro>
+
+<#macro renderColumnContainerBegin id style>
+  <table cellspacing="0"<#if id?has_content> id="${id}"</#if><#if style?has_content> class="${style}"</#if>>
+  <tr>
+</#macro>
+
+<#macro renderColumnContainerEnd>
+  </tr>
+  </table>
+</#macro>
+
+<#macro renderColumnBegin id style>
+  <td<#if id?has_content> id="${id}"</#if><#if style?has_content> class="${style}"</#if>>
+</#macro>
+
+<#macro renderColumnEnd>
+  </td>
 </#macro>

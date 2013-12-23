@@ -94,6 +94,21 @@ under the License.
             </widgets>
         </section>
     </screen>
+
+    <screen name="ListPayments">
+        <section>
+            <actions>
+                <set field="noConditionFind" value="Y"/>
+                <set field="parameters.statusId" from-field="statusId"/>
+            </actions>
+            <widgets>
+                <screenlet title="${uiLabelMap.AccountingInvoicePayments}">
+                    <include-form name="ListPayments"  location="component://accounting/widget/PaymentForms.xml"/>
+                </screenlet>
+            </widgets>
+        </section>
+    </screen>
+
     <screen name="NewPayment">
         <section>
             <actions>
@@ -484,7 +499,8 @@ under the License.
                 <set field="titleProperty" value="AccountingFindSalesInvoicesByDueDate"/>
                 <set field="headerItem" value="payments"/>
                 <set field="viewIndex" from-field="parameters.VIEW_INDEX" type="Integer" default-value="0"/>
-                <set field="viewSize" from-field="parameters.VIEW_SIZE" type="Integer" default-value="50"/>
+                <property-to-field resource="widget" property="widget.form.defaultViewSize" field="viewSizeDefaultValue"/>
+                <set field="viewSize" from-field="parameters.VIEW_SIZE" type="Integer" default-value="${viewSizeDefaultValue}"/>
 
                 <set field="invoicePaymentInfoList" from-field="parameters.invoicePaymentInfoList" type="List"/>
             </actions>
@@ -515,7 +531,8 @@ under the License.
                 <set field="titleProperty" value="AccountingFindPurchaseInvoicesByDueDate"/>
                 <set field="headerItem" value="payments"/>
                 <set field="viewIndex" from-field="parameters.VIEW_INDEX" type="Integer" default-value="0"/>
-                <set field="viewSize" from-field="parameters.VIEW_SIZE" type="Integer" default-value="50"/>
+                <property-to-field resource="widget" property="widget.form.defaultViewSize" field="viewSizeDefaultValue"/>
+                <set field="viewSize" from-field="parameters.VIEW_SIZE" type="Integer" default-value="${viewSizeDefaultValue}"/>
 
                 <set field="invoicePaymentInfoList" from-field="parameters.invoicePaymentInfoList" type="List"/>
             </actions>
@@ -532,27 +549,6 @@ under the License.
                             <widgets>
                                 <screenlet title="${uiLabelMap.AccountingFindPurchaseInvoicesByDueDate}">
                                     <include-form name="ListInvoicesByDueDate" location="component://accounting/widget/PaymentForms.xml"/>
-                                </screenlet>
-                            </widgets>
-                        </section>
-                    </decorator-section>
-                </decorator-screen>
-            </widgets>
-        </section>
-    </screen>
-    <screen name="PaymentReport">
-        <section>
-            <actions>
-                <set field="headerItem" value="payments"/>
-                <set field="tabButtonItem" value="paymentReport"/>
-            </actions>
-            <widgets>
-                <decorator-screen name="CommonPaymentDecorator" location="${parameters.mainDecoratorLocation}">
-                    <decorator-section name="body">
-                        <section>
-                            <widgets>
-                                <screenlet title="Payment Report">
-                                    <include-form name="PaymentReport" location="component://accounting/widget/PaymentForms.xml"/>
                                 </screenlet>
                             </widgets>
                         </section>

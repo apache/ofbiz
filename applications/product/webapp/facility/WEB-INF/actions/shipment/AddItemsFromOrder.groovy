@@ -29,8 +29,8 @@ selectFromShipmentPlan = request.getParameter("selectFromShipmentPlan");
 shipment = delegator.findOne("Shipment", [shipmentId : shipmentId], false);
 
 if (shipment) {
-    context.originFacility = shipment.getRelatedOne("OriginFacility");
-    context.destinationFacility = shipment.getRelatedOne("DestinationFacility");
+    context.originFacility = shipment.getRelatedOne("OriginFacility", false);
+    context.destinationFacility = shipment.getRelatedOne("DestinationFacility", false);
 }
 
 if (!orderId && shipment && !selectFromShipmentPlan) {
@@ -45,8 +45,8 @@ if (orderId && shipment) {
     context.orderHeader = orderHeader;
 
     if (orderHeader) {
-        context.orderHeaderStatus = orderHeader.getRelatedOne("StatusItem");
-        context.orderType = orderHeader.getRelatedOne("OrderType");
+        context.orderHeaderStatus = orderHeader.getRelatedOne("StatusItem", false);
+        context.orderType = orderHeader.getRelatedOne("OrderType", false);
 
         isSalesOrder = "SALES_ORDER".equals(orderHeader.orderTypeId);
         context.isSalesOrder = isSalesOrder;
@@ -61,13 +61,13 @@ if (orderId && shipment) {
         if (orderItemShipGroup) {
             oiasgaLimitMap = [shipGroupSeqId : shipGroupSeqId];
         }
-        orderItems = orderHeader.getRelated("OrderItemAndShipGroupAssoc", oiasgaLimitMap, ['shipGroupSeqId', 'orderItemSeqId']);
+        orderItems = orderHeader.getRelated("OrderItemAndShipGroupAssoc", oiasgaLimitMap, ['shipGroupSeqId', 'orderItemSeqId'], false);
         orderItemDatas = [] as LinkedList;
         orderItems.each { orderItemAndShipGroupAssoc ->
             orderItemData = [:];
-            product = orderItemAndShipGroupAssoc.getRelatedOne("Product");
+            product = orderItemAndShipGroupAssoc.getRelatedOne("Product", false);
 
-            itemIssuances = orderItemAndShipGroupAssoc.getRelated("ItemIssuance");
+            itemIssuances = orderItemAndShipGroupAssoc.getRelated("ItemIssuance", null, null, false);
             totalQuantityIssued = 0;
             itemIssuances.each { itemIssuance ->
                 if (itemIssuance.quantity) {
@@ -83,15 +83,15 @@ if (orderId && shipment) {
                 if (orderItemShipGroup) {
                     oisgirLimitMap = [shipGroupSeqId : shipGroupSeqId];
                 }
-                orderItemShipGrpInvResList = orderItemAndShipGroupAssoc.getRelated("OrderItemShipGrpInvRes", oisgirLimitMap, ['reservedDatetime']);
+                orderItemShipGrpInvResList = orderItemAndShipGroupAssoc.getRelated("OrderItemShipGrpInvRes", oisgirLimitMap, ['reservedDatetime'], false);
                 orderItemShipGrpInvResDatas = [] as LinkedList;
                 totalQuantityReserved = 0;
                 orderItemShipGrpInvResList.each { orderItemShipGrpInvRes ->
-                    inventoryItem = orderItemShipGrpInvRes.getRelatedOne("InventoryItem");
+                    inventoryItem = orderItemShipGrpInvRes.getRelatedOne("InventoryItem", false);
                     orderItemShipGrpInvResData = [:];
                     orderItemShipGrpInvResData.orderItemShipGrpInvRes = orderItemShipGrpInvRes;
                     orderItemShipGrpInvResData.inventoryItem = inventoryItem;
-                    orderItemShipGrpInvResData.inventoryItemFacility = inventoryItem.getRelatedOne("Facility");
+                    orderItemShipGrpInvResData.inventoryItemFacility = inventoryItem.getRelatedOne("Facility", false);
                     orderItemShipGrpInvResDatas.add(orderItemShipGrpInvResData);
 
                     if (orderItemShipGrpInvRes.quantity) {
@@ -120,7 +120,7 @@ if (shipment && selectFromShipmentPlan) {
     context.isSalesOrder = true;
     shipmentPlans.each { shipmentPlan ->
         orderItemData = [:];
-        orderItem = shipmentPlan.getRelatedOne("OrderItem");
+        orderItem = shipmentPlan.getRelatedOne("OrderItem", false);
 
         orderItemShipGroup = null;
         if (shipGroupSeqId) {
@@ -134,16 +134,16 @@ if (shipment && selectFromShipmentPlan) {
         }
 
         orderItemShipGroupAssoc = null;
-        orderItemShipGroupAssocs = orderItem.getRelatedByAnd("OrderItemShipGroupAssoc", oiasgaLimitMap);
+        orderItemShipGroupAssocs = orderItem.getRelated("OrderItemShipGroupAssoc", oiasgaLimitMap, null, false);
         if (orderItemShipGroupAssocs) {
             orderItemShipGroupAssoc = EntityUtil.getFirst(orderItemShipGroupAssocs);
         }
         plannedQuantity = shipmentPlan.getDouble("quantity");
         totalProposedQuantity = 0.0;
 
-        product = orderItem.getRelatedOne("Product");
+        product = orderItem.getRelatedOne("Product", false);
 
-        itemIssuances = orderItem.getRelated("ItemIssuance");
+        itemIssuances = orderItem.getRelated("ItemIssuance", null, null, false);
         totalQuantityIssued = 0;
         totalQuantityIssuedInShipment = 0;
         itemIssuances.each { itemIssuance ->
@@ -161,15 +161,15 @@ if (shipment && selectFromShipmentPlan) {
             }
         }
 
-        orderItemShipGrpInvResList = orderItem.getRelated("OrderItemShipGrpInvRes", null, ['reservedDatetime']);
+        orderItemShipGrpInvResList = orderItem.getRelated("OrderItemShipGrpInvRes", null, ['reservedDatetime'], false);
         orderItemShipGrpInvResDatas = [] as LinkedList;
         totalQuantityReserved = 0;
         orderItemShipGrpInvResList.each { orderItemShipGrpInvRes ->
-            inventoryItem = orderItemShipGrpInvRes.getRelatedOne("InventoryItem");
+            inventoryItem = orderItemShipGrpInvRes.getRelatedOne("InventoryItem", false);
             orderItemShipGrpInvResData = [:];
             orderItemShipGrpInvResData.orderItemShipGrpInvRes = orderItemShipGrpInvRes;
             orderItemShipGrpInvResData.inventoryItem = inventoryItem;
-            orderItemShipGrpInvResData.inventoryItemFacility = inventoryItem.getRelatedOne("Facility");
+            orderItemShipGrpInvResData.inventoryItemFacility = inventoryItem.getRelatedOne("Facility", false);
             orderItemShipGrpInvResDatas.add(orderItemShipGrpInvResData);
 
             reservedQuantity = 0.0;

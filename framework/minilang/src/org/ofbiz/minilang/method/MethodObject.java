@@ -18,26 +18,25 @@
  *******************************************************************************/
 package org.ofbiz.minilang.method;
 
-import org.w3c.dom.*;
-import org.ofbiz.minilang.*;
+import org.ofbiz.minilang.MiniLangElement;
+import org.ofbiz.minilang.SimpleMethod;
+import org.w3c.dom.Element;
 
 /**
  * A single Object value to be used as a parameter or whatever
  */
-public abstract class MethodObject<T> {
-
-    protected SimpleMethod simpleMethod;
+public abstract class MethodObject<T> extends MiniLangElement {
 
     public MethodObject(Element element, SimpleMethod simpleMethod) {
-        this.simpleMethod = simpleMethod;
+        super(element, simpleMethod);
     }
-
-    /** Get the name for the type of the object */
-    public abstract String getTypeName();
-
-    /** Get the Class for the type of the object */
-    public abstract Class<T> getTypeClass(ClassLoader loader);
 
     /** Get the Object value */
     public abstract T getObject(MethodContext methodContext);
+
+    /** Get the Class for the type of the object */
+    public abstract Class<T> getTypeClass(MethodContext methodContext) throws ClassNotFoundException;
+
+    /** Get the name for the type of the object */
+    public abstract String getTypeName();
 }

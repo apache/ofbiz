@@ -72,6 +72,7 @@ import org.ofbiz.content.content.UploadContentAndImage;
 import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
+import org.ofbiz.entity.util.EntityUtilProperties;
 import org.ofbiz.service.GenericServiceException;
 import org.ofbiz.service.LocalDispatcher;
 import org.ofbiz.widget.screen.MacroScreenRenderer;
@@ -117,7 +118,7 @@ public class DataResourceWorker  implements org.ofbiz.widget.DataResourceWorkerI
         if (parentCategoryId != null) {
             matchValue = parentCategoryId;
         }
-        List<GenericValue> categoryValues = delegator.findByAndCache("DataCategory", UtilMisc.toMap("parentCategoryId", matchValue));
+        List<GenericValue> categoryValues = delegator.findByAnd("DataCategory", UtilMisc.toMap("parentCategoryId", matchValue), null, true);
         categoryNode.put("count", Integer.valueOf(categoryValues.size()));
         List<Map<String, Object>> subCategoryIds = FastList.newInstance();
         for (int i = 0; i < categoryValues.size(); i++) {
@@ -519,7 +520,7 @@ public class DataResourceWorker  implements org.ofbiz.widget.DataResourceWorkerI
             File[] subs = parent.listFiles();
             for (int i = 0; i < subs.length; i++) {
                 if (subs[i].isDirectory()) {
-                    dirMap.put(Long.valueOf(subs[0].lastModified()), subs[i]);
+                    dirMap.put(Long.valueOf(subs[i].lastModified()), subs[i]);
                 }
             }
         } else {
@@ -544,7 +545,7 @@ public class DataResourceWorker  implements org.ofbiz.widget.DataResourceWorkerI
             latestDir = makeNewDirectory(parent);
         }
 
-        Debug.log("Directory Name : " + latestDir.getName(), module);
+        Debug.logInfo("Directory Name : " + latestDir.getName(), module);
         if (absolute) {
             return latestDir.getAbsolutePath().replace('\\','/');
         } else {
@@ -575,7 +576,7 @@ public class DataResourceWorker  implements org.ofbiz.widget.DataResourceWorkerI
             throw new GeneralException("Cannot clear dataResource related cache for a null dataResourceId");
         }
 
-        GenericValue dataResource = delegator.findByPrimaryKeyCache("DataResource", UtilMisc.toMap("dataResourceId", dataResourceId));
+        GenericValue dataResource = delegator.findOne("DataResource", UtilMisc.toMap("dataResourceId", dataResourceId), true);
         if (dataResource != null) {
             String dataTemplateTypeId = dataResource.getString("dataTemplateTypeId");
             if ("FTL".equals(dataTemplateTypeId)) {
@@ -694,7 +695,7 @@ public class DataResourceWorker  implements org.ofbiz.widget.DataResourceWorkerI
                 if (sourceFileLocation != null && sourceFileLocation.exists()) {
                     UtilMisc.copyFile(sourceFileLocation,targetFileLocation);
                 } else {
-                    String defaultVisualThemeId = UtilProperties.getPropertyValue("general", "VISUAL_THEME");
+                    String defaultVisualThemeId = EntityUtilProperties.getPropertyValue("general", "VISUAL_THEME", delegator);
                     if (defaultVisualThemeId != null) {
                         GenericValue themeValue = delegator.findOne("VisualThemeResource", UtilMisc.toMap("visualThemeId", defaultVisualThemeId, "resourceTypeEnumId", "VT_DOCBOOKSTYLESHEET", "sequenceId", "01"), true);
                         sourceFileLocation = new File(System.getProperty("ofbiz.home") + "/themes" + themeValue.get("resourceValue"));
@@ -817,8 +818,10 @@ public class DataResourceWorker  implements org.ofbiz.widget.DataResourceWorkerI
             writeText(dataResource, text, templateContext, mimeTypeId, locale, out);
         } else if ("ELECTRONIC_TEXT".equals(dataResourceTypeId)) {
             GenericValue electronicText = delegator.findOne("ElectronicText", UtilMisc.toMap("dataResourceId", dataResourceId), cache);
-            String text = electronicText.getString("textData");
-            writeText(dataResource, text, templateContext, mimeTypeId, locale, out);
+            if (electronicText != null) {
+                String text = electronicText.getString("textData");
+                writeText(dataResource, text, templateContext, mimeTypeId, locale, out);
+            }
 
         // object types
         } else if (dataResourceTypeId.endsWith("_OBJECT")) {

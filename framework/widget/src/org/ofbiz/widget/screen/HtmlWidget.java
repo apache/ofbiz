@@ -21,6 +21,7 @@ package org.ofbiz.widget.screen;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -41,6 +42,7 @@ import org.ofbiz.widget.html.HtmlWidgetRenderer;
 import org.w3c.dom.Element;
 
 import freemarker.ext.beans.BeansWrapper;
+import freemarker.ext.beans.CollectionModel;
 import freemarker.ext.beans.StringModel;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
@@ -55,12 +57,12 @@ import freemarker.template.TemplateModelException;
 public class HtmlWidget extends ModelScreenWidget {
     public static final String module = HtmlWidget.class.getName();
 
-    public static UtilCache<String, Template> specialTemplateCache = UtilCache.createUtilCache("widget.screen.template.ftl.general", 0, 0, false);
-    protected static BeansWrapper specialBeansWrapper = new ExtendedWrapper();
-    protected static Configuration specialConfig = FreeMarkerWorker.makeConfiguration(specialBeansWrapper);
+    private static final UtilCache<String, Template> specialTemplateCache = UtilCache.createUtilCache("widget.screen.template.ftl.general", 0, 0, false);
+    protected static Configuration specialConfig = FreeMarkerWorker.makeConfiguration(FreeMarkerWorker.configureBeansWrapper(new ExtendedWrapper()));
 
     // not sure if this is the best way to get FTL to use my fancy MapModel derivative, but should work at least...
     public static class ExtendedWrapper extends BeansWrapper {
+        @SuppressWarnings("unchecked")
         @Override
         public TemplateModel wrap(Object object) throws TemplateModelException {
             /* NOTE: don't use this and the StringHtmlWrapperForFtl or things will be double-encoded
@@ -71,6 +73,9 @@ public class HtmlWidget extends ModelScreenWidget {
             // and handles most things without causing too many problems
             if (object instanceof String) {
                 return new StringHtmlWrapperForFtl((String) object, this);
+            } else if (object instanceof Collection && !(object instanceof Map)) {
+                // An additional wrapper to ensure ${aCollection} is properly encoded for html
+                return new CollectionHtmlWrapperForFtl((Collection) object, this);
             }
             return super.wrap(object);
         }
@@ -84,6 +89,20 @@ public class HtmlWidget extends ModelScreenWidget {
         public String getAsString() {
             return StringUtil.htmlEncoder.encode(super.getAsString());
         }
+    }
+
+    public static class CollectionHtmlWrapperForFtl extends CollectionModel {
+
+        @SuppressWarnings("unchecked")
+        public CollectionHtmlWrapperForFtl(Collection collection, BeansWrapper wrapper) {
+            super(collection, wrapper);
+        }
+
+        @Override
+        public String getAsString() {
+            return StringUtil.htmlEncoder.encode(super.getAsString());
+        }
+
     }
 
     // End Static, begin class section
@@ -163,7 +182,7 @@ public class HtmlWidget extends ModelScreenWidget {
         }
 
         contextMs.push();
-        for(Map.Entry<String, Object> mapEntry: contextMs.entrySet()) {
+        for (Map.Entry<String, Object> mapEntry: contextMs.entrySet()) {
             Object value = mapEntry.getValue();
             if (value instanceof GenericValue) {
                 contextMs.put(mapEntry.getKey(), GenericValueHtmlWrapper.create((GenericValue) value));

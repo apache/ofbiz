@@ -51,7 +51,7 @@ under the License.
             <#assign alt_row = false/>
             <#list quoteItems as quoteItem>
                 <#if quoteItem.productId?exists>
-                    <#assign product = quoteItem.getRelatedOne("Product")>
+                    <#assign product = quoteItem.getRelatedOne("Product", false)>
                 <#else>
                     <#assign product = null> <#-- don't drag it along to the next iteration -->
                 </#if>
@@ -60,7 +60,7 @@ under the License.
                     <#assign selectedAmount = 1/>
                 </#if>
                 <#assign quoteItemAmount = quoteItem.quoteUnitPrice?default(0) * quoteItem.quantity?default(0) * selectedAmount>
-                <#assign quoteItemAdjustments = quoteItem.getRelated("QuoteAdjustment")>
+                <#assign quoteItemAdjustments = quoteItem.getRelated("QuoteAdjustment", null, null, false)>
                 <#assign totalQuoteItemAdjustmentAmount = 0.0>
                 <#list quoteItemAdjustments as quoteItemAdjustment>
                     <#assign totalQuoteItemAdjustmentAmount = quoteItemAdjustment.amount?default(0) + totalQuoteItemAdjustmentAmount>
@@ -103,7 +103,7 @@ under the License.
                     <td align="right" valign="top"><@ofbizCurrency amount=totalQuoteItemAmount isoCode=quote.currencyUomId/></td>
                 </tr>
                 <#list quoteTerms as quoteTerm>
-                <#assign termDescription = delegator.findByPrimaryKey("TermType",{"termTypeId":quoteTerm.termTypeId})>
+                <#assign termDescription = delegator.findOne("TermType",{"termTypeId":quoteTerm.termTypeId}, false)>
                 <tr <#if alt_row>class="alternate-row" </#if>>
                     <td valign="top">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;${termDescription.description?if_exists}</td>
                     <td valign="top">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;${quoteTerm.termValue?if_exists}</td>
@@ -117,7 +117,7 @@ under the License.
                 </#list>
                 <#-- now show adjustment details per line item -->
                 <#list quoteItemAdjustments as quoteItemAdjustment>
-                    <#assign adjustmentType = quoteItemAdjustment.getRelatedOne("OrderAdjustmentType")>
+                    <#assign adjustmentType = quoteItemAdjustment.getRelatedOne("OrderAdjustmentType", false)>
                     <tr class="alternate-row">
                         <td align="right" colspan="4"><span class="label">${adjustmentType.get("description",locale)?if_exists}</span></td>
                         <td align="right"><@ofbizCurrency amount=quoteItemAdjustment.amount isoCode=quote.currencyUomId/></td>
@@ -136,7 +136,7 @@ under the License.
             <#assign totalQuoteHeaderAdjustmentAmount = 0.0>
             <#assign findAdjustment = false>
             <#list quoteAdjustments as quoteAdjustment>
-                <#assign adjustmentType = quoteAdjustment.getRelatedOne("OrderAdjustmentType")>
+                <#assign adjustmentType = quoteAdjustment.getRelatedOne("OrderAdjustmentType", false)>
                 <#if !quoteAdjustment.quoteItemSeqId?exists>
                     <#assign totalQuoteHeaderAdjustmentAmount = quoteAdjustment.amount?default(0) + totalQuoteHeaderAdjustmentAmount>
                     <tr>

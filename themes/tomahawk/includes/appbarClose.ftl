@@ -42,10 +42,10 @@ under the License.
 
 <#if parameters.portalPageId?has_content && !appModelMenu.getModelMenuItemByName(headerItem)?exists && userLogin?exists>
     <#assign findMap = Static["org.ofbiz.base.util.UtilMisc"].toMap("portalPageId", parameters.portalPageId)>
-    <#assign portalPage = delegator.findByPrimaryKeyCache("PortalPage", findMap)>
+    <#assign portalPage = delegator.findOne("PortalPage", findMap, true)?if_exists>
     <#if portalPage?has_content>
       <div id="app-nav-selected-item">
-        ${portalPage.portalPageName?if_exists}
+        ${portalPage.get("portalPageName", locale)?if_exists}
       </div>
     </#if>
 </#if>
@@ -75,7 +75,7 @@ under the License.
       <#--if webSiteId?exists && requestAttributes._CURRENT_VIEW_?exists && helpTopic?exists-->
       <#if parameters.componentName?exists && requestAttributes._CURRENT_VIEW_?exists && helpTopic?exists>
         <#include "component://common/webcommon/includes/helplink.ftl" />
-        <li><a class="help-link <#if pageAvail?has_content> alert</#if>" href="javascript:lookup_popup2('showHelp?helpTopic=${helpTopic}&amp;portalPageId=${parameters.portalPageId?if_exists}','help' ,500,500);" title="${uiLabelMap.CommonHelp}"></a></li>
+        <li><a class="help-link <#if pageAvail?has_content> alert</#if>" href="javascript:lookup_popup1('showHelp?helpTopic=${helpTopic}&amp;portalPageId=${parameters.portalPageId?if_exists}','help' ,500,500);" title="${uiLabelMap.CommonHelp}"></a></li>
       </#if>
       <li><a href="<@ofbizUrl>logout</@ofbizUrl>">${uiLabelMap.CommonLogout}</a></li>
       <li><a href="<@ofbizUrl>ListVisualThemes</@ofbizUrl>">${uiLabelMap.CommonVisualThemes}</a></li>
@@ -88,7 +88,7 @@ under the License.
         <li class="org">${orgName}</li>
       </#if>
       <#if userLogin.partyId?exists>
-        <li class="user"><a href="passwordChange">${userName}</a></li>
+        <li class="user"><a href="<@ofbizUrl>passwordChange</@ofbizUrl>">${userName}</a></li>
       <#else>
         <li class="user">${userName}</li>
       </#if>

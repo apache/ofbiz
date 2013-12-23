@@ -28,7 +28,9 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -38,18 +40,13 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 
-import javolution.util.FastList;
-import javolution.util.FastMap;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-
 import org.ofbiz.base.concurrent.ExecutionPool;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilTimer;
 import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.base.util.UtilXml;
 import org.ofbiz.entity.GenericEntityException;
-import org.ofbiz.entity.config.DatasourceInfo;
+import org.ofbiz.entity.config.model.Datasource;
 import org.ofbiz.entity.config.EntityConfigUtil;
 import org.ofbiz.entity.datasource.GenericHelperInfo;
 import org.ofbiz.entity.model.ModelEntity;
@@ -61,6 +58,8 @@ import org.ofbiz.entity.model.ModelKeyMap;
 import org.ofbiz.entity.model.ModelRelation;
 import org.ofbiz.entity.model.ModelViewEntity;
 import org.ofbiz.entity.transaction.TransactionUtil;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 /**
  * Utilities for Entity Database Maintenance
@@ -72,7 +71,7 @@ public class DatabaseUtil {
 
     // OFBiz Connections
     protected ModelFieldTypeReader modelFieldTypeReader = null;
-    protected DatasourceInfo datasourceInfo = null;
+    protected Datasource datasourceInfo = null;
     protected GenericHelperInfo helperInfo = null;
 
     // Legacy Connections
@@ -92,7 +91,7 @@ public class DatabaseUtil {
     public DatabaseUtil(GenericHelperInfo helperInfo, ExecutorService executor) {
         this.helperInfo = helperInfo;
         this.modelFieldTypeReader = ModelFieldTypeReader.getModelFieldTypeReader(helperInfo.getHelperBaseName());
-        this.datasourceInfo = EntityConfigUtil.getDatasourceInfo(helperInfo.getHelperBaseName());
+        this.datasourceInfo = EntityConfigUtil.getDatasource(helperInfo.getHelperBaseName());
         this.executor = executor;
     }
 
@@ -167,7 +166,7 @@ public class DatabaseUtil {
         }
     }
 
-    public DatasourceInfo getDatasourceInfo() {
+    public Datasource getDatasource() {
         return this.datasourceInfo;
     }
 
@@ -176,7 +175,7 @@ public class DatabaseUtil {
     /* ====================================================================== */
 
     public void checkDb(Map<String, ModelEntity> modelEntities, List<String> messages, boolean addMissing) {
-        checkDb(modelEntities, null, messages, datasourceInfo.checkPrimaryKeysOnStart, (datasourceInfo.useFks && datasourceInfo.checkForeignKeysOnStart), (datasourceInfo.useFkIndices && datasourceInfo.checkFkIndicesOnStart), addMissing);
+        checkDb(modelEntities, null, messages, datasourceInfo.getCheckPksOnStart(), (datasourceInfo.getUseForeignKeys() && datasourceInfo.getCheckFksOnStart()), (datasourceInfo.getUseForeignKeyIndices() && datasourceInfo.getCheckFkIndicesOnStart()), addMissing);
     }
 
     public void checkDb(Map<String, ModelEntity> modelEntities, List<String> colWrongSize, List<String> messages, boolean checkPks, boolean checkFks, boolean checkFkIdx, boolean addMissing) {
@@ -223,7 +222,7 @@ public class DatabaseUtil {
         Collections.sort(modelEntityList);
         int curEnt = 0;
         int totalEnt = modelEntityList.size();
-        List<ModelEntity> entitiesAdded = FastList.newInstance();
+        List<ModelEntity> entitiesAdded = new LinkedList<ModelEntity>();
         String schemaName;
         try {
             DatabaseMetaData dbData = this.getDatabaseMetaData(null, messages);
@@ -234,7 +233,7 @@ public class DatabaseUtil {
             Debug.logError(message, module);
             return;
         }
-        List<Future<CreateTableCallable>> tableFutures = FastList.newInstance();
+        List<Future<CreateTableCallable>> tableFutures = new LinkedList<Future<CreateTableCallable>>();
         for (ModelEntity entity: modelEntityList) {
             curEnt++;
 
@@ -270,7 +269,7 @@ public class DatabaseUtil {
                 tableNames.remove(tableName);
 
                 if (colInfo != null) {
-                    Map<String, ModelField> fieldColNames = FastMap.newInstance();
+                    Map<String, ModelField> fieldColNames = new HashMap<String, ModelField>();
                     Iterator<ModelField> fieldIter = entity.getFieldsIterator();
                     while (fieldIter.hasNext()) {
                         ModelField field = fieldIter.next();
@@ -440,14 +439,14 @@ public class DatabaseUtil {
         }
 
         // for each newly added table, add fk indices
-        if (datasourceInfo.useFkIndices) {
+        if (datasourceInfo.getUseForeignKeyIndices()) {
             int totalFkIndices = 0;
-            List<Future<AbstractCountingCallable>> fkIndicesFutures = FastList.newInstance();
+            List<Future<AbstractCountingCallable>> fkIndicesFutures = new LinkedList<Future<AbstractCountingCallable>>();
             for (ModelEntity curEntity: entitiesAdded) {
                 if (curEntity.getRelationsOneSize() > 0) {
                     fkIndicesFutures.add(submitWork(new AbstractCountingCallable(curEntity, modelEntities) {
                         public AbstractCountingCallable call() throws Exception {
-                            count = createForeignKeyIndices(entity, datasourceInfo.constraintNameClipLength, messages);
+                            count = createForeignKeyIndices(entity, datasourceInfo.getConstraintNameClipLength(), messages);
                             return this;
                         }
                     }));
@@ -460,18 +459,18 @@ public class DatabaseUtil {
         }
 
         // for each newly added table, add fks
-        if (datasourceInfo.useFks) {
+        if (datasourceInfo.getUseForeignKeys()) {
             int totalFks = 0;
             for (ModelEntity curEntity: entitiesAdded) {
-                totalFks += this.createForeignKeys(curEntity, modelEntities, datasourceInfo.constraintNameClipLength, datasourceInfo.fkStyle, datasourceInfo.useFkInitiallyDeferred, messages);
+                totalFks += this.createForeignKeys(curEntity, modelEntities, datasourceInfo.getConstraintNameClipLength(), datasourceInfo.getFkStyle(), datasourceInfo.getUseFkInitiallyDeferred(), messages);
             }
             if (totalFks > 0) Debug.logImportant("==== TOTAL Foreign Keys Created: " + totalFks, module);
         }
 
         // for each newly added table, add declared indexes
-        if (datasourceInfo.useIndices) {
+        if (datasourceInfo.getUseIndices()) {
             int totalDis = 0;
-            List<Future<AbstractCountingCallable>> disFutures = FastList.newInstance();
+            List<Future<AbstractCountingCallable>> disFutures = new LinkedList<Future<AbstractCountingCallable>>();
             for (ModelEntity curEntity: entitiesAdded) {
                 if (curEntity.getIndexesSize() > 0) {
                     disFutures.add(submitWork(new AbstractCountingCallable(curEntity,  modelEntities) {
@@ -491,7 +490,7 @@ public class DatabaseUtil {
 
         // make sure each one-relation has an FK
         if (checkFks) {
-        //if (!justColumns && datasourceInfo.useFks && datasourceInfo.checkForeignKeysOnStart) {
+        //if (!justColumns && datasourceInfo.getUseForeignKeys() && datasourceInfo.checkForeignKeysOnStart) {
             // NOTE: This ISN'T working for Postgres or MySQL, who knows about others, may be from JDBC driver bugs...
             int numFksCreated = 0;
             // TODO: check each key-map to make sure it exists in the FK, if any differences warn and then remove FK and recreate it
@@ -535,7 +534,7 @@ public class DatabaseUtil {
                             Debug.logError("No such relation: " + entity.getEntityName() + " -> " + modelRelation.getRelEntityName(), module);
                             continue;
                         }
-                        String relConstraintName = makeFkConstraintName(modelRelation, datasourceInfo.constraintNameClipLength);
+                        String relConstraintName = makeFkConstraintName(modelRelation, datasourceInfo.getConstraintNameClipLength());
                         ReferenceCheckInfo rcInfo = null;
 
                         if (rcInfoMap != null) {
@@ -551,7 +550,7 @@ public class DatabaseUtil {
                             if (Debug.infoOn()) Debug.logInfo(noFkMessage, module);
 
                             if (addMissing) {
-                                String errMsg = createForeignKey(entity, modelRelation, relModelEntity, datasourceInfo.constraintNameClipLength, datasourceInfo.fkStyle, datasourceInfo.useFkInitiallyDeferred);
+                                String errMsg = createForeignKey(entity, modelRelation, relModelEntity, datasourceInfo.getConstraintNameClipLength(), datasourceInfo.getFkStyle(), datasourceInfo.getUseFkInitiallyDeferred());
                                 if (UtilValidate.isNotEmpty(errMsg)) {
                                     String message = "Could not create foreign key " + relConstraintName + " for entity [" + entity.getEntityName() + "]: " + errMsg;
                                     Debug.logError(message, module);
@@ -586,8 +585,8 @@ public class DatabaseUtil {
         }
 
         // make sure each one-relation has an index
-        if (checkFkIdx || datasourceInfo.checkIndicesOnStart) {
-        //if (!justColumns && datasourceInfo.useFkIndices && datasourceInfo.checkFkIndicesOnStart) {
+        if (checkFkIdx || datasourceInfo.getCheckIndicesOnStart()) {
+        //if (!justColumns && datasourceInfo.getUseForeignKeyIndices() && datasourceInfo.checkFkIndicesOnStart) {
             int numIndicesCreated = 0;
             // TODO: check each key-map to make sure it exists in the index, if any differences warn and then remove the index and recreate it
 
@@ -619,9 +618,9 @@ public class DatabaseUtil {
                     if (tableIndexList == null) {
                         // evidently no indexes in the database for this table, do the create all
                         if (checkFkIdx) {
-                            this.createForeignKeyIndices(entity, datasourceInfo.constraintNameClipLength, messages);
+                            this.createForeignKeyIndices(entity, datasourceInfo.getConstraintNameClipLength(), messages);
                         }
-                        if (datasourceInfo.checkIndicesOnStart) {
+                        if (datasourceInfo.getCheckIndicesOnStart()) {
                             this.createDeclaredIndices(entity, messages);
                         }
                         continue;
@@ -635,7 +634,7 @@ public class DatabaseUtil {
                             continue;
                         }
 
-                        String relConstraintName = makeFkConstraintName(modelRelation, datasourceInfo.constraintNameClipLength);
+                        String relConstraintName = makeFkConstraintName(modelRelation, datasourceInfo.getConstraintNameClipLength());
                         if (tableIndexList.contains(relConstraintName)) {
                             tableIndexList.remove(relConstraintName);
                         } else {
@@ -646,7 +645,7 @@ public class DatabaseUtil {
                                 if (Debug.infoOn()) Debug.logInfo(noIdxMessage, module);
 
                                 if (addMissing) {
-                                    String errMsg = createForeignKeyIndex(entity, modelRelation, datasourceInfo.constraintNameClipLength);
+                                    String errMsg = createForeignKeyIndex(entity, modelRelation, datasourceInfo.getConstraintNameClipLength());
                                     if (UtilValidate.isNotEmpty(errMsg)) {
                                         String message = "Could not create foreign key index " + relConstraintName + " for entity [" + entity.getEntityName() + "]: " + errMsg;
                                         Debug.logError(message, module);
@@ -674,12 +673,12 @@ public class DatabaseUtil {
                     while (indexes.hasNext()) {
                         ModelIndex modelIndex = indexes.next();
 
-                        String relIndexName = makeIndexName(modelIndex, datasourceInfo.constraintNameClipLength);
+                        String relIndexName = makeIndexName(modelIndex, datasourceInfo.getConstraintNameClipLength());
                         String checkIndexName = needsUpperCase[0] ? relIndexName.toUpperCase() : relIndexName;
                         if (tableIndexList.contains(checkIndexName)) {
                             tableIndexList.remove(checkIndexName);
                         } else {
-                            if (datasourceInfo.checkIndicesOnStart) {
+                            if (datasourceInfo.getCheckIndicesOnStart()) {
                                 // if not, create one
                                 String noIdxMessage = "No Index [" + relIndexName + "] found for entity [" + entityName + "]";
                                 if (messages != null) messages.add(noIdxMessage);
@@ -708,7 +707,7 @@ public class DatabaseUtil {
                         if (messages != null) messages.add(message);
                     }
 
-                    // show Indexe key references that exist but are unknown
+                    // show index key references that exist but are unknown
                     if (tableIndexList != null) {
                         for (String indexLeft: tableIndexList) {
                             String message = "Unknown Index " + indexLeft + " found in table " + entity.getTableName(datasourceInfo);
@@ -737,7 +736,7 @@ public class DatabaseUtil {
         // go through each table and make a ModelEntity object, add to list
         // for each entity make corresponding ModelField objects
         // then print out XML for the entities/fields
-        List<ModelEntity> newEntList = FastList.newInstance();
+        List<ModelEntity> newEntList = new LinkedList<ModelEntity>();
 
         boolean isCaseSensitive = false;
         DatabaseMetaData dbData = this.getDatabaseMetaData(null, messages);
@@ -925,17 +924,15 @@ public class DatabaseUtil {
         if (dbData == null) {
             return;
         }
-        // Database Info
         if (Debug.infoOn()) {
+            // Database Info
             try {
                 Debug.logInfo("Database Product Name is " + dbData.getDatabaseProductName(), module);
                 Debug.logInfo("Database Product Version is " + dbData.getDatabaseProductVersion(), module);
             } catch (SQLException e) {
                 Debug.logWarning("Unable to get Database name & version information", module);
             }
-        }
-        // JDBC Driver Info
-        if (Debug.infoOn()) {
+            // JDBC Driver Info
             try {
                 Debug.logInfo("Database Driver Name is " + dbData.getDriverName(), module);
                 Debug.logInfo("Database Driver Version is " + dbData.getDriverVersion(), module);
@@ -945,10 +942,8 @@ public class DatabaseUtil {
             } catch (AbstractMethodError ame) {
                 Debug.logWarning("Unable to get Driver JDBC Version", module);
             }
-        }
-        // Db/Driver support settings
-        if (Debug.infoOn()) {
-                Debug.logInfo("Database Setting/Support Information (those with a * should be true):", module);
+            // Db/Driver support settings
+            Debug.logInfo("Database Setting/Support Information (those with a * should be true):", module);
             for (Detection detection: detections) {
                 String requiredFlag = detection.required ? "*" : "";
                 try {
@@ -1103,7 +1098,7 @@ public class DatabaseUtil {
     public Map<String, Map<String, ColumnCheckInfo>> getColumnInfo(Set<String> tableNames, boolean getPks, Collection<String> messages) {
         // if there are no tableNames, don't even try to get the columns
         if (tableNames.size() == 0) {
-            return FastMap.newInstance();
+            return new HashMap<String, Map<String, ColumnCheckInfo>>();
         }
 
         Connection connection = null;
@@ -1133,7 +1128,7 @@ public class DatabaseUtil {
 
             if (Debug.infoOn()) Debug.logInfo("Getting Column Info From Database", module);
 
-            Map<String, Map<String, ColumnCheckInfo>> colInfo = FastMap.newInstance();
+            Map<String, Map<String, ColumnCheckInfo>> colInfo = new HashMap<String, Map<String, ColumnCheckInfo>>();
             try {
                 String lookupSchemaName = getSchemaName(dbData);
                 boolean needsUpperCase = false;
@@ -1188,7 +1183,7 @@ public class DatabaseUtil {
 
                             Map<String, ColumnCheckInfo> tableColInfo = colInfo.get(ccInfo.tableName);
                             if (tableColInfo == null) {
-                                tableColInfo = FastMap.newInstance();
+                                tableColInfo = new HashMap<String, ColumnCheckInfo>();
                                 colInfo.put(ccInfo.tableName, tableColInfo);
                             }
                             tableColInfo.put(ccInfo.columnName, ccInfo);
@@ -1229,7 +1224,7 @@ public class DatabaseUtil {
                     }
                     if (pkCount == 0) {
                         Debug.logInfo("Searching in " + tableNames.size() + " tables for primary key fields ...", module);
-                        List<Future<AbstractCountingCallable>> pkFetcherFutures = FastList.newInstance();
+                        List<Future<AbstractCountingCallable>> pkFetcherFutures = new LinkedList<Future<AbstractCountingCallable>>();
                         for (String curTable: tableNames) {
                             curTable = curTable.substring(curTable.indexOf('.') + 1); //cut off schema name
                             pkFetcherFutures.add(submitWork(createPrimaryKeyFetcher(dbData, lookupSchemaName, needsUpperCase, colInfo, messages, curTable)));
@@ -1352,7 +1347,7 @@ public class DatabaseUtil {
 
         if (Debug.infoOn()) Debug.logInfo("Getting Foreign Key (Reference) Info From Database", module);
 
-        Map<String, Map<String, ReferenceCheckInfo>> refInfo = FastMap.newInstance();
+        Map<String, Map<String, ReferenceCheckInfo>> refInfo = new HashMap<String, Map<String, ReferenceCheckInfo>>();
 
         try {
             // ResultSet rsCols = dbData.getCrossReference(null, null, null, null, null, null);
@@ -1409,7 +1404,7 @@ public class DatabaseUtil {
 
                     Map<String, ReferenceCheckInfo> tableRefInfo = refInfo.get(rcInfo.fkTableName);
                     if (tableRefInfo == null) {
-                        tableRefInfo = FastMap.newInstance();
+                        tableRefInfo = new HashMap<String, ReferenceCheckInfo>();
                         refInfo.put(rcInfo.fkTableName, tableRefInfo);
                         if (Debug.verboseOn()) Debug.logVerbose("Adding new Map for table: " + rcInfo.fkTableName, module);
                     }
@@ -1486,7 +1481,7 @@ public class DatabaseUtil {
 
         if (Debug.infoOn()) Debug.logInfo("Getting Index Info From Database", module);
 
-        Map<String, Set<String>> indexInfo = FastMap.newInstance();
+        Map<String, Set<String>> indexInfo = new HashMap<String, Set<String>>();
         try {
             int totalIndices = 0;
             String lookupSchemaName = getSchemaName(dbData);
@@ -1621,7 +1616,7 @@ public class DatabaseUtil {
     private abstract class AbstractCountingCallable implements Callable<AbstractCountingCallable> {
         protected final ModelEntity entity;
         protected final Map<String, ModelEntity> modelEntities;
-        protected final List<String> messages = FastList.newInstance();
+        protected final List<String> messages = new LinkedList<String>();
         protected int count;
 
         protected AbstractCountingCallable(ModelEntity entity, Map<String, ModelEntity> modelEntities) {
@@ -1681,19 +1676,19 @@ public class DatabaseUtil {
 
             if ("String".equals(type.getJavaType()) || "java.lang.String".equals(type.getJavaType())) {
                 // if there is a characterSet, add the CHARACTER SET arg here
-                if (UtilValidate.isNotEmpty(this.datasourceInfo.characterSet)) {
+                if (UtilValidate.isNotEmpty(this.datasourceInfo.getCharacterSet())) {
                     sqlBuf.append(" CHARACTER SET ");
-                    sqlBuf.append(this.datasourceInfo.characterSet);
+                    sqlBuf.append(this.datasourceInfo.getCharacterSet());
                 }
                 // if there is a collate, add the COLLATE arg here
-                if (UtilValidate.isNotEmpty(this.datasourceInfo.collate)) {
+                if (UtilValidate.isNotEmpty(this.datasourceInfo.getCollate())) {
                     sqlBuf.append(" COLLATE ");
-                    sqlBuf.append(this.datasourceInfo.collate);
+                    sqlBuf.append(this.datasourceInfo.getCollate());
                 }
             }
 
             if (field.getIsNotNull() || field.getIsPk()) {
-                if (this.datasourceInfo.alwaysUseConstraintKeyword) {
+                if (this.datasourceInfo.getAlwaysUseConstraintKeyword()) {
                     sqlBuf.append(" CONSTRAINT NOT NULL, ");
                 } else {
                     sqlBuf.append(" NOT NULL, ");
@@ -1703,8 +1698,8 @@ public class DatabaseUtil {
             }
         }
 
-        String pkName = makePkConstraintName(entity, this.datasourceInfo.constraintNameClipLength);
-        if (this.datasourceInfo.usePkConstraintNames) {
+        String pkName = makePkConstraintName(entity, this.datasourceInfo.getConstraintNameClipLength());
+        if (this.datasourceInfo.getUsePkConstraintNames()) {
             sqlBuf.append("CONSTRAINT ");
             sqlBuf.append(pkName);
         }
@@ -1730,7 +1725,7 @@ public class DatabaseUtil {
                         continue;
                     }
 
-                    String fkConstraintClause = makeFkConstraintClause(entity, modelRelation, relModelEntity, this.datasourceInfo.constraintNameClipLength, this.datasourceInfo.fkStyle, this.datasourceInfo.useFkInitiallyDeferred);
+                    String fkConstraintClause = makeFkConstraintClause(entity, modelRelation, relModelEntity, this.datasourceInfo.getConstraintNameClipLength(), this.datasourceInfo.getFkStyle(), this.datasourceInfo.getUseFkInitiallyDeferred());
                     if (UtilValidate.isNotEmpty(fkConstraintClause)) {
                         sqlBuf.append(", ");
                         sqlBuf.append(fkConstraintClause);
@@ -1744,25 +1739,25 @@ public class DatabaseUtil {
         sqlBuf.append(")");
 
         // if there is a tableType, add the TYPE arg here
-        if (UtilValidate.isNotEmpty(this.datasourceInfo.tableType)) {
+        if (UtilValidate.isNotEmpty(this.datasourceInfo.getTableType())) {
          // jaz:20101229 - This appears to be only used by mysql and now mysql has
             // deprecated (and in 5.5.x removed) the use of the TYPE keyword. This is
             // changed to ENGINE which is supported starting at 4.1
             sqlBuf.append(" ENGINE ");
             //sqlBuf.append(" TYPE ");
-            sqlBuf.append(this.datasourceInfo.tableType);
+            sqlBuf.append(this.datasourceInfo.getTableType());
         }
 
         // if there is a characterSet, add the CHARACTER SET arg here
-        if (UtilValidate.isNotEmpty(this.datasourceInfo.characterSet)) {
+        if (UtilValidate.isNotEmpty(this.datasourceInfo.getCharacterSet())) {
             sqlBuf.append(" CHARACTER SET ");
-            sqlBuf.append(this.datasourceInfo.characterSet);
+            sqlBuf.append(this.datasourceInfo.getCharacterSet());
         }
 
         // if there is a collate, add the COLLATE arg here
-        if (UtilValidate.isNotEmpty(this.datasourceInfo.collate)) {
+        if (UtilValidate.isNotEmpty(this.datasourceInfo.getCollate())) {
             sqlBuf.append(" COLLATE ");
-            sqlBuf.append(this.datasourceInfo.collate);
+            sqlBuf.append(this.datasourceInfo.getCollate());
         }
 
         if (Debug.verboseOn()) Debug.logVerbose("[createTable] sql=" + sqlBuf.toString(), module);
@@ -1875,15 +1870,15 @@ public class DatabaseUtil {
 
         if ("String".equals(type.getJavaType()) || "java.lang.String".equals(type.getJavaType())) {
             // if there is a characterSet, add the CHARACTER SET arg here
-            if (UtilValidate.isNotEmpty(this.datasourceInfo.characterSet)) {
+            if (UtilValidate.isNotEmpty(this.datasourceInfo.getCharacterSet())) {
                 sqlBuf.append(" CHARACTER SET ");
-                sqlBuf.append(this.datasourceInfo.characterSet);
+                sqlBuf.append(this.datasourceInfo.getCharacterSet());
             }
 
             // if there is a collate, add the COLLATE arg here
-            if (UtilValidate.isNotEmpty(this.datasourceInfo.collate)) {
+            if (UtilValidate.isNotEmpty(this.datasourceInfo.getCollate())) {
                 sqlBuf.append(" COLLATE ");
-                sqlBuf.append(this.datasourceInfo.collate);
+                sqlBuf.append(this.datasourceInfo.getCollate());
             }
         }
 
@@ -1903,15 +1898,15 @@ public class DatabaseUtil {
 
             if ("String".equals(type.getJavaType()) || "java.lang.String".equals(type.getJavaType())) {
                 // if there is a characterSet, add the CHARACTER SET arg here
-                if (UtilValidate.isNotEmpty(this.datasourceInfo.characterSet)) {
+                if (UtilValidate.isNotEmpty(this.datasourceInfo.getCharacterSet())) {
                     sql2Buf.append(" CHARACTER SET ");
-                    sql2Buf.append(this.datasourceInfo.characterSet);
+                    sql2Buf.append(this.datasourceInfo.getCharacterSet());
                 }
 
                 // if there is a collate, add the COLLATE arg here
-                if (UtilValidate.isNotEmpty(this.datasourceInfo.collate)) {
+                if (UtilValidate.isNotEmpty(this.datasourceInfo.getCollate())) {
                     sql2Buf.append(" COLLATE ");
-                    sql2Buf.append(this.datasourceInfo.collate);
+                    sql2Buf.append(this.datasourceInfo.getCollate());
                 }
             }
 
@@ -2174,7 +2169,7 @@ public class DatabaseUtil {
 
     /* ====================================================================== */
     public int createForeignKeys(ModelEntity entity, Map<String, ModelEntity> modelEntities, List<String> messages) {
-        return this.createForeignKeys(entity, modelEntities, datasourceInfo.constraintNameClipLength, datasourceInfo.fkStyle, datasourceInfo.useFkInitiallyDeferred, messages);
+        return this.createForeignKeys(entity, modelEntities, datasourceInfo.getConstraintNameClipLength(), datasourceInfo.getFkStyle(), datasourceInfo.getUseFkInitiallyDeferred(), messages);
     }
     public int createForeignKeys(ModelEntity entity, Map<String, ModelEntity> modelEntities, int constraintNameClipLength, String fkStyle, boolean useFkInitiallyDeferred, List<String> messages) {
         if (entity == null) {
@@ -2285,12 +2280,10 @@ public class DatabaseUtil {
 
     public String makeFkConstraintClause(ModelEntity entity, ModelRelation modelRelation, ModelEntity relModelEntity, int constraintNameClipLength, String fkStyle, boolean useFkInitiallyDeferred) {
         // make the two column lists
-        Iterator<ModelKeyMap> keyMapsIter = modelRelation.getKeyMapsIterator();
         StringBuilder mainCols = new StringBuilder();
         StringBuilder relCols = new StringBuilder();
 
-        while (keyMapsIter.hasNext()) {
-            ModelKeyMap keyMap = keyMapsIter.next();
+        for (ModelKeyMap keyMap : modelRelation.getKeyMaps()) {
 
             ModelField mainField = entity.getField(keyMap.getFieldName());
             if (mainField == null) {
@@ -2358,7 +2351,7 @@ public class DatabaseUtil {
     }
 
     public void deleteForeignKeys(ModelEntity entity, Map<String, ModelEntity> modelEntities, List<String> messages) {
-        this.deleteForeignKeys(entity, modelEntities, datasourceInfo.constraintNameClipLength, messages);
+        this.deleteForeignKeys(entity, modelEntities, datasourceInfo.getConstraintNameClipLength(), messages);
     }
 
     public void deleteForeignKeys(ModelEntity entity, Map<String, ModelEntity> modelEntities, int constraintNameClipLength, List<String> messages) {
@@ -2430,7 +2423,7 @@ public class DatabaseUtil {
         // now add constraint clause
         StringBuilder sqlBuf = new StringBuilder("ALTER TABLE ");
         sqlBuf.append(entity.getTableName(datasourceInfo));
-        if (datasourceInfo.dropFkUseForeignKeyKeyword) {
+        if (datasourceInfo.getDropFkUseForeignKeyKeyword()) {
             sqlBuf.append(" DROP FOREIGN KEY ");
         } else {
             sqlBuf.append(" DROP CONSTRAINT ");
@@ -2472,11 +2465,11 @@ public class DatabaseUtil {
     }
 
     public void createPrimaryKey(ModelEntity entity, boolean usePkConstraintNames, List<String> messages) {
-        createPrimaryKey(entity, usePkConstraintNames, datasourceInfo.constraintNameClipLength, messages);
+        createPrimaryKey(entity, usePkConstraintNames, datasourceInfo.getConstraintNameClipLength(), messages);
     }
 
     public void createPrimaryKey(ModelEntity entity, List<String> messages) {
-        createPrimaryKey(entity, datasourceInfo.usePkConstraintNames, messages);
+        createPrimaryKey(entity, datasourceInfo.getUsePkConstraintNames(), messages);
     }
 
     public String createPrimaryKey(ModelEntity entity, boolean usePkConstraintNames, int constraintNameClipLength) {
@@ -2555,11 +2548,11 @@ public class DatabaseUtil {
     }
 
     public void deletePrimaryKey(ModelEntity entity, boolean usePkConstraintNames,  List<String> messages) {
-        deletePrimaryKey(entity, usePkConstraintNames, datasourceInfo.constraintNameClipLength, messages);
+        deletePrimaryKey(entity, usePkConstraintNames, datasourceInfo.getConstraintNameClipLength(), messages);
     }
 
     public void deletePrimaryKey(ModelEntity entity, List<String> messages) {
-        deletePrimaryKey(entity, datasourceInfo.usePkConstraintNames, messages);
+        deletePrimaryKey(entity, datasourceInfo.getUsePkConstraintNames(), messages);
     }
 
     public String deletePrimaryKey(ModelEntity entity, boolean usePkConstraintNames, int constraintNameClipLength) {
@@ -2717,11 +2710,9 @@ public class DatabaseUtil {
     }
 
     public String makeIndexClause(ModelEntity entity, ModelIndex modelIndex) {
-        Iterator<ModelIndex.Field> fieldsIter = modelIndex.getFieldsIterator();
         StringBuilder mainCols = new StringBuilder();
 
-        while (fieldsIter.hasNext()) {
-            ModelIndex.Field field = fieldsIter.next();
+        for (ModelIndex.Field field : modelIndex.getFields()) {
             ModelIndex.Function function = field.getFunction();
             if (mainCols.length() > 0) {
                 mainCols.append(", ");
@@ -2737,11 +2728,11 @@ public class DatabaseUtil {
         }
 
         StringBuilder indexSqlBuf = new StringBuilder("CREATE ");
-        if (datasourceInfo.useIndicesUnique && modelIndex.getUnique()) {
+        if (datasourceInfo.getUseIndicesUnique() && modelIndex.getUnique()) {
             indexSqlBuf.append("UNIQUE ");
         }
         indexSqlBuf.append("INDEX ");
-        indexSqlBuf.append(makeIndexName(modelIndex, datasourceInfo.constraintNameClipLength));
+        indexSqlBuf.append(makeIndexName(modelIndex, datasourceInfo.getConstraintNameClipLength()));
         indexSqlBuf.append(" ON ");
         indexSqlBuf.append(entity.getTableName(datasourceInfo));
 
@@ -2846,7 +2837,7 @@ public class DatabaseUtil {
     /* ====================================================================== */
     /* ====================================================================== */
     public int createForeignKeyIndices(ModelEntity entity, List<String> messages) {
-        return createForeignKeyIndices(entity, datasourceInfo.constraintNameClipLength, messages);
+        return createForeignKeyIndices(entity, datasourceInfo.getConstraintNameClipLength(), messages);
     }
 
     public int createForeignKeyIndices(ModelEntity entity, int constraintNameClipLength, List<String> messages) {
@@ -2936,11 +2927,9 @@ public class DatabaseUtil {
     }
 
     public String makeFkIndexClause(ModelEntity entity, ModelRelation modelRelation, int constraintNameClipLength) {
-        Iterator<ModelKeyMap> keyMapsIter = modelRelation.getKeyMapsIterator();
         StringBuilder mainCols = new StringBuilder();
 
-        while (keyMapsIter.hasNext()) {
-            ModelKeyMap keyMap = keyMapsIter.next();
+        for (ModelKeyMap keyMap : modelRelation.getKeyMaps()) {
             ModelField mainField = entity.getField(keyMap.getFieldName());
 
             if (mainField == null) {
@@ -2970,7 +2959,7 @@ public class DatabaseUtil {
 
     public void deleteForeignKeyIndices(ModelEntity entity, List<String> messages) {
         if (messages == null) messages = new ArrayList<String>();
-        String err = deleteForeignKeyIndices(entity, datasourceInfo.constraintNameClipLength);
+        String err = deleteForeignKeyIndices(entity, datasourceInfo.getConstraintNameClipLength());
         if (!UtilValidate.isEmpty(err)) {
             messages.add(err);
         }
@@ -3068,14 +3057,14 @@ public class DatabaseUtil {
     }
 
     public String getSchemaName(DatabaseMetaData dbData) throws SQLException {
-        if (!isLegacy && this.datasourceInfo.useSchemas && dbData.supportsSchemasInTableDefinitions()) {
-            if (UtilValidate.isNotEmpty(this.datasourceInfo.schemaName)) {
+        if (!isLegacy && this.datasourceInfo.getUseSchemas() && dbData.supportsSchemasInTableDefinitions()) {
+            if (UtilValidate.isNotEmpty(this.datasourceInfo.getSchemaName())) {
                 if (dbData.storesLowerCaseIdentifiers()) {
-                    return this.datasourceInfo.schemaName.toLowerCase();
+                    return this.datasourceInfo.getSchemaName().toLowerCase();
                 } else if (dbData.storesUpperCaseIdentifiers()) {
-                    return this.datasourceInfo.schemaName.toUpperCase();
+                    return this.datasourceInfo.getSchemaName().toUpperCase();
                 } else {
-                    return this.datasourceInfo.schemaName;
+                    return this.datasourceInfo.getSchemaName();
                 }
             } else {
                 return dbData.getUserName();
@@ -3090,7 +3079,7 @@ public class DatabaseUtil {
         if (entity instanceof ModelViewEntity) {
             return;
         }
-        if (UtilValidate.isEmpty(this.datasourceInfo.characterSet) && UtilValidate.isEmpty(this.datasourceInfo.collate)) {
+        if (UtilValidate.isEmpty(this.datasourceInfo.getCharacterSet()) && UtilValidate.isEmpty(this.datasourceInfo.getCollate())) {
             messages.add("Not setting character-set and collate for entity [" + entity.getEntityName() + "], options not specified in the datasource definition in the entityengine.xml file.");
             return;
         }
@@ -3110,14 +3099,14 @@ public class DatabaseUtil {
             //sqlTableBuf.append("");
 
             // if there is a characterSet, add the CHARACTER SET arg here
-            if (UtilValidate.isNotEmpty(this.datasourceInfo.characterSet)) {
+            if (UtilValidate.isNotEmpty(this.datasourceInfo.getCharacterSet())) {
                 sqlTableBuf.append(" DEFAULT CHARACTER SET ");
-                sqlTableBuf.append(this.datasourceInfo.characterSet);
+                sqlTableBuf.append(this.datasourceInfo.getCharacterSet());
             }
             // if there is a collate, add the COLLATE arg here
-            if (UtilValidate.isNotEmpty(this.datasourceInfo.collate)) {
+            if (UtilValidate.isNotEmpty(this.datasourceInfo.getCollate())) {
                 sqlTableBuf.append(" COLLATE ");
-                sqlTableBuf.append(this.datasourceInfo.collate);
+                sqlTableBuf.append(this.datasourceInfo.getCollate());
             }
 
             if (Debug.verboseOn()) Debug.logVerbose("[updateCharacterSetAndCollation] character-set and collate sql=" + sqlTableBuf, module);
@@ -3158,18 +3147,18 @@ public class DatabaseUtil {
                 sqlBuf.append(type.getSqlType());
 
                 // if there is a characterSet, add the CHARACTER SET arg here
-                if (UtilValidate.isNotEmpty(this.datasourceInfo.characterSet)) {
+                if (UtilValidate.isNotEmpty(this.datasourceInfo.getCharacterSet())) {
                     sqlBuf.append(" CHARACTER SET ");
-                    sqlBuf.append(this.datasourceInfo.characterSet);
+                    sqlBuf.append(this.datasourceInfo.getCharacterSet());
                 }
                 // if there is a collate, add the COLLATE arg here
-                if (UtilValidate.isNotEmpty(this.datasourceInfo.collate)) {
+                if (UtilValidate.isNotEmpty(this.datasourceInfo.getCollate())) {
                     sqlBuf.append(" COLLATE ");
-                    sqlBuf.append(this.datasourceInfo.collate);
+                    sqlBuf.append(this.datasourceInfo.getCollate());
                 }
 
                 if (field.getIsPk()  || field.getIsNotNull()) {
-                    if (this.datasourceInfo.alwaysUseConstraintKeyword) {
+                    if (this.datasourceInfo.getAlwaysUseConstraintKeyword()) {
                         sqlBuf.append(" CONSTRAINT NOT NULL");
                     } else {
                         sqlBuf.append(" NOT NULL");

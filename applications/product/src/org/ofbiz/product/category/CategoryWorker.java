@@ -19,7 +19,9 @@
 package org.ofbiz.product.category;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import javax.servlet.ServletRequest;
@@ -34,14 +36,18 @@ import org.ofbiz.base.util.UtilFormatOut;
 import org.ofbiz.base.util.UtilGenerics;
 import org.ofbiz.base.util.UtilHttp;
 import org.ofbiz.base.util.UtilMisc;
+import org.ofbiz.base.util.UtilProperties;
 import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.entity.Delegator;
+import org.ofbiz.entity.GenericDelegator;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
 import org.ofbiz.entity.condition.EntityCondition;
 import org.ofbiz.entity.condition.EntityOperator;
 import org.ofbiz.entity.util.EntityUtil;
 import org.ofbiz.product.product.ProductWorker;
+import org.ofbiz.service.DispatchContext;
+import org.ofbiz.service.ServiceUtil;
 
 /**
  * CategoryWorker - Worker class to reduce code in JSPs.
@@ -49,6 +55,8 @@ import org.ofbiz.product.product.ProductWorker;
 public class CategoryWorker {
 
     public static final String module = CategoryWorker.class.getName();
+
+    private CategoryWorker () {}
 
     public static String getCatalogTopCategory(ServletRequest request, String defaultTopCategory) {
         HttpServletRequest httpRequest = (HttpServletRequest) request;
@@ -85,7 +93,7 @@ public class CategoryWorker {
             Collection<GenericValue> allCategories = delegator.findList("ProductCategory", null, null, null, null, false);
 
             for (GenericValue curCat: allCategories) {
-                Collection<GenericValue> parentCats = curCat.getRelatedCache("CurrentProductCategoryRollup");
+                Collection<GenericValue> parentCats = curCat.getRelated("CurrentProductCategoryRollup", null, null, true);
 
                 if (parentCats.isEmpty()) results.add(curCat);
             }
@@ -127,17 +135,22 @@ public class CategoryWorker {
     }
 
     public static List<GenericValue> getRelatedCategoriesRet(ServletRequest request, String attributeName, String parentId, boolean limitView, boolean excludeEmpty, boolean recursive) {
+      Delegator delegator = (Delegator) request.getAttribute("delegator");
+
+      return getRelatedCategoriesRet(delegator, attributeName, parentId, limitView, excludeEmpty, false);
+    }
+
+    public static List<GenericValue> getRelatedCategoriesRet(Delegator delegator, String attributeName, String parentId, boolean limitView, boolean excludeEmpty, boolean recursive) {
         List<GenericValue> categories = FastList.newInstance();
 
         if (Debug.verboseOn()) Debug.logVerbose("[CategoryWorker.getRelatedCategories] ParentID: " + parentId, module);
 
-        Delegator delegator = (Delegator) request.getAttribute("delegator");
         List<GenericValue> rollups = null;
 
         try {
-            rollups = delegator.findByAndCache("ProductCategoryRollup",
+            rollups = delegator.findByAnd("ProductCategoryRollup",
                         UtilMisc.toMap("parentProductCategoryId", parentId),
-                        UtilMisc.toList("sequenceNum"));
+                        UtilMisc.toList("sequenceNum"), true);
             if (limitView) {
                 rollups = EntityUtil.filterByDate(rollups, true);
             }
@@ -145,29 +158,29 @@ public class CategoryWorker {
             Debug.logWarning(e.getMessage(), module);
         }
         if (rollups != null) {
-            // Debug.log("Rollup size: " + rollups.size(), module);
+            // Debug.logInfo("Rollup size: " + rollups.size(), module);
             for (GenericValue parent: rollups) {
-                // Debug.log("Adding child of: " + parent.getString("parentProductCategoryId"), module);
+                // Debug.logInfo("Adding child of: " + parent.getString("parentProductCategoryId"), module);
                 GenericValue cv = null;
 
                 try {
-                    cv = parent.getRelatedOneCache("CurrentProductCategory");
+                    cv = parent.getRelatedOne("CurrentProductCategory", true);
                 } catch (GenericEntityException e) {
                     Debug.logWarning(e.getMessage(), module);
                 }
                 if (cv != null) {
                     if (excludeEmpty) {
                         if (!isCategoryEmpty(cv)) {
-                            //Debug.log("Child : " + cv.getString("productCategoryId") + " is not empty.", module);
+                            //Debug.logInfo("Child : " + cv.getString("productCategoryId") + " is not empty.", module);
                             categories.add(cv);
                             if (recursive) {
-                                categories.addAll(getRelatedCategoriesRet(request, attributeName, cv.getString("productCategoryId"), limitView, excludeEmpty, recursive));
+                                categories.addAll(getRelatedCategoriesRet(delegator, attributeName, cv.getString("productCategoryId"), limitView, excludeEmpty, recursive));
                             }
                         }
                     } else {
                         categories.add(cv);
                         if (recursive) {
-                            categories.addAll(getRelatedCategoriesRet(request, attributeName, cv.getString("productCategoryId"), limitView, excludeEmpty, recursive));
+                            categories.addAll(getRelatedCategoriesRet(delegator, attributeName, cv.getString("productCategoryId"), limitView, excludeEmpty, recursive));
                         }
                     }
                 }
@@ -179,14 +192,14 @@ public class CategoryWorker {
     public static boolean isCategoryEmpty(GenericValue category) {
         boolean empty = true;
         long members = categoryMemberCount(category);
-        //Debug.log("Category : " + category.get("productCategoryId") + " has " + members  + " members", module);
+        //Debug.logInfo("Category : " + category.get("productCategoryId") + " has " + members  + " members", module);
         if (members > 0) {
             empty = false;
         }
 
         if (empty) {
             long rollups = categoryRollupCount(category);
-            //Debug.log("Category : " + category.get("productCategoryId") + " has " + rollups  + " rollups", module);
+            //Debug.logInfo("Category : " + category.get("productCategoryId") + " has " + rollups  + " rollups", module);
             if (rollups > 0) {
                 empty = false;
             }
@@ -350,11 +363,11 @@ public class CategoryWorker {
         if (productCategoryId == null) return false;
         if (UtilValidate.isEmpty(productId)) return false;
 
-        List<GenericValue> productCategoryMembers = EntityUtil.filterByDate(delegator.findByAndCache("ProductCategoryMember",
-                UtilMisc.toMap("productCategoryId", productCategoryId, "productId", productId)), true);
+        List<GenericValue> productCategoryMembers = EntityUtil.filterByDate(delegator.findByAnd("ProductCategoryMember",
+                UtilMisc.toMap("productCategoryId", productCategoryId, "productId", productId), null, true), true);
         if (UtilValidate.isEmpty(productCategoryMembers)) {
             //before giving up see if this is a variant product, and if so look up the virtual product and check it...
-            GenericValue product = delegator.findByPrimaryKeyCache("Product", UtilMisc.toMap("productId", productId));
+            GenericValue product = delegator.findOne("Product", UtilMisc.toMap("productId", productId), true);
             List<GenericValue> productAssocs = ProductWorker.getVariantVirtualAssocs(product);
             //this does take into account that a product could be a variant of multiple products, but this shouldn't ever really happen...
             if (productAssocs != null) {
@@ -409,5 +422,60 @@ public class CategoryWorker {
                 getCategoryContentWrappers(catContentWrappers, subCat, request);
             }
         }
+    }
+    
+    /**
+     * Returns a complete category trail - can be used for exporting proper category trees. 
+     * This is mostly useful when used in combination with bread-crumbs,  for building a 
+     * faceted index tree, or to export a category tree for migration to another system.
+     * Will create the tree from root point to categoryId.
+     * 
+     * This method is not meant to be run on every request.
+     * Its best use is to generate the trail every so often and store somewhere 
+     * (a lucene/solr tree, entities, cache or so). 
+     * 
+     * @param dctx The DispatchContext that this service is operating in
+     * @param context Map containing the input parameters
+     * @return Map organized trail from root point to categoryId.
+     * */
+    public static Map getCategoryTrail(DispatchContext dctx, Map context) {
+        String productCategoryId = (String) context.get("productCategoryId");
+        Map<String, Object> results = ServiceUtil.returnSuccess();
+        GenericDelegator delegator = (GenericDelegator) dctx.getDelegator();
+        List<String> trailElements = FastList.newInstance();
+        trailElements.add(productCategoryId);
+        String parentProductCategoryId = productCategoryId;
+        while (UtilValidate.isNotEmpty(parentProductCategoryId)) {
+            // find product category rollup
+            try {
+                List<EntityCondition> rolllupConds = FastList.newInstance();
+                rolllupConds.add(EntityCondition.makeCondition("productCategoryId", parentProductCategoryId));
+                rolllupConds.add(EntityUtil.getFilterByDateExpr());
+                List<GenericValue> productCategoryRollups = delegator.findList("ProductCategoryRollup", 
+                        EntityCondition.makeCondition(rolllupConds), null, UtilMisc.toList("sequenceNum"), null, true);
+                if (UtilValidate.isNotEmpty(productCategoryRollups)) {
+                    // add only categories that belong to the top category to trail
+                    for (GenericValue productCategoryRollup : productCategoryRollups) {
+                        String trailCategoryId = productCategoryRollup.getString("parentProductCategoryId");
+                        parentProductCategoryId = trailCategoryId;
+                        if (trailElements.contains(trailCategoryId)) {
+                            break;
+                        } else {
+                            trailElements.add(trailCategoryId);
+                        }
+                    }
+                } else {
+                    parentProductCategoryId = null;
+                }
+            } catch (GenericEntityException e) {
+                Map<String, String> messageMap = UtilMisc.toMap("errMessage", ". Cannot generate trail from product category. ");
+                String errMsg = UtilProperties.getMessage("CommonUiLabels", "CommonDatabaseProblem", messageMap, (Locale) context.get("locale"));
+                Debug.logError(e, errMsg, module);
+                return ServiceUtil.returnError(errMsg);
+            }
+        }
+        Collections.reverse(trailElements);
+        results.put("trail", trailElements);
+        return results;
     }
 }

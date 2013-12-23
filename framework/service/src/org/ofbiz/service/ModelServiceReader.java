@@ -20,8 +20,6 @@ package org.ofbiz.service;
 
 import java.io.IOException;
 import java.io.Serializable;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.net.URL;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -35,9 +33,9 @@ import javolution.util.FastMap;
 
 import org.ofbiz.base.config.GenericConfigException;
 import org.ofbiz.base.config.ResourceHandler;
+import org.ofbiz.base.metrics.MetricsFactory;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.GeneralException;
-import org.ofbiz.base.util.UtilProperties;
 import org.ofbiz.base.util.UtilTimer;
 import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.base.util.UtilXml;
@@ -46,15 +44,12 @@ import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.model.ModelEntity;
 import org.ofbiz.entity.model.ModelField;
 import org.ofbiz.entity.model.ModelFieldType;
-import org.ofbiz.service.engine.GenericEngine;
 import org.ofbiz.service.group.GroupModel;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
-
-import org.webslinger.invoker.Wrap;
 
 import freemarker.template.utility.StringUtil;
 
@@ -65,13 +60,11 @@ import freemarker.template.utility.StringUtil;
 public class ModelServiceReader implements Serializable {
 
     public static final String module = ModelServiceReader.class.getName();
-    protected static boolean serviceDebugMode = true;
 
     /** is either from a URL or from a ResourceLoader (through the ResourceHandler) */
     protected boolean isFromURL;
     protected URL readerURL = null;
     protected ResourceHandler handler = null;
-    protected Map<String, ModelService> modelServices = null;
     protected DispatchContext dctx = null;
 
     public static Map<String, ModelService> getModelServiceMap(URL readerURL, DispatchContext dctx) {
@@ -94,7 +87,6 @@ public class ModelServiceReader implements Serializable {
         this.readerURL = readerURL;
         this.handler = handler;
         this.dctx = dctx;
-        serviceDebugMode = "true".equals(UtilProperties.getPropertyValue("service", "servicedispatcher.servicedebugmode", "true"));
     }
 
     private Map<String, ModelService> getModelServices() {
@@ -204,21 +196,6 @@ public class ModelServiceReader implements Serializable {
         ModelService service = new ModelService();
 
         service.name = UtilXml.checkEmpty(serviceElement.getAttribute("name")).intern();
-        if (serviceDebugMode) {
-            Wrap<GenericInvoker> wrap = new Wrap<GenericInvoker>().fileName(resourceLocation + '#' + service.name).wrappedClass(GenericInvokerImpl.class);
-            for (Method method: GenericInvokerImpl.class.getDeclaredMethods()) {
-                if (method.getName().startsWith("run")) {
-                    wrap.wrap(method);
-                } else if (method.getName().startsWith("send")) {
-                    wrap.wrap(method);
-                }
-            }
-            Object startLine = serviceElement.getUserData("startLine");
-            if (startLine != null) {
-                wrap.lineNumber(((Integer) startLine).intValue());
-            }
-            service.invoker = wrap.newInstance(new Class<?>[] {ModelService.class}, new Object[] {service});
-        }
         service.definitionLocation = resourceLocation;
         service.engineName = UtilXml.checkEmpty(serviceElement.getAttribute("engine")).intern();
         service.location = UtilXml.checkEmpty(serviceElement.getAttribute("location")).intern();
@@ -232,10 +209,11 @@ public class ModelServiceReader implements Serializable {
         service.export = "true".equalsIgnoreCase(serviceElement.getAttribute("export"));
         service.debug = "true".equalsIgnoreCase(serviceElement.getAttribute("debug"));
 
-        // this defaults to true; if anything but false, make it true
+        // these defaults to false; if anything but false, make it true
         service.validate = !"false".equalsIgnoreCase(serviceElement.getAttribute("validate"));
         service.useTransaction = !"false".equalsIgnoreCase(serviceElement.getAttribute("use-transaction"));
         service.requireNewTransaction = !"false".equalsIgnoreCase(serviceElement.getAttribute("require-new-transaction"));
+        service.hideResultInLog = !"false".equalsIgnoreCase(serviceElement.getAttribute("hideResultInLog"));        
 
         // set the semaphore sleep/wait times
         String semaphoreWaitStr = UtilXml.checkEmpty(serviceElement.getAttribute("semaphore-wait-seconds"));
@@ -286,7 +264,7 @@ public class ModelServiceReader implements Serializable {
                 timeout = 0;
             }
         }
-        service.transactionTimeout = timeout;
+        service.transactionTimeout = timeout;                
 
         service.description = getCDATADef(serviceElement, "description");
         service.nameSpace = getCDATADef(serviceElement, "namespace");
@@ -301,7 +279,11 @@ public class ModelServiceReader implements Serializable {
         this.createAutoAttrDefs(serviceElement, service);
         this.createAttrDefs(serviceElement, service);
         this.createOverrideDefs(serviceElement, service);
-
+        // Get metrics.
+        Element metricsElement = UtilXml.firstChildElement(serviceElement, "metric");
+        if (metricsElement != null) {
+            service.metrics = MetricsFactory.getInstance(metricsElement);
+        }
         return service;
     }
 
@@ -522,6 +504,8 @@ public class ModelServiceReader implements Serializable {
             param.mode = UtilXml.checkEmpty(attribute.getAttribute("mode")).intern();
             param.entityName = UtilXml.checkEmpty(attribute.getAttribute("entity-name")).intern();
             param.fieldName = UtilXml.checkEmpty(attribute.getAttribute("field-name")).intern();
+            param.requestAttributeName = UtilXml.checkEmpty(attribute.getAttribute("request-attribute-name")).intern();
+            param.sessionAttributeName = UtilXml.checkEmpty(attribute.getAttribute("session-attribute-name")).intern();
             param.stringMapPrefix = UtilXml.checkEmpty(attribute.getAttribute("string-map-prefix")).intern();
             param.stringListSuffix = UtilXml.checkEmpty(attribute.getAttribute("string-list-suffix")).intern();
             param.formLabel = attribute.hasAttribute("form-label")?attribute.getAttribute("form-label").intern():null;
@@ -748,55 +732,5 @@ public class ModelServiceReader implements Serializable {
         }
 
         return document;
-    }
-
-    public static class GenericInvokerImpl implements GenericInvoker {
-        private final ModelService modelService;
-
-        public GenericInvokerImpl(ModelService modelService) {
-            this.modelService = modelService;
-        }
-
-        public Map<String, Object> runSync(String localName, GenericEngine engine, Map<String, Object> context) throws GenericServiceException {
-            return engine.runSync(localName, modelService, context);
-        }
-
-        public void runSyncIgnore(String localName, GenericEngine engine, Map<String, Object> context) throws GenericServiceException {
-            engine.runSyncIgnore(localName, modelService, context);
-        }
-
-        public void runAsync(String localName, GenericEngine engine, Map<String, Object> context, GenericRequester requester, boolean persist) throws GenericServiceException {
-            if (requester != null) {
-                engine.runAsync(localName, modelService, context, requester, persist);
-            } else {
-                engine.runAsync(localName, modelService, context, persist);
-            }
-        }
-
-        public void sendCallbacks(GenericEngine engine, Map<String, Object> context, Map<String, Object> result, Throwable t, int mode) throws GenericServiceException {
-            if (t != null) {
-                engine.sendCallbacks(modelService, context, t, mode);
-            } else if (result != null) {
-                engine.sendCallbacks(modelService, context, result, mode);
-            } else {
-                engine.sendCallbacks(modelService, context, mode);
-            }
-        }
-
-        public GenericInvokerImpl copy(ModelService modelService) {
-            try {
-                try {
-                    return getClass().getConstructor(ModelService.class).newInstance(modelService);
-                } catch (InvocationTargetException e) {
-                    throw e.getCause();
-                }
-            } catch (RuntimeException e) {
-                throw e;
-            } catch (Error e) {
-                throw e;
-            } catch (Throwable e) {
-                throw (InternalError) new InternalError(e.getMessage()).initCause(e);
-            }
-        }
     }
 }

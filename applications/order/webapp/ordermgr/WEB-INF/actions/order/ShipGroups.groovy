@@ -33,17 +33,17 @@ shipGroupSeqId = parameters.shipGroupSeqId;
 findMap = [orderId: orderId];
 if (shipGroupSeqId) findMap.shipGroupSeqId = shipGroupSeqId;
 
-shipGroups = delegator.findByAnd("OrderItemShipGroup", findMap, ["shipGroupSeqId"]);
+shipGroups = delegator.findByAnd("OrderItemShipGroup", findMap, ["shipGroupSeqId"], false);
 context.shipGroups = shipGroups;
 
 // method to expand the marketing packages
 FastList expandProductGroup(product, quantityInGroup, quantityShipped, quantityOpen, assocType) {
     sublines = FastList.newInstance();
-    associations = product.getRelatedByAnd("MainProductAssoc", [productAssocTypeId : assocType]);
+    associations = product.getRelated("MainProductAssoc", [productAssocTypeId : assocType], null, false);
     associations = EntityUtil.filterByDate(associations);
     associations.each { association ->
         line = FastMap.newInstance();
-        line.product = association.getRelatedOne("AssocProduct");
+        line.product = association.getRelatedOne("AssocProduct", false);
 
         // determine the quantities
         quantityComposed = association.quantity ?: 0;
@@ -60,26 +60,26 @@ groupData = FastMap.newInstance();
 shipGroups.each { shipGroup ->
     data = FastMap.newInstance();
 
-    address = shipGroup.getRelatedOne("PostalAddress");
+    address = shipGroup.getRelatedOne("PostalAddress", false);
     data.address = address;
 
-    phoneNumber = shipGroup.getRelatedOne("TelecomTelecomNumber");
+    phoneNumber = shipGroup.getRelatedOne("TelecomTelecomNumber", false);
     data.phoneNumber = phoneNumber;
 
-    carrierShipmentMethod = shipGroup.getRelatedOne("CarrierShipmentMethod");
+    carrierShipmentMethod = shipGroup.getRelatedOne("CarrierShipmentMethod", false);
     if (carrierShipmentMethod) {
         data.carrierShipmentMethod = carrierShipmentMethod;
-        data.shipmentMethodType = carrierShipmentMethod.getRelatedOneCache("ShipmentMethodType");
+        data.shipmentMethodType = carrierShipmentMethod.getRelatedOne("ShipmentMethodType", true);
     }
 
     // the lines in a page, each line being a row of data to display
     lines = FastList.newInstance();
 
     // process the order item to ship group associations, each being a line item for the group
-    orderItemAssocs = shipGroup.getRelated("OrderItemShipGroupAssoc", ["orderItemSeqId"]);
+    orderItemAssocs = shipGroup.getRelated("OrderItemShipGroupAssoc", null, ["orderItemSeqId"], false);
     orderItemAssocs.each { orderItemAssoc ->
-        orderItem = orderItemAssoc.getRelatedOne("OrderItem");
-        product = orderItem.getRelatedOne("Product");
+        orderItem = orderItemAssoc.getRelatedOne("OrderItem", false);
+        product = orderItem.getRelatedOne("Product", false);
         line = FastMap.newInstance();
 
         // the quantity in group
@@ -90,7 +90,7 @@ shipGroups.each { shipGroup ->
 
         // the quantity shipped
         quantityShipped = 0.0;
-        issuances = delegator.findByAnd("ItemIssuance", [orderId : orderItem.orderId, orderItemSeqId : orderItem.orderItemSeqId, shipGroupSeqId : orderItemAssoc.shipGroupSeqId]);
+        issuances = delegator.findByAnd("ItemIssuance", [orderId : orderItem.orderId, orderItemSeqId : orderItem.orderItemSeqId, shipGroupSeqId : orderItemAssoc.shipGroupSeqId], null, false);
         issuances.each { issuance ->
             quantityShipped += issuance.quantity;
         }

@@ -34,11 +34,15 @@ import javolution.util.FastList;
 import javolution.util.FastSet;
 
 import org.ofbiz.base.component.ComponentConfig;
+import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.FileUtil;
 import org.ofbiz.base.util.UtilFormatOut;
 import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.base.util.UtilXml;
 import org.ofbiz.entity.Delegator;
+import org.ofbiz.entity.GenericEntityConfException;
+import org.ofbiz.entity.config.model.DelegatorElement;
+import org.ofbiz.entity.config.EntityConfigUtil;
 import org.ofbiz.entity.model.ModelEntity;
 import org.ofbiz.entity.model.ModelField;
 import org.ofbiz.service.DispatchContext;
@@ -67,7 +71,21 @@ public class LabelReferences {
     public LabelReferences(Delegator delegator, LabelManagerFactory factory) {
         this.delegator = delegator;
         this.labels = factory.getLabels();
-        this.dispatchContext = new DispatchContext("LabelManagerDispCtx:" + delegator.getDelegatorName(), null, this.getClass().getClassLoader(), null);
+        DelegatorElement delegatorInfo = null;
+        try {
+            delegatorInfo = EntityConfigUtil.getDelegator(delegator.getDelegatorBaseName());
+        } catch (GenericEntityConfException e) {
+            Debug.logWarning(e, "Exception thrown while getting delegator config: ", module);
+        }
+        String modelName;
+        if (delegatorInfo != null) {
+            modelName = delegatorInfo.getEntityModelReader();
+        } else {
+            modelName = "main";
+        }
+        // since we do not associate a dispatcher to this DispatchContext, it is important to set a name of an existing entity model reader:
+        // in this way it will be possible to retrieve the service models from the cache
+        this.dispatchContext = new DispatchContext(modelName, this.getClass().getClassLoader(), null);
         Collection<LabelInfo> infoList = this.labels.values();
         for (LabelInfo labelInfo : infoList) {
             this.labelSet.add(labelInfo.getLabelKey());
@@ -81,7 +99,6 @@ public class LabelReferences {
             }
             this.rootFolders.add(rootFolder);
         }
-        this.rootFolders.add(System.getProperty("ofbiz.home") + "/specialpurpose/shark/");
     }
 
     public Map<String, Map<String, Integer>> getLabelReferences() throws IOException, SAXException, ParserConfigurationException, GenericServiceException {

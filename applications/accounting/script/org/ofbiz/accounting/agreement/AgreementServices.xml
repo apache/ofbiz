@@ -19,7 +19,7 @@ under the License.
 -->
 
 <simple-methods xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/simple-methods.xsd">
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/simple-methods-v2.xsd">
 
     <!-- ================================================================ -->
     <!-- Agreement Services -->
@@ -97,6 +97,15 @@ under the License.
                 <set-service-fields service-name="createAgreementProductAppl" to-map="createAgreementProductApplInMap" map="agreementProductAppl"/>
                 <set from-field="agreementIdTo" field="createAgreementProductApplInMap.agreementId"/>
                 <call-service service-name="createAgreementProductAppl" in-map-name="createAgreementProductApplInMap"/>
+            </iterate>
+        </if-compare>
+        <if-compare field="parameters.copyAgreementFacilities" value="Y" operator="equals">
+            <get-related value-field="agreement" relation-name="AgreementFaclityAppl" list="agreementFaclityAppls"/>
+            <iterate list="agreementFaclityAppls" entry="agreementFaclityAppl">
+                <clear-field field="createAgreementFaclityApplInMap"/>
+                <set-service-fields service-name="createAgreementFaclityAppl" to-map="createAgreementFaclityApplInMap" map="agreementFaclityAppl"/>
+                <set from-field="agreementIdTo" field="createAgreementFaclityApplInMap.agreementId"/>
+                <call-service service-name="createAgreementFaclityAppl" in-map-name="createAgreementFaclityApplInMap"/>
             </iterate>
         </if-compare>
         <if-compare field="parameters.copyAgreementParties" value="Y" operator="equals">

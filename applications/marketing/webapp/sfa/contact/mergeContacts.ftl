@@ -90,14 +90,14 @@ under the License.
               <td width="20%"></td>
             </tr>
             <tr>
-              <td width="20%" >${uiLabelMap.PartyCountry}</td>
+              <td width="20%" >${uiLabelMap.CommonCountry}</td>
               <td width="30%">${contactInfo1.country?if_exists}</td>
               <td width="30%">${contactInfo2.country?if_exists}</td>
               <td width="20%"></td>
             </tr>
             <tr><td><br /><h3>${uiLabelMap.PartyPrimaryPhone}</h3></td></tr>
             <tr>
-              <td width="20%">${uiLabelMap.PartyCountryCode}</td>
+              <td width="20%">${uiLabelMap.CommonCountryCode}</td>
               <td width="30%">${contactInfo1.countryCode?if_exists}</td>
               <td width="30%">${contactInfo2.countryCode?if_exists}</td>
               <td width="10%"><input type="checkbox" name="useContactNum2" value="Y"/></td>

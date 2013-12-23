@@ -67,7 +67,7 @@ under the License.
               <#assign rowCount = 0>
               <#list productCategoryMembers as productCategoryMember>
                 <#assign suffix = "_o_" + productCategoryMember_index>
-                <#assign product = productCategoryMember.getRelatedOne("Product")>
+                <#assign product = productCategoryMember.getRelatedOne("Product", false)>
                 <#assign hasntStarted = false>
                 <#if productCategoryMember.fromDate?exists && nowTimestamp.before(productCategoryMember.getTimestamp("fromDate"))><#assign hasntStarted = true></#if>
                 <#assign hasExpired = false>
@@ -75,7 +75,7 @@ under the License.
                   <tr valign="middle"<#if rowClass == "1"> class="alternate-row"</#if>>
                     <td>
                       <#if (product.smallImageUrl)?exists>
-                         <a href="<@ofbizUrl>EditProduct?productId=${(productCategoryMember.productId)?if_exists}</@ofbizUrl>"><img alt="Small Image" src="<@ofbizContentUrl>${product.smallImageUrl}</@ofbizContentUrl>" height="40" width="40" align="middle" /></a>
+                         <a href="<@ofbizUrl>EditProduct?productId=${(productCategoryMember.productId)?if_exists}</@ofbizUrl>"><img alt="Small Image" src="<@ofbizContentUrl>${product.smallImageUrl}</@ofbizContentUrl>" class="cssImgSmall" align="middle" /></a>
                       </#if>
                       <a href="<@ofbizUrl>EditProduct?productId=${(productCategoryMember.productId)?if_exists}</@ofbizUrl>" class="buttontext"><#if product?exists>${(product.internalName)?if_exists}</#if> [${(productCategoryMember.productId)?if_exists}]</a>
                     </td>

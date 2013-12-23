@@ -25,7 +25,7 @@ import javax.servlet.http.Cookie;
 
 import org.apache.catalina.connector.Request;
 import org.apache.catalina.connector.Response;
-import org.apache.catalina.core.ApplicationSessionCookieConfig;
+import org.apache.catalina.util.SessionConfig;
 import org.apache.catalina.valves.ValveBase;
 import org.apache.tomcat.util.buf.MessageBytes;
 import org.apache.tomcat.util.http.MimeHeaders;
@@ -50,9 +50,8 @@ public class CrossSubdomainSessionValve extends ValveBase {
         // replace any Tomcat-generated session cookies with our own
         Cookie[] cookies = request.getCookies();
         if (cookies != null) {
-            for (int i = 0; i < cookies.length; i++) {
-                Cookie cookie = cookies[i];
-                if (ApplicationSessionCookieConfig.getSessionCookieName(null).equals(cookie.getName())) {
+            for (Cookie cookie : cookies) {
+                if (SessionConfig.getSessionCookieName(null).equals(cookie.getName())) {
                     replaceCookie(request, response, cookie);
                 }
             }

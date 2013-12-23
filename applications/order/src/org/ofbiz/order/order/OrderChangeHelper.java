@@ -18,7 +18,6 @@
  *******************************************************************************/
 package org.ofbiz.order.order;
 
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -173,33 +172,31 @@ public class OrderChangeHelper {
             Delegator delegator = dispatcher.getDelegator();
             GenericValue orderHeader = null;
             try {
-                orderHeader = delegator.findByPrimaryKey("OrderHeader", UtilMisc.toMap("orderId", orderId));
+                orderHeader = delegator.findOne("OrderHeader", UtilMisc.toMap("orderId", orderId), false);
             } catch (GenericEntityException e) {
                 Debug.logError(e, "ERROR: Unable to get OrderHeader for OrderID : " + orderId, module);
             }
             if (orderHeader != null) {
                 List<GenericValue> orderItems = null;
                 try {
-                    orderItems = orderHeader.getRelated("OrderItem");
+                    orderItems = orderHeader.getRelated("OrderItem", null, null, false);
                 } catch (GenericEntityException e) {
                     Debug.logError(e, "ERROR: Unable to get OrderItem records for OrderHeader : " + orderId, module);
                 }
                 if (UtilValidate.isNotEmpty(orderItems)) {
-                    Iterator<GenericValue> oii = orderItems.iterator();
-                    while (oii.hasNext()) {
-                        GenericValue orderItem = oii.next();
+                    for (GenericValue orderItem : orderItems) {
                         String orderItemSeqId = orderItem.getString("orderItemSeqId");
                         GenericValue product = null;
 
                         try {
-                            product = orderItem.getRelatedOne("Product");
+                            product = orderItem.getRelatedOne("Product", false);
                         } catch (GenericEntityException e) {
                             Debug.logError(e, "ERROR: Unable to get Product record for OrderItem : " + orderId + "/" + orderItemSeqId, module);
                         }
                         if (product != null) {
                             GenericValue productType = null;
                             try {
-                                productType = product.getRelatedOne("ProductType");
+                                productType = product.getRelatedOne("ProductType", false);
                             } catch (GenericEntityException e) {
                                 Debug.logError(e, "ERROR: Unable to get ProductType from Product : " + product, module);
                             }
@@ -251,7 +248,7 @@ public class OrderChangeHelper {
     public static void createReceivedPayments(LocalDispatcher dispatcher, GenericValue userLogin, String orderId) throws GenericEntityException, GenericServiceException {
         GenericValue orderHeader = null;
         try {
-            orderHeader = dispatcher.getDelegator().findByPrimaryKey("OrderHeader", UtilMisc.toMap("orderId", orderId));
+            orderHeader = dispatcher.getDelegator().findOne("OrderHeader", UtilMisc.toMap("orderId", orderId), false);
         } catch (GenericEntityException e) {
             Debug.logError(e, module);
         }
@@ -264,9 +261,7 @@ public class OrderChangeHelper {
             }
 
             List<GenericValue> opps = orh.getPaymentPreferences();
-            Iterator<GenericValue> oppi = opps.iterator();
-            while (oppi.hasNext()) {
-                GenericValue opp = oppi.next();
+            for (GenericValue opp : opps) {
                 if ("PAYMENT_RECEIVED".equals(opp.getString("statusId"))) {
                     List<GenericValue> payments = orh.getOrderPayments(opp);
                     if (UtilValidate.isEmpty(payments)) {
@@ -286,7 +281,7 @@ public class OrderChangeHelper {
     public static void createOrderInvoice(LocalDispatcher dispatcher, GenericValue userLogin, String orderId) throws GenericServiceException {
         GenericValue orderHeader = null;
         try {
-            orderHeader = dispatcher.getDelegator().findByPrimaryKey("OrderHeader", UtilMisc.toMap("orderId", orderId));
+            orderHeader = dispatcher.getDelegator().findOne("OrderHeader", UtilMisc.toMap("orderId", orderId), false);
         } catch (GenericEntityException e) {
             Debug.logError(e, module);
         }

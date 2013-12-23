@@ -21,9 +21,6 @@ package org.ofbiz.webapp.control;
 import static org.ofbiz.base.util.UtilGenerics.checkMap;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.Collection;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
@@ -38,11 +35,6 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import javolution.util.FastList;
-
-import org.ofbiz.base.container.Container;
-import org.ofbiz.base.container.ContainerException;
-import org.ofbiz.base.container.ContainerLoader;
 import org.ofbiz.base.util.CachedClassLoader;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.StringUtil;
@@ -61,11 +53,9 @@ import org.ofbiz.entity.util.EntityUtil;
 import org.ofbiz.security.Security;
 import org.ofbiz.security.SecurityConfigurationException;
 import org.ofbiz.security.SecurityFactory;
-import org.ofbiz.security.authz.AbstractAuthorization;
-import org.ofbiz.security.authz.Authorization;
-import org.ofbiz.security.authz.AuthorizationFactory;
-import org.ofbiz.service.GenericDispatcher;
 import org.ofbiz.service.LocalDispatcher;
+import org.ofbiz.service.ServiceContainer;
+import org.ofbiz.webapp.website.WebSiteWorker;
 
 /**
  * ContextFilter - Restricts access to raw files and configures servlet objects.
@@ -73,14 +63,11 @@ import org.ofbiz.service.LocalDispatcher;
 public class ContextFilter implements Filter {
 
     public static final String module = ContextFilter.class.getName();
-    public static final String CONTAINER_CONFIG = "limited-containers.xml";
     public static final String FORWARDED_FROM_SERVLET = "_FORWARDED_FROM_SERVLET_";
 
     protected ClassLoader localCachedClassLoader = null;
     protected FilterConfig config = null;
     protected boolean debug = false;
-    protected Container rmiLoadedContainer = null; // used in Geronimo/WASCE to allow to deregister
-
 
     /**
      * @see javax.servlet.Filter#init(javax.servlet.FilterConfig)
@@ -101,17 +88,10 @@ public class ContextFilter implements Filter {
             debug = Debug.verboseOn();
         }
 
-        // load the containers
-        Container container = getContainers();
-        if (container != null) {
-            rmiLoadedContainer = container; // used in Geronimo/WASCE to allow to deregister
-        }
         // check the serverId
         getServerId();
         // initialize the delegator
         getDelegator(config.getServletContext());
-        // initialize authorizer
-        getAuthz();
         // initialize security
         getSecurity();
         // initialize the services dispatcher
@@ -142,7 +122,7 @@ public class ContextFilter implements Filter {
 
         // set the webSiteId in the session
         if (UtilValidate.isEmpty(httpRequest.getSession().getAttribute("webSiteId"))){
-            httpRequest.getSession().setAttribute("webSiteId", config.getServletContext().getAttribute("webSiteId"));
+            httpRequest.getSession().setAttribute("webSiteId", WebSiteWorker.getWebSiteId(httpRequest));
         }
 
         // set the filesystem path of context root.
@@ -206,7 +186,7 @@ public class ContextFilter implements Filter {
             allowList.add("/");  // No path is allowed.
             allowList.add("");   // No path is allowed.
 
-            if (debug) Debug.log("[Domain]: " + httpRequest.getServerName() + " [Request]: " + httpRequest.getRequestURI(), module);
+            if (debug) Debug.logInfo("[Domain]: " + httpRequest.getServerName() + " [Request]: " + httpRequest.getRequestURI(), module);
 
             requestPath = httpRequest.getServletPath();
             if (requestPath == null) requestPath = "";
@@ -305,22 +285,19 @@ public class ContextFilter implements Filter {
                     config.getServletContext().setAttribute("delegator", delegator);
 
                     // clear web context objects
-                    config.getServletContext().setAttribute("authorization", null);
                     config.getServletContext().setAttribute("security", null);
                     config.getServletContext().setAttribute("dispatcher", null);
 
-                    // initialize authorizer
-                    getAuthz();
                     // initialize security
                     Security security = getSecurity();
                     // initialize the services dispatcher
                     LocalDispatcher dispatcher = getDispatcher(config.getServletContext());
 
                     // set web context objects
-                    httpRequest.getSession().setAttribute("dispatcher", dispatcher);
-                    httpRequest.getSession().setAttribute("security", security);
+                    request.setAttribute("dispatcher", dispatcher);
+                    request.setAttribute("security", security);
                     
-                    httpRequest.setAttribute("tenantId", tenantId);
+                    request.setAttribute("tenantId", tenantId);
                 }
 
                 // NOTE DEJ20101130: do NOT always put the delegator name in the user's session because the user may 
@@ -335,9 +312,6 @@ public class ContextFilter implements Filter {
 
         // we're done checking; continue on
         chain.doFilter(httpRequest, httpResponse);
-
-        // reset thread local security
-        AbstractAuthorization.clearThreadLocal();
     }
 
     /**
@@ -345,11 +319,6 @@ public class ContextFilter implements Filter {
      */
     public void destroy() {
         getDispatcher(config.getServletContext()).deregister();
-        try {
-            destroyRmiContainer(); // used in Geronimo/WASCE to allow to deregister
-        } catch (ServletException e) {
-            Debug.logError("Error when stopping containers, this exception should not arise...", module);
-        }
         config = null;
     }
 
@@ -369,22 +338,6 @@ public class ContextFilter implements Filter {
             Debug.logError("[ContextFilter.init] ERROR: delegator not defined.", module);
             return null;
         }
-        Collection<URL> readers = null;
-        String readerFiles = servletContext.getInitParameter("serviceReaderUrls");
-
-        if (readerFiles != null) {
-            readers = FastList.newInstance();
-            for (String name: StringUtil.split(readerFiles, ";")) {
-                try {
-                    URL readerURL = servletContext.getResource(name);
-                    if (readerURL != null) readers.add(readerURL);
-                } catch (NullPointerException npe) {
-                    Debug.logInfo(npe, "[ContextFilter.init] ERROR: Null pointer exception thrown.", module);
-                } catch (MalformedURLException e) {
-                    Debug.logError(e, "[ContextFilter.init] ERROR: cannot get URL from String.", module);
-                }
-            }
-        }
         // get the unique name of this dispatcher
         String dispatcherName = servletContext.getInitParameter("localDispatcherName");
 
@@ -393,7 +346,7 @@ public class ContextFilter implements Filter {
             dispatcherName = delegator.getDelegatorName();
         }
 
-        LocalDispatcher dispatcher = GenericDispatcher.getLocalDispatcher(dispatcherName, delegator, readers, null);
+        LocalDispatcher dispatcher = ServiceContainer.getLocalDispatcher(dispatcherName, delegator);
         if (dispatcher == null) {
             Debug.logError("[ContextFilter.init] ERROR: dispatcher could not be initialized.", module);
         }
@@ -419,27 +372,6 @@ public class ContextFilter implements Filter {
         return delegator;
     }
 
-    protected Authorization getAuthz() {
-        Authorization authz = (Authorization) config.getServletContext().getAttribute("authorization");
-        if (authz == null) {
-            Delegator delegator = (Delegator) config.getServletContext().getAttribute("delegator");
-
-            if (delegator != null) {
-                try {
-                    authz = AuthorizationFactory.getInstance(delegator);
-                } catch (SecurityConfigurationException e) {
-                    Debug.logError(e, "[ServiceDispatcher.init] : No instance of authorization implementation found.", module);
-                }
-            }
-            config.getServletContext().setAttribute("authz", authz);
-            if (authz == null) {
-                Debug.logError("[ContextFilter.init] ERROR: authorization create failed.", module);
-            }
-        }
-        return authz;
-    }
-
-    @Deprecated
     protected Security getSecurity() {
         Security security = (Security) config.getServletContext().getAttribute("security");
         if (security == null) {
@@ -449,12 +381,12 @@ public class ContextFilter implements Filter {
                 try {
                     security = SecurityFactory.getInstance(delegator);
                 } catch (SecurityConfigurationException e) {
-                    Debug.logError(e, "[ServiceDispatcher.init] : No instance of security imeplemtation found.", module);
+                    Debug.logError(e, "Unable to obtain an instance of the security object.", module);
                 }
             }
             config.getServletContext().setAttribute("security", security);
             if (security == null) {
-                Debug.logError("[ContextFilter.init] ERROR: security create failed.", module);
+                Debug.logError("An invalid (null) Security object has been set in the servlet context.", module);
             }
         }
         return security;
@@ -486,21 +418,5 @@ public class ContextFilter implements Filter {
             config.getServletContext().setAttribute("_serverId", serverId);
         }
         return serverId;
-    }
-
-    protected Container getContainers() throws ServletException {
-        return ContainerLoader.getContainer("rmi-dispatcher");
-    }
-
-    // used in Geronimo/WASCE to allow to deregister
-    protected void destroyRmiContainer() throws ServletException {
-        if (rmiLoadedContainer != null) {
-            try {
-                rmiLoadedContainer.stop();
-            } catch (ContainerException e) {
-                Debug.logError(e, module);
-                throw new ServletException("Error when stopping the RMI loaded container");
-            }
-        }
     }
 }

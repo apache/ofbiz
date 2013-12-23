@@ -53,7 +53,6 @@ import javax.xml.transform.stream.StreamSource;
 import javolution.util.FastList;
 import javolution.util.FastMap;
 
-import org.apache.fop.apps.FOPException;
 import org.apache.fop.apps.Fop;
 import org.apache.fop.apps.MimeConstants;
 import org.ofbiz.base.util.Debug;
@@ -66,7 +65,9 @@ import org.ofbiz.base.util.UtilProperties;
 import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.base.util.collections.MapStack;
 import org.ofbiz.base.util.string.FlexibleStringExpander;
+import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericValue;
+import org.ofbiz.entity.util.EntityUtilProperties;
 import org.ofbiz.service.DispatchContext;
 import org.ofbiz.service.GenericServiceException;
 import org.ofbiz.service.LocalDispatcher;
@@ -98,6 +99,7 @@ public class EmailServices {
      *@return Map with the result of the service, the output parameters
      */
     public static Map<String, Object> sendMail(DispatchContext ctx, Map<String, ? extends Object> context) {
+        Delegator delegator = ctx.getDelegator();
         String communicationEventId = (String) context.get("communicationEventId");
         String orderId = (String) context.get("orderId");
         Locale locale = (Locale) context.get("locale");
@@ -155,6 +157,7 @@ public class EmailServices {
         String messageId = (String) context.get("messageId");
         String contentType = (String) context.get("contentType");
         Boolean sendPartial = (Boolean) context.get("sendPartial");
+        Boolean isStartTLSEnabled = (Boolean) context.get("startTLSEnabled");
 
         boolean useSmtpAuth = false;
 
@@ -162,31 +165,34 @@ public class EmailServices {
         if (sendType == null || sendType.equals("mail.smtp.host")) {
             sendType = "mail.smtp.host";
             if (UtilValidate.isEmpty(sendVia)) {
-                sendVia = UtilProperties.getPropertyValue("general.properties", "mail.smtp.relay.host", "localhost");
+                sendVia = EntityUtilProperties.getPropertyValue("general.properties", "mail.smtp.relay.host", "localhost", delegator);
             }
             if (UtilValidate.isEmpty(authUser)) {
-                authUser = UtilProperties.getPropertyValue("general.properties", "mail.smtp.auth.user");
+                authUser = EntityUtilProperties.getPropertyValue("general.properties", "mail.smtp.auth.user", delegator);
             }
             if (UtilValidate.isEmpty(authPass)) {
-                authPass = UtilProperties.getPropertyValue("general.properties", "mail.smtp.auth.password");
+                authPass = EntityUtilProperties.getPropertyValue("general.properties", "mail.smtp.auth.password", delegator);
             }
             if (UtilValidate.isNotEmpty(authUser)) {
                 useSmtpAuth = true;
             }
             if (UtilValidate.isEmpty(port)) {
-                port = UtilProperties.getPropertyValue("general.properties", "mail.smtp.port");
+                port = EntityUtilProperties.getPropertyValue("general.properties", "mail.smtp.port", delegator);
             }
             if (UtilValidate.isEmpty(socketFactoryPort)) {
-                socketFactoryPort = UtilProperties.getPropertyValue("general.properties", "mail.smtp.socketFactory.port");
+                socketFactoryPort = EntityUtilProperties.getPropertyValue("general.properties", "mail.smtp.socketFactory.port", delegator);
             }
             if (UtilValidate.isEmpty(socketFactoryClass)) {
-                socketFactoryClass = UtilProperties.getPropertyValue("general.properties", "mail.smtp.socketFactory.class");
+                socketFactoryClass = EntityUtilProperties.getPropertyValue("general.properties", "mail.smtp.socketFactory.class", delegator);
             }
             if (UtilValidate.isEmpty(socketFactoryFallback)) {
-                socketFactoryFallback = UtilProperties.getPropertyValue("general.properties", "mail.smtp.socketFactory.fallback", "false");
+                socketFactoryFallback = EntityUtilProperties.getPropertyValue("general.properties", "mail.smtp.socketFactory.fallback", "false", delegator);
             }
             if (sendPartial == null) {
-                sendPartial = UtilProperties.propertyValueEqualsIgnoreCase("general.properties", "mail.smtp.sendpartial", "true") ? true : false;
+                sendPartial = EntityUtilProperties.propertyValueEqualsIgnoreCase("general.properties", "mail.smtp.sendpartial", "true", delegator) ? true : false;
+            }
+            if (isStartTLSEnabled == null) {
+                isStartTLSEnabled = EntityUtilProperties.propertyValueEqualsIgnoreCase("general.properties", "mail.smtp.starttls.enable", "true", delegator);
             }
         } else if (sendVia == null) {
             return ServiceUtil.returnError(UtilProperties.getMessage(resource, "CommonEmailSendMissingParameterSendVia", locale));
@@ -224,6 +230,9 @@ public class EmailServices {
             }
             if (sendPartial != null) {
                 props.put("mail.smtp.sendpartial", sendPartial ? "true" : "false");
+            }
+            if (isStartTLSEnabled) {
+                props.put("mail.smtp.starttls.enable", "true");
             }
 
             session = Session.getInstance(props);
@@ -298,7 +307,7 @@ public class EmailServices {
         }
 
         // check to see if sending mail is enabled
-        String mailEnabled = UtilProperties.getPropertyValue("general.properties", "mail.notifications.enabled", "N");
+        String mailEnabled = EntityUtilProperties.getPropertyValue("general.properties", "mail.notifications.enabled", "N", delegator);
         if (!"Y".equalsIgnoreCase(mailEnabled)) {
             // no error; just return as if we already processed
             Debug.logImportant("Mail notifications disabled in general.properties; mail with subject [" + subject + "] not sent to addressee [" + sendTo + "]", module);
@@ -526,22 +535,12 @@ public class EmailServices {
                     baos.close();
 
                     // store in the list of maps for sendmail....
-                    bodyParts.add(UtilMisc.<String, Object>toMap("content", baos.toByteArray(), "type", "application/pdf", "filename", attachmentName));
-                } catch (GeneralException ge) {
-                    Debug.logError(ge, "Error rendering PDF attachment for email: " + ge.toString(), module);
-                    return ServiceUtil.returnError(UtilProperties.getMessage(resource, "CommonEmailSendRenderingScreenPdfError", UtilMisc.toMap("errorString", ge.toString()), locale));
-                } catch (IOException ie) {
-                    Debug.logError(ie, "Error rendering PDF attachment for email: " + ie.toString(), module);
-                    return ServiceUtil.returnError(UtilProperties.getMessage(resource, "CommonEmailSendRenderingScreenPdfError", UtilMisc.toMap("errorString", ie.toString()), locale));
-                } catch (FOPException fe) {
-                    Debug.logError(fe, "Error rendering PDF attachment for email: " + fe.toString(), module);
-                    return ServiceUtil.returnError(UtilProperties.getMessage(resource, "CommonEmailSendRenderingScreenPdfError", UtilMisc.toMap("errorString", fe.toString()), locale));
-                } catch (SAXException se) {
-                    Debug.logError(se, "Error rendering PDF attachment for email: " + se.toString(), module);
-                    return ServiceUtil.returnError(UtilProperties.getMessage(resource, "CommonEmailSendRenderingScreenPdfError", UtilMisc.toMap("errorString", se.toString()), locale));
-                } catch (ParserConfigurationException pe) {
-                    Debug.logError(pe, "Error rendering PDF attachment for email: " + pe.toString(), module);
-                    return ServiceUtil.returnError(UtilProperties.getMessage(resource, "CommonEmailSendRenderingScreenPdfError", UtilMisc.toMap("errorString", pe.toString()), locale));
+                    bodyParts.add(UtilMisc.<String, Object> toMap("content", baos.toByteArray(), "type", "application/pdf", "filename",
+                            attachmentName));
+                } catch (Exception e) {
+                    Debug.logError(e, "Error rendering PDF attachment for email: " + e.toString(), module);
+                    return ServiceUtil.returnError(UtilProperties.getMessage(resource, "CommonEmailSendRenderingScreenPdfError",
+                            UtilMisc.toMap("errorString", e.toString()), locale));
                 }
                 
                 serviceContext.put("bodyParts", bodyParts);
@@ -582,11 +581,21 @@ public class EmailServices {
 
         Map<String, Object> result = ServiceUtil.returnSuccess();
         Map<String, Object> sendMailResult;
+        Boolean hideInLog = (Boolean) serviceContext.get("hideInLog");
+        hideInLog = hideInLog == null ? false : hideInLog;
         try {
-            if (isMultiPart) {
-                sendMailResult = dispatcher.runSync("sendMailMultiPart", serviceContext);
+            if (!hideInLog) {
+                if (isMultiPart) {
+                    sendMailResult = dispatcher.runSync("sendMailMultiPart", serviceContext);
+                } else {
+                    sendMailResult = dispatcher.runSync("sendMail", serviceContext);
+                }
             } else {
-                sendMailResult = dispatcher.runSync("sendMail", serviceContext);
+                if (isMultiPart) {
+                    sendMailResult = dispatcher.runSync("sendMailMultiPartHiddenInLog", serviceContext);
+                } else {
+                    sendMailResult = dispatcher.runSync("sendMailHiddenInLog", serviceContext);
+                }
             }
         } catch (Exception e) {
             Debug.logError(e, "Error send email:" + e.toString(), module);
@@ -609,6 +618,19 @@ public class EmailServices {
         return result;
     }
 
+    /**
+     * JavaMail Service same than sendMailFromScreen but with hidden result in log.
+     * To prevent having not encoded passwords shown in log
+     *@param dctx The DispatchContext that this service is operating in
+     *@param rServiceContext Map containing the input parameters
+     *@return Map with the result of the service, the output parameters
+     */
+    public static Map<String, Object> sendMailHiddenInLogFromScreen(DispatchContext dctx, Map<String, ? extends Object> rServiceContext) {
+        Map<String, Object> serviceContext = UtilMisc.makeMapWritable(rServiceContext);
+        serviceContext.put("hideInLog", true);        
+        return sendMailFromScreen(dctx, serviceContext);
+    }
+    
     public static void sendFailureNotification(DispatchContext dctx, Map<String, ? extends Object> context, MimeMessage message, List<SMTPAddressFailedException> failures) {
         Locale locale = (Locale) context.get("locale");
         Map<String, Object> newContext = FastMap.newInstance();

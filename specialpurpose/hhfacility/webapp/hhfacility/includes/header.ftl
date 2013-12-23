@@ -16,54 +16,33 @@ KIND, either express or implied.  See the License for the
 specific language governing permissions and limitations
 under the License.
 -->
-
-<html>
-<head>
-<script language="JavaScript" type="text/javascript">
-<!--
-    // Setting of field focus to initialise the
-    // handheld forms - critical when scanner is being used.
-    focusField = "";
-    function fieldFocus() {
-        if (focusField != "") {
-            document.forms[0].elements[focusField].focus();
-            document.forms[0].elements[focusField].select();
-        }
-    }
-
-    // Function to move to next field when enter pressed
-    // event is passed as firefox needs it to get keycode instead
-    // of using window.event, return false will stop form submit
-    function enter(e,nextfield) {
-        if (e.keyCode == 13) {
-            nextfield.focus();
-            nextfield.select();
-            return false;
-        } else {
-          return true;
-        }
-    }
-//-->
-</script>
-<link rel="stylesheet" href="/images/maincss.css" type="text/css">
-<title>Hand Held Facility</title>
-</head>
-<body onload=fieldFocus()>
-<#assign facility = parameters.facility?if_exists>
-<table width=240 height=250 align=top>
-<tr height=24>
-<td width=100% align=top class='boxbottom'>
-<!--<p align="right">${Static["org.ofbiz.base.util.UtilDateTime"].nowTimestamp().toString()}</p>-->
-<span class="boxhead">
-<a href="<@ofbizUrl>/main</@ofbizUrl>">Main</a>
-<#if facility?has_content><a href="<@ofbizUrl>/menu?facilityId=${facility.facilityId?if_exists}</@ofbizUrl>">Menu</a></#if>
-<a href="<@ofbizUrl>/logout</@ofbizUrl>">Logout</a>
-</span>
-</td>
-</tr>
-<tr class="boxtop">
-<td width=100%>
-</td>
-</tr>
-<tr height=196>
-<td width=100% align=top class='boxbottom'>
+<#assign docLangAttr = locale.toString()?replace("_", "-")>
+<#assign langDir = "ltr">
+<#if "ar.iw"?contains(docLangAttr?substring(0, 2))>
+    <#assign langDir = "rtl">
+</#if>
+<html lang="${docLangAttr}" dir="${langDir}" xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <title>${applicationTitle?if_exists}</title>
+    <#if layoutSettings.javaScripts?has_content>
+        <#assign javaScriptsSet = Static["org.ofbiz.base.util.UtilMisc"].toSet(layoutSettings.javaScripts)/>
+        <#list layoutSettings.javaScripts as javaScript>
+            <#if javaScriptsSet.contains(javaScript)>
+                <#assign nothing = javaScriptsSet.remove(javaScript)/>
+                <script src="<@ofbizContentUrl>${StringUtil.wrapString(javaScript)}</@ofbizContentUrl>" type="text/javascript"></script>
+            </#if>
+        </#list>
+    </#if>
+    <#if layoutSettings.VT_HDR_JAVASCRIPT?has_content>
+        <#list layoutSettings.VT_HDR_JAVASCRIPT as javaScript>
+            <script src="<@ofbizContentUrl>${StringUtil.wrapString(javaScript)}</@ofbizContentUrl>" type="text/javascript"></script>
+        </#list>
+    </#if>
+  </head>
+  <body>
+    <div data-role="header">
+      <a href="<@ofbizUrl>/menu?facilityId=${parameters.facilityId?if_exists}</@ofbizUrl>">Main</a>
+      <h1>${title?if_exists}</h1>
+    </div>

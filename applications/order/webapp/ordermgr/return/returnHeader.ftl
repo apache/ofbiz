@@ -54,7 +54,7 @@ under the License.
           <#else>
              <select name="currencyUomId">
                 <#if (orderHeader?has_content) && (orderHeader.currencyUom?has_content)>
-                  <option value="${orderHeader.currencyUom}" selected>${orderHeader.getRelatedOne("Uom").getString("description",locale)}</option>
+                  <option value="${orderHeader.currencyUom}" selected>${orderHeader.getRelatedOne("Uom", false).getString("description",locale)}</option>
                   <option value="${orderHeader.currencyUom}">---</option>
                 <#elseif defaultCurrency?has_content>
                   <option value="${defaultCurrency.uomId}" selected>${defaultCurrency.getString("description")}</option>
@@ -141,7 +141,7 @@ under the License.
                   <option value=""></option>
                   <#if creditCardList?has_content>
                     <#list creditCardList as creditCardPm>
-                      <#assign creditCard = creditCardPm.getRelatedOne("CreditCard")>
+                      <#assign creditCard = creditCardPm.getRelatedOne("CreditCard", false)>
                       <option value="${creditCard.paymentMethodId}">CC:&nbsp;${Static["org.ofbiz.party.contact.ContactHelper"].formatCreditCard(creditCard)}</option>
                     </#list>
                   </#if>
@@ -155,7 +155,7 @@ under the License.
                 <input type='text' size='20' name='paymentMethodId' value="${returnHeader?if_exists.paymentMethodId?if_exists}"/>
               </#if>
               <#if (returnHeader.fromPartyId)?has_content>
-                <a href="/partymgr/control/editcreditcard?partyId=${returnHeader.fromPartyId}${externalKeyParam}" target="partymgr" class="smallSubmit">${uiLabelMap.AccountingCreateNewCreditCard}</a>
+                <a href="/partymgr/control/editcreditcard?partyId=${returnHeader.fromPartyId}${StringUtil.wrapString(externalKeyParam)}" target="partymgr" class="smallSubmit">${uiLabelMap.AccountingCreateNewCreditCard}</a>
               </#if>
             </td>
           </tr>

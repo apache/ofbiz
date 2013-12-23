@@ -76,8 +76,8 @@ under the License.
 <#macro renderFieldTitle style title id fieldHelpText="">${title?default("")?replace("&nbsp;", " ")}</#macro>
 <#macro renderSingleFormFieldTitle title>${title?default("")}</#macro>
     
-<#macro renderFormOpen linkUrl formType targetWindow containerId containerStyle autocomplete name useRowSubmit></#macro>
-<#macro renderFormClose focusFieldName formName></#macro>
+<#macro renderFormOpen linkUrl formType targetWindow containerId containerStyle autocomplete name viewIndexField viewSizeField viewIndex viewSize useRowSubmit></#macro>
+<#macro renderFormClose focusFieldName formName containerId hasRequiredField></#macro>
 <#macro renderMultiFormClose></#macro>
     
 <#macro renderFormatListWrapperOpen formName style columnStyles><fo:table border="solid black"><#list columnStyles as columnStyle><fo:table-column<#if columnStyle?has_content> <@getFoStyle columnStyle/></#if>/></#list></#macro>
@@ -133,7 +133,7 @@ under the License.
 <#macro renderFieldGroupClose style id title></#macro>
 
 <#macro renderHyperlinkTitle name title showSelectAll="N"></#macro>
-<#macro renderSortField style title linkUrl ajaxEnabled><@renderFieldTitle style title /></#macro>
+<#macro renderSortField style title linkUrl ajaxEnabled tooltip=""><@renderFieldTitle style title /></#macro>
 <#macro formatBoundaryComment boundaryType widgetType widgetName></#macro>
 <#macro makeHiddenFormLinkAnchor linkStyle hiddenFormName event action imgSrc description><@renderField description /></#macro>
 <#macro makeHyperlinkString linkStyle hiddenFormName event action imgSrc title alternate linkUrl targetWindow description confirmation><@makeBlock linkStyle description /></#macro>

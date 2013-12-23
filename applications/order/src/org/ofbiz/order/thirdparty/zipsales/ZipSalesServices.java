@@ -23,7 +23,6 @@ import java.net.URL;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -146,7 +145,7 @@ public class ZipSalesServices {
                 }
 
                 // console log
-                Debug.log(newValue.get("zipCode") + "/" + newValue.get("stateCode") + "/" + newValue.get("city") + "/" + newValue.get("county") + "/" + newValue.get("fromDate"));
+                Debug.logInfo(newValue.get("zipCode") + "/" + newValue.get("stateCode") + "/" + newValue.get("city") + "/" + newValue.get("county") + "/" + newValue.get("fromDate"), module);
             }
         }
 
@@ -202,7 +201,7 @@ public class ZipSalesServices {
                     }
 
                     // console log
-                    Debug.log(newValue.get("stateCode") + "/" + newValue.get("city") + "/" + newValue.get("county") + "/" + newValue.get("fromDate"));
+                    Debug.logInfo(newValue.get("stateCode") + "/" + newValue.get("city") + "/" + newValue.get("county") + "/" + newValue.get("fromDate"), module);
                 }
             }
         }
@@ -272,7 +271,7 @@ public class ZipSalesServices {
         }
 
         // lookup the records
-        List<GenericValue> zipLookup = delegator.findByAnd("ZipSalesTaxLookup", UtilMisc.toMap("zipCode", zipCode), UtilMisc.toList("-fromDate"));
+        List<GenericValue> zipLookup = delegator.findByAnd("ZipSalesTaxLookup", UtilMisc.toMap("zipCode", zipCode), UtilMisc.toList("-fromDate"), false);
         if (UtilValidate.isEmpty(zipLookup)) {
             throw new GeneralException("The zip code entered is not valid.");
         }
@@ -346,7 +345,7 @@ public class ZipSalesServices {
         // look up the rules
         List<GenericValue> ruleLookup = null;
         try {
-            ruleLookup = delegator.findByAnd("ZipSalesRuleLookup", UtilMisc.toMap("stateCode", stateCode), UtilMisc.toList("-fromDate"));
+            ruleLookup = delegator.findByAnd("ZipSalesRuleLookup", UtilMisc.toMap("stateCode", stateCode), UtilMisc.toList("-fromDate"), false);
         } catch (GenericEntityException e) {
             Debug.logError(e, module);
         }
@@ -362,13 +361,11 @@ public class ZipSalesServices {
         }
 
         if (ruleLookup != null) {
-            Iterator<GenericValue> ruleIterator = ruleLookup.iterator();
-            while (ruleIterator.hasNext()) {
+            for (GenericValue rule : ruleLookup) {
                 if (!taxShipping) {
                     // if we found an rule which passes no need to contine (all rules are ||)
                     break;
                 }
-                GenericValue rule = ruleIterator.next();
                 String idCode = rule.getString("idCode");
                 String taxable = rule.getString("taxable");
                 String condition = rule.getString("shipCond");
@@ -468,10 +465,10 @@ public class ZipSalesServices {
 
         BigDecimal taxableAmount = itemAmount;
         if (taxShipping) {
-            //Debug.log("Taxing shipping", module);
+            //Debug.logInfo("Taxing shipping", module);
             taxableAmount = taxableAmount.add(shippingAmount);
         } else {
-            Debug.log("Shipping is not taxable", module);
+            Debug.logInfo("Shipping is not taxable", module);
         }
 
         // calc tax amount

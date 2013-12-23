@@ -25,6 +25,7 @@ import org.ofbiz.order.order.*;
 import org.ofbiz.party.contact.*;
 import org.ofbiz.product.catalog.*;
 import org.ofbiz.product.store.*;
+import org.ofbiz.webapp.website.WebSiteWorker;
 
 cart = session.getAttribute("shoppingCart");
 context.cart = cart;
@@ -55,7 +56,7 @@ context.headerAdjustmentsToShow = OrderReadHelper.filterOrderAdjustments(orderHe
 
 orderSubTotal = OrderReadHelper.getOrderItemsSubTotal(orderItems, orderAdjustments, workEfforts);
 context.orderSubTotal = orderSubTotal;
-context.placingCustomerPerson = userLogin?.getRelatedOne("Person");
+context.placingCustomerPerson = userLogin?.getRelatedOne("Person", false);
 context.paymentMethods = cart.getPaymentMethods();
 
 paymentMethodTypeIds = cart.getPaymentMethodTypeIds();
@@ -63,11 +64,11 @@ paymentMethodType = null;
 paymentMethodTypeId = null;
 if (paymentMethodTypeIds) {
     paymentMethodTypeId = paymentMethodTypeIds[0];
-    paymentMethodType = delegator.findByPrimaryKey("PaymentMethodType", [paymentMethodTypeId : paymentMethodTypeId]);
+    paymentMethodType = delegator.findOne("PaymentMethodType", [paymentMethodTypeId : paymentMethodTypeId], false);
     context.paymentMethodType = paymentMethodType;
 }
 
-webSiteId = CatalogWorker.getWebSiteId(request);
+webSiteId = WebSiteWorker.getWebSiteId(request);
 
 productStore = ProductStoreWorker.getProductStore(request);
 context.productStore = productStore;
@@ -82,7 +83,7 @@ if (paymentAddress) context.paymentAddress = paymentAddress;
 
 // TODO: FIXME!
 /*
-billingAccount = cart.getBillingAccountId() ? delegator.findByPrimaryKey("BillingAccount", [billingAccountId : cart.getBillingAccountId()]) : null;
+billingAccount = cart.getBillingAccountId() ? delegator.findOne("BillingAccount", [billingAccountId : cart.getBillingAccountId()], false) : null;
 if (billingAccount)
     context.billingAccount = billingAccount;
 */
@@ -96,7 +97,7 @@ context.giftMessage = cart.getGiftMessage();
 context.isGift = cart.getIsGift();
 context.currencyUomId = cart.getCurrency();
 
-shipmentMethodType = delegator.findByPrimaryKey("ShipmentMethodType", [shipmentMethodTypeId : cart.getShipmentMethodTypeId()]);
+shipmentMethodType = delegator.findOne("ShipmentMethodType", [shipmentMethodTypeId : cart.getShipmentMethodTypeId()], false);
 if (shipmentMethodType) context.shipMethDescription = shipmentMethodType.description;
 
 orh = new OrderReadHelper(orderAdjustments, orderItems);

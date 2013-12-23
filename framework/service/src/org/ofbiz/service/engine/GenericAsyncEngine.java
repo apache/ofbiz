@@ -20,9 +20,9 @@ package org.ofbiz.service.engine;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.Date;
 import java.util.Map;
 
+import org.ofbiz.base.config.GenericConfigException;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilDateTime;
 import org.ofbiz.base.util.UtilMisc;
@@ -103,10 +103,10 @@ public abstract class GenericAsyncEngine extends AbstractEngine {
 
                 // Create the job info
                 String jobId = dispatcher.getDelegator().getNextSeqId("JobSandbox");
-                String jobName = Long.toString((new Date().getTime()));
+                String jobName = Long.toString(System.currentTimeMillis());
 
                 Map<String, Object> jFields = UtilMisc.toMap("jobId", jobId, "jobName", jobName, "runTime", UtilDateTime.nowTimestamp());
-                jFields.put("poolId", ServiceConfigUtil.getSendPool());
+                jFields.put("poolId", ServiceConfigUtil.getServiceEngine().getThreadPool().getSendToPool());
                 jFields.put("statusId", "SERVICE_PENDING");
                 jFields.put("serviceName", modelService.name);
                 jFields.put("loaderName", localName);
@@ -126,18 +126,15 @@ public abstract class GenericAsyncEngine extends AbstractEngine {
                 throw new GenericServiceException("Problem serializing service attributes", e);
             } catch (IOException e) {
                 throw new GenericServiceException("Problem serializing service attributes", e);
+            } catch (GenericConfigException e) {
+                throw new GenericServiceException("Problem serializing service attributes", e);
             }
 
-            // make sure we stored okay
-            if (jobV == null) {
-                throw new GenericServiceException("Persisted job not created");
-            } else {
-                Debug.logInfo("Persisted job queued : " + jobV.getString("jobName"), module);
-            }
+            Debug.logInfo("Persisted job queued : " + jobV.getString("jobName"), module);
         } else {
             JobManager jMgr = dispatcher.getJobManager();
             if (jMgr != null) {
-                String name = Long.toString(new Date().getTime());
+                String name = Long.toString(System.currentTimeMillis());
                 String jobId = modelService.name + "." + name;
                 job = new GenericServiceJob(dctx, jobId, name, modelService.name, context, requester);
                 try {

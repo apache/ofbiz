@@ -54,7 +54,7 @@ under the License.
 <#macro renderSingleFormFieldTitle></#macro>
 
 <#macro renderFormOpen linkUrl formType targetWindow containerId containerStyle autocomplete name useRowSubmit></#macro>
-<#macro renderFormClose focusFieldName formName></#macro>
+<#macro renderFormClose focusFieldName formName containerId hasRequiredField></#macro>
 <#macro renderMultiFormClose></#macro>
 
 <#macro renderFormatListWrapperOpen formName style columnStyles></#macro>
@@ -113,7 +113,7 @@ under the License.
 <#macro renderFieldGroupClose style id title></#macro>
 
 <#macro renderHyperlinkTitle name title showSelectAll="N"></#macro>
-<#macro renderSortField style title linkUrl ajaxEnabled><@renderFieldTitle style title /></#macro>
+<#macro renderSortField style title linkUrl ajaxEnabled tooltip=""><@renderFieldTitle style title /></#macro>
 <#macro formatBoundaryComment boundaryType widgetType widgetName></#macro>
 <#macro makeHiddenFormLinkAnchor linkStyle hiddenFormName event action imgSrc description><@renderField description /></#macro>
 <#macro makeHyperlinkString linkStyle hiddenFormName event action imgSrc alternate linkUrl targetWindow description><@renderField description /></#macro>

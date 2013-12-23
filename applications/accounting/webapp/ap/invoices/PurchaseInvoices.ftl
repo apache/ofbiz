@@ -128,7 +128,7 @@ function runAction() {
     <span class="label">${uiLabelMap.AccountingRunningTotalOutstanding} :</span>
     <span class="label" id="showInvoiceRunningTotal"></span>
   </div>
-  <form name="listPurchaseInvoices" id="listPurchaseInvoices"  method="post" action="javascript:void();">
+  <form name="listPurchaseInvoices" id="listPurchaseInvoices"  method="post" action="javascript:void(0);">
     <div align="right">
       <!-- May add some more options in future like cancel selected invoices-->
       <select name="serviceName" id="serviceName" onchange="javascript:setServiceName(this);">
@@ -193,7 +193,7 @@ function runAction() {
       <#list invoices as invoice>
         <#assign invoicePaymentInfoList = dispatcher.runSync("getInvoicePaymentInfoList", Static["org.ofbiz.base.util.UtilMisc"].toMap("invoiceId", invoice.invoiceId, "userLogin", userLogin))/>
         <#assign invoicePaymentInfo = invoicePaymentInfoList.get("invoicePaymentInfoList").get(0)?if_exists>
-          <#assign statusItem = invoice.getRelatedOneCache("StatusItem")>
+          <#assign statusItem = invoice.getRelatedOne("StatusItem", true)>
           <tr valign="middle"<#if alt_row> class="alternate-row"</#if>>
             <td><a class="buttontext" href="<@ofbizUrl>invoiceOverview?invoiceId=${invoice.invoiceId}</@ofbizUrl>">${invoice.get("invoiceId")}</a></td>
             <td>${invoice.invoiceTypeDesc?default(invoice.invoiceTypeId)}</td>

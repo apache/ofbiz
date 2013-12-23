@@ -94,7 +94,7 @@ public class LoopSubContentTransform implements TemplateTransformModel {
         ctx.put("subContentDataResourceView", subContentDataResourceView);
         GenericValue electronicText = null;
         try {
-            electronicText = subContentDataResourceView.getRelatedOne("ElectronicText");
+            electronicText = subContentDataResourceView.getRelatedOne("ElectronicText", false);
         } catch (GenericEntityException e) {
             throw new RuntimeException(e.getMessage());
         }
@@ -116,7 +116,7 @@ public class LoopSubContentTransform implements TemplateTransformModel {
             String parentContentId = (String)ctx.get("contentId");
             if (UtilValidate.isEmpty(mimeTypeId) && UtilValidate.isNotEmpty(parentContentId)) { // will need these below
                 try {
-                    GenericValue parentContent = delegator.findByPrimaryKey("Content", UtilMisc.toMap("contentId", parentContentId));
+                    GenericValue parentContent = delegator.findOne("Content", UtilMisc.toMap("contentId", parentContentId), false);
                     if (parentContent != null) {
                         mimeTypeId = (String) parentContent.get("mimeTypeId");
                         ctx.put("parentContent", parentContent);

@@ -27,10 +27,13 @@ import java.util.TimeZone;
 import javolution.util.FastList;
 
 import org.apache.oro.text.regex.MalformedPatternException;
-import org.ofbiz.base.util.CompilerMatcher;
+import org.apache.oro.text.regex.Pattern;
+import org.apache.oro.text.regex.PatternMatcher;
+import org.apache.oro.text.regex.Perl5Matcher;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.GeneralException;
 import org.ofbiz.base.util.ObjectType;
+import org.ofbiz.base.util.PatternFactory;
 import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.base.util.UtilXml;
 import org.ofbiz.base.util.collections.FlexibleMapAccessor;
@@ -39,7 +42,6 @@ import org.ofbiz.entity.GenericValue;
 import org.ofbiz.entityext.permission.EntityPermissionChecker;
 import org.ofbiz.minilang.operation.BaseCompare;
 import org.ofbiz.security.Security;
-import org.ofbiz.security.authz.Authorization;
 import org.w3c.dom.Element;
 
 /**
@@ -211,18 +213,15 @@ public class ModelTreeCondition {
             if (userLogin != null) {
                 String permission = permissionExdr.expandString(context);
                 String action = actionExdr.expandString(context);
-
-                Authorization authz = (Authorization) context.get("authorization");
                 Security security = (Security) context.get("security");
                 if (UtilValidate.isNotEmpty(action)) {
-                    //Debug.logWarning("Deprecated method hasEntityPermission() was called; the action field should no longer be used", module);
                     // run hasEntityPermission
                     if (security.hasEntityPermission(permission, action, userLogin)) {
                         return true;
                     }
                 } else {
                     // run hasPermission
-                    if (authz.hasPermission(userLogin.getString("userLoginId"), permission, context)) {
+                    if (security.hasPermission(permission, userLogin)) {
                         return true;
                     }
                 }
@@ -394,8 +393,6 @@ public class ModelTreeCondition {
     }
 
     public static class IfRegexp extends TreeCondition {
-        private transient static ThreadLocal<CompilerMatcher> compilerMatcher = CompilerMatcher.getThreadLocal();
-
         protected FlexibleMapAccessor<Object> fieldAcsr;
         protected FlexibleStringExpander exprExdr;
 
@@ -409,6 +406,16 @@ public class ModelTreeCondition {
         @Override
         public boolean eval(Map<String, ? extends Object> context) {
             Object fieldVal = this.fieldAcsr.get(context);
+            String expr = this.exprExdr.expandString(context);
+            Pattern pattern = null;
+
+            try {
+                pattern = PatternFactory.createOrGetPerl5CompiledPattern(expr, true);
+            } catch (MalformedPatternException e) {
+                String errMsg = "Error in evaluation in if-regexp in screen: " + e.toString();
+                Debug.logError(e, errMsg, module);
+                throw new IllegalArgumentException(errMsg);
+            }
 
             String fieldString = null;
             try {
@@ -419,13 +426,8 @@ public class ModelTreeCondition {
             // always use an empty string by default
             if (fieldString == null) fieldString = "";
 
-            try {
-                return compilerMatcher.get().matches(fieldString, this.exprExdr.expandString(context));
-            } catch (MalformedPatternException e) {
-                String errMsg = "Error in evaluation in if-regexp in screen: " + e.toString();
-                Debug.logError(e, errMsg, module);
-                throw new IllegalArgumentException(errMsg);
-            }
+            PatternMatcher matcher = new Perl5Matcher();
+            return matcher.matches(fieldString, pattern);
         }
     }
 

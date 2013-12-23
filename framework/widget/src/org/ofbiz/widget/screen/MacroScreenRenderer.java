@@ -32,6 +32,7 @@ import java.util.WeakHashMap;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.xml.parsers.ParserConfigurationException;
 
 import javolution.util.FastMap;
 
@@ -41,6 +42,7 @@ import org.ofbiz.base.util.UtilFormatOut;
 import org.ofbiz.base.util.UtilGenerics;
 import org.ofbiz.base.util.UtilHttp;
 import org.ofbiz.base.util.UtilMisc;
+import org.ofbiz.base.util.UtilProperties;
 import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.base.util.template.FreeMarkerWorker;
 import org.ofbiz.entity.Delegator;
@@ -53,18 +55,16 @@ import org.ofbiz.widget.WidgetContentWorker;
 import org.ofbiz.widget.WidgetDataResourceWorker;
 import org.ofbiz.widget.WidgetWorker;
 import org.ofbiz.widget.form.FormStringRenderer;
+import org.ofbiz.widget.form.MacroFormRenderer;
 import org.ofbiz.widget.form.ModelForm;
-import org.ofbiz.widget.html.HtmlFormRenderer;
 import org.ofbiz.widget.html.HtmlScreenRenderer.ScreenletMenuRenderer;
 import org.ofbiz.widget.menu.MenuStringRenderer;
-import org.ofbiz.widget.screen.ModelScreenWidget;
-import org.ofbiz.widget.screen.ScreenStringRenderer;
+import org.ofbiz.widget.screen.ModelScreenWidget.*;
+import org.xml.sax.SAXException;
 
 import freemarker.core.Environment;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
-import org.xml.sax.SAXException;
-import javax.xml.parsers.ParserConfigurationException;
 
 public class MacroScreenRenderer implements ScreenStringRenderer {
 
@@ -74,6 +74,8 @@ public class MacroScreenRenderer implements ScreenStringRenderer {
     private String rendererName;
     private int elementId = 999;
     protected boolean widgetCommentsEnabled = false;
+    private static final String formrenderer = UtilProperties.getPropertyValue("widget", "screen.formrenderer");
+    private int screenLetsIdCounter = 1;
 
     public MacroScreenRenderer(String name, String macroLibraryPath) throws TemplateException, IOException {
         macroLibrary = FreeMarkerWorker.getTemplate(macroLibraryPath);
@@ -192,7 +194,7 @@ public class MacroScreenRenderer implements ScreenStringRenderer {
         parameters.put("id", containerId);
         parameters.put("style", container.getStyle(context));
         parameters.put("autoUpdateLink", autoUpdateLink);
-        parameters.put("autoUpdateInterval", container.getAutoUpdateInterval());
+        parameters.put("autoUpdateInterval", container.getAutoUpdateInterval(context));
         executeMacro(writer, "renderContainerBegin", parameters);
     }
 
@@ -627,11 +629,17 @@ public class MacroScreenRenderer implements ScreenStringRenderer {
         }
 
         Map<String, Object> parameters = FastMap.newInstance();
-        parameters.put("id", screenlet.getId(context));
         parameters.put("title", title);
         parameters.put("collapsible", collapsible);
         parameters.put("saveCollapsed", screenlet.saveCollapsed());
-        parameters.put("collapsibleAreaId", screenlet.getId(context) + "_col");
+        if (UtilValidate.isNotEmpty (screenlet.getId(context))) {
+            parameters.put("id", screenlet.getId(context));
+            parameters.put("collapsibleAreaId", screenlet.getId(context) + "_col");
+        } else {
+            parameters.put("id", "screenlet_" + screenLetsIdCounter);
+            parameters.put("collapsibleAreaId","screenlet_" + screenLetsIdCounter + "_col");
+            screenLetsIdCounter++;
+        }
         parameters.put("expandToolTip", expandToolTip);
         parameters.put("collapseToolTip", collapseToolTip);
         parameters.put("fullUrlString", fullUrlString);
@@ -651,7 +659,12 @@ public class MacroScreenRenderer implements ScreenStringRenderer {
                 Map<String, Object> globalCtx = UtilGenerics.checkMap(context.get("globalContext"));
                 globalCtx.put("NO_PAGINATOR", true);
                 FormStringRenderer savedRenderer = (FormStringRenderer) context.get("formStringRenderer");
-                HtmlFormRenderer renderer = new HtmlFormRenderer(request, response);
+                MacroFormRenderer renderer = null;
+                try {
+                    renderer = new MacroFormRenderer(formrenderer, request, response);
+                } catch (TemplateException e) {
+                    Debug.logError("Not rendering content, error on MacroFormRenderer creation.", module);
+                }
                 renderer.setRenderPagination(false);
                 context.put("formStringRenderer", renderer);
                 subWidget.renderWidgetString(writer, context, this);
@@ -995,5 +1008,38 @@ public class MacroScreenRenderer implements ScreenStringRenderer {
             }
         }
         modelScreen.renderScreenString(writer, context, this);
+    }
+
+    @Override
+    public void renderColumnContainer(Appendable writer, Map<String, Object> context, ColumnContainer columnContainer) throws IOException {
+        String id = columnContainer.getId(context);
+        String style = columnContainer.getStyle(context);
+        StringBuilder sb = new StringBuilder("<@renderColumnContainerBegin");
+        sb.append(" id=\"");
+        sb.append(id);
+        sb.append("\" style=\"");
+        sb.append(style);
+        sb.append("\" />");
+        executeMacro(writer, sb.toString());
+        for (Column column : columnContainer.getColumns()) {
+            id = column.getId(context);
+            style = column.getStyle(context);
+            sb = new StringBuilder("<@renderColumnBegin");
+            sb.append(" id=\"");
+            sb.append(id);
+            sb.append("\" style=\"");
+            sb.append(style);
+            sb.append("\" />");
+            executeMacro(writer, sb.toString());
+            for (ModelScreenWidget subWidget : column.getSubWidgets()) {
+                try {
+                    subWidget.renderWidgetString(writer, context, this);
+                } catch (GeneralException e) {
+                    throw new IOException(e);
+                }
+            }
+            executeMacro(writer, "<@renderColumnEnd />");
+        }
+        executeMacro(writer, "<@renderColumnContainerEnd />");
     }
 }

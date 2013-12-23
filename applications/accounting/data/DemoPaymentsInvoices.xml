@@ -22,6 +22,7 @@ under the License.
     <Person partyId="AcctBuyer" firstName="Acct" lastName="Buyer"/>
     <PartyRole partyId="AcctBuyer" roleTypeId="BUYER"/>
     <UserLogin partyId="AcctBuyer" userLoginId="AcctBuyer"/>
+    <SecurityGroup groupId="ORDERPURCH"/><!-- is needed because accounting is before order -->
     <UserLoginSecurityGroup userLoginId="AcctBuyer" groupId="ORDERPURCH" fromDate="2001-05-13 00:00:00"/>
 
     <Party partyId="AcctBigSupplier" partyTypeId="PARTY_GROUP"/>
@@ -159,8 +160,8 @@ under the License.
     <!-- Demo invoice data for sales invoice with INVOICE_PAID status -->
     <Party partyId="DemoCustAgent"/>
     <PartyRole partyId="DemoCustAgent" roleTypeId="SALES_REP"/>
-    <Product productId="WG-9943"/>
-    <Product productId="WG-9943-B3"/>
+    <Product productId="WG-9943" productTypeId="FINISHED_GOOD"/>
+    <Product productId="WG-9943-B3" productTypeId="FINISHED_GOOD"/>
 
     <Agreement agreementId="8000" partyIdFrom="Company" partyIdTo="DemoCustAgent" agreementTypeId="COMMISSION_AGREEMENT" description="Commission Agreement with DemoCustAgent"/>
     <AgreementItem agreementId="8000" agreementItemSeqId="0001" agreementItemTypeId="AGREEMENT_COMMISSION" currencyUomId="USD" agreementText="Commission in USD"/>
@@ -223,4 +224,9 @@ under the License.
             partyId="Company" transactionDate="2009-07-18 00:00:01.000" entryDate="2009-08-11 12:28:45.315" performedByPartyId="admin" statusId="FINACT_TRNS_CREATED" paymentId="8002"/>
     <Payment paymentId="8002" finAccountTransId="9104"/>
 
+    <!-- invoice export demo data for replacement id's -->
+    <Product productId="GZ-2644"/><!-- further data to be added in other components" -->
+    <GoodIdentification goodIdentificationTypeId="INVOICE_EXPORT" idValue="GZ-2644-replaced" productId="GZ-2644"/>
+    <Party partyId="DemoCustomer"/><!-- further data to be added in other components" -->
+    <PartyIdentification idValue="DemoCustomer2" partyId="DemoCustomer" partyIdentificationTypeId="INVOICE_EXPORT"/>
 </entity-engine-xml>

@@ -22,7 +22,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.sql.Timestamp;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -86,7 +85,7 @@ public class CompDocServices {
 
         if (UtilValidate.isNotEmpty(contentId)) {
             try {
-                delegator.findByPrimaryKey("Content", UtilMisc.toMap("contentId", contentId));
+                delegator.findOne("Content", UtilMisc.toMap("contentId", contentId), false);
             } catch (GenericEntityException e) {
                 Debug.logError(e, "Error running serviceName persistContentAndAssoc", module);
                 return ServiceUtil.returnError(UtilProperties.getMessage(CoreEvents.err_resource, "ContentNoContentFound", UtilMisc.toMap("contentId", contentId), locale));
@@ -177,14 +176,12 @@ public class CompDocServices {
             //PdfWriter writer = PdfWriter.getInstance(document, baos);
             PdfCopy writer = new PdfCopy(document, baos);
             document.open();
-            Iterator<GenericValue> iter = compDocParts.iterator();
             int pgCnt =0;
-            while (iter.hasNext()) {
-                GenericValue contentAssocRevisionItemView = iter.next();
+            for (GenericValue contentAssocRevisionItemView : compDocParts) {
                 //String thisContentId = contentAssocRevisionItemView.getString("contentId");
                 //String thisContentRevisionSeqId = contentAssocRevisionItemView.getString("maxRevisionSeqId");
                 String thisDataResourceId = contentAssocRevisionItemView.getString("dataResourceId");
-                GenericValue dataResource = delegator.findByPrimaryKey("DataResource", UtilMisc.toMap("dataResourceId", thisDataResourceId));
+                GenericValue dataResource = delegator.findOne("DataResource", UtilMisc.toMap("dataResourceId", thisDataResourceId), false);
                 String inputMimeType = null;
                 if (dataResource != null) {
                     inputMimeType = dataResource.getString("mimeTypeId");
@@ -207,13 +204,13 @@ public class CompDocServices {
                     String acroFormContentId = null;
                     GenericValue surveyResponse = null;
                     if (UtilValidate.isNotEmpty(surveyResponseId)) {
-                        surveyResponse = delegator.findByPrimaryKey("SurveyResponse", UtilMisc.toMap("surveyResponseId", surveyResponseId));
+                        surveyResponse = delegator.findOne("SurveyResponse", UtilMisc.toMap("surveyResponseId", surveyResponseId), false);
                         if (surveyResponse != null) {
                             surveyId = surveyResponse.getString("surveyId");
                         }
                     }
                     if (UtilValidate.isNotEmpty(surveyId)) {
-                        GenericValue survey = delegator.findByPrimaryKey("Survey", UtilMisc.toMap("surveyId", surveyId));
+                        GenericValue survey = delegator.findOne("Survey", UtilMisc.toMap("surveyId", surveyId), false);
                         if (survey != null) {
                             acroFormContentId = survey.getString("acroFormContentId");
                             if (UtilValidate.isNotEmpty(acroFormContentId)) {
@@ -317,12 +314,12 @@ public class CompDocServices {
 
             GenericValue dataResource = null;
             if (UtilValidate.isEmpty(contentRevisionSeqId)) {
-                GenericValue content = delegator.findByPrimaryKeyCache("Content", UtilMisc.toMap("contentId", contentId));
+                GenericValue content = delegator.findOne("Content", UtilMisc.toMap("contentId", contentId), true);
                 dataResourceId = content.getString("dataResourceId");
                 Debug.logInfo("SCVH(0b)- dataResourceId:" + dataResourceId, module);
-                dataResource = delegator.findByPrimaryKey("DataResource", UtilMisc.toMap("dataResourceId", dataResourceId));
+                dataResource = delegator.findOne("DataResource", UtilMisc.toMap("dataResourceId", dataResourceId), false);
              } else {
-                GenericValue contentRevisionItem = delegator.findByPrimaryKeyCache("ContentRevisionItem", UtilMisc.toMap("contentId", contentId, "itemContentId", contentId, "contentRevisionSeqId", contentRevisionSeqId));
+                GenericValue contentRevisionItem = delegator.findOne("ContentRevisionItem", UtilMisc.toMap("contentId", contentId, "itemContentId", contentId, "contentRevisionSeqId", contentRevisionSeqId), true);
                 if (contentRevisionItem == null) {
                     throw new ViewHandlerException("ContentRevisionItem record not found for contentId=" + contentId
                                                    + ", contentRevisionSeqId=" + contentRevisionSeqId + ", itemContentId=" + contentId);
@@ -332,7 +329,7 @@ public class CompDocServices {
                         + ", contentRevisionSeqId=" + contentRevisionSeqId + ", itemContentId=" + contentId, module);
                 dataResourceId = contentRevisionItem.getString("newDataResourceId");
                 Debug.logInfo("SCVH(3)- dataResourceId:" + dataResourceId, module);
-                dataResource = delegator.findByPrimaryKey("DataResource", UtilMisc.toMap("dataResourceId", dataResourceId));
+                dataResource = delegator.findOne("DataResource", UtilMisc.toMap("dataResourceId", dataResourceId), false);
             }
             String inputMimeType = null;
             if (dataResource != null) {
@@ -353,13 +350,13 @@ public class CompDocServices {
                 String acroFormContentId = null;
                 GenericValue surveyResponse = null;
                 if (UtilValidate.isNotEmpty(surveyResponseId)) {
-                    surveyResponse = delegator.findByPrimaryKey("SurveyResponse", UtilMisc.toMap("surveyResponseId", surveyResponseId));
+                    surveyResponse = delegator.findOne("SurveyResponse", UtilMisc.toMap("surveyResponseId", surveyResponseId), false);
                     if (surveyResponse != null) {
                         surveyId = surveyResponse.getString("surveyId");
                     }
                 }
                 if (UtilValidate.isNotEmpty(surveyId)) {
-                    GenericValue survey = delegator.findByPrimaryKey("Survey", UtilMisc.toMap("surveyId", surveyId));
+                    GenericValue survey = delegator.findOne("Survey", UtilMisc.toMap("surveyId", surveyId), false);
                     if (survey != null) {
                         acroFormContentId = survey.getString("acroFormContentId");
                         if (UtilValidate.isNotEmpty(acroFormContentId)) {

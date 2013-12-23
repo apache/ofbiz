@@ -207,7 +207,11 @@ public class ServerHitBin {
                 }
                 if (bin == null) {
                     bin = new ServerHitBin(id, type, true, delegator);
-                    binList.add(0, bin);
+                    if (binList.size() > 0) {
+                        binList.add(0, bin);
+                    } else {
+                        binList.add(bin);
+                    }
                 }
             }
         }
@@ -609,7 +613,7 @@ public class ServerHitBin {
             // check for type data before running.
             GenericValue serverHitType = null;
 
-            serverHitType = delegator.findByPrimaryKeyCache("ServerHitType", UtilMisc.toMap("hitTypeId", ServerHitBin.typeIds[this.type]));
+            serverHitType = delegator.findOne("ServerHitType", UtilMisc.toMap("hitTypeId", ServerHitBin.typeIds[this.type]), true);
             if (serverHitType == null) {
                 // datamodel data not loaded; not storing hit.
                 Debug.logWarning("The datamodel data has not been loaded; cannot find hitTypeId '" + ServerHitBin.typeIds[this.type] + " not storing ServerHit.", module);
@@ -619,10 +623,16 @@ public class ServerHitBin {
             GenericValue visit = VisitHandler.getVisit(request.getSession());
             if (visit == null) {
                 // no visit info stored, so don't store the ServerHit
-                Debug.logWarning("Could not find a visitId, so not storing ServerHit. This is probably a configuration error. If you turn of persistance of visits you should also turn off persistence of hits.", module);
+                Debug.logWarning("Could not find a visitId, so not storing ServerHit. This is probably a configuration error. If you turn off persistance of visits you should also turn off persistence of hits.", module);
                 return;
             }
             String visitId = visit.getString("visitId");
+            visit = delegator.findOne("Visit", UtilMisc.toMap("visitId", visitId), false);
+            if (visit == null) {
+                // GenericValue stored in client session does not exist in database.
+                Debug.logInfo("The Visit GenericValue stored in the client session does not exist in the database, not storing server hit.", module);
+                return;
+            }
             
             Debug.logInfo("Visit delegatorName=" + visit.getDelegator().getDelegatorName() + ", ServerHitBin delegatorName=" + this.delegator.getDelegatorName(), module);
             

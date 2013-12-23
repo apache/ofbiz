@@ -19,7 +19,6 @@
 package org.ofbiz.content.content;
 
 import java.sql.Timestamp;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -210,7 +209,6 @@ public class ContentServicesComplex {
         //EntityExpr joinExpr = null;
         //EntityExpr expr = null;
         String viewName = null;
-        GenericValue contentAssoc = null;
         String contentFieldName = null;
         if (direction != null && direction.equalsIgnoreCase("From")) {
             contentFieldName = "contentIdTo";
@@ -245,7 +243,7 @@ public class ContentServicesComplex {
         List<GenericValue> contentAssocsUnfiltered = null;
 
         //if (Debug.infoOn()) Debug.logInfo("in getAssocAndContent...Cache, fieldMap:" + fieldMap, module);
-        contentAssocsUnfiltered = delegator.findByAndCache("ContentAssoc", fieldMap, UtilMisc.toList("-fromDate"));
+        contentAssocsUnfiltered = delegator.findByAnd("ContentAssoc", fieldMap, UtilMisc.toList("-fromDate"), true);
 
         //if (Debug.infoOn()) Debug.logInfo("in getAssocAndContent...Cache, contentAssocsUnfiltered:" + contentAssocsUnfiltered, module);
         if (fromDate == null && fromDateStr != null) {
@@ -257,9 +255,7 @@ public class ContentServicesComplex {
         String contentAssocTypeId = null;
         List<GenericValue> contentAssocsTypeFiltered = FastList.newInstance();
         if (assocTypes != null && assocTypes.size() > 1) {
-            Iterator<GenericValue> it = contentAssocsDateFiltered.iterator();
-            while (it.hasNext()) {
-                contentAssoc = it.next();
+            for (GenericValue contentAssoc : contentAssocsDateFiltered) {
                 contentAssocTypeId = (String)contentAssoc.get("contentAssocTypeId");
                 if (assocTypes.contains(contentAssocTypeId)) {
                     contentAssocsTypeFiltered.add(contentAssoc);
@@ -281,10 +277,8 @@ public class ContentServicesComplex {
         GenericValue dataResource = null;
         List<GenericValue> contentAssocDataResourceList = FastList.newInstance();
         Locale locale = Locale.getDefault(); // TODO: this needs to be passed in
-        Iterator<GenericValue> it = contentAssocsTypeFiltered.iterator();
-        while (it.hasNext()) {
-            contentAssoc = it.next();
-            content = contentAssoc.getRelatedOneCache(assocRelationName);
+        for (GenericValue contentAssoc : contentAssocsTypeFiltered) {
+            content = contentAssoc.getRelatedOne(assocRelationName, true);
             if (UtilValidate.isNotEmpty(contentTypes)) {
                 String contentTypeId = (String)content.get("contentTypeId");
                 if (contentTypes.contains(contentTypeId)) {
@@ -300,7 +294,7 @@ public class ContentServicesComplex {
             //contentAssocDataResourceView.setAllFields(contentAssoc, false, null, null);
             String dataResourceId = content.getString("dataResourceId");
             if (UtilValidate.isNotEmpty(dataResourceId))
-                dataResource = content.getRelatedOneCache("DataResource");
+                dataResource = content.getRelatedOne("DataResource", true);
             //if (Debug.infoOn()) Debug.logInfo("dataResource:" + dataResource, module);
             //if (Debug.infoOn()) Debug.logInfo("contentAssocDataResourceView:" + contentAssocDataResourceView, module);
             if (dataResource != null) {

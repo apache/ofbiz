@@ -28,7 +28,7 @@ under the License.
             <link target="FindUtilCache"/>
         </menu-item>
         <menu-item name="artifact" title="${uiLabelMap.WebtoolsArtifactInfo}">
-            <link target="ArtifactInfo"/>
+            <link target="ViewComponents"/>
         </menu-item>
         <menu-item name="entity" title="${uiLabelMap.WebtoolsEntityEngine}">
             <link target="entitymaint"/>
@@ -57,9 +57,6 @@ under the License.
                 <if-service-permission service-name="securityPermissionCheck" main-action="VIEW"/>
             </condition>
             <link target="security"/>
-        </menu-item>
-        <menu-item name="tests" title="Tests">
-            <link target="selenium"/>
         </menu-item>
         <menu-item name="LayoutDemo" title="${uiLabelMap.WebtoolsLayoutDemo}">
             <link target="WebtoolsLayoutDemo" />
@@ -92,6 +89,9 @@ under the License.
         </menu-item>
         <menu-item name="entityExportAll" title="${uiLabelMap.PageTitleEntityExportAll}">
             <link target="EntityExportAll"/>
+        </menu-item>
+        <menu-item name="programExport" title="${uiLabelMap.PageTitleProgramExport}">
+            <link target="ProgramExport"/>
         </menu-item>
         <menu-item name="entityImport" title="${uiLabelMap.PageTitleEntityImport}">
             <link target="EntityImport"/>
@@ -145,11 +145,11 @@ under the License.
 
     <menu name="artifactTabBar" extends="CommonTabBarMenu" extends-resource="component://common/widget/CommonMenus.xml"
           selected-menuitem-context-field-name="tabButtonItem">
-        <menu-item name="artifactInfo" title="${uiLabelMap.WebtoolsArtifactInfo}">
-            <link target="ArtifactInfo"/>
-        </menu-item>
         <menu-item name="viewents" title="${uiLabelMap.WebtoolsViewComponents}">
             <link target="ViewComponents"/>
+        </menu-item>
+        <menu-item name="artifactInfo" title="${uiLabelMap.WebtoolsArtifactInfo} ${uiLabelMap.CommonSearch} ${uiLabelMap.WebtoolsArtifactInfoTimeToLoad}">
+            <link target="ArtifactInfo"/>
         </menu-item>
         <menu-item name="labels" title="${uiLabelMap.WebtoolsLabelManager}">
             <link target="SearchLabels"/>
@@ -195,6 +195,9 @@ under the License.
         <menu-item name="checkDb" title="${uiLabelMap.WebtoolsCheckUpdateDatabase}">
             <link target="view/checkdb"/>
         </menu-item>
+        <menu-item name="ConnectionPoolStatus" title="${uiLabelMap.ConnectionPoolStatus}">
+            <link target="ConnectionPoolStatus"/>
+        </menu-item>
         <menu-item name="entityPerformanceTest" title="${uiLabelMap.WebtoolsPerformanceTests}">
             <link target="EntityPerformanceTest"/>
         </menu-item>
@@ -216,6 +219,16 @@ under the License.
         </menu-item>
     </menu>
 
+    <menu name="StatsTabBar" extends="CommonTabBarMenu" extends-resource="component://common/widget/CommonMenus.xml"
+          selected-menuitem-context-field-name="tabButtonItem">
+        <menu-item name="stats" title="${uiLabelMap.WebtoolsStatistics}">
+            <link target="StatsSinceStart"/>
+        </menu-item>
+        <menu-item name="metrics" title="${uiLabelMap.WebtoolsMetrics}">
+            <link target="ViewMetrics"/>
+        </menu-item>
+    </menu>
+
     <menu name="StatsSinceStart" extends="CommonButtonBarMenu" extends-resource="component://common/widget/CommonMenus.xml">
         <menu-item name="clearStats" title="${uiLabelMap.WebtoolsStatsClearSince}">
             <link target="StatsSinceStart">
@@ -228,9 +241,6 @@ under the License.
     </menu>
 
     <menu name="StatsBinHistory" extends="CommonButtonBarMenu" extends-resource="component://common/widget/CommonMenus.xml">
-        <menu-item name="statsSinceStart" title="${uiLabelMap.WebtoolsStatsMainPageTitle}">
-            <link target="StatsSinceStart"/>
-        </menu-item>
         <menu-item name="refresh" title="${uiLabelMap.CommonRefresh}" widget-style="buttontext refresh">
             <link target="StatBinsHistory">
                <parameter param-name="statsId" from-field="parameters.statsId"/>
@@ -284,10 +294,18 @@ under the License.
     
     <menu name="LayoutDemo" extends="CommonTabBarMenu" extends-resource="component://common/widget/CommonMenus.xml">
         <menu-item name="Selected" title="${uiLabelMap.CommonSelected}" widget-style="selected">
-            <link target="${demoTargetUrl}"/>
+            <link target="${demoTargetUrl}">
+                <parameter param-name="demoParam1"/>
+                <parameter param-name="demoParam2"/>
+                <parameter param-name="demoParam3"/>
+            </link>
         </menu-item>
         <menu-item name="Enabled" title="${uiLabelMap.CommonEnabled}">
-            <link target="${demoTargetUrl}"/>
+            <link target="${demoTargetUrl}" link-type="hidden-form">
+                <parameter param-name="demoParam1"/>
+                <parameter param-name="demoParam2"/>
+                <parameter param-name="demoParam3"/>
+            </link>
         </menu-item>
         <menu-item name="Disabled" title="${uiLabelMap.CommonDisabled}" widget-style="disabled">
         </menu-item>

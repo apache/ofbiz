@@ -22,14 +22,14 @@ import org.ofbiz.base.util.*;
 
 // get last request from this user and use that project/task assignment as default on the screen
 
-custRequestList = delegator.findByAnd("CustRequest", ["fromPartyId" : fromPartyId], ["-createdDate"]);
+custRequestList = delegator.findByAnd("CustRequest", ["fromPartyId" : fromPartyId], ["-createdDate"], false);
 if (custRequestList) {
-    custReqTaskList = custRequestList.get(0).getRelated("CustRequestWorkEffort");
+    custReqTaskList = custRequestList.get(0).getRelated("CustRequestWorkEffort", null, null, false);
     if (custReqTaskList) {
-        custReqTask = custReqTaskList.get(0).getRelatedOne("WorkEffort");  // phase
-        projectChildWorkEffort = custReqTask.getRelatedOne("ParentWorkEffort");  // phase name
+        custReqTask = custReqTaskList.get(0).getRelatedOne("WorkEffort", false);  // phase
+        projectChildWorkEffort = custReqTask.getRelatedOne("ParentWorkEffort", false);  // phase name
         if (projectChildWorkEffort) {
-            partyList = custReqTask.getRelated("WorkEffortPartyAssignment");
+            partyList = custReqTask.getRelated("WorkEffortPartyAssignment", null, null, false);
             if (partyList) {
                 context.childWorkEffortId = projectChildWorkEffort.workEffortId;
                 context.partyId= partyList.get(0).partyId;

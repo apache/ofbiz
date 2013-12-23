@@ -26,10 +26,12 @@ under the License.
             <actions>
                 <set field="titleProperty" value="OrderReports"/>
                 <set field="headerItem" value="reports"/>
+                <property-map resource="BirtUiLabels" map-name="uiLabelMap" global="true"/>
             </actions>
             <widgets>
                 <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
                     <decorator-section name="body">
+                        <label style="h3">${uiLabelMap.BirtOrderReportsWarning}</label>
                         <include-portal-page id="OrderReportPage"/>
                     </decorator-section>
                 </decorator-screen>
@@ -107,46 +109,6 @@ under the License.
             </widgets>
         </section>
     </screen>
-    
-    <!--New Screen-->
-    <screen name="SalesReport">
-        <section>
-            <actions>
-                <property-map resource="OrderUiLabels" map-name="uiLabelMap" global="true"/>
-            </actions>
-            <widgets>
-                <screenlet title="Sales Report">
-                    <include-form name="SalesReport" location="component://order/widget/ordermgr/ReportForms.xml"/>
-                </screenlet>
-            </widgets>
-        </section>
-    </screen>
-
-    <screen name="NetBeforeOverheadReport">
-        <section>
-            <actions>
-                <property-map resource="ProductUiLabels" map-name="uiLabelMap" global="true"/>
-            </actions>
-            <widgets>
-                <screenlet title="Net Before Overhead Report">
-                    <include-form name="NetBeforeOverheadReport" location="component://order/widget/ordermgr/ReportForms.xml"/>
-                </screenlet>
-            </widgets>
-        </section>
-    </screen>
-    
-    <screen name="ProductDemandReport">
-        <section>
-            <actions>
-                <property-map resource="ProductUiLabels" map-name="uiLabelMap" global="true"/>
-            </actions>
-            <widgets>
-                <screenlet title="Product Demand Report">
-                    <include-form name="ProductDemandReport" location="component://order/widget/ordermgr/ReportForms.xml"/>
-                </screenlet>
-            </widgets>
-        </section>
-    </screen> 
 
     <screen name="OrderPurchaseReportPayment">
         <section>
@@ -163,8 +125,8 @@ under the License.
                         <condition-expr field-name="originFacilityId" operator="equals" from-field="parameters.originFacilityId" ignore-if-empty="true"/>
                         <condition-expr field-name="terminalId" operator="equals" from-field="parameters.terminalId" ignore-if-empty="true"/>
                         <condition-expr field-name="statusId" operator="equals" from-field="parameters.statusId" ignore-if-empty="true"/>
-                        <condition-expr field-name="orderDate" operator="greater-equals" from-field="parameters.fromOrderDate" ignore-if-null="true"/>
-                        <condition-expr field-name="orderDate" operator="less" from-field="parameters.thruOrderDate" ignore-if-null="true"/>
+                        <condition-expr field-name="orderDate" operator="greater-equals" from-field="parameters.fromOrderDate" ignore-if-empty="true"/>
+                        <condition-expr field-name="orderDate" operator="less" from-field="parameters.thruOrderDate" ignore-if-empty="true"/>
                     </condition-list>
                     <select-field field-name="productStoreId"/>
                     <select-field field-name="originFacilityId"/>
@@ -201,8 +163,8 @@ under the License.
                         <condition-expr field-name="originFacilityId" operator="equals" from-field="parameters.originFacilityId" ignore-if-empty="true"/>
                         <condition-expr field-name="terminalId" operator="equals" from-field="parameters.terminalId" ignore-if-empty="true"/>
                         <condition-expr field-name="statusId" operator="equals" from-field="parameters.statusId" ignore-if-empty="true"/>
-                        <condition-expr field-name="orderDate" operator="greater-equals" from-field="parameters.fromOrderDate" ignore-if-null="true"/>
-                        <condition-expr field-name="orderDate" operator="less" from-field="parameters.thruOrderDate" ignore-if-null="true"/>
+                        <condition-expr field-name="orderDate" operator="greater-equals" from-field="parameters.fromOrderDate" ignore-if-empty="true"/>
+                        <condition-expr field-name="orderDate" operator="less" from-field="parameters.thruOrderDate" ignore-if-empty="true"/>
                     </condition-list>
                     <select-field field-name="productStoreId"/>
                     <select-field field-name="originFacilityId"/>
@@ -245,8 +207,8 @@ under the License.
                         <condition-expr field-name="orderTypeId" operator="equals" value="SALES_ORDER"/>
                         <!-- possible bug: using from-field="parameters.orderStatusId" did not work for the following line -->
                         <condition-expr field-name="orderStatusId" operator="equals" value="${parameters.orderStatusId}" ignore-if-empty="true"/>
-                        <condition-expr field-name="orderDate" operator="greater-equals" from-field="parameters.fromOrderDate" ignore-if-null="true"/>
-                        <condition-expr field-name="orderDate" operator="less" from-field="parameters.thruOrderDate" ignore-if-null="true"/>
+                        <condition-expr field-name="orderDate" operator="greater-equals" from-field="parameters.fromOrderDate" ignore-if-empty="true"/>
+                        <condition-expr field-name="orderDate" operator="less" from-field="parameters.thruOrderDate" ignore-if-empty="true"/>
                     </condition-list>
                     <!-- note that we need to explicitly identify the fields to select, otherwise the query will include fields that can't logically be grouped -->
                     <select-field field-name="productStoreId"/>
@@ -313,8 +275,8 @@ under the License.
                         <condition-expr field-name="fromRoleTypeId" operator="equals" value="BILL_FROM_VENDOR"/>
                         <condition-expr field-name="orderTypeId" operator="equals" value="PURCHASE_ORDER"/>
                         <condition-expr field-name="orderStatusId" operator="equals" value="${parameters.orderStatusId}" ignore-if-empty="true"/>
-                        <condition-expr field-name="orderDate" operator="greater-equals" from-field="parameters.fromOrderDate" ignore-if-null="true"/>
-                        <condition-expr field-name="orderDate" operator="less" from-field="parameters.thruOrderDate" ignore-if-null="true"/>
+                        <condition-expr field-name="orderDate" operator="greater-equals" from-field="parameters.fromOrderDate" ignore-if-empty="true"/>
+                        <condition-expr field-name="orderDate" operator="less" from-field="parameters.thruOrderDate" ignore-if-empty="true"/>
                     </condition-list>
                     <!-- note that we need to explicitly identify the fields to select, otherwise the query will include fields that can't logically be grouped -->
                     <select-field field-name="productId"/>
@@ -328,95 +290,6 @@ under the License.
                 <platform-specific>
                     <xsl-fo><html-template location="component://order/webapp/ordermgr/reports/PurchasesByOrganizationReport.fo.ftl"/></xsl-fo>
                 </platform-specific>
-            </widgets>
-        </section>
-    </screen>
-    
-    <screen name="SalesOrderReport">
-        <section>
-            <actions>
-                <entity-condition entity-name="SalesOrderItemStarSchema" list="SalesReportList">
-                    <condition-list combine="and">
-                        <condition-expr field-name="orderDate" operator="greater-equals" from-field="parameters.fromOrderDate" ignore-if-null="true"/>
-                        <condition-expr field-name="orderDate" operator="less" from-field="parameters.thruOrderDate" ignore-if-null="true"/>
-                    </condition-list>
-                </entity-condition>
-            </actions>
-            <widgets>
-                <platform-specific>
-                    <xml><html-template location="component://order/webapp/ordermgr/reports/SalesReport.rptdesign"/></xml>
-                </platform-specific>
-            </widgets>
-        </section>
-    </screen>
-
-    <screen name="NetBeforeOverheadOrderReport">
-        <section>
-            <widgets>
-                <platform-specific>
-                    <xml><html-template location="component://order/webapp/ordermgr/reports/NetBeforeOverheadReport.rptdesign"/></xml>
-                </platform-specific>
-            </widgets>
-        </section>
-    </screen>
-    
-    <screen name="ProductDemandOrderReport ">
-        <section>
-            <widgets>
-                <platform-specific>
-                    <xml><html-template location="component://order/webapp/ordermgr/reports/ProductDemandReport.rptdesign"/></xml>
-                </platform-specific>
-            </widgets>
-        </section>
-    </screen>
-    
-    <!-- Sale Order By Referrer -->
-    <screen name="SaleOrdersByReferrerReport">
-        <section>
-            <widgets>
-                <screenlet title="Sale Orders by Referrer Report">
-                    <include-form name="OrderByReferrer" location="component://order/widget/ordermgr/ReportForms.xml"/>
-                </screenlet>
-            </widgets>
-        </section>
-    </screen>
-    <!-- Sale Order By Channel -->
-    <screen name="SaleOrdersByChannelReport">
-        <section>
-            <widgets>
-                <screenlet title="Sale Orders By Channel Report">
-                    <include-form name="SaleOrdersByChannel" location="component://order/widget/ordermgr/ReportForms.xml"/>
-                </screenlet>
-            </widgets>
-        </section>
-    </screen>
-    <!-- Sale Order with Discount Code -->
-    <screen name="SaleOrderDiscountCodeReport">
-        <section>
-            <widgets>
-                <screenlet title="Sale Orders Discount Code Report">
-                    <include-form name="SaleOrderDiscountCode" location="component://order/widget/ordermgr/ReportForms.xml"/>
-                </screenlet>
-            </widgets>
-        </section>
-    </screen>
-    <!-- Last Three Months Sales Report -->
-    <screen name="Last3MonthsSalesReport">
-        <section>
-            <widgets>
-                <screenlet title="Last Three Months Sales Report">
-                    <include-form name="Last3MonthsSalesReport" location="component://order/widget/ordermgr/ReportForms.xml"/>
-                </screenlet>
-            </widgets>
-        </section>
-    </screen>
-    <!-- Coupon Sales Report -->
-    <screen name="CouponSalesReport">
-        <section>
-            <widgets>
-                <screenlet title="Coupon Sales Report">
-                    <include-form name="CouponSalesReport" location="component://order/widget/ordermgr/ReportForms.xml"/>
-                </screenlet>
             </widgets>
         </section>
     </screen>

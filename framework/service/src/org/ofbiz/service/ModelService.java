@@ -59,6 +59,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javolution.util.FastList;
 import javolution.util.FastMap;
 
+import org.ofbiz.base.metrics.Metrics;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.GeneralException;
 import org.ofbiz.base.util.ObjectType;
@@ -178,6 +179,9 @@ public class ModelService extends AbstractMap<String, Object> implements Seriali
     /** Semaphore sleep time (in milliseconds) */
     public int semaphoreSleep;
 
+    /** Require a new transaction for this service */
+    public boolean hideResultInLog;
+    
     /** Set of services this service implements */
     public Set<ModelServiceIface> implServices = new LinkedHashSet<ModelServiceIface>();
 
@@ -202,7 +206,10 @@ public class ModelService extends AbstractMap<String, Object> implements Seriali
     /** Flag to say if we have pulled in our addition parameters from our implemented service(s) */
     protected boolean inheritedParameters = false;
 
-    public GenericInvoker invoker;
+    /**
+     * Service metrics.
+     */
+    public Metrics metrics = null;
 
     public ModelService() {}
 
@@ -229,10 +236,8 @@ public class ModelService extends AbstractMap<String, Object> implements Seriali
         this.overrideParameters = model.overrideParameters;
         this.inheritedParameters = model.inheritedParameters();
         this.internalGroup = model.internalGroup;
-        if (model.invoker != null) {
-            this.invoker = model.invoker.copy(this);
-        }
-
+        this.hideResultInLog = model.hideResultInLog;
+        this.metrics = model.metrics;
         List<ModelParam> modelParamList = model.getModelParamList();
         for (ModelParam param: modelParamList) {
             this.addParamClone(param);
@@ -348,6 +353,7 @@ public class ModelService extends AbstractMap<String, Object> implements Seriali
         buf.append(contextInfo).append("::");
         buf.append(contextParamList).append("::");
         buf.append(inheritedParameters).append("::");
+        buf.append(hideResultInLog).append("::");
         return buf.toString();
     }
 
@@ -569,18 +575,12 @@ public class ModelService extends AbstractMap<String, Object> implements Seriali
         // required and type validation complete, do allow-html validation
         if ("IN".equals(mode)) {
             List<String> errorMessageList = FastList.newInstance();
-            for (ModelParam modelParam: this.contextInfo.values()) {
-                if (context.get(modelParam.name) != null &&
-                        ("String".equals(modelParam.type) || "java.lang.String".equals(modelParam.type)) &&
-                        !"any".equals(modelParam.allowHtml) &&
-                        ("INOUT".equals(modelParam.mode) || "IN".equals(modelParam.mode))) {
-                    // the param is a String, allow-html is none or safe, and we are looking at an IN parameter during input parameter validation
+            for (ModelParam modelParam : this.contextInfo.values()) {
+                // the param is a String, allow-html is not any, and we are looking at an IN parameter during input parameter validation
+                if (context.get(modelParam.name) != null && ("String".equals(modelParam.type) || "java.lang.String".equals(modelParam.type)) 
+                        && !"any".equals(modelParam.allowHtml) && ("INOUT".equals(modelParam.mode) || "IN".equals(modelParam.mode))) {
                     String value = (String) context.get(modelParam.name);
-                    if ("none".equals(modelParam.allowHtml)) {
-                        StringUtil.checkStringForHtmlStrictNone(modelParam.name, value, errorMessageList);
-                    } else if ("safe".equals(modelParam.allowHtml)) {
-                        StringUtil.checkStringForHtmlSafeOnly(modelParam.name, value, errorMessageList);
-                    }
+                    StringUtil.checkStringForHtmlStrictNone(modelParam.name, value, errorMessageList);
                 }
             }
             if (errorMessageList.size() > 0) {
@@ -1365,6 +1365,18 @@ public class ModelService extends AbstractMap<String, Object> implements Seriali
         /*--------- Standard Objects --------*/
         /*-----------------------------------*/
 
+        /* null Element */
+        Element stdNullElement = document.createElement("xsd:element");
+        stdNullElement.setAttribute("name", "null");
+        stdNullElement.setAttribute("nillable", "true");
+        Element stdNullElement0 = document.createElement("xsd:complexType");
+        stdNullElement.appendChild(stdNullElement0);
+        Element stdNullElement1 = document.createElement("xsd:attribute");
+        stdNullElement0.appendChild(stdNullElement1);
+        stdNullElement1.setAttribute("name", "value");
+        stdNullElement1.setAttribute("type", "xsd:string");
+        stdNullElement1.setAttribute("use", "required");
+        schema.appendChild(stdNullElement);
         /* std-String Element */
         Element stdStringElement = document.createElement("xsd:element");
         stdStringElement.setAttribute("name", "std-String");
@@ -1442,6 +1454,17 @@ public class ModelService extends AbstractMap<String, Object> implements Seriali
         stdLocaleElement1.setAttribute("type", "xsd:string");
         stdLocaleElement1.setAttribute("use", "required");
         schema.appendChild(stdLocaleElement);
+        /* std-BigDecimal Element */
+        Element stdBigDecimalElement = document.createElement("xsd:element");
+        stdBigDecimalElement.setAttribute("name", "std-BigDecimal");
+        Element stdBigDecimalElement0 = document.createElement("xsd:complexType");
+        stdBigDecimalElement.appendChild(stdBigDecimalElement0);
+        Element stdBigDecimalElement1 = document.createElement("xsd:attribute");
+        stdBigDecimalElement0.appendChild(stdBigDecimalElement1);
+        stdBigDecimalElement1.setAttribute("name", "value");
+        stdBigDecimalElement1.setAttribute("type", "xsd:decimal");
+        stdBigDecimalElement1.setAttribute("use", "required");
+        schema.appendChild(stdBigDecimalElement);
 
         /*-----------------------------------*/
         /*----------- SQL Objects -----------*/
@@ -1602,7 +1625,7 @@ public class ModelService extends AbstractMap<String, Object> implements Seriali
         cusObjElement.appendChild(cusObjElement0);
         Element cusObjElement1 = document.createElement("xsd:documentation");
         cusObjElement0.appendChild(cusObjElement1);
-        cusObjElement1.setTextContent("Object content need to be in CDATA such as <cus-obj><![CDATA[--byteHex--]]></cus-obj>");
+        cusObjElement1.setTextContent("Object content is hex encoded so does not need to be in a CDATA block.");
         schema.appendChild(cusObjElement);
 
         /*-----------------------------------*/
@@ -1652,6 +1675,11 @@ public class ModelService extends AbstractMap<String, Object> implements Seriali
         mapValueComplexType.setAttribute("name", "map-Value");
         Element mapValueComplexType0 = document.createElement("xsd:choice");
         mapValueComplexType.appendChild(mapValueComplexType0);
+        Element mapValueComplexTypeNull = document.createElement("xsd:element");
+        mapValueComplexTypeNull.setAttribute("ref", "tns:null");
+        mapValueComplexTypeNull.setAttribute("minOccurs", "1");
+        mapValueComplexTypeNull.setAttribute("maxOccurs", "1");
+        mapValueComplexType0.appendChild(mapValueComplexTypeNull);
         Element mapValueComplexType1 = document.createElement("xsd:element");
         mapValueComplexType1.setAttribute("ref", "tns:std-String");
         mapValueComplexType1.setAttribute("minOccurs", "1");
@@ -1778,12 +1806,23 @@ public class ModelService extends AbstractMap<String, Object> implements Seriali
         mapValueComplexType25.setAttribute("maxOccurs", "1");
         mapValueComplexType0.appendChild(mapValueComplexType25);
         schema.appendChild(mapValueComplexType);
+        Element mapValueComplexType26 = document.createElement("xsd:element");
+        mapValueComplexType26.setAttribute("ref", "tns:std-BigDecimal");
+        mapValueComplexType26.setAttribute("minOccurs", "1");
+        mapValueComplexType26.setAttribute("maxOccurs", "1");
+        mapValueComplexType0.appendChild(mapValueComplexType26);
+        schema.appendChild(mapValueComplexType);
 
         /* col-Collection Complex Type */
         Element colCollectionComplexType = document.createElement("xsd:complexType");
         colCollectionComplexType.setAttribute("name", "col-Collection");
         Element colCollectionComplexType0 = document.createElement("xsd:choice");
         colCollectionComplexType.appendChild(colCollectionComplexType0);
+        Element colCollectionComplexTypeNull = document.createElement("xsd:element");
+        colCollectionComplexTypeNull.setAttribute("ref", "tns:null");
+        colCollectionComplexTypeNull.setAttribute("minOccurs", "0");
+        colCollectionComplexTypeNull.setAttribute("maxOccurs", "unbounded");
+        colCollectionComplexType0.appendChild(colCollectionComplexTypeNull);
         Element colCollectionComplexType1 = document.createElement("xsd:element");
         colCollectionComplexType1.setAttribute("ref", "tns:std-String");
         colCollectionComplexType1.setAttribute("minOccurs", "0");
@@ -1909,6 +1948,12 @@ public class ModelService extends AbstractMap<String, Object> implements Seriali
         colCollectionComplexType25.setAttribute("minOccurs", "0");
         colCollectionComplexType25.setAttribute("maxOccurs", "unbounded");
         colCollectionComplexType0.appendChild(colCollectionComplexType25);
+        schema.appendChild(colCollectionComplexType);
+        Element colCollectionComplexType26 = document.createElement("xsd:element");
+        colCollectionComplexType26.setAttribute("ref", "tns:std-BigDecimal");
+        colCollectionComplexType26.setAttribute("minOccurs", "0");
+        colCollectionComplexType26.setAttribute("maxOccurs", "unbounded");
+        colCollectionComplexType0.appendChild(colCollectionComplexType26);
         schema.appendChild(colCollectionComplexType);
 
         types.setDocumentationElement(schema);

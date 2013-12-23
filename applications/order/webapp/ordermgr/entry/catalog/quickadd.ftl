@@ -29,7 +29,7 @@ under the License.
             <option value='${productCategory.productCategoryId}'>${productCategory.categoryName?if_exists}</option>
             <option value='${productCategory.productCategoryId}'>--</option>
             <#list quickAddCats as quickAddCatalogId>
-              <#assign loopCategory = delegator.findByPrimaryKeyCache("ProductCategory", Static["org.ofbiz.base.util.UtilMisc"].toMap("productCategoryId", quickAddCatalogId))>
+              <#assign loopCategory = delegator.findOne("ProductCategory", Static["org.ofbiz.base.util.UtilMisc"].toMap("productCategoryId", quickAddCatalogId), true)>
               <#if loopCategory?has_content>
                 <option value='${quickAddCatalogId}'>${loopCategory.categoryName?if_exists}</option>
               </#if>
@@ -45,7 +45,7 @@ under the License.
         <td valign="top" width="0" colspan='2'>
           <div>
             <#if productCategory.categoryImageUrl?exists>
-              <img src="<@ofbizContentUrl>${productCategory.categoryImageUrl}</@ofbizContentUrl>" vspace="5" hspace="5" border="1" height='100' alt="" />
+              <img src="<@ofbizContentUrl>${productCategory.categoryImageUrl}</@ofbizContentUrl>" vspace="5" hspace="5" class="cssImgLarge" alt="" />
             </#if>
             ${productCategory.longDescription?if_exists}
           </div>
@@ -65,7 +65,7 @@ under the License.
     </div>
     <div class="quickaddtable">
       <#list productCategoryMembers as productCategoryMember>
-        <#assign product = productCategoryMember.getRelatedOneCache("Product")>
+        <#assign product = productCategoryMember.getRelatedOne("Product", true)>
         <p>
             ${setRequestAttribute("optProductId", productCategoryMember.productId)}
             ${screens.render(quickaddsummaryScreen)}

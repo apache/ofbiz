@@ -20,7 +20,6 @@ package org.ofbiz.order.shoppinglist;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -58,6 +57,7 @@ import org.ofbiz.service.GenericServiceException;
 import org.ofbiz.service.LocalDispatcher;
 import org.ofbiz.service.ModelService;
 import org.ofbiz.service.ServiceUtil;
+import org.ofbiz.webapp.website.WebSiteWorker;
 
 /**
  * Shopping cart events.
@@ -214,24 +214,22 @@ public class ShoppingListEvents {
         GenericValue shoppingList = null;
         List<GenericValue> shoppingListItems = null;
         try {
-            shoppingList = delegator.findByPrimaryKey("ShoppingList", UtilMisc.toMap("shoppingListId", shoppingListId));
+            shoppingList = delegator.findOne("ShoppingList", UtilMisc.toMap("shoppingListId", shoppingListId), false);
             if (shoppingList == null) {
                 errMsg = UtilProperties.getMessage(resource_error,"shoppinglistevents.error_getting_shopping_list_and_items", cart.getLocale());
                 throw new IllegalArgumentException(errMsg);
             }
 
-            shoppingListItems = shoppingList.getRelated("ShoppingListItem");
+            shoppingListItems = shoppingList.getRelated("ShoppingListItem", null, null, false);
             if (shoppingListItems == null) {
                 shoppingListItems = FastList.newInstance();
             }
 
             // include all items of child lists if flagged to do so
             if (includeChild) {
-                List<GenericValue> childShoppingLists = shoppingList.getRelated("ChildShoppingList");
-                Iterator<GenericValue> ci = childShoppingLists.iterator();
-                while (ci.hasNext()) {
-                    GenericValue v = ci.next();
-                    List<GenericValue> items = v.getRelated("ShoppingListItem");
+                List<GenericValue> childShoppingLists = shoppingList.getRelated("ChildShoppingList", null, null, false);
+                for (GenericValue v : childShoppingLists) {
+                    List<GenericValue> items = v.getRelated("ShoppingListItem", null, null, false);
                     shoppingListItems.addAll(items);
                 }
             }
@@ -260,9 +258,7 @@ public class ShoppingListEvents {
 
         // add the items
         StringBuilder eventMessage = new StringBuilder();
-        Iterator<GenericValue> i = shoppingListItems.iterator();
-        while (i.hasNext()) {
-            GenericValue shoppingListItem = i.next();
+        for (GenericValue shoppingListItem : shoppingListItems) {
             String productId = shoppingListItem.getString("productId");
             BigDecimal quantity = shoppingListItem.getBigDecimal("quantity");
             Timestamp reservStart = shoppingListItem.getTimestamp("reservStart");
@@ -376,7 +372,7 @@ public class ShoppingListEvents {
         // TODO: add sorting, just in case there are multiple...
         if (partyId != null) {
             Map<String, Object> findMap = UtilMisc.<String, Object>toMap("partyId", partyId, "productStoreId", productStoreId, "shoppingListTypeId", "SLT_SPEC_PURP", "listName", PERSISTANT_LIST_NAME);
-            List<GenericValue> existingLists = delegator.findByAnd("ShoppingList", findMap);
+            List<GenericValue> existingLists = delegator.findByAnd("ShoppingList", findMap, null, false);
             Debug.logInfo("Finding existing auto-save shopping list with:  \nfindMap: " + findMap + "\nlists: " + existingLists, module);
     
             if (UtilValidate.isNotEmpty(existingLists)) {
@@ -408,10 +404,10 @@ public class ShoppingListEvents {
                 autoSaveListId = getAutoSaveListId(delegator, dispatcher, null, userLogin, cart.getProductStoreId());
                 cart.setAutoSaveListId(autoSaveListId);
             }
-            GenericValue shoppingList = delegator.findByPrimaryKey("ShoppingList", UtilMisc.toMap("shoppingListId", autoSaveListId));
+            GenericValue shoppingList = delegator.findOne("ShoppingList", UtilMisc.toMap("shoppingListId", autoSaveListId), false);
             Integer currentListSize = 0;
             if (UtilValidate.isNotEmpty(shoppingList)) {
-                List<GenericValue> shoppingListItems = shoppingList.getRelated("ShoppingListItem");
+                List<GenericValue> shoppingListItems = shoppingList.getRelated("ShoppingListItem", null, null, false);
                 if (UtilValidate.isNotEmpty(shoppingListItems)) {
                     currentListSize = shoppingListItems.size();
                 }
@@ -464,7 +460,7 @@ public class ShoppingListEvents {
 
         // safety check for missing required parameter.
         if (cart.getWebSiteId() == null) {
-            cart.setWebSiteId(CatalogWorker.getWebSiteId(request));
+            cart.setWebSiteId(WebSiteWorker.getWebSiteId(request));
         }
 
         // locate the user's identity
@@ -509,7 +505,7 @@ public class ShoppingListEvents {
         if (!okayToLoad && lastLoad != null) {
             GenericValue shoppingList = null;
             try {
-                shoppingList = delegator.findByPrimaryKey("ShoppingList", UtilMisc.toMap("shoppingListId", autoSaveListId));
+                shoppingList = delegator.findOne("ShoppingList", UtilMisc.toMap("shoppingListId", autoSaveListId), false);
             } catch (GenericEntityException e) {
                 Debug.logError(e, module);
             }
@@ -556,10 +552,8 @@ public class ShoppingListEvents {
      */
     public static int makeListItemSurveyResp(Delegator delegator, GenericValue item, List<String> surveyResps) throws GenericEntityException {
         if (UtilValidate.isNotEmpty(surveyResps)) {
-            Iterator<String> i = surveyResps.iterator();
             int count = 0;
-            while (i.hasNext()) {
-                String responseId = i.next();
+            for (String responseId : surveyResps) {
                 GenericValue listResp = delegator.makeValue("ShoppingListItemSurvey");
                 listResp.set("shoppingListId", item.getString("shoppingListId"));
                 listResp.set("shoppingListItemSeqId", item.getString("shoppingListItemSeqId"));
@@ -578,9 +572,7 @@ public class ShoppingListEvents {
     public static Map<String, List<String>> getItemSurveyInfos(List<GenericValue> items) {
         Map<String, List<String>> surveyInfos = FastMap.newInstance();
         if (UtilValidate.isNotEmpty(items)) {
-            Iterator<GenericValue> itemIt = items.iterator();
-            while (itemIt.hasNext()) {
-                GenericValue item = itemIt.next();
+            for (GenericValue item : items) {
                 String listId = item.getString("shoppingListId");
                 String itemId = item.getString("shoppingListItemSeqId");
                 surveyInfos.put(listId + "." + itemId, getItemSurveyInfo(item));
@@ -597,15 +589,13 @@ public class ShoppingListEvents {
         List<String> responseIds = FastList.newInstance();
         List<GenericValue> surveyResp = null;
         try {
-            surveyResp = item.getRelated("ShoppingListItemSurvey");
+            surveyResp = item.getRelated("ShoppingListItemSurvey", null, null, false);
         } catch (GenericEntityException e) {
             Debug.logError(e, module);
         }
 
         if (UtilValidate.isNotEmpty(surveyResp)) {
-            Iterator<GenericValue> respIt = surveyResp.iterator();
-            while (respIt.hasNext()) {
-                GenericValue resp = respIt.next();
+            for (GenericValue resp : surveyResp) {
                 responseIds.add(resp.getString("surveyResponseId"));
             }
         }
@@ -640,7 +630,7 @@ public class ShoppingListEvents {
         ShoppingCart cart = (ShoppingCart) session.getAttribute("shoppingCart");
         GenericValue userLogin = (GenericValue) session.getAttribute("userLogin");
         Properties systemProps = System.getProperties();
-        String guestShoppingUserName = "GuestShoppingListId_" + systemProps.getProperty("user.name");
+        String guestShoppingUserName = "GuestShoppingListId_" + systemProps.getProperty("user.name").replace(" ", "_");
         String productStoreId = ProductStoreWorker.getProductStoreId(request);
         int cookieAge = (60 * 60 * 24 * 30);
         String autoSaveListId = null;
@@ -698,7 +688,7 @@ public class ShoppingListEvents {
      */
     public static String clearGuestShoppingListCookies (HttpServletRequest request, HttpServletResponse response){
         Properties systemProps = System.getProperties();
-        String guestShoppingUserName = "GuestShoppingListId_" + systemProps.getProperty("user.name");
+        String guestShoppingUserName = "GuestShoppingListId_" + systemProps.getProperty("user.name").replace(" ", "_");
         Cookie guestShoppingListCookie = new Cookie(guestShoppingUserName, null);
         guestShoppingListCookie.setMaxAge(0);
         guestShoppingListCookie.setPath("/");

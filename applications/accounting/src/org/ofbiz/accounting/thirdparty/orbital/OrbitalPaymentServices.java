@@ -127,7 +127,7 @@ public class OrbitalPaymentServices {
         GenericValue orderPaymentPreference = (GenericValue) context.get("orderPaymentPreference");
         GenericValue creditCard = null;
         try {
-            creditCard = delegator.getRelatedOne("CreditCard",orderPaymentPreference);
+            creditCard = orderPaymentPreference.getRelatedOne("CreditCard", false);
         } catch (GenericEntityException e) {
             Debug.logError(e, module);
             return ServiceUtil.returnError(UtilProperties.getMessage(resource, 
@@ -173,7 +173,7 @@ public class OrbitalPaymentServices {
         GenericValue orderPaymentPreference = (GenericValue) context.get("orderPaymentPreference");
         GenericValue creditCard = null;
         try {
-            creditCard = delegator.getRelatedOne("CreditCard",orderPaymentPreference);
+            creditCard = orderPaymentPreference.getRelatedOne("CreditCard", false);
         } catch (GenericEntityException e) {
             Debug.logError(e, module);
             return ServiceUtil.returnError(UtilProperties.getMessage(resource, 
@@ -218,7 +218,7 @@ public class OrbitalPaymentServices {
 
         GenericValue orderPaymentPreference = (GenericValue) context.get("orderPaymentPreference");
         try {
-            delegator.getRelatedOne("CreditCard",orderPaymentPreference);
+            orderPaymentPreference.getRelatedOne("CreditCard", false);
         } catch (GenericEntityException e) {
             Debug.logError(e, module);
             return ServiceUtil.returnError(UtilProperties.getMessage(resource, 
@@ -339,13 +339,13 @@ public class OrbitalPaymentServices {
                     // sometimes the ccAuthCapture interface is used, in which case the creditCard is passed directly
                      creditCard = (GenericValue) params.get("creditCard");
                     if (creditCard == null || ! (opp.get("paymentMethodId").equals(creditCard.get("paymentMethodId")))) {
-                        creditCard = opp.getRelatedOne("CreditCard");
+                        creditCard = opp.getRelatedOne("CreditCard", false);
                     }
                 }
 
                 request.setFieldValue("AVSname", "Demo Customer");
                 if (UtilValidate.isNotEmpty(creditCard.getString("contactMechId"))) {
-                    GenericValue address = creditCard.getRelatedOne("PostalAddress");
+                    GenericValue address = creditCard.getRelatedOne("PostalAddress", false);
                     if (address != null) {
                         request.setFieldValue("AVSaddress1", UtilFormatOut.checkNull(address.getString("address1")));
                         request.setFieldValue("AVScity", UtilFormatOut.checkNull(address.getString("city")));
@@ -372,9 +372,9 @@ public class OrbitalPaymentServices {
 
             //Display the request
             if ("AUTH_ONLY".equals(transType)) {
-                Debug.log("\nAuth Request:\n ======== " + request.getXML());
+                Debug.logInfo("\nAuth Request:\n ======== " + request.getXML());
             } else if ("AUTH_CAPTURE".equals(transType)) {
-                Debug.log("\nAuth Capture Request:\n ======== " + request.getXML());
+                Debug.logInfo("\nAuth Capture Request:\n ======== " + request.getXML());
             }
             results.put("processAmount", amount);
         } catch (InitializationException ie) {
@@ -403,7 +403,7 @@ public class OrbitalPaymentServices {
 
             request.setFieldValue("PCDestName", UtilFormatOut.checkNull(creditCard.getString("firstNameOnCard") + creditCard.getString("lastNameOnCard")));
             if (UtilValidate.isNotEmpty(creditCard.getString("contactMechId"))) {
-                GenericValue address = creditCard.getRelatedOne("PostalAddress");
+                GenericValue address = creditCard.getRelatedOne("PostalAddress", false);
                 if (address != null) {
                     request.setFieldValue("PCOrderNum", UtilFormatOut.checkNull(orderId));
                     request.setFieldValue("PCDestAddress1", UtilFormatOut.checkNull(address.getString("address1")));
@@ -414,7 +414,7 @@ public class OrbitalPaymentServices {
                 }
             }
             //Display the request
-            Debug.log("\nCapture Request:\n ======== " + request.getXML());
+            Debug.logInfo("\nCapture Request:\n ======== " + request.getXML());
             results.put("captureAmount", amount);
         } catch (InitializationException ie) {
             Debug.logInfo("Unable to initialize request object", module);
@@ -446,7 +446,7 @@ public class OrbitalPaymentServices {
             request.setFieldValue("Exp", UtilFormatOut.checkNull(expDate));
             request.setFieldValue("Comments", "This is a credit card refund");
 
-            Debug.log("\nRefund Request:\n ======== " + request.getXML());
+            Debug.logInfo("\nRefund Request:\n ======== " + request.getXML());
             results.put("refundAmount", amount);
         } catch (InitializationException ie) {
             Debug.logInfo("Unable to initialize request object", module);
@@ -470,7 +470,7 @@ public class OrbitalPaymentServices {
             request.setFieldValue("OrderID", UtilFormatOut.checkNull(orderId));
 
             //Display the request
-            Debug.log("\nRelease Request:\n ======== " + request.getXML());
+            Debug.logInfo("\nRelease Request:\n ======== " + request.getXML());
             results.put("releaseAmount", amount);
         } catch (InitializationException ie) {
             Debug.logInfo("Unable to initialize request object", module);
@@ -631,10 +631,10 @@ public class OrbitalPaymentServices {
         String shippingRef = "";
         try {
             GenericValue orderHeader = delegator.findOne("OrderHeader", false, UtilMisc.toMap("orderId", orderId));
-            GenericValue trackingCodeOrder = EntityUtil.getFirst(orderHeader.getRelated("TrackingCodeOrder"));
+            GenericValue trackingCodeOrder = EntityUtil.getFirst(orderHeader.getRelated("TrackingCodeOrder", null, null, false));
             GenericValue trackingCode = null;
             if (UtilValidate.isNotEmpty(trackingCodeOrder)) {
-                trackingCode = trackingCodeOrder.getRelatedOne("TrackingCode");
+                trackingCode = trackingCodeOrder.getRelatedOne("TrackingCode", false);
             }
             if (UtilValidate.isNotEmpty(trackingCode) && UtilValidate.isNotEmpty(trackingCode.getString("description"))) {
                 // get tracking code description and provide it into shipping reference.

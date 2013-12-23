@@ -35,10 +35,10 @@ under the License.
         </tr>
         <#list workEffortSurveyAppls as workEffortSurveyAppl>
           <#if workEffortSurveyAppl?has_content>
-            <#assign productStoreSurveyAppls = workEffortSurveyAppl.getRelated("ProductStoreSurveyAppl")>
+            <#assign productStoreSurveyAppls = workEffortSurveyAppl.getRelated("ProductStoreSurveyAppl", null, null, false)>
             <#list productStoreSurveyAppls as productStoreSurveyAppl>
               <#if productStoreSurveyAppl?has_content>
-                <#assign survey = productStoreSurveyAppl.getRelatedOne("Survey")>
+                <#assign survey = productStoreSurveyAppl.getRelatedOne("Survey", false)>
                 <tr>
                   <form method="post" action="<@ofbizUrl>updateWorkEffortSurveyAppl</@ofbizUrl>" name="editWorkEffortSurveyAppl_${workEffortSurveyAppl_index}">
                   <td><a href="/content/control/EditSurvey?surveyId=${workEffortSurveyAppl.surveyId?if_exists}" class="buttontext">${workEffortSurveyAppl.surveyId?if_exists} - ${survey.surveyName?if_exists}</a></td>

@@ -2165,6 +2165,30 @@ height: 1px;
     padding-top: 4px;
 }
 
+img.cssImgXLarge {
+	/*border: 1px black solid;*/
+	max-width: 200px;
+	max-height: 150px;
+}
+
+img.cssImgLarge {
+	/*border: 1px black solid;*/
+	max-width: 100px;
+	max-height: 75px;
+}
+
+img.cssImgStandard {
+	/*border: 1px black solid;*/
+	max-width: 70px;
+	max-height: 52px;
+}
+
+img.cssImgSmall {
+	/*border: 1px black solid;*/
+	max-width: 50px;
+	max-height: 37px;
+}
+
 /* ========================================================== */
 /* ===== JavaScript jQuery widgets                      ===== */
 /* ========================================================== */
@@ -2532,6 +2556,7 @@ height: 1px;
  *
  * http://docs.jquery.com/UI/Menu#theming
  */
+.ui-autocomplete-loading { background: white url('images/ui-anim_basic_16x16.gif') right center no-repeat !important; }
 .ui-menu {
     list-style:none;
     padding: 2px;
@@ -2717,14 +2742,12 @@ height:22px;
 }
 
 /* css for timepicker */
-.ui-timepicker-div .ui-widget-header{ margin-bottom: 8px; }
-.ui-timepicker-div dl{ text-align: left; }
-.ui-timepicker-div dl dt{ height: 25px; }
-.ui-timepicker-div dl dd{ margin: -25px 0 10px 65px; }
-.ui-timepicker-div .ui_tpicker_hour div { padding-right: 2px; }
-.ui-timepicker-div .ui_tpicker_minute div { padding-right: 6px; }
-.ui-timepicker-div .ui_tpicker_second div { padding-right: 6px; }
+.ui-timepicker-div .ui-widget-header { margin-bottom: 8px; }
+.ui-timepicker-div dl { text-align: left; }
+.ui-timepicker-div dl dt { height: 25px; margin-bottom: -25px; }
+.ui-timepicker-div dl dd { margin: 0 10px 10px 65px; }
 .ui-timepicker-div td { font-size: 90%; }
+.ui-tpicker-grid-label { background: none; border: none; margin: 0; padding: 0; }
 
 /* RTL support */
 .ui-datepicker-rtl { direction: rtl; }
@@ -2744,8 +2767,9 @@ z-index:50000;
 position:absolute;
 }
 #wait-spinner-image {
-height:21px;
-width:56px;
+height:45px;
+width:45px;
+background-repeat: no-repeat;
 background-image:url(/images/spinner.gif);
 }
 
@@ -2818,4 +2842,3 @@ width:10%
  */
 .ui-progressbar { height:2em; text-align: left; }
 .ui-progressbar .ui-progressbar-value {margin: -1px; height:100%; }
-

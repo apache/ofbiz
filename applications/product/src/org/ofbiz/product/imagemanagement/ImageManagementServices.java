@@ -30,7 +30,6 @@ import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -112,29 +111,7 @@ public class ImageManagementServices {
             
             String sizeType = null;
             if (UtilValidate.isNotEmpty(imageResize)) {
-                if (imageResize.equals("IMAGE_AVATAR")) {
-                    sizeType = "100x75";
-                } else if (imageResize.equals("IMAGE_THUMBNAIL")) {
-                    sizeType = "150x112";
-                }    
-                else if (imageResize.equals("IMAGE_WEBSITE")) {
-                    sizeType = "320x240";
-                }
-                else if (imageResize.equals("IMAGE_BOARD")) {
-                    sizeType = "640x480";
-                }
-                else if (imageResize.equals("IMAGE_MONITOR15")) {
-                    sizeType = "800x600";
-                }
-                else if (imageResize.equals("IMAGE_MONITOR17")) {
-                    sizeType = "1024x768";
-                }
-                else if (imageResize.equals("IMAGE_MONITOR19")) {
-                    sizeType = "1280x1024";
-                }
-                else if (imageResize.equals("IMAGE_MONITOR21")) {
-                    sizeType = "1600x1200";
-                }
+                sizeType = imageResize;
             }
             
             Map<String, Object> contentCtx = FastMap.newInstance();
@@ -150,8 +127,7 @@ public class ImageManagementServices {
             
             String contentId = (String) contentResult.get("contentId");
             result.put("contentFrameId", contentId);
-            result.put("contentId", (String) context.get("contentId"));
-            result.put("dataResourceId", (String) context.get("dataResourceId"));
+            result.put("contentId", contentId);
             
             // File to use for original image
             FlexibleStringExpander filenameExpander = FlexibleStringExpander.getInstance(imageFilenameFormat);
@@ -170,7 +146,7 @@ public class ImageManagementServices {
             
             List<GenericValue> fileExtension = FastList.newInstance();
             try {
-                fileExtension = delegator.findByAnd("FileExtension", UtilMisc.toMap("mimeTypeId", fileContentType ));
+                fileExtension = delegator.findByAnd("FileExtension", UtilMisc.toMap("mimeTypeId", fileContentType ), null, false);
             } catch (GenericEntityException e) {
                 Debug.logError(e, module);
                 return ServiceUtil.returnError(e.getMessage());
@@ -298,6 +274,20 @@ public class ImageManagementServices {
                 Debug.logError(e, module);
                 return ServiceUtil.returnError(e.getMessage());
             }
+            
+            String autoApproveImage = UtilProperties.getPropertyValue("catalog", "image.management.autoApproveImage");
+            if (autoApproveImage.equals("Y")) {
+                Map<String, Object> autoApproveCtx = FastMap.newInstance();
+                autoApproveCtx.put("contentId", contentId);
+                autoApproveCtx.put("userLogin", userLogin);
+                autoApproveCtx.put("checkStatusId", "IM_APPROVED");
+                try {
+                    dispatcher.runSync("updateStatusImageManagement", autoApproveCtx);
+                } catch (GenericServiceException e) {
+                    Debug.logError(e, module);
+                    return ServiceUtil.returnError(e.getMessage());
+                }
+            }
         }
         return result;
     }
@@ -369,8 +359,8 @@ public class ImageManagementServices {
             bufImg = (BufferedImage) resultBufImgMap.get("bufferedImage");
             
             // get Dimensions
-            imgHeight = (double) bufImg.getHeight();
-            imgWidth = (double) bufImg.getWidth();
+            imgHeight = bufImg.getHeight();
+            imgWidth = bufImg.getWidth();
             if (imgHeight == 0.0 || imgWidth == 0.0) {
                 String errMsg = UtilProperties.getMessage(resource, "ScaleImage.one_current_image_dimension_is_null", locale) + " : imgHeight = " + imgHeight + " ; imgWidth = " + imgWidth;
                 Debug.logError(errMsg, module);
@@ -379,10 +369,7 @@ public class ImageManagementServices {
             }
             
             /* scale Image for each Size Type */
-            Iterator<String> sizeIter = sizeTypeList.iterator();
-            while (sizeIter.hasNext()) {
-                String sizeType = sizeIter.next();
-                
+            for (String sizeType : sizeTypeList) {
                 resultScaleImgMap.putAll(ImageTransform.scaleImage(bufImg, imgHeight, imgWidth, imgPropertyMap, sizeType, locale));
                 
                 if (resultScaleImgMap.containsKey("responseMessage") && resultScaleImgMap.get("responseMessage").equals("success")) {
@@ -403,7 +390,7 @@ public class ImageManagementServices {
                     
                     // write new image
                     try {
-                        ImageIO.write((RenderedImage) bufNewImg, imgExtension, new File(imageServerPath + "/" + productId + "/" + filenameToUse));
+                        ImageIO.write(bufNewImg, imgExtension, new File(imageServerPath + "/" + productId + "/" + filenameToUse));
                         File deleteFile = new File(imageServerPath + "/"  + filenameToUse);
                         deleteFile.delete();
                         //FIXME can be removed ?
@@ -462,7 +449,9 @@ public class ImageManagementServices {
             return ServiceUtil.returnError(e.getMessage());
         }
         
-        result.put("dataResourceFrameId", dataResourceResult.get("dataResourceId"));
+        String dataResourceId = (String) dataResourceResult.get("dataResourceId");
+        result.put("dataResourceFrameId", dataResourceId);
+        result.put("dataResourceId", dataResourceId);
         
         Map<String, Object> contentUp = FastMap.newInstance();
         contentUp.put("contentId", contentId);
@@ -487,7 +476,7 @@ public class ImageManagementServices {
         if (content != null) {
             GenericValue dataResource = null;
             try {
-                dataResource = content.getRelatedOne("DataResource");
+                dataResource = content.getRelatedOne("DataResource", false);
             } catch (GenericEntityException e) {
                 Debug.logError(e, module);
                 return ServiceUtil.returnError(e.getMessage());
@@ -548,7 +537,7 @@ public class ImageManagementServices {
         
         List<GenericValue> fileExtensionThumb = FastList.newInstance();
         try {
-            fileExtensionThumb = delegator.findByAnd("FileExtension", UtilMisc.toMap("mimeTypeId", fileContentType));
+            fileExtensionThumb = delegator.findByAnd("FileExtension", UtilMisc.toMap("mimeTypeId", fileContentType), null, false);
         } catch (GenericEntityException e) {
             Debug.logError(e, module);
             return ServiceUtil.returnError(e.getMessage());
@@ -569,7 +558,7 @@ public class ImageManagementServices {
         
         List<GenericValue> fileExtensionThumb = FastList.newInstance();
         try {
-            fileExtensionThumb = delegator.findByAnd("FileExtension", UtilMisc.toMap("mimeTypeId", fileContentType));
+            fileExtensionThumb = delegator.findByAnd("FileExtension", UtilMisc.toMap("mimeTypeId", fileContentType), null, false);
         } catch (GenericEntityException e) {
             Debug.logError(e, module);
             return ServiceUtil.returnError(e.getMessage());
@@ -843,7 +832,7 @@ public class ImageManagementServices {
         return result;
     }
     
-    public static Map<String, Object> resizeImageOfProduct(DispatchContext dctx, Map<String, ? extends Object> context) {
+    public static Map<String, Object> createNewImageThumbnail(DispatchContext dctx, Map<String, ? extends Object> context) {
         LocalDispatcher dispatcher = dctx.getDispatcher();
         GenericValue userLogin = (GenericValue) context.get("userLogin");
         String imageServerPath = FlexibleStringExpander.expandString(UtilProperties.getPropertyValue("catalog", "image.management.path"), context);
@@ -851,7 +840,7 @@ public class ImageManagementServices {
         String productId = (String) context.get("productId");
         String contentId = (String) context.get("contentId");
         String dataResourceName = (String) context.get("dataResourceName");
-        String width = (String) context.get("resizeWidth");
+        String width = (String) context.get("sizeWidth");
         String imageType = ".jpg";
         int resizeWidth = Integer.parseInt(width);
         int resizeHeight = resizeWidth;
@@ -903,6 +892,30 @@ public class ImageManagementServices {
             Debug.logError(e, module);
             return ServiceUtil.returnError(e.getMessage());
         }
+        String successMsg = "Create new thumbnail size successful";
+        return ServiceUtil.returnSuccess(successMsg);
+    }
+    
+    public static Map<String, Object> resizeImageOfProduct(DispatchContext dctx, Map<String, ? extends Object> context) {
+        String imageServerPath = FlexibleStringExpander.expandString(UtilProperties.getPropertyValue("catalog", "image.management.path"), context);
+        String productId = (String) context.get("productId");
+        String dataResourceName = (String) context.get("dataResourceName");
+        String width = (String) context.get("resizeWidth");
+        int resizeWidth = Integer.parseInt(width);
+        int resizeHeight = resizeWidth;
+        
+        try {
+            BufferedImage bufImg = ImageIO.read(new File(imageServerPath + "/" + productId + "/" + dataResourceName));
+            double imgHeight = bufImg.getHeight();
+            double imgWidth = bufImg.getWidth();
+            String filenameToUse = dataResourceName;
+            String mimeType = dataResourceName.substring(dataResourceName.length() - 3, dataResourceName.length());
+            Map<String, Object> resultResize = ImageManagementServices.resizeImage(bufImg, imgHeight, imgWidth, resizeHeight, resizeWidth);
+            ImageIO.write((RenderedImage) resultResize.get("bufferedImage"), mimeType, new File(imageServerPath + "/" + productId + "/" + filenameToUse));
+        } catch (Exception e) {
+            Debug.logError(e, module);
+            return ServiceUtil.returnError(e.getMessage());
+        }
         String successMsg = "Resize images successful";
         return ServiceUtil.returnSuccess(successMsg);
     }
@@ -921,14 +934,14 @@ public class ImageManagementServices {
         String imageUrl = imageServerUrl + "/" + productId + "/" + filenameToUse;
         
         try {
-            List<GenericValue> productContentList = delegator.findByAnd("ProductContentAndInfo", UtilMisc.toMap("productId", productId, "contentId", contentId, "productContentTypeId", "IMAGE"));
+            List<GenericValue> productContentList = delegator.findByAnd("ProductContentAndInfo", UtilMisc.toMap("productId", productId, "contentId", contentId, "productContentTypeId", "IMAGE"), null, false);
             GenericValue productContent = EntityUtil.getFirst(productContentList);
             String dataResourceName = (String) productContent.get("drDataResourceName");
             String mimeType = filenameToUse.substring(filenameToUse.lastIndexOf("."));
             
             if (imageType.equals(mimeType)) {
                 BufferedImage bufImg = ImageIO.read(new File(imageServerPath + "/" + productId + "/" + dataResourceName));
-                ImageIO.write((RenderedImage) bufImg, imgExtension, new File(imageServerPath + "/" + productId + "/" + filenameToUse));
+                ImageIO.write(bufImg, imgExtension, new File(imageServerPath + "/" + productId + "/" + filenameToUse));
                 
                 File file = new File(imageServerPath + "/" + productId + "/" + dataResourceName);
                 file.delete();
@@ -953,7 +966,7 @@ public class ImageManagementServices {
                 if (content != null) {
                     GenericValue dataResource = null;
                     try {
-                        dataResource = content.getRelatedOne("DataResource");
+                        dataResource = content.getRelatedOne("DataResource", false);
                     } catch (GenericEntityException e) {
                         Debug.logError(e, module);
                         return ServiceUtil.returnError(e.getMessage());
@@ -974,12 +987,12 @@ public class ImageManagementServices {
                     }
                 }
                 
-                List<GenericValue> contentAssocList = delegator.findByAnd("ContentAssoc", UtilMisc.toMap("contentId", contentId, "contentAssocTypeId", "IMAGE_THUMBNAIL"));
+                List<GenericValue> contentAssocList = delegator.findByAnd("ContentAssoc", UtilMisc.toMap("contentId", contentId, "contentAssocTypeId", "IMAGE_THUMBNAIL"), null, false);
                 if (contentAssocList.size() > 0) {
                     for (int i = 0; i < contentAssocList.size(); i++) {
                         GenericValue contentAssoc = contentAssocList.get(i);
                         
-                        List<GenericValue> dataResourceAssocList = delegator.findByAnd("ContentDataResourceView", UtilMisc.toMap("contentId", contentAssoc.get("contentIdTo")));
+                        List<GenericValue> dataResourceAssocList = delegator.findByAnd("ContentDataResourceView", UtilMisc.toMap("contentId", contentAssoc.get("contentIdTo")), null, false);
                         GenericValue dataResourceAssoc = EntityUtil.getFirst(dataResourceAssocList);
                         
                         String drDataResourceNameAssoc = (String) dataResourceAssoc.get("drDataResourceName");
@@ -987,7 +1000,7 @@ public class ImageManagementServices {
                         String imageUrlAssoc = imageServerUrl + "/" + productId + "/" + filenameToUseAssoc;
                         
                         BufferedImage bufImgAssoc = ImageIO.read(new File(imageServerPath + "/" + productId + "/" + drDataResourceNameAssoc));
-                        ImageIO.write((RenderedImage) bufImgAssoc, imgExtension, new File(imageServerPath + "/" + productId + "/" + filenameToUseAssoc));
+                        ImageIO.write(bufImgAssoc, imgExtension, new File(imageServerPath + "/" + productId + "/" + filenameToUseAssoc));
                         
                         File fileAssoc = new File(imageServerPath + "/" + productId + "/" + drDataResourceNameAssoc);
                         fileAssoc.delete();
@@ -1012,7 +1025,7 @@ public class ImageManagementServices {
                         if (contentAssocUp != null) {
                             GenericValue dataResourceAssocUp = null;
                             try {
-                                dataResourceAssocUp = contentAssocUp.getRelatedOne("DataResource");
+                                dataResourceAssocUp = contentAssocUp.getRelatedOne("DataResource", false);
                             } catch (GenericEntityException e) {
                                 Debug.logError(e, module);
                                 return ServiceUtil.returnError(e.getMessage());

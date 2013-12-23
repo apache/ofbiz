@@ -90,20 +90,46 @@ under the License.
             </widgets>
         </section>
     </screen>
+    <!-- decorator used in creating a response to an ajax request -->
+    <screen name="AjaxGlobalDecorator">
+        <section>
+            <actions>
+                <property-map resource="CommonUiLabels" map-name="uiLabelMap" global="true" />
+            </actions>
+            <widgets>
+                <platform-specific>
+                    <html>
+                        <html-template location="component://common/webcommon/includes/htmlheader-for-ajax.ftl" />
+                    </html>
+                </platform-specific>
+                <decorator-section-include name="body" />
+                <platform-specific>
+                    <html>
+                        <html-template location="component://common/webcommon/includes/htmlfooter-for-ajax.ftl" />
+                    </html>
+                </platform-specific>
+            </widgets>
+        </section>
+    </screen>
     <!--
         The following screen is used to generate Ajax list of options for autocomplete fields
     -->
     <screen name="ajaxAutocompleteOptions">
         <section>
             <actions>
-                <set field="autocompleteOptions" from-field="parameters.autocompleteOptions"/>
+                <set field="autocompleteOptions" from-field="parameters.autocompleteOptions" />
             </actions>
             <widgets>
-                <platform-specific><html><html-template location="component://common/webcommon/includes/ajaxAutocompleteOptions.ftl"/></html></platform-specific>
+                <decorator-screen name="AjaxGlobalDecorator">
+                    <decorator-section name="body">
+                        <platform-specific>
+                            <html><html-template location="component://common/webcommon/includes/ajaxAutocompleteOptions.ftl" /></html>
+                        </platform-specific>
+                    </decorator-section>
+                </decorator-screen>
             </widgets>
         </section>
     </screen>
-
     <!-- Global screen rendering context initialization, intended to be included in screen decorators. Devs - please keep this simple and generic. -->
     <screen name="GlobalActions">
         <section>
@@ -117,21 +143,22 @@ under the License.
                 <set field="layoutSettings.javaScripts[+0]" value="${groovy: org.ofbiz.common.JsLanguageFilesMapping.validation.getFilePath(initialLocaleComplete)}" global="true" />
                 <set field="layoutSettings.javaScripts[+0]" value="${groovy: org.ofbiz.common.JsLanguageFilesMapping.dateTime.getFilePath(initialLocaleComplete)}" global="true" />
                 <set field="layoutSettings.javaScripts[+0]" value="/images/jquery/plugins/asmselect/jquery.asmselect-1.0.4a-beta.js" global="true" />
-                <set field="layoutSettings.javaScripts[+0]" value="/images/jquery/plugins/datetimepicker/jquery-ui-timepicker-addon-0.9.7.js" global="true" />
+                <set field="layoutSettings.javaScripts[+0]" value="/images/jquery/plugins/datetimepicker/jquery-ui-timepicker-addon-1.0.5.js" global="true" />
                 <set field="layoutSettings.javaScripts[+0]" value="/images/jquery/plugins/jquery.maskedinput-1.2.2.min.js" global="true" />
-                <set field="layoutSettings.javaScripts[+0]" value="/images/jquery/ui/js/jquery-ui-1.8.16.custom.min.js" global="true" />
+                <set field="layoutSettings.javaScripts[+0]" value="/images/jquery/ui/js/jquery-ui-1.9.0.custom.min.js" global="true" />
                 <set field="layoutSettings.javaScripts[+0]" value="/images/jquery/plugins/jeditable/jquery.jeditable.js" global="true" />
                 <set field="layoutSettings.javaScripts[+0]" value="/images/jquery/plugins/validate/jquery.validate.min.js" global="true" />
                 <set field="layoutSettings.javaScripts[+0]" value="/images/jquery/plugins/fjTimer/jquerytimer-min.js" global="true" />
                 <set field="layoutSettings.javaScripts[+0]" value="/images/jquery/ui/development-bundle/ui/jquery.ui.datepicker.js" global="true" />
-                <set field="layoutSettings.javaScripts[+0]" value="/images/jquery/jquery-1.7.min.js" global="true" />
+                <set field="layoutSettings.javaScripts[+0]" value="/images/jquery/jquery-1.8.2.min.js" global="true" />
                 <!-- jQuery CSSs -->
                 <set field="layoutSettings.styleSheets[+0]" value="/images/jquery/plugins/asmselect/jquery.asmselect-1.0.4a-beta.css" global="true" />
-                <set field="layoutSettings.styleSheets[+0]" value="/images/jquery/plugins/datetimepicker/jquery-ui-timepicker-addon-0.9.6.css" global="true" />
                 <set field="layoutSettings.javaScripts[]" value="/images/selectall.js" global="true" />
                 <set field="layoutSettings.javaScripts[]" value="/images/fieldlookup.js" global="true" />
                 <set field="layoutSettings.javaScripts[]" value="/images/GooglemapMarkers.js" global="true" />
-                <set field="layoutSettings.javaScripts[]" value="/images/getDependentDropdownValues.js" global="true" />
+                <set field="layoutSettings.javaScripts[]" value="/images/date/date.format-1.2.3-min.js" global="true" />
+                <set field="layoutSettings.javaScripts[]" value="/images/date/date.timezone-min.js" global="true" />
+                <set field="layoutSettings.javaScripts[]" value="/images/miscAjaxFunctions.js" global="true" />
                 <set field="layoutSettings.javaScripts[]" value="/images/selectMultipleRelatedValues.js" global="true" />
                 <set field="visualThemeId" from-field="userPreferences.VISUAL_THEME" global="true" />
                 <service service-name="getVisualThemeResources">
@@ -159,6 +186,7 @@ under the License.
                         <set field="appbarOpenTemplateLocation" from-field="layoutSettings.VT_NAV_OPEN_TMPLT[0]" />
                         <set field="appbarCloseTemplateLocation" from-field="layoutSettings.VT_NAV_CLOSE_TMPLT[0]" />
                         <set field="messagesTemplateLocation" from-field="layoutSettings.VT_MSG_TMPLT_LOC[0]" />
+                        <set field="layoutSettings.suppressTab" value="ofbizsetup"/><!-- diseable ofbiz setup by default -->
                     </actions>
                     <widgets />
                 </section>
@@ -406,11 +434,20 @@ under the License.
             <fail-widgets>
                 <section>
                     <actions>
+                        <property-map resource="CommonUiLabels" map-name="uiLabelMap" global="true"/>
                         <set field="searchType" from-field="parameters.searchType" default-value="${searchType}"/>
                         <script location="component://common/webcommon/WEB-INF/actions/includes/FindAutocompleteOptions.groovy"/>
                     </actions>
                     <widgets>
-                        <platform-specific><html><html-template location="component://common/webcommon/includes/ajaxAutocompleteOptions.ftl"/></html></platform-specific>
+                        <decorator-screen name="AjaxGlobalDecorator">
+                            <decorator-section name="body">
+                                <platform-specific>
+                                    <html>
+                                        <html-template location="component://common/webcommon/includes/ajaxAutocompleteOptions.ftl" />
+                                    </html>
+                                </platform-specific>
+                            </decorator-section>
+                        </decorator-screen>
                     </widgets>
                 </section>
             </fail-widgets>
@@ -436,16 +473,15 @@ under the License.
                 <set field="layoutSettings.javaScripts[+0]" value="${groovy: org.ofbiz.common.JsLanguageFilesMapping.validation.getFilePath(initialLocaleComplete)}" global="true"/>
 
                 <set field="layoutSettings.javaScripts[+0]" value="/images/jquery/plugins/asmselect/jquery.asmselect-1.0.4a-beta.js" global="true"/>
-                <set field="layoutSettings.javaScripts[+0]" value="/images/jquery/plugins/datetimepicker/jquery-ui-timepicker-addon-0.9.7.js" global="true"/>
-                <set field="layoutSettings.javaScripts[+0]" value="/images/jquery/ui/js/jquery-ui-1.8.16.custom.min.js" global="true"/>
+                <set field="layoutSettings.javaScripts[+0]" value="/images/jquery/plugins/datetimepicker/jquery-ui-timepicker-addon-1.0.5.js" global="true"/>
+                <set field="layoutSettings.javaScripts[+0]" value="/images/jquery/ui/js/jquery-ui-1.9.0.custom.min.js" global="true"/>
                 <set field="layoutSettings.javaScripts[+0]" value="/images/jquery/plugins/jeditable/jquery.jeditable.js" global="true"/>
                 <set field="layoutSettings.javaScripts[+0]" value="/images/jquery/plugins/fjTimer/jquerytimer-min.js" global="true"/>
                 <set field="layoutSettings.javaScripts[+0]" value="/images/jquery/plugins/validate/jquery.validate.min.js" global="true"/>
                 <set field="layoutSettings.javaScripts[+0]" value="/images/jquery/ui/development-bundle/ui/jquery.ui.datepicker.js" global="true"/>
-                <set field="layoutSettings.javaScripts[+0]" value="/images/jquery/jquery-1.7.min.js" global="true"/>
+                <set field="layoutSettings.javaScripts[+0]" value="/images/jquery/jquery-1.8.2.min.js" global="true"/>
                     <!-- jQuery CSSs -->
                 <set field="layoutSettings.styleSheets[+0]" value="/images/jquery/plugins/asmselect/jquery.asmselect-1.0.4a-beta.css" global="true"/>
-                <set field="layoutSettings.styleSheets[+0]" value="/images/jquery/plugins/datetimepicker/jquery-ui-timepicker-addon-0.9.6.css" global="true"/>
 
 
 
@@ -476,7 +512,7 @@ under the License.
             <actions>
                 <property-map resource="CommonUiLabels" map-name="uiLabelMap" global="true"/>
                 <set field="logoImageUrl" value="/images/ofbiz_logo.gif"/>
-                <!--<set field="defaultFontFamily" value="Arial"/>-->
+                <property-to-field resource="fop.properties" field="defaultFontFamily" property="fop.font.family" default="Arial"/>
             </actions>
             <widgets>
                 <platform-specific><xsl-fo><html-template location="component://common/webcommon/includes/reportTemplate.fo.ftl"/></xsl-fo></platform-specific>
@@ -541,9 +577,9 @@ under the License.
     <screen name="ajaxNotLoggedIn">
         <section>
             <widgets>
-                <decorator-screen name="LookupDecorator">
+                <decorator-screen name="AjaxGlobalDecorator">
                     <decorator-section name="body">
-                        <link target="checkLogin" text="${uiLabelMap.CommonSessionTimeoutPleaseLogIn}"/>
+                        <label style="message" text="${uiLabelMap.CommonSessionTimeoutPleaseLogIn}"/>
                     </decorator-section>
                 </decorator-screen>
             </widgets>

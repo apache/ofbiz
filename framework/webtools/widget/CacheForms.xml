@@ -21,6 +21,13 @@ under the License.
 <forms xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
         xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/widget-form.xsd">
 
+    <form name="MemoryInfo" type="single" default-map-name="memoryInfo">
+        <field name="memory" title="${uiLabelMap.WebtoolsTotalMemory}"><display/></field>
+        <field name="maxMemory" title="${uiLabelMap.WebtoolsMaxMemory}"><display/></field>
+        <field name="freeMemory" title="${uiLabelMap.WebtoolsFreeMemory}"><display/></field>
+        <field name="usedMemory" title="${uiLabelMap.WebtoolsUsedMemory}"><display/></field>
+        <field name="totalCacheMemory" title="${uiLabelMap.WebtoolsCacheMemory}"><display/></field>
+    </form>
     <form name="ListCache" type="list" list-name="cacheList" paginate-target="FindUtilCache" separate-columns="true" odd-row-style="alternate-row" default-table-style="basic-table hover-bar" header-row-style="header-row-2">
         <field name="cacheName" title="${uiLabelMap.WebtoolsCacheName}" sort-field="true"><display/></field>
         <field name="cacheSize" title="${uiLabelMap.WebtoolsSize}" sort-field="true"><display/></field>
@@ -31,17 +38,18 @@ under the License.
         <field name="expireTime" title="${uiLabelMap.WebtoolsExpireTime}" sort-field="true"><display/></field>
         <field name="useSoftReference" title="${uiLabelMap.WebtoolsUseSoftRef}" sort-field="true"><display/></field>
         <field name="useFileSystemStore" title="${uiLabelMap.WebtoolsUseFileStore}" sort-field="true"><display/></field>
-        <field name="administration" title="${uiLabelMap.CommonEmptyHeader}" widget-style="buttontext" use-when="hasUtilCacheEdit">
+        <field name="cacheMemory" title="${uiLabelMap.WebtoolsCacheMemory}" sort-field="true"><display/></field>
+        <field name="administration" title=" " widget-style="buttontext" use-when="hasUtilCacheEdit">
             <hyperlink description="${uiLabelMap.WebtoolsElements}" target="FindUtilCacheElements">
                 <parameter param-name="UTIL_CACHE_NAME" from-field="cacheName"/>
             </hyperlink>
         </field>
-        <field name="admin_edit" title="${uiLabelMap.CommonEmptyHeader}" widget-style="buttontext" use-when="hasUtilCacheEdit">
+        <field name="admin_edit" title=" " widget-style="buttontext" use-when="hasUtilCacheEdit">
             <hyperlink description="${uiLabelMap.CommonEdit}" target="EditUtilCache">
                 <parameter param-name="UTIL_CACHE_NAME" from-field="cacheName"/>
             </hyperlink>
         </field>
-        <field name="admin_clear" title="${uiLabelMap.CommonEmptyHeader}" widget-style="buttontext" use-when="hasUtilCacheEdit">
+        <field name="admin_clear" title=" " widget-style="buttontext" use-when="hasUtilCacheEdit">
             <hyperlink description="${uiLabelMap.CommonClear}" target="FindUtilCacheClear">
                 <parameter param-name="UTIL_CACHE_NAME" from-field="cacheName"/>
             </hyperlink>
@@ -53,7 +61,7 @@ under the License.
         <field name="expireTimeMillis" title="${uiLabelMap.WebtoolsExpireTime}" sort-field="true"><display/></field>
         <field name="lineSize" title="${uiLabelMap.WebtoolsBytes}" sort-field="true"><display/></field>
 
-        <field name="administration" title="${uiLabelMap.CommonEmptyHeader}" widget-style="buttontext" use-when="hasUtilCacheEdit">
+        <field name="administration" title=" " widget-style="buttontext" use-when="hasUtilCacheEdit">
             <hyperlink description="${uiLabelMap.CommonRemove}" target="FindUtilCacheElementsRemoveElement">
                 <parameter param-name="UTIL_CACHE_NAME" from-field="cacheName"/>
                 <parameter param-name="UTIL_CACHE_ELEMENT_NUMBER" from-field="keyNum"/>

@@ -28,7 +28,8 @@ under the License.
 
                 <set field="queryString" from-field="result.queryString"/>
                 <set field="viewIndex" from-field="parameters.VIEW_INDEX" type="Integer"/>
-                <set field="viewSize" from-field="parameters.VIEW_SIZE" type="Integer" default-value="10"/>
+                <property-to-field resource="widget" property="widget.form.defaultViewSize" field="viewSizeDefaultValue"/>
+                <set field="viewSize" from-field="parameters.VIEW_SIZE" type="Integer" default-value="${viewSizeDefaultValue}"/>
                 <entity-condition entity-name="Timesheet" list="currentTimesheetList">
                     <condition-list combine="and">
                         <condition-expr field-name="partyId" from-field="userLogin.partyId"/>
@@ -78,9 +79,9 @@ under the License.
                                                 </actions>
                                                 <widgets>
                                                     <container>
-                                                        <label style="tabletext" text="${uiLabelMap.WorkEffortTimesheetTimeEntry} ${uiLabelMap.CommonFor} ${currentTimeEntry.fromDate} "/>
+                                                        <label text="${uiLabelMap.WorkEffortTimesheetTimeEntry} ${uiLabelMap.CommonFor} ${currentTimeEntry.fromDate} "/>
                                                         <label style="tableheadtext" text="${currentTimeEntry.hours} ${uiLabelMap.WorkEffortTimesheetHours} "/>
-                                                        <label style="tabletext" text="${currentTimeEntry.comments} [${currentRateType.description}]"/>
+                                                        <label text="${currentTimeEntry.comments} [${currentRateType.description}]"/>
                                                         <section>
                                                             <condition><not><if-empty field="currentTimeEntry.workEffortId"/></not></condition>
                                                             <widgets>

@@ -18,22 +18,20 @@
  *******************************************************************************/
 package org.ofbiz.service.engine;
 
-import java.util.Map;
-import java.util.List;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
-import javolution.util.FastMap;
-
-import org.ofbiz.service.ServiceDispatcher;
-import org.ofbiz.service.ModelService;
-import org.ofbiz.service.GenericServiceException;
-import org.ofbiz.service.GenericServiceCallback;
-import org.ofbiz.service.config.ServiceConfigUtil;
 import org.ofbiz.base.config.GenericConfigException;
 import org.ofbiz.base.util.Debug;
-import org.ofbiz.base.util.UtilXml;
-
-import org.w3c.dom.Element;
+import org.ofbiz.service.GenericServiceCallback;
+import org.ofbiz.service.GenericServiceException;
+import org.ofbiz.service.ModelService;
+import org.ofbiz.service.ServiceDispatcher;
+import org.ofbiz.service.config.ServiceConfigUtil;
+import org.ofbiz.service.config.model.ServiceLocation;
 
 /**
  * Abstract Service Engine
@@ -41,40 +39,35 @@ import org.w3c.dom.Element;
 public abstract class AbstractEngine implements GenericEngine {
 
     public static final String module = AbstractEngine.class.getName();
-    protected static Map<String, String> locationMap = null;
+    protected static final Map<String, String> locationMap = createLocationMap();
 
     protected ServiceDispatcher dispatcher = null;
 
     protected AbstractEngine(ServiceDispatcher dispatcher) {
         this.dispatcher = dispatcher;
-        initLocations();
     }
 
     // creates the location alias map
-    protected synchronized void initLocations() {
-        if (locationMap == null) {
-            locationMap = FastMap.newInstance();
+    protected static Map<String, String> createLocationMap() {
+        Map<String, String> tmpMap = new HashMap<String, String>();
 
-            Element root = null;
-            try {
-                root = ServiceConfigUtil.getXmlRootElement();
-            } catch (GenericConfigException e) {
-                Debug.logError(e, module);
-            }
-
-            if (root != null) {
-                List<? extends Element> locationElements = UtilXml.childElementList(root, "service-location");
-                if (locationElements != null) {
-                    for (Element e: locationElements) {
-                        locationMap.put(e.getAttribute("name"), e.getAttribute("location"));
-                    }
-                }
-            }
-            Debug.logInfo("Loaded Service Locations : " + locationMap, module);
+        List<ServiceLocation> locationsList = null;
+        try {
+            locationsList = ServiceConfigUtil.getServiceEngine().getServiceLocations();
+        } catch (GenericConfigException e) {
+            // FIXME: Refactor API so exceptions can be thrown and caught.
+            Debug.logError(e, module);
+            throw new RuntimeException(e.getMessage());
         }
+        for (ServiceLocation e: locationsList) {
+            tmpMap.put(e.getName(), e.getLocation());
+        }
+
+        Debug.logInfo("Loaded Service Locations: " + tmpMap, module);
+        return Collections.unmodifiableMap(tmpMap);
     }
 
-    // uses the lookup map to determin if the location has been aliased in serviceconfig.xml
+    // uses the lookup map to determine if the location has been aliased by a service-location element in serviceengine.xml
     protected String getLocation(ModelService model) {
         if (locationMap.containsKey(model.location)) {
             return locationMap.get(model.location);

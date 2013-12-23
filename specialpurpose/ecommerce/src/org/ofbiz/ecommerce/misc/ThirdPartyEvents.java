@@ -128,7 +128,7 @@ public class ThirdPartyEvents {
         }
 
         try {
-            party = userLogin == null ? null : userLogin.getRelatedOne("Party");
+            party = userLogin == null ? null : userLogin.getRelatedOne("Party", false);
         } catch (GenericEntityException gee) {
             Debug.logWarning(gee, module);
         }
@@ -205,7 +205,7 @@ public class ThirdPartyEvents {
             return "success";
 
         try {
-            party = userLogin == null ? null : userLogin.getRelatedOne("Party");
+            party = userLogin == null ? null : userLogin.getRelatedOne("Party", false);
         } catch (GenericEntityException gee) {
             Debug.logWarning(gee, module);
         }
@@ -248,7 +248,7 @@ public class ThirdPartyEvents {
 
     private static GenericValue getPartyRelationship(GenericValue party, String roleTypeTo) {
         try {
-            return EntityUtil.getFirst(EntityUtil.filterByDate(party.getRelatedByAnd("FromPartyRelationship", UtilMisc.toMap("roleTypeIdTo", roleTypeTo)), true));
+            return EntityUtil.getFirst(EntityUtil.filterByDate(party.getRelated("FromPartyRelationship", UtilMisc.toMap("roleTypeIdTo", roleTypeTo), null, false), true));
         } catch (GenericEntityException gee) {
             Debug.logWarning(gee, module);
         }

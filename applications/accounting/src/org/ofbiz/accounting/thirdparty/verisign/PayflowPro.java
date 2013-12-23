@@ -163,7 +163,7 @@ public class PayflowPro {
         params.append("&").append(parseContext(data));
 
         // transmit the request
-        if (Debug.verboseOn()) Debug.logVerbose("Sending to Verisign: " + params.toString(), module);
+        //if (Debug.verboseOn()) Debug.logVerbose("Sending to Verisign: " + params.toString(), module);
         String resp;
         if (!comparePaymentGatewayConfigValue(delegator, paymentGatewayConfigId, "enableTransmit", configString, "payment.verisign.enable_transmit",  "false")) {
             resp = pfp.submitTransaction(params.toString(), pfp.generateRequestId());
@@ -524,11 +524,11 @@ public class PayflowPro {
             parameterMap.put("SHIPTOSTREET2", StringUtils.left(shippingAddress.getString("address2"), 30));
             parameterMap.put("SHIPTOCITY", StringUtils.left(shippingAddress.getString("city"), 40));
             if (shippingAddress.getString("stateProvinceGeoId") != null && !"_NA_".equals(shippingAddress.getString("stateProvinceGeoId"))) {
-                GenericValue stateProvinceGeo = shippingAddress.getRelatedOne("StateProvinceGeo");
+                GenericValue stateProvinceGeo = shippingAddress.getRelatedOne("StateProvinceGeo", false);
                 parameterMap.put("SHIPTOSTATE", StringUtils.left(stateProvinceGeo.getString("geoCode"), 40));
             }
             parameterMap.put("SHIPTOZIP", StringUtils.left(shippingAddress.getString("postalCode"), 16));
-            GenericValue countryGeo = shippingAddress.getRelatedOne("CountryGeo");
+            GenericValue countryGeo = shippingAddress.getRelatedOne("CountryGeo", false);
             parameterMap.put("SHIPTOCOUNTRY", StringUtils.left(countryGeo.getString("geoCode"), 2));
         }
     }
@@ -613,8 +613,8 @@ public class PayflowPro {
         String configString = "payment.properties";
         GenericValue payPalPaymentMethod = null;
         try {
-            payPalPaymentMethod = paymentPref.getRelatedOne("PaymentMethod");
-            payPalPaymentMethod = payPalPaymentMethod.getRelatedOne("PayPalPaymentMethod");
+            payPalPaymentMethod = paymentPref.getRelatedOne("PaymentMethod", false);
+            payPalPaymentMethod = payPalPaymentMethod.getRelatedOne("PayPalPaymentMethod", false);
         } catch (GenericEntityException e) {
             Debug.logError(e, module);
             return ServiceUtil.returnError(e.getMessage());
@@ -671,11 +671,7 @@ public class PayflowPro {
         Debug.logInfo("Verisign response string: " + resp, module);
         Map<String, String> parameters = FastMap.newInstance();
         List<String> params = StringUtil.split(resp, "&");
-        Iterator<String> i = params.iterator();
-
-        while (i.hasNext()) {
-            String str = (String) i.next();
-
+        for (String str : params) {
             if (str.length() > 0) {
                 List<String> kv = StringUtil.split(str, "=");
                 String k = kv.get(0);

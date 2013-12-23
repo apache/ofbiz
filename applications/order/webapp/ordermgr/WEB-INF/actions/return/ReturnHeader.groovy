@@ -40,12 +40,12 @@ if (parameters.returnHeader) {
     returnId = parameters.returnId;
 }
 if (returnId) {
-    returnHeader = delegator.findByPrimaryKey("ReturnHeader", [returnId : returnId]);
+    returnHeader = delegator.findOne("ReturnHeader", [returnId : returnId], false);
     if (returnHeader) {
         partyId = returnHeader.fromPartyId;
         toPartyId = parameters.toPartyId;
 
-        context.currentStatus = returnHeader.getRelatedOneCache("StatusItem");
+        context.currentStatus = returnHeader.getRelatedOne("StatusItem", true);
     }
 } else {
     partyId = parameters.partyId;
@@ -54,7 +54,7 @@ if (returnId) {
     returnHeaders.each { returnHeader ->
         returnMap = [:];
         returnMap.returnId = returnHeader.returnId;
-        statusItem = returnHeader.getRelatedOne("StatusItem");
+        statusItem = returnHeader.getRelatedOne("StatusItem", false);
         returnMap.statusId = statusItem.description;
         returnMap.fromPartyId = returnHeader.fromPartyId;
         returnMap.toPartyId = returnHeader.toPartyId;
@@ -69,7 +69,7 @@ context.returnId = returnId;
 //fin account info
 finAccounts = null;
 if (partyId) {
-    finAccounts = delegator.findByAnd("FinAccountAndRole", [partyId: partyId, finAccountTypeId: "STORE_CREDIT_ACCT", roleTypeId: "OWNER", statusId: "FNACT_ACTIVE"]);
+    finAccounts = delegator.findByAnd("FinAccountAndRole", [partyId: partyId, finAccountTypeId: "STORE_CREDIT_ACCT", roleTypeId: "OWNER", statusId: "FNACT_ACTIVE"], null, false);
     finAccounts = EntityUtil.filterByDate(finAccounts);
 }
 context.finAccounts = finAccounts;
@@ -77,7 +77,7 @@ context.finAccounts = finAccounts;
 // billing account info
 billingAccountList = null;
 if (partyId) {
-    billingAccountList = delegator.findByAnd("BillingAccountAndRole", [partyId : partyId]);
+    billingAccountList = delegator.findByAnd("BillingAccountAndRole", [partyId : partyId], null, false);
     billingAccountList = EntityUtil.filterByDate(billingAccountList);
 }
 context.billingAccountList = billingAccountList;
@@ -86,8 +86,8 @@ context.billingAccountList = billingAccountList;
 List creditCardList = null;
 List eftAccountList = null;
 if (partyId) {
-    creditCardList = EntityUtil.filterByDate(delegator.findByAnd("PaymentMethodAndCreditCard", [partyId : partyId]));
-    eftAccountList = EntityUtil.filterByDate(delegator.findByAnd("PaymentMethodAndEftAccount", [partyId : partyId]));
+    creditCardList = EntityUtil.filterByDate(delegator.findByAnd("PaymentMethodAndCreditCard", [partyId : partyId], null, false));
+    eftAccountList = EntityUtil.filterByDate(delegator.findByAnd("PaymentMethodAndEftAccount", [partyId : partyId], null, false));
 }
 context.creditCardList = creditCardList;
 context.eftAccountList = eftAccountList;
@@ -95,9 +95,9 @@ context.eftAccountList = eftAccountList;
 orderRole = null;
 orderHeader = null;
 if (orderId) {
-    orderRoles = delegator.findByAnd("OrderRole", [orderId : orderId, roleTypeId : "BILL_TO_CUSTOMER"]);
+    orderRoles = delegator.findByAnd("OrderRole", [orderId : orderId, roleTypeId : "BILL_TO_CUSTOMER"], null, false);
     orderRole = EntityUtil.getFirst(orderRoles);
-    orderHeader = delegator.findByPrimaryKey("OrderHeader", [orderId : orderId]);
+    orderHeader = delegator.findOne("OrderHeader", [orderId : orderId], false);
 }
 context.orderRole = orderRole;
 context.orderHeader = orderHeader;

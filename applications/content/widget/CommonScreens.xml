@@ -32,7 +32,7 @@ under the License.
                 <property-map resource="ProductUiLabels" map-name="uiLabelMap" global="true"/>
                 <set field="layoutSettings.companyName" from-field="uiLabelMap.ContentCompanyName" global="true"/>
                 <set field="layoutSettings.companySubtitle" from-field="uiLabelMap.ContentCompanySubtitle" global="true"/>
-                <set field="layoutSettings.styleSheets[]" value="/content/images/contentForum.css" global="true"/>
+                <set field="layoutSettings.styleSheets[]" value="/contentimages/contentForum.css" global="true"/>
                 <set field="layoutSettings.javaScripts[]" value="/images/selectall.js" global="true"/>
                 <set field="activeApp" value="contentmgr" global="true"/>
                 <set field="applicationMenuName" value="ContentAppBar" global="true"/>
@@ -392,7 +392,7 @@ under the License.
                 <decorator-screen name="main-decorator"  location="${parameters.mainDecoratorLocation}">
                     <decorator-section name="body">
                         <screenlet title="${uiLabelMap.ContentMain}">
-                            <container><label style="tabletext" text="${uiLabelMap.ContentWelcome}"/></container>
+                            <container><label text="${uiLabelMap.ContentWelcome}"/></container>
                         </screenlet>
                     </decorator-section>
                 </decorator-screen>

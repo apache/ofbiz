@@ -42,6 +42,7 @@ import org.ofbiz.entity.GenericValue;
 import org.ofbiz.service.GenericServiceException;
 import org.ofbiz.service.LocalDispatcher;
 import org.ofbiz.service.ServiceUtil;
+import org.ofbiz.webapp.website.WebSiteWorker;
 
 /**
  * DataEvents Class
@@ -60,6 +61,7 @@ public class DataEvents {
         Delegator delegator = (Delegator) request.getAttribute("delegator");
         LocalDispatcher dispatcher = (LocalDispatcher) request.getAttribute("dispatcher");
         HttpSession session = request.getSession();
+        Locale locale = UtilHttp.getLocale(request);
 
         GenericValue userLogin = (GenericValue) session.getAttribute("userLogin");
         String userAgent = request.getHeader("User-Agent");
@@ -79,7 +81,7 @@ public class DataEvents {
         // get the content record
         GenericValue content;
         try {
-            content = delegator.findByPrimaryKey("Content", UtilMisc.toMap("contentId", contentId));
+            content = delegator.findOne("Content", UtilMisc.toMap("contentId", contentId), false);
         } catch (GenericEntityException e) {
             Debug.logError(e, module);
             request.setAttribute("_ERROR_MESSAGE_", e.getMessage());
@@ -106,7 +108,7 @@ public class DataEvents {
         // get the data resource
         GenericValue dataResource;
         try {
-            dataResource = delegator.findByPrimaryKey("DataResource", UtilMisc.toMap("dataResourceId", dataResourceId));
+            dataResource = delegator.findOne("DataResource", UtilMisc.toMap("dataResourceId", dataResourceId), false);
         } catch (GenericEntityException e) {
             Debug.logError(e, module);
             request.setAttribute("_ERROR_MESSAGE_", e.getMessage());
@@ -130,7 +132,7 @@ public class DataEvents {
         // not public check security
         if (!"Y".equalsIgnoreCase(isPublic)) {
             // do security check
-            Map<String, Object> permSvcCtx = UtilMisc.toMap("userLogin", userLogin, "mainAction", "VIEW", "contentId", contentId);
+            Map<String, ? extends Object> permSvcCtx = UtilMisc.toMap("userLogin", userLogin, "locale", locale, "mainAction", "VIEW", "contentId", contentId);
             Map<String, Object> permSvcResp;
             try {
                 permSvcResp = dispatcher.runSync(permissionService, permSvcCtx);
@@ -160,14 +162,13 @@ public class DataEvents {
         String contextRoot = (String) request.getAttribute("_CONTEXT_ROOT_");
         String webSiteId = (String) session.getAttribute("webSiteId");
         String dataName = dataResource.getString("dataResourceName");
-        Locale locale = UtilHttp.getLocale(request);
 
         // get the mime type
         String mimeType = DataResourceWorker.getMimeType(dataResource);
 
         // hack for IE and mime types
         if (userAgent.indexOf("MSIE") > -1) {
-            Debug.log("Found MSIE changing mime type from - " + mimeType, module);
+            Debug.logInfo("Found MSIE changing mime type from - " + mimeType, module);
             mimeType = "application/octet-stream";
         }
 
@@ -200,7 +201,7 @@ public class DataEvents {
             stream = (InputStream) resourceData.get("stream");
             length = (Long) resourceData.get("length");
         }
-        Debug.log("Got resource data stream: " + length + " bytes", module);
+        Debug.logInfo("Got resource data stream: " + length + " bytes", module);
 
         // stream the content to the browser
         if (stream != null && length != null) {
@@ -209,7 +210,9 @@ public class DataEvents {
             } catch (IOException e) {
                 Debug.logError(e, "Unable to write content to browser", module);
                 request.setAttribute("_ERROR_MESSAGE_", e.getMessage());
-                return "error";
+                // this must be handled with a special error string because the output stream has been already used and we will not be able to return the error page;
+                // the "io-error" should be associated to a response of type "none"
+                return "io-error";
             }
         } else {
             String errorMsg = "No data is available.";
@@ -230,7 +233,7 @@ public class DataEvents {
         Delegator delegator = (Delegator) request.getAttribute("delegator");
         Map<String, Object> parameters = UtilHttp.getParameterMap(request);
 
-        Debug.log("Img UserAgent - " + request.getHeader("User-Agent"), module);
+        Debug.logInfo("Img UserAgent - " + request.getHeader("User-Agent"), module);
 
         String dataResourceId = (String) parameters.get("imgId");
         if (UtilValidate.isEmpty(dataResourceId)) {
@@ -241,7 +244,7 @@ public class DataEvents {
         }
 
         try {
-            GenericValue dataResource = delegator.findByPrimaryKeyCache("DataResource", UtilMisc.toMap("dataResourceId", dataResourceId));
+            GenericValue dataResource = delegator.findOne("DataResource", UtilMisc.toMap("dataResourceId", dataResourceId), true);
             if (!"Y".equals(dataResource.getString("isPublic"))) {
                 // now require login...
                 GenericValue userLogin = (GenericValue) session.getAttribute("userLogin");
@@ -255,7 +258,7 @@ public class DataEvents {
                 // make sure the logged in user can download this content; otherwise is a pretty big security hole for DataResource records...
                 // TODO: should we restrict the roleTypeId?
                 List<GenericValue> contentAndRoleList = delegator.findByAnd("ContentAndRole",
-                        UtilMisc.toMap("partyId", userLogin.get("partyId"), "dataResourceId", dataResourceId));
+                        UtilMisc.toMap("partyId", userLogin.get("partyId"), "dataResourceId", dataResourceId), null, false);
                 if (contentAndRoleList.size() == 0) {
                     String errorMsg = "You do not have permission to download the Data Resource with ID [" + dataResourceId + "], ie you are not associated with it.";
                     Debug.logError(errorMsg, module);
@@ -269,7 +272,7 @@ public class DataEvents {
             // hack for IE and mime types
             String userAgent = request.getHeader("User-Agent");
             if (userAgent.indexOf("MSIE") > -1) {
-                Debug.log("Found MSIE changing mime type from - " + mimeType, module);
+                Debug.logInfo("Found MSIE changing mime type from - " + mimeType, module);
                 mimeType = "application/octet-stream";
             }
 
@@ -277,7 +280,7 @@ public class DataEvents {
                 response.setContentType(mimeType);
             }
             OutputStream os = response.getOutputStream();
-            DataResourceWorker.streamDataResource(os, delegator, dataResourceId, "", application.getInitParameter("webSiteId"), UtilHttp.getLocale(request), application.getRealPath("/"));
+            DataResourceWorker.streamDataResource(os, delegator, dataResourceId, "", WebSiteWorker.getWebSiteId(request), UtilHttp.getLocale(request), application.getRealPath("/"));
             os.flush();
         } catch (GenericEntityException e) {
             String errMsg = "Error downloading digital product content: " + e.toString();

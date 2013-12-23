@@ -21,10 +21,8 @@ package org.ofbiz.content.compdoc;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Set;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
@@ -48,6 +46,7 @@ import org.ofbiz.service.ModelService;
 import org.ofbiz.service.ServiceAuthException;
 import org.ofbiz.service.ServiceUtil;
 import org.ofbiz.webapp.event.CoreEvents;
+import org.ofbiz.webapp.website.WebSiteWorker;
 
 
 /**
@@ -80,7 +79,7 @@ public class CompDocEvents {
 
         if (UtilValidate.isNotEmpty(contentId)) {
             try {
-                delegator.findByPrimaryKey("Content", UtilMisc.toMap("contentId", contentId));
+                delegator.findOne("Content", UtilMisc.toMap("contentId", contentId), false);
             } catch (GenericEntityException e) {
                 Debug.logError(e, "Error running serviceName persistContentAndAssoc", module);
                 String errMsg = UtilProperties.getMessage(CoreEvents.err_resource, "coreEvents.error_modelservice_for_srv_name", locale);
@@ -104,10 +103,7 @@ public class CompDocEvents {
             Map<String, Object> persistResult = dispatcher.runSync("persistContentAndAssoc", persistMap);
             contentId = (String)persistResult.get("contentId");
             //request.setAttribute("contentId", contentId);
-            Set<String> keySet = persistResult.keySet();
-            Iterator<String> iter = keySet.iterator();
-            while (iter.hasNext()) {
-                Object obj = iter.next();
+            for (Object obj : persistResult.keySet()) {
                 Object val = persistResult.get(obj);
                 request.setAttribute(obj.toString(), val);
             }
@@ -117,10 +113,7 @@ public class CompDocEvents {
             contentRevisionMap.put("contentId", contentId);
             contentRevisionMap.put("userLogin", userLogin);
             Map<String, Object> result = dispatcher.runSync("persistContentRevisionAndItem", contentRevisionMap);
-            keySet = result.keySet();
-            iter = keySet.iterator();
-            while (iter.hasNext()) {
-                Object obj = iter.next();
+            for (Object obj : result.keySet()) {
                 Object val = result.get(obj);
                 request.setAttribute(obj.toString(), val);
             }
@@ -157,14 +150,11 @@ public class CompDocEvents {
         String contentId = (String)paramMap.get("contentId");
         Locale locale = UtilHttp.getLocale(request);
         String rootDir = null;
-        String webSiteId = null;
+        String webSiteId = WebSiteWorker.getWebSiteId(request);
         String https = null;
 
         if (UtilValidate.isEmpty(rootDir)) {
             rootDir = servletContext.getRealPath("/");
-        }
-        if (UtilValidate.isEmpty(webSiteId)) {
-            webSiteId = (String) servletContext.getAttribute("webSiteId");
         }
         if (UtilValidate.isEmpty(https)) {
             https = (String) servletContext.getAttribute("https");
@@ -231,14 +221,11 @@ public class CompDocEvents {
         String contentId = (String)paramMap.get("contentId");
         Locale locale = UtilHttp.getLocale(request);
         String rootDir = null;
-        String webSiteId = null;
+        String webSiteId = WebSiteWorker.getWebSiteId(request);
         String https = null;
 
         if (UtilValidate.isEmpty(rootDir)) {
             rootDir = servletContext.getRealPath("/");
-        }
-        if (UtilValidate.isEmpty(webSiteId)) {
-            webSiteId = (String) servletContext.getAttribute("webSiteId");
         }
         if (UtilValidate.isEmpty(https)) {
             https = (String) servletContext.getAttribute("https");

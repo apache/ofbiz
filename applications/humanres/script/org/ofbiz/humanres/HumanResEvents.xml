@@ -19,7 +19,7 @@
 -->
 
 <simple-methods xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/simple-methods.xsd">
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/simple-methods-v2.xsd">
     <simple-method method-name="createInternalOrg" short-description="">
         <set field="internalCtx.partyIdFrom" from-field="parameters.headpartyId"/>
         <set field="internalCtx.partyIdTo" from-field="parameters.partyId"/>
@@ -55,6 +55,12 @@
     
     <!-- Public Holiday -->
     <simple-method method-name="createPublicHoliday" short-description="Create Public Holiday">
+        <if-empty field="parameters.workEffortName">            
+            <add-error>
+                <fail-message message="The Holiday Name is missing."/>
+            </add-error>
+            <check-errors/>
+        </if-empty>     
         <if-empty field="parameters.estimatedStartDate">
             <add-error>
                 <fail-message message="The FromDate is missing"/>

@@ -48,6 +48,8 @@ import org.xml.sax.SAXException;
 
 public interface Delegator {
 
+    enum OperationType {INSERT, UPDATE, DELETE}
+
     public void clearAllCacheLinesByDummyPK(Collection<GenericPK> dummyPKs);
 
     public void clearAllCacheLinesByValue(Collection<GenericValue> values);
@@ -157,10 +159,13 @@ public interface Delegator {
      * @param primaryKey
      *            The GenericPK to create a value in the datasource from
      * @param doCacheClear
-     *            boolean that specifies whether to clear related cache entries
-     *            for this primaryKey to be created
+     *            boolean that specifies whether or not to automatically clear
+     *            cache entries related to this operation. This should always be
+     *            <code>true</code> - otherwise you will lose data integrity.
      * @return GenericValue instance containing the new instance
+     * @deprecated use {@link #create(GenericPK primaryKey)}
      */
+    @Deprecated
     public GenericValue create(GenericPK primaryKey, boolean doCacheClear) throws GenericEntityException;
 
     /**
@@ -181,9 +186,12 @@ public interface Delegator {
      *            The GenericValue to create a value in the datasource from
      * @param doCacheClear
      *            boolean that specifies whether or not to automatically clear
-     *            cache entries related to this operation
+     *            cache entries related to this operation. This should always be
+     *            <code>true</code> - otherwise you will lose data integrity.
      * @return GenericValue instance containing the new instance
+     * @deprecated use {@link #create(GenericValue value)}
      */
+    @Deprecated
     public GenericValue create(GenericValue value, boolean doCacheClear) throws GenericEntityException;
 
     /**
@@ -220,9 +228,12 @@ public interface Delegator {
      *            instance
      * @param doCacheClear
      *            boolean that specifies whether or not to automatically clear
-     *            cache entries related to this operation
+     *            cache entries related to this operation. This should always be
+     *            <code>true</code> - otherwise you will lose data integrity.
      * @return GenericValue instance containing the new or updated instance
+     * @deprecated use {@link #createOrStore(GenericValue value)}
      */
+    @Deprecated
     public GenericValue createOrStore(GenericValue value, boolean doCacheClear) throws GenericEntityException;
 
     /**
@@ -288,6 +299,17 @@ public interface Delegator {
     public EntityListIterator find(String entityName, EntityCondition whereEntityCondition, EntityCondition havingEntityCondition, Set<String> fieldsToSelect, List<String> orderBy, EntityFindOptions findOptions) throws GenericEntityException;
 
     /**
+     * Finds all Generic entities 
+     *
+     * @param entityName
+     *            The Name of the Entity as defined in the entity XML file
+     * @param useCache
+     *            Whether to cache the results
+     * @return List containing all Generic entities
+     */
+    public List<GenericValue> findAll(String entityName, boolean useCache) throws GenericEntityException;
+
+    /**
      * Finds Generic Entity records by all of the specified fields (ie: combined
      * using AND) NOTE 20080502: 264 references
      *
@@ -297,7 +319,9 @@ public interface Delegator {
      *            The fields of the named entity to query by with their
      *            corresponding values
      * @return List of GenericValue instances that match the query
+     * @deprecated use {@link #findByAnd(String, Map, List, boolean)}
      */
+    @Deprecated
     public List<GenericValue> findByAnd(String entityName, Map<String, ? extends Object> fields) throws GenericEntityException;
 
     /**
@@ -314,7 +338,9 @@ public interface Delegator {
      *            optionally add a " ASC" for ascending or " DESC" for
      *            descending
      * @return List of GenericValue instances that match the query
+     * @deprecated use {@link #findByAnd(String, Map, List, boolean)}
      */
+    @Deprecated
     public List<GenericValue> findByAnd(String entityName, Map<String, ? extends Object> fields, List<String> orderBy) throws GenericEntityException;
 
     /**
@@ -327,7 +353,9 @@ public interface Delegator {
      *            The fields of the named entity to query by with their
      *            corresponding values
      * @return List of GenericValue instances that match the query
+     * @deprecated use {@link #findByAnd(String, Map, List, boolean)}
      */
+    @Deprecated
     public List<GenericValue> findByAnd(String entityName, Object... fields) throws GenericEntityException;
 
     /**
@@ -341,7 +369,9 @@ public interface Delegator {
      *            The fields of the named entity to query by with their
      *            corresponding values
      * @return List of GenericValue instances that match the query
+     * @deprecated use {@link #findByAnd(String, Map, List, boolean)}
      */
+    @Deprecated
     public List<GenericValue> findByAndCache(String entityName, Map<String, ? extends Object> fields) throws GenericEntityException;
 
     /**
@@ -359,8 +389,30 @@ public interface Delegator {
      *            optionally add a " ASC" for ascending or " DESC" for
      *            descending
      * @return List of GenericValue instances that match the query
+     * @deprecated use {@link #findByAnd(String, Map, List, boolean)}
      */
+    @Deprecated
     public List<GenericValue> findByAndCache(String entityName, Map<String, ? extends Object> fields, List<String> orderBy) throws GenericEntityException;
+
+    /**
+     * Finds Generic Entity records by all of the specified fields (ie: combined
+     * using AND), looking first in the cache; uses orderBy for lookup, but only
+     * keys results on the entityName and fields
+     *
+     * @param entityName
+     *            The Name of the Entity as defined in the entity XML file
+     * @param fields
+     *            The fields of the named entity to query by with their
+     *            corresponding values
+     * @param orderBy
+     *            The fields of the named entity to order the query by;
+     *            optionally add a " ASC" for ascending or " DESC" for
+     *            descending
+     * @param useCache
+     *            Whether to cache the results
+     * @return List of GenericValue instances that match the query
+     */
+    public List<GenericValue> findByAnd(String entityName, Map<String, ? extends Object> fields, List<String> orderBy, boolean useCache) throws GenericEntityException;
 
     /**
      * Find a Generic Entity by its Primary Key NOTE 20080502: 550 references
@@ -373,7 +425,9 @@ public interface Delegator {
      *            The fields of the named entity to query by with their
      *            corresponding values
      * @return The GenericValue corresponding to the primaryKey
+     * @deprecated use {@link #findOne(String, Map, boolean)}
      */
+    @Deprecated
     public GenericValue findByPrimaryKey(String entityName, Map<String, ? extends Object> fields) throws GenericEntityException;
 
     /**
@@ -386,7 +440,9 @@ public interface Delegator {
      *            The fields of the named entity to query by with their
      *            corresponding values
      * @return The GenericValue corresponding to the primaryKey
+     * @deprecated use {@link #findOne(String, Map, boolean)}
      */
+    @Deprecated
     public GenericValue findByPrimaryKeyCache(String entityName, Map<String, ? extends Object> fields) throws GenericEntityException;
 
     /**
@@ -399,7 +455,9 @@ public interface Delegator {
      *            The fields of the named entity to query by with their
      *            corresponding values
      * @return The GenericValue corresponding to the primaryKey
+     * @deprecated use {@link #findOne(String, boolean, Object...)}
      */
+    @Deprecated
     public GenericValue findByPrimaryKeyCache(String entityName, Object... fields) throws GenericEntityException;
 
     /**
@@ -479,14 +537,13 @@ public interface Delegator {
     public EntityListIterator findListIteratorByCondition(DynamicViewEntity dynamicViewEntity, EntityCondition whereEntityCondition, EntityCondition havingEntityCondition, Collection<String> fieldsToSelect, List<String> orderBy, EntityFindOptions findOptions) throws GenericEntityException;
 
     /**
-     * Find a Generic Entity by its Primary Key NOTE 20080502: 6 references
+     * Find a Generic Entity by its primary key.
      *
-     * @param entityName
-     *            The Name of the Entity as defined in the entity XML file
-     * @param fields
-     *            The fields of the named entity to query by with their
-     *            corresponding values
-     * @return The GenericValue corresponding to the primaryKey
+     * @param entityName The Name of the Entity as defined in the entity XML file
+     * @param useCache Retrieve the Generic Entity from the cache when <code>true</code>
+     * @param fields The fields of the named entity to query by with their corresponding values
+     * @return The Generic Entity corresponding to the primary key
+     * @throws GenericEntityException
      */
     public GenericValue findOne(String entityName, boolean useCache, Object... fields) throws GenericEntityException;
 
@@ -739,7 +796,9 @@ public interface Delegator {
      *            GenericValue instance containing the entity
      * @return List of GenericValue instances as specified in the relation
      *         definition
+     * @deprecated use {@link #getRelated(String, Map, List, GenericValue, boolean)}
      */
+    @Deprecated
     public List<GenericValue> getRelated(String relationName, Map<String, ? extends Object> byAndFields, List<String> orderBy, GenericValue value) throws GenericEntityException;
 
     /**
@@ -755,8 +814,33 @@ public interface Delegator {
      *            GenericValue instance containing the entity
      * @return List of GenericValue instances as specified in the relation
      *         definition
+     * @deprecated use {@link #getRelated(String, Map, List, GenericValue, boolean)}
      */
+    @Deprecated
     public List<GenericValue> getRelatedCache(String relationName, GenericValue value) throws GenericEntityException;
+
+    /**
+     * Get the named Related Entity for the GenericValue from the persistent
+     * store
+     *
+     * @param relationName
+     *            String containing the relation name which is the combination
+     *            of relation.title and relation.rel-entity-name as specified in
+     *            the entity XML definition file
+     * @param byAndFields
+     *            the fields that must equal in order to keep; may be null
+     * @param orderBy
+     *            The fields of the named entity to order the query by; may be
+     *            null; optionally add a " ASC" for ascending or " DESC" for
+     *            descending
+     * @param value
+     *            GenericValue instance containing the entity
+     * @param useCache
+     *            Whether to cache the results
+     * @return List of GenericValue instances as specified in the relation
+     *         definition
+     */
+    public List<GenericValue> getRelated(String relationName, Map<String, ? extends Object> byAndFields, List<String> orderBy, GenericValue value, boolean useCache) throws GenericEntityException;
 
     /**
      * Get a dummy primary key for the named Related Entity for the GenericValue
@@ -776,23 +860,44 @@ public interface Delegator {
     public GenericPK getRelatedDummyPK(String relationName, Map<String, ? extends Object> byAndFields, GenericValue value) throws GenericEntityException;
 
     /**
-     * Get related entity where relation is of type one, uses findByPrimaryKey
+     * Get related entity where relation is of type one, uses findOne
      * NOTE 20080502: 7 references
      *
      * @throws IllegalArgumentException
      *             if the list found has more than one item
+     * @deprecated use {@link #getRelatedOne(String, GenericValue, boolean)}
      */
+    @Deprecated
     public GenericValue getRelatedOne(String relationName, GenericValue value) throws GenericEntityException;
 
     /**
-     * Get related entity where relation is of type one, uses findByPrimaryKey,
+     * Get related entity where relation is of type one, uses findOne
      * checking first in the cache to see if the desired value is there NOTE
      * 20080502: 1 references
      *
      * @throws IllegalArgumentException
      *             if the list found has more than one item
+     * @deprecated use {@link #getRelatedOne(String, GenericValue, boolean)}
      */
+    @Deprecated
     public GenericValue getRelatedOneCache(String relationName, GenericValue value) throws GenericEntityException;
+
+    /**
+     * Get related entity where relation is of type one, uses findByPrimaryKey
+     *
+     * @param relationName
+     *            String containing the relation name which is the combination
+     *            of relation.title and relation.rel-entity-name as specified in
+     *            the entity XML definition file
+     * @param value
+     *            GenericValue instance containing the entity
+     * @param useCache
+     *            Whether to cache the results
+     * @return GenericValue that is the related entity
+     * @throws IllegalArgumentException
+     *             if the list found has more than one item
+     */
+    public GenericValue getRelatedOne(String relationName, GenericValue value, boolean useCache) throws GenericEntityException;
 
     public void initEntityEcaHandler();
 
@@ -864,8 +969,11 @@ public interface Delegator {
      *            GenericValue instance containing the entity to refresh
      * @param doCacheClear
      *            boolean that specifies whether or not to automatically clear
-     *            cache entries related to this operation
+     *            cache entries related to this operation. This should always be
+     *            <code>true</code> - otherwise you will lose data integrity.
+     * @deprecated use {@link #refresh(GenericValue value)}
      */
+    @Deprecated
     public void refresh(GenericValue value, boolean doCacheClear) throws GenericEntityException;
 
     /**
@@ -913,9 +1021,12 @@ public interface Delegator {
      *            or by and fields to remove
      * @param doCacheClear
      *            boolean that specifies whether or not to automatically clear
-     *            cache entries related to this operation
+     *            cache entries related to this operation. This should always be
+     *            <code>true</code> - otherwise you will lose data integrity.
      * @return int representing number of rows effected by this operation
+     * @deprecated use {@link #removeAll(List<? extends GenericEntity> dummyPKs)}
      */
+    @Deprecated
     public int removeAll(List<? extends GenericEntity> dummyPKs, boolean doCacheClear) throws GenericEntityException;
 
     public int removeAll(String entityName) throws GenericEntityException;
@@ -927,8 +1038,9 @@ public interface Delegator {
      * @param entityName
      *            The Name of the Entity as defined in the entity XML file
      * @param doCacheClear
-     *            boolean that specifies whether to clear cache entries for this
-     *            value to be removed
+     *            boolean that specifies whether or not to automatically clear
+     *            cache entries related to this operation. This should always be
+     *            <code>true</code> - otherwise you will lose data integrity.
      * @param fields
      *            The fields of the named entity to query by with their
      *            corresponding values
@@ -959,10 +1071,13 @@ public interface Delegator {
      *            The fields of the named entity to query by with their
      *            corresponding values
      * @param doCacheClear
-     *            boolean that specifies whether to clear cache entries for this
-     *            value to be removed
+     *            boolean that specifies whether or not to automatically clear
+     *            cache entries related to this operation. This should always be
+     *            <code>true</code> - otherwise you will lose data integrity.
      * @return int representing number of rows effected by this operation
+     * @deprecated use {@link #removeByAnd(String entityName, Map<String, ? extends Object> fields)}
      */
+    @Deprecated
     public int removeByAnd(String entityName, Map<String, ? extends Object> fields, boolean doCacheClear) throws GenericEntityException;
 
     /**
@@ -997,10 +1112,13 @@ public interface Delegator {
      * @param condition
      *            The condition used to restrict the removing
      * @param doCacheClear
-     *            boolean that specifies whether to clear cache entries for this
-     *            value to be removed
+     *            boolean that specifies whether or not to automatically clear
+     *            cache entries related to this operation. This should always be
+     *            <code>true</code> - otherwise you will lose data integrity.
      * @return int representing number of rows effected by this operation
+     * @deprecated use {@link #removeByCondition(String entityName, EntityCondition condition)}
      */
+    @Deprecated
     public int removeByCondition(String entityName, EntityCondition condition, boolean doCacheClear) throws GenericEntityException;
 
     /**
@@ -1018,10 +1136,13 @@ public interface Delegator {
      * @param primaryKey
      *            The primary key of the entity to remove.
      * @param doCacheClear
-     *            boolean that specifies whether to clear cache entries for this
-     *            primaryKey to be removed
+     *            boolean that specifies whether or not to automatically clear
+     *            cache entries related to this operation. This should always be
+     *            <code>true</code> - otherwise you will lose data integrity.
      * @return int representing number of rows effected by this operation
+     * @deprecated use {@link #removeByPrimaryKey(GenericPK primaryKey)} 
      */
+    @Deprecated
     public int removeByPrimaryKey(GenericPK primaryKey, boolean doCacheClear) throws GenericEntityException;
 
     /**
@@ -1049,10 +1170,13 @@ public interface Delegator {
      * @param value
      *            GenericValue instance containing the entity
      * @param doCacheClear
-     *            boolean that specifies whether to clear cache entries for this
-     *            value to be removed
+     *            boolean that specifies whether or not to automatically clear
+     *            cache entries related to this operation. This should always be
+     *            <code>true</code> - otherwise you will lose data integrity.
      * @return int representing number of rows effected by this operation
+     * @deprecated use {@link #removeRelated(String relationName, GenericValue value)}
      */
+    @Deprecated
     public int removeRelated(String relationName, GenericValue value, boolean doCacheClear) throws GenericEntityException;
 
     /**
@@ -1070,10 +1194,13 @@ public interface Delegator {
      * @param value
      *            The GenericValue object of the entity to remove.
      * @param doCacheClear
-     *            boolean that specifies whether to clear cache entries for this
-     *            value to be removed
+     *            boolean that specifies whether or not to automatically clear
+     *            cache entries related to this operation. This should always be
+     *            <code>true</code> - otherwise you will lose data integrity.
      * @return int representing number of rows effected by this operation
+     * @deprecated use {@link #removeValue(GenericValue value)} 
      */
+    @Deprecated
     public int removeValue(GenericValue value, boolean doCacheClear) throws GenericEntityException;
 
     public void rollback();
@@ -1113,9 +1240,12 @@ public interface Delegator {
      *            GenericValue instance containing the entity
      * @param doCacheClear
      *            boolean that specifies whether or not to automatically clear
-     *            cache entries related to this operation
+     *            cache entries related to this operation. This should always be
+     *            <code>true</code> - otherwise you will lose data integrity.
      * @return int representing number of rows effected by this operation
+     * @deprecated use {@link #store(GenericValue value)} 
      */
+    @Deprecated
     public int store(GenericValue value, boolean doCacheClear) throws GenericEntityException;
 
     /**
@@ -1150,9 +1280,12 @@ public interface Delegator {
      *            store
      * @param doCacheClear
      *            boolean that specifies whether or not to automatically clear
-     *            cache entries related to this operation
+     *            cache entries related to this operation. This should always be
+     *            <code>true</code> - otherwise you will lose data integrity.
      * @return int representing number of rows effected by this operation
+     * @deprecated use {@link #storeAll(List<GenericValue> values)} 
      */
+    @Deprecated
     public int storeAll(List<GenericValue> values, boolean doCacheClear) throws GenericEntityException;
 
     /**
@@ -1170,11 +1303,13 @@ public interface Delegator {
      *            store
      * @param doCacheClear
      *            boolean that specifies whether or not to automatically clear
-     *            cache entries related to this operation
+     *            cache entries related to this operation. This should always be
+     *            <code>true</code> - otherwise you will lose data integrity.
      * @param createDummyFks
      *            boolean that specifies whether or not to automatically create
      *            "dummy" place holder FKs
      * @return int representing number of rows effected by this operation
+     * @deprecated use {@link #storeAll(GenericValue value, boolean createDummyFks)} 
      */
     public int storeAll(List<GenericValue> values, boolean doCacheClear, boolean createDummyFks) throws GenericEntityException;
 
@@ -1202,11 +1337,14 @@ public interface Delegator {
      * @param condition
      *            The condition that restricts the list of stored values
      * @param doCacheClear
-     *            boolean that specifies whether to clear cache entries for
-     *            these values
+     *            boolean that specifies whether or not to automatically clear
+     *            cache entries related to this operation. This should always be
+     *            <code>true</code> - otherwise you will lose data integrity.
      * @return int representing number of rows effected by this operation
      * @throws GenericEntityException
+     * @deprecated use {@link #storeByCondition(String entityName, Map<String, ? extends Object> fieldsToSet, EntityCondition condition)}
      */
+    @Deprecated
     public int storeByCondition(String entityName, Map<String, ? extends Object> fieldsToSet, EntityCondition condition, boolean doCacheClear) throws GenericEntityException;
    
     /**

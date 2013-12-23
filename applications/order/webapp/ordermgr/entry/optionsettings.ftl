@@ -18,6 +18,7 @@ under the License.
 -->
 
 <#if security.hasEntityPermission("ORDERMGR", "_CREATE", session) || security.hasEntityPermission("ORDERMGR", "_PURCHASE_CREATE", session)>
+<form method="post" action="<@ofbizUrl>finalizeOrder</@ofbizUrl>" name="checkoutsetupform">
 <table border="0" width='100%' cellspacing='0' cellpadding='0' class='boxoutside'>
 <tr>
     <td width='100%'>
@@ -36,10 +37,10 @@ under the License.
               </tr>
               <tr>
                 <td colspan="2">
-                  <textarea cols="30" rows="3" name="internal_order_notes"></textarea>
+                  <textarea cols="30" rows="3" name="internal_order_notes"><#if (cart.getInternalOrderNotes().size()>0)>${(cart.getInternalOrderNotes()[0])?if_exists}</#if></textarea>
                 </td>
                 <td colspan="2">
-                  <textarea cols="30" rows="3" name="shippingNotes"></textarea>
+                  <textarea cols="30" rows="3" name="shippingNotes"><#if (cart.getOrderNotes().size()>0)>${(cart.getOrderNotes()[0])?if_exists}</#if></textarea>
                 </td>
               </tr>
             </table>
@@ -47,7 +48,6 @@ under the License.
         </tr>
         <tr>
           <td>
-            <form method="post" action="<@ofbizUrl>finalizeOrder</@ofbizUrl>" name="checkoutsetupform">
               <input type="hidden" name="finalizeMode" value="options"/>
 <#list 1..cart.getShipGroupSize() as currIndex>
 <#assign shipGroupIndex = currIndex - 1>
@@ -56,7 +56,7 @@ under the License.
     <#assign chosenShippingMethod = cart.getShipmentMethodTypeId(shipGroupIndex) + '@' + cart.getCarrierPartyId(shipGroupIndex)>
 </#if>
 <#assign supplierPartyId = cart.getSupplierPartyId(shipGroupIndex)?if_exists>
-<#assign supplier =  delegator.findByPrimaryKey("PartyGroup", Static["org.ofbiz.base.util.UtilMisc"].toMap("partyId", supplierPartyId))?if_exists />
+<#assign supplier =  delegator.findOne("PartyGroup", Static["org.ofbiz.base.util.UtilMisc"].toMap("partyId", supplierPartyId), false)?if_exists />
 
               <table width="100%" cellpadding="1" border="0" cellpadding="0" cellspacing="0">
               <tr><td colspan="2"><hr /></td></tr>
@@ -116,7 +116,7 @@ under the License.
                    <tr>
                      <input type='hidden' name='${shipGroupIndex?default("0")}_shipping_method' value="STANDARD@_NA_" />
                      <td>
-                       <input type='text' name='${shipGroupIndex?default("0")}_ship_estimate'/>
+                       <input type='text' name='${shipGroupIndex?default("0")}_ship_estimate' value="${cart.getItemShipGroupEstimate(shipGroupIndex?default('0'))?if_exists}"/>
                      </td>
                    </tr>
                </#if>
@@ -149,7 +149,7 @@ under the License.
                 <tr>
                     <td colspan="2">
                     <div>
-                      <@htmlTemplate.renderDateTimeField name="sgi${shipGroupIndex?default('0')}_shipBeforeDate" event="" action="" value="" className="" alert="" title="Format: yyyy-MM-dd HH:mm:ss.SSS" size="25" maxlength="30" id="sgi${shipGroupIndex?default('0')}_shipBeforeDate" dateType="date" shortDateInput=false timeDropdownParamName="" defaultDateTimeString="" localizedIconTitle="" timeDropdown="" timeHourName="" classString="" hour1="" hour2="" timeMinutesName="" minutes="" isTwelveHour="" ampmName="" amSelected="" pmSelected="" compositeType="" formName=""/>
+                      <@htmlTemplate.renderDateTimeField name="sgi${shipGroupIndex?default('0')}_shipBeforeDate" event="" action="" value="${(cart.getShipBeforeDate(shipGroupIndex))?if_exists}" className="" alert="" title="Format: yyyy-MM-dd HH:mm:ss.SSS" size="25" maxlength="30" id="sgi${shipGroupIndex?default('0')}_shipBeforeDate" dateType="date" shortDateInput=false timeDropdownParamName="" defaultDateTimeString="" localizedIconTitle="" timeDropdown="" timeHourName="" classString="" hour1="" hour2="" timeMinutesName="" minutes="" isTwelveHour="" ampmName="" amSelected="" pmSelected="" compositeType="" formName=""/>
                     </div>
                     </td>
                 </tr>
@@ -161,7 +161,7 @@ under the License.
                 <tr>
                     <td colspan="2">
                     <div>
-                      <@htmlTemplate.renderDateTimeField name="sgi${shipGroupIndex?default('0')}_shipAfterDate" event="" action="" value="" className="" alert="" title="Format: yyyy-MM-dd HH:mm:ss.SSS" size="25" maxlength="30" id="sgi${shipGroupIndex?default('0')}_shipAfterDate" dateType="date" shortDateInput=false timeDropdownParamName="" defaultDateTimeString="" localizedIconTitle="" timeDropdown="" timeHourName="" classString="" hour1="" hour2="" timeMinutesName="" minutes="" isTwelveHour="" ampmName="" amSelected="" pmSelected="" compositeType="" formName=""/>
+                      <@htmlTemplate.renderDateTimeField name="sgi${shipGroupIndex?default('0')}_shipAfterDate" event="" action="" value="${(cart.getShipAfterDate(shipGroupIndex))?if_exists}" className="" alert="" title="Format: yyyy-MM-dd HH:mm:ss.SSS" size="25" maxlength="30" id="sgi${shipGroupIndex?default('0')}_shipAfterDate" dateType="date" shortDateInput=false timeDropdownParamName="" defaultDateTimeString="" localizedIconTitle="" timeDropdown="" timeHourName="" classString="" hour1="" hour2="" timeMinutesName="" minutes="" isTwelveHour="" ampmName="" amSelected="" pmSelected="" compositeType="" formName=""/>
                     </div>
                     </td>
                 </tr>
@@ -184,8 +184,8 @@ under the License.
                             <td colspan="2">
                                 <div>
                                     <span class="h2"><b>${uiLabelMap.OrderIsThisGift}</b></span>
-                                    <input type="radio" <#if cart.getIsGift(shipGroupIndex)?default('Y') == 'Y'>checked="checked"</#if> name="${shipGroupIndex?default('0')}_is_gift" value="true" /><span class="tabletext">${uiLabelMap.CommonYes}</span>
-                                    <input type="radio" <#if cart.getIsGift(shipGroupIndex)?default('N') == 'N'>checked="checked"</#if> name="${shipGroupIndex?default('0')}_is_gift" value="false" /><span class="tabletext">${uiLabelMap.CommonNo}</span>
+                                    <input type="radio" <#if cart.getIsGift(shipGroupIndex)?default('Y') == 'Y'>checked="checked"</#if> name="${shipGroupIndex?default('0')}_is_gift" value="true" /><span>${uiLabelMap.CommonYes}</span>
+                                    <input type="radio" <#if cart.getIsGift(shipGroupIndex)?default('N') == 'N'>checked="checked"</#if> name="${shipGroupIndex?default('0')}_is_gift" value="false" /><span>${uiLabelMap.CommonNo}</span>
                                 </div>
                             </td>
                         </tr>
@@ -207,14 +207,13 @@ under the License.
                    </tr>
               </table>
 </#list>
-            </form>
           </td>
         </tr>
       </table>
     </td>
   </tr>
 </table>
-
+</form>
 <br />
 <#else>
   <h3>${uiLabelMap.OrderViewPermissionError}</h3>

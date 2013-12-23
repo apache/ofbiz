@@ -19,7 +19,7 @@ under the License.
 -->
 
 <simple-methods xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/simple-methods.xsd">
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/simple-methods-v2.xsd">
         
     <simple-method method-name="testCreateScrumProjectByProductOwner" short-description="Test Create Scrum Project" login-required="false">
         <entity-one value-field="userLogin" entity-name="UserLogin">
@@ -66,7 +66,7 @@ under the License.
         <call-simple-method method-name="updateScrumProject" xml-resource="component://scrum/script/org/ofbiz/scrum/ScrumEvents.xml"/>
     </simple-method>
     
-    <simple-method method-name="testCloseScrumProject" short-description="Test Close Scrum Project " login-required="false" user-login-name="userLogin">
+    <simple-method method-name="testCloseScrumProject" short-description="Test Close Scrum Project " login-required="false">
         <entity-one value-field="userLogin" entity-name="UserLogin">
             <field-map field-name="userLoginId" value="admin"/>
         </entity-one>

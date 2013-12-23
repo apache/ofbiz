@@ -34,10 +34,8 @@ import org.ofbiz.base.util.UtilProperties;
 import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.base.util.UtilXml;
 import org.ofbiz.base.util.cache.UtilCache;
-
 import org.ofbiz.service.DispatchContext;
 import org.ofbiz.service.ServiceUtil;
-
 import org.w3c.dom.Comment;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -113,6 +111,7 @@ public class SaveLabelsToXmlFile {
                 Document resourceDocument = UtilXml.makeEmptyXmlDocument("resource");
                 Element resourceElem = resourceDocument.getDocumentElement();
                 resourceElem.setAttribute("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance");
+                resourceElem.setAttribute("xsi:noNamespaceSchemaLocation","http://ofbiz.apache.org/dtds/ofbiz-properties.xsd");
                 for (String labelKey : labelsList) {
                     LabelInfo labelInfo = labels.get(labelKey);
                     if (!(labelInfo.getFileName().equalsIgnoreCase(fileName))) {
@@ -135,9 +134,6 @@ public class SaveLabelsToXmlFile {
                             valueString = StringEscapeUtils.unescapeHtml(valueString);
                             Element valueElem = UtilXml.addChildElementValue(propertyElem, "value", valueString, resourceDocument);
                             valueElem.setAttribute("xml:lang", localeFound);
-                            if (valueString.trim().length() == 0) {
-                                valueElem.setAttribute("xml:space", "preserve");
-                            }
                             if (UtilValidate.isNotEmpty(labelValue.getLabelComment())) {
                                 Comment labelComment = resourceDocument.createComment(StringEscapeUtils.unescapeHtml(labelValue.getLabelComment()));
                                 Node parent = valueElem.getParentNode();

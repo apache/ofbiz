@@ -49,12 +49,12 @@ under the License.
          <th>${uiLabelMap.CommonStatus}</th>
        </tr>
        <#list orderPaymentPreferences as orderPaymentPreference>
-         <#assign payments = orderPaymentPreference.getRelated("Payment")>
+         <#assign payments = orderPaymentPreference.getRelated("Payment", null, null, false)>
          <#list payments as payment>
-           <#assign statusItem = payment.getRelatedOne("StatusItem")>
+           <#assign statusItem = payment.getRelatedOne("StatusItem", false)>
            <#assign partyName = delegator.findOne("PartyNameView", {"partyId" : payment.partyIdTo}, true)>
            <tr>
-             <#if security.hasPermission("PAY_INFO_VIEW", session) || security.hasPermission("PAY_INFO_ADMIN", session)>
+             <#if security.hasEntityPermission("PAY_INFO", "_VIEW", session) || security.hasEntityPermission("ACCOUNTING", "_VIEW", session)>
                <td><a href="/accounting/control/paymentOverview?paymentId=${payment.paymentId}">${payment.paymentId}</a></td>
              <#else>
                <td>${payment.paymentId}</td>
@@ -79,8 +79,8 @@ under the License.
            <td width="1%">&nbsp;</td>
            <td valign="top" width="60%">
              <#list invoices as invoice>
-               <div>${uiLabelMap.CommonNbr}<a href="/accounting/control/invoiceOverview?invoiceId=${invoice}&amp;externalLoginKey=${externalLoginKey}" class="buttontext">${invoice}</a>
-               (<a target="_BLANK" href="/accounting/control/invoice.pdf?invoiceId=${invoice}&amp;externalLoginKey=${externalLoginKey}" class="buttontext">PDF</a>)</div>
+               <div>${uiLabelMap.CommonNbr}<a href="/accounting/control/invoiceOverview?invoiceId=${invoice}${StringUtil.wrapString(externalKeyParam)}" class="buttontext">${invoice}</a>
+               (<a target="_BLANK" href="/accounting/control/invoice.pdf?invoiceId=${invoice}${StringUtil.wrapString(externalKeyParam)}" class="buttontext">PDF</a>)</div>
              </#list>
            </td>
            <td width="10%">&nbsp;</td>
@@ -96,7 +96,7 @@ under the License.
          <#assign orderPaymentStatuses = orderReadHelper.getOrderPaymentStatuses()>
          <#if orderPaymentStatuses?has_content>
            <#list orderPaymentStatuses as orderPaymentStatus>
-             <#assign statusItem = orderPaymentStatus.getRelatedOne("StatusItem")?if_exists>
+             <#assign statusItem = orderPaymentStatus.getRelatedOne("StatusItem", false)?if_exists>
              <#if statusItem?has_content>
                 <div>
                   ${statusItem.get("description",locale)} <#if orderPaymentStatus.statusDatetime?has_content>- ${Static["org.ofbiz.base.util.UtilFormatOut"].formatDateTime(orderPaymentStatus.statusDatetime, "", locale, timeZone)!}</#if>
@@ -112,17 +112,17 @@ under the License.
      <tr><td colspan="4"><hr /></td></tr>
      <#if orderPaymentPreferences?has_content || billingAccount?has_content || invoices?has_content>
         <#list orderPaymentPreferences as orderPaymentPreference>
-          <#assign paymentList = orderPaymentPreference.getRelated("Payment")>
+          <#assign paymentList = orderPaymentPreference.getRelated("Payment", null, null, false)>
           <#assign pmBillingAddress = {}>
-          <#assign oppStatusItem = orderPaymentPreference.getRelatedOne("StatusItem")>
+          <#assign oppStatusItem = orderPaymentPreference.getRelatedOne("StatusItem", false)>
           <#if outputted?default("false") == "true">
             <tr><td colspan="4"><hr /></td></tr>
           </#if>
           <#assign outputted = "true">
           <#-- try the paymentMethod first; if paymentMethodId is specified it overrides paymentMethodTypeId -->
-          <#assign paymentMethod = orderPaymentPreference.getRelatedOne("PaymentMethod")?if_exists>
+          <#assign paymentMethod = orderPaymentPreference.getRelatedOne("PaymentMethod", false)?if_exists>
           <#if !paymentMethod?has_content>
-            <#assign paymentMethodType = orderPaymentPreference.getRelatedOne("PaymentMethodType")>
+            <#assign paymentMethodType = orderPaymentPreference.getRelatedOne("PaymentMethodType", false)>
             <#if paymentMethodType.paymentMethodTypeId == "EXT_BILLACT">
                 <#assign outputted = "false">
                 <#-- billing account -->
@@ -144,7 +144,7 @@ under the License.
                         <table class="basic-table" cellspacing='0'>
                             <tr>
                                 <td valign="top">
-                                    ${uiLabelMap.CommonNbr}<a href="/accounting/control/EditBillingAccount?billingAccountId=${billingAccount.billingAccountId}&amp;externalLoginKey=${externalLoginKey}" class="buttontext">${billingAccount.billingAccountId}</a>  - ${billingAccount.description?if_exists}
+                                    ${uiLabelMap.CommonNbr}<a href="/accounting/control/EditBillingAccount?billingAccountId=${billingAccount.billingAccountId}${StringUtil.wrapString(externalKeyParam)}" class="buttontext">${billingAccount.billingAccountId}</a>  - ${billingAccount.description?if_exists}
                                 </td>
                                 <td valign="top" align="right">
                                     <#if orderPaymentPreference.statusId != "PAYMENT_SETTLED" && orderPaymentPreference.statusId != "PAYMENT_RECEIVED">
@@ -172,10 +172,10 @@ under the License.
                   </tr>
                 </#if>
             <#elseif paymentMethodType.paymentMethodTypeId == "FIN_ACCOUNT">
-              <#assign finAccount = orderPaymentPreference.getRelatedOne("FinAccount")?if_exists/>
+              <#assign finAccount = orderPaymentPreference.getRelatedOne("FinAccount", false)?if_exists/>
               <#if (finAccount?has_content)>
-                <#assign gatewayResponses = orderPaymentPreference.getRelated("PaymentGatewayResponse")>
-                <#assign finAccountType = finAccount.getRelatedOne("FinAccountType")?if_exists/>
+                <#assign gatewayResponses = orderPaymentPreference.getRelated("PaymentGatewayResponse", null, null, false)>
+                <#assign finAccountType = finAccount.getRelatedOne("FinAccountType", false)?if_exists/>
                 <tr>
                   <td align="right" valign="top" width="29%">
                     <div>
@@ -191,7 +191,7 @@ under the License.
                       <#if (finAccountType?has_content)>
                         ${finAccountType.description?default(finAccountType.finAccountTypeId)}&nbsp;
                       </#if>
-                      #${finAccount.finAccountCode?default(finAccount.finAccountId)} (<a href="/accounting/control/EditFinAccount?finAccountId=${finAccount.finAccountId}&amp;externalLoginKey=${externalLoginKey}" class="buttontext">${finAccount.finAccountId}</a>)
+                      #${finAccount.finAccountCode?default(finAccount.finAccountId)} (<a href="/accounting/control/EditFinAccount?finAccountId=${finAccount.finAccountId}${StringUtil.wrapString(externalKeyParam)}" class="buttontext">${finAccount.finAccountId}</a>)
                       <br />
                       ${finAccount.finAccountName?if_exists}
                       <br />
@@ -199,10 +199,10 @@ under the License.
                       <#-- Authorize and Capture transactions -->
                       <div>
                         <#if orderPaymentPreference.statusId != "PAYMENT_SETTLED">
-                          <a href="/accounting/control/AuthorizeTransaction?orderId=${orderId?if_exists}&amp;orderPaymentPreferenceId=${orderPaymentPreference.orderPaymentPreferenceId}&amp;externalLoginKey=${externalLoginKey}" class="buttontext">${uiLabelMap.AccountingAuthorize}</a>
+                          <a href="/accounting/control/AuthorizeTransaction?orderId=${orderId?if_exists}&amp;orderPaymentPreferenceId=${orderPaymentPreference.orderPaymentPreferenceId}${StringUtil.wrapString(externalKeyParam)}" class="buttontext">${uiLabelMap.AccountingAuthorize}</a>
                         </#if>
                         <#if orderPaymentPreference.statusId == "PAYMENT_AUTHORIZED">
-                          <a href="/accounting/control/CaptureTransaction?orderId=${orderId?if_exists}&amp;orderPaymentPreferenceId=${orderPaymentPreference.orderPaymentPreferenceId}&amp;externalLoginKey=${externalLoginKey}" class="buttontext">${uiLabelMap.AccountingCapture}</a>
+                          <a href="/accounting/control/CaptureTransaction?orderId=${orderId?if_exists}&amp;orderPaymentPreferenceId=${orderPaymentPreference.orderPaymentPreferenceId}${StringUtil.wrapString(externalKeyParam)}" class="buttontext">${uiLabelMap.AccountingCapture}</a>
                         </#if>
                       </div>
                     </div>
@@ -210,14 +210,14 @@ under the License.
                       <div>
                         <hr />
                         <#list gatewayResponses as gatewayResponse>
-                          <#assign transactionCode = gatewayResponse.getRelatedOne("TranCodeEnumeration")>
+                          <#assign transactionCode = gatewayResponse.getRelatedOne("TranCodeEnumeration", false)>
                           ${(transactionCode.get("description",locale))?default("Unknown")}:
                           <#if gatewayResponse.transactionDate?has_content>${Static["org.ofbiz.base.util.UtilFormatOut"].formatDateTime(gatewayResponse.transactionDate, "", locale, timeZone)!} </#if>
                           <@ofbizCurrency amount=gatewayResponse.amount isoCode=currencyUomId/><br />
                           (<span class="label">${uiLabelMap.OrderReference}</span>&nbsp;${gatewayResponse.referenceNum?if_exists}
                           <span class="label">${uiLabelMap.OrderAvs}</span>&nbsp;${gatewayResponse.gatewayAvsResult?default("N/A")}
                           <span class="label">${uiLabelMap.OrderScore}</span>&nbsp;${gatewayResponse.gatewayScoreResult?default("N/A")})
-                          <a href="/accounting/control/ViewGatewayResponse?paymentGatewayResponseId=${gatewayResponse.paymentGatewayResponseId}&amp;externalLoginKey=${externalLoginKey}" class="buttontext">${uiLabelMap.CommonDetails}</a>
+                          <a href="/accounting/control/ViewGatewayResponse?paymentGatewayResponseId=${gatewayResponse.paymentGatewayResponseId}${StringUtil.wrapString(externalKeyParam)}" class="buttontext">${uiLabelMap.CommonDetails}</a>
                           <#if gatewayResponse_has_next><hr /></#if>
                         </#list>
                       </div>
@@ -248,7 +248,7 @@ under the License.
                       <td width="60%">
                         <div>
                             <#list paymentList as paymentMap>
-                                <a href="/accounting/control/paymentOverview?paymentId=${paymentMap.paymentId}&amp;externalLoginKey=${externalLoginKey}" class="buttontext">${paymentMap.paymentId}</a><#if paymentMap_has_next><br /></#if>
+                                <a href="/accounting/control/paymentOverview?paymentId=${paymentMap.paymentId}${StringUtil.wrapString(externalKeyParam)}" class="buttontext">${paymentMap.paymentId}</a><#if paymentMap_has_next><br /></#if>
                             </#list>
                         </div>
                       </td>
@@ -308,7 +308,7 @@ under the License.
                       <td width="60%">
                         <div>
                             <#list paymentList as paymentMap>
-                                <a href="/accounting/control/paymentOverview?paymentId=${paymentMap.paymentId}&amp;externalLoginKey=${externalLoginKey}" class="buttontext">${paymentMap.paymentId}</a><#if paymentMap_has_next><br /></#if>
+                                <a href="/accounting/control/paymentOverview?paymentId=${paymentMap.paymentId}${StringUtil.wrapString(externalKeyParam)}" class="buttontext">${paymentMap.paymentId}</a><#if paymentMap_has_next><br /></#if>
                             </#list>
                         </div>
                       </td>
@@ -317,10 +317,10 @@ under the License.
             </#if>
           <#else>
             <#if paymentMethod.paymentMethodTypeId?if_exists == "CREDIT_CARD">
-              <#assign gatewayResponses = orderPaymentPreference.getRelated("PaymentGatewayResponse")>
-              <#assign creditCard = paymentMethod.getRelatedOne("CreditCard")?if_exists>
+              <#assign gatewayResponses = orderPaymentPreference.getRelated("PaymentGatewayResponse", null, null, false)>
+              <#assign creditCard = paymentMethod.getRelatedOne("CreditCard", false)?if_exists>
               <#if creditCard?has_content>
-                <#assign pmBillingAddress = creditCard.getRelatedOne("PostalAddress")?if_exists>
+                <#assign pmBillingAddress = creditCard.getRelatedOne("PostalAddress", false)?if_exists>
               </#if>
               <tr>
                 <td align="right" valign="top" width="29%">
@@ -336,13 +336,13 @@ under the License.
                     <#if creditCard?has_content>
                       <#if creditCard.companyNameOnCard?exists>${creditCard.companyNameOnCard}<br /></#if>
                       <#if creditCard.titleOnCard?has_content>${creditCard.titleOnCard}&nbsp;</#if>
-                      ${creditCard.firstNameOnCard}&nbsp;
+                      ${creditCard.firstNameOnCard?default("N/A")}&nbsp;
                       <#if creditCard.middleNameOnCard?has_content>${creditCard.middleNameOnCard}&nbsp;</#if>
                       ${creditCard.lastNameOnCard?default("N/A")}
                       <#if creditCard.suffixOnCard?has_content>&nbsp;${creditCard.suffixOnCard}</#if>
                       <br />
 
-                      <#if security.hasEntityPermission("PAY_INFO", "_VIEW", session)>
+                      <#if security.hasEntityPermission("PAY_INFO", "_VIEW", session) || security.hasEntityPermission("ACCOUNTING", "_VIEW", session)>
                         ${creditCard.cardType}
                         <@maskSensitiveNumber cardNumber=creditCard.cardNumber?if_exists/>
                         ${creditCard.expireDate}
@@ -356,10 +356,10 @@ under the License.
                       <#-- Authorize and Capture transactions -->
                       <div>
                         <#if orderPaymentPreference.statusId != "PAYMENT_SETTLED">
-                          <a href="/accounting/control/AuthorizeTransaction?orderId=${orderId?if_exists}&amp;orderPaymentPreferenceId=${orderPaymentPreference.orderPaymentPreferenceId}&amp;externalLoginKey=${externalLoginKey}" class="buttontext">${uiLabelMap.AccountingAuthorize}</a>
+                          <a href="/accounting/control/AuthorizeTransaction?orderId=${orderId?if_exists}&amp;orderPaymentPreferenceId=${orderPaymentPreference.orderPaymentPreferenceId}${StringUtil.wrapString(externalKeyParam)}" class="buttontext">${uiLabelMap.AccountingAuthorize}</a>
                         </#if>
                         <#if orderPaymentPreference.statusId == "PAYMENT_AUTHORIZED">
-                          <a href="/accounting/control/CaptureTransaction?orderId=${orderId?if_exists}&amp;orderPaymentPreferenceId=${orderPaymentPreference.orderPaymentPreferenceId}&amp;externalLoginKey=${externalLoginKey}" class="buttontext">${uiLabelMap.AccountingCapture}</a>
+                          <a href="/accounting/control/CaptureTransaction?orderId=${orderId?if_exists}&amp;orderPaymentPreferenceId=${orderPaymentPreference.orderPaymentPreferenceId}${StringUtil.wrapString(externalKeyParam)}" class="buttontext">${uiLabelMap.AccountingCapture}</a>
                         </#if>
                       </div>
                     <#else>
@@ -370,14 +370,14 @@ under the License.
                     <div>
                       <hr />
                       <#list gatewayResponses as gatewayResponse>
-                        <#assign transactionCode = gatewayResponse.getRelatedOne("TranCodeEnumeration")>
+                        <#assign transactionCode = gatewayResponse.getRelatedOne("TranCodeEnumeration", false)>
                         ${(transactionCode.get("description",locale))?default("Unknown")}:
                         <#if gatewayResponse.transactionDate?has_content>${Static["org.ofbiz.base.util.UtilFormatOut"].formatDateTime(gatewayResponse.transactionDate, "", locale, timeZone)!} </#if>
                         <@ofbizCurrency amount=gatewayResponse.amount isoCode=currencyUomId/><br />
                         (<span class="label">${uiLabelMap.OrderReference}</span>&nbsp;${gatewayResponse.referenceNum?if_exists}
                         <span class="label">${uiLabelMap.OrderAvs}</span>&nbsp;${gatewayResponse.gatewayAvsResult?default("N/A")}
                         <span class="label">${uiLabelMap.OrderScore}</span>&nbsp;${gatewayResponse.gatewayScoreResult?default("N/A")})
-                        <a href="/accounting/control/ViewGatewayResponse?paymentGatewayResponseId=${gatewayResponse.paymentGatewayResponseId}&amp;externalLoginKey=${externalLoginKey}" class="buttontext">${uiLabelMap.CommonDetails}</a>
+                        <a href="/accounting/control/ViewGatewayResponse?paymentGatewayResponseId=${gatewayResponse.paymentGatewayResponseId}${StringUtil.wrapString(externalKeyParam)}" class="buttontext">${uiLabelMap.CommonDetails}</a>
                         <#if gatewayResponse_has_next><hr /></#if>
                       </#list>
                     </div>
@@ -398,9 +398,9 @@ under the License.
                 </td>
               </tr>
             <#elseif paymentMethod.paymentMethodTypeId?if_exists == "EFT_ACCOUNT">
-              <#assign eftAccount = paymentMethod.getRelatedOne("EftAccount")>
+              <#assign eftAccount = paymentMethod.getRelatedOne("EftAccount", false)>
               <#if eftAccount?has_content>
-                <#assign pmBillingAddress = eftAccount.getRelatedOne("PostalAddress")?if_exists>
+                <#assign pmBillingAddress = eftAccount.getRelatedOne("PostalAddress", false)?if_exists>
               </#if>
               <tr>
                 <td align="right" valign="top" width="29%">
@@ -446,16 +446,16 @@ under the License.
                   <td width="60%">
                     <div>
                         <#list paymentList as paymentMap>
-                            <a href="/accounting/control/paymentOverview?paymentId=${paymentMap.paymentId}&amp;externalLoginKey=${externalLoginKey}" class="buttontext">${paymentMap.paymentId}</a><#if paymentMap_has_next><br /></#if>
+                            <a href="/accounting/control/paymentOverview?paymentId=${paymentMap.paymentId}${StringUtil.wrapString(externalKeyParam)}" class="buttontext">${paymentMap.paymentId}</a><#if paymentMap_has_next><br /></#if>
                         </#list>
                     </div>
                   </td>
                 </tr>
               </#if>
             <#elseif paymentMethod.paymentMethodTypeId?if_exists == "GIFT_CARD">
-              <#assign giftCard = paymentMethod.getRelatedOne("GiftCard")>
+              <#assign giftCard = paymentMethod.getRelatedOne("GiftCard", false)>
               <#if giftCard?exists>
-                <#assign pmBillingAddress = giftCard.getRelatedOne("PostalAddress")?if_exists>
+                <#assign pmBillingAddress = giftCard.getRelatedOne("PostalAddress", false)?if_exists>
               </#if>
               <tr>
                 <td align="right" valign="top" width="29%">
@@ -469,7 +469,7 @@ under the License.
                 <td valign="top" width="60%">
                   <div>
                     <#if giftCard?has_content>
-                      <#if security.hasEntityPermission("PAY_INFO", "_VIEW", session)>
+                      <#if security.hasEntityPermission("PAY_INFO", "_VIEW", session) || security.hasEntityPermission("ACCOUNTING", "_VIEW", session)>
                         ${giftCard.cardNumber?default("N/A")} [${giftCard.pinNumber?default("N/A")}]
                         &nbsp;[<#if oppStatusItem?exists>${oppStatusItem.get("description",locale)}<#else>${orderPaymentPreference.statusId}</#if>]
                       <#else>
@@ -505,7 +505,7 @@ under the License.
                   <td width="60%">
                     <div>
                         <#list paymentList as paymentMap>
-                            <a href="/accounting/control/paymentOverview?paymentId=${paymentMap.paymentId}&amp;externalLoginKey=${externalLoginKey}" class="buttontext">${paymentMap.paymentId}</a><#if paymentMap_has_next><br /></#if>
+                            <a href="/accounting/control/paymentOverview?paymentId=${paymentMap.paymentId}${StringUtil.wrapString(externalKeyParam)}" class="buttontext">${paymentMap.paymentId}</a><#if paymentMap_has_next><br /></#if>
                         </#list>
                     </div>
                   </td>
@@ -540,7 +540,7 @@ under the License.
               <td width="60%">
                 <div>
                     <#list paymentList as paymentMap>
-                        <a href="/accounting/control/paymentOverview?paymentId=${paymentMap.paymentId}&amp;externalLoginKey=${externalLoginKey}" class="buttontext">${paymentMap.paymentId}</a><#if paymentMap_has_next><br /></#if>
+                        <a href="/accounting/control/paymentOverview?paymentId=${paymentMap.paymentId}${StringUtil.wrapString(externalKeyParam)}" class="buttontext">${paymentMap.paymentId}</a><#if paymentMap_has_next><br /></#if>
                     </#list>
                 </div>
               </td>
@@ -567,8 +567,8 @@ under the License.
             <td width="1%">&nbsp;</td>
             <td valign="top" width="60%">
               <#list invoices as invoice>
-                <div>${uiLabelMap.CommonNbr}<a href="/accounting/control/invoiceOverview?invoiceId=${invoice}&amp;externalLoginKey=${externalLoginKey}" class="buttontext">${invoice}</a>
-                (<a target="_BLANK" href="/accounting/control/invoice.pdf?invoiceId=${invoice}&amp;externalLoginKey=${externalLoginKey}" class="buttontext">PDF</a>)</div>
+                <div>${uiLabelMap.CommonNbr}<a href="/accounting/control/invoiceOverview?invoiceId=${invoice}${StringUtil.wrapString(externalKeyParam)}" class="buttontext">${invoice}</a>
+                (<a target="_BLANK" href="/accounting/control/invoice.pdf?invoiceId=${invoice}${StringUtil.wrapString(externalKeyParam)}" class="buttontext">PDF</a>)</div>
               </#list>
             </td>
             <td width="10%">&nbsp;</td>
@@ -596,7 +596,7 @@ under the License.
                <#if "CREDIT_CARD" == paymentMethod.paymentMethodTypeId>
                  <#assign creditCard = paymentMethodValueMap.creditCard/>
                  <#if (creditCard?has_content)>
-                   <#if security.hasEntityPermission("PAY_INFO", "_VIEW", session)>
+                   <#if security.hasEntityPermission("PAY_INFO", "_VIEW", session) || security.hasEntityPermission("ACCOUNTING", "_VIEW", session)>
                      ${creditCard.cardType?if_exists} <@maskSensitiveNumber cardNumber=creditCard.cardNumber?if_exists/> ${creditCard.expireDate?if_exists}
                    <#else>
                      ${Static["org.ofbiz.party.contact.ContactHelper"].formatCreditCard(creditCard)}

@@ -691,6 +691,7 @@ width: 100%;
 display: inline; /* IE Fix */
 }
 
+.button-bar form,
 .button-bar ul li ul li {
 float: left;
 font-weight: bold;
@@ -745,6 +746,7 @@ padding: 0.1em;
 }
 
 .tab-bar {
+display: table;
 margin: 0.5em 0.5em 0 0.5em;
 }
 
@@ -880,6 +882,38 @@ background: #FC7455;
 /* button column style - for the small
 collection of buttons used in lists */
 vertical-align: top;
+padding: 0.3em;
+}
+.basic-table tr .button-col a,
+.basic-table tr .button-col button,
+.basic-table tr .button-col input[type="reset"],
+.basic-table tr .button-col input[type="submit"],
+.basic-table tr .button-col input[type="button"] {
+    -webkit-appearance: none;
+    -moz-border-radius: 1em;
+    -webkit-border-radius: 1em;
+    border-radius: 1em;
+    background: #ddd url(images/button.png) repeat-x;
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(0, #fff), color-stop(1, #ddd));
+    background: -moz-linear-gradient(top center, #fff 0%, #ddd 100%);
+    border: 0.1em solid;
+    border-color: #ddd #bbb #999;
+    cursor: pointer;
+    color: #333;
+    display:inline-block;
+    font-size: 0.9em;
+    font-weight: bold;
+    outline: 0;
+    overflow: visible;
+    padding: 0.1em 0.5em 0.2em 0.5em;
+    text-decoration: none;
+    text-shadow: #fff 0 1px 1px; /* Setting must be in px */
+    /*text-transform:uppercase;*/
+    width: auto;
+    
+    /* IE7 */
+    *padding-top: 0.2em;
+    *padding-bottom: 0;
 }
 
 .basic-table .collapsed {
@@ -901,11 +935,13 @@ font-weight: bold;
 .basic-table .header-row-2 th .sort-order-asc,
 .basic-table .header-row-2 td .sort-order-asc{
 background: url(/images/arrow-gr-up.png) no-repeat right;
+padding-left: 0.5em;
 padding-right: 20px; /* Setting must be in px */
 }
 .basic-table .header-row-2 th .sort-order-desc,
 .basic-table .header-row-2 td .sort-order-desc{
 background: url(/images/arrow-gr-dw.png) no-repeat right;
+padding-left: 0.5em;
 padding-right: 20px; /* Setting must be in px */
 }
 .basic-table .header-row-2 th .sort-order,
@@ -1425,7 +1461,6 @@ a.buttontextbig,
 .button-style-1 ul a,
 .button-style-2 ul a, 
 .button-style-2 a, 
-.basic-table tr .button-col a, 
 .button,
 button,
 input[type="reset"],
@@ -2138,6 +2173,30 @@ border: #000000 solid 0.2em;
 float: left;
 overflow: auto;
 width: 30em;
+}
+
+img.cssImgXLarge {
+	/*border: 1px black solid;*/
+	max-width: 200px;
+	max-height: 150px;
+}
+
+img.cssImgLarge {
+	/*border: 1px black solid;*/
+	max-width: 100px;
+	max-height: 75px;
+}
+
+img.cssImgStandard {
+	/*border: 1px black solid;*/
+	max-width: 70px;
+	max-height: 52px;
+}
+
+img.cssImgSmall {
+	/*border: 1px black solid;*/
+	max-width: 50px;
+	max-height: 37px;
 }
 
 /* From http://jqueryui.com/demos/autocomplete/maxheight.html */

@@ -44,6 +44,7 @@ import org.ofbiz.entity.GenericValue;
 import org.ofbiz.entity.condition.EntityCondition;
 import org.ofbiz.entity.condition.EntityOperator;
 import org.ofbiz.entity.util.EntityUtil;
+import org.ofbiz.entity.util.EntityUtilProperties;
 import org.ofbiz.service.DispatchContext;
 import org.ofbiz.service.ModelService;
 import org.ofbiz.service.ServiceUtil;
@@ -73,7 +74,7 @@ public class ProductsExportToEbay {
             List<GenericValue> productsList  = delegator.findList("Product", EntityCondition.makeCondition("productId", EntityOperator.IN, selectResult), null, null, null, false);
             if (UtilValidate.isNotEmpty(productsList)) {
                 for (GenericValue product : productsList) {
-                    GenericValue startPriceValue = EntityUtil.getFirst(EntityUtil.filterByDate(product.getRelatedByAnd("ProductPrice", UtilMisc.toMap("productPricePurposeId", "EBAY", "productPriceTypeId", "MINIMUM_PRICE"))));
+                    GenericValue startPriceValue = EntityUtil.getFirst(EntityUtil.filterByDate(product.getRelated("ProductPrice", UtilMisc.toMap("productPricePurposeId", "EBAY", "productPriceTypeId", "MINIMUM_PRICE"), null, false)));
                     if (UtilValidate.isEmpty(startPriceValue)) {
                         String startPriceMissingMsg = "Unable to find a starting price for auction of product with id (" + product.getString("productId") + "), So Ignoring the export of this product to eBay.";
                         productExportFailureMessageList.add(startPriceMissingMsg);
@@ -205,7 +206,7 @@ public class ProductsExportToEbay {
                 String startPrice = (String)context.get("startPrice");
                 String startPriceCurrencyUomId = null;
                 if (UtilValidate.isEmpty(startPrice)) {
-                    GenericValue startPriceValue = EntityUtil.getFirst(EntityUtil.filterByDate(prod.getRelatedByAnd("ProductPrice", UtilMisc.toMap("productPricePurposeId", "EBAY", "productPriceTypeId", "MINIMUM_PRICE"))));
+                    GenericValue startPriceValue = EntityUtil.getFirst(EntityUtil.filterByDate(prod.getRelated("ProductPrice", UtilMisc.toMap("productPricePurposeId", "EBAY", "productPriceTypeId", "MINIMUM_PRICE"), null, false)));
                     if (UtilValidate.isNotEmpty(startPriceValue)) {
                         startPrice = startPriceValue.getString("price");
                         startPriceCurrencyUomId = startPriceValue.getString("currencyUomId");
@@ -216,7 +217,7 @@ public class ProductsExportToEbay {
                 String buyItNowPrice = (String)context.get("buyItNowPrice");
                 String buyItNowCurrencyUomId = null;
                 if (UtilValidate.isEmpty(buyItNowPrice)) {
-                    GenericValue buyItNowPriceValue = EntityUtil.getFirst(EntityUtil.filterByDate(prod.getRelatedByAnd("ProductPrice", UtilMisc.toMap("productPricePurposeId", "EBAY", "productPriceTypeId", "MAXIMUM_PRICE"))));
+                    GenericValue buyItNowPriceValue = EntityUtil.getFirst(EntityUtil.filterByDate(prod.getRelated("ProductPrice", UtilMisc.toMap("productPricePurposeId", "EBAY", "productPriceTypeId", "MAXIMUM_PRICE"), null, false)));
                     if (UtilValidate.isNotEmpty(buyItNowPriceValue)) {
                         buyItNowPrice = buyItNowPriceValue.getString("price");
                         buyItNowCurrencyUomId = buyItNowPriceValue.getString("currencyUomId");
@@ -244,19 +245,19 @@ public class ProductsExportToEbay {
                 if (listingFormat.equals("FixedPriceItem")) {
                     Element startPriceElem = UtilXml.addChildElementValue(itemElem, "StartPrice", startPrice, itemDocument);
                     if (UtilValidate.isEmpty(startPriceCurrencyUomId)) {
-                        startPriceCurrencyUomId = UtilProperties.getPropertyValue("general.properties", "currency.uom.id.default", "USD");
+                        startPriceCurrencyUomId = EntityUtilProperties.getPropertyValue("general.properties", "currency.uom.id.default", "USD", delegator);
                     }
                     startPriceElem.setAttribute("currencyID", startPriceCurrencyUomId);
                 }else{
                     Element startPriceElem = UtilXml.addChildElementValue(itemElem, "StartPrice", startPrice, itemDocument);
                     if (UtilValidate.isEmpty(startPriceCurrencyUomId)) {
-                        startPriceCurrencyUomId = UtilProperties.getPropertyValue("general.properties", "currency.uom.id.default", "USD");
+                        startPriceCurrencyUomId = EntityUtilProperties.getPropertyValue("general.properties", "currency.uom.id.default", "USD", delegator);
                     }
                     startPriceElem.setAttribute("currencyID", startPriceCurrencyUomId);
                     if (UtilValidate.isNotEmpty(buyItNowPrice)) {
                         Element buyNowPriceElem = UtilXml.addChildElementValue(itemElem, "BuyItNowPrice", buyItNowPrice, itemDocument);
                     if (UtilValidate.isEmpty(buyItNowCurrencyUomId)) {
-                        buyItNowCurrencyUomId = UtilProperties.getPropertyValue("general.properties", "currency.uom.id.default", "USD");
+                        buyItNowCurrencyUomId = EntityUtilProperties.getPropertyValue("general.properties", "currency.uom.id.default", "USD", delegator);
                     }
                     buyNowPriceElem.setAttribute("currencyID", buyItNowCurrencyUomId);
                     }
@@ -301,7 +302,7 @@ public class ProductsExportToEbay {
                         primaryCategoryId = categoryCode;
                     }
                 } else {
-                    GenericValue productCategoryValue = EntityUtil.getFirst(EntityUtil.filterByDate(delegator.findByAnd("ProductCategoryAndMember", UtilMisc.toMap("productCategoryTypeId", "EBAY_CATEGORY", "productId", prod.getString("productId")))));
+                    GenericValue productCategoryValue = EntityUtil.getFirst(EntityUtil.filterByDate(delegator.findByAnd("ProductCategoryAndMember", UtilMisc.toMap("productCategoryTypeId", "EBAY_CATEGORY", "productId", prod.getString("productId")), null, false)));
                     if (UtilValidate.isNotEmpty(productCategoryValue)) {
                         primaryCategoryId = productCategoryValue.getString("categoryName");
                     }

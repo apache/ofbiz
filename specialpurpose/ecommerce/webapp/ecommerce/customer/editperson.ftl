@@ -18,15 +18,15 @@ under the License.
 -->
 <#if person?exists>
   <h2>${uiLabelMap.PartyEditPersonalInformation}</h2>
-    <form method="post" action="<@ofbizUrl>updatePerson/${donePage}</@ofbizUrl>" name="editpersonform">
+    &nbsp;<form id="editpersonform1" method="post" action="<@ofbizUrl>updatePerson</@ofbizUrl>" name="editpersonform">    
 <#else>
   <h2>${uiLabelMap.PartyAddNewPersonalInformation}</h2>
-    <form method="post" action="<@ofbizUrl>createPerson/${donePage}</@ofbizUrl>" name="editpersonform">
+    &nbsp;<form id="editpersonform2" method="post" action="<@ofbizUrl>createPerson/${donePage}</@ofbizUrl>" name="editpersonform">
 </#if>
 <div>
-  <a href='<@ofbizUrl>authview/${donePage}</@ofbizUrl>' class="button">${uiLabelMap.CommonGoBack}</a>
-  <a href="javascript:document.editpersonform.submit()" class="button">${uiLabelMap.CommonSave}</a>
-
+  &nbsp;<a href='<@ofbizUrl>${donePage}</@ofbizUrl>' class="button">${uiLabelMap.CommonGoBack}</a>
+  &nbsp;<a href="javascript:document.editpersonform.submit()" class="button">${uiLabelMap.CommonSave}</a>
+  <p/>    
   <input type="hidden" name="partyId" value="${person.partyId?if_exists}" />
   <table width="90%" border="0" cellpadding="2" cellspacing="0">
   <tr>
@@ -98,7 +98,7 @@ under the License.
       <td align="right">${uiLabelMap.PartyBirthDate}</td>
       <td>
         <input type="text" class='inputBox' size="11" maxlength="20" name="birthDate" value="${(personData.birthDate.toString())?if_exists}"/>
-        <div class="tabletext">${uiLabelMap.CommonFormatDate}</div>
+        <div>${uiLabelMap.CommonFormatDate}</div>
       </td>
     </tr>
     <tr>
@@ -156,7 +156,7 @@ under the License.
       <td align="right">${uiLabelMap.PartyPassportExpireDate}</td>
       <td>
         <input type="text" class='inputBox' size="11" maxlength="20" name="passportExpireDate" value="${personData.passportExpireDate?if_exists}"/>
-        <div class="tabletext">${uiLabelMap.CommonFormatDate}</div>
+        <div>${uiLabelMap.CommonFormatDate}</div>
       </td>
     </tr>
     <tr>
@@ -174,6 +174,5 @@ under the License.
 </table>
 </div>
 </form>
-
-<a href='<@ofbizUrl>authview/${donePage}</@ofbizUrl>' class="button">${uiLabelMap.CommonGoBack}</a>
-<a href="javascript:document.editpersonform.submit()" class="button">${uiLabelMap.CommonSave}</a>
+&nbsp;<a href='<@ofbizUrl>${donePage}</@ofbizUrl>' class="button">${uiLabelMap.CommonGoBack}</a>
+&nbsp;<a id="editpersonform3" href="javascript:document.editpersonform.submit()" class="button">${uiLabelMap.CommonSave}</a>

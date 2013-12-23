@@ -37,6 +37,9 @@ import freemarker.template.TemplateTransformModel;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilFormatOut;
 import org.ofbiz.base.util.UtilHttp;
+import org.ofbiz.base.util.UtilValidate;
+import org.ofbiz.entity.Delegator;
+import org.ofbiz.entity.util.EntityUtilProperties;
 
 /**
  * OfbizCurrencyTransform - Freemarker Transform for content links
@@ -125,9 +128,32 @@ public class OfbizCurrencyTransform implements TemplateTransformModel {
         // rounding should be handled by the code, however some times the numbers are coming from
         // someplace else (i.e. an integration)
         Integer roundingNumber = getInteger(args, "rounding");
+        String scaleEnabled = "N";
+        Environment env = Environment.getCurrentEnvironment();
+        BeanModel req = null;
+        try {
+            req = (BeanModel) env.getVariable("request");
+        } catch (TemplateModelException e) {
+            Debug.logError(e.getMessage(), module);
+        }
+        if (req != null) {
+            HttpServletRequest request = (HttpServletRequest) req.getWrappedObject();
+            Delegator delegator = (Delegator) request.getAttribute("delegator");
+            // Get rounding from SystemProperty
+            if (UtilValidate.isNotEmpty(delegator)) {
+                String roundingString = EntityUtilProperties.getPropertyValue("general.properties", "currency.rounding.default", "10", delegator);
+                scaleEnabled = EntityUtilProperties.getPropertyValue("general.properties", "currency.scale.enabled", "N", delegator);
+                if (UtilValidate.isInteger(roundingString)) roundingNumber = Integer.parseInt(roundingString);
+            }
+        }
         if (roundingNumber == null) roundingNumber = 10;
+        if ("Y".equals(scaleEnabled)) {
+            if (amount.stripTrailingZeros().scale() <= 0) {
+                roundingNumber = 0;
+            }
+        }
         final int rounding = roundingNumber;
-
+        
         return new Writer(out) {
             @Override
             public void write(char cbuf[], int off, int len) {

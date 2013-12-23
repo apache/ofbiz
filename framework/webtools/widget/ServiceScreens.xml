@@ -49,12 +49,15 @@ under the License.
                 <set field="tabButtonItem" value="findJob"/>
                 <set field="jobCtx" from-field="parameters"/>
                 <set field="dummy" value="${groovy: if ('SERVICE_PENDING'.equals(jobCtx.statusId)) jobCtx.jobId = ''}"/> <!--  To more easily see current pending jobs and possibly cancel some others -->
+                <!-- fields for ServerHour24HourFormatJs.ftl -->
+                <set field="clockField" value="FindJobs_clock_title"/>
             </actions>
             <widgets>
                 <decorator-screen name="CommonServiceDecorator" location="${parameters.mainDecoratorLocation}">
                     <decorator-section name="body">
                         <section>
                             <widgets>
+                                <platform-specific><html><html-template location="component://common/webcommon/includes/ServerHour24HourFormatJs.ftl"/></html></platform-specific>
                                 <decorator-screen name="FindScreenDecorator" location="component://common/widget/CommonScreens.xml">
                                     <decorator-section name="search-options">
                                         <include-form name="FindJobs" location="component://webtools/widget/ServiceForms.xml"/>
@@ -65,6 +68,27 @@ under the License.
                                 </decorator-screen>
                             </widgets>
                         </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="JobDetails">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleJobDetails"/>
+                <set field="tabButtonItem" value="findJob"/>
+                <script location="component://webtools/webapp/webtools/WEB-INF/actions/service/JobDetails.groovy"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonServiceDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <screenlet title="${uiLabelMap.PageTitleJobDetails}">
+                            <include-form name="JobDetails" location="component://webtools/widget/ServiceForms.xml"/>
+                        </screenlet>
+                        <screenlet title="${uiLabelMap.WebtoolsRunTimeDataInfo}">
+                            <include-form name="JobRuntimeDataInfo" location="component://webtools/widget/ServiceForms.xml"/>
+                        </screenlet>
                     </decorator-section>
                 </decorator-screen>
             </widgets>
@@ -82,6 +106,7 @@ under the License.
                 <decorator-screen name="CommonServiceDecorator" location="${parameters.mainDecoratorLocation}">
                     <decorator-section name="body">
                         <screenlet title="${uiLabelMap.WebtoolsServiceEngineThreads}">
+                            <include-form name="PoolState" location="component://webtools/widget/ServiceForms.xml"/>
                             <include-form name="ListJavaThread" location="component://webtools/widget/ServiceForms.xml"/>
                         </screenlet>
                         <screenlet title="${uiLabelMap.WebtoolsGeneralJavaThreads}">

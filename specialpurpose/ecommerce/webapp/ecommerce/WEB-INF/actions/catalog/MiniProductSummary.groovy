@@ -28,17 +28,18 @@ import org.ofbiz.product.config.ProductConfigWorker;
 import org.ofbiz.product.catalog.*;
 import org.ofbiz.product.store.*;
 import org.ofbiz.order.shoppingcart.*;
+import org.ofbiz.webapp.website.WebSiteWorker;
 
 miniProduct = request.getAttribute("miniProduct");
 optProductId = request.getAttribute("optProductId");
-webSiteId = CatalogWorker.getWebSiteId(request);
+webSiteId = WebSiteWorker.getWebSiteId(request);
 prodCatalogId = CatalogWorker.getCurrentCatalogId(request);
 productStoreId = ProductStoreWorker.getProductStoreId(request);
 cart = ShoppingCartEvents.getCartObject(request);
 context.remove("totalPrice");
 
 if (optProductId) {
-    miniProduct = delegator.findByPrimaryKey("Product", [productId : optProductId]);
+    miniProduct = delegator.findOne("Product", [productId : optProductId], false);
 }
 
 if (miniProduct && productStoreId && prodCatalogId ) {
@@ -62,7 +63,7 @@ if (miniProduct && productStoreId && prodCatalogId ) {
     }
 
     // get aggregated product totalPrice
-    if ("AGGREGATED".equals(miniProduct.productTypeId)) {
+    if ("AGGREGATED".equals(miniProduct.productTypeId) || "AGGREGATED_SERVICE".equals(miniProduct.productTypeId)) {
         configWrapper = ProductConfigWorker.getProductConfigWrapper(optProductId, cart.getCurrency(), request);
         if (configWrapper) {
             configWrapper.setDefaultConfig();

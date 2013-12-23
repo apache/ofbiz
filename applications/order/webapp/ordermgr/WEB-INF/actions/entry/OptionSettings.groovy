@@ -30,7 +30,7 @@ context.cart = cart;
 productStore = ProductStoreWorker.getProductStore(request);
 if (productStore) {
     context.productStore = productStore;
-    context.carrierShipmentMethodList = delegator.findByAndCache('ProductStoreShipmentMethView', [productStoreId: productStore.productStoreId], ['sequenceNumber']);
+    context.carrierShipmentMethodList = delegator.findByAnd('ProductStoreShipmentMethView', [productStoreId: productStore.productStoreId], ['sequenceNumber'], true);
 }
 
 // nuke the event messages
@@ -39,7 +39,7 @@ request.removeAttribute("_EVENT_MESSAGE_");
 party = null;
 orderPartyIdId = cart.getPartyId();
 if (orderPartyIdId) {
-    orderPartyId = delegator.findByPrimaryKey("Party", [partyId : orderPartyIdId]);
+    orderPartyId = delegator.findOne("Party", [partyId : orderPartyIdId], false);
     context.orderPartyId = orderPartyId;
 }
 

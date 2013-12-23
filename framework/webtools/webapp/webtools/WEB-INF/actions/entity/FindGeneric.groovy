@@ -166,7 +166,7 @@ if ("true".equals(find)) {
             if (groupByFields || functionFields) {
                 fieldsToSelect = FastSet.newInstance();
 
-                for (ModelField groupByField : groupByFields) {
+                for (String groupByField : groupByFields) {
                     fieldsToSelect.add(groupByField);
                 }
 
@@ -174,8 +174,13 @@ if ("true".equals(find)) {
                     fieldsToSelect.add(functionField)
                 }
             }
-
-            resultEli = delegator.find(entityName, condition, null, fieldsToSelect, null, efo);
+            Collection pkNames = FastList.newInstance();
+            Iterator iter = modelEntity.getPksIterator();
+            while (iter != null && iter.hasNext()) {
+                ModelField curField = (ModelField) iter.next();
+                pkNames.add(curField.getName());
+            }
+            resultEli = delegator.find(entityName, condition, null, fieldsToSelect, pkNames, efo);
             resultPartialList = resultEli.getPartialList(lowIndex, highIndex - lowIndex + 1);
 
             arraySize = resultEli.getResultsSizeAfterPartialList();

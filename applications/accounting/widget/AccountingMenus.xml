@@ -27,13 +27,19 @@ under the License.
         <menu-item name="PaymentGroup" title="${uiLabelMap.AccountingPaymentGroup}"><link target="FindPaymentGroup"/></menu-item>
         <menu-item name="transaction" title="${uiLabelMap.AccountingTransactions}">
             <condition>
-                <if-has-permission permission="MANUAL" action="_PAYMENT"/>
+                <or>
+                    <if-has-permission permission="MANUAL" action="_PAYMENT"/>
+                    <if-has-permission permission="ACCOUNTING" action="_CREATE"/>
+                </or>
             </condition>
             <link target="FindGatewayResponses"/>
         </menu-item>
         <menu-item name="PaymentGatewayConfig" title="${uiLabelMap.AccountingPaymentGatewayConfig}">
             <condition>
-                <if-has-permission permission="PAYPROC" action="_ADMIN"/>
+                <or>
+                    <if-has-permission permission="PAYPROC" action="_ADMIN"/>
+                    <if-has-permission permission="ACCOUNTING" action="_ADMIN"/>
+                </or>
             </condition>
             <link target="FindPaymentGatewayConfig"/>
         </menu-item>
@@ -391,9 +397,6 @@ under the License.
             <link target="editPaymentApplications">
                 <parameter param-name="paymentId" from-field="payment.paymentId"/>
             </link>
-        </menu-item>
-           <menu-item name="paymentReport" title="Payment Report">
-            <link target="paymentReport"/>
         </menu-item>
     </menu>
 
@@ -1099,6 +1102,16 @@ under the License.
                 <parameter param-name="agreementItemSeqId" from-field="agreementItem.agreementItemSeqId"/>
             </link>
         </menu-item>
+
+        <menu-item name="ListAgreementItemFacility" title="${uiLabelMap.ProductFacilities}">
+            <condition>
+                <if-compare field="agreement.agreementTypeId" operator="not-equals" value="PURCHASE_AGREEMENT"/>
+            </condition>
+            <link target="ListAgreementItemFacilities">
+                <parameter param-name="agreementId" from-field="agreementItem.agreementId"/>
+                <parameter param-name="agreementItemSeqId" from-field="agreementItem.agreementItemSeqId"/>
+            </link>
+        </menu-item>
     </menu>
 
     <menu name="BillingAccountTabBar" extends="CommonTabBarMenu" extends-resource="component://common/widget/CommonMenus.xml">
@@ -1299,4 +1312,12 @@ under the License.
             </link>
         </menu-item>
     </menu>
+    <menu name="newAccountOrganization">
+        <menu-item name="addCompany"  title="${uiLabelMap.AccountingNewCompany}">
+            <condition>
+                <if-compare field="hasPrefPermission" operator="equals" value="true" type="Boolean"/>
+            </condition>
+            <link target="AddCompany" link-type="auto"/>
+        </menu-item>
+     </menu>
 </menus>

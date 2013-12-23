@@ -423,7 +423,7 @@ under the License.
                     <decorator-section name="body">
                         <screenlet title="${uiLabelMap.PageTitleProjectGanttChart}">
                             <platform-specific>
-                                <html><html-template location="component://projectmgr/webapp/projectmgr/project/gantChart.ftl"/></html>
+                                <html><html-template location="component://projectmgr/webapp/projectmgr/project/ganttChart.ftl"/></html>
                             </platform-specific>
                         </screenlet>
                     </decorator-section>
@@ -610,12 +610,17 @@ under the License.
                 <set field="tabButtonItem" value="listResourcesTask"/>
                 <set field="titleProperty" value="PageTitleListTaskByParty"/>
                 <set field="workEffortId" from-field="parameters.projectId"/>
-                <entity-and entity-name="WorkEffortAndPartyAssign" list="tasks">
-                    <field-map field-name="partyId" from-field="parameters.partyId"/>
-                    <field-map field-name="workEffortTypeId" value="TASK"/>
-                    <field-map field-name="statusId" value="PRTYASGN_ASSIGNED"/>
+                <entity-condition entity-name="WorkEffortAndPartyAssign" list="tasks">
+                    <condition-list combine="and">
+                        <condition-expr field-name="partyId" from-field="parameters.partyId"/>
+                        <condition-expr field-name="workEffortTypeId" value="TASK"/>
+                        <condition-list combine="or">
+                            <condition-expr field-name="statusId" value="PRTYASGN_ASSIGNED"/>
+                            <condition-expr field-name="statusId" value="PAS_ASSIGNED"/>
+                        </condition-list>
+                    </condition-list>
                     <order-by field-name="workEffortId"/>
-                </entity-and>
+                </entity-condition>
                 <set field="projectId" from-field="parameters.projectId" default-value="${parameters.workEffortId}"/>
                 <set field="partyId" from-field="parameters.partyId"/>
             </actions>
@@ -1022,7 +1027,7 @@ under the License.
                             <container style="clear"/>
                             <screenlet title="${uiLabelMap.PageTitleProjectGanttChart}">
                                 <platform-specific>
-                                    <html><html-template location="component://projectmgr/webapp/projectmgr/project/gantChart.ftl"/></html>
+                                    <html><html-template location="component://projectmgr/webapp/projectmgr/project/ganttChart.ftl"/></html>
                                 </platform-specific>
                             </screenlet>
                         </widgets>

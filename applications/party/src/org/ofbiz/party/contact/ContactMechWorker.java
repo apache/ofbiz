@@ -34,13 +34,13 @@ import javolution.util.FastMap;
 import org.ofbiz.base.util.Assert;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilMisc;
-import org.ofbiz.base.util.UtilProperties;
 import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
 import org.ofbiz.entity.condition.EntityCondition;
 import org.ofbiz.entity.util.EntityUtil;
+import org.ofbiz.entity.util.EntityUtilProperties;
 
 /**
  * Worker methods for Contact Mechanisms
@@ -48,6 +48,8 @@ import org.ofbiz.entity.util.EntityUtil;
 public class ContactMechWorker {
 
     public static final String module = ContactMechWorker.class.getName();
+
+    private ContactMechWorker() {}
 
     public static List<Map<String, Object>> getPartyContactMechValueMaps(Delegator delegator, String partyId, boolean showOld) {
        return getPartyContactMechValueMaps(delegator, partyId, showOld, null);
@@ -59,11 +61,11 @@ public class ContactMechWorker {
         List<GenericValue> allPartyContactMechs = null;
 
         try {
-            List<GenericValue> tempCol = delegator.findByAnd("PartyContactMech", UtilMisc.toMap("partyId", partyId));
+            List<GenericValue> tempCol = delegator.findByAnd("PartyContactMech", UtilMisc.toMap("partyId", partyId), null, false);
             if (contactMechTypeId != null) {
                 List<GenericValue> tempColTemp = FastList.newInstance();
                 for (GenericValue partyContactMech: tempCol) {
-                    GenericValue contactMech = delegator.getRelatedOne("ContactMech", partyContactMech);
+                    GenericValue contactMech = delegator.getRelatedOne("ContactMech", partyContactMech, false);
                     if (contactMech != null && contactMechTypeId.equals(contactMech.getString("contactMechTypeId"))) {
                         tempColTemp.add(partyContactMech);
                     }
@@ -83,7 +85,7 @@ public class ContactMechWorker {
             GenericValue contactMech = null;
 
             try {
-                contactMech = partyContactMech.getRelatedOne("ContactMech");
+                contactMech = partyContactMech.getRelatedOne("ContactMech", false);
             } catch (GenericEntityException e) {
                 Debug.logWarning(e, module);
             }
@@ -95,13 +97,13 @@ public class ContactMechWorker {
                 partyContactMechValueMap.put("partyContactMech", partyContactMech);
 
                 try {
-                    partyContactMechValueMap.put("contactMechType", contactMech.getRelatedOneCache("ContactMechType"));
+                    partyContactMechValueMap.put("contactMechType", contactMech.getRelatedOne("ContactMechType", true));
                 } catch (GenericEntityException e) {
                     Debug.logWarning(e, module);
                 }
 
                 try {
-                    List<GenericValue> partyContactMechPurposes = partyContactMech.getRelated("PartyContactMechPurpose");
+                    List<GenericValue> partyContactMechPurposes = partyContactMech.getRelated("PartyContactMechPurpose", null, null, false);
 
                     if (!showOld) partyContactMechPurposes = EntityUtil.filterByDate(partyContactMechPurposes, true);
                     partyContactMechValueMap.put("partyContactMechPurposes", partyContactMechPurposes);
@@ -111,9 +113,9 @@ public class ContactMechWorker {
 
                 try {
                     if ("POSTAL_ADDRESS".equals(contactMech.getString("contactMechTypeId"))) {
-                        partyContactMechValueMap.put("postalAddress", contactMech.getRelatedOne("PostalAddress"));
+                        partyContactMechValueMap.put("postalAddress", contactMech.getRelatedOne("PostalAddress", false));
                     } else if ("TELECOM_NUMBER".equals(contactMech.getString("contactMechTypeId"))) {
-                        partyContactMechValueMap.put("telecomNumber", contactMech.getRelatedOne("TelecomNumber"));
+                        partyContactMechValueMap.put("telecomNumber", contactMech.getRelatedOne("TelecomNumber", false));
                     }
                 } catch (GenericEntityException e) {
                     Debug.logWarning(e, module);
@@ -130,11 +132,11 @@ public class ContactMechWorker {
         List<GenericValue> allFacilityContactMechs = null;
 
         try {
-            List<GenericValue> tempCol = delegator.findByAnd("FacilityContactMech", UtilMisc.toMap("facilityId", facilityId));
+            List<GenericValue> tempCol = delegator.findByAnd("FacilityContactMech", UtilMisc.toMap("facilityId", facilityId), null, false);
             if (contactMechTypeId != null) {
                 List<GenericValue> tempColTemp = FastList.newInstance();
                 for (GenericValue partyContactMech: tempCol) {
-                    GenericValue contactMech = delegator.getRelatedOne("ContactMech", partyContactMech);
+                    GenericValue contactMech = delegator.getRelatedOne("ContactMech", partyContactMech, false);
                     if (contactMech != null && contactMechTypeId.equals(contactMech.getString("contactMechTypeId"))) {
                         tempColTemp.add(partyContactMech);
                     }
@@ -154,7 +156,7 @@ public class ContactMechWorker {
             GenericValue contactMech = null;
 
             try {
-                contactMech = facilityContactMech.getRelatedOne("ContactMech");
+                contactMech = facilityContactMech.getRelatedOne("ContactMech", false);
             } catch (GenericEntityException e) {
                 Debug.logWarning(e, module);
             }
@@ -166,13 +168,13 @@ public class ContactMechWorker {
                 facilityContactMechValueMap.put("facilityContactMech", facilityContactMech);
 
                 try {
-                    facilityContactMechValueMap.put("contactMechType", contactMech.getRelatedOneCache("ContactMechType"));
+                    facilityContactMechValueMap.put("contactMechType", contactMech.getRelatedOne("ContactMechType", true));
                 } catch (GenericEntityException e) {
                     Debug.logWarning(e, module);
                 }
 
                 try {
-                    List<GenericValue> facilityContactMechPurposes = facilityContactMech.getRelated("FacilityContactMechPurpose");
+                    List<GenericValue> facilityContactMechPurposes = facilityContactMech.getRelated("FacilityContactMechPurpose", null, null, false);
 
                     if (!showOld) facilityContactMechPurposes = EntityUtil.filterByDate(facilityContactMechPurposes, true);
                     facilityContactMechValueMap.put("facilityContactMechPurposes", facilityContactMechPurposes);
@@ -182,9 +184,9 @@ public class ContactMechWorker {
 
                 try {
                     if ("POSTAL_ADDRESS".equals(contactMech.getString("contactMechTypeId"))) {
-                        facilityContactMechValueMap.put("postalAddress", contactMech.getRelatedOne("PostalAddress"));
+                        facilityContactMechValueMap.put("postalAddress", contactMech.getRelatedOne("PostalAddress", false));
                     } else if ("TELECOM_NUMBER".equals(contactMech.getString("contactMechTypeId"))) {
-                        facilityContactMechValueMap.put("telecomNumber", contactMech.getRelatedOne("TelecomNumber"));
+                        facilityContactMechValueMap.put("telecomNumber", contactMech.getRelatedOne("TelecomNumber", false));
                     }
                 } catch (GenericEntityException e) {
                     Debug.logWarning(e, module);
@@ -202,7 +204,7 @@ public class ContactMechWorker {
         List<GenericValue> allOrderContactMechs = null;
 
         try {
-            allOrderContactMechs = delegator.findByAnd("OrderContactMech", UtilMisc.toMap("orderId", orderId), UtilMisc.toList("contactMechPurposeTypeId"));
+            allOrderContactMechs = delegator.findByAnd("OrderContactMech", UtilMisc.toMap("orderId", orderId), UtilMisc.toList("contactMechPurposeTypeId"), false);
         } catch (GenericEntityException e) {
             Debug.logWarning(e, module);
         }
@@ -213,7 +215,7 @@ public class ContactMechWorker {
             GenericValue contactMech = null;
 
             try {
-                contactMech = orderContactMech.getRelatedOne("ContactMech");
+                contactMech = orderContactMech.getRelatedOne("ContactMech", false);
             } catch (GenericEntityException e) {
                 Debug.logWarning(e, module);
             }
@@ -225,13 +227,13 @@ public class ContactMechWorker {
                 orderContactMechValueMap.put("orderContactMech", orderContactMech);
 
                 try {
-                    orderContactMechValueMap.put("contactMechType", contactMech.getRelatedOneCache("ContactMechType"));
+                    orderContactMechValueMap.put("contactMechType", contactMech.getRelatedOne("ContactMechType", true));
                 } catch (GenericEntityException e) {
                     Debug.logWarning(e, module);
                 }
 
                 try {
-                    GenericValue contactMechPurposeType = orderContactMech.getRelatedOne("ContactMechPurposeType");
+                    GenericValue contactMechPurposeType = orderContactMech.getRelatedOne("ContactMechPurposeType", false);
 
                     orderContactMechValueMap.put("contactMechPurposeType", contactMechPurposeType);
                 } catch (GenericEntityException e) {
@@ -240,9 +242,9 @@ public class ContactMechWorker {
 
                 try {
                     if ("POSTAL_ADDRESS".equals(contactMech.getString("contactMechTypeId"))) {
-                        orderContactMechValueMap.put("postalAddress", contactMech.getRelatedOne("PostalAddress"));
+                        orderContactMechValueMap.put("postalAddress", contactMech.getRelatedOne("PostalAddress", false));
                     } else if ("TELECOM_NUMBER".equals(contactMech.getString("contactMechTypeId"))) {
-                        orderContactMechValueMap.put("telecomNumber", contactMech.getRelatedOne("TelecomNumber"));
+                        orderContactMechValueMap.put("telecomNumber", contactMech.getRelatedOne("TelecomNumber", false));
                     }
                 } catch (GenericEntityException e) {
                     Debug.logWarning(e, module);
@@ -259,7 +261,7 @@ public class ContactMechWorker {
         List<GenericValue> allWorkEffortContactMechs = null;
 
         try {
-            List<GenericValue> workEffortContactMechs = delegator.findByAnd("WorkEffortContactMech", UtilMisc.toMap("workEffortId", workEffortId));
+            List<GenericValue> workEffortContactMechs = delegator.findByAnd("WorkEffortContactMech", UtilMisc.toMap("workEffortId", workEffortId), null, false);
             allWorkEffortContactMechs = EntityUtil.filterByDate(workEffortContactMechs);
         } catch (GenericEntityException e) {
             Debug.logWarning(e, module);
@@ -271,7 +273,7 @@ public class ContactMechWorker {
             GenericValue contactMech = null;
 
             try {
-                contactMech = workEffortContactMech.getRelatedOne("ContactMech");
+                contactMech = workEffortContactMech.getRelatedOne("ContactMech", false);
             } catch (GenericEntityException e) {
                 Debug.logWarning(e, module);
             }
@@ -283,16 +285,16 @@ public class ContactMechWorker {
                 workEffortContactMechValueMap.put("workEffortContactMech", workEffortContactMech);
 
                 try {
-                    workEffortContactMechValueMap.put("contactMechType", contactMech.getRelatedOneCache("ContactMechType"));
+                    workEffortContactMechValueMap.put("contactMechType", contactMech.getRelatedOne("ContactMechType", true));
                 } catch (GenericEntityException e) {
                     Debug.logWarning(e, module);
                 }
 
                 try {
                     if ("POSTAL_ADDRESS".equals(contactMech.getString("contactMechTypeId"))) {
-                        workEffortContactMechValueMap.put("postalAddress", contactMech.getRelatedOne("PostalAddress"));
+                        workEffortContactMechValueMap.put("postalAddress", contactMech.getRelatedOne("PostalAddress", false));
                     } else if ("TELECOM_NUMBER".equals(contactMech.getString("contactMechTypeId"))) {
-                        workEffortContactMechValueMap.put("telecomNumber", contactMech.getRelatedOne("TelecomNumber"));
+                        workEffortContactMechValueMap.put("telecomNumber", contactMech.getRelatedOne("TelecomNumber", false));
                     }
                 } catch (GenericEntityException e) {
                     Debug.logWarning(e, module);
@@ -335,7 +337,7 @@ public class ContactMechWorker {
             List<GenericValue> partyContactMechs = null;
 
             try {
-                partyContactMechs = EntityUtil.filterByDate(delegator.findByAnd("PartyContactMech", UtilMisc.toMap("partyId", partyId, "contactMechId", contactMechId)), true);
+                partyContactMechs = EntityUtil.filterByDate(delegator.findByAnd("PartyContactMech", UtilMisc.toMap("partyId", partyId, "contactMechId", contactMechId), null, false), true);
             } catch (GenericEntityException e) {
                 Debug.logWarning(e, module);
             }
@@ -348,7 +350,7 @@ public class ContactMechWorker {
                 Collection<GenericValue> partyContactMechPurposes = null;
 
                 try {
-                    partyContactMechPurposes = EntityUtil.filterByDate(partyContactMech.getRelated("PartyContactMechPurpose"), true);
+                    partyContactMechPurposes = EntityUtil.filterByDate(partyContactMech.getRelated("PartyContactMechPurpose", null, null, false), true);
                 } catch (GenericEntityException e) {
                     Debug.logWarning(e, module);
                 }
@@ -357,7 +359,7 @@ public class ContactMechWorker {
             }
 
             try {
-                contactMech = delegator.findByPrimaryKey("ContactMech", UtilMisc.toMap("contactMechId", contactMechId));
+                contactMech = delegator.findOne("ContactMech", UtilMisc.toMap("contactMechId", contactMechId), false);
             } catch (GenericEntityException e) {
                 Debug.logWarning(e, module);
             }
@@ -372,7 +374,7 @@ public class ContactMechWorker {
             target.put("contactMechTypeId", contactMechTypeId);
 
             try {
-                GenericValue contactMechType = delegator.findByPrimaryKey("ContactMechType", UtilMisc.toMap("contactMechTypeId", contactMechTypeId));
+                GenericValue contactMechType = delegator.findOne("ContactMechType", UtilMisc.toMap("contactMechTypeId", contactMechTypeId), false);
 
                 if (contactMechType != null)
                     target.put("contactMechType", contactMechType);
@@ -384,7 +386,7 @@ public class ContactMechWorker {
             Iterator<GenericValue> typePurposes = null;
 
             try {
-                typePurposes = UtilMisc.toIterator(delegator.findByAnd("ContactMechTypePurpose", UtilMisc.toMap("contactMechTypeId", contactMechTypeId)));
+                typePurposes = UtilMisc.toIterator(delegator.findByAnd("ContactMechTypePurpose", UtilMisc.toMap("contactMechTypeId", contactMechTypeId), null, false));
             } catch (GenericEntityException e) {
                 Debug.logWarning(e, module);
             }
@@ -393,7 +395,7 @@ public class ContactMechWorker {
                 GenericValue contactMechPurposeType = null;
 
                 try {
-                    contactMechPurposeType = contactMechTypePurpose.getRelatedOne("ContactMechPurposeType");
+                    contactMechPurposeType = contactMechTypePurpose.getRelatedOne("ContactMechPurposeType", false);
                 } catch (GenericEntityException e) {
                     Debug.logWarning(e, module);
                 }
@@ -440,7 +442,7 @@ public class ContactMechWorker {
             GenericValue postalAddress = null;
 
             try {
-                if (contactMech != null) postalAddress = contactMech.getRelatedOne("PostalAddress");
+                if (contactMech != null) postalAddress = contactMech.getRelatedOne("PostalAddress", false);
             } catch (GenericEntityException e) {
                 Debug.logWarning(e, module);
             }
@@ -449,7 +451,7 @@ public class ContactMechWorker {
             GenericValue telecomNumber = null;
 
             try {
-                if (contactMech != null) telecomNumber = contactMech.getRelatedOne("TelecomNumber");
+                if (contactMech != null) telecomNumber = contactMech.getRelatedOne("TelecomNumber", false);
             } catch (GenericEntityException e) {
                 Debug.logWarning(e, module);
             }
@@ -547,7 +549,7 @@ public class ContactMechWorker {
             List<GenericValue> facilityContactMechs = null;
 
             try {
-                facilityContactMechs = EntityUtil.filterByDate(delegator.findByAnd("FacilityContactMech", UtilMisc.toMap("facilityId", facilityId, "contactMechId", contactMechId)), true);
+                facilityContactMechs = EntityUtil.filterByDate(delegator.findByAnd("FacilityContactMech", UtilMisc.toMap("facilityId", facilityId, "contactMechId", contactMechId), null, false), true);
             } catch (GenericEntityException e) {
                 Debug.logWarning(e, module);
             }
@@ -560,7 +562,7 @@ public class ContactMechWorker {
                 Collection<GenericValue> facilityContactMechPurposes = null;
 
                 try {
-                    facilityContactMechPurposes = EntityUtil.filterByDate(facilityContactMech.getRelated("FacilityContactMechPurpose"), true);
+                    facilityContactMechPurposes = EntityUtil.filterByDate(facilityContactMech.getRelated("FacilityContactMechPurpose", null, null, false), true);
                 } catch (GenericEntityException e) {
                     Debug.logWarning(e, module);
                 }
@@ -569,7 +571,7 @@ public class ContactMechWorker {
             }
 
             try {
-                contactMech = delegator.findByPrimaryKey("ContactMech", UtilMisc.toMap("contactMechId", contactMechId));
+                contactMech = delegator.findOne("ContactMech", UtilMisc.toMap("contactMechId", contactMechId), false);
             } catch (GenericEntityException e) {
                 Debug.logWarning(e, module);
             }
@@ -584,7 +586,7 @@ public class ContactMechWorker {
             target.put("contactMechTypeId", contactMechTypeId);
 
             try {
-                GenericValue contactMechType = delegator.findByPrimaryKey("ContactMechType", UtilMisc.toMap("contactMechTypeId", contactMechTypeId));
+                GenericValue contactMechType = delegator.findOne("ContactMechType", UtilMisc.toMap("contactMechTypeId", contactMechTypeId), false);
 
                 if (contactMechType != null)
                     target.put("contactMechType", contactMechType);
@@ -596,7 +598,7 @@ public class ContactMechWorker {
             Iterator<GenericValue> typePurposes = null;
 
             try {
-                typePurposes = UtilMisc.toIterator(delegator.findByAnd("ContactMechTypePurpose", UtilMisc.toMap("contactMechTypeId", contactMechTypeId)));
+                typePurposes = UtilMisc.toIterator(delegator.findByAnd("ContactMechTypePurpose", UtilMisc.toMap("contactMechTypeId", contactMechTypeId), null, false));
             } catch (GenericEntityException e) {
                 Debug.logWarning(e, module);
             }
@@ -605,7 +607,7 @@ public class ContactMechWorker {
                 GenericValue contactMechPurposeType = null;
 
                 try {
-                    contactMechPurposeType = contactMechTypePurpose.getRelatedOne("ContactMechPurposeType");
+                    contactMechPurposeType = contactMechTypePurpose.getRelatedOne("ContactMechPurposeType", false);
                 } catch (GenericEntityException e) {
                     Debug.logWarning(e, module);
                 }
@@ -652,7 +654,7 @@ public class ContactMechWorker {
             GenericValue postalAddress = null;
 
             try {
-                if (contactMech != null) postalAddress = contactMech.getRelatedOne("PostalAddress");
+                if (contactMech != null) postalAddress = contactMech.getRelatedOne("PostalAddress", false);
             } catch (GenericEntityException e) {
                 Debug.logWarning(e, module);
             }
@@ -661,7 +663,7 @@ public class ContactMechWorker {
             GenericValue telecomNumber = null;
 
             try {
-                if (contactMech != null) telecomNumber = contactMech.getRelatedOne("TelecomNumber");
+                if (contactMech != null) telecomNumber = contactMech.getRelatedOne("TelecomNumber", false);
             } catch (GenericEntityException e) {
                 Debug.logWarning(e, module);
             }
@@ -689,7 +691,7 @@ public class ContactMechWorker {
         List<GenericValue> allPartyContactMechs = null;
 
         try {
-            allPartyContactMechs = EntityUtil.filterByDate(delegator.findByAnd("PartyContactMech", UtilMisc.toMap("partyId", partyId)), true);
+            allPartyContactMechs = EntityUtil.filterByDate(delegator.findByAnd("PartyContactMech", UtilMisc.toMap("partyId", partyId), null, false), true);
         } catch (GenericEntityException e) {
             Debug.logWarning(e, module);
         }
@@ -700,7 +702,7 @@ public class ContactMechWorker {
             GenericValue contactMech = null;
 
             try {
-                contactMech = partyContactMech.getRelatedOne("ContactMech");
+                contactMech = partyContactMech.getRelatedOne("ContactMech", false);
             } catch (GenericEntityException e) {
                 Debug.logWarning(e, module);
             }
@@ -712,14 +714,14 @@ public class ContactMechWorker {
                 postalAddressInfo.put("partyContactMech", partyContactMech);
 
                 try {
-                    GenericValue postalAddress = contactMech.getRelatedOne("PostalAddress");
+                    GenericValue postalAddress = contactMech.getRelatedOne("PostalAddress", false);
                     postalAddressInfo.put("postalAddress", postalAddress);
                 } catch (GenericEntityException e) {
                     Debug.logWarning(e, module);
                 }
 
                 try {
-                    List<GenericValue> partyContactMechPurposes = EntityUtil.filterByDate(partyContactMech.getRelated("PartyContactMechPurpose"), true);
+                    List<GenericValue> partyContactMechPurposes = EntityUtil.filterByDate(partyContactMech.getRelated("PartyContactMechPurpose", null, null, false), true);
                     postalAddressInfo.put("partyContactMechPurposes", partyContactMechPurposes);
                 } catch (GenericEntityException e) {
                     Debug.logWarning(e, module);
@@ -738,7 +740,7 @@ public class ContactMechWorker {
             List<GenericValue> partyContactMechs = null;
 
             try {
-                partyContactMechs = EntityUtil.filterByDate(delegator.findByAnd("PartyContactMech", UtilMisc.toMap("partyId", partyId, "contactMechId", curContactMechId)), true);
+                partyContactMechs = EntityUtil.filterByDate(delegator.findByAnd("PartyContactMech", UtilMisc.toMap("partyId", partyId, "contactMechId", curContactMechId), null, false), true);
             } catch (GenericEntityException e) {
                 Debug.logWarning(e, module);
             }
@@ -748,14 +750,14 @@ public class ContactMechWorker {
             GenericValue curContactMech = null;
             if (curPartyContactMech != null) {
                 try {
-                    curContactMech = curPartyContactMech.getRelatedOne("ContactMech");
+                    curContactMech = curPartyContactMech.getRelatedOne("ContactMech", false);
                 } catch (GenericEntityException e) {
                     Debug.logWarning(e, module);
                 }
 
                 Collection<GenericValue> curPartyContactMechPurposes = null;
                 try {
-                    curPartyContactMechPurposes = EntityUtil.filterByDate(curPartyContactMech.getRelated("PartyContactMechPurpose"), true);
+                    curPartyContactMechPurposes = EntityUtil.filterByDate(curPartyContactMech.getRelated("PartyContactMechPurpose", null, null, false), true);
                 } catch (GenericEntityException e) {
                     Debug.logWarning(e, module);
                 }
@@ -766,7 +768,7 @@ public class ContactMechWorker {
             GenericValue curPostalAddress = null;
             if (curContactMech != null) {
                 try {
-                    curPostalAddress = curContactMech.getRelatedOne("PostalAddress");
+                    curPostalAddress = curContactMech.getRelatedOne("PostalAddress", false);
                 } catch (GenericEntityException e) {
                     Debug.logWarning(e, module);
                 }
@@ -792,7 +794,7 @@ public class ContactMechWorker {
         String addr2 = postalAddress.getString("address2");
 
         // get the matching string from general.properties
-        String matcher = UtilProperties.getPropertyValue("general.properties", "usps.address.match");
+        String matcher = EntityUtilProperties.getPropertyValue("general.properties", "usps.address.match", postalAddress.getDelegator());
         if (UtilValidate.isNotEmpty(matcher)) {
             if (addr1 != null && addr1.toLowerCase().matches(matcher)) {
                 return true;
@@ -842,11 +844,11 @@ public class ContactMechWorker {
         Delegator delegator = postalAddress.getDelegator();
         List<GenericValue> postalAddresses = FastList.newInstance();
         try {
-            List<GenericValue> partyContactMechs = delegator.findByAnd("PartyContactMech", UtilMisc.toMap("partyId", companyPartyId));
+            List<GenericValue> partyContactMechs = delegator.findByAnd("PartyContactMech", UtilMisc.toMap("partyId", companyPartyId), null, false);
             partyContactMechs = EntityUtil.filterByDate(partyContactMechs);
             if (partyContactMechs != null) {
                 for (GenericValue pcm: partyContactMechs) {
-                    GenericValue addr = pcm.getRelatedOne("PostalAddress");
+                    GenericValue addr = pcm.getRelatedOne("PostalAddress", false);
                     if (addr != null) {
                         postalAddresses.add(addr);
                     }
@@ -888,7 +890,7 @@ public class ContactMechWorker {
     public static String getContactMechAttribute(Delegator delegator, String contactMechId, String attrName) {
         GenericValue attr = null;
         try {
-            attr = delegator.findByPrimaryKey("ContactMechAttribute", UtilMisc.toMap("contactMechId", contactMechId, "attrName", attrName));
+            attr = delegator.findOne("ContactMechAttribute", UtilMisc.toMap("contactMechId", contactMechId, "attrName", attrName), false);
         } catch (GenericEntityException e) {
             Debug.logError(e, module);
         }
@@ -908,14 +910,14 @@ public class ContactMechWorker {
         // no postalCodeGeoId, see if there is a Geo record matching the countryGeoId and postalCode fields
         if (UtilValidate.isNotEmpty(postalAddress.getString("countryGeoId")) && UtilValidate.isNotEmpty(postalAddress.getString("postalCode"))) {
             // first try the shortcut with the geoId convention for "{countryGeoId}-{postalCode}"
-            GenericValue geo = delegator.findByPrimaryKeyCache("Geo", UtilMisc.toMap("geoId", postalAddress.getString("countryGeoId") + "-" + postalAddress.getString("postalCode")));
+            GenericValue geo = delegator.findOne("Geo", UtilMisc.toMap("geoId", postalAddress.getString("countryGeoId") + "-" + postalAddress.getString("postalCode")), true);
             if (geo != null) {
                 // save the value to the database for quicker future reference
                 if (postalAddress.isMutable()) {
                     postalAddress.set("postalCodeGeoId", geo.getString("geoId"));
                     postalAddress.store();
                 } else {
-                    GenericValue mutablePostalAddress = delegator.findByPrimaryKey("PostalAddress", UtilMisc.toMap("contactMechId", postalAddress.getString("contactMechId")));
+                    GenericValue mutablePostalAddress = delegator.findOne("PostalAddress", UtilMisc.toMap("contactMechId", postalAddress.getString("contactMechId")), false);
                     mutablePostalAddress.set("postalCodeGeoId", geo.getString("geoId"));
                     mutablePostalAddress.store();
                 }
@@ -924,8 +926,8 @@ public class ContactMechWorker {
             }
 
             // no shortcut, try the longcut to see if there is something with a geoCode associated to the countryGeoId
-            List<GenericValue> geoAssocAndGeoToList = delegator.findByAndCache("GeoAssocAndGeoTo",
-                    UtilMisc.toMap("geoIdFrom", postalAddress.getString("countryGeoId"), "geoCode", postalAddress.getString("postalCode"), "geoAssocTypeId", "REGIONS"));
+            List<GenericValue> geoAssocAndGeoToList = delegator.findByAnd("GeoAssocAndGeoTo",
+                    UtilMisc.toMap("geoIdFrom", postalAddress.getString("countryGeoId"), "geoCode", postalAddress.getString("postalCode"), "geoAssocTypeId", "REGIONS"), null, true);
             GenericValue geoAssocAndGeoTo = EntityUtil.getFirst(geoAssocAndGeoToList);
             if (geoAssocAndGeoTo != null) {
                 // save the value to the database for quicker future reference
@@ -933,7 +935,7 @@ public class ContactMechWorker {
                     postalAddress.set("postalCodeGeoId", geoAssocAndGeoTo.getString("geoId"));
                     postalAddress.store();
                 } else {
-                    GenericValue mutablePostalAddress = delegator.findByPrimaryKey("PostalAddress", UtilMisc.toMap("contactMechId", postalAddress.getString("contactMechId")));
+                    GenericValue mutablePostalAddress = delegator.findOne("PostalAddress", UtilMisc.toMap("contactMechId", postalAddress.getString("contactMechId")), false);
                     mutablePostalAddress.set("postalCodeGeoId", geoAssocAndGeoTo.getString("geoId"));
                     mutablePostalAddress.store();
                 }
@@ -970,12 +972,12 @@ public class ContactMechWorker {
             sb.append(", ").append(postalAddress.get("city"));
         }
         if (postalAddress.get("stateProvinceGeoId") != null) {
-            GenericValue geoValue = postalAddress.getRelatedOne("StateProvinceGeo");
+            GenericValue geoValue = postalAddress.getRelatedOne("StateProvinceGeo", false);
             if (geoValue != null) {
                 sb.append(", ").append(geoValue.get("geoName"));
             }
         } else if (postalAddress.get("countyGeoId") != null) {
-            GenericValue geoValue = postalAddress.getRelatedOne("CountyGeo");
+            GenericValue geoValue = postalAddress.getRelatedOne("CountyGeo", false);
             if (geoValue != null) {
                 sb.append(", ").append(geoValue.get("geoName"));
             }
@@ -984,7 +986,7 @@ public class ContactMechWorker {
             sb.append(", ").append(postalAddress.get("postalCode"));
         }
         if (postalAddress.get("countryGeoId") != null) {
-            GenericValue geoValue = postalAddress.getRelatedOne("CountryGeo");
+            GenericValue geoValue = postalAddress.getRelatedOne("CountryGeo", false);
             if (geoValue != null) {
                 sb.append(", ").append(geoValue.get("geoName"));
             }

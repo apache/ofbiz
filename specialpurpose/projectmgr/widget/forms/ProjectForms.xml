@@ -63,7 +63,19 @@
                 <entity-options entity-name="PartyAcctgPrefAndGroup" description="${groupName}" key-field-name="partyId"/>
             </drop-down>
         </field>
-        <field name="priority" title="${uiLabelMap.CommonPriority}"><display/></field>
+        <field name="priority" title="${uiLabelMap.CommonPriority}">
+            <drop-down allow-empty="true" no-current-selected-key="${priority}">
+                <option key="1" description="${uiLabelMap.WorkEffortPriorityOne}"/>
+                <option key="2" description="${uiLabelMap.WorkEffortPriorityTwo}"/>
+                <option key="3" description="${uiLabelMap.WorkEffortPriorityThree}"/>
+                <option key="4" description="${uiLabelMap.WorkEffortPriorityFour}"/>
+                <option key="5" description="${uiLabelMap.WorkEffortPriorityFive}"/>
+                <option key="6" description="${uiLabelMap.WorkEffortPrioritySix}"/>
+                <option key="7" description="${uiLabelMap.WorkEffortPrioritySeventh}"/>
+                <option key="8" description="${uiLabelMap.WorkEffortPriorityEight}"/>
+                <option key="9" description="${uiLabelMap.WorkEffortPriorityNine}"/>
+            </drop-down>
+        </field>
         <field name="scopeEnumId" title="${uiLabelMap.ProjectMgrWorkEffortScopeEnumId}">
             <drop-down allow-empty="false" no-current-selected-key="WES_PRIVATE">
                 <entity-options entity-name="Enumeration" description="${description}" key-field-name="enumId">
@@ -80,10 +92,10 @@
                 </entity-options>
             </drop-down>
         </field>
-        <field use-when="projectId!=null" name="estimatedStartDate" title="${uiLabelMap.FormFieldTitle_estimatedStartDate}"><display type="date"/></field>
-        <field use-when="projectId!=null" name="estimatedCompletionDate" title="${uiLabelMap.FormFieldTitle_estimatedCompletionDate}"><display type="date"/></field>
-        <field use-when="projectId!=null" name="actualStartDate" title="${uiLabelMap.FormFieldTitle_actualStartDate}"><display type="date"/></field>
-        <field use-when="projectId!=null" name="actualCompletionDate" title="${uiLabelMap.FormFieldTitle_actualCompletionDate}"><display type="date"/></field>
+        <field use-when="projectId!=null" name="estimatedStartDate" title="${uiLabelMap.FormFieldTitle_estimatedStartDate}"><date-time/></field>
+        <field use-when="projectId!=null" name="estimatedCompletionDate" title="${uiLabelMap.FormFieldTitle_estimatedCompletionDate}"><date-time/></field>
+        <field use-when="projectId!=null" name="actualStartDate" title="${uiLabelMap.FormFieldTitle_actualStartDate}"><date-time/></field>
+        <field use-when="projectId!=null" name="actualCompletionDate" title="${uiLabelMap.FormFieldTitle_actualCompletionDate}"><date-time/></field>
         <field name="emailAddress" title="${uiLabelMap.FormFieldTitle_mailingListEmail}"><text/></field>
         <field name="save" title="${uiLabelMap.CommonSave}"><submit/></field>
     </form>
@@ -124,7 +136,7 @@
             </entity-condition>
         </actions>
         <row-actions>
-            <set field="showPosition1" value="${bsh:String prev=(String)previousItem.get(&quot;workEffortId&quot;);return !(prev!=null&amp;&amp;prev.equals(workEffortId));}" type="Boolean"/>
+            <set field="showPosition1" value="${groovy:String prev=(String)previousItem.get(&quot;workEffortId&quot;);return !(prev!=null&amp;&amp;prev.equals(workEffortId));}" type="Boolean"/>
         </row-actions>
         <field name="workEffortId"><hidden/></field>
         <field name="phaseName" position="1" use-when="showPosition1"><display description="${phaseName}[${phaseId}]"/></field>
@@ -454,7 +466,7 @@
         <field name="statusId"><display-entity entity-name="StatusItem" description="${description}"/></field>
         <field name="orderDate"><display/></field>
         <field name="entryDate"><display/></field>
-        <field name="linkProjectOrder" title="${uiLabelMap.CommonEmptyHeader}" widget-style="buttontext" use-when="headerItem.equals(&quot;editProjectOrders&quot;)">
+        <field name="linkProjectOrder" title=" " widget-style="buttontext" use-when="headerItem.equals(&quot;editProjectOrders&quot;)">
             <hyperlink target="unLinkProjectOrder" description="${uiLabelMap.ProjectMgrRemoveLinkFromProject}">
                 <parameter param-name="workEffortId" from-field="projectId"/>
                 <parameter param-name="orderId"/>
@@ -525,8 +537,8 @@
         <row-actions>
             <entity-one entity-name="PartyAcctgPreference" value-field="orgParty"/>
             <entity-one entity-name="Party" value-field="clientParty"/>
-            <set field="currencyUomId" value="${bsh:orgParty!=null&amp;&amp;orgParty.getString(&quot;baseCurrencyUomId&quot;)!=null?orgParty.getString(&quot;baseCurrencyUomId&quot;):&quot;&quot;}"/>
-            <set field="currencyUomId" value="${bsh:clientParty!=null&amp;&amp;clientParty.getString(&quot;preferredCurrencyUomId&quot;)!=null?clientParty.getString(&quot;preferredCurrencyUomId&quot;):currencyUomId}"/>
+            <set field="currencyUomId" value="${groovy: orgParty?.getString('baseCurrencyUomId') ?: ''}"/>
+            <set field="currencyUomId" value="${groovy: clientParty?.getString('preferredCurrencyUomId') ?: currencyUomId}"/>
         </row-actions>
         <field name="projectId"><hidden/></field>
         <field name="partyName" title="${uiLabelMap.CommonName}">
@@ -540,7 +552,7 @@
     <form name="EditWorkEffortPartyAssigns" target="deleteWorkEffortPartyAssign" title="" type="list" paginate-target="ListWorkEffortPartyAssigns"
         odd-row-style="alternate-row" header-row-style="header-row-2" default-table-style="basic-table hover-bar">
         <actions>
-            <entity-condition entity-name="WorkEffortPartyAssignView" filter-by-date="true">
+            <entity-condition entity-name="WorkEffortPartyAssignView" >
                 <condition-expr field-name="workEffortId" operator="equals" from-field="workEffortId"/>
                 <order-by field-name="roleTypeId"/>
             </entity-condition>
@@ -555,9 +567,9 @@
         <field name="roleTypeId" title="${uiLabelMap.PartyRoleType}">
             <display-entity entity-name="RoleType"/>
         </field>
-        <field name="fromDate" title="${uiLabelMap.CommonFromDate}"><display type="date"/></field>
-        <field name="thruDate" title="${uiLabelMap.CommonThruDate}"><display type="date"/></field>
-        <field name="deleteButton" widget-style="smallSubmit"><submit button-type="button"/></field>
+        <field name="fromDate" title="${uiLabelMap.CommonFromDate}"><display type="date-time"/></field>
+        <field name="thruDate" title="${uiLabelMap.CommonThruDate}"><display type="date-time"/></field>
+        <field name="expireButton" widget-style="smallSubmit"  use-when="${thruDate==null || (thruDate &gt; nowTimestamp)}"><submit button-type="button"/></field>
     </form>
     <form name="AddWorkEffortPartyAssign" target="createWorkEffortPartyAssign" title="" type="single"
         header-row-style="header-row" default-table-style="basic-table">
@@ -849,7 +861,7 @@
         </field>
         <field name="thruDate"><ignored/></field>
         <field name="submitButton"><ignored/></field>
-        <field name="deleteLink" title="${uiLabelMap.CommonEmptyHeader}" widget-style="buttontext" use-when="headerItem.equals(&quot;EditProjectContents&quot;)">
+        <field name="deleteLink" title=" " widget-style="buttontext" use-when="headerItem.equals(&quot;EditProjectContents&quot;)">
             <hyperlink also-hidden="false" description="${uiLabelMap.CommonDelete}" target="deleteProjectContent">
                 <parameter param-name="contentId"/>
                 <parameter param-name="workEffortId"/>
@@ -857,10 +869,10 @@
                 <parameter param-name="fromDate"/>
             </hyperlink>
         </field>
-        <field name="downloadLink" title="${uiLabelMap.CommonEmptyHeader}" widget-style="buttontext">
+        <field name="downloadLink" title=" " widget-style="buttontext">
             <hyperlink description="${uiLabelMap.ContentDownload}" target="ViewSimpleContent?contentId=${contentId}"/>
         </field>
-        <field name="deleteLink" title="${uiLabelMap.CommonEmptyHeader}" widget-style="buttontext" use-when="headerItem.equals(&quot;EditTaskContents&quot;)">
+        <field name="deleteLink" title=" " widget-style="buttontext" use-when="headerItem.equals(&quot;EditTaskContents&quot;)">
             <hyperlink also-hidden="false" description="${uiLabelMap.CommonDelete}" target="deleteTaskContent">
                 <parameter param-name="contentId"/>
                 <parameter param-name="workEffortId"/>

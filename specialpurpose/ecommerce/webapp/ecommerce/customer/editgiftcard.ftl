@@ -19,7 +19,7 @@ under the License.
 
 <#if canNotView>
   <p><h3>${uiLabelMap.AccountingCardInfoNotBelongToYou}.</h3></p>
-&nbsp;<a href="<@ofbizUrl>authview/${donePage}</@ofbizUrl>" class="buttontext">[${uiLabelMap.CommonBack}]</a>
+&nbsp;<a href="<@ofbizUrl>${donePage}</@ofbizUrl>" class="buttontext">[${uiLabelMap.CommonGoBack}]</a>
 <#else>
     <#if !giftCard?exists>
       <h1>${uiLabelMap.AccountingAddNewGiftCard}</h1>
@@ -29,12 +29,12 @@ under the License.
       <form method="post" action="<@ofbizUrl>updateGiftCard?DONE_PAGE=${donePage}</@ofbizUrl>" name="editgiftcardform" style="margin: 0;">
         <input type="hidden" name="paymentMethodId" value="${paymentMethodId}" />
     </#if>
-    &nbsp;<a href="<@ofbizUrl>${donePage}</@ofbizUrl>" class="buttontext">[${uiLabelMap.CommonCancelDone}]</a>
-    &nbsp;<a href="javascript:document.editgiftcardform.submit()" class="buttontext">[${uiLabelMap.CommonSave}]</a>
-
+    &nbsp;<a href="<@ofbizUrl>${donePage}</@ofbizUrl>" class="button">${uiLabelMap.CommonGoBack}</a>
+    &nbsp;<a href="javascript:document.editgiftcardform.submit()" class="button">${uiLabelMap.CommonSave}</a>  
+    <p/> 
     <table width="90%" border="0" cellpadding="2" cellspacing="0">
     <tr>
-      <td width="26%" align="right" valign="top"><div class="tabletext">${uiLabelMap.AccountingCardNumber}</div></td>
+      <td width="26%" align="right" valign="top"><div>${uiLabelMap.AccountingCardNumber}</div></td>
       <td width="5">&nbsp;</td>
       <td width="74%">
         <#if giftCardData?has_content && giftCardData.cardNumber?has_content>
@@ -56,14 +56,14 @@ under the License.
       </td>
     </tr>
     <tr>
-      <td width="26%" align="right" valign="top"><div class="tabletext">${uiLabelMap.AccountingPINNumber}</div></td>
+      <td width="26%" align="right" valign="top"><div>${uiLabelMap.AccountingPINNumber}</div></td>
       <td width="5">&nbsp;</td>
       <td width="74%">
         <input type="password" class="inputBox" size="10" maxlength="60" name="pinNumber" value="${giftCardData.pinNumber?if_exists}" />
       </td>
     </tr>
     <tr>
-      <td width="26%" align="right" valign="top"><div class="tabletext">${uiLabelMap.AccountingExpirationDate}</div></td>
+      <td width="26%" align="right" valign="top"><div>${uiLabelMap.AccountingExpirationDate}</div></td>
       <td width="5">&nbsp;</td>
       <td width="74%">
         <#assign expMonth = "">
@@ -100,15 +100,14 @@ under the License.
       </td>
     </tr>
     <tr>
-      <td width="26%" align="right" valign="top"><div class="tabletext">${uiLabelMap.CommonDescription}</div></td>
+      <td width="26%" align="right" valign="top"><div>${uiLabelMap.CommonDescription}</div></td>
       <td width="5">&nbsp;</td>
       <td width="74%">
         <input type="text" class="inputBox" size="30" maxlength="60" name="description" value="${paymentMethodData.description?if_exists}" />
       </td>
     </tr>
   </table>
-  </form>
-
-  &nbsp;<a href="<@ofbizUrl>${donePage}</@ofbizUrl>" class="buttontext">[${uiLabelMap.CommonCancelDone}]</a>
-  &nbsp;<a href="javascript:document.editgiftcardform.submit()" class="buttontext">[${uiLabelMap.CommonSave}]</a>
+  </form>  
+  &nbsp;<a href="<@ofbizUrl>${donePage}</@ofbizUrl>" class="button">${uiLabelMap.CommonGoBack}</a>
+  &nbsp;<a href="javascript:document.editgiftcardform.submit()" class="button">${uiLabelMap.CommonSave}</a>  
 </#if>

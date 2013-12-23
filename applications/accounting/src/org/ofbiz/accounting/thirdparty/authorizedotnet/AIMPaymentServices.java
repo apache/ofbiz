@@ -107,7 +107,7 @@ public class AIMPaymentServices {
         GenericValue orderPaymentPreference = (GenericValue) context.get("orderPaymentPreference");
         GenericValue creditCard = null;
         try {
-            creditCard = delegator.getRelatedOne("CreditCard",orderPaymentPreference);
+            creditCard = delegator.getRelatedOne("CreditCard",orderPaymentPreference, false);
         } catch (GenericEntityException e) {
             Debug.logError(e, module);
             return ServiceUtil.returnError(UtilProperties.getMessage(resource, 
@@ -155,7 +155,7 @@ public class AIMPaymentServices {
         GenericValue orderPaymentPreference = (GenericValue) context.get("orderPaymentPreference");
         GenericValue creditCard = null;
         try {
-            creditCard = delegator.getRelatedOne("CreditCard", orderPaymentPreference);
+            creditCard = delegator.getRelatedOne("CreditCard", orderPaymentPreference, false);
         } catch (GenericEntityException e) {
             Debug.logError(e, module);
             return ServiceUtil.returnError(UtilProperties.getMessage(resource, 
@@ -499,13 +499,13 @@ public class AIMPaymentServices {
                     // sometimes the ccAuthCapture interface is used, in which case the creditCard is passed directly
                     GenericValue creditCard = (GenericValue) params.get("creditCard");
                     if (creditCard == null || ! (opp.get("paymentMethodId").equals(creditCard.get("paymentMethodId")))) {
-                        creditCard = opp.getRelatedOne("CreditCard");
+                        creditCard = opp.getRelatedOne("CreditCard", false);
                     }
                     AIMRequest.put("x_First_Name", UtilFormatOut.checkNull(creditCard.getString("firstNameOnCard")));
                     AIMRequest.put("x_Last_Name", UtilFormatOut.checkNull(creditCard.getString("lastNameOnCard")));
                     AIMRequest.put("x_Company", UtilFormatOut.checkNull(creditCard.getString("companyNameOnCard")));
                     if (UtilValidate.isNotEmpty(creditCard.getString("contactMechId"))) {
-                        GenericValue address = creditCard.getRelatedOne("PostalAddress");
+                        GenericValue address = creditCard.getRelatedOne("PostalAddress", false);
                         if (address != null) {
                             AIMRequest.put("x_Address", UtilFormatOut.checkNull(address.getString("address1")));
                             AIMRequest.put("x_City", UtilFormatOut.checkNull(address.getString("city")));
@@ -651,7 +651,7 @@ public class AIMPaymentServices {
             results.put("authRefNum", ar.getTransactionId());
             results.put("cvCode", ar.getCvResult());
             results.put("avsCode", ar.getAvsResult());
-            if (ar.getAmount() == BigDecimal.ZERO) {
+            if (BigDecimal.ZERO.compareTo(ar.getAmount()) == 0) {
                 results.put("processAmount", getXAmount(request));
             } else {
                 results.put("processAmount", ar.getAmount());
@@ -673,7 +673,7 @@ public class AIMPaymentServices {
         results.put("captureRefNum", ar.getTransactionId());
         if (captureResult.booleanValue()) { //passed
             results.put("captureCode", ar.getAuthorizationCode());
-            if (ar.getAmount() == BigDecimal.ZERO) {
+            if (BigDecimal.ZERO.compareTo(ar.getAmount()) == 0) {
                 results.put("captureAmount", getXAmount(request));
             } else {
                 results.put("captureAmount", ar.getAmount());
@@ -694,7 +694,7 @@ public class AIMPaymentServices {
         results.put("refundRefNum", ar.getTransactionId());
         if (captureResult.booleanValue()) { //passed
             results.put("refundCode", ar.getAuthorizationCode());
-            if (ar.getAmount() == BigDecimal.ZERO) {
+            if (BigDecimal.ZERO.compareTo(ar.getAmount()) == 0) {
                 results.put("refundAmount", getXAmount(request));
             } else {
                 results.put("refundAmount", ar.getAmount());
@@ -716,7 +716,7 @@ public class AIMPaymentServices {
         results.put("releaseRefNum", ar.getTransactionId());
         if (captureResult.booleanValue()) { //passed
             results.put("releaseCode", ar.getAuthorizationCode());
-            if (ar.getAmount() == BigDecimal.ZERO) {
+            if (BigDecimal.ZERO.compareTo(ar.getAmount()) == 0) {
                 results.put("releaseAmount", getXAmount(request));
             } else {
                 results.put("releaseAmount", ar.getAmount());
@@ -743,7 +743,7 @@ public class AIMPaymentServices {
             results.put("authRefNum", ar.getTransactionId());
             results.put("cvCode", ar.getCvResult());
             results.put("avsCode", ar.getAvsResult());
-            if (ar.getAmount() == BigDecimal.ZERO) {
+            if (BigDecimal.ZERO.compareTo(ar.getAmount()) == 0) {
                 results.put("processAmount", getXAmount(request));
             } else {
                 results.put("processAmount", ar.getAmount());
@@ -793,8 +793,9 @@ public class AIMPaymentServices {
     private static BigDecimal getXAmount(Map<String, Object> request) {
         BigDecimal amt = BigDecimal.ZERO;
         if (request.get("x_Amount") != null) {
+            BigDecimal amount = (BigDecimal) request.get("x_Amount");
             try {
-                amt = new BigDecimal((String) request.get("x_Amount"));
+                amt = amount;
             } catch (NumberFormatException e) {
                 Debug.logWarning(e, e.getMessage(), module);
             }

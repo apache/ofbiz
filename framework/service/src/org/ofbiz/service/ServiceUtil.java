@@ -18,12 +18,13 @@
  *******************************************************************************/
 package org.ofbiz.service;
 
+import java.math.BigDecimal;
 import java.sql.Timestamp;
-import com.ibm.icu.util.Calendar;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.TimeZone;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.transaction.Transaction;
@@ -31,6 +32,7 @@ import javax.transaction.Transaction;
 import javolution.util.FastList;
 import javolution.util.FastMap;
 
+import org.ofbiz.base.config.GenericConfigException;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilDateTime;
 import org.ofbiz.base.util.UtilGenerics;
@@ -49,6 +51,8 @@ import org.ofbiz.entity.util.EntityFindOptions;
 import org.ofbiz.entity.util.EntityListIterator;
 import org.ofbiz.security.Security;
 import org.ofbiz.service.config.ServiceConfigUtil;
+
+import com.ibm.icu.util.Calendar;
 
 /**
  * Generic Service Utility Class
@@ -183,6 +187,9 @@ public class ServiceUtil {
      *<b>security check</b>: userLogin partyId must equal partyId, or must have [secEntity][secOperation] permission
      */
     public static String getPartyIdCheckSecurity(GenericValue userLogin, Security security, Map<String, ? extends Object> context, Map<String, Object> result, String secEntity, String secOperation) {
+        return getPartyIdCheckSecurity(userLogin, security, context, result, secEntity, secOperation, null, null);
+    }
+    public static String getPartyIdCheckSecurity(GenericValue userLogin, Security security, Map<String, ? extends Object> context, Map<String, Object> result, String secEntity, String secOperation, String adminSecEntity, String adminSecOperation) {
         String partyId = (String) context.get("partyId");
         Locale locale = getLocale(context);
         if (UtilValidate.isEmpty(partyId)) {
@@ -197,9 +204,9 @@ public class ServiceUtil {
             return partyId;
         }
 
-        // <b>security check</b>: userLogin partyId must equal partyId, or must have PARTYMGR_CREATE permission
+        // <b>security check</b>: userLogin partyId must equal partyId, or must have either of the two permissions
         if (!partyId.equals(userLogin.getString("partyId"))) {
-            if (!security.hasEntityPermission(secEntity, secOperation, userLogin)) {
+            if (!security.hasEntityPermission(secEntity, secOperation, userLogin) && !(adminSecEntity != null && adminSecOperation != null && security.hasEntityPermission(adminSecEntity, adminSecOperation, userLogin))) {
                 result.put(ModelService.RESPONSE_MESSAGE, ModelService.RESPOND_ERROR);
                 String errMsg = UtilProperties.getMessage(ServiceUtil.resource, "serviceUtil.no_permission_to_operation", locale) + ".";
                 result.put(ModelService.ERROR_MESSAGE, errMsg);
@@ -365,14 +372,19 @@ public class ServiceUtil {
     }
 
     public static Map<String, Object> purgeOldJobs(DispatchContext dctx, Map<String, ? extends Object> context) {
-        String sendPool = ServiceConfigUtil.getSendPool();
-        int daysToKeep = ServiceConfigUtil.getPurgeJobDays();
+        Debug.logWarning("WARNING: purgeOldJobs service invoked. This service is obsolete - the Job Scheduler will purge old jobs automatically.", module);
+        String sendPool = null;
+        Calendar cal = Calendar.getInstance();
+        try {
+            sendPool = ServiceConfigUtil.getServiceEngine().getThreadPool().getSendToPool();
+            int daysToKeep = ServiceConfigUtil.getServiceEngine().getThreadPool().getPurgeJobDays();
+            cal.add(Calendar.DAY_OF_YEAR, -daysToKeep);
+        } catch (GenericConfigException e) {
+            Debug.logWarning(e, "Exception thrown while getting service configuration: ", module);
+            return returnError("Exception thrown while getting service configuration: " + e);
+        }
         Delegator delegator = dctx.getDelegator();
 
-        Timestamp now = UtilDateTime.nowTimestamp();
-        Calendar cal = Calendar.getInstance();
-        cal.setTimeInMillis(now.getTime());
-        cal.add(Calendar.DAY_OF_YEAR, daysToKeep * -1);
         Timestamp purgeTime = new Timestamp(cal.getTimeInMillis());
 
         // create the conditions to query
@@ -413,13 +425,12 @@ public class ServiceUtil {
                     // begin this transaction
                     beganTx1 = TransactionUtil.begin();
 
-                    EntityListIterator foundJobs = delegator.find("JobSandbox", mainCond, null, null, null, findOptions);
+                    EntityListIterator foundJobs = delegator.find("JobSandbox", mainCond, null, UtilMisc.toSet("jobId"), null, findOptions);
                     try {
                         curList = foundJobs.getPartialList(1, 1000);
                     } finally {
                         foundJobs.close();
                     }
-
                 } catch (GenericEntityException e) {
                     Debug.logError(e, "Cannot obtain job data from datasource", module);
                     try {
@@ -435,20 +446,14 @@ public class ServiceUtil {
                         Debug.logWarning(e, module);
                     }
                 }
-
                 // remove each from the list in its own transaction
                 if (UtilValidate.isNotEmpty(curList)) {
-                    // list of runtime data IDs to attempt to delete
-                    List<String> runtimeToDelete = FastList.newInstance();
-
                     for (GenericValue job: curList) {
-                        String runtimeId = job.getString("runtimeDataId");
                         String jobId = job.getString("jobId");
                         boolean beganTx2 = false;
                         try {
                             beganTx2 = TransactionUtil.begin();
                             job.remove();
-                            runtimeToDelete.add(runtimeId);
                         } catch (GenericEntityException e) {
                             Debug.logInfo("Cannot remove job data for ID: " + jobId, module);
                             try {
@@ -464,35 +469,49 @@ public class ServiceUtil {
                             }
                         }
                     }
-
-                    // delete the runtime data - in a new transaction for each delete
-                    // we do this so that the ones which cannot be deleted to not cause
-                    // the entire group to rollback; some may be attached to multiple jobs.
-                    if (runtimeToDelete.size() > 0) {
-                        for (String runtimeId: runtimeToDelete) {
-                            boolean beganTx3 = false;
-                            try {
-                                beganTx3 = TransactionUtil.begin();
-                                delegator.removeByAnd("RuntimeData", "runtimeDataId", runtimeId);
-
-                            } catch (GenericEntityException e) {
-                                Debug.logInfo("Cannot remove runtime data for ID: " + runtimeId, module);
-                                try {
-                                    TransactionUtil.rollback(beganTx3, e.getMessage(), e);
-                                } catch (GenericTransactionException e1) {
-                                    Debug.logWarning(e1, module);
-                                }
-                            } finally {
-                                try {
-                                    TransactionUtil.commit(beganTx3);
-                                } catch (GenericTransactionException e) {
-                                    Debug.logWarning(e, module);
-                                }
-                            }
-                        }
-                    }
                 } else {
                     noMoreResults = true;
+                }
+            }
+
+            // Now JobSandbox data is cleaned up. Now process Runtime data and remove the whole data in single shot that is of no need.
+            boolean beganTx3 = false;
+            GenericValue runtimeData = null;
+            EntityListIterator runTimeDataIt = null;
+            List<GenericValue> runtimeDataToDelete = FastList.newInstance();
+            long jobsandBoxCount = 0;
+            try {
+                // begin this transaction
+                beganTx3 = TransactionUtil.begin();
+
+                runTimeDataIt = delegator.find("RuntimeData", null, null, UtilMisc.toSet("runtimeDataId"), null, null);
+                try {
+                    while ((runtimeData = runTimeDataIt.next()) != null) {
+                        EntityCondition whereCondition = EntityCondition.makeCondition(UtilMisc.toList(EntityCondition.makeCondition("runtimeDataId", EntityOperator.NOT_EQUAL, null),
+                                EntityCondition.makeCondition("runtimeDataId", EntityOperator.EQUALS, runtimeData.getString("runtimeDataId"))), EntityOperator.AND);
+                        jobsandBoxCount = delegator.findCountByCondition("JobSandbox", whereCondition, null, null);
+                        if (BigDecimal.ZERO.compareTo(BigDecimal.valueOf(jobsandBoxCount)) == 0) {
+                            runtimeDataToDelete.add(runtimeData);
+                        }
+                    }
+                } finally {
+                    runTimeDataIt.close();
+                }
+                // Now we are ready to delete runtimeData, we can safely delete complete list that we have recently fetched i.e runtimeDataToDelete.
+                delegator.removeAll(runtimeDataToDelete);
+            } catch (GenericEntityException e) {
+                Debug.logError(e, "Cannot obtain runtime data from datasource", module);
+                try {
+                    TransactionUtil.rollback(beganTx3, e.getMessage(), e);
+                } catch (GenericTransactionException e1) {
+                    Debug.logWarning(e1, module);
+                }
+                return ServiceUtil.returnError(e.getMessage());
+            } finally {
+                try {
+                    TransactionUtil.commit(beganTx3);
+                } catch (GenericTransactionException e) {
+                    Debug.logWarning(e, module);
                 }
             }
         } catch (GenericTransactionException e) {
@@ -605,7 +624,7 @@ public class ServiceUtil {
         Delegator delegator = dctx.getDelegator();
         if (UtilValidate.isNotEmpty(runAsUser)) {
             try {
-                GenericValue runAs = delegator.findByPrimaryKeyCache("UserLogin", "userLoginId", runAsUser);
+                GenericValue runAs = delegator.findOne("UserLogin", true, "userLoginId", runAsUser);
                 if (runAs != null) {
                     userLogin = runAs;
                 }
@@ -672,5 +691,41 @@ public class ServiceUtil {
         }
 
         return ServiceUtil.returnSuccess();
+    }
+
+    /**
+     * Checks all incoming service attributes and look for fields with the same
+     * name in the incoming map and copy those onto the outgoing map. Also
+     * includes a userLogin if service requires one.
+     *
+     * @param dispatcher
+     * @param serviceName
+     * @param fromMap
+     * @param userLogin
+     *            (optional) - will be added to the map if is required
+     * @param timeZone
+     * @param locale
+     * @return filled Map or null on error
+     * @throws GeneralServiceException
+     */
+    public static Map<String, Object> setServiceFields(LocalDispatcher dispatcher, String serviceName, Map<String, Object> fromMap, GenericValue userLogin,
+            TimeZone timeZone, Locale locale) throws GeneralServiceException {
+        Map<String, Object> outMap = FastMap.newInstance();
+
+        ModelService modelService = null;
+        try {
+            modelService = dispatcher.getDispatchContext().getModelService(serviceName);
+        } catch (GenericServiceException e) {
+            String errMsg = "Could not get service definition for service name [" + serviceName + "]: ";
+            Debug.logError(e, errMsg, module);
+            throw new GeneralServiceException(e);
+        }
+        outMap.putAll(modelService.makeValid(fromMap, "IN", true, null, timeZone, locale));
+
+        if (userLogin != null && modelService.auth) {
+            outMap.put("userLogin", userLogin);
+        }
+
+        return outMap;
     }
 }

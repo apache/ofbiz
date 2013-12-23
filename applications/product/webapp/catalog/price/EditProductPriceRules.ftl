@@ -29,8 +29,8 @@ under the License.
             <td width="10%"><b>&nbsp;</b></td>
           </tr>
         <#if productPriceRule?exists>
-          <#assign productPriceConds = productPriceRule.getRelated("ProductPriceCond")>
-          <#assign productPriceActions = productPriceRule.getRelated("ProductPriceAction")>
+          <#assign productPriceConds = productPriceRule.getRelated("ProductPriceCond", null, null, false)>
+          <#assign productPriceActions = productPriceRule.getRelated("ProductPriceAction", null, null, false)>
           <tr valign="middle">
             <td class="label"><b>${productPriceRule.productPriceRuleId}</b></td>
             <td>
@@ -83,7 +83,7 @@ under the License.
                                 <input type="hidden" name="productPriceCondSeqId" value="${productPriceCond.productPriceCondSeqId}"/>
                                 <select name="inputParamEnumId" size="1">
                                     <#if productPriceCond.inputParamEnumId?has_content>
-                                      <#assign inputParamEnum = productPriceCond.getRelatedOneCache("InputParamEnumeration")?if_exists>
+                                      <#assign inputParamEnum = productPriceCond.getRelatedOne("InputParamEnumeration", true)?if_exists>
                                       <option value="${productPriceCond.inputParamEnumId}"><#if inputParamEnum?exists>${inputParamEnum.get("description",locale)}<#else>[${productPriceCond.inputParamEnumId}]</#if></option>
                                       <option value="${productPriceCond.inputParamEnumId}">&nbsp;</option>
                                     <#else>
@@ -95,7 +95,7 @@ under the License.
                                 </select>
                                 <select name="operatorEnumId" size="1">
                                     <#if productPriceCond.operatorEnumId?has_content>
-                                      <#assign operatorEnum = productPriceCond.getRelatedOneCache("OperatorEnumeration")?if_exists>
+                                      <#assign operatorEnum = productPriceCond.getRelatedOne("OperatorEnumeration", true)?if_exists>
                                       <option value="${productPriceCond.operatorEnumId}"><#if operatorEnum?exists>${operatorEnum.get("description",locale)}<#else>[${productPriceCond.operatorEnumId}]</#if></option>
                                       <option value="${productPriceCond.operatorEnumId}">&nbsp;</option>
                                     <#else>
@@ -166,7 +166,7 @@ under the License.
                                 <input type="hidden" name="productPriceActionSeqId" value="${productPriceAction.productPriceActionSeqId}" />
                                 <select name="productPriceActionTypeId" size="1">
                                     <#if productPriceAction.productPriceActionTypeId?has_content>
-                                      <#assign productPriceActionType = productPriceAction.getRelatedOneCache("ProductPriceActionType")>
+                                      <#assign productPriceActionType = productPriceAction.getRelatedOne("ProductPriceActionType", true)>
                                       <option value="${productPriceAction.productPriceActionTypeId}"><#if productPriceActionType?exists>${productPriceActionType.get("description",locale)}<#else>[${productPriceAction.productPriceActionTypeId}]</#if></option>
                                       <option value="${productPriceAction.productPriceActionTypeId}">&nbsp;</option>
                                     <#else>

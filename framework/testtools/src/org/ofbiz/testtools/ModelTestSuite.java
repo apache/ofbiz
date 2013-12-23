@@ -38,8 +38,8 @@ import org.ofbiz.entity.DelegatorFactory;
 import org.ofbiz.entity.testtools.EntityTestCase;
 import org.ofbiz.minilang.MiniLangException;
 import org.ofbiz.minilang.SimpleMethod;
-import org.ofbiz.service.GenericDispatcher;
 import org.ofbiz.service.LocalDispatcher;
+import org.ofbiz.service.ServiceContainer;
 import org.ofbiz.service.testtools.OFBizTestCase;
 import org.w3c.dom.Element;
 
@@ -71,7 +71,7 @@ public class ModelTestSuite {
         String uniqueSuffix = "-" + RandomStringUtils.randomAlphanumeric(10);
 
         this.delegator = DelegatorFactory.getDelegator(this.originalDelegatorName).makeTestDelegator(this.originalDelegatorName + uniqueSuffix);
-        this.dispatcher = GenericDispatcher.getLocalDispatcher(originalDispatcherName + uniqueSuffix, delegator);
+        this.dispatcher = ServiceContainer.getLocalDispatcher(originalDispatcherName + uniqueSuffix, delegator);
 
         for (Element testCaseElement : UtilXml.childElementList(mainElement, UtilMisc.toSet("test-case", "test-group"))) {
             String caseName = testCaseElement.getAttribute("case-name");
@@ -139,10 +139,7 @@ public class ModelTestSuite {
         } else if ("entity-xml-assert".equals(nodeName)) {
             // this is the old, deprecated name for the element, changed because it now does assert or load
             this.testList.add(new EntityXmlAssertTest(caseName, testElement));
-        } else if ("jython-test".equals(nodeName)) {
-            this.testList.add(new JythonTest(caseName, testElement));
         }
-
     }
 
     String getSuiteName() {

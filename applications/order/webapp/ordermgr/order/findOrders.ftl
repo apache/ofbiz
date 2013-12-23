@@ -76,7 +76,7 @@ function toggleOrderIdList() {
 
 <#if security.hasEntityPermission("ORDERMGR", "_VIEW", session)>
 <#if parameters.hideFields?has_content>
-<form name='lookupandhidefields${requestParameters.hideFields}' method="post" action="<@ofbizUrl>searchorders</@ofbizUrl>">
+<form name='lookupandhidefields${requestParameters.hideFields?default("Y")}' method="post" action="<@ofbizUrl>searchorders</@ofbizUrl>">
   <#if parameters.hideFields?default("N")=='Y'>
     <input type="hidden" name="hideFields" value="N"/>
   <#else>
@@ -87,6 +87,8 @@ function toggleOrderIdList() {
   <input type='hidden' name='correspondingPoId' value='${requestParameters.correspondingPoId?if_exists}'/>
   <input type='hidden' name='internalCode' value='${requestParameters.internalCode?if_exists}'/>
   <input type='hidden' name='productId' value='${requestParameters.productId?if_exists}'/>
+  <input type='hidden' name='goodIdentificationTypeId' value='${requestParameters.goodIdentificationTypeId?if_exists}'/>
+  <input type='hidden' name='goodIdentificationIdValue' value='${requestParameters.goodIdentificationIdValue?if_exists}'/>
   <input type='hidden' name='inventoryItemId' value='${requestParameters.inventoryItemId?if_exists}'/>
   <input type='hidden' name='serialNumber' value='${requestParameters.serialNumber?if_exists}'/>
   <input type='hidden' name='softIdentifier' value='${requestParameters.softIdentifier?if_exists}'/>
@@ -128,7 +130,7 @@ function toggleOrderIdList() {
       <#if requestParameters.hideFields?default("N") == "Y">
         <li><a href="javascript:document.lookupandhidefields${requestParameters.hideFields}.submit()">${uiLabelMap.CommonShowLookupFields}</a></li>
       <#else>
-        <#if orderList?exists><li><a href="javascript:document.lookupandhidefields${requestParameters.hideFields}.submit()">${uiLabelMap.CommonHideFields}</a></li></#if>
+        <#if orderList?exists><li><a href="javascript:document.lookupandhidefields${requestParameters.hideFields?default("Y")}.submit()">${uiLabelMap.CommonHideFields}</a></li></#if>
         <li><a href="/partymgr/control/findparty?externalLoginKey=${requestAttributes.externalLoginKey?if_exists}">${uiLabelMap.PartyLookupParty}</a></li>
         <li><a href="javascript:lookupOrders(true);">${uiLabelMap.OrderLookupOrder}</a></li>
       </#if>
@@ -166,6 +168,29 @@ function toggleOrderIdList() {
                 <td width='5%'>&nbsp;</td>
                 <td align='left'><input type='text' name='productId' value='${requestParameters.productId?if_exists}'/></td>
               </tr>
+              <#if goodIdentificationTypes?has_content>
+              <tr>
+                  <td width='25%' align='right' class='label'>${uiLabelMap.ProductGoodIdentificationType}</td>
+                  <td width='5%'>&nbsp;</td>
+                  <td align='left'>
+                      <select name='goodIdentificationTypeId'>
+                          <#if currentGoodIdentificationType?has_content>
+                              <option value="${currentGoodIdentificationType.goodIdentificationTypeId}">${currentGoodIdentificationType.get("description", locale)}</option>
+                              <option value="${currentGoodIdentificationType.goodIdentificationTypeId}">---</option>
+                          </#if>
+                          <option value="">${uiLabelMap.ProductAnyGoodIdentification}</option>
+                          <#list goodIdentificationTypes as goodIdentificationType>
+                              <option value="${goodIdentificationType.goodIdentificationTypeId}">${goodIdentificationType.get("description", locale)}</option>
+                          </#list>
+                      </select>
+                  </td>
+              </tr>
+              <tr>
+                  <td width='25%' align='right' class='label'>${uiLabelMap.ProductGoodIdentification}</td>
+                  <td width='5%'>&nbsp;</td>
+                  <td align='left'><input type='text' name='goodIdentificationIdValue' value='${requestParameters.goodIdentificationIdValue?if_exists}'/></td>
+              </tr>
+              </#if>
               <tr>
                 <td width='25%' align='right' class='label'>${uiLabelMap.ProductInventoryItemId}</td>
                 <td width='5%'>&nbsp;</td>
@@ -188,7 +213,6 @@ function toggleOrderIdList() {
                   <select name='roleTypeId' id='roleTypeId' multiple="multiple">
                     <#if currentRole?has_content>
                     <option value="${currentRole.roleTypeId}">${currentRole.get("description", locale)}</option>
-                    <option value="${currentRole.roleTypeId}">---</option>
                     </#if>
                     <option value="">${uiLabelMap.CommonAnyRoleType}</option>
                     <#list roleTypes as roleType>
@@ -319,13 +343,13 @@ function toggleOrderIdList() {
                 <td align='left'>
                   <select name="shipmentMethod">
                     <#if currentCarrierShipmentMethod?has_content>
-                      <#assign currentShipmentMethodType = currentCarrierShipmentMethod.getRelatedOne("ShipmentMethodType")>
+                      <#assign currentShipmentMethodType = currentCarrierShipmentMethod.getRelatedOne("ShipmentMethodType", false)>
                       <option value="${currentCarrierShipmentMethod.partyId}@${currentCarrierShipmentMethod.shipmentMethodTypeId}">${currentCarrierShipmentMethod.partyId?if_exists} ${currentShipmentMethodType.description?if_exists}</option>
                       <option value="${currentCarrierShipmentMethod.partyId}@${currentCarrierShipmentMethod.shipmentMethodTypeId}">---</option>
                     </#if>
                     <option value="">${uiLabelMap.OrderSelectShippingMethod}</option>
                     <#list carrierShipmentMethods as carrierShipmentMethod>
-                      <#assign shipmentMethodType = carrierShipmentMethod.getRelatedOne("ShipmentMethodType")>
+                      <#assign shipmentMethodType = carrierShipmentMethod.getRelatedOne("ShipmentMethodType", false)>
                       <option value="${carrierShipmentMethod.partyId}@${carrierShipmentMethod.shipmentMethodTypeId}">${carrierShipmentMethod.partyId?if_exists} ${shipmentMethodType.description?if_exists}</option>
                     </#list>
                   </select>
@@ -458,6 +482,18 @@ function toggleOrderIdList() {
                   </select>
                 </td>
               </tr>
+              <tr>
+                <td width='25%' align='right' class='label'>${uiLabelMap.AccountingPaymentStatus}</td>
+                <td width="5%">&nbsp;</td>
+                <td>
+                    <select name="paymentStatusId">
+                        <option value="">${uiLabelMap.CommonAll}</option>
+                        <#list paymentStatusList as paymentStatus>
+                            <option value="${paymentStatus.statusId}">${paymentStatus.get("description", locale)}</option>
+                        </#list>
+                    </select>
+                </td>
+              </tr>
               <tr><td colspan="3"><hr /></td></tr>
               <tr>
                 <td width='25%' align='right'>&nbsp;</td>
@@ -520,12 +556,12 @@ document.lookuporder.orderId.focus();
         </#list>
       </#if>
     </form>
-    <form name="massOrderChangeForm" method="post" action="javascript:void();">
+    <form name="massOrderChangeForm" method="post" action="javascript:void(0);">
       <div>&nbsp;</div>
       <div align="right">
         <input type="hidden" name="screenLocation" value="component://order/widget/ordermgr/OrderPrintScreens.xml#OrderPDF"/>
         <select name="serviceName" onchange="javascript:setServiceName(this);">
-           <option value="javascript:void();">&nbsp;</option>
+           <option value="javascript:void(0);">&nbsp;</option>
            <option value="<@ofbizUrl>massApproveOrders?hideFields=${requestParameters.hideFields?default("N")}${paramList}</@ofbizUrl>">${uiLabelMap.OrderApproveOrder}</option>
            <option value="<@ofbizUrl>massHoldOrders?hideFields=${requestParameters.hideFields?default("N")}${paramList}</@ofbizUrl>">${uiLabelMap.OrderHold}</option>
            <option value="<@ofbizUrl>massProcessOrders?hideFields=${requestParameters.hideFields?default("N")}${paramList}</@ofbizUrl>">${uiLabelMap.OrderProcessOrder}</option>
@@ -538,7 +574,7 @@ document.lookuporder.orderId.focus();
            <option value="<@ofbizUrl>massCreateFileForOrders?hideFields=${requestParameters.hideFields?default('N')}${paramList}</@ofbizUrl>">${uiLabelMap.ContentCreateFile}</option>
         </select>
         <select name="printerName">
-           <option value="javascript:void();">&nbsp;</option>
+           <option value="javascript:void(0);">&nbsp;</option>
            <#list printers as printer>
            <option value="${printer}">${printer}</option>
            </#list>
@@ -575,8 +611,8 @@ document.lookuporder.orderId.focus();
           <#assign alt_row = false>
           <#list orderList as orderHeader>
             <#assign orh = Static["org.ofbiz.order.order.OrderReadHelper"].getHelper(orderHeader)>
-            <#assign statusItem = orderHeader.getRelatedOneCache("StatusItem")>
-            <#assign orderType = orderHeader.getRelatedOneCache("OrderType")>
+            <#assign statusItem = orderHeader.getRelatedOne("StatusItem", true)>
+            <#assign orderType = orderHeader.getRelatedOne("OrderType", true)>
             <#if orderType.orderTypeId == "PURCHASE_ORDER">
               <#assign displayParty = orh.getSupplierAgent()?if_exists>
             <#else>

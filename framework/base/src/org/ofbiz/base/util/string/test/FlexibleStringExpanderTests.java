@@ -295,9 +295,6 @@ public class FlexibleStringExpanderTests extends TestCase {
         fseTest("empty FlexibleStringExpander", "", testMap, null, null, "", null, true);
         fseTest("UEL integration(nested): throw Exception", "${${throwException.value}}", testMap, "", false);
         fseTest("UEL integration: throw Exception", "${throwException.value}", testMap, null, null, "", null, false);
-        fseTest("hidden (runtime) nested replacement", "${nested}!", testMap, "Hello World!", false);
-        fseTest("hidden (runtime) nested null replacement", "Hello ${${nullVar}}World!", testMap, "Hello World!", false);
-        fseTest("hidden (runtime) nested null callreplacement", "Hello ${${groovy:" + FlexibleStringExpanderTests.class.getName() + ".StaticReturnNull()}}World!", testMap, "Hello World!", false);
         fseTest("UEL integration(nested): throw Exception", "${throw${exc}.value}", testMap, "", false);
         fseTest("UEL integration(nested): throw NPE", "${throwNPE${blank}.value}", testMap, "", false);
         fseTest("visible nested replacement", "${'Hello ${var}'}!", testMap, "Hello World!", false);

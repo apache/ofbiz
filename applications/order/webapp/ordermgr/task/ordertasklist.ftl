@@ -38,7 +38,7 @@ under the License.
 // -->
 </script>
 
-<#if security.hasRolePermission("ORDERMGR", "_VIEW", "", "", session) || security.hasRolePermission("ORDERMGR_ROLE", "_VIEW", "", "", session)>
+<#if security.hasEntityPermission("ORDERMGR", "_VIEW", session)>
 <#assign tasksFound = false>
 <div class="screenlet">
     <div class="screenlet-title-bar">
@@ -68,7 +68,7 @@ under the License.
                           <#assign alt_row = false>
                           <#list poList as orderHeaderAndRole>
                             <#assign orh = Static["org.ofbiz.order.order.OrderReadHelper"].getHelper(orderHeaderAndRole)>
-                            <#assign statusItem = orderHeaderAndRole.getRelatedOneCache("StatusItem")>
+                            <#assign statusItem = orderHeaderAndRole.getRelatedOne("StatusItem", true)>
                             <#assign placingParty = orh.getPlacingParty()?if_exists>
                             <tr valign="middle"<#if alt_row> class="alternate-row"</#if>>
                               <td><a href="<@ofbizUrl>orderview?orderId=${orderHeaderAndRole.orderId}</@ofbizUrl>" class='buttontext'>${orderHeaderAndRole.orderId}</a></td>
@@ -142,7 +142,7 @@ under the License.
                               <td>
                                 <div>
                                   <#if task.customerPartyId?exists>
-                                    <a href="${customerDetailLink}${task.customerPartyId}${externalKeyParam}" target="partymgr" class="buttontext">${Static["org.ofbiz.order.task.TaskWorker"].getCustomerName(task)}</a>
+                                    <a href="${customerDetailLink}${task.customerPartyId}${StringUtil.wrapString(externalKeyParam)}" target="partymgr" class="buttontext">${Static["org.ofbiz.order.task.TaskWorker"].getCustomerName(task)}</a>
                                   <#else>
                                     N/A
                                   </#if>
@@ -165,7 +165,7 @@ under the License.
                               </td>
                               <td>${task.priority?default("0")}</td>
                               <td>
-                                <a href="/workeffort/control/activity?workEffortId=${task.workEffortId}${externalKeyParam}" target="workeffort" class="buttontext">
+                                <a href="/workeffort/control/activity?workEffortId=${task.workEffortId}${StringUtil.wrapString(externalKeyParam)}" target="workeffort" class="buttontext">
                                   ${Static["org.ofbiz.order.task.TaskWorker"].getPrettyStatus(task)}
                                 </a>
                               </td>
@@ -229,7 +229,7 @@ under the License.
                                 </td>
                                 <td>
                                   <#if task.customerPartyId?exists>
-                                  <a href="${customerDetailLink}${task.customerPartyId}${externalKeyParam}" target="partymgr" class="buttontext">${Static["org.ofbiz.order.task.TaskWorker"].getCustomerName(task)}</a>
+                                  <a href="${customerDetailLink}${task.customerPartyId}${StringUtil.wrapString(externalKeyParam)}" target="partymgr" class="buttontext">${Static["org.ofbiz.order.task.TaskWorker"].getCustomerName(task)}</a>
                                   <#else>
                                   &nbsp;
                                   </#if>
@@ -253,7 +253,7 @@ under the License.
                                   <#if task.wepaPartyId == "_NA_">
                                     <div>N/A</div>
                                   <#else>
-                                    <a href="${customerDetailLink}${task.wepaPartyId}${externalKeyParam}" target="partymgr" class="buttontext">${task.wepaPartyId}</a>
+                                    <a href="${customerDetailLink}${task.wepaPartyId}${StringUtil.wrapString(externalKeyParam)}" target="partymgr" class="buttontext">${task.wepaPartyId}</a>
                                   </#if>
                                 </td>
                                 <td>${Static["org.ofbiz.order.task.TaskWorker"].getRoleDescription(task)}</td>

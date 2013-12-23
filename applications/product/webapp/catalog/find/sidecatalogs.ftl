@@ -16,16 +16,15 @@ KIND, either express or implied.  See the License for the
 specific language governing permissions and limitations
 under the License.
 -->
-<div><a href='<@ofbizUrl>FindProdCatalog</@ofbizUrl>' class='buttontext'>${uiLabelMap.ProductCatalogDetailList}</a></div>
 <div class="browsecategorylist">
   <#assign sortList = Static["org.ofbiz.base.util.UtilMisc"].toList("prodCatalogCategoryTypeId", "sequenceNum", "productCategoryId")>
   <#list prodCatalogs as prodCatalog>
   <#if curProdCatalogId?exists && curProdCatalogId == prodCatalog.prodCatalogId>
-    <#assign prodCatalogCategories = prodCatalog.getRelatedOrderByCache("ProdCatalogCategory", sortList)>
+    <#assign prodCatalogCategories = prodCatalog.getRelated("ProdCatalogCategory", null, sortList, true)>
     <div class='browsecategorytext'><a href="<@ofbizUrl>EditProdCatalog?prodCatalogId=${prodCatalog.prodCatalogId}</@ofbizUrl>" class='browsecategorybutton'>${prodCatalog.catalogName?if_exists}</a></div>
       <div class="browsecategorylist">
         <#list prodCatalogCategories as prodCatalogCategory>
-          <#assign productCategory = prodCatalogCategory.getRelatedOneCache("ProductCategory")>
+          <#assign productCategory = prodCatalogCategory.getRelatedOne("ProductCategory", true)>
           <div class='browsecategorytext'><a href='<@ofbizUrl>EditCategory?CATALOG_TOP_CATEGORY=${prodCatalogCategory.productCategoryId}&amp;productCategoryId=${prodCatalogCategory.productCategoryId}</@ofbizUrl>' class="browsecategorybutton">${(productCategory.categoryName)?default(productCategory.description)?default(productCategory.productCategoryId)}</a></div>
         </#list>
       </div>

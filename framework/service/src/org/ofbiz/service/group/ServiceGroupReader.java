@@ -18,6 +18,7 @@
  *******************************************************************************/
 package org.ofbiz.service.group;
 
+import java.util.List;
 import java.util.Map;
 
 import javolution.util.FastMap;
@@ -29,7 +30,10 @@ import org.ofbiz.base.config.ResourceHandler;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilXml;
 import org.ofbiz.service.config.ServiceConfigUtil;
+import org.ofbiz.service.config.model.ServiceGroups;
 import org.w3c.dom.Element;
+
+import freemarker.template.utility.StringUtil;
 
 /**
  * ServiceGroupReader.java
@@ -42,17 +46,16 @@ public class ServiceGroupReader {
     public static Map<String, GroupModel> groupsCache = FastMap.newInstance();
 
     public static void readConfig() {
-        Element rootElement = null;
-
+        List<ServiceGroups> serviceGroupsList = null;
         try {
-            rootElement = ServiceConfigUtil.getXmlRootElement();
+            serviceGroupsList = ServiceConfigUtil.getServiceEngine().getServiceGroups();
         } catch (GenericConfigException e) {
-            Debug.logError(e, "Error getting Service Engine XML root element", module);
-            return;
+            // FIXME: Refactor API so exceptions can be thrown and caught.
+            Debug.logError(e, module);
+            throw new RuntimeException(e.getMessage());
         }
-
-        for (Element serviceGroupElement: UtilXml.childElementList(rootElement, "service-groups")) {
-            ResourceHandler handler = new MainResourceHandler(ServiceConfigUtil.SERVICE_ENGINE_XML_FILENAME, serviceGroupElement);
+        for (ServiceGroups serviceGroup : serviceGroupsList) {
+            ResourceHandler handler = new MainResourceHandler(ServiceConfigUtil.SERVICE_ENGINE_XML_FILENAME, serviceGroup.getLoader(), serviceGroup.getLocation());
             addGroupDefinitions(handler);
         }
 
@@ -85,7 +88,7 @@ public class ServiceGroupReader {
             } catch (GenericConfigException e) {
                 Debug.logError(e, "Could not get resource URL", module);
             }
-            Debug.logImportant("Loaded [" + numDefs + "] Group definitions from " + resourceLocation, module);
+            Debug.logImportant("Loaded [" + StringUtil.leftPad(Integer.toString(numDefs), 3) + "] Group definitions from " + resourceLocation, module);
         }
     }
 

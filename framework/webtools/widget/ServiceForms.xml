@@ -42,12 +42,12 @@ under the License.
         </field>
         <field name="SERVICE_INTERVAL" title="${uiLabelMap.WebtoolsInterval}" tooltip="${uiLabelMap.WebtoolsForUseWithFrequency}"><text/></field>
         <field name="SERVICE_COUNT" title="${uiLabelMap.WebtoolsCount}" tooltip="${uiLabelMap.WebtoolsNumberOfTimeTheJobWillRun}"><text default-value="1"/></field>
-        <field name="SERVICE_MAXRETRY" title="${uiLabelMap.WebtoolsMaxRetry}" tooltip="${uiLabelMap.WebtoolsNumberOfJobRetry}"><text/></field>
+        <field name="SERVICE_MAXRETRY" title="${uiLabelMap.WebtoolsMaxRetry}" tooltip="${uiLabelMap.WebtoolsNumberOfJobRetry}"><text default-value="0"/></field>
         <field name="submitButton" title="${uiLabelMap.CommonSubmit}"><submit button-type="button"/></field>
     </form>
 
     <form name="runService" type="single" target="setSyncServiceParameters"
-        header-row-style="header-row" default-table-style="basic-table">
+        header-row-style="header-row" default-table-style="basic-table" focus-field-name="SERVICE_NAME">
         <field name="SERVICE_NAME" title="${uiLabelMap.WebtoolsService}"><text/></field>
         <field name="POOL_NAME" title="${uiLabelMap.WebtoolsPool}"><text/></field>
         <field name="_RUN_SYNC_"><hidden value="Y"/></field>
@@ -55,19 +55,22 @@ under the License.
     </form>
 
     <form name="FindJobs" type="single" target="FindJob" default-entity-name="JobSandbox">
-        <field name="noConditionFind"><hidden value="Y"/><!-- if this isn't there then with all fields empty no query will be done --></field>
-        <field name="jobName" title="${uiLabelMap.WebtoolsJob}"><text-find/></field>
-        <field name="jobId" title="${uiLabelMap.CommonId}"><text-find/></field>
+        <field name="noConditionFind" position="1"><hidden value="Y"/><!-- if this isn't there then with all fields empty no query will be done --></field>
+        <field name="jobName" title="${uiLabelMap.WebtoolsJob}" position="1"><text-find/></field>
+        <field name="clock" position="2" title="${uiLabelMap.CommonServerHour}:"><display/></field>
+        <field name="jobId" title="${uiLabelMap.CommonId}" position="1"><text-find/></field>
         <field name="serviceName" title="${uiLabelMap.WebtoolsServiceName}"><text-find/></field>
-        <field name="statusId" title="${uiLabelMap.CommonStatus}">
-            <drop-down allow-empty="true" current-description="">
+        <field name="statusId" title="${uiLabelMap.CommonStatus}" position="1">
+            <drop-down allow-empty="true">
                 <entity-options description="${description}" key-field-name="statusId" entity-name="StatusItem">
                     <entity-constraint name="statusTypeId" operator="equals" value="SERVICE_STATUS"/>
                     <entity-order-by field-name="description"/>
                 </entity-options>
             </drop-down>
         </field>
-        <field name="submitButton" title="${uiLabelMap.CommonFind}"><submit button-type="button"/></field>
+        <field name="submitButton" title="${uiLabelMap.CommonFind}" position="1">
+            <submit button-type="button"/>
+        </field>
     </form>
 
     <form name="ListJobs" type="list" list-name="listIt" paginate-target="FindJob" default-entity-name="JobSandbox" separate-columns="true"
@@ -82,7 +85,11 @@ under the License.
             </service>
         </actions>
         <field name="jobName" title="${uiLabelMap.WebtoolsJob}" sort-field="true"><display/></field>
-        <field name="jobId" title="${uiLabelMap.CommonId}" sort-field="true"><display/></field>
+        <field name="jobId" title="${uiLabelMap.CommonId}" sort-field="true">
+            <hyperlink also-hidden="false" description="${jobId}" target="JobDetails">
+                <parameter param-name="jobId" from-field="jobId"/>
+            </hyperlink>
+        </field>
         <field name="poolId" title="${uiLabelMap.WebtoolsPool}" sort-field="true"><display/></field>
         <field name="runTime" title="${uiLabelMap.WebtoolsRunTime}" sort-field="true"><display/></field>
         <field name="startDateTime" title="${uiLabelMap.CommonStartDateTime}" sort-field="true"><display/></field>
@@ -92,21 +99,35 @@ under the License.
             </hyperlink>
         </field>
         <field name="statusId" title="${uiLabelMap.CommonStatus}" sort-field="true"><display-entity entity-name="StatusItem" description="${description}"/></field>
-        <field name="cancelDateTime" title="${uiLabelMap.CommonEndDateTime}" sort-field="true"><display/></field>
-        <field name="cancelButton" title="${uiLabelMap.CommonEmptyHeader}" use-when="startDateTime==null&amp;&amp;finishDateTime==null&amp;&amp;cancelDateTime==null" widget-style="buttontext">
+        <field name="finishDateTime" title="${uiLabelMap.CommonEndDateTime}" sort-field="true"><display/></field>
+        <field name="cancelButton" title=" " use-when="startDateTime==null&amp;&amp;finishDateTime==null&amp;&amp;cancelDateTime==null" widget-style="buttontext">
             <hyperlink also-hidden="false" description="${uiLabelMap.WebtoolsCancelJob}" target="cancelJob">
                 <parameter param-name="jobId"/>
             </hyperlink>
         </field>
     </form>
+    <form name="JobDetails" type="single">
+        <auto-fields-entity entity-name="JobSandbox" map-name="job" default-field-type="display"/>
+    </form>
+    <form name="JobRuntimeDataInfo" type="list" list-name="runtimeInfoList" default-table-style="basic-table hover-bar" paginate="false">
+        <field name="key"><display/></field>
+        <field name="value"><display/></field>
+    </form>
+    <form name="PoolState" type="single" default-map-name="poolState">
+        <field name="keepAliveTimeInSeconds"><display/></field>
+        <field name="numberOfCoreInvokerThreads"><display/></field>
+        <field name="currentNumberOfInvokerThreads"><display/></field>
+        <field name="numberOfActiveInvokerThreads"><display/></field>
+        <field name="maxNumberOfInvokerThreads"><display/></field>
+        <field name="greatestNumberOfInvokerThreads"><display/></field>
+        <field name="numberOfCompletedTasks"><display/></field>
+    </form>
     <form name="ListJavaThread" type="list" list-name="threads" paginate-target="threadList" separate-columns="true"
         odd-row-style="alternate-row" default-table-style="basic-table hover-bar">
-        <field name="threadId" title="${uiLabelMap.WebtoolsThread}"><display description="${threadId} ${threadName}"/></field>
-        <field name="status" title="${uiLabelMap.CommonStatus}"><display/></field>
-        <field name="jobName" title="${uiLabelMap.WebtoolsJob}"><display default-value="${uiLabelMap.CommonNone}"/></field>
+        <field name="id" title="${uiLabelMap.WebtoolsThread}"><display description="${threadId} ${threadName}"/></field>
+        <field name="name" title="${uiLabelMap.WebtoolsJob}"><display default-value="${uiLabelMap.CommonNone}"/></field>
         <field name="serviceName" title="${uiLabelMap.WebtoolsService}"><display default-value="${uiLabelMap.CommonNone}"/></field>
-        <field name="usage" title="${uiLabelMap.WebtoolsUsage}"><display/></field>
-        <field name="ttl" title="${uiLabelMap.WebtoolsTTL} (ms)"><display/></field>
+        <field name="time" title="${uiLabelMap.CommonStartDateTime}"><display/></field>
         <field name="runTime" title="${uiLabelMap.CommonTime} (ms)"><display/></field>
     </form>
     <form name="ListServices" type="list" list-name="services" paginate-target="ServiceLog" separate-columns="true"

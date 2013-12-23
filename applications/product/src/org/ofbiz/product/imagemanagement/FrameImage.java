@@ -97,7 +97,7 @@ public class FrameImage {
         
         String frameImageName = null;
         try {
-            GenericValue contentDataResourceView = delegator.findByPrimaryKey("ContentDataResourceView", UtilMisc.toMap("contentId", frameContentId, "drDataResourceId", frameDataResourceId));
+            GenericValue contentDataResourceView = delegator.findOne("ContentDataResourceView", UtilMisc.toMap("contentId", frameContentId, "drDataResourceId", frameDataResourceId), false);
             frameImageName = contentDataResourceView.getString("contentName");
         } catch (Exception e) {
             Debug.logError(e, module);
@@ -154,7 +154,7 @@ public class FrameImage {
             Image newImg2 = bufImg2.getScaledInstance(width , height , Image.SCALE_SMOOTH);
             BufferedImage bufNewImg = combineBufferedImage(newImg1, newImg2, bufImgType);
             String mimeType = imageName.substring(imageName.lastIndexOf(".") + 1);
-            ImageIO.write((RenderedImage) bufNewImg, mimeType, new File(imageServerPath + "/" + productId + "/" + filenameToUse));
+            ImageIO.write(bufNewImg, mimeType, new File(imageServerPath + "/" + productId + "/" + filenameToUse));
             
             double imgHeight = bufNewImg.getHeight();
             double imgWidth = bufNewImg.getWidth();
@@ -357,7 +357,7 @@ public class FrameImage {
         
         String frameImageName = null;
         try {
-            GenericValue contentDataResourceView = delegator.findByPrimaryKey("ContentDataResourceView", UtilMisc.toMap("contentId", frameContentId, "drDataResourceId", frameDataResourceId));
+            GenericValue contentDataResourceView = delegator.findOne("ContentDataResourceView", UtilMisc.toMap("contentId", frameContentId, "drDataResourceId", frameDataResourceId), false);
             frameImageName = contentDataResourceView.getString("contentName");
         } catch (Exception e) {
             request.setAttribute("_ERROR_MESSAGE_", e.getMessage());
@@ -384,7 +384,7 @@ public class FrameImage {
             Image newImg2 = bufImg2.getScaledInstance(width , height , Image.SCALE_SMOOTH);
             BufferedImage bufNewImg = combineBufferedImage(newImg1, newImg2, bufImgType);
             String mimeType = imageName.substring(imageName.lastIndexOf(".") + 1);
-            ImageIO.write((RenderedImage) bufNewImg, mimeType, new File(imageServerPath + "/preview/" + "/previewImage.jpg"));
+            ImageIO.write(bufNewImg, mimeType, new File(imageServerPath + "/preview/" + "/previewImage.jpg"));
             
         }
          else{
@@ -411,7 +411,7 @@ public class FrameImage {
         
         String frameDataResourceId = null;
         try {
-            List<GenericValue> contentDataResources = delegator.findByAnd("ContentDataResourceView", UtilMisc.toMap("contentId", frameContentId));
+            List<GenericValue> contentDataResources = delegator.findByAnd("ContentDataResourceView", UtilMisc.toMap("contentId", frameContentId), null, false);
             GenericValue contentDataResource = EntityUtil.getFirst(contentDataResources);
             frameDataResourceId = contentDataResource.getString("dataResourceId");
         } catch (Exception e) {

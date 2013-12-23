@@ -34,7 +34,7 @@
                 </entity-condition>
                 <set field="partyId" from-field="parties[0].partyId"/>
                 <set field="customerPartyId" from-field="customerRel.partyIdFrom"/>
-                <set field="previousParams" from-field="sessionAttributes._PREVIOUS_PARAMS_"/>
+                <set field="previousParams" from-field="_PREVIOUS_PARAMS_" from-scope="user"/>
                 <property-to-field field="defaultCountryGeoId" resource="general" property="country.geo.id.default" default="USA"/>
             </actions>
             <widgets>
@@ -50,7 +50,7 @@
                                         <if-empty field="parties"/>
                                     </condition>
                                     <actions>
-                                        <!-- fields for setDependentDropdownValuesJs.ftl, it's a try on generalization, if you need an example with more than one dropdown in a form have a look at EditProductPriceRules screen -->
+                                        <!-- fields for setDependentDropdownValuesJs.ftl -->
                                         <set field="dependentForm" value="NewCustomer"/>
                                         <set field="paramKey" value="countryGeoId"/>                                        
                                         <set field="mainId" value="USER_COUNTRY"/>

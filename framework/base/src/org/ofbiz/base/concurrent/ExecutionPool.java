@@ -18,12 +18,11 @@
  *******************************************************************************/
 package org.ofbiz.base.concurrent;
 
-import java.lang.management.ManagementFactory;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
-import java.util.concurrent.Delayed;
 import java.util.concurrent.DelayQueue;
+import java.util.concurrent.Delayed;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
@@ -39,7 +38,7 @@ import org.ofbiz.base.util.Debug;
 @SourceMonitored
 public final class ExecutionPool {
     public static final String module = ExecutionPool.class.getName();
-    public static final ScheduledExecutorService GLOBAL_EXECUTOR = getExecutor(null, "ofbiz-config", -1, true);
+    public static final ScheduledExecutorService GLOBAL_EXECUTOR = getExecutor(null, "OFBiz-config", -1, false);
 
     protected static class ExecutionPoolThreadFactory implements ThreadFactory {
         private final ThreadGroup group;
@@ -60,25 +59,15 @@ public final class ExecutionPool {
         }
     }
 
-    @Deprecated
-    public static ThreadFactory createThreadFactory(String namePrefix) {
-        return createThreadFactory(null, namePrefix);
-    }
-
     public static ThreadFactory createThreadFactory(ThreadGroup group, String namePrefix) {
         return new ExecutionPoolThreadFactory(group, namePrefix);
-    }
-
-    @Deprecated
-    public static ScheduledExecutorService getExecutor(String namePrefix, int threadCount) {
-        return getExecutor(null, namePrefix, threadCount, true);
     }
 
     public static ScheduledExecutorService getExecutor(ThreadGroup group, String namePrefix, int threadCount, boolean preStart) {
         if (threadCount == 0) {
             threadCount = 1;
         } else if (threadCount < 0) {
-            int numCpus = ManagementFactory.getOperatingSystemMXBean().getAvailableProcessors();
+            int numCpus = Runtime.getRuntime().availableProcessors();
             threadCount = Math.abs(threadCount) * numCpus;
         }
         ThreadFactory threadFactory = createThreadFactory(group, namePrefix);
@@ -87,16 +76,6 @@ public final class ExecutionPool {
             executor.prestartAllCoreThreads();
         }
         return executor;
-    }
-
-    @Deprecated
-    public static ScheduledExecutorService getNewExactExecutor(String namePrefix) {
-        return getExecutor(null, namePrefix, -1, true);
-    }
-
-    @Deprecated
-    public static ScheduledExecutorService getNewOptimalExecutor(String namePrefix) {
-        return getExecutor(null, namePrefix, -2, true);
     }
 
     public static <F> List<F> getAllFutures(Collection<Future<F>> futureList) {
@@ -134,11 +113,11 @@ public final class ExecutionPool {
 
     static {
         ExecutionPoolPulseWorker worker = new ExecutionPoolPulseWorker();
-        int processorCount = ManagementFactory.getOperatingSystemMXBean().getAvailableProcessors();
+        int processorCount = Runtime.getRuntime().availableProcessors();
         for (int i = 0; i < processorCount; i++) {
             Thread t = new Thread(worker);
             t.setDaemon(true);
-            t.setName("ExecutionPoolPulseWorker(" + i + ")");
+            t.setName("OFBiz-ExecutionPoolPulseWorker-" + i);
             t.start();
         }
     }

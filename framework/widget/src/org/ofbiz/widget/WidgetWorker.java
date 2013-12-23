@@ -20,8 +20,13 @@ package org.ofbiz.widget;
 
 import java.io.IOException;
 import java.io.StringWriter;
+import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
+import java.net.URLEncoder;
+import java.nio.charset.Charset;
 import java.text.DateFormat;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
 
@@ -29,18 +34,28 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import javolution.util.FastList;
+import javolution.util.FastMap;
+
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.StringUtil;
 import org.ofbiz.base.util.UtilDateTime;
 import org.ofbiz.base.util.UtilGenerics;
 import org.ofbiz.base.util.UtilHttp;
 import org.ofbiz.base.util.UtilValidate;
+import org.ofbiz.base.util.UtilXml;
 import org.ofbiz.base.util.collections.FlexibleMapAccessor;
 import org.ofbiz.base.util.string.FlexibleStringExpander;
 import org.ofbiz.entity.Delegator;
+import org.ofbiz.entity.model.ModelEntity;
+import org.ofbiz.entity.model.ModelField;
+import org.ofbiz.service.GenericServiceException;
 import org.ofbiz.service.LocalDispatcher;
+import org.ofbiz.service.ModelParam;
+import org.ofbiz.service.ModelService;
 import org.ofbiz.webapp.control.ConfigXMLReader;
 import org.ofbiz.webapp.control.RequestHandler;
+import org.ofbiz.webapp.control.WebAppConfigurationException;
 import org.ofbiz.webapp.taglib.ContentUrlTag;
 import org.ofbiz.widget.form.ModelForm;
 import org.ofbiz.widget.form.ModelFormField;
@@ -104,10 +119,10 @@ public class WidgetWorker {
                     parameterValue = parameter.getValue();
                 } else {
                     Object parameterObject = parameter.getValue();
-                    
+
                     // skip null values
                     if (parameterObject == null) continue;
-                    
+
                     if (parameterObject instanceof String[]) {
                         // it's probably a String[], just get the first value
                         String[] parameterArray = (String[]) parameterObject;
@@ -118,7 +133,7 @@ public class WidgetWorker {
                         parameterValue = parameterObject.toString();
                     }
                 }
-                
+
                 if (needsAmp) {
                     externalWriter.append("&amp;");
                 } else {
@@ -280,10 +295,15 @@ public class WidgetWorker {
 
         for (Map.Entry<String, String> parameter: parameterMap.entrySet()) {
             if (parameter.getValue() != null) {
+                String key = parameter.getKey();
+
                 writer.append("<input name=\"");
-                writer.append(parameter.getKey());
+                writer.append(key);
                 writer.append("\" value=\"");
-                writer.append(parameter.getValue());
+
+                String valueFromContext = context.containsKey(key) && context.get(key)!= null ?
+                        context.get(key).toString() : parameter.getValue();
+                writer.append(valueFromContext);
                 writer.append("\" type=\"hidden\"/>");
             }
         }
@@ -339,9 +359,14 @@ public class WidgetWorker {
 
         public String getValue(Map<String, Object> context) {
             if (this.value != null) {
-                return this.value.expandString(context);
+                try {
+                    return URLEncoder.encode(this.value.expandString(context), Charset.forName("UTF-8").displayName());
+                } catch (UnsupportedEncodingException e) {
+                    Debug.logError(e, module);
+                    return this.value.expandString(context);
+                }
             }
-            
+
             Object retVal = null;
             if (this.fromField != null && this.fromField.get(context) != null) {
                 retVal = this.fromField.get(context);
@@ -352,7 +377,7 @@ public class WidgetWorker {
             if (retVal != null) {
                 TimeZone timeZone = (TimeZone) context.get("timeZone");
                 if (timeZone == null) timeZone = TimeZone.getDefault();
-                
+
                 String returnValue = null;
                 // format string based on the user's time zone (not locale because these are parameters)
                 if (retVal instanceof Double || retVal instanceof Float || retVal instanceof BigDecimal) {
@@ -370,12 +395,140 @@ public class WidgetWorker {
                     DateFormat df = UtilDateTime.toDateTimeFormat("EEE MMM dd hh:mm:ss z yyyy", timeZone, null);
                     returnValue = df.format((java.util.Date) retVal);
                 } else {
-                    returnValue = retVal.toString();
+                    try {
+                        returnValue = URLEncoder.encode(retVal.toString(), Charset.forName("UTF-8").displayName());
+                    } catch (UnsupportedEncodingException e) {
+                        Debug.logError(e, module);
+                    }
                 }
                 return returnValue;
             } else {
                 return null;
             }
+        }
+    }
+
+    public static class AutoServiceParameters {
+        private String serviceName;
+        List<String> excludeList = FastList.newInstance();
+        boolean includePk;
+        boolean includeNonPk;
+        boolean sendIfEmpty;
+        public AutoServiceParameters(Element autoElement){
+            serviceName = UtilXml.checkEmpty(autoElement.getAttribute("service-name"));
+            sendIfEmpty = "true".equals(autoElement.getAttribute("send-if-empty"));
+            List<? extends Element> excludes = UtilXml.childElementList(autoElement, "exclude");
+            if (excludes != null) {
+                for (Element exclude: excludes) {
+                    if (UtilValidate.isNotEmpty(exclude.getAttribute("field-name"))) {
+                        excludeList.add(exclude.getAttribute("field-name"));
+                    }
+                }
+            }
+        }
+
+        @SuppressWarnings("unchecked")
+        public Map<String, String> getParametersMap(Map<String, Object> context, String defaultServiceName) {
+            Map<String, String> autServiceParams = FastMap.newInstance();
+            LocalDispatcher dispatcher = (LocalDispatcher) context.get("dispatcher");
+            if (dispatcher == null) {
+                Debug.logError("We can not append auto service Parameters since we could not find dispatcher in the current context", module);
+                return autServiceParams;
+            }
+            if (UtilValidate.isEmpty(serviceName)) serviceName = defaultServiceName;
+            FlexibleStringExpander toExpand = FlexibleStringExpander.getInstance(serviceName);
+            ModelService service = null;
+            try {
+                service = dispatcher.getDispatchContext().getModelService(toExpand.toString());
+            } catch (GenericServiceException e) {
+                Debug.logError("Resolve service throw an error : " + e, module);
+            }
+            if (service == null) {
+                Debug.logError("We can not append auto service Parameters since we could not find service with name [" + serviceName + "]", module);
+                return autServiceParams;
+            }
+
+            Iterator<ModelParam> paramsIter = service.getInModelParamList().iterator();
+            if (paramsIter != null) {
+                while (paramsIter.hasNext()) {
+                    ModelParam param = paramsIter.next();
+                    if (param.getInternal()) continue;
+                    String paramName = param.getName();
+                    FlexibleMapAccessor<Object> fma = FlexibleMapAccessor.getInstance(paramName);
+                    if (!excludeList.contains(paramName)) {
+                        Object flexibleValue = fma.get(context);
+                        if (UtilValidate.isEmpty(flexibleValue) && context.containsKey("parameters")) {
+                            flexibleValue = fma.get((Map<String, ? extends Object>) context.get("parameters"));
+                        }
+                        if (UtilValidate.isNotEmpty(flexibleValue) || sendIfEmpty) {
+                            autServiceParams.put(paramName, String.valueOf(flexibleValue));
+                        }
+                    }
+                }
+            }
+            return autServiceParams;
+        }
+    }
+
+    public static class AutoEntityParameters {
+        private String entityName;
+        private String includeType;
+        List<String> excludeList = FastList.newInstance();
+        boolean includePk;
+        boolean includeNonPk;
+        boolean sendIfEmpty;
+        public AutoEntityParameters(Element autoElement){
+            entityName = UtilXml.checkEmpty(autoElement.getAttribute("entity-name"));
+            sendIfEmpty = "true".equals(autoElement.getAttribute("send-if-empty"));
+            includeType = UtilXml.checkEmpty(autoElement.getAttribute("include"));
+            includePk = "pk".equals(includeType) || "all".equals(includeType);
+            includeNonPk = "nonpk".equals(includeType) || "all".equals(includeType);
+            List<? extends Element> excludes = UtilXml.childElementList(autoElement, "exclude");
+            if (excludes != null) {
+                for (Element exclude: excludes) {
+                    if (UtilValidate.isNotEmpty(exclude.getAttribute("field-name"))) {
+                        excludeList.add(exclude.getAttribute("field-name"));
+                    }
+                }
+            }
+        }
+
+        @SuppressWarnings("unchecked")
+        public Map<String, String> getParametersMap(Map<String, Object> context, String defaultEntityName) {
+            Map<String, String> autEntityParams = FastMap.newInstance();
+            Delegator delegator = (Delegator) context.get("delegator");
+            if (delegator == null) {
+                Debug.logError("We can not append auto entity Parameters since we could not find delegator in the current context", module);
+                return autEntityParams;
+            }
+            if (UtilValidate.isEmpty(entityName)) entityName = defaultEntityName;
+            FlexibleStringExpander toExpand = FlexibleStringExpander.getInstance(entityName);
+            ModelEntity entity = delegator.getModelEntity(toExpand.expandString(context));
+            if (entity == null) {
+                Debug.logError("We can not append auto entity Parameters since we could not find entity with name [" + entityName + "]", module);
+                return autEntityParams;
+            }
+
+            Iterator<ModelField> fieldsIter = entity.getFieldsIterator();
+            if (fieldsIter != null) {
+                while (fieldsIter.hasNext()) {
+                    ModelField field = fieldsIter.next();
+                    String fieldName = field.getName();
+                    FlexibleMapAccessor<Object> fma = FlexibleMapAccessor.getInstance(fieldName);
+                    boolean shouldExclude = excludeList.contains(fieldName);
+                    if ((!shouldExclude) && (!field.getIsAutoCreatedInternal())
+                            && ((field.getIsPk() && includePk) || (!field.getIsPk() && includeNonPk))) {
+                        Object flexibleValue = fma.get(context);
+                        if (UtilValidate.isEmpty(flexibleValue) && context.containsKey("parameters")) {
+                            flexibleValue = fma.get((Map<String, Object>) context.get("parameters"));
+                        }
+                        if (UtilValidate.isNotEmpty(flexibleValue) || sendIfEmpty) {
+                            autEntityParams.put(fieldName, String.valueOf(flexibleValue));
+                        }
+                    }
+                }
+            }
+            return autEntityParams;
         }
     }
 
@@ -385,7 +538,12 @@ public class WidgetWorker {
                 String requestUri = (target.indexOf('?') > -1) ? target.substring(0, target.indexOf('?')) : target;
                 ServletContext servletContext = request.getSession().getServletContext();
                 RequestHandler rh = (RequestHandler) servletContext.getAttribute("_REQUEST_HANDLER_");
-                ConfigXMLReader.RequestMap requestMap = rh.getControllerConfig().getRequestMapMap().get(requestUri);
+                ConfigXMLReader.RequestMap requestMap = null;
+                try {
+                    requestMap = rh.getControllerConfig().getRequestMapMap().get(requestUri);
+                } catch (WebAppConfigurationException e) {
+                    Debug.logError(e, "Exception thrown while parsing controller.xml file: ", module);
+                }
                 if (requestMap != null && requestMap.event != null) {
                     return "hidden-form";
                 } else {
@@ -401,7 +559,7 @@ public class WidgetWorker {
 
     /** Returns the script location based on a script combined name:
      * <code>location#methodName</code>.
-     * 
+     *
      * @param combinedName The combined location/method name
      * @return The script location
      */
@@ -416,7 +574,7 @@ public class WidgetWorker {
     /** Returns the script method name based on a script combined name:
      * <code>location#methodName</code>. Returns <code>null</code> if
      * no method name is found.
-     * 
+     *
      * @param combinedName The combined location/method name
      * @return The method name or <code>null</code>
      */

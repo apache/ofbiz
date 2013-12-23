@@ -52,11 +52,13 @@ public class PartyWorker {
 
     public static String module = PartyWorker.class.getName();
 
+    private PartyWorker() {}
+
     public static Map<String, GenericValue> getPartyOtherValues(ServletRequest request, String partyId, String partyAttr, String personAttr, String partyGroupAttr) {
         Delegator delegator = (Delegator) request.getAttribute("delegator");
         Map<String, GenericValue> result = FastMap.newInstance();
         try {
-            GenericValue party = delegator.findByPrimaryKey("Party", UtilMisc.toMap("partyId", partyId));
+            GenericValue party = delegator.findOne("Party", UtilMisc.toMap("partyId", partyId), false);
 
             if (party != null)
                 result.put(partyAttr, party);
@@ -65,7 +67,7 @@ public class PartyWorker {
         }
 
         try {
-            GenericValue person = delegator.findByPrimaryKey("Person", UtilMisc.toMap("partyId", partyId));
+            GenericValue person = delegator.findOne("Person", UtilMisc.toMap("partyId", partyId), false);
 
             if (person != null)
                 result.put(personAttr, person);
@@ -74,7 +76,7 @@ public class PartyWorker {
         }
 
         try {
-            GenericValue partyGroup = delegator.findByPrimaryKey("PartyGroup", UtilMisc.toMap("partyId", partyId));
+            GenericValue partyGroup = delegator.findOne("PartyGroup", UtilMisc.toMap("partyId", partyId), false);
 
             if (partyGroup != null)
                 result.put(partyGroupAttr, partyGroup);
@@ -108,7 +110,7 @@ public class PartyWorker {
 
     public static GenericValue findPartyLatestContactMech(String partyId, String contactMechTypeId, Delegator delegator) {
         try {
-            List<GenericValue> cmList = delegator.findByAnd("PartyAndContactMech", UtilMisc.toMap("partyId", partyId, "contactMechTypeId", contactMechTypeId), UtilMisc.toList("-fromDate"));
+            List<GenericValue> cmList = delegator.findByAnd("PartyAndContactMech", UtilMisc.toMap("partyId", partyId, "contactMechTypeId", contactMechTypeId), UtilMisc.toList("-fromDate"), false);
             cmList = EntityUtil.filterByDate(cmList);
             return EntityUtil.getFirst(cmList);
         } catch (GenericEntityException e) {
@@ -121,7 +123,7 @@ public class PartyWorker {
         GenericValue pcm = findPartyLatestContactMech(partyId, "POSTAL_ADDRESS", delegator);
         if (pcm != null) {
             try {
-                return pcm.getRelatedOne("PostalAddress");
+                return pcm.getRelatedOne("PostalAddress", false);
             } catch (GenericEntityException e) {
                 Debug.logError(e, "Error while finding latest PostalAddress for party with ID [" + partyId + "]: " + e.toString(), module);
             }
@@ -133,7 +135,7 @@ public class PartyWorker {
         GenericValue latestPostalAddress = findPartyLatestPostalAddress(partyId, delegator);
         if (latestPostalAddress  != null) {
             try {
-                GenericValue latestGeoPoint =  latestPostalAddress.getRelatedOne("GeoPoint");
+                GenericValue latestGeoPoint =  latestPostalAddress.getRelatedOne("GeoPoint", false);
                 if (latestGeoPoint  != null) {
                     return latestGeoPoint;
                 }
@@ -149,7 +151,7 @@ public class PartyWorker {
         GenericValue pcm = findPartyLatestContactMech(partyId, "TELECOM_NUMBER", delegator);
         if (pcm != null) {
             try {
-                return pcm.getRelatedOne("TelecomNumber");
+                return pcm.getRelatedOne("TelecomNumber", false);
             } catch (GenericEntityException e) {
                 Debug.logError(e, "Error while finding latest TelecomNumber for party with ID [" + partyId + "]: " + e.toString(), module);
             }
@@ -159,7 +161,7 @@ public class PartyWorker {
 
     public static GenericValue findPartyLatestUserLogin(String partyId, Delegator delegator) {
         try {
-            List<GenericValue> userLoginList = delegator.findByAnd("UserLogin", UtilMisc.toMap("partyId", partyId), UtilMisc.toList("-" + ModelEntity.STAMP_FIELD));
+            List<GenericValue> userLoginList = delegator.findByAnd("UserLogin", UtilMisc.toMap("partyId", partyId), UtilMisc.toList("-" + ModelEntity.STAMP_FIELD), false);
             return EntityUtil.getFirst(userLoginList);
         } catch (GenericEntityException e) {
             Debug.logError(e, "Error while finding latest UserLogin for party with ID [" + partyId + "]: " + e.toString(), module);
@@ -169,7 +171,7 @@ public class PartyWorker {
 
     public static Timestamp findPartyLastLoginTime(String partyId, Delegator delegator) {
         try {
-            List<GenericValue> loginHistory = delegator.findByAnd("UserLoginHistory", UtilMisc.toMap("partyId", partyId), UtilMisc.toList("-fromDate"));
+            List<GenericValue> loginHistory = delegator.findByAnd("UserLoginHistory", UtilMisc.toMap("partyId", partyId), UtilMisc.toList("-fromDate"), false);
             GenericValue v = EntityUtil.getFirst(loginHistory);
             if (v != null) {
                 return v.getTimestamp("fromDate");
@@ -258,7 +260,7 @@ public class PartyWorker {
             for (GenericValue partyAndAddr: validFound) {
                 String partyId = partyAndAddr.getString("partyId");
                 if (UtilValidate.isNotEmpty(partyId)) {
-                    GenericValue p = delegator.findByPrimaryKey("Person", UtilMisc.toMap("partyId", partyId));
+                    GenericValue p = delegator.findOne("Person", UtilMisc.toMap("partyId", partyId), false);
                     if (p != null) {
                         String fName = p.getString("firstName");
                         String lName = p.getString("lastName");
@@ -357,7 +359,7 @@ public class PartyWorker {
         List<String> sort = UtilMisc.toList("-fromDate");
         EntityCondition addrCond = EntityCondition.makeCondition(addrExprs, EntityOperator.AND);
         List<GenericValue> addresses = EntityUtil.filterByDate(delegator.findList("PartyAndPostalAddress", addrCond, null, sort, null, false));
-        //Debug.log("Checking for matching address: " + addrCond.toString() + "[" + addresses.size() + "]", module);
+        //Debug.logInfo("Checking for matching address: " + addrCond.toString() + "[" + addresses.size() + "]", module);
 
         if (UtilValidate.isEmpty(addresses)) {
             // No address matches, return an empty list
@@ -372,7 +374,7 @@ public class PartyWorker {
             String addr1Target = PartyWorker.makeMatchingString(delegator, address.getString("address1"));
 
             if (addr1Target != null) {
-                Debug.log("Comparing address1 : " + addr1Source + " / " + addr1Target, module);
+                Debug.logInfo("Comparing address1 : " + addr1Source + " / " + addr1Target, module);
                 if (addr1Target.equals(addr1Source)) {
 
                     // address 2 field
@@ -380,17 +382,17 @@ public class PartyWorker {
                         String addr2Source = PartyWorker.makeMatchingString(delegator, address2);
                         String addr2Target = PartyWorker.makeMatchingString(delegator, address.getString("address2"));
                         if (addr2Target != null) {
-                            Debug.log("Comparing address2 : " + addr2Source + " / " + addr2Target, module);
+                            Debug.logInfo("Comparing address2 : " + addr2Source + " / " + addr2Target, module);
 
                             if (addr2Source.equals(addr2Target)) {
-                                Debug.log("Matching address2; adding valid address", module);
+                                Debug.logInfo("Matching address2; adding valid address", module);
                                 validFound.add(address);
                                 //validParty.put(address.getString("partyId"), address.getString("contactMechId"));
                             }
                         }
                     } else {
                         if (address.get("address2") == null) {
-                            Debug.log("No address2; adding valid address", module);
+                            Debug.logInfo("No address2; adding valid address", module);
                             validFound.add(address);
                             //validParty.put(address.getString("partyId"), address.getString("contactMechId"));
                         }
@@ -491,7 +493,7 @@ public class PartyWorker {
 
         // 1) look if the idToFind given is a real partyId
         if (searchPartyFirst) {
-            party = delegator.findByPrimaryKeyCache("Party", UtilMisc.toMap("partyId", idToFind));
+            party = delegator.findOne("Party", UtilMisc.toMap("partyId", idToFind), true);
         }
 
         if (searchAllId || (searchPartyFirst && UtilValidate.isEmpty(party))) {
@@ -500,11 +502,11 @@ public class PartyWorker {
             if (UtilValidate.isNotEmpty(partyIdentificationTypeId)) {
                 conditions.put("partyIdentificationTypeId", partyIdentificationTypeId);
             }
-            partiesFound = delegator.findByAndCache("PartyIdentificationAndParty", conditions, UtilMisc.toList("partyId"));
+            partiesFound = delegator.findByAnd("PartyIdentificationAndParty", conditions, UtilMisc.toList("partyId"), true);
         }
 
         if (! searchPartyFirst) {
-            party = delegator.findByPrimaryKeyCache("Party", UtilMisc.toMap("partyId", idToFind));
+            party = delegator.findOne("Party", UtilMisc.toMap("partyId", idToFind), true);
         }
 
         if (UtilValidate.isNotEmpty(party)) {
@@ -547,7 +549,7 @@ public class PartyWorker {
                 GenericValue partyToAdd = party;
                 //retreive party GV if the actual genericValue came from viewEntity
                 if (! "Party".equals(party.getEntityName())) {
-                    partyToAdd = delegator.findByPrimaryKeyCache("Party", UtilMisc.toMap("partyId", party.get("partyId")));
+                    partyToAdd = delegator.findOne("Party", UtilMisc.toMap("partyId", party.get("partyId")), true);
                 }
 
                 if (UtilValidate.isEmpty(parties)) {

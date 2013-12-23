@@ -75,8 +75,8 @@ public class PickListServices {
                     Debug.logError(e, module);
                     return ServiceUtil.returnError(e.getMessage());
                 }
-                Debug.log("Recieved orderIdList  - " + orderIdList, module);
-                Debug.log("Found orderHeaderList - " + orderHeaderList, module);
+                Debug.logInfo("Recieved orderIdList  - " + orderIdList, module);
+                Debug.logInfo("Found orderHeaderList - " + orderHeaderList, module);
             }
         }
 
@@ -89,7 +89,7 @@ public class PickListServices {
         // lookup the items in the bin
         List<GenericValue> items;
         try {
-            items = delegator.findByAnd("PicklistItem", UtilMisc.toMap("picklistBinId", picklistBinId));
+            items = delegator.findByAnd("PicklistItem", UtilMisc.toMap("picklistBinId", picklistBinId), null, false);
         } catch (GenericEntityException e) {
             Debug.logError(e, module);
             throw e;

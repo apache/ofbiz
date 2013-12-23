@@ -168,7 +168,7 @@ if (action) {
         oneInventory.checkTime = checkTime;
         oneInventory.facilityId = facilityId;
         oneInventory.productId = oneProd.productId;
-        minimumStock = oneProd.minimumStock as String;
+        minimumStock = oneProd.minimumStock;
         oneInventory.minimumStock = minimumStock;
         oneInventory.reorderQuantity = oneProd.reorderQuantity;
         oneInventory.daysToShip = oneProd.daysToShip;
@@ -181,7 +181,7 @@ if (action) {
             oneInventory.offsetQOHQtyAvailable = resultMap.offsetQOHQtyAvailable;
             oneInventory.offsetATPQtyAvailable = resultMap.offsetATPQtyAvailable;
             oneInventory.usageQuantity = resultMap.usageQuantity;
-            oneInventory.defultPrice = resultMap.defultPrice;
+            oneInventory.defaultPrice = resultMap.defaultPrice;
             oneInventory.listPrice = resultMap.listPrice;
             oneInventory.wholeSalePrice = resultMap.wholeSalePrice;
             if (offsetQOHQty && offsetATPQty) {

@@ -31,36 +31,29 @@ invItemTypePrefix += "_%";
 organizationPartyId = parameters.organizationPartyId;
 exprBldr = new EntityConditionBuilder();
 invoiceItemTypes = delegator.findList("InvoiceItemType", exprBldr.LIKE(invoiceItemTypeId: invItemTypePrefix), null, null, null, false);
-allTypes = [];
-invoiceItemTypes.each { invoiceItemType ->
-    activeGlDescription = "";
-    remove = " ";
-    glAccounts = null;
+
+context.invoiceItemTypes = invoiceItemTypes.collect { invoiceItemType ->
+    defaultAccount = true
     glAccount = null;
-    invoiceItemTypeOrgs = invoiceItemType.getRelatedByAnd("InvoiceItemTypeGlAccount", [organizationPartyId : organizationPartyId]);
-    overrideGlAccountId = " ";
+    invoiceItemTypeOrgs = invoiceItemType.getRelated("InvoiceItemTypeGlAccount", [organizationPartyId : organizationPartyId], null, false);
+    overrideGlAccountId = null
     if (invoiceItemTypeOrgs) {
         invoiceItemTypeOrg = invoiceItemTypeOrgs[0];
         overrideGlAccountId = invoiceItemTypeOrg.glAccountId;
 
-        glAccounts = invoiceItemTypeOrg.getRelated("GlAccount");
+        glAccounts = invoiceItemTypeOrg.getRelated("GlAccount", null, null, false);
         if (glAccounts) {
             glAccount = glAccounts[0];
+            defaultAccount = false
         }
     } else {
-        glAccount = invoiceItemType.getRelatedOne("DefaultGlAccount");
+        glAccount = invoiceItemType.getRelatedOne("DefaultGlAccount", false);
     }
 
-    if (glAccount) {
-        activeGlDescription = glAccount.accountName;
-        remove = "Remove";
-    }
-
-    allTypes.add([invoiceItemTypeId : invoiceItemType.invoiceItemTypeId,
+    return [invoiceItemTypeId : invoiceItemType.invoiceItemTypeId,
                   description : invoiceItemType.description,
                   defaultGlAccountId : invoiceItemType.defaultGlAccountId,
                   overrideGlAccountId : overrideGlAccountId,
-                  remove : remove,
-                  activeGlDescription : activeGlDescription]);
+                  defaultAccount : defaultAccount,
+                  activeGlDescription : glAccount?.accountName];
 }
-context.invoiceItemTypes = allTypes;

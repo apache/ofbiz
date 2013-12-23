@@ -24,6 +24,7 @@ import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 
+import freemarker.template.utility.StringUtil;
 import javolution.util.FastList;
 import javolution.util.FastMap;
 
@@ -36,9 +37,9 @@ import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilXml;
 import org.ofbiz.base.util.cache.UtilCache;
 import org.ofbiz.entity.Delegator;
-import org.ofbiz.entity.config.DelegatorInfo;
+import org.ofbiz.entity.GenericEntityConfException;
 import org.ofbiz.entity.config.EntityConfigUtil;
-import org.ofbiz.entity.config.EntityEcaReaderInfo;
+import org.ofbiz.entity.config.model.*;
 import org.w3c.dom.Element;
 
 /**
@@ -48,42 +49,47 @@ public class EntityEcaUtil {
 
     public static final String module = EntityEcaUtil.class.getName();
 
-    public static UtilCache<String, Map<String, Map<String, List<EntityEcaRule>>>> entityEcaReaders = UtilCache.createUtilCache("entity.EcaReaders", 0, 0, false);
+    private static final UtilCache<String, Map<String, Map<String, List<EntityEcaRule>>>> entityEcaReaders = UtilCache.createUtilCache("entity.EcaReaders", 0, 0, false);
 
     public static Map<String, Map<String, List<EntityEcaRule>>> getEntityEcaCache(String entityEcaReaderName) {
         Map<String, Map<String, List<EntityEcaRule>>> ecaCache = entityEcaReaders.get(entityEcaReaderName);
         if (ecaCache == null) {
-            synchronized (EntityEcaUtil.class) {
-                ecaCache = entityEcaReaders.get(entityEcaReaderName);
-                if (ecaCache == null) {
-                    ecaCache = FastMap.newInstance();
-                    readConfig(entityEcaReaderName, ecaCache);
-                    entityEcaReaders.put(entityEcaReaderName, ecaCache);
-                }
-            }
+            ecaCache = FastMap.newInstance();
+            readConfig(entityEcaReaderName, ecaCache);
+            ecaCache = entityEcaReaders.putIfAbsentAndGet(entityEcaReaderName, ecaCache);
         }
         return ecaCache;
     }
 
     public static String getEntityEcaReaderName(String delegatorName) {
-        DelegatorInfo delegatorInfo = EntityConfigUtil.getDelegatorInfo(delegatorName);
+        DelegatorElement delegatorInfo = null;
+        try {
+            delegatorInfo = EntityConfigUtil.getDelegator(delegatorName);
+        } catch (GenericEntityConfException e) {
+            Debug.logWarning(e, "Exception thrown while getting field type config: ", module);
+        }
         if (delegatorInfo == null) {
             Debug.logError("BAD ERROR: Could not find delegator config with name: " + delegatorName, module);
             return null;
         }
-        return delegatorInfo.entityEcaReader;
+        return delegatorInfo.getEntityEcaReader();
     }
 
     protected static void readConfig(String entityEcaReaderName, Map<String, Map<String, List<EntityEcaRule>>> ecaCache) {
-        EntityEcaReaderInfo entityEcaReaderInfo = EntityConfigUtil.getEntityEcaReaderInfo(entityEcaReaderName);
+        EntityEcaReader entityEcaReaderInfo = null;
+        try {
+            entityEcaReaderInfo = EntityConfigUtil.getEntityEcaReader(entityEcaReaderName);
+        } catch (GenericEntityConfException e) {
+            Debug.logError(e, "Exception thrown while getting entity-eca-reader config with name: " + entityEcaReaderName, module);
+        }
         if (entityEcaReaderInfo == null) {
             Debug.logError("BAD ERROR: Could not find entity-eca-reader config with name: " + entityEcaReaderName, module);
             return;
         }
 
         List<Future<List<EntityEcaRule>>> futures = FastList.newInstance();
-        for (Element eecaResourceElement: entityEcaReaderInfo.resourceElements) {
-            ResourceHandler handler = new MainResourceHandler(EntityConfigUtil.ENTITY_ENGINE_XML_FILENAME, eecaResourceElement);
+        for (Resource eecaResourceElement : entityEcaReaderInfo.getResourceList()) {
+            ResourceHandler handler = new MainResourceHandler(EntityConfigUtil.ENTITY_ENGINE_XML_FILENAME, eecaResourceElement.getLoader(), eecaResourceElement.getLocation());
             futures.add(ExecutionPool.GLOBAL_EXECUTOR.submit(createEcaLoaderCallable(handler)));
         }
 
@@ -130,7 +136,7 @@ public class EntityEcaUtil {
             rules.add(new EntityEcaRule(e));
         }
         try {
-            Debug.logImportant("Loaded [" + rules.size() + "] Entity ECA definitions from " + handler.getFullLocation() + " in loader " + handler.getLoaderName(), module);
+            Debug.logImportant("Loaded [" + StringUtil.leftPad(Integer.toString(rules.size()), 3) + "] Entity ECA definitions from " + handler.getFullLocation() + " in loader " + handler.getLoaderName(), module);
         } catch (GenericConfigException e) {
             Debug.logError(e, module);
         }

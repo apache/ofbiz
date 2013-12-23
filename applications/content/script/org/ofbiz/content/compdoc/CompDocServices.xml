@@ -19,7 +19,7 @@ under the License.
 -->
 
 <simple-methods xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-                xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/simple-methods.xsd">
+                xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/simple-methods-v2.xsd">
 
     <simple-method method-name="genCompDocInstance" short-description="Create CompDoc">
         <entity-one entity-name="Content" value-field="rootTemplateContent">
@@ -198,6 +198,9 @@ under the License.
         </call-service>
         <!--  put all the result fields in this service's result -->
         <iterate-map map="pResults" key="key" value="val">
+            <if-compare field="key" operator="equals" value="responseMessage">
+                <continue/>
+            </if-compare>
             <field-to-result field="val" result-name="${key}"/>
         </iterate-map>
 

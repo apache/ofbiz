@@ -37,7 +37,7 @@ imageManagementPath = FlexibleStringExpander.expandString(UtilProperties.getProp
 String fileType = "original";
 String productId = request.getParameter("productId");
 
-productContentList = delegator.findByAnd("ProductContentAndInfo", UtilMisc.toMap("productId", productId, "productContentTypeId", "DEFAULT_IMAGE"));
+productContentList = delegator.findByAnd("ProductContentAndInfo", UtilMisc.toMap("productId", productId, "productContentTypeId", "DEFAULT_IMAGE"), null, false);
 if (productContentList) {
     dataResourceName = productContentList.get(0).drDataResourceName
 }
@@ -59,13 +59,13 @@ context.imageNameOriginal = imageUrlPrefix + "/" + filenameExpander.expandString
 
 // Start ProductContent stuff
 if (productId) {
-    product = delegator.findByPrimaryKey("Product",["productId" : productId]);
+    product = delegator.findOne("Product",["productId" : productId], false);
     context.productId = productId;
 }
 
 productContent = null;
 if (product) {
-    productContent = product.getRelated('ProductContent', null, ['productContentTypeId']);
+    productContent = product.getRelated('ProductContent', null, ['productContentTypeId'], false);
 }
 context.productContent = productContent;
 // End ProductContent stuff
@@ -109,7 +109,7 @@ if (fileType) {
     if (checkPathFile.equals(productContentList.get(0).drObjectInfo)) {
         BufferedImage bufImg = ImageIO.read(new File(imageManagementPath + "/" + productId + "/" + dataResourceName));
     } else {
-        BufferedImage bufImg = ImageIO.read(new File(productContentList.get(0).drObjectInfo)));
+        BufferedImage bufImg = ImageIO.read(new File(productContentList.get(0).drObjectInfo));
     }
     ImageIO.write((RenderedImage) bufImg, "jpg", new File(imageManagementPath + "/" + productId + "/" + defaultFileName));
 

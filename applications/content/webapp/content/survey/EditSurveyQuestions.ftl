@@ -44,12 +44,12 @@ under the License.
         </tr>
         <#assign alt_row = false>
         <#list surveyQuestionAndApplList as surveyQuestionAndAppl>
-          <#assign questionType = surveyQuestionAndAppl.getRelatedOneCache("SurveyQuestionType")/>
-          <#assign questionCat = surveyQuestionAndAppl.getRelatedOneCache("SurveyQuestionCategory")?if_exists/>
-          <#assign currentSurveyPage = surveyQuestionAndAppl.getRelatedOneCache("SurveyPage")?if_exists/>
-          <#assign currentSurveyMultiResp = surveyQuestionAndAppl.getRelatedOneCache("SurveyMultiResp")?if_exists/>
+          <#assign questionType = surveyQuestionAndAppl.getRelatedOne("SurveyQuestionType", true)/>
+          <#assign questionCat = surveyQuestionAndAppl.getRelatedOne("SurveyQuestionCategory", true)?if_exists/>
+          <#assign currentSurveyPage = surveyQuestionAndAppl.getRelatedOne("SurveyPage", true)?if_exists/>
+          <#assign currentSurveyMultiResp = surveyQuestionAndAppl.getRelatedOne("SurveyMultiResp", true)?if_exists/>
           <#if currentSurveyMultiResp?has_content>
-            <#assign currentSurveyMultiRespColumns = currentSurveyMultiResp.getRelated("SurveyMultiRespColumn")/>
+            <#assign currentSurveyMultiRespColumns = currentSurveyMultiResp.getRelated("SurveyMultiRespColumn", null, null, false)/>
           <#else/>
             <#assign currentSurveyMultiRespColumns = []/>
           </#if>
@@ -92,7 +92,7 @@ under the License.
               <td>
                 <select name="surveyMultiRespColId">
                   <#if surveyQuestionAndAppl.surveyMultiRespColId?has_content>
-                    <#assign currentSurveyMultiRespColumn = surveyQuestionAndAppl.getRelatedOne("SurveyMultiRespColumn")/>
+                    <#assign currentSurveyMultiRespColumn = surveyQuestionAndAppl.getRelatedOne("SurveyMultiRespColumn", false)/>
                     <option value="${currentSurveyMultiRespColumn.surveyMultiRespColId}">${(currentSurveyMultiRespColumn.columnTitle)?if_exists} [${currentSurveyMultiRespColumn.surveyMultiRespColId}]</option>
                     <option value="${currentSurveyMultiRespColumn.surveyMultiRespColId}">----</option>
                   </#if>
@@ -160,7 +160,7 @@ under the License.
               </tr>
           <#assign alt_row = false>
           <#list categoryQuestions as question>
-            <#assign questionType = question.getRelatedOne("SurveyQuestionType")>
+            <#assign questionType = question.getRelatedOne("SurveyQuestionType", false)>
             <form method="post" action="<@ofbizUrl>createSurveyQuestionAppl</@ofbizUrl>">
               <input type="hidden" name="surveyId" value="${requestParameters.surveyId}" />
               <input type="hidden" name="surveyQuestionId" value="${question.surveyQuestionId}" />
@@ -284,8 +284,15 @@ under the License.
         <tr<#if alt_row> class="alternate-row"</#if>>
           <td>${option.description?if_exists}</td>
           <td>${option.sequenceNum?if_exists}</td>
-          <td><a href="<@ofbizUrl>EditSurveyQuestions?surveyId=${requestParameters.surveyId}&amp;surveyQuestionId=${option.surveyQuestionId}&amp;surveyOptionSeqId=${option.surveyOptionSeqId}</@ofbizUrl>" class="buttontext">${uiLabelMap.CommonEdit}</a>
-          <td><a href="<@ofbizUrl>removeSurveyQuestionAppl?surveyId=${requestParameters.surveyId}&amp;surveyQuestionId=${option.surveyQuestionId}&amp;surveyOptionSeqId=${option.surveyOptionSeqId}</@ofbizUrl>" class="buttontext">${uiLabelMap.CommonRemove}</a>
+          <td><a href="<@ofbizUrl>EditSurveyQuestions?surveyId=${requestParameters.surveyId}&amp;surveyQuestionId=${option.surveyQuestionId}&amp;surveyOptionSeqId=${option.surveyOptionSeqId}</@ofbizUrl>" class="buttontext">${uiLabelMap.CommonEdit}</a></td>
+          <td>
+            <form id="deleteSurveyQuestionOption_${option_index}" action="<@ofbizUrl>deleteSurveyQuestionOption</@ofbizUrl>" method="post">
+              <input type="hidden" name="surveyId" value="${requestParameters.surveyId}" />
+              <input type="hidden" name="surveyQuestionId" value="${option.surveyQuestionId}" />
+              <input type="hidden" name="surveyOptionSeqId" value="${option.surveyOptionSeqId}" />
+              <a href="javascript:document.getElementById('deleteSurveyQuestionOption_${option_index}').submit();"" class="buttontext">${uiLabelMap.CommonRemove}</a>
+            </form>
+          </td>
         </tr>
         <#assign alt_row = !alt_row>
       </#list>

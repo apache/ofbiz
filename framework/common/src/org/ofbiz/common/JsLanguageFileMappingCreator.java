@@ -1,3 +1,22 @@
+/*******************************************************************************
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ *******************************************************************************/
+
 package org.ofbiz.common;
 
 import java.io.File;
@@ -53,9 +72,11 @@ public class JsLanguageFileMappingCreator {
             String displayCountry = locale.toString();
             String modifiedDisplayCountry = null;
             String modifiedDisplayCountryForValidation = null;
+            String modifiedDisplayCountryForValidation2 = null;
             if (displayCountry.indexOf('_') != -1) {
                 modifiedDisplayCountry = displayCountry.replace("_", "-");
                 modifiedDisplayCountryForValidation = displayCountry.replace("_", "").toLowerCase(); // fun: in validate plugin we have also ptpt and ptbr for instance...
+                modifiedDisplayCountryForValidation2 = displayCountry.substring(displayCountry.indexOf('_')+1).toLowerCase(); // weird, validate plugin treat zh_CN as cn (not zhcn) and zh_TW as tw (not zhtw)
             } else {
                 modifiedDisplayCountry = displayCountry;
             }
@@ -96,14 +117,21 @@ public class JsLanguageFileMappingCreator {
             if (file.exists()) {
                 fileUrl = validateRelPath + validateLocalePrefix + strippedLocale + jsFilePostFix;
             } else {
+                // use default language en
+                fileUrl = validateRelPath + validateLocalePrefix + defaultLocaleJquery + jsFilePostFix;
                 // Try to guess a language (fun: in validate plugin we have also ptpt and ptbr for instance....)
-                fileName = componentRoot + validateRelPath + validateLocalePrefix + modifiedDisplayCountryForValidation + jsFilePostFix;
-                file = FileUtil.getFile(fileName);
-                if (file.exists()) {
-                    fileUrl = validateRelPath + validateLocalePrefix + modifiedDisplayCountryForValidation + jsFilePostFix;
-                } else {
-                    // use default language en
-                    fileUrl = validateRelPath + validateLocalePrefix + defaultLocaleJquery + jsFilePostFix;
+                if (modifiedDisplayCountryForValidation != null) {
+                    fileName = componentRoot + validateRelPath + validateLocalePrefix + modifiedDisplayCountryForValidation + jsFilePostFix;
+                    file = FileUtil.getFile(fileName);
+                    if (file.exists()) {
+                        fileUrl = validateRelPath + validateLocalePrefix + modifiedDisplayCountryForValidation + jsFilePostFix;
+                    } else {
+                        fileName = componentRoot + validateRelPath + validateLocalePrefix + modifiedDisplayCountryForValidation2 + jsFilePostFix;
+                        file = FileUtil.getFile(fileName);
+                        if (file.exists()) {
+                            fileUrl = validateRelPath + validateLocalePrefix + modifiedDisplayCountryForValidation2 + jsFilePostFix;
+                        }
+                    }
                 }
             }
             validationLocaleFile.put(displayCountry, fileUrl);

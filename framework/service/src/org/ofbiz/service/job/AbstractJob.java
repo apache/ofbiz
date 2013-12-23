@@ -18,68 +18,101 @@
  *******************************************************************************/
 package org.ofbiz.service.job;
 
+import java.util.Date;
+
+import org.ofbiz.base.util.Assert;
+import org.ofbiz.base.util.Debug;
+import org.ofbiz.entity.transaction.GenericTransactionException;
+import org.ofbiz.entity.transaction.TransactionUtil;
+
 /**
- * Abstract Service Job - Invokes a service
+ * Abstract Job.
  */
-@SuppressWarnings("serial")
 public abstract class AbstractJob implements Job {
 
     public static final String module = AbstractJob.class.getName();
 
-    protected long runtime = -1;
-    protected long sequence = 0;
-    private String jobId;
-    private String jobName;
-    private boolean queued = false;
+    private final String jobId;
+    private final String jobName;
+    protected State currentState = State.CREATED;
+    private long elapsedTime = 0;
+    private final Date startTime = new Date();
 
     protected AbstractJob(String jobId, String jobName) {
+        Assert.notNull("jobId", jobId, "jobName", jobName);
         this.jobId = jobId;
         this.jobName = jobName;
     }
 
-    /**
-     * Returns the time to run in milliseconds.
-     */
-    public long getRuntime() {
-        return runtime;
+    @Override
+    public State currentState() {
+        return currentState;
     }
 
-    /**
-     * Returns true if this job is still valid.
-     */
-    public boolean isValid() {
-        if (runtime > 0)
-            return true;
-        return false;
-    }
-
-    /**
-     * Returns the ID of this Job.
-     */
+    @Override
     public String getJobId() {
         return this.jobId;
     }
 
-    /**
-     * Returns the name of this Job.
-     */
+    @Override
     public String getJobName() {
         return this.jobName;
     }
 
-    /**
-     * Flags this job as 'is-queued'
-     */
+    @Override
     public void queue() throws InvalidJobException {
-        this.queued = true;
+        if (currentState != State.CREATED) {
+            throw new InvalidJobException("Illegal state change");
+        }
+        this.currentState = State.QUEUED;
+    }
+
+    @Override
+    public void deQueue() throws InvalidJobException {
+        if (currentState != State.QUEUED) {
+            throw new InvalidJobException("Illegal state change");
+        }
+        this.currentState = State.CREATED;
     }
 
     /**
-     *  Executes the Job.
+     *  Executes this Job. The {@link #run()} method calls this method.
      */
     public abstract void exec() throws InvalidJobException;
 
-    public boolean isQueued() {
-        return queued;
+    @Override
+    public void run() {
+        long startMillis = System.currentTimeMillis();
+        try {
+            exec();
+        } catch (InvalidJobException e) {
+            Debug.logWarning(e.getMessage(), module);
+        }
+        // sanity check; make sure we don't have any transactions in place
+        try {
+            // roll back current TX first
+            if (TransactionUtil.isTransactionInPlace()) {
+                Debug.logWarning("*** NOTICE: JobInvoker finished w/ a transaction in place! Rolling back.", module);
+                TransactionUtil.rollback();
+            }
+            // now resume/rollback any suspended txs
+            if (TransactionUtil.suspendedTransactionsHeld()) {
+                int suspended = TransactionUtil.cleanSuspendedTransactions();
+                Debug.logWarning("Resumed/Rolled Back [" + suspended + "] transactions.", module);
+            }
+        } catch (GenericTransactionException e) {
+            Debug.logWarning(e, module);
+        }
+        elapsedTime = System.currentTimeMillis() - startMillis;
+    }
+
+    @Override
+    public long getRuntime() {
+        return elapsedTime;
+    }
+
+    @Override
+    public Date getStartTime() {
+        return startTime;
     }
 }

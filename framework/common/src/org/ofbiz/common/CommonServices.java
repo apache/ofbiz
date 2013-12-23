@@ -18,17 +18,21 @@
  *******************************************************************************/
 package org.ofbiz.common;
 
+import static org.ofbiz.base.util.UtilGenerics.checkList;
+import static org.ofbiz.base.util.UtilGenerics.checkMap;
+
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.RandomAccessFile;
 import java.io.Writer;
 import java.nio.ByteBuffer;
 import java.sql.Timestamp;
+import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -43,15 +47,16 @@ import javolution.util.FastMap;
 
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
+import org.ofbiz.base.metrics.Metrics;
+import org.ofbiz.base.metrics.MetricsFactory;
 import org.ofbiz.base.util.Debug;
+import org.ofbiz.base.util.StringUtil;
 import org.ofbiz.base.util.UtilDateTime;
-import org.ofbiz.base.util.UtilValidate;
-
-import static org.ofbiz.base.util.UtilGenerics.checkList;
-import static org.ofbiz.base.util.UtilGenerics.checkMap;
 import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.base.util.UtilProperties;
+import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.entity.Delegator;
+import org.ofbiz.entity.GenericEntityConfException;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
 import org.ofbiz.entity.model.ModelEntity;
@@ -63,6 +68,7 @@ import org.ofbiz.service.ModelService;
 import org.ofbiz.service.ServiceUtil;
 import org.ofbiz.service.ServiceXaWrapper;
 import org.ofbiz.service.mail.MimeMessageWrapper;
+import org.owasp.esapi.errors.EncodingException;
 
 /**
  * Common Services
@@ -184,7 +190,7 @@ public class CommonServices {
                 partyId = userLogin.getString("partyId");
         }
 
-        Map<String, String> fields = UtilMisc.toMap("noteId", noteId, "noteName", noteName, "noteInfo", note,
+        Map<String, Object> fields = UtilMisc.toMap("noteId", noteId, "noteName", noteName, "noteInfo", note,
                 "noteParty", partyId, "noteDateTime", noteDate);
 
         try {
@@ -324,7 +330,7 @@ public class CommonServices {
         set.add(delegator.getModelEntity("RoleType"));
 
         for (ModelEntity modelEntity: set) {
-            Debug.log(modelEntity.getEntityName(), module);
+            Debug.logInfo(modelEntity.getEntityName(), module);
         }
         return ServiceUtil.returnSuccess();
     }
@@ -362,14 +368,18 @@ public class CommonServices {
     }
 
     public static Map<String, Object> displayXaDebugInfo(DispatchContext dctx, Map<String, ?> context) {
-        if (TransactionUtil.debugResources) {
-            if (UtilValidate.isNotEmpty(TransactionUtil.debugResMap)) {
-                TransactionUtil.logRunningTx();
+        try {
+            if (TransactionUtil.debugResources()) {
+                if (UtilValidate.isNotEmpty(TransactionUtil.debugResMap)) {
+                    TransactionUtil.logRunningTx();
+                } else {
+                    Debug.logInfo("No running transaction to display.", module);
+                }
             } else {
-                Debug.log("No running transaction to display.", module);
+                Debug.logInfo("Debug resources is disabled.", module);
             }
-        } else {
-            Debug.log("Debug resources is disabled.", module);
+        } catch (GenericEntityConfException e) {
+            return ServiceUtil.returnError(e.getMessage());
         }
 
         return ServiceUtil.returnSuccess();
@@ -458,7 +468,7 @@ public class CommonServices {
 
         for (String str: listOfStrings) {
             String v = mapOfStrings.get(str);
-            Debug.log("SimpleMapListTest: " + str + " -> " + v, module);
+            Debug.logInfo("SimpleMapListTest: " + str + " -> " + v, module);
         }
 
         return ServiceUtil.returnSuccess();
@@ -469,17 +479,17 @@ public class CommonServices {
         MimeMessage message = wrapper.getMessage();
         try {
             if (message.getAllRecipients() != null) {
-               Debug.log("To: " + UtilMisc.toListArray(message.getAllRecipients()), module);
+               Debug.logInfo("To: " + UtilMisc.toListArray(message.getAllRecipients()), module);
             }
             if (message.getFrom() != null) {
-               Debug.log("From: " + UtilMisc.toListArray(message.getFrom()), module);
+               Debug.logInfo("From: " + UtilMisc.toListArray(message.getFrom()), module);
             }
-            Debug.log("Subject: " + message.getSubject(), module);
+            Debug.logInfo("Subject: " + message.getSubject(), module);
             if (message.getSentDate() != null) {
-                Debug.log("Sent: " + message.getSentDate().toString(), module);
+                Debug.logInfo("Sent: " + message.getSentDate().toString(), module);
             }
             if (message.getReceivedDate() != null) {
-                Debug.log("Received: " + message.getReceivedDate().toString(), module);
+                Debug.logInfo("Received: " + message.getReceivedDate().toString(), module);
             }
         } catch (Exception e) {
             Debug.logError(e, module);
@@ -497,7 +507,7 @@ public class CommonServices {
 
         try {
             while ((line = reader.readLine()) != null) {
-                Debug.log("Read line: " + line, module);
+                Debug.logInfo("Read line: " + line, module);
                 writer.write(line);
             }
         } catch (IOException e) {
@@ -541,4 +551,35 @@ public class CommonServices {
         }
     }
 
+    public static Map<String, Object> getAllMetrics(DispatchContext dctx, Map<String, ?> context) {
+        List<Map<String, Object>> metricsMapList = FastList.newInstance();
+        Collection<Metrics> metricsList = MetricsFactory.getMetrics();
+        for (Metrics metrics : metricsList) {
+            Map<String, Object> metricsMap = FastMap.newInstance();
+            metricsMap.put("name", metrics.getName());
+            metricsMap.put("serviceRate", metrics.getServiceRate());
+            metricsMap.put("threshold", metrics.getThreshold());
+            metricsMap.put("totalEvents", metrics.getTotalEvents());
+            metricsMapList.add(metricsMap);
+        }
+        Map<String, Object> result = ServiceUtil.returnSuccess();
+        result.put("metricsList", metricsMapList);
+        return result;
+    }
+
+    public static Map<String, Object> resetMetric(DispatchContext dctx, Map<String, ?> context) {
+        String name = (String) context.get("name");
+        try {
+            name = StringUtil.defaultWebEncoder.decodeFromURL(name);
+        } catch (EncodingException e) {
+            return ServiceUtil.returnError("Exception thrown while decoding metric name \"" + name + "\"");
+        }
+        Metrics metric = MetricsFactory.getMetric(name);
+        if (metric != null) {
+            metric.reset();
+            return ServiceUtil.returnSuccess();
+
+        }
+        return ServiceUtil.returnError("Metric \"" + name + "\" not found.");
+    }
 }

@@ -193,7 +193,7 @@ under the License.
         <field name="requirePostalCodeExt" type="indicator"></field>
         <field name="addressFormat" type="long-varchar"></field>
         <prim-key field="geoId"/>
-        <relation rel-entity-name="Geo" type="one">
+        <relation type="one" rel-entity-name="Geo" fk-name="CNY_ADR_GEO">
             <key-map field-name="geoId"/>
         </relation>
         <relation type="one" fk-name="CNY_ADR_GEO_TYPE" rel-entity-name="GeoAssocType" >
@@ -304,7 +304,17 @@ under the License.
         <key-map field-name="parentTypeId" rel-field-name="geoTypeId"/>
       </relation>
     </entity>
-
+    <extend-entity entity-name="Visit">
+        <field name="clientIpStateProvGeoId" type="id"></field>
+        <field name="clientIpCountryGeoId" type="id"></field>
+        <relation type="one" fk-name="VISIT_CIP_STPRV" title="ClientIpStateProv" rel-entity-name="Geo">
+            <key-map field-name="clientIpStateProvGeoId" rel-field-name="geoId"/>
+        </relation>
+        <relation type="one" fk-name="VISIT_CIP_CNTRY" title="ClientIpCountry" rel-entity-name="Geo">
+            <key-map field-name="clientIpCountryGeoId" rel-field-name="geoId"/>
+        </relation>
+    </extend-entity>
+ 
   <!-- ========================================================= -->
   <!-- org.ofbiz.common.keyword -->
   <!-- ========================================================= -->
@@ -839,4 +849,17 @@ under the License.
             <key-map field-name="portalPageId"/>
         </view-link>
     </view-entity>
+
+    <!-- ============================ -->
+    <!-- org.ofbiz.common.property -->
+    <!-- ============================ -->
+    
+    <entity entity-name="SystemProperty" package-name="org.ofbiz.common.property" title="Defines a System Property">
+        <field name="systemResourceId" type="id-long-ne"></field>
+        <field name="systemPropertyId" type="id-long-ne"></field>
+        <field name="systemPropertyValue" type="value"></field>
+        <field name="description" type="description"></field>
+        <prim-key field="systemResourceId"/>
+        <prim-key field="systemPropertyId"/>
+    </entity>
 </entitymodel>

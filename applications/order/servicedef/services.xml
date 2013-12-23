@@ -25,11 +25,6 @@ under the License.
     <version>1.0</version>
 
     <!-- Order processing services -->
-    <service name="processOrderWf" engine="workflow" location="org.ofbiz.order" invoke="ProcessOrder">
-        <description>Service for testing the workflow engine</description>
-        <attribute name="orderId" type="String" mode="IN" optional="false"/>
-    </service>
-
     <service name="orderNotificationInterface" engine="interface" location="" invoke="">
         <attribute name="orderId" type="String" mode="IN" optional="false"/>
         <attribute name="orderItemSeqId" type="String" mode="IN" optional="true"/>
@@ -184,12 +179,8 @@ under the License.
 
     <service name="orderAdjustmentPermissionCheck" engine="simple"
             location="component://order/script/org/ofbiz/order/order/OrderSimpleMethods.xml" invoke="orderAdjustmentPermissionCheck">
-        <description>
-            Performs a party contact mech security check. The userLogin partyId must equal the partyId parameter.
-            Only the order owner should be able to cancel an item from Ecommerce.
-        </description>
+        <description>Permission service for the creation and editing of order adjustments</description>
         <implements service="permissionInterface"/>
-        <attribute name="partyId" type="String" mode="IN" optional="true"/>
     </service>
 
     <service name="createOrderAdjustment" default-entity-name="OrderAdjustment" engine="simple"
@@ -312,7 +303,7 @@ under the License.
     </service>
 
     <service name="updateOrderItems" engine="java" auth="true"
-            location="org.ofbiz.order.order.OrderServices" invoke="updateApprovedOrderItems">
+            location="org.ofbiz.order.order.OrderServices" invoke="updateApprovedOrderItems" transaction-timeout="7200">
         <description>Update the quantities/prices for an existing order</description>
         <attribute name="orderId" type="String" mode="INOUT" optional="false"/>
         <attribute name="supplierPartyId" type="String" mode="IN" optional="true"/>
@@ -358,6 +349,7 @@ under the License.
         <attribute name="amount" type="BigDecimal" mode="IN" optional="true"/>
         <attribute name="overridePrice" type="String" mode="IN" optional="true"/>
         <attribute name="reasonEnumId" type="String" mode="IN" optional="true"/>
+        <attribute name="orderItemTypeId" type="String" mode="IN" optional="true"/>
         <attribute name="changeComments" type="String" mode="IN" optional="true"/>
         <attribute name="itemDesiredDeliveryDate" type="Timestamp" mode="IN" optional="true"/>
         <attribute name="itemAttributesMap" type="Map" mode="IN" optional="true"/>
@@ -458,7 +450,7 @@ under the License.
             location="org.ofbiz.order.order.OrderServices" invoke="createOrderNote" auth="true">
         <description>Create a note item and associate with a order header</description>
         <attribute name="orderId" type="String" mode="IN"/>
-        <attribute name="note" type="String" mode="IN" allow-html="safe"/>
+        <attribute name="note" type="String" mode="IN" allow-html="any"/>
         <attribute name="internalNote" type="String" mode="IN"/>
         <attribute name="noteName" type="String" mode="IN" optional="true"/>
     </service>
@@ -653,8 +645,8 @@ under the License.
         <attribute name="orderId" type="String" mode="OUT" optional="false"/>
     </service>
 
-    <service name="orderSequence-enforced" engine="simple"
-        location="component://order/script/org/ofbiz/order/order/OrderServices.xml" invoke="orderSequence-enforced">
+    <service name="orderSequence_enforced" engine="simple"
+        location="component://order/script/org/ofbiz/order/order/OrderServices.xml" invoke="orderSequence_enforced">
         <implements service="getNextOrderId"/>
         <attribute name="partyAcctgPreference" type="org.ofbiz.entity.GenericValue" mode="IN"/>
         <override name="orderId" type="Long" mode="OUT"/>
@@ -828,10 +820,15 @@ under the License.
         <attribute name="budgetId" type="String" mode="IN" optional="true"/>
         <attribute name="quoteId" type="String" mode="IN" optional="true"/>
 
+        <!-- Product identification -->
+        <attribute name="goodIdentificationTypeId" type="String" mode="IN" optional="true"/>
+        <attribute name="goodIdentificationIdValue" type="String" mode="IN" optional="true"/>
+
         <attribute name="billingAccountId" type="String" mode="IN" optional="true"/>
         <attribute name="finAccountId" type="String" mode="IN" optional="true"/>
         <attribute name="cardNumber" type="String" mode="IN" optional="true"/>
         <attribute name="accountNumber" type="String" mode="IN" optional="true"/>
+        <attribute name="paymentStatusId" type="String" mode="IN" optional="true"/>
 
         <!-- shipment/inventory fields -->
         <attribute name="inventoryItemId" type="String" mode="IN" optional="true"/>
@@ -1142,6 +1139,12 @@ under the License.
     <service name="deleteOrderItemAttribute" engine="entity-auto" default-entity-name="OrderItemAttribute" invoke="delete" auth="true">
         <description>Delete Order Item Attribute</description>
         <auto-attributes mode="IN" entity-name="OrderItemAttribute" include="pk" optional="false"/>
+    </service>
+    
+    <!-- Order Item Group Order -->
+    <service name="createOrderItemGroupOrder" engine="entity-auto" default-entity-name="OrderItemGroupOrder" invoke="create" auth="true">
+        <description>Create Order Item Group Order</description>
+        <auto-attributes mode="IN" entity-name="OrderItemGroupOrder" include="pk" optional="false"/>
     </service>
     
 </services>

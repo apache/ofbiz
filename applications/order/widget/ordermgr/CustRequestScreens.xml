@@ -75,9 +75,17 @@ under the License.
                 <entity-and entity-name="CustRequestContent" list="custRequestContents" filter-by-date="true">
                     <field-map field-name="custRequestId" from-field="custRequestId"/>
                 </entity-and>
-                <entity-and entity-name="CustRequestAndContent" list="custRequestAndContents">
-                    <field-map field-name="custRequestId" from-field="custRequestId"/>
-                </entity-and>
+                <entity-condition entity-name="CustRequestAndContent" list="custRequestAndContents">
+                    <condition-list combine="and">
+                        <condition-expr field-name="custRequestId" from-field="custRequestId"/>
+                        <condition-expr field-name="fromDate" operator="less-equals" from-field="nowTimestamp"/>                        
+                        <condition-list combine="or">
+                            <condition-expr field-name="thruDate" operator="greater-equals" from-field="nowTimestamp"/>
+                            <condition-expr field-name="thruDate" from-field="null"/>
+                        </condition-list>
+                    </condition-list>
+                    <order-by field-name="fromDate"/>
+                </entity-condition>
                 <entity-and entity-name="CustRequestItemNoteView" list="notes">
                     <field-map field-name="custRequestId" from-field="custRequestId"/>
                 </entity-and>
@@ -221,7 +229,8 @@ under the License.
                 <set field="headerItem" value="request"/>
                 <set field="custRequestId" from-field="parameters.custRequestId"/>
                 <set field="viewIndex" from-field="parameters.VIEW_INDEX" type="Integer"/>
-                <set field="viewSize" from-field="parameters.VIEW_SIZE" type="Integer" default-value="50"/>
+                <property-to-field resource="widget" property="widget.form.defaultViewSize" field="viewSizeDefaultValue"/>
+                <set field="viewSize" from-field="parameters.VIEW_SIZE" type="Integer" default-value="${viewSizeDefaultValue}"/>
                 <entity-one entity-name="CustRequest" value-field="custRequest"/>
                 <entity-and entity-name="CustRequestItem" list="custRequestItems">
                     <field-map from-field="custRequestId" field-name="custRequestId"/>
@@ -476,9 +485,17 @@ under the License.
                 <set field="tabButtonItem" value="custRequestContent"/>
                 <set field="headerItem" value="request"/>
                 <set field="custRequestId" from-field="parameters.custRequestId"/>
-                <entity-and entity-name="CustRequestAndContent" list="custRequestAndContents">
-                    <field-map field-name="custRequestId" from-field="custRequestId"/>
-                </entity-and>
+                <entity-condition entity-name="CustRequestAndContent" list="custRequestAndContents">
+                    <condition-list combine="and">
+                        <condition-expr field-name="custRequestId" from-field="custRequestId"/>
+                        <condition-expr field-name="fromDate" operator="less-equals" from-field="nowTimestamp"/>                        
+                        <condition-list combine="or">
+                            <condition-expr field-name="thruDate" operator="greater-equals" from-field="nowTimestamp"/>
+                            <condition-expr field-name="thruDate" from-field="null"/>
+                        </condition-list>
+                    </condition-list>
+                    <order-by field-name="fromDate"/>
+                </entity-condition>
             </actions>
             <widgets>
                 <decorator-screen name="CommonRequestDecorator" location="${parameters.mainDecoratorLocation}">
@@ -701,5 +718,21 @@ under the License.
             </fail-widgets>
         </section>
     </screen>
-    
+
+    <screen name="ListCustReturns">
+        <section>
+            <actions>
+                <set field="partyId" from-field="userLogin.partyId"/>
+                <set field="screenletTitle" from-field="uiLabelMap.OrderMyReturns"/>
+                <entity-one entity-name="StatusItem" value-field="statusItem">
+                    <field-map field-name="statusId" from-field="statusId"/>
+                </entity-one>
+            </actions>
+            <widgets>
+                <screenlet title="${screenletTitle} (${statusItem.description})" navigation-form-name="ListCustReturns" >
+                    <include-form name="ListReturns" location="component://order/widget/ordermgr/CustRequestForms.xml"/>
+                </screenlet>
+            </widgets>
+        </section>
+    </screen>
 </screens>

@@ -19,7 +19,7 @@ under the License.
 -->
 
 <simple-methods xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/simple-methods.xsd">
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/simple-methods-v2.xsd">
     <simple-method method-name="createAffiliate" short-description="Create Affiliate" login-required="false">
 
        <!-- Create the UserLogin Record -->
@@ -126,10 +126,5 @@ under the License.
         <call-service service-name="createAffiliate" in-map-name="af_context">
             <default-message resource="EcommerceUiLabels" property="EcommerceAffiliateCreatedSuccessfully"/>
         </call-service>
-
-    </simple-method>
-    <simple-method method-name="addCheckValue" short-description="Add field to request for investigation purpose" login-required="false">
-        <set field="checkValue" value="check" type="PlainString"/>
-        <field-to-request field="checkValue" request-name="checkValue"/>
     </simple-method>
 </simple-methods>

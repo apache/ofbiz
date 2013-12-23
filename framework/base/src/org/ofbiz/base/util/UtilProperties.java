@@ -19,6 +19,7 @@
 package org.ofbiz.base.util;
 
 import java.io.BufferedInputStream;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -68,12 +69,12 @@ public class UtilProperties implements Serializable {
     /** An instance of the generic cache for storing the non-locale-specific properties.
      *  Each Properties instance is keyed by the resource String.
      */
-    protected static UtilCache<String, Properties> resourceCache = UtilCache.createUtilCache("properties.UtilPropertiesResourceCache");
+    private static final UtilCache<String, Properties> resourceCache = UtilCache.createUtilCache("properties.UtilPropertiesResourceCache");
 
     /** An instance of the generic cache for storing the non-locale-specific properties.
      *  Each Properties instance is keyed by the file's URL.
      */
-    protected static UtilCache<String, Properties> urlCache = UtilCache.createUtilCache("properties.UtilPropertiesUrlCache");
+    private static final UtilCache<String, Properties> urlCache = UtilCache.createUtilCache("properties.UtilPropertiesUrlCache");
 
     protected static Locale fallbackLocale = null;
     protected static Set<Locale> defaultCandidateLocales = null;
@@ -281,7 +282,7 @@ public class UtilProperties implements Serializable {
         try {
             value = properties.getProperty(name);
         } catch (Exception e) {
-            Debug.log(e, module);
+            Debug.logInfo(e, module);
         }
         return value == null ? "" : value.trim();
     }
@@ -302,14 +303,19 @@ public class UtilProperties implements Serializable {
 
                 if (url == null)
                     return null;
-                properties = getProperties(url);
-                resourceCache.put(cacheKey, properties);
+                String fileName = url.getFile();
+                File file = new File(fileName);
+                if (file.isDirectory()) {
+                    Debug.logError(fileName + " is (also?) a directory! No properties assigned.", module);
+                    return null;
+                }
+                properties = resourceCache.putIfAbsentAndGet(cacheKey, getProperties(url));
             } catch (MissingResourceException e) {
-                Debug.log(e, module);
+                Debug.logInfo(e, module);
             }
         }
         if (properties == null) {
-            Debug.log("[UtilProperties.getProperties] could not find resource: " + resource, module);
+            Debug.logInfo("[UtilProperties.getProperties] could not find resource: " + resource, module);
             return null;
         }
         return properties;
@@ -330,11 +336,11 @@ public class UtilProperties implements Serializable {
                 properties.load(url.openStream());
                 urlCache.put(url.toString(), properties);
             } catch (Exception e) {
-                Debug.log(e, module);
+                Debug.logInfo(e, module);
             }
         }
         if (properties == null) {
-            Debug.log("[UtilProperties.getProperties] could not find resource: " + url, module);
+            Debug.logInfo("[UtilProperties.getProperties] could not find resource: " + url, module);
             return null;
         }
         return properties;
@@ -421,7 +427,7 @@ public class UtilProperties implements Serializable {
         try {
             value = properties.getProperty(name);
         } catch (Exception e) {
-            Debug.log(e, module);
+            Debug.logInfo(e, module);
         }
         return value == null ? "" : value.trim();
     }
@@ -458,7 +464,7 @@ public class UtilProperties implements Serializable {
                 curIdx++;
             }
         } catch (Exception e) {
-            Debug.log(e, module);
+            Debug.logInfo(e, module);
         }
         return value == null ? "" : value.trim();
     }
@@ -534,7 +540,7 @@ public class UtilProperties implements Serializable {
 
              propFile.close();
          } catch (FileNotFoundException e) {
-             Debug.log(e, "Unable to located the resource file.", module);
+             Debug.logInfo(e, "Unable to located the resource file.", module);
          } catch (IOException e) {
              Debug.logError(e, module);
          }
@@ -576,7 +582,7 @@ public class UtilProperties implements Serializable {
         try {
             value = bundle.getString(name);
         } catch (Exception e) {
-            //Debug.log(e, module);
+            //Debug.logInfo(e, module);
         }
         return value == null ? name : value.trim();
     }
@@ -585,8 +591,8 @@ public class UtilProperties implements Serializable {
      * to the given locale and replacing argument place holders with the given arguments using the MessageFormat class
      * @param resource The name of the resource - can be a file, class, or URL
      * @param name The name of the property in the properties file
-     * @param locale The locale that the given resource will correspond to
      * @param arguments An array of Objects to insert into the message argument place holders
+     * @param locale The locale that the given resource will correspond to
      * @return The value of the property in the properties file
      */
     public static String getMessage(String resource, String name, Object[] arguments, Locale locale) {
@@ -606,8 +612,8 @@ public class UtilProperties implements Serializable {
      * to the given locale and replacing argument place holders with the given arguments using the MessageFormat class
      * @param resource The name of the resource - can be a file, class, or URL
      * @param name The name of the property in the properties file
-     * @param locale The locale that the given resource will correspond to
      * @param arguments A List of Objects to insert into the message argument place holders
+     * @param locale The locale that the given resource will correspond to
      * @return The value of the property in the properties file
      */
     public static <E> String getMessage(String resource, String name, List<E> arguments, Locale locale) {
@@ -631,8 +637,8 @@ public class UtilProperties implements Serializable {
      * to the given locale and replacing argument place holders with the given arguments using the FlexibleStringExpander class
      * @param resource The name of the resource - can be a file, class, or URL
      * @param name The name of the property in the properties file
-     * @param locale The locale that the given resource will correspond to
      * @param context A Map of Objects to insert into the message place holders using the ${} syntax of the FlexibleStringExpander
+     * @param locale The locale that the given resource will correspond to
      * @return The value of the property in the properties file
      */
     public static String getMessage(String resource, String name, Map<String, ? extends Object> context, Locale locale) {
@@ -672,7 +678,7 @@ public class UtilProperties implements Serializable {
             String resourceCacheKey = createResourceName(resource, locale, false);
             if (!resourceNotFoundMessagesShown.contains(resourceCacheKey)) {
                 resourceNotFoundMessagesShown.add(resourceCacheKey);
-                Debug.log("[UtilProperties.getPropertyValue] could not find resource: " + resource + " for locale " + locale, module);
+                Debug.logInfo("[UtilProperties.getPropertyValue] could not find resource: " + resource + " for locale " + locale, module);
             }
             throw new IllegalArgumentException("Could not find resource bundle [" + resource + "] in the locale [" + locale + "]");
         }
@@ -724,9 +730,9 @@ public class UtilProperties implements Serializable {
                 properties = new ExtendedProperties(url, locale);
             } catch (Exception e) {
                 if (UtilValidate.isNotEmpty(e.getMessage())) {
-                    Debug.log(e.getMessage(), module);
+                    Debug.logInfo(e.getMessage(), module);
                 } else {
-                    Debug.log("Exception thrown: " + e.getClass().getName(), module);
+                    Debug.logInfo("Exception thrown: " + e.getClass().getName(), module);
                 }
                 properties = null;
             }
@@ -964,8 +970,14 @@ public class UtilProperties implements Serializable {
                 throw new IllegalArgumentException("locale cannot be null");
             }
             String localeString = locale.toString();
+            String correctedLocaleString = localeString.replace('_','-');
             for (Element property : propertyList) {
-                Element value = UtilXml.firstChildElement(property, "value", "xml:lang", localeString);
+                // Support old way of specifying xml:lang value.
+                // Old way: en_AU, new way: en-AU
+                Element value = UtilXml.firstChildElement(property, "value", "xml:lang", correctedLocaleString);
+                if( value == null ) {
+                    value = UtilXml.firstChildElement(property, "value", "xml:lang", localeString);
+                }
                 if (value != null) {
                     if (properties == null) {
                         properties = new Properties();
@@ -1000,7 +1012,7 @@ public class UtilProperties implements Serializable {
      * properties file format.
      */
     public static class UtilResourceBundle extends ResourceBundle {
-        protected static UtilCache<String, UtilResourceBundle> bundleCache = UtilCache.createUtilCache("properties.UtilPropertiesBundleCache");
+        private static final UtilCache<String, UtilResourceBundle> bundleCache = UtilCache.createUtilCache("properties.UtilPropertiesBundleCache");
         protected Properties properties = null;
         protected Locale locale = null;
         protected int hashCode = hashCode();
@@ -1053,7 +1065,9 @@ public class UtilProperties implements Serializable {
                         bundle = new UtilResourceBundle(bundle.properties, locale, parentBundle);
                     }
                     double totalTime = System.currentTimeMillis() - startTime;
-                    Debug.logInfo("ResourceBundle " + resource + " (" + locale + ") created in " + totalTime/1000.0 + "s with " + numProperties + " properties", module);
+                    if (Debug.infoOn()) {
+                        Debug.logInfo("ResourceBundle " + resource + " (" + locale + ") created in " + totalTime/1000.0 + "s with " + numProperties + " properties", module);
+                    }
                     bundleCache.put(resourceName, bundle);
                 }
             }

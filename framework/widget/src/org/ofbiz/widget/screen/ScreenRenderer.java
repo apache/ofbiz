@@ -44,21 +44,21 @@ import org.ofbiz.base.util.UtilHttp;
 import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.base.util.collections.MapStack;
+import org.ofbiz.base.util.template.FreeMarkerWorker;
 import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericEntity;
 import org.ofbiz.entity.GenericValue;
 import org.ofbiz.security.Security;
-import org.ofbiz.security.authz.Authorization;
 import org.ofbiz.service.DispatchContext;
 import org.ofbiz.service.GenericServiceException;
 import org.ofbiz.service.LocalDispatcher;
 import org.ofbiz.webapp.control.LoginWorker;
+import org.ofbiz.webapp.website.WebSiteWorker;
 import org.ofbiz.widget.cache.GenericWidgetOutput;
 import org.ofbiz.widget.cache.ScreenCache;
 import org.ofbiz.widget.cache.WidgetContextCacheKey;
 import org.xml.sax.SAXException;
 
-import freemarker.ext.beans.BeansWrapper;
 import freemarker.ext.jsp.TaglibFactory;
 import freemarker.ext.servlet.HttpRequestHashModel;
 import freemarker.ext.servlet.HttpSessionHashModel;
@@ -145,11 +145,11 @@ public class ScreenRenderer {
         return this.screenStringRenderer;
     }
 
-    public void populateBasicContext(Map<String, Object> parameters, Delegator delegator, LocalDispatcher dispatcher, Authorization authz, Security security, Locale locale, GenericValue userLogin) {
-        populateBasicContext(context, this, parameters, delegator, dispatcher, authz, security, locale, userLogin);
+    public void populateBasicContext(Map<String, Object> parameters, Delegator delegator, LocalDispatcher dispatcher, Security security, Locale locale, GenericValue userLogin) {
+        populateBasicContext(context, this, parameters, delegator, dispatcher, security, locale, userLogin);
     }
 
-    public static void populateBasicContext(MapStack<String> context, ScreenRenderer screens, Map<String, Object> parameters, Delegator delegator, LocalDispatcher dispatcher, Authorization authz, Security security, Locale locale, GenericValue userLogin) {
+    public static void populateBasicContext(MapStack<String> context, ScreenRenderer screens, Map<String, Object> parameters, Delegator delegator, LocalDispatcher dispatcher, Security security, Locale locale, GenericValue userLogin) {
         // ========== setup values that should always be in a screen context
         // include an object to more easily render screens
         context.put("screens", screens);
@@ -163,7 +163,6 @@ public class ScreenRenderer {
         context.put("parameters", parameters);
         context.put("delegator", delegator);
         context.put("dispatcher", dispatcher);
-        context.put("authz", authz);
         context.put("security", security);
         context.put("locale", locale);
         context.put("userLogin", userLogin);
@@ -192,14 +191,14 @@ public class ScreenRenderer {
         HttpSession session = request.getSession();
 
         // attribute names to skip for session and application attributes; these are all handled as special cases, duplicating results and causing undesired messages
-        Set<String> attrNamesToSkip = UtilMisc.toSet("delegator", "dispatcher", "authz", "security", "webSiteId",
+        Set<String> attrNamesToSkip = UtilMisc.toSet("delegator", "dispatcher", "security", "webSiteId",
                 "org.apache.catalina.jsp_classpath");
         Map<String, Object> parameterMap = UtilHttp.getCombinedMap(request, attrNamesToSkip);
 
         GenericValue userLogin = (GenericValue) session.getAttribute("userLogin");
 
         populateBasicContext(context, screens, parameterMap, (Delegator) request.getAttribute("delegator"),
-                (LocalDispatcher) request.getAttribute("dispatcher"), (Authorization) request.getAttribute("authz"),
+                (LocalDispatcher) request.getAttribute("dispatcher"),
                 (Security) request.getAttribute("security"), UtilHttp.getLocale(request), userLogin);
 
         context.put("autoUserLogin", session.getAttribute("autoUserLogin"));
@@ -218,6 +217,9 @@ public class ScreenRenderer {
         context.put("response", response);
         context.put("session", session);
         context.put("application", servletContext);
+        if (session != null) {
+            context.put("webappName", session.getAttribute("_WEBAPP_NAME_"));
+        }
         if (servletContext != null) {
             String rootDir = (String) context.get("rootDir");
             String webSiteId = (String) context.get("webSiteId");
@@ -227,7 +229,7 @@ public class ScreenRenderer {
                 context.put("rootDir", rootDir);
             }
             if (UtilValidate.isEmpty(webSiteId)) {
-                webSiteId = (String) servletContext.getAttribute("webSiteId");
+                webSiteId = WebSiteWorker.getWebSiteId(request);
                 context.put("webSiteId", webSiteId);
             }
             if (UtilValidate.isEmpty(https)) {
@@ -238,9 +240,8 @@ public class ScreenRenderer {
         context.put("javaScriptEnabled", Boolean.valueOf(UtilHttp.isJavaScriptEnabled(request)));
 
         // these ones are FreeMarker specific and will only work in FTL templates, mainly here for backward compatibility
-        BeansWrapper wrapper = BeansWrapper.getDefaultInstance();
-        context.put("sessionAttributes", new HttpSessionHashModel(session, wrapper));
-        context.put("requestAttributes", new HttpRequestHashModel(request, wrapper));
+        context.put("sessionAttributes", new HttpSessionHashModel(session, FreeMarkerWorker.getDefaultOfbizWrapper()));
+        context.put("requestAttributes", new HttpRequestHashModel(request, FreeMarkerWorker.getDefaultOfbizWrapper()));
         TaglibFactory JspTaglibs = new TaglibFactory(servletContext);
         context.put("JspTaglibs", JspTaglibs);
         context.put("requestParameters",  UtilHttp.getParameterMap(request));
@@ -314,7 +315,7 @@ public class ScreenRenderer {
     }
 
     public void populateContextForService(DispatchContext dctx, Map<String, Object> serviceContext) {
-        this.populateBasicContext(serviceContext, dctx.getDelegator(), dctx.getDispatcher(), dctx.getAuthorization(),
+        this.populateBasicContext(serviceContext, dctx.getDelegator(), dctx.getDispatcher(),
                 dctx.getSecurity(), (Locale) serviceContext.get("locale"), (GenericValue) serviceContext.get("userLogin"));
     }
 }

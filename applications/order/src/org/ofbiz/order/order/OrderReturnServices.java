@@ -57,7 +57,6 @@ import org.ofbiz.product.store.ProductStoreWorker;
 import org.ofbiz.service.DispatchContext;
 import org.ofbiz.service.GenericServiceException;
 import org.ofbiz.service.LocalDispatcher;
-import org.ofbiz.service.ModelParam;
 import org.ofbiz.service.ModelService;
 import org.ofbiz.service.ServiceUtil;
 
@@ -134,7 +133,7 @@ public class OrderReturnServices {
         if (delegator == null || returnId == null || returnItemSeqId == null) {
             throw new IllegalArgumentException("Method parameters cannot contain nulls");
         }
-        Debug.log("Finding the initial item cost for return item : " + returnId + " / " + returnItemSeqId, module);
+        Debug.logInfo("Finding the initial item cost for return item : " + returnId + " / " + returnItemSeqId, module);
 
         // the cost holder
         BigDecimal itemCost = BigDecimal.ZERO;
@@ -142,41 +141,41 @@ public class OrderReturnServices {
         // get the return item information
         GenericValue returnItem = null;
         try {
-            returnItem = delegator.findByPrimaryKey("ReturnItem", UtilMisc.toMap("returnId", returnId, "returnItemSeqId", returnItemSeqId));
+            returnItem = delegator.findOne("ReturnItem", UtilMisc.toMap("returnId", returnId, "returnItemSeqId", returnItemSeqId), false);
         } catch (GenericEntityException e) {
             Debug.logError(e, module);
             throw new GeneralRuntimeException(e.getMessage());
         }
-        Debug.log("Return item value object - " + returnItem, module);
+        Debug.logInfo("Return item value object - " + returnItem, module);
 
         // check for an orderItem association
         if (returnItem != null) {
             String orderId = returnItem.getString("orderId");
             String orderItemSeqId = returnItem.getString("orderItemSeqId");
             if (orderItemSeqId != null && orderId != null) {
-                Debug.log("Found order item reference", module);
+                Debug.logInfo("Found order item reference", module);
                 // locate the item issuance(s) for this order item
                 List<GenericValue> itemIssue = null;
                 try {
-                    itemIssue = delegator.findByAnd("ItemIssuance", UtilMisc.toMap("orderId", orderId, "orderItemSeqId", orderItemSeqId));
+                    itemIssue = delegator.findByAnd("ItemIssuance", UtilMisc.toMap("orderId", orderId, "orderItemSeqId", orderItemSeqId), null, false);
                 } catch (GenericEntityException e) {
                     Debug.logError(e, module);
                     throw new GeneralRuntimeException(e.getMessage());
                 }
                 if (UtilValidate.isNotEmpty(itemIssue)) {
-                    Debug.log("Found item issuance reference", module);
+                    Debug.logInfo("Found item issuance reference", module);
                     // just use the first one for now; maybe later we can find a better way to determine which was the
                     // actual item being returned; maybe by serial number
                     GenericValue issue = EntityUtil.getFirst(itemIssue);
                     GenericValue inventoryItem = null;
                     try {
-                        inventoryItem = issue.getRelatedOne("InventoryItem");
+                        inventoryItem = issue.getRelatedOne("InventoryItem", false);
                     } catch (GenericEntityException e) {
                         Debug.logError(e, module);
                         throw new GeneralRuntimeException(e.getMessage());
                     }
                     if (inventoryItem != null) {
-                        Debug.log("Located inventory item - " + inventoryItem.getString("inventoryItemId"), module);
+                        Debug.logInfo("Located inventory item - " + inventoryItem.getString("inventoryItemId"), module);
                         if (inventoryItem.get("unitCost") != null) {
                             itemCost = inventoryItem.getBigDecimal("unitCost");
                         } else {
@@ -187,7 +186,7 @@ public class OrderReturnServices {
             }
         }
 
-        Debug.log("Initial item cost - " + itemCost, module);
+        Debug.logInfo("Initial item cost - " + itemCost, module);
         return itemCost;
     }
 
@@ -202,7 +201,7 @@ public class OrderReturnServices {
         // get the return header
         GenericValue returnHeader = null;
         try {
-            returnHeader = delegator.findByPrimaryKey("ReturnHeader", UtilMisc.toMap("returnId", returnId));
+            returnHeader = delegator.findOne("ReturnHeader", UtilMisc.toMap("returnId", returnId), false);
         } catch (GenericEntityException e) {
             Debug.logError(e, module);
             return ServiceUtil.returnError(UtilProperties.getMessage(resource_error,
@@ -213,7 +212,7 @@ public class OrderReturnServices {
         List<GenericValue> returnItems = null;
         List<GenericValue> returnAdjustments = FastList.newInstance();
         try {
-            returnItems = returnHeader.getRelated("ReturnItem");
+            returnItems = returnHeader.getRelated("ReturnItem", null, null, false);
             returnAdjustments = delegator.findList("ReturnAdjustment", EntityCondition.makeCondition(
                                 EntityCondition.makeCondition("returnId", EntityOperator.EQUALS, returnId), EntityOperator.AND,
                                 EntityCondition.makeCondition("returnItemSeqId", EntityOperator.EQUALS, "_NA_")), null, UtilMisc.toList("returnAdjustmentTypeId"), null, true);
@@ -230,7 +229,7 @@ public class OrderReturnServices {
             GenericValue firstItem = EntityUtil.getFirst(returnItems);
             GenericValue orderHeader = null;
             try {
-                orderHeader = firstItem.getRelatedOne("OrderHeader");
+                orderHeader = firstItem.getRelatedOne("OrderHeader", false);
             } catch (GenericEntityException e) {
                 Debug.logError(e, module);
                 return ServiceUtil.returnError(UtilProperties.getMessage(resource_error,
@@ -250,7 +249,7 @@ public class OrderReturnServices {
 
             GenericValue productStoreEmail = null;
             try {
-                productStoreEmail = delegator.findByPrimaryKey("ProductStoreEmailSetting", UtilMisc.toMap("productStoreId", productStoreId, "emailType", emailType));
+                productStoreEmail = delegator.findOne("ProductStoreEmailSetting", UtilMisc.toMap("productStoreId", productStoreId, "emailType", emailType), false);
             } catch (GenericEntityException e) {
                 Debug.logError(e, module);
             }
@@ -356,7 +355,7 @@ public class OrderReturnServices {
                                 EntityCondition.makeCondition("returnId", EntityOperator.EQUALS, returnId), EntityOperator.AND,
                                 EntityCondition.makeCondition("returnTypeId", EntityOperator.EQUALS, "RTN_WAIT_REPLACE_RES")), null, UtilMisc.toList("createdStamp"), null, false);
                         for (GenericValue returnItem : returnItems) {
-                            GenericValue returnItemResponse = returnItem.getRelatedOne("ReturnItemResponse");
+                            GenericValue returnItemResponse = returnItem.getRelatedOne("ReturnItemResponse", false);
                             if (returnItemResponse != null) {
                                 String replacementOrderId = returnItemResponse.getString("replacementOrderId");
                                 Map<String, Object> svcCtx = UtilMisc.<String, Object>toMap("orderId", replacementOrderId, "userLogin", userLogin);
@@ -385,7 +384,7 @@ public class OrderReturnServices {
         Locale locale = (Locale) context.get("locale");
         if (orderItem.get("productId") != null) {
             try {
-                product = orderItem.getRelatedOne("Product");
+                product = orderItem.getRelatedOne("Product", false);
             } catch (GenericEntityException e) {
                 Debug.logError(e, "ERROR: Unable to get Product from OrderItem", module);
             }
@@ -419,7 +418,7 @@ public class OrderReturnServices {
         if (returnable && (itemStatus.equals("ITEM_APPROVED") || itemStatus.equals("ITEM_COMPLETED"))) {
             List<GenericValue> returnedItems = null;
             try {
-                returnedItems = orderItem.getRelated("ReturnItem");
+                returnedItems = orderItem.getRelated("ReturnItem", null, null, false);
             } catch (GenericEntityException e) {
                 Debug.logError(e, module);
                 return ServiceUtil.returnError(UtilProperties.getMessage(resource_error,
@@ -429,12 +428,10 @@ public class OrderReturnServices {
                 returnableQuantity = orderQty;
             } else {
                 BigDecimal returnedQty = BigDecimal.ZERO;
-                Iterator<GenericValue> ri = returnedItems.iterator();
-                while (ri.hasNext()) {
-                    GenericValue returnItem = ri.next();
+                for (GenericValue returnItem : returnedItems) {
                     GenericValue returnHeader = null;
                     try {
-                        returnHeader = returnItem.getRelatedOne("ReturnHeader");
+                        returnHeader = returnItem.getRelatedOne("ReturnHeader", false);
                     } catch (GenericEntityException e) {
                         Debug.logError(e, module);
                         return ServiceUtil.returnError(UtilProperties.getMessage(resource_error,
@@ -468,7 +465,7 @@ public class OrderReturnServices {
 
         GenericValue orderHeader = null;
         try {
-            orderHeader = delegator.findByPrimaryKey("OrderHeader", UtilMisc.toMap("orderId", orderId));
+            orderHeader = delegator.findOne("OrderHeader", UtilMisc.toMap("orderId", orderId), false);
         } catch (GenericEntityException e) {
             Debug.logError(e, module);
             return ServiceUtil.returnError(UtilProperties.getMessage(resource_error,
@@ -498,12 +495,10 @@ public class OrderReturnServices {
             }
 
             if (orderItemQuantitiesIssued != null) {
-                Iterator<GenericValue> i = orderItemQuantitiesIssued.iterator();
-                while (i.hasNext()) {
-                    GenericValue orderItemQuantityIssued = i.next();
+                for (GenericValue orderItemQuantityIssued : orderItemQuantitiesIssued) {
                     GenericValue item = null;
                     try {
-                        item = orderItemQuantityIssued.getRelatedOne("OrderItem");
+                        item = orderItemQuantityIssued.getRelatedOne("OrderItem", false);
                     } catch (GenericEntityException e) {
                         Debug.logError(e, module);
                         return ServiceUtil.returnError(UtilProperties.getMessage(resource_error,
@@ -515,7 +510,7 @@ public class OrderReturnServices {
                         BigDecimal quantityIssued = orderItemQuantityIssued.getBigDecimal("quantityIssued");
                         if (UtilValidate.isEmpty(quantityIssued) || quantityIssued.compareTo(BigDecimal.ZERO) == 0) {
                             try {
-                                GenericValue itemProduct = item.getRelatedOne("Product");
+                                GenericValue itemProduct = item.getRelatedOne("Product", false);
                                 if (ProductWorker.isPhysical(itemProduct)) {
                                     continue;
                                 }
@@ -552,7 +547,7 @@ public class OrderReturnServices {
                         GenericValue product = null;
                         if (item.get("productId") != null) {
                             try {
-                                product = item.getRelatedOne("Product");
+                                product = item.getRelatedOne("Product", false);
                             } catch (GenericEntityException e) {
                                 Debug.logError(e, module);
                                 return ServiceUtil.returnError(UtilProperties.getMessage(resource_error,
@@ -571,16 +566,14 @@ public class OrderReturnServices {
                         // Order item adjustments
                         List<GenericValue> itemAdjustments = null;
                         try {
-                            itemAdjustments = item.getRelated("OrderAdjustment");
+                            itemAdjustments = item.getRelated("OrderAdjustment", null, null, false);
                         } catch (GenericEntityException e) {
                             Debug.logError(e, module);
                             return ServiceUtil.returnError(UtilProperties.getMessage(resource_error,
                                     "OrderErrorUnableToGetOrderAdjustmentsFromItem", locale));
                         }
                         if (UtilValidate.isNotEmpty(itemAdjustments)) {
-                            Iterator<GenericValue> itemAdjustmentsIt = itemAdjustments.iterator();
-                            while (itemAdjustmentsIt.hasNext()) {
-                                GenericValue itemAdjustment = itemAdjustmentsIt.next();
+                            for (GenericValue itemAdjustment : itemAdjustments) {
                                 returnInfo = FastMap.newInstance();
                                 returnInfo.put("returnableQuantity", BigDecimal.ONE);
                                  // TODO: the returnablePrice should be set to the amount minus the already returned amount
@@ -616,9 +609,9 @@ public class OrderReturnServices {
         GenericValue returnHeader = null;
         List<GenericValue> returnItems = null;
         try {
-            returnHeader = delegator.findByPrimaryKey("ReturnHeader", UtilMisc.toMap("returnId", returnId));
+            returnHeader = delegator.findOne("ReturnHeader", UtilMisc.toMap("returnId", returnId), false);
             if (returnHeader != null) {
-                returnItems = returnHeader.getRelated("ReturnItem");
+                returnItems = returnHeader.getRelated("ReturnItem", null, null, false);
             }
         } catch (GenericEntityException e) {
             Debug.logError(e, "Problems looking up return information", module);
@@ -637,9 +630,7 @@ public class OrderReturnServices {
 
         List<GenericValue> completedItems = FastList.newInstance();
         if (returnHeader != null && UtilValidate.isNotEmpty(returnItems)) {
-            Iterator<GenericValue> itemsIter = returnItems.iterator();
-            while (itemsIter.hasNext()) {
-                GenericValue item = itemsIter.next();
+            for (GenericValue item : returnItems) {
                 String itemStatus = item != null ? item.getString("statusId") : null;
                 if (itemStatus != null) {
                     // both completed and cancelled items qualify for completed status change
@@ -650,7 +641,7 @@ public class OrderReturnServices {
                         // considered completed after the return is accepted
                         if ("RETURN_ACCEPTED".equals(returnHeader.getString("statusId"))) {
                             try {
-                                GenericValue itemProduct = item.getRelatedOne("Product");
+                                GenericValue itemProduct = item.getRelatedOne("Product", false);
                                 if (!ProductWorker.isPhysical(itemProduct)) {
                                     completedItems.add(item);
                                 }
@@ -711,9 +702,9 @@ public class OrderReturnServices {
         GenericValue returnHeader = null;
         List<GenericValue> returnItems = null;
         try {
-            returnHeader = delegator.findByPrimaryKey("ReturnHeader", UtilMisc.toMap("returnId", returnId));
+            returnHeader = delegator.findOne("ReturnHeader", UtilMisc.toMap("returnId", returnId), false);
             if (returnHeader != null) {
-                returnItems = returnHeader.getRelatedByAnd("ReturnItem", UtilMisc.toMap("returnTypeId", "RTN_CREDIT"));
+                returnItems = returnHeader.getRelated("ReturnItem", UtilMisc.toMap("returnTypeId", "RTN_CREDIT"), null, false);
             }
         } catch (GenericEntityException e) {
             Debug.logError(e, "Problems looking up return information", module);
@@ -751,7 +742,7 @@ public class OrderReturnServices {
             }
             if (UtilValidate.isNotEmpty(returnItem)) {
                 try {
-                    orderHeader = returnItem.getRelatedOne("OrderHeader");
+                    orderHeader = returnItem.getRelatedOne("OrderHeader", false);
                 } catch (GenericEntityException e) {
                     return ServiceUtil.returnError(e.getMessage());
                 }
@@ -762,20 +753,22 @@ public class OrderReturnServices {
             }
 
             // if both billingAccountId and finAccountId are supplied, look for productStore.storeCreditAccountEnumId preference
-            if (finAccountId != null && billingAccountId != null) {
-                Debug.logWarning("FinAccount and BillingAccount both are supplied for storing credit, priority will be given to ProductStore preference. Default is FinAccount.", module);
-                if (productStore != null && productStore.getString("storeCreditAccountEnumId") != null && "BILLING_ACCOUNT".equals(productStore.getString("storeCreditAccountEnumId"))) {
+            if (finAccountId != null && billingAccountId != null && productStore != null && productStore.getString("storeCreditAccountEnumId") != null) {
+                Debug.logWarning("You have entered both financial account and billing account for store credit. Based on the configuration on product store, only one of them will be selected.", module);
+                if ("BILLING_ACCOUNT".equals(productStore.getString("storeCreditAccountEnumId"))) {
                     finAccountId = null;
+                    Debug.logWarning("Default setting on product store is billing account. Store credit will goes to billing account [" + billingAccountId + "]", module);
                 } else {
                     billingAccountId = null;
-                }
+                    Debug.logWarning("Default setting on product store is financial account. Store credit will goes to financial account [" + finAccountId + "]", module);
+               }
             }
 
             if (finAccountId == null && billingAccountId == null) {
                 // First find a Billing Account with negative balance, and if found store credit to that
                 List<GenericValue> billingAccounts = FastList.newInstance();
                 try {
-                    billingAccounts = delegator.findByAnd("BillingAccountRoleAndAddress", UtilMisc.toMap("partyId", fromPartyId, "roleTypeId", "BILL_TO_CUSTOMER"));
+                    billingAccounts = delegator.findByAnd("BillingAccountRoleAndAddress", UtilMisc.toMap("partyId", fromPartyId, "roleTypeId", "BILL_TO_CUSTOMER"), null, false);
                 } catch (GenericEntityException e) {
                     return ServiceUtil.returnError(e.getMessage());
                 }
@@ -822,7 +815,7 @@ public class OrderReturnServices {
                     } else {
                         List<GenericValue> finAccounts = null;
                         try {
-                            finAccounts = delegator.findByAnd("FinAccountAndRole", UtilMisc.toMap("partyId", fromPartyId, "finAccountTypeId", "STORE_CREDIT_ACCT", "roleTypeId", "OWNER", "statusId", "FNACT_ACTIVE"));
+                            finAccounts = delegator.findByAnd("FinAccountAndRole", UtilMisc.toMap("partyId", fromPartyId, "finAccountTypeId", "STORE_CREDIT_ACCT", "roleTypeId", "OWNER", "statusId", "FNACT_ACTIVE"), null, false);
                         } catch (GenericEntityException e) {
                             return ServiceUtil.returnError(e.getMessage());
                         }
@@ -881,8 +874,7 @@ public class OrderReturnServices {
 
             // first, compute the total credit from the return items
             BigDecimal creditTotal = ZERO;
-            for (Iterator<GenericValue> itemsIter = returnItems.iterator(); itemsIter.hasNext();) {
-                GenericValue item = itemsIter.next();
+            for (GenericValue item : returnItems) {
                 BigDecimal quantity = item.getBigDecimal("returnQuantity");
                 BigDecimal price = item.getBigDecimal("returnPrice");
                 if (quantity == null) quantity = ZERO;
@@ -962,8 +954,7 @@ public class OrderReturnServices {
             String itemResponseId = (String) serviceResults.get("returnItemResponseId");
 
             // loop through the items again to update them and store a status change history
-            for (Iterator<GenericValue> itemsIter = returnItems.iterator(); itemsIter.hasNext();) {
-                GenericValue item = itemsIter.next();
+            for (GenericValue item : returnItems) {
                 Map<String, Object> returnItemMap = UtilMisc.<String, Object>toMap("returnItemResponseId", itemResponseId, "returnId", item.get("returnId"), "returnItemSeqId", item.get("returnItemSeqId"), "statusId", "RETURN_COMPLETED", "userLogin", userLogin);
                 // store the item changes (attached responseId)
                 try {
@@ -1023,7 +1014,7 @@ public class OrderReturnServices {
      */
     public static BigDecimal getBillingAccountBalance(String billingAccountId, DispatchContext dctx) throws GenericEntityException {
         Delegator delegator = dctx.getDelegator();
-        GenericValue billingAccount = delegator.findByPrimaryKey("BillingAccount", UtilMisc.toMap("billingAccountId", billingAccountId));
+        GenericValue billingAccount = delegator.findOne("BillingAccount", UtilMisc.toMap("billingAccountId", billingAccountId), false);
 
         BigDecimal balance = ZERO;
         BigDecimal accountLimit = ZERO;
@@ -1040,16 +1031,14 @@ public class OrderReturnServices {
            ), EntityOperator.AND);
 
         List<GenericValue> orderPaymentPreferenceSums = delegator.findList("OrderPurchasePaymentSummary", whereConditions, UtilMisc.toSet("maxAmount"), null, null, false);
-        for (Iterator<GenericValue> oppsi = orderPaymentPreferenceSums.iterator(); oppsi.hasNext();) {
-            GenericValue orderPaymentPreferenceSum = oppsi.next();
+        for (GenericValue orderPaymentPreferenceSum : orderPaymentPreferenceSums) {
             BigDecimal maxAmount = orderPaymentPreferenceSum.getBigDecimal("maxAmount");
             balance = maxAmount != null ? balance.subtract(maxAmount) : balance;
         }
 
-        List<GenericValue> paymentAppls = delegator.findByAnd("PaymentApplication", UtilMisc.toMap("billingAccountId", billingAccountId));
+        List<GenericValue> paymentAppls = delegator.findByAnd("PaymentApplication", UtilMisc.toMap("billingAccountId", billingAccountId), null, false);
         // TODO: cancelled payments?
-        for (Iterator<GenericValue> pAi = paymentAppls.iterator(); pAi.hasNext();) {
-            GenericValue paymentAppl = pAi.next();
+        for (GenericValue paymentAppl : paymentAppls) {
             if (paymentAppl.getString("invoiceId") == null) {
                 BigDecimal amountApplied = paymentAppl.getBigDecimal("amountApplied");
                 balance = balance.add(amountApplied);
@@ -1082,13 +1071,12 @@ public class OrderReturnServices {
 
         try {
             // get the related product stores via the orders related to this return
-            List<GenericValue> orders = EntityUtil.getRelated("OrderHeader", returnItems);
-            List<GenericValue> productStores = EntityUtil.getRelated("ProductStore", orders);
+            List<GenericValue> orders = EntityUtil.getRelated("OrderHeader", null, returnItems, false);
+            List<GenericValue> productStores = EntityUtil.getRelated("ProductStore", null, orders, false);
 
             // find the minimum storeCreditValidDays of all the ProductStores associated with all the Orders on the Return, skipping null ones
             Long storeCreditValidDays = null;
-            for (Iterator<GenericValue> iter = productStores.iterator(); iter.hasNext();) {
-                GenericValue productStore = iter.next();
+            for (GenericValue productStore : productStores) {
                 Long thisStoreValidDays = productStore.getLong("storeCreditValidDays");
                 if (thisStoreValidDays == null) continue;
 
@@ -1144,8 +1132,8 @@ public class OrderReturnServices {
         GenericValue orderHeader = null;
         List<GenericValue> orderPayPrefs = FastList.newInstance();
         try {
-            orderHeader = delegator.findByPrimaryKey("OrderHeader", UtilMisc.toMap("orderId", orderId));
-            orderPayPrefs = orderHeader.getRelated("OrderPaymentPreference", UtilMisc.toList("-maxAmount"));
+            orderHeader = delegator.findOne("OrderHeader", UtilMisc.toMap("orderId", orderId), false);
+            orderPayPrefs = orderHeader.getRelated("OrderPaymentPreference", null, UtilMisc.toList("-maxAmount"), false);
         } catch (GenericEntityException e) {
             Debug.logError("Problem looking up order information for orderId #" + orderId, module);
             return ServiceUtil.returnError(UtilProperties.getMessage(resource_error,
@@ -1156,7 +1144,7 @@ public class OrderReturnServices {
         if (UtilValidate.isEmpty(orderPayPrefs)) {
             List<GenericValue> returnItemResponses = FastList.newInstance();
             try {
-                returnItemResponses = orderHeader.getRelated("ReplacementReturnItemResponse");
+                returnItemResponses = orderHeader.getRelated("ReplacementReturnItemResponse", null, null, false);
             } catch (GenericEntityException e) {
                 Debug.logError("Problem getting ReturnItemResponses", module);
                 return ServiceUtil.returnError(e.getMessage());
@@ -1166,8 +1154,8 @@ public class OrderReturnServices {
                 GenericValue returnItem = null;
                 GenericValue returnHeader = null;
                 try {
-                    returnItem = EntityUtil.getFirst(returnItemResponse.getRelated("ReturnItem"));
-                    returnHeader = returnItem.getRelatedOne("ReturnHeader");
+                    returnItem = EntityUtil.getFirst(returnItemResponse.getRelated("ReturnItem", null, null, false));
+                    returnHeader = returnItem.getRelatedOne("ReturnHeader", false);
                 } catch (GenericEntityException e) {
                     Debug.logError("Problem getting ReturnItem", module);
                     return ServiceUtil.returnError(e.getMessage());
@@ -1204,9 +1192,9 @@ public class OrderReturnServices {
         GenericValue returnHeader = null;
         List<GenericValue> returnItems = null;
         try {
-            returnHeader = delegator.findByPrimaryKey("ReturnHeader", UtilMisc.toMap("returnId", returnId));
+            returnHeader = delegator.findOne("ReturnHeader", UtilMisc.toMap("returnId", returnId), false);
             if (returnHeader != null) {
-                returnItems = returnHeader.getRelatedByAnd("ReturnItem", UtilMisc.toMap("returnTypeId", returnTypeId));
+                returnItems = returnHeader.getRelated("ReturnItem", UtilMisc.toMap("returnTypeId", returnTypeId), null, false);
             }
         } catch (GenericEntityException e) {
             Debug.logError(e, "Problems looking up return information", module);
@@ -1245,20 +1233,20 @@ public class OrderReturnServices {
                 GenericValue orderHeader = null;
                 List<GenericValue> orderPayPrefs = null;
                 try {
-                    orderHeader = delegator.findByPrimaryKey("OrderHeader", UtilMisc.toMap("orderId", orderId));
+                    orderHeader = delegator.findOne("OrderHeader", UtilMisc.toMap("orderId", orderId), false);
                     // sort these desending by maxAmount
-                    orderPayPrefs = orderHeader.getRelated("OrderPaymentPreference", UtilMisc.toList("-maxAmount"));
+                    orderPayPrefs = orderHeader.getRelated("OrderPaymentPreference", null, UtilMisc.toList("-maxAmount"), false);
 
                     List<EntityExpr> exprs = UtilMisc.toList(EntityCondition.makeCondition("statusId", EntityOperator.EQUALS, "PAYMENT_SETTLED"), EntityCondition.makeCondition("statusId", EntityOperator.EQUALS, "PAYMENT_RECEIVED"));
                     orderPayPrefs = EntityUtil.filterByOr(orderPayPrefs, exprs);
 
                     // Check for replacement order
                     if (UtilValidate.isEmpty(orderPayPrefs)) {
-                        List<GenericValue> orderItemAssocs = delegator.findByAnd("OrderItemAssoc", UtilMisc.toMap("toOrderId", orderId, "orderItemAssocTypeId", "REPLACEMENT"));
+                        List<GenericValue> orderItemAssocs = delegator.findByAnd("OrderItemAssoc", UtilMisc.toMap("toOrderId", orderId, "orderItemAssocTypeId", "REPLACEMENT"), null, false);
                         if (UtilValidate.isNotEmpty(orderItemAssocs)) {
                             String originalOrderId = EntityUtil.getFirst(orderItemAssocs).getString("orderId");
-                            orderHeader = delegator.findByPrimaryKey("OrderHeader", UtilMisc.toMap("orderId", originalOrderId));
-                            orderPayPrefs = orderHeader.getRelated("OrderPaymentPreference", UtilMisc.toList("-maxAmount"));
+                            orderHeader = delegator.findOne("OrderHeader", UtilMisc.toMap("orderId", originalOrderId), false);
+                            orderPayPrefs = orderHeader.getRelated("OrderPaymentPreference", null, UtilMisc.toList("-maxAmount"), false);
                             orderPayPrefs = EntityUtil.filterByOr(orderPayPrefs, exprs);
                             orderId = originalOrderId;
                         }
@@ -1287,7 +1275,7 @@ public class OrderReturnServices {
 
                     if (UtilValidate.isNotEmpty(orgAcctgPref)) {
                         try {
-                            orgAcctgPref.getRelatedOne("PaymentMethod");
+                            orgAcctgPref.getRelatedOne("PaymentMethod", false);
                         } catch (GenericEntityException e) {
                             Debug.logError("Error retrieving related refundPaymentMethod from PartyAcctgPreference for partyId " + productStore.get("payToPartyId"), module);
                         }
@@ -1314,9 +1302,7 @@ public class OrderReturnServices {
                  * the intent is to get the refundable amounts per orderPaymentPreference, grouped by payment method type.
                  */
                 Map<String, List<Map<String, Object>>> prefSplitMap = FastMap.newInstance();
-                Iterator<GenericValue> oppit = orderPayPrefs.iterator();
-                while (oppit.hasNext()) {
-                    GenericValue orderPayPref = oppit.next();
+                for (GenericValue orderPayPref : orderPayPrefs) {
                     String paymentMethodTypeId = orderPayPref.getString("paymentMethodTypeId");
                     String orderPayPrefKey = orderPayPref.getString("paymentMethodId") != null ? orderPayPref.getString("paymentMethodId") : orderPayPref.getString("paymentMethodTypeId");
 
@@ -1484,12 +1470,9 @@ public class OrderReturnServices {
                             String responseId = (String) serviceResults.get("returnItemResponseId");
 
                             // Set the response on each item
-                            Iterator<GenericValue> itemsIter = items.iterator();
-                            while (itemsIter.hasNext()) {
-                                GenericValue item = itemsIter.next();
-
+                            for (GenericValue item : items) {
                                 Map<String, Object> returnItemMap = UtilMisc.<String, Object>toMap("returnItemResponseId", responseId, "returnId", item.get("returnId"), "returnItemSeqId", item.get("returnItemSeqId"), "statusId", returnItemStatusId, "userLogin", userLogin);
-                                //Debug.log("Updating item status", module);
+                                //Debug.logInfo("Updating item status", module);
                                 try {
                                     serviceResults = dispatcher.runSync("updateReturnItem", returnItemMap);
                                     if (ServiceUtil.isError(serviceResults)) {
@@ -1502,7 +1485,7 @@ public class OrderReturnServices {
                                             "OrderProblemUpdatingReturnItemReturnItemResponseId", locale));
                                 }
 
-                                //Debug.log("Item status and return status history created", module);
+                                //Debug.logInfo("Item status and return status history created", module);
                             }
 
                             // Create the payment applications for the return invoice
@@ -1540,7 +1523,7 @@ public class OrderReturnServices {
 
         GenericValue orderHeader = null;
         try {
-            orderHeader = paymentPref.getRelatedOne("OrderHeader");
+            orderHeader = paymentPref.getRelatedOne("OrderHeader", false);
         } catch (GenericEntityException e) {
             Debug.logError(e, "Cannot get OrderHeader from OrderPaymentPreference", module);
             return ServiceUtil.returnError(UtilProperties.getMessage(resource, 
@@ -1637,7 +1620,7 @@ public class OrderReturnServices {
         String responseId = (String) context.get("returnItemResponseId");
         String errorMsg = "Failed to create payment applications for return item response [" + responseId + "]. ";
         try {
-            GenericValue response = delegator.findByPrimaryKey("ReturnItemResponse", UtilMisc.toMap("returnItemResponseId", responseId));
+            GenericValue response = delegator.findOne("ReturnItemResponse", UtilMisc.toMap("returnItemResponseId", responseId), false);
             if (response == null) {
                 return ServiceUtil.returnError(errorMsg + "Return Item Response not found with ID [" + responseId + "].");
             }
@@ -1646,13 +1629,11 @@ public class OrderReturnServices {
 
             // for each return item in the response, get the list of return item billings and then a list of invoices
             Map<String, GenericValue> returnInvoices = FastMap.newInstance(); // key is invoiceId, value is Invoice GenericValue
-            List<GenericValue> items = response.getRelated("ReturnItem");
-            for (Iterator<GenericValue> itemIter = items.iterator(); itemIter.hasNext();) {
-                GenericValue item = itemIter.next();
-                List<GenericValue> billings = item.getRelated("ReturnItemBilling");
-                for (Iterator<GenericValue> billIter = billings.iterator(); billIter.hasNext();) {
-                    GenericValue billing = billIter.next();
-                    GenericValue invoice = billing.getRelatedOne("Invoice");
+            List<GenericValue> items = response.getRelated("ReturnItem", null, null, false);
+            for (GenericValue item : items) {
+                List<GenericValue> billings = item.getRelated("ReturnItemBilling", null, null, false);
+                for (GenericValue billing : billings) {
+                    GenericValue invoice = billing.getRelatedOne("Invoice", false);
 
                     // put the invoice in the map if it doesn't already exist (a very loopy way of doing group by invoiceId without creating a view)
                     if (returnInvoices.get(invoice.getString("invoiceId")) == null) {
@@ -1664,13 +1645,10 @@ public class OrderReturnServices {
             // for each return invoice found, sum up the related billings
             Map<String, BigDecimal> invoiceTotals = FastMap.newInstance(); // key is invoiceId, value is the sum of all billings for that invoice
             BigDecimal grandTotal = ZERO; // The sum of all return invoice totals
-            for (Iterator<GenericValue> iter = returnInvoices.values().iterator(); iter.hasNext();) {
-                GenericValue invoice = iter.next();
-
-                List<GenericValue> billings = invoice.getRelated("ReturnItemBilling");
+            for (GenericValue invoice : returnInvoices.values()) {
+                List<GenericValue> billings = invoice.getRelated("ReturnItemBilling", null, null, false);
                 BigDecimal runningTotal = ZERO;
-                for (Iterator<GenericValue> billIter = billings.iterator(); billIter.hasNext();) {
-                    GenericValue billing = billIter.next();
+                for (GenericValue billing : billings) {
                     runningTotal = runningTotal.add(billing.getBigDecimal("amount").multiply(billing.getBigDecimal("quantity")).setScale(decimals, rounding));
                 }
 
@@ -1679,8 +1657,7 @@ public class OrderReturnServices {
             }
 
             // now allocate responseAmount * invoiceTotal / grandTotal to each invoice
-            for (Iterator<GenericValue> iter = returnInvoices.values().iterator(); iter.hasNext();) {
-                GenericValue invoice = iter.next();
+            for (GenericValue invoice : returnInvoices.values()) {
                 String invoiceId = invoice.getString("invoiceId");
                 BigDecimal invoiceTotal = invoiceTotals.get(invoiceId);
 
@@ -1692,7 +1669,7 @@ public class OrderReturnServices {
                     input.put("amountApplied", amountApplied);
                     input.put("userLogin", userLogin);
                     if (response.get("billingAccountId") != null) {
-                        GenericValue billingAccount = response.getRelatedOne("BillingAccount");
+                        GenericValue billingAccount = response.getRelatedOne("BillingAccount", false);
                         if (billingAccount != null) {
                             input.put("billingAccountId", response.get("billingAccountId"));
                         }
@@ -1727,9 +1704,9 @@ public class OrderReturnServices {
         GenericValue returnHeader = null;
         List<GenericValue> returnItems = null;
         try {
-            returnHeader = delegator.findByPrimaryKey("ReturnHeader", UtilMisc.toMap("returnId", returnId));
+            returnHeader = delegator.findOne("ReturnHeader", UtilMisc.toMap("returnId", returnId), false);
             if (returnHeader != null) {
-                returnItems = returnHeader.getRelatedByAnd("ReturnItem", UtilMisc.toMap("returnTypeId", returnTypeId));
+                returnItems = returnHeader.getRelated("ReturnItem", UtilMisc.toMap("returnTypeId", returnTypeId), null, false);
             }
         } catch (GenericEntityException e) {
             Debug.logError(e, "Problems looking up return information", module);
@@ -1751,7 +1728,7 @@ public class OrderReturnServices {
                 // get order header & payment prefs
                 GenericValue orderHeader = null;
                 try {
-                    orderHeader = delegator.findByPrimaryKey("OrderHeader", UtilMisc.toMap("orderId", orderId));
+                    orderHeader = delegator.findOne("OrderHeader", UtilMisc.toMap("orderId", orderId), false);
                 } catch (GenericEntityException e) {
                     Debug.logError(e, "Cannot get Order details for #" + orderId, module);
                     continue;
@@ -1788,14 +1765,12 @@ public class OrderReturnServices {
                 List<GenericValue> contactMechs = FastList.newInstance();
                 List<GenericValue> orderCm = null;
                 try {
-                    orderCm = orderHeader.getRelated("OrderContactMech");
+                    orderCm = orderHeader.getRelated("OrderContactMech", null, null, false);
                 } catch (GenericEntityException e) {
                     Debug.logError(e, module);
                 }
                 if (orderCm != null) {
-                    Iterator<GenericValue> orderCmi = orderCm.iterator();
-                    while (orderCmi.hasNext()) {
-                        GenericValue v = orderCmi.next();
+                    for (GenericValue v : orderCm) {
                         contactMechs.add(GenericValue.create(v));
                     }
                     orderMap.put("orderContactMechs", contactMechs);
@@ -1807,7 +1782,7 @@ public class OrderReturnServices {
                 List shipmentPrefs = new ArrayList();
                 List orderSp = null;
                 try {
-                    orderSp = orderHeader.getRelated("OrderShipmentPreference");
+                    orderSp = orderHeader.getRelated("OrderShipmentPreference", null, null, false);
                 } catch (GenericEntityException e) {
                     Debug.logError(e, module);
                 }
@@ -1829,15 +1804,13 @@ public class OrderReturnServices {
                 List<String> orderItemShipGroupIds = FastList.newInstance(); // this is used to store the ship group ids of the groups already added to the orderItemShipGroupInfo list
                 List<GenericValue> orderItemAssocs = FastList.newInstance();
                 if (returnItemList != null) {
-                    Iterator<GenericValue> returnItemIter = returnItemList.iterator();
                     int itemCount = 1;
-                    while (returnItemIter.hasNext()) {
-                        GenericValue returnItem = returnItemIter.next();
+                    for (GenericValue returnItem : returnItemList) {
                         GenericValue orderItem = null;
                         GenericValue product = null;
                         try {
-                            orderItem = returnItem.getRelatedOne("OrderItem");
-                            product = orderItem.getRelatedOne("Product");
+                            orderItem = returnItem.getRelatedOne("OrderItem", false);
+                            product = orderItem.getRelatedOne("Product", false);
                         } catch (GenericEntityException e) {
                             Debug.logError(e, module);
                             continue;
@@ -1853,11 +1826,9 @@ public class OrderReturnServices {
                                 if ("CUSTOMER_RETURN".equals(returnHeaderTypeId)) {
                                     try {
                                         if (UtilValidate.isNotEmpty(product)) {
-                                            GenericValue refurbItemAssoc = EntityUtil.getFirst(EntityUtil.filterByDate(product.getRelated("MainProductAssoc",
-                                                                                                       UtilMisc.toMap("productAssocTypeId", "PRODUCT_REFURB"),
-                                                                                                       UtilMisc.toList("sequenceNum"))));
+                                            GenericValue refurbItemAssoc = EntityUtil.getFirst(EntityUtil.filterByDate(product.getRelated("MainProductAssoc", UtilMisc.toMap("productAssocTypeId", "PRODUCT_REFURB"), UtilMisc.toList("sequenceNum"), false)));
                                             if (UtilValidate.isNotEmpty(refurbItemAssoc)) {
-                                                refurbItem = refurbItemAssoc.getRelatedOne("AssocProduct");
+                                                refurbItem = refurbItemAssoc.getRelatedOne("AssocProduct", false);
                                             }
                                         }
                                     } catch (GenericEntityException e) {
@@ -1872,7 +1843,7 @@ public class OrderReturnServices {
                                             if (ServiceUtil.isError(invReqResult)) {
                                                 Debug.logError("Error calling isStoreInventoryAvailable service, result is: " + invReqResult, module);
                                             } else {
-                                                inventoryAvailable = "Y".equals((String) invReqResult.get("available"));
+                                                inventoryAvailable = "Y".equals(invReqResult.get("available"));
                                             }
                                         } catch (GenericServiceException e) {
                                             Debug.logError(e, "Fatal error calling inventory checking services: " + e.toString(), module);
@@ -1912,10 +1883,10 @@ public class OrderReturnServices {
                                 //
                                 GenericValue orderItemShipGroupAssoc = null;
                                 try {
-                                    orderItemShipGroupAssoc = EntityUtil.getFirst(orderItem.getRelated("OrderItemShipGroupAssoc"));
+                                    orderItemShipGroupAssoc = EntityUtil.getFirst(orderItem.getRelated("OrderItemShipGroupAssoc", null, null, false));
                                     if (orderItemShipGroupAssoc != null) {
                                         if (!orderItemShipGroupIds.contains(orderItemShipGroupAssoc.getString("shipGroupSeqId"))) {
-                                            GenericValue orderItemShipGroup = orderItemShipGroupAssoc.getRelatedOne("OrderItemShipGroup");
+                                            GenericValue orderItemShipGroup = orderItemShipGroupAssoc.getRelatedOne("OrderItemShipGroup", false);
                                             GenericValue newOrderItemShipGroup = (GenericValue)orderItemShipGroup.clone();
                                             newOrderItemShipGroup.set("orderId", null);
                                             orderItemShipGroupInfo.add(newOrderItemShipGroup);
@@ -1938,20 +1909,17 @@ public class OrderReturnServices {
                                     List<GenericValue> repairItems = null;
                                     try {
                                         if (UtilValidate.isNotEmpty(product)) {
-                                            repairItems = EntityUtil.filterByDate(product.getRelated("MainProductAssoc",
-                                                    UtilMisc.toMap("productAssocTypeId", "PRODUCT_REPAIR_SRV"), UtilMisc.toList("sequenceNum")));
+                                            repairItems = EntityUtil.filterByDate(product.getRelated("MainProductAssoc", UtilMisc.toMap("productAssocTypeId", "PRODUCT_REPAIR_SRV"), UtilMisc.toList("sequenceNum"), false));
                                         }
                                     } catch (GenericEntityException e) {
                                         Debug.logError(e, module);
                                         continue;
                                     }
                                     if (UtilValidate.isNotEmpty(repairItems)) {
-                                        Iterator<GenericValue> repairItemIt = repairItems.iterator();
-                                        while (repairItemIt.hasNext()) {
-                                            GenericValue repairItem = repairItemIt.next();
+                                        for (GenericValue repairItem : repairItems) {
                                             GenericValue repairItemProduct = null;
                                             try {
-                                                repairItemProduct = repairItem.getRelatedOne("AssocProduct");
+                                                repairItemProduct = repairItem.getRelatedOne("AssocProduct", false);
                                             } catch (GenericEntityException e) {
                                                 Debug.logError(e, module);
                                                 continue;
@@ -1995,7 +1963,7 @@ public class OrderReturnServices {
                                                 }
 
                                                 if (priceResult.get("listPrice") != null) {
-                                                    newItem.set("unitListPrice", (BigDecimal)priceResult.get("listPrice"));
+                                                    newItem.set("unitListPrice", priceResult.get("listPrice"));
                                                 }
 
                                                 BigDecimal repairUnitPrice = null;
@@ -2054,7 +2022,7 @@ public class OrderReturnServices {
                 if ((additionalItemTotal.compareTo(BigDecimal.ZERO) > 0) || ("RTN_CSREPLACE".equals(returnTypeId) && orderPriceTotal.compareTo(ZERO) > 0)) {
                     GenericValue paymentMethod = null;
                     try {
-                        paymentMethod = returnHeader.getRelatedOne("PaymentMethod");
+                        paymentMethod = returnHeader.getRelatedOne("PaymentMethod", false);
                     } catch (GenericEntityException e) {
                         Debug.logError(e, module);
                     }
@@ -2085,18 +2053,16 @@ public class OrderReturnServices {
 
                 // we'll assume new order is under same terms as original.  note orderTerms is a required parameter of storeOrder
                 try {
-                    orderMap.put("orderTerms", orderHeader.getRelated("OrderTerm"));
+                    orderMap.put("orderTerms", orderHeader.getRelated("OrderTerm", null, null, false));
                 } catch (GenericEntityException e) {
                     Debug.logError(e, "Cannot create replacement order because order terms for original order are not available", module);
                 }
                 // we'll assume the new order has the same order roles of the original one
                 try {
-                    List<GenericValue> orderRoles = orderHeader.getRelated("OrderRole");
+                    List<GenericValue> orderRoles = orderHeader.getRelated("OrderRole", null, null, false);
                     Map<String, List<String>> orderRolesMap = FastMap.newInstance();
                     if (orderRoles != null) {
-                        Iterator<GenericValue> orderRolesIt = orderRoles.iterator();
-                        while (orderRolesIt.hasNext()) {
-                            GenericValue orderRole = orderRolesIt.next();
+                        for (GenericValue orderRole : orderRoles) {
                             List<String> parties = orderRolesMap.get(orderRole.getString("roleTypeId"));
                             if (parties == null) {
                                 parties = FastList.newInstance();
@@ -2173,9 +2139,7 @@ public class OrderReturnServices {
                                 "OrderProblemCreatingReturnItemResponseRecord", locale));
                     }
 
-                    Iterator<GenericValue> updateReturnItemIter = returnItemList.iterator();
-                    while (updateReturnItemIter.hasNext()) {
-                        GenericValue returnItem = updateReturnItemIter.next();
+                    for (GenericValue returnItem : returnItemList) {
                         Map<String, Object> updateReturnItemCtx = FastMap.newInstance();
                         updateReturnItemCtx.put("returnId", returnId);
                         updateReturnItemCtx.put("returnItemSeqId", returnItem.get("returnItemSeqId"));
@@ -2223,9 +2187,9 @@ public class OrderReturnServices {
         GenericValue returnHeader;
         List<GenericValue> returnItems = null;
         try {
-            returnHeader = delegator.findByPrimaryKey("ReturnHeader", UtilMisc.toMap("returnId", returnId));
+            returnHeader = delegator.findOne("ReturnHeader", UtilMisc.toMap("returnId", returnId), false);
             if (returnHeader != null) {
-                returnItems = returnHeader.getRelatedByAnd("ReturnItem", UtilMisc.toMap("returnTypeId", "RTN_REFUND"));
+                returnItems = returnHeader.getRelated("ReturnItem", UtilMisc.toMap("returnTypeId", "RTN_REFUND"), null, false);
             }
         } catch (GenericEntityException e) {
             Debug.logError(e, module);
@@ -2233,16 +2197,14 @@ public class OrderReturnServices {
         }
 
         if (returnItems != null) {
-            Iterator<GenericValue> ri = returnItems.iterator();
-            while (ri.hasNext()) {
-                GenericValue returnItem = ri.next();
+            for (GenericValue returnItem : returnItems) {
                 String orderItemSeqId = returnItem.getString("orderItemSeqId");
                 String orderId = returnItem.getString("orderId");
 
                 // lookup subscriptions
                 List<GenericValue> subscriptions;
                 try {
-                    subscriptions = delegator.findByAnd("Subscription", UtilMisc.toMap("orderId", orderId, "orderItemSeqId", orderItemSeqId));
+                    subscriptions = delegator.findByAnd("Subscription", UtilMisc.toMap("orderId", orderId, "orderItemSeqId", orderItemSeqId), null, false);
                 } catch (GenericEntityException e) {
                     Debug.logError(e, module);
                     return ServiceUtil.returnError(e.getMessage());
@@ -2250,9 +2212,7 @@ public class OrderReturnServices {
 
                 // cancel all current subscriptions
                 if (subscriptions != null) {
-                    Iterator<GenericValue> si = subscriptions.iterator();
-                    while (si.hasNext()) {
-                        GenericValue subscription = si.next();
+                    for (GenericValue subscription : subscriptions) {
                         Timestamp thruDate = subscription.getTimestamp("thruDate");
                         if (thruDate == null || thruDate.after(now)) {
                             subscription.set("thruDate", now);
@@ -2281,9 +2241,7 @@ public class OrderReturnServices {
      * @param returnTypeId the return type id
      */
     public static void groupReturnItemsByOrder(List<GenericValue> returnItems, Map<String, List<GenericValue>> returnItemsByOrderId, Map<String, BigDecimal> totalByOrder, Delegator delegator, String returnId, String returnTypeId) {
-        Iterator<GenericValue> itemIt = returnItems.iterator();
-        while (itemIt.hasNext()) {
-            GenericValue returnItem = itemIt.next();
+        for (GenericValue returnItem : returnItems) {
             String orderId = returnItem.getString("orderId");
             if (orderId != null) {
                 if (returnItemsByOrderId != null) {
@@ -2326,9 +2284,7 @@ public class OrderReturnServices {
 
         // We may also have some order-level adjustments, so we need to go through each order again and add those as well
         if ((totalByOrder != null) && (totalByOrder.keySet() != null)) {
-            Iterator<String> orderIterator = totalByOrder.keySet().iterator();
-            while (orderIterator.hasNext()) {
-                String orderId = orderIterator.next();
+            for (String orderId : totalByOrder.keySet()) {
                 // find returnAdjustment for returnHeader
                 Map<String, Object> condition = UtilMisc.<String, Object>toMap("returnId", returnId,
                                                "returnItemSeqId", org.ofbiz.common.DataModelConstants.SEQ_ID_NA,
@@ -2347,7 +2303,7 @@ public class OrderReturnServices {
         List<GenericValue> returnItems = null;
         Map<String, Object> returnAmountByOrder = FastMap.newInstance();
         try {
-            returnItems = delegator.findByAnd("ReturnItem", UtilMisc.toMap("returnId", returnId));
+            returnItems = delegator.findByAnd("ReturnItem", UtilMisc.toMap("returnId", returnId), null, false);
 
         } catch (GenericEntityException e) {
             Debug.logError(e, "Problems looking up return information", module);
@@ -2355,20 +2311,14 @@ public class OrderReturnServices {
                     "OrderErrorGettingReturnHeaderItemInformation", locale));
         }
         if ((returnItems != null) && (returnItems.size() > 0)) {
-            Iterator<GenericValue> returnItemIterator = returnItems.iterator();
-            GenericValue returnItem = null;
-            GenericValue returnItemResponse = null;
-            GenericValue payment = null;
-            String orderId;
             List<String> paymentList = FastList.newInstance();
-            while (returnItemIterator.hasNext()) {
-                returnItem = returnItemIterator.next();
-                orderId = returnItem.getString("orderId");
+            for (GenericValue returnItem : returnItems) {
+                String orderId = returnItem.getString("orderId");
                 try {
-                    returnItemResponse = returnItem.getRelatedOne("ReturnItemResponse");
+                    GenericValue returnItemResponse = returnItem.getRelatedOne("ReturnItemResponse", false);
                     if ((returnItemResponse != null) && (orderId != null)) {
                         // TODO should we filter on payment's status (PMNT_SENT,PMNT_RECEIVED)
-                        payment = returnItemResponse.getRelatedOne("Payment");
+                        GenericValue payment = returnItemResponse.getRelatedOne("Payment", false);
                         if ((payment != null) && (payment.getBigDecimal("amount") != null) &&
                                 !paymentList.contains(payment.get("paymentId"))) {
                             UtilMisc.addToBigDecimalInMap(returnAmountByOrder, orderId, payment.getBigDecimal("amount"));
@@ -2407,10 +2357,11 @@ public class OrderReturnServices {
         }
 
         if ((returnAmountByOrder != null) && (returnAmountByOrder.keySet() != null)) {
-            Iterator<String> orderIterator = returnAmountByOrder.keySet().iterator();
-            while (orderIterator.hasNext()) {
-                String orderId = orderIterator.next();
+            for (String orderId : returnAmountByOrder.keySet()) {
                 BigDecimal returnAmount = returnAmountByOrder.get(orderId);
+                if (returnAmount == null) {
+                    return ServiceUtil.returnError("No returnAmount found for order:" + orderId);
+                }
                 if (returnAmount.abs().compareTo(new BigDecimal("0.000001")) < 0) {
                     Debug.logError("Order [" + orderId + "] refund amount[ " + returnAmount + "] less than zero", module);
                     return ServiceUtil.returnError(UtilProperties.getMessage(resource_error,
@@ -2418,14 +2369,10 @@ public class OrderReturnServices {
                 }
                 OrderReadHelper helper = new OrderReadHelper(delegator, orderId);
                 BigDecimal grandTotal = helper.getOrderGrandTotal();
-                if (returnAmount == null) {
-                    Debug.logInfo("No returnAmount found for order:" + orderId, module);
-                } else {
-                    if (returnAmount.subtract(grandTotal).compareTo(new BigDecimal("0.01")) > 0) {
-                        Debug.logError("Order [" + orderId + "] refund amount[ " + returnAmount + "] exceeds order total [" + grandTotal + "]", module);
-                        return ServiceUtil.returnError(UtilProperties.getMessage(resource_error,
-                                "OrderRefundAmountExceedsOrderTotal", locale));
-                    }
+                if (returnAmount.subtract(grandTotal).compareTo(new BigDecimal("0.01")) > 0) {
+                    Debug.logError("Order [" + orderId + "] refund amount[ " + returnAmount + "] exceeds order total [" + grandTotal + "]", module);
+                    return ServiceUtil.returnError(UtilProperties.getMessage(resource_error,
+                            "OrderRefundAmountExceedsOrderTotal", locale));
                 }
             }
         }
@@ -2439,6 +2386,7 @@ public class OrderReturnServices {
         String returnId = (String) context.get("returnId");
         String returnItemSeqId = (String) context.get("returnItemSeqId");
         String description = (String) context.get("description");
+        BigDecimal amount = (BigDecimal) context.get("amount");
         Locale locale = (Locale) context.get("locale");
 
         GenericValue returnItemTypeMap = null;
@@ -2448,27 +2396,29 @@ public class OrderReturnServices {
         GenericValue returnItem = null;
         GenericValue returnHeader = null;
 
-        BigDecimal amount;
-
         // if orderAdjustment is not empty, then copy most return adjustment information from orderAdjustment's
         if (orderAdjustmentId != null) {
             try {
-                orderAdjustment = delegator.findByPrimaryKey("OrderAdjustment", UtilMisc.toMap("orderAdjustmentId", orderAdjustmentId));
-
+                orderAdjustment = delegator.findOne("OrderAdjustment", UtilMisc.toMap("orderAdjustmentId", orderAdjustmentId), false);
+                if (orderAdjustment == null) {
+                    return ServiceUtil.returnError(UtilProperties.getMessage(resource, 
+                            "OrderCreateReturnAdjustmentNotFoundOrderAdjustment", 
+                            UtilMisc.toMap("orderAdjustmentId", orderAdjustmentId), locale));
+                }
                 // get returnHeaderTypeId from ReturnHeader and then use it to figure out return item type mapping
-                returnHeader = delegator.findByPrimaryKey("ReturnHeader", UtilMisc.toMap("returnId", returnId));
+                returnHeader = delegator.findOne("ReturnHeader", UtilMisc.toMap("returnId", returnId), false);
                 String returnHeaderTypeId = ((returnHeader != null) && (returnHeader.getString("returnHeaderTypeId") != null)) ? returnHeader.getString("returnHeaderTypeId") : "CUSTOMER_RETURN";
-                returnItemTypeMap = delegator.findByPrimaryKey("ReturnItemTypeMap",
-                        UtilMisc.toMap("returnHeaderTypeId", returnHeaderTypeId, "returnItemMapKey", orderAdjustment.get("orderAdjustmentTypeId")));
-                returnAdjustmentType = returnItemTypeMap.getRelatedOne("ReturnAdjustmentType");
+                returnItemTypeMap = delegator.findOne("ReturnItemTypeMap",
+                        UtilMisc.toMap("returnHeaderTypeId", returnHeaderTypeId, "returnItemMapKey", orderAdjustment.get("orderAdjustmentTypeId")), false);
+                returnAdjustmentType = returnItemTypeMap.getRelatedOne("ReturnAdjustmentType", false);
                 if (returnAdjustmentType != null && UtilValidate.isEmpty(description)) {
                     description = returnAdjustmentType.getString("description");
                 }
                 if ((returnItemSeqId != null) && !("_NA_".equals(returnItemSeqId))) {
-                    returnItem = delegator.findByPrimaryKey("ReturnItem",
-                            UtilMisc.toMap("returnId", returnId, "returnItemSeqId", returnItemSeqId));
-                    Debug.log("returnId:" + returnId + ",returnItemSeqId:" + returnItemSeqId);
-                    orderItem = returnItem.getRelatedOne("OrderItem");
+                    returnItem = delegator.findOne("ReturnItem",
+                            UtilMisc.toMap("returnId", returnId, "returnItemSeqId", returnItemSeqId), false);
+                    Debug.logInfo("returnId:" + returnId + ",returnItemSeqId:" + returnItemSeqId, module);
+                    orderItem = returnItem.getRelatedOne("OrderItem", false);
                 } else {
                     // we don't have the returnItemSeqId but before we consider this
                     // an header adjustment we try to get a return item in this return
@@ -2478,9 +2428,9 @@ public class OrderReturnServices {
                         returnItem = EntityUtil.getFirst(delegator.findByAnd("ReturnItem",
                                                                              UtilMisc.toMap("returnId", returnId,
                                                                                             "orderId", orderAdjustment.getString("orderId"),
-                                                                                            "orderItemSeqId", orderAdjustment.getString("orderItemSeqId"))));
+                                                                                            "orderItemSeqId", orderAdjustment.getString("orderItemSeqId")), null, false));
                         if (UtilValidate.isNotEmpty(returnItem)) {
-                            orderItem = returnItem.getRelatedOne("OrderItem");
+                            orderItem = returnItem.getRelatedOne("OrderItem", false);
                         }
                     }
                 }
@@ -2489,6 +2439,9 @@ public class OrderReturnServices {
                 throw new GeneralRuntimeException(e.getMessage());
             }
             context.putAll(orderAdjustment.getAllFields());
+            if (UtilValidate.isNotEmpty(amount)) {
+                context.put("amount", amount);
+            }
         }
 
         // if orderAdjustmentTypeId is empty, ie not found from orderAdjustmentId, then try to get returnAdjustmentTypeId from returnItemTypeMap,
@@ -2501,12 +2454,6 @@ public class OrderReturnServices {
         if (returnItem != null) {  // returnAdjustment for returnItem
             if (needRecalculate(returnAdjustmentTypeId)) {
                 Debug.logInfo("returnPrice:" + returnItem.getBigDecimal("returnPrice") + ",returnQuantity:" + returnItem.getBigDecimal("returnQuantity") + ",sourcePercentage:" + orderAdjustment.getBigDecimal("sourcePercentage"), module);
-                if (orderAdjustment == null) {
-                    Debug.logError("orderAdjustment [" + orderAdjustmentId + "] not found", module);
-                    return ServiceUtil.returnError(UtilProperties.getMessage(resource, 
-                            "OrderCreateReturnAdjustmentNotFoundOrderAdjustment", 
-                            UtilMisc.toMap("orderAdjustmentId", orderAdjustmentId), locale));
-                }
                 BigDecimal returnTotal = returnItem.getBigDecimal("returnPrice").multiply(returnItem.getBigDecimal("returnQuantity"));
                 BigDecimal orderTotal = orderItem.getBigDecimal("quantity").multiply(orderItem.getBigDecimal("unitPrice"));
                 amount = getAdjustmentAmount("RET_SALES_TAX_ADJ".equals(returnAdjustmentTypeId), returnTotal, orderTotal, orderAdjustment.getBigDecimal("amount"));
@@ -2554,10 +2501,10 @@ public class OrderReturnServices {
 
 
         try {
-            returnAdjustment = delegator.findByPrimaryKey("ReturnAdjustment", UtilMisc.toMap("returnAdjustmentId", context.get("returnAdjustmentId")));
+            returnAdjustment = delegator.findOne("ReturnAdjustment", UtilMisc.toMap("returnAdjustmentId", context.get("returnAdjustmentId")), false);
             if (returnAdjustment != null) {
-                returnItem = delegator.findByPrimaryKey("ReturnItem",
-                        UtilMisc.toMap("returnId", returnAdjustment.get("returnId"), "returnItemSeqId", returnAdjustment.get("returnItemSeqId")));
+                returnItem = delegator.findOne("ReturnItem",
+                        UtilMisc.toMap("returnId", returnAdjustment.get("returnId"), "returnItemSeqId", returnAdjustment.get("returnItemSeqId")), false);
                 returnAdjustmentTypeId = returnAdjustment.getString("returnAdjustmentTypeId");
             }
 
@@ -2660,11 +2607,9 @@ public class OrderReturnServices {
         List<GenericValue> adjustments;
         try {
             // TODO: find on a view-entity with a sum is probably more efficient
-            adjustments = delegator.findByAnd("ReturnAdjustment", condition);
+            adjustments = delegator.findByAnd("ReturnAdjustment", condition, null, false);
             if (adjustments != null) {
-                Iterator<GenericValue> adjustmentIterator = adjustments.iterator();
-                while (adjustmentIterator.hasNext()) {
-                    GenericValue returnAdjustment = adjustmentIterator.next();
+                for (GenericValue returnAdjustment : adjustments) {
                     if ((returnAdjustment != null) && (returnAdjustment.get("amount") != null)) {
                        total = total.add(returnAdjustment.getBigDecimal("amount"));
                     }

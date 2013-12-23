@@ -19,7 +19,7 @@ under the License.
 -->
 
 <simple-methods xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/simple-methods.xsd">
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/simple-methods-v2.xsd">
 
     <simple-method method-name="createCustomer" short-description="Create Customer" login-required="false">
         <call-class-method class-name="org.ofbiz.product.store.ProductStoreWorker" method-name="getProductStore" ret-field="productStore">
@@ -803,7 +803,7 @@ under the License.
                 <string value="SHIPPING_LOCATION"/>
                 <field field="addressContext.contactMechId"/>
             </call-object-method>
-            <call-object-method obj-field="cart" method-name="setShippingContactMechId">
+            <call-object-method obj-field="cart" method-name="setAllShippingContactMechId">
                 <field field="addressContext.contactMechId"/>
             </call-object-method>
         </if-not-empty>
@@ -820,25 +820,25 @@ under the License.
        <session-to-field field="cart" session-name="shoppingCart"/>
        <if-not-empty field="cart">
            <set field="shipmentMethodTypeId" from-field="parameters.shipmentMethodTypeId"/>
-           <call-object-method obj-field="cart" method-name="setShipmentMethodTypeId">
+           <call-object-method obj-field="cart" method-name="setAllShipmentMethodTypeId">
                <field field="shipmentMethodTypeId"/>
            </call-object-method>
 
            <set field="carrierPartyId" from-field="parameters.carrierPartyId"/>
-           <call-object-method obj-field="cart" method-name="setCarrierPartyId">
+           <call-object-method obj-field="cart" method-name="setAllCarrierPartyId">
                <field field="carrierPartyId"/>
            </call-object-method>
 
            <set field="maySplit" from-field="parameters.may_split" type="Boolean"/>
            <if-not-empty field="maySplit">
-               <call-object-method obj-field="cart" method-name="setMaySplit">
+               <call-object-method obj-field="cart" method-name="setAllMaySplit">
                    <field field="maySplit" type="Boolean"/>
                </call-object-method>
            </if-not-empty>
 
            <set field="shippingInstruction" from-field="parameters.shipping_instructions" type="String"/>
            <if-not-empty field="shippingInstruction">
-           <call-object-method obj-field="cart" method-name="setShippingInstructions">
+           <call-object-method obj-field="cart" method-name="setAllShippingInstructions">
                <field field="shippingInstruction" type="String"/>
            </call-object-method>
            </if-not-empty>
@@ -852,14 +852,14 @@ under the License.
 
            <set field="isGift" from-field="parameters.is_gift" type="Boolean"/>
            <if-not-empty field="isGift">
-               <call-object-method obj-field="cart" method-name="setIsGift">
+               <call-object-method obj-field="cart" method-name="setAllIsGift">
                    <field field="isGift" type="Boolean"/>
                </call-object-method>
            </if-not-empty>
 
            <set field="giftMessage" from-field="parameters.gift_message" type="String"/>
            <if-not-empty field="giftMessage">
-           <call-object-method obj-field="cart" method-name="setGiftMessage">
+           <call-object-method obj-field="cart" method-name="setAllGiftMessage">
                <field field="giftMessage" type="String"/>
            </call-object-method>
            </if-not-empty>
@@ -1055,13 +1055,13 @@ under the License.
         <if-empty field="shoppingCart">
             <session-to-field field="shoppingCart"/>
         </if-empty>
-        <call-object-method obj-field="shoppingCart" method-name="setShipmentMethodTypeId">
+        <call-object-method obj-field="shoppingCart" method-name="setAllShipmentMethodTypeId">
             <field field="shipmentMethodTypeId"/>
         </call-object-method>
-        <call-object-method obj-field="shoppingCart" method-name="setCarrierPartyId">
+        <call-object-method obj-field="shoppingCart" method-name="setAllCarrierPartyId">
             <field field="carrierPartyId"/>
         </call-object-method>
-        <call-object-method obj-field="shoppingCart" method-name="setProductStoreShipMethId">
+        <call-object-method obj-field="shoppingCart" method-name="setAllProductStoreShipMethId">
             <field field="productStoreShipMethId"/>
         </call-object-method>
         <call-object-method  obj-field="shoppingCart" method-name="getCurrency" ret-field="isoCode"/>
@@ -1280,47 +1280,18 @@ under the License.
             <add-error><fail-property resource="PartyUiLabels" property="PartyEmailAddressMissingError"/></add-error>
             <else>
                 <if-validate-method field="parameters.emailAddress" method="isEmail" class="org.ofbiz.base.util.UtilValidate">
-                    <!-- Check existing email -->
-                    <entity-condition list="contacts" entity-name="PartyContactDetailByPurpose">
-                        <condition-list>
-                            <condition-expr field-name="infoString" from-field="parameters.emailAddress"/>
-                            <condition-expr field-name="contactMechTypeId" value="EMAIL_ADDRESS"/>
-                            <condition-expr field-name="contactMechPurposeTypeId" value="PRIMARY_EMAIL"/>
-                        </condition-list>
-                    </entity-condition>
-                    <if-not-empty field="contacts">
-                        <first-from-list entry="contact" list="contacts"/>
-                        <set field="isExistingEmail" type="Boolean" value="true"/>
-                    </if-not-empty>
                     <else>
                         <add-error><fail-property resource="PartyUiLabels" property="PartyEmailAddressNotFormattedCorrectly"/></add-error>
                     </else>
                 </if-validate-method>
             </else>
         </if-empty>
-        <call-object-method obj-field="parameters.captcha" method-name="toLowerCase" ret-field="parameters.captcha"/>
-        <call-object-method obj-field="parameters.captchaCode" method-name="toLowerCase" ret-field="parameters.captchaCode"/>
-        <if-compare-field operator="not-equals" field="parameters.captcha" to-field="parameters.captchaCode">
+        <call-object-method obj-field="parameters.captcha" method-name="toLowerCase" ret-field="submittedCaptcha"/>
+        <script>groovy: context.actualCaptcha = request.getSession().getAttribute("_CAPTCHA_CODE_")?.get("captchaImage")?.toLowerCase()</script>
+        <if-compare-field operator="not-equals" field="submittedCaptcha" to-field="actualCaptcha">
             <add-error><fail-property resource="MyPortalUiLabels" property="MyPortalCaptchaMissingError"/></add-error>
         </if-compare-field>
         <check-errors/>
-        <!-- If email already exist, will go to confirm screen. -->
-        <if>
-            <condition>
-                <and>
-                    <if-empty field="parameters.partyId"/>
-                    <if-compare operator="equals" value="true" field="isExistingEmail"/>
-                </and>
-            </condition>
-            <then>
-                <entity-one value-field="person" entity-name="Person">
-                    <field-map field-name="partyId" from-field="contact.partyId"/>
-                </entity-one>
-                <field-to-request field="person" request-name="person"/>
-                <return response-code="confirm"/>
-            </then>
-        </if>
-        <!-- If person doesn't exist, will create new person and contact. -->
         <if-empty field="parameters.partyId">
             <set-service-fields service-name="createPerson" to-map="newPerson" map="parameters"/>
             <call-service service-name="createPerson" in-map-name="newPerson">
@@ -1343,4 +1314,9 @@ under the License.
             <default-message property="CommonGenericServiceSuccessMessage" resource="CommonUiLabels"></default-message>
         </call-service>
     </simple-method>
+    <simple-method method-name="fromSetSessionLocale" 
+      short-description="Add field to request for redirection after SetSessionLocale" login-required="false">
+        <set field="fromSetSessionLocale" value="true"/>
+        <field-to-request field="fromSetSessionLocale" request-name="fromSetSessionLocale"/>
+    </simple-method>    
 </simple-methods>

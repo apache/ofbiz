@@ -19,7 +19,7 @@
   -->
 
 <simple-methods xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/simple-methods.xsd">
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/simple-methods-v2.xsd">
 
     <!-- base content CRUD services -->
     <simple-method method-name="createContent" short-description="Create a Content Record">
@@ -491,27 +491,6 @@
         <remove-value value-field="lookedUpValue"/>
     </simple-method>
 
-    <!-- Methods for ContentPurposeOperation -->
-    <simple-method method-name="createContentPurposeOperation" short-description="Create Content PurposeOperation">
-        <make-value entity-name="ContentPurposeOperation" value-field="newEntity"/>
-        <set-nonpk-fields map="parameters" value-field="newEntity"/>
-        <set-pk-fields map="parameters" value-field="newEntity"/>
-        <create-value value-field="newEntity"/>
-    </simple-method>
-    <simple-method method-name="updateContentPurposeOperation" short-description="Update Content PurposeOperation">
-        <make-value entity-name="ContentPurposeOperation" value-field="lookupKeyValue"/>
-        <set-pk-fields map="parameters" value-field="lookupKeyValue"/>
-        <find-by-primary-key entity-name="ContentPurposeOperation" map="lookupKeyValue" value-field="lookedUpValue"/>
-        <set-nonpk-fields map="parameters" value-field="lookedUpValue"/>
-        <store-value value-field="lookedUpValue"/>
-    </simple-method>
-    <simple-method method-name="removeContentPurposeOperation" short-description="Remove Content PurposeOperation">
-        <make-value entity-name="ContentPurposeOperation" value-field="lookupKeyValue"/>
-        <set-pk-fields map="parameters" value-field="lookupKeyValue"/>
-        <find-by-primary-key entity-name="ContentPurposeOperation" map="lookupKeyValue" value-field="lookedUpValue"/>
-        <remove-value value-field="lookedUpValue"/>
-    </simple-method>
-
     <!-- Methods for ContentAttribute -->
     <simple-method method-name="createContentAttribute" short-description="Create Content Attribute">
         <make-value entity-name="ContentAttribute" value-field="newEntity"/>
@@ -530,28 +509,6 @@
         <make-value entity-name="ContentAttribute" value-field="lookupKeyValue"/>
         <set-pk-fields map="parameters" value-field="lookupKeyValue"/>
         <find-by-primary-key entity-name="ContentAttribute" map="lookupKeyValue" value-field="lookedUpValue"/>
-        <remove-value value-field="lookedUpValue"/>
-    </simple-method>
-
-    <!-- Methods for ContentMetaData -->
-    <simple-method method-name="createContentMetaData" short-description="Create Content MetaData">
-        <make-value entity-name="ContentMetaData" value-field="newEntity"/>
-        <set-nonpk-fields map="parameters" value-field="newEntity"/>
-        <set-pk-fields map="parameters" value-field="newEntity"/>
-        <create-value value-field="newEntity"/>
-    </simple-method>
-    <simple-method method-name="updateContentMetaData" short-description="Update Content MetaData">
-        <make-value entity-name="ContentMetaData" value-field="lookupKeyValue"/>
-        <set-pk-fields map="parameters" value-field="lookupKeyValue"/>
-        <find-by-primary-key entity-name="ContentMetaData" map="lookupKeyValue" value-field="lookedUpValue"/>
-        <set-nonpk-fields map="parameters" value-field="lookedUpValue"/>
-        <store-value value-field="lookedUpValue"/>
-    </simple-method>
-    <simple-method method-name="removeContentMetaData" short-description="Remove Content MetaData">
-        <check-errors/>
-        <make-value entity-name="ContentMetaData" value-field="lookupKeyValue"/>
-        <set-pk-fields map="parameters" value-field="lookupKeyValue"/>
-        <find-by-primary-key entity-name="ContentMetaData" map="lookupKeyValue" value-field="lookedUpValue"/>
         <remove-value value-field="lookedUpValue"/>
     </simple-method>
 
@@ -822,11 +779,13 @@
         </call-service>
 
         <iterate-map key="key" value="val" map="persistOut">
+            <if-compare field="key" operator="equals" value="responseMessage">
+                <continue/>
+            </if-compare>
             <field-to-result field="val" result-name="${key}"/>
         </iterate-map>
 
         <set field="mapIn.contentId"  from-field="persistOut.contentId"/>
-        <!-- <set field="mapIn.fromDate"  from-field="nowTimestamp"/> -->
         <set field="mapIn.communicationEventId"  from-field="parameters.communicationEventId"/>
         <set field="mapIn.sequenceNum"  from-field="parameters.sequenceNum"/>
         <call-service service-name="createCommEventContentAssoc" in-map-name="mapIn">
@@ -860,6 +819,9 @@
         </call-service>
 
         <iterate-map key="key" value="val" map="persistOut">
+            <if-compare field="key" operator="equals" value="responseMessage">
+                <continue/>
+            </if-compare>
             <field-to-result field="val" result-name="${key}"/>
         </iterate-map>
 
@@ -880,7 +842,7 @@
 
     <!-- This service would primarily be used to update the thruDate field.
         -->
-    <simple-method method-name="updateCommEventContentAssoc" short-description="Create CommEventContentAssoc">
+    <simple-method method-name="updateCommEventContentAssoc" short-description="Update CommEventContentAssoc">
         <make-value entity-name="CommEventContentAssoc" value-field="pkCommEventContentAssoc"/>
         <set-pk-fields value-field="pkCommEventContentAssoc" map="parameters"/>
         <find-by-primary-key value-field="commEventContentAssoc" map="pkCommEventContentAssoc" entity-name="CommEventContentAssoc"/>

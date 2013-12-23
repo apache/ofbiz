@@ -229,7 +229,7 @@ under the License.
             </service>
         </actions>
         <row-actions>
-            <set field="showPosition1" value="${bsh:String prev=(String)previousItem.get(&quot;inventoryItemId&quot;);return new Boolean(!(prev!=null&amp;&amp;prev.equals(inventoryItemId)));}" type="Boolean"/>
+            <set field="showPosition1" value="${groovy: String prev = (String) previousItem.get('inventoryItemId');return new Boolean(!(prev!=null &amp;&amp; prev.equals(inventoryItemId)));}" type="Boolean"/>
         </row-actions>
 
         <field name="inventoryItemId" widget-style="buttontext" position="1" use-when="showPosition1">
@@ -293,7 +293,7 @@ under the License.
             </service>
         </actions>
         <row-actions>
-            <set field="showPosition1" value="${bsh:String prev=(String)previousItem.get(&quot;productId&quot;);return new Boolean(!(prev!=null&amp;&amp;prev.equals(productId)));}" type="Boolean"/>
+            <set field="showPosition1" value="${groovy:String prev = (String) previousItem.get('productId'); return new Boolean(!(prev!=null &amp;&amp; prev.equals(productId)));}" type="Boolean"/>
         </row-actions>
 
         <field name="productId" position="1" use-when="showPosition1" widget-style="buttontext">
@@ -435,8 +435,8 @@ under the License.
         </field>
         <field name="VIEW_SIZE" entry-name="viewSize" title="${uiLabelMap.ProductShowProductsPerPage}"><text/></field>
         <field name="monthsInPastLimit" entry-name="monthsInPastLimit"><text/></field>
-        <field name="fromDateSellThrough"><date-time/></field>
-        <field name="thruDateSellThrough"><date-time/></field>
+        <field name="fromDateSellThrough" title="${uiLabelMap.ProductFromDateSellThrough}"><date-time/></field>
+        <field name="thruDateSellThrough" title="${uiLabelMap.ProductThruDateSellThrough}"><date-time/></field>
         <field name="submitButton" title="${uiLabelMap.CommonFind}" widget-style="smallSubmit">
             <submit button-type="button"/>
         </field>
@@ -559,9 +559,7 @@ under the License.
     <form name="FindPhysicalInventory" type="single" target="FindFacilityPhysicalInventory" title=""
         header-row-style="header-row" default-table-style="basic-table">
         <field name="facilityId"><hidden/></field>
-        <field name="productId" title="${uiLabelMap.ProductProductId}">
-            <text/>
-        </field>
+        <field name="productId" position="1"><lookup target-form-name="LookupProduct"/></field>
         <field name="internalName" title="${uiLabelMap.ProductInternalName}">
             <text/>
         </field>
@@ -612,7 +610,7 @@ under the License.
         </field>
         <field name="fromDate"><display/></field>
         <field name="submitButton" title="${uiLabelMap.CommonUpdate}"><submit button-type="button"/></field>
-        <field name="deleteLink" title="${uiLabelMap.CommonEmptyHeader}" widget-style="buttontext">
+        <field name="deleteLink" title=" " widget-style="buttontext">
             <hyperlink target="removeGroupFromFacility" description="${uiLabelMap.CommonDelete}" also-hidden="false">
                 <parameter param-name="facilityId"/>
                 <parameter param-name="facilityGroupId"/>
@@ -644,7 +642,7 @@ under the License.
         </field>
         <field name="fromDate" title="${uiLabelMap.CommonFromDate}"><date-time/></field>
         <field name="thruDate" title="${uiLabelMap.CommonThruDate}"><date-time/></field>
-        <field name="deleteLink" title="${uiLabelMap.CommonEmptyHeader}" widget-style="buttontext">
+        <field name="deleteLink" title=" " widget-style="buttontext">
             <hyperlink target="removePartyFromFacility" description="${uiLabelMap.CommonDelete}" also-hidden="false">
                 <parameter param-name="facilityId"/>
                 <parameter param-name="partyId"/>
@@ -810,7 +808,7 @@ under the License.
     </form>
 
     <form name="FromFacilityTransfersComplete" type="multi" target="CompleteRequestedTransfers?completeRequested=true&amp;facilityId=${facilityId}" title="" list-name="fromTransfers"
-        odd-row-style="alternate-row" default-table-style="basic-table hover-bar">
+        odd-row-style="alternate-row" default-table-style="basic-table hover-bar" use-row-submit="true">
         <row-actions>
             <entity-one entity-name="InventoryItem" value-field="inventoryItem">
                 <field-map field-name="inventoryItemId"/>
@@ -855,35 +853,6 @@ under the License.
             <submit/>
         </field>
     </form>
-    
-    <form name="ViewFacilityInventoryHistoryReportForm" extends="FindFacilityInventoryByProduct" target="RenderInventoryReportHtml" target-window="_BLANK">
-        <field name="facilityId"><hidden/></field>
-        <field name="productId"><hidden/></field>
-        <field name="internalName"><hidden/></field>
-        <field name="productTypeId"><hidden/></field>
-        <field name="searchInProductCategoryId"><hidden/></field>
-        <field name="productSupplierId"><hidden/></field>
-        <field name="statusId"><hidden/></field>
-        <field name="productsSoldThruTimestamp"><hidden/></field>
-        <field name="VIEW_SIZE"><hidden/></field>
-        <field name="monthsInPastLimit"><hidden/></field>
-        <field name="fromDateSellThrough"><hidden/></field>
-        <field name="thruDateSellThrough"><hidden/></field>
-        <field name="offsetQOHQty"><hidden/></field>
-        <field name="offsetATPQty"><hidden/></field>
-        <field name="lastIntMonth" title="Number of last month to sold out"><text size="15" default-value="0"></text></field>
-        <field name="contentType" action="document.ViewFacilityInventoryHistoryReportForm.action=this.value" event="onchange">
-            <drop-down allow-empty="false" >
-                <option key="RenderInventoryReportHtml" description="HTML"/>
-                <option key="RenderInventoryReportPDF" description="PDF"/>
-                <!--option key="RenderInventoryReportExcel" description="MS-Excel"/>
-                <option key="RenderInventoryReportMSWord" description="MS-Word"/>
-                <option key="RenderInventoryReportPPT" description="MS-Powerpoint"/-->
-            </drop-down>
-        </field>
-        <field name="submitButton"><hidden/></field>
-        <field name="report" title="Export Report" widget-style="smallSubmit"><submit button-type="button"/></field>
-    </form>
 
     <!--Facility Content-->
     <form name="AddFacilityContent" type="upload" focus-field-name="contentId" 
@@ -924,7 +893,7 @@ under the License.
         <field name="mimeTypeId"><display/></field>
         <field name="contentTypeId" title="${uiLabelMap.FormFieldTitle_contentTypeId}"><display-entity entity-name="ContentType" also-hidden="false"/></field>
         <field name="fromDate"><display/></field>
-        <field name="deleteLink" title="${uiLabelMap.CommonEmptyHeader}" widget-style="buttontext">
+        <field name="deleteLink" title=" " widget-style="buttontext">
            <hyperlink also-hidden="false" description="${uiLabelMap.CommonDelete}" target="deleteFacilityContent">
                 <parameter param-name="facilityId"/>
                 <parameter param-name="contentId"/>
@@ -958,5 +927,20 @@ under the License.
         </field>
         <field name="information"><text size="50" maxlength="60"/></field>
         <field name="selectButton" title="${uiLabelMap.CommonSubmit}"><submit button-type="button"/></field>
+    </form>
+
+    <form name="ListFacilityAgreements" type="list" list-name="facilityAgreements"
+        odd-row-style="alternate-row" default-table-style="basic-table">
+        <field name="agreementId" widget-style="buttontext">
+            <hyperlink target="/accounting/control/EditAgreementItemFacility" target-type="inter-app" description="${agreementId}/${agreementItemSeqId}" also-hidden="false">
+                <parameter param-name="agreementId"/>
+                <parameter param-name="agreementItemSeqId"/>
+                <parameter param-name="faclityId"/>
+            </hyperlink>
+        </field>
+        <field name="agreementText"><display/></field>
+        <field name="description"><display/></field>
+        <field name="fromDate"><display/></field>
+        <field name="thruDate"><display/></field>
     </form>
 </forms>

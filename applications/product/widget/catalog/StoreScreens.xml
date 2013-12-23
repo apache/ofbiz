@@ -101,6 +101,10 @@ under the License.
                 <set field="labelTitleProperty" value="ProductPromotions"/>
                 <set field="userEntered" from-field="parameters.userEntered"/>
                 <set field="activeOnly" from-field="parameters.activeOnly" default-value="true"/>
+                
+                <set field="productStoreId" from-field="parameters.productStoreId"/>
+                <entity-one entity-name="ProductStore" value-field="productStore" auto-field-map="true"/>                
+                
                 <entity-condition entity-name="ProductStorePromoAndAppl" list="productStorePromoAndAppls" filter-by-date="${activeOnly}">
                     <condition-list combine="and">
                         <condition-expr field-name="userEntered" from-field="userEntered" ignore-if-empty="true"/>
@@ -587,6 +591,67 @@ under the License.
             <fail-widgets>
                 <label style="h3">${uiLabelMap.ProductCatalogUpdatePermissionError}</label>
            </fail-widgets>
+        </section>
+    </screen>
+
+    <screen name="ListParentProductStoreGroup">
+        <section>
+            <actions>
+                <set field="titleProperty" value="ProductProductStoreGroup"/>
+                <set field="tabButtonItem" value="storeGroup"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonProductStoreGroupDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <screenlet title="${uiLabelMap.ProductParentProductStoreGroupList}">
+                            <include-form name="ListParentProductStoreGroup" location="component://product/widget/catalog/StoreForms.xml"/>
+                        </screenlet>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="EditProductStoreGroup">
+        <section>
+            <actions>
+                <set field="titleProperty" value="ProductProductStoreGroup"/>
+                <set field="tabButtonItem" value="storeGroup"/>
+                <entity-one entity-name="ProductStoreGroup" value-field="productStoreGroup"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonProductStoreGroupDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <screenlet title="${uiLabelMap.ProductProductStoreGroup}">
+                            <include-form name="EditProductStoreGroup" location="component://product/widget/catalog/StoreForms.xml"/>
+                        </screenlet>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="EditProductStoreGroupAndAssoc">
+        <section>
+            <actions>
+                <property-map map-name="uiLabelMap" resource="CommonUiLabels"/>
+                <property-map map-name="uiLabelMap" resource="ProductUiLabels"/>
+                <entity-one entity-name="ProductStoreGroup" value-field="productStoreGroup"/>
+            </actions>
+            <widgets>
+                <screenlet title="${uiLabelMap.ProductProductStoreGroup} ${productStoreGroup.productStoreGroupName} [${productStoreGroup.productStoreGroupId}]" name="editProductStoreGroup" collapsible="true" initially-collapsed="true">
+                    <include-form name="EditProductStoreGroup" location="component://product/widget/catalog/StoreForms.xml"/>
+                </screenlet>
+                <screenlet title="${uiLabelMap.ProductProductStoreGroupRollup}" id="editProductStoreGroupRollup" name="editProductStoreGroupRollup" collapsible="true" initially-collapsed="true">
+                    <include-form name="ListProductStoreGroupAssoc" location="component://product/widget/catalog/StoreForms.xml"/>
+                </screenlet>
+                <screenlet title="${uiLabelMap.ProductProductStoreMember}">
+                    <include-form name="ListProductStoreAssoc" location="component://product/widget/catalog/StoreForms.xml"/>
+                </screenlet>
+                <screenlet title="${uiLabelMap.ProductAddToProductStoreGroup}">
+                    <include-form name="AddProductStoreAssoc" location="component://product/widget/catalog/StoreForms.xml"/>
+                </screenlet>
+            </widgets>
         </section>
     </screen>
 

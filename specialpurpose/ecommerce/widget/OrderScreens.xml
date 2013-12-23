@@ -311,7 +311,7 @@ under the License.
         <section>
             <actions>
                 <set field="titleProperty" value="PageTitleSplitItemsForShipping"/>
-                <script location="component://ecommerce/webapp/ecommerce/WEB-INF/actions/order/SplitShip.groovy"/>
+                <script location="component://order/webapp/ordermgr/WEB-INF/actions/entry/SplitShip.groovy"/>
             </actions>
             <widgets>
                 <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
@@ -616,7 +616,7 @@ under the License.
                 <script location="component://ecommerce/webapp/ecommerce/WEB-INF/actions/customer/EditShippingAddress.groovy"/>
                 <script location="component://ecommerce/webapp/ecommerce/WEB-INF/actions/customer/EditBillingAddress.groovy"/>
                 <script location="component://ecommerce/webapp/ecommerce/WEB-INF/actions/customer/EditEmailAndTelecomNumber.groovy"/>
-
+                <script location="component://ecommerce/webapp/ecommerce/WEB-INF/actions/customer/OnePageCheckoutOptions.groovy"/>
             </actions>
             <widgets>
                 <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">

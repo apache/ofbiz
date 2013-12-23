@@ -53,7 +53,11 @@ ${virtualJavaScript?if_exists}
 </script>
 <#if product?exists>
     <#-- variable setup -->
-    <#assign productUrl><@ofbizCatalogAltUrl productId=product.productId productCategoryId=categoryId/></#assign>
+    <#if backendPath?default("N") == "Y">
+        <#assign productUrl><@ofbizCatalogUrl productId=product.productId productCategoryId=categoryId/></#assign>
+    <#else>
+        <#assign productUrl><@ofbizCatalogAltUrl productId=product.productId productCategoryId=categoryId/></#assign>
+    </#if>
 
     <#if requestAttributes.productCategoryMember?exists>
         <#assign prodCatMem = requestAttributes.productCategoryMember>
@@ -116,7 +120,7 @@ ${virtualJavaScript?if_exists}
               <input type="hidden" name="add_product_id" value="${product.productId}"/>
               <input type="text" size="5" name="quantity" value="1"/>
               <input type="hidden" name="clearSearch" value="N"/>
-              <input type="hidden" name="mainSubmited" value="Y"/>
+              <input type="hidden" name="mainSubmitted" value="Y"/>
               <a href="javascript:document.the${requestAttributes.formNamePrefix?if_exists}${requestAttributes.listIndex?if_exists}form.submit()" class="buttontext">${uiLabelMap.OrderAddToCart}</a>
             <#if mainProducts?has_content>
                 <input type="hidden" name="product_id" value=""/>
@@ -138,16 +142,16 @@ ${virtualJavaScript?if_exists}
                   <input type="hidden" name="add_product_id" value="${prodCatMem.productId?if_exists}"/>
                   <input type="hidden" name="quantity" value="${prodCatMem.quantity?if_exists}"/>
                   <input type="hidden" name="clearSearch" value="N"/>
-                  <input type="hidden" name="mainSubmited" value="Y"/>
+                  <input type="hidden" name="mainSubmitted" value="Y"/>
                   <a href="javascript:document.the${requestAttributes.formNamePrefix?if_exists}${requestAttributes.listIndex?if_exists}defaultform.submit()" class="buttontext">${uiLabelMap.CommonAddDefault}(${prodCatMem.quantity?string.number}) ${uiLabelMap.OrderToCart}</a>
                 </form>
-                <#assign productCategory = delegator.findByPrimaryKey("ProductCategory", Static["org.ofbiz.base.util.UtilMisc"].toMap("productCategoryId", prodCatMem.productCategoryId))/>
+                <#assign productCategory = delegator.findOne("ProductCategory", Static["org.ofbiz.base.util.UtilMisc"].toMap("productCategoryId", prodCatMem.productCategoryId), false)/>
                 <#if productCategory.productCategoryTypeId != "BEST_SELL_CATEGORY">
                     <form method="post" action="<@ofbizUrl>additem</@ofbizUrl>" name="the${requestAttributes.formNamePrefix?if_exists}${requestAttributes.listIndex?if_exists}defaultform" style="margin: 0;">
                       <input type="hidden" name="add_product_id" value="${prodCatMem.productId?if_exists}"/>
                       <input type="hidden" name="quantity" value="${prodCatMem.quantity?if_exists}"/>
                       <input type="hidden" name="clearSearch" value="N"/>
-                      <input type="hidden" name="mainSubmited" value="Y"/>
+                      <input type="hidden" name="mainSubmitted" value="Y"/>
                       <a href="javascript:document.the${requestAttributes.formNamePrefix?if_exists}${requestAttributes.listIndex?if_exists}defaultform.submit()" class="buttontext">${uiLabelMap.CommonAddDefault}(${prodCatMem.quantity?string.number}) ${uiLabelMap.OrderToCart}</a>
                     </form>
                 </#if>
@@ -221,7 +225,7 @@ ${virtualJavaScript?if_exists}
           </#if>
           <form method="post" action="<@ofbizUrl secure="${request.isSecure()?string}">addToCompare</@ofbizUrl>" name="addToCompare${requestAttributes.listIndex?if_exists}form">
               <input type="hidden" name="productId" value="${product.productId}"/>
-              <input type="hidden" name="mainSubmited" value="Y"/>
+              <input type="hidden" name="mainSubmitted" value="Y"/>
           </form>
           <a href="javascript:document.addToCompare${requestAttributes.listIndex?if_exists}form.submit()" class="buttontext">${uiLabelMap.ProductAddToCompare}</a>
         </div>

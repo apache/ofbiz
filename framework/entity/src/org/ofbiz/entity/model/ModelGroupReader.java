@@ -20,13 +20,12 @@ package org.ofbiz.entity.model;
 
 import java.io.Serializable;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
-
-import javolution.util.FastSet;
 
 import org.ofbiz.base.component.ComponentConfig;
 import org.ofbiz.base.config.GenericConfigException;
@@ -38,9 +37,10 @@ import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.base.util.UtilXml;
 import org.ofbiz.base.util.cache.UtilCache;
 import org.ofbiz.entity.GenericEntityConfException;
-import org.ofbiz.entity.config.DelegatorInfo;
 import org.ofbiz.entity.config.EntityConfigUtil;
-import org.ofbiz.entity.config.EntityGroupReaderInfo;
+import org.ofbiz.entity.config.model.DelegatorElement;
+import org.ofbiz.entity.config.model.EntityGroupReader;
+import org.ofbiz.entity.config.model.Resource;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -53,7 +53,7 @@ import org.w3c.dom.Node;
 public class ModelGroupReader implements Serializable {
 
     public static final String module = ModelGroupReader.class.getName();
-    public static UtilCache<String, ModelGroupReader> readers = UtilCache.createUtilCache("entity.ModelGroupReader", 0, 0);
+    private static final UtilCache<String, ModelGroupReader> readers = UtilCache.createUtilCache("entity.ModelGroupReader", 0, 0);
 
     private Map<String, String> groupCache = null;
     private Set<String> groupNames = null;
@@ -62,37 +62,30 @@ public class ModelGroupReader implements Serializable {
     public List<ResourceHandler> entityGroupResourceHandlers = new LinkedList<ResourceHandler>();
 
     public static ModelGroupReader getModelGroupReader(String delegatorName) throws GenericEntityConfException {
-        DelegatorInfo delegatorInfo = EntityConfigUtil.getDelegatorInfo(delegatorName);
+        DelegatorElement delegatorInfo = EntityConfigUtil.getDelegator(delegatorName);
 
         if (delegatorInfo == null) {
             throw new GenericEntityConfException("Could not find a delegator with the name " + delegatorName);
         }
 
-        String tempModelName = delegatorInfo.entityGroupReader;
+        String tempModelName = delegatorInfo.getEntityGroupReader();
         ModelGroupReader reader = readers.get(tempModelName);
 
-        if (reader == null) { // don't want to block here
-            synchronized (ModelGroupReader.class) {
-                // must check if null again as one of the blocked threads can still enter
-                reader = readers.get(tempModelName);
-                if (reader == null) {
-                    reader = new ModelGroupReader(tempModelName);
-                    readers.put(tempModelName, reader);
-                }
-            }
+        if (reader == null) {
+            reader = readers.putIfAbsentAndGet(tempModelName, new ModelGroupReader(tempModelName));
         }
         return reader;
     }
 
     public ModelGroupReader(String modelName) throws GenericEntityConfException {
         this.modelName = modelName;
-        EntityGroupReaderInfo entityGroupReaderInfo = EntityConfigUtil.getEntityGroupReaderInfo(modelName);
+        EntityGroupReader entityGroupReaderInfo = EntityConfigUtil.getEntityGroupReader(modelName);
 
         if (entityGroupReaderInfo == null) {
             throw new GenericEntityConfException("Cound not find an entity-group-reader with the name " + modelName);
         }
-        for (Element resourceElement: entityGroupReaderInfo.resourceElements) {
-            this.entityGroupResourceHandlers.add(new MainResourceHandler(EntityConfigUtil.ENTITY_ENGINE_XML_FILENAME, resourceElement));
+        for (Resource resourceElement: entityGroupReaderInfo.getResourceList()) {
+            this.entityGroupResourceHandlers.add(new MainResourceHandler(EntityConfigUtil.ENTITY_ENGINE_XML_FILENAME, resourceElement.getLoader(), resourceElement.getLocation()));
         }
 
         // get all of the component resource group stuff, ie specified in each ofbiz-component.xml file
@@ -176,11 +169,16 @@ public class ModelGroupReader implements Serializable {
         if (gc != null) {
             String groupName = gc.get(entityName);
             if (groupName == null) {
-                DelegatorInfo delegatorInfo = EntityConfigUtil.getDelegatorInfo(delegatorBaseName);
+                DelegatorElement delegatorInfo = null;
+                try {
+                    delegatorInfo = EntityConfigUtil.getDelegator(delegatorBaseName);
+                } catch (GenericEntityConfException e) {
+                    Debug.logWarning(e, "Exception thrown while getting delegator config: ", module);
+                }
                 if (delegatorInfo == null) {
                     throw new RuntimeException("Could not find DelegatorInfo for delegatorBaseName [" + delegatorBaseName + "]");
                 }
-                groupName = delegatorInfo.defaultGroupName;
+                groupName = delegatorInfo.getDefaultGroupName();
             }
             return groupName;
         } else {
@@ -195,11 +193,14 @@ public class ModelGroupReader implements Serializable {
         if (delegatorBaseName.indexOf('#') >= 0) {
             delegatorBaseName = delegatorBaseName.substring(0, delegatorBaseName.indexOf('#'));
         }
-        
         getGroupCache();
         if (this.groupNames == null) return null;
-        Set<String> newSet = FastSet.newInstance();
-        newSet.add(EntityConfigUtil.getDelegatorInfo(delegatorBaseName).defaultGroupName);
+        Set<String> newSet = new HashSet<String>();
+        try {
+            newSet.add(EntityConfigUtil.getDelegator(delegatorBaseName).getDefaultGroupName());
+        } catch (GenericEntityConfException e) {
+            Debug.logWarning(e, "Exception thrown while getting delegator config: ", module);
+        }
         newSet.addAll(this.groupNames);
         return newSet;
     }
@@ -210,7 +211,7 @@ public class ModelGroupReader implements Serializable {
      */
     public Set<String> getEntityNamesByGroup(String groupName) {
         Map<String, String> gc = getGroupCache();
-        Set<String> enames = FastSet.newInstance();
+        Set<String> enames = new HashSet<String>();
 
         if (groupName == null || groupName.length() <= 0) return enames;
         if (UtilValidate.isEmpty(gc)) return enames;

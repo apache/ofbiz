@@ -29,15 +29,22 @@ import org.ofbiz.party.contact.*;
 import org.ofbiz.product.catalog.*;
 import org.ofbiz.product.store.*;
 import org.ofbiz.service.calendar.*;
+import org.ofbiz.webapp.website.WebSiteWorker;
 
-party = userLogin.getRelatedOne("Party");
+if (userLogin) 
+{
+    party = userLogin.getRelatedOne("Party", false);
+}  else {
+    return; // session ended, prevents a NPE
+}
+
 
 cart = ShoppingCartEvents.getCartObject(request);
 currencyUomId = cart.getCurrency();
 
 productStoreId = ProductStoreWorker.getProductStoreId(request);
 prodCatalogId = CatalogWorker.getCurrentCatalogId(request);
-webSiteId = CatalogWorker.getWebSiteId(request);
+webSiteId = WebSiteWorker.getWebSiteId(request);
 
 context.productStoreId = productStoreId;
 context.currencyUomId = currencyUomId;
@@ -71,20 +78,20 @@ session.setAttribute("currentShoppingListId", shoppingListId);
 
 // if we passed a shoppingListId get the shopping list info
 if (shoppingListId) {
-    shoppingList = delegator.findByPrimaryKey("ShoppingList", [shoppingListId : shoppingListId]);
+    shoppingList = delegator.findOne("ShoppingList", [shoppingListId : shoppingListId], false);
     context.shoppingList = shoppingList;
 
     if (shoppingList) {
         shoppingListItemTotal = 0.0;
         shoppingListChildTotal = 0.0;
 
-        shoppingListItems = shoppingList.getRelatedCache("ShoppingListItem");
+        shoppingListItems = shoppingList.getRelated("ShoppingListItem", null, null, true);
         if (shoppingListItems) {
             shoppingListItemDatas = new ArrayList(shoppingListItems.size());
             shoppingListItems.each { shoppingListItem ->
                 shoppingListItemData = [:];
 
-                product = shoppingListItem.getRelatedOneCache("Product");
+                product = shoppingListItem.getRelatedOne("Product", true);
 
                 calcPriceInMap = [product : product, quantity : shoppingListItem.quantity, currencyUomId : currencyUomId, userLogin : userLogin];
                 calcPriceInMap.webSiteId = webSiteId;
@@ -125,7 +132,7 @@ if (shoppingListId) {
 
                 productVariantAssocs = null;
                 if ("Y".equals(product.isVirtual)) {
-                    productVariantAssocs = product.getRelatedCache("MainProductAssoc", [productAssocTypeId : "PRODUCT_VARIANT"], ["sequenceNum"]);
+                    productVariantAssocs = product.getRelated("MainProductAssoc", [productAssocTypeId : "PRODUCT_VARIANT"], ["sequenceNum"], true);
                     productVariantAssocs = EntityUtil.filterByDate(productVariantAssocs);
                 }
                 shoppingListItemData.shoppingListItem = shoppingListItem;
@@ -138,16 +145,14 @@ if (shoppingListId) {
             context.shoppingListItemDatas = shoppingListItemDatas;
             // pagination for the shopping list
             viewIndex = Integer.valueOf(parameters.VIEW_INDEX  ?: 1);
-            viewSize = Integer.valueOf(parameters.VIEW_SIZE ?: 20);
-            listSize = 0;
-            if (shoppingListItemDatas)
-                listSize = shoppingListItemDatas.size();
-            
-            lowIndex = (((viewIndex - 1) * viewSize) + 1);
+            viewSize = Integer.valueOf(parameters.VIEW_SIZE ?: UtilProperties.getPropertyValue("widget", "widget.form.defaultViewSize", "20"));
+            listSize = shoppingListItemDatas ? shoppingListItemDatas.size() : 0;
+
+            lowIndex = ((viewIndex - 1) * viewSize) + 1;
             highIndex = viewIndex * viewSize;
-            if (highIndex > listSize) {
-                highIndex = listSize;
-            }
+            highIndex = highIndex > listSize ? listSize : highIndex;
+            lowIndex = lowIndex > highIndex ? highIndex : lowIndex; 
+
             context.viewIndex = viewIndex;
             context.viewSize = viewSize;
             context.listSize = listSize;
@@ -155,11 +160,11 @@ if (shoppingListId) {
             context.highIndex = highIndex;
         }
 
-        shoppingListType = shoppingList.getRelatedOne("ShoppingListType");
+        shoppingListType = shoppingList.getRelatedOne("ShoppingListType", false);
         context.shoppingListType = shoppingListType;
 
         // get the child shopping lists of the current list for the logged in user
-        childShoppingLists = delegator.findByAndCache("ShoppingList", [partyId : userLogin.partyId, parentShoppingListId : shoppingListId], ["listName"]);
+        childShoppingLists = delegator.findByAnd("ShoppingList", [partyId : userLogin.partyId, parentShoppingListId : shoppingListId], ["listName"], true);
         // now get prices for each child shopping list...
         if (childShoppingLists) {
             childShoppingListDatas = new ArrayList(childShoppingLists.size());
@@ -182,14 +187,14 @@ if (shoppingListId) {
         context.shoppingListChildTotal = shoppingListChildTotal;
 
         // get the parent shopping list if there is one
-        parentShoppingList = shoppingList.getRelatedOne("ParentShoppingList");
+        parentShoppingList = shoppingList.getRelatedOne("ParentShoppingList", false);
         context.parentShoppingList = parentShoppingList;
 
         context.canView = userLogin.partyId.equals(shoppingList.partyId);
 
         // auto-reorder info
         if ("SLT_AUTO_REODR".equals(shoppingListType?.shoppingListTypeId)) {
-            recurrenceVo = shoppingList.getRelatedOne("RecurrenceInfo");
+            recurrenceVo = shoppingList.getRelatedOne("RecurrenceInfo", false);
             context.recurrenceInfo = recurrenceVo;
 
             if (userLogin.partyId.equals(shoppingList.partyId)) {
@@ -198,9 +203,9 @@ if (shoppingListId) {
                 // get customer's shipping & payment info
                 context.chosenShippingMethod = shoppingList.shipmentMethodTypeId + "@" + shoppingList.carrierPartyId;
                 context.shippingContactMechList = ContactHelper.getContactMech(party, "SHIPPING_LOCATION", "POSTAL_ADDRESS", false);
-                context.paymentMethodList = EntityUtil.filterByDate(party.getRelated("PaymentMethod", null, ["paymentMethodTypeId"]));
+                context.paymentMethodList = EntityUtil.filterByDate(party.getRelated("PaymentMethod", null, ["paymentMethodTypeId"], false));
 
-                shipAddress = delegator.findByPrimaryKey("PostalAddress", ["contactMechId" : shoppingList.contactMechId]);
+                shipAddress = delegator.findOne("PostalAddress", ["contactMechId" : shoppingList.contactMechId], false);
                 Debug.log("SL - address : " + shipAddress);
                 if (shipAddress) {
                     listCart = ShoppingListServices.makeShoppingListCart(dispatcher, shoppingListId, locale);

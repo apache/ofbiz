@@ -103,7 +103,7 @@ under the License.
       <field name="visitId" type="id"></field>
       <field name="fromDate" type="date-time"></field>
       <field name="thruDate" type="date-time"></field>
-      <field name="passwordUsed" type="short-varchar" encrypt="true"></field>
+      <field name="passwordUsed" type="long-varchar" encrypt="true"></field>
       <field name="successfulLogin" type="indicator"></field>
       <prim-key field="userLoginId"/>
       <prim-key field="fromDate"/>
@@ -157,20 +157,7 @@ under the License.
             title="Security Component - Security Permission Entity">
       <field name="permissionId" type="id-long-ne"></field>
       <field name="description" type="description"></field>
-      <field name="dynamicAccess" type="value"></field>
       <prim-key field="permissionId"/>
-    </entity>
-    <entity entity-name="SecurityPermissionAutoGrant"
-            package-name="org.ofbiz.security.securitygroup"
-            default-resource-name="SecurityEntityLabels"
-            title="Security Component - Security Permission Auto Grant Entity">
-      <field name="permissionId" type="id-long-ne"></field>
-      <field name="grantPermission" type="id-vlong-ne"></field>
-      <prim-key field="permissionId"/>
-      <prim-key field="grantPermission"/>
-      <relation type="one" fk-name="SEC_PERM_AUTO_GRNT" rel-entity-name="SecurityPermission">
-        <key-map field-name="permissionId"/>
-      </relation>
     </entity>
     <view-entity entity-name="UserLoginAndSecurityGroup"
           package-name="org.ofbiz.security.securitygroup"

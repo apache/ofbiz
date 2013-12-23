@@ -23,14 +23,13 @@ import java.io.Serializable;
 import java.sql.Timestamp;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import javolution.util.FastList;
-import javolution.util.FastMap;
-import javolution.util.FastSet;
 
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilDateTime;
@@ -54,7 +53,7 @@ public class EntityUtil {
     public static final String module = EntityUtil.class.getName();
 
     public static <V> Map<String, V> makeFields(V... args) {
-        Map<String, V> fields = FastMap.newInstance();
+        Map<String, V> fields = new HashMap<String, V>();
         if (args != null) {
             for (int i = 0; i < args.length;) {
                 if (!(args[i] instanceof String)) throw new IllegalArgumentException("Key(" + i + "), with value(" + args[i] + ") is not a String.");
@@ -70,19 +69,37 @@ public class EntityUtil {
     }
 
 
+    public static GenericValue getFirst(Collection<GenericValue> values) {
+        if (UtilValidate.isNotEmpty(values)) {
+            return values.iterator().next();
+        } else {
+            return null;
+        }
+    }
+
     public static GenericValue getFirst(List<GenericValue> values) {
-        if ((values != null) && (values.size() > 0)) {
+        if (UtilValidate.isNotEmpty(values)) {
             return values.get(0);
         } else {
             return null;
         }
     }
 
-    public static GenericValue getOnly(List<GenericValue> values) {
-        if (values != null) {
-            if (values.size() <= 0) {
-                return null;
+    public static GenericValue getOnly(Collection<GenericValue> values) {
+        if (UtilValidate.isNotEmpty(values)) {
+            Iterator<GenericValue> it = values.iterator();
+            GenericValue result = it.next();
+            if (it.hasNext()) {
+                throw new IllegalArgumentException("Passed List had more than one value.");
             }
+            return result;
+        } else {
+            return null;
+        }
+    }
+
+    public static GenericValue getOnly(List<GenericValue> values) {
+        if (UtilValidate.isNotEmpty(values)) {
             if (values.size() == 1) {
                 return values.get(0);
             } else {
@@ -170,7 +187,7 @@ public class EntityUtil {
         if (fromDateName == null) fromDateName = "fromDate";
         if (thruDateName == null) thruDateName = "thruDate";
 
-        List<T> result = FastList.newInstance();
+        List<T> result = new LinkedList<T>();
         Iterator<T> iter = datedValues.iterator();
 
         if (allAreSame) {
@@ -245,10 +262,10 @@ public class EntityUtil {
 
         List<T> result = null;
         if (UtilValidate.isEmpty(fields)) {
-            result = FastList.newInstance();
+            result = new LinkedList<T>();
             result.addAll(values);
         } else {
-            result = FastList.newInstance();
+            result = new LinkedList<T>();
             for (T value: values) {
                 if (value.matchesFields(fields)) {
                     result.add(value);
@@ -272,7 +289,7 @@ public class EntityUtil {
             return values;
         }
 
-        List<T> result = FastList.newInstance();
+        List<T> result = new LinkedList<T>();
         for (T value: values) {
             boolean include = true;
 
@@ -300,7 +317,7 @@ public class EntityUtil {
             return values;
         }
 
-        List<T> result = FastList.newInstance();
+        List<T> result = new LinkedList<T>();
         for (T value: values) {
             boolean include = false;
 
@@ -325,56 +342,58 @@ public class EntityUtil {
      */
     public static <T extends GenericEntity> List<T> orderBy(Collection<T> values, List<String> orderBy) {
         if (values == null) return null;
-        if (values.size() == 0) return FastList.newInstance();
+        if (values.size() == 0) return new LinkedList<T>();
         if (UtilValidate.isEmpty(orderBy)) {
-            List<T> newList = FastList.newInstance();
+            List<T> newList = new LinkedList<T>();
             newList.addAll(values);
             return newList;
         }
 
-        List<T> result = FastList.newInstance();
+        List<T> result = new LinkedList<T>();
         result.addAll(values);
         if (Debug.verboseOn()) Debug.logVerbose("Sorting " + values.size() + " values, orderBy=" + orderBy.toString(), module);
         Collections.sort(result, new OrderByList(orderBy));
         return result;
     }
 
+    /**
+     * @deprecated use {@link #getRelated(String, Map, List, boolean)}
+     */
+    @Deprecated
     public static List<GenericValue> getRelated(String relationName, List<GenericValue> values) throws GenericEntityException {
-        if (values == null) return null;
-
-        List<GenericValue> result = FastList.newInstance();
-        for (GenericValue value: values) {
-            result.addAll(value.getRelated(relationName));
-        }
-        return result;
+        return getRelated(relationName, null, values, false);
     }
 
+    /**
+     * @deprecated use {@link #getRelated(String, Map, List, boolean)}
+     */
+    @Deprecated
     public static List<GenericValue> getRelatedCache(String relationName, List<GenericValue> values) throws GenericEntityException {
-        if (values == null) return null;
-
-        List<GenericValue> result = FastList.newInstance();
-        for (GenericValue value: values) {
-            result.addAll(value.getRelatedCache(relationName));
-        }
-        return result;
+        return getRelated(relationName, null, values, true);
     }
 
+    /**
+     * @deprecated use {@link #getRelated(String, Map, List, boolean)}
+     */
+    @Deprecated
     public static List<GenericValue> getRelatedByAnd(String relationName, Map<String, ? extends Object> fields, List<GenericValue> values) throws GenericEntityException {
-        if (values == null) return null;
-
-        List<GenericValue> result = FastList.newInstance();
-        for (GenericValue value: values) {
-            result.addAll(value.getRelatedByAnd(relationName, fields));
-        }
-        return result;
+        return getRelated(relationName, fields, values, false);
     }
 
+    /**
+     * @deprecated use {@link #getRelated(String, Map, List, boolean)}
+     */
+    @Deprecated
     public static List<GenericValue> getRelatedByAndCache(String relationName, Map<String, ? extends Object> fields, List<GenericValue> values) throws GenericEntityException {
+        return getRelated(relationName, fields, values, true);
+    }
+
+    public static List<GenericValue> getRelated(String relationName, Map<String, ? extends Object> fields, List<GenericValue> values, boolean useCache) throws GenericEntityException {
         if (values == null) return null;
 
-        List<GenericValue> result = FastList.newInstance();
+        List<GenericValue> result = new LinkedList<GenericValue>();
         for (GenericValue value: values) {
-            result.addAll(value.getRelatedByAndCache(relationName, fields));
+            result.addAll(value.getRelated(relationName, fields, null, useCache));
         }
         return result;
     }
@@ -382,7 +401,7 @@ public class EntityUtil {
     public static <T extends GenericEntity> List<T> filterByCondition(List<T> values, EntityCondition condition) {
         if (values == null) return null;
 
-        List<T> result = FastList.newInstance();
+        List<T> result = new LinkedList<T>();
         for (T value: values) {
             if (condition.entityMatches(value)) {
                 result.add(value);
@@ -394,7 +413,7 @@ public class EntityUtil {
     public static <T extends GenericEntity> List<T> filterOutByCondition(List<T> values, EntityCondition condition) {
         if (values == null) return null;
 
-        List<T> result = FastList.newInstance();
+        List<T> result = new LinkedList<T>();
         for (T value: values) {
             if (!condition.entityMatches(value)) {
                 result.add(value);
@@ -424,7 +443,7 @@ public class EntityUtil {
             search = null;
             for (GenericValue entity: entities) {
                 if (now.equals(entity.get("fromDate"))) {
-                    search = FastMap.newInstance();
+                    search = new HashMap<String, Object>();
                     for (Map.Entry<String, ? super Object> entry: entity.getPrimaryKey().entrySet()) {
                         search.put(entry.getKey(), entry.getValue());
                     }
@@ -435,18 +454,18 @@ public class EntityUtil {
                 entity.store();
             }
             if (search == null) {
-                search = FastMap.newInstance();
+                search = new HashMap<String, Object>();
                 search.putAll(EntityUtil.getFirst(entities));
             }
         } else {
             /* why is this being done? leaving out for now...
             search = new HashMap(search);
             */
-            search = FastMap.newInstance();
+            search = new HashMap<String, Object>();
             search.putAll(find);
         }
         if (now.equals(search.get("fromDate"))) {
-            return EntityUtil.getOnly(delegator.findByAnd(entityName, search));
+            return EntityUtil.getOnly(delegator.findByAnd(entityName, search, null, false));
         } else {
             search.put("fromDate",now);
             search.remove("thruDate");
@@ -470,10 +489,10 @@ public class EntityUtil {
         if (genericValueList == null || fieldName == null) {
             return null;
         }
-        List<T> fieldList = FastList.newInstance();
+        List<T> fieldList = new LinkedList<T>();
         Set<T> distinctSet = null;
         if (distinct) {
-            distinctSet = FastSet.newInstance();
+            distinctSet = new HashSet<T>();
         }
 
         for (GenericValue value: genericValueList) {
@@ -497,10 +516,10 @@ public class EntityUtil {
         if (genericValueEli == null || fieldName == null) {
             return null;
         }
-        List<T> fieldList = FastList.newInstance();
+        List<T> fieldList = new LinkedList<T>();
         Set<T> distinctSet = null;
         if (distinct) {
-            distinctSet = FastSet.newInstance();
+            distinctSet = new HashSet<T>();
         }
 
         GenericValue value = null;

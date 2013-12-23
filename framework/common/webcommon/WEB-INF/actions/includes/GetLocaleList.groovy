@@ -25,12 +25,26 @@ import org.ofbiz.base.util.UtilMisc;
 locales = [] as LinkedList;
 availableLocales = UtilMisc.availableLocales()
 
+// Debug.logInfo(parameters.localeString + "==" +  parameters.localeName);
+
 if (availableLocales) {
     availableLocales.each { availableLocale ->
         locale = [:];
         locale.localeName = availableLocale.getDisplayName(availableLocale);
         locale.localeString = availableLocale.toString();
-        locales.add(locale);
+        if (UtilValidate.isNotEmpty(parameters.localeString)) {
+            if (locale.localeString.toUpperCase().contains(parameters.localeString.toUpperCase())) {
+                locales.add(locale);
+            }
+        }
+        if (UtilValidate.isNotEmpty(parameters.localeName)) {
+            if (locale.localeName.toUpperCase().contains(parameters.localeName.toUpperCase())) {
+                locales.add(locale);
+            }
+        }
+        if (UtilValidate.isEmpty(parameters.localeString) && UtilValidate.isEmpty(parameters.localeName)) {
+            locales.add(locale);
+        }
     }
 }
 

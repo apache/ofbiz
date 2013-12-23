@@ -20,7 +20,6 @@
 package org.ofbiz.content.blog;
 
 import java.io.IOException;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -75,7 +74,7 @@ public class BlogRssServices {
         // get the main blog content
         GenericValue content = null;
         try {
-            content = delegator.findByPrimaryKey("Content", UtilMisc.toMap("contentId", contentId));
+            content = delegator.findOne("Content", UtilMisc.toMap("contentId", contentId), false);
         } catch (GenericEntityException e) {
             Debug.logError(e, module);
         }
@@ -115,9 +114,7 @@ public class BlogRssServices {
         }
 
         if (contentRecs != null) {
-            Iterator<GenericValue> i = contentRecs.iterator();
-            while (i.hasNext()) {
-                GenericValue v = i.next();
+            for (GenericValue v : contentRecs) {
                 String sub = null;
                 try {
                     Map<String, Object> dummy = FastMap.newInstance();

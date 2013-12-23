@@ -87,18 +87,7 @@
             </para>
         </section>
         <section>
-            <title>3. Jython</title>
-            <para>
-                Specific jython script's location which will be tested in a script-location attribute like this:
-                <programlisting>
-                    &lt;test-case case-name="service-tests"&gt;
-                        &lt;jython-test script-location="component://testtools/webapp/testtools/actions/ServiceEngineTests.py"/&gt;
-                    &lt;/test-case&gt;
-                </programlisting>
-            </para>
-        </section>
-        <section>
-            <title>4. Service</title>
+            <title>3. Service</title>
             <para>
                 Specific service's name which will be tested in a service-name attribute like this:
                 <programlisting>
@@ -109,7 +98,7 @@
             </para>
         </section>
         <section>
-            <title>5. Simple Method</title>
+            <title>4. Simple Method</title>
             <para>
                 Specific simple method's location and name which will be tested in a location and a name attribute respectively like this:
                 <programlisting>
@@ -182,7 +171,7 @@
         <section>
             <title>1. Roll back</title>
             <para>
-                Roll back error message occured when transaction roll back data. This error message will be in between starting and finished test cass line like this:
+                Roll back error message occurred when transaction roll back data. This error message will be in between starting and finished test cass line like this:
                 <programlisting>
                     [java] 2009-12-22 16:05:28,349 (main) [   TestRunContainer.java:238:INFO ] [JUNIT] : [test case's name] starting...
                     [java] 2009-12-22 16:05:28,355 (main) [    TransactionUtil.java:336:ERROR]
@@ -233,38 +222,23 @@
             <para>
                 A Cobertura error message can show because of the test system requires a cobertura library that calculates the percentage of code accessed by tests like this:
                 <programlisting>
-                    [java]  java.lang.ClassNotFoundException: org.ofbiz.base.config.CoberturaInstrumenter
-                    [java]     at java.net.URLClassLoader$1.run(URLClassLoader.java:200)
-                    [java]     at java.security.AccessController.doPrivileged(Native Method)
-                    [java]     at java.net.URLClassLoader.findClass(URLClassLoader.java:188)
-                    [java]     at java.lang.ClassLoader.loadClass(ClassLoader.java:307)
-                    [java]     at java.lang.ClassLoader.loadClass(ClassLoader.java:252)
-                    [java]     at org.ofbiz.base.start.InstrumenterWorker.instrument(InstrumenterWorker.java:39)
-                    [java]     at org.ofbiz.base.start.Classpath.instrument(Classpath.java:92)
-                    [java]     at org.ofbiz.base.start.Start.initClasspath(Start.java:228)
-                    [java]     at org.ofbiz.base.start.Start.init(Start.java:87)
-                    [java]     at org.ofbiz.base.start.Start.main(Start.java:410)
+                    [java] InstrumenterWorker.instrument - Code instrumentation has been disabled, unable to find instrumenter class org.ofbiz.base.config.CoberturaInstrumenter
                 </programlisting>
                 If you want to use cobertura, you have to install it:
                 <orderedlist>
                     <listitem>
                         <para>
-                            download the library from <link xl:href="http://cobertura.sourceforge.net/">the Cobertura website</link>.
-                        </para>
-                    </listitem>
-                    <listitem>
-                        <para>
-                            Put cobertura.jar in 'framework/base/lib' directory.
-                        </para>
-                    </listitem>
-                    <listitem>
-                        <para>
-                            Comment cobertura excluding in 'framework/base/build.xml' file.
+                            Execute the download-cobertura ant task
                         </para>
                     </listitem>
                     <listitem>
                         <para>
                             Re-compile source code.
+                        </para>
+                    </listitem>
+                    <listitem>
+                        <para>
+                            Execute the run-tests ant task
                         </para>
                     </listitem>
                 </orderedlist>

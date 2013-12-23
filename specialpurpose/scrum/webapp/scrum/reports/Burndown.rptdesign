@@ -37,7 +37,7 @@ estimatedHrs = params["estimatedHrs"].value;
 maxHours = params["maxHours"].value;
 currentDay = -1;
 
-userLogin = delegator.findByPrimaryKey("UserLogin",UtilMisc.toMap("userLoginId","admin"));
+userLogin = delegator.findOne("UserLogin",UtilMisc.toMap("userLoginId","admin"), false);
 // caculate average diff hours
 var holidayNumber = BigDecimal.ZERO;
 var notHolidayNumber = BigDecimal.ZERO;
@@ -274,7 +274,7 @@ var actualHours = BigDecimal.ZERO;
 
 // get times from all backlog item's tasks
 var sprint = delegator.findOne("WorkEffort", UtilMisc.toMap("workEffortId", sprintId), false);
-var backlogItems = sprint.getRelated("CustRequestWorkEffort");
+var backlogItems = sprint.getRelated("CustRequestWorkEffort", null, null, false);
 for (i=0; i<backlogItems.size(); i++) {
     // get all task from backlog item
     var backlogItem = backlogItems.get(i);

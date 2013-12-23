@@ -63,13 +63,6 @@ under the License.
         <response name="success" type="view" value="FastLoadCache"/>
     </request-map>
 
-    <request-map uri="changeDelegator">
-        <security https="true" auth="true"/>
-        <event type="java" path="org.ofbiz.webapp.event.CoreEvents" invoke="changeDelegator"/>
-        <response name="success" type="view" value="main"/>
-        <response name="error" type="view" value="error"/>
-    </request-map>
-
     <request-map uri="advancedsearch">
         <security https="true" auth="true"/>
         <response name="success" type="view" value="advancedsearch"/>
@@ -1446,6 +1439,39 @@ under the License.
         <response name="error" type="view" value="EditProdCatalogStores"/>
     </request-map>
 
+    <request-map uri="ListParentProductStoreGroup"><security https="true" auth="true"/><response name="success" type="view" value="ListParentProductStoreGroup"/></request-map>
+    <request-map uri="EditProductStoreGroup"><security https="true" auth="true"/><response name="success" type="view" value="EditProductStoreGroup"/></request-map>
+    <request-map uri="EditProductStoreGroupAndAssoc"><security https="true" auth="true"/><response name="success" type="view" value="EditProductStoreGroupAndAssoc"/></request-map>
+    <request-map uri="createProductStoreGroup">
+        <security https="true" auth="true"/>
+        <event type="service" path="" invoke="createProductStoreGroup"/>
+        <response name="success" type="view" value="ListParentProductStoreGroup"/>
+        <response name="error" type="view" value="EditProductStoreGroup"/>
+    </request-map>
+    <request-map uri="updateProductStoreGroup">
+        <security https="true" auth="true"/>
+        <event type="service" path="" invoke="updateProductStoreGroup"/>
+        <response name="success" type="view" value="ListParentProductStoreGroup"/>
+        <response name="error" type="view" value="EditProductStoreGroup"/>
+    </request-map>
+    <request-map uri="getProductStoreGroupRollupHierarchy">
+        <security auth="false" https="true"/>
+        <event type="java" path="org.ofbiz.product.store.ProductStoreEvents" invoke="getChildProductStoreGroupTree"/>
+        <response name="success" type="none"/>
+    </request-map>
+    <request-map uri="AddProductStoreToGroup">
+        <security auth="true" https="true"/>
+        <event type="service" invoke="createProductStoreGroupMember"/>
+        <response name="success" type="request" value="json"/>
+        <response name="error" type="request" value="json"/>
+    </request-map>
+    <request-map uri="updateProductStoreGroupRollup">
+        <security https="true" auth="true"/>
+        <event type="service" path="" invoke="updateProductStoreGroupRollup"/>
+        <response name="success" type="view" value="ListParentProductStoreGroup"/>
+        <response name="error" type="view" value="EditProductStoreGroup"/>
+    </request-map>
+
     <!-- ================ ProdCatalog Parties Requests ================= -->
     <request-map uri="EditProdCatalogParties">
         <security https="true" auth="true"/>
@@ -2062,7 +2088,7 @@ under the License.
     </request-map>
     <request-map uri="prepareCreateShipMeth">
         <security https="true" auth="true"/>
-        <event type="groovy" path="component://product/webapp/catalog/store/" invoke="prepareCreateShipMeth.groovy"/>
+        <event type="groovy" path="component://product/webapp/catalog/store/prepareCreateShipMeth.groovy"/>
         <response name="success" type="view" value="EditProductStoreShipSetup"/>
         <response name="error" type="view" value="EditProductStoreShipSetup"/>
     </request-map>
@@ -2384,15 +2410,21 @@ under the License.
     </request-map>
 
     <!-- ================ Product Review Requests ================= -->
-    <request-map uri="pendingReviews">
-        <security https="true" auth="true"/>
-        <response name="success" type="view" value="pendingReviews"/>
-    </request-map>
     <request-map uri="updateProductReview">
         <security https="true" auth="true"/>
-        <event type="service-multi" path="" invoke="updateProductReview"/>
-        <response name="success" type="view" value="pendingReviews"/>
-        <response name="error" type="view" value="pendingReviews"/>
+        <event type="service" path="" invoke="updateProductReview"/>
+        <response name="success" type="request-redirect-noparam" value="FindReviews"/>
+        <response name="error" type="view" value="FindReviews"/>
+    </request-map>
+    <request-map uri="FindReviews">
+        <security https="true" auth="true"/>
+        <response name="success" type="view" value="FindReviews"/>
+    </request-map>
+    <request-map uri="updateProductReviewStatus">
+        <security https="true" auth="true"/>
+        <event type="service" path="" invoke="setProductReviewStatus"/>
+        <response name="success" type="view" value="FindReviews"/>
+        <response name="error" type="view" value="FindReviews"/>
     </request-map>
 
     <!-- ================ Supplier Product Requests ================= -->
@@ -2824,7 +2856,7 @@ under the License.
     </request-map>
     <request-map uri="checkAction">
         <security https="true" auth="true"/>
-        <event type="groovy" path="component://product/webapp/catalog/WEB-INF/actions/imagemanagement/" invoke="checkAction.groovy"/>
+        <event type="groovy" path="component://product/webapp/catalog/WEB-INF/actions/imagemanagement/checkAction.groovy"/>
         <response name="frame" type="request" value="ImageFrames"/>
         <response name="watermark" type="request" value="ImageWatermarking"/>
         <response name="crop" type="request" value="ImageCropping"/>
@@ -2833,7 +2865,7 @@ under the License.
     </request-map>
     <request-map uri="checkRejected">
         <security https="true" auth="true"/>
-        <event type="groovy" path="component://product/webapp/catalog/WEB-INF/actions/imagemanagement/" invoke="checkRejected.groovy"/>
+        <event type="groovy" path="component://product/webapp/catalog/WEB-INF/actions/imagemanagement/checkRejected.groovy"/>
         <response name="approved" type="view" value="ImageApprove"/>
         <response name="rejected" type="view" value="ListPeopleRejected"/>
     </request-map>
@@ -2907,9 +2939,9 @@ under the License.
         <security https="true" auth="true"/>
         <response name="success" type="view" value="ImageResize"/>
     </request-map>
-    <request-map uri="resizeAllImageOfProduct">
+    <request-map uri="resizeImages">
         <security https="true" auth="true"/>
-        <event type="service" path="" invoke="resizeAllImageOfProduct"/>
+        <event type="service" path="" invoke="resizeImages"/>
         <response name="success" type="view" value="ImageResize"/>
         <response name="error" type="view" value="ImageResize"/>
     </request-map>
@@ -2945,6 +2977,7 @@ under the License.
     <request-map uri="LookupDataResource"><security auth="true" https="true"/><response name="success" type="view" value="LookupDataResource"/></request-map>
     <request-map uri="LookupPerson"><security auth="true" https="true"/><response name="success" type="view" value="LookupPerson"/></request-map>
     <request-map uri="LookupPreferredContactMech"><security https="true" auth="true"/><response name="success" type="view" value="LookupPreferredContactMech"/></request-map>
+    <request-map uri="LookupContactList"><security https="true" auth="true"/><response name="success" type="view" value="LookupContactList"/></request-map>
 
     <!-- ================ Vendor Product Requests ================= -->
     <request-map uri="EditVendorProduct">
@@ -3139,7 +3172,6 @@ under the License.
     <view-map name="ListFeaturePrice" type="screen" page="component://product/widget/catalog/FeatureScreens.xml#ListFeaturePrice"/>
     <view-map name="CreateFeature" type="screen" page="component://product/widget/catalog/FeatureScreens.xml#CreateFeature"/>
 
-    <view-map name="FindProdCatalog" type="screen" page="component://product/widget/catalog/CatalogScreens.xml#FindProdCatalog"/>
     <view-map name="EditProdCatalog" type="screen" page="component://product/widget/catalog/CatalogScreens.xml#EditProdCatalog"/>
     <view-map name="EditProdCatalogCategories" type="screen" page="component://product/widget/catalog/CatalogScreens.xml#EditProdCatalogCategories"/>
     <view-map name="EditProdCatalogStores" type="screen" page="component://product/widget/catalog/CatalogScreens.xml#EditProdCatalogStores"/>
@@ -3179,8 +3211,11 @@ under the License.
     <view-map name="EditProductStoreFacility" page="component://product/widget/catalog/StoreScreens.xml#EditProductStoreFacility" type="screen"/>
     <view-map name="EditVendorProduct" type="screen" page="component://product/widget/catalog/ProductScreens.xml#EditVendorProduct"/>
     <view-map name="EditKeywordThesaurus" type="screen" page="component://product/widget/catalog/ThesaurusScreens.xml#EditKeywordThesaurus"/>
+    <view-map name="ListParentProductStoreGroup" type="screen" page="component://product/widget/catalog/StoreScreens.xml#ListParentProductStoreGroup"/>
+    <view-map name="EditProductStoreGroup" type="screen" page="component://product/widget/catalog/StoreScreens.xml#EditProductStoreGroup"/>
+    <view-map name="EditProductStoreGroupAndAssoc" type="screen" page="component://product/widget/catalog/StoreScreens.xml#EditProductStoreGroupAndAssoc"/>
 
-    <view-map name="pendingReviews" type="screen" page="component://product/widget/catalog/ReviewScreens.xml#pendingReviews"/>
+    <view-map name="FindReviews" type="screen" page="component://product/widget/catalog/ReviewScreens.xml#FindReviews"/>
 
     <view-map name="ViewProductOrder" type="screen" page="component://product/widget/catalog/ProductScreens.xml#ViewProductOrder"/>
     <view-map name="EditProductCommunicationEvents" type="screen" page="component://product/widget/catalog/ProductScreens.xml#EditProductCommunicationEvents"/>
@@ -3223,6 +3258,7 @@ under the License.
     <view-map name="LookupDataResource" page="component://content/widget/content/DataResourceScreens.xml#LookupDataResource" type="screen"/>
     <view-map name="LookupPerson" page="component://party/widget/partymgr/LookupScreens.xml#LookupPerson" type="screen"/>
     <view-map name="LookupPreferredContactMech" type="screen" page="component://marketing/widget/ContactListScreens.xml#LookupPreferredContactMech"/>
+	<view-map name="LookupContactList" type="screen" page="component://marketing/widget/ContactListScreens.xml#LookupContactList"/>
 
     <!-- Image Management request mappings -->
     <view-map name="Imagemanagement" type="screen" page="component://product/widget/catalog/ImageManagementScreens.xml#Imagemanagement"/>
@@ -3248,8 +3284,6 @@ under the License.
     <view-map name="ListImageRecentlyApproved" type="screen" page="component://product/widget/catalog/ImageManagementScreens.xml#ListImageRecentlyApproved"/>
     <view-map name="ListPeopleApproved" type="screen" page="component://product/widget/catalog/ImageManagementScreens.xml#ListPeopleApproved"/>
     <view-map name="ListPeopleRejected" type="screen" page="component://product/widget/catalog/ImageManagementScreens.xml#ListPeopleRejected"/>
-    <view-map name="AutomaticResize" type="screen" page="component://product/widget/catalog/ImageManagementScreens.xml#AutomaticResize"/>
-    <view-map name="ListAutomaticResize" type="screen" page="component://product/widget/catalog/ImageManagementScreens.xml#ListAutomaticResize"/>
     <view-map name="LookupImageFrame" type="screen" page="component://product/widget/catalog/ImageManagementScreens.xml#LookupImageFrame"/>
     <view-map name="ImageResize" type="screen" page="component://product/widget/catalog/ImageManagementScreens.xml#ImageResize"/>
     <!-- end of view mappings -->

@@ -22,6 +22,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
+import java.lang.String;
 import java.util.Enumeration;
 import java.util.Map;
 
@@ -56,14 +57,14 @@ public class TestRunContainer implements Container {
     protected String testCase = null;
     protected String logLevel = null;
 
-    /**
-     * @see org.ofbiz.base.container.Container#init(java.lang.String[], java.lang.String)
-     */
-    public void init(String[] args, String configFile) {
+    private String name;
+
+    @Override
+    public void init(String[] args, String name, String configFile) {
+        this.name = name;
         this.configFile = configFile;
         if (args != null) {
-            for (int i = 0; i < args.length; i++) {
-                String argument = args[i];
+            for (String argument : args) {
                 // arguments can prefix w/ a '-'. Just strip them off
                 if (argument.startsWith("-")) {
                     int subIdx = 1;
@@ -154,38 +155,38 @@ public class TestRunContainer implements Container {
             }
 
             // display the results
-            Debug.log("[JUNIT] Results for test suite: " + suite.getName());
-            Debug.log("[JUNIT] Pass: " + results.wasSuccessful() + " | # Tests: " + results.runCount() + " | # Failed: " +
+            Debug.logInfo("[JUNIT] Results for test suite: " + suite.getName(), module);
+            Debug.logInfo("[JUNIT] Pass: " + results.wasSuccessful() + " | # Tests: " + results.runCount() + " | # Failed: " +
                     results.failureCount() + " # Errors: " + results.errorCount(), module);
             if (Debug.importantOn()) {
-                Debug.log("[JUNIT] ----------------------------- ERRORS ----------------------------- [JUNIT]", module);
+                Debug.logInfo("[JUNIT] ----------------------------- ERRORS ----------------------------- [JUNIT]", module);
                 Enumeration<?> err = results.errors();
                 if (!err.hasMoreElements()) {
-                    Debug.log("None");
+                    Debug.logInfo("None", module);
                 } else {
                     while (err.hasMoreElements()) {
                         Object error = err.nextElement();
-                        Debug.log("--> " + error, module);
+                        Debug.logInfo("--> " + error, module);
                         if (error instanceof TestFailure) {
-                            Debug.log(((TestFailure) error).trace());
+                            Debug.logInfo(((TestFailure) error).trace(), module);
                         }
                     }
                 }
-                Debug.log("[JUNIT] ------------------------------------------------------------------ [JUNIT]", module);
-                Debug.log("[JUNIT] ---------------------------- FAILURES ---------------------------- [JUNIT]", module);
+                Debug.logInfo("[JUNIT] ------------------------------------------------------------------ [JUNIT]", module);
+                Debug.logInfo("[JUNIT] ---------------------------- FAILURES ---------------------------- [JUNIT]", module);
                 Enumeration<?> fail = results.failures();
                 if (!fail.hasMoreElements()) {
-                    Debug.log("None");
+                    Debug.logInfo("None", module);
                 } else {
                     while (fail.hasMoreElements()) {
                         Object failure = fail.nextElement();
-                        Debug.log("--> " + failure, module);
+                        Debug.logInfo("--> " + failure, module);
                         if (failure instanceof TestFailure) {
-                            Debug.log(((TestFailure) failure).trace());
+                            Debug.logInfo(((TestFailure) failure).trace(), module);
                         }
                     }
                 }
-                Debug.log("[JUNIT] ------------------------------------------------------------------ [JUNIT]", module);
+                Debug.logInfo("[JUNIT] ------------------------------------------------------------------ [JUNIT]", module);
             }
         }
 
@@ -196,6 +197,10 @@ public class TestRunContainer implements Container {
     }
 
     public void stop() throws ContainerException {
+    }
+
+    public String getName() {
+        return name;
     }
 
     class JunitXmlListener extends XMLJUnitResultFormatter {

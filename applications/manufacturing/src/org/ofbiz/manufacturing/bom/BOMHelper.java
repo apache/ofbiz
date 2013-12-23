@@ -20,7 +20,6 @@
 package org.ofbiz.manufacturing.bom;
 
 import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
 
 import org.ofbiz.base.util.Debug;
@@ -65,14 +64,11 @@ public class BOMHelper {
         // If the date is null, set it to today.
         if (inDate == null) inDate = new Date();
         int maxDepth = 0;
-        List<GenericValue> productNodesList = delegator.findByAndCache("ProductAssoc", 
-                UtilMisc.toMap("productIdTo", productId, "productAssocTypeId", bomType));
+        List<GenericValue> productNodesList = delegator.findByAnd("ProductAssoc", 
+                UtilMisc.toMap("productIdTo", productId, "productAssocTypeId", bomType), null, true);
         productNodesList = EntityUtil.filterByDate(productNodesList, inDate);
-        GenericValue oneNode = null;
-        Iterator<GenericValue> nodesIterator = productNodesList.iterator();
         int depth = 0;
-        while (nodesIterator.hasNext()) {
-            oneNode = nodesIterator.next();
+        for (GenericValue oneNode : productNodesList) {
             depth = 0;
             depth = getMaxDepth(oneNode.getString("productId"), bomType, inDate, delegator);
             depth++;
@@ -111,14 +107,11 @@ public class BOMHelper {
             productIdKeys = tree.getAllProductsId();
             productIdKeys.add(productIdKey);
         }
-        List<GenericValue> productNodesList = delegator.findByAndCache("ProductAssoc",
-                UtilMisc.toMap("productIdTo", productId, "productAssocTypeId", bomType));
+        List<GenericValue> productNodesList = delegator.findByAnd("ProductAssoc",
+                UtilMisc.toMap("productIdTo", productId, "productAssocTypeId", bomType), null, true);
         productNodesList = EntityUtil.filterByDate(productNodesList, inDate);
-        GenericValue oneNode = null;
         GenericValue duplicatedNode = null;
-        Iterator<GenericValue> nodesIterator = productNodesList.iterator();
-        while (nodesIterator.hasNext()) {
-            oneNode = nodesIterator.next();
+        for (GenericValue oneNode : productNodesList) {
             for (int i = 0; i < productIdKeys.size(); i++) {
                 if (oneNode.getString("productId").equals(productIdKeys.get(i))) {
                     return oneNode;
@@ -140,13 +133,11 @@ public class BOMHelper {
         String shipmentId = request.getParameter("shipmentId");
 
         try {
-        List<GenericValue> shipmentPlans = delegator.findByAnd("OrderShipment", UtilMisc.toMap("shipmentId", shipmentId));
-        Iterator<GenericValue> shipmentPlansIt = shipmentPlans.iterator();
-        while (shipmentPlansIt.hasNext()) {
-            GenericValue shipmentPlan = shipmentPlansIt.next();
-            GenericValue orderItem = shipmentPlan.getRelatedOne("OrderItem");
+        List<GenericValue> shipmentPlans = delegator.findByAnd("OrderShipment", UtilMisc.toMap("shipmentId", shipmentId), null, false);
+        for (GenericValue shipmentPlan : shipmentPlans) {
+            GenericValue orderItem = shipmentPlan.getRelatedOne("OrderItem", false);
 
-            List<GenericValue> productionRuns = delegator.findByAndCache("WorkOrderItemFulfillment", UtilMisc.toMap("orderId", shipmentPlan.getString("orderId"), "orderItemSeqId", shipmentPlan.getString("orderItemSeqId"), "shipGroupSeqId", shipmentPlan.getString("shipGroupSeqId")));
+            List<GenericValue> productionRuns = delegator.findByAnd("WorkOrderItemFulfillment", UtilMisc.toMap("orderId", shipmentPlan.getString("orderId"), "orderItemSeqId", shipmentPlan.getString("orderItemSeqId"), "shipGroupSeqId", shipmentPlan.getString("shipGroupSeqId")), null, true);
             if (UtilValidate.isNotEmpty(productionRuns)) {
                 Debug.logError("Production Run for order item (" + orderItem.getString("orderId") + "/" + orderItem.getString("orderItemSeqId") + ") not created.", module);
                 continue;

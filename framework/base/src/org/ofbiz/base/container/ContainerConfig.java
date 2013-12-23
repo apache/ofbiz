@@ -30,6 +30,7 @@ import java.util.Map;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.ofbiz.base.lang.LockedBy;
+import org.ofbiz.base.util.StringUtil;
 import org.ofbiz.base.util.UtilURL;
 import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.base.util.UtilXml;
@@ -172,13 +173,15 @@ public class ContainerConfig {
     }
 
     public static class Container {
-        public String name;
-        public String className;
-        public Map<String, Property> properties;
+        public final String name;
+        public final String className;
+        public final List<String> loaders;
+        public final Map<String, Property> properties;
 
         public Container(Element element) {
             this.name = element.getAttribute("name");
             this.className = element.getAttribute("class");
+            this.loaders = StringUtil.split(element.getAttribute("loaders"), ",");
 
             properties = new LinkedHashMap<String, Property>();
             for (Element curElement: UtilXml.childElementList(element, "property")) {

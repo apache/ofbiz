@@ -31,15 +31,34 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
- * Start - OFBiz Container(s) Startup Class
- *
+ * OFBiz startup class.
+ * 
  */
-public class Start {
+public final class Start {
 
-    private static final String SHUTDOWN_COMMAND = "SHUTDOWN";
-    private static final String STATUS_COMMAND = "STATUS";
+    private static final Start instance = new Start();
+
+    private static Command checkCommand(Command command, Command wanted) {
+        if (wanted == Command.HELP || wanted.equals(command)) {
+            return wanted;
+        } else if (command == null) {
+            return wanted;
+        } else {
+            System.err.println("Duplicate command detected(was " + command + ", wanted " + wanted);
+            return Command.HELP_ERROR;
+        }
+    }
+
+    /**
+     * Returns the <code>Start</code> instance.
+     */
+    public static Start getInstance() {
+        return instance;
+    }
 
     private static void help(PrintStream out) {
         out.println("");
@@ -57,26 +76,10 @@ public class Start {
         out.println("[no command] -> Start the server w/ default config");
     }
 
-    private enum Command {
-        HELP, HELP_ERROR, STATUS, SHUTDOWN, COMMAND
-    }
-
-    private static Command checkCommand(Command command, Command wanted) {
-        if (wanted == Command.HELP || wanted.equals(command)) {
-            return wanted;
-        } else if (command == null) {
-            return wanted;
-        } else {
-            System.err.println("Duplicate command detected(was " + command + ", wanted " + wanted);
-            return Command.HELP_ERROR;
-        }
-    }
-
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws StartupException {
         Command command = null;
         List<String> loaderArgs = new ArrayList<String>(args.length);
-        System.err.println("debug: args=" + java.util.Arrays.asList(args));
-        for (String arg: args) {
+        for (String arg : args) {
             if (arg.equals("-help") || arg.equals("-?")) {
                 command = checkCommand(command, Command.HELP);
             } else if (arg.equals("-status")) {
@@ -95,8 +98,6 @@ public class Start {
                 }
             }
         }
-        System.err.println("debug: command=" + command);
-        System.err.println("debug: loaderArgs=" + loaderArgs);
         if (command == null) {
             command = Command.COMMAND;
             loaderArgs.add("start");
@@ -108,26 +109,35 @@ public class Start {
             help(System.err);
             System.exit(1);
         }
-        Start start = new Start();
-        start.init(args, command == Command.COMMAND);
-        if (command == Command.STATUS) {
-            System.out.println("Current Status : " + start.status());
-        } else if (command == Command.SHUTDOWN) {
-            System.out.println("Shutting down server : " + start.shutdown());
-        } else {
-            // general start
-            start.start();
+        instance.init(args, command == Command.COMMAND);
+        try {
+            if (command == Command.STATUS) {
+                System.out.println("Current Status : " + instance.status());
+            } else if (command == Command.SHUTDOWN) {
+                System.out.println("Shutting down server : " + instance.shutdown());
+            } else {
+                // general start
+                instance.start();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.exit(99);
         }
     }
 
+    // ---------------------------------------------- //
+
     private Config config = null;
-    private List<String> loaderArgs = new ArrayList<String>();
+    private final List<String> loaderArgs = new ArrayList<String>();
     private final ArrayList<StartupLoader> loaders = new ArrayList<StartupLoader>();
-    private boolean serverStarted = false;
-    private boolean serverStopping = false;
+    private final AtomicReference<ServerState> serverState = new AtomicReference<ServerState>(ServerState.STARTING);
     private Thread adminPortThread = null;
 
-    private void createListenerThread() throws IOException {
+    /** DO NOT REMOVE: This method is needed by commons-daemon in reflection mode. */
+    public Start() {
+    }
+
+    private void createListenerThread() throws StartupException {
         if (config.adminPort > 0) {
             this.adminPortThread = new AdminPortThread();
             this.adminPortThread.start();
@@ -145,11 +155,14 @@ public class Start {
         }
     }
 
-    public void init(String[] args) throws IOException {
-        init(args, true);
+    /**
+     * Returns the server's current state.
+     */
+    public ServerState getCurrentState() {
+        return serverState.get();
     }
 
-    public void init(String[] args, boolean fullInit) throws IOException {
+    private void init(String[] args, boolean fullInit) throws StartupException {
         String globalSystemPropsFileName = System.getProperty("ofbiz.system.props");
         if (globalSystemPropsFileName != null) {
             FileInputStream stream = null;
@@ -157,51 +170,58 @@ public class Start {
                 stream = new FileInputStream(globalSystemPropsFileName);
                 System.getProperties().load(stream);
             } catch (IOException e) {
-                throw (IOException) new IOException("Couldn't load global system props").initCause(e);
+                throw (StartupException) new StartupException("Couldn't load global system props").initCause(e);
             } finally {
-                if (stream != null){
+                if (stream != null) {
                     try {
                         stream.close();
                     } catch (IOException e) {
-                        throw new IOException(e);
+                        throw (StartupException) new StartupException("Couldn't close stream").initCause(e);
                     }
                 }
             }
         }
-        this.config = Config.getInstance(args);
+        try {
+            this.config = Config.getInstance(args);
+        } catch (IOException e) {
+            throw (StartupException) new StartupException("Couldn't not fetch config instance").initCause(e);
+        }
         // parse the startup arguments
         if (args.length > 1) {
             this.loaderArgs.addAll(Arrays.asList(args).subList(1, args.length));
         }
-
         if (!fullInit) {
             return;
         }
         // initialize the classpath
         initClasspath();
-
         // create the log directory
         createLogDirectory();
-
         // create the listener thread
         createListenerThread();
-
         // set the shutdown hook
         if (config.useShutdownHook) {
-            Runtime.getRuntime().addShutdownHook(new Thread() { public void run() { shutdownServer(); } });
+            Runtime.getRuntime().addShutdownHook(new Thread() {
+                @Override
+                public void run() {
+                    shutdownServer();
+                }
+            });
         } else {
             System.out.println("Shutdown hook disabled");
         }
 
         // initialize the startup loaders
-        if (!initStartLoaders()) {
-            System.exit(99);
-        }
+        initStartLoaders();
     }
 
-    private void initClasspath() throws IOException {
+    private void initClasspath() throws StartupException {
         Classpath classPath = new Classpath(System.getProperty("java.class.path"));
-        this.config.initClasspath(classPath);
+        try {
+            this.config.initClasspath(classPath);
+        } catch (IOException e) {
+            throw (StartupException) new StartupException("Couldn't initialized classpath").initCause(e);
+        }
         // Set the classpath/classloader
         System.setProperty("java.class.path", classPath.toString());
         ClassLoader classloader = classPath.getClassLoader();
@@ -212,49 +232,48 @@ public class Start {
         }
     }
 
-    private boolean initStartLoaders() {
+    private void initStartLoaders() throws StartupException {
         ClassLoader classloader = Thread.currentThread().getContextClassLoader();
         synchronized (this.loaders) {
             // initialize the loaders
-            for (String loaderClassName: config.loaders) {
-                if (this.serverStopping) {
-                    return false;
+            for (Map<String, String> loaderMap : config.loaders) {
+                if (this.serverState.get() == ServerState.STOPPING) {
+                    return;
                 }
                 try {
+                    String loaderClassName = loaderMap.get("class");
                     Class<?> loaderClass = classloader.loadClass(loaderClassName);
                     StartupLoader loader = (StartupLoader) loaderClass.newInstance();
                     loader.load(config, loaderArgs.toArray(new String[loaderArgs.size()]));
                     loaders.add(loader);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    return false;
+                } catch (ClassNotFoundException e) {
+                    throw (StartupException) new StartupException(e.getMessage()).initCause(e);
+                } catch (InstantiationException e) {
+                    throw (StartupException) new StartupException(e.getMessage()).initCause(e);
+                } catch (IllegalAccessException e) {
+                    throw (StartupException) new StartupException(e.getMessage()).initCause(e);
                 }
             }
             this.loaders.trimToSize();
         }
-        return true;
+        return;
     }
 
-    private String sendSocketCommand(String command) throws IOException, ConnectException {
+    private String sendSocketCommand(Control control) throws IOException, ConnectException {
         String response = "OFBiz is Down";
-
         try {
-        Socket socket = new Socket(config.adminAddress, config.adminPort);
-
-        // send the command
-        PrintWriter writer = new PrintWriter(socket.getOutputStream(), true);
-        writer.println(config.adminKey + ":" + command);
-        writer.flush();
-
-        // read the reply
-        BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-        response = reader.readLine();
-
-        reader.close();
-
-        // close the socket
-        writer.close();
-        socket.close();
+            Socket socket = new Socket(config.adminAddress, config.adminPort);
+            // send the command
+            PrintWriter writer = new PrintWriter(socket.getOutputStream(), true);
+            writer.println(config.adminKey + ":" + control);
+            writer.flush();
+            // read the reply
+            BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+            response = reader.readLine();
+            reader.close();
+            // close the socket
+            writer.close();
+            socket.close();
 
         } catch (ConnectException e) {
             System.out.println("Could not connect to " + config.adminAddress + ":" + config.adminPort);
@@ -262,13 +281,20 @@ public class Start {
         return response;
     }
 
-    public String shutdown() throws IOException {
-        return sendSocketCommand(Start.SHUTDOWN_COMMAND);
+    private String shutdown() throws IOException {
+        return sendSocketCommand(Control.SHUTDOWN);
     }
 
     private void shutdownServer() {
-        if (serverStopping) return;
-        serverStopping = true;
+        ServerState currentState;
+        do {
+            currentState = this.serverState.get();
+            if (currentState == ServerState.STOPPING) {
+                return;
+            }
+        } while (!this.serverState.compareAndSet(currentState, ServerState.STOPPING));
+        // The current thread was the one that successfully changed the state;
+        // continue with further processing.
         synchronized (this.loaders) {
             // Unload in reverse order
             for (int i = this.loaders.size(); i > 0; i--) {
@@ -285,15 +311,6 @@ public class Start {
         }
     }
 
-    public void start() {
-        if (!startStartLoaders()) {
-            System.exit(99);
-        }
-        if (config.shutdownAfterLoad) {
-            stopServer();
-        }
-    }
-
     /**
      * Returns <code>true</code> if all loaders were started.
      * 
@@ -302,8 +319,8 @@ public class Start {
     private boolean startStartLoaders() {
         synchronized (this.loaders) {
             // start the loaders
-            for (StartupLoader loader: this.loaders) {
-                if (this.serverStopping) {
+            for (StartupLoader loader : this.loaders) {
+                if (this.serverState.get() == ServerState.STOPPING) {
                     return false;
                 }
                 try {
@@ -313,14 +330,13 @@ public class Start {
                     return false;
                 }
             }
-            serverStarted = true;
         }
-        return true;
+        return this.serverState.compareAndSet(ServerState.STARTING, ServerState.RUNNING);
     }
 
-    public String status() throws IOException {
+    private String status() throws IOException {
         try {
-            return sendSocketCommand(Start.STATUS_COMMAND);
+            return sendSocketCommand(Control.STATUS);
         } catch (ConnectException e) {
             return "Not Running";
         } catch (IOException e) {
@@ -328,17 +344,57 @@ public class Start {
         }
     }
 
-    public void stopServer() {
+    private void stopServer() {
         shutdownServer();
         System.exit(0);
     }
 
+    // ----------------------------------------------- //
+    // commons-daemon interface
+    // http://commons.apache.org/proper/commons-daemon/jsvc.html
+    // ----------------------------------------------- //
+
+    // DO NOT REMOVE: This method is needed by commons-daemon in reflection mode.
+    public void init(String[] args) throws StartupException {
+        init(args, true);
+    }
+
+    // DO NOT REMOVE: This method is needed by commons-daemon in reflection mode.
+    public void destroy() {
+        // FIXME: undo init() calls.
+    }
+
+    // DO NOT REMOVE: This method is needed by commons-daemon in reflection mode.
+    public void start() throws Exception {
+        if (!startStartLoaders()) {
+            if (this.serverState.get() == ServerState.STOPPING) {
+                return;
+            } else {
+                throw new Exception("Error during start.");
+            }
+        }
+        if (config.shutdownAfterLoad) {
+            stopServer();
+        }
+    }
+
+    // DO NOT REMOVE: This method is needed by commons-daemon in reflection mode.
+    public void stop() {
+        shutdownServer();
+    }
+
+    // ----------------------------------------------- //
+
     private class AdminPortThread extends Thread {
         private ServerSocket serverSocket = null;
 
-        AdminPortThread() throws IOException {
-            super("AdminPortThread");
-            this.serverSocket = new ServerSocket(config.adminPort, 1, config.adminAddress);
+        AdminPortThread() throws StartupException {
+            super("OFBiz-AdminPortThread");
+            try {
+                this.serverSocket = new ServerSocket(config.adminPort, 1, config.adminAddress);
+            } catch (IOException e) {
+                throw (StartupException) new StartupException("Couldn't create server socket(" + config.adminAddress + ":" + config.adminPort + ")").initCause(e);
+            }
             setDaemon(false);
         }
 
@@ -349,26 +405,21 @@ public class Start {
                 reader = new BufferedReader(new InputStreamReader(client.getInputStream()));
                 String request = reader.readLine();
                 writer = new PrintWriter(client.getOutputStream(), true);
+                Control control;
                 if (request != null && !request.isEmpty() && request.contains(":")) {
                     String key = request.substring(0, request.indexOf(':'));
-                    String command = request.substring(request.indexOf(':') + 1);
                     if (key.equals(config.adminKey)) {
-                        if (command.equals(Start.SHUTDOWN_COMMAND)) {
-                            if (serverStopping) {
-                                writer.println("IN-PROGRESS");
-                            } else {
-                                writer.println("OK");
-                                writer.flush();
-                                stopServer();
-                            }
-                            return;
-                        } else if (command.equals(Start.STATUS_COMMAND)) {
-                            writer.println(serverStopping ? "Stopping" : serverStarted ? "Running" : "Starting");
-                            return;
+                        control = Control.valueOf(request.substring(request.indexOf(':') + 1));
+                        if (control == null) {
+                            control = Control.FAIL;
                         }
+                    } else {
+                        control = Control.FAIL;
                     }
+                } else {
+                    control = Control.FAIL;
                 }
-                writer.println("FAIL");
+                control.processRequest(Start.this, writer);
             } finally {
                 if (reader != null) {
                     reader.close();
@@ -393,6 +444,48 @@ public class Start {
                     e.printStackTrace();
                 }
             }
+        }
+    }
+
+    private enum Command {
+        HELP, HELP_ERROR, STATUS, SHUTDOWN, COMMAND
+    }
+
+    private enum Control {
+        SHUTDOWN {
+            @Override
+            void processRequest(Start start, PrintWriter writer) {
+                if (start.serverState.get() == ServerState.STOPPING) {
+                    writer.println("IN-PROGRESS");
+                } else {
+                    writer.println("OK");
+                    writer.flush();
+                    start.stopServer();
+                }
+            }
+        },
+        STATUS {
+            @Override
+            void processRequest(Start start, PrintWriter writer) {
+                writer.println(start.serverState.get());
+            }
+        },
+        FAIL {
+            @Override
+            void processRequest(Start start, PrintWriter writer) {
+                writer.println("FAIL");
+            }
+        };
+
+        abstract void processRequest(Start start, PrintWriter writer);
+    }
+
+    public enum ServerState {
+        STARTING, RUNNING, STOPPING;
+
+        @Override
+        public String toString() {
+            return name().charAt(0) + name().substring(1).toLowerCase();
         }
     }
 }

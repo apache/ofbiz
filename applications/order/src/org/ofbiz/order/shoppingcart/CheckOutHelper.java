@@ -27,7 +27,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Set;
 
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.GeneralException;
@@ -48,6 +47,7 @@ import org.ofbiz.entity.condition.EntityConditionList;
 import org.ofbiz.entity.condition.EntityExpr;
 import org.ofbiz.entity.condition.EntityFunction;
 import org.ofbiz.entity.condition.EntityOperator;
+import org.ofbiz.entity.util.EntityTypeUtil;
 import org.ofbiz.entity.util.EntityUtil;
 import org.ofbiz.order.finaccount.FinAccountHelper;
 import org.ofbiz.order.order.OrderChangeHelper;
@@ -114,7 +114,7 @@ public class CheckOutHelper {
 
         // set the shipping address
         if (UtilValidate.isNotEmpty(shippingContactMechId)) {
-            this.cart.setShippingContactMechId(shippingContactMechId);
+            this.cart.setAllShippingContactMechId(shippingContactMechId);
         } else if (cart.shippingApplies()) {
             // only return an error if shipping is required for this purchase
             errMsg = UtilProperties.getMessage(resource_error,"checkhelper.select_shipping_destination", (cart != null ? cart.getLocale() : Locale.getDefault()));
@@ -165,8 +165,8 @@ public class CheckOutHelper {
                 carrierPartyId = shippingMethod.substring(delimiterPos + 1);
             }
 
-            this.cart.setShipmentMethodTypeId(shipmentMethodTypeId);
-            this.cart.setCarrierPartyId(carrierPartyId);
+            this.cart.setAllShipmentMethodTypeId(shipmentMethodTypeId);
+            this.cart.setAllCarrierPartyId(carrierPartyId);
         } else if (cart.shippingApplies()) {
             // only return an error if shipping is required for this purchase
             errMsg = UtilProperties.getMessage(resource_error,"checkhelper.select_shipping_method", (cart != null ? cart.getLocale() : Locale.getDefault()));
@@ -174,20 +174,20 @@ public class CheckOutHelper {
         }
 
         // set the shipping instructions
-        this.cart.setShippingInstructions(shippingInstructions);
+        this.cart.setAllShippingInstructions(shippingInstructions);
 
         if (UtilValidate.isNotEmpty(maySplit)) {
-            cart.setMaySplit(Boolean.valueOf(maySplit));
+            cart.setAllMaySplit(Boolean.valueOf(maySplit));
         } else {
             errMsg = UtilProperties.getMessage(resource_error,"checkhelper.select_splitting_preference", (cart != null ? cart.getLocale() : Locale.getDefault()));
             errorMessages.add(errMsg);
         }
 
         // set the gift message
-        this.cart.setGiftMessage(giftMessage);
+        this.cart.setAllGiftMessage(giftMessage);
 
         if (UtilValidate.isNotEmpty(isGift)) {
-            cart.setIsGift(Boolean.valueOf(isGift));
+            cart.setAllIsGift(Boolean.valueOf(isGift));
         } else {
             errMsg = UtilProperties.getMessage(resource_error, "checkhelper.specify_if_order_is_gift", (cart != null ? cart.getLocale() : Locale.getDefault()));
             errorMessages.add(errMsg);
@@ -263,11 +263,9 @@ public class CheckOutHelper {
                 cart.setBillingAccount(billingAccountId, (billingAccountAmt != null ? billingAccountAmt: BigDecimal.ZERO));
                 // copy the billing account terms as order terms
                 try {
-                    List<GenericValue> billingAccountTerms = delegator.findByAnd("BillingAccountTerm", UtilMisc.toMap("billingAccountId", billingAccountId));
+                    List<GenericValue> billingAccountTerms = delegator.findByAnd("BillingAccountTerm", UtilMisc.toMap("billingAccountId", billingAccountId), null, false);
                     if (UtilValidate.isNotEmpty(billingAccountTerms)) {
-                        Iterator<GenericValue> billingAccountTermsIt = billingAccountTerms.iterator();
-                        while (billingAccountTermsIt.hasNext()) {
-                            GenericValue billingAccountTerm = billingAccountTermsIt.next();
+                        for (GenericValue billingAccountTerm : billingAccountTerms) {
                             // the term is not copied if in the cart a term of the same type is already set
                             if (!cart.hasOrderTerm(billingAccountTerm.getString("termTypeId"))) {
                                 cart.addOrderTerm(billingAccountTerm.getString("termTypeId"), billingAccountTerm.getBigDecimal("termValue"), billingAccountTerm.getLong("termDays"));
@@ -317,10 +315,7 @@ public class CheckOutHelper {
                 }
             }
 
-            Set<String> paymentMethods = selectedPaymentMethods.keySet();
-            Iterator<String> i = paymentMethods.iterator();
-            while (i.hasNext()) {
-                String checkOutPaymentId = i.next();
+            for (String checkOutPaymentId : selectedPaymentMethods.keySet()) {
                 String finAccountId = null;
 
                 if (checkOutPaymentId.indexOf("|") > -1) {
@@ -632,19 +627,17 @@ public class CheckOutHelper {
         // If needed, the production runs are created and linked to the order lines.
         //
         List<GenericValue> orderItems = UtilGenerics.checkList(context.get("orderItems"));
-        Iterator<GenericValue> orderItemsIt = orderItems.iterator();
         int counter = 0;
-        while (orderItemsIt.hasNext()) {
-            GenericValue orderItem = orderItemsIt.next();
+        for (GenericValue orderItem : orderItems) {
             String productId = orderItem.getString("productId");
             if (productId != null) {
                 try {
                     // do something tricky here: run as the "system" user
                     // that can actually create and run a production run
-                    GenericValue permUserLogin = delegator.findByPrimaryKeyCache("UserLogin", UtilMisc.toMap("userLoginId", "system"));
+                    GenericValue permUserLogin = delegator.findOne("UserLogin", UtilMisc.toMap("userLoginId", "system"), true);
                     GenericValue productStore = ProductStoreWorker.getProductStore(productStoreId, delegator);
-                    GenericValue product = delegator.findByPrimaryKey("Product", UtilMisc.toMap("productId", productId));
-                    if ("AGGREGATED_CONF".equals(product.getString("productTypeId")) || "AGGREGATEDSERV_CONF".equals(product.getString("productTypeId"))) {
+                    GenericValue product = delegator.findOne("Product", UtilMisc.toMap("productId", productId), false);
+                    if (EntityTypeUtil.hasParentType(delegator, "ProductType", "productTypeId", product.getString("productTypeId"), "parentTypeId", "AGGREGATED")) {
                         org.ofbiz.product.config.ProductConfigWrapper config = this.cart.findCartItem(counter).getConfigWrapper();
                         Map<String, Object> inputMap = new HashMap<String, Object>();
                         inputMap.put("config", config);
@@ -674,9 +667,7 @@ public class CheckOutHelper {
         // ----------
         // The status of the requirement associated to the shopping cart lines is set to "ordered".
         //
-        Iterator<ShoppingCartItem> shoppingCartItems = this.cart.items().iterator();
-        while (shoppingCartItems.hasNext()) {
-            ShoppingCartItem shoppingCartItem = shoppingCartItems.next();
+        for (ShoppingCartItem shoppingCartItem : this.cart.items()) {
             String requirementId = shoppingCartItem.getRequirementId();
             if (requirementId != null) {
                 try {
@@ -705,7 +696,7 @@ public class CheckOutHelper {
 
         GenericValue party = null;
         try {
-            party = this.delegator.findByPrimaryKey("Party", UtilMisc.toMap("partyId", partyId));
+            party = this.delegator.findOne("Party", UtilMisc.toMap("partyId", partyId), false);
         } catch (GenericEntityException e) {
             Debug.logWarning(e, UtilProperties.getMessage(resource_error,"OrderProblemsGettingPartyRecord", cart.getLocale()), module);
         }
@@ -730,9 +721,7 @@ public class CheckOutHelper {
         String additionalEmails = this.cart.getOrderAdditionalEmails();
         List<String> emailList = StringUtil.split(additionalEmails, ",");
         if (emailList == null) emailList = new ArrayList<String>();
-        Iterator<String> eli = emailList.iterator();
-        while (eli.hasNext()) {
-            String email = eli.next();
+        for (String email : emailList) {
             String contactMechId = this.delegator.getNextSeqId("ContactMech");
             GenericValue contactMech = this.delegator.makeValue("ContactMech",
                     UtilMisc.toMap("contactMechId", contactMechId, "contactMechTypeId", "EMAIL_ADDRESS", "infoString", email));
@@ -868,8 +857,8 @@ public class CheckOutHelper {
                 GenericValue facilityContactMech = ContactMechWorker.getFacilityContactMechByPurpose(delegator, originFacilityId, UtilMisc.toList("SHIP_ORIG_LOCATION", "PRIMARY_LOCATION"));
                 if (facilityContactMech != null) {
                     try {
-                        shipAddress = delegator.findByPrimaryKey("PostalAddress",
-                                UtilMisc.toMap("contactMechId", facilityContactMech.getString("contactMechId")));
+                        shipAddress = delegator.findOne("PostalAddress",
+                                UtilMisc.toMap("contactMechId", facilityContactMech.getString("contactMechId")), false);
                     } catch (GenericEntityException e) {
                         Debug.logError(e, module);
                     }
@@ -942,7 +931,7 @@ public class CheckOutHelper {
 
         List<GenericValue> allPaymentPreferences = null;
         try {
-            allPaymentPreferences = delegator.findByAnd("OrderPaymentPreference", UtilMisc.toMap("orderId", orderId));
+            allPaymentPreferences = delegator.findByAnd("OrderPaymentPreference", UtilMisc.toMap("orderId", orderId), null, false);
         } catch (GenericEntityException e) {
             throw new GeneralException("Problems getting payment preferences", e);
         }
@@ -955,9 +944,7 @@ public class CheckOutHelper {
         List<EntityExpr> exprs = UtilMisc.toList(EntityCondition.makeCondition("manualRefNum", EntityOperator.NOT_EQUAL, null));
         List<GenericValue> manualRefPaymentPrefs = EntityUtil.filterByAnd(allPaymentPreferences, exprs);
         if (UtilValidate.isNotEmpty(manualRefPaymentPrefs)) {
-            Iterator<GenericValue> i = manualRefPaymentPrefs.iterator();
-            while (i.hasNext()) {
-                GenericValue opp = i.next();
+            for (GenericValue opp : manualRefPaymentPrefs) {
                 Map<String, Object> authCtx = new HashMap<String, Object>();
                 authCtx.put("orderPaymentPreference", opp);
                 if (opp.get("paymentMethodId") == null) {
@@ -1067,7 +1054,7 @@ public class CheckOutHelper {
 
                     // set the order and item status to approved
                     if (autoApproveOrder) {
-                        List<GenericValue> productStorePaymentSettingList = delegator.findByAnd("ProductStorePaymentSetting", UtilMisc.toMap("productStoreId", productStore.getString("productStoreId"), "paymentMethodTypeId", "CREDIT_CARD", "paymentService", "cyberSourceCCAuth"));
+                        List<GenericValue> productStorePaymentSettingList = delegator.findByAnd("ProductStorePaymentSetting", UtilMisc.toMap("productStoreId", productStore.getString("productStoreId"), "paymentMethodTypeId", "CREDIT_CARD", "paymentService", "cyberSourceCCAuth"), null, false);
                         if (productStorePaymentSettingList.size() > 0) {
                             String decision = (String) paymentResult.get("authCode");
                             if (UtilValidate.isNotEmpty(decision)) {
@@ -1175,9 +1162,7 @@ public class CheckOutHelper {
     public static void adjustFaceToFacePayment(String orderId, BigDecimal cartTotal, List<GenericValue> allPaymentPrefs, GenericValue userLogin, Delegator delegator) throws GeneralException {
         BigDecimal prefTotal = BigDecimal.ZERO;
         if (allPaymentPrefs != null) {
-            Iterator<GenericValue> i = allPaymentPrefs.iterator();
-            while (i.hasNext()) {
-                GenericValue pref = i.next();
+            for (GenericValue pref : allPaymentPrefs) {
                 BigDecimal maxAmount = pref.getBigDecimal("maxAmount");
                 if (maxAmount == null) maxAmount = BigDecimal.ZERO;
                 prefTotal = prefTotal.add(maxAmount);
@@ -1216,16 +1201,14 @@ public class CheckOutHelper {
         String errMsg=null;
 
         List<GenericValue> paymentMethods = this.cart.getPaymentMethods();
-        Iterator<GenericValue> i = paymentMethods.iterator();
-        while (i.hasNext()) {
-            GenericValue paymentMethod = i.next();
+        for (GenericValue paymentMethod : paymentMethods) {
             if ((paymentMethod != null) && ("CREDIT_CARD".equals(paymentMethod.getString("paymentMethodTypeId")))) {
                 GenericValue creditCard = null;
                 GenericValue billingAddress = null;
                 try {
-                    creditCard = paymentMethod.getRelatedOne("CreditCard");
+                    creditCard = paymentMethod.getRelatedOne("CreditCard", false);
                     if (creditCard != null)
-                        billingAddress = creditCard.getRelatedOne("PostalAddress");
+                        billingAddress = creditCard.getRelatedOne("PostalAddress", false);
                 } catch (GenericEntityException e) {
                     Debug.logError(e, "Problems getting credit card from payment method", module);
                     errMsg = UtilProperties.getMessage(resource_error,"checkhelper.problems_reading_database", (cart != null ? cart.getLocale() : Locale.getDefault()));
@@ -1284,7 +1267,7 @@ public class CheckOutHelper {
                 userLogin.set("enabled", "N");
                 userLogin.store();
             } else {
-                userLogin = delegator.findByPrimaryKeyCache("UserLogin", UtilMisc.toMap("userLoginId", "system"));
+                userLogin = delegator.findOne("UserLogin", UtilMisc.toMap("userLoginId", "system"), true);
             }
         } catch (GenericEntityException e) {
             Debug.logError(e, module);
@@ -1310,7 +1293,7 @@ public class CheckOutHelper {
         // you cannot accept multiple payment type when using an external gateway
         GenericValue orderHeader = null;
         try {
-            orderHeader = this.delegator.findByPrimaryKey("OrderHeader", UtilMisc.toMap("orderId", orderId));
+            orderHeader = this.delegator.findOne("OrderHeader", UtilMisc.toMap("orderId", orderId), false);
         } catch (GenericEntityException e) {
             Debug.logError(e, "Problems getting order header", module);
             errMsg = UtilProperties.getMessage(resource_error,"checkhelper.problems_getting_order_header", (cart != null ? cart.getLocale() : Locale.getDefault()));
@@ -1320,7 +1303,7 @@ public class CheckOutHelper {
         if (orderHeader != null) {
             List<GenericValue> paymentPrefs = null;
             try {
-                paymentPrefs = orderHeader.getRelated("OrderPaymentPreference");
+                paymentPrefs = orderHeader.getRelated("OrderPaymentPreference", null, null, false);
             } catch (GenericEntityException e) {
                 Debug.logError(e, "Problems getting order payments", module);
                 errMsg = UtilProperties.getMessage(resource_error,"checkhelper.problems_getting_payment_preference", (cart != null ? cart.getLocale() : Locale.getDefault()));
@@ -1517,9 +1500,7 @@ public class CheckOutHelper {
     public Map<String, BigDecimal> makeBillingAccountMap(List<GenericValue> paymentPrefs) {
         Map<String, BigDecimal> accountMap = new HashMap<String, BigDecimal>();
         if (paymentPrefs != null) {
-            Iterator<GenericValue> i = paymentPrefs.iterator();
-            while (i.hasNext()) {
-                GenericValue pp = i.next();
+            for (GenericValue pp : paymentPrefs) {
                 if (pp.get("billingAccountId") != null) {
                     accountMap.put(pp.getString("billingAccountId"), pp.getBigDecimal("maxAmount"));
                 }
@@ -1556,18 +1537,14 @@ public class CheckOutHelper {
         // update the selected payment methods amount with valid numbers
         if (paymentMethods != null) {
             List<String> nullPaymentIds = new ArrayList<String>();
-            Iterator<String> i = paymentMethods.iterator();
-            while (i.hasNext()) {
-                String paymentMethodId = i.next();
+            for (String paymentMethodId : paymentMethods) {
                 BigDecimal paymentAmount = cart.getPaymentAmount(paymentMethodId);
                 if (paymentAmount == null || paymentAmount.compareTo(BigDecimal.ZERO) == 0) {
                     if (Debug.verboseOn()) Debug.logVerbose("Found null paymentMethodId - " + paymentMethodId, module);
                     nullPaymentIds.add(paymentMethodId);
                 }
             }
-            Iterator<String> npi = nullPaymentIds.iterator();
-            while (npi.hasNext()) {
-                String paymentMethodId = npi.next();
+            for (String paymentMethodId : nullPaymentIds) {
                 BigDecimal selectedPaymentTotal = cart.getPaymentTotal();
                 BigDecimal requiredAmount = cart.getGrandTotal();
                 BigDecimal newAmount = requiredAmount.subtract(selectedPaymentTotal);
@@ -1635,9 +1612,7 @@ public class CheckOutHelper {
         String balanceField = null;
 
         // get the gift card objects to check
-        Iterator<GenericValue> i = cart.getGiftCards().iterator();
-        while (i.hasNext()) {
-            GenericValue gc = i.next();
+        for (GenericValue gc : cart.getGiftCards()) {
             Map<String, Object> gcBalanceMap = null;
             BigDecimal gcBalance = BigDecimal.ZERO;
             try {

@@ -19,7 +19,7 @@
   -->
 
 <simple-methods xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/simple-methods.xsd">
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/simple-methods-v2.xsd">
     <!-- Methods for Survey -->
     <simple-method method-name="createSurvey" short-description="Create Survey">
         <check-permission action="_CREATE" permission="CONTENTMGR">
@@ -282,7 +282,6 @@
         </check-permission>
         <check-errors/>
         <entity-one entity-name="SurveyQuestionOption" value-field="lookedUpValue"/>
-        <set-pk-fields map="parameters" value-field="lookupKeyValue"/>
         <set-nonpk-fields map="parameters" value-field="lookedUpValue"/>
         <store-value value-field="lookedUpValue"/>
     </simple-method>

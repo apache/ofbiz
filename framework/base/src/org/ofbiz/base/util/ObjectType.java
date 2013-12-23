@@ -460,7 +460,7 @@ public class ObjectType {
      * include: String, Boolean, Double, Float, Long, Integer, Date (java.sql.Date),
      * Time, Timestamp, TimeZone;
      * @param obj Object to convert
-     * @param type Name of type to convert to
+     * @param type Optional Java class name of type to convert to. A <code>null</code> or empty <code>String</code> will return the original object.
      * @param format Optional (can be null) format string for Date, Time, Timestamp
      * @param timeZone Optional (can be null) TimeZone for converting dates and times
      * @param locale Optional (can be null) Locale for formatting and parsing Double, Float, Long, Integer
@@ -471,27 +471,11 @@ public class ObjectType {
     @SourceMonitored
     @SuppressWarnings("unchecked")
     public static Object simpleTypeConvert(Object obj, String type, String format, TimeZone timeZone, Locale locale, boolean noTypeFail) throws GeneralException {
-        if (obj == null) {
-            return null;
+        if (obj == null || UtilValidate.isEmpty(type) || "Object".equals(type) || "java.lang.Object".equals(type)) {
+            return obj;
         }
-
-        int genericsStart = type.indexOf("<");
-        if (genericsStart != -1) {
-            type = type.substring(0, genericsStart);
-        }
-
         if ("PlainString".equals(type)) {
             return obj.toString();
-        }
-        Class<?> sourceClass = obj.getClass();
-        if (sourceClass.getName().equals(type)) {
-            return obj;
-        }
-        if ("Object".equals(type) || "java.lang.Object".equals(type)) {
-            return obj;
-        }
-        if (obj instanceof String && UtilValidate.isEmpty(obj)) {
-            return null;
         }
         if (obj instanceof Node) {
             Node node = (Node) obj;
@@ -502,13 +486,24 @@ public class ObjectType {
                 return simpleTypeConvert(nodeValue, type, format, timeZone, locale, noTypeFail);
             }
         }
+        int genericsStart = type.indexOf("<");
+        if (genericsStart != -1) {
+            type = type.substring(0, genericsStart);
+        }
+        Class<?> sourceClass = obj.getClass();
         Class<?> targetClass = null;
         try {
             targetClass = loadClass(type);
         } catch (ClassNotFoundException e) {
             throw new GeneralException("Conversion from " + sourceClass.getName() + " to " + type + " not currently supported", e);
         }
-        Converter<Object,Object> converter = null;
+        if (sourceClass.equals(targetClass)) {
+            return obj;
+        }
+        if (obj instanceof String && ((String) obj).length() == 0) {
+            return null;
+        }
+        Converter<Object, Object> converter = null;
         try {
             converter = (Converter<Object, Object>) Converters.getConverter(sourceClass, targetClass);
         } catch (ClassNotFoundException e) {}
@@ -527,12 +522,14 @@ public class ObjectType {
                 try {
                     return localizedConverter.convert(obj, locale, timeZone, format);
                 } catch (ConversionException e) {
+                    Debug.logWarning(e, "Exception thrown while converting type: ", module);
                     throw new GeneralException(e.getMessage(), e);
                 }
             }
             try {
                 return converter.convert(obj);
             } catch (ConversionException e) {
+                Debug.logWarning(e, "Exception thrown while converting type: ", module);
                 throw new GeneralException(e.getMessage(), e);
             }
         }
@@ -568,17 +565,19 @@ public class ObjectType {
             Debug.logWarning("The specified type [" + type + "] is not a valid class or a known special type, may see more errors later because of this: " + e.getMessage(), module);
         }
 
-        // some default behavior for null values, results in a bit cleaner operation
-        if ("is-null".equals(operator) && value1 == null) {
-            return Boolean.TRUE;
-        } else if ("is-not-null".equals(operator) && value1 == null) {
-            return Boolean.FALSE;
-        } else if ("is-empty".equals(operator) && value1 == null) {
-            return Boolean.TRUE;
-        } else if ("is-not-empty".equals(operator) && value1 == null) {
-            return Boolean.FALSE;
-        } else if ("contains".equals(operator) && value1 == null) {
-            return Boolean.FALSE;
+        if (value1 == null) {
+            // some default behavior for null values, results in a bit cleaner operation
+            if ("is-null".equals(operator)) {
+                return Boolean.TRUE;
+            } else if ("is-not-null".equals(operator)) {
+                return Boolean.FALSE;
+            } else if ("is-empty".equals(operator)) {
+                return Boolean.TRUE;
+            } else if ("is-not-empty".equals(operator)) {
+                return Boolean.FALSE;
+            } else if ("contains".equals(operator)) {
+                return Boolean.FALSE;
+            }
         }
 
         int result = 0;
@@ -765,18 +764,18 @@ public class ObjectType {
     public static boolean isEmpty(Object value) {
         if (value == null) return true;
 
-        if (value instanceof String) return UtilValidate.isEmpty((String) value);
-        if (value instanceof Collection) return UtilValidate.isEmpty((Collection<? extends Object>) value);
-        if (value instanceof Map) return UtilValidate.isEmpty((Map<? extends Object, ? extends Object>) value);
-        if (value instanceof CharSequence) return UtilValidate.isEmpty((CharSequence) value);
-        if (value instanceof IsEmpty) return UtilValidate.isEmpty((IsEmpty) value);
+        if (value instanceof String) return ((String) value).length() == 0;
+        if (value instanceof Collection) return ((Collection<? extends Object>) value).size() == 0;
+        if (value instanceof Map) return ((Map<? extends Object, ? extends Object>) value).size() == 0;
+        if (value instanceof CharSequence) return ((CharSequence) value).length() == 0;
+        if (value instanceof IsEmpty) return ((IsEmpty) value).isEmpty();
 
         // These types would flood the log
         // Number covers: BigDecimal, BigInteger, Byte, Double, Float, Integer, Long, Short
         if (value instanceof Boolean) return false;
         if (value instanceof Number) return false;
         if (value instanceof Character) return false;
-        if (value instanceof java.sql.Timestamp) return false;
+        if (value instanceof java.util.Date) return false;
 
         if (Debug.verboseOn()) {
             Debug.logVerbose("In ObjectType.isEmpty(Object value) returning false for " + value.getClass() + " Object.", module);

@@ -59,16 +59,16 @@ if (toPrintOrders) {
                     orderMap.orderId = orderId;
                     orderMap.orderDate = orderHeader.orderDate;
                     billingOrderContactMechs = [];
-                    billingOrderContactMechs = delegator.findByAnd("OrderContactMech", [orderId : orderId, contactMechPurposeTypeId : "BILLING_LOCATION"]);
+                    billingOrderContactMechs = delegator.findByAnd("OrderContactMech", [orderId : orderId, contactMechPurposeTypeId : "BILLING_LOCATION"], null, false);
                     if (billingOrderContactMechs.size() > 0) {
                         billingContactMechId = EntityUtil.getFirst(billingOrderContactMechs).contactMechId;
                         billingAddress = delegator.findOne("PostalAddress", [contactMechId : billingContactMechId], false);
                     }
-                    shippingContactMechId = EntityUtil.getFirst(delegator.findByAnd("OrderContactMech", [orderId : orderId, contactMechPurposeTypeId : "SHIPPING_LOCATION"])).contactMechId;
+                    shippingContactMechId = EntityUtil.getFirst(delegator.findByAnd("OrderContactMech", [orderId : orderId, contactMechPurposeTypeId : "SHIPPING_LOCATION"], null, false)).contactMechId;
                     shippingAddress = delegator.findOne("PostalAddress", [contactMechId : shippingContactMechId], false);
                     orderItemShipGroups.each { orderItemShipGroup ->
                         if (orderItemShipGroup.orderId == orderId) {
-                            orderMap.shipmentMethodType = EntityUtil.getFirst(orderItemShipGroup.getRelated("ShipmentMethodType")).description;
+                            orderMap.shipmentMethodType = EntityUtil.getFirst(orderItemShipGroup.getRelated("ShipmentMethodType", null, null, false)).description;
                             orderMap.carrierPartyId = orderItemShipGroup.carrierPartyId;
                             orderMap.shipGroupSeqId = orderItemShipGroup.shipGroupSeqId;
                             orderMap.carrierPartyId = orderItemShipGroup.carrierPartyId;

@@ -18,8 +18,8 @@ under the License.
 -->
 
 <#macro displayReturnAdjustment returnAdjustment adjEditable>
-    <#assign returnHeader = returnAdjustment.getRelatedOne("ReturnHeader")>
-    <#assign adjReturnType = returnAdjustment.getRelatedOne("ReturnType")?if_exists>
+    <#assign returnHeader = returnAdjustment.getRelatedOne("ReturnHeader", false)>
+    <#assign adjReturnType = returnAdjustment.getRelatedOne("ReturnType", false)?if_exists>
     <#if (adjEditable)>
         <input type="hidden" name="_rowSubmit_o_${rowCount}" value="Y" />
         <input type="hidden" name="returnAdjustmentId_o_${rowCount}" value="${returnAdjustment.returnAdjustmentId}" />
@@ -71,13 +71,13 @@ under the License.
     <#if returnHeader?has_content>
       <#if returnHeader.destinationFacilityId?has_content && returnHeader.statusId == "RETURN_ACCEPTED" && returnHeader.returnHeaderTypeId?starts_with("CUSTOMER_")>
         <#list returnShipmentIds as returnShipmentId>
-          <a href="/facility/control/ViewShipment?shipmentId=${returnShipmentId.shipmentId}${externalKeyParam}" class="buttontext">${uiLabelMap.ProductShipmentId} ${returnShipmentId.shipmentId}</a>
-          <a href="/facility/control/ReceiveReturn?facilityId=${returnHeader.destinationFacilityId}&amp;returnId=${returnHeader.returnId?if_exists}&amp;shipmentId=${returnShipmentId.shipmentId}${externalKeyParam}" class="buttontext">${uiLabelMap.OrderReceiveReturn}</a>
+          <a href="/facility/control/ViewShipment?shipmentId=${returnShipmentId.shipmentId}${StringUtil.wrapString(externalKeyParam)}" class="buttontext">${uiLabelMap.ProductShipmentId} ${returnShipmentId.shipmentId}</a>
+          <a href="/facility/control/ReceiveReturn?facilityId=${returnHeader.destinationFacilityId}&amp;returnId=${returnHeader.returnId?if_exists}&amp;shipmentId=${returnShipmentId.shipmentId}${StringUtil.wrapString(externalKeyParam)}" class="buttontext">${uiLabelMap.OrderReceiveReturn}</a>
         </#list>
       <#elseif returnHeader.statusId == "SUP_RETURN_ACCEPTED" && returnHeader.returnHeaderTypeId == "VENDOR_RETURN">
          <#if returnShipmentIds?has_content>
            <#list returnShipmentIds as returnShipmentId>
-             <a href="/facility/control/ViewShipment?shipmentId=${returnShipmentId.shipmentId}${externalKeyParam}" class="buttontext">${uiLabelMap.ProductShipmentId} ${returnShipmentId.shipmentId}</a>
+             <a href="/facility/control/ViewShipment?shipmentId=${returnShipmentId.shipmentId}${StringUtil.wrapString(externalKeyParam)}" class="buttontext">${uiLabelMap.ProductShipmentId} ${returnShipmentId.shipmentId}</a>
            </#list>
          <#else>
            <a href="/facility/control/EditShipment?primaryReturnId=${returnHeader.returnId}&amp;partyIdTo=${toPartyId}&amp;statusId=SHIPMENT_INPUT&amp;shipmentTypeId=PURCHASE_RETURN" class="buttontext">${uiLabelMap.OrderCreateReturnShipment}</a>
@@ -142,12 +142,12 @@ under the License.
           <#if returnItems?has_content>
             <#assign alt_row = false>
             <#list returnItems as item>
-              <#assign orderItem = item.getRelatedOne("OrderItem")?if_exists>
-              <#assign orderHeader = item.getRelatedOne("OrderHeader")?if_exists>
-              <#assign returnReason = item.getRelatedOne("ReturnReason")?if_exists>
-              <#assign returnType = item.getRelatedOne("ReturnType")?if_exists>
-              <#assign status = item.getRelatedOne("InventoryStatusItem")?if_exists>
-              <#assign shipmentReceipts = item.getRelated("ShipmentReceipt")?if_exists>
+              <#assign orderItem = item.getRelatedOne("OrderItem", false)?if_exists>
+              <#assign orderHeader = item.getRelatedOne("OrderHeader", false)?if_exists>
+              <#assign returnReason = item.getRelatedOne("ReturnReason", false)?if_exists>
+              <#assign returnType = item.getRelatedOne("ReturnType", false)?if_exists>
+              <#assign status = item.getRelatedOne("InventoryStatusItem", false)?if_exists>
+              <#assign shipmentReceipts = item.getRelated("ShipmentReceipt", null, null, false)?if_exists>
               <#if (item.get("returnQuantity")?exists && item.get("returnPrice")?exists)>
                  <#assign returnTotal = returnTotal + item.get("returnQuantity") * item.get("returnPrice") >
                  <#assign returnItemSubTotal = item.get("returnQuantity") * item.get("returnPrice") >
@@ -249,14 +249,14 @@ under the License.
                 <#if (readOnly)>
                   <td>
                   <#if returnHeader.statusId == "RETURN_COMPLETED" || returnHeader.statusId == "SUP_RETURN_COMPLETED">
-                    <#assign itemResp = item.getRelatedOne("ReturnItemResponse")?if_exists>
+                    <#assign itemResp = item.getRelatedOne("ReturnItemResponse", false)?if_exists>
                     <#if itemResp?has_content>
                       <#if itemResp.paymentId?has_content>
-                        <div>${uiLabelMap.AccountingPayment} ${uiLabelMap.CommonNbr}<a href="/accounting/control/paymentOverview?paymentId=${itemResp.paymentId}${externalKeyParam}" class="buttontext">${itemResp.paymentId}</a></div>
+                        <div>${uiLabelMap.AccountingPayment} ${uiLabelMap.CommonNbr}<a href="/accounting/control/paymentOverview?paymentId=${itemResp.paymentId}${StringUtil.wrapString(externalKeyParam)}" class="buttontext">${itemResp.paymentId}</a></div>
                       <#elseif itemResp.replacementOrderId?has_content>
                         <div>${uiLabelMap.OrderOrder} ${uiLabelMap.CommonNbr}<a href="<@ofbizUrl>orderview?orderId=${itemResp.replacementOrderId}</@ofbizUrl>" class="buttontext">${itemResp.replacementOrderId}</a></div>
                       <#elseif itemResp.billingAccountId?has_content>
-                        <div>${uiLabelMap.AccountingAccountId} ${uiLabelMap.CommonNbr}<a href="/accounting/control/EditBillingAccount?billingAccountId=${itemResp.billingAccountId}${externalKeyParam}" class="buttontext">${itemResp.billingAccountId}</a></div>
+                        <div>${uiLabelMap.AccountingAccountId} ${uiLabelMap.CommonNbr}<a href="/accounting/control/EditBillingAccount?billingAccountId=${itemResp.billingAccountId}${StringUtil.wrapString(externalKeyParam)}" class="buttontext">${itemResp.billingAccountId}</a></div>
                       </#if>
                     <#else>
                       <div>${uiLabelMap.CommonNone}</div>
@@ -273,7 +273,7 @@ under the License.
                 </#if>
               </tr>
               <#assign rowCount = rowCount + 1>
-              <#assign returnItemAdjustments = item.getRelated("ReturnAdjustment")>
+              <#assign returnItemAdjustments = item.getRelated("ReturnAdjustment", null, null, false)>
               <#if (returnItemAdjustments?has_content)>
                   <#list returnItemAdjustments as returnItemAdjustment>
                      <@displayReturnAdjustment returnAdjustment=returnItemAdjustment adjEditable=false/>  <#-- adjustments of return items should never be editable -->

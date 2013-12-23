@@ -80,9 +80,9 @@ under the License.
     <fo:block font-weight="bold">${uiLabelMap.AccountingPaymentInformation}:</fo:block>
     <#list orderPaymentPreferences as orderPaymentPreference>
         <fo:block text-indent="0.2in">
-            <#assign paymentMethodType = orderPaymentPreference.getRelatedOne("PaymentMethodType")?if_exists>
-            <#if ((orderPaymentPreference != null) && (orderPaymentPreference.getString("paymentMethodTypeId") == "CREDIT_CARD") && (orderPaymentPreference.getString("paymentMethodId")?has_content))>
-                <#assign creditCard = orderPaymentPreference.getRelatedOne("PaymentMethod").getRelatedOne("CreditCard")>
+            <#assign paymentMethodType = orderPaymentPreference.getRelatedOne("PaymentMethodType", false)?if_exists>
+            <#if (orderPaymentPreference?? && (orderPaymentPreference.getString("paymentMethodTypeId") == "CREDIT_CARD") && (orderPaymentPreference.getString("paymentMethodId")?has_content))>
+                <#assign creditCard = orderPaymentPreference.getRelatedOne("PaymentMethod", false).getRelatedOne("CreditCard", false)>
                 ${Static["org.ofbiz.party.contact.ContactHelper"].formatCreditCard(creditCard)}
             <#else>
                 ${paymentMethodType.get("description",locale)?if_exists}
@@ -90,13 +90,13 @@ under the License.
         </fo:block>
     </#list>
 </#if>
-<#if orderHeader.getString("orderTypeId") == "SALES_ORDER" && shipGroups?exists?has_content>
+<#if orderHeader.getString("orderTypeId") == "SALES_ORDER" && shipGroups?has_content>
     <fo:block font-weight="bold">${uiLabelMap.OrderShipmentInformation}:</fo:block>
     <#list shipGroups as shipGroup>
         <fo:block text-indent="0.2in">
             <#if shipGroups.size() gt 1>${shipGroup.shipGroupSeqId} - </#if>
             <#if (shipGroup.shipmentMethodTypeId)?exists>
-                ${(shipGroup.getRelatedOne("ShipmentMethodType").get("description", locale))?default(shipGroup.shipmentMethodTypeId)}
+                ${(shipGroup.getRelatedOne("ShipmentMethodType", false).get("description", locale))?default(shipGroup.shipmentMethodTypeId)}
             </#if>
             <#if (shipGroup.shipAfterDate)?exists || (shipGroup.shipByDate)?exists>
                 <#if (shipGroup.shipAfterDate)?exists> - ${uiLabelMap.OrderShipAfterDate}: ${Static["org.ofbiz.base.util.UtilDateTime"].toDateString(shipGroup.shipAfterDate)}</#if><#if (shipGroup.shipByDate)?exists> - ${uiLabelMap.OrderShipBeforeDate}: ${Static["org.ofbiz.base.util.UtilDateTime"].toDateString(shipGroup.shipByDate)}</#if>
@@ -105,11 +105,11 @@ under the License.
     </#list>
 </#if>
 
-<#if orderTerms?exists?has_content && orderTerms.size() gt 0>
+<#if orderTerms?has_content && orderTerms.size() gt 0>
     <fo:block font-weight="bold">${uiLabelMap.OrderOrderTerms}:</fo:block>
     <#list orderTerms as orderTerm>
         <fo:block text-indent="0.2in">
-            ${orderTerm.getRelatedOne("TermType").get("description",locale)} ${orderTerm.termValue?default("")} ${orderTerm.termDays?default("")} ${orderTerm.textValue?default("")}
+            ${orderTerm.getRelatedOne("TermType", false).get("description",locale)} ${orderTerm.termValue?default("")} ${orderTerm.termDays?default("")} ${orderTerm.textValue?default("")}
         </fo:block>
     </#list>
 </#if>

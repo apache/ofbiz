@@ -7,178 +7,111 @@ Other licenses used by libraries distributed with Apache OFBiz are listed
 below. This file includes a list of all libraries distributed with Apache
 OFBiz and the full text of the license used for each.
 
-For additional details, see the NOTICE file and:
-http://cwiki.apache.org/confluence/display/OFBADMIN/Libraries+Included+in+OFBiz
+For additional details, see the NOTICE file.
 =========================================================================
 The following libraries are licensed under the Apache License Version 2.0:
-ofbiz/trunk/framework/base/lib/ant-launcher-1.8.2.jar
-ofbiz/trunk/framework/base/lib/ant-1.8.2.jar
-ofbiz/trunk/framework/base/lib/ant-junit-1.8.2.jar
-ofbiz/trunk/framework/base/lib/ant-trax-1.8.0.jar
-ofbiz/trunk/framework/base/lib/ant/ant-apache-bsf-1.8.2.jar
-ofbiz/trunk/framework/base/lib/ant/ant-nodeps-1.8.1.jar
-ofbiz/trunk/framework/base/lib/avalon-framework-4.2.0.jar
-ofbiz/trunk/framework/base/lib/avalon-util-exception-1.0.0.jar
-ofbiz/trunk/framework/base/lib/batik-all-1.7.jar
-ofbiz/trunk/framework/base/lib/barcode4j-fop-ext-complete-2.0.jar
-ofbiz/trunk/framework/base/lib/clhm-release-1.0-lru.jar
-ofbiz/trunk/framework/base/lib/httpclient-4.1.1.jar
-ofbiz/trunk/framework/base/lib/httpclient-cache-4.1.1.jar
-ofbiz/trunk/framework/base/lib/httpcore-4.1.jar
-ofbiz/trunk/framework/base/lib/httpmime-4.1.1.jar
-ofbiz/trunk/framework/base/lib/ivy-2.2.0.jar
-ofbiz/trunk/framework/base/lib/jakarta-regexp-1.5.jar
-ofbiz/trunk/framework/base/lib/jpim-0.1.jar
-ofbiz/trunk/framework/base/lib/juel-2.2.1.jar
-ofbiz/trunk/framework/base/lib/log4j-1.2.15.jar
-ofbiz/trunk/framework/base/lib/mx4j-3.0.1.jar
-ofbiz/trunk/framework/base/lib/mx4j-remote-3.0.1.jar
-ofbiz/trunk/framework/base/lib/nekohtml.jar
-ofbiz/trunk/framework/base/lib/resolver-2.9.1.jar
-ofbiz/trunk/framework/base/lib/serializer-2.9.1.jar
-ofbiz/trunk/framework/base/lib/ws-commons-java5-1.0.1.jar
-ofbiz/trunk/framework/base/lib/ws-commons-util-1.0.2.jar
-ofbiz/trunk/framework/base/lib/xercesImpl-2.9.1.jar
-ofbiz/trunk/framework/base/lib/xml-apis-2.9.1.jar
-ofbiz/trunk/framework/base/lib/commons/commons-beanutils-1.7.0.jar
-ofbiz/trunk/framework/base/lib/commons/commons-cli-1.0.jar
-ofbiz/trunk/framework/base/lib/commons/commons-codec-1.4.jar
-ofbiz/trunk/framework/base/lib/commons/commons-collections-3.2.jar
-ofbiz/trunk/framework/base/lib/commons/commons-digester-1.8.jar
-ofbiz/trunk/framework/base/lib/commons/commons-discovery-0.4.jar
-ofbiz/trunk/framework/base/lib/commons/commons-el-1.0.jar
-ofbiz/trunk/framework/base/lib/commons/commons-fileupload-1.2.2.jar
-ofbiz/trunk/framework/base/lib/commons/commons-io-1.3.1.jar
-ofbiz/trunk/framework/base/lib/commons/commons-lang-2.4.jar
-ofbiz/trunk/framework/base/lib/commons/commons-logging-1.1.jar
-ofbiz/trunk/framework/base/lib/commons/commons-modeler-2.0.jar
-ofbiz/trunk/framework/base/lib/commons/commons-net-1.4.1.jar
-ofbiz/trunk/framework/base/lib/commons/commons-pool-1.3.jar
-ofbiz/trunk/framework/base/lib/commons/commons-primitives-1.0.jar
-ofbiz/trunk/framework/base/lib/commons/commons-validator-1.3.1
-ofbiz/trunk/framework/base/lib/commons/commons-vfs-20070730.jar
-ofbiz/trunk/framework/base/lib/j2eespecs/geronimo-activation_1.0.2_spec-1.0.jar
-ofbiz/trunk/framework/base/lib/j2eespecs/geronimo-j2ee-connector_1.5_spec-1.0.jar
-ofbiz/trunk/framework/base/lib/j2eespecs/geronimo-jaxr_1.0_spec-1.0.jar
-ofbiz/trunk/framework/base/lib/j2eespecs/geronimo-jaxrpc_1.1_spec-1.0.jar
-ofbiz/trunk/framework/base/lib/j2eespecs/geronimo-jms_1.1_spec-1.0.jar
-ofbiz/trunk/framework/base/lib/j2eespecs/geronimo-jta_1.1_spec-1.1.1.jar
-ofbiz/trunk/framework/base/lib/j2eespecs/geronimo-qname_1.1_spec-1.0.jar
-ofbiz/trunk/framework/base/lib/j2eespecs/geronimo-saaj_1.1_spec-1.0.jar
-ofbiz/trunk/framework/base/lib/j2eespecs/tomcat-7.0.23.annotations-api.jar
-ofbiz/trunk/framework/base/lib/j2eespecs/tomcat-7.0.23.el-api.jar
-ofbiz/trunk/framework/base/lib/j2eespecs/tomcat-7.0.23.jsp-api.jar
-ofbiz/trunk/framework/base/lib/j2eespecs/tomcat-7.0.23.servlet-api.jar
-ofbiz/trunk/framework/base/lib/scripting/bsf-2.4.0.jar
-ofbiz/trunk/framework/base/lib/scripting/jakarta-oro-2.0.8.jar
-ofbiz/trunk/framework/base/lib/scripting/groovy-all-1.7.7.jar
-ofbiz/trunk/framework/base/lib/scripting/jansi-1.2.1.jar
-ofbiz/trunk/framework/base/lib/xmlrpc-client-3.1.2.jar
-ofbiz/trunk/framework/base/lib/xmlrpc-common-3.1.2.jar
-ofbiz/trunk/framework/base/lib/xmlrpc-server-3.1.2.jar
-ofbiz/framework/catalina/lib/tomcat-7.0.23.tomcat-util.jar
-ofbiz/framework/catalina/lib/tomcat-7.0.23.tomcat-i18n-es.jar
-ofbiz/framework/catalina/lib/tomcat-7.0.23.catalina-ant.jar
-ofbiz/framework/catalina/lib/tomcat-7.0.23.catalina.jar
-ofbiz/framework/catalina/lib/tomcat-7.0.23.jasper-el.jar
-ofbiz/framework/catalina/lib/tomcat-7.0.23.tomcat-juli.jar
-ofbiz/framework/catalina/lib/tomcat-7.0.23.tomcat-i18n-ja.jar
-ofbiz/framework/catalina/lib/tomcat-7.0.23.catalina-tribes.jar
-ofbiz/framework/catalina/lib/tomcat-7.0.23.tomcat-dbcp.jar
-ofbiz/framework/catalina/lib/tomcat-7.0.23.tomcat-juli-adapters.jar
-ofbiz/framework/catalina/lib/tomcat-7.0.23.tomcat-i18n-fr.jar
-ofbiz/framework/catalina/lib/tomcat-7.0.23.tomcat-coyote.jar
-ofbiz/framework/catalina/lib/tomcat-7.0.23.catalina-ha.jar
-ofbiz/framework/catalina/lib/tomcat-7.0.23.tomcat-api.jar
-ofbiz/framework/catalina/lib/tomcat-7.0.23.jasper.jar
-ofbiz/trunk/framework/entity/lib/commons-dbcp-1.3-20091113-r835956.jar
-ofbiz/trunk/framework/entity/lib/jdbc/derby-10.8.2.2.jar
-ofbiz/trunk/framework/entity/lib/jdbc/derbytools-10.8.2.2.jar
-ofbiz/trunk/framework/jetty/lib/ant-1.8.2.jar
-ofbiz/trunk/framework/jetty/lib/jasper-compiler-5.5.15.jar
-ofbiz/trunk/framework/jetty/lib/jasper-compiler-jdt-5.5.15.jar
-ofbiz/trunk/framework/jetty/lib/jasper-runtime-5.5.15.jar
-ofbiz/trunk/framework/jetty/lib/jetty-6.1.11.jar
-ofbiz/trunk/framework/jetty/lib/jetty-ajp-6.1.11.jar
-ofbiz/trunk/framework/jetty/lib/jetty-sslengine-6.1.11.jar
-ofbiz/trunk/framework/jetty/lib/jetty-util-6.1.11.jar
-ofbiz/trunk/framework/jetty/lib/xmlParserAPIs-2.6.2.jar
-ofbiz/trunk/framework/service/lib/axis-ant.jar
-ofbiz/trunk/framework/service/lib/axis.jar
-ofbiz/trunk/framework/service/lib/axiom-api-1.2.9.jar
-ofbiz/trunk/framework/service/lib/axiom-impl-1.2.9.jar
-ofbiz/trunk/framework/service/lib/axis2-kernel-1.5.2.jar
-ofbiz/trunk/framework/service/lib/axis2-transport-http-1.5.2.jar
-ofbiz/trunk/framework/service/lib/axis2-transport-local-1.5.2.jar
-ofbiz/trunk/framework/service/lib/commons-httpclient-3.1.jar
-ofbiz/trunk/framework/service/lib/neethi-2.0.4.jar
-ofbiz/trunk/framework/service/lib/XmlSchema-1.4.3.jar
-ofbiz/trunk/framework/testtools/lib/selenium-java-client-driver.jar
-ofbiz/trunk/framework/webapp/lib/fop-1.0.jar
-ofbiz/trunk/framework/webapp/lib/velocity-1.6.1.jar
-ofbiz/trunk/framework/webapp/lib/xmlgraphics-commons-1.4.jar
-ofbiz/trunk/framework/webapp/lib/json-lib-2.2.3-jdk15.jar
-ofbiz/trunk/framework/webapp/lib/ezmorph-0.9.1.jar
-ofbiz/trunk/framework/webapp/lib/rome-0.9.jar
-ofbiz/trunk/framework/webapp/lib/serializer-2.7.0.jar
-ofbiz/trunk/framework/webapp/lib/xalan-2.7.1.jar
-ofbiz/trunk/framework/geronimo/lib/geronimo-connector-2.1.1.jar
-ofbiz/trunk/framework/geronimo/lib/geronimo-transaction-2.1.1.jar
-ofbiz/trunk/framework/base/lib/webslinger-base-invoker-20091211-3897-7ab22baea4b6.jar
-ofbiz/trunk/framework/webslinger/lib/webslinger-20091211-3897-7ab22baea4b6.jar
-ofbiz/trunk/framework/webslinger/lib/webslinger-base-cache-20091211-3897-7ab22baea4b6.jar
-ofbiz/trunk/framework/webslinger/lib/webslinger-base-collections-20091211-3897-7ab22baea4b6.jar
-ofbiz/trunk/framework/webslinger/lib/webslinger-base-collections-arrays-20091211-3897-7ab22baea4b6.jar
-ofbiz/trunk/framework/webslinger/lib/webslinger-base-concurrent-20091211-3897-7ab22baea4b6.jar
-ofbiz/trunk/framework/webslinger/lib/webslinger-base-html-20091211-3897-7ab22baea4b6.jar
-ofbiz/trunk/framework/webslinger/lib/webslinger-base-invoker-20091211-3897-7ab22baea4b6.jar
-ofbiz/trunk/framework/webslinger/lib/webslinger-base-io-20091211-3897-7ab22baea4b6.jar
-ofbiz/trunk/framework/webslinger/lib/webslinger-base-javacc-20091211-3897-7ab22baea4b6.jar
-ofbiz/trunk/framework/webslinger/lib/webslinger-base-junit-20091211-3897-7ab22baea4b6.jar
-ofbiz/trunk/framework/webslinger/lib/webslinger-base-lang-20091211-3897-7ab22baea4b6.jar
-ofbiz/trunk/framework/webslinger/lib/webslinger-base-logging-20091211-3897-7ab22baea4b6.jar
-ofbiz/trunk/framework/webslinger/lib/webslinger-base-resolver-20091211-3897-7ab22baea4b6.jar
-ofbiz/trunk/framework/webslinger/lib/webslinger-base-util-20091211-3897-7ab22baea4b6.jar
-ofbiz/trunk/framework/webslinger/lib/webslinger-base-xml-20091211-3897-7ab22baea4b6.jar
-ofbiz/trunk/framework/webslinger/lib/webslinger-catalina-20091211-3897-7ab22baea4b6.jar
-ofbiz/trunk/framework/webslinger/lib/webslinger-cgi-20091211-3897-7ab22baea4b6.jar
-ofbiz/trunk/framework/webslinger/lib/webslinger-embryo-20091211-3897-7ab22baea4b6.jar
-ofbiz/trunk/framework/webslinger/lib/webslinger-extension-beanshell-20091211-3897-7ab22baea4b6.jar
-ofbiz/trunk/framework/webslinger/lib/webslinger-extension-bsf-20091211-3897-7ab22baea4b6.jar
-ofbiz/trunk/framework/webslinger/lib/webslinger-extension-code-20091211-3897-7ab22baea4b6.jar
-ofbiz/trunk/framework/webslinger/lib/webslinger-extension-commonsvfs-object-20091211-3897-7ab22baea4b6.jar
-ofbiz/trunk/framework/webslinger/lib/webslinger-extension-directory-20091211-3897-7ab22baea4b6.jar
-ofbiz/trunk/framework/webslinger/lib/webslinger-extension-freemarker-20091211-3897-7ab22baea4b6.jar
-ofbiz/trunk/framework/webslinger/lib/webslinger-extension-groovy-20091211-3897-7ab22baea4b6.jar
-ofbiz/trunk/framework/webslinger/lib/webslinger-extension-image-20091211-3897-7ab22baea4b6.jar
-ofbiz/trunk/framework/webslinger/lib/webslinger-extension-janino-20091211-3897-7ab22baea4b6.jar
-ofbiz/trunk/framework/webslinger/lib/webslinger-extension-jruby-20091211-3897-7ab22baea4b6.jar
-ofbiz/trunk/framework/webslinger/lib/webslinger-extension-jython-20091211-3897-7ab22baea4b6.jar
-ofbiz/trunk/framework/webslinger/lib/webslinger-extension-nutch-20091211-3897-7ab22baea4b6.jar
-ofbiz/trunk/framework/webslinger/lib/webslinger-extension-plan9-20091211-3897-7ab22baea4b6.jar
-ofbiz/trunk/framework/webslinger/lib/webslinger-extension-quercus-20091211-3897-7ab22baea4b6.jar
-ofbiz/trunk/framework/webslinger/lib/webslinger-extension-rhino-20091211-3897-7ab22baea4b6.jar
-ofbiz/trunk/framework/webslinger/lib/webslinger-extension-servlet-20091211-3897-7ab22baea4b6.jar
-ofbiz/trunk/framework/webslinger/lib/webslinger-extension-template-20091211-3897-7ab22baea4b6.jar
-ofbiz/trunk/framework/webslinger/lib/webslinger-extension-velocity-20091211-3897-7ab22baea4b6.jar
-ofbiz/trunk/framework/webslinger/lib/webslinger-extension-wiki-20091211-3897-7ab22baea4b6.jar
-ofbiz/trunk/framework/webslinger/lib/webslinger-launcher-20091211-3897-7ab22baea4b6.jar
-ofbiz/trunk/applications/content/lib/fontbox-1.4.0.jar
-ofbiz/trunk/applications/content/lib/jempbox-1.4.0.jar
-ofbiz/trunk/applications/content/lib/lucene-core-3.5.0.jar
-ofbiz/trunk/applications/content/lib/pdfbox-1.4.0.jar
-ofbiz/trunk/applications/content/lib/poi-3.8-beta5-20111217.jar
-ofbiz/trunk/applications/content/lib/poi-ooxml-3.8-beta5-20111217.jar
-ofbiz/trunk/applications/content/lib/poi-ooxml-schemas-3.8-beta5-20111217.jar
-ofbiz/trunk/applications/content/lib/poi-scratchpad-3.8-beta5-20111217.jar
-ofbiz/trunk/applications/content/lib/poi-3.7.jar
-ofbiz/trunk/applications/content/lib/poi-ooxml-3.7.jar
-ofbiz/trunk/applications/content/lib/poi-scratchpad-3.7.jar
-ofbiz/trunk/applications/content/lib/tika-core-1.0.jar
-ofbiz/trunk/applications/content/lib/tika-parsers-1.0.jar
-ofbiz/trunk/applications/product/lib/dozer-4.2.1.jar
-ofbiz/trunk/applications/product/lib/watermarker-0.0.4.jar
-ofbiz/trunk/specialpurpose/googlecheckout/lib/checkout-sdk-0.8.8.jar
+framework/base/lib/ant-1.9.0-ant-launcher.jar
+framework/base/lib/ant-1.9.0-ant.jar
+framework/base/lib/ant-1.9.0-ant-junit.jar
+framework/base/lib/ant/ant-1.9.0-ant-apache-bsf.jar
+framework/base/lib/ant/ant-nodeps-1.8.1.jar
+framework/base/lib/avalon-framework-4.2.0.jar
+framework/base/lib/avalon-util-exception-1.0.0.jar
+framework/base/lib/batik-all-1.7.jar
+framework/base/lib/barcode4j-2.1-barcode4j-fop-ext-complete.jar
+framework/base/lib/clhm-release-1.0-lru.jar
+framework/base/lib/httpclient-4.2.1.jar
+framework/base/lib/httpclient-cache-4.2.1.jar
+framework/base/lib/httpcore-4.2.1.jar
+framework/base/lib/httpmime-4.2.1.jar
+framework/base/lib/ivy-2.2.0.jar
+framework/base/lib/jakarta-regexp-1.5.jar
+framework/base/lib/jpim-0.1.jar
+framework/base/lib/juel-2.2.1.jar
+framework/base/lib/log4j-1.2.17.jar
+framework/base/lib/mx4j-3.0.1.jar
+framework/base/lib/mx4j-remote-3.0.1.jar
+framework/base/lib/nekohtml-1.9.16.jar
+framework/base/lib/resolver-2.9.1.jar
+framework/base/lib/serializer-2.9.1.jar
+framework/base/lib/ws-commons-java5-1.0.1.jar
+framework/base/lib/ws-commons-util-1.0.2.jar
+framework/base/lib/xercesImpl-2.9.1.jar
+framework/base/lib/xml-apis-2.9.1.jar
+framework/base/lib/xml-apis-ext-1.3.04.jar
+framework/base/lib/commons/commons-beanutils-core-1.8.3.jar
+framework/base/lib/commons/commons-cli-1.2.jar
+framework/base/lib/commons/commons-codec-1.6.jar
+framework/base/lib/commons/commons-collections-3.2.1.jar
+framework/base/lib/commons/commons-compress-1.4.1.jar
+framework/base/lib/commons/commons-csv-1.0.jar
+framework/base/lib/commons/commons-digester3-3.2.jar
+framework/base/lib/commons/commons-discovery-0.4.jar
+framework/base/lib/commons/commons-el-1.0.jar
+framework/base/lib/commons/commons-fileupload-1.2.2.jar
+framework/base/lib/commons/commons-io-2.4.jar
+framework/base/lib/commons/commons-lang-2.6.jar
+framework/base/lib/commons/commons-logging-1.1.2.jar
+framework/base/lib/commons/commons-modeler-2.0.1.jar
+framework/base/lib/commons/commons-net-3.1.jar
+framework/base/lib/commons/commons-pool-1.3.jar
+framework/base/lib/commons/commons-primitives-1.0.jar
+framework/base/lib/commons/commons-validator-1.4.0.jar
+framework/base/lib/j2eespecs/geronimo-activation_1.0.2_spec-1.0.jar
+framework/base/lib/j2eespecs/geronimo-j2ee-connector_1.5_spec-1.0.jar
+framework/base/lib/j2eespecs/geronimo-jaxr_1.0_spec-1.0.jar
+framework/base/lib/j2eespecs/geronimo-jaxrpc_1.1_spec-1.0.jar
+framework/base/lib/j2eespecs/geronimo-jms_1.1_spec-1.0.jar
+framework/base/lib/j2eespecs/geronimo-jta_1.1_spec-1.1.1.jar
+framework/base/lib/j2eespecs/geronimo-saaj_1.1_spec-1.0.jar
+framework/base/lib/j2eespecs/annotations-api-3.0.jar
+framework/base/lib/j2eespecs/jsp-api-2.2.jar
+framework/base/lib/j2eespecs/servlet-api-3.0.jar
+framework/base/lib/scripting/bsf-2.4.0.jar
+framework/base/lib/scripting/jakarta-oro-2.0.8.jar
+framework/base/lib/scripting/groovy-all-2.1.9.jar
+framework/base/lib/scripting/jansi-1.2.1.jar
+framework/base/lib/xmlrpc-client-3.1.2.jar
+framework/base/lib/xmlrpc-common-3.1.2.jar
+framework/base/lib/xmlrpc-server-3.1.2.jar
+framework/catalina/lib/tomcat-7.0.47-catalina-ha.jar
+framework/catalina/lib/tomcat-7.0.47-catalina-tribes.jar
+framework/catalina/lib/tomcat-7.0.47-tomcat-embed-core.jar
+framework/catalina/lib/tomcat-7.0.47-tomcat-embed-jasper.jar
+framework/catalina/lib/tomcat-7.0.47-tomcat-embed-logging-log4j.jar
+framework/entity/lib/commons-dbcp-1.4.jar
+framework/entity/lib/jdbc/derby-10.8.2.2.jar
+framework/entity/lib/jdbc/derbytools-10.8.2.2.jar
+framework/service/lib/axiom-api-1.2.9.jar
+framework/service/lib/axiom-impl-1.2.9.jar
+framework/service/lib/axis2-kernel-1.5.2.jar
+framework/service/lib/axis2-transport-http-1.5.2.jar
+framework/service/lib/axis2-transport-local-1.5.2.jar
+framework/service/lib/commons-httpclient-3.1.jar
+framework/service/lib/neethi-2.0.4.jar
+framework/service/lib/XmlSchema-1.4.3.jar
+framework/webapp/lib/fop-1.1.jar
+framework/webapp/lib/velocity-1.6.1.jar
+framework/webapp/lib/xmlgraphics-commons-1.5.jar
+framework/webapp/lib/json-lib-2.2.3-jdk15.jar
+framework/webapp/lib/ezmorph-0.9.1.jar
+framework/webapp/lib/rome-0.9.jar
+framework/webapp/lib/serializer-2.7.0.jar
+framework/webapp/lib/xalan-2.7.1.jar
+framework/geronimo/lib/geronimo-connector-2.1.1.jar
+framework/geronimo/lib/geronimo-transaction-2.1.1.jar
+framework/testtools/lib/org.springframework.core-3.1.0.M2.jar
+framework/testtools/lib/org.springframework.test-3.1.0.M2.jar
+framework/testtools/lib/org.springframework.web-3.1.0.M2.jar
+applications/content/lib/fontbox-1.7.1.jar
+applications/content/lib/jempbox-1.7.1.jar
+applications/content/lib/pdfbox-1.7.1.jar
+applications/content/lib/poi-3.9-20121203.jar
+applications/content/lib/tika-core-1.0.jar
+applications/content/lib/tika-parsers-1.0.jar
+applications/product/lib/dozer-4.2.1.jar
+applications/product/lib/watermarker-0.0.4.jar
+framework/images/webapp/images/date/timezones*
 =========================================================================
                                  Apache License
                            Version 2.0, January 2004
@@ -390,8 +323,8 @@ ofbiz/trunk/specialpurpose/googlecheckout/lib/checkout-sdk-0.8.8.jar
 =========================================================================
 The following libraries distributed with Apache OFBiz are licensed under the
 Apache Software License:
-ofbiz/trunk/framework/webapp/lib/DataVision-1.0.0.jar
-ofbiz/trunk/framework/base/lib/ant/ant-contrib-1.0b3.jar
+framework/webapp/lib/DataVision-1.0.0.jar
+framework/base/lib/ant/ant-contrib-1.0b3.jar
 =========================================================================
 Apache Software License
 
@@ -448,7 +381,7 @@ Illinois, Urbana-Champaign.
 =========================================================================
 The following libraries distributed with Apache OFBiz are licensed under the
 JDOM (Modified Apache)  License:
-ofbiz/trunk/framework/webapp/lib/jdom-1.1.jar
+framework/webapp/lib/jdom-1.1.jar
 =========================================================================
 The JDOM License
  Copyright (C) 2000-2004 Jason Hunter & Brett McLaughlin.
@@ -504,27 +437,25 @@ The JDOM License
 =========================================================================
 The following libraries distributed with Apache OFBiz are licensed under the
 BSD License:
-ofbiz/trunk/applications/content/lib/dom4j-1.6.1.jar
-ofbiz/trunk/framework/base/lib/antisamy-bin.1.2.jar
-ofbiz/trunk/framework/base/lib/freemarker-2.3.10.jar
-ofbiz/trunk/framework/base/lib/hamcrest-all-1.2.jar
-ofbiz/trunk/framework/base/lib/httpunit.jar
-ofbiz/trunk/framework/base/lib/ical4j-1.0-rc2.jar
-ofbiz/trunk/lib/build/javacc/javacc.jar (5.0)
-ofbiz/trunk/framework/base/lib/javolution-5.4.3.jar
-ofbiz/trunk/framework/base/lib/junitperf.jar
-ofbiz/trunk/framework/base/lib/xpp3_min-1.1.4c.jar
-ofbiz/trunk/framework/base/lib/xstream-1.3.1.jar
-ofbiz/trunk/framework/base/lib/owasp-esapi-full-java-1.4.jar
-ofbiz/trunk/framework/base/lib/scripting/antlr-2.7.6.jar
-ofbiz/trunk/framework/base/lib/scripting/asm-3.2.jar
-ofbiz/trunk/framework/base/lib/scripting/asm-analysis-3.2.jar
-ofbiz/trunk/framework/base/lib/scripting/asm-tree-3.2.jar
-ofbiz/trunk/framework/base/lib/scripting/asm-util-3.2.jar
-ofbiz/trunk/framework/base/lib/scripting/janino-2.5.15.jar
-ofbiz/trunk/framework/base/lib/scripting/jline-0.9.94.jar
-ofbiz/trunk/specialpurpose/ldap/lib/cas-server-core-3.3.jar
-ofbiz/trunk/specialpurpose/pos/lib/looks-2.0.2.jar
+applications/content/lib/dom4j-1.6.1.jar
+framework/base/lib/antisamy-bin.1.2.jar
+framework/base/lib/bsh-engine-modified.jar
+framework/base/lib/freemarker-2.3.19-null-wildcards.jar
+framework/base/lib/hamcrest-all-1.2.jar
+framework/base/lib/httpunit-1.7.jar
+framework/base/lib/ical4j-1.0-rc2.jar
+lib/build/javacc/javacc.jar (5.0)
+framework/base/lib/javolution-5.4.3.jar
+framework/base/lib/xpp3_min-1.1.4c.jar
+framework/base/lib/xstream-1.3.1.jar
+framework/base/lib/owasp-esapi-full-java-1.4.jar
+framework/base/lib/scripting/antlr-2.7.6.jar
+framework/base/lib/scripting/asm-3.2.jar
+framework/base/lib/scripting/asm-analysis-3.2.jar
+framework/base/lib/scripting/asm-tree-3.2.jar
+framework/base/lib/scripting/asm-util-3.2.jar
+framework/base/lib/scripting/janino-2.5.15.jar
+framework/base/lib/scripting/jline-0.9.94.jar
 
 =========================================================================
 The BSD License
@@ -581,9 +512,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 =========================================================================
 The following libraries distributed with Apache OFBiz are licensed under the
 Mozilla Public License Version 1.1:
-ofbiz/trunk/framework/guiapp/lib/XuiCoreSwing-v3.2rc2b.jar
-ofbiz/trunk/framework/guiapp/lib/XuiOptional-v3.2rc2b.jar
-ofbiz/trunk/framework/webapp/lib/iText-2.1.7.jar
+framework/webapp/lib/iText-2.1.7.jar
 =========================================================================
                           MOZILLA PUBLIC LICENSE
                                 Version 1.1
@@ -1058,10 +987,8 @@ EXHIBIT A -Mozilla Public License.
 =========================================================================
 The following libraries distributed with Apache OFBiz are licensed under the
 Common Public License:
-ofbiz/trunk/specialpurpose/pos/lib/jcl.jar
-ofbiz/trunk/specialpurpose/pos/lib/jpos18-controls.jar
-ofbiz/trunk/framework/service/lib/wsdl4j.jar
-ofbiz/trunk/framework/base/lib/junit.jar
+framework/service/lib/wsdl4j-1.6.2.jar
+framework/base/lib/junit-dep-4.10.jar
 =========================================================================
 Common Public License Version 1.0
 
@@ -1280,12 +1207,12 @@ any resulting litigation.
 =========================================================================
 The following libraries distributed with Apache OFBiz are licensed under the
 MIT/X License:
-ofbiz/trunk/framework/base/lib/icu4j-4_4.jar
-ofbiz/trunk/framework/entity/lib/ofbiz-minerva.jar
-ofbiz/trunk/framework/jetty/lib/jcl104-over-slf4j-1.3.1.jar
-ofbiz/trunk/framework/jetty/lib/slf4j-api-1.3.1.jar
-ofbiz/trunk/framework/jetty/lib/slf4j-log4j12-1.3.1.jar
-ofbiz/trunk/framework/images/webapp/images/jquery/*
+framework/base/lib/icu4j-49_1.jar
+framework/base/lib/jcl-over-slf4j-1.6.4.jar
+framework/base/lib/slf4j-api-1.6.4.jar
+framework/base/lib/slf4j-log4j12-1.6.4.jar
+framework/images/webapp/images/jquery/*
+framework/images/webapp/images/date/date.format-1.2.3*.js
 =========================================================================
 The MIT License
 
@@ -1311,61 +1238,8 @@ THE SOFTWARE.
 
 =========================================================================
 The following libraries distributed with Apache OFBiz are licensed under the
-W3C License:
-ofbiz/trunk/framework/base/lib/Tidy.jar
-=========================================================================
-W3C¨ SOFTWARE NOTICE AND LICENSE
-
- Copyright © 1994-2001 World Wide Web Consortium, (Massachusetts Institute of
- Technology, Institut National de Recherche en Informatique et en Automatique,
- Keio University). All Rights Reserved. http://www.w3.org/Consortium/Legal/
-
- This W3C work (including software, documents, or other related items) is
- being provided by the copyright holders under the following license. By
- obtaining, using and/or copying this work, you (the licensee) agree that you
- have read, understood, and will comply with the following terms and
- conditions:
-
- Permission to use, copy, modify, and distribute this software and its
- documentation, with or without modification,  for any purpose and without fee
- or royalty is hereby granted, provided that you include the following on ALL
- copies of the software and documentation or portions thereof, including
- modifications, that you make:
-
-   1. The full text of this NOTICE in a location viewable to users of the
-   redistributed or derivative work.
-
-   2. Any pre-existing intellectual property disclaimers, notices, or terms and
-   conditions. If none exist, a short notice of the following form (hypertext is
-   preferred, text is permitted) should be used within the body of any
-   redistributed or derivative code: "Copyright © [$date-of-software] World Wide
-   Web Consortium, (Massachusetts Institute of Technology, Institut National de
-   Recherche en Informatique et en Automatique, Keio University). All Rights
-   Reserved. http://www.w3.org/Consortium/Legal/"
-
-   3. Notice of any changes or modifications to the W3C files, including the
-   date changes were made. (We recommend you provide URIs to the location from
-   which the code is derived.)
-
- THIS SOFTWARE AND DOCUMENTATION IS PROVIDED "AS IS," AND COPYRIGHT HOLDERS
- MAKE NO REPRESENTATIONS OR WARRANTIES, EXPRESS OR IMPLIED, INCLUDING BUT NOT
- LIMITED TO, WARRANTIES OF MERCHANTABILITY OR FITNESS FOR ANY PARTICULAR PURPOSE
- OR THAT THE USE OF THE SOFTWARE OR DOCUMENTATION WILL NOT INFRINGE ANY THIRD
- PARTY PATENTS, COPYRIGHTS, TRADEMARKS OR OTHER RIGHTS.
-
- COPYRIGHT HOLDERS WILL NOT BE LIABLE FOR ANY DIRECT, INDIRECT, SPECIAL OR
- CONSEQUENTIAL DAMAGES ARISING OUT OF ANY USE OF THE SOFTWARE OR
- DOCUMENTATION.
-
- The name and trademarks of copyright holders may NOT be used in advertising
- or publicity pertaining to the software without specific, written prior
- permission. Title to copyright in this software and any associated
- documentation will at all times remain with copyright holders.
-
-=========================================================================
-The following libraries distributed with Apache OFBiz are licensed under the
 Sun Public License:
-ofbiz/trunk/framework/base/lib/scripting/bsh-2.0b4.jar
+framework/base/lib/scripting/bsh-2.0b4.jar
 =========================================================================
 SUN PUBLIC LICENSE Version 1.0
 
@@ -1841,7 +1715,7 @@ Exhibit A -Sun Public License Notice.
 
 =========================================================================
 The Jython library is licensed under the BeOpen/CNRI as follows.
-ofbiz/trunk/framework/base/lib/scripting/jython-nooro.jar
+framework/base/lib/scripting/jython-nooro.jar
 =========================================================================
 Jython changes Software License.
 =========================================================================
@@ -1966,7 +1840,7 @@ JPython version 1.1.x
 =========================================================================
 The JDBM library is licensed under the JDBM LICENSE v1.00 as follows.
 This license is nearly equivalent to the BSD License.
-ofbiz/trunk/framework/base/lib/jdbm-1.0-SNAPSHOT.jar
+framework/base/lib/jdbm-1.0-SNAPSHOT.jar
 =========================================================================
 /**
  * JDBM LICENSE v1.00
@@ -2017,12 +1891,8 @@ ofbiz/trunk/framework/base/lib/jdbm-1.0-SNAPSHOT.jar
 =========================================================================
 The following library distributed with Apache OFBiz is licensed under the
 COMMON DEVELOPMENT AND DISTRIBUTION LICENSE (CDDL):
-ofbiz/trunk/framework/base/lib/juel-2.1.1.jar (contains the javax.el package)
-ofbiz/trunk/framework/base/lib/mail.jar
-ofbiz/trunk/specialpurpose/ebaystore/lib/attributes.jar
-ofbiz/trunk/specialpurpose/ebaystore/lib/ebaysdkcore.jar
-ofbiz/trunk/specialpurpose/ebaystore/lib/helper.jar
-ofbiz/trunk/specialpurpose/ebaystore/lib/ebaycalls.jar
+framework/base/lib/juel-2.1.1.jar (contains the javax.el package)
+framework/base/lib/mail-1.4.jar
 =========================================================================
 COMMON DEVELOPMENT AND DISTRIBUTION LICENSE (CDDL) Version 1.0 1.
 
@@ -2312,176 +2182,9 @@ Courts of the Northern District of California and the state courts of the State
 of California, with venue lying in Santa Clara County, California.
 
 =========================================================================
-Apache OFBiz includes the XML Schema files from the Open Applications Group, Inc
-NOTE: these files and the license are for an older version of the OAGIS
-specification, namely version 7.2.1.
-ofbiz/specialpurpose/oagis/dtd/002_confirm_bod_004.xsd
-ofbiz/specialpurpose/oagis/dtd/068_sync_inventory_005.xsd
-ofbiz/specialpurpose/oagis/dtd/161_show_shipment_005.xsd
-ofbiz/specialpurpose/oagis/dtd/161B_process_shipment_001.xsd
-ofbiz/specialpurpose/oagis/dtd/196_acknowledge_delivery_001.xsd
-ofbiz/specialpurpose/oagis/dtd/197_receive_delivery_001.xsd
-ofbiz/specialpurpose/oagis/dtd/oagis_fields.xsd
-ofbiz/specialpurpose/oagis/dtd/oagis_segments.xsd
-Open Applications Group Xml Schema is licensed as follows:
-=========================================================================
-Copyright (c) 1998-2001 Open Applications Group, Inc. All Rights Reserved
-
-Documents and resource files on the Open Applications Group, Inc. Internet site are
-provided under the following license.  By obtaining, using, and/or copying this file,
-or any related file obtained from this site, you agree that you have read, understood,
-and will comply with the following terms and conditions:
-
-Permissions to use, copy, and distribute the contents of this file, in any medium
-for any purpose and without fee or royalty is hereby granted, provided that you
-include the following on ALL copies of the file that you use:
-
-1. A reference to the original Open Applications Group resource
-2. A notice of the form "Copyright (c) Open Applications Group. All Rights Reserved
-
-When space permits, inclusion of the full text of this NOTICE should be provided.
-Attribution is requested to be provided in any software, documentation, or other items
-or products that you create related to the implementation of the contents of this file.
-
-THIS RESOURCE IS PROVIDED AS IS, AND THE COPYRIGHT HOLDER MAKES NO REPRESENTATIONS
-OR WARRANTIES, EXPRESS OR IMPLIED, INCLUDING, BUT NOT LIMITED TO, WARRANTIES OF
-MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, NON-INFRINGEMENT, OR TITLE; THAT
-THE CONTENTS OF THE DOCUMENT ARE SUITABLE FOR ANY PURPOSE; NOR THAT THE IMPLEMENTATION
-OF SUCH CONTENTS WILL NOT INFRINGE ANY THIRD PARTY PATENTS, COPYRIGHTS, TRADEMARKS OR
-OTHER RIGHTS.
-THE COPYRIGHT HOLDER WILL NOT BE LIABLE FOR ANY DIRECT, INDIRECT, SPECIAL OR
-CONSEQUENTIAL DAMAGES ARISING OUT OF ANY USE OF THE DOCUMENT OR THE PERFORMANCE OR
-IMPLEMENTATION OF THE CONTENTS THEREOF.
-
-The name and trademarks of copyright holder may NOT be used in advertising or publicity
-pertaining to this file or its contents without specific, written prior permission.
-
-Title to copyright in this document will at all times remain with copyright holders.
-
-Please Note: This file is a work in process, and may be modified or enhanced, at the
-discretion of the Open Applications Group without notice, at any time.
-Please contact the Open Applications Group at www.openapplications.org with any
-questions or comments regarding the usage of this material.
-
-=========================================================================
 The following libraries distributed with Apache OFBiz are licensed under the
 Eclipse Public License - v 1.0:
-ofbiz/trunk/framework/catalina/lib/tomcat-6.0.16-jasper-jdt.jar
-ofbiz/trunk/framework/birt/lib/chartengineapi.jar
-ofbiz/trunk/framework/birt/lib/coreapi.jar
-ofbiz/trunk/framework/birt/lib/crosstabcoreapi.jar
-ofbiz/trunk/framework/birt/lib/dataadapterapi.jar
-ofbiz/trunk/framework/birt/lib/dataaggregationapi.jar
-ofbiz/trunk/framework/birt/lib/dataextraction.jar
-ofbiz/trunk/framework/birt/lib/dteapi.jar
-ofbiz/trunk/framework/birt/lib/emitterconfig.jar
-ofbiz/trunk/framework/birt/lib/engineapi.jar
-ofbiz/trunk/framework/birt/lib/jaxrpc.jar
-ofbiz/trunk/framework/birt/lib/modelapi.jar
-ofbiz/trunk/framework/birt/lib/modelodaapi.jar
-ofbiz/trunk/framework/birt/lib/odadesignapi.jar
-ofbiz/trunk/framework/birt/lib/saaj.jar
-ofbiz/trunk/framework/birt/lib/scriptapi.jar
-ofbiz/trunk/framework/birt/lib/viewservlets.jar
-ofbiz/trunk/framework/birt/lib/platform/plugins/org.apache.batik.css_1.6.0.v200912221622.jar
-ofbiz/trunk/framework/birt/lib/platform/plugins/org.apache.batik.util_1.6.0.v200805290154.jar
-ofbiz/trunk/framework/birt/lib/platform/plugins/org.apache.batik.transcoder_1.6.0.v200805290154.jar
-ofbiz/trunk/framework/birt/lib/platform/plugins/org.apache.batik.dom.svg_1.6.0.v200805290154.jar
-ofbiz/trunk/framework/birt/lib/platform/plugins/org.apache.batik.bridge_1.6.0.v200912221622.jar
-ofbiz/trunk/framework/birt/lib/platform/plugins/org.apache.batik.dom_1.6.0.v200912221622.jar
-ofbiz/trunk/framework/birt/lib/platform/plugins/org.apache.xml.resolver_1.2.0.v201005080400.jar
-ofbiz/trunk/framework/birt/lib/platform/plugins/org.apache.xml.serializer_2.7.1.v201005080400.jar
-ofbiz/trunk/framework/birt/lib/platform/plugins/org.eclipse.birt.api_1.0.0.jar
-ofbiz/trunk/framework/birt/lib/platform/plugins/org.eclipse.birt.chart.device.extension_2.6.0.v20100521.jar
-ofbiz/trunk/framework/birt/lib/platform/plugins/org.eclipse.birt.chart.device.svg_2.6.0.v20100527.jar
-ofbiz/trunk/framework/birt/lib/platform/plugins/org.eclipse.birt.chart.engine_2.6.0.v20100607.jar
-ofbiz/trunk/framework/birt/lib/platform/plugins/org.eclipse.birt.chart.engine.extension_2.6.0.v20100601.jar
-ofbiz/trunk/framework/birt/lib/platform/plugins/org.eclipse.birt.chart.reportitem_2.6.0.v20100604.jar
-ofbiz/trunk/framework/birt/lib/platform/plugins/org.eclipse.birt.core_2.6.0.v20100526.jar
-ofbiz/trunk/framework/birt/lib/platform/plugins/org.eclipse.birt.core.script.function_2.6.0.v20100524.jar
-ofbiz/trunk/framework/birt/lib/platform/plugins/org.eclipse.birt.data_2.6.0.v20100524.jar
-ofbiz/trunk/framework/birt/lib/platform/plugins/org.eclipse.birt.data.aggregation_2.6.0.v20100524.jar
-ofbiz/trunk/framework/birt/lib/platform/plugins/org.eclipse.birt.report.data.adapter_2.6.0.v20100525.jar
-ofbiz/trunk/framework/birt/lib/platform/plugins/org.eclipse.birt.report.data.oda.jdbc.dbprofile_2.6.0.v20100524.jar
-ofbiz/trunk/framework/birt/lib/platform/plugins/org.eclipse.birt.report.data.oda.jdbc.dbprofile.sampledb_2.6.0.v20100524.jar
-ofbiz/trunk/framework/birt/lib/platform/plugins/org.eclipse.birt.report.data.oda.xml_2.6.0.v20100524.jar
-ofbiz/trunk/framework/birt/lib/platform/plugins/org.eclipse.birt.report.engine_2.6.0.v20100609.jar
-ofbiz/trunk/framework/birt/lib/platform/plugins/org.eclipse.birt.report.engine.dataextraction_2.5.2.v20100115.jar
-ofbiz/trunk/framework/birt/lib/platform/plugins/org.eclipse.birt.report.engine.dataextraction.csv_2.5.2.v20100115.jar
-ofbiz/trunk/framework/birt/lib/platform/plugins/org.eclipse.birt.report.engine.emitter.config_2.6.0.v20100304.jar
-ofbiz/trunk/framework/birt/lib/platform/plugins/org.eclipse.birt.report.engine.emitter.html.config_2.6.0.v20100304.jar
-ofbiz/trunk/framework/birt/lib/platform/plugins/org.eclipse.birt.report.engine.emitter.pdf_2.6.0.v20100513.jar
-ofbiz/trunk/framework/birt/lib/platform/plugins/org.eclipse.birt.report.engine.emitter.postscript_2.6.0.v20100526.jar
-ofbiz/trunk/framework/birt/lib/platform/plugins/org.eclipse.birt.report.engine.emitter.ppt_2.6.0.v20100429.jar
-ofbiz/trunk/framework/birt/lib/platform/plugins/org.eclipse.birt.report.engine.emitter.prototype.excel_2.6.0.v20100601.jar
-ofbiz/trunk/framework/birt/lib/platform/plugins/org.eclipse.birt.report.engine.emitter.wpml_2.6.0.v20100520.jar
-ofbiz/trunk/framework/birt/lib/platform/plugins/org.eclipse.birt.report.item.crosstab.core_2.6.0.v20100531.jar
-ofbiz/trunk/framework/birt/lib/platform/plugins/org.eclipse.birt.report.model_2.6.0.v20100603.jar
-ofbiz/trunk/framework/birt/lib/platform/plugins/org.eclipse.birt.report.model.adapter.oda_2.6.0.v20100528.jar
-ofbiz/trunk/framework/birt/lib/platform/plugins/org.eclipse.core.contenttype_3.4.100.v20100505-1235.jar
-ofbiz/trunk/framework/birt/lib/platform/plugins/org.eclipse.core.expressions_3.4.200.v20100505.jar
-ofbiz/trunk/framework/birt/lib/platform/plugins/org.eclipse.core.filesystem_1.3.0.v20100526-0737.jar
-ofbiz/trunk/framework/birt/lib/platform/plugins/org.eclipse.core.jobs_3.5.0.v20100515.jar
-ofbiz/trunk/framework/birt/lib/platform/plugins/org.eclipse.core.resources_3.6.0.v20100526-0737.jar
-ofbiz/trunk/framework/birt/lib/platform/plugins/org.eclipse.core.runtime_3.6.0.v20100505.jar
-ofbiz/trunk/framework/birt/lib/platform/plugins/org.eclipse.core.runtime.compatibility_3.2.100.v20100505.jar
-ofbiz/trunk/framework/birt/lib/platform/plugins/org.eclipse.core.runtime.compatibility.auth_3.2.200.v20100517.jar
-ofbiz/trunk/framework/birt/lib/platform/plugins/org.eclipse.datatools.connectivity_1.2.0.v201005270426.jar
-ofbiz/trunk/framework/birt/lib/platform/plugins/org.eclipse.datatools.connectivity.apache.derby_1.0.100.v200906020900.jar
-ofbiz/trunk/framework/birt/lib/platform/plugins/org.eclipse.datatools.connectivity.apache.derby.dbdefinition_1.0.2.v200906020900.jar
-ofbiz/trunk/framework/birt/lib/platform/plugins/org.eclipse.datatools.connectivity.console.profile_1.0.0.v200906020553.jar
-ofbiz/trunk/framework/birt/lib/platform/plugins/org.eclipse.datatools.connectivity.dbdefinition.genericJDBC_1.0.1.v200906111145.jar
-ofbiz/trunk/framework/birt/lib/platform/plugins/org.eclipse.datatools.connectivity.db.generic_1.0.1.v200906020900.jar
-ofbiz/trunk/framework/birt/lib/platform/plugins/org.eclipse.datatools.connectivity.oda_3.3.0.v201004270801.jar
-ofbiz/trunk/framework/birt/lib/platform/plugins/org.eclipse.datatools.connectivity.oda.consumer_3.2.3.v201005281018.jar
-ofbiz/trunk/framework/birt/lib/platform/plugins/org.eclipse.datatools.connectivity.oda.design_3.3.0.v201004020648.jar
-ofbiz/trunk/framework/birt/lib/platform/plugins/org.eclipse.datatools.connectivity.oda.flatfile_3.1.1.v201001131420.jar
-ofbiz/trunk/framework/birt/lib/platform/plugins/org.eclipse.datatools.connectivity.oda.profile_3.2.3.v201005281018.jar
-ofbiz/trunk/framework/birt/lib/platform/plugins/org.eclipse.datatools.connectivity.sqm.core_1.2.0.v201005270630.jar
-ofbiz/trunk/framework/birt/lib/platform/plugins/org.eclipse.datatools.enablement.hsqldb_1.0.0.v200906020900.jar
-ofbiz/trunk/framework/birt/lib/platform/plugins/org.eclipse.datatools.enablement.hsqldb.dbdefinition_1.0.0.v200906020900.jar
-ofbiz/trunk/framework/birt/lib/platform/plugins/org.eclipse.datatools.enablement.ibm.db2.iseries_1.0.2.v201005211230.jar
-ofbiz/trunk/framework/birt/lib/platform/plugins/org.eclipse.datatools.enablement.ibm.db2.iseries.dbdefinition_1.0.3.v200906020900.jar
-ofbiz/trunk/framework/birt/lib/platform/plugins/org.eclipse.datatools.enablement.ibm.db2.luw_1.0.2.v201005211230.jar
-ofbiz/trunk/framework/birt/lib/platform/plugins/org.eclipse.datatools.enablement.ibm.db2.luw.dbdefinition_1.0.4.v201005211215.jar
-ofbiz/trunk/framework/birt/lib/platform/plugins/org.eclipse.datatools.enablement.ibm.db2.zseries_1.0.2.v201005211230.jar
-ofbiz/trunk/framework/birt/lib/platform/plugins/org.eclipse.datatools.enablement.ibm.db2.zseries.dbdefinition_1.0.4.v201005211230.jar
-ofbiz/trunk/framework/birt/lib/platform/plugins/org.eclipse.datatools.enablement.ibm.informix_1.0.1.v201005211230.jar
-ofbiz/trunk/framework/birt/lib/platform/plugins/org.eclipse.datatools.enablement.ibm.informix.dbdefinition_1.0.4.v201005211230.jar
-ofbiz/trunk/framework/birt/lib/platform/plugins/org.eclipse.datatools.enablement.msft.sqlserver_1.0.1.v201001180222.jar
-ofbiz/trunk/framework/birt/lib/platform/plugins/org.eclipse.datatools.enablement.msft.sqlserver.dbdefinition_1.0.0.v201004211630.jar
-ofbiz/trunk/framework/birt/lib/platform/plugins/org.eclipse.datatools.enablement.mysql_1.0.2.v201002041100.jar
-ofbiz/trunk/framework/birt/lib/platform/plugins/org.eclipse.datatools.enablement.mysql.dbdefinition_1.0.4.v200906020900.jar
-ofbiz/trunk/framework/birt/lib/platform/plugins/org.eclipse.datatools.enablement.oda.ws_1.2.2.v201001131420.jar
-ofbiz/trunk/framework/birt/lib/platform/plugins/org.eclipse.datatools.enablement.oda.xml_1.2.1.v201001151620.jar
-ofbiz/trunk/framework/birt/lib/platform/plugins/org.eclipse.datatools.enablement.oracle_1.0.0.v200906020900.jar
-ofbiz/trunk/framework/birt/lib/platform/plugins/org.eclipse.datatools.enablement.oracle.dbdefinition_1.0.101.v201004211630.jar
-ofbiz/trunk/framework/birt/lib/platform/plugins/org.eclipse.datatools.enablement.postgresql_1.0.1.v200906020900.jar
-ofbiz/trunk/framework/birt/lib/platform/plugins/org.eclipse.datatools.enablement.postgresql.dbdefinition_1.0.1.v200906020900.jar
-ofbiz/trunk/framework/birt/lib/platform/plugins/org.eclipse.datatools.enablement.sap.maxdb_1.0.0.v200906020900.jar
-ofbiz/trunk/framework/birt/lib/platform/plugins/org.eclipse.datatools.enablement.sap.maxdb.dbdefinition_1.0.0.v200906020900.jar
-ofbiz/trunk/framework/birt/lib/platform/plugins/org.eclipse.datatools.modelbase.dbdefinition_1.0.2.v201002130228.jar
-ofbiz/trunk/framework/birt/lib/platform/plugins/org.eclipse.datatools.modelbase.derby_1.0.0.v201002161452.jar
-ofbiz/trunk/framework/birt/lib/platform/plugins/org.eclipse.datatools.modelbase.sql_1.0.4.v201002250945.jar
-ofbiz/trunk/framework/birt/lib/platform/plugins/org.eclipse.emf_2.6.0.v20100607-0756.jar
-ofbiz/trunk/framework/birt/lib/platform/plugins/org.eclipse.emf.common_2.6.0.v20100607-0756.jar
-ofbiz/trunk/framework/birt/lib/platform/plugins/org.eclipse.emf.ecore_2.6.0.v20100607-0756.jar
-ofbiz/trunk/framework/birt/lib/platform/plugins/org.eclipse.emf.ecore.change_2.5.0.v20100521-1846.jar
-ofbiz/trunk/framework/birt/lib/platform/plugins/org.eclipse.emf.ecore.xmi_2.5.0.v20100521-1846.jar
-ofbiz/trunk/framework/birt/lib/platform/plugins/org.eclipse.equinox.app_1.3.0.v20100512.jar
-ofbiz/trunk/framework/birt/lib/platform/plugins/org.eclipse.equinox.common_3.6.0.v20100503.jar
-ofbiz/trunk/framework/birt/lib/platform/plugins/org.eclipse.equinox.preferences_3.3.0.v20100503.jar
-ofbiz/trunk/framework/birt/lib/platform/plugins/org.eclipse.equinox.registry_3.5.0.v20100503.jar
-ofbiz/trunk/framework/birt/lib/platform/plugins/org.eclipse.osgi_3.6.0.v20100517.jar
-ofbiz/trunk/framework/birt/lib/platform/plugins/org.eclipse.osgi.services_3.2.100.v20100503.jar
-ofbiz/trunk/framework/birt/lib/platform/plugins/org.eclipse.update.configurator_3.3.100.v20100512.jar
-ofbiz/trunk/framework/birt/lib/platform/plugins/org.w3c.css.sac_1.3.0.v200805290154.jar
-ofbiz/trunk/framework/birt/lib/platform/plugins/org.w3c.dom.smil_1.0.0.v200806040011.jar
-ofbiz/trunk/framework/birt/lib/platform/plugins/org.w3c.dom.svg_1.1.0.v200806040011.jar
-ofbiz/trunk/framework/birt/lib/platform/plugins/org.eclipse.core.runtime.compatibility.registry_3.3.0.v20100520-1800/runtime_registry_compatibility.jar
-ofbiz/trunk/framework/birt/lib/platform/plugins/org.mozilla.rhino_1.7.1.v20090608/lib/js.jar
-ofbiz/trunk/framework/birt/lib/platform/plugins/org.w3c.sac_1.3.0.v20090608/lib/flute.jar
-ofbiz/trunk/framework/catalina/lib/ecj-7.jar
+framework/catalina/lib/ecj-4.2.2.jar
 =========================================================================
 Eclipse Public License - v 1.0
 
@@ -2695,56 +2398,9 @@ after the cause of action arose. Each party waives its rights to a jury trial in
 any resulting litigation.
 
 =========================================================================
-Apache Ofbiz includes docbook templates in the /applications/content/template/docbook
-directory with the following licence:
-Copyright
----------
-Copyright (C) 1999-2007 Norman Walsh
-Copyright (C) 2003 Jiří Kosek
-Copyright (C) 2004-2007 Steve Ball
-Copyright (C) 2005-2008 The DocBook Project
-
-Permission is hereby granted, free of charge, to any person
-obtaining a copy of this software and associated documentation
-files (the ``Software''), to deal in the Software without
-restriction, including without limitation the rights to use,
-copy, modify, merge, publish, distribute, sublicense, and/or
-sell copies of the Software, and to permit persons to whom the
-Software is furnished to do so, subject to the following
-conditions:
-
-The above copyright notice and this permission notice shall be
-included in all copies or substantial portions of the Software.
-
-Except as contained in this notice, the names of individuals
-credited with contribution to this software shall not be used in
-advertising or otherwise to promote the sale, use or other
-dealings in this Software without prior written authorization
-from the individuals in question.
-
-Any stylesheet derived from this Software that is publically
-distributed will be identified with a different name and the
-version strings in any derived Software will be changed so that
-no possibility of confusion between the derived package and this
-Software will exist.
-
-Warranty
---------
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
-OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-NONINFRINGEMENT.  IN NO EVENT SHALL NORMAN WALSH OR ANY OTHER
-CONTRIBUTOR BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
-WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
-OTHER DEALINGS IN THE SOFTWARE.
-
-Contacting the Author
----------------------
 The DocBook XSL stylesheets are maintained by Norman Walsh,
 <ndw@nwalsh.com>, and members of the DocBook Project,
 <docbook-developers@sf.net>
-=========================================================================
 The docbook schemas in the files docbook.xsd, docbook.dtd xlink.xsd
 and xml.xsd are distributed under the GNU Free Documentation License
 GNU Free Documentation License
@@ -2752,27 +2408,30 @@ It was allowed by the author to use the docbook files within the
 Apache OFBiz system in an email to H.Bakker from N.Walsh dd
 Tue, 25 Aug 2009 07:27:51 -0400 (18:27 ICT)
 =========================================================================
-Apache Ofbiz includes images in the ofbiz/framework/images/webapp/images/icons
-directory with the following licence: Creative Commons Attribution 2.5 License 
-and condition :
+The following libraries are licensed under the Creative Commons Attribution 
+2.5 License:
+jcip-annotations-1.0.jar
 
+Apache Ofbiz includes images in the ofbiz/framework/images/webapp/images/icons
+directory with the following licence: Creative Commons Attribution 2.5 License
+and condition :
 
 =========================================================================
 Creative Commons Attribution 2.5 License.
 http://creativecommons.org/licenses/by/2.5/
 
 THE WORK (AS DEFINED BELOW) IS PROVIDED UNDER THE TERMS OF THIS CREATIVE
-COMMONS PUBLIC LICENSE ("CCPL" OR "LICENSE"). THE WORK IS PROTECTED BY 
+COMMONS PUBLIC LICENSE ("CCPL" OR "LICENSE"). THE WORK IS PROTECTED BY
 COPYRIGHT AND/OR OTHER APPLICABLE LAW. ANY USE OF THE WORK OTHER THAN AS
 AUTHORIZED UNDER THIS LICENSE OR COPYRIGHT LAW IS PROHIBITED.
 
-BY EXERCISING ANY RIGHTS TO THE WORK PROVIDED HERE, YOU ACCEPT AND AGREE 
+BY EXERCISING ANY RIGHTS TO THE WORK PROVIDED HERE, YOU ACCEPT AND AGREE
 TO BE BOUND BY THE TERMS OF THIS LICENSE. THE LICENSOR GRANTS YOU THE RIGHTS
 CONTAINED HERE IN CONSIDERATION OF YOUR ACCEPTANCE OF SUCH TERMS AND CONDITIONS.
 
 1. Definitions
  1. "Collective Work" means a work, such as a periodical issue,
-     anthology or encyclopedia, in which the Work in its 
+     anthology or encyclopedia, in which the Work in its
      entirety in unmodified form, along with a number of
      other contributions, constituting separate and independent
      works in themselves, are assembled into a collective whole.
@@ -2780,20 +2439,20 @@ CONTAINED HERE IN CONSIDERATION OF YOUR ACCEPTANCE OF SUCH TERMS AND CONDITIONS.
      considered a Derivative Work (as defined below) for the
      purposes of this License.
  2. "Derivative Work" means a work based upon the Work or upon
-     the Work and other pre-existing works, such as a 
+     the Work and other pre-existing works, such as a
      translation, musical arrangement, dramatization,
      fictionalization, motion picture version, sound recording,
-     art reproduction, abridgment, condensation, or any other 
+     art reproduction, abridgment, condensation, or any other
      form in which the Work may be recast, transformed,
-     or adapted, except that a work that constitutes 
+     or adapted, except that a work that constitutes
      a Collective Work will not be considered a Derivative
-     Work for the purpose of this License. 
+     Work for the purpose of this License.
      For the avoidance of doubt, where the Work is a musical
-     composition or sound recording, the synchronization of 
+     composition or sound recording, the synchronization of
      the Work in timed-relation with a moving image ("synching")
      will be considered a Derivative Work for the purpose
      of this License.
- 3. "Licensor" means the individual or entity that offers 
+ 3. "Licensor" means the individual or entity that offers
     the Work under the terms of this License.
  4. "Original Author" means the individual or entity who
     created the Work.
@@ -2802,7 +2461,7 @@ CONTAINED HERE IN CONSIDERATION OF YOUR ACCEPTANCE OF SUCH TERMS AND CONDITIONS.
  6. "You" means an individual or entity exercising rights under
     this License who has not previously violated the terms of
     this License with respect to the Work, or who has received
-    express permission from the Licensor to exercise rights 
+    express permission from the Licensor to exercise rights
     under this License despite a previous violation.
 
 2. Fair Use Rights. Nothing in this license is intended to reduce,
@@ -2821,7 +2480,7 @@ CONTAINED HERE IN CONSIDERATION OF YOUR ACCEPTANCE OF SUCH TERMS AND CONDITIONS.
     Work as incorporated in the Collective Works;
  2. to create and reproduce Derivative Works;
  3. to distribute copies or phonorecords of, display
-    publicly, perform publicly, and perform publicly 
+    publicly, perform publicly, and perform publicly
     by means of a digital audio transmission the Work
     including as incorporated in Collective Works;
  4. to distribute copies or phonorecords of, display publicly,
@@ -2835,7 +2494,7 @@ CONTAINED HERE IN CONSIDERATION OF YOUR ACCEPTANCE OF SUCH TERMS AND CONDITIONS.
        society (e.g. ASCAP, BMI, SESAC), royalties for the
        public performance or public digital performance
        (e.g. webcast) of the Work.
-    2. Mechanical Rights and Statutory Royalties. 
+    2. Mechanical Rights and Statutory Royalties.
        Licensor waives the exclusive right to collect,
        whether individually or via a music rights agency
        or designated agent (e.g. Harry Fox Agency),
@@ -2844,11 +2503,11 @@ CONTAINED HERE IN CONSIDERATION OF YOUR ACCEPTANCE OF SUCH TERMS AND CONDITIONS.
        subject to the compulsory license created by
        17 USC Section 115 of the US Copyright Act
        (or the equivalent in other jurisdictions).
- 6. Webcasting Rights and Statutory Royalties. 
-    For the avoidance of doubt, where the Work is a sound 
+ 6. Webcasting Rights and Statutory Royalties.
+    For the avoidance of doubt, where the Work is a sound
     recording, Licensor waives the exclusive right to collect,
     whether individually or via a performance-rights society
-    (e.g. SoundExchange), royalties for the public digital 
+    (e.g. SoundExchange), royalties for the public digital
     performance (e.g. webcast) of the Work, subject to the
     compulsory license created by 17 USC Section 114 of the
     US Copyright Act (or the equivalent in other jurisdictions).
@@ -2861,18 +2520,18 @@ granted by Licensor are hereby reserved.
 
 4. Restrictions.The license granted in Section 3 above is expressly
    made subject to and limited by the following restrictions:
- 1. You may distribute, publicly display, publicly perform, 
+ 1. You may distribute, publicly display, publicly perform,
     or publicly digitally perform the Work only under the terms
-    of this License, and You must include a copy of, or the 
-    Uniform Resource Identifier for, this License with every 
-    copy or phonorecord of the Work You distribute, publicly 
+    of this License, and You must include a copy of, or the
+    Uniform Resource Identifier for, this License with every
+    copy or phonorecord of the Work You distribute, publicly
     display, publicly perform, or publicly digitally perform.
     You may not offer or impose any terms on the Work that alter
-    or restrict the terms of this License or the recipients' 
-    exercise of the rights granted hereunder. You may not 
+    or restrict the terms of this License or the recipients'
+    exercise of the rights granted hereunder. You may not
     sublicense the Work. You must keep intact all notices
     that refer to this License and to the disclaimer of warranties.
-    You may not distribute, publicly display, publicly perform, 
+    You may not distribute, publicly display, publicly perform,
     or publicly digitally perform the Work with any technological
     measures that control access or use of the Work in a manner
     inconsistent with the terms of this License Agreement.
@@ -2880,13 +2539,13 @@ granted by Licensor are hereby reserved.
     Work, but this does not require the Collective Work apart from
     the Work itself to be made subject to the terms of this License.
     If You create a Collective Work, upon notice from any Licensor
-    You must, to the extent practicable, remove from the Collective 
-    Work any credit as required by clause 4(b), as requested. 
+    You must, to the extent practicable, remove from the Collective
+    Work any credit as required by clause 4(b), as requested.
     If You create a Derivative Work, upon notice from any Licensor
     You must, to the extent practicable, remove from the Derivative
     Work any credit as required by clause 4(b), as requested.
-   2. If you distribute, publicly display, publicly perform, 
-      or publicly digitally perform the Work or any Derivative 
+   2. If you distribute, publicly display, publicly perform,
+      or publicly digitally perform the Work or any Derivative
       Works or Collective Works, You must keep intact all copyright
       notices for the Work and provide, reasonable to the medium
       or means You are utilizing: (i) the name of the Original Author
@@ -2899,13 +2558,13 @@ granted by Licensor are hereby reserved.
       reasonably practicable, the Uniform Resource Identifier,
       if any, that Licensor specifies to be associated with the Work,
       unless such URI does not refer to the copyright notice or
-      licensing information for the Work; and in the case of a 
+      licensing information for the Work; and in the case of a
       Derivative Work, a credit identifying the use of the Work
       in the Derivative Work (e.g., "French translation of the Work
       by Original Author," or "Screenplay based on original Work by
-      Original Author"). Such credit may be implemented in any 
-      reasonable manner; provided, however, that in the case of a 
-      Derivative Work or Collective Work, at a minimum such credit 
+      Original Author"). Such credit may be implemented in any
+      reasonable manner; provided, however, that in the case of a
+      Derivative Work or Collective Work, at a minimum such credit
       will appear where any other comparable authorship credit appears
       and in a manner at least as prominent as such other comparable
       authorship credit.
@@ -2920,7 +2579,7 @@ LATENT OR OTHER DEFECTS, ACCURACY, OR THE PRESENCE OF ABSENCE OF ERRORS,
 WHETHER OR NOT DISCOVERABLE. SOME JURISDICTIONS DO NOT ALLOW THE
 EXCLUSION OF IMPLIED WARRANTIES, SO SUCH EXCLUSION MAY NOT APPLY TO YOU.
 
-6. Limitation on Liability. 
+6. Limitation on Liability.
 EXCEPT TO THE EXTENT REQUIRED BY APPLICABLE LAW, IN NO EVENT WILL LICENSOR
 BE LIABLE TO YOU ON ANY LEGAL THEORY FOR ANY SPECIAL, INCIDENTAL,
 CONSEQUENTIAL, PUNITIVE OR EXEMPLARY DAMAGES ARISING OUT OF THIS LICENSE
@@ -2963,8 +2622,54 @@ OF SUCH DAMAGES.
       by the party to be charged with such waiver or consent.
   5. This License constitutes the entire agreement between the parties with
      respect to the Work licensed here. There are no understandings, agreements
-     or representations with respect to the Work not specified here. 
+     or representations with respect to the Work not specified here.
      Licensor shall not be bound by any additional provisions that may appear
      in any communication from You. This License may not be modified without
      the mutual written agreement of the Licensor and You.
+=========================================================================
+Web-based Help from DocBook XML license
+David Cramer <dcramer AT motive DOT com><david AT thingbag DOT net>
+Kasun Gajasinghe <kasunbg AT gmail DOT com>
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software 
+and associated documentation files (the Software), to deal in the Software without restriction, 
+including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, 
+and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, 
+subject to the following conditions:
+
+    * The above copyright notice and this permission notice shall be included in all copies or substantial 
+    portions of the Software.
+    * Except as contained in this notice, the names of individuals credited with contribution to this software 
+    shall not be used in advertising or otherwise to promote the sale, use or other dealings in this Software 
+    without prior written authorization from the individuals in question.
+    * Any stylesheet derived from this Software that is publicly distributed will be identified with a different 
+    name and the version strings in any derived Software will be changed so that no possibility of confusion 
+    between the derived package and this Software will exist.
+
+Warranty: THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, 
+INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE 
+AND NONINFRINGEMENT. IN NO EVENT SHALL DAVID CRAMER, KASUN GAJASINGHE, OR ANY OTHER CONTRIBUTOR 
+BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR 
+OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+This package is maintained by Kasun Gajasinghe, <kasunbg AT gmail DOT com> and David Cramer, <david AT thingbag DOT net>.
+
+This package also includes the following software written and copyrighted by others:
+
+This package also includes the following software written and copyrighted by others:
+    * Files in template/common/jquery are copyrighted by JQuery under the MIT License. 
+      The file jquery.cookie.js Copyright (c) 2006 Klaus Hartl under the MIT license.
+    * Some files in the template/content/search and indexer directories were originally 
+      part of N. Quaine's htmlsearch DITA plugin. The htmlsearch DITA plugin is 
+      available from the files page of the DITA-users yahoogroup. 
+      The htmlsearch plugin was released under a BSD-style license. 
+      See indexer/license.txt for details.
+    * Stemmers from the Snowball project released under a BSD license.
+    * Code from the Apache Lucene search engine provides support for tokenizing Chinese, 
+      Japanese, and Korean content released under the Apache 2.0 license.
+    * Code that provides weighted search results and some other improvements was graciously 
+      donated by SyncRO Soft Ltd., the publishers of the oXygen XML Editor.
+    * Cosmetic improvements provided by OpenStack.
+
+Webhelp for DocBook was developed as a Google Summer of Code project. August 2010
 

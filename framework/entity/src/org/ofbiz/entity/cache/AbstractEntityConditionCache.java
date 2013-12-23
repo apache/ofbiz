@@ -21,8 +21,8 @@ package org.ofbiz.entity.cache;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-
-import javolution.util.FastMap;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilMisc;
@@ -34,7 +34,7 @@ import org.ofbiz.entity.GenericValue;
 import org.ofbiz.entity.condition.EntityCondition;
 import org.ofbiz.entity.model.ModelEntity;
 
-public abstract class AbstractEntityConditionCache<K, V> extends AbstractCache<EntityCondition, Map<K, V>> {
+public abstract class AbstractEntityConditionCache<K, V> extends AbstractCache<EntityCondition, ConcurrentMap<K, V>> {
 
     public static final String module = AbstractEntityConditionCache.class.getName();
 
@@ -43,9 +43,8 @@ public abstract class AbstractEntityConditionCache<K, V> extends AbstractCache<E
     }
 
     protected V get(String entityName, EntityCondition condition, K key) {
-        Map<K, V> conditionCache = getConditionCache(entityName, condition);
+        ConcurrentMap<K, V> conditionCache = getConditionCache(entityName, condition);
         if (conditionCache == null) return null;
-        // the following line was synchronized, but for pretty good safety and better performance, only syncrhnizing the put; synchronized (conditionCache) {
         return conditionCache.get(key);
     }
 
@@ -57,23 +56,34 @@ public abstract class AbstractEntityConditionCache<K, V> extends AbstractCache<E
         }
 
         Map<K, V> conditionCache = getOrCreateConditionCache(entityName, condition);
-        synchronized (conditionCache) {
-            return conditionCache.put(key, value);
+        return conditionCache.put(key, value);
+    }
+
+    /**
+     * Removes all condition caches that include the specified entity.
+     */
+    public void remove(GenericEntity entity) {
+        UtilCache.clearCache(getCacheName(entity.getEntityName()));
+        ModelEntity model = entity.getModelEntity();
+        if (model != null) {
+            Iterator<String> it = model.getViewConvertorsIterator();
+            while (it.hasNext()) {
+                String targetEntityName = it.next();
+                UtilCache.clearCache(getCacheName(targetEntityName));
+            }
         }
     }
 
     public void remove(String entityName, EntityCondition condition) {
-        UtilCache<EntityCondition, Map<K, V>> cache = getCache(entityName);
+        UtilCache<EntityCondition, ConcurrentMap<K, V>> cache = getCache(entityName);
         if (cache == null) return;
         cache.remove(condition);
     }
 
     protected V remove(String entityName, EntityCondition condition, K key) {
-        Map<K, V> conditionCache = getConditionCache(entityName, condition);
+        ConcurrentMap<K, V> conditionCache = getConditionCache(entityName, condition);
         if (conditionCache == null) return null;
-        synchronized (conditionCache) {
-            return conditionCache.remove(key);
-         }
+        return conditionCache.remove(key);
     }
 
     public static final EntityCondition getConditionKey(EntityCondition condition) {
@@ -92,18 +102,18 @@ public abstract class AbstractEntityConditionCache<K, V> extends AbstractCache<E
         return frozenCondition;
     }
 
-    protected Map<K, V> getConditionCache(String entityName, EntityCondition condition) {
-        UtilCache<EntityCondition, Map<K, V>> cache = getCache(entityName);
+    protected ConcurrentMap<K, V> getConditionCache(String entityName, EntityCondition condition) {
+        UtilCache<EntityCondition, ConcurrentMap<K, V>> cache = getCache(entityName);
         if (cache == null) return null;
         return cache.get(getConditionKey(condition));
     }
 
     protected Map<K, V> getOrCreateConditionCache(String entityName, EntityCondition condition) {
-        UtilCache<EntityCondition, Map<K, V>> utilCache = getOrCreateCache(entityName);
+        UtilCache<EntityCondition, ConcurrentMap<K, V>> utilCache = getOrCreateCache(entityName);
         EntityCondition conditionKey = getConditionKey(condition);
-        Map<K, V> conditionCache = utilCache.get(conditionKey);
+        ConcurrentMap<K, V> conditionCache = utilCache.get(conditionKey);
         if (conditionCache == null) {
-            conditionCache = FastMap.newInstance();
+            conditionCache = new ConcurrentHashMap<K, V>();
             utilCache.put(conditionKey, conditionCache);
         }
         return conditionCache;
@@ -156,7 +166,7 @@ public abstract class AbstractEntityConditionCache<K, V> extends AbstractCache<E
         }
     }
 
-    public synchronized void storeHook(boolean isPK, GenericEntity oldEntity, GenericEntity newEntity) {
+    public void storeHook(boolean isPK, GenericEntity oldEntity, GenericEntity newEntity) {
         ModelEntity model = getModelCheckValid(oldEntity, newEntity);
         String entityName = model.getEntityName();
         // for info about cache clearing

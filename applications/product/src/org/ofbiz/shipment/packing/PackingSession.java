@@ -41,9 +41,9 @@ import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
 import org.ofbiz.entity.util.EntityUtil;
 import org.ofbiz.product.product.ProductWorker;
-import org.ofbiz.service.GenericDispatcher;
 import org.ofbiz.service.GenericServiceException;
 import org.ofbiz.service.LocalDispatcher;
+import org.ofbiz.service.ServiceContainer;
 import org.ofbiz.service.ServiceUtil;
 
 @SuppressWarnings("serial")
@@ -131,7 +131,7 @@ public class PackingSession implements java.io.Serializable {
         invLookup.put("orderId", orderId);
         invLookup.put("orderItemSeqId", orderItemSeqId);
         invLookup.put("shipGroupSeqId", shipGroupSeqId);
-        List<GenericValue> reservations = this.getDelegator().findByAnd("OrderItemShipGrpInvRes", invLookup, UtilMisc.toList("quantity DESC"));
+        List<GenericValue> reservations = this.getDelegator().findByAnd("OrderItemShipGrpInvRes", invLookup, UtilMisc.toList("quantity DESC"), false);
 
         // no reservations we cannot add this item
         if (UtilValidate.isEmpty(reservations)) {
@@ -153,7 +153,7 @@ public class PackingSession implements java.io.Serializable {
                 GenericValue res = i.next();
 
                 // Check that the inventory item product match with the current product to pack
-                if (!productId.equals(res.getRelatedOne("InventoryItem").getString("productId"))) {
+                if (!productId.equals(res.getRelatedOne("InventoryItem", false).getString("productId"))) {
                     continue;
                 }
 
@@ -170,16 +170,16 @@ public class PackingSession implements java.io.Serializable {
                 int thisCheck = this.checkLineForAdd(res, orderId, orderItemSeqId, shipGroupSeqId, productId, thisQty, packageSeqId, update);
                 switch (thisCheck) {
                     case 2:
-                        Debug.log("Packing check returned '2' - new pack line will be created!", module);
+                        Debug.logInfo("Packing check returned '2' - new pack line will be created!", module);
                         toCreateMap.put(res, thisQty);
                         qtyRemain = qtyRemain.subtract(thisQty);
                         break;
                     case 1:
-                        Debug.log("Packing check returned '1' - existing pack line has been updated!", module);
+                        Debug.logInfo("Packing check returned '1' - existing pack line has been updated!", module);
                         qtyRemain = qtyRemain.subtract(thisQty);
                         break;
                     case 0:
-                        Debug.log("Packing check returned '0' - doing nothing.", module);
+                        Debug.logInfo("Packing check returned '0' - doing nothing.", module);
                         break;
                 }
             }
@@ -254,7 +254,7 @@ public class PackingSession implements java.io.Serializable {
         lookupMap.put("shipGroupSeqId", shipGroupSeqId);
 
         List<String> sort = UtilMisc.toList("-quantity");
-        List<GenericValue> orderItems = this.getDelegator().findByAnd("OrderItemAndShipGroupAssoc", lookupMap, sort);
+        List<GenericValue> orderItems = this.getDelegator().findByAnd("OrderItemAndShipGroupAssoc", lookupMap, sort, false);
 
         String orderItemSeqId = null;
         if (orderItems != null) {
@@ -264,7 +264,7 @@ public class PackingSession implements java.io.Serializable {
                 invLookup.put("orderId", orderId);
                 invLookup.put("orderItemSeqId", item.getString("orderItemSeqId"));
                 invLookup.put("shipGroupSeqId", shipGroupSeqId);
-                List<GenericValue> reservations = this.getDelegator().findByAnd("OrderItemShipGrpInvRes", invLookup);
+                List<GenericValue> reservations = this.getDelegator().findByAnd("OrderItemShipGrpInvRes", invLookup, null, false);
                 for (GenericValue res: reservations) {
                     BigDecimal qty = res.getBigDecimal("quantity");
                     if (quantity.compareTo(qty) <= 0) {
@@ -290,10 +290,10 @@ public class PackingSession implements java.io.Serializable {
         PackingSessionLine line = this.findLine(orderId, orderItemSeqId, shipGroupSeqId, productId, invItemId, packageSeqId);
         BigDecimal packedQty = this.getPackedQuantity(orderId, orderItemSeqId, shipGroupSeqId, productId);
 
-        Debug.log("Packed quantity [" + packedQty + "] + [" + quantity + "]", module);
+        Debug.logInfo("Packed quantity [" + packedQty + "] + [" + quantity + "]", module);
 
         if (line == null) {
-            Debug.log("No current line found testing [" + invItemId + "] R: " + resQty + " / Q: " + quantity, module);
+            Debug.logInfo("No current line found testing [" + invItemId + "] R: " + resQty + " / Q: " + quantity, module);
             if (resQty.compareTo(quantity) < 0) {
                 return 0;
             } else {
@@ -301,7 +301,7 @@ public class PackingSession implements java.io.Serializable {
             }
         } else {
             BigDecimal newQty = update ? quantity : (line.getQuantity().add(quantity));
-            Debug.log("Existing line found testing [" + invItemId + "] R: " + resQty + " / Q: " + newQty, module);
+            Debug.logInfo("Existing line found testing [" + invItemId + "] R: " + resQty + " / Q: " + newQty, module);
             if (resQty.compareTo(newQty) < 0) {
                 return 0;
             } else {
@@ -445,7 +445,7 @@ public class PackingSession implements java.io.Serializable {
         BigDecimal reserved = BigDecimal.ONE.negate();
         try {
             GenericValue res = EntityUtil.getFirst(this.getDelegator().findByAnd("OrderItemAndShipGrpInvResAndItemSum", UtilMisc.toMap("orderId", orderId,
-                    "orderItemSeqId", orderItemSeqId, "shipGroupSeqId", shipGroupSeqId, "inventoryProductId", productId)));
+                    "orderItemSeqId", orderItemSeqId, "shipGroupSeqId", shipGroupSeqId, "inventoryProductId", productId), null, false));
             reserved = res.getBigDecimal("totQuantityAvailable");
             if (reserved == null) {
                 reserved = BigDecimal.ONE.negate();
@@ -496,7 +496,7 @@ public class PackingSession implements java.io.Serializable {
 
     public LocalDispatcher getDispatcher() {
         if (_dispatcher == null) {
-            _dispatcher = GenericDispatcher.getLocalDispatcher(dispatcherName, this.getDelegator());
+            _dispatcher = ServiceContainer.getLocalDispatcher(dispatcherName, this.getDelegator());
         }
         return _dispatcher;
     }
@@ -590,7 +590,7 @@ public class PackingSession implements java.io.Serializable {
             }
             this.packageWeights.put(line.packageSeq, packageWeight);
         }
-        if (line.packageSeq == packageSeq) {
+        if (line.packageSeq == packageSeq && packageSeq > 1) {
             packageSeq--;
         }
     }
@@ -702,7 +702,7 @@ public class PackingSession implements java.io.Serializable {
             lookupMap.put("shipGroupSeqId", shipGroupSeqId);
         }
         try {
-            issues = this.getDelegator().findByAnd("ItemIssuance",  lookupMap);
+            issues = this.getDelegator().findByAnd("ItemIssuance",  lookupMap, null, false);
         } catch (GenericEntityException e) {
             Debug.logError(e, module);
         }
@@ -723,13 +723,13 @@ public class PackingSession implements java.io.Serializable {
         newShipment.put("picklistBinId", picklistBinId);
         newShipment.put("additionalShippingCharge", additionalShippingCharge);
         newShipment.put("userLogin", userLogin);
-        GenericValue orderRoleShipTo = EntityUtil.getFirst(delegator.findByAnd("OrderRole", UtilMisc.toMap("orderId", primaryOrderId, "roleTypeId", "SHIP_TO_CUSTOMER")));
+        GenericValue orderRoleShipTo = EntityUtil.getFirst(delegator.findByAnd("OrderRole", UtilMisc.toMap("orderId", primaryOrderId, "roleTypeId", "SHIP_TO_CUSTOMER"), null, false));
         if (UtilValidate.isNotEmpty(orderRoleShipTo)) {
             newShipment.put("partyIdTo", orderRoleShipTo.getString("partyId"));
         }
         String partyIdFrom = null;
         if (primaryOrderId != null) {
-            GenericValue orderItemShipGroup = EntityUtil.getFirst(delegator.findByAnd("OrderItemShipGroup", UtilMisc.toMap("orderId", primaryOrderId, "shipGroupSeqId", primaryShipGrp)));
+            GenericValue orderItemShipGroup = EntityUtil.getFirst(delegator.findByAnd("OrderItemShipGroup", UtilMisc.toMap("orderId", primaryOrderId, "shipGroupSeqId", primaryShipGrp), null, false));
             if (UtilValidate.isNotEmpty(orderItemShipGroup.getString("vendorPartyId"))) {
                 partyIdFrom = orderItemShipGroup.getString("vendorPartyId");
             } else if (UtilValidate.isNotEmpty(orderItemShipGroup.getString("facilityId"))) {
@@ -739,11 +739,11 @@ public class PackingSession implements java.io.Serializable {
                 }
             }
             if (UtilValidate.isEmpty(partyIdFrom)) {
-                GenericValue orderRoleShipFrom = EntityUtil.getFirst(delegator.findByAnd("OrderRole", UtilMisc.toMap("orderId", primaryOrderId, "roleTypeId", "SHIP_FROM_VENDOR")));
+                GenericValue orderRoleShipFrom = EntityUtil.getFirst(delegator.findByAnd("OrderRole", UtilMisc.toMap("orderId", primaryOrderId, "roleTypeId", "SHIP_FROM_VENDOR"), null, false));
                 if (UtilValidate.isNotEmpty(orderRoleShipFrom)) {
                     partyIdFrom = orderRoleShipFrom.getString("partyId");
                 } else {
-                    orderRoleShipFrom = EntityUtil.getFirst(delegator.findByAnd("OrderRole", UtilMisc.toMap("orderId", primaryOrderId, "roleTypeId", "BILL_FROM_VENDOR")));
+                    orderRoleShipFrom = EntityUtil.getFirst(delegator.findByAnd("OrderRole", UtilMisc.toMap("orderId", primaryOrderId, "roleTypeId", "BILL_FROM_VENDOR"), null, false));
                     partyIdFrom = orderRoleShipFrom.getString("partyId");
                 }
             }
@@ -755,7 +755,7 @@ public class PackingSession implements java.io.Serializable {
         }
 
         newShipment.put("partyIdFrom", partyIdFrom);
-        Debug.log("Creating new shipment with context: " + newShipment, module);
+        Debug.logInfo("Creating new shipment with context: " + newShipment, module);
         Map<String, Object> newShipResp = this.getDispatcher().runSync("createShipment", newShipment);
 
         if (ServiceUtil.isError(newShipResp)) {
@@ -816,7 +816,7 @@ public class PackingSession implements java.io.Serializable {
     protected void updateShipmentRouteSegments() throws GeneralException {
         BigDecimal shipmentWeight = getTotalWeight();
         if (shipmentWeight.compareTo(BigDecimal.ZERO) <= 0) return;
-        List<GenericValue> shipmentRouteSegments = getDelegator().findByAnd("ShipmentRouteSegment", UtilMisc.toMap("shipmentId", this.getShipmentId()));
+        List<GenericValue> shipmentRouteSegments = getDelegator().findByAnd("ShipmentRouteSegment", UtilMisc.toMap("shipmentId", this.getShipmentId()), null, false);
         if (! UtilValidate.isEmpty(shipmentRouteSegments)) {
             for (GenericValue shipmentRouteSegment: shipmentRouteSegments) {
                 shipmentRouteSegment.set("billingWeight", shipmentWeight);
@@ -837,7 +837,7 @@ public class PackingSession implements java.io.Serializable {
     protected void setPickerOnPicklist() throws GeneralException {
         if (picklistBinId != null) {
             // first find the picklist id
-            GenericValue bin = this.getDelegator().findByPrimaryKey("PicklistBin", UtilMisc.toMap("picklistBinId", picklistBinId));
+            GenericValue bin = this.getDelegator().findOne("PicklistBin", UtilMisc.toMap("picklistBinId", picklistBinId), false);
             if (bin != null) {
                 Map<String, Object> ctx = FastMap.newInstance();
                 ctx.put("picklistId", bin.getString("picklistId"));
@@ -845,7 +845,7 @@ public class PackingSession implements java.io.Serializable {
                 ctx.put("roleTypeId", "PICKER");
 
                 // check if the role already exists and is valid
-                List<GenericValue> currentRoles = this.getDelegator().findByAnd("PicklistRole", ctx);
+                List<GenericValue> currentRoles = this.getDelegator().findByAnd("PicklistRole", ctx, null, false);
                 currentRoles = EntityUtil.filterByDate(currentRoles);
 
                 // if not; create the role
@@ -906,7 +906,7 @@ public class PackingSession implements java.io.Serializable {
             if (UtilValidate.isEmpty(shippableItemInfo)) {
                 shippableItemInfo = FastList.newInstance();
                 for (PackingSessionLine line: getLines()) {
-                    List<GenericValue> oiasgas = getDelegator().findByAnd("OrderItemAndShipGroupAssoc", UtilMisc.toMap("orderId", line.getOrderId(), "orderItemSeqId", line.getOrderItemSeqId(), "shipGroupSeqId", line.getShipGroupSeqId()));
+                    List<GenericValue> oiasgas = getDelegator().findByAnd("OrderItemAndShipGroupAssoc", UtilMisc.toMap("orderId", line.getOrderId(), "orderItemSeqId", line.getOrderItemSeqId(), "shipGroupSeqId", line.getShipGroupSeqId()), null, false);
                     shippableItemInfo.addAll(oiasgas);
                 }
             }
@@ -999,8 +999,8 @@ public class PackingSession implements java.io.Serializable {
             if ("PicklistItem".equals(v.getEntityName())) {
                 quantity = v.getBigDecimal("quantity").setScale(2, BigDecimal.ROUND_HALF_UP);
                 try {
-                    orderItem = v.getRelatedOne("OrderItem");
-                    productId = v.getRelatedOne("InventoryItem").getString("productId");
+                    orderItem = v.getRelatedOne("OrderItem", false);
+                    productId = v.getRelatedOne("InventoryItem", false).getString("productId");
                 } catch (GenericEntityException e) {
                     Debug.logError(e, module);
                 }
@@ -1010,7 +1010,7 @@ public class PackingSession implements java.io.Serializable {
                 productId = v.getString("inventoryProductId");
                 quantity = v.getBigDecimal("totQuantityReserved").setScale(2, BigDecimal.ROUND_HALF_UP);
             }
-            Debug.log("created item display object quantity: " + quantity + " (" + productId + ")", module);
+            Debug.logInfo("created item display object quantity: " + quantity + " (" + productId + ")", module);
         }
 
         public GenericValue getOrderItem() {

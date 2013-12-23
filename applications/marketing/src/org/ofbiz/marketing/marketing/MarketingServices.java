@@ -68,14 +68,14 @@ public class MarketingServices {
         try {
             // locate the contact list
             Map<String, Object> input = UtilMisc.<String, Object>toMap("contactListId", contactListId);
-            GenericValue contactList = delegator.findByPrimaryKey("ContactList", input);
+            GenericValue contactList = delegator.findOne("ContactList", input, false);
             if (contactList == null) {
                 String error = UtilProperties.getMessage(resourceMarketing, "MarketingContactListNotFound", input, locale);
                 return ServiceUtil.returnError(error);
             }
 
             // perform actions as the system user
-            GenericValue userLogin = delegator.findByPrimaryKeyCache("UserLogin", UtilMisc.toMap("userLoginId", "system"));
+            GenericValue userLogin = delegator.findOne("UserLogin", UtilMisc.toMap("userLoginId", "system"), true);
 
             // associate the email with anonymous user TODO: do we need a custom contact mech purpose type, say MARKETING_EMAIL?
             if (partyId == null) {
@@ -108,11 +108,11 @@ public class MarketingServices {
             }
         } catch (GenericEntityException e) {
             String error = UtilProperties.getMessage(resourceOrder, "checkhelper.problems_reading_database", locale);
-            Debug.log(e, error + e.getMessage(), module);
+            Debug.logInfo(e, error + e.getMessage(), module);
             return ServiceUtil.returnError(error);
         } catch (GenericServiceException e) {
             String error = UtilProperties.getMessage(resourceMarketing, "MarketingServiceError", locale);
-            Debug.log(e, error + e.getMessage(), module);
+            Debug.logInfo(e, error + e.getMessage(), module);
             return ServiceUtil.returnError(error);
         }
         return ServiceUtil.returnSuccess();

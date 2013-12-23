@@ -167,7 +167,7 @@ under the License.
 <#if extInfo == "T">
           <tr><td colspan="3"><hr /></td></tr>
           <tr>
-            <td class="label">${uiLabelMap.PartyCountryCode}</td>
+            <td class="label">${uiLabelMap.CommonCountryCode}</td>
             <td><input type="text" name="countryCode" value="${parameters.countryCode?if_exists}"/></td>
           </tr>
           <tr>
@@ -258,14 +258,14 @@ under the License.
     <#assign alt_row = false>
     <#assign rowCount = 0>
     <#list partyList as partyRow>
-      <#assign partyType = partyRow.getRelatedOne("PartyType")?if_exists>
+      <#assign partyType = partyRow.getRelatedOne("PartyType", false)?if_exists>
       <tr valign="middle"<#if alt_row> class="alternate-row"</#if>>
         <td><a href="<@ofbizUrl>viewprofile?partyId=${partyRow.partyId}</@ofbizUrl>">${partyRow.partyId}</a></td>
         <td>
       <#if partyRow.containsKey("userLoginId")>
           ${partyRow.userLoginId?default("N/A")}
       <#else>
-        <#assign userLogins = partyRow.getRelated("UserLogin")>
+        <#assign userLogins = partyRow.getRelated("UserLogin", null, null, false)>
         <#if (userLogins.size() > 0)>
           <#if (userLogins.size() > 1)>
           (${uiLabelMap.CommonMany})
@@ -313,7 +313,7 @@ under the License.
       <#if partyType?exists>
         <td>
         <#if partyType.partyTypeId?has_content && partyType.partyTypeId=="PERSON">
-          <#assign partyRelateCom = delegator.findByAnd("PartyRelationship", {"partyIdTo", partyRow.partyId,"roleTypeIdFrom","ACCOUNT","roleTypeIdTo","CONTACT"})>
+          <#assign partyRelateCom = delegator.findByAnd("PartyRelationship", {"partyIdTo", partyRow.partyId,"roleTypeIdFrom","ACCOUNT","roleTypeIdTo","CONTACT"}, null, false)>
           <#if partyRelateCom?has_content>
             <#list partyRelateCom as partyRelationship>
               <#if partyRelationship.partyIdFrom?has_content>
@@ -337,7 +337,7 @@ under the License.
         <td>${partyDate.lastModifiedDate?if_exists}</td>
         <td class="button-col align-float">
           <a href="<@ofbizUrl>viewprofile?partyId=${partyRow.partyId}</@ofbizUrl>">${uiLabelMap.CommonDetails}</a>
-      <#if security.hasRolePermission("ORDERMGR", "_VIEW", "", "", session)>
+      <#if security.hasEntityPermission("ORDERMGR", "_VIEW", session)>
           <form name= "searchorders_o_${rowCount}" method= "post" action= "/ordermgr/control/searchorders">
             <input type= "hidden" name= "lookupFlag" value= "Y" />
             <input type= "hidden" name= "hideFields" value= "Y" />

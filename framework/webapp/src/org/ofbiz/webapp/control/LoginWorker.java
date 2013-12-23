@@ -22,8 +22,12 @@ import static org.ofbiz.base.util.UtilGenerics.checkMap;
 
 import java.math.BigInteger;
 import java.security.cert.X509Certificate;
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.ServiceLoader;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -39,18 +43,18 @@ import javolution.util.FastList;
 import javolution.util.FastMap;
 
 import org.ofbiz.base.component.ComponentConfig;
-import org.ofbiz.base.container.ContainerConfig;
-import org.ofbiz.base.container.ContainerException;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.GeneralException;
 import org.ofbiz.base.util.KeyStoreUtil;
 import org.ofbiz.base.util.StringUtil;
+import org.ofbiz.base.util.StringUtil.StringWrapper;
+import org.ofbiz.base.util.UtilDateTime;
 import org.ofbiz.base.util.UtilFormatOut;
+import org.ofbiz.base.util.UtilGenerics;
 import org.ofbiz.base.util.UtilHttp;
 import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.base.util.UtilProperties;
 import org.ofbiz.base.util.UtilValidate;
-import org.ofbiz.base.util.StringUtil.StringWrapper;
 import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.DelegatorFactory;
 import org.ofbiz.entity.GenericEntityException;
@@ -62,11 +66,10 @@ import org.ofbiz.entity.model.ModelEntity;
 import org.ofbiz.entity.serialize.XmlSerializer;
 import org.ofbiz.entity.transaction.GenericTransactionException;
 import org.ofbiz.entity.transaction.TransactionUtil;
+import org.ofbiz.entity.util.EntityUtil;
 import org.ofbiz.security.Security;
 import org.ofbiz.security.SecurityConfigurationException;
 import org.ofbiz.security.SecurityFactory;
-import org.ofbiz.security.authz.Authorization;
-import org.ofbiz.security.authz.AuthorizationFactory;
 import org.ofbiz.service.GenericServiceException;
 import org.ofbiz.service.LocalDispatcher;
 import org.ofbiz.service.ModelService;
@@ -121,6 +124,10 @@ public class LoginWorker {
      * Gets (and creates if necessary) a key to be used for an external login parameter
      */
     public static String getExternalLoginKey(HttpServletRequest request) {
+        boolean externalLoginKeyEnabled = "true".equals(UtilProperties.getPropertyValue("security", "security.login.externalLoginKey.enabled", "true"));
+        if (!externalLoginKeyEnabled) {
+            return null;
+        }
         //Debug.logInfo("Running getExternalLoginKey, externalLoginKeys.size=" + externalLoginKeys.size(), module);
         GenericValue userLogin = (GenericValue) request.getAttribute("userLogin");
 
@@ -133,7 +140,7 @@ public class LoginWorker {
             String sesExtKey = (String) session.getAttribute(EXTERNAL_LOGIN_KEY_ATTR);
 
             if (sesExtKey != null) {
-                if (isAjax(request)) return sesExtKey; 
+                if (isAjax(request)) return sesExtKey;
 
                 externalLoginKeys.remove(sesExtKey);
             }
@@ -214,14 +221,8 @@ public class LoginWorker {
     }
 
     /**
-     * An HTTP WebEvent handler that checks to see is a userLogin is logged in.
-     * If not, the user is forwarded to the login page.
-     *
-     * @param request The HTTP request object for the current JSP or Servlet request.
-     * @param response The HTTP response object for the current JSP or Servlet request.
-     * @return String
      */
-    public static String checkLogin(HttpServletRequest request, HttpServletResponse response) {
+    public static GenericValue checkLogout(HttpServletRequest request, HttpServletResponse response) {
         HttpSession session = request.getSession();
         GenericValue userLogin = (GenericValue) session.getAttribute("userLogin");
 
@@ -233,15 +234,83 @@ public class LoginWorker {
         // user is logged in; check to see if they have globally logged out if not
         // check if they have permission for this login attempt; if not log them out
         if (userLogin != null) {
+            List<Object> errorMessageList = UtilGenerics.checkList(request.getAttribute("_ERROR_MESSAGE_LIST"));
             if (!hasBasePermission(userLogin, request) || isFlaggedLoggedOut(userLogin)) {
+                if (errorMessageList == null) {
+                    errorMessageList = new FastList<Object>();
+                    request.setAttribute("_ERROR_MESSAGE_LIST", errorMessageList);
+                }
+                errorMessageList.add("User does not have permission or is flagged as logged out");
                 Debug.logInfo("User does not have permission or is flagged as logged out", module);
                 doBasicLogout(userLogin, request, response);
                 userLogin = null;
-
-                // have to reget this because the old session object will be invalid
-                session = request.getSession();
             }
         }
+        return userLogin;
+    }
+
+    /** This WebEvent allows for java 'services' to hook into the login path.
+     * This method loads all instances of {@link LoginCheck}, and calls the
+     * {@link LoginCheck#associate} method.  The first implementation to return
+     * a non-null value gets that value returned to the caller.  Returning
+     * "none" will abort processing, while anything else gets looked up in
+     * outer view dispatch.  This event is called when the current request
+     * needs to have a validly logged in user; it is a wrapper around {@link
+     * #checkLogin}.
+     *
+     * @param request The HTTP request object for the current JSP or Servlet request.
+     * @param response The HTTP response object for the current JSP or Servlet request.
+     * @return String
+     */
+    public static String extensionCheckLogin(HttpServletRequest request, HttpServletResponse response) {
+        for (LoginCheck check: ServiceLoader.load(LoginCheck.class)) {
+            if (!check.isEnabled()) {
+                continue;
+            }
+            String result = check.associate(request, response);
+            if (result != null) {
+                return result;
+            }
+        }
+        return checkLogin(request, response);
+    }
+
+    /** This WebEvent allows for java 'services' to hook into the login path.
+     * This method loads all instances of {@link LoginCheck}, and calls the
+     * {@link LoginCheck#check} method.  The first implementation to return
+     * a non-null value gets that value returned to the caller.  Returning
+     * "none" will abort processing, while anything else gets looked up in
+     * outer view dispatch; for preprocessors, only "success" makes sense.
+     *
+     * @param request The HTTP request object for the current JSP or Servlet request.
+     * @param response The HTTP response object for the current JSP or Servlet request.
+     * @return String
+     */
+    public static String extensionConnectLogin(HttpServletRequest request, HttpServletResponse response) {
+        for (LoginCheck check: ServiceLoader.load(LoginCheck.class)) {
+            if (!check.isEnabled()) {
+                continue;
+            }
+            String result = check.check(request, response);
+            if (result != null) {
+                return result;
+            }
+        }
+        return "success";
+    }
+
+    /**
+     * An HTTP WebEvent handler that checks to see is a userLogin is logged in.
+     * If not, the user is forwarded to the login page.
+     *
+     * @param request The HTTP request object for the current JSP or Servlet request.
+     * @param response The HTTP response object for the current JSP or Servlet request.
+     * @return String
+     */
+    public static String checkLogin(HttpServletRequest request, HttpServletResponse response) {
+        GenericValue userLogin = checkLogout(request, response);
+        // have to reget this because the old session object will be invalid
+        HttpSession session = request.getSession();
 
         String username = null;
         String password = null;
@@ -315,43 +384,44 @@ public class LoginWorker {
         if (UtilValidate.isEmpty(password)) {
             unpwErrMsgList.add(UtilProperties.getMessage(resourceWebapp, "loginevents.password_was_empty_reenter", UtilHttp.getLocale(request)));
         }
+        boolean requirePasswordChange = "Y".equals(request.getParameter("requirePasswordChange"));
         if (!unpwErrMsgList.isEmpty()) {
             request.setAttribute("_ERROR_MESSAGE_LIST_", unpwErrMsgList);
-            return "error";
+            return  requirePasswordChange ? "requirePasswordChange" : "error";
         }
-        
+
         boolean setupNewDelegatorEtc = false;
-        
+
         LocalDispatcher dispatcher = (LocalDispatcher) request.getAttribute("dispatcher");
         Delegator delegator = (Delegator) request.getAttribute("delegator");
 
         // if a tenantId was passed in, see if the userLoginId is associated with that tenantId (can use any delegator for this, entity is not tenant-specific)
         String tenantId = request.getParameter("tenantId");
         if (UtilValidate.isNotEmpty(tenantId)) {
-            // see if we need to activate a tenant delegator, only do if the current delegatorName has a hash symbol in it, and if the passed in tenantId doesn't match the one in the delegatorName 
+            // see if we need to activate a tenant delegator, only do if the current delegatorName has a hash symbol in it, and if the passed in tenantId doesn't match the one in the delegatorName
             String oldDelegatorName = delegator.getDelegatorName();
             int delegatorNameHashIndex = oldDelegatorName.indexOf('#');
             String currentDelegatorTenantId = null;
             if (delegatorNameHashIndex > 0) {
                 currentDelegatorTenantId = oldDelegatorName.substring(delegatorNameHashIndex + 1);
-                if (currentDelegatorTenantId != null) currentDelegatorTenantId.trim();
+                if (currentDelegatorTenantId != null) currentDelegatorTenantId = currentDelegatorTenantId.trim();
             }
-            
+
             if (delegatorNameHashIndex == -1 || (currentDelegatorTenantId != null && !tenantId.equals(currentDelegatorTenantId))) {
-                /* don't require this, allow a user to authenticate inside the tenant as long as the userLoginId and 
-                 * password match what is in that tenant's database; instead just set things up below 
+                /* don't require this, allow a user to authenticate inside the tenant as long as the userLoginId and
+                 * password match what is in that tenant's database; instead just set things up below
                 try {
                     List<GenericValue> tenantUserLoginList = delegator.findList("TenantUserLogin", EntityCondition.makeCondition(EntityOperator.AND, "tenantId", tenantId, "userLoginId", username), null, null, null, false);
                     if (tenantUserLoginList != null && tenantUserLoginList.size() > 0) {
                         ServletContext servletContext = session.getServletContext();
-                        
+
                         // if so make that tenant active, setup a new delegator and a new dispatcher
                         String delegatorName = delegator.getDelegatorName() + "#" + tenantId;
-                        
+
                         // after this line the delegator is replaced with the new per-tenant delegator
                         delegator = DelegatorFactory.getDelegator(delegatorName);
                         dispatcher = ContextFilter.makeWebappDispatcher(servletContext, delegator);
-                        
+
                         // NOTE: these will be local for now and set in the request and session later, after we've verified that the user
                         setupNewDelegatorEtc = true;
                     } else {
@@ -369,10 +439,10 @@ public class LoginWorker {
                 */
 
                 ServletContext servletContext = session.getServletContext();
-                
+
                 // make that tenant active, setup a new delegator and a new dispatcher
                 String delegatorName = delegator.getDelegatorBaseName() + "#" + tenantId;
-                
+
                 try {
                     // after this line the delegator is replaced with the new per-tenant delegator
                     delegator = DelegatorFactory.getDelegator(delegatorName);
@@ -384,7 +454,7 @@ public class LoginWorker {
                     request.setAttribute("_ERROR_MESSAGE_", errMsg);
                     return "error";
                 }
-                
+
                 // NOTE: these will be local for now and set in the request and session later, after we've verified that the user
                 setupNewDelegatorEtc = true;
             }
@@ -406,7 +476,7 @@ public class LoginWorker {
         if (ModelService.RESPOND_SUCCESS.equals(result.get(ModelService.RESPONSE_MESSAGE))) {
             GenericValue userLogin = (GenericValue) result.get("userLogin");
 
-            if ("Y".equals(request.getParameter("requirePasswordChange"))) {
+            if (requirePasswordChange) {
                 Map<String, Object> inMap = UtilMisc.<String, Object>toMap("login.username", username, "login.password", password, "locale", UtilHttp.getLocale(request));
                 inMap.put("userLoginId", username);
                 inMap.put("currentPassword", password);
@@ -420,7 +490,7 @@ public class LoginWorker {
                     Map<String, String> messageMap = UtilMisc.toMap("errorMessage", e.getMessage());
                     String errMsg = UtilProperties.getMessage(resourceWebapp, "loginevents.following_error_occurred_during_login", messageMap, UtilHttp.getLocale(request));
                     request.setAttribute("_ERROR_MESSAGE_", errMsg);
-                    return "error";
+                    return "requirePasswordChange";
                 }
                 if (ServiceUtil.isError(resultPasswordChange)) {
                     String errorMessage = (String) resultPasswordChange.get(ModelService.ERROR_MESSAGE);
@@ -430,7 +500,7 @@ public class LoginWorker {
                         request.setAttribute("_ERROR_MESSAGE_", errMsg);
                     }
                     request.setAttribute("_ERROR_MESSAGE_LIST_", resultPasswordChange.get(ModelService.ERROR_MESSAGE_LIST));
-                    return "error";
+                    return "requirePasswordChange";
                 } else {
                     try {
                         userLogin.refresh();
@@ -440,20 +510,26 @@ public class LoginWorker {
                         Map<String, String> messageMap = UtilMisc.toMap("errorMessage", e.getMessage());
                         String errMsg = UtilProperties.getMessage(resourceWebapp, "loginevents.following_error_occurred_during_login", messageMap, UtilHttp.getLocale(request));
                         request.setAttribute("_ERROR_MESSAGE_", errMsg);
-                        return "error";
+                        return "requirePasswordChange";
                     }
                 }
             }
 
             if (setupNewDelegatorEtc) {
                 // now set the delegator and dispatcher in a bunch of places just in case they were changed
-                setWebContextObjects(request, response, delegator, dispatcher, true);
+                setWebContextObjects(request, response, delegator, dispatcher);
             }
-            
+
             // check to see if a password change is required for the user
             Map<String, Object> userLoginSession = checkMap(result.get("userLoginSession"), String.class, Object.class);
             if (userLogin != null && "Y".equals(userLogin.getString("requirePasswordChange"))) {
                 return "requirePasswordChange";
+            }
+            String autoChangePassword = UtilProperties.getPropertyValue("security.properties", "user.auto.change.password.enable", "false");
+            if ("true".equalsIgnoreCase(autoChangePassword)) {
+                if ("requirePasswordChange".equals(autoChangePassword(request, response))) {
+                    return "requirePasswordChange";
+                }
             }
 
             // check on JavaScriptEnabled
@@ -466,59 +542,36 @@ public class LoginWorker {
             } catch (GenericServiceException e) {
                 Debug.logError(e, "Error setting user preference", module);
             }
-            
+
             // finally do the main login routine to set everything else up in the session, etc
             return doMainLogin(request, response, userLogin, userLoginSession);
         } else {
             Map<String, String> messageMap = UtilMisc.toMap("errorMessage", (String) result.get(ModelService.ERROR_MESSAGE));
             String errMsg = UtilProperties.getMessage(resourceWebapp, "loginevents.following_error_occurred_during_login", messageMap, UtilHttp.getLocale(request));
             request.setAttribute("_ERROR_MESSAGE_", errMsg);
-            return "error";
+            return requirePasswordChange ? "requirePasswordChange" : "error";
         }
     }
-    
-    /*         persistSerialized is set at false in the context of a cluster when using (at least) DeltaManager. 
-            Because we have no easy ways to set DeltaManager.pathname to null from OFBiz
-           So persistSerialized is set to true when login out. This prevent a NPE due to non serialized objects put in session*/
-    private static void setWebContextObjects(HttpServletRequest request, HttpServletResponse response, Delegator delegator, LocalDispatcher dispatcher, Boolean persistSerialized) {
+
+    private static void setWebContextObjects(HttpServletRequest request, HttpServletResponse response, Delegator delegator, LocalDispatcher dispatcher) {
         HttpSession session = request.getSession();
-        
-        // NOTE: we do NOT want to set this in the servletContet, only in the request and session
-        session.setAttribute("delegatorName", delegator.getDelegatorName());
-        
+        // NOTE: we do NOT want to set this in the servletContext, only in the request and session
+        // We also need to setup the security objects since they are dependent on the delegator
+        Security security = null;
+        try {
+            security = SecurityFactory.getInstance(delegator);
+        } catch (SecurityConfigurationException e) {
+            Debug.logError(e, module);
+        }
         request.setAttribute("delegator", delegator);
-        if (!persistSerialized) {
-            session.setAttribute("delegator", null);
-        } else {
-            session.setAttribute("delegator", delegator);
-        }
-        
         request.setAttribute("dispatcher", dispatcher);
-        if (!persistSerialized) {
-            session.setAttribute("dispatcher", null);
-        } else {
-            session.setAttribute("dispatcher", dispatcher);
-        }
-        
-        if (persistSerialized) {
-            // we also need to setup the security and authz objects since they are dependent on the delegator
-            try {
-                Security security = SecurityFactory.getInstance(delegator);
-                request.setAttribute("security", security);
-                session.setAttribute("security", security);
-            } catch (SecurityConfigurationException e) {
-                Debug.logError(e, module);
-            }
-            
-            try {
-                Authorization authz = AuthorizationFactory.getInstance(delegator);
-                request.setAttribute("authz", authz);
-                session.setAttribute("authz", authz);
-            } catch (SecurityConfigurationException e) {
-                Debug.logError(e, module);
-            }
-        }
-        
+        request.setAttribute("security", security);
+
+        session.setAttribute("delegatorName", delegator.getDelegatorName());
+        session.setAttribute("delegator", delegator);
+        session.setAttribute("dispatcher", dispatcher);
+        session.setAttribute("security", security);
+
         // get rid of the visit info since it was pointing to the previous database, and get a new one
         session.removeAttribute("visitor");
         session.removeAttribute("visit");
@@ -568,8 +621,8 @@ public class LoginWorker {
         if (modelUserLogin.isField("partyId")) {
             // if partyId is a field, then we should have these relations defined
             try {
-                GenericValue person = userLogin.getRelatedOne("Person");
-                GenericValue partyGroup = userLogin.getRelatedOne("PartyGroup");
+                GenericValue person = userLogin.getRelatedOne("Person", false);
+                GenericValue partyGroup = userLogin.getRelatedOne("PartyGroup", false);
                 if (person != null) session.setAttribute("person", person);
                 if (partyGroup != null) session.setAttribute("partyGroup", partyGroup);
             } catch (GenericEntityException e) {
@@ -633,7 +686,6 @@ public class LoginWorker {
         request.removeAttribute("delegator");
         request.removeAttribute("dispatcher");
         request.removeAttribute("security");
-        request.removeAttribute("authz");
 
         // now empty out the session
         session.invalidate();
@@ -641,7 +693,7 @@ public class LoginWorker {
 
         // setup some things that should always be there
         UtilHttp.setInitialRequestInfo(request);
-        
+
         if (currCatalog != null) session.setAttribute("CURRENT_CATALOG_ID", currCatalog);
         if (delegatorName != null) {
             // if there is a tenantId in the delegatorName remove it now so that tenant selection doesn't last beyond logout
@@ -652,24 +704,9 @@ public class LoginWorker {
 
             delegator = DelegatorFactory.getDelegator(delegatorName);
             LocalDispatcher dispatcher = ContextFilter.makeWebappDispatcher(session.getServletContext(), delegator);
-            // get the container configuration           
-            String ofbizHome = System.getProperty("ofbiz.home");
-            String configFile = ofbizHome + "/framework/base/config/ofbiz-containers.xml";
-            ContainerConfig.Container cc = null;
-            String mgrClassName = null;
-            try {
-                cc = ContainerConfig.getContainer("catalina-container", configFile);
-                mgrClassName = ContainerConfig.getPropertyValue(cc, "manager-class", "org.apache.catalina.ha.session.DeltaManager");
-            } catch (ContainerException e) {
-                Debug.logError(e, "No catalina-container configuration found in container config!");
-            }
-            if ("org.apache.catalina.ha.session.DeltaManager".equals(mgrClassName)) {
-                setWebContextObjects(request, response, delegator, dispatcher, false);
-            } else {
-                setWebContextObjects(request, response, delegator, dispatcher, true);
-            }
+            setWebContextObjects(request, response, delegator, dispatcher);
         }
-        
+
         // DON'T save the cart, causes too many problems: if (shoppingCart != null) session.setAttribute("shoppingCart", new WebShoppingCart(shoppingCart, session));
     }
 
@@ -766,7 +803,7 @@ public class LoginWorker {
         return "success";
     }
 
-    private static boolean isUserLoggedIn(HttpServletRequest request) {
+    public static boolean isUserLoggedIn(HttpServletRequest request) {
         HttpSession session = request.getSession();
         GenericValue currentUserLogin = (GenericValue) session.getAttribute("userLogin");
         if (currentUserLogin != null) {
@@ -787,7 +824,7 @@ public class LoginWorker {
      * @param userLoginId
      * @return Returns "success" if user could be logged in or "error" if there was a problem.
      */
-    private static String loginUserWithUserLoginId(HttpServletRequest request, HttpServletResponse response, String userLoginId) {
+    public static String loginUserWithUserLoginId(HttpServletRequest request, HttpServletResponse response, String userLoginId) {
         Delegator delegator = (Delegator) request.getAttribute("delegator");
         try {
             GenericValue userLogin = delegator.findOne("UserLogin", false, "userLoginId", userLoginId);
@@ -871,7 +908,7 @@ public class LoginWorker {
 
             String cnPattern = UtilProperties.getPropertyValue("security.properties", "security.login.cert.pattern", "(.*)");
             Pattern pattern = Pattern.compile(cnPattern);
-            //Debug.log("CN Pattern: " + cnPattern, module);
+            //Debug.logInfo("CN Pattern: " + cnPattern, module);
 
             if (currentUserLogin == null) {
                 X509Certificate[] clientCerts = (X509Certificate[]) request.getAttribute("javax.servlet.request.X509Certificate"); // 2.2 spec
@@ -884,7 +921,7 @@ public class LoginWorker {
 
                     for (int i = 0; i < clientCerts.length; i++) {
                         //X500Principal x500 = clientCerts[i].getSubjectX500Principal();
-                        //Debug.log("Checking client certification for authentication: " + x500.getName(), module);
+                        //Debug.logInfo("Checking client certification for authentication: " + x500.getName(), module);
 
                         Map<String, String> x500Map = KeyStoreUtil.getCertX500Map(clientCerts[i]);
                         if (i == 0) {
@@ -894,14 +931,14 @@ public class LoginWorker {
                             if (m.matches()) {
                                 userLoginId = m.group(1);
                             } else {
-                                Debug.log("Client certificate CN does not match pattern: [" + cnPattern + "]", module);
+                                Debug.logInfo("Client certificate CN does not match pattern: [" + cnPattern + "]", module);
                             }
                         }
 
                         try {
                             // check for a valid issuer (or generated cert data)
                             if (LoginWorker.checkValidIssuer(delegator, x500Map, clientCerts[i].getSerialNumber())) {
-                                //Debug.log("Looking up userLogin from CN: " + userLoginId, module);
+                                //Debug.logInfo("Looking up userLogin from CN: " + userLoginId, module);
 
                                 // CN should match the userLoginId
                                 GenericValue userLogin = delegator.findOne("UserLogin", false, "userLoginId", userLoginId);
@@ -972,7 +1009,7 @@ public class LoginWorker {
 
         GenericValue userLogin = LoginWorker.externalLoginKeys.get(externalKey);
         if (userLogin != null) {
-            //to check it's the right tenant 
+            //to check it's the right tenant
             //in case username and password are the same in different tenants
             LocalDispatcher dispatcher = (LocalDispatcher) request.getAttribute("dispatcher");
             Delegator delegator = (Delegator) request.getAttribute("delegator");
@@ -981,7 +1018,7 @@ public class LoginWorker {
             if (!oldDelegatorName.equals(userLogin.getDelegator().getDelegatorName())) {
                 delegator = DelegatorFactory.getDelegator(userLogin.getDelegator().getDelegatorName());
                 dispatcher = ContextFilter.makeWebappDispatcher(servletContext, delegator);
-                setWebContextObjects(request, response, delegator, dispatcher, true);
+                setWebContextObjects(request, response, delegator, dispatcher);
             }
             // found userLogin, do the external login...
 
@@ -1023,31 +1060,68 @@ public class LoginWorker {
                 "Y".equalsIgnoreCase(userLogin.getString("hasLoggedOut")) : false);
     }
 
-    protected static boolean hasBasePermission(GenericValue userLogin, HttpServletRequest request) {
-        ServletContext context = (ServletContext) request.getAttribute("servletContext");
-        Authorization authz = (Authorization) request.getAttribute("authz");
+    /**
+     * Returns <code>true</code> if the specified user is authorized to access the specified web application.
+     * @param info
+     * @param security
+     * @param userLogin
+     * @return <code>true</code> if the specified user is authorized to access the specified web application
+     */
+    public static boolean hasApplicationPermission(ComponentConfig.WebappInfo info, Security security, GenericValue userLogin) {
+        // New authorization attribute takes precedence.
+        String accessPermission = info.getAccessPermission();
+        if (!accessPermission.isEmpty()) {
+            return security.hasPermission(accessPermission, userLogin);
+        }
+        for (String permission: info.getBasePermission()) {
+            if (!"NONE".equals(permission) && !security.hasEntityPermission(permission, "_VIEW", userLogin)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public static boolean hasBasePermission(GenericValue userLogin, HttpServletRequest request) {
         Security security = (Security) request.getAttribute("security");
-
-        String serverId = (String) context.getAttribute("_serverId");
-        String contextPath = request.getContextPath();
-
-        ComponentConfig.WebappInfo info = ComponentConfig.getWebAppInfo(serverId, contextPath);
         if (security != null) {
+            ServletContext context = (ServletContext) request.getAttribute("servletContext");
+            String serverId = (String) context.getAttribute("_serverId");
+            // get a context path from the request, if it is empty then assume it is the root mount point
+            String contextPath = request.getContextPath();
+            if (UtilValidate.isEmpty(contextPath)) {
+                contextPath = "/";
+            }
+            ComponentConfig.WebappInfo info = ComponentConfig.getWebAppInfo(serverId, contextPath);
             if (info != null) {
-                for (String permission: info.getBasePermission()) {
-                    if (!"NONE".equals(permission) && !security.hasEntityPermission(permission, "_VIEW", userLogin) &&
-                            !authz.hasPermission(userLogin.getString("userLoginId"), permission, null)) {
-                        return false;
-                    }
-                }
+                return hasApplicationPermission(info, security, userLogin);
             } else {
                 Debug.logInfo("No webapp configuration found for : " + serverId + " / " + contextPath, module);
             }
         } else {
             Debug.logWarning("Received a null Security object from HttpServletRequest", module);
         }
-
         return true;
+    }
+
+    /**
+     * Returns a <code>Collection</code> of <code>WebappInfo</code> instances that the specified
+     * user is authorized to access.
+     * @param security
+     * @param userLogin
+     * @param serverName
+     * @param menuName
+     * @return A <code>Collection</code> <code>WebappInfo</code> instances that the specified
+     * user is authorized to access
+     */
+    public static Collection<ComponentConfig.WebappInfo> getAppBarWebInfos(Security security, GenericValue userLogin, String serverName, String menuName) {
+        Collection<ComponentConfig.WebappInfo> allInfos = ComponentConfig.getAppBarWebInfos(serverName, menuName);
+        Collection<ComponentConfig.WebappInfo> allowedInfos = new ArrayList<ComponentConfig.WebappInfo>(allInfos.size());
+        for (ComponentConfig.WebappInfo info : allInfos) {
+            if (hasApplicationPermission(info, security, userLogin)) {
+                allowedInfos.add(info);
+            }
+        }
+        return allowedInfos;
     }
 
     public static Map<String, Object> getUserLoginSession(GenericValue userLogin) {
@@ -1055,7 +1129,7 @@ public class LoginWorker {
         GenericValue userLoginSession;
         Map<String, Object> userLoginSessionMap = null;
         try {
-            userLoginSession = userLogin.getRelatedOne("UserLoginSession");
+            userLoginSession = userLogin.getRelatedOne("UserLoginSession", false);
             if (userLoginSession != null) {
                 Object deserObj = XmlSerializer.deserialize(userLoginSession.getString("sessionData"), delegator);
                 //don't check, just cast, if it fails it will get caught and reported below; if (deserObj instanceof Map)
@@ -1069,9 +1143,45 @@ public class LoginWorker {
         }
         return userLoginSessionMap;
     }
-    
+
     public static boolean isAjax(HttpServletRequest request) {
        return "XMLHttpRequest".equals(request.getHeader("X-Requested-With"));
     }
-    
+
+    public static String autoChangePassword(HttpServletRequest request, HttpServletResponse response) {
+        Delegator delegator = (Delegator) request.getAttribute("delegator");
+        String userName = request.getParameter("USERNAME");
+        Timestamp now = UtilDateTime.nowTimestamp();
+        Integer reqToChangePwdInDays = Integer.valueOf(UtilProperties.getPropertyValue("security.properties", "user.change.password.days", "0"));
+        Integer passwordNoticePeriod = Integer.valueOf(UtilProperties.getPropertyValue("security.properties", "user.change.password.notification.days", "0"));
+        if (reqToChangePwdInDays > 0) {
+            List<GenericValue> passwordHistories = null;
+            try {
+                passwordHistories = delegator.findByAnd("UserLoginPasswordHistory", UtilMisc.toMap("userLoginId", userName), null, false);
+            } catch (GenericEntityException e) {
+                Debug.logError(e, "Cannot get user's password history record: " + e.getMessage(), module);
+            }
+            if (UtilValidate.isNotEmpty(passwordHistories)) {
+                GenericValue passwordHistory = EntityUtil.getFirst(EntityUtil.filterByDate(passwordHistories));
+                Timestamp passwordCreationDate = passwordHistory.getTimestamp("fromDate");
+                Integer passwordValidDays = reqToChangePwdInDays - passwordNoticePeriod; // Notification starts after days.
+                Timestamp startNotificationFromDate = UtilDateTime.addDaysToTimestamp(passwordCreationDate, passwordValidDays);
+                Timestamp passwordExpirationDate = UtilDateTime.addDaysToTimestamp(passwordCreationDate, reqToChangePwdInDays);
+                if (now.after(startNotificationFromDate)) {
+                    if (now.after(passwordExpirationDate)) {
+                        Map<String, String> messageMap = UtilMisc.toMap("passwordExpirationDate", passwordExpirationDate.toString());
+                        String errMsg = UtilProperties.getMessage(resourceWebapp, "loginevents.password_expired_message", messageMap, UtilHttp.getLocale(request));
+                        request.setAttribute("_ERROR_MESSAGE_", errMsg);
+                        return "requirePasswordChange";
+                    } else {
+                        Map<String, String> messageMap = UtilMisc.toMap("passwordExpirationDate", passwordExpirationDate.toString());
+                        String errMsg = UtilProperties.getMessage(resourceWebapp, "loginevents.password_expiration_alert", messageMap, UtilHttp.getLocale(request));
+                        request.setAttribute("_EVENT_MESSAGE_", errMsg);
+                        return "success";
+                    }
+                }
+            }
+        }
+        return "success";
+    }
 }

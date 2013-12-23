@@ -322,10 +322,10 @@ $(function(){
   <#if unavailableVariants?exists>
     <ul>
       <#list unavailableVariants as prod>
-        <#assign features = prod.getRelated("ProductFeatureAppl")/>
+        <#assign features = prod.getRelated("ProductFeatureAppl", null, null, false)/>
         <li>
           <#list features as feature>
-            <em>${feature.getRelatedOne("ProductFeature").description}</em><#if feature_has_next>, </#if>
+            <em>${feature.getRelatedOne("ProductFeature", false).description}</em><#if feature_has_next>, </#if>
           </#list>
           <span>${uiLabelMap.ProductItemOutOfStock}</span>
         </li>
@@ -355,7 +355,7 @@ $(function(){
     
     <hr />
     <div id="productImageBox">
-        <#if productImageList != null && productImageList?has_content>
+        <#if productImageList?has_content>
             <#-- Product image/name/price -->
             <div id="detailImageBox">
                 <#assign productLargeImageUrl = productContentWrapper.get("LARGE_IMAGE_URL")?if_exists />
@@ -364,7 +364,7 @@ $(function(){
                     <#assign productLargeImageUrl = firstLargeImage />
                 </#if>
                 <#if productLargeImageUrl?string?has_content>
-                    <a href="javascript:popupDetail();"><img id="detailImage" src="<@ofbizContentUrl>${contentPathPrefix?if_exists}${productLargeImageUrl?if_exists}</@ofbizContentUrl>" name="mainImage" vspace="5" hspace="5" width="200" alt="" /></a>
+                    <a href="javascript:popupDetail();"><img id="detailImage" src="<@ofbizContentUrl>${contentPathPrefix?if_exists}${productLargeImageUrl?if_exists}</@ofbizContentUrl>" name="mainImage" vspace="5" hspace="5" class="cssImgXLarge" alt="" /></a>
                     <input type="hidden" id="originalImage" name="originalImage" value="<@ofbizContentUrl>${contentPathPrefix?if_exists}${productLargeImageUrl?if_exists}</@ofbizContentUrl>" />
                 </#if>
                 <#if !productLargeImageUrl?string?has_content>
@@ -390,7 +390,7 @@ $(function(){
                     <#assign productLargeImageUrl = firstLargeImage />
                 </#if>
                 <#if productLargeImageUrl?string?has_content>
-                    <a href="javascript:popupDetail();"><img id="detailImage" src="<@ofbizContentUrl>${contentPathPrefix?if_exists}${productLargeImageUrl?if_exists}</@ofbizContentUrl>" name="mainImage" vspace="5" hspace="5" width="200" alt="" /></a>
+                    <a href="javascript:popupDetail();"><img id="detailImage" src="<@ofbizContentUrl>${contentPathPrefix?if_exists}${productLargeImageUrl?if_exists}</@ofbizContentUrl>" name="mainImage" vspace="5" hspace="5" class="cssImgXLarge" alt="" /></a>
                     <input type="hidden" id="originalImage" name="originalImage" value="<@ofbizContentUrl>${contentPathPrefix?if_exists}${productLargeImageUrl?if_exists}</@ofbizContentUrl>" />
                 </#if>
                 <#if !productLargeImageUrl?string?has_content>
@@ -400,22 +400,22 @@ $(function(){
             <div id="additionalImageBox">
                 <#if productAdditionalImage1?string?has_content>
                     <div class="additionalImage">
-                        <a href="javascript:void(0);" swapDetail="<@ofbizContentUrl>${productAdditionalImage1}</@ofbizContentUrl>"><img src="<@ofbizContentUrl>${productAdditionalImage1}</@ofbizContentUrl>" vspace="5" hspace="5" width="200" alt="" /></a>
+                        <a href="javascript:void(0);" swapDetail="<@ofbizContentUrl>${productAdditionalImage1}</@ofbizContentUrl>"><img src="<@ofbizContentUrl>${productAdditionalImage1}</@ofbizContentUrl>" vspace="5" hspace="5" class="cssImgXLarge" alt="" /></a>
                     </div>
                 </#if>
                 <#if productAdditionalImage2?string?has_content>
                     <div class="additionalImage">
-                        <a href="javascript:void(0);" swapDetail="<@ofbizContentUrl>${productAdditionalImage2}</@ofbizContentUrl>"><img src="<@ofbizContentUrl>${productAdditionalImage2}</@ofbizContentUrl>" vspace="5" hspace="5" width="200" alt="" /></a>
+                        <a href="javascript:void(0);" swapDetail="<@ofbizContentUrl>${productAdditionalImage2}</@ofbizContentUrl>"><img src="<@ofbizContentUrl>${productAdditionalImage2}</@ofbizContentUrl>" vspace="5" hspace="5" class="cssImgXLarge" alt="" /></a>
                     </div>
                 </#if>
                 <#if productAdditionalImage3?string?has_content>
                     <div class="additionalImage">
-                        <a href="javascript:void(0);" swapDetail="<@ofbizContentUrl>${productAdditionalImage3}</@ofbizContentUrl>"><img src="<@ofbizContentUrl>${productAdditionalImage3}</@ofbizContentUrl>" vspace="5" hspace="5" width="200" alt="" /></a>
+                        <a href="javascript:void(0);" swapDetail="<@ofbizContentUrl>${productAdditionalImage3}</@ofbizContentUrl>"><img src="<@ofbizContentUrl>${productAdditionalImage3}</@ofbizContentUrl>" vspace="5" hspace="5" class="cssImgXLarge" alt="" /></a>
                     </div>
                 </#if>
                 <#if productAdditionalImage4?string?has_content>
                     <div class="additionalImage">
-                        <a href="javascript:void(0);" swapDetail="<@ofbizContentUrl>${productAdditionalImage4}</@ofbizContentUrl>"><img src="<@ofbizContentUrl>${productAdditionalImage4}</@ofbizContentUrl>" vspace="5" hspace="5" width="200" alt="" /></a>
+                        <a href="javascript:void(0);" swapDetail="<@ofbizContentUrl>${productAdditionalImage4}</@ofbizContentUrl>"><img src="<@ofbizContentUrl>${productAdditionalImage4}</@ofbizContentUrl>" vspace="5" hspace="5" class="cssImgXLarge" alt="" /></a>
                     </div>
                 </#if>
             </div>
@@ -429,10 +429,9 @@ $(function(){
           <#if sizeProductFeatureAndAppls?has_content>
             <div>
               <#if (sizeProductFeatureAndAppls?size == 1)>
-                <#-- TODO : i18n -->
-                Size:
+                ${uiLabelMap.OrderSizeAvailableSingle}:
               <#else>
-                Sizes Available:
+                ${uiLabelMap.OrderSizeAvailableMultiple}:
               </#if>
               <#list sizeProductFeatureAndAppls as sizeProductFeatureAndAppl>
                 ${sizeProductFeatureAndAppl.description?default(sizeProductFeatureAndAppl.abbrev?default(sizeProductFeatureAndAppl.productFeatureId))}<#if sizeProductFeatureAndAppl_has_next>,</#if>
@@ -495,32 +494,32 @@ $(function(){
             </div>
           </#if>
           <#if (product.quantityIncluded?exists && product.quantityIncluded != 0) || product.quantityUomId?has_content>
-            <#assign quantityUom = product.getRelatedOneCache("QuantityUom")?if_exists />
+            <#assign quantityUom = product.getRelatedOne("QuantityUom", true)?if_exists />
             <div>
               ${uiLabelMap.CommonQuantity}: ${product.quantityIncluded?if_exists} ${((quantityUom.abbreviation)?default(product.quantityUomId))?if_exists}
             </div>
           </#if>
     
           <#if (product.weight?exists && product.weight != 0) || product.weightUomId?has_content>
-            <#assign weightUom = product.getRelatedOneCache("WeightUom")?if_exists />
+            <#assign weightUom = product.getRelatedOne("WeightUom", true)?if_exists />
             <div>
               ${uiLabelMap.CommonWeight}: ${product.weight?if_exists} ${((weightUom.abbreviation)?default(product.weightUomId))?if_exists}
             </div>
           </#if>
           <#if (product.productHeight?exists && product.productHeight != 0) || product.heightUomId?has_content>
-            <#assign heightUom = product.getRelatedOneCache("HeightUom")?if_exists />
+            <#assign heightUom = product.getRelatedOne("HeightUom", true)?if_exists />
             <div>
               ${uiLabelMap.CommonHeight}: ${product.productHeight?if_exists} ${((heightUom.abbreviation)?default(product.heightUomId))?if_exists}
             </div>
           </#if>
           <#if (product.productWidth?exists && product.productWidth != 0) || product.widthUomId?has_content>
-            <#assign widthUom = product.getRelatedOneCache("WidthUom")?if_exists />
+            <#assign widthUom = product.getRelatedOne("WidthUom", true)?if_exists />
             <div>
               ${uiLabelMap.CommonWidth}: ${product.productWidth?if_exists} ${((widthUom.abbreviation)?default(product.widthUomId))?if_exists}
             </div>
           </#if>
           <#if (product.productDepth?exists && product.productDepth != 0) || product.depthUomId?has_content>
-            <#assign depthUom = product.getRelatedOneCache("DepthUom")?if_exists />
+            <#assign depthUom = product.getRelatedOne("DepthUom", true)?if_exists />
             <div>
               ${uiLabelMap.CommonDepth}: ${product.productDepth?if_exists} ${((depthUom.abbreviation)?default(product.depthUomId))?if_exists}
             </div>
@@ -539,7 +538,7 @@ $(function(){
           <#if disFeatureList?exists && 0 &lt; disFeatureList.size()>
           <p>&nbsp;</p>
             <#list disFeatureList as currentFeature>
-                <#assign disFeatureType = currentFeature.getRelatedOneCache("ProductFeatureType") />
+                <#assign disFeatureType = currentFeature.getRelatedOne("ProductFeatureType", true) />
                 <div>
                     <#if disFeatureType.description?exists>${disFeatureType.get("description", locale)}<#else>${currentFeature.productFeatureTypeId}</#if>:&nbsp;${currentFeature.description}
                 </div>
@@ -564,7 +563,7 @@ $(function(){
                     <#list featureList as feature>
                         <#if feature_index == 0>
                             <div>${feature.description}: <select id="FT${feature.productFeatureTypeId}" name="FT${feature.productFeatureTypeId}" onchange="javascript:checkRadioButton();">
-                            <option value="select" selected="selected"> select option </option>
+                            <option value="select" selected="selected">${uiLabelMap.EcommerceSelectOption}</option>
                         <#else>
                             <option value="${feature.productFeatureId}">${feature.description} <#if feature.price?exists>(+ <@ofbizCurrency amount=feature.price?string isoCode=feature.currencyUomId />)</#if></option>
                         </#if>
@@ -746,9 +745,9 @@ $(function(){
                     <#if !imageUrl?string?has_content>
                       <#assign imageUrl = "/images/defaultImage.jpg" />
                     </#if>
-                      <a href="javascript:getList('FT${featureOrderFirst}','${indexer}',1);"><img src="<@ofbizContentUrl>${contentPathPrefix?if_exists}${imageUrl}</@ofbizContentUrl>" width="60" height="60" alt="" /></a>
-                      <br />
                       <a href="javascript:getList('FT${featureOrderFirst}','${indexer}',1);" class="linktext">${key}</a>
+                      <a href="javascript:getList('FT${featureOrderFirst}','${indexer}',1);"><img src="<@ofbizContentUrl>${contentPathPrefix?if_exists}${imageUrl}</@ofbizContentUrl>" class="cssImgSmall" alt="" /></a>
+                      <br />
                   </#if>
                   <#assign indexer = indexer + 1 />
                 </#list>
@@ -784,8 +783,8 @@ $(function(){
     <hr />
           <#if productReviews?has_content>
             <#list productReviews as productReview>
-              <#assign postedUserLogin = productReview.getRelatedOne("UserLogin") />
-              <#assign postedPerson = postedUserLogin.getRelatedOne("Person")?if_exists />
+              <#assign postedUserLogin = productReview.getRelatedOne("UserLogin", false) />
+              <#assign postedPerson = postedUserLogin.getRelatedOne("Person", false)?if_exists />
                         <div><strong>${uiLabelMap.CommonBy}: </strong><#if productReview.postedAnonymous?default("N") == "Y"> ${uiLabelMap.OrderAnonymous}<#else> ${postedPerson.firstName} ${postedPerson.lastName}&nbsp;</#if></div>
                         <div><strong>${uiLabelMap.CommonAt}: </strong>${productReview.postedDateTime?if_exists}&nbsp;</div>
                         <div><strong>${uiLabelMap.OrderRanking}: </strong>${productReview.productRating?if_exists?string}</div>

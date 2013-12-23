@@ -21,6 +21,7 @@ import java.util.*;
 import java.sql.Timestamp;
 import org.ofbiz.entity.*;
 import org.ofbiz.base.util.*;
+import org.ofbiz.entity.util.*;
 
 module = "FindOrders.groovy";
 
@@ -33,7 +34,7 @@ roleTypes = delegator.findList("RoleType", null, null, ["description"], null, fa
 context.roleTypes = roleTypes;
 
 // get the order statuses
-orderStatuses = delegator.findByAnd("StatusItem", [statusTypeId : "ORDER_STATUS"], ["sequenceId", "description"]);
+orderStatuses = delegator.findByAnd("StatusItem", [statusTypeId : "ORDER_STATUS"], ["sequenceId", "description"], false);
 context.orderStatuses = orderStatuses;
 
 // get websites
@@ -45,44 +46,52 @@ stores = delegator.findList("ProductStore", null, null, ["storeName"], null, fal
 context.productStores = stores;
 
 // get the channels
-channels = delegator.findByAnd("Enumeration", [enumTypeId : "ORDER_SALES_CHANNEL"], ["sequenceId"]);
+channels = delegator.findByAnd("Enumeration", [enumTypeId : "ORDER_SALES_CHANNEL"], ["sequenceId"], false);
 context.salesChannels = channels;
 
 // get the Shipping Methods
 carrierShipmentMethods = delegator.findList("CarrierShipmentMethod", null, null, null, null, false);
 context.carrierShipmentMethods = carrierShipmentMethods;
 
+// get the Payment Status
+paymentStatusList = delegator.findByAnd("StatusItem", [statusTypeId : "PAYMENT_PREF_STATUS"], ["description"], false);
+context.paymentStatusList = paymentStatusList;
+
+// get the good identification types
+goodIdentificationTypes = delegator.findList("GoodIdentificationType", null, null, ["goodIdentificationTypeId", "description"], null, false);
+context.goodIdentificationTypes = goodIdentificationTypes;
+
 // current role type
 currentRoleTypeId = request.getParameter("roleTypeId");
 if (currentRoleTypeId) {
-    currentRole = delegator.findByPrimaryKeyCache("RoleType", [roleTypeId : currentRoleTypeId]);
+    currentRole = delegator.findOne("RoleType", [roleTypeId : currentRoleTypeId], true);
     context.currentRole = currentRole;
 }
 
 // current selected type
 currentTypeId = request.getParameter("orderTypeId");
 if (currentTypeId) {
-    currentType = delegator.findByPrimaryKeyCache("OrderType", [orderTypeId : currentTypeId]);
+    currentType = delegator.findOne("OrderType", [orderTypeId : currentTypeId], true);
     context.currentType = currentType;
 }
 // current selected status
 currentStatusId = request.getParameter("orderStatusId");
 if (currentStatusId) {
-    currentStatus = delegator.findByPrimaryKeyCache("StatusItem", [statusId : currentStatusId]);
+    currentStatus = delegator.findOne("StatusItem", [statusId : currentStatusId], true);
     context.currentStatus = currentStatus;
 }
 
 // current website
 currentWebSiteId = request.getParameter("orderWebSiteId");
 if (currentWebSiteId) {
-    currentWebSite = delegator.findByPrimaryKeyCache("WebSite", [webSiteId : currentWebSiteId]);
+    currentWebSite = delegator.findOne("WebSite", [webSiteId : currentWebSiteId], true);
     context.currentWebSite = currentWebSite;
 }
 
 // current store
 currentProductStoreId = request.getParameter("productStoreId");
 if (currentProductStoreId) {
-    currentProductStore = delegator.findByPrimaryKeyCache("ProductStore", [productStoreId : currentProductStoreId]);
+    currentProductStore = delegator.findOne("ProductStore", [productStoreId : currentProductStoreId], true);
     context.currentProductStore = currentProductStore;
 }
 
@@ -92,7 +101,7 @@ if (shipmentMethod) {
     carrierPartyId = shipmentMethod.substring(0, shipmentMethod.indexOf("@"));
     shipmentMethodTypeId = shipmentMethod.substring(shipmentMethod.indexOf("@")+1);
     if (carrierPartyId && shipmentMethodTypeId) {
-        currentCarrierShipmentMethod = delegator.findByAnd("CarrierShipmentMethod", [partyId : carrierPartyId, shipmentMethodTypeId : shipmentMethodTypeId]);
+        currentCarrierShipmentMethod = EntityUtil.getFirst(delegator.findByAnd("CarrierShipmentMethod", [partyId : carrierPartyId, shipmentMethodTypeId : shipmentMethodTypeId], null, false));
         context.currentCarrierShipmentMethod = currentCarrierShipmentMethod;
     }
 }
@@ -100,8 +109,15 @@ if (shipmentMethod) {
 // current channel
 currentSalesChannelId = request.getParameter("salesChannelEnumId");
 if (currentSalesChannelId) {
-    currentSalesChannel = delegator.findByPrimaryKey("Enumeration", [enumId : currentSalesChannelId]);
+    currentSalesChannel = delegator.findOne("Enumeration", [enumId : currentSalesChannelId], false);
     context.currentSalesChannel = currentSalesChannel;
+}
+
+// current good identification type
+currentGoodIdentificationTypeId = request.getParameter("goodIdentificationTypeId");
+if (currentGoodIdentificationTypeId) {
+    currentGoodIdentificationType = delegator.findByPrimaryKey("GoodIdentificationType", ["goodIdentificationTypeId" : currentGoodIdentificationTypeId]);
+    context.currentGoodIdentificationType = currentGoodIdentificationType;
 }
 
 // create the fromDate for calendar
@@ -133,7 +149,8 @@ context.thruDateStr = toStr;
 viewIndex = request.getParameter("viewIndex") ? Integer.valueOf(request.getParameter("viewIndex")) : 1;
 context.viewIndex = viewIndex;
 
-viewSize = request.getParameter("viewSize") ? Integer.valueOf(request.getParameter("viewSize")) : 20;
+viewSize = request.getParameter("viewSize") ? Integer.valueOf(request.getParameter("viewSize")) : 
+                                                                UtilProperties.getPropertyValue("widget", "widget.form.defaultViewSize", "20");
 context.viewSize = viewSize;
 
 // get the lookup flag

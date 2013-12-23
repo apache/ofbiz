@@ -133,7 +133,7 @@ under the License.
             <#if layoutSettings.topLines?has_content>
               <#list layoutSettings.topLines as topLine>
                 <#if topLine.text?exists>
-                  <li>${topLine.text}<a href="${StringUtil.wrapString(topLine.url?if_exists)}&amp;externalLoginKey=${externalLoginKey}">${topLine.urlText?if_exists}</a></li>
+                  <li>${topLine.text}<a href="${StringUtil.wrapString(topLine.url?if_exists)}${StringUtil.wrapString(externalKeyParam)}">${topLine.urlText?if_exists}</a></li>
                 <#elseif topLine.dropDownList?exists>
                   <li><#include "component://common/webcommon/includes/insertDropDown.ftl"/></li>
                 <#else>
@@ -150,7 +150,7 @@ under the License.
           <#---if webSiteId?exists && requestAttributes._CURRENT_VIEW_?exists && helpTopic?exists-->
           <#if parameters.componentName?exists && requestAttributes._CURRENT_VIEW_?exists && helpTopic?exists>
             <#include "component://common/webcommon/includes/helplink.ftl" />
-            <li><a <#if pageAvail?has_content>class="alert"</#if> href="javascript:lookup_popup2('showHelp?helpTopic=${helpTopic}&amp;portalPageId=${parameters.portalPageId?if_exists}','help' ,500,500);">${uiLabelMap.CommonHelp}</a></li>
+            <li><a <#if pageAvail?has_content>class="alert"</#if> href="javascript:lookup_popup1('showHelp?helpTopic=${helpTopic}&amp;portalPageId=${parameters.portalPageId?if_exists}','help' ,500,500);">${uiLabelMap.CommonHelp}</a></li>
           </#if>
           </ul>
       </li>

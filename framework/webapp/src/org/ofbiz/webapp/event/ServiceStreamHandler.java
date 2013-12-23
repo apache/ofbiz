@@ -34,9 +34,9 @@ import javolution.util.FastMap;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.DelegatorFactory;
-import org.ofbiz.service.GenericDispatcher;
 import org.ofbiz.service.GenericServiceException;
 import org.ofbiz.service.LocalDispatcher;
+import org.ofbiz.service.ServiceContainer;
 import org.ofbiz.service.ServiceUtil;
 import org.ofbiz.webapp.control.ConfigXMLReader.Event;
 import org.ofbiz.webapp.control.ConfigXMLReader.RequestMap;
@@ -53,7 +53,7 @@ public class ServiceStreamHandler implements EventHandler {
     public void init(ServletContext context) throws EventHandlerException {
         String delegatorName = context.getInitParameter("entityDelegatorName");
         this.delegator = DelegatorFactory.getDelegator(delegatorName);
-        this.dispatcher = GenericDispatcher.getLocalDispatcher(this.delegator.getDelegatorName(), delegator);
+        this.dispatcher = ServiceContainer.getLocalDispatcher(this.delegator.getDelegatorName(), delegator);
     }
 
     public String invoke(Event event, RequestMap requestMap, HttpServletRequest request, HttpServletResponse response) throws EventHandlerException {
@@ -83,7 +83,7 @@ public class ServiceStreamHandler implements EventHandler {
             outputError(out, e, "Exception thrown in runSync()");
             throw new EventHandlerException(e.getMessage(), e);
         }
-        Debug.log("Received respone: " + resp, module);
+        Debug.logInfo("Received respone: " + resp, module);
         if (ServiceUtil.isError(resp)) {
             outputError(out, null, ServiceUtil.getErrorMessage(resp));
             throw new EventHandlerException(ServiceUtil.getErrorMessage(resp));
@@ -109,7 +109,7 @@ public class ServiceStreamHandler implements EventHandler {
         if (message != null)
             out.println("Error message: " + message);
         if (error != null)
-            out.println("Exception occured: " + error.toString());
+            out.println("Exception occurred: " + error.toString());
         out.flush();
         out.close();
         try {

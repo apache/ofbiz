@@ -83,7 +83,7 @@ public class IdealEvents {
         GenericValue orderHeader = null;
         List<GenericValue> orderItemList = null;
         try {
-            orderHeader = delegator.findByPrimaryKey("OrderHeader", UtilMisc.toMap("orderId", orderId));
+            orderHeader = delegator.findOne("OrderHeader", UtilMisc.toMap("orderId", orderId), false);
             orderItemList = delegator.findByAnd("OrderItem", UtilMisc.toMap("orderId", orderId));
         } catch (GenericEntityException e) {
             Debug.logError(e, "Cannot get the order header for order: " + orderId, module);
@@ -193,10 +193,7 @@ public class IdealEvents {
         GenericValue userLogin = (GenericValue) request.getSession().getAttribute("userLogin");
         Map <String, Object> parametersMap = UtilHttp.getParameterMap(request);
         String transactionId = request.getParameter("trxid");
-        Set<String> keySet = parametersMap.keySet();
-        Iterator<String> i = keySet.iterator();
-        while (i.hasNext()) {
-            String name = (String) i.next();
+        for (String name : parametersMap.keySet()) {
             String value = request.getParameter(name);
             Debug.logError("### Param: " + name + " => " + value, module);
         }
@@ -296,7 +293,7 @@ public class IdealEvents {
             }
         }
         if (okay) {
-            request.setAttribute("_EVENT_MESSAGE_", UtilProperties.getMessage(resource, "IdealSuccessFull", locale));
+            request.setAttribute("_EVENT_MESSAGE_", UtilProperties.getMessage(resource, "IdealSuccessful", locale));
             // attempt to release the offline hold on the order (workflow)
             OrderChangeHelper.releaseInitialOrderHold(dispatcher, orderId);
             // call the email confirm service
@@ -321,9 +318,7 @@ public class IdealEvents {
             return false;
         }
         if (paymentPrefs.size() > 0) {
-            Iterator <GenericValue> i = paymentPrefs.iterator();
-            while (i.hasNext()) {
-                GenericValue pref = i.next();
+            for (GenericValue pref : paymentPrefs) {
                 boolean okay = setPaymentPreference(dispatcher, userLogin, pref, request);
                 if (!okay)
                     return false;

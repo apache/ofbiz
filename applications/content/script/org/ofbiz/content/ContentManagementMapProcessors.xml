@@ -19,7 +19,7 @@ under the License.
 -->
 
 <simple-map-processors xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/simple-methods.xsd">
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/simple-methods-v2.xsd">
   <simple-map-processor name="contentIn">
       <process field="contentId"><copy to-field="contentId" replace="true" set-if-null="false"/></process>
       <process field="contentTypeId"><copy to-field="contentTypeId" replace="true" set-if-null="false"/></process>
@@ -27,6 +27,7 @@ under the License.
       <process field="dataResourceId"><copy to-field="dataResourceId" replace="true" set-if-null="false"/></process>
       <process field="dataSourceId"><copy to-field="dataSourceId" replace="true" set-if-null="false"/></process>
       <process field="statusId"><copy to-field="statusId" replace="true" set-if-null="false"/></process>
+      <process field="customMethodId"><copy to-field="customMethodId" replace="true" set-if-null="false"/></process>
       <process field="serviceName"><copy to-field="serviceName" replace="true" set-if-null="false"/></process>
       <process field="contentName"><copy to-field="contentName" replace="true" set-if-null="false"/></process>
       <process field="description"><copy to-field="description" replace="true" set-if-null="false"/></process>
@@ -112,6 +113,7 @@ under the License.
       <process field="dataResourceId"><copy to-field="dataResourceId" replace="true" set-if-null="false"/></process>
       <process field="dataSourceId"><copy to-field="dataSourceId" replace="true" set-if-null="false"/></process>
       <process field="statusId"><copy to-field="statusId" replace="true" set-if-null="false"/></process>
+      <process field="customMethodId"><copy to-field="customMethodId" replace="true" set-if-null="false"/></process>
       <process field="serviceName"><copy to-field="serviceName" replace="true" set-if-null="false"/></process>
       <process field="contentName"><copy to-field="contentName" replace="true" set-if-null="false"/></process>
       <process field="description"><copy to-field="description" replace="true" set-if-null="false"/></process>

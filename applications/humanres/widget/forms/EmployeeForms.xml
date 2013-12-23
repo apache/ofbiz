@@ -58,7 +58,7 @@
             </drop-down>
         </field>
         <field name="phoneTitle" title="${uiLabelMap.PartyPrimaryPhone}" title-area-style="group-label"><display/></field>
-        <field name="countryCode" title="${uiLabelMap.PartyCountryCode}"><text size="4" maxlength="10"/></field>
+        <field name="countryCode" title="${uiLabelMap.CommonCountryCode}"><text size="4" maxlength="10"/></field>
         <field name="areaCode" title="${uiLabelMap.PartyAreaCode}"><text size="4" maxlength="10"/></field>
         <field name="contactNumber" title="${uiLabelMap.PartyPhoneNumber}" tooltip="${uiLabelMap.CommonRequired}" widget-style="required"><text size="15" maxlength="15"/></field>
         <field name="extension" title="${uiLabelMap.PartyContactExt}"><text size="6" maxlength="10"/></field>
@@ -214,7 +214,7 @@
         <auto-fields-service service-name="updateEmplLeave"/>
         <field name="partyId"><hidden/></field>
         <field name="approverPartyId"><lookup target-form-name="LookupPartyName"/></field>
-        <field name="leaveStatus"><display/></field>
+        <field name="leaveStatus"><display-entity entity-name="StatusItem" key-field-name="statusId"/></field>
         <field name="emplLeaveReasonTypeId"><display/></field>
         <field name="leaveTypeId"><display-entity description="${description}" entity-name="EmplLeaveType"/></field>
         <field name="fromDate"></field>

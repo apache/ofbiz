@@ -29,17 +29,17 @@ orderPaymentPreferenceId = context.orderPaymentPreferenceId;
 if ((!orderId) || (!orderPaymentPreferenceId)) return;
 
 if (orderId) {
-   orderHeader = delegator.findByPrimaryKey("OrderHeader", [orderId : orderId]);
+   orderHeader = delegator.findOne("OrderHeader", [orderId : orderId], false);
    context.orderHeader = orderHeader;
 }
 
 if (orderPaymentPreferenceId) {
-   orderPaymentPreference = delegator.findByPrimaryKey("OrderPaymentPreference", [orderPaymentPreferenceId : orderPaymentPreferenceId]);
+   orderPaymentPreference = delegator.findOne("OrderPaymentPreference", [orderPaymentPreferenceId : orderPaymentPreferenceId], false);
    context.orderPaymentPreference = orderPaymentPreference;
 }
 
 if (orderPaymentPreference) {
-   paymentMethodType = orderPaymentPreference.getRelatedOneCache("PaymentMethodType");
+   paymentMethodType = orderPaymentPreference.getRelatedOne("PaymentMethodType", true);
    context.paymentMethodType = paymentMethodType;
 }
 
@@ -49,7 +49,7 @@ if (orderPaymentPreference) {
 
 if (orderPaymentPreference) {
     // we retrieve the captureAmount by looking at the latest authorized gateway response for this orderPaymentPreference
-    gatewayResponses = orderPaymentPreference.getRelated("PaymentGatewayResponse", ["transactionDate DESC"]);
+    gatewayResponses = orderPaymentPreference.getRelated("PaymentGatewayResponse", null, ["transactionDate DESC"], false);
     EntityUtil.filterByCondition(gatewayResponses, EntityCondition.makeCondition("transCodeEnumId", EntityOperator.EQUALS, "PGT_AUTHORIZE"));
 
     if (gatewayResponses) {

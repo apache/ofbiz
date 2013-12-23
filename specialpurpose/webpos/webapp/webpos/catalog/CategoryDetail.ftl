@@ -22,7 +22,7 @@ under the License.
   <#assign cell = 0/>
   <tr>    
   <#list productCategoryMembers as productCategoryMember>
-  <#assign product = productCategoryMember.getRelatedOne("Product")?if_exists>
+  <#assign product = productCategoryMember.getRelatedOne("Product", false)?if_exists>
   <#if product?exists && product?has_content>
     <#assign smallImageUrl = Static["org.ofbiz.product.product.ProductContentWrapper"].getProductContentAsText(product, "SMALL_IMAGE_URL", locale, dispatcher)?if_exists />
     <#if !smallImageUrl?string?has_content>
@@ -39,7 +39,7 @@ under the License.
         <li id="${button}" class="notSelectedButton">
           <#if smallImageUrl?string?has_content>
             <a href="${addItemLink}">
-              <img src="<@ofbizContentUrl>${smallImageUrl}</@ofbizContentUrl>" align="center" width="60px" height="60px" border="0"/>
+              <img src="<@ofbizContentUrl>${smallImageUrl}</@ofbizContentUrl>" align="center" class="cssImgSmall"/>
             </a>
           </#if>
         </li>

@@ -18,14 +18,14 @@
  *******************************************************************************/
 package org.ofbiz.service.engine;
 
+import static org.ofbiz.base.util.UtilGenerics.cast;
+
 import java.util.Map;
 
 import org.ofbiz.base.util.BshUtil;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.GeneralException;
-import static org.ofbiz.base.util.UtilGenerics.cast;
 import org.ofbiz.base.util.UtilValidate;
-import org.ofbiz.base.util.cache.UtilCache;
 import org.ofbiz.service.GenericServiceException;
 import org.ofbiz.service.ModelService;
 import org.ofbiz.service.ServiceDispatcher;
@@ -35,8 +35,6 @@ import org.ofbiz.service.ServiceUtil;
  * BeanShell Script Service Engine
  */
 public final class BeanShellEngine extends GenericAsyncEngine {
-
-    public static UtilCache<String, String> scriptCache = UtilCache.createUtilCache("BeanShellScripts", 0, 0);
 
     public BeanShellEngine(ServiceDispatcher dispatcher) {
         super(dispatcher);

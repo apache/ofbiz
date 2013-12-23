@@ -30,7 +30,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
 
 import javolution.util.FastMap;
 
@@ -45,6 +44,7 @@ import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
+import org.ofbiz.entity.util.EntityTypeUtil;
 import org.ofbiz.entity.util.EntityUtil;
 import org.ofbiz.order.order.OrderReadHelper;
 import org.ofbiz.order.shoppingcart.product.ProductPromoWorker;
@@ -192,7 +192,7 @@ public class ShoppingCartHelper {
         GenericValue product = null;
         if (productId != null) {
             try {
-                product = delegator.findByPrimaryKeyCache("Product", UtilMisc.toMap("productId", productId));
+                product = delegator.findOne("Product", UtilMisc.toMap("productId", productId), true);
             } catch (GenericEntityException e) {
                 Debug.logError(e, "Unable to lookup product : " + productId, module);
             }
@@ -208,10 +208,8 @@ public class ShoppingCartHelper {
 
         // Get the additional features selected for the product (if any)
         Map<String, Object> selectedFeatures = UtilHttp.makeParamMapWithPrefix(context, null, "FT", null);
-        Iterator<String> selectedFeaturesTypes = selectedFeatures.keySet().iterator();
         Map<String, GenericValue> additionalFeaturesMap = FastMap.newInstance();
-        while (selectedFeaturesTypes.hasNext()) {
-            String selectedFeatureType = selectedFeaturesTypes.next();
+        for (String selectedFeatureType : selectedFeatures.keySet()) {
             String selectedFeatureValue = (String)selectedFeatures.get(selectedFeatureType);
             if (UtilValidate.isNotEmpty(selectedFeatureValue)) {
                 GenericValue productFeatureAndAppl = null;
@@ -219,7 +217,7 @@ public class ShoppingCartHelper {
                     productFeatureAndAppl = EntityUtil.getFirst(EntityUtil.filterByDate(delegator.findByAnd("ProductFeatureAndAppl",
                                                                                     UtilMisc.toMap("productId", productId,
                                                                                                    "productFeatureTypeId", selectedFeatureType,
-                                                                                                   "productFeatureId", selectedFeatureValue))));
+                                                                                                   "productFeatureId", selectedFeatureValue), null, false)));
                 } catch (GenericEntityException gee) {
                     Debug.logError(gee, module);
                 }
@@ -327,9 +325,9 @@ public class ShoppingCartHelper {
                     BigDecimal amount = orderItem.getBigDecimal("selectedAmount");
                     ProductConfigWrapper configWrapper = null;
                     String aggregatedProdId = null;
-                    if ("AGGREGATED_CONF".equals(ProductWorker.getProductTypeId(delegator, productId))) {
+                    if (EntityTypeUtil.hasParentType(delegator, "ProductType", "productTypeId", ProductWorker.getProductTypeId(delegator, productId), "parentTypeId", "AGGREGATED")) {
                         try {
-                            GenericValue instanceProduct = delegator.findByPrimaryKey("Product", UtilMisc.toMap("productId", productId));
+                            GenericValue instanceProduct = delegator.findOne("Product", UtilMisc.toMap("productId", productId), false);
                             String configId = instanceProduct.getString("configId");
                             aggregatedProdId = ProductWorker.getInstanceAggregatedId(delegator, productId);
                             configWrapper = ProductConfigWorker.loadProductConfigWrapper(delegator, dispatcher, configId, aggregatedProdId, cart.getProductStoreId(), catalogId, cart.getWebSiteId(), cart.getCurrency(), cart.getLocale(), cart.getAutoUserLogin());
@@ -432,7 +430,7 @@ public class ShoppingCartHelper {
                         originalProductId = productId;
                         productId = ProductWorker.getOriginalProductId(delegator, productId);
                         try {
-                            originalProduct = delegator.findByPrimaryKey("Product", UtilMisc.toMap("productId", originalProductId));
+                            originalProduct = delegator.findOne("Product", UtilMisc.toMap("productId", originalProductId), false);
                         } catch (GenericEntityException e) {
                             Debug.logError(e, "Error getting parent product", module);
                         }
@@ -502,7 +500,7 @@ public class ShoppingCartHelper {
                 requirementId = (String) context.get("requirementId" + thisSuffix);
                 GenericValue requirement = null;
                 try {
-                    requirement = delegator.findByPrimaryKey("Requirement", UtilMisc.toMap("requirementId", requirementId));
+                    requirement = delegator.findOne("Requirement", UtilMisc.toMap("requirementId", requirementId), false);
                 } catch (GenericEntityException gee) {
                 }
                 if (requirement == null) {
@@ -569,7 +567,7 @@ public class ShoppingCartHelper {
         Collection<GenericValue> prodCatMemberCol = null;
 
         try {
-            prodCatMemberCol = delegator.findByAndCache("ProductCategoryMember", UtilMisc.toMap("productCategoryId", categoryId));
+            prodCatMemberCol = delegator.findByAnd("ProductCategoryMember", UtilMisc.toMap("productCategoryId", categoryId), null, true);
         } catch (GenericEntityException e) {
             Debug.logWarning(e.toString(), module);
             Map<String, Object> messageMap = UtilMisc.<String, Object>toMap("categoryId", categoryId);
@@ -587,10 +585,7 @@ public class ShoppingCartHelper {
         }
 
         BigDecimal totalQuantity = BigDecimal.ZERO;
-        Iterator<GenericValue> pcmIter = prodCatMemberCol.iterator();
-
-        while (pcmIter.hasNext()) {
-            GenericValue productCategoryMember = pcmIter.next();
+        for (GenericValue productCategoryMember : prodCatMemberCol) {
             BigDecimal quantity = productCategoryMember.getBigDecimal("quantity");
 
             if (quantity != null && quantity.compareTo(BigDecimal.ZERO) > 0) {
@@ -620,13 +615,8 @@ public class ShoppingCartHelper {
     /** Delete an item from the shopping cart. */
     public Map<String, Object> deleteFromCart(Map<String, ? extends Object> context) {
         Map<String, Object> result = null;
-        Set<String> names = context.keySet();
-        Iterator<String> i = names.iterator();
         ArrayList<String> errorMsgs = new ArrayList<String>();
-
-        while (i.hasNext()) {
-            String o = i.next();
-
+        for (String o : context.keySet()) {
             if (o.toUpperCase().startsWith("DELETE")) {
                 try {
                     String indexStr = o.substring(o.lastIndexOf('_') + 1);
@@ -661,9 +651,6 @@ public class ShoppingCartHelper {
         ArrayList<ShoppingCartItem> deleteList = new ArrayList<ShoppingCartItem>();
         ArrayList<String> errorMsgs = new ArrayList<String>();
 
-        Set<String> parameterNames = context.keySet();
-        Iterator<String> parameterNameIter = parameterNames.iterator();
-
         BigDecimal oldQuantity = BigDecimal.ONE.negate();
         String oldDescription = "";
         BigDecimal oldPrice = BigDecimal.ONE.negate();
@@ -676,11 +663,11 @@ public class ShoppingCartHelper {
         }
 
         // TODO: This should be refactored to use UtilHttp.parseMultiFormData(parameters)
-        while (parameterNameIter.hasNext()) {
-            String parameterName = parameterNameIter.next();
+        for (String parameterName : context.keySet()) {
             int underscorePos = parameterName.lastIndexOf('_');
 
-            if (underscorePos >= 0) {
+            // ignore localized date input elements, just use their counterpart without the _i18n suffix
+            if (underscorePos >= 0 && (!parameterName.endsWith("_i18n"))) {
                 try {
                     String indexStr = parameterName.substring(underscorePos + 1);
                     int index = Integer.parseInt(indexStr);
@@ -880,10 +867,7 @@ public class ShoppingCartHelper {
             }
         }
 
-        Iterator<ShoppingCartItem> di = deleteList.iterator();
-
-        while (di.hasNext()) {
-            ShoppingCartItem item = di.next();
+        for (ShoppingCartItem item : deleteList) {
             int itemIndex = this.cart.getItemIndex(item);
 
             if (Debug.infoOn())
@@ -942,7 +926,7 @@ public class ShoppingCartHelper {
         GenericValue productFeatureAppl = null;
         List<GenericValue> features = null;
         try {
-            features = delegator.findByAnd("ProductFeatureAndAppl", fields, UtilMisc.toList("-fromDate"));
+            features = delegator.findByAnd("ProductFeatureAndAppl", fields, UtilMisc.toList("-fromDate"), false);
         } catch (GenericEntityException e) {
             Debug.logError(e, module);
             return null;
@@ -988,7 +972,7 @@ public class ShoppingCartHelper {
         }
 
         try {
-            agreement = this.delegator.findByPrimaryKeyCache("Agreement",UtilMisc.toMap("agreementId", agreementId));
+            agreement = this.delegator.findOne("Agreement",UtilMisc.toMap("agreementId", agreementId), true);
         } catch (GenericEntityException e) {
             Debug.logWarning(e.toString(), module);
             result = ServiceUtil.returnError(UtilProperties.getMessage(resource_error,"OrderCouldNotGetAgreement",UtilMisc.toMap("agreementId",agreementId),this.cart.getLocale()) + UtilProperties.getMessage(resource_error,"OrderError",this.cart.getLocale()) + e.getMessage());
@@ -1002,7 +986,7 @@ public class ShoppingCartHelper {
             cart.setAgreementId(agreementId);
             try {
                 // set the currency based on the pricing agreement
-                List<GenericValue> agreementItems = agreement.getRelated("AgreementItem", UtilMisc.toMap("agreementItemTypeId", "AGREEMENT_PRICING_PR"), null);
+                List<GenericValue> agreementItems = agreement.getRelated("AgreementItem", UtilMisc.toMap("agreementItemTypeId", "AGREEMENT_PRICING_PR"), null, false);
                 if (agreementItems.size() > 0) {
                     GenericValue agreementItem = agreementItems.get(0);
                     String currencyUomId = (String) agreementItem.get("currencyUomId");
@@ -1025,7 +1009,7 @@ public class ShoppingCartHelper {
                  // clear the existing order terms
                  cart.removeOrderTerms();
                  // set order terms based on agreement terms
-                 List<GenericValue> agreementTerms = EntityUtil.filterByDate(agreement.getRelated("AgreementTerm"));
+                 List<GenericValue> agreementTerms = EntityUtil.filterByDate(agreement.getRelated("AgreementTerm", null, null, false));
                  if (agreementTerms.size() > 0) {
                       for (int i = 0; agreementTerms.size() > i;i++) {
                            GenericValue agreementTerm = agreementTerms.get(i);

@@ -53,7 +53,7 @@ function insertImageName(size,nameValue) {
         <#assign rowClass = "2">
         <#list productContentList as entry>
         <#assign productContent=entry.productContent/>
-        <#assign productContentType=productContent.getRelatedOneCache("ProdConfItemContentType")/>
+        <#assign productContentType=productContent.getRelatedOne("ProdConfItemContentType", true)/>
         <tr valign="middle"<#if rowClass == "1"> class="alternate-row"</#if>>
             <td><a href="<@ofbizUrl>EditProductConfigItemContentContent?configItemId=${productContent.configItemId}&amp;contentId=${productContent.contentId}&amp;confItemContentTypeId=${productContent.confItemContentTypeId}&amp;fromDate=${productContent.fromDate}</@ofbizUrl>" class="buttontext">${entry.content.description?default("[${uiLabelMap.ProductNoDescription}]")} [${entry.content.contentId}]</td>
             <td>${productContentType.description?default(productContent.confItemContentTypeId)}</td>
@@ -115,7 +115,7 @@ function insertImageName(size,nameValue) {
                     <td width="20%" align="right" valign="top" class="label">
                         ${uiLabelMap.ProductSmallImage}
                         <#if (configItem.imageUrl)?exists>
-                            <a href="<@ofbizContentUrl>${configItem.imageUrl}</@ofbizContentUrl>" target="_blank"><img alt="Image" src="<@ofbizContentUrl>${configItem.imageUrl}</@ofbizContentUrl>" height="40" width="40" /></a>
+                            <a href="<@ofbizContentUrl>${configItem.imageUrl}</@ofbizContentUrl>" target="_blank"><img alt="Image" src="<@ofbizContentUrl>${configItem.imageUrl}</@ofbizContentUrl>" class="cssImgSmall" /></a>
                         </#if>
                     </td>
                     <td>&nbsp;</td>

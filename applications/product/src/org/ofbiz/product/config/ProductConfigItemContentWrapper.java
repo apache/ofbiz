@@ -41,8 +41,8 @@ import org.ofbiz.entity.GenericValue;
 import org.ofbiz.entity.model.ModelEntity;
 import org.ofbiz.entity.model.ModelUtil;
 import org.ofbiz.entity.util.EntityUtil;
-import org.ofbiz.service.GenericDispatcher;
 import org.ofbiz.service.LocalDispatcher;
+import org.ofbiz.service.ServiceContainer;
 
 /**
  * Product Config Item Content Worker: gets product content to display
@@ -98,7 +98,7 @@ public class ProductConfigItemContentWrapper implements java.io.Serializable {
 
     public LocalDispatcher getDispatcher() {
         if (dispatcher == null) {
-            dispatcher = GenericDispatcher.getLocalDispatcher(dispatcherName, this.getDelegator());
+            dispatcher = ServiceContainer.getLocalDispatcher(dispatcherName, this.getDelegator());
         }
         return dispatcher;
     }
@@ -150,7 +150,7 @@ public class ProductConfigItemContentWrapper implements java.io.Serializable {
         ModelEntity productConfigItemModel = delegator.getModelEntity("ProductConfigItem");
         if (productConfigItemModel.isField(candidateFieldName)) {
             if (productConfigItem == null) {
-                productConfigItem = delegator.findByPrimaryKeyCache("ProductConfigItem", UtilMisc.toMap("configItemId", configItemId));
+                productConfigItem = delegator.findOne("ProductConfigItem", UtilMisc.toMap("configItemId", configItemId), true);
             }
             if (productConfigItem != null) {
                 String candidateValue = productConfigItem.getString(candidateFieldName);
@@ -161,7 +161,7 @@ public class ProductConfigItemContentWrapper implements java.io.Serializable {
             }
         }
 
-        List<GenericValue> productConfigItemContentList = delegator.findByAndCache("ProdConfItemContent", UtilMisc.toMap("configItemId", configItemId, "confItemContentTypeId", confItemContentTypeId), UtilMisc.toList("-fromDate"));
+        List<GenericValue> productConfigItemContentList = delegator.findByAnd("ProdConfItemContent", UtilMisc.toMap("configItemId", configItemId, "confItemContentTypeId", confItemContentTypeId), UtilMisc.toList("-fromDate"), true);
         productConfigItemContentList = EntityUtil.filterByDate(productConfigItemContentList);
         GenericValue productConfigItemContent = EntityUtil.getFirst(productConfigItemContentList);
         if (productConfigItemContent != null) {

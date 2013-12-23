@@ -31,12 +31,16 @@ public class JposDeviceContainer implements Container {
 
     protected String configFile = null;
 
-    public void init(String[] args, String configFile) throws ContainerException {
+    private String name;
+
+    public void init(String[] args, String name, String configFile) throws ContainerException {
         this.configFile = configFile;
+        this.name = name;
     }
 
+
     public boolean start() throws ContainerException {
-        ContainerConfig.Container cc = ContainerConfig.getContainer("jpos.device-container", configFile);
+        ContainerConfig.Container cc = ContainerConfig.getContainer(name, configFile);
         if (cc == null) {
             throw new ContainerException("No jpos.device-container configuration found in container config!");
         }
@@ -62,5 +66,9 @@ public class JposDeviceContainer implements Container {
             Debug.logError(e, module);
         }
         Debug.logInfo("JPOS Devices released and closed", module);
+    }
+
+    public String getName() {
+        return name;
     }
 }

@@ -173,7 +173,7 @@ public class EbayEvents {
 
         ApiContext apiContext = EbayStoreHelper.getApiContext(productStoreId, locale, delegator);
         //String webSiteUrl = (String) requestParams.get("webSiteUrl");
-        String webSiteUrl = "http://demo.ofbiz.org";
+        String webSiteUrl = "http://demo-trunk.ofbiz.apache.org";
         Map<String,Object> addItemObject = getAddItemListingObject(request, apiContext);
         List<Map<String,Object>> itemObjs = null;
         if (UtilValidate.isNotEmpty(addItemObject.get("itemListings"))) {
@@ -192,11 +192,11 @@ public class EbayEvents {
                         }
                     }
                 }
-                Debug.log("run in with productIds "+productIds);
+                Debug.logInfo("run in with productIds "+productIds, module);
                 for (String productId : productIds) {
                     AddItemCall addItemCall = new AddItemCall(apiContext);
                     ItemType item = new ItemType();
-                    GenericValue product = delegator.findByPrimaryKey("Product", UtilMisc.toMap("productId", productId));
+                    GenericValue product = delegator.findOne("Product", UtilMisc.toMap("productId", productId), false);
                     item.setTitle(product.getString("internalName"));
                     item.setCurrency(CurrencyCodeType.USD);
                     String productDescription = "";
@@ -544,7 +544,7 @@ public class EbayEvents {
         EbayStoreSiteFacade sf = null;
         // find is exiting product and set category into item in additem call
         try {
-            if (UtilValidate.isNotEmpty(delegator.findByPrimaryKey("Product", UtilMisc.toMap("productId", productId)))) {
+            if (UtilValidate.isNotEmpty(delegator.findOne("Product", UtilMisc.toMap("productId", productId), false))) {
                 ApiContext apiContext = getApiContext(request);
                 Map<String,Object> addItemObject = getAddItemListingObject(request, apiContext);
                 List<Map<String,Object>> addItemlist = UtilGenerics.checkList(addItemObject.get("itemListing"));
@@ -864,7 +864,7 @@ public class EbayEvents {
                         attributeMapList.put("Currency", "USD");
 
                         if (UtilValidate.isNotEmpty(requestParams.get("requireEbayInventory")) && "Y".equals(requestParams.get("requireEbayInventory").toString())) {
-                            GenericValue ebayProductStore = EntityUtil.getFirst(EntityUtil.filterByDate(delegator.findByAnd("EbayProductStoreInventory", UtilMisc.toMap("productStoreId", productStoreId, "productId", productId))));
+                            GenericValue ebayProductStore = EntityUtil.getFirst(EntityUtil.filterByDate(delegator.findByAnd("EbayProductStoreInventory", UtilMisc.toMap("productStoreId", productStoreId, "productId", productId), null, false)));
                             if (UtilValidate.isNotEmpty(ebayProductStore)) {
                                 String facilityId = ebayProductStore.getString("facilityId");
                                 BigDecimal atp = ebayProductStore.getBigDecimal("availableToPromiseListing");
@@ -900,9 +900,9 @@ public class EbayEvents {
                             itemObj.put("isAutoRelist", "Y");
                         }
                         try {
-                            GenericValue storeRole = EntityUtil.getFirst(delegator.findByAnd("ProductStoreRole", UtilMisc.toMap("productStoreId", productStoreId, "roleTypeId", "EBAY_ACCOUNT")));
+                            GenericValue storeRole = EntityUtil.getFirst(delegator.findByAnd("ProductStoreRole", UtilMisc.toMap("productStoreId", productStoreId, "roleTypeId", "EBAY_ACCOUNT"), null, false));
                             if (UtilValidate.isNotEmpty(storeRole)) {
-                                List<GenericValue> ebayUserLoginList = delegator.findByAnd("UserLogin", UtilMisc.toMap("partyId", storeRole.get("partyId")));
+                                List<GenericValue> ebayUserLoginList = delegator.findByAnd("UserLogin", UtilMisc.toMap("partyId", storeRole.get("partyId")), null, false);
                                 if (ebayUserLoginList.size() > 0) {
                                     GenericValue eBayUserLogin = EntityUtil.getFirst(ebayUserLoginList);
                                     if (UtilValidate.isNotEmpty(eBayUserLogin)) {
@@ -1127,7 +1127,7 @@ public class EbayEvents {
                                 revReq.setSellingManagerProductDetails(prodDetailType);
                                 revResp = (ReviseSellingManagerProductResponseType) revProdCall.execute(revReq);
                                 if (revResp != null && "SUCCESS".equals(revResp.getAck().toString())) {
-                                    Debug.log("  Already update quantity on eBay inventory with product id ::"+revResp.getSellingManagerProductDetails().getProductID());
+                                    Debug.logInfo("  Already update quantity on eBay inventory with product id ::"+revResp.getSellingManagerProductDetails().getProductID(), module);
                                 } else {
                                     EbayStoreHelper.createErrorLogMessage(userLogin, dispatcher, productStoreId, revResp.getAck().toString(), "ReviseSellingManagerProductCall : updateQuantityInventoryProduct", revResp.getErrors(0).getLongMessage());
                                 }

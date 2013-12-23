@@ -64,7 +64,7 @@ public class WeightPackageServices {
         }
         try {
             // Checked no of packages, it should not be greater than ordered quantity
-            List<GenericValue> orderItems = delegator.findByAnd("OrderItem", UtilMisc.toMap("orderId", orderId, "statusId", "ITEM_APPROVED"));
+            List<GenericValue> orderItems = delegator.findByAnd("OrderItem", UtilMisc.toMap("orderId", orderId, "statusId", "ITEM_APPROVED"), null, false);
             BigDecimal orderedItemQty = ZERO;
             for (GenericValue orderItem : orderItems) {
                 orderedItemQty = orderedItemQty.add(orderItem.getBigDecimal("quantity"));
@@ -199,7 +199,7 @@ public class WeightPackageServices {
             return ServiceUtil.returnError(e.getMessage());
         }
 
-        return ServiceUtil.returnSuccess(UtilProperties.getMessage("ProductUiLabels", "FacilityThereIsProblemOccuredInPaymentCapture", locale));
+        return ServiceUtil.returnSuccess(UtilProperties.getMessage("ProductUiLabels", "FacilityThereIsProblemOccurredInPaymentCapture", locale));
     }
 
 }

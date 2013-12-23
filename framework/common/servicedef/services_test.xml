@@ -57,16 +57,6 @@ under the License.
         <implements service="testScv"/>
     </service>
 
-    <service name="testWorkflow" engine="workflow" location="TEST-PKG" invoke="TestWorkflow">
-        <attribute name="orderId" type="String" mode="IN"/>
-        <attribute name="partyId" type="String" mode="IN"/>
-        <attribute name="orderStatusId" type="String" mode="OUT"/>
-    </service>
-    <service name="testWorkflowCondition" engine="java"
-            location="org.ofbiz.common.CommonServices" invoke="testWorkflowCondition">
-        <attribute name="serviceName" type="String" mode="IN" optional="true"/>
-        <attribute name="evaluationResult" type="Boolean" mode="OUT"/>
-    </service>
     <service name="testRollback" engine="java" export="true" validate="false"
             location="org.ofbiz.common.CommonServices" invoke="testRollbackListener">
         <description>Test service</description>
@@ -82,21 +72,18 @@ under the License.
 
     <service name="groupTest" engine="group" location="testGroup" invoke=""/>
 
-    <service name="testHttp" engine="http"
-            location="http://localhost:8080/webtools/control/httpService" invoke="testScv">
+    <service name="testHttp" engine="http" location="main-http" invoke="testScv">
         <description>HTTP service wrapper around the test service</description>
         <attribute name="message" type="String" mode="IN" optional="true"/>
         <attribute name="resp" type="String" mode="OUT"/>
     </service>
 
-    <service name="testSoap" engine="soap" export="true"
-            location="http://localhost:8080/webtools/control/SOAPService" invoke="testSOAPScv">
+    <service name="testSoap" engine="soap" export="true" location="main-soap" invoke="testSOAPScv">
         <description>SOAP service; calls the OFBiz test SOAP service</description>
         <implements service="testSOAPScv"/>
     </service>
     
-    <service name="testSoapSimple" engine="soap" export="true"
-            location="http://localhost:8080/webtools/control/SOAPService" invoke="testScv">
+    <service name="testSoapSimple" engine="soap" export="true" location="main-soap" invoke="testScv">
         <description>simple SOAP service; calls the OFBiz test service</description>
         <implements service="testScv"/>
     </service>
@@ -158,16 +145,53 @@ under the License.
         invoke="GetGeoIPContext">
         <attribute name="invoke" type="String" mode="IN" />
         <attribute name="result" type="String" mode="OUT"/>
-    </service>    
-    
+    </service>
+
     <service name="testBsh" engine="bsh" location="component://common/script/org/ofbiz/common/BshServiceTest.bsh" invoke="">
+        <description>Test BeanShell Script Service</description>
+        <attribute name="message" type="String" mode="IN" optional="true" />
+        <attribute name="result" type="String" mode="OUT" />
+    </service>
+
+    <service name="testGroovy" engine="groovy" location="component://common/script/org/ofbiz/common/GroovyServiceTest.groovy" invoke="">
+        <description>Test Groovy Script Service</description>
+        <attribute name="message" type="String" mode="IN" optional="true"/>
+        <attribute name="result" type="String" mode="OUT"/>
+    </service>
+
+    <service name="testGroovyMethod" engine="groovy" location="component://common/script/org/ofbiz/common/GroovyServiceTest.groovy" invoke="testMethod">
+        <description>Test Groovy Script Service Method Invocation</description>
+        <attribute name="message" type="String" mode="IN" optional="true"/>
+        <attribute name="result" type="String" mode="OUT"/>
+    </service>
+
+    <service name="testScriptEngineBsh" engine="script" location="component://common/script/org/ofbiz/common/BshServiceTest.bsh" invoke="">
         <description>Test BeanShell Script Service</description>
         <attribute name="message" type="String" mode="IN" optional="true"/>
         <attribute name="result" type="String" mode="OUT"/>
     </service>
 
-    <service name="testGroovy" engine="groovy" location="component://common/script/org/ofbiz/common/GroovyServiceTest.groovy" invoke="">
-        <description>Test Groovy Script Service</description>
+    <service name="testScriptEngineGroovy" engine="script" location="component://common/script/org/ofbiz/common/GroovyServiceTest.groovy" invoke="">
+        <description>Test Script Engine With Groovy Script</description>
+        <attribute name="message" type="String" mode="IN" optional="true"/>
+        <attribute name="result" type="String" mode="OUT"/>
+    </service>
+
+    <service name="testScriptEngineGroovyMethod" engine="script" location="component://common/script/org/ofbiz/common/GroovyServiceTest.groovy" invoke="testMethod">
+        <description>Test Script Engine With Groovy Script Method Invocation</description>
+        <attribute name="message" type="String" mode="IN" optional="true"/>
+        <attribute name="result" type="String" mode="OUT"/>
+    </service>
+
+    <service name="testScriptEngineJavaScript" engine="script" location="component://common/script/org/ofbiz/common/JavaScriptTest.js" invoke="">
+        <description>Test Script Engine With JavaScript</description>
+        <attribute name="message" type="String" mode="IN" optional="true"/>
+        <attribute name="exampleId" type="String" mode="IN" optional="true"/>
+        <attribute name="result" type="String" mode="OUT"/>
+    </service>
+
+    <service name="testScriptEngineJavaScriptFunction" engine="script" location="component://common/script/org/ofbiz/common/JavaScriptTest.js" invoke="testFunction">
+        <description>Test Script Engine With JavaScript Function Invocation</description>
         <attribute name="message" type="String" mode="IN" optional="true"/>
         <attribute name="result" type="String" mode="OUT"/>
     </service>

@@ -26,14 +26,15 @@ import java.rmi.server.RMIServerSocketFactory;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
+import org.ofbiz.base.container.ClassLoaderContainer;
 import org.ofbiz.base.container.Container;
 import org.ofbiz.base.container.ContainerConfig;
 import org.ofbiz.base.container.ContainerException;
 import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.DelegatorFactory;
-import org.ofbiz.service.GenericDispatcher;
 import org.ofbiz.service.LocalDispatcher;
+import org.ofbiz.service.ServiceContainer;
 
 /**
  * RMI Service Engine Container / Dispatcher
@@ -45,19 +46,18 @@ public class RmiServiceContainer implements Container {
     protected RemoteDispatcherImpl remote = null;
     protected String configFile = null;
     protected String name = null;
-
+    private String containerName;
     // Container methods
 
-    /**
-     * @see org.ofbiz.base.container.Container#init(java.lang.String[], java.lang.String)
-     */
-    public void init(String[] args, String configFile) {
+    @Override
+    public void init(String[] args, String name, String configFile) {
+        this.containerName = name;
         this.configFile = configFile;
     }
 
     public boolean start() throws ContainerException {
         // get the container config
-        ContainerConfig.Container cfg = ContainerConfig.getContainer("rmi-dispatcher", configFile);
+        ContainerConfig.Container cfg = ContainerConfig.getContainer(containerName, configFile);
         ContainerConfig.Container.Property initialCtxProp = cfg.getProperty("use-initial-context");
         ContainerConfig.Container.Property lookupHostProp = cfg.getProperty("bound-host");
         ContainerConfig.Container.Property lookupPortProp = cfg.getProperty("bound-port");
@@ -81,6 +81,11 @@ public class RmiServiceContainer implements Container {
         String useCtx = initialCtxProp == null || initialCtxProp.value == null ? "false" : initialCtxProp.value;
         String host = lookupHostProp == null || lookupHostProp.value == null ? "localhost" : lookupHostProp.value;
         String port = lookupPortProp == null || lookupPortProp.value == null ? "1099" : lookupPortProp.value;
+        if (ClassLoaderContainer.portOffset != 0) {
+            Integer portValue = Integer.valueOf(port);
+            portValue += ClassLoaderContainer.portOffset;
+            port = portValue.toString();
+        }                
         String keystore = ContainerConfig.getPropertyValue(cfg, "ssl-keystore", null);
         String ksType = ContainerConfig.getPropertyValue(cfg, "ssl-keystore-type", "JKS");
         String ksPass = ContainerConfig.getPropertyValue(cfg, "ssl-keystore-pass", null);
@@ -125,7 +130,7 @@ public class RmiServiceContainer implements Container {
         Delegator delegator = DelegatorFactory.getDelegator(delegatorProp.value);
 
         // create the LocalDispatcher
-        LocalDispatcher dispatcher = GenericDispatcher.getLocalDispatcher(name, delegator);
+        LocalDispatcher dispatcher = ServiceContainer.getLocalDispatcher(name, delegator);
 
         // create the RemoteDispatcher
         try {
@@ -169,5 +174,9 @@ public class RmiServiceContainer implements Container {
 
     public void stop() throws ContainerException {
         remote.deregister();
+    }
+
+    public String getName() {
+        return containerName;
     }
 }

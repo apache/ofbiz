@@ -60,6 +60,7 @@ public class PromoServices {
             'Z', '2', '3', '4', '5', '6', '7', '8', '9' };
 
     public static Map<String, Object> createProductPromoCodeSet(DispatchContext dctx, Map<String, ? extends Object> context) {
+        Locale locale = (Locale) context.get("locale");
         Delegator delegator = dctx.getDelegator();
         LocalDispatcher dispatcher = dctx.getDispatcher();
         Long quantity = (Long) context.get("quantity");
@@ -77,7 +78,7 @@ public class PromoServices {
 
         String newPromoCodeId = "";
         StringBuilder bankOfNumbers = new StringBuilder();
-        bankOfNumbers.append("Following PromoCodes have been created: ");
+        bankOfNumbers.append(UtilProperties.getMessage(resource, "ProductPromoCodesCreated", locale));
         for (long i = 0; i < quantity; i++) {
             Map<String, Object> createProductPromoCodeMap = null;
             boolean foundUniqueNewCode = false;
@@ -91,7 +92,7 @@ public class PromoServices {
                 }
                 GenericValue existingPromoCode = null;
                 try {
-                    existingPromoCode = delegator.findByPrimaryKeyCache("ProductPromoCode", "productPromoCodeId", newPromoCodeId);
+                    existingPromoCode = delegator.findOne("ProductPromoCode", UtilMisc.toMap("productPromoCodeId", newPromoCodeId), true);
                 }
                 catch (GenericEntityException e) {
                     Debug.logWarning("Could not find ProductPromoCode for just generated ID: " + newPromoCodeId, module);
@@ -110,11 +111,11 @@ public class PromoServices {
                 newContext.put("productPromoCodeId", newPromoCodeId);
                 createProductPromoCodeMap = dispatcher.runSync("createProductPromoCode", newContext);
             } catch (GenericServiceException err) {
-                return ServiceUtil.returnError("Could not create a bank of promo codes", null, null, createProductPromoCodeMap);
+                return ServiceUtil.returnError(UtilProperties.getMessage(resource, "ProductPromoCodeCannotBeCreated", locale), null, null, createProductPromoCodeMap);
             }
             if (ServiceUtil.isError(createProductPromoCodeMap)) {
                 // what to do here? try again?
-                return ServiceUtil.returnError("Could not create a bank of promo codes", null, null, createProductPromoCodeMap);
+                return ServiceUtil.returnError(UtilProperties.getMessage(resource, "ProductPromoCodeCannotBeCreated", locale), null, null, createProductPromoCodeMap);
             }
             bankOfNumbers.append((String) createProductPromoCodeMap.get("productPromoCodeId"));
             bankOfNumbers.append(",");
@@ -236,16 +237,18 @@ public class PromoServices {
     public static Map<String, Object> importPromoCodeEmailsFromFile(DispatchContext dctx, Map<String, ? extends Object> context) {
         LocalDispatcher dispatcher = dctx.getDispatcher();
         String productPromoCodeId = (String) context.get("productPromoCodeId");
-        byte[] wrapper = (byte[]) context.get("uploadedFile");
         GenericValue userLogin = (GenericValue) context.get("userLogin");
         Locale locale = (Locale) context.get("locale");
 
-        if (wrapper == null) {
-            return ServiceUtil.returnError(UtilProperties.getMessage(resource, 
-                    "ProductPromoCodeImportUploadedFileNotValid", locale));
+        ByteBuffer bytebufferwrapper = (ByteBuffer) context.get("uploadedFile");
+
+        if (bytebufferwrapper == null) {
+            return ServiceUtil.returnError(UtilProperties.getMessage(resource, "ProductPromoCodeImportUploadedFileNotValid", locale));
         }
 
-        // read the bytes into a reader
+        byte[] wrapper = bytebufferwrapper.array();
+       
+      // read the bytes into a reader
         BufferedReader reader = new BufferedReader(new StringReader(new String(wrapper)));
         List<Object> errors = FastList.newInstance();
         int lines = 0;

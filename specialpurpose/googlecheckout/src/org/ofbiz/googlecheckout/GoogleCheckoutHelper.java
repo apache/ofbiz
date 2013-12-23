@@ -96,7 +96,7 @@ public class GoogleCheckoutHelper {
         String externalId = info.getGoogleOrderNumber();
         GenericValue order = null;
         try {
-            List<GenericValue> orders = delegator.findByAnd("OrderHeader", UtilMisc.toMap("externalId", externalId, "salesChannelEnumId" , SALES_CHANNEL));
+            List<GenericValue> orders = delegator.findByAnd("OrderHeader", UtilMisc.toMap("externalId", externalId, "salesChannelEnumId" , SALES_CHANNEL), null, false);
             order = EntityUtil.getFirst(orders);
         } catch (GenericEntityException e) {
             Debug.logError(e, module);
@@ -142,13 +142,13 @@ public class GoogleCheckoutHelper {
         List<GenericValue> orders = null;
         GenericValue orderPaymentPreference = null;
         try {
-            orders = delegator.findByAnd("OrderHeader", UtilMisc.toMap("externalId", externalId, "salesChannelEnumId", SALES_CHANNEL));
+            orders = delegator.findByAnd("OrderHeader", UtilMisc.toMap("externalId", externalId, "salesChannelEnumId", SALES_CHANNEL), null, false);
         } catch (GenericEntityException e) {
             Debug.logError(e, module);
         }
         if (UtilValidate.isNotEmpty(orders)) {
             GenericValue order = EntityUtil.getFirst(orders);
-            List<GenericValue> orderPaymentPreferences = order.getRelated("OrderPaymentPreference");
+            List<GenericValue> orderPaymentPreferences = order.getRelated("OrderPaymentPreference", null, null, false);
             if (UtilValidate.isNotEmpty(orderPaymentPreferences)) {
                 orderPaymentPreference = EntityUtil.getFirst(orderPaymentPreferences);
                 BigDecimal maxAmount = new BigDecimal(info.getAuthorizationAmount());
@@ -171,13 +171,13 @@ public class GoogleCheckoutHelper {
         List<GenericValue> orders = null;
         GenericValue orderPaymentPreference = null;
         try {
-            orders = delegator.findByAnd("OrderHeader", UtilMisc.toMap("externalId", externalId, "salesChannelEnumId", SALES_CHANNEL));
+            orders = delegator.findByAnd("OrderHeader", UtilMisc.toMap("externalId", externalId, "salesChannelEnumId", SALES_CHANNEL), null, false);
         } catch (GenericEntityException e) {
             Debug.logError(e, module);
         }
         if (UtilValidate.isNotEmpty(orders)) {
             GenericValue order = EntityUtil.getFirst(orders);
-            List<GenericValue> orderPaymentPreferences = order.getRelated("OrderPaymentPreference");
+            List<GenericValue> orderPaymentPreferences = order.getRelated("OrderPaymentPreference", null, null, false);
             if (UtilValidate.isNotEmpty(orderPaymentPreferences)) {
                 orderPaymentPreference = EntityUtil.getFirst(orderPaymentPreferences);
                 BigDecimal maxAmount = new BigDecimal(info.getTotalChargeAmount());
@@ -201,13 +201,13 @@ public class GoogleCheckoutHelper {
         List<GenericValue> orders = null;
         GenericValue orderPaymentPreference = null;
         try {
-            orders = delegator.findByAnd("OrderHeader", UtilMisc.toMap("externalId", externalId, "salesChannelEnumId", SALES_CHANNEL));
+            orders = delegator.findByAnd("OrderHeader", UtilMisc.toMap("externalId", externalId, "salesChannelEnumId", SALES_CHANNEL), null, false);
         } catch (GenericEntityException e) {
             Debug.logError(e, module);
         }
         if (UtilValidate.isNotEmpty(orders)) {
             GenericValue order = EntityUtil.getFirst(orders);
-            List<GenericValue> orderPaymentPreferences = order.getRelated("OrderPaymentPreference");
+            List<GenericValue> orderPaymentPreferences = order.getRelated("OrderPaymentPreference", null, null, false);
             if (UtilValidate.isNotEmpty(orderPaymentPreferences)) {
                 orderPaymentPreference = EntityUtil.getFirst(orderPaymentPreferences);
                 BigDecimal maxAmount = new BigDecimal(info.getTotalRefundAmount());
@@ -236,7 +236,7 @@ public class GoogleCheckoutHelper {
         String externalId = info.getGoogleOrderNumber();
 
         // check and make sure this order doesn't already exist
-        List<GenericValue> existingOrder = delegator.findByAnd("OrderHeader", UtilMisc.toMap("externalId", externalId));
+        List<GenericValue> existingOrder = delegator.findByAnd("OrderHeader", UtilMisc.toMap("externalId", externalId), null, false);
         if (UtilValidate.isNotEmpty(existingOrder)) {
             //throw new GeneralException("Google order #" + externalId + " already exists.");
             Debug.logWarning("Google order #" + externalId + " already exists.", module);
@@ -279,7 +279,7 @@ public class GoogleCheckoutHelper {
 
         cart.setOrderPartyId(partyInfo[0]);
         cart.setPlacingCustomerPartyId(partyInfo[0]);
-        cart.setShippingContactMechId(partyInfo[1]);
+        cart.setAllShippingContactMechId(partyInfo[1]);
 
         // contact info
         String shippingEmail = shippingAddress.getEmail();
@@ -418,10 +418,10 @@ public class GoogleCheckoutHelper {
             String carrierPartyId = googleShipping.getString("carrierPartyId");
             Boolean maySplit = Boolean.FALSE;
 
-            cart.setShipmentMethodTypeId(shipmentMethodTypeId);
-            cart.setCarrierPartyId(carrierPartyId);
-            cart.setMaySplit(maySplit);
-            cart.setShippingContactMechId(shipContactMechId);
+            cart.setAllShipmentMethodTypeId(shipmentMethodTypeId);
+            cart.setAllCarrierPartyId(carrierPartyId);
+            cart.setAllMaySplit(maySplit);
+            cart.setAllShippingContactMechId(shipContactMechId);
         } else {
             Debug.logWarning("No valid fulfillment method found! No shipping info set!", module);
         }
@@ -556,7 +556,7 @@ public class GoogleCheckoutHelper {
 
         // check to make sure the purpose doesn't already exist
         List<GenericValue> values = delegator.findByAnd("PartyContactMechPurpose", UtilMisc.toMap("partyId", partyId,
-                "contactMechId", contactMechId, "contactMechPurposeTypeId", contactMechPurposeTypeId));
+                "contactMechId", contactMechId, "contactMechPurposeTypeId", contactMechPurposeTypeId), null, false);
 
         if (UtilValidate.isEmpty(values)) {
             Map<String, Object> addPurposeMap = FastMap.newInstance();
@@ -603,7 +603,7 @@ public class GoogleCheckoutHelper {
 
         List<GenericValue> cmLookup;
         try {
-            cmLookup = delegator.findByAnd(entityName, lookupMap, UtilMisc.toList("-fromDate"));
+            cmLookup = delegator.findByAnd(entityName, lookupMap, UtilMisc.toList("-fromDate"), false);
             cmLookup = EntityUtil.filterByDate(cmLookup);
         } catch (GenericEntityException e) {
             Debug.logError(e, module);
@@ -656,7 +656,7 @@ public class GoogleCheckoutHelper {
         }
         List<GenericValue> geos = null;
         try {
-            geos = delegator.findByAnd("Geo", UtilMisc.toMap("geoCode", geoCode, "geoTypeId", "COUNTRY"));
+            geos = delegator.findByAnd("Geo", UtilMisc.toMap("geoCode", geoCode, "geoTypeId", "COUNTRY"), null, false);
         } catch (GenericEntityException e) {
             Debug.logError(e, module);
         }

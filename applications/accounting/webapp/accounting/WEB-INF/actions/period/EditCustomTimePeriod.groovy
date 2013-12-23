@@ -33,12 +33,12 @@ if (currentCustomTimePeriodId) {
     context.currentCustomTimePeriodId = currentCustomTimePeriodId;
 }
 
-currentCustomTimePeriod = currentCustomTimePeriodId ? delegator.findByPrimaryKey("CustomTimePeriod", [customTimePeriodId : currentCustomTimePeriodId]) : null;
+currentCustomTimePeriod = currentCustomTimePeriodId ? delegator.findOne("CustomTimePeriod", [customTimePeriodId : currentCustomTimePeriodId], false) : null;
 if (currentCustomTimePeriod) {
     context.currentCustomTimePeriod = currentCustomTimePeriod;
 }
 
-currentPeriodType = currentCustomTimePeriod ? currentCustomTimePeriod.getRelatedOneCache("PeriodType") : null;
+currentPeriodType = currentCustomTimePeriod ? currentCustomTimePeriod.getRelatedOne("PeriodType", true) : null;
 if (currentPeriodType) {
     context.currentPeriodType = currentPeriodType;
 }
@@ -47,7 +47,7 @@ findMap = [ : ];
 if (findOrganizationPartyId) findMap.organizationPartyId = findOrganizationPartyId;
 if (currentCustomTimePeriodId) findMap.parentPeriodId = currentCustomTimePeriodId;
 
-customTimePeriods = delegator.findByAnd("CustomTimePeriod", findMap, ["periodTypeId", "periodNum", "fromDate"]);
+customTimePeriods = delegator.findByAnd("CustomTimePeriod", findMap, ["periodTypeId", "periodNum", "fromDate"], false);
 context.customTimePeriods = customTimePeriods;
 
 allCustomTimePeriods = delegator.findList("CustomTimePeriod", null, null, ["organizationPartyId", "parentPeriodId", "periodTypeId", "periodNum", "fromDate"], null, false);

@@ -19,7 +19,7 @@ under the License.
 -->
 
 <simple-methods xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/simple-methods.xsd">
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/simple-methods-v2.xsd">
 
     <!-- Test case for Accounting Transaction on Sales -->
     <simple-method method-name="testAcctgTransForSalesOrderShipments" short-description="Creation and Shipments of sales order" login-required="false">
@@ -152,7 +152,7 @@ under the License.
         <assert><not><if-empty field="accountsReceivableEntries"></if-empty></not></assert>
 
         <clear-field field="acctgTransEntryFilter"/>
-        <set field="acctgTransEntryFilter.glAccountId" value="400000"/>
+        <set field="acctgTransEntryFilter.glAccountId" value="401000"/>
         <filter-list-by-and list="acctgTransEntryList" to-list="salesAccountEntries" map="acctgTransEntryFilter"/>
         <assert><not><if-empty field="salesAccountEntries"></if-empty></not></assert>
 

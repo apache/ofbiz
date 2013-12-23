@@ -19,14 +19,12 @@
 -->
 
 <simple-methods xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
-    xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/simple-methods.xsd">
+    xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/simple-methods-v2.xsd">
 
     <simple-method method-name="getOrder" short-description="Get Orders" login-required="false">
         <if-not-empty field="Week">
-            <!--<set field="year" from-field="Year" type="Integer"/>-->
-            <!--<set field="week1" from-field="Week" type="Integer"/>-->
-            <set field="year" value="2009" type="Integer"/>
-            <set field="week1" value="49" type="Integer"/>
+            <set field="year" from-field="Year" type="Integer"/>
+            <set field="week1" from-field="Week" type="Integer"/>
             <calculate field="week2" type="Integer">
                 <calcop field="week1" operator="subtract">
                     <number value="1"/>

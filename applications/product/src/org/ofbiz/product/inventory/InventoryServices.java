@@ -21,7 +21,6 @@ package org.ofbiz.product.inventory;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.sql.Timestamp;
-import com.ibm.icu.util.Calendar;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -52,6 +51,8 @@ import org.ofbiz.service.GenericServiceException;
 import org.ofbiz.service.LocalDispatcher;
 import org.ofbiz.service.ServiceUtil;
 
+import com.ibm.icu.util.Calendar;
+
 /**
  * Inventory Services
  */
@@ -71,7 +72,7 @@ public class InventoryServices {
         Locale locale = (Locale) context.get("locale");
 
         try {
-            inventoryItem = delegator.findByPrimaryKey("InventoryItem", UtilMisc.toMap("inventoryItemId", inventoryItemId));
+            inventoryItem = delegator.findOne("InventoryItem", UtilMisc.toMap("inventoryItemId", inventoryItemId), false);
         } catch (GenericEntityException e) {
             return ServiceUtil.returnError(UtilProperties.getMessage(resource, 
                     "ProductNotFindInventoryItemWithId", locale) + inventoryItemId);
@@ -223,10 +224,10 @@ public class InventoryServices {
         Locale locale = (Locale) context.get("locale");
 
         try {
-            inventoryTransfer = delegator.findByPrimaryKey("InventoryTransfer",
-                    UtilMisc.toMap("inventoryTransferId", inventoryTransferId));
-            inventoryItem = inventoryTransfer.getRelatedOne("InventoryItem");
-            destinationFacility = inventoryTransfer.getRelatedOne("ToFacility");
+            inventoryTransfer = delegator.findOne("InventoryTransfer",
+                    UtilMisc.toMap("inventoryTransferId", inventoryTransferId), false);
+            inventoryItem = inventoryTransfer.getRelatedOne("InventoryItem", false);
+            destinationFacility = inventoryTransfer.getRelatedOne("ToFacility", false);
         } catch (GenericEntityException e) {
             return ServiceUtil.returnError(UtilProperties.getMessage(resource, 
                     "ProductInventoryItemLookupProblem", 
@@ -336,14 +337,14 @@ public class InventoryServices {
         Locale locale = (Locale) context.get("locale");
 
         try {
-            inventoryTransfer = delegator.findByPrimaryKey("InventoryTransfer",
-                    UtilMisc.toMap("inventoryTransferId", inventoryTransferId));
+            inventoryTransfer = delegator.findOne("InventoryTransfer",
+                    UtilMisc.toMap("inventoryTransferId", inventoryTransferId), false);
             if (UtilValidate.isEmpty(inventoryTransfer)) {
                 return ServiceUtil.returnError(UtilProperties.getMessage(resource, 
                         "ProductInventoryItemTransferNotFound", 
                         UtilMisc.toMap("inventoryTransferId", inventoryTransferId), locale));
             }
-            inventoryItem = inventoryTransfer.getRelatedOne("InventoryItem");
+            inventoryItem = inventoryTransfer.getRelatedOne("InventoryItem", false);
         } catch (GenericEntityException e) {
             return ServiceUtil.returnError(UtilProperties.getMessage(resource, 
                     "ProductInventoryItemLookupProblem", 
@@ -439,7 +440,7 @@ public class InventoryServices {
             return ServiceUtil.returnSuccess();
         }
 
-        Debug.log("OOS Inventory Items: " + inventoryItems.size(), module);
+        Debug.logInfo("OOS Inventory Items: " + inventoryItems.size(), module);
 
         for (GenericValue inventoryItem: inventoryItems) {
             // get the incomming shipment information for the item
@@ -462,7 +463,7 @@ public class InventoryServices {
             // get the reservations in order of newest first
             List<GenericValue> reservations = null;
             try {
-                reservations = inventoryItem.getRelated("OrderItemShipGrpInvRes", null, UtilMisc.toList("-reservedDatetime"));
+                reservations = inventoryItem.getRelated("OrderItemShipGrpInvRes", null, UtilMisc.toList("-reservedDatetime"), false);
             } catch (GenericEntityException e) {
                 Debug.logError(e, "Problem getting related reservations", module);
                 return ServiceUtil.returnError(UtilProperties.getMessage(resource, 
@@ -474,7 +475,7 @@ public class InventoryServices {
                 continue;
             }
 
-            Debug.log("Reservations for item: " + reservations.size(), module);
+            Debug.logInfo("Reservations for item: " + reservations.size(), module);
 
             // available at the time of order
             BigDecimal availableBeforeReserved = inventoryItem.getBigDecimal("availableToPromiseTotal");
@@ -495,7 +496,7 @@ public class InventoryServices {
                     }
                 }
 
-                Debug.log("Promised Date: " + actualPromiseDate, module);
+                Debug.logInfo("Promised Date: " + actualPromiseDate, module);
 
                 // find the next possible ship date
                 Timestamp nextShipDate = null;
@@ -508,7 +509,7 @@ public class InventoryServices {
                     }
                 }
 
-                Debug.log("Next Ship Date: " + nextShipDate, module);
+                Debug.logInfo("Next Ship Date: " + nextShipDate, module);
 
                 // create a modified promise date (promise date - 1 day)
                 Calendar pCal = Calendar.getInstance();
@@ -517,17 +518,17 @@ public class InventoryServices {
                 Timestamp modifiedPromisedDate = new Timestamp(pCal.getTimeInMillis());
                 Timestamp now = UtilDateTime.nowTimestamp();
 
-                Debug.log("Promised Date + 1: " + modifiedPromisedDate, module);
-                Debug.log("Now: " + now, module);
+                Debug.logInfo("Promised Date + 1: " + modifiedPromisedDate, module);
+                Debug.logInfo("Now: " + now, module);
 
                 // check the promised date vs the next ship date
                 if (nextShipDate == null || nextShipDate.after(actualPromiseDate)) {
                     if (nextShipDate == null && modifiedPromisedDate.after(now)) {
                         // do nothing; we are okay to assume it will be shipped on time
-                        Debug.log("No ship date known yet, but promised date hasn't approached, assuming it will be here on time", module);
+                        Debug.logInfo("No ship date known yet, but promised date hasn't approached, assuming it will be here on time", module);
                     } else {
                         // we cannot ship by the promised date; need to notify the customer
-                        Debug.log("We won't ship on time, getting notification info", module);
+                        Debug.logInfo("We won't ship on time, getting notification info", module);
                         Map<String, Timestamp> notifyItems = ordersToUpdate.get(orderId);
                         if (notifyItems == null) {
                             notifyItems = FastMap.newInstance();
@@ -545,7 +546,7 @@ public class InventoryServices {
                         boolean needToCancel = false;
                         if (nextShipDate == null || nextShipDate.after(farPastPromised)) {
                             // we cannot ship until >30 days after promised; using cancel rule
-                            Debug.log("Ship date is >30 past the promised date", module);
+                            Debug.logInfo("Ship date is >30 past the promised date", module);
                             needToCancel = true;
                         } else if (currentPromiseDate != null && actualPromiseDate.equals(currentPromiseDate)) {
                             // this is the second notification; using cancel rule
@@ -555,7 +556,7 @@ public class InventoryServices {
                         // add the info to the cancel map if we need to schedule a cancel
                         if (needToCancel) {
                             // queue the item to be cancelled
-                            Debug.log("Flagging the item to auto-cancel", module);
+                            Debug.logInfo("Flagging the item to auto-cancel", module);
                             Map<String, Timestamp> cancelItems = ordersToCancel.get(orderId);
                             if (cancelItems == null) {
                                 cancelItems = FastMap.newInstance();
@@ -591,7 +592,7 @@ public class InventoryServices {
             List<GenericValue> orderItemShipGroups = null;
             try {
                 orderItemShipGroups= delegator.findByAnd("OrderItemShipGroup",
-                        UtilMisc.toMap("orderId", orderId));
+                        UtilMisc.toMap("orderId", orderId), null, false);
             } catch (GenericEntityException e) {
                 Debug.logError(e, "Cannot get OrderItemShipGroups from orderId" + orderId, module);
             }
@@ -605,10 +606,10 @@ public class InventoryServices {
                                 UtilMisc.toMap("shipGroupSeqId",
                                         orderItemShipGroup.get("shipGroupSeqId"),
                                         "orderId",
-                                        orderId));
+                                        orderId), null, false);
 
                     for (GenericValue assoc: orderItemShipGroupAssoc) {
-                        GenericValue orderItem = assoc.getRelatedOne("OrderItem");
+                        GenericValue orderItem = assoc.getRelatedOne("OrderItem", false);
                         if (orderItem != null) {
                             orderItems.add(orderItem);
                         }
@@ -644,7 +645,7 @@ public class InventoryServices {
                         Timestamp cancelDate = cancelItems.get(orderItemSeqId);
                         Timestamp currentCancelDate = orderItem.getTimestamp("autoCancelDate");
 
-                        Debug.logError("OI: " + orderId + " SEQID: "+ orderItemSeqId + " cancelAll: " + cancelAll + " cancelDate: " + cancelDate, module);
+                        Debug.logInfo("OI: " + orderId + " SEQID: "+ orderItemSeqId + " cancelAll: " + cancelAll + " cancelDate: " + cancelDate, module);
                         if (backOrderedItems.containsKey(orderItemSeqId)) {
                             orderItem.set("estimatedShipDate", shipDate);
 
@@ -781,7 +782,7 @@ public class InventoryServices {
         List<GenericValue> facilities = null;
         try {
             if (facilityId != null) {
-                facilities = delegator.findByAnd("Facility", UtilMisc.toMap("facilityId", facilityId));
+                facilities = delegator.findByAnd("Facility", UtilMisc.toMap("facilityId", facilityId), null, false);
             } else {
                 facilities = delegator.findList("Facility", null, null, null, null, false);
             }
@@ -799,7 +800,7 @@ public class InventoryServices {
 
             GenericValue product = null;
             try {
-                product = orderItem.getRelatedOneCache("Product");
+                product = orderItem.getRelatedOne("Product", true);
             } catch (GenericEntityException e) {
                 Debug.logError(e, "Couldn't get product.", module);
                 return ServiceUtil.returnError(UtilProperties.getMessage(resource, 
@@ -864,7 +865,7 @@ public class InventoryServices {
         Timestamp checkTime = (Timestamp)context.get("checkTime");
         String facilityId = (String)context.get("facilityId");
         String productId = (String)context.get("productId");
-        String minimumStockStr = (String)context.get("minimumStock");
+        BigDecimal minimumStock = (BigDecimal)context.get("minimumStock");
         String statusId = (String)context.get("statusId");
 
         Map<String, Object> result = FastMap.newInstance();
@@ -873,7 +874,7 @@ public class InventoryServices {
         Map<String, String> contextInput = UtilMisc.toMap("productId", productId, "facilityId", facilityId, "statusId", statusId);
         GenericValue product = null;
         try {
-            product = delegator.findByPrimaryKey("Product", UtilMisc.toMap("productId", productId));
+            product = delegator.findOne("Product", UtilMisc.toMap("productId", productId), false);
         } catch (GenericEntityException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
@@ -894,10 +895,7 @@ public class InventoryServices {
             }
         }
         // filter for quantities
-        BigDecimal minimumStock = BigDecimal.ZERO;
-        if (minimumStockStr != null) {
-            minimumStock = new BigDecimal(minimumStockStr);
-        }
+        minimumStock = minimumStock != null ? minimumStock : BigDecimal.ZERO;
 
         BigDecimal quantityOnHandTotal = BigDecimal.ZERO;
         if (resultOutput.get("quantityOnHandTotal") != null) {
@@ -912,8 +910,8 @@ public class InventoryServices {
         BigDecimal offsetATPQtyAvailable = availableToPromiseTotal.subtract(minimumStock);
 
         BigDecimal quantityOnOrder = InventoryWorker.getOutstandingPurchasedQuantity(productId, delegator);
-        result.put("totalQuantityOnHand", resultOutput.get("quantityOnHandTotal").toString());
-        result.put("totalAvailableToPromise", resultOutput.get("availableToPromiseTotal").toString());
+        result.put("totalQuantityOnHand", resultOutput.get("quantityOnHandTotal"));
+        result.put("totalAvailableToPromise", resultOutput.get("availableToPromiseTotal"));
         result.put("quantityOnOrder", quantityOnOrder);
 
         result.put("offsetQOHQtyAvailable", offsetQOHQtyAvailable);
@@ -921,7 +919,7 @@ public class InventoryServices {
 
         List<GenericValue> productPrices = null;
         try {
-            productPrices = delegator.findByAndCache("ProductPrice", UtilMisc.toMap("productId",productId), UtilMisc.toList("-fromDate"));
+            productPrices = delegator.findByAnd("ProductPrice", UtilMisc.toMap("productId",productId), UtilMisc.toList("-fromDate"), true);
         } catch (GenericEntityException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
@@ -929,13 +927,13 @@ public class InventoryServices {
         //change this for product price
         for (GenericValue onePrice: productPrices) {
             if (onePrice.getString("productPriceTypeId").equals("DEFAULT_PRICE")) { //defaultPrice
-                result.put("defultPrice", onePrice.getBigDecimal("price"));
+                result.put("defaultPrice", onePrice.getBigDecimal("price"));
             } else if (onePrice.getString("productPriceTypeId").equals("WHOLESALE_PRICE")) {//
                 result.put("wholeSalePrice", onePrice.getBigDecimal("price"));
             } else if (onePrice.getString("productPriceTypeId").equals("LIST_PRICE")) {//listPrice
                 result.put("listPrice", onePrice.getBigDecimal("price"));
             } else {
-                result.put("defultPrice", onePrice.getBigDecimal("price"));
+                result.put("defaultPrice", onePrice.getBigDecimal("price"));
                 result.put("listPrice", onePrice.getBigDecimal("price"));
                 result.put("wholeSalePrice", onePrice.getBigDecimal("price"));
             }

@@ -73,26 +73,22 @@ public class ProductDisplayWorker {
 
             while (cartiter != null && cartiter.hasNext()) {
                 ShoppingCartItem item = cartiter.next();
-                // Collection upgradeProducts = delegator.findByAndCache("ProductAssoc", UtilMisc.toMap("productId", item.getProductId(), "productAssocTypeId", "PRODUCT_UPGRADE"), null);
-                List<GenericValue> complementProducts = delegator.findByAndCache("ProductAssoc", UtilMisc.toMap("productId", item.getProductId(), "productAssocTypeId", "PRODUCT_COMPLEMENT"), null);
+                // Collection upgradeProducts = delegator.findByAnd("ProductAssoc", UtilMisc.toMap("productId", item.getProductId(), "productAssocTypeId", "PRODUCT_UPGRADE"), null, true);
+                List<GenericValue> complementProducts = delegator.findByAnd("ProductAssoc", UtilMisc.toMap("productId", item.getProductId(), "productAssocTypeId", "PRODUCT_COMPLEMENT"), null, true);
                 // since ProductAssoc records have a fromDate and thruDate, we can filter by now so that only assocs in the date range are included
                 complementProducts = EntityUtil.filterByDate(complementProducts);
 
-                List<GenericValue> productsCategories = delegator.findByAndCache("ProductCategoryMember", UtilMisc.toMap("productId", item.getProductId()), null);
+                List<GenericValue> productsCategories = delegator.findByAnd("ProductCategoryMember", UtilMisc.toMap("productId", item.getProductId()), null, true);
                 productsCategories = EntityUtil.filterByDate(productsCategories, true);
                 if (productsCategories != null) {
-                    Iterator<GenericValue> productsCategoriesIter = productsCategories.iterator();
-                    while (productsCategoriesIter.hasNext()) {
-                        GenericValue productsCategoryMember = productsCategoriesIter.next();
-                        GenericValue productsCategory = productsCategoryMember.getRelatedOneCache("ProductCategory");
+                    for (GenericValue productsCategoryMember : productsCategories) {
+                        GenericValue productsCategory = productsCategoryMember.getRelatedOne("ProductCategory", true);
                         if ("CROSS_SELL_CATEGORY".equals(productsCategory.getString("productCategoryTypeId"))) {
-                            List<GenericValue> curPcms = productsCategory.getRelatedCache("ProductCategoryMember");
+                            List<GenericValue> curPcms = productsCategory.getRelated("ProductCategoryMember", null, null, true);
                             if (curPcms != null) {
-                                Iterator<GenericValue> curPcmsIter = curPcms.iterator();
-                                while (curPcmsIter.hasNext()) {
-                                    GenericValue curPcm = curPcmsIter.next();
+                                for (GenericValue curPcm : curPcms) {
                                     if (!products.containsKey(curPcm.getString("productId"))) {
-                                        GenericValue product = curPcm.getRelatedOneCache("Product");
+                                        GenericValue product = curPcm.getRelatedOne("Product", true);
                                         products.put(product.getString("productId"), product);
                                     }
                                 }
@@ -102,11 +98,9 @@ public class ProductDisplayWorker {
                 }
 
                 if (UtilValidate.isNotEmpty(complementProducts)) {
-                    Iterator<GenericValue> complIter = complementProducts.iterator();
-                    while (complIter.hasNext()) {
-                        GenericValue productAssoc = complIter.next();
+                    for (GenericValue productAssoc : complementProducts) {
                         if (!products.containsKey(productAssoc.getString("productIdTo"))) {
-                            GenericValue product = productAssoc.getRelatedOneCache("AssocProduct");
+                            GenericValue product = productAssoc.getRelatedOne("AssocProduct", true);
                             products.put(product.getString("productId"), product);
                         }
                     }
@@ -174,42 +168,37 @@ public class ProductDisplayWorker {
                 // keep track of how many times a product occurs in order to find averages and rank by purchase amount
                 productOccurances = new HashMap<String, Integer>();
                 
-                // get all order role entities for user by customer role type
-                // final String[] USER_ORDER_ROLE_TYPES = {"END_USER_CUSTOMER", "SHIP_TO_CUSTOMER", "BILL_TO_CUSTOMER", "PLACING_CUSTOMER"};
-                final String[] USER_ORDER_ROLE_TYPES = {"PLACING_CUSTOMER"};
+                // get all order role entities for user by customer role type : PLACING_CUSTOMER
+                List<GenericValue> orderRoles = delegator.findByAnd("OrderRole", UtilMisc.toMap("partyId", userLogin.get("partyId"), "roleTypeId", "PLACING_CUSTOMER"), null, false);
+                Iterator<GenericValue> ordersIter = UtilMisc.toIterator(orderRoles);
 
-                for (int i = 0; i < USER_ORDER_ROLE_TYPES.length; i++) {
-                    List<GenericValue> orderRoles = delegator.findByAnd("OrderRole", UtilMisc.toMap("partyId", userLogin.get("partyId"), "roleTypeId", USER_ORDER_ROLE_TYPES[i]), null);
-                    Iterator<GenericValue> ordersIter = UtilMisc.toIterator(orderRoles);
+                while (ordersIter != null && ordersIter.hasNext()) {
+                    GenericValue orderRole = ordersIter.next();
+                    // for each order role get all order items
+                    List<GenericValue> orderItems = orderRole.getRelated("OrderItem", null, null, false);
+                    Iterator<GenericValue> orderItemsIter = UtilMisc.toIterator(orderItems);
 
-                    while (ordersIter != null && ordersIter.hasNext()) {
-                        GenericValue orderRole = ordersIter.next();
-                        // for each order role get all order items
-                        List<GenericValue> orderItems = orderRole.getRelated("OrderItem");
-                        Iterator<GenericValue> orderItemsIter = UtilMisc.toIterator(orderItems);
+                    while (orderItemsIter != null && orderItemsIter.hasNext()) {
+                        GenericValue orderItem = orderItemsIter.next();
+                        String productId = orderItem.getString("productId");
+                        if (UtilValidate.isNotEmpty(productId)) {
+                            // for each order item get the associated product
+                            GenericValue product = orderItem.getRelatedOne("Product", true);
 
-                        while (orderItemsIter != null && orderItemsIter.hasNext()) {
-                            GenericValue orderItem = orderItemsIter.next();
-                            String productId = orderItem.getString("productId");
-                            if (UtilValidate.isNotEmpty(productId)) {
-                                // for each order item get the associated product
-                                GenericValue product = orderItem.getRelatedOneCache("Product");
+                            products.put(product.getString("productId"), product);
 
-                                products.put(product.getString("productId"), product);
+                            BigDecimal curQuant = productQuantities.get(product.get("productId"));
 
-                                BigDecimal curQuant = productQuantities.get(product.get("productId"));
+                            if (curQuant == null) curQuant = BigDecimal.ZERO;
+                            BigDecimal orderQuant = orderItem.getBigDecimal("quantity");
 
-                                if (curQuant == null) curQuant = BigDecimal.ZERO;
-                                BigDecimal orderQuant = orderItem.getBigDecimal("quantity");
+                            if (orderQuant == null) orderQuant = BigDecimal.ZERO;
+                            productQuantities.put(product.getString("productId"), curQuant.add(orderQuant));
 
-                                if (orderQuant == null) orderQuant = BigDecimal.ZERO;
-                                productQuantities.put(product.getString("productId"), curQuant.add(orderQuant));
+                            Integer curOcc = productOccurances.get(product.get("productId"));
 
-                                Integer curOcc = productOccurances.get(product.get("productId"));
-
-                                if (curOcc == null) curOcc = Integer.valueOf(0);
-                                productOccurances.put(product.getString("productId"), Integer.valueOf(curOcc.intValue() + 1));
-                            }
+                            if (curOcc == null) curOcc = Integer.valueOf(0);
+                            productOccurances.put(product.getString("productId"), Integer.valueOf(curOcc.intValue() + 1));
                         }
                     }
                 }
@@ -238,9 +227,7 @@ public class ProductDisplayWorker {
             // remove all products that are already in the cart
             ShoppingCart cart = (ShoppingCart) httpRequest.getSession().getAttribute("shoppingCart");
             if (UtilValidate.isNotEmpty(cart)) {
-                Iterator<ShoppingCartItem> cartiter = cart.iterator();
-                while (cartiter.hasNext()) {
-                    ShoppingCartItem item = cartiter.next();
+                for (ShoppingCartItem item : cart) {
                     String productId = item.getProductId();
                     products.remove(productId);
                     productQuantities.remove(productId);
@@ -285,7 +272,7 @@ public class ProductDisplayWorker {
                 Integer quantity = entry.getValue();
                 BigDecimal occs = productQuantities.get(prodId);
                 //For quantity we should test if we allow to add decimal quantity for this product an productStore : if not then round to 0
-                if(! ProductWorker.isDecimalQuantityOrderAllowed(delegator, (String)prodId, cart.getProductStoreId())){
+                if(! ProductWorker.isDecimalQuantityOrderAllowed(delegator, prodId, cart.getProductStoreId())){
                     occs = occs.setScale(0, UtilNumber.getBigDecimalRoundingMode("order.rounding"));
                 }
                 else {

@@ -22,7 +22,6 @@ import java.util.Map;
 
 import org.ofbiz.entity.Delegator;
 import org.ofbiz.security.Security;
-import org.ofbiz.security.authz.Authorization;
 import org.ofbiz.service.jms.JmsListenerFactory;
 import org.ofbiz.service.job.JobManager;
 
@@ -319,11 +318,6 @@ public interface LocalDispatcher {
      */
     public Delegator getDelegator();
 
-    /**
-     * Gets the Authorization object associated with this dispatcher
-     * @return Authorization object associated with this dispatcher
-     */
-    public Authorization getAuthorization();
 
     /**
      * Gets the Security object associated with this dispatcher
@@ -344,7 +338,7 @@ public interface LocalDispatcher {
     public DispatchContext getDispatchContext();
 
     /**
-     * De-Registers this LocalDispatcher with the ServiceDispatcher
+     * De-Registers this LocalDispatcher
      */
     public void deregister();
 }

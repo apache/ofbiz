@@ -46,12 +46,6 @@ under the License.
         <response name="success" type="request" value="main"/>
     </request-map>
 
-    <request-map uri="changeDelegator">
-        <event type="java" path="org.ofbiz.webapp.event.CoreEvents" invoke="changeDelegator"/>
-        <response name="success" type="view" value="main"/>
-        <response name="error" type="view" value="error"/>
-    </request-map>
-
     <request-map uri="main">
         <security https="true" auth="true"/>
         <response name="success" type="view" value="main"/>
@@ -466,7 +460,7 @@ under the License.
     </request-map>
     <request-map uri="ShowProductionRun">
         <security https="true" auth="true"/>
-        <event type="groovy" path="component://manufacturing/webapp/manufacturing/jobshopmgt/" invoke="ShowProductionRun.groovy"/>
+        <event type="groovy" path="component://manufacturing/webapp/manufacturing/jobshopmgt/ShowProductionRun.groovy"/>
         <response name="docs_not_printed" type="view" value="EditProductionRun"/>
         <response name="docs_printed" type="view" value="ProductionRunDeclaration"/>
         <response name="error" type="view" value="FindProductionRun"/>

@@ -19,7 +19,7 @@ under the License.
 
 <#if canNotView>
   <h3>${uiLabelMap.AccountingCardInfoNotBelongToYou}.</h3>
-<a href="<@ofbizUrl>authview/${donePage}</@ofbizUrl>" class="button">${uiLabelMap.CommonBack}</a>
+<a href="<@ofbizUrl>${donePage}</@ofbizUrl>" class="button">${uiLabelMap.CommonGoBack}</a>
 <#else>
   <#if !creditCard?exists>
       <h2>${uiLabelMap.AccountingAddNewCreditCard}</h2>
@@ -30,9 +30,10 @@ under the License.
       <form method="post" action="<@ofbizUrl>updateCreditCard?DONE_PAGE=${donePage}</@ofbizUrl>" name="editcreditcardform">
         <div>
         <input type="hidden" name="paymentMethodId" value="${paymentMethodId}" />
-    </#if>
-      <a href="<@ofbizUrl>${donePage}</@ofbizUrl>" class="button">${uiLabelMap.CommonCancelDone}</a>
-      <a href="javascript:document.editcreditcardform.submit()" class="button">${uiLabelMap.CommonSave}</a>
+    </#if>      
+      &nbsp;<a href="<@ofbizUrl>${donePage}</@ofbizUrl>" class="button">${uiLabelMap.CommonGoBack}</a>
+      &nbsp;<a href="javascript:document.editcreditcardform.submit()" class="button">${uiLabelMap.CommonSave}</a>  
+      <p/>
       <table width="90%" border="0" cellpadding="2" cellspacing="0">
          ${screens.render("component://accounting/widget/CommonScreens.xml#creditCardFields")}
          <tr>
@@ -54,37 +55,37 @@ under the License.
                  <td valign="top">
                    ${uiLabelMap.PartyUseCurrentAddress}:
                    <#list curPartyContactMechPurposes as curPartyContactMechPurpose>
-                     <#assign curContactMechPurposeType = curPartyContactMechPurpose.getRelatedOneCache("ContactMechPurposeType") />
-                     <div class="tabletext">
+                     <#assign curContactMechPurposeType = curPartyContactMechPurpose.getRelatedOne("ContactMechPurposeType", true) />
+                     <div>
                        ${curContactMechPurposeType.get("description",locale)?if_exists}
                        <#if curPartyContactMechPurpose.thruDate?exists>
                          ((${uiLabelMap.CommonExpire}:${curPartyContactMechPurpose.thruDate.toString()})
                        </#if>
                      </div>
                    </#list>
-                   <div class="tabletext">
+                   <div>
                    <#if curPostalAddress.toName?exists>${uiLabelMap.CommonTo}: ${curPostalAddress.toName}<br /></#if>
                    <#if curPostalAddress.attnName?exists>${uiLabelMap.PartyAddrAttnName}: ${curPostalAddress.attnName}<br /></#if>
                      ${curPostalAddress.address1?if_exists}<br />
                    <#if curPostalAddress.address2?exists>${curPostalAddress.address2}<br /></#if>
                      ${curPostalAddress.city}<#if curPostalAddress.stateProvinceGeoId?has_content>,&nbsp;${curPostalAddress.stateProvinceGeoId}</#if>&nbsp;${curPostalAddress.postalCode}
                    <#if curPostalAddress.countryGeoId?exists><br />${curPostalAddress.countryGeoId}</#if>
-                   <div class="tabletext">(${uiLabelMap.CommonUpdated}:&nbsp;${(curPartyContactMech.fromDate.toString())?if_exists})</div>
-                   <#if curPartyContactMech.thruDate?exists><div class="tabletext">${uiLabelMap.CommonDelete}:&nbsp;${curPartyContactMech.thruDate.toString()}</#if>
+                   <div>(${uiLabelMap.CommonUpdated}:&nbsp;${(curPartyContactMech.fromDate.toString())?if_exists})</div>
+                   <#if curPartyContactMech.thruDate?exists><div>${uiLabelMap.CommonDelete}:&nbsp;${curPartyContactMech.thruDate.toString()}</#if>
                    </div>
                  </td>
                </tr>
              <#else>
            <#-- <tr>
             <td valign="top" colspan="2">
-              <div class="tabletext">${uiLabelMap.PartyBillingAddressNotSelected}</div>
+              <div>${uiLabelMap.PartyBillingAddressNotSelected}</div>
             </td>
           </tr> -->
              </#if>
           <#-- is confusing
           <tr>
             <td valign="top" colspan="2">
-              <div class="tabletext">${uiLabelMap.EcommerceMessage3}</div>
+              <div>${uiLabelMap.EcommerceMessage3}</div>
             </td>
           </tr>
           -->
@@ -99,13 +100,13 @@ under the License.
                  </td>
                  <td valign="middle">
                    <#list partyContactMechPurposes as partyContactMechPurpose>
-                     <#assign contactMechPurposeType = partyContactMechPurpose.getRelatedOneCache("ContactMechPurposeType") />
-                     <div class="tabletext">
+                     <#assign contactMechPurposeType = partyContactMechPurpose.getRelatedOne("ContactMechPurposeType", true) />
+                     <div>
                        ${contactMechPurposeType.get("description",locale)?if_exists}
                        <#if partyContactMechPurpose.thruDate?exists>(${uiLabelMap.CommonExpire}:${partyContactMechPurpose.thruDate})</#if>
                      </div>
                    </#list>
-                   <div class="tabletext">
+                   <div>
                      <#if postalAddress.toName?exists>${uiLabelMap.CommonTo}: ${postalAddress.toName}<br /></#if>
                      <#if postalAddress.attnName?exists>${uiLabelMap.PartyAddrAttnName}: ${postalAddress.attnName}<br /></#if>
                      ${postalAddress.address1?if_exists}<br />
@@ -113,20 +114,20 @@ under the License.
                      ${postalAddress.city}<#if postalAddress.stateProvinceGeoId?has_content>,&nbsp;${postalAddress.stateProvinceGeoId}</#if>&nbsp;${postalAddress.postalCode}
                      <#if postalAddress.countryGeoId?exists><br />${postalAddress.countryGeoId}</#if>
                    </div>
-                   <div class="tabletext">(${uiLabelMap.CommonUpdated}:&nbsp;${(partyContactMech.fromDate.toString())?if_exists})</div>
-                   <#if partyContactMech.thruDate?exists><div class="tabletext">${uiLabelMap.CommonDelete}:&nbsp;${partyContactMech.thruDate.toString()}</div></#if>
+                   <div>(${uiLabelMap.CommonUpdated}:&nbsp;${(partyContactMech.fromDate.toString())?if_exists})</div>
+                   <#if partyContactMech.thruDate?exists><div>${uiLabelMap.CommonDelete}:&nbsp;${partyContactMech.thruDate.toString()}</div></#if>
                  </td>
                </tr>
                </#list>
                <#if !postalAddressInfos?has_content && !curContactMech?exists>
-                 <tr><td colspan="2"><div class="tabletext">${uiLabelMap.PartyNoContactInformation}.</div></td></tr>
+                 <tr><td colspan="2"><div>${uiLabelMap.PartyNoContactInformation}.</div></td></tr>
                </#if>
                <tr>
                  <td align="right" valign="top">
                    <input type="radio" name="contactMechId" value="_NEW_" <#if !hasCurrent>checked="checked"</#if> />
                  </td>
                  <td valign="middle">
-                   <span class="tabletext">${uiLabelMap.PartyCreateNewBillingAddress}.</span>
+                   <span>${uiLabelMap.PartyCreateNewBillingAddress}.</span>
                  </td>
                </tr>
              </table>
@@ -134,9 +135,8 @@ under the License.
          </tr>
        </table>
        </div>
-     </form>
-
-  <a href="<@ofbizUrl>${donePage}</@ofbizUrl>" class="button">${uiLabelMap.CommonCancelDone}</a>
-  <a href="javascript:document.editcreditcardform.submit()" class="button">${uiLabelMap.CommonSave}</a>
+     </form>  
+  &nbsp;<a href="<@ofbizUrl>${donePage}</@ofbizUrl>" class="button">${uiLabelMap.CommonGoBack}</a>
+  &nbsp;<a href="javascript:document.editcreditcardform.submit()" class="button">${uiLabelMap.CommonSave}</a>  
 </#if>
 

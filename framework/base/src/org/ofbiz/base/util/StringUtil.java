@@ -28,7 +28,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javolution.context.ObjectFactory;
@@ -165,10 +164,20 @@ public class StringUtil {
      * @return a String of all values in the list seperated by the delimiter
      */
     public static String join(List<?> list, String delim) {
-        if (list == null || list.size() < 1)
+        return join ((Collection<?>) list, delim);
+    }
+
+    /**
+     * Creates a single string from a Collection of strings seperated by a delimiter.
+     * @param col a collection of strings to join
+     * @param delim the delimiter character(s) to use. (null value will join with no delimiter)
+     * @return a String of all values in the collection seperated by the delimiter
+     */
+    public static String join(Collection<?> col, String delim) {
+        if (UtilValidate.isEmpty(col))
             return null;
         StringBuilder buf = new StringBuilder();
-        Iterator<?> i = list.iterator();
+        Iterator<?> i = col.iterator();
 
         while (i.hasNext()) {
             buf.append(i.next());
@@ -188,13 +197,10 @@ public class StringUtil {
         List<String> splitList = null;
         StringTokenizer st = null;
 
-        if (str == null)
-            return splitList;
+        if (str == null) return splitList;
 
-        if (delim != null)
-            st = new StringTokenizer(str, delim);
-        else
-            st = new StringTokenizer(str);
+        if (delim != null) st = new StringTokenizer(str, delim);
+        else               st = new StringTokenizer(str);
 
         if (st != null && st.hasMoreTokens()) {
             splitList = FastList.newInstance();
@@ -202,6 +208,31 @@ public class StringUtil {
             while (st.hasMoreTokens())
                 splitList.add(st.nextToken());
         }
+        return splitList;
+    }
+
+    /**
+     * Splits a String on a delimiter into a List of Strings.
+     * @param str the String to split
+     * @param delim the delimiter character(s) to join on (null will split on whitespace)
+     * @param limit see String.split() method
+     * @return a list of Strings
+     */
+    public static List<String> split(String str, String delim, int limit) {
+        List<String> splitList = null;
+        String[] st = null;
+
+        if (str == null) return splitList;
+
+        if (delim != null) st = Pattern.compile(delim).split(str, limit);
+        else               st = str.split("\\s");
+
+
+        if (st != null && st.length > 0) {
+            splitList = FastList.newInstance();
+            for (int i=0; i < st.length; i++) splitList.add(st[i]);
+        }
+
         return splitList;
     }
 
@@ -228,13 +259,28 @@ public class StringUtil {
      * @return a Map of name/value pairs
      */
     public static Map<String, String> strToMap(String str, String delim, boolean trim) {
+        return strToMap(str, delim, trim, null);
+
+    }
+
+    /**
+     * Creates a Map from a name/value pair string
+     * @param str The string to decode and format
+     * @param delim the delimiter character(s) to join on (null will split on whitespace)
+     * @param trim Trim whitespace off fields
+     * @param pairsSeparator in case you use not encoded name/value pairs strings
+     *        and want to replace "=" to avoid clashes with parameters values in a not encoded URL, default to "="
+     * @return a Map of name/value pairs
+     */
+    public static Map<String, String> strToMap(String str, String delim, boolean trim, String pairsSeparator) {
         if (str == null) return null;
         Map<String, String> decodedMap = FastMap.newInstance();
         List<String> elements = split(str, delim);
+        pairsSeparator = pairsSeparator == null ? "=" : pairsSeparator;
 
         for (String s: elements) {
-            List<String> e = split(s, "=");
 
+            List<String> e = split(s, pairsSeparator);
             if (e.size() != 2) {
                 continue;
             }
@@ -265,7 +311,7 @@ public class StringUtil {
      * @return a Map of name/value pairs
      */
     public static Map<String, String> strToMap(String str, boolean trim) {
-        return strToMap(str, "|", trim);
+        return strToMap(str, null, trim);
     }
 
     /**
@@ -284,10 +330,10 @@ public class StringUtil {
      * @return a Map of name/value pairs
      */
     public static Map<String, String> strToMap(String str) {
-        return strToMap(str, "|", false);
+        return strToMap(str, null, false);
     }
 
-    
+
     /**
      * Creates an encoded String from a Map of name/value pairs (MUST BE STRINGS!)
      * @param map The Map of name/value pairs
@@ -330,7 +376,9 @@ public class StringUtil {
     }
 
     /**
-     * Reads a String version of a Map (should contain only strings) and creates a new Map
+     * Reads a String version of a Map (should contain only strings) and creates a new Map.
+     * Partial Map elements are skipped: <code>{foo=fooValue, bar=}</code> will contain only
+     * the foo element.
      *
      * @param s String value of a Map ({n1=v1, n2=v2})
      * @return new Map
@@ -342,7 +390,9 @@ public class StringUtil {
             String[] entries = s.split("\\,\\s");
             for (String entry: entries) {
                 String[] nv = entry.split("\\=");
-                newMap.put(nv[0], nv[1]);
+                if (nv.length == 2) {
+                    newMap.put(nv[0], nv[1]);
+                }
             }
         } else {
             throw new IllegalArgumentException("String is not from Map.toString()");
@@ -495,9 +545,7 @@ public class StringUtil {
      * Removes all matches of regex from a str
      */
     public static String removeRegex(String str, String regex) {
-        Pattern pattern = Pattern.compile(regex);
-        Matcher matcher = pattern.matcher(str);
-        return matcher.replaceAll("");
+        return str.replaceAll(regex, "");
     }
 
     /**

@@ -19,7 +19,7 @@ under the License.
 -->
 
 <simple-methods xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/simple-methods.xsd">
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/simple-methods-v2.xsd">
 
     <simple-method method-name="loadSalesOrderFact" short-description="">
         <entity-one entity-name="OrderHeader" value-field="orderHeader"/>
@@ -482,6 +482,10 @@ under the License.
     </simple-method>
     
     <simple-method method-name="convertUomCurrency" short-description="Convert Uom Currency from UomConversionDated entity">
+        <if-empty field="parameters.nowDate">
+            <now field="now"/>            
+            <set field="parameters.nowDate" from-field="now"/>
+        </if-empty>
         <entity-condition entity-name="UomConversionDated" list="UomConversionDatedList">
             <condition-list combine="and">
                 <condition-expr field-name="uomId" operator="equals" from-field="parameters.uomId"/>

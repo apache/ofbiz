@@ -21,6 +21,7 @@ package org.ofbiz.base.util.string;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
@@ -29,19 +30,15 @@ import javax.el.PropertyNotFoundException;
 
 import org.ofbiz.base.lang.IsEmpty;
 import org.ofbiz.base.lang.SourceMonitored;
-import org.ofbiz.base.util.BshUtil;
 import org.ofbiz.base.util.Debug;
-import org.ofbiz.base.util.GroovyUtil;
 import org.ofbiz.base.util.ObjectType;
+import org.ofbiz.base.util.ScriptUtil;
 import org.ofbiz.base.util.UtilDateTime;
 import org.ofbiz.base.util.UtilFormatOut;
 import org.ofbiz.base.util.UtilGenerics;
 import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.base.util.cache.UtilCache;
-import org.codehaus.groovy.runtime.InvokerHelper;
-
-import bsh.EvalError;
 
 /** Expands String values that contain Unified Expression Language (JSR 245)
  * syntax. This class also supports the execution of bsh scripts by using the
@@ -60,6 +57,55 @@ public abstract class FlexibleStringExpander implements Serializable, IsEmpty {
     public static final String closeBracket = "}";
     protected static final UtilCache<Key, FlexibleStringExpander> exprCache = UtilCache.createUtilCache("flexibleStringExpander.ExpressionCache");
     protected static final FlexibleStringExpander nullExpr = new ConstSimpleElem(new char[0]);
+
+    /**
+     * Returns <code>true</code> if <code>fse</code> contains a <code>String</code> constant.
+     * @param fse The <code>FlexibleStringExpander</code> to test
+     * @return <code>true</code> if <code>fse</code> contains a <code>String</code> constant
+     */
+    public static boolean containsConstant(FlexibleStringExpander fse) {
+        if (fse instanceof ConstSimpleElem || fse instanceof ConstOffsetElem) {
+            return true;
+        }
+        if (fse instanceof Elements) {
+            Elements fseElements = (Elements) fse;
+            for (FlexibleStringExpander childElement : fseElements.childElems) {
+                if (containsConstant(childElement)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Returns <code>true</code> if <code>fse</code> contains an expression.
+     * @param fse The <code>FlexibleStringExpander</code> to test
+     * @return <code>true</code> if <code>fse</code> contains an expression
+     */
+    public static boolean containsExpression(FlexibleStringExpander fse) {
+        return !(fse instanceof ConstSimpleElem);
+    }
+
+    /**
+     * Returns <code>true</code> if <code>fse</code> contains a script.
+     * @param fse The <code>FlexibleStringExpander</code> to test
+     * @return <code>true</code> if <code>fse</code> contains a script
+     */
+    public static boolean containsScript(FlexibleStringExpander fse) {
+        if (fse instanceof ScriptElem) {
+            return true;
+        }
+        if (fse instanceof Elements) {
+            Elements fseElements = (Elements) fse;
+            for (FlexibleStringExpander childElement : fseElements.childElems) {
+                if (containsScript(childElement)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
 
     /** Evaluate an expression and return the result as a <code>String</code>.
      * Null expressions return <code>null</code>.
@@ -268,16 +314,16 @@ public abstract class FlexibleStringExpander implements Serializable, IsEmpty {
             }
             if (expression.indexOf("bsh:", start + 2) == start + 2 && !escapedExpression) {
                 // checks to see if this starts with a "bsh:", if so treat the rest of the expression as a bsh scriptlet
-                strElems.add(new BshElem(chars, start, Math.min(end + 1, start + length) - start, start + 6, end - start - 6));
+                strElems.add(new ScriptElem(chars, start, Math.min(end + 1, start + length) - start, start + 6, end - start - 6));
             } else if (expression.indexOf("groovy:", start + 2) == start + 2 && !escapedExpression) {
                 // checks to see if this starts with a "groovy:", if so treat the rest of the expression as a groovy scriptlet
-                strElems.add(new GroovyElem(chars, start, Math.min(end + 1, start + length) - start, start + 9, end - start - 9));
+                strElems.add(new ScriptElem(chars, start, Math.min(end + 1, start + length) - start, start + 9, end - start - 9));
             } else {
                 // Scan for matching closing bracket
-                int ptr = expression.indexOf(openBracket, start + 2);
+                int ptr = expression.indexOf("{", start + 2);
                 while (ptr != -1 && end != -1 && ptr < end) {
                     end = expression.indexOf(closeBracket, end + 1);
-                    ptr = expression.indexOf(openBracket, ptr + 2);
+                    ptr = expression.indexOf("{", ptr + 1);
                 }
                 if (end == -1) {
                     end = origLen;
@@ -391,9 +437,12 @@ public abstract class FlexibleStringExpander implements Serializable, IsEmpty {
         Object obj = get(context, timeZone, locale);
         StringBuilder buffer = new StringBuilder(this.hint);
         try {
-            if (obj instanceof String && UtilValidate.isEmpty(obj)) {
-            } else if (obj != null) {
-                buffer.append(ObjectType.simpleTypeConvert(obj, "String", null, timeZone, locale, true));
+            if (obj != null) {
+                if (obj instanceof String) {
+                    buffer.append(obj);
+                } else {
+                    buffer.append(ObjectType.simpleTypeConvert(obj, "String", null, timeZone, locale, true));
+                }
             }
         } catch (Exception e) {
             buffer.append(obj);
@@ -485,35 +534,6 @@ public abstract class FlexibleStringExpander implements Serializable, IsEmpty {
         @Override
         public String getOriginal() {
             return new String(this.chars, this.offset, this.length);
-        }
-    }
-
-    /** An object that represents a <code>${bsh:}</code> expression. */
-    protected static class BshElem extends ArrayOffsetString {
-        private final int parseStart;
-        private final int parseLength;
-
-        protected BshElem(char[] chars, int offset, int length, int parseStart, int parseLength) {
-            super(chars, offset, length);
-            this.parseStart = parseStart;
-            this.parseLength = parseLength;
-        }
-
-        @Override
-        protected Object get(Map<String, ? extends Object> context, TimeZone timeZone, Locale locale) {
-            try {
-                Object obj = BshUtil.eval(new String(this.chars, this.parseStart, this.parseLength), UtilMisc.makeMapWritable(context));
-                if (obj != null) {
-                    return obj;
-                } else {
-                    if (Debug.verboseOn()) {
-                        Debug.logVerbose("BSH scriptlet evaluated to null [" + this + "], got no return so inserting nothing.", module);
-                    }
-                }
-            } catch (EvalError e) {
-                Debug.logWarning(e, "Error evaluating BSH scriptlet [" + this + "], inserting nothing; error was: " + e, module);
-            }
-            return null;
         }
     }
 
@@ -613,29 +633,37 @@ public abstract class FlexibleStringExpander implements Serializable, IsEmpty {
         }
     }
 
-    /** An object that represents a <code>${groovy:}</code> expression. */
-    protected static class GroovyElem extends ArrayOffsetString {
+    /** An object that represents a <code>${[groovy|bsh]:}</code> expression. */
+    protected static class ScriptElem extends ArrayOffsetString {
+        private final String language;
+        private final int parseStart;
+        private final int parseLength;
+        private final String script;
         protected final Class<?> parsedScript;
 
-        protected GroovyElem(char[] chars, int offset, int length, int parseStart, int parseLength) {
+        protected ScriptElem(char[] chars, int offset, int length, int parseStart, int parseLength) {
             super(chars, offset, length);
-            this.parsedScript = GroovyUtil.parseClass(new String(chars, parseStart, parseLength));
+            this.language = new String(this.chars, offset + 2, parseStart - offset - 3);
+            this.parseStart = parseStart;
+            this.parseLength = parseLength;
+            this.script = new String(this.chars, this.parseStart, this.parseLength);
+            this.parsedScript = ScriptUtil.parseScript(this.language, this.script);
         }
 
         @Override
         protected Object get(Map<String, ? extends Object> context, TimeZone timeZone, Locale locale) {
             try {
-                Object obj = InvokerHelper.createScript(this.parsedScript, GroovyUtil.getBinding(context)).run();
+                Map <String, Object> contextCopy = new HashMap<String, Object>(context);
+                Object obj = ScriptUtil.evaluate(this.language, this.script, this.parsedScript, contextCopy);
                 if (obj != null) {
                     return obj;
                 } else {
                     if (Debug.verboseOn()) {
-                        Debug.logVerbose("Groovy scriptlet evaluated to null [" + this + "], got no return so inserting nothing.", module);
+                        Debug.logVerbose("Scriptlet evaluated to null [" + this + "].", module);
                     }
                 }
             } catch (Exception e) {
-                // handle other things, like the groovy.lang.MissingPropertyException
-                Debug.logWarning(e, "Error evaluating Groovy scriptlet [" + this + "], inserting nothing; error was: " + e, module);
+                Debug.logWarning(e, "Error evaluating scriptlet [" + this + "]; error was: " + e, module);
             }
             return null;
         }
@@ -695,16 +723,6 @@ public abstract class FlexibleStringExpander implements Serializable, IsEmpty {
                 }
             } catch (Exception e) {
                 Debug.logError("Error evaluating expression " + this + ": " + e, module);
-            }
-            if (obj != null) {
-                try {
-                    // Check for runtime nesting
-                    String str = (String) obj;
-                    if (str.contains(openBracket)) {
-                        FlexibleStringExpander fse = FlexibleStringExpander.getInstance(str);
-                        return fse.get(context, timeZone, locale);
-                    }
-                } catch (ClassCastException e) {}
             }
             return obj;
         }

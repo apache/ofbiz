@@ -25,8 +25,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.InetAddress;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Properties;
 import java.util.TimeZone;
 
@@ -55,7 +57,7 @@ public class Config {
         String firstArg = args.length > 0 ? args[0] : "";
         String configFileName = getConfigFileName(firstArg);
         Config result = new Config();
-        result.readConfig(configFileName);
+        result.readConfig(configFileName, args);
         return result;
     }
 
@@ -71,7 +73,7 @@ public class Config {
     public String containerConfig;
     public String instrumenterClassName;
     public String instrumenterFile;
-    public List<String> loaders;
+    public List<Map<String, String>> loaders;
     public String logDir;
     public String ofbizHome;
     public boolean requireCommJar = false;
@@ -209,8 +211,6 @@ public class Config {
                     fis = new FileInputStream(propsFile);
                     if (fis != null) {
                         props.load(fis);
-                    } else {
-                        throw new FileNotFoundException();
                     }
                 } catch (FileNotFoundException e2) {
                     // do nothing; we will see empty props below
@@ -283,7 +283,7 @@ public class Config {
         }
     }
 
-    public void readConfig(String config) throws IOException {
+    public void readConfig(String config, String[] args) throws IOException {
         // check the java_version
         String javaVersion = System.getProperty("java.version");
         String javaVendor = System.getProperty("java.vendor");
@@ -343,7 +343,6 @@ public class Config {
         String serverHost = getProp(props, "ofbiz.admin.host", "127.0.0.1");
 
         String adminPortStr = getProp(props, "ofbiz.admin.port", "0");
-
         // set the admin key
         adminKey = getProp(props, "ofbiz.admin.key", "NA");
 
@@ -353,6 +352,14 @@ public class Config {
         // parse the port number
         try {
             adminPort = Integer.parseInt(adminPortStr);
+            if (args.length > 0) {
+                for (String arg : args) {
+                    if (arg.toLowerCase().contains("portoffset=")) {
+                        adminPort = adminPort != 0 ? adminPort : 10523; // This is necessary because the ASF machines don't allow ports 1 to 3, see  INFRA-6790
+                        adminPort += Integer.parseInt(arg.split("=")[1]);
+                    }
+                }
+            }
         } catch (Exception e) {
             adminPort = 0;
         }
@@ -397,16 +404,16 @@ public class Config {
         // set the default locale
         String localeString = props.getProperty("ofbiz.locale.default");
         if (localeString != null && localeString.length() > 0) {
-            String args[] = localeString.split("_");
-            switch (args.length) {
+            String locales[] = localeString.split("_");
+            switch (locales.length) {
                 case 1:
-                    Locale.setDefault(new Locale(args[0]));
+                    Locale.setDefault(new Locale(locales[0]));
                     break;
                 case 2:
-                    Locale.setDefault(new Locale(args[0], args[1]));
+                    Locale.setDefault(new Locale(locales[0], locales[1]));
                     break;
                 case 3:
-                    Locale.setDefault(new Locale(args[0], args[1], args[2]));
+                    Locale.setDefault(new Locale(locales[0], locales[1], locales[2]));
             }
             System.setProperty("user.language", localeString);
         }
@@ -421,14 +428,18 @@ public class Config {
         instrumenterFile = getProp(props, "ofbiz.instrumenterFile", null);
 
         // loader classes
-        loaders = new ArrayList<String>();
+        loaders = new ArrayList<Map<String, String>>();
         int currentPosition = 1;
+        Map<String, String> loader = null;
         while (true) {
+            loader = new HashMap<String, String>();
             String loaderClass = props.getProperty("ofbiz.start.loader" + currentPosition);
             if (loaderClass == null || loaderClass.length() == 0) {
                 break;
             } else {
-                loaders.add(loaderClass);
+                loader.put("class", loaderClass);
+                loader.put("profiles", props.getProperty("ofbiz.start.loader" + currentPosition + ".loaders"));
+                loaders.add(loader);
                 currentPosition++;
             }
         }

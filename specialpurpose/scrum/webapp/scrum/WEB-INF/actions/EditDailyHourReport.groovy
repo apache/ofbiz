@@ -40,7 +40,7 @@ if (!partyId) {
 timesheet = null;
 timesheetId = parameters.timesheetId;
 if (timesheetId) {
-    timesheet = delegator.findByPrimaryKey("Timesheet", ["timesheetId" : timesheetId]);
+    timesheet = delegator.findOne("Timesheet", ["timesheetId" : timesheetId], false);
     partyId = timesheet.partyId; // use the party from this timesheet
 } else {
     // make sure because of timezone changes, not a duplicate timesheet is created
@@ -56,7 +56,7 @@ if (timesheetId) {
     if (timesheet == null) {
         result = dispatcher.runSync("createProjectTimesheet", ["userLogin" : parameters.userLogin, "partyId" : partyId]);
         if (result && result.timesheetId) {
-            timesheet = delegator.findByPrimaryKey("Timesheet", ["timesheetId" : result.timesheetId]);
+            timesheet = delegator.findOne("Timesheet", ["timesheetId" : result.timesheetId], false);
         }
     }
 }
@@ -65,9 +65,9 @@ context.timesheet = timesheet;
 context.weekNumber = UtilDateTime.weekNumber(timesheet.fromDate);
 
 // get the user names
-context.partyNameView = delegator.findByPrimaryKey("PartyNameView",["partyId" : partyId]);
+context.partyNameView = delegator.findOne("PartyNameView",["partyId" : partyId], false);
 // get the default rate for this person
-rateTypes = EntityUtil.filterByDate(delegator.findByAnd("PartyRate", ["partyId" : partyId, "defaultRate" : "Y"]));
+rateTypes = EntityUtil.filterByDate(delegator.findByAnd("PartyRate", ["partyId" : partyId, "defaultRate" : "Y"], null, false));
 if (rateTypes) {
     context.defaultRateTypeId = rateTypes[0].rateTypeId;
 }
@@ -90,9 +90,9 @@ lastEmplLeaveEntry = null;
 // retrieve work effort data when the workeffortId has changed.
 void retrieveWorkEffortData() {
         // get the planned number of hours
-        entryWorkEffort = lastTimeEntry.getRelatedOne("WorkEffort");
+        entryWorkEffort = lastTimeEntry.getRelatedOne("WorkEffort", false);
         if (entryWorkEffort) {
-            plannedHours = entryWorkEffort.getRelated("WorkEffortSkillStandard");
+            plannedHours = entryWorkEffort.getRelated("WorkEffortSkillStandard", null, null, false);
             pHours = 0.00;
             plannedHours.each { plannedHour ->
                 if (plannedHour.estimatedDuration) {
@@ -108,13 +108,13 @@ void retrieveWorkEffortData() {
             //entry.plannedHours = pHours;
             planHours = 0.0;
             planHours = lastTimeEntry.planHours;
-            lastTimeEntryOfTasks = delegator.findByAnd("TimeEntry", ["workEffortId" : lastTimeEntry.workEffortId, "partyId" : partyId], ["-fromDate"]);
+            lastTimeEntryOfTasks = delegator.findByAnd("TimeEntry", ["workEffortId" : lastTimeEntry.workEffortId, "partyId" : partyId], ["-fromDate"], false);
             if (lastTimeEntryOfTasks.size() != 0) lastTimeEntry = lastTimeEntryOfTasks[0];
             if (planHours < 1) {
                 planHours = estimatedHour;
             }
             entry.planHours = lastTimeEntry.planHours;
-            actualHours = entryWorkEffort.getRelated("TimeEntry");
+            actualHours = entryWorkEffort.getRelated("TimeEntry", null, null, false);
             aHours = 0.00;
             actualHours.each { actualHour ->
                 if (actualHour.hours) {
@@ -123,7 +123,7 @@ void retrieveWorkEffortData() {
             }
             entry.actualHours = aHours;
             // get party assignment data to be able to set the task to complete
-            workEffortPartyAssigns = EntityUtil.filterByDate(entryWorkEffort.getRelatedByAnd("WorkEffortPartyAssignment", ["partyId" : partyId]));
+            workEffortPartyAssigns = EntityUtil.filterByDate(entryWorkEffort.getRelated("WorkEffortPartyAssignment", ["partyId" : partyId], null, false));
             if (workEffortPartyAssigns) {
                 workEffortPartyAssign = workEffortPartyAssigns[0];
                 entry.fromDate = workEffortPartyAssign.getTimestamp("fromDate");
@@ -164,7 +164,7 @@ void retrieveWorkEffortData() {
         entry = ["timesheetId" : timesheet.timesheetId];
 }
 
-timeEntries = timesheet.getRelated("TimeEntry", ["workEffortId", "rateTypeId", "fromDate"]);
+timeEntries = timesheet.getRelated("TimeEntry", null, ["workEffortId", "rateTypeId", "fromDate"], false);
 te = timeEntries.iterator();
 while (te.hasNext()) {
     // only fill lastTimeEntry when not the first time
@@ -350,7 +350,7 @@ if (timeEntry || emplLeaveEntry) {
 }
 context.timeEntries = entries;
 // get all timesheets of this user, including the planned hours
-timesheetsDb = delegator.findByAnd("Timesheet", ["partyId" : partyId], ["fromDate DESC"]);
+timesheetsDb = delegator.findByAnd("Timesheet", ["partyId" : partyId], ["fromDate DESC"], false);
 timesheets = new LinkedList();
 timesheetsDb.each { timesheetDb ->
     //get hours from EmplLeave;
@@ -378,7 +378,7 @@ timesheetsDb.each { timesheetDb ->
     //get hours from TimeEntry;
     timesheet = [:];
     timesheet.putAll(timesheetDb);
-    entries = timesheetDb.getRelated("TimeEntry");
+    entries = timesheetDb.getRelated("TimeEntry", null, null, false);
     hours = 0.00;
     entries.each { timeEntry ->
         if (timeEntry.hours) {
@@ -396,19 +396,19 @@ context.timesheets = timesheets;
 taskList=[];
 projectSprintBacklogAndTaskList = [];
 backlogIndexList = [];
-projectAndTaskList = delegator.findByAnd("ProjectSprintBacklogAndTask", ["sprintTypeId" : "SCRUM_SPRINT","taskCurrentStatusId" : "STS_CREATED"], ["projectName ASC","taskActualStartDate DESC"]);
+projectAndTaskList = delegator.findByAnd("ProjectSprintBacklogAndTask", ["sprintTypeId" : "SCRUM_SPRINT","taskCurrentStatusId" : "STS_CREATED"], ["projectName ASC","taskActualStartDate DESC"], false);
 projectAndTaskList.each { projectAndTaskMap ->
 userLoginId = userLogin.partyId;
     sprintId = projectAndTaskMap.sprintId;
-    workEffortList = delegator.findByAnd("WorkEffortAndProduct", ["workEffortId" : projectAndTaskMap.projectId]);
+    workEffortList = delegator.findByAnd("WorkEffortAndProduct", ["workEffortId" : projectAndTaskMap.projectId], null, false);
     backlogIndexList.add(workEffortList[0].productId);
 	
-    partyAssignmentSprintList = delegator.findByAnd("WorkEffortPartyAssignment", ["workEffortId" : sprintId, "partyId" : userLoginId]);
+    partyAssignmentSprintList = delegator.findByAnd("WorkEffortPartyAssignment", ["workEffortId" : sprintId, "partyId" : userLoginId], null, false);
     partyAssignmentSprintMap = partyAssignmentSprintList[0];
     // if this userLoginId is a member of sprint
     if (partyAssignmentSprintMap) {
         workEffortId = projectAndTaskMap.taskId;
-        partyAssignmentTaskList = delegator.findByAnd("WorkEffortPartyAssignment", ["workEffortId" : workEffortId]);
+        partyAssignmentTaskList = delegator.findByAnd("WorkEffortPartyAssignment", ["workEffortId" : workEffortId], null, false);
         partyAssignmentTaskMap = partyAssignmentTaskList[0];
         // if the task do not assigned
         if (partyAssignmentTaskMap) {
@@ -427,24 +427,24 @@ userLoginId = userLogin.partyId;
 unplanList=[];
 if (backlogIndexList) {
     backlogIndex = new HashSet(backlogIndexList);
-    custRequestList = delegator.findByAnd("CustRequest", ["custRequestTypeId" : "RF_UNPLAN_BACKLOG","statusId" : "CRQ_REVIEWED"],["custRequestDate DESC"]);
+    custRequestList = delegator.findByAnd("CustRequest", ["custRequestTypeId" : "RF_UNPLAN_BACKLOG","statusId" : "CRQ_REVIEWED"],["custRequestDate DESC"], false);
     if (custRequestList) {
         custRequestList.each { custRequestMap ->
-            custRequestItemList = custRequestMap.getRelated("CustRequestItem");
+            custRequestItemList = custRequestMap.getRelated("CustRequestItem", null, null, false);
 			custRequestItem =  
 			productOut = custRequestItemList[0].productId;
-			product = delegator.findByPrimaryKey("Product", ["productId" : productOut]);
+			product = delegator.findOne("Product", ["productId" : productOut], false);
             backlogIndex.each { backlogProduct ->
                 productId = backlogProduct
                 if (productId.equals(productOut)) {
-                    custRequestWorkEffortList = delegator.findByAnd("CustRequestWorkEffort", ["custRequestId" : custRequestItemList[0].custRequestId]);
+                    custRequestWorkEffortList = delegator.findByAnd("CustRequestWorkEffort", ["custRequestId" : custRequestItemList[0].custRequestId], null, false);
                     custRequestWorkEffortList.each { custRequestWorkEffortMap ->
-                        partyAssignmentTaskList = delegator.findByAnd("WorkEffortPartyAssignment", ["workEffortId" : custRequestWorkEffortMap.workEffortId]);
+                        partyAssignmentTaskList = delegator.findByAnd("WorkEffortPartyAssignment", ["workEffortId" : custRequestWorkEffortMap.workEffortId], null, false);
                         partyAssignmentTaskMap = partyAssignmentTaskList[0];
                         // if the task do not assigned
                         if (!partyAssignmentTaskMap) {
                             result = [:];
-                            workEffortMap = delegator.findByPrimaryKey("WorkEffort", ["workEffortId" : custRequestWorkEffortMap.workEffortId]);
+                            workEffortMap = delegator.findOne("WorkEffort", ["workEffortId" : custRequestWorkEffortMap.workEffortId], false);
                             result.description = custRequestMap.description;
                             result.productName = product.internalName;
                             result.taskId = workEffortMap.workEffortId;

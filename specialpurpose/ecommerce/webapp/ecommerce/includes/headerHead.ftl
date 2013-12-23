@@ -16,7 +16,12 @@ KIND, either express or implied.  See the License for the
 specific language governing permissions and limitations
 under the License.
 -->
-<html xmlns="http://www.w3.org/1999/xhtml">
+<#assign docLangAttr = locale.toString()?replace("_", "-")>
+<#assign langDir = "ltr">
+<#if "ar.iw"?contains(docLangAttr?substring(0, 2))>
+    <#assign langDir = "rtl">
+</#if>
+<html lang="${docLangAttr}" dir="${langDir}" xmlns="http://www.w3.org/1999/xhtml">
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
   <title><#if title?has_content>${title}<#elseif titleProperty?has_content>${uiLabelMap.get(titleProperty)}</#if>: ${(productStore.storeName)?if_exists}</title>
@@ -82,6 +87,7 @@ under the License.
   </#if>
 
   <#-- Meta tags if defined by the page action -->
+  <meta name="generator" content="Apache OFBiz - eCommerce"/>
   <#if metaDescription?exists>
     <meta name="description" content="${metaDescription}"/>
   </#if>
@@ -91,7 +97,9 @@ under the License.
   <#if webAnalyticsConfigs?has_content>
     <script language="JavaScript" type="text/javascript">
     <#list webAnalyticsConfigs as webAnalyticsConfig>
+      <#if  webAnalyticsConfig.webAnalyticsTypeId != "BACKEND_ANALYTICS">
         ${StringUtil.wrapString(webAnalyticsConfig.webAnalyticsCode?if_exists)}
+      </#if>
     </#list>
     </script>
   </#if>

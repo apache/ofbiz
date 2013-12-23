@@ -49,6 +49,7 @@ import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
 import org.ofbiz.entity.condition.EntityCondition;
 import org.ofbiz.entity.condition.EntityOperator;
+import org.ofbiz.entity.util.EntityUtilProperties;
 import org.ofbiz.service.DispatchContext;
 import org.ofbiz.service.GenericServiceException;
 import org.ofbiz.service.LocalDispatcher;
@@ -125,7 +126,7 @@ public class ProductsExportToGoogle {
                             if (prodCatMemb != null) {
                                 String productId = prodCatMemb.getString("productId");
                                 if (productId != null) {
-                                    GenericValue prod = prodCatMemb.getRelatedOne("Product");
+                                    GenericValue prod = prodCatMemb.getRelatedOne("Product", false);
                                     Timestamp salesDiscontinuationDate = prod.getTimestamp("salesDiscontinuationDate");
                                     // do not consider discontinued product
                                     if (salesDiscontinuationDate == null) {
@@ -431,11 +432,11 @@ public class ProductsExportToGoogle {
                 String productName = null;
                 String productDescription = null;
                 //String productURL = null;
-                List<GenericValue> productAndInfos = delegator.findByAnd("ProductContentAndInfo", UtilMisc.toMap("productId", prod.getString("productId"), "localeString", localeString, "thruDate", null));
+                List<GenericValue> productAndInfos = delegator.findByAnd("ProductContentAndInfo", UtilMisc.toMap("productId", prod.getString("productId"), "localeString", localeString, "thruDate", null), null, false);
                 if (productAndInfos.size() > 0) {
                     for (GenericValue productContentAndInfo : productAndInfos ) {
                         String dataReSourceId = productContentAndInfo.getString("dataResourceId");
-                        GenericValue electronicText = delegator.findByPrimaryKey("ElectronicText", UtilMisc.toMap("dataResourceId", dataReSourceId));
+                        GenericValue electronicText = delegator.findOne("ElectronicText", UtilMisc.toMap("dataResourceId", dataReSourceId), false);
                         if ("PRODUCT_NAME".equals(productContentAndInfo.getString("productContentTypeId")))
                             productName = electronicText.getString("textData");
                         if ("LONG_DESCRIPTION".equals(productContentAndInfo.getString("productContentTypeId")))
@@ -494,7 +495,7 @@ public class ProductsExportToGoogle {
                 String googleProductId = null;
                 if (!"insert".equals(actionType)) {
                     try {
-                        googleProduct = delegator.findByPrimaryKey("GoodIdentification", UtilMisc.toMap("productId", prod.getString("productId"), "goodIdentificationTypeId", "GOOGLE_ID_" + localeString));
+                        googleProduct = delegator.findOne("GoodIdentification", UtilMisc.toMap("productId", prod.getString("productId"), "goodIdentificationTypeId", "GOOGLE_ID_" + localeString), false);
                         if (UtilValidate.isNotEmpty(googleProduct)) {
                             googleProductId = googleProduct.getString("idValue");
                         }
@@ -551,7 +552,7 @@ public class ProductsExportToGoogle {
                 Iterator<GenericValue> productCategoryMembersIter = productCategoryMembers.iterator();
                 while (productCategoryMembersIter.hasNext()) {
                     GenericValue productCategoryMember = productCategoryMembersIter.next();
-                    GenericValue productCategory = productCategoryMember.getRelatedOne("ProductCategory");
+                    GenericValue productCategory = productCategoryMember.getRelatedOne("ProductCategory", false);
                     String productCategoryId = productCategory.getString("productCategoryId");
                     String checkCategory = null;
                     if ("GB".equals(countryCode)) {
@@ -582,7 +583,7 @@ public class ProductsExportToGoogle {
                     UtilXml.addChildElementNSValue(entryElem, "g:brand", prod.getString("brandName"), feedDocument, googleBaseNSUrl);
                 }
                 try {
-                    googleProduct = delegator.findByPrimaryKey("GoodIdentification", UtilMisc.toMap("productId", prod.getString("productId"), "goodIdentificationTypeId", "SKU"));
+                    googleProduct = delegator.findOne("GoodIdentification", UtilMisc.toMap("productId", prod.getString("productId"), "goodIdentificationTypeId", "SKU"), false);
                     if (UtilValidate.isNotEmpty(googleProduct)) {
                         UtilXml.addChildElementNSValue(entryElem, "g:ean", googleProduct.getString("idValue"), feedDocument, googleBaseNSUrl);
                     }
@@ -633,7 +634,7 @@ public class ProductsExportToGoogle {
         result.put("newProductsInGoogle", newProductsInGoogle);
         result.put("productsRemovedFromGoogle", productsRemovedFromGoogle);
         result.put("localeString", localeString);
-        //Debug.log("======returning with result: " + result);
+        //Debug.logInfo("======returning with result: " + result, module);
         return result;
     }
 
@@ -655,7 +656,7 @@ public class ProductsExportToGoogle {
     private static Map<String, Object> readResponseFromGoogle(String msg, List<String> newProductsInGoogle, List<String> productsRemovedFromGoogle,
             LocalDispatcher dispatcher, Delegator delegator, Locale locale, String localeString) {
         List<String> message = FastList.newInstance();
-        // Debug.log("====get xml response from google: " + msg);
+        // Debug.logInfo("====get xml response from google: " + msg, module);
         try {
             Document docResponse = UtilXml.readXmlDocument(msg, true);
             Element elemResponse = docResponse.getDocumentElement();
@@ -737,11 +738,11 @@ public class ProductsExportToGoogle {
                buildGoogleBaseConfigContext.put("postItemsUrl", googleBaseConfig.getString("postItemsUrl"));
             }
         } else {
-            buildGoogleBaseConfigContext.put("developerKey", UtilProperties.getPropertyValue(configString, "googleBaseExport.developerKey"));
-            buildGoogleBaseConfigContext.put("authenticationUrl", UtilProperties.getPropertyValue(configString, "googleBaseExport.authenticationUrl"));
-            buildGoogleBaseConfigContext.put("accountEmail", UtilProperties.getPropertyValue(configString, "googleBaseExport.accountEmail"));
-            buildGoogleBaseConfigContext.put("accountPassword", UtilProperties.getPropertyValue(configString, "googleBaseExport.accountPassword"));
-            buildGoogleBaseConfigContext.put("postItemsUrl", UtilProperties.getPropertyValue(configString, "googleBaseExport.postItemsUrl"));
+            buildGoogleBaseConfigContext.put("developerKey", EntityUtilProperties.getPropertyValue(configString, "googleBaseExport.developerKey", delegator));
+            buildGoogleBaseConfigContext.put("authenticationUrl", EntityUtilProperties.getPropertyValue(configString, "googleBaseExport.authenticationUrl", delegator));
+            buildGoogleBaseConfigContext.put("accountEmail", EntityUtilProperties.getPropertyValue(configString, "googleBaseExport.accountEmail", delegator));
+            buildGoogleBaseConfigContext.put("accountPassword", EntityUtilProperties.getPropertyValue(configString, "googleBaseExport.accountPassword", delegator));
+            buildGoogleBaseConfigContext.put("postItemsUrl", EntityUtilProperties.getPropertyValue(configString, "googleBaseExport.postItemsUrl", delegator));
         }
         return buildGoogleBaseConfigContext;
     }
@@ -756,7 +757,7 @@ public class ProductsExportToGoogle {
             }
             
             //Add quantity item
-            List<GenericValue> inventoryItems = delegator.findByAnd("InventoryItem", UtilMisc.toMap("productId", product.getString("productId")));
+            List<GenericValue> inventoryItems = delegator.findByAnd("InventoryItem", UtilMisc.toMap("productId", product.getString("productId")), null, false);
             if (UtilValidate.isNotEmpty(inventoryItems)) {
                 BigDecimal totalquantity = new BigDecimal(0);
                 for (GenericValue inventoryItem : inventoryItems) {
@@ -774,11 +775,11 @@ public class ProductsExportToGoogle {
             UtilXml.addChildElementNSValue(entryElem, "g:online_only", "y", feedDocument, googleBaseNSUrl);
             //Add shipping weight
             if (UtilValidate.isNotEmpty(product.getString("weight")) && UtilValidate.isNotEmpty(product.getString("weightUomId"))) {
-                GenericValue uom = delegator.findByPrimaryKey("Uom", UtilMisc.toMap("uomId", product.getString("weightUomId")));
+                GenericValue uom = delegator.findOne("Uom", UtilMisc.toMap("uomId", product.getString("weightUomId")), false);
                 String shippingWeight = product.getString("weight") + " " + uom.getString("description");
                 UtilXml.addChildElementNSValue(entryElem, "g:shipping_weight", shippingWeight, feedDocument, googleBaseNSUrl);
             }
-            List<GenericValue> productFeatureAndAppls = delegator.findByAnd("ProductFeatureAndAppl", UtilMisc.toMap("productId", product.getString("productId")));
+            List<GenericValue> productFeatureAndAppls = delegator.findByAnd("ProductFeatureAndAppl", UtilMisc.toMap("productId", product.getString("productId")), null, false);
             if (productFeatureAndAppls.size() > 0) {
                 for (GenericValue productFeatureAndAppl : productFeatureAndAppls) {
                     //Add Genre

@@ -19,7 +19,7 @@ under the License.
 -->
 
 <simple-methods xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/simple-methods.xsd">
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/simple-methods-v2.xsd">
     <simple-method method-name="sendMailFromTemplateSetting" short-description="Send Mail from Email Template Setting">
         <!-- if partyIdTo provided but no emailAddress, get it from the partyContactMech -->
         <if-empty field="parameters.sendTo">
@@ -38,11 +38,8 @@ under the License.
                     <result-to-field result-name="emailAddress" field="parameters.sendTo"/>
                 </call-service>
                 <if-empty field="parameters.sendTo">
-                    <log level="error" message="PartyId: ${parameters.partyIdTo} has no valid email address!"></log>
-                    <add-error>
-                        <fail-property resource="CommonUiLabels" property="CommonEmailNotValid"/>
-                    </add-error>
-                    <check-errors/>
+                    <log level="info" message="PartyId: ${parameters.partyIdTo} has no valid email address, not sending email"></log>
+                    <return/>
                 </if-empty>
             </if-empty>
         </if-not-empty>

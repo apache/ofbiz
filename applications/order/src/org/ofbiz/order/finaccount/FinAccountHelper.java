@@ -23,7 +23,6 @@ import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.Random;
-import java.util.regex.Pattern;
 
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilDateTime;
@@ -71,7 +70,7 @@ public class FinAccountHelper {
 
      /**
       * A convenience method which adds transactions.get(0).get(fieldName) to initialValue, all done in BigDecimal to decimals and rounding
-      * @param initialValue the initial value 
+      * @param initialValue the initial value
       * @param transactions a List of GenericValue objects of transactions
       * @param fieldName the field name to get the value from the transaction
       * @param decimals number of decimals
@@ -114,7 +113,7 @@ public class FinAccountHelper {
                  newAccountCode.append(char_pool[r.nextInt(char_pool.length)]);
              }
 
-             List<GenericValue> existingAccountsWithCode = delegator.findByAnd("FinAccount", UtilMisc.toMap("finAccountCode", newAccountCode.toString()));
+             List<GenericValue> existingAccountsWithCode = delegator.findByAnd("FinAccount", UtilMisc.toMap("finAccountCode", newAccountCode.toString()), null, false);
              if (existingAccountsWithCode.size() == 0) {
                  foundUniqueNewCode = true;
              }
@@ -136,13 +135,10 @@ public class FinAccountHelper {
       * @throws GenericEntityException
       */
      public static GenericValue getFinAccountFromCode(String finAccountCode, Delegator delegator) throws GenericEntityException {
-         // regex magic to turn all letters in code to uppercase and then remove all non-alphanumeric letters
          if (finAccountCode == null) {
              return null;
          }
-
-         Pattern filterRegex = Pattern.compile("[^0-9A-Z]");
-         finAccountCode = finAccountCode.toUpperCase().replaceAll(filterRegex.pattern(), "");
+         finAccountCode = finAccountCode.toUpperCase().replaceAll("[^0-9A-Z]", "");
 
          // now we need to get the encrypted version of the fin account code the user passed in to look up against FinAccount
          // we do this by making a temporary generic entity with same finAccountCode and then doing a match
@@ -151,7 +147,7 @@ public class FinAccountHelper {
          String encryptedFinAccountCode = encryptedFinAccount.getString("finAccountCode");
 
          // now look for the account
-         List<GenericValue> accounts = delegator.findByAnd("FinAccount", UtilMisc.toMap("finAccountCode", encryptedFinAccountCode));
+         List<GenericValue> accounts = delegator.findByAnd("FinAccount", UtilMisc.toMap("finAccountCode", encryptedFinAccountCode), null, false);
          accounts = EntityUtil.filterByDate(accounts);
 
          if (UtilValidate.isEmpty(accounts)) {
@@ -212,7 +208,7 @@ public class FinAccountHelper {
       * @param finAccountId the financial account id
       * @param asOfDateTime the validity date
       * @param delegator the delegator
-      * @return returns the net balance (see above) minus the sum of all authorization amounts which are not expired 
+      * @return returns the net balance (see above) minus the sum of all authorization amounts which are not expired
       * @throws GenericEntityException
       */
     public static BigDecimal getAvailableBalance(String finAccountId, Timestamp asOfDateTime, Delegator delegator) throws GenericEntityException {
@@ -249,7 +245,7 @@ public class FinAccountHelper {
     public static boolean validatePin(Delegator delegator, String finAccountId, String pinNumber) {
         GenericValue finAccount = null;
         try {
-            finAccount = delegator.findByPrimaryKey("FinAccount", UtilMisc.toMap("finAccountId", finAccountId));
+            finAccount = delegator.findOne("FinAccount", UtilMisc.toMap("finAccountId", finAccountId), false);
         } catch (GenericEntityException e) {
             Debug.logError(e, module);
         }
@@ -306,7 +302,7 @@ public class FinAccountHelper {
     }
 
     private static boolean checkIsNumberInDatabase(Delegator delegator, String number) throws GenericEntityException {
-        GenericValue finAccount = delegator.findByPrimaryKey("FinAccount", UtilMisc.toMap("finAccountId", number));
+        GenericValue finAccount = delegator.findOne("FinAccount", UtilMisc.toMap("finAccountId", number), false);
         return finAccount == null;
     }
 

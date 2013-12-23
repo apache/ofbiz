@@ -19,7 +19,6 @@
 package org.ofbiz.accounting.thirdparty.clearcommerce;
 
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.io.OutputStream;
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -28,7 +27,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
 
 import org.ofbiz.accounting.payment.PaymentGatewayServices;
@@ -47,7 +45,6 @@ import org.ofbiz.service.DispatchContext;
 import org.ofbiz.service.ServiceUtil;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.xml.sax.SAXException;
 
 
 /**
@@ -706,7 +703,7 @@ public class CCPaymentServices {
 
         Map<String, Object> pbOrder = UtilGenerics.checkMap(context.get("pbOrder"));
         if (pbOrder != null) {
-            if (Debug.verboseOn()) Debug.logInfo("pbOrder Map not empty:" + pbOrder.toString(),module);
+            if (Debug.verboseOn()) Debug.logVerbose("pbOrder Map not empty:" + pbOrder.toString(),module);
             Element pbOrderElement =  UtilXml.addChildElement(orderFormDocElement, "PbOrder", requestDocument); // periodic billing order
             UtilXml.addChildElementValue(pbOrderElement, "OrderFrequencyCycle", (String) pbOrder.get("OrderFrequencyCycle"), requestDocument);
             Element interval = UtilXml.addChildElementValue(pbOrderElement, "OrderFrequencyInterval", (String) pbOrder.get("OrderFrequencyInterval"), requestDocument);
@@ -792,10 +789,10 @@ public class CCPaymentServices {
         String countryGeoId = address.getString("countryGeoId");
         if (UtilValidate.isNotEmpty(countryGeoId)) {
             try {
-                GenericValue countryGeo = address.getRelatedOneCache("CountryGeo");
+                GenericValue countryGeo = address.getRelatedOne("CountryGeo", true);
                 UtilXml.addChildElementValue(addressElement, "Country", countryGeo.getString("geoSecCode"), document);
             } catch (GenericEntityException gee) {
-                Debug.log(gee, "Error finding related Geo for countryGeoId: " + countryGeoId, module);
+                Debug.logInfo(gee, "Error finding related Geo for countryGeoId: " + countryGeoId, module);
             }
         }
     }
@@ -909,7 +906,7 @@ public class CCPaymentServices {
         try {
             response = http.post();
         } catch (HttpClientException hce) {
-            Debug.log(hce, module);
+            Debug.logInfo(hce, module);
             throw new ClearCommerceException("ClearCommerce connection problem", hce);
         }
 
@@ -921,12 +918,8 @@ public class CCPaymentServices {
         Document responseDocument = null;
         try {
             responseDocument = UtilXml.readXmlDocument(response, false);
-        } catch (SAXException se) {
-            throw new ClearCommerceException("Error reading response Document from a String: " + se.getMessage());
-        } catch (ParserConfigurationException pce) {
-            throw new ClearCommerceException("Error reading response Document from a String: " + pce.getMessage());
-        } catch (IOException ioe) {
-            throw new ClearCommerceException("Error reading response Document from a String: " + ioe.getMessage());
+        } catch (Exception e) {
+            throw new ClearCommerceException("Error reading response Document from a String: " + e.getMessage());
         }
         if (Debug.verboseOn()) Debug.logVerbose("Result severity from clearCommerce:" + getMessageListMaxSev(responseDocument), module);
         if (Debug.verboseOn() && getMessageListMaxSev(responseDocument) > 4)

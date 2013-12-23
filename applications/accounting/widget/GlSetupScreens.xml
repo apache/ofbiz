@@ -51,13 +51,10 @@ under the License.
     <screen name="ListCompanies">
         <section>
             <actions>
-                <property-map resource="AccountingUiLabels" map-name="uiLabelMap" global="true"/>
                 <set field="titleProperty" value="AccountingAvailableInternalOrganizations"/>
                 <set field="headerItem" value="companies"/>
                 <set field="labelTitleProperty" value="${uiLabelMap.AccountingAvailableInternalOrganizations}"/>
-                <entity-condition entity-name="PartyRole" list="parties">
-                    <condition-expr field-name="roleTypeId" operator="equals" value="INTERNAL_ORGANIZATIO"/>
-                </entity-condition>
+                <entity-condition entity-name="PartyAcctgPreference" list="parties"/>
                 <service service-name="acctgPrefPermissionCheck" result-map="permResult">
                     <field-map field-name="mainAction" value="UPDATE"/>
                 </service>
@@ -70,11 +67,66 @@ under the License.
             <widgets>
                 <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
                     <decorator-section name="body">
-                        <screenlet title="${uiLabelMap.AccountingAvailableInternalOrganizations}">
+                        <screenlet title="${uiLabelMap.AccountingAvailableInternalOrganizations}" navigation-menu-name="newAccountOrganization">
+                            <include-menu location="component://accounting/widget/AccountingMenus.xml" name="newAccountOrganization"/>
                             <include-form name="ListCompanies" location="component://accounting/widget/GlSetupForms.xml"/>
                         </screenlet>
                     </decorator-section>
                 </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="AddCompany">
+        <section>
+            <actions>
+                <set field="titleProperty" value="AccountingNewCompany"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <screenlet title="${uiLabelMap.AccountingNewCompany}">
+                            <include-form name="AddCompany" location="component://accounting/widget/GlSetupForms.xml"/>
+                        </screenlet>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="ImportExport">
+        <section>
+            <actions>
+                <set field="titleProperty" value="CommonImportExport"/>
+                <entity-one entity-name="PartyGroup" value-field="partyGroup">
+                    <field-map field-name="partyId" from-field="parameters.organizationPartyId"/>
+                </entity-one>
+            </actions>
+            <widgets>
+                <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <screenlet title="${uiLabelMap.AccountingInvoice} ${uiLabelMap.CommonImportExport}  ${uiLabelMap.CommonFor}: ${partyGroup.groupName} [${parameters.organizationPartyId}]">
+                            <container style="lefthalf">
+                                <label style="h2">${uiLabelMap.CommonImport}</label>
+                                <include-form name="ImportInvoice" location="component://accounting/widget/GlSetupForms.xml"/>
+                            </container>
+                            <container style="righthalf">
+                                <label style="h2">${uiLabelMap.CommonExport}</label>
+                                <include-form name="ExportInvoice" location="component://accounting/widget/GlSetupForms.xml"/>
+                            </container>
+                         </screenlet>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="ExportInvoiceCsv">
+        <section>
+            <actions>
+                <property-map resource="CommonUiLabels" map-name="uiLabelMap" global="true"/>
+                <property-map resource="AccountingUiLabels" map-name="uiLabelMap" global="true"/>
+                <set field="organizationPartyId" from-field="parameters.organizationPartyId"/>
+            </actions>
+            <widgets>
+                    <include-form name="ExportInvoiceCsv" location="component://accounting/widget/GlSetupForms.xml"/>           
             </widgets>
         </section>
     </screen>

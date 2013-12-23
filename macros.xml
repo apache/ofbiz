@@ -57,7 +57,7 @@ under the License.
   <pathelement location="${ofbiz.home.dir}/framework/base/lib/commons/commons-cli-1.0.jar"/>
   <pathelement location="${ofbiz.home.dir}/framework/base/lib/scripting/antlr-2.7.6.jar"/>
   <pathelement location="${ofbiz.home.dir}/framework/base/lib/scripting/asm-3.2.jar"/>
-  <pathelement location="${ofbiz.home.dir}/framework/base/lib/scripting/groovy-all-1.7.7.jar"/>
+  <pathelement location="${ofbiz.home.dir}/framework/base/lib/scripting/groovy-all-2.1.9.jar"/>
  </path>
  <path id="rhino.class.path">
   <pathelement location="${ofbiz.home.dir}/extension/rhino/lib/js-1.7.R1.jar"/>
@@ -90,7 +90,7 @@ under the License.
  <presetdef name="default-javadoc">
     <javadoc classpathref="local.class.path"
              destdir="${build.dir}/javadocs"
-             windowtitle="Open for Business - ${desc}"
+             windowtitle="Apache Open for Business - ${desc}"
              useexternalfile="yes"
              maxmemory="512M"
              encoding="UTF-8"
@@ -109,8 +109,6 @@ under the License.
         <exclude name="**/JREntityListIteratorDataSource.java"/>
         <exclude name="**/JRMapCollectionDataSource.java"/>
         <exclude name="**/openoffice/"/>
-        <exclude name="**/XaPoolConnectionFactory.java"/>
-        <exclude name="**/JasperReportsPdfViewHandler.java"/>
         <exclude name="**/JasperReportsXmlViewHandler.java"/>
         <exclude name="**/JasperReportsJXlsViewHandler.java"/>
         <exclude name="**/JasperReportsPoiXlsViewHandler.java"/>
@@ -120,7 +118,6 @@ under the License.
         <exclude name="**/FopPdfViewHandler.java"/>
         <exclude name="**/FreeMarkerViewRenderer.java"/>
         <exclude name="**/JpCacheIncludeTransform.java"/>             
-        <exclude name="**/shark/"/>
       </fileset>
       <link href="http://java.sun.com/javase/6/docs/api/" offline="true" packagelistLoc="${ofbiz.home.dir}/tools/api-java16"/>
     </javadoc>
@@ -194,12 +191,6 @@ under the License.
   </groovyc>
  </presetdef>
 
- <!-- replaced by ant contrib version -->    
- <!--scriptdef name="if" language="javascript" classpathref="rhino.class.path" loaderref="rhino.class.path.loader" src="${ofbiz.home.dir}/tools/If-ant.py">
-  <element name="condition" classname="org.apache.tools.ant.taskdefs.condition.And"/>
-  <element name="commands" classname="org.apache.tools.ant.taskdefs.Sequential"/>
-  <element name="else" classname="org.apache.tools.ant.taskdefs.Sequential"/>
-  </scriptdef-->
   <taskdef resource="net/sf/antcontrib/antlib.xml">
     <classpath>
         <pathelement location="${ofbiz.home.dir}/framework/base/lib/ant/ant-contrib-1.0b3.jar"/>
@@ -266,4 +257,12 @@ under the License.
    </if>
   </sequential>
  </macrodef>
+
+ <presetdef name="externalsubant">
+  <subant inheritall="false">
+   <propertyset>
+    <propertyref name="ofbiz.home.dir"/>
+   </propertyset>
+  </subant>
+ </presetdef>
 </project>
