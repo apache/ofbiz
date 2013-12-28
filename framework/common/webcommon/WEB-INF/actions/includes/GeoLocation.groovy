@@ -17,11 +17,7 @@
  * under the License.
  */
 
-if (context.geoChart.points) {    
-    //context.geoChart.points = ;
-    println "context.geoChart.points==========================================" + context.geoChart.points
+if (geoPoint && geoPoint.elevationUomId) {
+    elevationUom = delegator.findOne("Uom", [uomId : geoPoint.elevationUomId], false);
+    context.elevationUomAbbr = elevationUom.abbreviation;
 }
-if (geoPoints) {    
-    println "geoPoints==========================================" + geoPoints
-}
-
