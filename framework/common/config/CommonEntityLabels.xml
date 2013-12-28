@@ -1129,17 +1129,12 @@
         <value xml:lang="zh_TW">絕對網址</value>
     </property>
     <property key="Enumeration.description.KOTT_OFBURL">
-        <value xml:lang="de">OFBiz URL</value>
         <value xml:lang="en">OFBiz URL</value>
         <value xml:lang="es">URL OFBiz</value>
         <value xml:lang="fr">URL (lien internet) au sein d'OFBiz</value>
         <value xml:lang="it">URL OFBiz</value>
-        <value xml:lang="ja">OFBiz URL</value>
         <value xml:lang="pt">URL OFBiz</value>
         <value xml:lang="ro">URL OFBiz</value>
-        <value xml:lang="ru">OFBiz URL</value>
-        <value xml:lang="th">OFBiz URL</value>
-        <value xml:lang="vi">OFBiz URL</value>
         <value xml:lang="zh">OFBiz网址</value>
         <value xml:lang="zh_TW">OFBiz網址</value>
     </property>
@@ -11812,8 +11807,8 @@
         <value xml:lang="pt_BR">Enfileirado</value>
         <value xml:lang="ru">Очереди</value>
         <value xml:lang="vi">Đang trong hàng đợi</value>
-        <value xml:lang="zh">正在运行</value>
-        <value xml:lang="zh_TW">正在運行</value>
+        <value xml:lang="zh">已进入队列</value>
+        <value xml:lang="zh_TW">已進入佇列</value>
     </property>
     <property key="StatusItem.description.SERVICE_RUNNING">
         <value xml:lang="en">Running</value>
@@ -11824,8 +11819,8 @@
         <value xml:lang="pt_BR">Em execução</value>
         <value xml:lang="ru">Работающий</value>
         <value xml:lang="vi">Đang chạy</value>
-        <value xml:lang="zh">已进入队列</value>
-        <value xml:lang="zh_TW">已進入佇列</value>
+        <value xml:lang="zh">正在运行</value>
+        <value xml:lang="zh_TW">正在運行</value>
     </property>
     <property key="StatusItem.description.SHIPMENT_CANCELLED">
         <value xml:lang="de">Annulliert</value>

@@ -165,7 +165,7 @@ under the License.
         <section>
             <actions>
                 <set field="tabButtonItem" value="ExampleGeoLocationPointSet1"/>
-                <set field="geoPoints[+0].lat" value="37.4419" type="Float"/>
+                <set field="geoPoints[+0].lat" value="37,4459" type="Float"/>
                 <set field="geoPoints[0].lon" value="-122.1419" type="Float"/>
                 <set field="geoPoints[+1].lat" value="37.4819" type="Float"/>
                 <set field="geoPoints[1].lon" value="-122.1519" type="Float"/>
@@ -184,7 +184,7 @@ under the License.
         <section>
             <actions>
                 <set field="tabButtonItem" value="ExampleGeoLocationPointSet2"/>
-                <set field="geoPoints[+0].lat" value="37.4459" type="Float"/>
+                <set field="geoPoints[+0].lat" value="37.4419" type="Float"/>
                 <set field="geoPoints[0].lon" value="-122.1489" type="Float"/>
                 <set field="geoPoints[+1].lat" value="37.4829" type="Float"/>
                 <set field="geoPoints[1].lon" value="-122.1599" type="Float"/>
@@ -193,6 +193,7 @@ under the License.
                 <set field="geoCenter.lat" value="37.4419" type="Float"/>
                 <set field="geoCenter.lon" value="-122.1419" type="Float"/>
                 <set field="geoCenter.zoom" value="12"/>
+                <script location="component://common/webcommon/WEB-INF/actions/includes/GeoLocation.groovy"/>
             </actions>
             <widgets>
                 <include-screen name="CommonExampleGeoLocationDecorator" location="${parameters.mainDecoratorLocation}"/>
