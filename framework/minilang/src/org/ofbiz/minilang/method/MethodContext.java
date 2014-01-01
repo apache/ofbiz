@@ -195,6 +195,10 @@ public final class MethodContext {
         return this.locale;
     }
 
+    public void setLocale(Locale locale) {
+        this.locale = locale;
+    }
+
     public int getMethodType() {
         return this.methodType;
     }
