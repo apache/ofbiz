@@ -247,7 +247,7 @@ under the License.
     </simple-method>
 
     <simple-method method-name="getCountryList" short-description="Returns a list of country" login-required="false">
-        <call-class-method method-name="getCountryList" class-name="org.ofbiz.common.CommonWorkers" ret-field="geoList">
+        <call-class-method method-name="get CountryList" class-name="org.ofbiz.common.CommonWorkers" ret-field="geoList">
             <field field="delegator" type="org.ofbiz.entity.Delegator"/>
         </call-class-method>
         <iterate list="geoList" entry="countryGeo">
