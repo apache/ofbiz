@@ -332,16 +332,6 @@ under the License.
     <xs:element name="set" substitutionGroup="AllActions">
         <xs:complexType>
             <xs:attributeGroup ref="attlist.set"/>
-            <xs:attribute type="xs:string" name="locale">
-                <xs:annotation>
-                    <xs:documentation>
-                        A locale value (eg: en). The locale allows to pass values with types which are locale dependent (like Float, etc.).
-                        Defaults to the environment locale. Works only if a type which makes sense is also passed.
-                        
-                        Optional. Attribute types: constant, ${expression}.
-                    </xs:documentation>
-                </xs:annotation>
-            </xs:attribute>
         </xs:complexType>
     </xs:element>
     <xs:attributeGroup name="attlist.set">
