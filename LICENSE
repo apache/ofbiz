@@ -1959,7 +1959,7 @@ framework/base/lib/jdbm-1.0-SNAPSHOT.jar
 The following library distributed with Apache OFBiz is licensed under the
 COMMON DEVELOPMENT AND DISTRIBUTION LICENSE (CDDL):
 framework/base/lib/juel-2.1.1.jar (contains the javax.el package)
-framework/base/lib/mail-1.4.jar
+framework/base/lib/mail-1.5.1.jar
 framework/jetty/lib/com.sun.el-2.2.0.v201108011116.jar
 framework/jetty/lib/javax.servlet.jsp.jstl-1.2.0.v201105211821.jar
 framework/jetty/lib/org.apache.jasper.glassfish-2.2.2.v201112011158.jar
