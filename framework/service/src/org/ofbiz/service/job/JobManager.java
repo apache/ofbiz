@@ -42,7 +42,6 @@ import org.ofbiz.entity.condition.EntityExpr;
 import org.ofbiz.entity.condition.EntityOperator;
 import org.ofbiz.entity.serialize.SerializeException;
 import org.ofbiz.entity.serialize.XmlSerializer;
-import org.ofbiz.entity.transaction.GenericTransactionException;
 import org.ofbiz.entity.transaction.TransactionUtil;
 import org.ofbiz.service.DispatchContext;
 import org.ofbiz.service.GenericDispatcher;
@@ -143,6 +142,7 @@ public class JobManager {
             synchronized (this) {
                 boolean beganTransaction = false;
 
+                List<Job> localPoll = FastList.newInstance();
                 try {
                     beganTransaction = TransactionUtil.begin();
                     if (!beganTransaction) {
@@ -150,16 +150,13 @@ public class JobManager {
                         return null;
                     }
 
-                    List<Job> localPoll = FastList.newInstance();
-
-                    // first update the jobs w/ this instance running information
+                    // first update the JobSandbox with this instance running information
                     delegator.storeByCondition("JobSandbox", updateFields, mainCondition);
 
                     // now query all the 'queued' jobs for this instance
                     List<GenericValue> jobEnt = delegator.findByAnd("JobSandbox", updateFields, order);
-                    //jobEnt = delegator.findByCondition("JobSandbox", mainCondition, null, order);
 
-                    if (UtilValidate.isNotEmpty(jobEnt)) {
+                    if (!jobEnt.isEmpty()) {
                         for (GenericValue v: jobEnt) {
                             DispatchContext dctx = getDispatcher().getDispatchContext();
                             if (dctx == null) {
@@ -177,29 +174,19 @@ public class JobManager {
                     } else {
                         pollDone = true;
                     }
-
-                    // nothing should go wrong at this point, so add to the general list
-                    poll.addAll(localPoll);
+                    TransactionUtil.commit(beganTransaction);
                 } catch (Throwable t) {
                     // catch Throwable so nothing slips through the cracks... this is a fairly sensitive operation
-                    String errMsg = "Error in polling JobSandbox: [" + t.toString() + "]. Rolling back transaction.";
-                    Debug.logError(t, errMsg, module);
+                    String errMsg = "Error in polling JobSandbox, rolling back transaction: ";
                     try {
-                        // only rollback the transaction if we started one...
                         TransactionUtil.rollback(beganTransaction, errMsg, t);
                     } catch (GenericEntityException e2) {
-                        Debug.logError(e2, "[Delegator] Could not rollback transaction: " + e2.toString(), module);
+                        Debug.logError(e2, "Could not rollback transaction: ", module);
                     }
-                } finally {
-                    try {
-                        // only commit the transaction if we started one... but make sure we try
-                        TransactionUtil.commit(beganTransaction);
-                    } catch (GenericTransactionException e) {
-                        String errMsg = "Transaction error trying to commit when polling and updating the JobSandbox: " + e.toString();
-                        // we don't really want to do anything different, so just log and move on
-                        Debug.logError(e, errMsg, module);
-                    }
+                    Debug.logError(t, errMsg, module);
+                    localPoll.clear();
                 }
+                poll.addAll(localPoll);
             }
         }
         return poll;
