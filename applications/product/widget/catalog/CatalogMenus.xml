@@ -532,9 +532,7 @@ under the License.
             <condition>
                 <not><if-empty field="product"/></not>
             </condition>
-            <link target="/ecommerce/control/product" url-mode="inter-app">
-                <parameter param-name="product_id" from-field="productId"/>
-            </link>
+            <link target="/ecommerce/product/${ecomLink}" url-mode="inter-app" />
         </menu-item>
         <menu-item name="ProductBarCode" title="${uiLabelMap.ProductBarcode}">
             <condition>

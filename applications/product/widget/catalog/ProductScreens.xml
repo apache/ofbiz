@@ -33,6 +33,8 @@ under the License.
                 <set field="productId" from-field="parameters.productId" global="true"/>
                 <entity-one entity-name="Product" value-field="product"/>
                 <set field="product" from-field="product" global="true"/>
+                <set field="ecomLink" value="${groovy: product.internalName.replace(' ', org.ofbiz.product.category.ftl.CatalogUrlSeoTransform.URL_HYPHEN) 
+                    + org.ofbiz.product.category.ftl.CatalogUrlSeoTransform.URL_HYPHEN + productId + '.html'}"/>                
             </actions>
             <widgets>
                 <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
