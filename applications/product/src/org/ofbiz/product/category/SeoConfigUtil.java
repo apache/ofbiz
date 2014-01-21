@@ -209,7 +209,7 @@ public class SeoConfigUtil {
                             Debug.logInfo("  " + ELEMENT_EXCEPTIONS + ": ", module);
                             List<? extends Element> exceptionUrlPatterns = UtilXml.childElementList(exceptions, ELEMENT_URLPATTERN);
                             for (int i = 0; i < exceptionUrlPatterns.size(); i++) {
-                                Element element = (Element) exceptionUrlPatterns.get(i);
+                                Element element = exceptionUrlPatterns.get(i);
                                 String urlpattern = element.getTextContent();
                                 if (UtilValidate.isNotEmpty(urlpattern)) {
                                     try {
@@ -492,11 +492,12 @@ public class SeoConfigUtil {
     }
 
     /**
-     * Check whether a product id is in the special list. If we cannot get a product from a lower cased 
+     * Check whether a product id is in the special list. If we cannot get a product from a lower cased
      * or upper cased product id, then it's special.
      * 
      * @return boolean to indicate whether the product id is special.
      */
+    @Deprecated
     public static boolean isSpecialProductId(String productId) {
         return specialProductIds.containsKey(productId);
     }
@@ -508,6 +509,7 @@ public class SeoConfigUtil {
      * @return true to indicate it has been added to special product id; false to indicate it's not special.
      * @throws Exception to indicate there's already same lower cased product id in the list but value is a different product id.
      */
+    @Deprecated
     public static boolean addSpecialProductId(String productId) throws Exception {
         if (productId.toLowerCase().equals(productId) || productId.toUpperCase().equals(productId)) {
             return false;
@@ -528,6 +530,7 @@ public class SeoConfigUtil {
      * 
      * @return String of the original product id
      */
+    @Deprecated
     public static String getSpecialProductId(String productId) {
         return specialProductIds.get(productId);
     }
