@@ -1060,4 +1060,9 @@ public class UtilMisc {
             out.close();
         }
     }
+
+    public static int getViewLastIndex(int listSize, int viewSize) {
+        return (int)Math.ceil(listSize / viewSize) - 1;
+    }
+    
 }
