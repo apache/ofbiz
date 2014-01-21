@@ -761,8 +761,8 @@ public class MacroScreenRenderer implements ScreenStringRenderer {
         // Last button
         String lastLinkUrl = "";
         if (highIndex < listSize) {
-            int page = (listSize / viewSize);
-            linkText = prepLinkText + page + anchor;
+            int lastIndex = UtilMisc.getViewLastIndex(listSize, viewSize);
+            linkText = prepLinkText + lastIndex + anchor;
             lastLinkUrl = rh.makeLink(request, response, linkText);
         }
         String nextLinkUrl = "";
