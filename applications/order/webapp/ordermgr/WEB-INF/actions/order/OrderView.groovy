@@ -273,10 +273,12 @@ if (orderHeader) {
     productStore = orderHeader.getRelatedOne("ProductStore");
     if (productStore) {
         facility = productStore.getRelatedOne("Facility");
-        inventorySummaryByFacility = dispatcher.runSync("getProductInventorySummaryForItems", [orderItems : orderItems, facilityId : facility.facilityId]);
-        context.availableToPromiseByFacilityMap = inventorySummaryByFacility.availableToPromiseMap;
-        context.quantityOnHandByFacilityMap = inventorySummaryByFacility.quantityOnHandMap;
-        context.facility = facility;
+        if (facility) {
+            inventorySummaryByFacility = dispatcher.runSync("getProductInventorySummaryForItems", [orderItems : orderItems, facilityId : facility.facilityId]);
+            context.availableToPromiseByFacilityMap = inventorySummaryByFacility.availableToPromiseMap;
+            context.quantityOnHandByFacilityMap = inventorySummaryByFacility.quantityOnHandMap;
+            context.facility = facility;
+        }
     }
 
     // Get a list of facilities for purchase orders to receive against.
