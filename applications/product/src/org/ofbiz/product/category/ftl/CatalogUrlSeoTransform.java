@@ -199,12 +199,12 @@ public class CatalogUrlSeoTransform implements TemplateTransformModel {
                     String categoryIdName = null;
                     String categoryId = category.getString("productCategoryId");
                     if (UtilValidate.isNotEmpty(categoryName)) {
-                        categoryName = SeoUrlUtil.replaceSpecialCharsUrl(categoryName.trim().toLowerCase());
+                        categoryName = SeoUrlUtil.replaceSpecialCharsUrl(categoryName.trim());
                         if (matcher.matches(categoryName, asciiPattern)) {
-                            categoryIdName = categoryName.toLowerCase().replaceAll(" ", URL_HYPHEN);
-                            categoryNameId = categoryIdName + URL_HYPHEN + categoryId.trim().toLowerCase().replaceAll(" ", URL_HYPHEN);
+                            categoryIdName = categoryName.replaceAll(" ", URL_HYPHEN);
+                            categoryNameId = categoryIdName + URL_HYPHEN + categoryId.trim().replaceAll(" ", URL_HYPHEN);
                         } else {
-                            categoryIdName = categoryId.trim().toLowerCase().replaceAll(" ", URL_HYPHEN);
+                            categoryIdName = categoryId.trim().replaceAll(" ", URL_HYPHEN);
                             categoryNameId = categoryIdName;
                         }
                     } else {
@@ -213,14 +213,14 @@ public class CatalogUrlSeoTransform implements TemplateTransformModel {
                         StringWrapper alternativeUrl = wrapper.get("ALTERNATIVE_URL");
                         if (UtilValidate.isNotEmpty(alternativeUrl) && UtilValidate.isNotEmpty(alternativeUrl.toString())) {
                             categoryIdName = SeoUrlUtil.replaceSpecialCharsUrl(alternativeUrl.toString());
-                            categoryNameId = categoryIdName + URL_HYPHEN + categoryId.trim().toLowerCase().replaceAll(" ", URL_HYPHEN);
+                            categoryNameId = categoryIdName + URL_HYPHEN + categoryId.trim().replaceAll(" ", URL_HYPHEN);
                         } else {
-                            categoryNameId = categoryId.trim().toLowerCase().replaceAll(" ", URL_HYPHEN);
+                            categoryNameId = categoryId.trim().replaceAll(" ", URL_HYPHEN);
                             categoryIdName = categoryNameId;
                         }
                     }
                     if (categoryNameIdMap.containsKey(categoryNameId)) {
-                        categoryNameId = categoryId.trim().toLowerCase().replaceAll(" ", URL_HYPHEN);
+                        categoryNameId = categoryId.trim().replaceAll(" ", URL_HYPHEN);
                         categoryIdName = categoryNameId;
                     }
                     if (!matcher.matches(categoryNameId, asciiPattern) || categoryNameIdMap.containsKey(categoryNameId)) {
@@ -310,8 +310,8 @@ public class CatalogUrlSeoTransform implements TemplateTransformModel {
                 }
             }
             try {
-                SeoConfigUtil.addSpecialProductId(productId);
-                urlBuilder.append(productId.toLowerCase());
+                //SeoConfigUtil.addSpecialProductId(productId);
+                urlBuilder.append(productId);
             } catch (Exception e) {
                 urlBuilder.append(productId);
             }
@@ -352,9 +352,9 @@ public class CatalogUrlSeoTransform implements TemplateTransformModel {
                     if (UtilValidate.isNotEmpty(categoryName)) {
                         urlBuilder.append(categoryName);
                         urlBuilder.append(URL_HYPHEN);
-                        urlBuilder.append(lastCategoryId.trim().toLowerCase().replaceAll(" ", URL_HYPHEN));
+                        urlBuilder.append(lastCategoryId.trim().replaceAll(" ", URL_HYPHEN));
                     } else {
-                        urlBuilder.append(lastCategoryId.trim().toLowerCase().replaceAll(" ", URL_HYPHEN));
+                        urlBuilder.append(lastCategoryId.trim().replaceAll(" ", URL_HYPHEN));
                     }
                 }
             }
@@ -468,7 +468,7 @@ public class CatalogUrlSeoTransform implements TemplateTransformModel {
         Perl5Matcher matcher = new Perl5Matcher();
         String niceName = null;
         if (UtilValidate.isNotEmpty(name)) {
-            name = name.trim().toLowerCase().replaceAll(" ", URL_HYPHEN);
+            name = name.trim().replaceAll(" ", URL_HYPHEN);
             if (UtilValidate.isNotEmpty(name) && matcher.matches(name, asciiPattern)) {
                 niceName = name;
             }
@@ -490,8 +490,8 @@ public class CatalogUrlSeoTransform implements TemplateTransformModel {
      * @param uri
      *            String to reverse transform
      * @return boolean to indicate whether the uri is forwarded.
-     * @throws IOException 
-     * @throws ServletException 
+     * @throws IOException
+     * @throws ServletException
      */
     public static boolean forwardUri(HttpServletRequest request, HttpServletResponse response, Delegator delegator, String controlServlet) throws ServletException, IOException {
         String pathInfo = request.getRequestURI();
@@ -558,11 +558,11 @@ public class CatalogUrlSeoTransform implements TemplateTransformModel {
                         try {
                             List<EntityExpr> exprs = FastList.newInstance();
                             exprs.add(EntityCondition.makeCondition("productId", EntityOperator.EQUALS, lastPathElement));
-                            if (SeoConfigUtil.isSpecialProductId(tempProductId)) {
-                                exprs.add(EntityCondition.makeCondition("productId", EntityOperator.EQUALS, SeoConfigUtil.getSpecialProductId(tempProductId)));
-                            } else {
-                                exprs.add(EntityCondition.makeCondition("productId", EntityOperator.EQUALS, tempProductId.toUpperCase()));
-                            }
+//                            if (SeoConfigUtil.isSpecialProductId(tempProductId)) {
+//                                exprs.add(EntityCondition.makeCondition("productId", EntityOperator.EQUALS, SeoConfigUtil.getSpecialProductId(tempProductId)));
+//                            } else {
+                                exprs.add(EntityCondition.makeCondition("productId", EntityOperator.EQUALS, tempProductId));
+//                            }
                             List<GenericValue> products = delegator.findList("Product", EntityCondition.makeCondition(exprs, EntityOperator.OR), UtilMisc.toSet("productId", "productName"), null, null, true);
                             
                             if (products != null && products.size() > 0) {
@@ -615,8 +615,8 @@ public class CatalogUrlSeoTransform implements TemplateTransformModel {
      * @param uri
      *            String to reverse transform
      * @return String
-     * @throws IOException 
-     * @throws ServletException 
+     * @throws IOException
+     * @throws ServletException
      */
     public static boolean forwardCategoryUri(HttpServletRequest request, HttpServletResponse response, Delegator delegator, String controlServlet) throws ServletException, IOException {
         String pathInfo = request.getRequestURI();
