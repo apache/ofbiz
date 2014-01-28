@@ -363,6 +363,16 @@ under the License.
         <response name="success" type="view" value="ViewComponents"/>
     </request-map>
 
+    <request-map uri="TestSuiteInfo">
+        <security https="true" auth="true"/>
+        <response name="success" type="view" value="TestSuiteInfo"/>
+    </request-map>
+
+    <request-map uri="RunTest">
+        <security https="true" auth="true"/>
+        <event type="java" path="org.ofbiz.webtools.artifactinfo.RunTestEvents" invoke="runTest"/>
+        <response name="success" type="request-redirect" value="TestSuiteInfo"/>
+    </request-map>
     <!-- EntitySQL requests -->
     <request-map uri="EntitySQLProcessor">
         <security https="true" auth="true"/>
@@ -375,6 +385,11 @@ under the License.
     </request-map>
 
     <!-- Entity Export/Import requests -->
+    <request-map uri="ProgramExport">
+        <security https="true" auth="true"/>
+        <response name="success" type="view" value="ProgramExport"/>
+        <response name="error" type="view" value="ProgramExport"/>
+    </request-map>
     <request-map uri="EntityExportAll"><security https="true" auth="true"/><response name="success" type="view" value="EntityExportAll"/><response name="error" type="view" value="EntityExportAll"/></request-map>
     <request-map uri="entityExportAll">
         <security https="true" auth="true"/>
@@ -676,16 +691,17 @@ under the License.
     <view-map name="EntitySQLProcessor" page="component://webtools/widget/EntityScreens.xml#EntitySQLProcessor" type="screen"/>
     <view-map name="ConnectionPoolStatus" page="component://webtools/widget/EntityScreens.xml#ConnectionPoolStatus" type="screen"/>
     <view-map name="EntityExportAll" page="component://webtools/widget/EntityScreens.xml#EntityExportAll" type="screen"/>
+    <view-map name="ProgramExport" page="component://webtools/widget/EntityScreens.xml#ProgramExport" type="screen"/>
     <view-map name="EntityImportDir" page="component://webtools/widget/EntityScreens.xml#EntityImportDir" type="screen"/>
     <view-map name="EntityImport" page="component://webtools/widget/EntityScreens.xml#EntityImport" type="screen"/>
     <view-map name="EntityImportReaders" page="component://webtools/widget/EntityScreens.xml#EntityImportReaders" type="screen"/>
-
-    <view-map name="ViewComponents" page="component://webtools/widget/MiscScreens.xml#ViewComponents" type="screen"/>
 
     <!-- cert views -->
     <view-map name="viewbrowsercerts" type="screen" page="component://webtools/widget/CommonScreens.xml#browsercerts"/>
 
     <!-- Artifact Info Views -->
+    <view-map name="ViewComponents" page="component://webtools/widget/ArtifactInfoScreens.xml#ViewComponents" type="screen"/>
+    <view-map name="TestSuiteInfo" page="component://webtools/widget/ArtifactInfoScreens.xml#TestSuiteInfo" type="screen"/>
     <view-map name="ArtifactInfo" type="screen" page="component://webtools/widget/ArtifactInfoScreens.xml#ArtifactInfo"/>
 
     <!-- Label Manager Views -->

@@ -18,11 +18,10 @@
  *******************************************************************************/
 package org.ofbiz.minilang.method.callops;
 
+import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-
-import javolution.util.FastList;
-import javolution.util.FastMap;
 
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.collections.FlexibleMapAccessor;
@@ -42,7 +41,7 @@ import org.w3c.dom.Element;
 /**
  * Implements the &lt;set-service-fields&gt; element.
  * 
- * @see <a href="https://cwiki.apache.org/OFBADMIN/mini-language-reference.html#Mini-languageReference-{{%3Csetservicefields%3E}}">Mini-language Reference</a>
+ * @see <a href="https://cwiki.apache.org/confluence/display/OFBADMIN/Mini-language+Reference#Mini-languageReference-{{%3Csetservicefields%3E}}">Mini-language Reference</a>
  */
 public final class SetServiceFields extends MethodOperation {
 
@@ -61,14 +60,16 @@ public final class SetServiceFields extends MethodOperation {
     private final FlexibleMapAccessor<Map<String, ? extends Object>> mapFma;
     private final FlexibleStringExpander serviceNameFse;
     private final FlexibleMapAccessor<Map<String, Object>> toMapFma;
+    private final String mode;
 
     public SetServiceFields(Element element, SimpleMethod simpleMethod) throws MiniLangException {
         super(element, simpleMethod);
         if (MiniLangValidate.validationOn()) {
-            MiniLangValidate.attributeNames(simpleMethod, element, "service-name", "map", "to-map");
+            MiniLangValidate.attributeNames(simpleMethod, element, "service-name", "map", "to-map", "mode");
             MiniLangValidate.requiredAttributes(simpleMethod, element, "service-name", "map", "to-map");
             MiniLangValidate.constantPlusExpressionAttributes(simpleMethod, element, "service-name");
             MiniLangValidate.expressionAttributes(simpleMethod, element, "map", "to-map");
+            MiniLangValidate.constantAttributes(simpleMethod, element, "mode");
             MiniLangValidate.noChildElements(simpleMethod, element);
         }
         boolean elementModified = autoCorrect(element);
@@ -78,6 +79,7 @@ public final class SetServiceFields extends MethodOperation {
         serviceNameFse = FlexibleStringExpander.getInstance(element.getAttribute("service-name"));
         mapFma = FlexibleMapAccessor.getInstance(element.getAttribute("map"));
         toMapFma = FlexibleMapAccessor.getInstance(element.getAttribute("to-map"));
+        mode = ModelService.OUT_PARAM.equals(element.getAttribute("mode")) ? ModelService.OUT_PARAM : ModelService.IN_PARAM;
     }
 
     @Override
@@ -98,11 +100,11 @@ public final class SetServiceFields extends MethodOperation {
         }
         Map<String, Object> toMap = toMapFma.get(methodContext.getEnvMap());
         if (toMap == null) {
-            toMap = FastMap.newInstance();
+            toMap = new HashMap<String, Object>();
             toMapFma.put(methodContext.getEnvMap(), toMap);
         }
-        List<Object> errorMessages = FastList.newInstance();
-        Map<String, Object> validAttributes = modelService.makeValid(fromMap, "IN", true, errorMessages, methodContext.getTimeZone(), methodContext.getLocale());
+        List<Object> errorMessages = new LinkedList<Object>();
+        Map<String, Object> validAttributes = modelService.makeValid(fromMap, mode, true, errorMessages, methodContext.getTimeZone(), methodContext.getLocale());
         if (errorMessages.size() > 0) {
             for (Object obj : errorMessages) {
                 simpleMethod.addErrorMessage(methodContext, (String) obj);
@@ -130,6 +132,7 @@ public final class SetServiceFields extends MethodOperation {
         if (!this.toMapFma.isEmpty()) {
             sb.append("to-map=\"").append(this.toMapFma).append("\" ");
         }
+        sb.append("mode=\"").append(this.mode).append("\" ");
         sb.append("/>");
         return sb.toString();
     }

@@ -21,7 +21,6 @@ package org.ofbiz.product.inventory;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.sql.Timestamp;
-import com.ibm.icu.util.Calendar;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -51,6 +50,8 @@ import org.ofbiz.service.DispatchContext;
 import org.ofbiz.service.GenericServiceException;
 import org.ofbiz.service.LocalDispatcher;
 import org.ofbiz.service.ServiceUtil;
+
+import com.ibm.icu.util.Calendar;
 
 /**
  * Inventory Services
@@ -864,7 +865,7 @@ public class InventoryServices {
         Timestamp checkTime = (Timestamp)context.get("checkTime");
         String facilityId = (String)context.get("facilityId");
         String productId = (String)context.get("productId");
-        String minimumStockStr = (String)context.get("minimumStock");
+        BigDecimal minimumStock = (BigDecimal)context.get("minimumStock");
         String statusId = (String)context.get("statusId");
 
         Map<String, Object> result = FastMap.newInstance();
@@ -894,10 +895,7 @@ public class InventoryServices {
             }
         }
         // filter for quantities
-        BigDecimal minimumStock = BigDecimal.ZERO;
-        if (minimumStockStr != null) {
-            minimumStock = new BigDecimal(minimumStockStr);
-        }
+        minimumStock = minimumStock != null ? minimumStock : BigDecimal.ZERO;
 
         BigDecimal quantityOnHandTotal = BigDecimal.ZERO;
         if (resultOutput.get("quantityOnHandTotal") != null) {
@@ -912,8 +910,8 @@ public class InventoryServices {
         BigDecimal offsetATPQtyAvailable = availableToPromiseTotal.subtract(minimumStock);
 
         BigDecimal quantityOnOrder = InventoryWorker.getOutstandingPurchasedQuantity(productId, delegator);
-        result.put("totalQuantityOnHand", resultOutput.get("quantityOnHandTotal").toString());
-        result.put("totalAvailableToPromise", resultOutput.get("availableToPromiseTotal").toString());
+        result.put("totalQuantityOnHand", resultOutput.get("quantityOnHandTotal"));
+        result.put("totalAvailableToPromise", resultOutput.get("availableToPromiseTotal"));
         result.put("quantityOnOrder", quantityOnOrder);
 
         result.put("offsetQOHQtyAvailable", offsetQOHQtyAvailable);
@@ -929,13 +927,13 @@ public class InventoryServices {
         //change this for product price
         for (GenericValue onePrice: productPrices) {
             if (onePrice.getString("productPriceTypeId").equals("DEFAULT_PRICE")) { //defaultPrice
-                result.put("defultPrice", onePrice.getBigDecimal("price"));
+                result.put("defaultPrice", onePrice.getBigDecimal("price"));
             } else if (onePrice.getString("productPriceTypeId").equals("WHOLESALE_PRICE")) {//
                 result.put("wholeSalePrice", onePrice.getBigDecimal("price"));
             } else if (onePrice.getString("productPriceTypeId").equals("LIST_PRICE")) {//listPrice
                 result.put("listPrice", onePrice.getBigDecimal("price"));
             } else {
-                result.put("defultPrice", onePrice.getBigDecimal("price"));
+                result.put("defaultPrice", onePrice.getBigDecimal("price"));
                 result.put("listPrice", onePrice.getBigDecimal("price"));
                 result.put("wholeSalePrice", onePrice.getBigDecimal("price"));
             }

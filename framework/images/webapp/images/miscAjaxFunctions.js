@@ -16,7 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-// *** getDependentDropdownValues allows to dynamically populate a dependent drop-down on change on its parent drop-down, doesn't require any fixed naming convention 
+ 
+function getDependentDropdownValues(request, paramKey, paramField, targetField, responseName, keyName, descName, selected, callback, allowEmpty, hide, hideTitle, inputField){
+// To dynamically populate a dependent drop-down on change on its parent drop-down, doesn't require any fixed naming convention 
 // request      = request calling the service which retrieve the info from the DB, ex: getAssociatedStateList
 // paramKey     = parameter value used in the called service 
 // paramField   = parent drop-down field Id (mainId)
@@ -30,10 +32,9 @@
 // hide         = optional boolean argument, if true the dependent drop-down field (targetField) will be hidden when no options are available else only disabled. False by default.
 // hideTitle    = optional boolean argument (hide must be set to true), if true the title of the dependent drop-down field (targetField) will be hidden when no options are available else only disabled. False by default.
 // inputField   = optional name of an input field    
-// 				  this is to handle a specific case where an input field is needed instead of a drop-down when no values are returned by the request
-// 				  this will be maybe extended later to use an auto-completed drop-down or a lookup, instead of straight drop-down currently, when there are too much values to populate
-// 				  this is e.g. currently used in the Product Price Rules screen
-function getDependentDropdownValues(request, paramKey, paramField, targetField, responseName, keyName, descName, selected, callback, allowEmpty, hide, hideTitle, inputField){
+//             this is to handle a specific case where an input field is needed instead of a drop-down when no values are returned by the request
+//             this will be maybe extended later to use an auto-completed drop-down or a lookup, instead of straight drop-down currently, when there are too much values to populate
+//             this is e.g. currently used in the Product Price Rules screen
     target = '#' + targetField;
     input = '#' + inputField;
     targetTitle = target + '_title'
@@ -117,12 +118,15 @@ function getDependentDropdownValues(request, paramKey, paramField, targetField, 
 }
 
 //*** calls any service already mounted as an event
-function getServiceResult(request, params){
+// arguments must be either a request only (1st argument) or a request followed by {name;value} pair/s parameters 
+function getServiceResult(){
+    var request = arguments[0];
+    var params =  new Array();
     var data;
     jQuery.ajax({
         type: 'POST',
         url: request,
-        data: params,
+        data: prepareAjaxData(arguments),
         async: false,
         cache: false,
         success: function(result){
@@ -132,18 +136,17 @@ function getServiceResult(request, params){
     return data;
 }
 
-//*** calls any service already mounted as an event
-function getServiceResult(request){
-    var data;
-    jQuery.ajax({
-        type: 'POST',
-        url: request,
-        async: false,
-        cache: false,
-        success: function(result){
-            data = result;
-        }
+function prepareAjaxData(params) {
+  var data = new Array();
+  if (params.length > 1) {
+    for (var i = 1; i < params.length; i++) {
+      data.push({
+        name: params[i],
+        value: params[i + 1]
     });
+      i++;
+    }
+  }
     return data;
 }
 

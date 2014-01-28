@@ -30,6 +30,7 @@ under the License.
         <permission-service service-name="acctgAgreementPermissionCheck" main-action="CREATE"/>
         <auto-attributes include="nonpk" mode="IN" optional="true"/>
         <auto-attributes include="pk" mode="OUT" optional="true"/>
+        <override name="textData" allow-html="any"/>
     </service>
     <service name="updateAgreement" default-entity-name="Agreement" engine="simple"
                 location="component://accounting/script/org/ofbiz/accounting/agreement/AgreementServices.xml" invoke="updateAgreement" auth="true">
@@ -37,6 +38,7 @@ under the License.
         <permission-service service-name="acctgAgreementPermissionCheck" main-action="UPDATE"/>
         <auto-attributes include="pk" mode="IN" optional="false"/>
         <auto-attributes include="nonpk" mode="IN" optional="true"/>
+        <override name="textData" allow-html="any"/>
     </service>
     <service name="cancelAgreement" default-entity-name="Agreement" engine="simple"
                 location="component://accounting/script/org/ofbiz/accounting/agreement/AgreementServices.xml" invoke="cancelAgreement" auth="true">
@@ -63,6 +65,7 @@ under the License.
         <permission-service service-name="acctgAgreementPermissionCheck" main-action="CREATE"/>
         <auto-attributes include="pk" mode="INOUT" optional="true"/>
         <auto-attributes include="nonpk" mode="IN" optional="true"/>
+        <override name="agreementText" allow-html="any"/>
     </service>
     <service name="updateAgreementItem" default-entity-name="AgreementItem" engine="simple"
                 location="component://accounting/script/org/ofbiz/accounting/agreement/AgreementServices.xml" invoke="updateAgreementItem" auth="true">
@@ -70,6 +73,7 @@ under the License.
         <permission-service service-name="acctgAgreementPermissionCheck" main-action="UPDATE"/>
         <auto-attributes include="pk" mode="IN" optional="true"/>
         <auto-attributes include="nonpk" mode="IN" optional="true"/>
+        <override name="agreementText" allow-html="any"/>
     </service>
     <service name="removeAgreementItem" default-entity-name="AgreementItem" engine="simple"
                 location="component://accounting/script/org/ofbiz/accounting/agreement/AgreementServices.xml" invoke="removeAgreementItem" auth="true">
@@ -86,6 +90,7 @@ under the License.
         <permission-service service-name="acctgAgreementPermissionCheck" main-action="CREATE"/>
         <auto-attributes include="pk" mode="INOUT" optional="true"/>
         <auto-attributes include="nonpk" mode="IN" optional="true"/>
+        <override name="textValue" allow-html="any"/>
     </service>
     <service name="updateAgreementTerm" default-entity-name="AgreementTerm" engine="simple"
                 location="component://accounting/script/org/ofbiz/accounting/agreement/AgreementServices.xml" invoke="updateAgreementTerm" auth="true">
@@ -93,6 +98,7 @@ under the License.
         <permission-service service-name="acctgAgreementPermissionCheck" main-action="UPDATE"/>
         <auto-attributes include="pk" mode="IN" optional="true"/>
         <auto-attributes include="nonpk" mode="IN" optional="true"/>
+        <override name="textValue" allow-html="any"/>
     </service>
     <service name="deleteAgreementTerm" default-entity-name="AgreementTerm" engine="simple"
                 location="component://accounting/script/org/ofbiz/accounting/agreement/AgreementServices.xml" invoke="deleteAgreementTerm" auth="true">

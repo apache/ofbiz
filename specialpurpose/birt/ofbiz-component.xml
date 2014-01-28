@@ -50,7 +50,7 @@ under the License.
             location="webapp/ordermgr"
             base-permission="OFBTOOLS,ORDERMGR"
             mount-point="/ordermgr"/>
-    -->
+
     <webapp name="birt"
             title="BIRT"
             server="default-server"

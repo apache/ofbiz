@@ -19,9 +19,8 @@
 package org.ofbiz.minilang.method.envops;
 
 import java.text.MessageFormat;
+import java.util.LinkedList;
 import java.util.List;
-
-import javolution.util.FastList;
 
 import org.ofbiz.base.util.MessageString;
 import org.ofbiz.base.util.UtilValidate;
@@ -38,7 +37,7 @@ import org.w3c.dom.Element;
 /**
  * Implements the &lt;string-to-list&gt; element.
  * 
- * @see <a href="https://cwiki.apache.org/OFBADMIN/mini-language-reference.html#Mini-languageReference-{{%3Cstringtolist%3E}}">Mini-language Reference</a>
+ * @see <a href="https://cwiki.apache.org/confluence/display/OFBADMIN/Mini-language+Reference#Mini-languageReference-{{%3Cstringtolist%3E}}">Mini-language Reference</a>
  */
 public final class StringToList extends MethodOperation {
 
@@ -81,7 +80,7 @@ public final class StringToList extends MethodOperation {
         }
         List<Object> toList = listFma.get(methodContext.getEnvMap());
         if (toList == null) {
-            toList = FastList.newInstance();
+            toList = new LinkedList<Object>();
             listFma.put(methodContext.getEnvMap(), toList);
         }
         toList.add(value);

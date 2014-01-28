@@ -172,7 +172,7 @@ under the License.
             </td>
             <td>
               <#if orderReadyToPickInfoList?has_content>
-                <form method="post" action="<@ofbizUrl>printPickSheets</@ofbizUrl>">
+                <form method="post" action="<@ofbizUrl>printPickSheets</@ofbizUrl>" target="_blank">
                   <input type="hidden" name="printGroupName" value="${groupName?if_exists}"/>
                   <input type="hidden" name="facilityId" value="${facilityId?if_exists}"/>
                   <input type="hidden" name="groupByShippingMethod" value="${requestParameters.groupByShippingMethod?if_exists}"/>
@@ -216,7 +216,7 @@ under the License.
             </td>
             <td>
               <#if (orderReadyToPickInfoListSizeTotal > 0)>
-                <form method="post" action="<@ofbizUrl>printPickSheets</@ofbizUrl>">
+                <form method="post" action="<@ofbizUrl>printPickSheets</@ofbizUrl>" target="_blank">
                   <input type="hidden" name="facilityId" value="${facilityId?if_exists}"/>
                   <span class="label">${uiLabelMap.FormFieldTitle_printPickSheetFirst}</span>
                   <input type="text" size="4" name="maxNumberOfOrdersToPrint" value="20"/>
@@ -273,14 +273,14 @@ under the License.
             <#assign orderProduct = oiasga.getRelatedOne("OrderItem", false).getRelatedOne("Product", false)?if_exists>
             <#assign product = oiasga.getRelatedOne("InventoryItem", false).getRelatedOne("Product", false)?if_exists>
             <tr valign="middle"<#if alt_row> class="alternate-row"</#if>>
-              <td><a href="/ordermgr/control/orderview?orderId=${oiasga.orderId}${externalKeyParam}" class="buttontext" target="_blank">${oiasga.orderId}</a></td>
+              <td><a href="/ordermgr/control/orderview?orderId=${oiasga.orderId}${StringUtil.wrapString(externalKeyParam)}" class="buttontext" target="_blank">${oiasga.orderId}</a></td>
               <td>${header.orderDate?string}</td>
               <td>${(channel.description)?if_exists}</td>
               <td>${oiasga.orderItemSeqId}</td>
               <td>
-                <a href="/catalog/control/EditProduct?productId=${orderProduct.productId?if_exists}${externalKeyParam}" class="buttontext" target="_blank">${(orderProduct.internalName)?if_exists}</a>
+                <a href="/catalog/control/EditProduct?productId=${orderProduct.productId?if_exists}${StringUtil.wrapString(externalKeyParam)}" class="buttontext" target="_blank">${(orderProduct.internalName)?if_exists}</a>
                 <#if orderProduct.productId != product.productId>
-                  &nbsp;[<a href="/catalog/control/EditProduct?productId=${product.productId?if_exists}${externalKeyParam}" class="buttontext" target="_blank">${(product.internalName)?if_exists}</a>]
+                  &nbsp;[<a href="/catalog/control/EditProduct?productId=${product.productId?if_exists}${StringUtil.wrapString(externalKeyParam)}" class="buttontext" target="_blank">${(product.internalName)?if_exists}</a>]
                 </#if>
               </td>
               <td>${oiasga.shipGroupSeqId}</td>

@@ -18,9 +18,8 @@
  *******************************************************************************/
 package org.ofbiz.minilang.method.envops;
 
+import java.util.LinkedList;
 import java.util.List;
-
-import javolution.util.FastList;
 
 import org.ofbiz.base.util.collections.FlexibleMapAccessor;
 import org.ofbiz.minilang.MiniLangException;
@@ -33,7 +32,7 @@ import org.w3c.dom.Element;
 /**
  * Implements the &lt;field-to-list&gt; element.
  * 
- * @see <a href="https://cwiki.apache.org/OFBADMIN/mini-language-reference.html#Mini-languageReference-{{%3Cfieldtolist%3E}}">Mini-language Reference</a>
+ * @see <a href="https://cwiki.apache.org/confluence/display/OFBADMIN/Mini-language+Reference#Mini-languageReference-{{%3Cfieldtolist%3E}}">Mini-language Reference</a>
 */
 public final class FieldToList extends MethodOperation {
 
@@ -59,7 +58,7 @@ public final class FieldToList extends MethodOperation {
         if (fieldVal != null) {
             List<Object> toList = listFma.get(methodContext.getEnvMap());
             if (toList == null) {
-                toList = FastList.newInstance();
+                toList = new LinkedList<Object>();
                 listFma.put(methodContext.getEnvMap(), toList);
             }
             toList.add(fieldVal);

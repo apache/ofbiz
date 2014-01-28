@@ -19,19 +19,16 @@
 
 package org.ofbiz.entity.condition;
 
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-
-import javolution.context.ObjectFactory;
-import javolution.lang.Reusable;
-import javolution.util.FastList;
 
 import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericEntity;
 import org.ofbiz.entity.GenericModelException;
-import org.ofbiz.entity.config.DatasourceInfo;
+import org.ofbiz.entity.config.model.Datasource;
 import org.ofbiz.entity.model.ModelEntity;
 import org.ofbiz.entity.model.ModelField;
 import org.ofbiz.entity.model.ModelViewEntity;
@@ -42,16 +39,9 @@ import org.ofbiz.entity.model.ModelViewEntity.ModelAlias;
  *
  */
 @SuppressWarnings("serial")
-public class EntityFieldValue extends EntityConditionValue implements Reusable {
+public class EntityFieldValue extends EntityConditionValue {
 
     public static final String module = EntityFieldValue.class.getName();
-
-    protected static final ObjectFactory<EntityFieldValue> entityFieldValueFactory = new ObjectFactory<EntityFieldValue>() {
-        @Override
-        protected EntityFieldValue create() {
-            return new EntityFieldValue();
-        }
-    };
 
     protected String fieldName = null;
     protected String entityAlias = null;
@@ -59,24 +49,22 @@ public class EntityFieldValue extends EntityConditionValue implements Reusable {
     protected ModelViewEntity modelViewEntity = null;
 
     public static EntityFieldValue makeFieldValue(String fieldName) {
-        EntityFieldValue efv = EntityFieldValue.entityFieldValueFactory.object();
+        EntityFieldValue efv = new EntityFieldValue();
         efv.init(fieldName, null, null, null);
         return efv;
     }
 
     public static EntityFieldValue makeFieldValue(String fieldName, String entityAlias, List<String> entityAliasStack, ModelViewEntity modelViewEntity) {
-        EntityFieldValue efv = EntityFieldValue.entityFieldValueFactory.object();
+        EntityFieldValue efv = new EntityFieldValue();
         efv.init(fieldName, entityAlias, entityAliasStack, modelViewEntity);
         return efv;
     }
-
-    protected EntityFieldValue() {}
 
     public void init(String fieldName, String entityAlias, List<String> entityAliasStack, ModelViewEntity modelViewEntity) {
         this.fieldName = fieldName;
         this.entityAlias = entityAlias;
         if (UtilValidate.isNotEmpty(entityAliasStack)) {
-            this.entityAliasStack = FastList.newInstance();
+            this.entityAliasStack = new LinkedList<String>();
             this.entityAliasStack.addAll(entityAliasStack);
         }
         this.modelViewEntity = modelViewEntity;
@@ -135,7 +123,7 @@ public class EntityFieldValue extends EntityConditionValue implements Reusable {
     }
 
     @Override
-    public void addSqlValue(StringBuilder sql, Map<String, String> tableAliases, ModelEntity modelEntity, List<EntityConditionParam> entityConditionParams, boolean includeTableNamePrefix, DatasourceInfo datasourceInfo) {
+    public void addSqlValue(StringBuilder sql, Map<String, String> tableAliases, ModelEntity modelEntity, List<EntityConditionParam> entityConditionParams, boolean includeTableNamePrefix, Datasource datasourceInfo) {
         if (this.modelViewEntity != null) {
             // NOTE: this section is a bit of a hack; the other code is terribly complex and really needs to be refactored to incorporate support for this
 

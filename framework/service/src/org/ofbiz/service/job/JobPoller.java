@@ -33,26 +33,24 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.ofbiz.base.config.GenericConfigException;
 import org.ofbiz.base.start.Start;
 import org.ofbiz.base.util.Assert;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.service.config.ServiceConfigUtil;
+import org.ofbiz.service.config.ServiceConfigListener;
+import org.ofbiz.service.config.model.ServiceConfig;
+import org.ofbiz.service.config.model.ThreadPool;
 
 /**
  * Job poller. Queues and runs jobs.
  */
-public final class JobPoller {
+public final class JobPoller implements ServiceConfigListener {
 
     public static final String module = JobPoller.class.getName();
     private static final AtomicInteger created = new AtomicInteger();
-    private static final int MIN_THREADS = 1; // Must be no less than one or the executor will shut down.
-    private static final int MAX_THREADS = 5; // Values higher than 5 might slow things down.
-    private static final int POLL_WAIT = 30000; // Database polling interval - 30 seconds.
-    private static final int QUEUE_SIZE = 100;
-    private static final long THREAD_TTL = 120000; // Idle thread lifespan - 2 minutes.
     private static final ConcurrentHashMap<String, JobManager> jobManagers = new ConcurrentHashMap<String, JobManager>();
-    private static final ThreadPoolExecutor executor = new ThreadPoolExecutor(minThreads(), maxThreads(), getTTL(),
-            TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>(queueSize()), new JobInvokerThreadFactory(), new ThreadPoolExecutor.AbortPolicy());
+    private static final ThreadPoolExecutor executor = createThreadPoolExecutor();
     private static final JobPoller instance = new JobPoller();
 
     /**
@@ -62,79 +60,26 @@ public final class JobPoller {
         return instance;
     }
 
-    private static long getTTL() {
-        String threadTTLAttr = ServiceConfigUtil.getElementAttr("thread-pool", "ttl");
-        if (!threadTTLAttr.isEmpty()) {
-            try {
-                int threadTTL = Integer.parseInt(threadTTLAttr);
-                if (threadTTL > 0) {
-                    return threadTTL;
-                }
-            } catch (NumberFormatException e) {
-                Debug.logError("Exception thrown while parsing thread TTL from serviceengine.xml file [" + e + "]. Using default value.", module);
-            }
+    private static ThreadPoolExecutor createThreadPoolExecutor() {
+        try {
+            ThreadPool threadPool = ServiceConfigUtil.getServiceEngine(ServiceConfigUtil.engine).getThreadPool();
+            return new ThreadPoolExecutor(threadPool.getMinThreads(), threadPool.getMaxThreads(), threadPool.getTtl(),
+                    TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>(threadPool.getJobs()), new JobInvokerThreadFactory(), new ThreadPoolExecutor.AbortPolicy());
+        } catch (GenericConfigException e) {
+            Debug.logError(e, "Exception thrown while getting <thread-pool> model, using default <thread-pool> values: ", module);
+            return new ThreadPoolExecutor(ThreadPool.MIN_THREADS, ThreadPool.MAX_THREADS, ThreadPool.THREAD_TTL,
+                    TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>(ThreadPool.QUEUE_SIZE), new JobInvokerThreadFactory(), new ThreadPoolExecutor.AbortPolicy());
         }
-        return THREAD_TTL;
-    }
-
-    private static int maxThreads() {
-        String maxThreadsAttr = ServiceConfigUtil.getElementAttr("thread-pool", "max-threads");
-        if (!maxThreadsAttr.isEmpty()) {
-            try {
-                int maxThreads = Integer.parseInt(maxThreadsAttr);
-                if (maxThreads > 0) {
-                    return maxThreads;
-                }
-            } catch (NumberFormatException e) {
-                Debug.logError("Exception thrown while parsing maximum threads from serviceengine.xml file [" + e + "]. Using default value.", module);
-            }
-        }
-        return MAX_THREADS;
-    }
-
-    private static int minThreads() {
-        String minThreadsAttr = ServiceConfigUtil.getElementAttr("thread-pool", "min-threads");
-        if (!minThreadsAttr.isEmpty()) {
-            try {
-                int minThreads = Integer.parseInt(minThreadsAttr);
-                if (minThreads > 0) {
-                    return minThreads;
-                }
-            } catch (NumberFormatException e) {
-                Debug.logError("Exception thrown while parsing minimum threads from serviceengine.xml file [" + e + "]. Using default value.", module);
-            }
-        }
-        return MIN_THREADS;
     }
 
     private static int pollWaitTime() {
-        String pollIntervalAttr = ServiceConfigUtil.getElementAttr("thread-pool", "poll-db-millis");
-        if (!pollIntervalAttr.isEmpty()) {
-            try {
-                int pollInterval = Integer.parseInt(pollIntervalAttr);
-                if (pollInterval > 0) {
-                    return pollInterval;
-                }
-            } catch (NumberFormatException e) {
-                Debug.logError("Exception thrown while parsing database polling interval from serviceengine.xml file [" + e + "]. Using default value.", module);
-            }
+        try {
+            ThreadPool threadPool = ServiceConfigUtil.getServiceEngine(ServiceConfigUtil.engine).getThreadPool();
+            return threadPool.getPollDbMillis();
+        } catch (GenericConfigException e) {
+            Debug.logError(e, "Exception thrown while getting <thread-pool> model, using default <thread-pool> values: ", module);
+            return ThreadPool.POLL_WAIT;
         }
-        return POLL_WAIT;
-    }
-
-    private static int queueSize() {
-        String queueSizeAttr = ServiceConfigUtil.getElementAttr("thread-pool", "jobs");
-        if (!queueSizeAttr.isEmpty()) {
-            try {
-                int queueSize = Integer.parseInt(queueSizeAttr);
-                if (queueSize > 0) {
-                    return queueSize;
-                }
-            } catch (NumberFormatException e) {
-                Debug.logError("Exception thrown while parsing queue size from serviceengine.xml file [" + e + "]. Using default value.", module);
-            }
-        }
-        return QUEUE_SIZE;
     }
 
     /**
@@ -160,6 +105,7 @@ public final class JobPoller {
         } else {
             jobManagerPollerThread = null;
         }
+        ServiceConfigUtil.registerServiceConfigListener(this);
     }
 
     /**
@@ -195,9 +141,23 @@ public final class JobPoller {
         return poolState;
     }
 
+    @Override
+    public void onServiceConfigChange(ServiceConfig serviceConfig) {
+        if (!executor.isShutdown()) {
+            ThreadPool threadPool = serviceConfig.getServiceEngine(ServiceConfigUtil.engine).getThreadPool();
+            executor.setCorePoolSize(threadPool.getMinThreads());
+            executor.setMaximumPoolSize(threadPool.getMaxThreads());
+            executor.setKeepAliveTime(threadPool.getTtl(), TimeUnit.MILLISECONDS);
+        }
+    }
+
     private boolean pollEnabled() {
-        String enabled = ServiceConfigUtil.getElementAttr("thread-pool", "poll-enabled");
-        return !"false".equalsIgnoreCase(enabled);
+        try {
+            return ServiceConfigUtil.getServiceEngine().getThreadPool().getPollEnabled();
+        } catch (GenericConfigException e) {
+            Debug.logWarning(e, "Exception thrown while getting configuration: ", module);
+            return false;
+        }
     }
 
     /**

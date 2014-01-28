@@ -795,11 +795,17 @@ public class CheckOutEvents {
                 // set the shipping method
                 if (mode.equals("ship")) {
                     shippingContactMechId = request.getParameter(shipGroupIndex + "_shipping_contact_mech_id");
+                    String facilityId = request.getParameter(shipGroupIndex + "_shipGroupFacilityId");
                     if (shippingContactMechId == null) {
-                        shippingContactMechId = (String) request.getAttribute("contactMechId"); // FIXME
+                        shippingContactMechId = (String) request.getAttribute("contactMechId");
+                    } else if(cart.getOrderType().equals("PURCHASE_ORDER")){
+                        String[] shipInfo = shippingContactMechId.split("_@_");
+                        if(shipInfo.length > 1){
+                            shippingContactMechId = shipInfo[0];
+                            facilityId = shipInfo[1];   
+                        }
                     }
                     String supplierPartyId = request.getParameter(shipGroupIndex + "_supplierPartyId");
-                    String facilityId = request.getParameter(shipGroupIndex + "_shipGroupFacilityId");
                     if (UtilValidate.isNotEmpty(facilityId)) {
                         cart.setShipGroupFacilityId(shipGroupIndex, facilityId);
                     }
@@ -890,10 +896,6 @@ public class CheckOutEvents {
                     return "error";
                 }
                 selectedPaymentMethods.put("EXT_BILLACT", UtilMisc.<String, Object>toMap("amount", billingAccountAmt, "securityCode", null));
-            }
-
-            if (UtilValidate.isEmpty(selectedPaymentMethods)) {
-                return "error";
             }
 
             // If the user has just created a new payment method, add it to the map with a null amount, so that

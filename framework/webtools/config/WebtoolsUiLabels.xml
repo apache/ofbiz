@@ -18,7 +18,7 @@
     specific language governing permissions and limitations
     under the License.
 -->
-<resource xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/ofbiz.properties.xsd">
+<resource xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
     <property key="ConnectionPoolStatus">
         <value xml:lang="en">Connection Pool Status</value>
         <value xml:lang="ja">接続プールステータス</value>
@@ -627,6 +627,9 @@
         <value xml:lang="zh">浏览日志</value>
         <value xml:lang="zh_TW">瀏覽日誌</value>
     </property>
+    <property key="PageTitleProgramExport">
+        <value xml:lang="en">Programmable Export</value>
+    </property>
     <property key="PageTitleRunService">
         <value xml:lang="de">Dienst starten</value>
         <value xml:lang="en">Run Service</value>
@@ -813,14 +816,19 @@
     </property>
     <property key="WebtoolsArtifactInfo">
         <value xml:lang="de">OFBiz Elemente-Info</value>
-        <value xml:lang="en">Artifact Info (may take some time to load)</value>
-        <value xml:lang="fr">Information sur les éléments d'OFBiz (cela peut prendre un certain temps à charger)</value>
+        <value xml:lang="en">Artifact Info</value>
+        <value xml:lang="fr">Information sur les éléments d'OFBiz</value>
         <value xml:lang="it">Informazioni sugli artefatti</value>
         <value xml:lang="ja">OFBiz要素情報</value>
         <value xml:lang="pt">Info do Artefato</value>
-        <value xml:lang="vi">Thông tin Nhân tạo (đợi chút thời gian)</value>
+        <value xml:lang="vi">Thông tin Nhân tạo</value>
         <value xml:lang="zh">人工程序信息</value>
         <value xml:lang="zh_TW">人工程式資訊</value>
+    </property>
+    <property key="WebtoolsArtifactInfoTimeToLoad">
+        <value xml:lang="en">(may take some time to load)</value>
+        <value xml:lang="fr">(cela peut prendre un certain temps à charger)</value>
+        <value xml:lang="vi">(đợi chút thời gian)</value>
     </property>
     <property key="WebtoolsAsync">
         <value xml:lang="de">Asynchron</value>
@@ -1965,7 +1973,6 @@
         <value xml:lang="en">eomodel Full Path is not write-able: ${eomodeldFullPath}</value>
         <value xml:lang="it">eomodel path completo non è scrivibile: ${eomodeldFullPath}</value>
         <value xml:lang="ja">EOMODELのフルパスが書き込み可能ではありません: ${eomodeldFullPath}</value>
-        <value xml:lang="vi"></value>
         <value xml:lang="zh">eomodel完整路径不可写：${eomodeldFullPath}</value>
     </property>
     <property key="WebtoolsEomodelSavingFileError">
@@ -3402,21 +3409,25 @@
     </property>
     <property key="WebtoolsMetrics">
         <value xml:lang="en">Metrics</value>
+        <value xml:lang="fr">Mesures</value>
         <value xml:lang="ja">メトリックス</value>
         <value xml:lang="zh">度量</value>
     </property>
     <property key="WebtoolsMetricsRate">
-        <value xml:lang="en">Service Rate (mS)</value>
+        <value xml:lang="en">Service Rate (ms)</value>
+        <value xml:lang="fr">Durée moyenne (ms)</value>
         <value xml:lang="ja">サービスレート(ミリ秒)</value>
         <value xml:lang="zh">服务速率（毫秒）</value>
     </property>
     <property key="WebtoolsMetricsThreshold">
         <value xml:lang="en">Threshold</value>
+        <value xml:lang="fr">Seuil</value>
         <value xml:lang="ja">しきい値</value>
         <value xml:lang="zh">阀值</value>
     </property>
     <property key="WebtoolsMetricsTotalEvents">
         <value xml:lang="en">Total Events</value>
+        <value xml:lang="fr">Nombre d'occurences</value>
         <value xml:lang="ja">イベント合計</value>
         <value xml:lang="zh">全部事件</value>
     </property>
@@ -4888,6 +4899,7 @@
     <property key="WebtoolsStatistics">
         <value xml:lang="de">Statistiken</value>
         <value xml:lang="en">Statistics</value>
+        <value xml:lang="fr">Statistiques</value>
         <value xml:lang="it">Statistiche</value>
         <value xml:lang="ja">統計</value>
         <value xml:lang="pt">EstatÃ­sticas</value>
@@ -5327,14 +5339,8 @@
         <value xml:lang="zh_TW">運行離線同步</value>
     </property>
     <property key="WebtoolsTTL">
-        <value xml:lang="de">TTL</value>
         <value xml:lang="en">TTL</value>
         <value xml:lang="fr">Péremption</value>
-        <value xml:lang="it">TTL</value>
-        <value xml:lang="ja">TTL</value>
-        <value xml:lang="pt">TTL</value>
-        <value xml:lang="th">TTL</value>
-        <value xml:lang="vi">TTL</value>
         <value xml:lang="zh">存在时间</value>
     </property>
     <property key="WebtoolsTable">
@@ -5401,14 +5407,9 @@
     <property key="WebtoolsThreadId">
         <value xml:lang="de">ThreadID</value>
         <value xml:lang="en">ID</value>
-        <value xml:lang="fr">ID</value>
-        <value xml:lang="it">ID</value>
-        <value xml:lang="ja">ID</value>
-        <value xml:lang="pt">ID</value>
         <value xml:lang="th">รหัส</value>
         <value xml:lang="vi">Id</value>
         <value xml:lang="zh">标识</value>
-        <value xml:lang="zh_TW">ID</value>
     </property>
     <property key="WebtoolsThreadList">
         <value xml:lang="de">Thread Liste</value>

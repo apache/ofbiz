@@ -115,6 +115,14 @@ under the License.
             <xs:attribute type="xs:string" name="default-widget-style" />
             <xs:attribute type="xs:string" name="default-tooltip-style" />
             <xs:attribute type="xs:string" name="default-required-field-style" />
+            <xs:attribute type="xs:string" name="sort-field-parameter-name">
+                <xs:annotation>
+                    <xs:documentation>
+                        The name of the request parameter that is used for specifying the sorted column. This is required when you
+                        have more than one list on a screen - each list must use its own sort field parameter. Defaults to "sortField".
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
             <xs:attribute type="xs:string" name="default-sort-field-style">
                 <xs:annotation>
                     <xs:documentation>CSS style to used for form sort fields. Defaults to "sort-order".</xs:documentation>
@@ -418,12 +426,15 @@ under the License.
         </xs:annotation>
         <xs:complexType>
             <xs:sequence>
+                <xs:element minOccurs="0" ref="auto-parameters-service"/>
+                <xs:element minOccurs="0" ref="auto-parameters-entity"/>
                 <xs:element minOccurs="0" maxOccurs="unbounded" ref="parameter" />
             </xs:sequence>
             <xs:attribute name="event-type" use="required">
                 <xs:simpleType>
                     <xs:restriction base="xs:token">
                         <xs:enumeration value="paginate" />
+                        <xs:enumeration value="sort-column" />
                         <xs:enumeration value="submit" />
                     </xs:restriction>
                 </xs:simpleType>
@@ -619,6 +630,12 @@ under the License.
                 </xs:documentation>
                 </xs:annotation>
             </xs:attribute>
+            <xs:attribute type="xs:string" name="sort-field-help-text">
+                <xs:annotation>
+                    <xs:documentation>Help text to be displayed when the mouse hovers over the column heading.
+                </xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
             <xs:attribute type="xs:string" name="sort-field-asc-style">
                 <xs:annotation>
                     <xs:documentation>The name of a style (like a CSS class) to apply to the sort field link ordered ascending.
@@ -746,6 +763,11 @@ under the License.
                         <xs:enumeration value="N" />
                     </xs:restriction>
                 </xs:simpleType>
+            </xs:attribute>
+            <xs:attribute name="placeholder" type="xs:string">
+                <xs:annotation>
+                    <xs:documentation>Specifies a short hint that describes the expected value of an input field.</xs:documentation>
+                </xs:annotation>
             </xs:attribute>
         </xs:complexType>
     </xs:element>
@@ -947,6 +969,8 @@ under the License.
     <xs:element name="hyperlink" substitutionGroup="AllFields">
         <xs:complexType>
             <xs:sequence>
+                <xs:element minOccurs="0" ref="auto-parameters-service"/>
+                <xs:element minOccurs="0" ref="auto-parameters-entity"/>
                 <xs:element minOccurs="0" maxOccurs="unbounded" ref="parameter" />
             </xs:sequence>
             <xs:attribute name="also-hidden" default="true">
@@ -1040,6 +1064,60 @@ under the License.
             <xs:attribute type="xs:string" name="value" />
         </xs:complexType>
     </xs:element>
+    <xs:element name="auto-parameters-service">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element minOccurs="0" maxOccurs="unbounded" ref="exclude"/>
+            </xs:sequence>
+            <xs:attribute name="service-name" type="xs:string">
+                 <xs:annotation>
+                     <xs:documentation>The service name used to resolve parameters. If empty, use form defaultServiceName. Flexible string allowed.</xs:documentation>
+                 </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="send-if-empty" default="true">
+                <xs:simpleType>
+                    <xs:restriction base="xs:token">
+                        <xs:enumeration value="true"/>
+                        <xs:enumeration value="false"/>
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:attribute>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="auto-parameters-entity">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element minOccurs="0" maxOccurs="unbounded" ref="exclude"/>
+            </xs:sequence>
+            <xs:attribute name="entity-name" type="xs:string">
+                 <xs:annotation>
+                     <xs:documentation>The entity name used to resolve parameters. If empty use form defaultEntityName attribute. Flexible string allowed.</xs:documentation>
+                 </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="include" default="pk">
+                <xs:simpleType>
+                    <xs:restriction base="xs:token">
+                        <xs:enumeration value="pk"/>
+                        <xs:enumeration value="nonpk"/>
+                        <xs:enumeration value="all"/>
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:attribute>
+            <xs:attribute name="send-if-empty" default="true">
+                <xs:simpleType>
+                    <xs:restriction base="xs:token">
+                        <xs:enumeration value="true"/>
+                        <xs:enumeration value="false"/>
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:attribute>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="exclude">
+        <xs:complexType>
+            <xs:attribute name="field-name" type="xs:string" use="required"/>
+        </xs:complexType>
+    </xs:element>
     <xs:element name="ignored" substitutionGroup="AllFields">
         <xs:complexType/>
     </xs:element>
@@ -1066,18 +1144,26 @@ under the License.
             <xs:attribute type="xs:string" name="default-value" />
             <xs:attribute type="xs:string" name="description-field-name">
                 <xs:annotation>
-                    <xs:documentation>The name of a field whose value is also filled when coming back from lookup selection.</xs:documentation>
+                    <xs:documentation>
+                        The name of a field whose value is also filled when coming back from lookup selection.
+                    </xs:documentation>
                 </xs:annotation>
             </xs:attribute>
             <xs:attribute type="xs:string" name="target-parameter">
                 <xs:annotation>
-                    <xs:documentation>The name of a field whose value is passed in as a parameter to the lookup target form. Can be a comma separated list. You need to affect it the value using parameters.parmI (where I is the position number in the list, I must begin at 0) in the related lookup
-                        screen. See LookupPreferredContactMech as example</xs:documentation>
+                    <xs:documentation>The name of a field whose value is passed in as a parameter to the lookup target form. 
+                        Can be a comma separated list. You need to affect it the value using parameters.parmI 
+                        (where I is the position number in the list, I must begin at 0) in the related lookup screen. 
+                        See LookupPreferredContactMech as example
+                    </xs:documentation>
                 </xs:annotation>
             </xs:attribute>
             <xs:attribute name="client-autocomplete-field" default="true">
                 <xs:annotation>
-                    <xs:documentation>Tells the browser whether or not to try and autocomplete with values previously entered. Default to true.</xs:documentation>
+                    <xs:documentation>
+                        Tells the browser whether or not to try and autocomplete with values previously entered. 
+                        Default to true.
+                    </xs:documentation>
                 </xs:annotation>
                 <xs:simpleType>
                     <xs:restriction base="xs:token">
@@ -1096,7 +1182,10 @@ under the License.
             </xs:attribute>
             <xs:attribute name="presentation" default="layer">
                 <xs:annotation>
-                    <xs:documentation>Shows the lookup as moveable and resizable layer or popup window. Default to layer.</xs:documentation>
+                    <xs:documentation>
+                        Shows the lookup as moveable and resizable layer or popup window. 
+                        Default to layer.
+                    </xs:documentation>
                 </xs:annotation>
                 <xs:simpleType>
                     <xs:restriction base="xs:string">
@@ -1151,6 +1240,14 @@ under the License.
                         <xs:enumeration value="false" />
                     </xs:restriction>
                 </xs:simpleType>
+            </xs:attribute>
+            <xs:attribute name="show-description" type="xs:boolean">
+                <xs:annotation>
+                    <xs:documentation>If true, a special span with css class "tooltip" will be created at right of the lookup button 
+                        and a description will fill in. 
+                        If not set then it depends on the "widget.lookup.showDescription" setting.
+                    </xs:documentation>
+                </xs:annotation>
             </xs:attribute>
         </xs:complexType>
     </xs:element>
@@ -1665,6 +1762,8 @@ under the License.
     <xs:element name="sub-hyperlink">
         <xs:complexType>
             <xs:sequence>
+                <xs:element minOccurs="0" ref="auto-parameters-service"/>
+                <xs:element minOccurs="0" ref="auto-parameters-entity"/>
                 <xs:element minOccurs="0" maxOccurs="unbounded" ref="parameter" />
             </xs:sequence>
             <xs:attribute type="xs:string" name="use-when" />

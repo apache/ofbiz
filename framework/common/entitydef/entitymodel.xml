@@ -280,16 +280,16 @@ under the License.
         title="Geographic Location">
         <field name="geoPointId" type="id-ne"></field>
         <field name="dataSourceId" type="id"></field>
-        <field name="latitude" type="floating-point" not-null="true"></field>
-        <field name="longitude" type="floating-point" not-null="true"></field>
-        <field name="elevation" type="floating-point"></field>
-        <field name="elevationUomId" type="id"><description>We need an UOM for elevation (feet, meters, etc.)</description></field>
+        <field name="latitude" type="short-varchar" not-null="true"></field>
+        <field name="longitude" type="short-varchar" not-null="true"></field>
+        <field name="elevation" type="fixed-point"></field>
+        <field name="elevationUomId" type="id"><description>UOM for elevation (feet, meters, etc.)</description></field>
         <field name="information" type="comment"><description>To enter any related information</description></field>
         <prim-key field="geoPointId"/>
         <relation type="one" fk-name="GEOPOINT_DTSRC" rel-entity-name="DataSource">
             <key-map field-name="dataSourceId"/>
         </relation>
-        <relation type="one" fk-name="GPT_TYPE_UOM" title="Elevation" rel-entity-name="Uom">
+        <relation type="one" fk-name="GPT_ELEV_UOM" title="Elevation" rel-entity-name="Uom">
             <key-map field-name="elevationUomId" rel-field-name="uomId"/>
         </relation>
     </entity>
@@ -304,7 +304,17 @@ under the License.
         <key-map field-name="parentTypeId" rel-field-name="geoTypeId"/>
       </relation>
     </entity>
-
+    <extend-entity entity-name="Visit">
+        <field name="clientIpStateProvGeoId" type="id"></field>
+        <field name="clientIpCountryGeoId" type="id"></field>
+        <relation type="one" fk-name="VISIT_CIP_STPRV" title="ClientIpStateProv" rel-entity-name="Geo">
+            <key-map field-name="clientIpStateProvGeoId" rel-field-name="geoId"/>
+        </relation>
+        <relation type="one" fk-name="VISIT_CIP_CNTRY" title="ClientIpCountry" rel-entity-name="Geo">
+            <key-map field-name="clientIpCountryGeoId" rel-field-name="geoId"/>
+        </relation>
+    </extend-entity>
+ 
   <!-- ========================================================= -->
   <!-- org.ofbiz.common.keyword -->
   <!-- ========================================================= -->

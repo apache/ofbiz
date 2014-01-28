@@ -21,12 +21,14 @@ package org.ofbiz.service.job;
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.RejectedExecutionException;
 
+import org.ofbiz.base.config.GenericConfigException;
 import org.ofbiz.base.util.Assert;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilDateTime;
@@ -50,6 +52,7 @@ import org.ofbiz.service.ServiceContainer;
 import org.ofbiz.service.calendar.RecurrenceInfo;
 import org.ofbiz.service.calendar.RecurrenceInfoException;
 import org.ofbiz.service.config.ServiceConfigUtil;
+import org.ofbiz.service.config.model.RunFromPool;
 
 import com.ibm.icu.util.Calendar;
 
@@ -133,6 +136,15 @@ public final class JobManager {
         return JobPoller.getInstance().getPoolState();
     }
 
+    private static List<String> getRunPools() throws GenericConfigException {
+        List<RunFromPool> runFromPools = ServiceConfigUtil.getServiceEngine().getThreadPool().getRunFromPools();
+        List<String> readPools = new ArrayList<String>(runFromPools.size());
+        for (RunFromPool runFromPool : runFromPools) {
+            readPools.add(runFromPool.getName());
+        }
+        return readPools;
+    }
+
     /**
      * Scans the JobSandbox entity and returns a list of jobs that are due to run.
      * Returns an empty list if there are no jobs due to run.
@@ -143,11 +155,10 @@ public final class JobManager {
         // The rest of this method logs exceptions and does not throw them.
         // The idea is to keep the JobPoller working even when a database
         // connection is not available (possible on a saturated server).
-        List<Job> poll = new ArrayList<Job>(limit);
         DispatchContext dctx = getDispatcher().getDispatchContext();
         if (dctx == null) {
             Debug.logWarning("Unable to locate DispatchContext object; not running job!", module);
-            return poll;
+            return Collections.emptyList();
         }
         // basic query
         List<EntityExpr> expressions = UtilMisc.toList(EntityCondition.makeCondition("runTime", EntityOperator.LESS_THAN_EQUAL_TO, UtilDateTime.nowTimestamp()),
@@ -155,13 +166,20 @@ public final class JobManager {
                 EntityCondition.makeCondition("cancelDateTime", EntityOperator.EQUALS, null),
                 EntityCondition.makeCondition("runByInstanceId", EntityOperator.EQUALS, null));
         // limit to just defined pools
-        List<String> pools = ServiceConfigUtil.getRunPools();
+        List<String> pools = null;
+        try {
+            pools = getRunPools();
+        } catch (GenericConfigException e) {
+            Debug.logWarning(e, "Unable to get run pools - not running job: ", module);
+            return Collections.emptyList();
+        }
         List<EntityExpr> poolsExpr = UtilMisc.toList(EntityCondition.makeCondition("poolId", EntityOperator.EQUALS, null));
-        if (pools != null) {
+        if (!pools.isEmpty()) {
             for (String poolName : pools) {
                 poolsExpr.add(EntityCondition.makeCondition("poolId", EntityOperator.EQUALS, poolName));
             }
         }
+        List<Job> poll = new ArrayList<Job>(limit);
         // make the conditions
         EntityCondition baseCondition = EntityCondition.makeCondition(expressions);
         EntityCondition poolCondition = EntityCondition.makeCondition(poolsExpr, EntityOperator.OR);
@@ -171,7 +189,7 @@ public final class JobManager {
         try {
             beganTransaction = TransactionUtil.begin();
             if (!beganTransaction) {
-                Debug.logWarning("Unable to poll JobSandbox for jobs; transaction was not started by this process", module);
+                Debug.logWarning("Unable to poll JobSandbox for jobs; unable to begin transaction.", module);
                 return poll;
             }
             jobsIterator = delegator.find("JobSandbox", mainCondition, null, null, UtilMisc.toList("runTime"), null);
@@ -188,15 +206,16 @@ public final class JobManager {
                 }
                 jobValue = jobsIterator.next();
             }
+            TransactionUtil.commit(beganTransaction);
         } catch (Throwable t) {
-            poll.clear();
-            String errMsg =  "Exception thrown while polling JobSandbox: ";
-            Debug.logWarning(t, errMsg, module);
+            String errMsg = "Exception thrown while polling JobSandbox: ";
             try {
-                TransactionUtil.rollback(beganTransaction, errMsg + t.getMessage(), t);
+                TransactionUtil.rollback(beganTransaction, errMsg, t);
             } catch (GenericEntityException e) {
                 Debug.logWarning(e, "Exception thrown while rolling back transaction: ", module);
             }
+            Debug.logWarning(t, errMsg, module);
+            return Collections.emptyList();
         } finally {
             if (jobsIterator != null) {
                 try {
@@ -205,17 +224,17 @@ public final class JobManager {
                     Debug.logWarning(e, module);
                 }
             }
-            try {
-                TransactionUtil.commit(beganTransaction);
-            } catch (GenericTransactionException e) {
-                Debug.logWarning(e, "Transaction error trying to commit when polling and updating the JobSandbox: ", module);
-            }
         }
         if (poll.isEmpty()) {
             // No jobs to run, see if there are any jobs to purge
-            int daysToKeep = ServiceConfigUtil.getPurgeJobDays();
             Calendar cal = Calendar.getInstance();
-            cal.add(Calendar.DAY_OF_YEAR, -daysToKeep);
+            try {
+                int daysToKeep = ServiceConfigUtil.getServiceEngine().getThreadPool().getPurgeJobDays();
+                cal.add(Calendar.DAY_OF_YEAR, -daysToKeep);
+            } catch (GenericConfigException e) {
+                Debug.logWarning(e, "Unable to get purge job days: ", module);
+                return Collections.emptyList();
+            }
             Timestamp purgeTime = new Timestamp(cal.getTimeInMillis());
             List<EntityExpr> finExp = UtilMisc.toList(EntityCondition.makeCondition("finishDateTime", EntityOperator.NOT_EQUAL, null), EntityCondition.makeCondition("finishDateTime", EntityOperator.LESS_THAN, purgeTime));
             List<EntityExpr> canExp = UtilMisc.toList(EntityCondition.makeCondition("cancelDateTime", EntityOperator.NOT_EQUAL, null), EntityCondition.makeCondition("cancelDateTime", EntityOperator.LESS_THAN, purgeTime));
@@ -226,8 +245,8 @@ public final class JobManager {
             try {
                 beganTransaction = TransactionUtil.begin();
                 if (!beganTransaction) {
-                    Debug.logWarning("Unable to poll JobSandbox for jobs; transaction was not started by this process", module);
-                    return poll;
+                    Debug.logWarning("Unable to poll JobSandbox for jobs; unable to begin transaction.", module);
+                    return Collections.emptyList();
                 }
                 jobsIterator = delegator.find("JobSandbox", mainCondition, null, null, UtilMisc.toList("jobId"), null);
                 GenericValue jobValue = jobsIterator.next();
@@ -238,15 +257,16 @@ public final class JobManager {
                     }
                     jobValue = jobsIterator.next();
                 }
+                TransactionUtil.commit(beganTransaction);
             } catch (Throwable t) {
-                poll.clear();
-                String errMsg =  "Exception thrown while polling JobSandbox: ";
-                Debug.logWarning(t, errMsg, module);
+                String errMsg = "Exception thrown while polling JobSandbox: ";
                 try {
-                    TransactionUtil.rollback(beganTransaction, errMsg + t.getMessage(), t);
+                    TransactionUtil.rollback(beganTransaction, errMsg, t);
                 } catch (GenericEntityException e) {
                     Debug.logWarning(e, "Exception thrown while rolling back transaction: ", module);
                 }
+                Debug.logWarning(t, errMsg, module);
+                return Collections.emptyList();
             } finally {
                 if (jobsIterator != null) {
                     try {
@@ -254,11 +274,6 @@ public final class JobManager {
                     } catch (GenericEntityException e) {
                         Debug.logWarning(e, module);
                     }
-                }
-                try {
-                    TransactionUtil.commit(beganTransaction);
-                } catch (GenericTransactionException e) {
-                    Debug.logWarning(e, "Transaction error trying to commit when polling the JobSandbox: ", module);
                 }
             }
         }
@@ -523,7 +538,11 @@ public final class JobManager {
         if (UtilValidate.isNotEmpty(poolName)) {
             jFields.put("poolId", poolName);
         } else {
-            jFields.put("poolId", ServiceConfigUtil.getSendPool());
+            try {
+                jFields.put("poolId", ServiceConfigUtil.getServiceEngine().getThreadPool().getSendToPool());
+            } catch (GenericConfigException e) {
+                throw new JobManagerException(e.getMessage(), e);
+            }
         }
         // set the loader name
         jFields.put("loaderName", delegator.getDelegatorName());

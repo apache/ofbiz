@@ -43,8 +43,8 @@ import org.ofbiz.base.util.GeneralException;
 import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.base.util.cache.UtilCache;
 import org.ofbiz.entity.GenericEntityException;
-import org.ofbiz.entity.config.DelegatorInfo;
 import org.ofbiz.entity.config.EntityConfigUtil;
+import org.ofbiz.entity.config.model.DelegatorElement;
 import org.ofbiz.entity.model.ModelEntity;
 import org.ofbiz.entity.model.ModelReader;
 import org.ofbiz.service.DispatchContext;
@@ -53,6 +53,7 @@ import org.ofbiz.service.ModelService;
 import org.ofbiz.service.eca.ServiceEcaRule;
 import org.ofbiz.webapp.control.ConfigXMLReader;
 import org.ofbiz.webapp.control.ConfigXMLReader.ControllerConfig;
+import org.ofbiz.webapp.control.WebAppConfigurationException;
 import org.ofbiz.widget.form.FormFactory;
 import org.ofbiz.widget.form.ModelForm;
 import org.ofbiz.widget.screen.ModelScreen;
@@ -127,10 +128,10 @@ public class ArtifactInfoFactory {
     protected ArtifactInfoFactory(String delegatorName) throws GeneralException {
         this.delegatorName = delegatorName;
         this.entityModelReader = ModelReader.getModelReader(delegatorName);
-        DelegatorInfo delegatorInfo = EntityConfigUtil.getDelegatorInfo(delegatorName);
+        DelegatorElement delegatorInfo = EntityConfigUtil.getDelegator(delegatorName);
         String modelName;
         if (delegatorInfo != null) {
-            modelName = delegatorInfo.entityModelReader;
+            modelName = delegatorInfo.getEntityModelReader();
         } else {
             modelName = "main";
         }
@@ -143,7 +144,7 @@ public class ArtifactInfoFactory {
 
     public void prepareAll() throws GeneralException {
         Debug.logInfo("Loading artifact info objects...", module);
-        List<Future<Void>> futures = new ArrayList();
+        List<Future<Void>> futures = new ArrayList<Future<Void>>();
         Set<String> entityNames = this.getEntityModelReader().getEntityNames();
         for (String entityName: entityNames) {
             this.getEntityArtifactInfo(entityName);
@@ -157,7 +158,7 @@ public class ArtifactInfoFactory {
 
         Collection<ComponentConfig> componentConfigs = ComponentConfig.getAllComponents();
         ExecutionPool.getAllFutures(futures);
-        futures = new ArrayList();
+        futures = new ArrayList<Future<Void>>();
         for (ComponentConfig componentConfig: componentConfigs) {
             futures.add(ExecutionPool.GLOBAL_EXECUTOR.submit(prepareTaskForComponentAnalysis(componentConfig)));
         }
@@ -193,12 +194,23 @@ public class ArtifactInfoFactory {
     }
 
     public ConfigXMLReader.RequestMap getControllerRequestMap(URL controllerXmlUrl, String requestUri) {
-        return ConfigXMLReader.getControllerConfig(controllerXmlUrl).getRequestMapMap().get(requestUri);
+        try {
+            return ConfigXMLReader.getControllerConfig(controllerXmlUrl).getRequestMapMap().get(requestUri);
+        } catch (WebAppConfigurationException e) {
+            Debug.logError(e, "Exception thrown while parsing controller.xml file: ", module);
+        }
+        return null;
     }
 
     public ConfigXMLReader.ViewMap getControllerViewMap(URL controllerXmlUrl, String viewUri) {
-        ControllerConfig cc = ConfigXMLReader.getControllerConfig(controllerXmlUrl);
-        return cc.getViewMapMap().get(viewUri);
+        ControllerConfig cc;
+        try {
+            cc = ConfigXMLReader.getControllerConfig(controllerXmlUrl);
+            return cc.getViewMapMap().get(viewUri);
+        } catch (WebAppConfigurationException e) {
+            Debug.logError(e, "Exception thrown while parsing controller.xml file: ", module);
+        }
+        return null;
     }
 
     public EntityArtifactInfo getEntityArtifactInfo(String entityName) throws GeneralException {
@@ -370,8 +382,10 @@ public class ArtifactInfoFactory {
     }
 
     // private methods
+    @SuppressWarnings("unchecked")
     private Callable<Void> prepareTaskForServiceAnalysis(final String serviceName) {
         return new Callable() {
+            @Override
             public Callable<Void> call() throws Exception {
                 try {
                     getServiceArtifactInfo(serviceName);
@@ -383,8 +397,10 @@ public class ArtifactInfoFactory {
         };
     }
 
+    @SuppressWarnings("unchecked")
     private Callable<Void> prepareTaskForComponentAnalysis(final ComponentConfig componentConfig) {
         return new Callable() {
+            @Override
             public Callable<Void> call() throws Exception {
                 String componentName = componentConfig.getGlobalName();
                 String rootComponentPath = componentConfig.getRootLocation();

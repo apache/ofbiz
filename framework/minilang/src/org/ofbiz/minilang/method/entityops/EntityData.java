@@ -20,9 +20,8 @@ package org.ofbiz.minilang.method.entityops;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.LinkedList;
 import java.util.List;
-
-import javolution.util.FastList;
 
 import org.ofbiz.base.location.FlexibleLocation;
 import org.ofbiz.base.util.Debug;
@@ -43,7 +42,7 @@ import org.w3c.dom.Element;
 /**
  * Implements the &lt;entity-data&gt; element.
  * 
- * @see <a href="https://cwiki.apache.org/OFBADMIN/mini-language-reference.html#Mini-languageReference-{{%3Centitydata%3E}}">Mini-language Reference</a>
+ * @see <a href="https://cwiki.apache.org/confluence/display/OFBADMIN/Mini-language+Reference#Mini-languageReference-{{%3Centitydata%3E}}">Mini-language Reference</a>
  */
 public final class EntityData extends MethodOperation {
 
@@ -86,7 +85,7 @@ public final class EntityData extends MethodOperation {
     public boolean exec(MethodContext methodContext) throws MiniLangException {
         List<Object> messages = errorListFma.get(methodContext.getEnvMap());
         if (messages == null) {
-            messages = FastList.newInstance();
+            messages = new LinkedList<Object>();
             errorListFma.put(methodContext.getEnvMap(), messages);
         }
         String location = this.locationFse.expandString(methodContext.getEnvMap());

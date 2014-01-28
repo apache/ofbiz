@@ -109,7 +109,7 @@ public class TaxAuthorityServices {
                 }
 
                 // add up amounts from adjustments (amount OR exemptAmount, sourcePercentage)
-                for(GenericValue taxAdjustment : taxAdustmentList) {
+                for (GenericValue taxAdjustment : taxAdustmentList) {
                     if ("SALES_TAX".equals(taxAdjustment.getString("orderAdjustmentTypeId"))) {
                         taxPercentage = taxPercentage.add(taxAdjustment.getBigDecimal("sourcePercentage"));
                         BigDecimal adjAmount = taxAdjustment.getBigDecimal("amount");
@@ -209,14 +209,9 @@ public class TaxAuthorityServices {
             BigDecimal itemAmount = itemAmountList.get(i);
             BigDecimal itemPrice = itemPriceList.get(i);
             BigDecimal itemQuantity = itemQuantityList != null ? itemQuantityList.get(i) : null;
-            BigDecimal shippingAmount = itemShippingList.get(i);
+            BigDecimal shippingAmount = itemShippingList != null ? itemShippingList.get(i) : null;
             List<GenericValue> taxList = null;
             if (shippingAddress != null) {
-                if ("Y".equals(productStore.getString("calcTaxAfterPromotion")) && itemAmount.compareTo(BigDecimal.ZERO) != 0) {
-                    if (itemQuantity.compareTo(new BigDecimal("1.00")) == 0) {
-                        itemPrice = itemAmount;
-                    }
-                }
                 taxList = getTaxAdjustments(delegator, product, productStore, payToPartyId, billToPartyId, taxAuthoritySet, itemPrice, itemQuantity, itemAmount, shippingAmount, ZERO_BASE);
             }
             // this is an add and not an addAll because we want a List of Lists of GenericValues, one List of Adjustments per item
@@ -300,7 +295,7 @@ public class TaxAuthorityServices {
                 EntityOperator.AND,
                 EntityCondition.makeCondition("taxAuthGeoId", EntityOperator.EQUALS, "_NA_")));
 
-        for(GenericValue taxAuthority : taxAuthoritySet) {
+        for (GenericValue taxAuthority : taxAuthoritySet) {
             EntityCondition taxAuthCond = EntityCondition.makeCondition(
                     EntityCondition.makeCondition("taxAuthPartyId", EntityOperator.EQUALS, taxAuthority.getString("taxAuthPartyId")),
                     EntityOperator.AND,
@@ -330,9 +325,9 @@ public class TaxAuthorityServices {
                 } else {
                     productIdCond = EntityCondition.makeCondition("productId", EntityOperator.EQUALS, product.getString("productId"));
                 }
-                List<GenericValue> pcmList = delegator.findList("ProductCategoryMember", productIdCond, UtilMisc.toSet("productCategoryId"), null, null, true);
+                List<GenericValue> pcmList = delegator.findList("ProductCategoryMember", productIdCond, UtilMisc.toSet("productCategoryId", "fromDate", "thruDate"), null, null, true);
                 pcmList = EntityUtil.filterByDate(pcmList, true);
-                for(GenericValue pcm : pcmList) {
+                for (GenericValue pcm : pcmList) {
                     productCategoryIdSet.add(pcm.getString("productCategoryId"));
                 }
 
@@ -394,7 +389,7 @@ public class TaxAuthorityServices {
             }
 
             // find the right entry(s) based on purchase amount
-            for(GenericValue taxAuthorityRateProduct : filteredList) {
+            for (GenericValue taxAuthorityRateProduct : filteredList) {
                 BigDecimal taxRate = taxAuthorityRateProduct.get("taxPercentage") != null ? taxAuthorityRateProduct.getBigDecimal("taxPercentage") : ZERO_BASE;
                 BigDecimal taxable = ZERO_BASE;
 
@@ -474,7 +469,7 @@ public class TaxAuthorityServices {
                     Set<String> billToPartyIdSet = FastSet.newInstance();
                     billToPartyIdSet.add(billToPartyId);
                     List<GenericValue> partyRelationshipList = EntityUtil.filterByDate(delegator.findByAnd("PartyRelationship", UtilMisc.toMap("partyIdTo", billToPartyId, "partyRelationshipTypeId", "GROUP_ROLLUP"), null, true), true);
-                    for(GenericValue partyRelationship : partyRelationshipList) {
+                    for (GenericValue partyRelationship : partyRelationshipList) {
                         billToPartyIdSet.add(partyRelationship.getString("partyIdFrom"));
                     }
                     handlePartyTaxExempt(taxAdjValue, billToPartyIdSet, taxAuthGeoId, taxAuthPartyId, taxAmount, nowTimestamp, delegator);

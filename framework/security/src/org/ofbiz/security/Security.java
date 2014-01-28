@@ -27,12 +27,27 @@ import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericValue;
 
 /**
- * Security interface. This interface defines security-related methods.
+ * Security interface. This interface defines authorization-related methods.
+ * <p>Implementations must be thread-safe because the instance
+ * will be shared among multiple threads.</p>
+ * <p>Note that the API is changing. New versions might not reference a
+ * <code>Delegator</code>. Therefore, implementations requiring a <code>Delegator</code>
+ * reference should get one from the <code>GenericValue</code> method argument.</p>
  */
 public interface Security {
 
+    /**
+     *
+     * @deprecated No replacement.
+     */
+    @Deprecated
     public Delegator getDelegator();
 
+    /**
+    *
+    * @deprecated No replacement.
+    */
+    @Deprecated
     public void setDelegator(Delegator delegator);
 
     /**
@@ -41,7 +56,10 @@ public interface Security {
      * @param userLoginId The userLoginId to find security groups by
      * @return An iterator made from the Collection either cached or retrieved from the database through the
      *            UserLoginSecurityGroup Delegator.
+     *
+     * @deprecated No replacement.
      */
+    @Deprecated
     public Iterator<GenericValue> findUserLoginSecurityGroupByUserLoginId(String userLoginId);
 
     /**
@@ -52,7 +70,10 @@ public interface Security {
      * @param groupId The ID of the group
      * @param permission The name of the permission
      * @return boolean specifying whether or not a SecurityGroupPermission row exists
+     *
+     * @deprecated No replacement.
      */
+    @Deprecated
     public boolean securityGroupPermissionExists(String groupId, String permission);
 
     /**

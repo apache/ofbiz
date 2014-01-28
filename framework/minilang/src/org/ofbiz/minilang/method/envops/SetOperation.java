@@ -18,8 +18,8 @@
  *******************************************************************************/
 package org.ofbiz.minilang.method.envops;
 
-import javolution.util.FastList;
-import javolution.util.FastMap;
+import java.util.HashMap;
+import java.util.LinkedList;
 
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.ObjectType;
@@ -38,7 +38,7 @@ import org.w3c.dom.Element;
 /**
  * Implements the &lt;set&gt; element.
  * 
- * @see <a href="https://cwiki.apache.org/OFBADMIN/mini-language-reference.html#Mini-languageReference-{{%3Cset%3E}}">Mini-language Reference</a>
+ * @see <a href="https://cwiki.apache.org/confluence/display/OFBADMIN/Mini-language+Reference#Mini-languageReference-{{%3Cset%3E}}">Mini-language Reference</a>
  */
 public final class SetOperation extends MethodOperation {
 
@@ -163,9 +163,9 @@ public final class SetOperation extends MethodOperation {
         }
         if (this.type.length() > 0) {
             if ("NewMap".equals(this.type)) {
-                newValue = FastMap.newInstance();
+                newValue = new HashMap<String, Object>();
             } else if ("NewList".equals(this.type)) {
-                newValue = FastList.newInstance();
+                newValue = new LinkedList<Object>();
             } else {
                 try {
                     String format = null;

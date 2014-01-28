@@ -1706,10 +1706,9 @@
         <value xml:lang="fr">Carte de crédit</value>
         <value xml:lang="hi_IN">सीसी (क्रेडिट कार्ड)</value>
         <value xml:lang="it">Carta di credito</value>
-        <value xml:lang="ja">CC</value>
-        <value xml:lang="pt">CC</value>
         <value xml:lang="vi">Thẻ tín dụng (CC)</value>
         <value xml:lang="zh">信用卡</value>
+        <value xml:lang="pt">CC</value>
         <value xml:lang="zh_TW">信用卡</value>
     </property>
     <property key="AccountingAuthorizeNetRelayResponse">
@@ -1764,7 +1763,7 @@
     <property key="AccountingAvailableInternalOrganizations">
         <value xml:lang="ar">المؤسسات الداخلية المتوفرة</value>
         <value xml:lang="de">Verfügbare interne Organisationen</value>
-        <value xml:lang="en">Available Internal Organizations</value>
+        <value xml:lang="en">Available Internal Accounting Organizations</value>
         <value xml:lang="es">Organizaciones internas disponibles</value>
         <value xml:lang="fr">Organisations internes disponibles</value>
         <value xml:lang="hi_IN">उपलब्ध आंतरिक संगठन</value>
@@ -3006,7 +3005,6 @@
         <value xml:lang="fr">Un module de la famille Open For Business, logiciel libre de gestion d'entreprise.</value>
         <value xml:lang="hi_IN">Open Source Software के Open For Business परिवार का हिस्सा</value>
         <value xml:lang="it">Un modulo della famiglia di software open source Open For Business</value>
-        <value xml:lang="ja">Part of the Open For Business Family of Open Source Software</value>
         <value xml:lang="nl">Deel van de Open For Business-suite van Open Source Software</value>
         <value xml:lang="pt_BR">Parte da família OfBiz de software livre</value>
         <value xml:lang="pt_PT">Parte da família OfBiz de software de fonte aberta</value>
@@ -5009,6 +5007,9 @@
         <value xml:lang="vi">Trường expectedEndOfLife không được trống trong dữ liệu FixedAsset.</value>
         <value xml:lang="zh">固定资产数据中的期望使用寿命结束为空。</value>
         <value xml:lang="zh_TW">固定資產資料中的期望使用壽命結束為空。</value>
+    </property>
+    <property key="AccountingExportInvoices">
+        <value xml:lang="en">Export Invoices</value>
     </property>
     <property key="AccountingExpenses">
         <value xml:lang="de">Aufwendungen</value>
@@ -7785,21 +7786,8 @@
         <value xml:lang="zh_TW">總覽</value>
     </property>
     <property key="AccountingInvoicePDF">
-        <value xml:lang="de">PDF</value>
         <value xml:lang="en">PDF</value>
-        <value xml:lang="es">PDF</value>
-        <value xml:lang="fr">PDF</value>
         <value xml:lang="hi_IN">पीडीऍफ़(PDF)</value>
-        <value xml:lang="it">PDF</value>
-        <value xml:lang="ja">PDF</value>
-        <value xml:lang="nl">PDF</value>
-        <value xml:lang="pt">PDF</value>
-        <value xml:lang="ro">PDF</value>
-        <value xml:lang="ru">PDF</value>
-        <value xml:lang="th">PDF</value>
-        <value xml:lang="vi">PDF</value>
-        <value xml:lang="zh">PDF</value>
-        <value xml:lang="zh_TW">PDF</value>
     </property>
     <property key="AccountingInvoicePDFDefaultCur">
         <value xml:lang="de">PDF Standardwährung</value>
@@ -8708,6 +8696,9 @@
         <value xml:lang="zh">方法</value>
         <value xml:lang="zh_TW">方法</value>
     </property>
+    <property key="AccountingMissingPaymentMethod">
+        <value xml:lang="en">Cannot change the status to '${statusItem.description}' when the  mandatory payment method is missing.</value>
+    </property>
     <property key="AccountingMiddleNameCard">
         <value xml:lang="ar">الإسم الوسط على البطاقة</value>
         <value xml:lang="de">Mittlerer Name auf Karte</value>
@@ -8966,6 +8957,9 @@
         <value xml:lang="vi">Thêm quy ước hợp đồng</value>
         <value xml:lang="zh">新建合同条件</value>
         <value xml:lang="zh_TW">新建合同條件</value>
+    </property>
+    <property key="AccountingNewCompany">
+        <value xml:lang="en">Create new accounting company</value>
     </property>
     <property key="AccountingNewBillingAccount">
         <value xml:lang="ar">جساب فوترة جديد</value>
@@ -10044,17 +10038,8 @@
         <value xml:lang="zh_TW">覆蓋收入總帳科目編號</value>
     </property>
     <property key="AccountingPIN">
-        <value xml:lang="cs">PIN</value>
-        <value xml:lang="de">PIN</value>
         <value xml:lang="en">PIN</value>
-        <value xml:lang="es">PIN</value>
-        <value xml:lang="fr">PIN</value>
         <value xml:lang="hi_IN">पिन</value>
-        <value xml:lang="it">PIN</value>
-        <value xml:lang="ja">PIN</value>
-        <value xml:lang="nl">PIN</value>
-        <value xml:lang="pt">PIN</value>
-        <value xml:lang="ro">PIN</value>
         <value xml:lang="ru">ПИН</value>
         <value xml:lang="th">รหัสส่วนตัว</value>
         <value xml:lang="vi">PIN (mật mã cá nhân)</value>
@@ -12949,7 +12934,7 @@
         <value xml:lang="zh">授权网址</value>
     </property>
     <property key="AccountingSagePayErrorEncodingParameters">
-        <value xml:lang="en">Error occured in encoding parameters for HttpPost (${errorString})</value>
+        <value xml:lang="en">Error occurred in encoding parameters for HttpPost (${errorString})</value>
         <value xml:lang="fr">Erreur lors de l'encodage des paramètres pour HttpPost (${errorString})</value>
         <value xml:lang="it">Errore accaduto durante encoding parametri per HttpPost (${errorString})</value>
         <value xml:lang="ja">HTTP POSTのパラメータをエンコード中にエラーが発生しました (${errorString})</value>
@@ -12957,7 +12942,7 @@
         <value xml:lang="zh">对HttpPost进行参数编码时出错：${errorString}</value>
     </property>
     <property key="AccountingSagePayErrorHttpClientExecute">
-        <value xml:lang="en">Error occured in HttpClient execute (${errorString})</value>
+        <value xml:lang="en">Error occurred in HttpClient execute (${errorString})</value>
         <value xml:lang="fr">Erreur lors de l'exécution de HttpClient (${errorString})</value>
         <value xml:lang="it">Errore accaduto durante esecuzione HttpClient (${errorString})</value>
         <value xml:lang="ja">HTTPクライアント実行中にエラーが発生しました (${errorString})</value>
@@ -12965,7 +12950,7 @@
         <value xml:lang="zh">执行HttpClient时出错：${errorString}</value>
     </property>
     <property key="AccountingSagePayErrorHttpClientExecuteOrGettingResponse">
-        <value xml:lang="en">Error occured in HttpClient execute or getting response (${errorString})</value>
+        <value xml:lang="en">Error occurred in HttpClient execute or getting response (${errorString})</value>
         <value xml:lang="fr">Erreur lors de la réception de la réponse par HttpClient (${errorString})</value>
         <value xml:lang="it">Errore accaduto durante esecuzione HttpClient o ottendendo la risposta (${errorString})</value>
         <value xml:lang="ja">HTTPクライアント実行中またはレスポンス取得中にエラーが発生しました (${errorString})</value>
@@ -13666,9 +13651,9 @@
         <value xml:lang="vi">Sổ phụ</value>
         <value xml:lang="zh">明细分类账</value>
     </property>
-    <property key="AccountingSuccessFull">
+    <property key="AccountingSuccessful">
         <value xml:lang="ar">ناجح</value>
-        <value xml:lang="en">successfull</value>
+        <value xml:lang="en">successful</value>
         <value xml:lang="es">exitoso</value>
         <value xml:lang="fr">réussi</value>
         <value xml:lang="hi_IN">सफल</value>
@@ -14933,6 +14918,10 @@
         <value xml:lang="zh">总账不平原因</value>
         <value xml:lang="zh_TW">總帳不平原因</value>
     </property>
+    <property key="AccountingVat">
+        <value xml:lang="en">VAT</value>
+        <value xml:lang="nl">BTW</value>
+    </property>
     <property key="AccountingVendorParty">
         <value xml:lang="en">Vendor Party</value>
         <value xml:lang="fr">Réf. vendeur</value>
@@ -15440,6 +15429,7 @@
         <value xml:lang="zh_TW">賬戶代碼</value>
     </property>
     <property key="FormFieldTitle_accountCurrencyUomId">
+        <value xml:lang="de">Währung</value>
         <value xml:lang="en">Account Currency Uom Id</value>
         <value xml:lang="es">Id UM moneda de cuenta</value>
         <value xml:lang="fr">Unité de la monnaie</value>
@@ -17357,7 +17347,7 @@
     </property>
     <property key="FormFieldTitle_invoiceItemTypeId">
         <value xml:lang="ar">نوع بند فاتورة البيع</value>
-        <value xml:lang="en">Invoice Item Type      </value>
+        <value xml:lang="en">Invoice Item Type</value>
         <value xml:lang="es">Tipo de elemento factura de venta</value>
         <value xml:lang="fr">Type de ligne de facturation</value>
         <value xml:lang="hi_IN">चालन मद प्रकार</value>
@@ -18617,7 +18607,7 @@
         <value xml:lang="zh">生产能力</value>
         <value xml:lang="zh_TW">生產能力</value>
     </property>
-    <property key="FormFieldTitle_produtId">
+    <property key="FormFieldTitle_productId">
         <value xml:lang="de">Produkt ID</value>
         <value xml:lang="en">Product Id</value>
         <value xml:lang="es">Id Producto</value>
@@ -21613,8 +21603,8 @@
         <value xml:lang="vi">Thanh toán nhận qua iDEAL</value>
         <value xml:lang="zh">通过iDEAL接收到的支付</value>
     </property>
-    <property key="IdealSuccessFull">
-        <value xml:lang="en">The transaction has been successfull.</value>
+    <property key="IdealSuccessful">
+        <value xml:lang="en">The transaction has been successful.</value>
         <value xml:lang="fr">La transaction a été réussie.</value>
         <value xml:lang="ja">トランザクションは成功しました。</value>
         <value xml:lang="nl">De betaling is met succes ontvangen.</value>

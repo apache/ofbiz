@@ -18,237 +18,117 @@
  *******************************************************************************/
 package org.ofbiz.service.config;
 
-import java.io.Serializable;
+import java.net.URL;
 import java.util.List;
-import java.util.Map;
-
-import javolution.util.FastList;
-import javolution.util.FastMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.ofbiz.base.config.GenericConfigException;
-import org.ofbiz.base.config.ResourceLoader;
+import org.ofbiz.base.util.Assert;
 import org.ofbiz.base.util.Debug;
+import org.ofbiz.base.util.UtilURL;
 import org.ofbiz.base.util.UtilXml;
 import org.ofbiz.base.util.cache.UtilCache;
+import org.ofbiz.service.config.model.Engine;
+import org.ofbiz.service.config.model.ServiceConfig;
+import org.ofbiz.service.config.model.ServiceEngine;
+import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 
 /**
- * Misc. utility method for dealing with the serviceengine.xml file
+ * A <code>ServiceConfig</code> factory and related utility methods.
+ * <p>The <code>ServiceConfig</code> instance models the <code>serviceengine.xml</code> file
+ * and the instance is kept in the "service.ServiceConfig" cache. Clearing the cache will reload
+ * the service configuration file. Client code that depends on the <code>serviceengine.xml</code>
+ * file can be notified when the file is reloaded by implementing <code>ServiceConfigListener</code>
+ * and registering itself using the {@link #registerServiceConfigListener(ServiceConfigListener)}
+ * method.<p>
  */
-@SuppressWarnings("serial")
-public class ServiceConfigUtil implements Serializable {
+public final class ServiceConfigUtil {
 
     public static final String module = ServiceConfigUtil.class.getName();
     public static final String engine = "default";
     public static final String SERVICE_ENGINE_XML_FILENAME = "serviceengine.xml";
-    private static final UtilCache<String, Map<String, NotificationGroup>> notificationGroupCache = UtilCache.createUtilCache("service.NotificationGroups", 0, 0, false);
+    // Keep the ServiceConfig instance in a cache - so the configuration can be reloaded at run-time. There will be only one ServiceConfig instance in the cache.
+    private static final UtilCache<String, ServiceConfig> serviceConfigCache = UtilCache.createUtilCache("service.ServiceConfig", 0, 0, false);
+    private static final List<ServiceConfigListener> configListeners = new CopyOnWriteArrayList<ServiceConfigListener>();
 
-    public static Element getXmlRootElement() throws GenericConfigException {
-        Element root = ResourceLoader.getXmlRootElement(ServiceConfigUtil.SERVICE_ENGINE_XML_FILENAME);
-        return UtilXml.firstChildElement(root, "service-engine"); // only look at the first one for now
-    }
-
-    public static Element getElement(String elementName) {
-        Element rootElement = null;
-
-        try {
-            rootElement = ServiceConfigUtil.getXmlRootElement();
-        } catch (GenericConfigException e) {
-            Debug.logError(e, "Error getting Service Engine XML root element", module);
-        }
-        return  UtilXml.firstChildElement(rootElement, elementName);
-    }
-
-    public static String getElementAttr(String elementName, String attrName) {
-        Element element = getElement(elementName);
-
-        if (element == null) return null;
-        return element.getAttribute(attrName);
-    }
-
-    public static String getSendPool() {
-        return getElementAttr("thread-pool", "send-to-pool");
-    }
-
-    public static List<String> getRunPools() {
-        List<String> readPools = null;
-
-        Element threadPool = getElement("thread-pool");
-        List<? extends Element> readPoolElements = UtilXml.childElementList(threadPool, "run-from-pool");
-        if (readPoolElements != null) {
-            readPools = FastList.newInstance();
-            for (Element e: readPoolElements) {
-                readPools.add(e.getAttribute("name"));
-            }
-        }
-        return readPools;
-    }
-
-    public static int getPurgeJobDays() {
-        String days = getElementAttr("thread-pool", "purge-job-days");
-        int purgeDays;
-        try {
-            purgeDays = Integer.parseInt(days);
-        } catch (NumberFormatException e) {
-            Debug.logError(e, "Cannot read the number of days to keep jobs; not purging", module);
-            purgeDays = 0;
-        }
-        return purgeDays;
-    }
-
-    public static int getFailedRetryMin() {
-        String minString = getElementAttr("thread-pool", "failed-retry-min");
-        int retryMin;
-        try {
-            retryMin = Integer.parseInt(minString);
-        } catch (NumberFormatException e) {
-            Debug.logError(e, "Unable to parse retry minutes; using default of 30", module);
-            retryMin = 30;
-        }
-        return retryMin;
-    }
-
-    public static NotificationGroup getNotificationGroup(String group) {
-        Map<String, NotificationGroup> engineNotifyMap = notificationGroupCache.get(engine);
-        if (engineNotifyMap == null) {
-            //
-            Element rootElement = null;
-            try {
-                rootElement = ServiceConfigUtil.getXmlRootElement();
-            } catch (GenericConfigException e) {
-                Debug.logError(e, "Error getting Service Engine XML root element", module);
-            }
-            engineNotifyMap = FastMap.newInstance();
-            for (Element e: UtilXml.childElementList(rootElement, "notification-group")) {
-                NotificationGroup ng = new NotificationGroup(e);
-                engineNotifyMap.put(ng.getName(), ng);
-            }
-            engineNotifyMap = notificationGroupCache.putIfAbsentAndGet(engine, engineNotifyMap);
-        }
-        if (engineNotifyMap != null) {
-           return engineNotifyMap.get(group);
-        }
-
-        return null;
-    }
-
-
-    public static String getEngineParameter(String engineName, String name) throws GenericConfigException {
-        Element root = ServiceConfigUtil.getXmlRootElement();
-        Node node = root.getFirstChild();
-
-        if (node != null) {
-            do {
-                if (node.getNodeType() == Node.ELEMENT_NODE && "engine".equals(node.getNodeName())) {
-                    Element engine = (Element) node;
-                    if (engineName.equals(engine.getAttribute("name"))) {
-                        NodeList params  = engine.getElementsByTagName("parameter");
-                        if (params.getLength() > 0) {
-                            for (int index = 0; index < params.getLength(); index++) {
-                                Element param = (Element) params.item(index);
-                                if (param != null && name.equals(param.getAttribute("name"))) {
-                                    return param.getAttribute("value");
-                                }
-                            }
-                        }
-                    }
-                }
-            } while ((node = node.getNextSibling()) != null);
+    /**
+     * Returns the specified parameter value from the specified engine, or <code>null</code>
+     * if the engine or parameter are not found.
+     *  
+     * @param engineName
+     * @param parameterName
+     * @return
+     * @throws GenericConfigException
+     */
+    public static String getEngineParameter(String engineName, String parameterName) throws GenericConfigException {
+        Engine engine = getServiceEngine().getEngine(engineName);
+        if (engine != null) {
+            return engine.getParameterValue(parameterName);
         }
         return null;
     }
 
-    public static class NotificationGroup implements Serializable {
-        protected Notification notification;
-        protected List<Notify> notify;
-        protected String name;
-
-        protected NotificationGroup(Element e) {
-            name = e.getAttribute("name");
-            notify = FastList.newInstance();
-            notification = new Notification(UtilXml.firstChildElement(e, "notification"));
-
-            for (Element e2: UtilXml.childElementList(e, "notify")) {
-                notify.add(new Notify(e2));
-            }
-        }
-
-        public String getName() {
-            return name;
-        }
-
-        public Notification getNotification() {
-            return notification;
-        }
-
-        public List<Notify> getNotify() {
-            return notify;
-        }
-
-        public String getService() {
-            return notification.getService();
-        }
-
-        public String getSubject() {
-            return notification.getSubject();
-        }
-
-        public String getScreen() {
-            return notification.getScreen();
-        }
-
-        public List<String> getAddress(String type) {
-            List<String> l = FastList.newInstance();
-            for (Notify n: notify) {
-                if (n.getType().equals(type)) {
-                    l.add(n.getValue());
+    /**
+     * Returns the <code>ServiceConfig</code> instance.
+     * @throws GenericConfigException
+     */
+    public static ServiceConfig getServiceConfig() throws GenericConfigException {
+        ServiceConfig instance = serviceConfigCache.get("instance");
+        if (instance == null) {
+            Element serviceConfigElement = getXmlDocument().getDocumentElement();
+            instance = ServiceConfig.create(serviceConfigElement);
+            serviceConfigCache.putIfAbsent("instance", instance);
+            instance = serviceConfigCache.get("instance");
+            for (ServiceConfigListener listener : configListeners) {
+                try {
+                    listener.onServiceConfigChange(instance);
+                } catch (Exception e) {
+                    Debug.logError(e, "Exception thrown while notifying listener " + listener + ": ", module);
                 }
             }
-
-            return l;
         }
+        return instance;
+    }
 
-        class Notification implements Serializable {
-            protected String subject = null;
-            protected String screen = null;
-            protected String service = null;
+    /**
+     * Returns the default service engine configuration (named "default").
+     * @throws GenericConfigException 
+     */
+    public static ServiceEngine getServiceEngine() throws GenericConfigException {
+        return getServiceConfig().getServiceEngine(engine);
+    }
 
-            public Notification(Element e) {
-                service = e.getAttribute("service");
-                subject = e.getAttribute("subject");
-                screen = e.getAttribute("screen");
-            }
+    /**
+     * Returns the specified <code>ServiceEngine</code> configuration instance,
+     * or <code>null</code> if the configuration does not exist.
+     * 
+     * @throws GenericConfigException
+     */
+    public static ServiceEngine getServiceEngine(String name) throws GenericConfigException {
+        return getServiceConfig().getServiceEngine(name);
+    }
 
-            public String getScreen() {
-                return screen;
-            }
-
-            public String getSubject() {
-                return subject;
-            }
-
-            public String getService() {
-                return service;
-            }
+    private static Document getXmlDocument() throws GenericConfigException {
+        URL confUrl = UtilURL.fromResource(SERVICE_ENGINE_XML_FILENAME);
+        if (confUrl == null) {
+            throw new GenericConfigException("Could not find the " + SERVICE_ENGINE_XML_FILENAME + " file");
         }
-
-        class Notify implements Serializable {
-            protected String type;
-            protected String value;
-
-            public Notify(Element e) {
-                type = e.getAttribute("type");
-                value = UtilXml.elementValue(e);
-            }
-
-            public String getType() {
-                return type;
-            }
-            public String getValue() {
-                return value;
-            }
+        try {
+            return UtilXml.readXmlDocument(confUrl, true, true);
+        } catch (Exception e) {
+            throw new GenericConfigException("Exception thrown while reading " + SERVICE_ENGINE_XML_FILENAME + ": ", e);
         }
+    }
+
+    /**
+     * Register a <code>ServiceConfigListener</code> instance. The instance will be notified
+     * when the <code>serviceengine.xml</code> file is reloaded.
+     * 
+     * @param listener
+     */
+    public static void registerServiceConfigListener(ServiceConfigListener listener) {
+        Assert.notNull("listener", listener);
+        configListeners.add(listener);
     }
 }

@@ -193,7 +193,7 @@ public class IdealEvents {
         GenericValue userLogin = (GenericValue) request.getSession().getAttribute("userLogin");
         Map <String, Object> parametersMap = UtilHttp.getParameterMap(request);
         String transactionId = request.getParameter("trxid");
-        for(String name : parametersMap.keySet()) {
+        for (String name : parametersMap.keySet()) {
             String value = request.getParameter(name);
             Debug.logError("### Param: " + name + " => " + value, module);
         }
@@ -293,7 +293,7 @@ public class IdealEvents {
             }
         }
         if (okay) {
-            request.setAttribute("_EVENT_MESSAGE_", UtilProperties.getMessage(resource, "IdealSuccessFull", locale));
+            request.setAttribute("_EVENT_MESSAGE_", UtilProperties.getMessage(resource, "IdealSuccessful", locale));
             // attempt to release the offline hold on the order (workflow)
             OrderChangeHelper.releaseInitialOrderHold(dispatcher, orderId);
             // call the email confirm service
@@ -318,7 +318,7 @@ public class IdealEvents {
             return false;
         }
         if (paymentPrefs.size() > 0) {
-            for(GenericValue pref : paymentPrefs) {
+            for (GenericValue pref : paymentPrefs) {
                 boolean okay = setPaymentPreference(dispatcher, userLogin, pref, request);
                 if (!okay)
                     return false;

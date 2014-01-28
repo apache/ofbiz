@@ -18,9 +18,8 @@
  *******************************************************************************/
 package org.ofbiz.minilang.method.envops;
 
+import java.util.LinkedList;
 import java.util.List;
-
-import javolution.util.FastList;
 
 import org.ofbiz.base.util.collections.FlexibleMapAccessor;
 import org.ofbiz.minilang.MiniLangException;
@@ -34,7 +33,7 @@ import org.w3c.dom.Element;
 /**
  * Implements the &lt;add-error&gt; element.
  * 
- * @see <a href="https://cwiki.apache.org/OFBADMIN/mini-language-reference.html#Mini-languageReference-{{%3Cadderror%3E}}">Mini-language Reference</a>
+ * @see <a href="https://cwiki.apache.org/confluence/display/OFBADMIN/Mini-language+Reference#Mini-languageReference-{{%3Cadderror%3E}}">Mini-language Reference</a>
 */
 public final class AddError extends MethodOperation {
 
@@ -60,7 +59,7 @@ public final class AddError extends MethodOperation {
             if (message != null) {
                 List<String> messages = errorListFma.get(methodContext.getEnvMap());
                 if (messages == null) {
-                    messages = FastList.newInstance();
+                    messages = new LinkedList<String>();
                     errorListFma.put(methodContext.getEnvMap(), messages);
                 }
                 messages.add(message);

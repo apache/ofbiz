@@ -18,235 +18,170 @@
  *******************************************************************************/
 package org.ofbiz.entity.config;
 
-import java.util.HashMap;
+import java.net.URL;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.ofbiz.base.config.GenericConfigException;
-import org.ofbiz.base.config.ResourceLoader;
-import org.ofbiz.base.util.Debug;
+import org.ofbiz.base.util.UtilProperties;
+import org.ofbiz.base.util.UtilURL;
 import org.ofbiz.base.util.UtilXml;
 import org.ofbiz.entity.GenericEntityConfException;
-import org.ofbiz.entity.GenericEntityException;
+import org.ofbiz.entity.config.model.Datasource;
+import org.ofbiz.entity.config.model.DelegatorElement;
+import org.ofbiz.entity.config.model.EntityConfig;
+import org.ofbiz.entity.config.model.EntityDataReader;
+import org.ofbiz.entity.config.model.EntityEcaReader;
+import org.ofbiz.entity.config.model.EntityGroupReader;
+import org.ofbiz.entity.config.model.EntityModelReader;
+import org.ofbiz.entity.config.model.FieldType;
+import org.ofbiz.entity.config.model.InlineJdbc;
+import org.ofbiz.entity.config.model.ResourceLoader;
+import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 /**
  * Misc. utility method for dealing with the entityengine.xml file
  *
  */
-public class EntityConfigUtil {
+public final class EntityConfigUtil {
 
     public static final String module = EntityConfigUtil.class.getName();
     public static final String ENTITY_ENGINE_XML_FILENAME = "entityengine.xml";
+    private static final AtomicReference<EntityConfig> configRef = new AtomicReference<EntityConfig>(null);
 
-    private static volatile AtomicReference<EntityConfigUtil> configRef = new AtomicReference<EntityConfigUtil>();
+    public static String createConfigFileLineNumberText(Element element) {
+        if (element.getUserData("startLine") != null) {
+            return " [" + ENTITY_ENGINE_XML_FILENAME + " line " + element.getUserData("startLine") + "]";
+        }
+        return "";
+    }
 
-    // ========== engine info fields ==========
-    private final String txFactoryClass;
-    private final String txFactoryUserTxJndiName;
-    private final String txFactoryUserTxJndiServerName;
-    private final String txFactoryTxMgrJndiName;
-    private final String txFactoryTxMgrJndiServerName;
-    private final String connFactoryClass;
     /**
-     * Create Begin stacktrace when enlisting transactions
+     * Returns the <code>EntityConfig</code> instance.
+     * @throws GenericEntityConfException
      */
-    private final Boolean debugXAResources;
-
-    private final Map<String, ResourceLoaderInfo> resourceLoaderInfos = new HashMap<String, ResourceLoaderInfo>();
-    private final Map<String, DelegatorInfo> delegatorInfos = new HashMap<String, DelegatorInfo>();
-    private final Map<String, EntityModelReaderInfo> entityModelReaderInfos = new HashMap<String, EntityModelReaderInfo>();
-    private final Map<String, EntityGroupReaderInfo> entityGroupReaderInfos = new HashMap<String, EntityGroupReaderInfo>();
-    private final Map<String, EntityEcaReaderInfo> entityEcaReaderInfos = new HashMap<String, EntityEcaReaderInfo>();
-    private final Map<String, EntityDataReaderInfo> entityDataReaderInfos = new HashMap<String, EntityDataReaderInfo>();
-    private final Map<String, FieldTypeInfo> fieldTypeInfos = new HashMap<String, FieldTypeInfo>();
-    private final Map<String, DatasourceInfo> datasourceInfos = new HashMap<String, DatasourceInfo>();
-
-    private static Element getXmlRootElement() throws GenericEntityConfException {
-        try {
-            return ResourceLoader.getXmlRootElement(ENTITY_ENGINE_XML_FILENAME);
-        } catch (GenericConfigException e) {
-            throw new GenericEntityConfException("Could not get entity engine XML root element", e);
+    public static EntityConfig getEntityConfig() throws GenericEntityConfException {
+        EntityConfig instance = configRef.get();
+        if (instance == null) {
+            Element entityConfigElement = getXmlDocument().getDocumentElement();
+            instance = new EntityConfig(entityConfigElement);
+            if (!configRef.compareAndSet(null, instance)) {
+                instance = configRef.get();
+            }
         }
+        return instance;
     }
 
-    static {
+    private static Document getXmlDocument() throws GenericEntityConfException {
+        URL confUrl = UtilURL.fromResource(ENTITY_ENGINE_XML_FILENAME);
+        if (confUrl == null) {
+            throw new GenericEntityConfException("Could not find the " + ENTITY_ENGINE_XML_FILENAME + " file");
+        }
         try {
-            initialize(getXmlRootElement());
+            return UtilXml.readXmlDocument(confUrl, true, true);
         } catch (Exception e) {
-            Debug.logError(e, "Error loading entity config XML file " + ENTITY_ENGINE_XML_FILENAME, module);
+            throw new GenericEntityConfException("Exception thrown while reading " + ENTITY_ENGINE_XML_FILENAME + ": ", e);
         }
     }
 
-    public static void reinitialize() throws GenericEntityException {
-        try {
-            ResourceLoader.invalidateDocument(ENTITY_ENGINE_XML_FILENAME);
-            initialize(getXmlRootElement());
-        } catch (Exception e) {
-            throw new GenericEntityException("Error reloading entity config XML file " + ENTITY_ENGINE_XML_FILENAME, e);
-        }
+    public static String getTxFactoryClass() throws GenericEntityConfException {
+        return getEntityConfig().getTransactionFactory().getClassName();
     }
 
-    public static void initialize(Element rootElement) throws GenericEntityException {
-        configRef.set(new EntityConfigUtil(rootElement));
+    public static String getTxFactoryUserTxJndiName() throws GenericEntityConfException {
+        return getEntityConfig().getTransactionFactory().getUserTransactionJndi().getJndiName();
     }
 
-    private EntityConfigUtil(Element rootElement) throws GenericEntityException {
-        // load the transaction factory
-        Element transactionFactoryElement = UtilXml.firstChildElement(rootElement, "transaction-factory");
-        if (transactionFactoryElement == null) {
-            throw new GenericEntityConfException("ERROR: no transaction-factory definition was found in " + ENTITY_ENGINE_XML_FILENAME);
-        }
-
-        txFactoryClass = transactionFactoryElement.getAttribute("class");
-
-        Element userTxJndiElement = UtilXml.firstChildElement(transactionFactoryElement, "user-transaction-jndi");
-        if (userTxJndiElement != null) {
-            txFactoryUserTxJndiName = userTxJndiElement.getAttribute("jndi-name");
-            txFactoryUserTxJndiServerName = userTxJndiElement.getAttribute("jndi-server-name");
-        } else {
-            txFactoryUserTxJndiName = null;
-            txFactoryUserTxJndiServerName = null;
-        }
-
-        Element txMgrJndiElement = UtilXml.firstChildElement(transactionFactoryElement, "transaction-manager-jndi");
-        if (txMgrJndiElement != null) {
-            txFactoryTxMgrJndiName = txMgrJndiElement.getAttribute("jndi-name");
-            txFactoryTxMgrJndiServerName = txMgrJndiElement.getAttribute("jndi-server-name");
-        } else {
-            txFactoryTxMgrJndiName = null;
-            txFactoryTxMgrJndiServerName = null;
-        }
-
-        // load the connection factory
-        Element connectionFactoryElement = UtilXml.firstChildElement(rootElement, "connection-factory");
-        if (connectionFactoryElement == null) {
-            throw new GenericEntityConfException("ERROR: no connection-factory definition was found in " + ENTITY_ENGINE_XML_FILENAME);
-        }
-
-        connFactoryClass = connectionFactoryElement.getAttribute("class");
-
-        Element debugXaResourcesElement = UtilXml.firstChildElement(rootElement, "debug-xa-resources");
-        if (debugXaResourcesElement == null) { // This should not be since debug-xa-resources is required, but safer...
-            debugXAResources = false;
-        } else {
-            debugXAResources = "true".equals(debugXaResourcesElement.getAttribute("value"));
-        }
-        // not load all of the maps...
-
-        // resource-loader - resourceLoaderInfos
-        for (Element curElement: UtilXml.childElementList(rootElement, "resource-loader")) {
-            ResourceLoaderInfo resourceLoaderInfo = new ResourceLoaderInfo(curElement);
-            resourceLoaderInfos.put(resourceLoaderInfo.name, resourceLoaderInfo);
-        }
-
-        // delegator - delegatorInfos
-        for (Element curElement: UtilXml.childElementList(rootElement, "delegator")) {
-            DelegatorInfo delegatorInfo = new DelegatorInfo(curElement);
-            delegatorInfos.put(delegatorInfo.name, delegatorInfo);
-        }
-
-        // entity-model-reader - entityModelReaderInfos
-        for (Element curElement: UtilXml.childElementList(rootElement, "entity-model-reader")) {
-            EntityModelReaderInfo entityModelReaderInfo = new EntityModelReaderInfo(curElement);
-            entityModelReaderInfos.put(entityModelReaderInfo.name, entityModelReaderInfo);
-        }
-
-        // entity-group-reader - entityGroupReaderInfos
-        for (Element curElement: UtilXml.childElementList(rootElement, "entity-group-reader")) {
-            EntityGroupReaderInfo entityGroupReaderInfo = new EntityGroupReaderInfo(curElement);
-            entityGroupReaderInfos.put(entityGroupReaderInfo.name, entityGroupReaderInfo);
-        }
-
-        // entity-eca-reader - entityEcaReaderInfos
-        for (Element curElement: UtilXml.childElementList(rootElement, "entity-eca-reader")) {
-            EntityEcaReaderInfo entityEcaReaderInfo = new EntityEcaReaderInfo(curElement);
-            entityEcaReaderInfos.put(entityEcaReaderInfo.name, entityEcaReaderInfo);
-        }
-
-        // entity-data-reader - entityDataReaderInfos
-        for (Element curElement: UtilXml.childElementList(rootElement, "entity-data-reader")) {
-            EntityDataReaderInfo entityDataReaderInfo = new EntityDataReaderInfo(curElement);
-            entityDataReaderInfos.put(entityDataReaderInfo.name, entityDataReaderInfo);
-        }
-
-        // field-type - fieldTypeInfos
-        for (Element curElement: UtilXml.childElementList(rootElement, "field-type")) {
-            FieldTypeInfo fieldTypeInfo = new FieldTypeInfo(curElement);
-            fieldTypeInfos.put(fieldTypeInfo.name, fieldTypeInfo);
-        }
-
-        // datasource - datasourceInfos
-        for (Element curElement: UtilXml.childElementList(rootElement, "datasource")) {
-            DatasourceInfo datasourceInfo = new DatasourceInfo(curElement);
-            datasourceInfos.put(datasourceInfo.name, datasourceInfo);
-        }
+    public static String getTxFactoryUserTxJndiServerName() throws GenericEntityConfException {
+        return getEntityConfig().getTransactionFactory().getUserTransactionJndi().getJndiServerName();
     }
 
-    public static String getTxFactoryClass() {
-        return configRef.get().txFactoryClass;
+    public static String getTxFactoryTxMgrJndiName() throws GenericEntityConfException {
+        return getEntityConfig().getTransactionFactory().getTransactionManagerJndi().getJndiName();
     }
 
-    public static String getTxFactoryUserTxJndiName() {
-        return configRef.get().txFactoryUserTxJndiName;
-    }
-
-    public static String getTxFactoryUserTxJndiServerName() {
-        return configRef.get().txFactoryUserTxJndiServerName;
-    }
-
-    public static String getTxFactoryTxMgrJndiName() {
-        return configRef.get().txFactoryTxMgrJndiName;
+    public static String getTxFactoryTxMgrJndiServerName() throws GenericEntityConfException {
+        return getEntityConfig().getTransactionFactory().getTransactionManagerJndi().getJndiServerName();
     }
     
     /**
      * @return true Create Begin stacktrace when enlisting transactions
+     * @throws GenericEntityConfException 
      */
-    public static boolean isDebugXAResource() {
-        return configRef.get().debugXAResources;
+    public static boolean isDebugXAResource() throws GenericEntityConfException {
+        return getEntityConfig().getDebugXaResources().getValue();
     }
 
-    public static String getTxFactoryTxMgrJndiServerName() {
-        return configRef.get().txFactoryTxMgrJndiServerName;
+    public static String getConnectionFactoryClass() throws GenericEntityConfException {
+        return getEntityConfig().getConnectionFactory().getClassName();
     }
 
-    public static String getConnectionFactoryClass() {
-        return configRef.get().connFactoryClass;
+    public static ResourceLoader getResourceLoader(String name) throws GenericEntityConfException {
+        return getEntityConfig().getResourceLoader(name);
     }
 
-    public static ResourceLoaderInfo getResourceLoaderInfo(String name) {
-        return configRef.get().resourceLoaderInfos.get(name);
+    public static DelegatorElement getDelegator(String name) throws GenericEntityConfException {
+        return getEntityConfig().getDelegator(name);
     }
 
-    public static DelegatorInfo getDelegatorInfo(String name) {
-        return configRef.get().delegatorInfos.get(name);
+    public static EntityModelReader getEntityModelReader(String name) throws GenericEntityConfException {
+        return getEntityConfig().getEntityModelReader(name);
     }
 
-    public static EntityModelReaderInfo getEntityModelReaderInfo(String name) {
-        return configRef.get().entityModelReaderInfos.get(name);
+    public static EntityGroupReader getEntityGroupReader(String name) throws GenericEntityConfException {
+        return getEntityConfig().getEntityGroupReader(name);
     }
 
-    public static EntityGroupReaderInfo getEntityGroupReaderInfo(String name) {
-        return configRef.get().entityGroupReaderInfos.get(name);
+    public static EntityEcaReader getEntityEcaReader(String name) throws GenericEntityConfException {
+        return getEntityConfig().getEntityEcaReader(name);
     }
 
-    public static EntityEcaReaderInfo getEntityEcaReaderInfo(String name) {
-        return configRef.get().entityEcaReaderInfos.get(name);
+    public static EntityDataReader getEntityDataReader(String name) throws GenericEntityConfException {
+        return getEntityConfig().getEntityDataReader(name);
     }
 
-    public static EntityDataReaderInfo getEntityDataReaderInfo(String name) {
-        return configRef.get().entityDataReaderInfos.get(name);
+    public static FieldType getFieldType(String name) throws GenericEntityConfException {
+        return getEntityConfig().getFieldType(name);
     }
 
-    public static FieldTypeInfo getFieldTypeInfo(String name) {
-        return configRef.get().fieldTypeInfos.get(name);
+    public static Datasource getDatasource(String name) {
+        try {
+            return getEntityConfig().getDatasource(name);
+        } catch (GenericEntityConfException e) {
+            // FIXME: Doing this so we don't have to rewrite the entire API.
+            throw new RuntimeException(e);
+        }
     }
 
-    public static DatasourceInfo getDatasourceInfo(String name) {
-        return configRef.get().datasourceInfos.get(name);
+    public static Map<String, Datasource> getDatasources() throws GenericEntityConfException {
+        return getEntityConfig().getDatasourceMap();
     }
 
-    public static Map<String, DatasourceInfo> getDatasourceInfos() {
-        return configRef.get().datasourceInfos;
+    /**
+     * Returns the configured JDBC password.
+     * 
+     * @param inlineJdbcElement
+     * @return The configured JDBC password.
+     * @throws GenericEntityConfException If the password was not found.
+     * 
+     * @see <code>entity-config.xsd</code>
+     */
+    public static String getJdbcPassword(InlineJdbc inlineJdbcElement) throws GenericEntityConfException {
+        String jdbcPassword = inlineJdbcElement.getJdbcPassword();
+        if (!jdbcPassword.isEmpty()) {
+            return jdbcPassword;
+        }
+        String jdbcPasswordLookup = inlineJdbcElement.getJdbcPasswordLookup();
+        if (jdbcPasswordLookup.isEmpty()) {
+            throw new GenericEntityConfException("No jdbc-password or jdbc-password-lookup specified for inline-jdbc element, line: " + inlineJdbcElement.getLineNumber());
+        }
+        String key = "jdbc-password.".concat(jdbcPasswordLookup);
+        jdbcPassword = UtilProperties.getPropertyValue("passwords.properties", key);
+        if (jdbcPassword.isEmpty()) {
+            throw new GenericEntityConfException("'" + key + "' property not found in passwords.properties file for inline-jdbc element, line: " + inlineJdbcElement.getLineNumber());
+        }
+        return jdbcPassword;
     }
+
+    private EntityConfigUtil() {}
 }

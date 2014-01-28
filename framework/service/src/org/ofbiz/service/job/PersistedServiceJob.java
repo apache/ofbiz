@@ -28,6 +28,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import javolution.util.FastMap;
 
 import org.apache.commons.lang.StringUtils;
+import org.ofbiz.base.config.GenericConfigException;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilDateTime;
 import org.ofbiz.base.util.UtilGenerics;
@@ -244,16 +245,20 @@ public class PersistedServiceJob extends GenericServiceJob {
             if (this.canRetry()) {
                 // create a recurrence
                 Calendar cal = Calendar.getInstance();
-                cal.add(Calendar.MINUTE, ServiceConfigUtil.getFailedRetryMin());
+                try {
+                    cal.add(Calendar.MINUTE, ServiceConfigUtil.getServiceEngine().getThreadPool().getFailedRetryMin());
+                } catch (GenericConfigException e) {
+                    Debug.logWarning(e, "Unable to get retry minutes for job [" + getJobId() + "], defaulting to now: ", module);
+                }
                 long next = cal.getTimeInMillis();
                 try {
                     createRecurrence(next, true);
                 } catch (GenericEntityException e) {
                     Debug.logError(e, "Unable to re-schedule job [" + getJobId() + "]: ", module);
                 }
-                Debug.logInfo("Persisted Job [" + getJobId() + "] Failed Re-Scheduling : " + next, module);
+                Debug.logInfo("Persisted Job [" + getJobId() + "] Failed. Re-Scheduling : " + next, module);
             } else {
-                Debug.logWarning("Persisted Job [" + getJobId() + "] Failed - Max Retry Hit; not re-scheduling", module);
+                Debug.logWarning("Persisted Job [" + getJobId() + "] Failed. Max Retry Hit, not re-scheduling", module);
             }
         }
         // set the failed status

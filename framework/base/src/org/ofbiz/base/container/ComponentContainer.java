@@ -102,10 +102,6 @@ public class ComponentContainer implements Container {
         return true;
     }
 
-    public synchronized void loadComponents(String loaderConfig, boolean updateClasspath) throws AlreadyLoadedException, ComponentException {
-        loadComponents(loaderConfig, updateClasspath, null, null);
-    }
-
     public synchronized void loadComponents(String loaderConfig, boolean updateClasspath, String instrumenterClassName, String instrumenterFile) throws AlreadyLoadedException, ComponentException {
         // set the loaded list; and fail if already loaded
         //if (loadedComponents == null) {
@@ -205,7 +201,7 @@ public class ComponentContainer implements Container {
                     try {
                         File componentPath = FileUtil.getFile(parentPath.getCanonicalPath() + "/" + sub);
                         if (componentPath.isDirectory() && !sub.equals("CVS") && !sub.equals(".svn")) {
-                            // make sure we have a component configuraton file
+                            // make sure we have a component configuration file
                             String componentLocation = componentPath.getCanonicalPath();
                             File configFile = FileUtil.getFile(componentLocation + "/ofbiz-component.xml");
                             if (configFile.exists()) {
@@ -303,16 +299,4 @@ public class ComponentContainer implements Container {
         return name;
     }
 
-    /**
-     * Static method for easy loading of components for use when the container system is not.
-     *
-     * @param updateClasspath Tells the component loader to update the classpath, and thread classloader
-     * @throws AlreadyLoadedException
-     * @throws ComponentException
-     */
-    public static synchronized void loadComponents(boolean updateClasspath) throws AlreadyLoadedException, ComponentException {
-        ComponentContainer cc = new ComponentContainer();
-        cc.loadComponents(null, updateClasspath);
-        cc = null;
-    }
 }

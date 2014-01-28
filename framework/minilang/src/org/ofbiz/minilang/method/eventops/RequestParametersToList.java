@@ -18,9 +18,8 @@
  *******************************************************************************/
 package org.ofbiz.minilang.method.eventops;
 
+import java.util.LinkedList;
 import java.util.List;
-
-import javolution.util.FastList;
 
 import org.ofbiz.base.util.collections.FlexibleMapAccessor;
 import org.ofbiz.base.util.string.FlexibleStringExpander;
@@ -35,7 +34,7 @@ import org.w3c.dom.Element;
 /**
  * Implements the &lt;request-parameters-to-list&gt; element.
  * 
- * @see <a href="https://cwiki.apache.org/OFBADMIN/mini-language-reference.html#Mini-languageReference-{{%3Crequestparameterstolist%3E}}">Mini-language Reference</a>
+ * @see <a href="https://cwiki.apache.org/confluence/display/OFBADMIN/Mini-language+Reference#Mini-languageReference-{{%3Crequestparameterstolist%3E}}">Mini-language Reference</a>
  */
 public final class RequestParametersToList extends MethodOperation {
 
@@ -84,7 +83,7 @@ public final class RequestParametersToList extends MethodOperation {
             if (parameterValues != null) {
                 List<String> valueList = listFma.get(methodContext.getEnvMap());
                 if (valueList == null) {
-                    valueList = FastList.newInstance();
+                    valueList = new LinkedList<String>();
                     listFma.put(methodContext.getEnvMap(), valueList);
                 }
                 for (int i = 0; i < parameterValues.length; i++) {

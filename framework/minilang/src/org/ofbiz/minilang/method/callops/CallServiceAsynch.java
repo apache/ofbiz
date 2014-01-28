@@ -18,10 +18,9 @@
  *******************************************************************************/
 package org.ofbiz.minilang.method.callops;
 
+import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
-
-import javolution.util.FastMap;
 
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.collections.FlexibleMapAccessor;
@@ -39,7 +38,7 @@ import org.w3c.dom.Element;
 /**
  * Implements the &lt;call-service-asynch&gt; element.
  * 
- * @see <a href="https://cwiki.apache.org/OFBADMIN/mini-language-reference.html#Mini-languageReference-{{%3Ccallserviceasynch%3E}}">Mini-language Reference</a>
+ * @see <a href="https://cwiki.apache.org/confluence/display/OFBADMIN/Mini-language+Reference#Mini-languageReference-{{%3Ccallserviceasynch%3E}}">Mini-language Reference</a>
  */
 public final class CallServiceAsynch extends MethodOperation {
 
@@ -71,7 +70,7 @@ public final class CallServiceAsynch extends MethodOperation {
         String serviceName = serviceNameFse.expandString(methodContext.getEnvMap());
         Map<String, Object> inMap = inMapFma.get(methodContext.getEnvMap());
         if (inMap == null) {
-            inMap = FastMap.newInstance();
+            inMap = new HashMap<String, Object>();
         }
         if (includeUserLogin) {
             GenericValue userLogin = methodContext.getUserLogin();

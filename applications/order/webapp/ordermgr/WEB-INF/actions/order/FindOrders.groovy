@@ -21,6 +21,7 @@ import java.util.*;
 import java.sql.Timestamp;
 import org.ofbiz.entity.*;
 import org.ofbiz.base.util.*;
+import org.ofbiz.entity.util.*;
 
 module = "FindOrders.groovy";
 
@@ -55,6 +56,10 @@ context.carrierShipmentMethods = carrierShipmentMethods;
 // get the Payment Status
 paymentStatusList = delegator.findByAnd("StatusItem", [statusTypeId : "PAYMENT_PREF_STATUS"], ["description"], false);
 context.paymentStatusList = paymentStatusList;
+
+// get the good identification types
+goodIdentificationTypes = delegator.findList("GoodIdentificationType", null, null, ["goodIdentificationTypeId", "description"], null, false);
+context.goodIdentificationTypes = goodIdentificationTypes;
 
 // current role type
 currentRoleTypeId = request.getParameter("roleTypeId");
@@ -96,7 +101,7 @@ if (shipmentMethod) {
     carrierPartyId = shipmentMethod.substring(0, shipmentMethod.indexOf("@"));
     shipmentMethodTypeId = shipmentMethod.substring(shipmentMethod.indexOf("@")+1);
     if (carrierPartyId && shipmentMethodTypeId) {
-        currentCarrierShipmentMethod = delegator.findByAnd("CarrierShipmentMethod", [partyId : carrierPartyId, shipmentMethodTypeId : shipmentMethodTypeId], null, false);
+        currentCarrierShipmentMethod = EntityUtil.getFirst(delegator.findByAnd("CarrierShipmentMethod", [partyId : carrierPartyId, shipmentMethodTypeId : shipmentMethodTypeId], null, false));
         context.currentCarrierShipmentMethod = currentCarrierShipmentMethod;
     }
 }
@@ -106,6 +111,13 @@ currentSalesChannelId = request.getParameter("salesChannelEnumId");
 if (currentSalesChannelId) {
     currentSalesChannel = delegator.findOne("Enumeration", [enumId : currentSalesChannelId], false);
     context.currentSalesChannel = currentSalesChannel;
+}
+
+// current good identification type
+currentGoodIdentificationTypeId = request.getParameter("goodIdentificationTypeId");
+if (currentGoodIdentificationTypeId) {
+    currentGoodIdentificationType = delegator.findByPrimaryKey("GoodIdentificationType", ["goodIdentificationTypeId" : currentGoodIdentificationTypeId]);
+    context.currentGoodIdentificationType = currentGoodIdentificationType;
 }
 
 // create the fromDate for calendar
@@ -137,7 +149,8 @@ context.thruDateStr = toStr;
 viewIndex = request.getParameter("viewIndex") ? Integer.valueOf(request.getParameter("viewIndex")) : 1;
 context.viewIndex = viewIndex;
 
-viewSize = request.getParameter("viewSize") ? Integer.valueOf(request.getParameter("viewSize")) : 20;
+viewSize = request.getParameter("viewSize") ? Integer.valueOf(request.getParameter("viewSize")) : 
+                                                                UtilProperties.getPropertyValue("widget", "widget.form.defaultViewSize", "20");
 context.viewSize = viewSize;
 
 // get the lookup flag

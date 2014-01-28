@@ -18,25 +18,22 @@
  *******************************************************************************/
 package org.ofbiz.entity.jdbc;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Reader;
-import java.nio.ByteBuffer;
 import java.sql.Blob;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.sql.Types;
+import java.util.HashMap;
 import java.util.Map;
 
 import javax.sql.rowset.serial.SerialBlob;
-
-import javolution.util.FastMap;
 
 import org.ofbiz.base.util.Debug;
 
@@ -56,7 +53,7 @@ public abstract class JdbcValueHandler<T> {
         for the specified Java type. The JdbcValueHandler instances are
         initialized with the SQL type recommended by Sun/Oracle.
          */
-        Map<String, JdbcValueHandler<?>> result = FastMap.newInstance();
+        Map<String, JdbcValueHandler<?>> result = new HashMap<String, JdbcValueHandler<?>>();
         // JDBC 1
         result.put("byte[]", new ByteArrayJdbcValueHandler(Types.LONGVARBINARY));
         result.put("java.lang.Boolean", new BooleanJdbcValueHandler(Types.BOOLEAN));
@@ -99,7 +96,7 @@ public abstract class JdbcValueHandler<T> {
         method must be called with the correct type, or an
         exception will be thrown.
          */
-        Map<String, Integer> result = FastMap.newInstance();
+        Map<String, Integer> result = new HashMap<String, Integer>();
         // SQL 99 Data Types
         result.put("BIT", Types.BIT);
         result.put("BLOB", Types.BLOB);
@@ -185,31 +182,6 @@ public abstract class JdbcValueHandler<T> {
             }
         }
         return os.toByteArray();
-    }
-
-    protected static byte[] toByteArray(java.sql.Blob blob) throws SQLException {
-        InputStream inStream = null;
-        try {
-            inStream = blob.getBinaryStream();
-            int blobLength = (int) blob.length();
-            byte[] byteBuffer = new byte[blobLength];
-            int offset = 0;
-            int bytesRead = inStream.read(byteBuffer, offset, blobLength);
-            while (bytesRead > 0) {
-                offset += bytesRead;
-                bytesRead = inStream.read(byteBuffer, offset, blobLength);
-            }
-            return byteBuffer;
-        } catch (Exception e) {
-            throw new SQLException(e);
-        }
-        finally {
-            if (inStream != null) {
-                try {
-                    inStream.close();
-                } catch (IOException e) {}
-            }
-        }
     }
 
     // The target database SQL type to be used for the
@@ -325,67 +297,13 @@ public abstract class JdbcValueHandler<T> {
         }
         @Override
         protected void castAndSetValue(PreparedStatement ps, int parameterIndex, Object obj) throws SQLException {
-            // FIXME: This is here for backwards compatibility. Client code
-            // that uses a Blob java-type for a byte array should use a
-            // byte[] java-type instead.
-            if (obj instanceof Blob) {
-                ps.setBlob(parameterIndex, (Blob)obj);
-            } else if (obj instanceof byte[]) {
-                ps.setBytes(parameterIndex, (byte[]) obj);
-            } else if (obj instanceof ByteBuffer) {
-                ps.setBytes(parameterIndex, ((ByteBuffer)obj).array());
-            } else {
-                Debug.logError("JdbcValueHandler.castAndSetValue(): Unexpected type found. type=" + obj.getClass().getName(), module);
-                throw new IllegalArgumentException(obj.getClass().getName());
-            }
-            return;
+            ps.setBlob(parameterIndex, (Blob) obj);
         }
         @Override
         public Object getValue(ResultSet rs, int columnIndex) throws SQLException {
-            // FIXME: This code is here for backwards compatibility. Client code
-            // that uses a Blob java-type for non-Blob types should be updated
-            // to use the correct type.
-            Object originalObject;
-            byte[] fieldBytes;
-            try {
-                Blob theBlob = rs.getBlob(columnIndex);
-                fieldBytes = toByteArray(theBlob);
-                originalObject = theBlob;
-            } catch (SQLException e) {
-                // for backward compatibility if getBlob didn't work try getBytes
-                fieldBytes = rs.getBytes(columnIndex);
-                originalObject = fieldBytes;
-            }
-            if (originalObject != null) {
-                // for backward compatibility, check to see if there is a serialized object and if so return that
-                Object blobObject = null;
-                ObjectInputStream in = null;
-                try {
-                    in = new ObjectInputStream(new ByteArrayInputStream(fieldBytes));
-                    blobObject = in.readObject();
-                } catch (IOException e) {
-                    if (Debug.verboseOn()) Debug.logVerbose(e, "Unable to read BLOB data from input stream", module);
-                } catch (ClassNotFoundException e) {
-                    if (Debug.verboseOn()) Debug.logVerbose(e, "Class not found: Unable to cast BLOB data to an Java object while getting value, most likely because it is a straight byte[], so just using the raw bytes", module);
-                } finally {
-                    if (in != null) {
-                        try {
-                            in.close();
-                        } catch (IOException e) {}
-                    }
-                }
-                if (blobObject != null) {
-                    Debug.logWarning("Blob java-type used for java.lang.Object. Use java.lang.Object java-type instead.", module);
-                    return blobObject;
-                } else {
-                    if (originalObject instanceof Blob) {
-                        // NOTE using SerialBlob here instead of the Blob from the database to make sure we can pass it around, serialize it, etc
-                        return new SerialBlob((Blob) originalObject);
-                    } else {
-                        Debug.logWarning("Blob java-type used for byte array. Use byte[] java-type instead.", module);
-                        return originalObject;
-                    }
-                }
+            Blob fieldBlob = rs.getBlob(columnIndex);
+            if (fieldBlob != null) {
+                return new SerialBlob(fieldBlob);
             }
             return null;
         }

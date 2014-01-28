@@ -21,9 +21,9 @@
 <section xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="5.0" 
     xmlns:xl="http://www.w3.org/1999/xlink" 
     xmlns:xi="http://www.w3.org/2001/XInclude"
-    xsi:schemaLocation="http://docbook.org/ns/docbook ../../../content/dtd/docbook.xsd"
+    xsi:schemaLocation="http://docbook.org/ns/docbook ../../../../content/dtd/docbook.xsd"
     xmlns="http://docbook.org/ns/docbook">
-       <title>OFBiz: MFG: Display production run materials</title>
+       <title>Manufacturing: Display production run materials</title>
         <para>
         This screen provides an overview of materials connected to the production run.
         From here you can also connect new materials to the production run.

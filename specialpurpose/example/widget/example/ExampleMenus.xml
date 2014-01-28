@@ -35,12 +35,15 @@ under the License.
         </menu-item>
         <menu-item name="portalPage" parent-portal-page-value="EXAMPLE"/>
         <menu-item name="Dashboard" title="${uiLabelMap.ExampleDashboard}" align-style="opposed">
-            <link target="ManagePortalPages">
+            <link target="ManagePortalPages" link-type="anchor">
                 <parameter param-name="parentPortalPageId" value="EXAMPLE"/>
             </link>
         </menu-item>
         <menu-item name="ExampleGeoLocation" title="${uiLabelMap.CommonGeoLocation}">
             <link target="ExampleGeoLocationPointSet1"/>
+        </menu-item>
+        <menu-item name="ExampleCharts" title="Chart examples">
+            <link target="ExampleBarChart"/>
         </menu-item>
     </menu>
 

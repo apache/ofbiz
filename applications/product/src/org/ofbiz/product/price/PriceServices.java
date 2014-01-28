@@ -268,7 +268,6 @@ public class PriceServices {
                     List<GenericValue> variantAssocList = EntityUtil.filterByDate(delegator.findByAnd("ProductAssoc", UtilMisc.toMap("productId", product.get("productId"), "productAssocTypeId", "PRODUCT_VARIANT"), UtilMisc.toList("-fromDate"), true));
                     BigDecimal minDefaultPrice = null;
                     List<GenericValue> variantProductPrices = null;
-                    String variantProductId = null;
                     for (GenericValue variantAssoc: variantAssocList) {
                         String curVariantProductId = variantAssoc.getString("productIdTo");
                         List<GenericValue> curVariantPriceList = EntityUtil.filterByDate(delegator.findByAnd("ProductPrice", UtilMisc.toMap("productId", curVariantProductId), UtilMisc.toList("-fromDate"), true), nowTimestamp);
@@ -284,7 +283,6 @@ public class PriceServices {
                                     if (salesDiscontinuationDate == null || salesDiscontinuationDate.after(nowTimestamp)) {
                                         minDefaultPrice = curDefaultPrice;
                                         variantProductPrices = curVariantPriceList;
-                                        variantProductId = curVariantProductId;
                                         // Debug.logInfo("Found new lowest price " + minDefaultPrice + " for variant with ID " + variantProductId, module);
                                     }
                                 }
@@ -528,7 +526,7 @@ public class PriceServices {
             if (UtilValidate.isNotEmpty(currencyDefaultUomId) && UtilValidate.isNotEmpty(currencyUomIdTo) && !currencyDefaultUomId.equals(currencyUomIdTo)) {
                 if(UtilValidate.isNotEmpty(result)){
                     Map<String, Object> convertPriceMap = FastMap.newInstance();
-                    for(Map.Entry<String, Object> entry : result.entrySet()) {
+                    for (Map.Entry<String, Object> entry : result.entrySet()) {
                         BigDecimal tempPrice = BigDecimal.ZERO;
                         if(entry.getKey() == "basePrice")
                             tempPrice = (BigDecimal) entry.getValue();

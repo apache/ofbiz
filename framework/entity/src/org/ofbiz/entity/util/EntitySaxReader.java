@@ -27,13 +27,13 @@ import java.io.StringWriter;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
 import javolution.text.CharArray;
 import javolution.text.Text;
-import javolution.util.FastList;
-import javolution.util.FastMap;
 import javolution.xml.sax.Attributes;
 import javolution.xml.sax.XMLReaderImpl;
 
@@ -94,6 +94,7 @@ public class EntitySaxReader implements javolution.xml.sax.ContentHandler, Error
     protected boolean maintainTxStamps = false;
     protected boolean createDummyFks = false;
     protected boolean checkDataOnly = false;
+    @Deprecated
     protected boolean doCacheClear = true;
     protected boolean disableEeca = false;
     protected enum Action {CREATE, CREATE_UPDATE, CREATE_REPLACE, DELETE}; 
@@ -177,10 +178,12 @@ public class EntitySaxReader implements javolution.xml.sax.ContentHandler, Error
         this.checkDataOnly = checkDataOnly;
     }
 
+    @Deprecated
     public boolean getDoCacheClear() {
         return this.doCacheClear;
     }
 
+    @Deprecated
     public void setDoCacheClear(boolean doCacheClear) {
         this.doCacheClear = doCacheClear;
     }
@@ -191,7 +194,7 @@ public class EntitySaxReader implements javolution.xml.sax.ContentHandler, Error
 
     public List<Object> getMessageList() {
         if (this.checkDataOnly && this.messageList == null) {
-            messageList = FastList.newInstance();
+            messageList = new LinkedList<Object>();
         }
         return this.messageList;
     }
@@ -380,7 +383,7 @@ public class EntitySaxReader implements javolution.xml.sax.ContentHandler, Error
                     Template template = new Template("FMImportFilter", templateReader, config);
                     NodeModel nodeModel = NodeModel.wrap(this.rootNodeForTemplate);
 
-                    Map<String, Object> context = FastMap.newInstance();
+                    Map<String, Object> context = new HashMap<String, Object>();
                     TemplateHashModel staticModels = FreeMarkerWorker.getDefaultOfbizWrapper().getStaticModels();
                     context.put("Static", staticModels);
 
@@ -556,6 +559,7 @@ public class EntitySaxReader implements javolution.xml.sax.ContentHandler, Error
             }
 
             // check the do-cache-clear flag
+            @Deprecated
             CharSequence doCacheClear = attributes.getValue("do-cache-clear");
             if (doCacheClear != null) {
                 this.setDoCacheClear("true".equalsIgnoreCase(doCacheClear.toString()));
