@@ -45,7 +45,10 @@ under the License.
             <#local readonly = true/>
         <#else>
             <#local readonly = false />
-        </#if>    
+        </#if>
+    <#if userPreferences.VISUAL_THEME == "BIZZNESS_TIME">
+        <#local position = "center" />
+    </#if>
     <@renderLookupField className alert name value size maxlength id event action readonly autocomplete descriptionFieldName formName fieldFormName targetParameterIter imgSrc ajaxUrl ajaxEnabled presentation width height position fadeBackground clearText showDescription initiallyCollapsed/>
 </#macro>
 
