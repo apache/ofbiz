@@ -63,7 +63,7 @@ under the License.
         <field use-when="emplPosition!=null" name="emplPositionId" title="${uiLabelMap.HumanResEmplPositionId}" tooltip="${uiLabelMap.CommonNotModifRecreat}"><display/></field>
         <field use-when="emplPosition==null&amp;&amp;emplPositionId==null" name="emplPositionId" title="${uiLabelMap.HumanResEmplPositionId}"><lookup target-form-name="LookupEmplPosition"/></field>
         <field use-when="emplPosition==null&amp;&amp;emplPositionId!=null" name="emplPositionId" title="${uiLabelMap.HumanResEmplPositionId}" tooltip="${uiLabelMap.CommonCannotBeFound}: [${emplPositionId}]"><display/></field>
-        <field name="partyId" use-when="emplPosition!=null" parameter-name="partyId" title="organization partyId">
+        <field name="partyId" parameter-name="partyId" title="${uiLabelMap.HumanResEmploymentPartyIdFrom}" tooltip="${uiLabelMap.HumanResEmploymentPartyIdFromToolTip}">
             <drop-down allow-empty="false">
                 <entity-options description="${groupName}" entity-name="PartyRoleAndPartyDetail" key-field-name="partyId">
                     <entity-constraint name="roleTypeId" value="INTERNAL_ORGANIZATIO"/>
@@ -168,7 +168,7 @@ under the License.
         <field name="submitButton" title="${uiLabelMap.CommonAdd}"><submit button-type="button"/></field>
     </form>
     <form name="ListReportedToEmplPositionReportingStructs" type="list" target="updateEmplPositionReportingStruct" title="" paginate-target="EditReportedToEmplPositionReportingStruct"
-        odd-row-style="alternate-row" header-row-style="header-row-2" default-table-style="basic-table hover-bar">
+        odd-row-style="alternate-row" header-row-style="header-row-2" default-table-style="basic-table hover-bar" list-name="emplPositionReportingStructList">
         <actions>
             <entity-condition entity-name="EmplPositionReportingStruct" list="emplPositionReportingStructList">
                 <condition-expr field-name="emplPositionIdReportingTo" from-field="parameters.emplPositionId"/>
