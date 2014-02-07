@@ -108,7 +108,7 @@
     <classpathentry kind="lib" path="framework/base/lib/scripting/jython-nooro.jar"/>
     <classpathentry kind="lib" path="framework/base/lib/scripting/jansi-1.2.1.jar"/>
     <classpathentry kind="lib" path="framework/base/lib/scripting/jline-0.9.94.jar"/>
-    <classpathentry kind="lib" path="framework/birt/lib/org.eclipse.birt.runtime_3.7.2.v20120214-1408.jar"/>
+    <classpathentry kind="lib" path="framework/birt/lib/org.eclipse.birt.runtime_4.3.1.v20130918-1142.jar"/>
     <classpathentry kind="lib" path="framework/birt/lib/viewservlets.jar"/>
     <classpathentry kind="lib" path="framework/catalina/lib/ecj-4.2.2.jar"/>
     <classpathentry kind="lib" path="framework/catalina/lib/tomcat-7.0.50-catalina-ha.jar"/>
