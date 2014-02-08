@@ -210,6 +210,17 @@ under the License.
         </xs:attribute>
     </xs:attributeGroup>
 
+    <xs:attribute name="delegator-name" type="xs:string">
+        <xs:annotation>
+            <xs:documentation>
+                An alternate delegator name. When specified, the entity operation will use the
+                alternate delegator instead of the current delegator.
+                
+                Optional. Attribute types: constant, ${expression}.
+            </xs:documentation>
+        </xs:annotation>
+    </xs:attribute>
+
 <!--
     =============================
     ===== The Root Elements =====
@@ -583,7 +594,7 @@ under the License.
                 <xs:element ref="field" />
                 <xs:element ref="string" />
             </xs:choice>
-            <xs:attribute ref="field" />
+            <xs:attribute ref="field" use="required" />
             <xs:attribute name="class-name" type="javaClassName" use="required">
                 <xs:annotation>
                     <xs:documentation>
@@ -988,7 +999,7 @@ under the License.
             </xs:documentation>
         </xs:annotation>
         <xs:complexType>
-            <xs:attribute ref="field" />
+            <xs:attribute ref="field" use="required" />
             <xs:attribute type="xs:string" name="resource" use="required">
                 <xs:annotation>
                     <xs:documentation>
@@ -1095,7 +1106,7 @@ under the License.
             </xs:documentation>
         </xs:annotation>
         <xs:complexType>
-            <xs:attribute ref="field" />
+            <xs:attribute ref="field" use="required" />
             <xs:attribute type="xs:string" name="request-name">
                 <xs:annotation>
                     <xs:documentation>
@@ -1125,7 +1136,7 @@ under the License.
             </xs:documentation>
         </xs:annotation>
         <xs:complexType>
-            <xs:attribute ref="field" />
+            <xs:attribute ref="field" use="required" />
             <xs:attribute type="xs:string" name="session-name">
                 <xs:annotation>
                     <xs:documentation>
@@ -1248,7 +1259,7 @@ under the License.
             </xs:documentation>
         </xs:annotation>
         <xs:complexType>
-            <xs:attribute ref="field" />
+            <xs:attribute ref="field" use="required" />
             <xs:attribute type="xs:string" name="from">
                 <xs:annotation>
                     <xs:documentation>
@@ -1671,7 +1682,7 @@ under the License.
             </xs:documentation>
         </xs:annotation>
         <xs:complexType>
-            <xs:attribute ref="field" />
+            <xs:attribute ref="field" use="required" />
             <xs:attribute type="xs:string" name="resource" use="required">
                 <xs:annotation>
                     <xs:documentation>
@@ -2970,15 +2981,7 @@ under the License.
                 </xs:documentation>
             </xs:annotation>
         </xs:attribute>
-        <xs:attribute name="delegator-name" type="xs:string">
-            <xs:annotation>
-                <xs:documentation>
-                    Overrides the current delegator by specifying a delegator name.
-                    
-                    Optional. Attribute type: constant, ${expression}.
-                </xs:documentation>
-            </xs:annotation>
-        </xs:attribute>
+        <xs:attribute ref="delegator-name" />
     </xs:attributeGroup>
 
     <xs:element name="clear-cache-line" substitutionGroup="EntityValueOperations">
@@ -3010,6 +3013,7 @@ under the License.
                 </xs:documentation>
                 </xs:annotation>
             </xs:attribute>
+            <xs:attribute ref="delegator-name" />
         </xs:complexType>
     </xs:element>
 
@@ -3020,7 +3024,9 @@ under the License.
                 This element should be used sparingly because of the performance impact.
             </xs:documentation>
         </xs:annotation>
-        <xs:complexType/>
+        <xs:complexType>
+            <xs:attribute ref="delegator-name" />
+        </xs:complexType>
     </xs:element>
 
     <xs:element name="clone-value" substitutionGroup="EntityValueOperations">
@@ -3328,15 +3334,7 @@ under the License.
                     </xs:documentation>
                 </xs:annotation>
             </xs:attribute>
-            <xs:attribute name="delegator-name" type="xs:string">
-                <xs:annotation>
-                    <xs:documentation>
-                        Overrides the current delegator by specifying a delegator name.
-                        
-                        Optional. Attribute type: constant, ${expression}.
-                    </xs:documentation>
-                </xs:annotation>
-            </xs:attribute>
+            <xs:attribute ref="delegator-name" />
         </xs:complexType>
     </xs:element>
 
@@ -3385,15 +3383,7 @@ under the License.
                 </xs:annotation>
             </xs:attribute>
             <xs:attribute ref="error-list-name" />
-            <xs:attribute type="xs:string" name="delegator-name">
-                <xs:annotation>
-                    <xs:documentation>
-                        Overrides the current delegator by specifying a delegator name.
-                        
-                        Optional. Attribute type: constant, ${expression}.
-                    </xs:documentation>
-                </xs:annotation>
-            </xs:attribute>
+            <xs:attribute ref="delegator-name" />
         </xs:complexType>
     </xs:element>
 
@@ -3448,6 +3438,7 @@ under the License.
                     </xs:documentation>
                 </xs:annotation>
             </xs:attribute>
+            <xs:attribute ref="delegator-name" />
         </xs:complexType>
     </xs:element>
 
@@ -3671,15 +3662,7 @@ under the License.
                     </xs:documentation>
                 </xs:annotation>
             </xs:attribute>
-            <xs:attribute type="xs:string" name="delegator-name">
-                <xs:annotation>
-                    <xs:documentation>
-                        Overrides the current delegator by specifying a delegator name.
-                        
-                        Optional. Attribute type: constant, ${expression}.
-                    </xs:documentation>
-                </xs:annotation>
-            </xs:attribute>
+            <xs:attribute ref="delegator-name" />
         </xs:complexType>
     </xs:element>
 
@@ -3738,15 +3721,7 @@ under the License.
                     </xs:documentation>
                 </xs:annotation>
             </xs:attribute>
-            <xs:attribute type="xs:string" name="delegator-name">
-                <xs:annotation>
-                    <xs:documentation>
-                        Overrides the current delegator by specifying a delegator name.
-                        
-                        Optional. Attribute type: constant, ${expression}.
-                    </xs:documentation>
-                </xs:annotation>
-            </xs:attribute>
+            <xs:attribute ref="delegator-name" />
         </xs:complexType>
     </xs:element>
 
@@ -4041,6 +4016,7 @@ under the License.
                     </xs:documentation>
                 </xs:annotation>
             </xs:attribute>
+            <xs:attribute ref="delegator-name" />
         </xs:complexType>
     </xs:element>
 
@@ -4151,6 +4127,7 @@ under the License.
                     </xs:documentation>
                 </xs:annotation>
             </xs:attribute>
+            <xs:attribute ref="delegator-name" />
         </xs:complexType>
     </xs:element>
 
@@ -4181,6 +4158,7 @@ under the License.
                     </xs:documentation>
                 </xs:annotation>
             </xs:attribute>
+            <xs:attribute ref="delegator-name" />
         </xs:complexType>
     </xs:element>
 
@@ -4287,7 +4265,7 @@ under the License.
                     </xs:documentation>
                 </xs:annotation>
             </xs:attribute>
-            <xs:attribute ref="field" />
+            <xs:attribute ref="field" use="required" />
             <xs:attribute type="xs:string" name="stagger-max">
                 <xs:annotation>
                     <xs:documentation>
@@ -4309,6 +4287,7 @@ under the License.
                     </xs:documentation>
                 </xs:annotation>
             </xs:attribute>
+            <xs:attribute ref="delegator-name" />
         </xs:complexType>
     </xs:element>
 
@@ -4416,6 +4395,7 @@ under the License.
                     </xs:documentation>
                 </xs:annotation>
             </xs:attribute>
+            <xs:attribute ref="delegator-name" />
         </xs:complexType>
     </xs:element>
 

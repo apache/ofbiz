@@ -63,7 +63,7 @@ public final class RemoveValue extends MethodOperation {
         }
         boolean doCacheClear = !"false".equals(doCacheClearFse.expandString(methodContext.getEnvMap()));
         try {
-            methodContext.getDelegator().removeValue(value, doCacheClear);
+            value.getDelegator().removeValue(value, doCacheClear);
         } catch (GenericEntityException e) {
             String errMsg = "Exception thrown while removing entity value: " + e.getMessage();
             Debug.logWarning(e, errMsg, module);
