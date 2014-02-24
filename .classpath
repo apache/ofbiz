@@ -37,7 +37,8 @@
     <classpathentry kind="lib" path="framework/base/lib/jdbm-1.0-SNAPSHOT.jar"/>
     <classpathentry kind="lib" path="framework/base/lib/jdom-1.1.jar"/>
     <classpathentry kind="lib" path="framework/base/lib/jpim-0.1.jar"/>
-    <classpathentry kind="lib" path="framework/base/lib/juel-2.2.1.jar"/>
+    <classpathentry kind="lib" path="framework/base/lib/juel-impl-2.2.7.jar"/>
+    <classpathentry kind="lib" path="framework/base/lib/juel-spi-2.2.7.jar"/>
     <classpathentry kind="lib" path="framework/base/lib/junit-dep-4.10.jar"/>
     <classpathentry kind="lib" path="framework/base/lib/log4j-1.2.17.jar"/>
     <classpathentry kind="lib" path="framework/base/lib/mail-1.5.1.jar"/>
@@ -85,6 +86,7 @@
     <classpathentry kind="lib" path="framework/base/lib/j2eespecs/geronimo-jta_1.1_spec-1.1.1.jar"/>
     <classpathentry kind="lib" path="framework/base/lib/j2eespecs/geronimo-saaj_1.3_spec-1.1.jar"/>
     <classpathentry kind="lib" path="framework/base/lib/j2eespecs/annotations-api-3.0.jar"/>
+    <classpathentry kind="lib" path="framework/base/lib/j2eespecs/el-api-2.2.jar"/>
     <classpathentry kind="lib" path="framework/base/lib/j2eespecs/jsp-api-2.2.jar"/>
     <classpathentry kind="lib" path="framework/base/lib/j2eespecs/servlet-api-3.0.jar"/>
     <classpathentry kind="lib" path="framework/base/lib/scripting/antlr-2.7.6.jar"/>
@@ -99,12 +101,15 @@
     <classpathentry kind="lib" path="framework/base/lib/scripting/jython-nooro.jar"/>
     <classpathentry kind="lib" path="specialpurpose/birt/lib/org.eclipse.birt.runtime_4.3.1.v20130918-1142.jar"/>
     <classpathentry kind="lib" path="specialpurpose/birt/lib/viewservlets.jar"/>
-    <classpathentry kind="lib" path="framework/catalina/lib/ecj-4.2.2.jar"/>
-    <classpathentry kind="lib" path="framework/catalina/lib/tomcat-7.0.50-catalina-ha.jar"/>
-    <classpathentry kind="lib" path="framework/catalina/lib/tomcat-7.0.50-catalina-tribes.jar"/>
-    <classpathentry kind="lib" path="framework/catalina/lib/tomcat-7.0.50-tomcat-embed-core.jar"/>
-    <classpathentry kind="lib" path="framework/catalina/lib/tomcat-7.0.50-tomcat-embed-jasper.jar"/>
-    <classpathentry kind="lib" path="framework/catalina/lib/tomcat-7.0.50-tomcat-embed-logging-log4j.jar"/>
+    <classpathentry kind="lib" path="framework/catalina/lib/ecj-4.3.1.jar"/>
+    <classpathentry kind="lib" path="framework/catalina/lib/tomcat-7.0.52-catalina-ha.jar"/>
+    <classpathentry kind="lib" path="framework/catalina/lib/tomcat-7.0.52-catalina-tribes.jar"/>
+    <classpathentry kind="lib" path="framework/catalina/lib/tomcat-7.0.52-catalina.jar"/>
+    <classpathentry kind="lib" path="framework/catalina/lib/tomcat-7.0.52-jasper.jar"/>
+    <classpathentry kind="lib" path="framework/catalina/lib/tomcat-7.0.52-tomcat-api.jar"/>
+    <classpathentry kind="lib" path="framework/catalina/lib/tomcat-7.0.52-tomcat-coyote.jar"/>
+    <classpathentry kind="lib" path="framework/catalina/lib/tomcat-7.0.52-tomcat-juli.jar"/>
+    <classpathentry kind="lib" path="framework/catalina/lib/tomcat-7.0.52-tomcat-util.jar"/>
     <classpathentry kind="lib" path="framework/entity/lib/commons-dbcp-1.4.jar"/>
     <classpathentry kind="lib" path="framework/geronimo/lib/geronimo-connector-3.1.1.jar"/>
     <classpathentry kind="lib" path="framework/geronimo/lib/geronimo-transaction-3.1.1.jar"/>
@@ -135,7 +140,6 @@
     <classpathentry kind="lib" path="framework/service/lib/neethi-2.0.4.jar"/>
     <classpathentry kind="lib" path="framework/service/lib/XmlSchema-1.4.3.jar"/>
     <classpathentry kind="lib" path="framework/testtools/lib/org.springframework.test-3.1.0.M2.jar"/>
-    <classpathentry kind="lib" path="framework/testtools/lib/org.springframework.web-3.1.0.M2.jar"/>
     <classpathentry kind="lib" path="framework/testtools/lib/org.springframework.core-3.1.0.M2.jar"/>
     <classpathentry kind="lib" path="framework/webapp/lib/DataVision-1.0.0.jar"/>
     <classpathentry kind="lib" path="framework/webapp/lib/ezmorph-0.9.1.jar"/>
