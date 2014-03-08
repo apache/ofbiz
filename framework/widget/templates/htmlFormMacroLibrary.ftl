@@ -597,10 +597,10 @@ Parameter: initiallyCollapsed, Not used.
 Parameter: lastViewName, String, optional - If the ajaxEnabled parameter is true, the contents of lastViewName will be appended to the Ajax URL.
 -->
 <#macro renderLookupField name formName fieldFormName className="" alert="false" value="" size="" maxlength="" id="" event="" action="" readonly=false autocomplete="" descriptionFieldName="" targetParameterIter="" imgSrc="" ajaxUrl="" ajaxEnabled=javaScriptEnabled presentation="layer" width="" height="" position="" fadeBackground="true" clearText="" showDescription="" initiallyCollapsed="" lastViewName="main" >
-<#if Static["org.ofbiz.widget.ModelWidget"].widgetBoundaryCommentsEnabled(context)>
-<!-- @renderLookupField -->
-</#if>
-<#if (!ajaxUrl?has_content) && ajaxEnabled>
+  <#if Static["org.ofbiz.widget.ModelWidget"].widgetBoundaryCommentsEnabled(context)>
+  <!-- @renderLookupField -->
+  </#if>
+  <#if (!ajaxUrl?has_content) && ajaxEnabled?has_content && ajaxEnabled>
     <#local ajaxUrl = requestAttributes._REQUEST_HANDLER_.makeLink(request, response, fieldFormName)/>
     <#local ajaxUrl = id + "," + ajaxUrl + ",ajaxLookup=Y" />
 </#if>
