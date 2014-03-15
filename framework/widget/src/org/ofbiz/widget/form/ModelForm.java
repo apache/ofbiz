@@ -1062,6 +1062,9 @@ public class ModelForm extends ModelWidget {
             }
             //Debug.logInfo("In single form evaluating use-when for field " + currentFormField.getName() + ": " + currentFormField.getUseWhen(), module);
             if (!currentFormField.shouldUse(context)) {
+                if (UtilValidate.isNotEmpty(lastFormField)) {
+                    currentFormField = lastFormField;
+                }
                 continue;
             }
             alreadyRendered.add(currentFormField.getName());
@@ -2685,6 +2688,7 @@ public class ModelForm extends ModelWidget {
         String size = this.overrideListSize.expandString(context);
         if (UtilValidate.isNotEmpty(size)) {
             try {
+            	size =size.replaceAll("[^0-9.]", "");
                 listSize = Integer.parseInt(size);
             } catch (NumberFormatException e) {
                 Debug.logError(e, "Error getting override list size from value " + size, module);
