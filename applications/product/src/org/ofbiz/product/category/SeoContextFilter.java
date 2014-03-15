@@ -112,8 +112,8 @@ public class SeoContextFilter extends ContextFilter {
         httpRequest.setAttribute("_CONTEXT_ROOT_", config.getServletContext().getRealPath("/"));
 
         // set the server root url
-        StringBuffer serverRootUrl = UtilHttp.getServerRootUrl(httpRequest);
-        httpRequest.setAttribute("_SERVER_ROOT_URL_", serverRootUrl.toString());
+        String serverRootUrl = UtilHttp.getServerRootUrl(httpRequest);
+        httpRequest.setAttribute("_SERVER_ROOT_URL_", serverRootUrl);
 
         // request attributes from redirect call
         String reqAttrMapHex = (String) httpRequest.getSession().getAttribute("_REQ_ATTR_MAP_");

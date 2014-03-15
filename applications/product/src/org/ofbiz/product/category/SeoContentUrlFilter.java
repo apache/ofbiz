@@ -65,8 +65,7 @@ public class SeoContentUrlFilter extends ContextFilter {
         // Set request attribute and session
         UrlServletHelper.setRequestAttributes(request, delegator, servletContext);
         String urlContentId = null;
-        StringBuffer pathInfoBuffer = UtilHttp.getFullRequestUrl(httpRequest);
-        String pathInfo = pathInfoBuffer.toString();
+        String pathInfo = UtilHttp.getFullRequestUrl(httpRequest);
         if (UtilValidate.isNotEmpty(pathInfo)) {
             String alternativeUrl = pathInfo.substring(pathInfo.lastIndexOf("/"));
             if (alternativeUrl.endsWith("-content")) {
