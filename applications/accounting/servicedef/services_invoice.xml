@@ -155,7 +155,7 @@ under the License.
         <auto-attributes mode="OUT" include="pk" optional="false"/>
         <auto-attributes mode="IN" include="nonpk" optional="true"/>
     </service>
-    <service name="createInvoiceForOrderAllItems" engine="java"
+    <service name="createInvoiceForOrderAllItems" engine="java" export="true"
         location="org.ofbiz.accounting.invoice.InvoiceServices" invoke="createInvoiceForOrderAllItems">
         <description>
             Create an invoice from existing order using all order items
@@ -164,7 +164,7 @@ under the License.
         <attribute name="orderId" type="String" mode="IN" optional="false"/>
         <attribute name="invoiceId" type="String" mode="OUT" optional="true"/>
     </service>
-    <service name="createInvoiceForOrder" engine="java"
+    <service name="createInvoiceForOrder" engine="java" export="true"
         location="org.ofbiz.accounting.invoice.InvoiceServices" invoke="createInvoiceForOrder">
         <description>
             Create an invoice from existing order
@@ -269,7 +269,7 @@ under the License.
         <attribute name="shipmentId" type="String" mode="IN" optional="false"/>
         <attribute name="invoicesCreated" type="List" mode="OUT" optional="true"/>
     </service>
-    <service name="sendInvoicePerEmail" engine="simple"
+    <service name="sendInvoicePerEmail" engine="simple" export="true"
         location="component://accounting/script/org/ofbiz/accounting/invoice/InvoiceServices.xml" invoke="sendInvoicePerEmail">
         <description>Send an invoice per email</description>
         <attribute name="invoiceId" type="String" mode="IN" optional="false"/>

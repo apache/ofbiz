@@ -25,7 +25,7 @@ under the License.
     <version>1.0</version>
 
     <!-- Shipment Services -->
-    <service name="createCarrierShipmentMethod" engine="simple"
+    <service name="createCarrierShipmentMethod" engine="simple" export="true"
             location="component://product/script/org/ofbiz/shipment/shipment/ShipmentServices.xml" invoke="createCarrierShipmentMethod" auth="true">
         <description>Creates A CarrierShipmentMethod</description>
         <auto-attributes entity-name="CarrierShipmentMethod" include="pk" mode="IN" optional="false"/>

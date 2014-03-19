@@ -89,7 +89,7 @@ under the License.
         <attribute name="comments" type="String" mode="IN" optional="true"/>
     </service>
 
-    <service name="storeOrder" engine="java" validate="true" auth="true"
+    <service name="storeOrder" engine="java" validate="true" auth="true" export="true"
             location="org.ofbiz.order.order.OrderServices" invoke="createOrder">
         <description>Creates order entities</description>
         <attribute name="partyId" type="String" mode="IN" optional="false"/>
@@ -154,7 +154,7 @@ under the License.
         <attribute name="shoppingCart" type="org.ofbiz.order.shoppingcart.ShoppingCart" mode="IN" optional="false"/>
         <attribute name="manualHold" type="Boolean" mode="IN" optional="true"/>
     </service>
-    <service name="createOrderFromShoppingCart" engine="java"
+    <service name="createOrderFromShoppingCart" engine="java" export="true"
             location="org.ofbiz.order.order.OrderServices" invoke="createOrderFromShoppingCart" auth="false">
         <attribute name="shoppingCart" type="org.ofbiz.order.shoppingcart.ShoppingCart" mode="INOUT" optional="false"/>
         <attribute name="orderId" type="String" mode="OUT" optional="false"/>
@@ -342,7 +342,7 @@ under the License.
         <!-- <attribute name="locale" type="" mode="IN" optional="false"/> -->
         <attribute name="changeMap" type="Map" mode="IN" optional="false"/>
     </service>
-    <service name="appendOrderItem" engine="java" auth="true"
+    <service name="appendOrderItem" engine="java" auth="true" export="true"
             location="org.ofbiz.order.order.OrderServices" invoke="addItemToApprovedOrder">
         <description>Append an item to an existing order</description>
         <attribute name="orderId" type="String" mode="INOUT" optional="false"/>
@@ -440,7 +440,7 @@ under the License.
         <attribute name="roleTypeId" type="String" mode="IN"/>
     </service>
 
-    <service name="createOrderPaymentPreference" engine="java"
+    <service name="createOrderPaymentPreference" engine="java" export="true"
             location="org.ofbiz.order.order.OrderServices" invoke="createPaymentPreference">
         <description>Creates an order payment preference</description>
         <attribute name="orderId" type="String" mode="IN"/>
@@ -658,13 +658,13 @@ under the License.
     </service>
 
     <!-- OrderHeader -->
-    <service name="createOrderHeader" default-entity-name="OrderHeader" engine="simple"
+    <service name="createOrderHeader" default-entity-name="OrderHeader" engine="simple" export="true"
             location="component://order/script/org/ofbiz/order/order/OrderServices.xml" invoke="createOrderHeader" auth="true">
         <description>Create OrderHeader</description>
         <auto-attributes include="pk" mode="INOUT" optional="true"/>
         <auto-attributes include="nonpk" mode="IN" optional="true"/>
     </service>
-    <service name="updateOrderHeader" default-entity-name="OrderHeader" engine="simple"
+    <service name="updateOrderHeader" default-entity-name="OrderHeader" engine="simple" export="true"
             location="component://order/script/org/ofbiz/order/order/OrderServices.xml" invoke="updateOrderHeader" auth="true">
         <description>Update OrderHeader</description>
         <auto-attributes include="pk" mode="IN" optional="false"/>
@@ -684,7 +684,7 @@ under the License.
     </service>
 
     <!-- Order Shipping and Contacts -->
-    <service name="createOrderItemShipGroup" default-entity-name="OrderItemShipGroup" engine="simple"
+    <service name="createOrderItemShipGroup" default-entity-name="OrderItemShipGroup" engine="simple" export="true"
             location="component://order/script/org/ofbiz/order/order/OrderServices.xml" invoke="createOrderItemShipGroup" auth="true">
         <description>Creates a new OrderItemShipGroup.</description>
         <auto-attributes mode="IN" include="nonpk" optional="true"/>
@@ -792,7 +792,7 @@ under the License.
     </service>
 
     <!-- order lookup services -->
-    <service name="findOrders" engine="java" transaction-timeout="300" auth="true"
+    <service name="findOrders" engine="java" transaction-timeout="300" auth="true" export="true"
             location="org.ofbiz.order.order.OrderLookupServices" invoke="findOrders">
         <description>Uses dynamic view entity to find orders; returns a list of Order (OrderHeader) objects</description>
         <!-- order header fields -->
@@ -929,7 +929,7 @@ under the License.
             This is done by looking for all subscriptions which are active and where the automaticExtend flag is set to "Y"</description>
     </service>
 
-    <service name="createUpdateShippingAddress" engine="simple"
+    <service name="createUpdateShippingAddress" engine="simple" export="true"
             location="component://order/script/org/ofbiz/order/order/OrderServices.xml" invoke="createUpdateShippingAddress" auth="true">
         <description>Creates new shipping address and update existing address</description>
         <attribute name="productStoreId" mode="IN" type="String" optional="true"/>
@@ -950,7 +950,7 @@ under the License.
         <attribute name="billToContactMechId" mode="IN" type="String" optional="true"/>
     </service>
 
-    <service name="createUpdateBillingAddress" engine="simple"
+    <service name="createUpdateBillingAddress" engine="simple" export="true"
             location="component://order/script/org/ofbiz/order/order/OrderServices.xml" invoke="createUpdateBillingAddress" auth="true">
         <description>Creates new billing address and update existing address</description>
         <attribute name="productStoreId" mode="IN" type="String" optional="true"/>
@@ -1141,5 +1141,12 @@ under the License.
         <description>Delete Order Item Attribute</description>
         <auto-attributes mode="IN" entity-name="OrderItemAttribute" include="pk" optional="false"/>
     </service>
+
+    <service name="sendSOCreation" engine="java" auth="true"
+	     location="org.ofbiz.order.order.OrderServices" invoke="sendSOCreation">
+        <description>send SO creation</description>
+        <attribute mode="IN" name="orderId" type="String" optional="false"/>
+    </service>
+
     
 </services>

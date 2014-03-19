@@ -37,7 +37,7 @@ under the License.
         <override name="description" allow-html="safe"/>
         <override name="longDescription" allow-html="safe"/>
     </service>
-    <service name="createProduct" default-entity-name="Product" engine="simple"
+    <service name="createProduct" default-entity-name="Product" engine="simple" export="true"
                 location="component://product/script/org/ofbiz/product/product/ProductServices.xml" invoke="createProduct" auth="true">
         <description>Create a Product</description>
         <implements service="interfaceProduct"/>
@@ -237,7 +237,7 @@ under the License.
     </service>
 
     <!-- Product Price Services -->
-    <service name="createProductPrice" default-entity-name="ProductPrice" engine="simple"
+    <service name="createProductPrice" default-entity-name="ProductPrice" engine="simple" export="true"
                 location="component://product/script/org/ofbiz/product/price/PriceServices.xml" invoke="createProductPrice" auth="true">
         <description>
             Create an ProductPrice. 
@@ -481,7 +481,7 @@ under the License.
     </service>
 
     <!-- SupplierProduct Services -->
-    <service name="createSupplierProduct" default-entity-name="SupplierProduct" engine="simple"
+    <service name="createSupplierProduct" default-entity-name="SupplierProduct" engine="simple" export="true"
         location="component://product/script/org/ofbiz/product/supplier/SupplierProductServices.xml" invoke="createSupplierProduct" auth="true">
         <description>Create a new SupplierProduct record</description>
         <required-permissions join-type="AND">
@@ -612,7 +612,7 @@ under the License.
     <!-- ======================================== -->
     <!-- Product Catalog Services -->
     <!-- ======================================== -->
-    <service name="createProdCatalog" default-entity-name="ProdCatalog" engine="simple"
+    <service name="createProdCatalog" default-entity-name="ProdCatalog" engine="simple" export="true"
                 location="component://product/script/org/ofbiz/product/catalog/CatalogServices.xml" invoke="createProdCatalog" auth="true">
         <description>Create a ProdCatalog</description>
         <permission-service service-name="catalogPermissionCheck" main-action="CREATE"/>
@@ -635,7 +635,7 @@ under the License.
         <auto-attributes include="pk" mode="IN" optional="false"/>
     </service>
 
-    <service name="addProductCategoryToProdCatalog" default-entity-name="ProdCatalogCategory" engine="simple"
+    <service name="addProductCategoryToProdCatalog" default-entity-name="ProdCatalogCategory" engine="simple" export="true"
                 location="component://product/script/org/ofbiz/product/catalog/CatalogServices.xml" invoke="addProductCategoryToProdCatalog" auth="true">
         <description>Add ProductCategory To ProdCatalog</description>
         <permission-service service-name="catalogPermissionCheck" main-action="CREATE"/>
@@ -658,7 +658,7 @@ under the License.
         <auto-attributes include="pk" mode="IN" optional="false"/>
     </service>
 
-    <service name="addProdCatalogToParty" default-entity-name="ProdCatalogRole" engine="simple"
+    <service name="addProdCatalogToParty" default-entity-name="ProdCatalogRole" engine="simple" export="true"
                 location="component://product/script/org/ofbiz/product/catalog/CatalogServices.xml" invoke="addProdCatalogToParty" auth="true">
         <description>Add ProdCatalog To Party</description>
         <permission-service service-name="prodCatalogToPartyPermissionCheck" main-action="CREATE"/>
@@ -683,7 +683,7 @@ under the License.
     <!-- ======================================== -->
     <!-- Product Category Services -->
     <!-- ======================================== -->
-    <service name="createProductCategory" default-entity-name="ProductCategory" engine="simple"
+    <service name="createProductCategory" default-entity-name="ProductCategory" engine="simple" export="true"
                 location="component://product/script/org/ofbiz/product/category/CategoryServices.xml" invoke="createProductCategory" auth="true">
         <description>Create an ProductCategory</description>
         <auto-attributes include="pk" mode="INOUT" optional="true"/>
@@ -713,7 +713,7 @@ under the License.
         <attribute name="duplicateRoles" type="String" mode="IN" optional="true"/>
     </service>
 
-    <service name="safeAddProductToCategory" default-entity-name="ProductCategoryMember" engine="simple"
+    <service name="safeAddProductToCategory" default-entity-name="ProductCategoryMember" engine="simple" export="true"
                 location="component://product/script/org/ofbiz/product/category/CategoryServices.xml" invoke="addProductToCategory" auth="true">
         <description>Add Product To Category</description>
         <permission-service service-name="checkCategoryPermissionWithViewPurchaseAllow" main-action="CREATE"/>
@@ -732,7 +732,7 @@ under the License.
         <attribute name="categories" type="Object" mode="IN" optional="false"/>
         <override name="fromDate" optional="true"/>
     </service>
-    <service name="addProductToCategory" default-entity-name="ProductCategoryMember" engine="simple"
+    <service name="addProductToCategory" default-entity-name="ProductCategoryMember" engine="simple" export="true"
                 location="component://product/script/org/ofbiz/product/category/CategoryServices.xml" invoke="addProductToCategory" auth="true">
         <description>Add Product To Category</description>
         <permission-service service-name="checkCategoryPermissionWithViewPurchaseAllow" main-action="CREATE"/>
@@ -767,7 +767,7 @@ under the License.
         <attribute name="currencyUomId" type="String" mode="IN" optional="true"/>
     </service>
 
-    <service name="addPartyToCategory" engine="simple"
+    <service name="addPartyToCategory" engine="simple" export="true"
                 location="component://product/script/org/ofbiz/product/category/CategoryServices.xml" invoke="addPartyToCategory" auth="true">
         <description>Add Party To Category</description>
         <attribute name="productCategoryId" type="String" mode="IN" optional="false"/>
@@ -796,7 +796,7 @@ under the License.
         <attribute name="fromDate" type="Timestamp" mode="IN" optional="false"/>
     </service>
 
-    <service name="addPartyToProduct" engine="simple"
+    <service name="addPartyToProduct" engine="simple" export="true"
                 location="component://product/script/org/ofbiz/product/product/ProductServices.xml" invoke="addPartyToProduct" auth="true">
         <description>Add Party To Product</description>
         <attribute name="productId" type="String" mode="IN" optional="false"/>

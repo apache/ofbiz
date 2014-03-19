@@ -86,6 +86,13 @@ import org.ofbiz.service.ServiceUtil;
 
 import com.ibm.icu.util.Calendar;
 
+/* Remote RMI calls from OfBiz */
+import java.rmi.Naming;
+import java.rmi.NotBoundException;
+import java.rmi.RemoteException;
+import java.net.MalformedURLException;
+import org.ofbiz.service.rmi.RemoteDispatcher;
+
 /**
  * Order Processing Services
  */
@@ -5741,4 +5748,78 @@ public class OrderServices {
 
         return ServiceUtil.returnSuccess();
     }
+
+    /** Service to send data for SO creation on second OfBiz instance */
+    public static Map<String, Object> sendSOCreation(DispatchContext ctx, Map<String, ? extends Object> context) {
+
+        /*
+	Boolean connectError;
+
+	try {
+	    connectError = false;
+	    RemoteDispatcher remoteDispatcher = (RemoteDispatcher) Naming.lookup(UtilProperties.getPropertyValue("remoteRmi.properties","remoteURL"));
+	} catch (NotBoundException e) {
+	    connectError = true;
+	    e.printStackTrace();
+	} catch (MalformedURLException e) {
+	    connectError = true;
+	    e.printStackTrace();
+	} catch (RemoteException e) {
+	    connectError = true;
+	    e.printStackTrace();
+	}
+	if (connectError){
+	    return ServiceUtil.returnError("remote RMI generic error.");
+	}
+        */
+
+        Delegator delegator = ctx.getDelegator();
+        LocalDispatcher dispatcher = ctx.getDispatcher();
+        //Security security = ctx.getSecurity();
+
+        Locale locale = (Locale) context.get("locale");
+        Map<String, Object> successResult = ServiceUtil.returnSuccess();
+
+        GenericValue userLogin = (GenericValue) context.get("userLogin");
+        // get the order type
+        String orderId = (String) context.get("orderId");
+
+
+        GenericValue orderHeader = null;
+
+        try {
+            orderHeader = delegator.findOne("OrderHeader",UtilMisc.toMap("orderId",orderId),false);
+            List<GenericValue> orderItems = orderHeader.getRelated("OrderItem");
+
+        } catch (GenericEntityException e) {
+            Debug.logError(e, module);
+        }
+
+	//hmpars.put("currencyUom","USD");
+	//hmpars.put("orderAdjustments",orderAdjustments);
+	//hmpars.put("orderItems",orderItems);
+	//hmpars.put("orderTypeId","PURCHASE_ORDER");
+
+	/*
+	GenericValue = remoteDispatcher.runSync("storeOrder",
+				      UtilMisc.toMap(
+						     "currencyUom","USD",
+						     "orderNotes",orderNotes
+						     )
+				      );
+	*/
+
+	orderHeader.set("orderTypeId","PURCHASE_ORDER");
+
+	try {
+	    orderHeader.store();
+        } catch (GenericEntityException e) {
+            Debug.logError(e, module);
+        }
+
+	
+	return successResult;
+    }
+
+
 }

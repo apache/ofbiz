@@ -25,7 +25,7 @@ under the License.
     <version>1.0</version>
 
     <!-- Billing Account Services -->
-    <service name="createBillingAccount" engine="simple"
+    <service name="createBillingAccount" engine="simple" export="true"
             location="component://accounting/script/org/ofbiz/accounting/payment/BillingServices.xml" invoke="createBillingAccount">
         <description>Create a Billing Account</description>
         <permission-service service-name="acctgBillingAcctCheck" main-action="CREATE"/>
