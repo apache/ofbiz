@@ -25,7 +25,7 @@ under the License.
     <version>1.0</version>
 
     <!-- Product View Services -->
-    <service name="getProduct" engine="java" export="true"
+    <service name="getProduct" engine="java"
             location="org.ofbiz.product.product.ProductServices" invoke="prodFindProduct">
         <description>Gets a product value object.</description>
         <attribute name="productId" type="String" mode="IN"/>

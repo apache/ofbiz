@@ -210,7 +210,7 @@ under the License.
         <attribute name="applyStorePromotions" type="String" mode="IN" optional="true"/>
         <attribute name="quoteId" type="String" mode="OUT" optional="false"/>
     </service>
-    <service name="createQuoteFromShoppingList" engine="simple" auth="true" export="true"
+    <service name="createQuoteFromShoppingList" engine="simple" auth="true"
             location="component://order/script/org/ofbiz/order/quote/QuoteServices.xml" invoke="createQuoteFromShoppingList">
         <description>Creates a new quote from a shopping list</description>
         <attribute name="shoppingListId" type="String" mode="IN" optional="false"/>

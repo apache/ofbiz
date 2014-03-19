@@ -58,7 +58,7 @@ under the License.
        </required-permissions>
     </service>
 
-    <service name="createNote" engine="java" export="true"
+    <service name="createNote" engine="java"
         location="org.ofbiz.common.CommonServices" invoke="createNote">
         <description>Create a new note record</description>
         <attribute name="partyId" type="String" mode="INOUT" optional="true"/>
@@ -366,11 +366,11 @@ under the License.
     </service>
 
     <!-- UserLogin services -->
-    <service name="userLogin" engine="java" location="org.ofbiz.common.login.LoginServices" invoke="userLogin" export="true">
+    <service name="userLogin" engine="java" location="org.ofbiz.common.login.LoginServices" invoke="userLogin">
         <description>Used to Automatically Authenticate a username/password; create a UserLogin object</description>
         <implements service="authenticationInterface"/>
     </service>
-    <service name="createUserLogin" engine="java" auth="false" export="true"
+    <service name="createUserLogin" engine="java" auth="false"
         location="org.ofbiz.common.login.LoginServices" invoke="createUserLogin">
         <description>Create a UserLogin</description>
         <attribute name="userLoginId" type="String" mode="IN" optional="false"/>

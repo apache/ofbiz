@@ -159,7 +159,7 @@ under the License.
         <attribute name="custRequestName" type="String" mode="IN" optional="true"/>
         <attribute name="custRequestId" type="String" mode="OUT" optional="false"/>
     </service>
-    <service name="createCustRequestFromShoppingList" engine="simple" auth="true" export="true"
+    <service name="createCustRequestFromShoppingList" engine="simple" auth="true"
             location="component://order/script/org/ofbiz/order/request/CustRequestServices.xml" invoke="createCustRequestFromShoppingList">
         <description>Creates a new quote from a shopping list</description>
         <attribute name="shoppingListId" type="String" mode="IN" optional="false"/>

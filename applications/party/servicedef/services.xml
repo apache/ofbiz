@@ -109,7 +109,7 @@ under the License.
         <override name="firstName" optional="false"/>
         <override name="lastName" optional="false"/>
     </service>
-    <service name="createPartyGroup" engine="java" default-entity-name="PartyGroup" export="true"
+    <service name="createPartyGroup" engine="java" default-entity-name="PartyGroup"
             location="org.ofbiz.party.party.PartyServices" invoke="createPartyGroup" auth="false">
         <description>Create a PartyGroup</description>
         <auto-attributes mode="INOUT" include="pk" optional="true"/>
@@ -262,7 +262,7 @@ under the License.
     </service>
 
     <!-- Party Role services -->
-    <service name="createPartyRole" engine="simple" export="true"
+    <service name="createPartyRole" engine="simple"
             location="component://party/script/org/ofbiz/party/party/PartyServices.xml" invoke="createPartyRole" auth="true">
         <description>Create a Party Role (add a Role to a Party). The logged in user must have PARTYMGR_CREATE or have
             permission to change the role of this partyId</description>
@@ -383,14 +383,14 @@ under the License.
     </service>
 
     <!-- ContactMech services -->
-    <service name="createContactMech" engine="simple" export="true"
+    <service name="createContactMech" engine="simple"
             location="component://party/script/org/ofbiz/party/contact/ContactMechServices.xml" invoke="createContactMech" auth="true">
         <description>Create a ContactMech</description>
         <auto-attributes entity-name="ContactMech" include="nonpk" mode="IN" optional="false"/>
         <auto-attributes entity-name="ContactMech" include="pk" mode="INOUT" optional="true"/>
         <override name="infoString" optional="true"/>
     </service>
-    <service name="createPartyContactMech" engine="simple" export="true"
+    <service name="createPartyContactMech" engine="simple"
             location="component://party/script/org/ofbiz/party/contact/PartyContactMechServices.xml" invoke="createPartyContactMech" auth="true">
         <description>Create a PartyContactMech</description>
         <permission-service service-name="partyContactMechPermissionCheck" main-action="CREATE"/>
@@ -460,7 +460,7 @@ under the License.
         <attribute name="partyId" type="String" mode="OUT" optional="true"/>
         <attribute name="contactMechId" type="String" mode="OUT" optional="true"/>
     </service>
-    <service name="createPartyPostalAddress" engine="simple" export="true"
+    <service name="createPartyPostalAddress" engine="simple"
             location="component://party/script/org/ofbiz/party/contact/PartyContactMechServices.xml" invoke="createPartyPostalAddress" auth="true">
         <description>Create a Postal Address</description>
         <permission-service service-name="partyContactMechPermissionCheck" main-action="CREATE"/>
@@ -1294,7 +1294,7 @@ under the License.
         <attribute name="contactMechId" type="String" mode="IN" optional="true"/>
         <attribute name="contactMechId" type="String" mode="OUT" optional="false"/>
     </service>
-    <service name="createUpdatePartyPostalAddress" engine="simple" export="true"
+    <service name="createUpdatePartyPostalAddress" engine="simple"
         location="component://party/script/org/ofbiz/party/contact/PartyContactMechServices.xml" invoke="createUpdatePartyPostalAddress" auth="false">
         <description>Create or Update a postal address</description>
         <attribute name="partyId" type="String" mode="IN" optional="false"/>

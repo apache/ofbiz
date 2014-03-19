@@ -30,7 +30,7 @@ under the License.
         <auto-attributes mode="IN" entity-name="ShoppingList" include="nonpk" optional="true"/>
         <attribute name="shippingMethodString" type="String" mode="IN" optional="true"/>
     </service>
-    <service name="createShoppingList" engine="simple" auth="false" export="true"
+    <service name="createShoppingList" engine="simple" auth="false"
             location="component://order/script/org/ofbiz/order/shoppinglist/ShoppingListServices.xml" invoke="createShoppingList">
         <description>Create a shopping list entity</description>
         <implements service="createShoppingListRecurrence"/>
@@ -86,7 +86,7 @@ under the License.
         <attribute name="shipmentMethodTypeId" type="String" mode="OUT" optional="true"/>
         <attribute name="carrierPartyId" type="String" mode="OUT" optional="true"/>
     </service>
-    <service name="makeShoppingListFromOrder" engine="java" auth="true" export="true"
+    <service name="makeShoppingListFromOrder" engine="java" auth="true"
             location="org.ofbiz.order.shoppinglist.ShoppingListServices" invoke="makeListFromOrder">
         <description>Create/Update a shopping list from an order</description>
         <implements service="createShoppingListRecurrence"/>
@@ -134,7 +134,7 @@ under the License.
         <description>Add suggestions to a shopping list</description>
         <attribute name="orderId" type="String" mode="IN" optional="false"/>
     </service>
-    <service name="addDistinctShoppingListItem" engine="simple" auth="true" export="true"
+    <service name="addDistinctShoppingListItem" engine="simple" auth="true"
             location="component://order/script/org/ofbiz/order/shoppinglist/ShoppingListServices.xml" invoke="addDistinctShoppingListItem">
         <description>Adds a shopping list item if one with the same productId does not exist</description>
         <implements service="shoppingListItemInterface"/>

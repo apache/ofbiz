@@ -108,7 +108,7 @@ under the License.
         <attribute name="correspondingPoId" type="String" mode="IN" optional="true"/>
     </service>
 
-    <service name="loadCartFromOrder" engine="java" auth="true" export="true"
+    <service name="loadCartFromOrder" engine="java" auth="true"
             location="org.ofbiz.order.shoppingcart.ShoppingCartServices" invoke="loadCartFromOrder">
         <description>Create a ShoppingCart Object based on an existing order</description>
         <attribute name="orderId" type="String" mode="IN" optional="false"/>
@@ -118,14 +118,14 @@ under the License.
         <attribute name="shoppingCart" type="org.ofbiz.order.shoppingcart.ShoppingCart" mode="OUT" optional="false"/>
     </service>
 
-    <service name="loadCartFromQuote" engine="java" auth="true" export="true"
+    <service name="loadCartFromQuote" engine="java" auth="true"
             location="org.ofbiz.order.shoppingcart.ShoppingCartServices" invoke="loadCartFromQuote">
         <description>Create a ShoppingCart Object based on an existing quote. If applyQuoteAdjustments is set to false then standard cart adjustments are generated.</description>
         <attribute name="quoteId" type="String" mode="IN" optional="false"/>
         <attribute name="applyQuoteAdjustments" type="String" mode="IN" optional="true"/>
         <attribute name="shoppingCart" type="org.ofbiz.order.shoppingcart.ShoppingCart" mode="OUT" optional="false"/>
     </service>
-    <service name="loadCartFromShoppingList" engine="java" auth="true" export="true"
+    <service name="loadCartFromShoppingList" engine="java" auth="true"
             location="org.ofbiz.order.shoppingcart.ShoppingCartServices" invoke="loadCartFromShoppingList">
         <description>Create a ShoppingCart Object based on an existing shopping list.</description>
         <attribute name="shoppingListId" type="String" mode="IN" optional="false"/>
