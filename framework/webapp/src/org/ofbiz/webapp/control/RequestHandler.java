@@ -871,8 +871,7 @@ public class RequestHandler {
         // attempt to override the default view with a call back into the control servlet,
         // so just get the target view name and use that
         String servletName = req.getServletPath();
-        if (UtilValidate.isNotEmpty(servletName) && servletName.length() > 1
-                || servletName.startsWith("/")) {
+        if (UtilValidate.isNotEmpty(servletName) && servletName.length() > 1 || servletName.startsWith("/")) {
             servletName = servletName.substring(1);
         }
         
