@@ -1842,7 +1842,7 @@
         <value xml:lang="de">Anzahl Tage für Auftragskondition : ${orderTermDays}</value>
         <value xml:lang="en">Order Term Days : ${orderTermDays}</value>
         <value xml:lang="es">Días de los términos del pedido : ${orderTermDays}</value>
-        <value xml:lang="fr">Jours des termes de la commande : ${orderTermDays}</value>
+        <value xml:lang="fr">Jours de condition de réglement de la commande : ${orderTermDays}</value>
         <value xml:lang="it">Temini Giorni Ordine : ${orderTermDays}</value>
         <value xml:lang="pt_BR">Dias para o prazo do pedido: ${orderTermDays}</value>
         <value xml:lang="ro">Termene Zile Comenzi: ${orderTermDays}</value>
@@ -1861,7 +1861,7 @@
         <value xml:lang="de">Auftragskonditions-Typ wird benötigt. </value>
         <value xml:lang="en">Order Term Type is required. </value>
         <value xml:lang="es">El tipo de término del pedido es requerido.</value>
-        <value xml:lang="fr">Le type de terme de la commande est exigé. </value>
+        <value xml:lang="fr">Le type condition de réglement de la commande est exigé. </value>
         <value xml:lang="it">Tipo Termine Ordine è richiesto. </value>
         <value xml:lang="pt_BR">Tipo de prazo de pedido é obrigatório. </value>
         <value xml:lang="ro">A fost cerut Tipul Termenelor Comenzilor. </value>
@@ -1874,7 +1874,7 @@
         <value xml:lang="de">Wert der Auftragskondition : ${orderTermValue}</value>
         <value xml:lang="en">Order Term Value : ${orderTermValue}</value>
         <value xml:lang="es">Valor de los términos del pedido : ${orderTermValue}</value>
-        <value xml:lang="fr">Valeur des termes de la commande : ${orderTermValue}</value>
+        <value xml:lang="fr">Valeur de condition de réglement de la commande : ${orderTermValue}</value>
         <value xml:lang="it">Valore Termine Ordine : ${orderTermValue}</value>
         <value xml:lang="pt_BR">Valor para o prazo do pedido: ${orderTermValue}</value>
         <value xml:lang="ro">Valoare Termen Comanda : ${orderTermValue}</value>

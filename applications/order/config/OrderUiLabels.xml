@@ -7462,7 +7462,7 @@
         <value xml:lang="de">Konditionstyp</value>
         <value xml:lang="en">Term Type</value>
         <value xml:lang="es">Tipo</value>
-        <value xml:lang="fr">Type de besoin</value>
+        <value xml:lang="fr">Type de condition de réglement</value>
         <value xml:lang="it">Tipo Termine</value>
         <value xml:lang="nl">Soort conditie</value>
         <value xml:lang="pt_BR">Tipo de prazo</value>
@@ -7477,7 +7477,7 @@
         <value xml:lang="de">Kondition Wert</value>
         <value xml:lang="en">Term Value</value>
         <value xml:lang="es">Valor</value>
-        <value xml:lang="fr">Valeur de besoin</value>
+        <value xml:lang="fr">Valeur de condition de réglement</value>
         <value xml:lang="it">Valore Termine</value>
         <value xml:lang="nl">Conditie-waarde</value>
         <value xml:lang="pt_BR">Valor do período</value>
@@ -7492,7 +7492,7 @@
         <value xml:lang="de">Auftragskonditionen</value>
         <value xml:lang="en">Order Terms</value>
         <value xml:lang="es">Condiciones del pedido</value>
-        <value xml:lang="fr">Conditions de commande</value>
+        <value xml:lang="fr">Conditions de réglement de commande</value>
         <value xml:lang="it">Condizioni d'ordine</value>
         <value xml:lang="nl">Bestelvoorwaarden</value>
         <value xml:lang="pt_BR">Condições do pedido</value>
