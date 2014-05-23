@@ -25,6 +25,7 @@ runtime/data/utilcache.*
 runtime/catalina/work/*
 runtime/jetty
 runtime/tempfiles/*
+runtime/indexes/products/
 themes/flatgrey/webapp/flatgrey/javascript-min.css
 themes/flatgrey/webapp/flatgrey/js/application-min.js
 themes/flatgrey/webapp/flatgrey/maincss-min.css
@@ -37,3 +38,4 @@ themes/flatgrey/webapp/flatgrey/mainrtl-min.css
 *#
 .*.swp
 .*.swo
+framework/entity/lib/jdbc
