@@ -1,0 +1,15 @@
+"Applied fix from trunk for revision: 1597464  " 
+------------------------------------------------------------------------
+r1597464 | jleroux | 2014-05-25 22:04:08 +0200 (dim. 25 mai 2014) | 9 lignes
+
+2 patches from Deepak Dixit for "If customer pay higher than amount due, POS issues an error 'Problem with order change'." https://issues.apache.org/jira/browse/OFBIZ-5611
+
+If customer pay higher than amount due, POS issues an error 'Problem with order change'. 
+
+Deepak: 
+This is due to changes done at r#1186102 (http://ofbiz.markmail.org/message/orewmkxnalebolke?q=1186102)
+Removed incorrect condition form createPaymentApplication service.
+Also found type in PaymentEvents.java file (Xuilabels == > XuiLabels).
+
+------------------------------------------------------------------------
+
