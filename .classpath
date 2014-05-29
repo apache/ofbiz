@@ -206,18 +206,18 @@
   <classpathentry excluding="org/enhydra/|org/ofbiz/" kind="src" path="specialpurpose/shark/src"/>
   <classpathentry kind="src" path="specialpurpose/workflow/src"/>
   <classpathentry exported="true" kind="con" path="GROOVY_DSL_SUPPORT"/>
-  <classpathentry kind="lib" path="framework/base/lib/j2eespecs/tomcat-6.0.39-annotations-api.jar"/>
-  <classpathentry kind="lib" path="framework/base/lib/j2eespecs/tomcat-6.0.39-el-api.jar"/>
-  <classpathentry kind="lib" path="framework/base/lib/j2eespecs/tomcat-6.0.39-jsp-api.jar"/>
-  <classpathentry kind="lib" path="framework/base/lib/j2eespecs/tomcat-6.0.39-servlet-api.jar"/>
-  <classpathentry kind="lib" path="framework/catalina/lib/tomcat-6.0.39-catalina-ha.jar"/>
-  <classpathentry kind="lib" path="framework/catalina/lib/tomcat-6.0.39-catalina-tribes.jar"/>
-  <classpathentry kind="lib" path="framework/catalina/lib/tomcat-6.0.39-catalina.jar"/>
-  <classpathentry kind="lib" path="framework/catalina/lib/tomcat-6.0.39-jasper-el.jar"/>
-  <classpathentry kind="lib" path="framework/catalina/lib/tomcat-6.0.39-jasper.jar"/>
-  <classpathentry kind="lib" path="framework/catalina/lib/tomcat-6.0.39-tomcat-coyote.jar"/>
-  <classpathentry kind="lib" path="framework/catalina/lib/tomcat-6.0.39-tomcat-dbcp.jar"/>
-  <classpathentry kind="lib" path="framework/catalina/lib/tomcat-6.0.39-tomcat-juli.jar"/>
+  <classpathentry kind="lib" path="framework/base/lib/j2eespecs/tomcat-6.0.41-annotations-api.jar"/>
+  <classpathentry kind="lib" path="framework/base/lib/j2eespecs/tomcat-6.0.41-el-api.jar"/>
+  <classpathentry kind="lib" path="framework/base/lib/j2eespecs/tomcat-6.0.41-jsp-api.jar"/>
+  <classpathentry kind="lib" path="framework/base/lib/j2eespecs/tomcat-6.0.41-servlet-api.jar"/>
+  <classpathentry kind="lib" path="framework/catalina/lib/tomcat-6.0.41-catalina-ha.jar"/>
+  <classpathentry kind="lib" path="framework/catalina/lib/tomcat-6.0.41-catalina-tribes.jar"/>
+  <classpathentry kind="lib" path="framework/catalina/lib/tomcat-6.0.41-catalina.jar"/>
+  <classpathentry kind="lib" path="framework/catalina/lib/tomcat-6.0.41-jasper-el.jar"/>
+  <classpathentry kind="lib" path="framework/catalina/lib/tomcat-6.0.41-jasper.jar"/>
+  <classpathentry kind="lib" path="framework/catalina/lib/tomcat-6.0.41-tomcat-coyote.jar"/>
+  <classpathentry kind="lib" path="framework/catalina/lib/tomcat-6.0.41-tomcat-dbcp.jar"/>
+  <classpathentry kind="lib" path="framework/catalina/lib/tomcat-6.0.41-tomcat-juli.jar"/>
   <classpathentry kind="lib" path="framework/catalina/lib/ecj-4.3.1.jar"/>
   <classpathentry kind="output" path="bin"/>
 </classpath>
