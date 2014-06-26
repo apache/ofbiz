@@ -1973,13 +1973,7 @@ under the License.
     </form>
     <!-- GlAccount-->
     <form name="ListProductGlAccounts" type="list" target="updateProductGlAccount" title=""
-        odd-row-style="alternate-row" default-table-style="basic-table">
-        <actions>
-            <entity-condition entity-name="ProductGlAccount" list="productGlAccounts">
-                <condition-expr field-name="productId" from-field="productId"/>
-                <order-by field-name="productId"/>
-            </entity-condition>
-        </actions>
+        odd-row-style="alternate-row" default-table-style="basic-table" list-name="productGlAccounts">
         <field name="productId"><hidden/></field>
         <field name="glAccountTypeId" title="${uiLabelMap.ProductAccountType}">
             <display-entity entity-name="GlAccountType" key-field-name="glAccountTypeId" description="${description}"/>
