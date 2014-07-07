@@ -18,10 +18,15 @@
  *******************************************************************************/
 package org.ofbiz.product.category;
 
+import java.io.IOException;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
+import org.apache.catalina.servlets.DefaultServlet;
+import org.apache.jasper.servlet.JspServlet;
 import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.webapp.control.ControlServlet;
 
@@ -35,6 +40,8 @@ public class SeoControlServlet extends ControlServlet {
 
     protected static String defaultPage = null;
     protected static String controlServlet = null;
+    
+    public static final String REQUEST_IN_ALLOW_LIST = "_REQUEST_IN_ALLOW_LIST_";
 
     public SeoControlServlet() {
         super();
@@ -60,5 +67,21 @@ public class SeoControlServlet extends ControlServlet {
         }
 
         SeoConfigUtil.init();
+    }
+    
+    public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        if (request.getAttribute(REQUEST_IN_ALLOW_LIST) != null) {
+            if (request.getRequestURI().toLowerCase().endsWith(".jsp") || request.getRequestURI().toLowerCase().endsWith(".jspx") ) {
+                JspServlet jspServlet = new JspServlet();
+                jspServlet.init(this.getServletConfig());
+                jspServlet.service(request, response);
+            } else {
+                DefaultServlet defaultServlet = new DefaultServlet();
+                defaultServlet.init(this.getServletConfig());
+                defaultServlet.service(request, response);
+            }
+            return;
+        }
+        super.doGet(request, response);
     }
 }

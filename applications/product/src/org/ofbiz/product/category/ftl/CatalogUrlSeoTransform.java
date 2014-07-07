@@ -667,4 +667,174 @@ public class CatalogUrlSeoTransform implements TemplateTransformModel {
         return false;
     }
 
+    /**
+     * This is used when building product url in services.
+     * 
+     * @param delegator
+     * @param wrapper
+     * @param prefix
+     * @param contextPath
+     * @param productCategoryId
+     * @param previousCategoryId
+     * @param productId
+     * @return
+     */
+	public static String makeProductUrl(Delegator delegator, ProductContentWrapper wrapper, String prefix, String contextPath, String currentCategoryId, String previousCategoryId,
+			String productId) {
+        StringBuilder urlBuilder = new StringBuilder();
+        GenericValue product = null;
+        urlBuilder.append(prefix);
+        if (urlBuilder.charAt(urlBuilder.length() - 1) != '/') {
+            urlBuilder.append("/");
+        }
+        if (UtilValidate.isNotEmpty(productId)) {
+            try {
+                product = delegator.findOne("Product", UtilMisc.toMap("productId", productId), true);
+            } catch (GenericEntityException e) {
+                Debug.logError(e, "Error looking up product info for productId [" + productId + "]: " + e.toString(), module);
+            }
+        }
+        if (product != null) {
+            urlBuilder.append(CatalogUrlServlet.PRODUCT_REQUEST + "/");
+        }
+
+        if (UtilValidate.isNotEmpty(currentCategoryId)) {
+            List<String> trail = null;
+            trail = CategoryWorker.adjustTrail(trail, currentCategoryId, previousCategoryId);
+            if (!SeoConfigUtil.isCategoryUrlEnabled(contextPath)) {
+                for (String trailCategoryId: trail) {
+                    if ("TOP".equals(trailCategoryId)) continue;
+                    urlBuilder.append("/");
+                    urlBuilder.append(trailCategoryId);
+                }
+            } else {
+                if (trail != null && trail.size() > 1) {
+                    String lastCategoryId = trail.get(trail.size() - 1);
+                    if (!"TOP".equals(lastCategoryId)) {
+                        if (SeoConfigUtil.isCategoryNameEnabled()) {
+                            String categoryName = CatalogUrlSeoTransform.getCategoryIdNameMap().get(lastCategoryId);
+                            if (UtilValidate.isNotEmpty(categoryName)) {
+                                urlBuilder.append(categoryName);
+                                if (product != null) {
+                                    urlBuilder.append(URL_HYPHEN);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        if (UtilValidate.isNotEmpty(productId)) {
+            if (product != null) {
+                String productName = product.getString("productName");
+                productName = SeoUrlUtil.replaceSpecialCharsUrl(productName);
+                if (UtilValidate.isNotEmpty(productName)) {
+                    urlBuilder.append(productName + URL_HYPHEN);
+                } else {
+                    StringWrapper alternativeUrl = wrapper.get("ALTERNATIVE_URL");
+                    if (UtilValidate.isNotEmpty(alternativeUrl) && UtilValidate.isNotEmpty(alternativeUrl.toString())) {
+                        productName = SeoUrlUtil.replaceSpecialCharsUrl(alternativeUrl.toString());
+                        if (UtilValidate.isNotEmpty(productName)) {
+                            urlBuilder.append(productName + URL_HYPHEN);
+                        }
+                    }
+                }
+            }
+            try {
+                //SeoConfigUtil.addSpecialProductId(productId);
+                urlBuilder.append(productId);
+            } catch (Exception e) {
+                urlBuilder.append(productId);
+            }
+        }
+        
+        if (!urlBuilder.toString().endsWith("/") && UtilValidate.isNotEmpty(SeoConfigUtil.getCategoryUrlSuffix())) {
+            urlBuilder.append(SeoConfigUtil.getCategoryUrlSuffix());
+        }
+        
+        return urlBuilder.toString();
+	}
+
+	/**
+     * This is used when building category url in services.
+	 * 
+	 * @param delegator
+	 * @param wrapper
+	 * @param prefix
+	 * @param productCategoryId
+	 * @param previousCategoryId
+	 * @param productId
+	 * @param viewSize
+	 * @param viewIndex
+	 * @param viewSort
+	 * @param searchString
+	 * @return
+	 */
+	public static String makeCategoryUrl(Delegator delegator, CategoryContentWrapper wrapper, String prefix,
+			String currentCategoryId, String previousCategoryId, String productId, String viewSize, String viewIndex,
+			String viewSort, String searchString) {
+        StringBuilder urlBuilder = new StringBuilder();
+        urlBuilder.append(prefix);
+        if (urlBuilder.charAt(urlBuilder.length() - 1) != '/') {
+            urlBuilder.append("/");
+        }
+        urlBuilder.append(CatalogUrlServlet.CATEGORY_REQUEST + "/");
+
+        if (UtilValidate.isNotEmpty(currentCategoryId)) {
+            List<String> trail = null;
+            trail = CategoryWorker.adjustTrail(trail, currentCategoryId, previousCategoryId);
+            if (trail != null && trail.size() > 1) {
+                String lastCategoryId = trail.get(trail.size() - 1);
+                if (!"TOP".equals(lastCategoryId)) {
+                    String categoryName = CatalogUrlSeoTransform.getCategoryIdNameMap().get(lastCategoryId);
+                    if (UtilValidate.isNotEmpty(categoryName)) {
+                        urlBuilder.append(categoryName);
+                        urlBuilder.append(URL_HYPHEN);
+                        urlBuilder.append(lastCategoryId.trim().replaceAll(" ", URL_HYPHEN));
+                    } else {
+                        urlBuilder.append(lastCategoryId.trim().replaceAll(" ", URL_HYPHEN));
+                    }
+                }
+            }
+        }
+
+        if (!urlBuilder.toString().endsWith("/") && UtilValidate.isNotEmpty(SeoConfigUtil.getCategoryUrlSuffix())) {
+            urlBuilder.append(SeoConfigUtil.getCategoryUrlSuffix());
+        }
+        
+        // append view index
+        if (UtilValidate.isNotEmpty(viewIndex)) {
+            if (!urlBuilder.toString().endsWith("?") && !urlBuilder.toString().endsWith("&")) {
+                urlBuilder.append("?");
+            }
+            urlBuilder.append("viewIndex=" + viewIndex + "&");
+        }
+        // append view size
+        if (UtilValidate.isNotEmpty(viewSize)) {
+            if (!urlBuilder.toString().endsWith("?") && !urlBuilder.toString().endsWith("&")) {
+                urlBuilder.append("?");
+            }
+            urlBuilder.append("viewSize=" + viewSize + "&");
+        }
+        // append view sort
+        if (UtilValidate.isNotEmpty(viewSort)) {
+            if (!urlBuilder.toString().endsWith("?") && !urlBuilder.toString().endsWith("&")) {
+                urlBuilder.append("?");
+            }
+            urlBuilder.append("viewSort=" + viewSort + "&");
+        }
+        // append search string
+        if (UtilValidate.isNotEmpty(searchString)) {
+            if (!urlBuilder.toString().endsWith("?") && !urlBuilder.toString().endsWith("&")) {
+                urlBuilder.append("?");
+            }
+            urlBuilder.append("searchString=" + searchString + "&");
+        }
+        if (urlBuilder.toString().endsWith("&")) {
+            return urlBuilder.toString().substring(0, urlBuilder.toString().length()-1);
+        }
+        
+        return urlBuilder.toString();
+	}
 }

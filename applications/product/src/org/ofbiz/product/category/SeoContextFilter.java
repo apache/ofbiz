@@ -22,18 +22,23 @@ import static org.ofbiz.base.util.UtilGenerics.checkMap;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import javax.servlet.FilterChain;
+import javax.servlet.FilterConfig;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
+import javax.servlet.ServletRegistration;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import javolution.util.FastSet;
 
 import org.apache.oro.text.regex.Pattern;
 import org.apache.oro.text.regex.Perl5Matcher;
@@ -64,10 +69,30 @@ import org.ofbiz.webapp.website.WebSiteWorker;
 public class SeoContextFilter extends ContextFilter {
 
     public static final String module = SeoContextFilter.class.getName();
+    
+    protected Set<String> WebServlets = FastSet.newInstance();
+    
+    public void init(FilterConfig config) throws ServletException {
+        super.init(config);
+        
+        Map<String, ? extends ServletRegistration> servletRegistrations = config.getServletContext().getServletRegistrations();
+        for (String key : servletRegistrations.keySet()) {
+            Collection<String> servlets = servletRegistrations.get(key).getMappings();
+            for (String servlet : servlets) {
+                if (servlet.endsWith("/*")) {
+                    servlet = servlet.substring(0, servlet.length() - 2);
+                    if (UtilValidate.isNotEmpty(servlet) && !WebServlets.contains(servlet)) {
+                        WebServlets.add(servlet);
+                    }
+                }
+            }
+        }
+    }
 
     /**
      * @see javax.servlet.Filter#doFilter(javax.servlet.ServletRequest, javax.servlet.ServletResponse, javax.servlet.FilterChain)
      */
+    @SuppressWarnings("deprecation")
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
         HttpServletRequest httpRequest = (HttpServletRequest) request;
         HttpServletResponse httpResponse = (HttpServletResponse) response;
@@ -166,10 +191,10 @@ public class SeoContextFilter extends ContextFilter {
             String errorCode = config.getInitParameter("errorCode");
 
             List<String> allowList = StringUtil.split(allowedPath, ":");
-            allowList.add("/"); // No path is allowed.
-            if (UtilValidate.isNotEmpty(httpRequest.getServletPath())) {
-                allowList.add(""); // No path is allowed if servlet path is not empty.
-            }
+            // allowList.add("/"); // No path is allowed.
+            // if (UtilValidate.isNotEmpty(httpRequest.getServletPath())) {
+            //     allowList.add(""); // No path is allowed if servlet path is not empty.
+            // }
 
             if (debug) Debug.logInfo("[Domain]: " + httpRequest.getServerName() + " [Request]: " + httpRequest.getRequestURI(), module);
 
@@ -206,17 +231,21 @@ public class SeoContextFilter extends ContextFilter {
             if (pathItemList != null) {
                 viewName = pathItemList.get(0);
             }
+            
+            String requestUri = UtilHttp.getRequestUriFromTarget(httpRequest.getRequestURI());
 
             // Verbose Debugging
             if (Debug.verboseOn()) {
                 for (String allow : allowList) {
                     Debug.logVerbose("[Allow]: " + allow, module);
                 }
+                Debug.logVerbose("[View Name]: " + viewName, module);
+                Debug.logVerbose("[Request Uri]: " + requestUri, module);
                 Debug.logVerbose("[Request path]: " + requestPath, module);
                 Debug.logVerbose("[Request info]: " + requestInfo, module);
                 Debug.logVerbose("[Servlet path]: " + httpRequest.getServletPath(), module);
                 Debug.logVerbose(
-                        "[Not In AllowList]: " + (!allowList.contains(requestPath) && !allowList.contains(requestInfo) && !allowList.contains(httpRequest.getServletPath())),
+                        "[Not In AllowList]: " + (!allowList.contains(requestPath) && !allowList.contains(requestInfo) && !allowList.contains(httpRequest.getServletPath()) && !allowList.contains(requestUri) && !allowList.contains("/" + viewName)),
                         module);
                 Debug.logVerbose("[Not In controller]: " + (UtilValidate.isEmpty(requestPath) && UtilValidate.isEmpty(httpRequest.getServletPath()) && !uris.contains(viewName)),
                         module);
@@ -224,6 +253,7 @@ public class SeoContextFilter extends ContextFilter {
 
             // check to make sure the requested url is allowed
             if (!allowList.contains(requestPath) && !allowList.contains(requestInfo) && !allowList.contains(httpRequest.getServletPath())
+                    && !allowList.contains(requestUri) && !allowList.contains("/" + viewName)
                     && (UtilValidate.isEmpty(requestPath) && UtilValidate.isEmpty(httpRequest.getServletPath()) && !uris.contains(viewName))) {
                 String filterMessage = "[Filtered request]: " + contextUri;
 
@@ -263,6 +293,10 @@ public class SeoContextFilter extends ContextFilter {
                 }
                 Debug.logWarning(filterMessage, module);
                 return;
+            } else if ((allowList.contains(requestPath) || allowList.contains(requestInfo) || allowList.contains(httpRequest.getServletPath())
+                    || allowList.contains(requestUri) || allowList.contains("/" + viewName))
+                    && !WebServlets.contains(httpRequest.getServletPath())) {
+                request.setAttribute(SeoControlServlet.REQUEST_IN_ALLOW_LIST, Boolean.TRUE);
             }
         }
 

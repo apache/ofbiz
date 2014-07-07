@@ -140,16 +140,31 @@ public class CatalogAltUrlSeoTransform implements TemplateTransformModel {
                         Delegator delegator = FreeMarkerWorker.getWrappedObject("delegator", env);
                         LocalDispatcher dispatcher = FreeMarkerWorker.getWrappedObject("dispatcher", env);
                         Locale locale = (Locale) args.get("locale");
+                        String prefixString = ((StringModel) prefix).getAsString();
+                        prefixString = prefixString.replaceAll("&#47;", "/");
+                        String contextPath = prefixString;
+                        int lastSlashIndex = prefixString.lastIndexOf("/");
+                        if (lastSlashIndex > -1 && lastSlashIndex < prefixString.length()) {
+                            contextPath = prefixString.substring(prefixString.lastIndexOf("/"));
+                        }
                         if (UtilValidate.isNotEmpty(productId)) {
                             GenericValue product = delegator.findOne("Product", UtilMisc.toMap("productId", productId), false);
                             ProductContentWrapper wrapper = new ProductContentWrapper(dispatcher, product, locale, "text/html");
-                            url = CatalogUrlFilter.makeProductUrl(delegator, wrapper, null, ((StringModel) prefix).getAsString(), previousCategoryId, productCategoryId,
-                                    productId);
+                            if (SeoConfigUtil.isCategoryUrlEnabled(contextPath)) {
+                                url = CatalogUrlSeoTransform.makeProductUrl(delegator, wrapper, prefixString, contextPath, productCategoryId, previousCategoryId, productId);
+                            } else {
+                                url = CatalogUrlFilter.makeProductUrl(delegator, wrapper, null, prefixString, previousCategoryId, productCategoryId,
+                                        productId);
+                            }
                         } else {
                             GenericValue productCategory = delegator.findOne("ProductCategory", UtilMisc.toMap("productCategoryId", productCategoryId), false);
                             CategoryContentWrapper wrapper = new CategoryContentWrapper(dispatcher, productCategory, locale, "text/html");
-                            url = CatalogUrlFilter.makeCategoryUrl(delegator, wrapper, null, ((StringModel) prefix).getAsString(), previousCategoryId, productCategoryId,
-                                    productId, viewSize, viewIndex, viewSort, searchString);
+                            if (SeoConfigUtil.isCategoryUrlEnabled(contextPath)) {
+                                url = CatalogUrlSeoTransform.makeCategoryUrl(delegator, wrapper, prefixString, productCategoryId, previousCategoryId, productId, viewSize, viewIndex, viewSort, searchString);
+                            } else {
+                                url = CatalogUrlFilter.makeCategoryUrl(delegator, wrapper, null, prefixString, previousCategoryId, productCategoryId,
+                                        productId, viewSize, viewIndex, viewSort, searchString);
+                            }
                         }
                         out.write(url.toString());
                     } else {

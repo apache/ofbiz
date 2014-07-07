@@ -23,7 +23,7 @@
     <classpathentry kind="lib" path="framework/base/lib/clhm-release-1.0-lru.jar"/>
     <classpathentry kind="lib" path="framework/base/lib/hamcrest-all-1.2.jar"/>
     <classpathentry kind="lib" path="framework/base/lib/fop-1.1.jar"/>
-    <classpathentry kind="lib" path="framework/base/lib/freemarker-2.3.19-null-wildcards.jar"/>
+    <classpathentry kind="lib" path="framework/base/lib/freemarker-2.3-gae-d4ffa9e3727b83b95fd546591aa15dbad0118bd0.jar"/>
     <classpathentry kind="lib" path="framework/base/lib/httpclient-4.2.1.jar"/>
     <classpathentry kind="lib" path="framework/base/lib/httpclient-cache-4.2.1.jar"/>
     <classpathentry kind="lib" path="framework/base/lib/httpcore-4.2.1.jar"/>
@@ -158,9 +158,9 @@
     <classpathentry kind="lib" path="specialpurpose/ebaystore/lib/ebaycalls.jar"/>
     <classpathentry kind="lib" path="specialpurpose/ebaystore/lib/ebaysdkcore.jar"/>
     <classpathentry kind="lib" path="specialpurpose/ebaystore/lib/helper.jar"/>
-    <classpathentry kind="lib" path="specialpurpose/lucene/lib/lucene-analyzers-common-4.7.0.jar"/>
-    <classpathentry kind="lib" path="specialpurpose/lucene/lib/lucene-core-4.7.0.jar"/>
-    <classpathentry kind="lib" path="specialpurpose/lucene/lib/lucene-queryparser-4.7.0.jar"/>
+    <classpathentry kind="lib" path="specialpurpose/lucene/lib/lucene-analyzers-common-4.9.0.jar"/>
+    <classpathentry kind="lib" path="specialpurpose/lucene/lib/lucene-core-4.9.0.jar"/>
+    <classpathentry kind="lib" path="specialpurpose/lucene/lib/lucene-queryparser-4.9.0.jar"/>
     <classpathentry excluding="org/ofbiz/accounting/thirdparty/cybersource/**|org/ofbiz/accounting/thirdparty/verisign/**|org/ofbiz/accounting/thirdparty/worldpay/**|org/ofbiz/accounting/thirdparty/paypal/PayPalServices.java|org/ofbiz/accounting/thirdparty/orbital/**|org/ofbiz/accounting/thirdparty/securepay/**|org/ofbiz/accounting/thirdparty/ideal/**" kind="src" path="applications/accounting/src"/>
     <classpathentry excluding="org/ofbiz/content/openoffice/|org/ofbiz/content/report/" kind="src" path="applications/content/src"/>
     <classpathentry kind="src" path="applications/manufacturing/src"/>

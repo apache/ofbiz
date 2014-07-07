@@ -36,9 +36,6 @@ under the License.
         <fileset dir="${lib.dir}/scripting" includes="*.jar"/>
         <fileset dir="../start/build/lib" includes="*.jar"/>
     </path>
-    <patternset id="src-dirs">
-        <include name="build/gen-src/javacc"/>
-    </patternset>
 
     <filelist id="test.classes" dir="${src.dir}">
         <file name="org/ofbiz/base/lang/test/ComparableRangeTests.java"/>
@@ -63,6 +60,11 @@ under the License.
         <file name="org/ofbiz/base/concurrent/test/TTLCachedObjectTest.java"/>
     </filelist>
 
+    <patternset id="cobertura-src-dirs">
+        <include name="build/gen-src"/>
+        <include name="src"/>
+    </patternset>
+
     <target name="init">
         <!-- make sure we have crypto packages available -->
         <condition property="exclude.crypto" value="org/ofbiz/base/crypto/**">
@@ -72,7 +74,7 @@ under the License.
         </condition>
         <condition property="exclude.cobertura" value="org/ofbiz/base/config/Cobertura*.java">
             <not>
-                <available classname="net.sourceforge.cobertura.instrument.ClassInstrumenter" classpathref="local.class.path"/>
+                <available classname="net.sourceforge.cobertura.instrument.ClassInstrumenter" classpathref="cobertura.class.path"/>
             </not>
         </condition>
         <patternset id="src.exc.set">
@@ -87,7 +89,13 @@ under the License.
     </target>
 
     <target name="classes" depends="prepare,gen-src">
-        <javac16/>
+        <javac17>
+            <sourcepath>
+                <dirset dir="build/gen-src">
+                    <include name="javacc"/>
+                </dirset>
+            </sourcepath>
+        </javac17>
     </target>
 
     <target name="jar" depends="classes">

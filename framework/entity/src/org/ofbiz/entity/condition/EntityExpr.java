@@ -41,14 +41,14 @@ import org.ofbiz.entity.model.ModelFieldType;
  *
  */
 @SuppressWarnings("serial")
-public class EntityExpr extends EntityCondition {
+public final class EntityExpr extends EntityCondition {
     public static final String module = EntityExpr.class.getName();
 
-    private Object lhs = null;
-    private EntityOperator<Object, Object, ?> operator = null;
-    private Object rhs = null;
+    private final Object lhs;
+    private final EntityOperator<Object, Object, ?> operator;
+    private final Object rhs;
 
-    public <L,R,LL,RR> void init(L lhs, EntityComparisonOperator<LL,RR> operator, R rhs) {
+    public <L,R,LL,RR> EntityExpr(L lhs, EntityComparisonOperator<LL,RR> operator, R rhs) {
         if (lhs == null) {
             throw new IllegalArgumentException("The field name/value cannot be null");
         }
@@ -79,7 +79,7 @@ public class EntityExpr extends EntityCondition {
         //Debug.logInfo("new EntityExpr internal field=" + lhs + ", value=" + rhs + ", value type=" + (rhs == null ? "null object" : rhs.getClass().getName()), module);
     }
 
-    public void init(EntityCondition lhs, EntityJoinOperator operator, EntityCondition rhs) {
+    public EntityExpr(EntityCondition lhs, EntityJoinOperator operator, EntityCondition rhs) {
         if (lhs == null) {
             throw new IllegalArgumentException("The left EntityCondition argument cannot be null");
         }
@@ -93,12 +93,6 @@ public class EntityExpr extends EntityCondition {
         this.lhs = lhs;
         this.operator = UtilGenerics.cast(operator);
         this.rhs = rhs;
-    }
-
-    public void reset() {
-        this.lhs = null;
-        this.operator = null;
-        this.rhs = null;
     }
 
     public Object getLhs() {
@@ -156,22 +150,6 @@ public class EntityExpr extends EntityCondition {
     @Override
     public EntityCondition freeze() {
         return operator.freeze(lhs, rhs);
-    }
-
-    @Override
-    public void encryptConditionFields(ModelEntity modelEntity, Delegator delegator) {
-        if (this.lhs instanceof String) {
-            ModelField modelField = modelEntity.getField((String) this.lhs);
-            if (modelField != null && modelField.getEncrypt()) {
-                if (!(rhs instanceof EntityConditionValue)) {
-                    try {
-                        this.rhs = delegator.encryptFieldValue(modelEntity.getEntityName(), this.rhs);
-                    } catch (EntityCryptoException e) {
-                        Debug.logWarning(e, "Error encrypting field [" + modelEntity.getEntityName() + "." + modelField.getName() + "] with value: " + this.rhs, module);
-                    }
-                }
-            }
-        }
     }
 
     @Override

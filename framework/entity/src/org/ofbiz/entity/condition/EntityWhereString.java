@@ -40,16 +40,12 @@ import org.ofbiz.entity.model.ModelEntity;
  *
  */
 @SuppressWarnings("serial")
-public class EntityWhereString extends EntityCondition {
+public final class EntityWhereString extends EntityCondition {
 
-    protected String sqlString;
+    protected final String sqlString;
 
-    public void init(String sqlString) {
+    public EntityWhereString(String sqlString) {
         this.sqlString = sqlString;
-    }
-
-    public void reset() {
-        this.sqlString = null;
     }
 
     @Override
@@ -83,11 +79,6 @@ public class EntityWhereString extends EntityCondition {
     @Override
     public EntityCondition freeze() {
         return this;
-    }
-
-    @Override
-    public void encryptConditionFields(ModelEntity modelEntity, Delegator delegator) {
-        // nothing to do here...
     }
 
     @Override

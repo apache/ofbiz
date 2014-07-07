@@ -186,4 +186,41 @@ under the License.
         <key-map field-name="testingId"/>
       </relation>
     </view-entity>
+
+    <!-- =========================================================
+    The testing entity is a basic entity with a type
+    ========================================================= -->
+    <entity entity-name="TestingCrypto"
+        package-name="org.ofbiz.entity.test"
+        title="Testing Crypto Entity">
+        <field name="testingCryptoId" type="id-ne"/>
+        <field name="testingCryptoTypeId" type="id-ne"/>
+        <field name="unencryptedValue" type="description"/>
+        <field name="encryptedValue" type="description" encrypt="true"/>
+        <field name="saltedEncryptedValue" type="description" encrypt="salt"/>
+        <prim-key field="testingCryptoId"/>
+    </entity>
+    <view-entity entity-name="TestingCryptoRawView"
+            package-name="org.ofbiz.entity.test"
+            title="TestingCrypto Raw View">
+      <member-entity entity-alias="TC" entity-name="TestingCrypto"/>
+      <alias-all entity-alias="TC"/>
+      <alias name="rawEncryptedValue">
+        <complex-alias operator="+">
+          <complex-alias-field entity-alias="TC" field="encryptedValue"/>
+        </complex-alias>
+      </alias>
+      <alias name="rawSaltedEncryptedValue">
+        <complex-alias operator="+">
+          <complex-alias-field entity-alias="TC" field="saltedEncryptedValue"/>
+        </complex-alias>
+      </alias>
+    </view-entity>
+    <entity entity-name="TestingRemoveAll"
+        package-name="org.ofbiz.entity.test"
+        title="Testing Entity">
+        <field name="testingRemoveAllId" type="id-ne"/>
+        <field name="description" type="description"/>
+        <prim-key field="testingRemoveAllId"/>
+    </entity>
 </entitymodel>

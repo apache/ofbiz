@@ -33,10 +33,6 @@ under the License.
         <fileset dir="../base/lib" includes="*.jar"/>
         <fileset dir="../base/build/lib" includes="*.jar"/>
     </path>
-    <patternset id="src-dirs">
-        <include name="build/gen-src/javacc"/>
-        <include name="build/gen-src/jjtree"/>
-    </patternset>
     <path id="test.class.path">
         <path refid="local.class.path"/>
        <fileset dir="../base/lib" includes="*.jar"/>
@@ -51,6 +47,11 @@ under the License.
         <file name="org/ofbiz/sql/test/SelectTest.java"/>
         <file name="org/ofbiz/sql/test/SQLTest.java"/>
     </filelist>
+    <patternset id="cobertura-src-dirs">
+        <include name="build/gen-src/javacc"/>
+        <include name="build/gen-src/jjtree"/>
+        <include name="src"/>
+    </patternset>
 
     <!-- ================================================================== -->
     <!-- Compilation of the source files                                                                                                                         -->
@@ -61,7 +62,14 @@ under the License.
     </target>
 
     <target name="classes" depends="prepare,gen-src">
-        <javac16/>
+        <javac17>
+            <sourcepath>
+                <dirset dir="build/gen-src">
+                    <include name="javacc"/>
+                    <include name="jjtree"/>
+                </dirset>
+            </sourcepath>
+        </javac17>
     </target>
 
     <target name="jar" depends="classes">

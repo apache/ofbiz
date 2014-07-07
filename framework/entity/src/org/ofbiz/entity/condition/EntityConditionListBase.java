@@ -18,6 +18,7 @@
  *******************************************************************************/
 package org.ofbiz.entity.condition;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
@@ -37,32 +38,12 @@ import org.ofbiz.entity.model.ModelEntity;
 public abstract class EntityConditionListBase<T extends EntityCondition> extends EntityCondition {
     public static final String module = EntityConditionListBase.class.getName();
 
-    protected List<T> conditionList = null;
-    protected EntityJoinOperator operator = null;
+    protected final List<T> conditionList;
+    protected final EntityJoinOperator operator;
 
-    protected EntityConditionListBase() {}
-
-    public EntityConditionListBase(EntityJoinOperator operator, T... conditionList) {
-        this.init(operator, conditionList);
-    }
-
-    public EntityConditionListBase(List<T> conditionList, EntityJoinOperator operator) {
-        this.init(conditionList, operator);
-    }
-
-    public void init(EntityJoinOperator operator, T... conditionList) {
-        this.conditionList = Arrays.asList(conditionList);
-        this.operator = operator;
-    }
-
-    public void init(List<T> conditionList, EntityJoinOperator operator) {
+    protected EntityConditionListBase(List<T> conditionList, EntityJoinOperator operator) {
         this.conditionList = conditionList;
         this.operator = operator;
-    }
-
-    public void reset() {
-        this.conditionList = null;
-        this.operator = null;
     }
 
     public EntityJoinOperator getOperator() {
@@ -113,13 +94,6 @@ public abstract class EntityConditionListBase<T extends EntityCondition> extends
     @Override
     public EntityCondition freeze() {
         return operator.freeze(conditionList);
-    }
-
-    @Override
-    public void encryptConditionFields(ModelEntity modelEntity, Delegator delegator) {
-        for (T cond: this.conditionList) {
-            cond.encryptConditionFields(modelEntity, delegator);
-        }
     }
 
     @Override
