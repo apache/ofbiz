@@ -92,7 +92,6 @@ public class SeoContextFilter extends ContextFilter {
     /**
      * @see javax.servlet.Filter#doFilter(javax.servlet.ServletRequest, javax.servlet.ServletResponse, javax.servlet.FilterChain)
      */
-    @SuppressWarnings("deprecation")
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
         HttpServletRequest httpRequest = (HttpServletRequest) request;
         HttpServletResponse httpResponse = (HttpServletResponse) response;
@@ -191,10 +190,6 @@ public class SeoContextFilter extends ContextFilter {
             String errorCode = config.getInitParameter("errorCode");
 
             List<String> allowList = StringUtil.split(allowedPath, ":");
-            // allowList.add("/"); // No path is allowed.
-            // if (UtilValidate.isNotEmpty(httpRequest.getServletPath())) {
-            //     allowList.add(""); // No path is allowed if servlet path is not empty.
-            // }
 
             if (debug) Debug.logInfo("[Domain]: " + httpRequest.getServerName() + " [Request]: " + httpRequest.getRequestURI(), module);
 
