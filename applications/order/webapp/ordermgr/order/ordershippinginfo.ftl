@@ -252,20 +252,18 @@ under the License.
                             -->
                             <select name="shipmentMethod">
                                 <#if shipGroup.shipmentMethodTypeId?has_content>
-                                <option value="${shipGroup.shipmentMethodTypeId}@${shipGroup.carrierPartyId!}@${shipGroup.carrierRoleTypeId!}"><#if shipGroup.carrierPartyId?exists && shipGroup.carrierPartyId != "_NA_">${shipGroup.carrierPartyId!}</#if>&nbsp;${shipmentMethodType.get("description",locale)!}</option>
-                                <#else>
-                                <option value=""/>
+                                  <option value="${shipGroup.shipmentMethodTypeId}@${shipGroup.carrierPartyId!}@${shipGroup.carrierRoleTypeId!}"><#if shipGroup.carrierPartyId?exists && shipGroup.carrierPartyId != "_NA_">${shipGroup.carrierPartyId!}</#if>&nbsp;${shipmentMethodType.get("description",locale)!}</option>
                                 </#if>
                                 <#list productStoreShipmentMethList as productStoreShipmentMethod>
-                                <#assign shipmentMethodTypeAndParty = productStoreShipmentMethod.shipmentMethodTypeId + "@" + productStoreShipmentMethod.partyId + "@" + productStoreShipmentMethod.roleTypeId>
-                                <#if productStoreShipmentMethod.partyId?has_content || productStoreShipmentMethod?has_content>
-                                <option value="${shipmentMethodTypeAndParty?if_exists}"><#if productStoreShipmentMethod.partyId != "_NA_">${productStoreShipmentMethod.partyId?if_exists}</#if>&nbsp;${productStoreShipmentMethod.get("description",locale)?default("")}</option>
-                                </#if>
+                                  <#assign shipmentMethodTypeAndParty = productStoreShipmentMethod.shipmentMethodTypeId + "@" + productStoreShipmentMethod.partyId + "@" + productStoreShipmentMethod.roleTypeId>
+                                  <#if productStoreShipmentMethod.partyId?has_content || productStoreShipmentMethod?has_content>
+                                    <option value="${shipmentMethodTypeAndParty?if_exists}"><#if productStoreShipmentMethod.partyId != "_NA_">${productStoreShipmentMethod.partyId?if_exists}</#if>&nbsp;${productStoreShipmentMethod.get("description",locale)?default("")}</option>
+                                  </#if>
                                 </#list>
                             </select>
                             <#else>
                                 <#if (shipGroup.carrierPartyId)?default("_NA_") != "_NA_">
-                                ${shipGroup.carrierPartyId?if_exists}
+                                    ${shipGroup.carrierPartyId?if_exists}
                                 </#if>
                                 <#if shipmentMethodType?has_content>
                                     ${shipmentMethodType.get("description",locale)?default("")}
@@ -368,7 +366,6 @@ under the License.
       </script>
       <table width="100%" border="0" cellpadding="1" cellspacing="0">
         <#if shipGroup.supplierPartyId?has_content>
-          <#assign supplier =  delegator.findOne("PartyGroup", Static["org.ofbiz.base.util.UtilMisc"].toMap("partyId", shipGroup.supplierPartyId), false)?if_exists />
           <tr><td colspan="3"><hr /></td></tr>
           <tr>
             <td align="right" valign="top" width="15%">
@@ -376,7 +373,7 @@ under the License.
             </td>
             <td width="5">&nbsp;</td>
             <td valign="top" width="80%">
-              <#if supplier?has_content> - ${supplier.description?default(shipGroup.supplierPartyId)}</#if>
+              ${Static["org.ofbiz.party.party.PartyHelper"].getPartyName(delegator, shipGroup.supplierPartyId, false)!shipGroup.supplierPartyId}
             </td>
           </tr>
         </#if>
