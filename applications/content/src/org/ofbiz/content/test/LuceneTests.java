@@ -60,7 +60,7 @@ public class LuceneTests extends OFBizTestCase {
     protected void tearDown() throws Exception {
     }
 
-    public void testCreateIndex() throws Exception {
+    public void testSearchTermHand() throws Exception {
         Map<String, Object> ctx = FastMap.newInstance();
         ctx.put("contentId", "WebStoreCONTENT");
         ctx.put("userLogin", userLogin);
@@ -70,9 +70,7 @@ public class LuceneTests extends OFBizTestCase {
 
         List<String> badIndexList = UtilGenerics.checkList(resp.get("badIndexList"));
         assertEquals(8, badIndexList.size());
-    }
 
-    public void testSearchTermHand() throws Exception {
         Directory directory = FSDirectory.open(new File(SearchWorker.getIndexPath(null)));
         IndexReader r = null;
         try {

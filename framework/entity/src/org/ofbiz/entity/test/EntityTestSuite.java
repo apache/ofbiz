@@ -224,6 +224,27 @@ public class EntityTestSuite extends EntityTestCase {
         TransactionUtil.rollback(transBegin, null, null);
     }
 
+    protected long flushAndRecreateTree(String descriptionPrefix) throws Exception {
+        //
+        // The tree has a root, the root has level1max children.
+        //
+
+        // create the root
+        GenericValue root = delegator.create("TestingNode",
+                        "testingNodeId", delegator.getNextSeqId("TestingNode"),
+                        "primaryParentNodeId", GenericEntity.NULL_FIELD,
+                        "description", descriptionPrefix + ":0:root");
+        int level1;
+        for (level1 = 0; level1 < _level1max; level1++) {
+            String nextSeqId = delegator.getNextSeqId("TestingNode");
+            GenericValue v = delegator.create("TestingNode", "testingNodeId", nextSeqId,
+                                    "primaryParentNodeId", root.get("testingNodeId"),
+                                    "description", descriptionPrefix + ":1:node-level #1");
+            assertNotNull(v);
+        }
+        return level1 + 1;
+    }
+
     /*
      * Tests storing data with the delegator's .create method.  Also tests .findCountByCondition and .getNextSeqId
      */
@@ -238,9 +259,9 @@ public class EntityTestSuite extends EntityTestCase {
 
         // create the root
         GenericValue root = delegator.create("TestingNode",
-                        "testingNodeId", delegator.getNextSeqId("TestingNode"),
-                        "primaryParentNodeId", GenericEntity.NULL_FIELD,
-                        "description", "root");
+                "testingNodeId", delegator.getNextSeqId("TestingNode"),
+                "primaryParentNodeId", GenericEntity.NULL_FIELD,
+                "description", "root");
         int level1;
         for(level1 = 0; level1 < _level1max; level1++) {
             String nextSeqId = delegator.getNextSeqId("TestingNode");
@@ -294,6 +315,27 @@ public class EntityTestSuite extends EntityTestCase {
         assertEquals("Created/Stored Nodes", newValues.size(), n);
     }
 
+    protected void createNodeMembers(String typeId, String typeDescription, String descriptionPrefix) throws GenericEntityException {
+        delegator.removeByCondition("TestingType", EntityCondition.makeCondition("testingTypeId", EntityOperator.EQUALS, typeId));
+        delegator.create("TestingType", "testingTypeId", typeId, "description", typeDescription);
+        int i = 0;
+        Timestamp now = UtilDateTime.nowTimestamp();
+        for (GenericValue node: delegator.findList("TestingNode", EntityCondition.makeCondition("description", EntityOperator.LIKE, descriptionPrefix + "%"), null, null, null, false)) {
+            if (i % 2 == 0) {
+                GenericValue testing = delegator.create("Testing", "testingId", descriptionPrefix + ":" + node.get("testingNodeId"), "testingTypeId", typeId, "description", node.get("description"));
+                GenericValue member = delegator.makeValue("TestingNodeMember",
+                    "testingNodeId", node.get("testingNodeId"),
+                    "testingId", testing.get("testingId")
+                );
+
+                member.put("fromDate", now);
+                member.put("thruDate", UtilDateTime.getNextDayStart(now));
+                member.create();
+            }
+            i++;
+        }
+    }
+
     /*
      * Tests findByCondition and tests searching on a view-entity
      */
@@ -319,6 +361,20 @@ public class EntityTestSuite extends EntityTestCase {
      * Tests findByCondition and a find by distinct
      */
     public void testFindDistinct() throws Exception {
+        delegator.removeByCondition("Testing", EntityCondition.makeCondition("testingTypeId", EntityOperator.LIKE, "TEST-DISTINCT-%"));
+        List<GenericValue> testingDistinctList = delegator.findList("Testing", EntityCondition.makeCondition("testingTypeId", EntityOperator.LIKE, "TEST-DISTINCT-%"), null, null, null, false);
+        assertEquals("No existing Testing entities for distinct", 0, testingDistinctList.size());
+        delegator.removeByCondition("TestingType", EntityCondition.makeCondition("testingTypeId", EntityOperator.LIKE, "TEST-DISTINCT-%"));
+        GenericValue testValue = delegator.findOne("TestingType", true, "testingTypeId", "TEST-DISTINCT-1");
+        assertNull("No pre-existing type value", testValue);
+        delegator.create("TestingType", "testingTypeId", "TEST-DISTINCT-1", "description", "Testing Type #Distinct-1");
+        testValue = delegator.findOne("TestingType", true, "testingTypeId", "TEST-DISTINCT-1");
+        assertNotNull("Found newly created type value", testValue);
+
+        delegator.create("Testing", "testingId", "TEST-DISTINCT-1", "testingTypeId", "TEST-DISTINCT-1", "testingSize", Long.valueOf(10), "comments", "No-comments");
+        delegator.create("Testing", "testingId", "TEST-DISTINCT-2", "testingTypeId", "TEST-DISTINCT-1", "testingSize", Long.valueOf(10), "comments", "Some-comments");
+        delegator.create("Testing", "testingId", "TEST-DISTINCT-3", "testingTypeId", "TEST-DISTINCT-1", "testingSize", Long.valueOf(9), "comments", "No-comments");
+        delegator.create("Testing", "testingId", "TEST-DISTINCT-4", "testingTypeId", "TEST-DISTINCT-1", "testingSize", Long.valueOf(11), "comments", "Some-comments");
         List<EntityExpr> exprList = UtilMisc.toList(
                 EntityCondition.makeCondition("testingSize", EntityOperator.EQUALS, Long.valueOf(10)),
                 EntityCondition.makeCondition("comments", EntityOperator.EQUALS, "No-comments"));
@@ -401,10 +457,13 @@ public class EntityTestSuite extends EntityTestCase {
      * Tests the .getRelatedOne method and removeAll for removing entities
      */
     public void testRemoveNodeMemberAndTesting() throws Exception {
+        flushAndRecreateTree("rnmat");
+        createNodeMembers("TEST-RNMAT", "remove-node-member-and-testing", "rnmat");
         //
         // Find the testing entities tru the node member and build a list of them
         //
-        List<GenericValue> values = delegator.findList("TestingNodeMember", null, null, null, null, false);
+        EntityCondition isNodeWithMember = EntityCondition.makeCondition("testingId", EntityOperator.LIKE, "rnmat:%");
+        List<GenericValue> values = delegator.findList("TestingNodeMember", isNodeWithMember, null, null, null, false);
 
         ArrayList<GenericValue> testings = new ArrayList<GenericValue>();
 
@@ -413,11 +472,11 @@ public class EntityTestSuite extends EntityTestCase {
         }
         // and remove the nodeMember afterwards
         delegator.removeAll(values);
-        values = delegator.findList("TestingNodeMember", null, null, null, null, false);
+        values = delegator.findList("TestingNodeMember", isNodeWithMember, null, null, null, false);
         assertEquals("No more Node Member entities", 0, values.size());
 
         delegator.removeAll(testings);
-        values = delegator.findList("Testing", null, null, null, null, false);
+        values = delegator.findList("Testing", EntityCondition.makeCondition("description", EntityOperator.LIKE, "rnmat:%"), null, null, null, false);
         assertEquals("No more Testing entities", 0, values.size());
     }
 
@@ -438,10 +497,11 @@ public class EntityTestSuite extends EntityTestCase {
      * Tests the .removeByCondition method for removing entities directly
      */
     public void testRemoveByCondition() throws Exception {
+        flushAndRecreateTree("remove-by-condition-a");
         //
         // remove all the level1 nodes by using a condition on the description field
         //
-        EntityCondition isLevel1 = EntityCondition.makeCondition("description", EntityOperator.EQUALS, "node-level #1 (updated)");
+        EntityCondition isLevel1 = EntityCondition.makeCondition("description", EntityOperator.LIKE, "remove-by-condition-a:1:%");
         int n = delegator.removeByCondition("TestingNode", isLevel1);
         assertTrue("testRemoveByCondition nodes > 0", n > 0);
     }
@@ -450,11 +510,16 @@ public class EntityTestSuite extends EntityTestCase {
      * Test the .removeByPrimaryKey by using findByCondition and then retrieving the GenericPk from a GenericValue
      */
     public void testRemoveByPK() throws Exception {
+        flushAndRecreateTree("remove-by-pk");
         //
         // Find all the root nodes,
         // delete them their primary key
         //
-        EntityCondition isRoot = EntityCondition.makeCondition("primaryParentNodeId", EntityOperator.EQUALS, GenericEntity.NULL_FIELD);
+        EntityCondition isRoot = EntityCondition.makeCondition(
+            EntityCondition.makeCondition("description", EntityOperator.LIKE, "remove-by-pk:%"),
+            EntityOperator.AND,
+            EntityCondition.makeCondition("primaryParentNodeId", EntityOperator.NOT_EQUAL, GenericEntity.NULL_FIELD)
+        );
         List<GenericValue> rootValues = delegator.findList("TestingNode", isRoot, UtilMisc.toSet("testingNodeId"), null, null, false);
 
         for (GenericValue value: rootValues) {
@@ -465,7 +530,7 @@ public class EntityTestSuite extends EntityTestCase {
 
         // no more TestingNode should be in the data base anymore.
 
-        List<GenericValue> testingNodes = delegator.findList("TestingNode", null, null, null, null, false);
+        List<GenericValue> testingNodes = delegator.findList("TestingNode", isRoot, null, null, null, false);
         assertEquals("No more TestingNode after removing the roots", 0, testingNodes.size());
     }
 
@@ -473,28 +538,38 @@ public class EntityTestSuite extends EntityTestCase {
      * Tests the .removeAll method only.
      */
     public void testRemoveType() throws Exception {
-        List<GenericValue> values = delegator.findList("TestingType", null, null, null, null, false);
+        List<GenericValue> values = delegator.findList("TestingRemoveAll", null, null, null, null, false);
+        delegator.removeAll(values);
+        values = delegator.findList("TestingRemoveAll", null, null, null, null, false);
+        assertEquals("No more TestingRemoveAll: setup", 0, values.size());
+        for (int i = 0; i < 10; i++) {
+            delegator.create("TestingRemoveAll", "testingRemoveAllId", "prefix:" + i);
+        }
+        values = delegator.findList("TestingRemoveAll", null, null, null, null, false);
+        assertEquals("No more TestingRemoveAll: create", 10, values.size());
+
         delegator.removeAll(values);
 
         // now make sure there are no more of these
-        values = delegator.findList("TestingType", null, null, null, null, false);
-        assertEquals("No more TestingTypes after remove all", 0, values.size());
+        values = delegator.findList("TestingRemoveAll", null, null, null, null, false);
+        assertEquals("No more TestingRemoveAll: finish", 0, values.size());
     }
 
     /*
      * This test will create a large number of unique items and add them to the delegator at once
      */
     public void testCreateManyAndStoreAtOnce() throws Exception {
+        EntityCondition condition = EntityCondition.makeCondition("testingId", EntityOperator.LIKE, "T1-%");
         try {
             List<GenericValue> newValues = new LinkedList<GenericValue>();
             for (int i = 0; i < TEST_COUNT; i++) {
                 newValues.add(delegator.makeValue("Testing", "testingId", getTestId("T1-", i)));
             }
             delegator.storeAll(newValues);
-            List<GenericValue> newlyCreatedValues = delegator.findList("Testing", null, null, UtilMisc.toList("testingId"), null, false);
+            List<GenericValue> newlyCreatedValues = delegator.findList("Testing", condition, null, UtilMisc.toList("testingId"), null, false);
             assertEquals("Test to create " + TEST_COUNT + " and store all at once", TEST_COUNT, newlyCreatedValues.size());
         } finally {
-            List<GenericValue> newlyCreatedValues = delegator.findList("Testing", null, null, UtilMisc.toList("testingId"), null, false);
+            List<GenericValue> newlyCreatedValues = delegator.findList("Testing", condition, null, UtilMisc.toList("testingId"), null, false);
             delegator.removeAll(newlyCreatedValues);
         }
     }
@@ -503,39 +578,56 @@ public class EntityTestSuite extends EntityTestCase {
      * This test will create a large number of unique items and add them to the delegator at once
      */
     public void testCreateManyAndStoreOneAtATime() throws Exception {
-        for (int i = 0; i < TEST_COUNT; i++) {
-            delegator.create(delegator.makeValue("Testing", "testingId", getTestId("T2-", i)));
+        EntityCondition condition = EntityCondition.makeCondition("testingId", EntityOperator.LIKE, "T2-%");
+        try {
+            for (int i = 0; i < TEST_COUNT; i++) {
+                delegator.create(delegator.makeValue("Testing", "testingId", getTestId("T2-", i)));
+            }
+            List<GenericValue> newlyCreatedValues = delegator.findList("Testing", condition, null, UtilMisc.toList("testingId"), null, false);
+            assertEquals("Test to create " + TEST_COUNT + " and store one at a time: ", TEST_COUNT, newlyCreatedValues.size());
+        } finally {
+            List<GenericValue> newlyCreatedValues = delegator.findList("Testing", condition, null, UtilMisc.toList("testingId"), null, false);
+            delegator.removeAll(newlyCreatedValues);
         }
-        List<GenericValue> newlyCreatedValues = delegator.findList("Testing", null, null, UtilMisc.toList("testingId"), null, false);
-        assertEquals("Test to create " + TEST_COUNT + " and store one at a time: ", TEST_COUNT, newlyCreatedValues.size());
     }
 
     /*
      * This test will use the large number of unique items from above and test the EntityListIterator looping through the list
      */
     public void testEntityListIterator() throws Exception {
-        boolean beganTransaction = false;
+        EntityCondition condition = EntityCondition.makeCondition("testingId", EntityOperator.LIKE, "T3-%");
         try {
-            beganTransaction = TransactionUtil.begin();
-            EntityListIterator iterator = delegator.find("Testing", EntityCondition.makeCondition("testingId", EntityOperator.LIKE, "T2-%"), null, null, UtilMisc.toList("testingId"), null);
-            assertNotNull("Test if EntityListIterator was created: ", iterator);
-
-            int i = 0;
-            GenericValue item = iterator.next();
-            while (item != null) {
-                assertEquals("Testing if iterated data matches test data (row " + i + "): ", getTestId("T2-", i), item.getString("testingId"));
-                item = iterator.next();
-                i++;
+            List<GenericValue> newValues = new LinkedList<GenericValue>();
+            for (int i = 0; i < TEST_COUNT; i++) {
+                newValues.add(delegator.makeValue("Testing", "testingId", getTestId("T3-", i)));
             }
-            assertEquals("Test if EntitlyListIterator iterates exactly " + TEST_COUNT + " times: " , TEST_COUNT, i);
-            iterator.close();
-        } catch (GenericEntityException e) {
-            TransactionUtil.rollback(beganTransaction, "GenericEntityException occurred while iterating with EntityListIterator", e);
-            assertTrue("GenericEntityException:" + e.toString(), false);
-            return;
+            delegator.storeAll(newValues);
+            List<GenericValue> newlyCreatedValues = delegator.findList("Testing", condition, null, UtilMisc.toList("testingId"), null, false);
+            assertEquals("Test to create " + TEST_COUNT + " and store all at once", TEST_COUNT, newlyCreatedValues.size());
+            boolean beganTransaction = false;
+            try {
+                beganTransaction = TransactionUtil.begin();
+                EntityListIterator iterator = delegator.find("Testing", condition, null, null, UtilMisc.toList("testingId"), null);
+                assertNotNull("Test if EntityListIterator was created: ", iterator);
+
+                int i = 0;
+                GenericValue item = iterator.next();
+                while (item != null) {
+                    assertEquals("Testing if iterated data matches test data (row " + i + "): ", getTestId("T3-", i), item.getString("testingId"));
+                    item = iterator.next();
+                    i++;
+                }
+                assertEquals("Test if EntitlyListIterator iterates exactly " + TEST_COUNT + " times: " , TEST_COUNT, i);
+                iterator.close();
+            } catch (GenericEntityException e) {
+                TransactionUtil.rollback(beganTransaction, "GenericEntityException occurred while iterating with EntityListIterator", e);
+                assertTrue("GenericEntityException:" + e.toString(), false);
+                return;
+            } finally {
+                TransactionUtil.commit(beganTransaction);
+            }
         } finally {
-            TransactionUtil.commit(beganTransaction);
-            List<GenericValue> entitiesToRemove = delegator.findList("Testing", EntityCondition.makeCondition("testingId", EntityOperator.LIKE, "T2-%"), null, null, null, false);
+            List<GenericValue> entitiesToRemove = delegator.findList("Testing", condition, null, null, null, false);
             delegator.removeAll(entitiesToRemove);
         }
     }
