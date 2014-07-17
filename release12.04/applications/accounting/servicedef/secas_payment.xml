@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<service-eca xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/service-eca.xsd">
+
+<!-- these SECAs are for automatically creating accounting transactions based on business transactions.
+     They should normally be "sync" SECAs so that they happen as soon
+     as the business transactions are ready, and so that if the accounting transactions can't be created,
+     the user will get an error.  This is to avoid cases where business transactions are created but in limbo
+     because accounting transactions can't be created. -->
+
+     <!-- update invoices to PAID when payment is RECEIVED (e.g., customer payments) -->
+     <eca service="setPaymentStatus" event="commit">
+        <condition field-name="statusId" operator="equals" value="PMNT_RECEIVED"/>
+        <condition field-name="oldStatusId" operator="not-equals" value="PMNT_RECEIVED"/>
+        <action service="checkPaymentInvoices" mode="sync"/>
+     </eca>
+
+     <!-- update invoices to PAID when payment is SENT (e.g., vendor payments) -->
+     <eca service="setPaymentStatus" event="commit">
+        <condition field-name="statusId" operator="equals" value="PMNT_SENT"/>
+        <condition field-name="oldStatusId" operator="not-equals" value="PMNT_SENT"/>
+        <action service="checkPaymentInvoices" mode="sync"/>
+     </eca>
+
+     <!-- Create finAccountTrans record for payment. -->
+     <eca service="createPaymentAndApplicationForParty" event="commit">
+        <condition field-name="finAccountId" operator="is-not-empty"/>
+        <action service="createFinAccoutnTransFromPayment" mode="sync"/>
+     </eca>
+     
+     <!-- Update payment and payment associations when FinAccountTrans status is set to Cancle, remove finAccountTransId form Payment entity. -->
+     <eca service="setFinAccountTransStatus" event="commit">
+         <condition field-name="finAccountTransId" operator="is-not-empty"/>
+         <condition field-name="statusId" operator="equals" value="FINACT_TRNS_CANCELED"/>
+         <action service="expirePaymentAssociationsOnFinAccountTransCancel" mode="sync"/>
+         <action service="updatePaymentOnFinAccTransStatusSetToCancel" mode="sync"/>
+         <action service="updateFinAccountBalancesFromTrans" mode="sync"/>
+     </eca>
+     
+     <!-- Create Reverse Accouting Transaction and Entries on removing PaymentApplication -->
+     <eca service="removePaymentApplication" event="invoke">
+         <action service="revertAcctgTransOnRemovePaymentApplications" mode="sync"/>
+     </eca>
+     
+     <!-- set FinAccountTrans Status to CANCELED on Void Payment -->
+     <eca service="voidPayment" event="commit">
+         <condition field-name="finAccountTransId" operator="is-not-empty"/>
+         <condition field-name="statusId" operator="equals" value="FINACT_TRNS_CANCELED"/>
+         <action service="setFinAccountTransStatus" mode="sync"/>
+     </eca>
+
+    <eca service="setPaymentStatus" event="commit">
+        <condition operator="equals" field-name="statusId" value="PMNT_RECEIVED"/>
+        <condition operator="not-equals" field-name="oldStatusId" value="PMNT_RECEIVED"/>
+        <action service="createMatchingPaymentApplication" mode="sync"/>
+    </eca>
+
+    <eca service="setPaymentStatus" event="commit">
+        <condition operator="equals" field-name="statusId" value="PMNT_SENT"/>
+        <condition operator="not-equals" field-name="oldStatusId" value="PMNT_SENT"/>
+        <action service="createMatchingPaymentApplication" mode="sync"/>
+    </eca>
+
+</service-eca>
