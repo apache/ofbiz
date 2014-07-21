@@ -39,6 +39,7 @@ import org.ofbiz.base.util.GeneralException;
 import org.ofbiz.base.util.UtilJavaParse;
 import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.base.util.UtilPlist;
+import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.minilang.MiniLangException;
 import org.ofbiz.minilang.SimpleMethod;
 import org.ofbiz.service.ModelParam;
@@ -121,7 +122,7 @@ public class ServiceArtifactInfo extends ArtifactInfoBase {
     }
     protected void populateEntitiesFromNameSet(Set<String> allEntityNameSet) throws GeneralException {
         for (String entityName: allEntityNameSet) {
-            if (entityName.contains("${")) {
+            if (UtilValidate.isEmpty(entityName) || entityName.contains("${")) {
                 continue;
             }
             // attempt to convert relation names to entity names
