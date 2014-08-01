@@ -137,7 +137,10 @@ public class Iterate extends MethodOperation {
                 }
             }
         } else {
-            if (Debug.infoOn()) Debug.logInfo("List not found with name " + listAcsr + ", doing nothing: " + rawString(), module);
+            if (Debug.verboseOn()) {
+                Debug.logVerbose("Cannot iterate over a " + objList == null ? "null object" : objList.getClass().getName()
+                        + ", doing nothing: " + this, module);
+            }
             return true;
         }
         entryAcsr.put(methodContext, oldEntryValue);
