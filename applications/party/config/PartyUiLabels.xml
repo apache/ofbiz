@@ -11838,8 +11838,9 @@
     <property key="PartyTaxId">
         <value xml:lang="de">Steuer ID</value>
         <value xml:lang="en">Tax ID</value>
+        <value xml:lang="en_IN">TIN</value>
         <value xml:lang="es">Código de Impuesto</value>
-        <value xml:lang="fr">TVA</value>
+        <value xml:lang="fr">Id. de TVA</value>
         <value xml:lang="hi_IN">कर(tax) क्रमांक</value>
         <value xml:lang="it">ID Tasse</value>
         <value xml:lang="ja">税務ID</value>
