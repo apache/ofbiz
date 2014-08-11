@@ -237,13 +237,6 @@ public class CatalinaContainer implements Container {
     }
 
     public boolean start() throws ContainerException {
-        // Start the Tomcat server
-        try {
-            tomcat.getServer().start();
-        } catch (LifecycleException e) {
-            throw new ContainerException(e);
-        }
-
         // load the web applications
         loadComponents();
 
@@ -259,6 +252,12 @@ public class CatalinaContainer implements Container {
                 Debug.logInfo("Connector " + con.getProtocol() + " @ " + con.getPort() + " - " +
                     (con.getSecure() ? "secure" : "not-secure") + " [" + con.getProtocolHandlerClassName() + "] started.", module);
             }
+        }
+        // Start the Tomcat server
+        try {
+            tomcat.getServer().start();
+        } catch (LifecycleException e) {
+            throw new ContainerException(e);
         }
         Debug.logInfo("Started " + ServerInfo.getServerInfo(), module);
         return true;
@@ -564,7 +563,7 @@ public class CatalinaContainer implements Container {
     }
 
     protected Callable<Context> createContext(final ComponentConfig.WebappInfo appInfo) throws ContainerException {
-        Debug.logInfo("createContext(" + appInfo.name + ")", module);
+        Debug.logInfo("Creating context [" + appInfo.name + "]", module);
         final Engine engine = engines.get(appInfo.server);
         if (engine == null) {
             Debug.logWarning("Server with name [" + appInfo.server + "] not found; not mounting [" + appInfo.name + "]", module);
@@ -607,7 +606,6 @@ public class CatalinaContainer implements Container {
             public Context call() throws ContainerException, LifecycleException {
                 StandardContext context = configureContext(engine, host, appInfo);
                 context.setParent(host);
-                context.start();
                 return context;
             }
         };
@@ -682,7 +680,6 @@ public class CatalinaContainer implements Container {
         Engine egn = (Engine) context.getParent().getParent();
         egn.setService(tomcat.getService());
 
-        Debug.logInfo("host[" + host + "].addChild(" + context + ")", module);
         context.setJ2EEApplication(J2EE_APP);
         context.setJ2EEServer(J2EE_SERVER);
         context.setLoader(new WebappLoader(ClassLoaderContainer.getClassLoader()));

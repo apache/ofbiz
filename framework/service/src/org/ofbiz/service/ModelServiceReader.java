@@ -145,7 +145,7 @@ public class ModelServiceReader implements Serializable {
 
                     // check to see if service with same name has already been read
                     if (modelServices.containsKey(serviceName)) {
-                        Debug.logWarning("WARNING: Service " + serviceName + " is defined more than once, " +
+                        Debug.logWarning("Service " + serviceName + " is defined more than once, " +
                             "most recent will over-write previous definition(s)", module);
                     }
 
@@ -182,11 +182,11 @@ public class ModelServiceReader implements Serializable {
         }
         if (this.isFromURL) {
             utilTimer.timerString("Finished file " + readerURL + " - Total Services: " + i + " FINISHED");
-            Debug.logImportant("Loaded [" + StringUtil.leftPad(Integer.toString(i), 3) + "] Services from " + readerURL, module);
+            Debug.logInfo("Loaded [" + StringUtil.leftPad(Integer.toString(i), 3) + "] Services from " + readerURL, module);
         } else {
             utilTimer.timerString("Finished document in " + handler + " - Total Services: " + i + " FINISHED");
-            if (Debug.importantOn()) {
-                Debug.logImportant("Loaded [" + StringUtil.leftPad(Integer.toString(i), 3) + "] Services from " + resourceLocation, module);
+            if (Debug.infoOn()) {
+                Debug.logInfo("Loaded [" + StringUtil.leftPad(Integer.toString(i), 3) + "] Services from " + resourceLocation, module);
             }
         }
         return modelServices;
