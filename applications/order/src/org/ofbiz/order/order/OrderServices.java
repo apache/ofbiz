@@ -3288,7 +3288,6 @@ public class OrderServices {
         List<GenericValue> orderItems = UtilGenerics.checkList(context.get("orderItems"));
         GenericValue userLogin = (GenericValue) context.get("userLogin");
         Locale locale = (Locale) context.get("locale");
-
         if (UtilValidate.isNotEmpty(orderItems)) {
             // loop through the digital items to fulfill
             for (GenericValue orderItem : orderItems) {
@@ -3307,10 +3306,13 @@ public class OrderServices {
                         return ServiceUtil.returnError(UtilProperties.getMessage(resource_error,
                                 "OrderErrorCannotCheckForFulfillmentProductNotFound", locale));
                     }
+                    List<EntityExpr> exprs = new ArrayList<EntityExpr>();
 
-                    List<GenericValue> allProductContent = product.getRelated("ProductContent", null, null, false);
+                    exprs.add(EntityCondition.makeCondition("productContentTypeId", EntityOperator.IN, UtilMisc.toList("FULFILLMENT_EXTASYNC", "FULFILLMENT_EXTSYNC", "FULFILLMENT_EMAIL", "DIGITAL_DOWNLOAD")));
+                    exprs.add(EntityCondition.makeCondition("productId", EntityOperator.EQUALS, product.getString("productId")));
 
                     // try looking up the parent product if the product has no content and is a variant
+                    List<GenericValue> allProductContent = delegator.findList("ProductContent", EntityCondition.makeCondition(exprs, EntityOperator.AND), null, null, null, false);
                     if (UtilValidate.isEmpty(allProductContent) && ("Y".equals(product.getString("isVariant")))) {
                         GenericValue parentProduct = ProductWorker.getParentProduct(product.getString("productId"), delegator);
                         if (allProductContent == null) {
@@ -3331,7 +3333,6 @@ public class OrderServices {
                     return ServiceUtil.returnError(UtilProperties.getMessage(resource_error,
                             "OrderErrorCannotGetProductEntity", locale) + e.getMessage());
                 }
-
                 // now use the ProductContent to fulfill the item
                 if (UtilValidate.isNotEmpty(productContent)) {
                     for (GenericValue productContentItem : productContent) {
@@ -4071,6 +4072,7 @@ public class OrderServices {
 
         // get the new orderItems, adjustments, shipping info, payments and order item attributes from the cart
         List<Map<String, Object>> modifiedItems = FastList.newInstance();
+        List<Map<String, Object>> newItems = FastList.newInstance();
         List<GenericValue> toStore = new LinkedList<GenericValue>();
         List<GenericValue> toAddList = new ArrayList<GenericValue>();
         toAddList.addAll(cart.makeAllAdjustments());
@@ -4221,6 +4223,12 @@ public class OrderServices {
 
                 //  ignore promotion items. They are added/canceled automatically
                 if ("Y".equals(valueObj.getString("isPromo"))) {
+                    //Fetching the new promo items and adding it to list so that we can create OrderStatus record for that items.
+                    Map<String, Object> promoItem = FastMap.newInstance();
+                    promoItem.put("orderId", valueObj.getString("orderId"));
+                    promoItem.put("orderItemSeqId", valueObj.getString("orderItemSeqId"));
+                    promoItem.put("quantity", valueObj.getBigDecimal("quantity"));
+                    newItems.add(promoItem);
                     continue;
                 }
                 GenericValue oldOrderItem = null;
@@ -4293,6 +4301,7 @@ public class OrderServices {
                     appendedItem.put("quantity", valueObj.getBigDecimal("quantity"));
                     appendedItem.put("changeTypeEnumId", "ODR_ITM_APPEND");
                     modifiedItems.add(appendedItem);
+                    newItems.add(appendedItem);
                 }
             }
         }
@@ -4342,6 +4351,20 @@ public class OrderServices {
             }
         }
 
+      //To create record of OrderStatus entity
+        if (UtilValidate.isNotEmpty(newItems)) {
+            for (Map<String, Object> newItem : newItems) {
+                String itemStatusId = delegator.getNextSeqId("OrderStatus");
+                GenericValue itemStatus = delegator.makeValue("OrderStatus", UtilMisc.toMap("orderStatusId", itemStatusId));
+                itemStatus.put("statusId", "ITEM_CREATED");
+                itemStatus.put("orderId", newItem.get("orderId"));
+                itemStatus.put("orderItemSeqId", newItem.get("orderItemSeqId"));
+                itemStatus.put("statusDatetime", UtilDateTime.nowTimestamp());
+                itemStatus.set("statusUserLogin", userLogin.get("userLogin"));
+                delegator.create(itemStatus);
+            }
+        }
+        
         // make the order item object map & the ship group assoc list
         List<GenericValue> orderItemShipGroupAssoc = new LinkedList<GenericValue>();
         Map<String, GenericValue> itemValuesBySeqId = new HashMap<String, GenericValue>();

@@ -16,13 +16,13 @@ KIND, either express or implied.  See the License for the
 specific language governing permissions and limitations
 under the License.
 -->
-<#if (requestAttributes.uiLabelMap)?exists><#assign uiLabelMap = requestAttributes.uiLabelMap></#if>
+<#if (requestAttributes.uiLabelMap)??><#assign uiLabelMap = requestAttributes.uiLabelMap></#if>
 <br />
 <div class="label">[${product.productId}] ${product.internalName}</div>
 <br />
 <#if searchFeatures?has_content>
+  <form method="post" action="<@ofbizUrl>LookupVariantProduct</@ofbizUrl>" name="selectAllForm">
     <table cellspacing="0" class="basic-table">
-        <form method="post" action="<@ofbizUrl>LookupVariantProduct</@ofbizUrl>" name="selectAllForm">
         <input type="hidden" name="productId" value="${product.productId}" />
         <#list searchFeatures as searchFeature>
             <tr>
@@ -43,15 +43,12 @@ under the License.
         </#list>
         <tr>
             <td><input type="submit" value="${uiLabelMap.CommonSearch}" class="smallSubmit" /></td>
-        </form>
-        <form method="post" action="<@ofbizUrl>LookupProduct</@ofbizUrl>" name="">
-            <td><input type="submit" value="${uiLabelMap.CommonBack}" class="smallSubmit" /></td>
-        </form>
     </tr>
     </table>
+  </form>
 </#if>
 <br />
-<#if variantProducts?exists>
+<#if variantProducts??>
     <table cellspacing="0" class="basic-table">
         <tr class="header-row">
             <td><b>${uiLabelMap.ProductProductId}</b></td>
@@ -61,13 +58,13 @@ under the License.
         <#list variantProducts as variant>
             <tr>
                 <td><a class="buttontext" href="javascript:set_value('${variant.productId}')">${variant.productId}</a></td>
-                <td>${variant.brandName?if_exists}</td>
-                <td>${variant.internalName?if_exists}</td>
+                <td>${variant.brandName!}</td>
+                <td>${variant.internalName!}</td>
             </tr>
         </#list>
     </table>
 </#if>
-<#if productFeatureIds?exists>
+<#if productFeatureIds??>
     <table cellspacing="0" class="basic-table">
         <form method="post" action="<@ofbizUrl>LookupVariantProduct</@ofbizUrl>" name="createNewVariant">
         <input type="hidden" name="productId" value="${product.productId}" />

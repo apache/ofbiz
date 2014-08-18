@@ -24,10 +24,14 @@ import java.util.List;
 import java.util.concurrent.DelayQueue;
 import java.util.concurrent.Delayed;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
+import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import javolution.util.FastList;
@@ -38,7 +42,9 @@ import org.ofbiz.base.util.Debug;
 @SourceMonitored
 public final class ExecutionPool {
     public static final String module = ExecutionPool.class.getName();
-    public static final ScheduledExecutorService GLOBAL_EXECUTOR = getExecutor(null, "OFBiz-config", -1, false);
+    public static final ExecutorService GLOBAL_BATCH = getPooledExecutor(null, "OFBiz-batch", -1, Integer.MAX_VALUE, false);
+    public static final ScheduledExecutorService GLOBAL_EXECUTOR = getScheduledExecutor(null, "OFBiz-config", -1, false);
+    public static final ForkJoinPool GLOBAL_FORK_JOIN = getForkJoinPool(-1);
 
     protected static class ExecutionPoolThreadFactory implements ThreadFactory {
         private final ThreadGroup group;
@@ -63,19 +69,42 @@ public final class ExecutionPool {
         return new ExecutionPoolThreadFactory(group, namePrefix);
     }
 
-    public static ScheduledExecutorService getExecutor(ThreadGroup group, String namePrefix, int threadCount, boolean preStart) {
+    public static int autoAdjustThreadCount(int threadCount) {
         if (threadCount == 0) {
-            threadCount = 1;
+            return 1;
         } else if (threadCount < 0) {
             int numCpus = Runtime.getRuntime().availableProcessors();
-            threadCount = Math.abs(threadCount) * numCpus;
+            return Math.abs(threadCount) * numCpus;
+        } else {
+            return threadCount;
         }
+    }
+
+    @Deprecated
+    public static ScheduledExecutorService getExecutor(ThreadGroup group, String namePrefix, int threadCount, boolean preStart) {
+        return getScheduledExecutor(group, namePrefix, threadCount, preStart);
+    }
+
+    public static ScheduledExecutorService getScheduledExecutor(ThreadGroup group, String namePrefix, int threadCount, boolean preStart) {
         ThreadFactory threadFactory = createThreadFactory(group, namePrefix);
-        ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(threadCount, threadFactory);
+        ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(autoAdjustThreadCount(threadCount), threadFactory);
         if (preStart) {
             executor.prestartAllCoreThreads();
         }
         return executor;
+    }
+
+    public static ExecutorService getPooledExecutor(ThreadGroup group, String namePrefix, int threadCount, int maximumPoolSize, boolean preStart) {
+        ThreadFactory threadFactory = createThreadFactory(group, namePrefix);
+        ThreadPoolExecutor executor = new ThreadPoolExecutor(autoAdjustThreadCount(threadCount), maximumPoolSize, 5, TimeUnit.SECONDS, new SynchronousQueue<Runnable>(), threadFactory);
+        if (preStart) {
+            executor.prestartAllCoreThreads();
+        }
+        return executor;
+    }
+
+    public static ForkJoinPool getForkJoinPool(int threadCount) {
+        return new ForkJoinPool(autoAdjustThreadCount(threadCount));
     }
 
     public static <F> List<F> getAllFutures(Collection<Future<F>> futureList) {
