@@ -45,8 +45,6 @@ import javax.transaction.xa.XAException;
 import javolution.util.FastList;
 import javolution.util.FastMap;
 
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
 import org.ofbiz.base.metrics.Metrics;
 import org.ofbiz.base.metrics.MetricsFactory;
 import org.ofbiz.base.util.Debug;
@@ -221,23 +219,6 @@ public class CommonServices {
         Debug.set(Debug.INFO, "Y".equalsIgnoreCase((String) context.get("info")));
         Debug.set(Debug.TIMING, "Y".equalsIgnoreCase((String) context.get("timing")));
         Debug.set(Debug.VERBOSE, "Y".equalsIgnoreCase((String) context.get("verbose")));
-
-        return ServiceUtil.returnSuccess();
-    }
-
-    public static Map<String, Object> addOrUpdateLogger(DispatchContext dctc, Map<String, ?> context) {
-        String name = (String) context.get("name");
-        String level = (String) context.get("level");
-        boolean additivity = "Y".equalsIgnoreCase((String) context.get("additivity"));
-
-        Logger logger = null;
-        if ("root".equals(name)) {
-            logger = Logger.getRootLogger();
-        } else {
-            logger = Logger.getLogger(name);
-        }
-        logger.setLevel(Level.toLevel(level));
-        logger.setAdditivity(additivity);
 
         return ServiceUtil.returnSuccess();
     }
