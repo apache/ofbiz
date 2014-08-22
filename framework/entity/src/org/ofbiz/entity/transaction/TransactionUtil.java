@@ -133,7 +133,7 @@ public class TransactionUtil implements Status {
      * a transaction is already in place it will return false and do nothing.
      */
     public static boolean begin(int timeout) throws GenericTransactionException {
-        UserTransaction ut = TransactionFactory.getInstance().getUserTransaction();
+        UserTransaction ut = TransactionFactoryLoader.getInstance().getUserTransaction();
         if (ut != null) {
             try {
                 int currentStatus = ut.getStatus();
@@ -221,7 +221,7 @@ public class TransactionUtil implements Status {
     /** Gets the status of the transaction in the current thread IF
      * transactions are available, otherwise returns STATUS_NO_TRANSACTION */
     public static int getStatus() throws GenericTransactionException {
-        UserTransaction ut = TransactionFactory.getInstance().getUserTransaction();
+        UserTransaction ut = TransactionFactoryLoader.getInstance().getUserTransaction();
         if (ut != null) {
             try {
                 return ut.getStatus();
@@ -258,7 +258,7 @@ public class TransactionUtil implements Status {
 
     /** Commits the transaction in the current thread IF transactions are available */
     public static void commit() throws GenericTransactionException {
-        UserTransaction ut = TransactionFactory.getInstance().getUserTransaction();
+        UserTransaction ut = TransactionFactoryLoader.getInstance().getUserTransaction();
 
         if (ut != null) {
             try {
@@ -330,7 +330,7 @@ public class TransactionUtil implements Status {
 
     /** Rolls back transaction in the current thread IF transactions are available */
     public static void rollback(Throwable causeThrowable) throws GenericTransactionException {
-        UserTransaction ut = TransactionFactory.getInstance().getUserTransaction();
+        UserTransaction ut = TransactionFactoryLoader.getInstance().getUserTransaction();
 
         if (ut != null) {
             try {
@@ -369,7 +369,7 @@ public class TransactionUtil implements Status {
 
     /** Makes a rollback the only possible outcome of the transaction in the current thread IF transactions are available */
     public static void setRollbackOnly(String causeMessage, Throwable causeThrowable) throws GenericTransactionException {
-        UserTransaction ut = TransactionFactory.getInstance().getUserTransaction();
+        UserTransaction ut = TransactionFactoryLoader.getInstance().getUserTransaction();
         if (ut != null) {
             try {
                 int status = ut.getStatus();
@@ -403,7 +403,7 @@ public class TransactionUtil implements Status {
     public static Transaction suspend() throws GenericTransactionException {
         try {
             if (TransactionUtil.getStatus() != STATUS_NO_TRANSACTION) {
-                TransactionManager txMgr = TransactionFactory.getInstance().getTransactionManager();
+                TransactionManager txMgr = TransactionFactoryLoader.getInstance().getTransactionManager();
                 if (txMgr != null) {
                     pushTransactionBeginStackSave(clearTransactionBeginStack());
                     pushSetRollbackOnlyCauseSave(clearSetRollbackOnlyCause());
@@ -426,7 +426,7 @@ public class TransactionUtil implements Status {
         if (parentTx == null) {
             return;
         }
-        TransactionManager txMgr = TransactionFactory.getInstance().getTransactionManager();
+        TransactionManager txMgr = TransactionFactoryLoader.getInstance().getTransactionManager();
         try {
             if (txMgr != null) {
                 setTransactionBeginStack(popTransactionBeginStackSave());
@@ -455,7 +455,7 @@ public class TransactionUtil implements Status {
 
     /** Sets the timeout of the transaction in the current thread IF transactions are available */
     public static void setTransactionTimeout(int seconds) throws GenericTransactionException {
-        UserTransaction ut = TransactionFactory.getInstance().getUserTransaction();
+        UserTransaction ut = TransactionFactoryLoader.getInstance().getUserTransaction();
         if (ut != null) {
             try {
                 ut.setTransactionTimeout(seconds);
@@ -485,7 +485,7 @@ public class TransactionUtil implements Status {
         }
 
         try {
-            TransactionManager tm = TransactionFactory.getInstance().getTransactionManager();
+            TransactionManager tm = TransactionFactoryLoader.getInstance().getTransactionManager();
             if (tm != null && tm.getStatus() == STATUS_ACTIVE) {
                 Transaction tx = tm.getTransaction();
                 if (tx != null) {
@@ -565,7 +565,7 @@ public class TransactionUtil implements Status {
         }
 
         try {
-            TransactionManager tm = TransactionFactory.getInstance().getTransactionManager();
+            TransactionManager tm = TransactionFactoryLoader.getInstance().getTransactionManager();
             if (tm != null && tm.getStatus() == STATUS_ACTIVE) {
                 Transaction tx = tm.getTransaction();
                 if (tx != null) {

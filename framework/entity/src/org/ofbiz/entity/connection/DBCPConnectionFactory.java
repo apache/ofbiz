@@ -44,7 +44,7 @@ import org.ofbiz.entity.config.EntityConfigUtil;
 import org.ofbiz.entity.config.model.InlineJdbc;
 import org.ofbiz.entity.config.model.JdbcElement;
 import org.ofbiz.entity.datasource.GenericHelperInfo;
-import org.ofbiz.entity.transaction.TransactionFactory;
+import org.ofbiz.entity.transaction.TransactionFactoryLoader;
 import org.ofbiz.entity.transaction.TransactionUtil;
 
 /**
@@ -68,7 +68,7 @@ public class DBCPConnectionFactory implements ConnectionFactoryInterface {
         }
         InlineJdbc jdbcElement = (InlineJdbc) abstractJdbc;
         // connection properties
-        TransactionManager txMgr = TransactionFactory.getInstance().getTransactionManager();
+        TransactionManager txMgr = TransactionFactoryLoader.getInstance().getTransactionManager();
         String driverName = jdbcElement.getJdbcDriver();
 
         String jdbcUri = helperInfo.getOverrideJdbcUri(jdbcElement.getJdbcUri());

@@ -23,11 +23,11 @@ import org.ofbiz.entity.GenericEntityConfException;
 import org.ofbiz.entity.config.EntityConfigUtil;
 
 /**
- * TransactionFactory - central source for JTA objects
+ * TransactionFactoryLoader - utility class that loads the transaction manager and provides to client code a reference to it (TransactionFactoryInterface)
  */
-public class TransactionFactory {
+public class TransactionFactoryLoader {
 
-    public static final String module = TransactionFactory.class.getName();
+    public static final String module = TransactionFactoryLoader.class.getName();
     private static final TransactionFactoryInterface txFactory = createTransactionFactoryInterface();
 
     private static TransactionFactoryInterface createTransactionFactoryInterface() {

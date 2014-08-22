@@ -32,7 +32,7 @@ import org.ofbiz.entity.config.EntityConfigUtil;
 import org.ofbiz.entity.config.model.JdbcElement;
 import org.ofbiz.entity.connection.ConnectionFactoryInterface;
 import org.ofbiz.entity.datasource.GenericHelperInfo;
-import org.ofbiz.entity.transaction.TransactionFactory;
+import org.ofbiz.entity.transaction.TransactionFactoryLoader;
 
 /**
  * ConnectionFactory - central source for JDBC connections
@@ -84,7 +84,7 @@ public class ConnectionFactory {
     public static Connection getConnection(String helperName) throws SQLException, GenericEntityException {
         // Debug.logVerbose("Getting a connection", module);
 
-        Connection con = TransactionFactory.getInstance().getConnection(new GenericHelperInfo(null, helperName));
+        Connection con = TransactionFactoryLoader.getInstance().getConnection(new GenericHelperInfo(null, helperName));
         if (con == null) {
             Debug.logError("******* ERROR: No database connection found for helperName \"" + helperName + "\"", module);
         }
@@ -94,7 +94,7 @@ public class ConnectionFactory {
     public static Connection getConnection(GenericHelperInfo helperInfo) throws SQLException, GenericEntityException {
         // Debug.logVerbose("Getting a connection", module);
 
-        Connection con = TransactionFactory.getInstance().getConnection(helperInfo);
+        Connection con = TransactionFactoryLoader.getInstance().getConnection(helperInfo);
         if (con == null) {
             Debug.logError("******* ERROR: No database connection found for helperName \"" + helperInfo.getHelperFullName() + "\"", module);
         }
