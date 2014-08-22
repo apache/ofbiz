@@ -84,7 +84,7 @@ public class ConnectionFactory {
     public static Connection getConnection(String helperName) throws SQLException, GenericEntityException {
         // Debug.logVerbose("Getting a connection", module);
 
-        Connection con = TransactionFactory.getConnection(new GenericHelperInfo(null, helperName));
+        Connection con = TransactionFactory.getInstance().getConnection(new GenericHelperInfo(null, helperName));
         if (con == null) {
             Debug.logError("******* ERROR: No database connection found for helperName \"" + helperName + "\"", module);
         }
@@ -94,7 +94,7 @@ public class ConnectionFactory {
     public static Connection getConnection(GenericHelperInfo helperInfo) throws SQLException, GenericEntityException {
         // Debug.logVerbose("Getting a connection", module);
 
-        Connection con = TransactionFactory.getConnection(helperInfo);
+        Connection con = TransactionFactory.getInstance().getConnection(helperInfo);
         if (con == null) {
             Debug.logError("******* ERROR: No database connection found for helperName \"" + helperInfo.getHelperFullName() + "\"", module);
         }

@@ -45,6 +45,7 @@ import org.ofbiz.entity.config.model.InlineJdbc;
 import org.ofbiz.entity.config.model.JdbcElement;
 import org.ofbiz.entity.datasource.GenericHelperInfo;
 import org.ofbiz.entity.transaction.TransactionFactory;
+import org.ofbiz.entity.transaction.TransactionUtil;
 
 /**
  * Apache Commons DBCP connection factory.
@@ -60,14 +61,14 @@ public class DBCPConnectionFactory implements ConnectionFactoryInterface {
         String cacheKey = helperInfo.getHelperFullName();
         ManagedDataSource mds = dsCache.get(cacheKey);
         if (mds != null) {
-            return TransactionFactory.getCursorConnection(helperInfo, mds.getConnection());
+            return TransactionUtil.getCursorConnection(helperInfo, mds.getConnection());
         }
         if (!(abstractJdbc instanceof InlineJdbc)) {
             throw new GenericEntityConfException("DBCP requires an <inline-jdbc> child element in the <datasource> element");
         }
         InlineJdbc jdbcElement = (InlineJdbc) abstractJdbc;
         // connection properties
-        TransactionManager txMgr = TransactionFactory.getTransactionManager();
+        TransactionManager txMgr = TransactionFactory.getInstance().getTransactionManager();
         String driverName = jdbcElement.getJdbcDriver();
 
         String jdbcUri = helperInfo.getOverrideJdbcUri(jdbcElement.getJdbcUri());
@@ -152,7 +153,7 @@ public class DBCPConnectionFactory implements ConnectionFactoryInterface {
         dsCache.putIfAbsent(cacheKey, mds);
         mds = dsCache.get(cacheKey);
 
-        return TransactionFactory.getCursorConnection(helperInfo, mds.getConnection());
+        return TransactionUtil.getCursorConnection(helperInfo, mds.getConnection());
     }
 
     public void closeAll() {

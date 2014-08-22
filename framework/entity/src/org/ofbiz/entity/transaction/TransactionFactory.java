@@ -18,19 +18,9 @@
  *******************************************************************************/
 package org.ofbiz.entity.transaction;
 
-import java.sql.Connection;
-import java.sql.SQLException;
-
-import javax.transaction.TransactionManager;
-import javax.transaction.UserTransaction;
-
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.entity.GenericEntityConfException;
-import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.config.EntityConfigUtil;
-import org.ofbiz.entity.config.model.Datasource;
-import org.ofbiz.entity.datasource.GenericHelperInfo;
-import org.ofbiz.entity.jdbc.CursorConnection;
 
 /**
  * TransactionFactory - central source for JTA objects
@@ -60,46 +50,10 @@ public class TransactionFactory {
         return instance;
     }
 
-    private static TransactionFactoryInterface getTransactionFactory() {
+    public static TransactionFactoryInterface getInstance() {
         if (txFactory == null) {
             throw new IllegalStateException("The Transaction Factory is not initialized.");
         }
         return txFactory;
-    }
-
-    public static TransactionManager getTransactionManager() {
-        return getTransactionFactory().getTransactionManager();
-    }
-
-    public static UserTransaction getUserTransaction() {
-        return getTransactionFactory().getUserTransaction();
-    }
-
-    public static String getTxMgrName() {
-        return getTransactionFactory().getTxMgrName();
-    }
-
-    public static Connection getConnection(GenericHelperInfo helperInfo) throws SQLException, GenericEntityException {
-        return getTransactionFactory().getConnection(helperInfo);
-    }
-
-    public static void shutdown() {
-        getTransactionFactory().shutdown();
-    }
-
-    public static Connection getCursorConnection(GenericHelperInfo helperInfo, Connection con) {
-        Datasource datasourceInfo = EntityConfigUtil.getDatasource(helperInfo.getHelperBaseName());
-        if (datasourceInfo == null) {
-            Debug.logWarning("Could not find configuration for " + helperInfo.getHelperBaseName() + " datasource.", module);
-            return con;
-        } else if (datasourceInfo.getUseProxyCursor()) {
-            try {
-                if (datasourceInfo.getResultFetchSize() > 1)
-                    con = CursorConnection.newCursorConnection(con, datasourceInfo.getProxyCursorName(), datasourceInfo.getResultFetchSize());
-            } catch (Exception ex) {
-                Debug.logWarning(ex, "Error creating the cursor connection proxy " + helperInfo.getHelperBaseName() + " datasource.", module);
-            }
-        }
-        return con;
     }
 }

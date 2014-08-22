@@ -141,14 +141,14 @@ public class JNDIFactory implements TransactionFactoryInterface {
             String jndiName = jndiJdbcElement.getJndiName();
             String jndiServerName = jndiJdbcElement.getJndiServerName();
             Connection con = getJndiConnection(jndiName, jndiServerName);
-            if (con != null) return TransactionFactory.getCursorConnection(helperInfo, con);
+            if (con != null) return TransactionUtil.getCursorConnection(helperInfo, con);
         } else {
            // Debug.logError("JNDI loaded is the configured transaction manager but no jndi-jdbc element was specified in the " + helperName + " datasource. Please check your configuration.", module);
         }
 
         if (datasourceInfo.getInlineJdbc() != null) {
             Connection otherCon = ConnectionFactory.getManagedConnection(helperInfo, datasourceInfo.getInlineJdbc());
-            return TransactionFactory.getCursorConnection(helperInfo, otherCon);
+            return TransactionUtil.getCursorConnection(helperInfo, otherCon);
         } else {
             //no real need to print an error here
             return null;

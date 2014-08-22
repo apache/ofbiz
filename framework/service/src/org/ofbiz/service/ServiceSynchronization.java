@@ -49,7 +49,7 @@ public class ServiceSynchronization implements Synchronization {
     protected static ServiceSynchronization getInstance() throws GenericServiceException {
         ServiceSynchronization sync = null;
         try {
-            Transaction transaction = TransactionFactory.getTransactionManager().getTransaction();
+            Transaction transaction = TransactionFactory.getInstance().getTransactionManager().getTransaction();
             synchronized (transaction) {
                 sync = syncingleton.get(transaction);
                 if (sync == null) {

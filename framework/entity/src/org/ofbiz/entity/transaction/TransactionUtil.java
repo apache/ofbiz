@@ -52,6 +52,9 @@ import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.entity.GenericEntityConfException;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.config.EntityConfigUtil;
+import org.ofbiz.entity.config.model.Datasource;
+import org.ofbiz.entity.datasource.GenericHelperInfo;
+import org.ofbiz.entity.jdbc.CursorConnection;
 
 /**
  * <p>Transaction Utility to help with some common transaction tasks
@@ -130,7 +133,7 @@ public class TransactionUtil implements Status {
      * a transaction is already in place it will return false and do nothing.
      */
     public static boolean begin(int timeout) throws GenericTransactionException {
-        UserTransaction ut = TransactionFactory.getUserTransaction();
+        UserTransaction ut = TransactionFactory.getInstance().getUserTransaction();
         if (ut != null) {
             try {
                 int currentStatus = ut.getStatus();
@@ -218,7 +221,7 @@ public class TransactionUtil implements Status {
     /** Gets the status of the transaction in the current thread IF
      * transactions are available, otherwise returns STATUS_NO_TRANSACTION */
     public static int getStatus() throws GenericTransactionException {
-        UserTransaction ut = TransactionFactory.getUserTransaction();
+        UserTransaction ut = TransactionFactory.getInstance().getUserTransaction();
         if (ut != null) {
             try {
                 return ut.getStatus();
@@ -255,7 +258,7 @@ public class TransactionUtil implements Status {
 
     /** Commits the transaction in the current thread IF transactions are available */
     public static void commit() throws GenericTransactionException {
-        UserTransaction ut = TransactionFactory.getUserTransaction();
+        UserTransaction ut = TransactionFactory.getInstance().getUserTransaction();
 
         if (ut != null) {
             try {
@@ -327,7 +330,7 @@ public class TransactionUtil implements Status {
 
     /** Rolls back transaction in the current thread IF transactions are available */
     public static void rollback(Throwable causeThrowable) throws GenericTransactionException {
-        UserTransaction ut = TransactionFactory.getUserTransaction();
+        UserTransaction ut = TransactionFactory.getInstance().getUserTransaction();
 
         if (ut != null) {
             try {
@@ -366,7 +369,7 @@ public class TransactionUtil implements Status {
 
     /** Makes a rollback the only possible outcome of the transaction in the current thread IF transactions are available */
     public static void setRollbackOnly(String causeMessage, Throwable causeThrowable) throws GenericTransactionException {
-        UserTransaction ut = TransactionFactory.getUserTransaction();
+        UserTransaction ut = TransactionFactory.getInstance().getUserTransaction();
         if (ut != null) {
             try {
                 int status = ut.getStatus();
@@ -400,7 +403,7 @@ public class TransactionUtil implements Status {
     public static Transaction suspend() throws GenericTransactionException {
         try {
             if (TransactionUtil.getStatus() != STATUS_NO_TRANSACTION) {
-                TransactionManager txMgr = TransactionFactory.getTransactionManager();
+                TransactionManager txMgr = TransactionFactory.getInstance().getTransactionManager();
                 if (txMgr != null) {
                     pushTransactionBeginStackSave(clearTransactionBeginStack());
                     pushSetRollbackOnlyCauseSave(clearSetRollbackOnlyCause());
@@ -423,7 +426,7 @@ public class TransactionUtil implements Status {
         if (parentTx == null) {
             return;
         }
-        TransactionManager txMgr = TransactionFactory.getTransactionManager();
+        TransactionManager txMgr = TransactionFactory.getInstance().getTransactionManager();
         try {
             if (txMgr != null) {
                 setTransactionBeginStack(popTransactionBeginStackSave());
@@ -452,7 +455,7 @@ public class TransactionUtil implements Status {
 
     /** Sets the timeout of the transaction in the current thread IF transactions are available */
     public static void setTransactionTimeout(int seconds) throws GenericTransactionException {
-        UserTransaction ut = TransactionFactory.getUserTransaction();
+        UserTransaction ut = TransactionFactory.getInstance().getUserTransaction();
         if (ut != null) {
             try {
                 ut.setTransactionTimeout(seconds);
@@ -482,7 +485,7 @@ public class TransactionUtil implements Status {
         }
 
         try {
-            TransactionManager tm = TransactionFactory.getTransactionManager();
+            TransactionManager tm = TransactionFactory.getInstance().getTransactionManager();
             if (tm != null && tm.getStatus() == STATUS_ACTIVE) {
                 Transaction tx = tm.getTransaction();
                 if (tx != null) {
@@ -562,7 +565,7 @@ public class TransactionUtil implements Status {
         }
 
         try {
-            TransactionManager tm = TransactionFactory.getTransactionManager();
+            TransactionManager tm = TransactionFactory.getInstance().getTransactionManager();
             if (tm != null && tm.getStatus() == STATUS_ACTIVE) {
                 Transaction tx = tm.getTransaction();
                 if (tx != null) {
@@ -1051,4 +1054,21 @@ public class TransactionUtil implements Status {
             }
         }
     }
+
+    public static Connection getCursorConnection(GenericHelperInfo helperInfo, Connection con) {
+        Datasource datasourceInfo = EntityConfigUtil.getDatasource(helperInfo.getHelperBaseName());
+        if (datasourceInfo == null) {
+            Debug.logWarning("Could not find configuration for " + helperInfo.getHelperBaseName() + " datasource.", module);
+            return con;
+        } else if (datasourceInfo.getUseProxyCursor()) {
+            try {
+                if (datasourceInfo.getResultFetchSize() > 1)
+                    con = CursorConnection.newCursorConnection(con, datasourceInfo.getProxyCursorName(), datasourceInfo.getResultFetchSize());
+            } catch (Exception ex) {
+                Debug.logWarning(ex, "Error creating the cursor connection proxy " + helperInfo.getHelperBaseName() + " datasource.", module);
+            }
+        }
+        return con;
+    }
+
 }
