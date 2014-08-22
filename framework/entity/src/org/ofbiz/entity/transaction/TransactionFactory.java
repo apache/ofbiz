@@ -20,12 +20,12 @@ package org.ofbiz.entity.transaction;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.concurrent.atomic.AtomicReference;
 
 import javax.transaction.TransactionManager;
 import javax.transaction.UserTransaction;
 
 import org.ofbiz.base.util.Debug;
+import org.ofbiz.entity.GenericEntityConfException;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.config.EntityConfigUtil;
 import org.ofbiz.entity.config.model.Datasource;
@@ -38,32 +38,33 @@ import org.ofbiz.entity.jdbc.CursorConnection;
 public class TransactionFactory {
 
     public static final String module = TransactionFactory.class.getName();
-    private static final AtomicReference<TransactionFactoryInterface> txFactoryRef = new AtomicReference<TransactionFactoryInterface>(null);
+    private static final TransactionFactoryInterface txFactory = createTransactionFactoryInterface();
 
-    private static TransactionFactoryInterface createTransactionFactoryInterface() throws Exception {
-        String className = EntityConfigUtil.getTxFactoryClass();
-        if (className == null) {
-            throw new IllegalStateException("Could not find transaction factory class name definition");
+    private static TransactionFactoryInterface createTransactionFactoryInterface() {
+        TransactionFactoryInterface instance = null;
+        try {
+            String className = EntityConfigUtil.getTxFactoryClass();
+            if (className == null) {
+                throw new IllegalStateException("Could not find transaction factory class name definition");
+            }
+            ClassLoader loader = Thread.currentThread().getContextClassLoader();
+            Class<?> tfClass = loader.loadClass(className);
+            instance = (TransactionFactoryInterface) tfClass.newInstance();
+        } catch (GenericEntityConfException gece) {
+            Debug.logError(gece, "Could not find transaction factory class name definition", module);
+        } catch (ClassNotFoundException cnfe) {
+            Debug.logError(cnfe, "Could not find transaction factory class", module);
+        } catch (Exception e) {
+            Debug.logError(e, "Unable to instantiate the transaction factory", module);
         }
-        ClassLoader loader = Thread.currentThread().getContextClassLoader();
-        Class<?> tfClass = loader.loadClass(className);
-        return (TransactionFactoryInterface) tfClass.newInstance();
+        return instance;
     }
 
     private static TransactionFactoryInterface getTransactionFactory() {
-        TransactionFactoryInterface instance = txFactoryRef.get();
-        if (instance == null) {
-            try {
-                instance = createTransactionFactoryInterface();
-                if (!txFactoryRef.compareAndSet(null, instance)) {
-                    instance = txFactoryRef.get();
-                }
-            } catch (Exception e) {
-                Debug.logError(e, "Exception thrown while creating TransactionFactoryInterface instance: ", module);
-                throw new IllegalStateException("Error loading TransactionFactory class: " + e);
-            }
+        if (txFactory == null) {
+            throw new IllegalStateException("The Transaction Factory is not initialized.");
         }
-        return instance;
+        return txFactory;
     }
 
     public static TransactionManager getTransactionManager() {
