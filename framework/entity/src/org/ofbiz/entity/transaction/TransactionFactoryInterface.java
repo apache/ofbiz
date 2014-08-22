@@ -27,7 +27,7 @@ import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.datasource.GenericHelperInfo;
 
 /**
- * TransactionFactoryLoader - central source for JTA objects
+ * TransactionFactoryInterface - central source for JTA objects
  */
 public interface TransactionFactoryInterface {
 
