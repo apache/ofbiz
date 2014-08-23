@@ -30,6 +30,8 @@ import jimm.datavision.UserCancellationException;
 
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilValidate;
+import org.ofbiz.entity.datasource.GenericHelperInfo;
+import org.ofbiz.entity.transaction.TransactionFactoryLoader;
 import org.ofbiz.webapp.control.ContextFilter;
 import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.jdbc.ConnectionFactory;
@@ -74,7 +76,7 @@ public class DataVisionViewHandler extends AbstractViewHandler {
             String datasourceName = delegator.getEntityHelperName(info);
 
             Report report = new Report();
-            report.setDatabaseConnection(ConnectionFactory.getConnection(datasourceName));
+            report.setDatabaseConnection(TransactionFactoryLoader.getInstance().getConnection(new GenericHelperInfo(null, datasourceName)));
 
             /* NOTE: this is the old code that is no londer needed because of the new setDatabaseConnection method
             report.setDatabasePassword(""); // password can be bogus because we are using an OFBiz connection...

@@ -57,6 +57,7 @@ import org.ofbiz.entity.model.ModelIndex;
 import org.ofbiz.entity.model.ModelKeyMap;
 import org.ofbiz.entity.model.ModelRelation;
 import org.ofbiz.entity.model.ModelViewEntity;
+import org.ofbiz.entity.transaction.TransactionFactoryLoader;
 import org.ofbiz.entity.transaction.TransactionUtil;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -132,7 +133,7 @@ public class DatabaseUtil {
     protected Connection getConnection() throws SQLException, GenericEntityException {
         Connection connection = null;
         if (!isLegacy) {
-            connection = ConnectionFactory.getConnection(helperInfo);
+            connection = TransactionFactoryLoader.getInstance().getConnection(helperInfo);
         } else {
             connection = ConnectionFactory.getConnection(driverName, connectionUrl, null, userName, password);
         }

@@ -81,20 +81,6 @@ public class ConnectionFactory {
         return getConnection(null, connectionUrl, props, null, null);
     }
 
-    public static Connection getConnection(String helperName) throws SQLException, GenericEntityException {
-        return getConnection(new GenericHelperInfo(null, helperName));
-    }
-
-    public static Connection getConnection(GenericHelperInfo helperInfo) throws SQLException, GenericEntityException {
-        // Debug.logVerbose("Getting a connection", module);
-
-        Connection con = TransactionFactoryLoader.getInstance().getConnection(helperInfo);
-        if (con == null) {
-            Debug.logError("******* ERROR: No database connection found for helperName \"" + helperInfo.getHelperFullName() + "\"", module);
-        }
-        return con;
-    }
-
     private static ConnectionFactoryInterface getManagedConnectionFactory() {
         ConnectionFactoryInterface instance = connFactoryRef.get();
         if (instance == null) {

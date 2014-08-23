@@ -43,6 +43,7 @@ import org.ofbiz.entity.config.model.Datasource;
 import org.ofbiz.entity.config.model.EntityConfig;
 import org.ofbiz.entity.datasource.GenericHelperInfo;
 import org.ofbiz.entity.transaction.GenericTransactionException;
+import org.ofbiz.entity.transaction.TransactionFactoryLoader;
 import org.ofbiz.entity.transaction.TransactionUtil;
 
 /**
@@ -256,7 +257,7 @@ public class SQLProcessor {
         _manualTX = true;
 
         try {
-            _connection = ConnectionFactory.getConnection(helperInfo);
+            _connection = TransactionFactoryLoader.getInstance().getConnection(helperInfo);
             if (Debug.verboseOn()) Debug.logVerbose("SQLProcessor:connection() : manualTx=" + _manualTX, module);
         } catch (SQLException sqle) {
             throw new GenericDataSourceException("Unable to esablish a connection with the database.", sqle);
