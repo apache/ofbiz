@@ -41,9 +41,7 @@ import org.ofbiz.base.util.cache.UtilCache;
 import org.ofbiz.entity.datasource.GenericHelperInfo;
 import org.ofbiz.entity.transaction.TransactionFactoryLoader;
 import org.ofbiz.webapp.control.ContextFilter;
-import org.ofbiz.webapp.view.AbstractViewHandler;
 import org.ofbiz.entity.Delegator;
-import org.ofbiz.entity.jdbc.ConnectionFactory;
 
 
 /**

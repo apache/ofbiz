@@ -32,7 +32,6 @@ import org.ofbiz.base.util.UtilProperties;
 import org.ofbiz.entity.GenericDelegator;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.datasource.GenericHelperInfo;
-import org.ofbiz.entity.jdbc.ConnectionFactory;
 import org.ofbiz.entity.model.ModelEntity;
 import org.ofbiz.entity.model.ModelField;
 import org.ofbiz.entity.transaction.GenericTransactionException;

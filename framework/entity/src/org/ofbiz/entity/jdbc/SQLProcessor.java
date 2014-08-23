@@ -243,7 +243,7 @@ public class SQLProcessor {
     }
 
     /**
-     * Get a connection from the ConnectionFactory
+     * Get a connection from the ConnectionFactoryLoader
      *
      * @return  The connection created
      *

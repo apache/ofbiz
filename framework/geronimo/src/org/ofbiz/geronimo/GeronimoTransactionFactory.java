@@ -34,7 +34,7 @@ import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.config.model.Datasource;
 import org.ofbiz.entity.config.model.EntityConfig;
 import org.ofbiz.entity.datasource.GenericHelperInfo;
-import org.ofbiz.entity.jdbc.ConnectionFactory;
+import org.ofbiz.entity.jdbc.ConnectionFactoryLoader;
 import org.ofbiz.entity.transaction.TransactionFactoryInterface;
 
 /**
@@ -80,7 +80,7 @@ public class GeronimoTransactionFactory implements TransactionFactoryInterface {
         Datasource datasourceInfo = EntityConfig.getDatasource(helperInfo.getHelperBaseName());
 
         if (datasourceInfo != null && datasourceInfo.getInlineJdbc() != null) {
-            return ConnectionFactory.getInstance().getConnection(helperInfo, datasourceInfo.getInlineJdbc());
+            return ConnectionFactoryLoader.getInstance().getConnection(helperInfo, datasourceInfo.getInlineJdbc());
         } else {
             Debug.logError("Geronimo is the configured transaction manager but no inline-jdbc element was specified in the " + helperInfo.getHelperBaseName() + " datasource. Please check your configuration", module);
             return null;
@@ -88,7 +88,7 @@ public class GeronimoTransactionFactory implements TransactionFactoryInterface {
     }
 
     public void shutdown() {
-        ConnectionFactory.getInstance().closeAll();
+        ConnectionFactoryLoader.getInstance().closeAll();
         /*
         if (transactionContextManager != null) {
             // TODO: need to do anything for this?

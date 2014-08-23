@@ -39,9 +39,7 @@ import org.ofbiz.base.util.UtilHttp;
 import org.ofbiz.entity.datasource.GenericHelperInfo;
 import org.ofbiz.entity.transaction.TransactionFactoryLoader;
 import org.ofbiz.webapp.control.ContextFilter;
-import org.ofbiz.webapp.view.AbstractViewHandler;
 import org.ofbiz.entity.Delegator;
-import org.ofbiz.entity.jdbc.ConnectionFactory;
 
 /**
  * Handles JasperReports PDF view rendering

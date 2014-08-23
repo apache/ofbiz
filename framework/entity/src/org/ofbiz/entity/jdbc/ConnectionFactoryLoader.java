@@ -23,12 +23,12 @@ import org.ofbiz.entity.config.model.EntityConfig;
 import org.ofbiz.entity.connection.ConnectionFactoryInterface;
 
 /**
- * ConnectionFactory - central source for JDBC connections
+ * ConnectionFactoryLoader - utility class that loads the connection manager and provides to client code a reference to it (ConnectionFactoryInterface)
  *
  */
-public class ConnectionFactory {
+public class ConnectionFactoryLoader {
     // Debug module name
-    public static final String module = ConnectionFactory.class.getName();
+    public static final String module = ConnectionFactoryLoader.class.getName();
     private static final ConnectionFactoryInterface connFactory = createConnectionFactoryInterface();
 
     private static ConnectionFactoryInterface createConnectionFactoryInterface() {

@@ -39,7 +39,7 @@ import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.config.model.*;
 import org.ofbiz.entity.datasource.GenericHelperInfo;
-import org.ofbiz.entity.jdbc.ConnectionFactory;
+import org.ofbiz.entity.jdbc.ConnectionFactoryLoader;
 
 /**
  * Central source for Tyrex JTA objects from JNDI
@@ -145,7 +145,7 @@ public class JNDIFactory implements TransactionFactoryInterface {
         }
 
         if (datasourceInfo.getInlineJdbc() != null) {
-            Connection otherCon = ConnectionFactory.getInstance().getConnection(helperInfo, datasourceInfo.getInlineJdbc());
+            Connection otherCon = ConnectionFactoryLoader.getInstance().getConnection(helperInfo, datasourceInfo.getInlineJdbc());
             return TransactionUtil.getCursorConnection(helperInfo, otherCon);
         } else {
             //no real need to print an error here

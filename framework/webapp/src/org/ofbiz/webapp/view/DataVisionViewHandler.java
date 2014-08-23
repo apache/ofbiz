@@ -34,7 +34,6 @@ import org.ofbiz.entity.datasource.GenericHelperInfo;
 import org.ofbiz.entity.transaction.TransactionFactoryLoader;
 import org.ofbiz.webapp.control.ContextFilter;
 import org.ofbiz.entity.Delegator;
-import org.ofbiz.entity.jdbc.ConnectionFactory;
 
 /**
  * Handles DataVision type view rendering
