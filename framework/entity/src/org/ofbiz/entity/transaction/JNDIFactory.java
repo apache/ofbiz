@@ -44,7 +44,7 @@ import org.ofbiz.entity.jdbc.ConnectionFactoryLoader;
 /**
  * Central source for Tyrex JTA objects from JNDI
  */
-public class JNDIFactory implements TransactionFactoryInterface {
+public class JNDIFactory implements TransactionFactory {
 
     // Debug module name
     public static final String module = JNDIFactory.class.getName();

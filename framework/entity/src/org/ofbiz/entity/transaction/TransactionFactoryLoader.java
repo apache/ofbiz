@@ -23,15 +23,15 @@ import org.ofbiz.entity.GenericEntityConfException;
 import org.ofbiz.entity.config.model.EntityConfig;
 
 /**
- * TransactionFactoryLoader - utility class that loads the transaction manager and provides to client code a reference to it (TransactionFactoryInterface)
+ * TransactionFactoryLoader - utility class that loads the transaction manager and provides to client code a reference to it (TransactionFactory)
  */
 public class TransactionFactoryLoader {
 
     public static final String module = TransactionFactoryLoader.class.getName();
-    private static final TransactionFactoryInterface txFactory = createTransactionFactoryInterface();
+    private static final TransactionFactory txFactory = createTransactionFactory();
 
-    private static TransactionFactoryInterface createTransactionFactoryInterface() {
-        TransactionFactoryInterface instance = null;
+    private static TransactionFactory createTransactionFactory() {
+        TransactionFactory instance = null;
         try {
             String className = EntityConfig.getInstance().getTransactionFactory().getClassName();
             if (className == null) {
@@ -39,7 +39,7 @@ public class TransactionFactoryLoader {
             }
             ClassLoader loader = Thread.currentThread().getContextClassLoader();
             Class<?> tfClass = loader.loadClass(className);
-            instance = (TransactionFactoryInterface) tfClass.newInstance();
+            instance = (TransactionFactory) tfClass.newInstance();
         } catch (GenericEntityConfException gece) {
             Debug.logError(gece, "Could not find transaction factory class name definition", module);
         } catch (ClassNotFoundException cnfe) {
@@ -50,7 +50,7 @@ public class TransactionFactoryLoader {
         return instance;
     }
 
-    public static TransactionFactoryInterface getInstance() {
+    public static TransactionFactory getInstance() {
         if (txFactory == null) {
             throw new IllegalStateException("The Transaction Factory is not initialized.");
         }

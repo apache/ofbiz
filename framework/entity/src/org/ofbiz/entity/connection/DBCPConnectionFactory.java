@@ -28,7 +28,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import javax.transaction.TransactionManager;
 
-import org.apache.commons.dbcp2.ConnectionFactory;
 import org.apache.commons.dbcp2.DriverConnectionFactory;
 import org.apache.commons.dbcp2.PoolableConnectionFactory;
 import org.apache.commons.dbcp2.managed.LocalXAConnectionFactory;
@@ -52,7 +51,7 @@ import org.ofbiz.entity.transaction.TransactionUtil;
  * 
  * @see <a href="http://commons.apache.org/proper/commons-dbcp/">Apache Commons DBCP</a>
  */
-public class DBCPConnectionFactory implements ConnectionFactoryInterface {
+public class DBCPConnectionFactory implements ConnectionFactory {
 
     public static final String module = DBCPConnectionFactory.class.getName();
     protected static final ConcurrentHashMap<String, ManagedDataSource> dsCache = new ConcurrentHashMap<String, ManagedDataSource>();
@@ -99,7 +98,7 @@ public class DBCPConnectionFactory implements ConnectionFactoryInterface {
         cfProps.put("password", jdbcPassword);
 
         // create the connection factory
-        ConnectionFactory cf = new DriverConnectionFactory(jdbcDriver, jdbcUri, cfProps);
+        org.apache.commons.dbcp2.ConnectionFactory cf = new DriverConnectionFactory(jdbcDriver, jdbcUri, cfProps);
 
         // wrap it with a LocalXAConnectionFactory
         XAConnectionFactory xacf = new LocalXAConnectionFactory(txMgr, cf);

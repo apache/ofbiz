@@ -16,28 +16,20 @@
  * specific language governing permissions and limitations
  * under the License.
  *******************************************************************************/
-package org.ofbiz.entity.transaction;
+package org.ofbiz.entity.connection;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import javax.transaction.TransactionManager;
-import javax.transaction.UserTransaction;
 
 import org.ofbiz.entity.GenericEntityException;
+import org.ofbiz.entity.config.model.JdbcElement;
 import org.ofbiz.entity.datasource.GenericHelperInfo;
 
 /**
- * TransactionFactoryInterface - central source for JTA objects
+ * ConnectionFactory
  */
-public interface TransactionFactoryInterface {
+public interface ConnectionFactory {
 
-    public TransactionManager getTransactionManager();
-
-    public UserTransaction getUserTransaction();
-
-    public String getTxMgrName();
-
-    public Connection getConnection(GenericHelperInfo helperInfo) throws SQLException, GenericEntityException;
-
-    public void shutdown();
+    public Connection getConnection(GenericHelperInfo helperInfo, JdbcElement jdbcElement) throws SQLException, GenericEntityException;
+    public void closeAll();
 }

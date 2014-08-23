@@ -35,12 +35,12 @@ import org.ofbiz.entity.config.model.Datasource;
 import org.ofbiz.entity.config.model.EntityConfig;
 import org.ofbiz.entity.datasource.GenericHelperInfo;
 import org.ofbiz.entity.jdbc.ConnectionFactoryLoader;
-import org.ofbiz.entity.transaction.TransactionFactoryInterface;
+import org.ofbiz.entity.transaction.TransactionFactory;
 
 /**
  * GeronimoTransactionFactory
  */
-public class GeronimoTransactionFactory implements TransactionFactoryInterface {
+public class GeronimoTransactionFactory implements TransactionFactory {
 
     public static final String module = GeronimoTransactionFactory.class.getName();
 
@@ -59,14 +59,14 @@ public class GeronimoTransactionFactory implements TransactionFactoryInterface {
     }
 
     /*
-     * @see org.ofbiz.entity.transaction.TransactionFactoryInterface#getTransactionManager()
+     * @see org.ofbiz.entity.transaction.TransactionFactory#getTransactionManager()
      */
     public TransactionManager getTransactionManager() {
         return geronimoTransactionManager;
     }
 
     /*
-     * @see org.ofbiz.entity.transaction.TransactionFactoryInterface#getUserTransaction()
+     * @see org.ofbiz.entity.transaction.TransactionFactory#getUserTransaction()
      */
     public UserTransaction getUserTransaction() {
         return geronimoTransactionManager;
