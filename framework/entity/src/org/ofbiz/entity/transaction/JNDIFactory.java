@@ -145,7 +145,7 @@ public class JNDIFactory implements TransactionFactoryInterface {
         }
 
         if (datasourceInfo.getInlineJdbc() != null) {
-            Connection otherCon = ConnectionFactory.getManagedConnection(helperInfo, datasourceInfo.getInlineJdbc());
+            Connection otherCon = ConnectionFactory.getInstance().getConnection(helperInfo, datasourceInfo.getInlineJdbc());
             return TransactionUtil.getCursorConnection(helperInfo, otherCon);
         } else {
             //no real need to print an error here

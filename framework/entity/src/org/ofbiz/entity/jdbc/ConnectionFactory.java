@@ -23,16 +23,11 @@ import java.sql.Driver;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Properties;
-import java.util.concurrent.atomic.AtomicReference;
 
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilValidate;
-import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.config.model.EntityConfig;
-import org.ofbiz.entity.config.model.JdbcElement;
 import org.ofbiz.entity.connection.ConnectionFactoryInterface;
-import org.ofbiz.entity.datasource.GenericHelperInfo;
-import org.ofbiz.entity.transaction.TransactionFactoryLoader;
 
 /**
  * ConnectionFactory - central source for JDBC connections
@@ -93,14 +88,6 @@ public class ConnectionFactory {
 
     public static Connection getConnection(String connectionUrl, Properties props) throws SQLException {
         return getConnection(null, connectionUrl, props, null, null);
-    }
-
-    public static Connection getManagedConnection(GenericHelperInfo helperInfo, JdbcElement jdbcElement) throws SQLException, GenericEntityException {
-        return getInstance().getConnection(helperInfo, jdbcElement);
-    }
-
-    public static void closeAllManagedConnections() {
-        getInstance().closeAll();
     }
 
     public static void loadDriver(String driverName) throws SQLException {
