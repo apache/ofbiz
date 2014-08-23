@@ -18,14 +18,7 @@
  *******************************************************************************/
 package org.ofbiz.entity.jdbc;
 
-import java.sql.Connection;
-import java.sql.Driver;
-import java.sql.DriverManager;
-import java.sql.SQLException;
-import java.util.Properties;
-
 import org.ofbiz.base.util.Debug;
-import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.entity.config.model.EntityConfig;
 import org.ofbiz.entity.connection.ConnectionFactoryInterface;
 
@@ -61,47 +54,5 @@ public class ConnectionFactory {
             throw new IllegalStateException("The Connection Factory is not initialized.");
         }
         return connFactory;
-    }
-
-    public static Connection getConnection(String driverName, String connectionUrl, Properties props, String userName, String password) throws SQLException {
-        // first register the JDBC driver with the DriverManager
-        if (driverName != null) {
-            ConnectionFactory.loadDriver(driverName);
-        }
-
-        try {
-            if (UtilValidate.isNotEmpty(userName))
-                return DriverManager.getConnection(connectionUrl, userName, password);
-            else if (props != null)
-                return DriverManager.getConnection(connectionUrl, props);
-            else
-                return DriverManager.getConnection(connectionUrl);
-        } catch (SQLException e) {
-            Debug.logError(e, "SQL Error obtaining JDBC connection", module);
-            throw e;
-        }
-    }
-
-    public static Connection getConnection(String connectionUrl, String userName, String password) throws SQLException {
-        return getConnection(null, connectionUrl, null, userName, password);
-    }
-
-    public static Connection getConnection(String connectionUrl, Properties props) throws SQLException {
-        return getConnection(null, connectionUrl, props, null, null);
-    }
-
-    public static void loadDriver(String driverName) throws SQLException {
-        if (DriverManager.getDriver(driverName) == null) {
-            try {
-                Driver driver = (Driver) Class.forName(driverName, true, Thread.currentThread().getContextClassLoader()).newInstance();
-                DriverManager.registerDriver(driver);
-            } catch (ClassNotFoundException e) {
-                Debug.logWarning(e, "Unable to load driver [" + driverName + "]", module);
-            } catch (InstantiationException e) {
-                Debug.logWarning(e, "Unable to instantiate driver [" + driverName + "]", module);
-            } catch (IllegalAccessException e) {
-                Debug.logWarning(e, "Illegal access exception [" + driverName + "]", module);
-            }
-        }
     }
 }
