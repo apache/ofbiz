@@ -133,11 +133,4 @@ public class ConnectionFactory {
             }
         }
     }
-
-    public static void unloadDriver(String driverName) throws SQLException {
-        Driver driver = DriverManager.getDriver(driverName);
-        if (driver != null) {
-            DriverManager.deregisterDriver(driver);
-        }
-    }
 }
