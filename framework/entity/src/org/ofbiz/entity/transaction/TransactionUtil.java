@@ -51,8 +51,8 @@ import org.ofbiz.base.util.UtilGenerics;
 import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.entity.GenericEntityConfException;
 import org.ofbiz.entity.GenericEntityException;
-import org.ofbiz.entity.config.EntityConfigUtil;
 import org.ofbiz.entity.config.model.Datasource;
+import org.ofbiz.entity.config.model.EntityConfig;
 import org.ofbiz.entity.datasource.GenericHelperInfo;
 import org.ofbiz.entity.jdbc.CursorConnection;
 
@@ -172,7 +172,7 @@ public class TransactionUtil implements Status {
                 setTransactionBeginStack();
 
                 // initialize the debug resource
-                if (EntityConfigUtil.isDebugXAResource()) {
+                if (debugResources()) {
                     DebugXaResource dxa = new DebugXaResource();
                     try {
                         dxa.enlist();
@@ -542,12 +542,12 @@ public class TransactionUtil implements Status {
     }
 
     public static boolean debugResources() throws GenericEntityConfException {
-        return EntityConfigUtil.isDebugXAResource();
+        return EntityConfig.getInstance().getDebugXaResources().getValue();
     }
 
     public static void logRunningTx() {
         try {
-            if (EntityConfigUtil.isDebugXAResource()) {
+            if (debugResources()) {
                 if (UtilValidate.isNotEmpty(debugResMap)) {
                     for (DebugXaResource dxa: debugResMap.values()) {
                         dxa.log();
@@ -1056,7 +1056,7 @@ public class TransactionUtil implements Status {
     }
 
     public static Connection getCursorConnection(GenericHelperInfo helperInfo, Connection con) {
-        Datasource datasourceInfo = EntityConfigUtil.getDatasource(helperInfo.getHelperBaseName());
+        Datasource datasourceInfo = EntityConfig.getDatasource(helperInfo.getHelperBaseName());
         if (datasourceInfo == null) {
             Debug.logWarning("Could not find configuration for " + helperInfo.getHelperBaseName() + " datasource.", module);
             return con;

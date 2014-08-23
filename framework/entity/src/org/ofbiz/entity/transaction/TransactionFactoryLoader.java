@@ -20,7 +20,7 @@ package org.ofbiz.entity.transaction;
 
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.entity.GenericEntityConfException;
-import org.ofbiz.entity.config.EntityConfigUtil;
+import org.ofbiz.entity.config.model.EntityConfig;
 
 /**
  * TransactionFactoryLoader - utility class that loads the transaction manager and provides to client code a reference to it (TransactionFactoryInterface)
@@ -33,7 +33,7 @@ public class TransactionFactoryLoader {
     private static TransactionFactoryInterface createTransactionFactoryInterface() {
         TransactionFactoryInterface instance = null;
         try {
-            String className = EntityConfigUtil.getTxFactoryClass();
+            String className = EntityConfig.getInstance().getTransactionFactory().getClassName();
             if (className == null) {
                 throw new IllegalStateException("Could not find transaction factory class name definition");
             }

@@ -38,10 +38,8 @@ import org.ofbiz.base.util.JNDIContextFactory;
 import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.config.model.*;
-import org.ofbiz.entity.config.EntityConfigUtil;
 import org.ofbiz.entity.datasource.GenericHelperInfo;
 import org.ofbiz.entity.jdbc.ConnectionFactory;
-import org.w3c.dom.Element;
 
 /**
  * Central source for Tyrex JTA objects from JNDI
@@ -63,8 +61,8 @@ public class JNDIFactory implements TransactionFactoryInterface {
                 // try again inside the synch just in case someone when through while we were waiting
                 if (transactionManager == null) {
                     try {
-                        String jndiName = EntityConfigUtil.getTxFactoryTxMgrJndiName();
-                        String jndiServerName = EntityConfigUtil.getTxFactoryTxMgrJndiServerName();
+                        String jndiName = EntityConfig.getInstance().getTransactionFactory().getTransactionManagerJndi().getJndiName();
+                        String jndiServerName = EntityConfig.getInstance().getTransactionFactory().getTransactionManagerJndi().getJndiServerName();
 
                         if (UtilValidate.isNotEmpty(jndiName)) {
                             // if (Debug.verboseOn()) Debug.logVerbose("[JNDIFactory.getTransactionManager] Trying JNDI name " + jndiName, module);
@@ -99,8 +97,8 @@ public class JNDIFactory implements TransactionFactoryInterface {
                 // try again inside the synch just in case someone when through while we were waiting
                 if (userTransaction == null) {
                     try {
-                        String jndiName = EntityConfigUtil.getTxFactoryUserTxJndiName();
-                        String jndiServerName = EntityConfigUtil.getTxFactoryUserTxJndiServerName();
+                        String jndiName = EntityConfig.getInstance().getTransactionFactory().getUserTransactionJndi().getJndiName();
+                        String jndiServerName = EntityConfig.getInstance().getTransactionFactory().getUserTransactionJndi().getJndiServerName();
 
                         if (UtilValidate.isNotEmpty(jndiName)) {
                             // if (Debug.verboseOn()) Debug.logVerbose("[JNDIFactory.getTransactionManager] Trying JNDI name " + jndiName, module);
@@ -134,7 +132,7 @@ public class JNDIFactory implements TransactionFactoryInterface {
     }
 
     public Connection getConnection(GenericHelperInfo helperInfo) throws SQLException, GenericEntityException {
-        Datasource datasourceInfo = EntityConfigUtil.getDatasource(helperInfo.getHelperBaseName());
+        Datasource datasourceInfo = EntityConfig.getDatasource(helperInfo.getHelperBaseName());
 
         if (datasourceInfo.getJndiJdbc() != null) {
             JndiJdbc jndiJdbcElement = datasourceInfo.getJndiJdbc();

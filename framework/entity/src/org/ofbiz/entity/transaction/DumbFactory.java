@@ -35,7 +35,7 @@ import javax.transaction.UserTransaction;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.config.model.Datasource;
-import org.ofbiz.entity.config.EntityConfigUtil;
+import org.ofbiz.entity.config.model.EntityConfig;
 import org.ofbiz.entity.datasource.GenericHelperInfo;
 import org.ofbiz.entity.jdbc.ConnectionFactory;
 
@@ -108,7 +108,7 @@ public class DumbFactory implements TransactionFactoryInterface {
     }
 
     public Connection getConnection(GenericHelperInfo helperInfo) throws SQLException, GenericEntityException {
-        Datasource datasourceInfo = EntityConfigUtil.getDatasource(helperInfo.getHelperBaseName());
+        Datasource datasourceInfo = EntityConfig.getDatasource(helperInfo.getHelperBaseName());
 
         if (datasourceInfo.getInlineJdbc() != null) {
             Connection otherCon = ConnectionFactory.getManagedConnection(helperInfo, datasourceInfo.getInlineJdbc());

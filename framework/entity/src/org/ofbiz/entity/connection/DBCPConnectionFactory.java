@@ -40,7 +40,7 @@ import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.entity.GenericEntityConfException;
 import org.ofbiz.entity.GenericEntityException;
-import org.ofbiz.entity.config.EntityConfigUtil;
+import org.ofbiz.entity.config.model.EntityConfig;
 import org.ofbiz.entity.config.model.InlineJdbc;
 import org.ofbiz.entity.config.model.JdbcElement;
 import org.ofbiz.entity.datasource.GenericHelperInfo;
@@ -73,7 +73,7 @@ public class DBCPConnectionFactory implements ConnectionFactoryInterface {
 
         String jdbcUri = helperInfo.getOverrideJdbcUri(jdbcElement.getJdbcUri());
         String jdbcUsername = helperInfo.getOverrideUsername(jdbcElement.getJdbcUsername());
-        String jdbcPassword = helperInfo.getOverridePassword(EntityConfigUtil.getJdbcPassword(jdbcElement));
+        String jdbcPassword = helperInfo.getOverridePassword(EntityConfig.getJdbcPassword(jdbcElement));
 
         // pool settings
         int maxSize = jdbcElement.getPoolMaxsize();

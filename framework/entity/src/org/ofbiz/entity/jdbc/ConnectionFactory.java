@@ -28,7 +28,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.entity.GenericEntityException;
-import org.ofbiz.entity.config.EntityConfigUtil;
+import org.ofbiz.entity.config.model.EntityConfig;
 import org.ofbiz.entity.config.model.JdbcElement;
 import org.ofbiz.entity.connection.ConnectionFactoryInterface;
 import org.ofbiz.entity.datasource.GenericHelperInfo;
@@ -44,7 +44,7 @@ public class ConnectionFactory {
     private static final AtomicReference<ConnectionFactoryInterface> connFactoryRef = new AtomicReference<ConnectionFactoryInterface>(null);
 
     private static ConnectionFactoryInterface createConnectionFactoryInterface() throws Exception {
-        String className = EntityConfigUtil.getConnectionFactoryClass();
+        String className = EntityConfig.getInstance().getConnectionFactory().getClassName();
         if (className == null) {
             throw new IllegalStateException("Could not find connection factory class name definition");
         }

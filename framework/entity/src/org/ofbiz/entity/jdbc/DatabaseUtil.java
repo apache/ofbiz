@@ -47,7 +47,7 @@ import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.base.util.UtilXml;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.config.model.Datasource;
-import org.ofbiz.entity.config.EntityConfigUtil;
+import org.ofbiz.entity.config.model.EntityConfig;
 import org.ofbiz.entity.datasource.GenericHelperInfo;
 import org.ofbiz.entity.model.ModelEntity;
 import org.ofbiz.entity.model.ModelField;
@@ -91,7 +91,7 @@ public class DatabaseUtil {
     public DatabaseUtil(GenericHelperInfo helperInfo, ExecutorService executor) {
         this.helperInfo = helperInfo;
         this.modelFieldTypeReader = ModelFieldTypeReader.getModelFieldTypeReader(helperInfo.getHelperBaseName());
-        this.datasourceInfo = EntityConfigUtil.getDatasource(helperInfo.getHelperBaseName());
+        this.datasourceInfo = EntityConfig.getDatasource(helperInfo.getHelperBaseName());
         this.executor = executor;
     }
 

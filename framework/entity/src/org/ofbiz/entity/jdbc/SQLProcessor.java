@@ -40,7 +40,7 @@ import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericDataSourceException;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.config.model.Datasource;
-import org.ofbiz.entity.config.EntityConfigUtil;
+import org.ofbiz.entity.config.model.EntityConfig;
 import org.ofbiz.entity.datasource.GenericHelperInfo;
 import org.ofbiz.entity.transaction.GenericTransactionException;
 import org.ofbiz.entity.transaction.TransactionUtil;
@@ -753,7 +753,7 @@ public class SQLProcessor {
         if (field != null) {
             _ps.setBlob(_ind, field);
         } else {
-            Datasource datasourceInfo = EntityConfigUtil.getDatasource(this.helperInfo.getHelperBaseName());
+            Datasource datasourceInfo = EntityConfig.getDatasource(this.helperInfo.getHelperBaseName());
             if (datasourceInfo.getUseBinaryTypeForBlob()) {
                 _ps.setNull(_ind, Types.BINARY);
             } else {
@@ -804,7 +804,7 @@ public class SQLProcessor {
                 throw new SQLException(ex.getMessage());
             }
         } else {
-            Datasource datasourceInfo = EntityConfigUtil.getDatasource(this.helperInfo.getHelperBaseName());
+            Datasource datasourceInfo = EntityConfig.getDatasource(this.helperInfo.getHelperBaseName());
             if (datasourceInfo.getUseBinaryTypeForBlob()) {
                 _ps.setNull(_ind, Types.BINARY);
             } else {
@@ -827,7 +827,7 @@ public class SQLProcessor {
         if (bytes != null) {
             _ps.setBytes(_ind, bytes);
         } else {
-            Datasource datasourceInfo = EntityConfigUtil.getDatasource(this.helperInfo.getHelperBaseName());
+            Datasource datasourceInfo = EntityConfig.getDatasource(this.helperInfo.getHelperBaseName());
             if (datasourceInfo.getUseBinaryTypeForBlob()) {
                 _ps.setNull(_ind, Types.BINARY);
             } else {
@@ -865,7 +865,7 @@ public class SQLProcessor {
 
         // check if the statement was called with a specific fetch size, if not grab the default from the datasource
         if (fetchSize < 0) {
-            Datasource ds = EntityConfigUtil.getDatasource(this.helperInfo.getHelperBaseName());
+            Datasource ds = EntityConfig.getDatasource(this.helperInfo.getHelperBaseName());
             if (ds != null) {
                 fetchSize = ds.getResultFetchSize();
             } else {
