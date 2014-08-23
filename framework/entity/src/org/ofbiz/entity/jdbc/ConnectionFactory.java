@@ -41,18 +41,32 @@ import org.ofbiz.entity.transaction.TransactionFactoryLoader;
 public class ConnectionFactory {
     // Debug module name
     public static final String module = ConnectionFactory.class.getName();
-    private static final AtomicReference<ConnectionFactoryInterface> connFactoryRef = new AtomicReference<ConnectionFactoryInterface>(null);
+    private static final ConnectionFactoryInterface connFactory = createConnectionFactoryInterface();
 
-    private static ConnectionFactoryInterface createConnectionFactoryInterface() throws Exception {
-        String className = EntityConfig.getInstance().getConnectionFactory().getClassName();
-        if (className == null) {
-            throw new IllegalStateException("Could not find connection factory class name definition");
+    private static ConnectionFactoryInterface createConnectionFactoryInterface() {
+        ConnectionFactoryInterface instance = null;
+        try {
+            String className = EntityConfig.getInstance().getConnectionFactory().getClassName();
+            if (className == null) {
+                throw new IllegalStateException("Could not find connection factory class name definition");
+            }
+            ClassLoader loader = Thread.currentThread().getContextClassLoader();
+            Class<?> tfClass = loader.loadClass(className);
+            instance = (ConnectionFactoryInterface) tfClass.newInstance();
+        } catch (ClassNotFoundException cnfe) {
+            Debug.logError(cnfe, "Could not find connection factory class", module);
+        } catch (Exception e) {
+            Debug.logError(e, "Unable to instantiate the connection factory", module);
         }
-        ClassLoader loader = Thread.currentThread().getContextClassLoader();
-        Class<?> tfClass = loader.loadClass(className);
-        return (ConnectionFactoryInterface) tfClass.newInstance();
+        return instance;
     }
 
+    public static ConnectionFactoryInterface getInstance() {
+        if (connFactory == null) {
+            throw new IllegalStateException("The Connection Factory is not initialized.");
+        }
+        return connFactory;
+    }
 
     public static Connection getConnection(String driverName, String connectionUrl, Properties props, String userName, String password) throws SQLException {
         // first register the JDBC driver with the DriverManager
@@ -81,28 +95,12 @@ public class ConnectionFactory {
         return getConnection(null, connectionUrl, props, null, null);
     }
 
-    private static ConnectionFactoryInterface getManagedConnectionFactory() {
-        ConnectionFactoryInterface instance = connFactoryRef.get();
-        if (instance == null) {
-            try {
-                instance = createConnectionFactoryInterface();
-                if (!connFactoryRef.compareAndSet(null, instance)) {
-                    instance = connFactoryRef.get();
-                }
-            } catch (Exception e) {
-                Debug.logError(e, "Exception thrown while creating ConnectionFactoryInterface instance: ", module);
-                throw new IllegalStateException("Error loading ConnectionFactoryInterface class: " + e);
-            }
-        }
-        return instance;
-    }
-
     public static Connection getManagedConnection(GenericHelperInfo helperInfo, JdbcElement jdbcElement) throws SQLException, GenericEntityException {
-        return getManagedConnectionFactory().getConnection(helperInfo, jdbcElement);
+        return getInstance().getConnection(helperInfo, jdbcElement);
     }
 
     public static void closeAllManagedConnections() {
-        getManagedConnectionFactory().closeAll();
+        getInstance().closeAll();
     }
 
     public static void loadDriver(String driverName) throws SQLException {
