@@ -42,9 +42,9 @@ import org.ofbiz.entity.jdbc.ConnectionFactoryLoader;
 /**
  * A dumb, non-working transaction manager.
  */
-public class DumbFactory implements TransactionFactory {
+public class DumbTransactionFactory implements TransactionFactory {
 
-    public static final String module = DumbFactory.class.getName();
+    public static final String module = DumbTransactionFactory.class.getName();
 
     public TransactionManager getTransactionManager() {
         return new TransactionManager() {

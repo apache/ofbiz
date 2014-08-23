@@ -44,10 +44,10 @@ import org.ofbiz.entity.jdbc.ConnectionFactoryLoader;
 /**
  * Central source for Tyrex JTA objects from JNDI
  */
-public class JNDIFactory implements TransactionFactory {
+public class JNDITransactionFactory implements TransactionFactory {
 
     // Debug module name
-    public static final String module = JNDIFactory.class.getName();
+    public static final String module = JNDITransactionFactory.class.getName();
 
     static TransactionManager transactionManager = null;
     static UserTransaction userTransaction = null;
@@ -57,7 +57,7 @@ public class JNDIFactory implements TransactionFactory {
 
     public TransactionManager getTransactionManager() {
         if (transactionManager == null) {
-            synchronized (JNDIFactory.class) {
+            synchronized (JNDITransactionFactory.class) {
                 // try again inside the synch just in case someone when through while we were waiting
                 if (transactionManager == null) {
                     try {
@@ -65,7 +65,7 @@ public class JNDIFactory implements TransactionFactory {
                         String jndiServerName = EntityConfig.getInstance().getTransactionFactory().getTransactionManagerJndi().getJndiServerName();
 
                         if (UtilValidate.isNotEmpty(jndiName)) {
-                            // if (Debug.verboseOn()) Debug.logVerbose("[JNDIFactory.getTransactionManager] Trying JNDI name " + jndiName, module);
+                            // if (Debug.verboseOn()) Debug.logVerbose("[JNDITransactionFactory.getTransactionManager] Trying JNDI name " + jndiName, module);
 
                             try {
                                 InitialContext ic = JNDIContextFactory.getInitialContext(jndiServerName);
@@ -78,7 +78,7 @@ public class JNDIFactory implements TransactionFactory {
                                 transactionManager = null;
                             }
                             if (transactionManager == null) {
-                                Debug.logWarning("[JNDIFactory.getTransactionManager] Failed to find TransactionManager named " + jndiName + " in JNDI.", module);
+                                Debug.logWarning("Failed to find TransactionManager named " + jndiName + " in JNDI.", module);
                             }
                         }
                     } catch (GeneralException e) {
@@ -93,7 +93,7 @@ public class JNDIFactory implements TransactionFactory {
 
     public UserTransaction getUserTransaction() {
         if (userTransaction == null) {
-            synchronized (JNDIFactory.class) {
+            synchronized (JNDITransactionFactory.class) {
                 // try again inside the synch just in case someone when through while we were waiting
                 if (userTransaction == null) {
                     try {
@@ -101,7 +101,6 @@ public class JNDIFactory implements TransactionFactory {
                         String jndiServerName = EntityConfig.getInstance().getTransactionFactory().getUserTransactionJndi().getJndiServerName();
 
                         if (UtilValidate.isNotEmpty(jndiName)) {
-                            // if (Debug.verboseOn()) Debug.logVerbose("[JNDIFactory.getTransactionManager] Trying JNDI name " + jndiName, module);
 
                             try {
                                 InitialContext ic = JNDIContextFactory.getInitialContext(jndiServerName);
@@ -114,7 +113,7 @@ public class JNDIFactory implements TransactionFactory {
                                 userTransaction = null;
                             }
                             if (userTransaction == null) {
-                                Debug.logWarning("[JNDIFactory.getUserTransaction] Failed to find UserTransaction named " + jndiName + " in JNDI.", module);
+                                Debug.logWarning("Failed to find UserTransaction named " + jndiName + " in JNDI.", module);
                             }
                         }
                     } catch (GeneralException e) {
