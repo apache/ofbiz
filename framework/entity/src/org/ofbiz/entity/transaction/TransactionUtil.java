@@ -63,18 +63,21 @@ import org.ofbiz.entity.jdbc.CursorConnection;
 public class TransactionUtil implements Status {
     // Debug module name
     public static final String module = TransactionUtil.class.getName();
-    public static Map<Xid, DebugXaResource> debugResMap = Collections.<Xid, DebugXaResource>synchronizedMap(new HashMap<Xid, DebugXaResource>());
 
     private static ThreadLocal<List<Transaction>> suspendedTxStack = new ThreadLocal<List<Transaction>>();
     private static ThreadLocal<List<Exception>> suspendedTxLocationStack = new ThreadLocal<List<Exception>>();
     private static ThreadLocal<Exception> transactionBeginStack = new ThreadLocal<Exception>();
     private static ThreadLocal<List<Exception>> transactionBeginStackSave = new ThreadLocal<List<Exception>>();
-    private static Map<Long, Exception> allThreadsTransactionBeginStack = Collections.<Long, Exception>synchronizedMap(new HashMap<Long, Exception>());
-    private static Map<Long, List<Exception>> allThreadsTransactionBeginStackSave = Collections.<Long, List<Exception>>synchronizedMap(new HashMap<Long, List<Exception>>());
     private static ThreadLocal<RollbackOnlyCause> setRollbackOnlyCause = new ThreadLocal<RollbackOnlyCause>();
     private static ThreadLocal<List<RollbackOnlyCause>> setRollbackOnlyCauseSave = new ThreadLocal<List<RollbackOnlyCause>>();
     private static ThreadLocal<Timestamp> transactionStartStamp = new ThreadLocal<Timestamp>();
     private static ThreadLocal<Timestamp> transactionLastNowStamp = new ThreadLocal<Timestamp>();
+
+    private static final boolean debugResources = readDebugResources();
+    public static Map<Xid, DebugXaResource> debugResMap = Collections.<Xid, DebugXaResource>synchronizedMap(new HashMap<Xid, DebugXaResource>());
+    // in order to improve performance allThreadsTransactionBeginStack and allThreadsTransactionBeginStackSave are only maintained when logging level INFO is on
+    private static Map<Long, Exception> allThreadsTransactionBeginStack = Collections.<Long, Exception>synchronizedMap(new HashMap<Long, Exception>());
+    private static Map<Long, List<Exception>> allThreadsTransactionBeginStackSave = Collections.<Long, List<Exception>>synchronizedMap(new HashMap<Long, List<Exception>>());
 
     @Deprecated
     public static <V> V doNewTransaction(String ifErrorMessage, Callable<V> callable) throws GenericEntityException {
@@ -188,8 +191,6 @@ public class TransactionUtil implements Status {
             } catch (SystemException e) {
                 //This is Java 1.4 only, but useful for certain debuggins: Throwable t = e.getCause() == null ? e : e.getCause();
                 throw new GenericTransactionException("System error, could not begin transaction", e);
-            } catch (GenericEntityConfException e) {
-                throw new GenericTransactionException("Configuration error, could not begin transaction", e);
             }
         } else {
             if (Debug.infoOn()) Debug.logInfo("[TransactionUtil.begin] no user transaction, so no transaction begun", module);
@@ -541,21 +542,26 @@ public class TransactionUtil implements Status {
         }
     }
 
-    public static boolean debugResources() throws GenericEntityConfException {
-        return EntityConfig.getInstance().getDebugXaResources().getValue();
+    private static boolean readDebugResources() {
+        try {
+            return EntityConfig.getInstance().getDebugXaResources().getValue();
+        } catch (GenericEntityConfException gece) {
+            Debug.logWarning(gece, module);
+        }
+        return false;
+    }
+
+    public static boolean debugResources() {
+        return debugResources;
     }
 
     public static void logRunningTx() {
-        try {
-            if (debugResources()) {
-                if (UtilValidate.isNotEmpty(debugResMap)) {
-                    for (DebugXaResource dxa: debugResMap.values()) {
-                        dxa.log();
-                    }
+        if (debugResources()) {
+            if (UtilValidate.isNotEmpty(debugResMap)) {
+                for (DebugXaResource dxa: debugResMap.values()) {
+                    dxa.log();
                 }
             }
-        } catch (GenericEntityConfException e) {
-            Debug.logWarning("Exception thrown while logging: " + e, module);
         }
     }
 
@@ -669,23 +675,26 @@ public class TransactionUtil implements Status {
         }
         el.add(0, e);
 
-        Long curThreadId = Thread.currentThread().getId();
-        List<Exception> ctEl = allThreadsTransactionBeginStackSave.get(curThreadId);
-        if (ctEl == null) {
-            ctEl = new LinkedList<Exception>();
-            allThreadsTransactionBeginStackSave.put(curThreadId, ctEl);
+        if (Debug.infoOn()) {
+            Long curThreadId = Thread.currentThread().getId();
+            List<Exception> ctEl = allThreadsTransactionBeginStackSave.get(curThreadId);
+            if (ctEl == null) {
+                ctEl = new LinkedList<Exception>();
+                allThreadsTransactionBeginStackSave.put(curThreadId, ctEl);
+            }
+            ctEl.add(0, e);
         }
-        ctEl.add(0, e);
     }
 
     private static Exception popTransactionBeginStackSave() {
-        // do the unofficial all threads Map one first, and don't do a real return
-        Long curThreadId = Thread.currentThread().getId();
-        List<Exception> ctEl = allThreadsTransactionBeginStackSave.get(curThreadId);
-        if (UtilValidate.isNotEmpty(ctEl)) {
-            ctEl.remove(0);
+        if (Debug.infoOn()) {
+            // do the unofficial all threads Map one first, and don't do a real return
+            Long curThreadId = Thread.currentThread().getId();
+            List<Exception> ctEl = allThreadsTransactionBeginStackSave.get(curThreadId);
+            if (UtilValidate.isNotEmpty(ctEl)) {
+                ctEl.remove(0);
+            }
         }
-
         // then do the more reliable ThreadLocal one
         List<Exception> el = transactionBeginStackSave.get();
         if (UtilValidate.isNotEmpty(el)) {
@@ -755,14 +764,17 @@ public class TransactionUtil implements Status {
             Debug.logWarning(e2, "In setTransactionBeginStack a stack placeholder was already in place, here is the current location: ", module);
         }
         transactionBeginStack.set(newExc);
-        Long curThreadId = Thread.currentThread().getId();
-        allThreadsTransactionBeginStack.put(curThreadId, newExc);
+        if (Debug.infoOn()) {
+            Long curThreadId = Thread.currentThread().getId();
+            allThreadsTransactionBeginStack.put(curThreadId, newExc);
+        }
     }
 
     private static Exception clearTransactionBeginStack() {
-        Long curThreadId = Thread.currentThread().getId();
-        allThreadsTransactionBeginStack.remove(curThreadId);
-
+        if (Debug.infoOn()) {
+            Long curThreadId = Thread.currentThread().getId();
+            allThreadsTransactionBeginStack.remove(curThreadId);
+        }
         Exception e = transactionBeginStack.get();
         if (e == null) {
             Exception e2 = new Exception("Current Stack Trace");
