@@ -121,19 +121,19 @@ public class TransactionUtil implements Status {
             try {
                 int currentStatus = ut.getStatus();
                 if (Debug.verboseOn()) {
-                    Debug.logVerbose("[TransactionUtil.begin] current status : " + getTransactionStateString(currentStatus), module);
+                    Debug.logVerbose("Current status : " + getTransactionStateString(currentStatus), module);
                 }
                 if (currentStatus == Status.STATUS_ACTIVE) {
                     if (Debug.verboseOn()) {
-                        Debug.logVerbose("[TransactionUtil.begin] active transaction in place, so no transaction begun", module);
+                        Debug.logVerbose("Active transaction in place, so no transaction begun", module);
                     }
                     return false;
                 } else if (currentStatus == Status.STATUS_MARKED_ROLLBACK) {
                     Exception e = getTransactionBeginStack();
                     if (e != null) {
-                        Debug.logWarning(e, "[TransactionUtil.begin] active transaction marked for rollback in place, so no transaction begun; this stack trace shows when the exception began: ", module);
+                        Debug.logWarning(e, "Active transaction marked for rollback in place, so no transaction begun; this stack trace shows when the exception began: ", module);
                     } else {
-                        Debug.logWarning("[TransactionUtil.begin] active transaction marked for rollback in place, so no transaction begun", module);
+                        Debug.logWarning("Active transaction marked for rollback in place, so no transaction begun", module);
                     }
 
                     RollbackOnlyCause roc = getSetRollbackOnlyCause();
