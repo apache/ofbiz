@@ -79,28 +79,8 @@ public class TransactionUtil implements Status {
     private static Map<Long, Exception> allThreadsTransactionBeginStack = Collections.<Long, Exception>synchronizedMap(new HashMap<Long, Exception>());
     private static Map<Long, List<Exception>> allThreadsTransactionBeginStackSave = Collections.<Long, List<Exception>>synchronizedMap(new HashMap<Long, List<Exception>>());
 
-    @Deprecated
-    public static <V> V doNewTransaction(String ifErrorMessage, Callable<V> callable) throws GenericEntityException {
-        return noTransaction(inTransaction(callable, ifErrorMessage, 0, true)).call();
-    }
-
-    @Deprecated
-    public static <V> V doNewTransaction(String ifErrorMessage, boolean printException, Callable<V> callable) throws GenericEntityException {
-        return noTransaction(inTransaction(callable, ifErrorMessage, 0, printException)).call();
-    }
-
     public static <V> V doNewTransaction(Callable<V> callable, String ifErrorMessage, int timeout, boolean printException) throws GenericEntityException {
         return noTransaction(inTransaction(callable, ifErrorMessage, timeout, printException)).call();
-    }
-
-    @Deprecated
-    public static <V> V doTransaction(String ifErrorMessage, Callable<V> callable) throws GenericEntityException {
-        return inTransaction(callable, ifErrorMessage, 0, true).call();
-    }
-
-    @Deprecated
-    public static <V> V doTransaction(String ifErrorMessage, boolean printException, Callable<V> callable) throws GenericEntityException {
-        return inTransaction(callable, ifErrorMessage, 0, printException).call();
     }
 
     public static <V> V doTransaction(Callable<V> callable, String ifErrorMessage, int timeout, boolean printException) throws GenericEntityException {
@@ -186,14 +166,12 @@ public class TransactionUtil implements Status {
 
                 return true;
             } catch (NotSupportedException e) {
-                //This is Java 1.4 only, but useful for certain debuggins: Throwable t = e.getCause() == null ? e : e.getCause();
                 throw new GenericTransactionException("Not Supported error, could not begin transaction (probably a nesting problem)", e);
             } catch (SystemException e) {
-                //This is Java 1.4 only, but useful for certain debuggins: Throwable t = e.getCause() == null ? e : e.getCause();
                 throw new GenericTransactionException("System error, could not begin transaction", e);
             }
         } else {
-            if (Debug.infoOn()) Debug.logInfo("[TransactionUtil.begin] no user transaction, so no transaction begun", module);
+            if (Debug.infoOn()) Debug.logInfo("No user transaction, so no transaction begun", module);
             return false;
         }
     }
@@ -203,14 +181,14 @@ public class TransactionUtil implements Status {
         if (timeout > 0) {
             ut.setTransactionTimeout(timeout);
             if (Debug.verboseOn()) {
-                Debug.logVerbose("[TransactionUtil.begin] set transaction timeout to : " + timeout + " seconds", module);
+                Debug.logVerbose("Set transaction timeout to : " + timeout + " seconds", module);
             }
         }
 
         // begin the transaction
         ut.begin();
         if (Debug.verboseOn()) {
-            Debug.logVerbose("[TransactionUtil.begin] transaction begun", module);
+            Debug.logVerbose("Transaction begun", module);
         }
 
         // reset the timeout to the default
@@ -264,7 +242,7 @@ public class TransactionUtil implements Status {
         if (ut != null) {
             try {
                 int status = ut.getStatus();
-                Debug.logVerbose("[TransactionUtil.commit] current status : " + getTransactionStateString(status), module);
+                Debug.logVerbose("Current status : " + getTransactionStateString(status), module);
 
                 if (status != STATUS_NO_TRANSACTION && status != STATUS_COMMITTING && status != STATUS_COMMITTED && status != STATUS_ROLLING_BACK && status != STATUS_ROLLEDBACK) {
                     ut.commit();
@@ -275,9 +253,9 @@ public class TransactionUtil implements Status {
                     clearTransactionBeginStack();
                     clearSetRollbackOnlyCause();
 
-                    Debug.logVerbose("[TransactionUtil.commit] transaction committed", module);
+                    Debug.logVerbose("Transaction committed", module);
                 } else {
-                    Debug.logWarning("[TransactionUtil.commit] Not committing transaction, status is " + getStatusString(), module);
+                    Debug.logWarning("Not committing transaction, status is " + getStatusString(), module);
                 }
             } catch (RollbackException e) {
                 RollbackOnlyCause rollbackOnlyCause = getSetRollbackOnlyCause();
@@ -308,7 +286,7 @@ public class TransactionUtil implements Status {
                 throw new GenericTransactionException("System error, could not commit transaction: " + t.toString(), t);
             }
         } else {
-            Debug.logInfo("[TransactionUtil.commit] UserTransaction is null, not commiting", module);
+            Debug.logInfo("UserTransaction is null, not committing", module);
         }
     }
 
@@ -336,7 +314,7 @@ public class TransactionUtil implements Status {
         if (ut != null) {
             try {
                 int status = ut.getStatus();
-                Debug.logVerbose("[TransactionUtil.rollback] current status : " + getTransactionStateString(status), module);
+                Debug.logVerbose("Current status : " + getTransactionStateString(status), module);
 
                 if (status != STATUS_NO_TRANSACTION) {
                     //if (Debug.infoOn()) Thread.dumpStack();
@@ -352,9 +330,9 @@ public class TransactionUtil implements Status {
                     clearSetRollbackOnlyCause();
 
                     ut.rollback();
-                    Debug.logInfo("[TransactionUtil.rollback] transaction rolled back", module);
+                    Debug.logInfo("Transaction rolled back", module);
                 } else {
-                    Debug.logWarning("[TransactionUtil.rollback] transaction not rolled back, status is STATUS_NO_TRANSACTION", module);
+                    Debug.logWarning("Transaction not rolled back, status is STATUS_NO_TRANSACTION", module);
                 }
             } catch (IllegalStateException e) {
                 Throwable t = e.getCause() == null ? e : e.getCause();
@@ -364,7 +342,7 @@ public class TransactionUtil implements Status {
                 throw new GenericTransactionException("System error, could not rollback transaction: " + t.toString(), t);
             }
         } else {
-            Debug.logInfo("[TransactionUtil.rollback] No UserTransaction, transaction not rolled back", module);
+            Debug.logInfo("No UserTransaction, transaction not rolled back", module);
         }
     }
 
@@ -374,20 +352,20 @@ public class TransactionUtil implements Status {
         if (ut != null) {
             try {
                 int status = ut.getStatus();
-                Debug.logVerbose("[TransactionUtil.setRollbackOnly] current code : " + getTransactionStateString(status), module);
+                Debug.logVerbose("Current code : " + getTransactionStateString(status), module);
 
                 if (status != STATUS_NO_TRANSACTION) {
                     if (status != STATUS_MARKED_ROLLBACK) {
                         if (Debug.warningOn()) {
-                            Debug.logWarning(new Exception(causeMessage), "[TransactionUtil.setRollbackOnly] Calling transaction setRollbackOnly; this stack trace shows where this is happening:", module);
+                            Debug.logWarning(new Exception(causeMessage), "Calling transaction setRollbackOnly; this stack trace shows where this is happening:", module);
                         }
                         ut.setRollbackOnly();
                         setSetRollbackOnlyCause(causeMessage, causeThrowable);
                     } else {
-                        Debug.logInfo("[TransactionUtil.setRollbackOnly] transaction rollback only not set, rollback only is already set.", module);
+                        Debug.logInfo("Transaction rollback only not set, rollback only is already set.", module);
                     }
                 } else {
-                    Debug.logWarning("[TransactionUtil.setRollbackOnly] transaction rollback only not set, status is STATUS_NO_TRANSACTION", module);
+                    Debug.logWarning("Transaction rollback only not set, status is STATUS_NO_TRANSACTION", module);
                 }
             } catch (IllegalStateException e) {
                 Throwable t = e.getCause() == null ? e : e.getCause();
@@ -397,7 +375,7 @@ public class TransactionUtil implements Status {
                 throw new GenericTransactionException("System error, could not set rollback only on transaction: " + t.toString(), t);
             }
         } else {
-            Debug.logInfo("[TransactionUtil.setRollbackOnly] No UserTransaction, transaction rollback only not set", module);
+            Debug.logInfo("No UserTransaction, transaction rollback only not set", module);
         }
     }
 
@@ -436,18 +414,6 @@ public class TransactionUtil implements Status {
                 removeSuspendedTransaction(parentTx);
             }
         } catch (InvalidTransactionException e) {
-            /* NOTE: uncomment this for Weblogic Application Server
-            // this is a work-around for non-standard Weblogic functionality; for more information see: http://www.onjava.com/pub/a/onjava/2005/07/20/transactions.html?page=3
-            if (txMgr instanceof weblogic.transaction.ClientTransactionManager) {
-                // WebLogic 8 and above
-                ((weblogic.transaction.ClientTransactionManager) txMgr).forceResume(parentTx);
-            } else if (txMgr instanceof weblogic.transaction.TransactionManager) {
-                // WebLogic 7
-                ((weblogic.transaction.TransactionManager) txMgr).forceResume(parentTx);
-            } else {
-                throw new GenericTransactionException("System error, could not resume transaction", e);
-            }
-            */
             throw new GenericTransactionException("System error, could not resume transaction", e);
         } catch (SystemException e) {
             throw new GenericTransactionException("System error, could not resume transaction", e);
@@ -579,10 +545,8 @@ public class TransactionUtil implements Status {
                 }
             }
         } catch (RollbackException e) {
-            //This is Java 1.4 only, but useful for certain debuggins: Throwable t = e.getCause() == null ? e : e.getCause();
             throw new GenericTransactionException("Roll Back error, could not register synchronization in transaction even though transactions are available, current transaction rolled back", e);
         } catch (SystemException e) {
-            //This is Java 1.4 only, but useful for certain debuggins: Throwable t = e.getCause() == null ? e : e.getCause();
             throw new GenericTransactionException("System error, could not register synchronization in transaction even though transactions are available", e);
         }
     }
@@ -590,7 +554,7 @@ public class TransactionUtil implements Status {
     // =======================================
     // SUSPENDED TRANSACTIONS
     // =======================================
-    /** BE VERY CARFUL WHERE YOU CALL THIS!! */
+    /** BE VERY CAREFUL WHERE YOU CALL THIS!! */
     public static int cleanSuspendedTransactions() throws GenericTransactionException {
         Transaction trans = null;
         int num = 0;
