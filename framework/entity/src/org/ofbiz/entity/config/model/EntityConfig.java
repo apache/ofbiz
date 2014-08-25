@@ -98,10 +98,10 @@ public final class EntityConfig {
             this.transactionFactory = new TransactionFactory(transactionFactoryElement);
         }
         Element connectionFactoryElement = UtilXml.firstChildElement(element, "connection-factory");
-        if (connectionFactoryElement == null) {
-            throw new GenericEntityConfException("<entity-config> element child element <connection-factory> is missing");
-        } else {
+        if (connectionFactoryElement != null) {
             this.connectionFactory = new ConnectionFactory(connectionFactoryElement);
+        } else {
+            this.connectionFactory = null;
         }
         Element debugXaResourcesElement = UtilXml.firstChildElement(element, "debug-xa-resources");
         if (debugXaResourcesElement == null) {

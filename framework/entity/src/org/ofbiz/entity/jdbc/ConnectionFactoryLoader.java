@@ -34,6 +34,9 @@ public class ConnectionFactoryLoader {
     private static ConnectionFactory createConnectionFactory() {
         ConnectionFactory instance = null;
         try {
+            if (EntityConfig.getInstance().getConnectionFactory() == null) {
+                return null;
+            }
             String className = EntityConfig.getInstance().getConnectionFactory().getClassName();
             if (className == null) {
                 throw new IllegalStateException("Could not find connection factory class name definition");
