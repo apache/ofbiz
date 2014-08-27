@@ -44,8 +44,6 @@ import javax.mail.internet.MimeMessage;
 import javolution.util.FastList;
 import javolution.util.FastMap;
 
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
 import org.ofbiz.base.metrics.Metrics;
 import org.ofbiz.base.metrics.MetricsFactory;
 import org.ofbiz.base.util.Debug;
@@ -220,23 +218,6 @@ public class CommonServices {
         return ServiceUtil.returnSuccess();
     }
 
-    public static Map<String, Object> addOrUpdateLogger(DispatchContext dctc, Map<String, ?> context) {
-        String name = (String) context.get("name");
-        String level = (String) context.get("level");
-        boolean additivity = "Y".equalsIgnoreCase((String) context.get("additivity"));
-
-        Logger logger = null;
-        if ("root".equals(name)) {
-            logger = Logger.getRootLogger();
-        } else {
-            logger = Logger.getLogger(name);
-        }
-        logger.setLevel(Level.toLevel(level));
-        logger.setAdditivity(additivity);
-
-        return ServiceUtil.returnSuccess();
-    }
-
     public static Map<String, Object> forceGc(DispatchContext dctx, Map<String, ?> context) {
         System.gc();
         return ServiceUtil.returnSuccess();
@@ -363,18 +344,14 @@ public class CommonServices {
     }
 
     public static Map<String, Object> displayXaDebugInfo(DispatchContext dctx, Map<String, ?> context) {
-        try {
-            if (TransactionUtil.debugResources()) {
-                if (UtilValidate.isNotEmpty(TransactionUtil.debugResMap)) {
-                    TransactionUtil.logRunningTx();
-                } else {
-                    Debug.logInfo("No running transaction to display.", module);
-                }
+        if (TransactionUtil.debugResources()) {
+            if (UtilValidate.isNotEmpty(TransactionUtil.debugResMap)) {
+                TransactionUtil.logRunningTx();
             } else {
-                Debug.logInfo("Debug resources is disabled.", module);
+                Debug.logInfo("No running transaction to display.", module);
             }
-        } catch (GenericEntityConfException e) {
-            return ServiceUtil.returnError(e.getMessage());
+        } else {
+            Debug.logInfo("Debug resources is disabled.", module);
         }
 
         return ServiceUtil.returnSuccess();

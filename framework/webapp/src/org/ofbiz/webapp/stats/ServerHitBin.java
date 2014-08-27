@@ -18,7 +18,6 @@
  *******************************************************************************/
 package org.ofbiz.webapp.stats;
 
-import java.net.InetAddress;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -55,8 +54,22 @@ public class ServerHitBin {
     public static final int VIEW = 3;
     public static final int ENTITY = 4;
     public static final int SERVICE = 5;
-    public static final String[] typeNames = {"", "Request", "Event", "View", "Entity", "Service"};
-    public static final String[] typeIds = {"", "REQUEST", "EVENT", "VIEW", "ENTITY", "SERVICE"};
+
+    private static final String[] typeIds = {"", "REQUEST", "EVENT", "VIEW", "ENTITY", "SERVICE"};
+
+    // these Maps contain Lists of ServerHitBin objects by id, the most recent is first in the list
+    public static Map<String, List<ServerHitBin>> requestHistory = FastMap.newInstance();
+    public static Map<String, List<ServerHitBin>> eventHistory = FastMap.newInstance();
+    public static Map<String, List<ServerHitBin>> viewHistory = FastMap.newInstance();
+    public static Map<String, List<ServerHitBin>> entityHistory = FastMap.newInstance();
+    public static Map<String, List<ServerHitBin>> serviceHistory = FastMap.newInstance();
+
+    // these Maps contain ServerHitBin objects by id
+    public static Map<String, ServerHitBin> requestSinceStarted = FastMap.newInstance();
+    public static Map<String, ServerHitBin> eventSinceStarted = FastMap.newInstance();
+    public static Map<String, ServerHitBin> viewSinceStarted = FastMap.newInstance();
+    public static Map<String, ServerHitBin> entitySinceStarted = FastMap.newInstance();
+    public static Map<String, ServerHitBin> serviceSinceStarted = FastMap.newInstance();
 
     public static void countRequest(String id, HttpServletRequest request, long startTime, long runningTime, GenericValue userLogin) {
         countHit(id, REQUEST, request, startTime, runningTime, userLogin);
@@ -78,30 +91,12 @@ public class ServerHitBin {
         countHit(id, SERVICE, request, startTime, runningTime, userLogin);
     }
 
-    public static void countHit(String id, int type, HttpServletRequest request, long startTime, long runningTime, GenericValue userLogin) {
+    private static void countHit(String id, int type, HttpServletRequest request, long startTime, long runningTime, GenericValue userLogin) {
         // only count hits if enabled, if not specified defaults to false
         if (!"true".equals(UtilProperties.getPropertyValue("serverstats", "stats.enable." + typeIds[type]))) return;
         countHit(id, type, request, startTime, runningTime, userLogin, true);
     }
 
-    public static void advanceAllBins(long toTime) {
-        advanceAllBins(toTime, requestHistory);
-        advanceAllBins(toTime, eventHistory);
-        advanceAllBins(toTime, viewHistory);
-        advanceAllBins(toTime, entityHistory);
-        advanceAllBins(toTime, serviceHistory);
-    }
-
-    static void advanceAllBins(long toTime, Map<String, List<ServerHitBin>> binMap) {
-        for (Map.Entry<String, List<ServerHitBin>> entry  :binMap.entrySet()) {
-            if (entry.getValue() != null) {
-                for (ServerHitBin bin: entry.getValue()) {
-                    bin.advanceBin(toTime);
-                }
-            }
-        }
-    }
-    
     private static String makeIdTenantAware(String id, Delegator delegator) {
         if (UtilValidate.isNotEmpty(delegator.getDelegatorTenantId())) {
             return id + "#" + delegator.getDelegatorTenantId();
@@ -110,7 +105,7 @@ public class ServerHitBin {
         }
     }
 
-    protected static void countHit(String baseId, int type, HttpServletRequest request, long startTime, long runningTime, GenericValue userLogin, boolean isOriginal) {
+    private static void countHit(String baseId, int type, HttpServletRequest request, long startTime, long runningTime, GenericValue userLogin, boolean isOriginal) {
         Delegator delegator = (Delegator) request.getAttribute("delegator");
         if (delegator == null) {
             String delegatorName = (String) request.getSession().getAttribute("delegatorName");
@@ -238,11 +233,7 @@ public class ServerHitBin {
             countHit("GLOBAL", type, request, startTime, runningTime, userLogin, true);
     }
 
-    static void countHitSinceStart(String baseId, int type, long startTime, long runningTime, boolean isOriginal,
-        Delegator delegator) {
-        if (delegator == null) {
-            throw new IllegalArgumentException("The delegator passed to countHitSinceStart cannot be null");
-        }
+    private static void countHitSinceStart(String baseId, int type, long startTime, long runningTime, boolean isOriginal, Delegator delegator) {
 
         String id = makeIdTenantAware(baseId, delegator);
 
@@ -328,111 +319,33 @@ public class ServerHitBin {
             countHitSinceStart("GLOBAL", type, startTime, runningTime, false, delegator);
     }
 
-    // these Maps contain Lists of ServerHitBin objects by id, the most recent is first in the list
-    public static Map<String, List<ServerHitBin>> requestHistory = FastMap.newInstance();
-    public static Map<String, List<ServerHitBin>> eventHistory = FastMap.newInstance();
-    public static Map<String, List<ServerHitBin>> viewHistory = FastMap.newInstance();
-    public static Map<String, List<ServerHitBin>> entityHistory = FastMap.newInstance();
-    public static Map<String, List<ServerHitBin>> serviceHistory = FastMap.newInstance();
+    private final Delegator delegator;
+    private final String id;
+    private final int type;
+    private final boolean limitLength;
+    private final long binLength;
+    private long startTime;
+    private long endTime;
+    private long numberHits;
+    private long totalRunningTime;
+    private long minTime;
+    private long maxTime;
 
-    // these Maps contain ServerHitBin objects by id
-    public static Map<String, ServerHitBin> requestSinceStarted = FastMap.newInstance();
-    public static Map<String, ServerHitBin> eventSinceStarted = FastMap.newInstance();
-    public static Map<String, ServerHitBin> viewSinceStarted = FastMap.newInstance();
-    public static Map<String, ServerHitBin> entitySinceStarted = FastMap.newInstance();
-    public static Map<String, ServerHitBin> serviceSinceStarted = FastMap.newInstance();
-
-    Delegator delegator;
-    String delegatorName;
-    String id;
-    int type;
-    boolean limitLength;
-    long startTime;
-    long endTime;
-    long numberHits;
-    long totalRunningTime;
-    long minTime;
-    long maxTime;
-
-    public ServerHitBin(String id, int type, boolean limitLength, Delegator delegator) {
-        super();
-        if (delegator == null) {
-            throw new IllegalArgumentException("The delegator passed to countHitSinceStart cannot be null");
-        }
-
+    private ServerHitBin(String id, int type, boolean limitLength, Delegator delegator) {
         this.id = id;
         this.type = type;
         this.limitLength = limitLength;
         this.delegator = delegator;
-        this.delegatorName = delegator.getDelegatorName();
+        this.binLength = getNewBinLength();
         reset(getEvenStartingTime());
     }
 
-    public Delegator getDelegator() {
-        if (this.delegator == null) {
-            this.delegator = DelegatorFactory.getDelegator(this.delegatorName);
-        }
-        // if still null, then we have a problem
-        if (this.delegator == null) {
-            throw new IllegalArgumentException("Could not perform stats operation: could not find delegator with name: " + this.delegatorName);
-        }
-        return this.delegator;
-    }
-
-    long getEvenStartingTime() {
-        // binLengths should be a divisable evenly into 1 hour
-        long curTime = System.currentTimeMillis();
-        long binLength = getNewBinLength();
-
-        // find the first previous millis that are even on the hour
-        Calendar cal = Calendar.getInstance();
-
-        cal.setTime(new Date(curTime));
-        cal.set(Calendar.MINUTE, 0);
-        cal.set(Calendar.SECOND, 0);
-        cal.set(Calendar.MILLISECOND, 0);
-
-        while (cal.getTime().getTime() < (curTime - binLength)) {
-            cal.add(Calendar.MILLISECOND, (int) binLength);
-        }
-
-        return cal.getTime().getTime();
-    }
-
-    static long getNewBinLength() {
-        long binLength = (long) UtilProperties.getPropertyNumber("serverstats", "stats.bin.length.millis");
-
-        // if no or 0 binLength specified, set to 30 minutes
-        if (binLength <= 0) binLength = 1800000;
-        // if binLength is more than an hour, set it to one hour
-        if (binLength > 3600000) binLength = 3600000;
-        return binLength;
-    }
-
-    void reset(long startTime) {
-        this.startTime = startTime;
-        if (limitLength) {
-            long binLength = getNewBinLength();
-
-            // subtract 1 millisecond to keep bin starting times even
-            this.endTime = startTime + binLength - 1;
-        } else {
-            this.endTime = 0;
-        }
-        this.numberHits = 0;
-        this.totalRunningTime = 0;
-        this.minTime = Long.MAX_VALUE;
-        this.maxTime = 0;
-    }
-
-    ServerHitBin(ServerHitBin oldBin) {
-        super();
-
+    private ServerHitBin(ServerHitBin oldBin) {
         this.id = oldBin.id;
         this.type = oldBin.type;
         this.limitLength = oldBin.limitLength;
         this.delegator = oldBin.delegator;
-        this.delegatorName = oldBin.delegatorName;
+        this.binLength = oldBin.binLength;
         this.startTime = oldBin.startTime;
         this.endTime = oldBin.endTime;
         this.numberHits = oldBin.numberHits;
@@ -441,16 +354,16 @@ public class ServerHitBin {
         this.maxTime = oldBin.maxTime;
     }
 
+    public Delegator getDelegator() {
+        return this.delegator;
+    }
+
     public String getId() {
         return this.id;
     }
 
     public int getType() {
         return this.type;
-    }
-
-    public String getTypeString() {
-        return typeNames[this.type];
     }
 
     /** returns the startTime of the bin */
@@ -488,20 +401,8 @@ public class ServerHitBin {
         return this.numberHits;
     }
 
-    public long getTotalRunningTime() {
-        return this.totalRunningTime;
-    }
-
-    public long getMinTime() {
-        return this.minTime;
-    }
-
     public double getMinTimeSeconds() {
         return (this.minTime) / 1000.0;
-    }
-
-    public long getMaxTime() {
-        return this.maxTime;
     }
 
     public double getMaxTimeSeconds() {
@@ -521,7 +422,50 @@ public class ServerHitBin {
         return (this.numberHits) / this.getBinLengthMinutes();
     }
 
-    synchronized void addHit(long startTime, long runningTime) {
+    private long getNewBinLength() {
+        long binLength = (long) UtilProperties.getPropertyNumber("serverstats", "stats.bin.length.millis");
+
+        // if no or 0 binLength specified, set to 30 minutes
+        if (binLength <= 0) binLength = 1800000;
+        // if binLength is more than an hour, set it to one hour
+        if (binLength > 3600000) binLength = 3600000;
+        return binLength;
+    }
+
+    private long getEvenStartingTime() {
+        // binLengths should be a divisable evenly into 1 hour
+        long curTime = System.currentTimeMillis();
+
+        // find the first previous millis that are even on the hour
+        Calendar cal = Calendar.getInstance();
+
+        cal.setTime(new Date(curTime));
+        cal.set(Calendar.MINUTE, 0);
+        cal.set(Calendar.SECOND, 0);
+        cal.set(Calendar.MILLISECOND, 0);
+
+        while (cal.getTime().getTime() < (curTime - this.binLength)) {
+            cal.add(Calendar.MILLISECOND, (int) this.binLength);
+        }
+
+        return cal.getTime().getTime();
+    }
+
+    private void reset(long startTime) {
+        this.startTime = startTime;
+        if (limitLength) {
+            // subtract 1 millisecond to keep bin starting times even
+            this.endTime = startTime + this.binLength - 1;
+        } else {
+            this.endTime = 0;
+        }
+        this.numberHits = 0;
+        this.totalRunningTime = 0;
+        this.minTime = Long.MAX_VALUE;
+        this.maxTime = 0;
+    }
+
+    private synchronized void addHit(long startTime, long runningTime) {
         advanceBin(startTime + runningTime);
 
         this.numberHits++;
@@ -532,7 +476,7 @@ public class ServerHitBin {
             this.maxTime = runningTime;
     }
 
-    synchronized void advanceBin(long toTime) {
+    private synchronized void advanceBin(long toTime) {
         // first check to see if this bin has expired, if so save and recycle it
         while (limitLength && toTime > this.endTime) {
             List<ServerHitBin> binList = null;
@@ -577,17 +521,9 @@ public class ServerHitBin {
                     serverHitBin.set("minTimeMillis", Long.valueOf(this.minTime));
                     serverHitBin.set("maxTimeMillis", Long.valueOf(this.maxTime));
                     // get localhost ip address and hostname to store
-                    try {
-                        InetAddress address = InetAddress.getLocalHost();
-
-                        if (address != null) {
-                            serverHitBin.set("serverIpAddress", address.getHostAddress());
-                            serverHitBin.set("serverHostName", address.getHostName());
-                        } else {
-                            Debug.logError("Unable to get localhost internet address, was null", module);
-                        }
-                    } catch (java.net.UnknownHostException e) {
-                        Debug.logError("Unable to get localhost internet address: " + e.toString(), module);
+                    if (VisitHandler.address != null) {
+                        serverHitBin.set("serverIpAddress", VisitHandler.address.getHostAddress());
+                        serverHitBin.set("serverHostName", VisitHandler.address.getHostName());
                     }
                     try {
                         delegator.createSetNextSeqId(serverHitBin);
@@ -601,7 +537,7 @@ public class ServerHitBin {
         }
     }
 
-    void saveHit(HttpServletRequest request, long startTime, long runningTime, GenericValue userLogin) throws GenericEntityException {
+    private void saveHit(HttpServletRequest request, long startTime, long runningTime, GenericValue userLogin) throws GenericEntityException {
         // persist record of hit in ServerHit entity if option turned on
         if (UtilProperties.propertyValueEqualsIgnoreCase("serverstats", "stats.persist." + ServerHitBin.typeIds[type] + ".hit", "true")) {
             // if the hit type is ENTITY and the name contains "ServerHit" don't
@@ -679,17 +615,9 @@ public class ServerHitBin {
             serverHit.set("referrerUrl", referrerUrl.length() > 250 ? referrerUrl.substring(0, 250) : referrerUrl);
 
             // get localhost ip address and hostname to store
-            try {
-                InetAddress address = InetAddress.getLocalHost();
-
-                if (address != null) {
-                    serverHit.set("serverIpAddress", address.getHostAddress());
-                    serverHit.set("serverHostName", address.getHostName());
-                } else {
-                    Debug.logError("Unable to get localhost internet address, was null", module);
-                }
-            } catch (java.net.UnknownHostException e) {
-                Debug.logError("Unable to get localhost internet address: " + e.toString(), module);
+            if (VisitHandler.address != null) {
+                serverHit.set("serverIpAddress", VisitHandler.address.getHostAddress());
+                serverHit.set("serverHostName", VisitHandler.address.getHostName());
             }
 
             // The problem with
