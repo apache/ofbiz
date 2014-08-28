@@ -167,7 +167,7 @@ under the License.
               <#else>
                  jQuery("#${id}").datetimepicker({
                     showSecond: true,
-                    timeFormat: 'HH:mm:ss',
+                    timeFormat: 'hh:mm:ss',
                     stepHour: 1,
                     stepMinute: 1,
                     stepSecond: 1,
@@ -460,7 +460,7 @@ ${item.description}</span>
           <#else>
              jQuery("#${name?html}_fld0_value").datetimepicker({
                 showSecond: true,
-                timeFormat: 'HH:mm:ss',
+                timeFormat: 'hh:mm:ss',
                 stepHour: 1,
                 stepMinute: 5,
                 stepSecond: 10,
@@ -495,7 +495,7 @@ ${item.description}</span>
           <#else>
              jQuery("#${name?html}_fld1_value").datetimepicker({
                 showSecond: true,
-                timeFormat: 'HH:mm:ss',
+                timeFormat: 'hh:mm:ss',
                 stepHour: 1,
                 stepMinute: 5,
                 stepSecond: 10,
