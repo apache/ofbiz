@@ -171,7 +171,7 @@ under the License.
                  jQuery("#${id}").datetimepicker({
                     showSecond: true,
                     <#-- showMillisec: true, -->
-                    timeFormat: 'HH:mm:ss',
+                    timeFormat: 'hh:mm:ss',
                     stepHour: 1,
                     stepMinute: 1,
                     stepSecond: 1,
@@ -471,7 +471,7 @@ ${item.description}</span>
              jQuery("#${name?html}_fld0_value").datetimepicker({
                 showSecond: true,
                 <#-- showMillisec: true, -->
-                timeFormat: 'HH:mm:ss',
+                timeFormat: 'hh:mm:ss',
                 stepHour: 1,
                 stepMinute: 5,
                 stepSecond: 10,
@@ -507,7 +507,7 @@ ${item.description}</span>
              jQuery("#${name?html}_fld1_value").datetimepicker({
                 showSecond: true,
                 <#-- showMillisec: true, -->
-                timeFormat: 'HH:mm:ss',
+                timeFormat: 'hh:mm:ss',
                 stepHour: 1,
                 stepMinute: 5,
                 stepSecond: 10,
