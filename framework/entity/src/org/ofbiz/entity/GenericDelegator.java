@@ -1112,10 +1112,6 @@ public class GenericDelegator implements Delegator {
                 beganTransaction = TransactionUtil.begin();
             }
 
-            if (doCacheClear) {
-                // always clear cache before the operation
-                this.clearCacheLineByCondition(entityName, condition);
-            }
             ModelEntity modelEntity = getModelReader().getModelEntity(entityName);
             GenericHelper helper = getEntityHelper(entityName);
 
@@ -1125,6 +1121,9 @@ public class GenericDelegator implements Delegator {
             }
 
             int rowsAffected = helper.removeByCondition(modelEntity, condition);
+            if (rowsAffected > 0 && doCacheClear) {
+                this.clearCacheLine(entityName);
+            }
 
             if (testMode) {
                 for (GenericValue entity : removedEntities) {
@@ -1213,10 +1212,6 @@ public class GenericDelegator implements Delegator {
                 beganTransaction = TransactionUtil.begin();
             }
 
-            if (doCacheClear) {
-                // always clear cache before the operation
-                this.clearCacheLineByCondition(entityName, condition);
-            }
             ModelEntity modelEntity = getModelReader().getModelEntity(entityName);
             GenericHelper helper = getEntityHelper(entityName);
 
@@ -1226,6 +1221,9 @@ public class GenericDelegator implements Delegator {
             }
 
             int rowsAffected =  helper.storeByCondition(modelEntity, fieldsToSet, condition);
+            if (rowsAffected > 0 && doCacheClear) {
+                this.clearCacheLine(entityName);
+            }
 
             if (testMode) {
                 for (GenericValue entity : updatedEntities) {
