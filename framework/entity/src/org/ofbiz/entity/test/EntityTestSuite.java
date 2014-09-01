@@ -27,9 +27,16 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.sql.rowset.serial.SerialBlob;
 
+import org.ofbiz.base.concurrent.ExecutionPool;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.Observable;
 import org.ofbiz.base.util.Observer;
@@ -38,6 +45,7 @@ import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.base.util.UtilXml;
 import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.DelegatorFactory;
+import org.ofbiz.entity.GenericDelegator;
 import org.ofbiz.entity.GenericEntity;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericPK;
@@ -56,6 +64,8 @@ import org.ofbiz.entity.transaction.TransactionUtil;
 import org.ofbiz.entity.util.EntityFindOptions;
 import org.ofbiz.entity.util.EntityListIterator;
 import org.ofbiz.entity.util.EntitySaxReader;
+import org.ofbiz.entity.util.EntityUtil;
+import org.ofbiz.entity.util.SequenceUtil;
 
 public class EntityTestSuite extends EntityTestCase {
 
@@ -198,8 +208,21 @@ public class EntityTestSuite extends EntityTestCase {
         testValue.store();
         testValue = delegator.findOne("TestingType", true, "testingTypeId", "TEST-CACHE-1");
         assertEquals("Retrieved from cache value has the correct description", "New Testing Type #Cache-1", testValue.getString("description"));
+        // Test storeByCondition updates the cache
+        testValue = EntityUtil.getFirst(delegator.findByAnd("TestingType", UtilMisc.toMap("testingTypeId", "TEST-CACHE-1"), null, true));
+        EntityCondition storeByCondition = EntityCondition.makeCondition(UtilMisc.toMap("testingTypeId", "TEST-CACHE-1",
+                "lastUpdatedStamp", testValue.get("lastUpdatedStamp")));
+        int qtyChanged = delegator.storeByCondition("TestingType", UtilMisc.toMap("description", "New Testing Type #Cache-0"), storeByCondition);
+        assertEquals("Delegator.storeByCondition updated one value", 1, qtyChanged);
+        testValue = EntityUtil.getFirst(delegator.findByAnd("TestingType", UtilMisc.toMap("testingTypeId", "TEST-CACHE-1"), null, true));
+        assertEquals("Retrieved from cache value has the correct description", "New Testing Type #Cache-0", testValue.getString("description"));
+        // Test removeByCondition updates the cache
+        qtyChanged = delegator.removeByCondition("TestingType", storeByCondition);
+        assertEquals("Delegator.removeByCondition removed one value", 1, qtyChanged);
+        testValue = EntityUtil.getFirst(delegator.findByAnd("TestingType", UtilMisc.toMap("testingTypeId", "TEST-CACHE-1"), null, true));
+        assertEquals("Retrieved from cache value is null", null, testValue);
         // Test entity value remove operation updates the cache
-        testValue = (GenericValue) testValue.clone();
+        testValue = delegator.create("TestingType", "testingTypeId", "TEST-CACHE-1", "description", "Testing Type #Cache-1");
         testValue.remove();
         testValue = delegator.findOne("TestingType", true, "testingTypeId", "TEST-CACHE-1");
         assertEquals("Retrieved from cache value is null", null, testValue);
@@ -1067,6 +1090,66 @@ public class EntityTestSuite extends EntityTestCase {
         assertNull("Delete TestingType 1", testType);
         testType = delegator.findOne("TestingType", UtilMisc.toMap("testingTypeId", "JUNIT-TEST2"), false);
         assertNull("Delete TestingType 2", testType);
+    }
+
+    public void testSequenceValueItem() {
+        SequenceUtil sequencer = new SequenceUtil(delegator.getGroupHelperInfo(delegator.getEntityGroupName("SequenceValueItem")),
+                                                  delegator.getModelEntity("SequenceValueItem"),
+                                                  "seqName", "seqId");
+        UUID id = UUID.randomUUID();
+        String sequenceName = "BogusSequence" + id.toString();
+        for (int i = 10000; i <= 10015; i++) {
+            Long seqId = sequencer.getNextSeqId(sequenceName, 1, null);
+            assertEquals(i, seqId.longValue());
+        }
+        sequencer.forceBankRefresh(sequenceName, 1);
+        Long seqId = sequencer.getNextSeqId(sequenceName, 1, null);
+        assertEquals(10020, seqId.longValue());
+    }
+
+    public void testSequenceValueItemWithConcurrentThreads() {
+        final SequenceUtil sequencer = new SequenceUtil(delegator.getGroupHelperInfo(delegator.getEntityGroupName("SequenceValueItem")),
+                                                  delegator.getModelEntity("SequenceValueItem"),
+                                                  "seqName", "seqId");
+        UUID id = UUID.randomUUID();
+        final String sequenceName = "BogusSequence" + id.toString();
+        final ConcurrentMap<Long, Long> seqIds = new ConcurrentHashMap<Long, Long>();
+        final AtomicBoolean duplicateFound = new AtomicBoolean(false);
+        final AtomicBoolean nullSeqIdReturned = new AtomicBoolean(false);
+
+        List<Future<Void>> futures = new ArrayList<Future<Void>>();
+        Callable getSeqIdTask = new Callable() {
+                    public Callable<Void> call() throws Exception {
+                        Long seqId = sequencer.getNextSeqId(sequenceName, 1, null);
+                        if (seqId == null) {
+                            nullSeqIdReturned.set(true);
+                            return null;
+                        }
+                        Long existingValue = seqIds.putIfAbsent(seqId, seqId);
+                        if (existingValue != null) {
+                            duplicateFound.set(true);
+                        }
+                        return null;
+                    }
+                };
+        Callable refreshTask = new Callable() {
+                            public Callable<Void> call() throws Exception {
+                                sequencer.forceBankRefresh(sequenceName, 1);
+                                return null;
+                            }
+                        };
+        double probabilityOfRefresh = 0.1;
+        for (int i = 1; i <= 1000; i++) {
+            Callable randomTask = Math.random() < probabilityOfRefresh ? refreshTask : getSeqIdTask;
+            futures.add(ExecutionPool.GLOBAL_FORK_JOIN.submit(randomTask));
+        }
+        long startTime = System.currentTimeMillis();
+        ExecutionPool.getAllFutures(futures);
+        long endTime = System.currentTimeMillis();
+        long totalTime = endTime - startTime;
+        Debug.logInfo("testSequenceValueItemWithConcurrentThreads total time (ms): " + totalTime, module);
+        assertFalse("Null sequence id returned", nullSeqIdReturned.get());
+        assertFalse("Duplicate sequence id returned", duplicateFound.get());
     }
 
     private final class TestObserver implements Observer {

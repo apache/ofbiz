@@ -72,7 +72,6 @@ import org.ofbiz.entity.model.ModelRelation;
 import org.ofbiz.entity.model.ModelViewEntity;
 import org.ofbiz.entity.serialize.SerializeException;
 import org.ofbiz.entity.serialize.XmlSerializer;
-import org.ofbiz.entity.transaction.GenericTransactionException;
 import org.ofbiz.entity.transaction.TransactionUtil;
 import org.ofbiz.entity.util.DistributedCacheClear;
 import org.ofbiz.entity.util.EntityCrypto;
@@ -85,7 +84,7 @@ import org.w3c.dom.Node;
 import org.xml.sax.SAXException;
 
 /**
- * Generic Data Source Delegator Class
+ * The default implementation of the <code>Delegator</code> interface.
  *
  */
 public class GenericDelegator implements Delegator {
@@ -122,15 +121,6 @@ public class GenericDelegator implements Delegator {
     private static final AtomicReferenceFieldUpdater<GenericDelegator, LinkedBlockingDeque<?>> testOperationsUpdater = UtilGenerics.cast(AtomicReferenceFieldUpdater.newUpdater(GenericDelegator.class, LinkedBlockingDeque.class, "testOperations"));
     private volatile LinkedBlockingDeque<TestOperation> testOperations = null;
 
-    /** @deprecated Use Delegator delegator = DelegatorFactory.getDelegator(delegatorName);
-     * @param delegatorName
-     * @return the configured delegator
-     */
-    @Deprecated
-    public static GenericDelegator getGenericDelegator(String delegatorName) {
-        return (GenericDelegator) DelegatorFactory.getDelegator(delegatorName);
-    }
-
     protected static List<String> getUserIdentifierStack() {
         List<String> curValList = userIdentifierStack.get();
         if (curValList == null) {
@@ -138,11 +128,6 @@ public class GenericDelegator implements Delegator {
             userIdentifierStack.set(curValList);
         }
         return curValList;
-    }
-
-    public static String getCurrentUserIdentifier() {
-        List<String> curValList = getUserIdentifierStack();
-        return curValList.size() > 0 ? curValList.get(0) : null;
     }
 
     public static void pushUserIdentifier(String userIdentifier) {
@@ -174,11 +159,6 @@ public class GenericDelegator implements Delegator {
             sessionIdentifierStack.set(curValList);
         }
         return curValList;
-    }
-
-    public static String getCurrentSessionIdentifier() {
-        List<String> curValList = getSessionIdentifierStack();
-        return curValList.size() > 0 ? curValList.get(0) : null;
     }
 
     public static void pushSessionIdentifier(String sessionIdentifier) {
@@ -1201,10 +1181,6 @@ public class GenericDelegator implements Delegator {
                 beganTransaction = TransactionUtil.begin();
             }
 
-            if (doCacheClear) {
-                // always clear cache before the operation
-                this.clearCacheLineByCondition(entityName, condition);
-            }
             ModelEntity modelEntity = getModelReader().getModelEntity(entityName);
             GenericHelper helper = getEntityHelper(entityName);
 
@@ -1214,6 +1190,9 @@ public class GenericDelegator implements Delegator {
             }
 
             int rowsAffected = helper.removeByCondition(this, modelEntity, condition);
+            if (rowsAffected > 0 && doCacheClear) {
+                this.clearCacheLine(entityName);
+            }
 
             if (testMode) {
                 for (GenericValue entity : removedEntities) {
@@ -1315,10 +1294,6 @@ public class GenericDelegator implements Delegator {
                 beganTransaction = TransactionUtil.begin();
             }
 
-            if (doCacheClear) {
-                // always clear cache before the operation
-                this.clearCacheLineByCondition(entityName, condition);
-            }
             ModelEntity modelEntity = getModelReader().getModelEntity(entityName);
             GenericHelper helper = getEntityHelper(entityName);
 
@@ -1328,6 +1303,9 @@ public class GenericDelegator implements Delegator {
             }
 
             int rowsAffected =  helper.storeByCondition(this, modelEntity, fieldsToSet, condition);
+            if (rowsAffected > 0 && doCacheClear) {
+                this.clearCacheLine(entityName);
+            }
 
             if (testMode) {
                 for (GenericValue entity : updatedEntities) {
@@ -2544,24 +2522,14 @@ public class GenericDelegator implements Delegator {
     /* (non-Javadoc)
      * @see org.ofbiz.entity.Delegator#getNextSeqIdLong(java.lang.String, long)
      */
-    @Override
     public Long getNextSeqIdLong(String seqName, long staggerMax) {
-        boolean beganTransaction = false;
         try {
-            if (alwaysUseTransaction) {
-                beganTransaction = TransactionUtil.begin();
-            }
-
             SequenceUtil sequencer = this.AtomicRefSequencer.get();
             if (sequencer == null) {
                 ModelEntity seqEntity = this.getModelEntity("SequenceValueItem");
-                sequencer = new SequenceUtil(this, this.getEntityHelperInfo("SequenceValueItem"), seqEntity, "seqName", "seqId");
-                try {
-                    if (!AtomicRefSequencer.compareAndSet(null, sequencer)) {
-                        sequencer = this.AtomicRefSequencer.get();
-                    }
-                } catch (Exception e) {
-                    throw new IllegalStateException("Error thrown while creating AtomicReference<SequenceUtil> in getNextSeqIdLong()" + e);
+                sequencer = new SequenceUtil(this.getEntityHelperInfo("SequenceValueItem"), seqEntity, "seqName", "seqId");
+                if (!AtomicRefSequencer.compareAndSet(null, sequencer)) {
+                    sequencer = this.AtomicRefSequencer.get();
                 }
             }
 
@@ -2569,16 +2537,10 @@ public class GenericDelegator implements Delegator {
             ModelEntity seqModelEntity = this.getModelEntity(seqName);
 
             Long newSeqId = sequencer == null ? null : sequencer.getNextSeqId(seqName, staggerMax, seqModelEntity);
-            TransactionUtil.commit(beganTransaction);
             return newSeqId;
         } catch (Exception e) {
             String errMsg = "Failure in getNextSeqIdLong operation for seqName [" + seqName + "]: " + e.toString() + ". Rolling back transaction.";
             Debug.logError(e, errMsg, module);
-            try {
-                TransactionUtil.rollback(beganTransaction, errMsg, e);
-            } catch (GenericTransactionException e1) {
-                Debug.logError(e1, "Exception thrown while rolling back transaction: ", module);
-            }
             throw new GeneralRuntimeException(errMsg, e);
         }
     }
@@ -2829,7 +2791,7 @@ public class GenericDelegator implements Delegator {
      * @see org.ofbiz.entity.Delegator#cloneDelegator(java.lang.String)
      */
     @Override
-    public GenericDelegator cloneDelegator(String delegatorFullName) {
+    public Delegator cloneDelegator(String delegatorFullName) {
         // creates an exact clone of the delegator; except for the sequencer
         // note that this will not be cached and should be used only when
         // needed to change something for single instance (use).
@@ -2859,7 +2821,7 @@ public class GenericDelegator implements Delegator {
      * @see org.ofbiz.entity.Delegator#cloneDelegator()
      */
     @Override
-    public GenericDelegator cloneDelegator() {
+    public Delegator cloneDelegator() {
         return this.cloneDelegator(this.delegatorFullName);
     }
 
@@ -2867,8 +2829,8 @@ public class GenericDelegator implements Delegator {
      * @see org.ofbiz.entity.Delegator#makeTestDelegator(java.lang.String)
      */
     @Override
-    public GenericDelegator makeTestDelegator(String delegatorName) {
-        GenericDelegator testDelegator = this.cloneDelegator(delegatorName);
+    public Delegator makeTestDelegator(String delegatorName) {
+        GenericDelegator testDelegator = (GenericDelegator) this.cloneDelegator(delegatorName);
         testDelegator.entityEcaHandler.set(null);
         testDelegator.initEntityEcaHandler();
         testDelegator.setTestMode(true);
@@ -3008,5 +2970,17 @@ public class GenericDelegator implements Delegator {
     @Override
     public boolean useDistributedCacheClear() {
         return this.delegatorInfo.getDistributedCacheClearEnabled();
+    }
+
+    @Override
+    public String getCurrentSessionIdentifier() {
+        List<String> curValList = getSessionIdentifierStack();
+        return curValList.size() > 0 ? curValList.get(0) : null;
+    }
+
+    @Override
+    public String getCurrentUserIdentifier() {
+        List<String> curValList = getUserIdentifierStack();
+        return curValList.size() > 0 ? curValList.get(0) : null;
     }
 }
