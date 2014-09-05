@@ -24,6 +24,14 @@
         <value xml:lang="en">Add new Product Feature to current product</value>
         <value xml:lang="vi">Thêm tính năng cho sản phẩm hiện tại</value>
     </property>
+    <property key="AddProductComponent">
+        <value xml:lang="en">Add Product Component</value>
+        <value xml:lang="es">Añadir componente</value>
+        <value xml:lang="fr">Ajouter un composant</value>
+        <value xml:lang="it">Aggiungi componente</value>
+        <value xml:lang="pt_BR">Adicionar componente de produto</value>
+        <value xml:lang="ro">Adauga Componente Produs</value>
+    </property>
     <property key="CatalogWebAnalytics">
         <value xml:lang="de">Web Analytik</value>
         <value xml:lang="en">Web Analytics</value>
