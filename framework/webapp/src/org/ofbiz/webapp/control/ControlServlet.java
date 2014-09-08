@@ -35,10 +35,8 @@ import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.StringUtil;
 import org.ofbiz.base.util.UtilGenerics;
 import org.ofbiz.base.util.UtilHttp;
-import org.ofbiz.base.util.UtilJ2eeCompat;
 import org.ofbiz.base.util.UtilTimer;
 import org.ofbiz.base.util.UtilValidate;
-import org.ofbiz.base.util.template.FreeMarkerWorker;
 import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.DelegatorFactory;
 import org.ofbiz.entity.GenericDelegator;
@@ -49,8 +47,6 @@ import org.ofbiz.security.Security;
 import org.ofbiz.service.LocalDispatcher;
 import org.ofbiz.webapp.stats.ServerHitBin;
 import org.ofbiz.webapp.stats.VisitHandler;
-
-import freemarker.ext.servlet.ServletContextHashModel;
 
 /**
  * ControlServlet.java - Master servlet for the web application.
@@ -190,9 +186,6 @@ public class ControlServlet extends HttpServlet {
 
         request.setAttribute("_REQUEST_HANDLER_", requestHandler);
         
-        ServletContextHashModel ftlServletContext = new ServletContextHashModel(this, FreeMarkerWorker.getDefaultOfbizWrapper());
-        request.setAttribute("ftlServletContext", ftlServletContext);
-
         // setup some things that should always be there
         UtilHttp.setInitialRequestInfo(request);
         VisitHandler.getVisitor(request, response);
@@ -260,11 +253,7 @@ public class ControlServlet extends HttpServlet {
 
                     String errorMessage = "ERROR rendering error page [" + errorPage + "], but here is the error text: " + request.getAttribute("_ERROR_MESSAGE_");
                     try {
-                        if (UtilJ2eeCompat.useOutputStreamNotWriter(getServletContext())) {
-                            response.getOutputStream().print(errorMessage);
-                        } else {
-                            response.getWriter().print(errorMessage);
-                        }
+                        response.getWriter().print(errorMessage);
                     } catch (Throwable t2) {
                         try {
                             int errorToSend = HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
@@ -283,11 +272,7 @@ public class ControlServlet extends HttpServlet {
                 }
 
                 String errorMessage = "<html><body>ERROR in error page, (infinite loop or error page not found with name [" + errorPage + "]), but here is the text just in case it helps you: " + request.getAttribute("_ERROR_MESSAGE_") + "</body></html>";
-                if (UtilJ2eeCompat.useOutputStreamNotWriter(getServletContext())) {
-                    response.getOutputStream().print(errorMessage);
-                } else {
-                    response.getWriter().print(errorMessage);
-                }
+                response.getWriter().print(errorMessage);
             }
         }
 

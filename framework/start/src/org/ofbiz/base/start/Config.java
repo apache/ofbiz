@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.InetAddress;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -34,58 +35,198 @@ import java.util.TimeZone;
 
 public class Config {
 
-    private static String getConfigFileName(String command) {
-        // default command is "start"
-        if (command == null || command.trim().length() == 0) {
-            command = "start";
-        }
-        return "org/ofbiz/base/start/" + command + ".properties";
-    }
+    public final InetAddress adminAddress;
+    public final String adminKey;
+    public final int adminPort;
+    public final String awtHeadless;
+    public final String baseConfig;
+    public final String baseDtd;
+    public final String baseJar;
+    public final String baseLib;
+    public final String commJar;
+    public final String containerConfig;
+    public final String instrumenterClassName;
+    public final String instrumenterFile;
+    public final List<Map<String, String>> loaders;
+    public final String logDir;
+    public final String ofbizHome;
+    public final boolean requireCommJar;
+    public final boolean requireToolsJar;
+    public final boolean shutdownAfterLoad;
+    public final String splashLogo;
+    public final String toolsJar;
+    public final boolean useShutdownHook;
 
-    public static Config getInstance(String[] args) throws IOException {
+    Config(String[] args) throws IOException {
         String firstArg = args.length > 0 ? args[0] : "";
         // Needed when portoffset is used with these commands, start.properties fits for all of them
-        if ("start-batch".equalsIgnoreCase(firstArg) 
-                || "start-debug".equalsIgnoreCase(firstArg) 
-                || "stop".equalsIgnoreCase(firstArg) 
-                || "-shutdown".equalsIgnoreCase(firstArg) // shutdown & status hack (was pre-existing to portoffset introduction, also useful with it) 
+        if ("start-batch".equalsIgnoreCase(firstArg)
+                || "start-debug".equalsIgnoreCase(firstArg)
+                || "stop".equalsIgnoreCase(firstArg)
+                || "-shutdown".equalsIgnoreCase(firstArg) // shutdown & status hack (was pre-existing to portoffset introduction, also useful with it)
                 || "-status".equalsIgnoreCase(firstArg)) {
             firstArg = "start";
         }
-        String configFileName = getConfigFileName(firstArg);
-        Config result = new Config();
-        result.readConfig(configFileName, args);
-        return result;
-    }
+        // default command is "start"
+        if (firstArg == null || firstArg.trim().length() == 0) {
+            firstArg = "start";
+        }
+        String config =  "org/ofbiz/base/start/" + firstArg + ".properties";
 
-    public InetAddress adminAddress;
-    public String adminKey;
-    public int adminPort;
-    public String awtHeadless;
-    public String baseConfig;
-    public String baseDtd;
-    public String baseJar;
-    public String baseLib;
-    public String commJar;
-    public String containerConfig;
-    public String instrumenterClassName;
-    public String instrumenterFile;
-    public List<Map<String, String>> loaders;
-    public String logDir;
-    public String ofbizHome;
-    public boolean requireCommJar = false;
-    public boolean requireToolsJar = false;
-    public boolean shutdownAfterLoad = false;
-    public String splashLogo;
-    public String testConfig;
-    public String toolsJar;
-    public boolean useShutdownHook = true;
+        // check the java_version
+        String javaVersion = System.getProperty("java.version");
+        String javaVendor = System.getProperty("java.vendor");
+
+        Properties props = this.getPropertiesFile(config);
+        System.out.println("Start.java using configuration file " + config);
+
+        // set the ofbiz.home
+        String ofbizHomeTmp = props.getProperty("ofbiz.home", ".");
+        // get a full path
+        if (ofbizHomeTmp.equals(".")) {
+            ofbizHomeTmp = System.getProperty("user.dir");
+            ofbizHomeTmp = ofbizHomeTmp.replace('\\', '/');
+        }
+        ofbizHome = ofbizHomeTmp;
+        System.setProperty("ofbiz.home", ofbizHome);
+        System.out.println("Set OFBIZ_HOME to - " + ofbizHome);
+
+        // base config directory
+        baseConfig = getOfbizHomeProp(props, "ofbiz.base.config", "framework/base/config");
+
+        // base schema directory
+        baseDtd = getOfbizHomeProp(props, "ofbiz.base.schema", "framework/base/dtd");
+
+        // base lib directory
+        baseLib = getOfbizHomeProp(props, "ofbiz.base.lib", "framework/base/lib");
+
+        // base jar file
+        baseJar = getOfbizHomeProp(props, "ofbiz.base.jar", "framework/base/build/lib/ofbiz-base.jar");
+
+        // tools jar
+        String reqTJ = getProp(props, "java.tools.jar.required", "false");
+        requireToolsJar = "true".equalsIgnoreCase(reqTJ);
+        toolsJar = this.findSystemJar(props, javaVendor, javaVersion, "tools.jar", requireToolsJar);
+
+        // comm jar
+        String reqCJ = getProp(props, "java.comm.jar.required", "false");
+        requireCommJar = "true".equalsIgnoreCase(reqCJ);
+        commJar = this.findSystemJar(props, javaVendor, javaVersion, "comm.jar", requireCommJar);
+
+        // log directory
+        logDir = getOfbizHomeProp(props, "ofbiz.log.dir", "runtime/logs");
+
+        // container configuration
+        containerConfig = getOfbizHomeProp(props, "ofbiz.container.config", "framework/base/config/ofbiz-containers.xml");
+
+        // get the admin server info
+        String serverHost = getProp(props, "ofbiz.admin.host", "127.0.0.1");
+
+        String adminPortStr = getProp(props, "ofbiz.admin.port", "0");
+        // set the admin key
+        adminKey = getProp(props, "ofbiz.admin.key", "NA");
+
+        // create the host InetAddress
+        adminAddress = InetAddress.getByName(serverHost);
+
+        // parse the port number
+        int adminPortTmp;
+        try {
+            adminPortTmp = Integer.parseInt(adminPortStr);
+            if (args.length > 0) {
+                for (String arg : args) {
+                    if (arg.toLowerCase().contains("portoffset=") && !arg.toLowerCase().contains("${portoffset}")) {
+                        adminPortTmp = adminPortTmp != 0 ? adminPortTmp : 10523; // This is necessary because the ASF machines don't allow ports 1 to 3, see  INFRA-6790
+                        adminPortTmp += Integer.parseInt(arg.split("=")[1]);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            System.out.println("Error while parsing admin port number (so default to 10523) = " + e);
+            adminPortTmp = 10523;
+        }
+        adminPort = adminPortTmp;
+
+        // set the Derby system home
+        String derbyPath = getProp(props, "derby.system.home", "runtime/data/derby");
+        System.setProperty("derby.system.home", derbyPath);
+
+        // check for shutdown hook
+        if (System.getProperty("ofbiz.enable.hook") != null && System.getProperty("ofbiz.enable.hook").length() > 0) {
+            useShutdownHook = "true".equalsIgnoreCase(System.getProperty("ofbiz.enable.hook"));
+        } else if (props.getProperty("ofbiz.enable.hook") != null && props.getProperty("ofbiz.enable.hook").length() > 0) {
+            useShutdownHook = "true".equalsIgnoreCase(props.getProperty("ofbiz.enable.hook"));
+        } else {
+            useShutdownHook = true;
+        }
+
+        // check for auto-shutdown
+        if (System.getProperty("ofbiz.auto.shutdown") != null && System.getProperty("ofbiz.auto.shutdown").length() > 0) {
+            shutdownAfterLoad = "true".equalsIgnoreCase(System.getProperty("ofbiz.auto.shutdown"));
+        } else if (props.getProperty("ofbiz.auto.shutdown") != null && props.getProperty("ofbiz.auto.shutdown").length() > 0) {
+            shutdownAfterLoad = "true".equalsIgnoreCase(props.getProperty("ofbiz.auto.shutdown"));
+        } else {
+            shutdownAfterLoad = false;
+        }
+
+        // set AWT headless mode
+        awtHeadless = getProp(props, "java.awt.headless", null);
+        if (awtHeadless != null) {
+            System.setProperty("java.awt.headless", awtHeadless);
+        }
+
+        // get the splash logo
+        splashLogo = props.getProperty("ofbiz.start.splash.logo", null);
+
+        // set the default locale
+        String localeString = props.getProperty("ofbiz.locale.default");
+        if (localeString != null && localeString.length() > 0) {
+            String locales[] = localeString.split("_");
+            switch (locales.length) {
+                case 1:
+                    Locale.setDefault(new Locale(locales[0]));
+                    break;
+                case 2:
+                    Locale.setDefault(new Locale(locales[0], locales[1]));
+                    break;
+                case 3:
+                    Locale.setDefault(new Locale(locales[0], locales[1], locales[2]));
+            }
+            System.setProperty("user.language", localeString);
+        }
+
+        // set the default time zone
+        String tzString = props.getProperty("ofbiz.timeZone.default");
+        if (tzString != null && tzString.length() > 0) {
+            TimeZone.setDefault(TimeZone.getTimeZone(tzString));
+        }
+
+        instrumenterClassName = getProp(props, "ofbiz.instrumenterClassName", null);
+        instrumenterFile = getProp(props, "ofbiz.instrumenterFile", null);
+
+        // loader classes
+        List loadersTmp = new ArrayList<Map<String, String>>();
+        int currentPosition = 1;
+        Map<String, String> loader = null;
+        while (true) {
+            loader = new HashMap<String, String>();
+            String loaderClass = props.getProperty("ofbiz.start.loader" + currentPosition);
+            if (loaderClass == null || loaderClass.length() == 0) {
+                break;
+            } else {
+                loader.put("class", loaderClass);
+                loader.put("profiles", props.getProperty("ofbiz.start.loader" + currentPosition + ".loaders"));
+                loadersTmp.add(Collections.unmodifiableMap(loader));
+                currentPosition++;
+            }
+        }
+        loaders = Collections.unmodifiableList(loadersTmp);
+    }
 
     private String findSystemJar(Properties props, String javaVendor, String javaVersion, String jarName, boolean required) {
         String fileSep = System.getProperty("file.separator");
         String javaHome = System.getProperty("java.home");
         String errorMsg = "Unable to locate " + jarName + " - ";
-        // String foundMsg = "Found " + jarName + " - ";
         String jarLoc = "lib" + fileSep + jarName;
         File tj = null;
 
@@ -278,160 +419,4 @@ public class Config {
             }
         }
     }
-
-    public void readConfig(String config, String[] args) throws IOException {
-        // check the java_version
-        String javaVersion = System.getProperty("java.version");
-        String javaVendor = System.getProperty("java.vendor");
-
-        Properties props = this.getPropertiesFile(config);
-        System.out.println("Start.java using configuration file " + config);
-
-        // set the ofbiz.home
-        if (ofbizHome == null) {
-            ofbizHome = props.getProperty("ofbiz.home", ".");
-            // get a full path
-            if (ofbizHome.equals(".")) {
-                ofbizHome = System.getProperty("user.dir");
-                ofbizHome = ofbizHome.replace('\\', '/');
-                System.out.println("Set OFBIZ_HOME to - " + ofbizHome);
-            }
-        }
-        System.setProperty("ofbiz.home", ofbizHome);
-
-        // base config directory
-        baseConfig = getOfbizHomeProp(props, "ofbiz.base.config", "framework/base/config");
-
-        // base schema directory
-        baseDtd = getOfbizHomeProp(props, "ofbiz.base.schema", "framework/base/dtd");
-
-        // base lib directory
-        baseLib = getOfbizHomeProp(props, "ofbiz.base.lib", "framework/base/lib");
-
-        // base jar file
-        baseJar = getOfbizHomeProp(props, "ofbiz.base.jar", "framework/base/build/lib/ofbiz-base.jar");
-
-        // tools jar
-        String reqTJ = getProp(props, "java.tools.jar.required", "false");
-        requireToolsJar = "true".equalsIgnoreCase(reqTJ);
-        toolsJar = this.findSystemJar(props, javaVendor, javaVersion, "tools.jar", requireToolsJar);
-
-        // comm jar
-        String reqCJ = getProp(props, "java.comm.jar.required", "false");
-        requireCommJar = "true".equalsIgnoreCase(reqCJ);
-        commJar = this.findSystemJar(props, javaVendor, javaVersion, "comm.jar", requireCommJar);
-
-        // log directory
-        logDir = getOfbizHomeProp(props, "ofbiz.log.dir", "runtime/logs");
-
-        // container configuration
-        containerConfig = getOfbizHomeProp(props, "ofbiz.container.config", "framework/base/config/ofbiz-containers.xml");
-
-        // get the admin server info
-        String serverHost = getProp(props, "ofbiz.admin.host", "127.0.0.1");
-
-        String adminPortStr = getProp(props, "ofbiz.admin.port", "0");
-        // set the admin key
-        adminKey = getProp(props, "ofbiz.admin.key", "NA");
-
-        // create the host InetAddress
-        adminAddress = InetAddress.getByName(serverHost);
-
-        // parse the port number
-        try {
-            adminPort = Integer.parseInt(adminPortStr);
-            if (args.length > 0) {
-                for (String arg : args) {
-                    if (arg.toLowerCase().contains("portoffset=") && !arg.toLowerCase().contains("${portoffset}")) {
-                        adminPort = adminPort != 0 ? adminPort : 10523; // This is necessary because the ASF machines don't allow ports 1 to 3, see  INFRA-6790
-                        adminPort += Integer.parseInt(arg.split("=")[1]);
-                    }
-                }
-            }
-        } catch (Exception e) {
-            System.out.println("Error while parsing admin port number (so default to 10523) = " + e);
-            adminPort = 10523;
-        }
-
-        // set the Derby system home
-        String derbyPath = getProp(props, "derby.system.home", "runtime/data/derby");
-        System.setProperty("derby.system.home", derbyPath);
-
-        // set the property to tell Log4J to use log4j.xml
-        String log4jConfig = getProp(props, "log4j.configuration", "log4j.xml");
-
-        // set the log4j configuration property so we don't pick up one inside jars by
-        // mistake
-        System.setProperty("log4j.configuration", log4jConfig);
-
-        // check for shutdown hook
-        if (System.getProperty("ofbiz.enable.hook") != null && System.getProperty("ofbiz.enable.hook").length() > 0) {
-            useShutdownHook = "true".equalsIgnoreCase(System.getProperty("ofbiz.enable.hook"));
-        } else if (props.getProperty("ofbiz.enable.hook") != null && props.getProperty("ofbiz.enable.hook").length() > 0) {
-            useShutdownHook = "true".equalsIgnoreCase(props.getProperty("ofbiz.enable.hook"));
-        }
-
-        // check for auto-shutdown
-        if (System.getProperty("ofbiz.auto.shutdown") != null && System.getProperty("ofbiz.auto.shutdown").length() > 0) {
-            shutdownAfterLoad = "true".equalsIgnoreCase(System.getProperty("ofbiz.auto.shutdown"));
-        } else if (props.getProperty("ofbiz.auto.shutdown") != null && props.getProperty("ofbiz.auto.shutdown").length() > 0) {
-            shutdownAfterLoad = "true".equalsIgnoreCase(props.getProperty("ofbiz.auto.shutdown"));
-        }
-
-        // set AWT headless mode
-        awtHeadless = getProp(props, "java.awt.headless", null);
-        if (awtHeadless != null) {
-            System.setProperty("java.awt.headless", awtHeadless);
-        }
-
-        // get the splash logo
-        splashLogo = props.getProperty("ofbiz.start.splash.logo", null);
-
-        // set the property to tell Jetty to use 2.4 SessionListeners
-        System.setProperty("org.mortbay.jetty.servlet.AbstractSessionManager.24SessionDestroyed", "true");
-
-        // set the default locale
-        String localeString = props.getProperty("ofbiz.locale.default");
-        if (localeString != null && localeString.length() > 0) {
-            String locales[] = localeString.split("_");
-            switch (locales.length) {
-                case 1:
-                    Locale.setDefault(new Locale(locales[0]));
-                    break;
-                case 2:
-                    Locale.setDefault(new Locale(locales[0], locales[1]));
-                    break;
-                case 3:
-                    Locale.setDefault(new Locale(locales[0], locales[1], locales[2]));
-            }
-            System.setProperty("user.language", localeString);
-        }
-
-        // set the default time zone
-        String tzString = props.getProperty("ofbiz.timeZone.default");
-        if (tzString != null && tzString.length() > 0) {
-            TimeZone.setDefault(TimeZone.getTimeZone(tzString));
-        }
-
-        instrumenterClassName = getProp(props, "ofbiz.instrumenterClassName", null);
-        instrumenterFile = getProp(props, "ofbiz.instrumenterFile", null);
-
-        // loader classes
-        loaders = new ArrayList<Map<String, String>>();
-        int currentPosition = 1;
-        Map<String, String> loader = null;
-        while (true) {
-            loader = new HashMap<String, String>();
-            String loaderClass = props.getProperty("ofbiz.start.loader" + currentPosition);
-            if (loaderClass == null || loaderClass.length() == 0) {
-                break;
-            } else {
-                loader.put("class", loaderClass);
-                loader.put("profiles", props.getProperty("ofbiz.start.loader" + currentPosition + ".loaders"));
-                loaders.add(loader);
-                currentPosition++;
-            }
-        }
-    }
-
 }
