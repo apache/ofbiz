@@ -24,8 +24,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.ofbiz.base.container.ClassLoaderContainer;
 import org.ofbiz.base.lang.ThreadSafe;
+import org.ofbiz.base.start.Start;
 import org.ofbiz.base.util.UtilXml;
 import org.ofbiz.service.config.ServiceConfigException;
 import org.w3c.dom.Element;
@@ -87,17 +87,14 @@ public final class ServiceEngine {
         } else {
             List<ServiceLocation> serviceLocations = new ArrayList<ServiceLocation>(serviceLocationElementList.size());
             for (Element serviceLocationElement : serviceLocationElementList) {
-                serviceLocations.add(new ServiceLocation(serviceLocationElement));
-            }
-            for (ServiceLocation serviceLocation : serviceLocations) {
-                String location = serviceLocation.getLocation();
-                if (location.contains("localhost") && ClassLoaderContainer.portOffset != 0) {
-                    Integer port = 1099 + ClassLoaderContainer.portOffset; 
+                String location = serviceLocationElement.getAttribute("location").intern();
+                if (location.contains("localhost") && Start.getInstance().getConfig().portOffset != 0) {
+                    Integer port = 1099 + Start.getInstance().getConfig().portOffset;
                     location = location.replace("1099", port.toString());
                     port = 8080 + ClassLoaderContainer.portOffset; 
                     location = location.replace("8080", port.toString());
-                    serviceLocation.setLocation(location);
-                }                    
+                }
+                serviceLocations.add(new ServiceLocation(serviceLocationElement, location));
             }
             this.serviceLocations = Collections.unmodifiableList(serviceLocations);
         }
