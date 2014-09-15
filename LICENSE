@@ -96,14 +96,13 @@ framework/webapp/lib/ezmorph-0.9.1.jar
 framework/webapp/lib/rome-0.9.jar
 framework/webapp/lib/serializer-2.7.0.jar
 framework/webapp/lib/xalan-2.7.1.jar
-framework/geronimo/lib/geronimo-connector-3.1.1.jar
 framework/geronimo/lib/geronimo-transaction-3.1.1.jar
 framework/testtools/lib/org.springframework.core-3.1.0.M2.jar
 framework/testtools/lib/org.springframework.test-3.1.0.M2.jar
 applications/content/lib/fontbox-1.7.1.jar
 applications/content/lib/jempbox-1.7.1.jar
 applications/content/lib/pdfbox-1.7.1.jar
-applications/content/lib/poi-3.9-20121203.jar
+applications/content/lib/poi-3.10.1-20140818.jar
 applications/content/lib/tika-core-1.0.jar
 applications/content/lib/tika-parsers-1.0.jar
 applications/product/lib/dozer-4.2.1.jar

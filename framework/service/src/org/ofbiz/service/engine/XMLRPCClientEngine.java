@@ -28,7 +28,7 @@ import javolution.util.FastMap;
 import org.apache.xmlrpc.XmlRpcException;
 import org.apache.xmlrpc.client.XmlRpcClientConfigImpl;
 import org.ofbiz.base.config.GenericConfigException;
-import org.ofbiz.base.container.ClassLoaderContainer;
+import org.ofbiz.base.start.Start;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilGenerics;
 import org.ofbiz.base.util.UtilMisc;
@@ -91,9 +91,11 @@ public class XMLRPCClientEngine extends GenericAsyncEngine {
         String keyAlias  = null;
         try {
             url = ServiceConfigUtil.getEngineParameter(engine, "url");
-            if (ClassLoaderContainer.portOffset != 0) {
-                Integer port = 8080 + ClassLoaderContainer.portOffset; 
-                url = url.replace("8080", port.toString());
+            if (Start.getInstance().getConfig().portOffset != 0) {
+                String s = url.substring(url.lastIndexOf(":") + 1);
+                Integer rpcPort = Integer.valueOf(s.substring(0, s.indexOf("/")));
+                Integer port = rpcPort + Start.getInstance().getConfig().portOffset;
+                url = url.replace(rpcPort.toString(), port.toString());
             }
             login = ServiceConfigUtil.getEngineParameter(engine, "login");
             password = ServiceConfigUtil.getEngineParameter(engine, "password");
