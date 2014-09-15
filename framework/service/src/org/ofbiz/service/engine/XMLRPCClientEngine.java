@@ -91,10 +91,10 @@ public class XMLRPCClientEngine extends GenericAsyncEngine {
         String keyAlias  = null;
         try {
             url = ServiceConfigUtil.getEngineParameter(engine, "url");
-            if (Start.getInstance().getConfig().portOffset != 0) {
+            if (ClassLoaderContainer.portOffset != 0) {
                 String s = url.substring(url.lastIndexOf(":") + 1);
                 Integer rpcPort = Integer.valueOf(s.substring(0, s.indexOf("/")));
-                Integer port = rpcPort + Start.getInstance().getConfig().portOffset;
+                Integer port = rpcPort + ClassLoaderContainer.portOffset;
                 url = url.replace(rpcPort.toString(), port.toString());
             }
             login = ServiceConfigUtil.getEngineParameter(engine, "login");
