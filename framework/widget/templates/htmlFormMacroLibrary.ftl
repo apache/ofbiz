@@ -130,7 +130,7 @@ under the License.
               initDate = initDate.substring(0, initDate.indexOf('.'));
             }
             var ofbizTime = "<#if shortDateInput?exists && shortDateInput>yyyy-MM-dd<#else>yyyy-MM-dd HH:mm:ss</#if>";
-            var dateObj = Date.parseExact(initDate, ofbizTime);
+            var dateObj = Date.parse(initDate, ofbizTime);
             var formatedObj = dateObj.toString(dateFormat);
             jQuery("#${id}_i18n").val(formatedObj);
           }
@@ -139,7 +139,7 @@ under the License.
             var ofbizTime = "<#if shortDateInput?exists && shortDateInput>yyyy-MM-dd<#else>yyyy-MM-dd HH:mm:ss</#if>";
             var newValue = ""
             if (this.value != "") {
-              var dateObj = Date.parseExact(this.value, ofbizTime);
+              var dateObj = Date.parse(this.value, ofbizTime);
               var dateFormat = Date.CultureInfo.formatPatterns.shortDate<#if shortDateInput?exists && !shortDateInput> + " " + Date.CultureInfo.formatPatterns.longTime</#if>;
               newValue = dateObj.toString(dateFormat);
             }
@@ -148,7 +148,7 @@ under the License.
           jQuery("#${id}_i18n").change(function() {
             var dateFormat = Date.CultureInfo.formatPatterns.shortDate<#if shortDateInput?exists && !shortDateInput> + " " + Date.CultureInfo.formatPatterns.longTime</#if>,
             newValue = "",
-            dateObj = Date.parseExact(this.value, dateFormat),
+            dateObj = Date.parse(this.value, dateFormat),
             ofbizTime;
             if (this.value != "" && dateObj !== null) {
               ofbizTime = "<#if shortDateInput?exists && shortDateInput>yyyy-MM-dd<#else>yyyy-MM-dd HH:mm:ss</#if>";
