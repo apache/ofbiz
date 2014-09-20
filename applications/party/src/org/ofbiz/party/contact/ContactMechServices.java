@@ -806,6 +806,7 @@ public class ContactMechServices {
         // required parameters
         String contactMechId = (String) context.get("contactMechId");
         String contactMechPurposeTypeId = (String) context.get("contactMechPurposeTypeId");
+        Timestamp fromDate = (Timestamp) context.get("fromDate");
 
         GenericValue tempVal = null;
         try {
@@ -819,7 +820,9 @@ public class ContactMechServices {
             tempVal = null;
         }
 
-        Timestamp fromDate = UtilDateTime.nowTimestamp();
+        if (UtilValidate.isEmpty(fromDate)) {
+            fromDate = UtilDateTime.nowTimestamp();
+        }
 
         if (tempVal != null) {
             // exists already with valid date, show warning
