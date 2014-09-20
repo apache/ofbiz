@@ -33,10 +33,10 @@ if (!invoice) return;
 glAccountOrganizationAndClassList = null;
 if ("SALES_INVOICE".equals(invoice.invoiceTypeId)) {
     itemTypesCond = exprBldr.OR() {
-        EQUALS(invoiceItemTypeId: "INVOICE_ADJ")
-        EQUALS(parentTypeId: "INVOICE_ADJ")
-        EQUALS(invoiceItemTypeId: "INVOICE_ITM_ADJ")
-        EQUALS(parentTypeId: "INVOICE_ITM_ADJ")
+        EQUALS(invoiceItemTypeId: "SINVOICE_ADJ")
+        EQUALS(parentTypeId: "SINVOICE_ADJ")
+        EQUALS(invoiceItemTypeId: "SINVOICE_ITM_ADJ")
+        EQUALS(parentTypeId: "SINVOICE_ITM_ADJ")
         EQUALS(invoiceItemTypeId: "INV_PROD_ITEM")
         EQUALS(parentTypeId: "INV_PROD_ITEM")
     }
