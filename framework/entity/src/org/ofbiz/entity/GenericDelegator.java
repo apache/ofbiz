@@ -44,6 +44,7 @@ import org.ofbiz.base.util.UtilFormatOut;
 import org.ofbiz.base.util.UtilGenerics;
 import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.base.util.UtilObject;
+import org.ofbiz.base.util.UtilProperties;
 import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.base.util.UtilXml;
 import org.ofbiz.entity.cache.Cache;
@@ -68,7 +69,6 @@ import org.ofbiz.entity.model.ModelRelation;
 import org.ofbiz.entity.model.ModelViewEntity;
 import org.ofbiz.entity.serialize.SerializeException;
 import org.ofbiz.entity.serialize.XmlSerializer;
-import org.ofbiz.entity.transaction.GenericTransactionException;
 import org.ofbiz.entity.transaction.TransactionUtil;
 import org.ofbiz.entity.util.DistributedCacheClear;
 import org.ofbiz.entity.util.EntityCrypto;
@@ -2337,18 +2337,13 @@ public class GenericDelegator implements Delegator {
      * @see org.ofbiz.entity.Delegator#getNextSeqIdLong(java.lang.String, long)
      */
     public Long getNextSeqIdLong(String seqName, long staggerMax) {
-        boolean beganTransaction = false;
         try {
-            if (alwaysUseTransaction) {
-                beganTransaction = TransactionUtil.begin();
-            }
-
             // FIXME: Replace DCL code with AtomicReference
             if (sequencer == null) {
                 synchronized (this) {
                     if (sequencer == null) {
                         ModelEntity seqEntity = this.getModelEntity("SequenceValueItem");
-                        sequencer = new SequenceUtil(this, this.getEntityHelperInfo("SequenceValueItem"), seqEntity, "seqName", "seqId");
+                        sequencer = new SequenceUtil(this.getEntityHelperInfo("SequenceValueItem"), seqEntity, "seqName", "seqId");
                     }
                 }
             }
@@ -2357,16 +2352,10 @@ public class GenericDelegator implements Delegator {
             ModelEntity seqModelEntity = this.getModelEntity(seqName);
 
             Long newSeqId = sequencer == null ? null : sequencer.getNextSeqId(seqName, staggerMax, seqModelEntity);
-            TransactionUtil.commit(beganTransaction);
             return newSeqId;
         } catch (Exception e) {
             String errMsg = "Failure in getNextSeqIdLong operation for seqName [" + seqName + "]: " + e.toString() + ". Rolling back transaction.";
             Debug.logError(e, errMsg, module);
-            try {
-                TransactionUtil.rollback(beganTransaction, errMsg, e);
-            } catch (GenericTransactionException e1) {
-                Debug.logError(e1, "Exception thrown while rolling back transaction: ", module);
-            }
             throw new GeneralRuntimeException(errMsg, e);
         }
     }

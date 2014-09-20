@@ -27,7 +27,14 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.ofbiz.base.concurrent.ExecutionPool;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.Observable;
 import org.ofbiz.base.util.Observer;
@@ -44,8 +51,8 @@ import org.ofbiz.entity.condition.EntityCondition;
 import org.ofbiz.entity.condition.EntityConditionList;
 import org.ofbiz.entity.condition.EntityExpr;
 import org.ofbiz.entity.condition.EntityOperator;
-import org.ofbiz.entity.config.model.Datasource;
 import org.ofbiz.entity.config.EntityConfigUtil;
+import org.ofbiz.entity.config.model.Datasource;
 import org.ofbiz.entity.model.ModelEntity;
 import org.ofbiz.entity.model.ModelField;
 import org.ofbiz.entity.testtools.EntityTestCase;
@@ -1083,6 +1090,62 @@ public class EntityTestSuite extends EntityTestCase {
         assertNull("Delete TestingType 1", testType);
         testType = delegator.findOne("TestingType", UtilMisc.toMap("testingTypeId", "JUNIT-TEST2"), false);
         assertNull("Delete TestingType 2", testType);
+    }
+
+    public void testSequenceValueItem() {
+        SequenceUtil sequencer = new SequenceUtil(delegator.getGroupHelperInfo(delegator.getEntityGroupName("SequenceValueItem")),
+                                                  delegator.getModelEntity("SequenceValueItem"),
+                                                  "seqName", "seqId");
+        UUID id = UUID.randomUUID();
+        String sequenceName = "BogusSequence" + id.toString();
+        for (int i = 10000; i <= 10015; i++) {
+            Long seqId = sequencer.getNextSeqId(sequenceName, 1, null);
+            assertEquals(seqId.longValue(), i);
+        }
+        sequencer.forceBankRefresh(sequenceName, 1);
+        Long seqId = sequencer.getNextSeqId(sequenceName, 1, null);
+        assertEquals(seqId.longValue(), 10020);
+    }
+
+    public void testSequenceValueItemWithConcurrentThreads() {
+        final SequenceUtil sequencer = new SequenceUtil(delegator.getGroupHelperInfo(delegator.getEntityGroupName("SequenceValueItem")),
+                                                  delegator.getModelEntity("SequenceValueItem"),
+                                                  "seqName", "seqId");
+        UUID id = UUID.randomUUID();
+        final String sequenceName = "BogusSequence" + id.toString();
+        final ConcurrentMap<Long, Long> seqIds = new ConcurrentHashMap<Long, Long>();
+        final AtomicBoolean duplicateFound = new AtomicBoolean(false);
+        final AtomicBoolean nullSeqIdReturned = new AtomicBoolean(false);
+
+        List<Future<Void>> futures = new ArrayList<Future<Void>>();
+        Callable getSeqIdTask = new Callable() {
+                    public Callable<Void> call() throws Exception {
+                        Long seqId = sequencer.getNextSeqId(sequenceName, 1, null);
+                        if (seqId == null) {
+                            nullSeqIdReturned.set(true);
+                            return null;
+                        }
+                        Long existingValue = seqIds.putIfAbsent(seqId, seqId);
+                        if (existingValue != null) {
+                            duplicateFound.set(true);
+                        }
+                        return null;
+                    }
+                };
+        Callable refreshTask = new Callable() {
+                            public Callable<Void> call() throws Exception {
+                                sequencer.forceBankRefresh(sequenceName, 1);
+                                return null;
+                            }
+                        };
+        double probabilityOfRefresh = 0.1;
+        for (int i = 1; i <= 1000; i++) {
+            Callable randomTask = Math.random() < probabilityOfRefresh ? refreshTask : getSeqIdTask;
+            futures.add(ExecutionPool.GLOBAL_EXECUTOR.submit(randomTask));
+        }
+        ExecutionPool.getAllFutures(futures);
+        assertFalse("Null sequence id returned", nullSeqIdReturned.get());
+        assertFalse("Duplicate sequence id returned", duplicateFound.get());
     }
 
     private final class TestObserver implements Observer {
