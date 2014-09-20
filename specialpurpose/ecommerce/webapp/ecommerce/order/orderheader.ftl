@@ -38,7 +38,7 @@ under the License.
     </#if>
     ${uiLabelMap.CommonInformation}
     <#if (orderHeader.orderId)?exists>
-      ${externalOrder?if_exists} [ <a href="<@ofbizUrl fullPath="true">order.pdf?orderId=${(orderHeader.orderId)?if_exists}</@ofbizUrl>" class="lightbuttontext">PDF</a> ]
+      ${externalOrder!} [ <a href="<@ofbizUrl fullPath="true">order.pdf?orderId=${(orderHeader.orderId)!}</@ofbizUrl>" target="_BLANK" class="lightbuttontext">PDF</a> ]
     </#if>
   </h3>
   <#-- placing customer information -->
