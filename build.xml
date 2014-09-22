@@ -212,21 +212,19 @@ under the License.
     <target name="svninfo"
         description="Update the Release-revision info in the footer. Note that you need a valid Internet connection and Subversion connected to the OFBiz repository for that ">
         <echo message="Creating svninfo..."/>
-        <exec executable="svn" dir="." output="runtime/svninfo_tmp.xml" failonerror="true" resultproperty="hasSvnRepo">
+        <exec executable="svn" dir="." output="runtime/svninfo_tmp.xml">
             <arg value="info"/>
             <arg value="--xml"/>
         </exec>
-        <if>
-            <isset property="hasSvnRepo"/>
-            <then>                          
-                <xmlproperty file="runtime/svninfo_tmp.xml"/>
-                <basename property="releasePath" file="${info.entry.url}"/>
-                <echo message="Found Release-revision: ${releasePath}-r${info.entry.commit(revision)}"/>
-                <echo message=" - Release-revision : ${releasePath}-r${info.entry.commit(revision)}" file="runtime/svninfo.ftl"/>
-                <delete file="runtime/svninfo_tmp.xml"/>
-                <echo message="Done!"/>
-            </then>                                  
-        </if>                       
+        <xmlproperty file="runtime/svninfo_tmp.xml"/>
+        <echo message="Rev:${info.entry.commit(revision)}"/>
+        <basename property="releasePath" file="${info.entry.url}"/>
+        <tstamp>
+            <format property="dateTime" pattern="yyyy-MM-dd HH:mm:ss"/>
+        </tstamp>        
+        <echo message=" - Release-revision : ${releasePath}-r${info.entry.commit(revision)},  ${uiLabelMap.CommonBuiltOn} ${dateTime}" file="runtime/svninfo.ftl"/>
+        <delete file="runtime/svninfo_tmp.xml"/>
+        <echo message="Done!"/>
     </target>
 
     <target name="clean-svninfo">
@@ -243,18 +241,16 @@ under the License.
             <arg value="--abbrev-ref"/>
             <arg value="HEAD"/>
         </exec>
-        <exec executable="git" outputproperty="revision" failonerror="true" resultproperty="hasGitRepo">
+        <exec executable="git" outputproperty="revision">
             <arg value="rev-parse"/>
             <arg value="HEAD"/>
         </exec>
-        <if>
-            <isset property="hasGitRepo"/>
-            <then>                          
-                <echo message="Found Branch-revision: ${branch}-${revision}"/>
-                <echo message=" - Branch-revision: ${branch}-${revision}" file="runtime/gitinfo.ftl"/>
-                <echo message="Done!"/>
-            </then>                                  
-        </if>                
+        <tstamp>
+            <format property="dateTime" pattern="yyyy-MM-dd HH:mm:ss"/>
+        </tstamp>        
+        <echo message="Found Branch-revision: ${branch}-${revision}"/>
+        <echo message=" - Branch-revision: ${branch}-${revision}, ${uiLabelMap.CommonBuiltOn} ${dateTime}" file="runtime/gitinfo.ftl"/>
+        <echo message="Done!"/>
     </target>
 
     <target name="clean-gitinfo">
@@ -262,46 +258,34 @@ under the License.
         <echo message=" " file="runtime/gitinfo.ftl"/>
         <echo message="Done!"/>
     </target>
-    
-    <target name="deployed-date-time"
-        description="Set the date and time of last deployment info in the footer.">
-        <tstamp>
-            <format property="dateTime" pattern="yyyy/MM/dd HH:mm:ss"/>
-        </tstamp>
-        <echo message="${dateTime}" file="runtime/deployedThe.ftl"/>
-        <echo message="Done!"/>
-    </target>
 
-    <target name="clean-deployed-date-time">
-        <echo message="Resetting deployed-date-time..."/>
-        <echo message=" " file="runtime/deployedThe.ftl"/>
-        <echo message="Done!"/>
-    </target>    
-    
     <!-- ================================================================== -->
     <!-- Apply patches where needed                                         -->
     <!-- ================================================================== -->
+  
+  
 
     <target name="build-dev" 
-        description="Patch and build all sources in a dev environment. This includes patching OFBiz using patches in runtime/patches. On Windows you need to have patch.exe in the path and patch files must all be in dos format (CR+LF)">
-        <!-- patch task can't handle a fileset => create a global patch -->
-        <concat destfile="${basedir}/runtime/patches/dev.patch" encoding="UTF-8" outputencoding="UTF-8">            
-            <fileset dir="${basedir}/runtime/patches" casesensitive="no">
-                <exclude name="dev.patch"/> <!-- exclude the patch itself in case it's still there -->
-                <include name="*.patch"/>
-            </fileset>
-        </concat>
-        <if>
-            <resourceexists>
-                <file file="${basedir}/runtime/patches/dev.patch"/>
-            </resourceexists>            
-            <then>                          
-                <patch strip="0" patchfile="${basedir}/runtime/patches/dev.patch" dir="${basedir}"/>
-                <delete>
-                    <fileset dir="${basedir}/runtime/patches" includes="dev.patch"/>
-                </delete>
-            </then>                                  
-        </if>        
+      description="Patch sources in a dev environment if patch files are present in runtime/patches.">
+      <!-- patch task can't handle a fileset => create a global patch -->
+      <concat destfile="${basedir}/runtime/patches/dev.patch" encoding="UTF-8" outputencoding="UTF-8">
+        <fileset dir="${basedir}/runtime/patches" casesensitive="no">
+          <exclude name="dev.patch"/> <!-- exclude the patch itself in case it's still there -->
+          <include name="*.patch"/>
+        </fileset>
+      </concat>
+      <if>
+        <available file="${basedir}/runtime/patches/dev.patch"/>
+        <then>
+          <exec executable="svn" dir="${basedir}">
+            <arg value="patch"/>
+            <arg value="${basedir}/runtime/patches/dev.patch"/>
+          </exec>
+          <delete>
+            <fileset dir="${basedir}/runtime/patches" includes="dev.patch"/>
+          </delete>
+        </then>
+      </if>
     </target>
     
     <target name="build-test" 
@@ -343,6 +327,7 @@ under the License.
     
     <target name="build" depends="ofbiz-init">
         <echo message="[build] ========== Start Building (Compile) =========="/>
+        <antcall target="build-dev"/>
 
         <antcall target="build-framework"/>
         <antcall target="build-applications"/>

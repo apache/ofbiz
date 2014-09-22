@@ -17,5 +17,9 @@ KIND, either express or implied.  See the License for the
 specific language governing permissions and limitations
 under the License.
 -->
-<tomcat-users>
-</tomcat-users>
+
+<entity-engine-xml>
+    <Party partyId="PARTY_ENABLED" statusId="PARTY_ENABLED"/>
+    <Party partyId="PARTY_DISABLED" statusId="PARTY_DISABLED"/>
+    <Party partyId="STATUS_NULL"/>
+</entity-engine-xml>

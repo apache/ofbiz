@@ -346,13 +346,7 @@ function makeExpDate() {
                     <option>${creditCard.cardType}</option>
                     <option value="${creditCard.cardType}">---</option>
                     </#if>
-                    <option>Visa</option>
-                    <option value='MasterCard'>Master Card</option>
-                    <option value='AmericanExpress'>American Express</option>
-                    <option value='DinersClub'>Diners Club</option>
-                    <option>Discover</option>
-                    <option>EnRoute</option>
-                    <option>JCB</option>
+                    ${screens.render("component://common/widget/CommonScreens.xml#cctypes")}
                   </select>
                 *</td>
               </tr>
@@ -489,9 +483,9 @@ function makeExpDate() {
 
           <form method="post" action="<@ofbizUrl>finalizeOrder</@ofbizUrl>" name="checkoutsetupform" id="checkoutsetupform">
             <input type="hidden" name="finalizeMode" value="payment"/>
-            <input type="hidden" name="createNew" value="Y"/>
+            <input type="hidden" name="createNew" value="${(requestParameters.createNew)!}"/>
             <table width="100%" border="0" cellpadding="1" cellspacing="0">
-              <#if !requestParameters.createNew??>
+              <#if "Y" != requestParameters.createNew?default("")>
               <tr>
                 <td width='1%' nowrap="nowrap"><input type="radio" name="paymentMethodTypeAndId" value="EXT_OFFLINE" <#if checkOutPaymentId?? && checkOutPaymentId == "EXT_OFFLINE">checked="checked"</#if> onchange="setCheckoutPaymentId(this.value)" onclick="setCheckoutPaymentId(this.value)"/></td>
                 <td width='50%' nowrap="nowrap"><div>${uiLabelMap.OrderPaymentOfflineCheckMoney}</div></td>
