@@ -778,9 +778,16 @@
             <results-to-map map-name="persistOut"/>
         </call-service>
 
-        <iterate-map key="key" value="val" map="persistOut">
-            <field-to-result field="val" result-name="${key}"/>
-        </iterate-map>
+        <field-to-result field="persistOut.contentId" result-name="contentId"/>
+        <field-to-result field="persistOut.dataResourceId" result-name="dataResourceId"/>
+        <field-to-result field="persistOut.drDataResourceId" result-name="drDataResourceId"/>
+        <field-to-result field="persistOut.caContentIdTo" result-name="caContentIdTo"/>
+        <field-to-result field="persistOut.caContentId" result-name="caContentId"/>
+        <field-to-result field="persistOut.caContentAssocTypeId" result-name="caContentAssocTypeId"/>
+        <field-to-result field="persistOut.caFromDate" result-name="caFromDate"/>
+        <field-to-result field="persistOut.caSequenceNum" result-name="caSequenceNum"/>
+        <field-to-result field="persistOut.roleTypeList" result-name="roleTypeList"/>
+        <field-to-result field="persistOut.fromDate" result-name="fromDate"/>
 
         <set field="mapIn.contentId"  from-field="persistOut.contentId"/>
         <!-- <set field="mapIn.fromDate"  from-field="nowTimestamp"/> -->
@@ -816,9 +823,15 @@
         <call-service service-name="updateCommEventContentAssoc" in-map-name="mapIn">
         </call-service>
 
-        <iterate-map key="key" value="val" map="persistOut">
-            <field-to-result field="val" result-name="${key}"/>
-        </iterate-map>
+        <field-to-result field="persistOut.contentId" result-name="contentId"/>
+        <field-to-result field="persistOut.dataResourceId" result-name="dataResourceId"/>
+        <field-to-result field="persistOut.drDataResourceId" result-name="drDataResourceId"/>
+        <field-to-result field="persistOut.caContentIdTo" result-name="caContentIdTo"/>
+        <field-to-result field="persistOut.caContentId" result-name="caContentId"/>
+        <field-to-result field="persistOut.caContentAssocTypeId" result-name="caContentAssocTypeId"/>
+        <field-to-result field="persistOut.caFromDate" result-name="caFromDate"/>
+        <field-to-result field="persistOut.caSequenceNum" result-name="caSequenceNum"/>
+        <field-to-result field="persistOut.roleTypeList" result-name="roleTypeList"/>
 
     </simple-method>
 
