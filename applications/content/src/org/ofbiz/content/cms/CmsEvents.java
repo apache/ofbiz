@@ -282,8 +282,6 @@ public class CmsEvents {
                     // TODO: replace "screen" to support dynamic rendering of different output
                     FormStringRenderer formStringRenderer = new MacroFormRenderer(UtilProperties.getPropertyValue("widget", "screen.formrenderer"), request, response);
                     templateMap.put("formStringRenderer", formStringRenderer);
-                    //include DOCTYPE for cms screens
-                    writer.append("<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">");
                     
                     // if use web analytics
                     List<GenericValue> webAnalytics = delegator.findByAnd("WebAnalyticsConfig", UtilMisc.toMap("webSiteId", webSiteId), null, false);
