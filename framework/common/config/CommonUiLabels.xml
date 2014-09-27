@@ -1291,6 +1291,10 @@
         <value xml:lang="zh-CN">让利</value>
         <value xml:lang="zh-TW">回報</value>
     </property>
+    <property key="CommonBuiltOn">
+        <value xml:lang="en">built on</value>
+        <value xml:lang="fr">compilée le</value>
+    </property>
     <property key="CommonBut">
         <value xml:lang="ar">إلا</value>
         <value xml:lang="cs">ale</value>
@@ -7100,7 +7104,7 @@
         <value xml:lang="zh">没有省： _NA_</value>
     </property>
     <property key="CommonNoStatesProvincesExists">
-	<value xml:lang="cs">Žádný Kraj/Samosprávný celek neexistuje</value>
+  <value xml:lang="cs">Žádný Kraj/Samosprávný celek neexistuje</value>
         <value xml:lang="de">Es existiert kein Bundesland</value>
         <value xml:lang="en">No States/Provinces exist</value>
         <value xml:lang="es">No existen provincias</value>
@@ -13772,7 +13776,7 @@
         <value xml:lang="zh">币值</value>
         <value xml:lang="zh-TW">幣別</value>
     </property>
-    <property key="FormFieldTitle_updateButton">		
+    <property key="FormFieldTitle_updateButton">    
         <value xml:lang="ar">تحديث</value>
         <value xml:lang="cs">Obnovit</value>
         <value xml:lang="de">Aktualisieren</value>
