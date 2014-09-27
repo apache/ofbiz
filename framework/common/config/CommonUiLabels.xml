@@ -1128,6 +1128,10 @@
         <value xml:lang="zh_CN">让利</value>
         <value xml:lang="zh_TW">回報</value>
     </property>
+    <property key="CommonBuiltOn">
+        <value xml:lang="en">built on</value>
+        <value xml:lang="fr">compilée le</value>
+    </property>
     <property key="CommonBut">
         <value xml:lang="ar">إلا</value>
         <value xml:lang="de">aber</value>
