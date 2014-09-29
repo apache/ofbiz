@@ -169,8 +169,8 @@ public final class Datasource {
                 int maxWorkerPoolSizeInt = Integer.parseInt(maxWorkerPoolSize);
                 if (maxWorkerPoolSizeInt == 0) {
                     maxWorkerPoolSizeInt = 1;
-                } else if (maxWorkerPoolSizeInt < -2) {
-                    maxWorkerPoolSizeInt = -2;
+                } else if (maxWorkerPoolSizeInt < 0) {
+                    maxWorkerPoolSizeInt = Math.abs(maxWorkerPoolSizeInt) * Runtime.getRuntime().availableProcessors();
                 }
                 this.maxWorkerPoolSize = maxWorkerPoolSizeInt;
             } catch (Exception e) {
