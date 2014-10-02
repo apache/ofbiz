@@ -94,10 +94,7 @@ public class UrlRegexpContextFilter extends ContextFilter {
 
         // ----- Servlet Object Setup -----
         // set the cached class loader for more speedy running in this thread
-        String disableCachedClassloader = config.getInitParameter("disableCachedClassloader");
-        if (disableCachedClassloader == null || !"Y".equalsIgnoreCase(disableCachedClassloader)) {
-            Thread.currentThread().setContextClassLoader(localCachedClassLoader);
-        }
+
 
         // set the ServletContext in the request for future use
         httpRequest.setAttribute("servletContext", config.getServletContext());
