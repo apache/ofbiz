@@ -127,22 +127,19 @@ under the License.
     </service>
 
     <!-- Product Keyword Services -->
-    <service name="createProductKeyword" default-entity-name="ProductKeyword" engine="simple"
-            location="component://product/script/org/ofbiz/product/product/ProductServices.xml" invoke="createProductKeyword" auth="true">
+    <service name="createProductKeyword" default-entity-name="ProductKeyword" engine="entity-auto" invoke="create" auth="true">
         <description>Create a ProductKeyword</description>
         <permission-service service-name="productGenericPermission" main-action="CREATE"/>
         <auto-attributes include="pk" mode="IN" optional="false"/>
         <auto-attributes include="nonpk" mode="IN" optional="true"/>
     </service>
-    <service name="updateProductKeyword" default-entity-name="ProductKeyword" engine="simple"
-            location="component://product/script/org/ofbiz/product/product/ProductServices.xml" invoke="updateProductKeyword" auth="true">
+    <service name="updateProductKeyword" default-entity-name="ProductKeyword" engine="entity-auto" invoke="update" auth="true">
         <description>Update a ProductKeyword</description>
         <permission-service service-name="productGenericPermission" main-action="UPDATE"/>
         <auto-attributes include="pk" mode="IN" optional="false"/>
         <auto-attributes include="nonpk" mode="IN" optional="true"/>
     </service>
-    <service name="deleteProductKeyword" default-entity-name="ProductKeyword" engine="simple"
-            location="component://product/script/org/ofbiz/product/product/ProductServices.xml" invoke="deleteProductKeyword" auth="true">
+    <service name="deleteProductKeyword" default-entity-name="ProductKeyword" engine="entity-auto" invoke="delete" auth="true">
         <description>Delete a ProductKeyword</description>
         <permission-service service-name="productGenericPermission" main-action="DELETE"/>
         <auto-attributes include="pk" mode="IN" optional="false"/>
@@ -228,21 +225,18 @@ under the License.
 
     <!-- Product Association Services -->
 
-    <service name="createProductAssoc" default-entity-name="ProductAssoc" engine="simple"
-            location="component://product/script/org/ofbiz/product/product/ProductServices.xml"
-            invoke="createProductAssoc" auth="true">
+    <service name="createProductAssoc" default-entity-name="ProductAssoc" engine="entity-auto" invoke="create" auth="true">
+        <permission-service service-name="productGenericPermission" main-action="CREATE"/>
         <auto-attributes include="pk" mode="IN" optional="false"/>
         <auto-attributes include="nonpk" mode="IN" optional="true"/>
     </service>
-    <service name="updateProductAssoc" default-entity-name="ProductAssoc" engine="simple"
-            location="component://product/script/org/ofbiz/product/product/ProductServices.xml"
-            invoke="updateProductAssoc" auth="true">
+    <service name="updateProductAssoc" default-entity-name="ProductAssoc" engine="entity-auto" invoke="update" auth="true">
+        <permission-service service-name="productGenericPermission" main-action="UPDATE"/>
         <auto-attributes include="pk" mode="IN" optional="false"/>
         <auto-attributes include="nonpk" mode="IN" optional="true"/>
     </service>
-    <service name="deleteProductAssoc" default-entity-name="ProductAssoc" engine="simple"
-            location="component://product/script/org/ofbiz/product/product/ProductServices.xml"
-            invoke="deleteProductAssoc" auth="true">
+    <service name="deleteProductAssoc" default-entity-name="ProductAssoc" engine="entity-auto" invoke="delete" auth="true">
+        <permission-service service-name="productGenericPermission" main-action="DELETE"/>
         <auto-attributes include="pk" mode="IN" optional="false"/>
     </service>
 
@@ -327,40 +321,40 @@ under the License.
     </service>
 
     <!-- GoodIdentification Services -->
-    <service name="createGoodIdentification" default-entity-name="GoodIdentification" engine="simple"
-                location="component://product/script/org/ofbiz/product/product/ProductServices.xml" invoke="createGoodIdentification" auth="true">
+    <service name="createGoodIdentification" default-entity-name="GoodIdentification" engine="entity-auto" invoke="create" auth="true">
         <description>Create a GoodIdentification</description>
+        <permission-service service-name="productGenericPermission" main-action="CREATE"/>
         <auto-attributes include="pk" mode="IN" optional="false"/>
         <auto-attributes include="nonpk" mode="IN" optional="false"/>
     </service>
-    <service name="updateGoodIdentification" default-entity-name="GoodIdentification" engine="simple"
-                location="component://product/script/org/ofbiz/product/product/ProductServices.xml" invoke="updateGoodIdentification" auth="true">
+    <service name="updateGoodIdentification" default-entity-name="GoodIdentification" engine="entity-auto" invoke="update" auth="true">
         <description>Update a GoodIdentification</description>
+        <permission-service service-name="productGenericPermission" main-action="UPDATE"/>
         <auto-attributes include="pk" mode="IN" optional="false"/>
         <auto-attributes include="nonpk" mode="IN" optional="false"/>
     </service>
-    <service name="deleteGoodIdentification" default-entity-name="GoodIdentification" engine="simple"
-                location="component://product/script/org/ofbiz/product/product/ProductServices.xml" invoke="deleteGoodIdentification" auth="true">
+    <service name="deleteGoodIdentification" default-entity-name="GoodIdentification" engine="entity-auto" invoke="delete" auth="true">
         <description>Delete a GoodIdentification</description>
+        <permission-service service-name="productGenericPermission" main-action="DELETE"/>
         <auto-attributes include="pk" mode="IN" optional="false"/>
     </service>
 
     <!-- ProductGlAccount Services -->
-    <service name="createProductGlAccount" default-entity-name="ProductGlAccount" engine="simple"
-                location="component://product/script/org/ofbiz/product/product/ProductServices.xml" invoke="createProductGlAccount" auth="true">
+    <service name="createProductGlAccount" default-entity-name="ProductGlAccount" engine="entity-auto" invoke="create" auth="true">
         <description>Create a ProductGlAccount</description>
+        <permission-service service-name="productGenericPermission" main-action="CREATE"/>
         <auto-attributes include="pk" mode="IN" optional="false"/>
         <auto-attributes include="nonpk" mode="IN" optional="false"/>
     </service>
-    <service name="updateProductGlAccount" default-entity-name="ProductGlAccount" engine="simple"
-                location="component://product/script/org/ofbiz/product/product/ProductServices.xml" invoke="updateProductGlAccount" auth="true">
+    <service name="updateProductGlAccount" default-entity-name="ProductGlAccount" engine="entity-auto" invoke="update" auth="true">
         <description>Update a ProductGlAccount</description>
+        <permission-service service-name="productGenericPermission" main-action="UPDATE"/>
         <auto-attributes include="pk" mode="IN" optional="false"/>
         <auto-attributes include="nonpk" mode="IN" optional="false"/>
     </service>
-    <service name="deleteProductGlAccount" default-entity-name="ProductGlAccount" engine="simple"
-                location="component://product/script/org/ofbiz/product/product/ProductServices.xml" invoke="deleteProductGlAccount" auth="true">
+    <service name="deleteProductGlAccount" default-entity-name="ProductGlAccount" engine="entity-auto" invoke="delete" auth="true">
         <description>Delete a ProductGlAccount</description>
+        <permission-service service-name="productGenericPermission" main-action="DELETE"/>
         <auto-attributes include="pk" mode="IN" optional="false"/>
     </service>
 
@@ -558,56 +552,56 @@ under the License.
         <attribute name="supplierProductFeatures" type="java.util.List" mode="OUT" optional="false"/>
     </service>
 
-    <service name="createProductMaint" default-entity-name="ProductMaint" engine="simple"
-        location="component://product/script/org/ofbiz/product/product/ProductServices.xml" invoke="createProductMaint" auth="true">
+    <service name="createProductMaint" default-entity-name="ProductMaint" engine="entity-auto" invoke="create" auth="true">
         <description>Create a ProductMaint</description>
+        <permission-service service-name="productGenericPermission" main-action="CREATE"/>
         <auto-attributes include="pk" mode="IN" optional="false"/>
         <auto-attributes include="nonpk" mode="IN" optional="true"/>
         <override name="productMaintSeqId" mode="OUT"/> <!-- make this OUT rather than IN, we will automatically generate the next sub-sequence ID -->
     </service>
-    <service name="updateProductMaint" default-entity-name="ProductMaint" engine="simple"
-        location="component://product/script/org/ofbiz/product/product/ProductServices.xml" invoke="updateProductMaint" auth="true">
+    <service name="updateProductMaint" default-entity-name="ProductMaint" engine="entity-auto" invoke="update" auth="true">
         <description>Update a ProductMaint</description>
+        <permission-service service-name="productGenericPermission" main-action="UPDATE"/>
         <auto-attributes include="pk" mode="IN" optional="false"/>
         <auto-attributes include="nonpk" mode="IN" optional="true"/>
     </service>
-    <service name="deleteProductMaint" default-entity-name="ProductMaint" engine="simple"
-        location="component://product/script/org/ofbiz/product/product/ProductServices.xml" invoke="deleteProductMaint" auth="true">
+    <service name="deleteProductMaint" default-entity-name="ProductMaint" engine="entity-auto" invoke="delete" auth="true">
         <description>Delete a ProductMaint</description>
+        <permission-service service-name="productGenericPermission" main-action="DELETE"/>
         <auto-attributes include="pk" mode="IN" optional="false"/>
     </service>
-    <service name="createProductMeter" default-entity-name="ProductMeter" engine="simple"
-        location="component://product/script/org/ofbiz/product/product/ProductServices.xml" invoke="createProductMeter" auth="true">
+    <service name="createProductMeter" default-entity-name="ProductMeter" engine="entity-auto" invoke="create" auth="true">
         <description>Create a ProductMeter</description>
+        <permission-service service-name="productGenericPermission" main-action="CREATE"/>
         <auto-attributes include="pk" mode="IN" optional="false"/>
         <auto-attributes include="nonpk" mode="IN" optional="true"/>
     </service>
-    <service name="updateProductMeter" default-entity-name="ProductMeter" engine="simple"
-        location="component://product/script/org/ofbiz/product/product/ProductServices.xml" invoke="updateProductMeter" auth="true">
+    <service name="updateProductMeter" default-entity-name="ProductMeter" engine="entity-auto" invoke="update" auth="true">
         <description>Update a ProductMeter</description>
+        <permission-service service-name="productGenericPermission" main-action="UPDATE"/>
         <auto-attributes include="pk" mode="IN" optional="false"/>
         <auto-attributes include="nonpk" mode="IN" optional="true"/>
     </service>
-    <service name="deleteProductMeter" default-entity-name="ProductMeter" engine="simple"
-        location="component://product/script/org/ofbiz/product/product/ProductServices.xml" invoke="deleteProductMeter" auth="true">
+    <service name="deleteProductMeter" default-entity-name="ProductMeter" engine="entity-auto" invoke="delete" auth="true">
         <description>Delete a ProductMeter</description>
+        <permission-service service-name="productGenericPermission" main-action="DELETE"/>
         <auto-attributes include="pk" mode="IN" optional="false"/>
     </service>
-    <service name="createProductGeo" default-entity-name="ProductGeo" engine="simple"
-        location="component://product/script/org/ofbiz/product/product/ProductServices.xml" invoke="createProductGeo" auth="true">
+    <service name="createProductGeo" default-entity-name="ProductGeo" engine="entity-auto" invoke="create" auth="true">
         <description>Create a ProductGeo</description>
+        <permission-service service-name="productGenericPermission" main-action="CREATE"/>
         <auto-attributes include="pk" mode="IN" optional="false"/>
         <auto-attributes include="nonpk" mode="IN" optional="true"/>
     </service>
-    <service name="updateProductGeo" default-entity-name="ProductGeo" engine="simple"
-        location="component://product/script/org/ofbiz/product/product/ProductServices.xml" invoke="updateProductGeo" auth="true">
+    <service name="updateProductGeo" default-entity-name="ProductGeo" engine="entity-auto" invoke="update" auth="true">
         <description>Update a ProductGeo</description>
+        <permission-service service-name="productGenericPermission" main-action="UPDATE"/>
         <auto-attributes include="pk" mode="IN" optional="false"/>
         <auto-attributes include="nonpk" mode="IN" optional="true"/>
     </service>
-    <service name="deleteProductGeo" default-entity-name="ProductGeo" engine="simple"
-        location="component://product/script/org/ofbiz/product/product/ProductServices.xml" invoke="deleteProductGeo" auth="true">
+    <service name="deleteProductGeo" default-entity-name="ProductGeo" engine="entity-auto" invoke="delete" auth="true">
         <description>Delete a ProductGeo</description>
+        <permission-service service-name="productGenericPermission" main-action="DELETE"/>
         <auto-attributes include="pk" mode="IN" optional="false"/>
     </service>
     <service name="createCommunicationEventProduct" engine="simple"
@@ -624,69 +618,60 @@ under the License.
     <!-- ======================================== -->
     <!-- Product Catalog Services -->
     <!-- ======================================== -->
-    <service name="createProdCatalog" default-entity-name="ProdCatalog" engine="simple"
-                location="component://product/script/org/ofbiz/product/catalog/CatalogServices.xml" invoke="createProdCatalog" auth="true">
+    <service name="createProdCatalog" default-entity-name="ProdCatalog" engine="entity-auto" invoke="create" auth="true">
         <description>Create a ProdCatalog</description>
         <permission-service service-name="catalogPermissionCheck" main-action="CREATE"/>
         <auto-attributes include="pk" mode="INOUT" optional="true"/>
         <auto-attributes include="nonpk" mode="IN" optional="true"/>
         <override name="catalogName" optional="false"/>
     </service>
-    <service name="updateProdCatalog" default-entity-name="ProdCatalog" engine="simple"
-                location="component://product/script/org/ofbiz/product/catalog/CatalogServices.xml" invoke="updateProdCatalog" auth="true">
+    <service name="updateProdCatalog" default-entity-name="ProdCatalog" engine="entity-auto" invoke="update" auth="true">
         <description>Update an ProdCatalog</description>
         <permission-service service-name="catalogPermissionCheck" main-action="UPDATE"/>
         <auto-attributes include="pk" mode="IN" optional="false"/>
         <auto-attributes include="nonpk" mode="IN" optional="true"/>
         <override name="catalogName" optional="false"/>
     </service>
-    <service name="deleteProdCatalog" default-entity-name="ProdCatalog" engine="simple"
-                location="component://product/script/org/ofbiz/product/catalog/CatalogServices.xml" invoke="deleteProdCatalog" auth="true">
+    <service name="deleteProdCatalog" default-entity-name="ProdCatalog" engine="entity-auto" invoke="delete" auth="true">
         <description>Delete an ProdCatalog</description>
         <permission-service service-name="catalogPermissionCheck" main-action="DELETE"/>
         <auto-attributes include="pk" mode="IN" optional="false"/>
     </service>
 
-    <service name="addProductCategoryToProdCatalog" default-entity-name="ProdCatalogCategory" engine="simple"
-                location="component://product/script/org/ofbiz/product/catalog/CatalogServices.xml" invoke="addProductCategoryToProdCatalog" auth="true">
+    <service name="addProductCategoryToProdCatalog" default-entity-name="ProdCatalogCategory" engine="entity-auto" invoke="create" auth="true">
         <description>Add ProductCategory To ProdCatalog</description>
         <permission-service service-name="catalogPermissionCheck" main-action="CREATE"/>
         <auto-attributes include="pk" mode="IN" optional="false"/>
         <auto-attributes include="nonpk" mode="IN" optional="true"/>
         <override name="fromDate" optional="true"/>
     </service>
-    <service name="updateProductCategoryToProdCatalog" default-entity-name="ProdCatalogCategory" engine="simple"
-                location="component://product/script/org/ofbiz/product/catalog/CatalogServices.xml" invoke="updateProductCategoryToProdCatalog" auth="true">
+    <service name="updateProductCategoryToProdCatalog" default-entity-name="ProdCatalogCategory" engine="entity-auto" invoke="update" auth="true">
         <description>Add ProductCategory To ProdCatalog</description>
         <permission-service service-name="catalogPermissionCheck" main-action="UPDATE"/>
         <auto-attributes include="pk" mode="IN" optional="false"/>
         <auto-attributes include="nonpk" mode="IN" optional="true"/>
         <override name="prodCatalogCategoryTypeId" optional="false"/>
     </service>
-    <service name="removeProductCategoryFromProdCatalog" default-entity-name="ProdCatalogCategory" engine="simple"
-                location="component://product/script/org/ofbiz/product/catalog/CatalogServices.xml" invoke="removeProductCategoryFromProdCatalog" auth="true">
+    <service name="removeProductCategoryFromProdCatalog" default-entity-name="ProdCatalogCategory" engine="entity-auto" invoke="delete" auth="true">
         <description>Remove ProductCategory From ProdCatalog</description>
         <permission-service service-name="catalogPermissionCheck" main-action="DELETE"/>
         <auto-attributes include="pk" mode="IN" optional="false"/>
     </service>
 
-    <service name="addProdCatalogToParty" default-entity-name="ProdCatalogRole" engine="simple"
-                location="component://product/script/org/ofbiz/product/catalog/CatalogServices.xml" invoke="addProdCatalogToParty" auth="true">
+    <service name="addProdCatalogToParty" default-entity-name="ProdCatalogRole" engine="entity-auto" invoke="create" auth="true">
         <description>Add ProdCatalog To Party</description>
         <permission-service service-name="prodCatalogToPartyPermissionCheck" main-action="CREATE"/>
         <auto-attributes include="pk" mode="IN" optional="false"/>
         <auto-attributes include="nonpk" mode="IN" optional="true"/>
         <override name="fromDate" optional="true"/>
     </service>
-    <service name="updateProdCatalogToParty" default-entity-name="ProdCatalogRole" engine="simple"
-                location="component://product/script/org/ofbiz/product/catalog/CatalogServices.xml" invoke="updateProdCatalogToParty" auth="true">
+    <service name="updateProdCatalogToParty" default-entity-name="ProdCatalogRole" engine="entity-auto" invoke="update" auth="true">
         <description>Add ProdCatalog To Party</description>
         <permission-service service-name="prodCatalogToPartyPermissionCheck" main-action="UPDATE"/>
         <auto-attributes include="pk" mode="IN" optional="false"/>
         <auto-attributes include="nonpk" mode="IN" optional="true"/>
     </service>
-    <service name="removeProdCatalogFromParty" default-entity-name="ProdCatalogRole" engine="simple"
-                location="component://product/script/org/ofbiz/product/catalog/CatalogServices.xml" invoke="removeProdCatalogFromParty" auth="true">
+    <service name="removeProdCatalogFromParty" default-entity-name="ProdCatalogRole" engine="entity-auto" invoke="delete" auth="true">
         <description>Remove ProdCatalog From Party</description>
         <permission-service service-name="prodCatalogToPartyPermissionCheck" main-action="DELETE"/>
         <auto-attributes include="pk" mode="IN" optional="false"/>
@@ -1284,22 +1269,19 @@ under the License.
         <attribute type="String" mode="IN" name="productCategoryId" optional="true"/>
     </service>
     <!-- Product Attribute Services -->
-    <service name="createProductAttribute" default-entity-name="ProductAttribute" engine="simple"
-            location="component://product/script/org/ofbiz/product/product/ProductServices.xml" invoke="createProductAttribute" auth="true">
+    <service name="createProductAttribute" default-entity-name="ProductAttribute" engine="entity-auto" invoke="create" auth="true">
         <description>Create a ProductAttribute</description>
         <permission-service service-name="productGenericPermission" main-action="CREATE"/>
         <auto-attributes include="pk" mode="IN" optional="false"/>
         <auto-attributes include="nonpk" mode="IN" optional="true"/>
     </service>
-    <service name="updateProductAttribute" default-entity-name="ProductAttribute" engine="simple"
-            location="component://product/script/org/ofbiz/product/product/ProductServices.xml" invoke="updateProductAttribute" auth="true">
+    <service name="updateProductAttribute" default-entity-name="ProductAttribute" engine="entity-auto" invoke="update" auth="true">
         <description>Update a ProductAttribute</description>
         <permission-service service-name="productGenericPermission" main-action="UPDATE"/>
         <auto-attributes include="pk" mode="IN" optional="false"/>
         <auto-attributes include="nonpk" mode="IN" optional="true"/>
     </service>
-    <service name="deleteProductAttribute" default-entity-name="ProductAttribute" engine="simple"
-            location="component://product/script/org/ofbiz/product/product/ProductServices.xml" invoke="deleteProductAttribute" auth="true">
+    <service name="deleteProductAttribute" default-entity-name="ProductAttribute" engine="entity-auto" invoke="delete" auth="true">
         <description>Delete a ProductAttribute</description>
         <permission-service service-name="productGenericPermission" main-action="DELETE"/>
         <auto-attributes include="pk" mode="IN" optional="false"/>
