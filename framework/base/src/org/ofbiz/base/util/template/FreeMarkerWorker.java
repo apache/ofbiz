@@ -58,6 +58,7 @@ import freemarker.cache.TemplateLoader;
 import freemarker.core.Environment;
 import freemarker.ext.beans.BeanModel;
 import freemarker.ext.beans.BeansWrapper;
+import freemarker.ext.beans.BeansWrapperBuilder;
 import freemarker.template.Configuration;
 import freemarker.template.SimpleHash;
 import freemarker.template.SimpleScalar;
@@ -66,6 +67,7 @@ import freemarker.template.TemplateException;
 import freemarker.template.TemplateExceptionHandler;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
+import freemarker.template.Version;
 
 /** FreeMarkerWorker - Freemarker Template Engine Utilities.
  *
@@ -74,22 +76,19 @@ public class FreeMarkerWorker {
 
     public static final String module = FreeMarkerWorker.class.getName();
 
+    public static final Version version = new Version(2, 3, 21);
+
     // use soft references for this so that things from Content records don't kill all of our memory, or maybe not for performance reasons... hmmm, leave to config file...
     private static final UtilCache<String, Template> cachedTemplates = UtilCache.createUtilCache("template.ftl.general", 0, 0, false);
-    private static final BeansWrapper defaultOfbizWrapper = configureBeansWrapper(new BeansWrapper());
+    private static final BeansWrapper defaultOfbizWrapper = new BeansWrapperBuilder(version).build();
     private static final Configuration defaultOfbizConfig = makeConfiguration(defaultOfbizWrapper);
 
     public static BeansWrapper getDefaultOfbizWrapper() {
         return defaultOfbizWrapper;
     }
 
-    public static <T extends BeansWrapper> T configureBeansWrapper(T wrapper) {
-        wrapper.setNullWildcards(true);
-        return wrapper;
-    }
-
     public static Configuration makeConfiguration(BeansWrapper wrapper) {
-        Configuration newConfig = new Configuration();
+        Configuration newConfig = new Configuration(version);
 
         newConfig.setObjectWrapper(wrapper);
         newConfig.setSharedVariable("Static", wrapper.getStaticModels());
