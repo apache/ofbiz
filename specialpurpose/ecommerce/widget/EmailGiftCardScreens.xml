@@ -34,7 +34,7 @@ under the License.
     <screen name="GiftCardReload">
         <section>
             <actions>
-                <set field="baseEcommerceSecureUrl" value="${baseSecureUrl}/ecommerce/control/"/>
+                <set field="baseEcommerceSecureUrl" value="${baseSecureUrl}/ecommerce/control"/>
             </actions>
             <widgets>
                 <platform-specific><html><html-template location="component://ecommerce/templates/email/giftcardreload.ftl"/></html></platform-specific>
