@@ -55,9 +55,11 @@ def partyId = null;
 orderHeader = null;
 orderItems = null;
 orderAdjustments = null;
+comments = null;
 
 if (orderId) {
     orderHeader = delegator.findByPrimaryKey("OrderHeader", [orderId : orderId]);
+    comments = delegator.findList("OrderItemChange", EntityCondition.makeCondition("orderId", orderId), ["orderItemSeqId", "changeComments", "changeDatetime", "changeUserLogin"] as Set, ["changeDatetime DESC"], null, false);
 }
 
 if (orderHeader) {
@@ -73,6 +75,7 @@ if (orderHeader) {
     orderTerms = orderHeader.getRelated("OrderTerm");
 
     context.orderHeader = orderHeader;
+    context.comments = comments;
     context.orderReadHelper = orderReadHelper;
     context.orderItems = orderItems;
     context.orderAdjustments = orderAdjustments;
