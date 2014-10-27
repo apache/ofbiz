@@ -73,7 +73,7 @@ public final class JSON {
             return true;
         }
         if (obj instanceof JSON) {
-            return jsonString.equals(obj);
+            return jsonString.equals(((JSON)obj).jsonString);
         }
         return false;
     }
