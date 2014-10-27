@@ -713,31 +713,6 @@ public class ImageManagementServices {
         return "success";
     }
     
-    public static void toJsonObject(Map<String,Object> attrMap, HttpServletResponse response){
-        JSONObject json = JSONObject.fromObject(attrMap);
-        String jsonStr = json.toString();
-        if (jsonStr == null) {
-            Debug.logError("JSON Object was empty; fatal error!",module);
-        }
-        // set the X-JSON content type
-        response.setContentType("application/json");
-        // jsonStr.length is not reliable for unicode characters
-        try {
-            response.setContentLength(jsonStr.getBytes("UTF8").length);
-        } catch (UnsupportedEncodingException e) {
-            Debug.logError("Problems with Json encoding",module);
-        }
-        // return the JSON String
-        Writer out;
-        try {
-            out = response.getWriter();
-            out.write(jsonStr);
-            out.flush();
-        } catch (IOException e) {
-            Debug.logError("Unable to get response writer",module);
-        }
-    }
-    
     public static void toJsonObjectList(List<Map<String,Object>> list, HttpServletResponse response) throws EventHandlerException {
         JSONObject json = null;
         List<JSONObject> jsonList = new ArrayList<JSONObject>();

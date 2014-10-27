@@ -48,6 +48,8 @@ import net.sf.json.JSONSerializer;
 
 import org.apache.commons.lang.RandomStringUtils;
 import org.apache.commons.lang.StringUtils;
+import org.ofbiz.base.conversion.Converter;
+import org.ofbiz.base.conversion.Converters;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.StringUtil;
 import org.ofbiz.base.util.UtilGenerics;
@@ -288,11 +290,13 @@ public class CommonEvents {
                 attrMap.remove(ignoreAttr);
             }
         }
-
-        // create a JSON Object for return
-        JSONObject json = JSONObject.fromObject(attrMap);
-        writeJSONtoResponse(json, request.getMethod(), response);
-
+        try {
+            Converter<Map, JSON> converter = Converters.getConverter(Map.class, JSON.class);
+            JSON json = converter.convert(attrMap);
+            writeJSONtoResponse(json, request.getMethod(), response);
+        } catch (Exception e) {
+            return "error";
+        }
         return "success";
     }
 
