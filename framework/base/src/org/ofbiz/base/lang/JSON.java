@@ -23,12 +23,16 @@ import java.io.InputStream;
 import java.io.Reader;
 
 import org.apache.commons.io.IOUtils;
-import org.ofbiz.base.lang.ThreadSafe;
 import org.ofbiz.base.util.Assert;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /** A JSON object. */
 @ThreadSafe
 public final class JSON {
+
+    // TODO: Find a generic way to modify mapper options
+    private static final ObjectMapper mapper = new ObjectMapper();
 
     public static JSON from(InputStream inStream) throws IOException {
         Assert.notNull("inStream", inStream);
@@ -36,10 +40,13 @@ public final class JSON {
         return from(jsonString);
     }
 
-    public static JSON from(Object object) {
+    public static JSON from(Object object) throws IOException {
         Assert.notNull("object", object);
-        // TODO: Finish implementation.
-        return null;
+        try {
+            return from(mapper.writeValueAsString(object));
+        } catch (Exception e) {
+            throw new IOException(e);
+        }
     }
 
     public static JSON from(Reader reader) throws IOException {
@@ -70,9 +77,14 @@ public final class JSON {
         return jsonString.hashCode();
     }
 
-    public <T> T toObject() {
-        // TODO: Finish implementation.
-        return null;
+    public <T> T toObject(Class<T> targetClass) throws IOException {
+        try {
+            return mapper.readValue(jsonString, targetClass);
+        } catch (IOException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new IOException(e);
+        }
     }
 
     @Override
