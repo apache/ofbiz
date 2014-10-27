@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  *******************************************************************************/
-package org.ofbiz.base.conversion;
+package org.ofbiz.base.lang;
 
 import java.io.IOException;
 import java.io.InputStream;
