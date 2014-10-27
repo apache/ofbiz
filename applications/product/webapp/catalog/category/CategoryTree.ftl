@@ -77,9 +77,9 @@ var rawdata = [
                                             "onclickFunction" : "callDocument"
                                         };
                                     },
-                           success : function(data) {
+                           success : function(data) {
                                return data.treeData;
-                           }
+                           }
                 }
             },
             "types" : {
