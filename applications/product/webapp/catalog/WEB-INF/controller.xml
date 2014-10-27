@@ -3022,7 +3022,8 @@ under the License.
     <request-map uri="getChild">
         <security auth="false" https="true"/>
         <event type="java" path="org.ofbiz.product.category.CategoryServices" invoke="getChildCategoryTree"/>
-        <response name="success" type="none"/>
+        <response name="success" type="request" value="json"/>
+        <response name="error" type="request" value="json"/>
     </request-map>
     <request-map uri="listMiniproduct">
         <security auth="false" https="true"/>
