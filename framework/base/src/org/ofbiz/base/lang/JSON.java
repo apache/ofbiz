@@ -89,6 +89,6 @@ public final class JSON {
 
     @Override
     public String toString() {
-        return jsonString.toString();
+        return jsonString;
     }
 }
