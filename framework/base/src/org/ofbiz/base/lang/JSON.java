@@ -69,7 +69,13 @@ public final class JSON {
 
     @Override
     public boolean equals(Object obj) {
-        return jsonString.equals(obj);
+        if (obj == this) {
+            return true;
+        }
+        if (obj instanceof JSON) {
+            return jsonString.equals(obj);
+        }
+        return false;
     }
 
     @Override
