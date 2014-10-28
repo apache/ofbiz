@@ -18,14 +18,12 @@
  *******************************************************************************/
 package org.ofbiz.base.conversion;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
 
-import net.sf.json.JSON;
-import net.sf.json.JSONArray;
-import net.sf.json.JSONObject;
+import org.ofbiz.base.lang.JSON;
+import org.ofbiz.base.util.UtilGenerics;
 
 /** JSON Converter classes. */
 public class JSONConverters implements ConverterLoader {
@@ -37,10 +35,8 @@ public class JSONConverters implements ConverterLoader {
 
         public List<Object> convert(JSON obj) throws ConversionException {
             try {
-                return (List<Object>) JSONArray.toCollection((JSONArray)obj);
-            } catch (RuntimeException e) {
-                throw e;
-            } catch (Exception e) {
+                return UtilGenerics.<List<Object>>cast(obj.toObject(List.class));
+            } catch (IOException e) {
                 throw new ConversionException(e);
             }
         }
@@ -53,26 +49,8 @@ public class JSONConverters implements ConverterLoader {
 
         public Map<String, Object> convert(JSON obj) throws ConversionException {
             try {
-                return (Map<String, Object>) JSONObject.toBean((JSONObject)obj, Map.class);
-            } catch (RuntimeException e) {
-                throw e;
-            } catch (Exception e) {
-                throw new ConversionException(e);
-            }
-        }
-    }
-
-    public static class MapToJSON extends AbstractConverter<Map<String, Object>, JSON> {
-        public MapToJSON() {
-            super(Map.class, JSON.class);
-        }
-
-        public JSON convert(Map<String, Object> obj) throws ConversionException {
-            try {
-                return JSONObject.fromObject(obj);
-            } catch (RuntimeException e) {
-                throw e;
-            } catch (Exception e) {
+                return UtilGenerics.<Map<String, Object>>cast(obj.toObject(Map.class));
+            } catch (IOException e) {
                 throw new ConversionException(e);
             }
         }
@@ -85,28 +63,22 @@ public class JSONConverters implements ConverterLoader {
 
         public JSON convert(List<Object> obj) throws ConversionException {
             try {
-                return JSONArray.fromObject(obj);
-            } catch (RuntimeException e) {
-                throw e;
-            } catch (Exception e) {
+                return JSON.from(obj);
+            } catch (IOException e) {
                 throw new ConversionException(e);
             }
         }
     }
 
-    public static class JSONToSet extends AbstractConverter<JSON, Set<Object>> {
-        public JSONToSet() {
-            super(JSON.class, Set.class);
+    public static class MapToJSON extends AbstractConverter<Map<String, Object>, JSON> {
+        public MapToJSON() {
+            super(Map.class, JSON.class);
         }
 
-        public Set<Object> convert(JSON obj) throws ConversionException {
+        public JSON convert(Map<String, Object> obj) throws ConversionException {
             try {
-                Set<Object> set = new TreeSet<Object>();
-                set.addAll((JSONArray)obj);
-                return set;
-            } catch (RuntimeException e) {
-                throw e;
-            } catch (Exception e) {
+                return JSON.from(obj);
+            } catch (IOException e) {
                 throw new ConversionException(e);
             }
         }

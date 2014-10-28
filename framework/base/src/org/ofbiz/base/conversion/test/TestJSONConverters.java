@@ -24,18 +24,14 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
 
-import net.sf.json.JSONArray;
-import net.sf.json.JSONObject;
-import org.ofbiz.base.conversion.JSONConverters;
+import junit.framework.TestCase;
+
 import org.ofbiz.base.conversion.Converter;
 import org.ofbiz.base.conversion.ConverterLoader;
 import org.ofbiz.base.conversion.Converters;
-
-import net.sf.json.JSON;
-import junit.framework.TestCase;
+import org.ofbiz.base.conversion.JSONConverters;
+import org.ofbiz.base.lang.JSON;
 
 public class TestJSONConverters  extends TestCase {
     public TestJSONConverters(String name) {
@@ -46,37 +42,23 @@ public class TestJSONConverters  extends TestCase {
 
     public void testJSONToMap() throws Exception {
         Converter<JSON, Map> converter = Converters.getConverter(JSON.class, Map.class);
-        JSON json;
         Map map, convertedMap;
         map = new HashMap();
         map.put("field1", "value1");
-        json = JSONObject.fromObject(map);
+        JSON json = JSON.from(map);
         convertedMap = converter.convert(json);
         assertEquals("JSON to Map", map, convertedMap);
     }
 
     public void testJSONToList() throws Exception {
         Converter<JSON, List> converter = Converters.getConverter(JSON.class, List.class);
-        JSON json;
         List list, convertedList;
         list = new ArrayList();
         list.add("field1");
         list.add("field2");
-        json = JSONArray.fromObject(list);
+        JSON json = JSON.from(list);
         convertedList = converter.convert(json);
         assertEquals("JSON to List", list, convertedList);
-    }
-
-    public void testJSONToSet() throws Exception {
-        Converter<JSON, Set> converter = Converters.getConverter(JSON.class, Set.class);
-        JSON json;
-        Set set, convertedSet;
-        set = new TreeSet();
-        set.add("field1");
-        set.add("field2");
-        json = JSONArray.fromObject(set);
-        convertedSet = converter.convert(json);
-        assertEquals("JSON to Set", set, convertedSet);
     }
 
     public void testMapToJSON() throws Exception {
