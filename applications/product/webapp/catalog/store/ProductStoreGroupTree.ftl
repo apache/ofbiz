@@ -55,7 +55,10 @@ var rawdata = [
                                 "parentGroupId" :  n.attr ? n.attr("parentGroupId").replace("node_","") : 1,
                                 "onclickFunction" : "callDocument"
                         }; 
-                    }
+                    },
+                              success : function (data) {
+                                  return data.storeGroupTree;
+                              }
                 }
             },
             "types" : {

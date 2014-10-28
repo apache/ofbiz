@@ -1457,7 +1457,8 @@ under the License.
     <request-map uri="getProductStoreGroupRollupHierarchy">
         <security auth="false" https="true"/>
         <event type="java" path="org.ofbiz.product.store.ProductStoreEvents" invoke="getChildProductStoreGroupTree"/>
-        <response name="success" type="none"/>
+        <response name="success" type="request" value="json"/>
+        <response name="error" type="request" value="json"/>
     </request-map>
     <request-map uri="AddProductStoreToGroup">
         <security auth="true" https="true"/>
