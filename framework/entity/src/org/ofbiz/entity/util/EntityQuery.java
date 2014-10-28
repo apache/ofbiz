@@ -21,6 +21,7 @@ package org.ofbiz.entity.util;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -332,6 +333,16 @@ public class EntityQuery {
         return this;
     }
 
+    /** Specifies whether the query should return only values that are active during the specified moment using from/thruDate fields.
+     * 
+     * @param moment - Date representing the moment in time that the values should be active during
+     * @return this EntityQuery object, to enable chaining
+     */
+    public EntityQuery filterByDate(Date moment) {
+        this.filterByDate(new java.sql.Timestamp(moment.getTime()));
+        return this;
+    }
+
     /** Specifies whether the query should return only values that are currently active using the specified from/thru field name pairs.
      * 
      * @param fromThruFieldName - String pairs representing the from/thru date field names e.g. "fromDate", "thruDate", "contactFromDate", "contactThruDate"
@@ -446,7 +457,11 @@ public class EntityQuery {
     private EntityCondition makeWhereCondition(boolean usingCache) {
         // we don't use the useCache field here because not all queries will actually use the cache, e.g. findCountByCondition never uses the cache
         if (filterByDate && !usingCache) {
+            if (whereEntityCondition != null) {
                 return EntityCondition.makeCondition(whereEntityCondition, this.makeDateCondition());
+            } else {
+                return this.makeDateCondition();
+            }
         }
         return whereEntityCondition;
     }

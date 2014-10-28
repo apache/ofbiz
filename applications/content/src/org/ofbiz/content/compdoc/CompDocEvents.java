@@ -34,12 +34,12 @@ import javolution.util.FastMap;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilFormatOut;
 import org.ofbiz.base.util.UtilHttp;
-import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.base.util.UtilProperties;
 import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
+import org.ofbiz.entity.util.EntityQuery;
 import org.ofbiz.service.GenericServiceException;
 import org.ofbiz.service.LocalDispatcher;
 import org.ofbiz.service.ModelService;
@@ -79,7 +79,7 @@ public class CompDocEvents {
 
         if (UtilValidate.isNotEmpty(contentId)) {
             try {
-                delegator.findOne("Content", UtilMisc.toMap("contentId", contentId), false);
+                EntityQuery.use(delegator).from("Content").where("contentId", contentId).queryOne();
             } catch (GenericEntityException e) {
                 Debug.logError(e, "Error running serviceName persistContentAndAssoc", module);
                 String errMsg = UtilProperties.getMessage(CoreEvents.err_resource, "coreEvents.error_modelservice_for_srv_name", locale);
