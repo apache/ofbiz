@@ -34,12 +34,27 @@ public final class JSON {
     // TODO: Find a generic way to modify mapper options
     private static final ObjectMapper mapper = new ObjectMapper();
 
+    /**
+     * Creates a <code>JSON</code> instance from an <code>InputStream</code>.
+     * The method assumes the character set is UTF-8.
+     * 
+     * @param inStream
+     * @return a <code>JSON</code> instance
+     * @throws IOException
+     */
     public static JSON from(InputStream inStream) throws IOException {
         Assert.notNull("inStream", inStream);
         String jsonString = IOUtils.toString(inStream, "UTF-8");
         return from(jsonString);
     }
 
+    /**
+     * Creates a <code>JSON</code> instance from an unknown data type.
+     * 
+     * @param object
+     * @return a <code>JSON</code> instance
+     * @throws IOException
+     */
     public static JSON from(Object object) throws IOException {
         Assert.notNull("object", object);
         try {
@@ -49,12 +64,25 @@ public final class JSON {
         }
     }
 
+    /**
+     * Creates a <code>JSON</code> instance from a <code>Reader</code>.
+     * 
+     * @param reader
+     * @return a <code>JSON</code> instance
+     * @throws IOException
+     */
     public static JSON from(Reader reader) throws IOException {
         Assert.notNull("reader", reader);
         String jsonString = IOUtils.toString(reader);
         return from(jsonString);
     }
 
+    /**
+     * Creates a <code>JSON</code> instance from a <code>String</code>.
+     * 
+     * @param jsonString
+     * @return a <code>JSON</code> instance
+     */
     public static JSON from(String jsonString) {
         Assert.notNull("jsonString", jsonString);
         // TODO: Validate String
@@ -83,7 +111,15 @@ public final class JSON {
         return jsonString.hashCode();
     }
 
+    /**
+     * Converts this <code>JSON</code> object to the specified type.
+     * 
+     * @param targetClass
+     * @return an object of the specified type
+     * @throws IOException
+     */
     public <T> T toObject(Class<T> targetClass) throws IOException {
+        Assert.notNull("targetClass", targetClass);
         try {
             return mapper.readValue(jsonString, targetClass);
         } catch (IOException e) {
