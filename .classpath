@@ -36,7 +36,6 @@
     <classpathentry kind="lib" path="framework/base/lib/jdbm-1.0-SNAPSHOT.jar"/>
     <classpathentry kind="lib" path="framework/base/lib/jdom-1.1.jar"/>
     <classpathentry kind="lib" path="framework/base/lib/jpim-0.1.jar"/>
-    <classpathentry kind="lib" path="framework/base/lib/json-lib-2.2.3-jdk15.jar"/>
     <classpathentry kind="lib" path="framework/base/lib/juel-impl-2.2.7.jar"/>
     <classpathentry kind="lib" path="framework/base/lib/juel-spi-2.2.7.jar"/>
     <classpathentry kind="lib" path="framework/base/lib/junit-dep-4.10.jar"/>

@@ -28,7 +28,6 @@ framework/base/lib/jackson-core-2.4.2.jar
 framework/base/lib/jackson-databind-2.4.2.jar
 framework/base/lib/jakarta-regexp-1.5.jar
 framework/base/lib/jpim-0.1.jar
-framework/base/lib/json-lib-2.2.3-jdk15.jar
 framework/base/lib/juel-impl-2.2.7.jar
 framework/base/lib/juel-spi-2.2.7.jar
 framework/base/lib/log4j-1.2-api-2.0.1.jar
