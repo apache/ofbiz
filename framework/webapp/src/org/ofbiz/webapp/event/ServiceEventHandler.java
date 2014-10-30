@@ -235,14 +235,15 @@ public class ServiceEventHandler implements EventHandler {
 
         Map<String, Object> rawParametersMap = UtilHttp.getParameterMap(request, null, null);
         Set<String> urlOnlyParameterNames = UtilHttp.getUrlOnlyParameterMap(request).keySet();
-        Map<String, Object> requestBodyMap;
+        Map<String, Object> requestBodyMap = null;
         try {
             requestBodyMap = RequestBodyMapHandlerFactory.extractMapFromRequestBody(request);
         } catch (IOException ioe) {
             Debug.logWarning(ioe, module);
-            requestBodyMap = new HashMap<String, Object>();
         }
-        rawParametersMap.putAll(requestBodyMap);
+        if (requestBodyMap != null) {
+            rawParametersMap.putAll(requestBodyMap);
+        }
 
         // we have a service and the model; build the context
         Map<String, Object> serviceContext = FastMap.newInstance();
