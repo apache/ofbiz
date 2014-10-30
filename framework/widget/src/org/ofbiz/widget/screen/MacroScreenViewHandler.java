@@ -20,6 +20,7 @@ package org.ofbiz.widget.screen;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.util.List;
 import java.util.Map;
 
 import javax.servlet.ServletContext;
@@ -76,22 +77,34 @@ public class MacroScreenViewHandler extends AbstractViewHandler {
                 serviceCtx.put("visualThemeId", visualThemeId);
                 Map<String, Object> serviceResult = dispatcher.runSync("getVisualThemeResources", serviceCtx);
                 if (ServiceUtil.isSuccess(serviceResult)) {
-                    Map<String, Object> themeResources = UtilGenerics.cast(serviceResult.get("themeResources"));
-                    String macroLibraryPath = (String) themeResources.get("VT_SCRN_MACRO_LIB");
-                    if (macroLibraryPath != null) {
-                        screenMacroLibraryPath = macroLibraryPath;
+                    Map<String, List<String>> themeResources = UtilGenerics.cast(serviceResult.get("themeResources"));
+                    List<String> resourceList = UtilGenerics.cast(themeResources.get("VT_SCRN_MACRO_LIB"));
+                    if (resourceList != null && !resourceList.isEmpty()) {
+                        String macroLibraryPath = resourceList.get(0);
+                        if (macroLibraryPath != null) {
+                            screenMacroLibraryPath = macroLibraryPath;
+                        }
                     }
-                    macroLibraryPath = (String) themeResources.get("VT_FORM_MACRO_LIB");
-                    if (macroLibraryPath != null) {
-                        formMacroLibraryPath = macroLibraryPath;
+                    resourceList = UtilGenerics.cast(themeResources.get("VT_FORM_MACRO_LIB"));
+                    if (resourceList != null && !resourceList.isEmpty()) {
+                        String macroLibraryPath = resourceList.get(0);
+                        if (macroLibraryPath != null) {
+                            formMacroLibraryPath = macroLibraryPath;
+                        }
                     }
-                    macroLibraryPath = (String) themeResources.get("VT_TREE_MACRO_LIB");
-                    if (macroLibraryPath != null) {
-                        treeMacroLibraryPath = macroLibraryPath;
+                    resourceList = UtilGenerics.cast(themeResources.get("VT_TREE_MACRO_LIB"));
+                    if (resourceList != null && !resourceList.isEmpty()) {
+                        String macroLibraryPath = resourceList.get(0);
+                        if (macroLibraryPath != null) {
+                            treeMacroLibraryPath = macroLibraryPath;
+                        }
                     }
-                    macroLibraryPath = (String) themeResources.get("VT_MENU_MACRO_LIB");
-                    if (macroLibraryPath != null) {
-                        menuMacroLibraryPath = macroLibraryPath;
+                    resourceList = UtilGenerics.cast(themeResources.get("VT_MENU_MACRO_LIB"));
+                    if (resourceList != null && !resourceList.isEmpty()) {
+                        String macroLibraryPath = resourceList.get(0);
+                        if (macroLibraryPath != null) {
+                            menuMacroLibraryPath = macroLibraryPath;
+                        }
                     }
                 }
             }
