@@ -20,6 +20,8 @@
 package org.ofbiz.common.login;
 
 import java.sql.Timestamp;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -27,9 +29,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.transaction.Transaction;
-
-import javolution.util.FastList;
-import javolution.util.FastMap;
 
 import org.ofbiz.base.crypto.HashCrypt;
 import org.ofbiz.base.util.Debug;
@@ -50,6 +49,7 @@ import org.ofbiz.entity.transaction.GenericTransactionException;
 import org.ofbiz.entity.transaction.TransactionUtil;
 import org.ofbiz.entity.util.EntityFindOptions;
 import org.ofbiz.entity.util.EntityListIterator;
+import org.ofbiz.entity.util.EntityQuery;
 import org.ofbiz.security.Security;
 import org.ofbiz.service.DispatchContext;
 import org.ofbiz.service.LocalDispatcher;
@@ -90,7 +90,7 @@ public class LoginServices {
             }
         }
 
-        Map<String, Object> result = FastMap.newInstance();
+        Map<String, Object> result =  new LinkedHashMap<String, Object>();
         Delegator delegator = ctx.getDelegator();
         boolean useEncryption = "true".equals(UtilProperties.getPropertyValue("security.properties", "password.encrypt"));
 
@@ -468,11 +468,11 @@ public class LoginServices {
      *@return Map with the result of the service, the output parameters
      */
     public static Map<String, Object> createUserLogin(DispatchContext ctx, Map<String, ?> context) {
-        Map<String, Object> result = FastMap.newInstance();
+        Map<String, Object> result =  new LinkedHashMap<String, Object>();
         Delegator delegator = ctx.getDelegator();
         Security security = ctx.getSecurity();
         GenericValue loggedInUserLogin = (GenericValue) context.get("userLogin");
-        List<String> errorMessageList = FastList.newInstance();
+        List<String> errorMessageList = new LinkedList<String>();
         Locale locale = (Locale) context.get("locale");
 
         boolean useEncryption = "true".equals(UtilProperties.getPropertyValue("security.properties", "password.encrypt"));
@@ -493,7 +493,7 @@ public class LoginServices {
             GenericValue party = null;
 
             try {
-                party = delegator.findOne("Party", false, "partyId", partyId);
+                party = EntityQuery.use(delegator).from("Party").where("partyId", partyId).queryOne();
             } catch (GenericEntityException e) {
                 Debug.logWarning(e, "", module);
             }
@@ -609,7 +609,7 @@ public class LoginServices {
         GenericValue userLoginToUpdate = null;
 
         try {
-            userLoginToUpdate = delegator.findOne("UserLogin", false, "userLoginId", userLoginId);
+            userLoginToUpdate = EntityQuery.use(delegator).from("UserLogin").where("userLoginId", userLoginId).queryOne();
         } catch (GenericEntityException e) {
             Map<String, String> messageMap = UtilMisc.toMap("errorMessage", e.getMessage());
             errMsg = UtilProperties.getMessage(resource,"loginservices.could_not_change_password_read_failure", messageMap, locale);
@@ -652,7 +652,7 @@ public class LoginServices {
             newPasswordVerify = newPasswordVerify.toLowerCase();
         }
 
-        List<String> errorMessageList = FastList.newInstance();
+        List<String> errorMessageList = new LinkedList<String>();
         if (newPassword != null) {
             checkNewPassword(userLoginToUpdate, currentPassword, newPassword, newPasswordVerify,
                 passwordHint, errorMessageList, adminUser, locale);
@@ -700,10 +700,10 @@ public class LoginServices {
      *@return Map with the result of the service, the output parameters
      */
     public static Map<String, Object> updateUserLoginId(DispatchContext ctx, Map<String, ?> context) {
-        Map<String, Object> result = FastMap.newInstance();
+        Map<String, Object> result =  new LinkedHashMap<String, Object>();
         Delegator delegator = ctx.getDelegator();
         GenericValue loggedInUserLogin = (GenericValue) context.get("userLogin");
-        List<String> errorMessageList = FastList.newInstance();
+        List<String> errorMessageList = new LinkedList<String>();
         Locale locale = (Locale) context.get("locale");
 
         //boolean useEncryption = "true".equals(UtilProperties.getPropertyValue("security.properties", "password.encrypt"));
@@ -724,7 +724,7 @@ public class LoginServices {
         if (UtilValidate.isNotEmpty(partyId)) {
             //GenericValue party = null;
             //try {
-            //    party = delegator.findOne("Party", UtilMisc.toMap("partyId", partyId), false);
+            //    party = EntityQuery.use(delegator).from("Party").where("partyId", partyId).queryOne();
             //} catch (GenericEntityException e) {
             //    Debug.logWarning(e, "", module);
             //}
@@ -746,7 +746,7 @@ public class LoginServices {
 
         // check to see if there's a matching login and use it if it's for the same party
         try {
-            newUserLogin = delegator.findOne("UserLogin", false, "userLoginId", userLoginId);
+            newUserLogin = EntityQuery.use(delegator).from("UserLogin").where("userLoginId", userLoginId).queryOne();
         } catch (GenericEntityException e) {
             Debug.logWarning(e, "", module);
             Map<String, String> messageMap = UtilMisc.toMap("errorMessage", e.getMessage());
@@ -812,7 +812,7 @@ public class LoginServices {
      *@return Map with the result of the service, the output parameters
      */
     public static Map<String, Object> updateUserLoginSecurity(DispatchContext ctx, Map<String, ?> context) {
-        Map<String, Object> result = FastMap.newInstance();
+        Map<String, Object> result =  new LinkedHashMap<String, Object>();
         Delegator delegator = ctx.getDelegator();
         Security security = ctx.getSecurity();
         GenericValue loggedInUserLogin = (GenericValue) context.get("userLogin");
@@ -834,7 +834,7 @@ public class LoginServices {
         GenericValue userLoginToUpdate = null;
 
         try {
-            userLoginToUpdate = delegator.findOne("UserLogin", false, "userLoginId", userLoginId);
+            userLoginToUpdate = EntityQuery.use(delegator).from("UserLogin").where("userLoginId", userLoginId).queryOne();
         } catch (GenericEntityException e) {
             Map<String, String> messageMap = UtilMisc.toMap("errorMessage", e.getMessage());
             errMsg = UtilProperties.getMessage(resource,"loginservices.could_not_change_password_read_failure", messageMap, locale);

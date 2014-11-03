@@ -21,7 +21,10 @@ package org.ofbiz.widget.form;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -30,13 +33,8 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-import javolution.util.FastList;
-import javolution.util.FastMap;
-import javolution.util.FastSet;
-
 import org.ofbiz.base.util.BshUtil;
 import org.ofbiz.base.util.Debug;
-import org.ofbiz.base.util.GeneralException;
 import org.ofbiz.base.util.StringUtil;
 import org.ofbiz.base.util.UtilGenerics;
 import org.ofbiz.base.util.UtilMisc;
@@ -56,8 +54,9 @@ import org.ofbiz.service.DispatchContext;
 import org.ofbiz.service.GenericServiceException;
 import org.ofbiz.service.ModelParam;
 import org.ofbiz.service.ModelService;
-import org.ofbiz.webapp.control.ConfigXMLReader;
 import org.ofbiz.widget.ModelWidget;
+import org.ofbiz.widget.ModelWidgetAction;
+import org.ofbiz.widget.ModelWidgetVisitor;
 import org.ofbiz.widget.WidgetWorker;
 import org.w3c.dom.Element;
 
@@ -72,9 +71,6 @@ public class ModelForm extends ModelWidget {
 
     public static final String module = ModelForm.class.getName();
     public static final String DEFAULT_FORM_RESULT_LIST_NAME = "defaultFormResultList";
-
-    protected ModelReader entityModelReader;
-    protected DispatchContext dispatchContext;
 
     protected String formLocation;
     protected String parentFormName;
@@ -131,12 +127,12 @@ public class ModelForm extends ModelWidget {
     protected boolean overridenListSize = false;
     protected boolean clientAutocompleteFields = true;
 
-    protected List<AltTarget> altTargets = FastList.newInstance();
-    protected List<AutoFieldsService> autoFieldsServices = FastList.newInstance();
-    protected List<AutoFieldsEntity> autoFieldsEntities = FastList.newInstance();
-    protected List<String> lastOrderFields = FastList.newInstance();
-    protected List<SortField> sortOrderFields = FastList.newInstance();
-    protected List<AltRowStyle> altRowStyles = FastList.newInstance();
+    protected List<AltTarget> altTargets = new ArrayList<AltTarget>();
+    protected List<AutoFieldsService> autoFieldsServices = new ArrayList<AutoFieldsService>();
+    protected List<AutoFieldsEntity> autoFieldsEntities = new ArrayList<AutoFieldsEntity>();
+    protected List<String> lastOrderFields = new ArrayList<String>();
+    protected List<SortField> sortOrderFields = new ArrayList<SortField>();
+    protected List<AltRowStyle> altRowStyles = new ArrayList<AltRowStyle>();
 
     /** This List will contain one copy of each field for each field name in the order
      * they were encountered in the service, entity, or form definition; field definitions
@@ -147,25 +143,25 @@ public class ModelForm extends ModelWidget {
      * necessary to use the Map. The Map is used when loading the form definition to keep the
      * list clean and implement the override features for field definitions.
      */
-    protected List<ModelFormField> fieldList = FastList.newInstance();
+    protected List<ModelFormField> fieldList = new ArrayList<ModelFormField>();
 
     /** This Map is keyed with the field name and has a ModelFormField for the value.
      */
-    protected Map<String, ModelFormField> fieldMap = FastMap.newInstance();
+    protected Map<String, ModelFormField> fieldMap = new HashMap<String, ModelFormField>();
 
     /** Keeps track of conditional fields to help ensure that only one is rendered
      */
-    protected Set<String> useWhenFields = FastSet.newInstance();
+    protected Set<String> useWhenFields = new HashSet<String>();
 
     /** This is a list of FieldGroups in the order they were created.
      * Can also include Banner objects.
      */
-    protected List<FieldGroupBase> fieldGroupList = FastList.newInstance();
+    protected List<FieldGroupBase> fieldGroupList = new ArrayList<FieldGroupBase>();
 
     /** This Map is keyed with the field name and has a FieldGroup for the value.
      * Can also include Banner objects.
      */
-    protected Map<String, FieldGroupBase> fieldGroupMap = FastMap.newInstance();
+    protected Map<String, FieldGroupBase> fieldGroupMap = new HashMap<String, FieldGroupBase>();
 
     /** This field group will be the "catch-all" group for fields that are not
      *  included in an explicit field-group.
@@ -189,10 +185,10 @@ public class ModelForm extends ModelWidget {
     public static String DEFAULT_SORT_FIELD_ASC_STYLE = "sort-order-asc";
     public static String DEFAULT_SORT_FIELD_DESC_STYLE = "sort-order-desc";
 
-    protected List<ModelFormAction> actions;
-    protected List<ModelFormAction> rowActions;
+    protected List<ModelWidgetAction> actions;
+    protected List<ModelWidgetAction> rowActions;
     protected FlexibleStringExpander rowCountExdr;
-    protected List<ModelFormField> multiSubmitFields = FastList.newInstance();
+    protected List<ModelFormField> multiSubmitFields = new ArrayList<ModelFormField>();
     protected int rowCount = 0;
     private String sortFieldParameterName = "sortField";
 
@@ -204,28 +200,43 @@ public class ModelForm extends ModelWidget {
     protected List<UpdateArea> onSortColumnUpdateAreas;
 
     // ===== CONSTRUCTORS =====
-    /** Default Constructor */
-    public ModelForm() {}
 
     /** XML Constructor */
     public ModelForm(Element formElement, ModelReader entityModelReader, DispatchContext dispatchContext) {
         super(formElement);
-        this.entityModelReader = entityModelReader;
-        this.dispatchContext = dispatchContext;
         try {
-            initForm(formElement);
+            initForm(formElement, entityModelReader, dispatchContext);
         } catch (RuntimeException e) {
             Debug.logError(e, "Error parsing form [" + formElement.getAttribute("name") + "]: " + e.toString(), module);
             throw e;
         }
     }
 
-    public ModelForm(Element formElement) {
-        super(formElement);
-        initForm(formElement);
+    public String getTarget() {
+        return target.getOriginal();
     }
 
-    public void initForm(Element formElement) {
+    public List<AltTarget> getAltTargets() {
+        return altTargets;
+    }
+
+    public List<ModelWidgetAction> getActions() {
+        return actions;
+    }
+
+    public List<ModelWidgetAction> getRowActions() {
+        return rowActions;
+    }
+
+    public List<AutoFieldsEntity> getAutoFieldsEntities() {
+        return autoFieldsEntities;
+    }
+
+    public List<AutoFieldsService> getAutoFieldsServices() {
+        return autoFieldsServices;
+    }
+
+    public void initForm(Element formElement, ModelReader entityModelReader, DispatchContext dispatchContext) {
 
         setDefaultViewSize(UtilProperties.getPropertyValue("widget.properties", "widget.form.defaultViewSize"));
         // check if there is a parent form to inherit from
@@ -513,19 +524,19 @@ public class ModelForm extends ModelWidget {
         // auto-fields-service
         for (Element autoFieldsServiceElement: UtilXml.childElementList(formElement, "auto-fields-service")) {
             AutoFieldsService autoFieldsService = new AutoFieldsService(autoFieldsServiceElement);
-            this.addAutoFieldsFromService(autoFieldsService);
+            this.addAutoFieldsFromService(autoFieldsService, entityModelReader, dispatchContext);
         }
 
         // auto-fields-entity
         for (Element autoFieldsEntityElement: UtilXml.childElementList(formElement, "auto-fields-entity")) {
             AutoFieldsEntity autoFieldsEntity = new AutoFieldsEntity(autoFieldsEntityElement);
-            this.addAutoFieldsFromEntity(autoFieldsEntity);
+            this.addAutoFieldsFromEntity(autoFieldsEntity, entityModelReader);
         }
 
         // read in add field defs, add/override one by one using the fieldList and fieldMap
         String thisType = this.getType();
         for (Element fieldElement: UtilXml.childElementList(formElement, "field")) {
-            ModelFormField modelFormField = new ModelFormField(fieldElement, this);
+            ModelFormField modelFormField = new ModelFormField(fieldElement, this, entityModelReader, dispatchContext);
             ModelFormField.FieldInfo fieldInfo = modelFormField.getFieldInfo();
             if (thisType.equals("multi") && fieldInfo instanceof ModelFormField.SubmitField) {
                multiSubmitFields.add(modelFormField);
@@ -571,7 +582,7 @@ public class ModelForm extends ModelWidget {
 
         // reorder fields according to sort order
         if (sortOrderFields.size() > 0) {
-            List<ModelFormField> sortedFields = FastList.newInstance();
+            List<ModelFormField> sortedFields = new LinkedList<ModelFormField>();
             for (SortField sortField: this.sortOrderFields) {
                 String fieldName = sortField.getFieldName();
                 if (UtilValidate.isEmpty(fieldName)) {
@@ -599,7 +610,7 @@ public class ModelForm extends ModelWidget {
         }
 
         if (UtilValidate.isNotEmpty(this.lastOrderFields)) {
-            List<ModelFormField> lastedFields = FastList.newInstance();
+            List<ModelFormField> lastedFields = new LinkedList<ModelFormField>();
             for (String fieldName: this.lastOrderFields) {
                 if (UtilValidate.isEmpty(fieldName)) {
                     continue;
@@ -695,7 +706,7 @@ public class ModelForm extends ModelWidget {
 
     protected void addOnSubmitUpdateArea(UpdateArea updateArea) {
         if (onSubmitUpdateAreas == null) {
-            onSubmitUpdateAreas = FastList.newInstance();
+            onSubmitUpdateAreas = new ArrayList<UpdateArea>();
         }
         int index = onSubmitUpdateAreas.indexOf(updateArea);
         if (index != -1) {
@@ -707,7 +718,7 @@ public class ModelForm extends ModelWidget {
 
     protected void addOnPaginateUpdateArea(UpdateArea updateArea) {
         if (onPaginateUpdateAreas == null) {
-            onPaginateUpdateAreas = FastList.newInstance();
+            onPaginateUpdateAreas = new ArrayList<UpdateArea>();
         }
         int index = onPaginateUpdateAreas.indexOf(updateArea);
         if (index != -1) {
@@ -724,7 +735,7 @@ public class ModelForm extends ModelWidget {
 
     protected void addOnSortColumnUpdateArea(UpdateArea updateArea) {
         if (onSortColumnUpdateAreas == null) {
-            onSortColumnUpdateAreas = FastList.newInstance();
+            onSortColumnUpdateAreas = new ArrayList<UpdateArea>();
         }
         int index = onSortColumnUpdateAreas.indexOf(updateArea);
         if (index != -1) {
@@ -739,13 +750,13 @@ public class ModelForm extends ModelWidget {
         }
     }
 
-    public void addAutoFieldsFromService(AutoFieldsService autoFieldsService) {
+    private void addAutoFieldsFromService(AutoFieldsService autoFieldsService, ModelReader entityModelReader, DispatchContext dispatchContext) {
         autoFieldsServices.add(autoFieldsService);
 
         // read service def and auto-create fields
         ModelService modelService = null;
         try {
-            modelService = this.dispatchContext.getModelService(autoFieldsService.serviceName);
+            modelService = dispatchContext.getModelService(autoFieldsService.serviceName);
         } catch (GenericServiceException e) {
             String errmsg = "Error finding Service with name " + autoFieldsService.serviceName + " for auto-fields-service in a form widget";
             Debug.logError(e, errmsg, module);
@@ -761,7 +772,7 @@ public class ModelForm extends ModelWidget {
                 if (UtilValidate.isNotEmpty(modelParam.entityName) && UtilValidate.isNotEmpty(modelParam.fieldName)) {
                     ModelEntity modelEntity;
                     try {
-                        modelEntity = this.entityModelReader.getModelEntity(modelParam.entityName);
+                        modelEntity = entityModelReader.getModelEntity(modelParam.entityName);
                         if (modelEntity != null) {
                             ModelField modelField = modelEntity.getField(modelParam.fieldName);
                             if (modelField != null) {
@@ -788,7 +799,7 @@ public class ModelForm extends ModelWidget {
         }
     }
 
-    public ModelFormField addFieldFromServiceParam(ModelService modelService, ModelParam modelParam, String defaultFieldType, int defaultPosition) {
+    private ModelFormField addFieldFromServiceParam(ModelService modelService, ModelParam modelParam, String defaultFieldType, int defaultPosition) {
         // create field def from service param def
         ModelFormField newFormField = new ModelFormField(this);
         newFormField.setName(modelParam.name);
@@ -801,12 +812,12 @@ public class ModelForm extends ModelWidget {
         return this.addUpdateField(newFormField);
     }
 
-    public void addAutoFieldsFromEntity(AutoFieldsEntity autoFieldsEntity) {
+    private void addAutoFieldsFromEntity(AutoFieldsEntity autoFieldsEntity, ModelReader entityModelReader) {
         autoFieldsEntities.add(autoFieldsEntity);
         // read entity def and auto-create fields
         ModelEntity modelEntity = null;
         try {
-            modelEntity = this.entityModelReader.getModelEntity(autoFieldsEntity.entityName);
+            modelEntity = entityModelReader.getModelEntity(autoFieldsEntity.entityName);
         } catch (GenericEntityException e) {
             Debug.logError(e, module);
         }
@@ -828,7 +839,7 @@ public class ModelForm extends ModelWidget {
         }
     }
 
-    public ModelFormField addFieldFromEntityField(ModelEntity modelEntity, ModelField modelField, String defaultFieldType, int defaultPosition) {
+    private ModelFormField addFieldFromEntityField(ModelEntity modelEntity, ModelField modelField, String defaultFieldType, int defaultPosition) {
         // create field def from entity field def
         ModelFormField newFormField = new ModelFormField(this);
         newFormField.setName(modelField.getName());
@@ -840,7 +851,7 @@ public class ModelForm extends ModelWidget {
     }
 
     public void runFormActions(Map<String, Object> context) {
-        ModelFormAction.runSubActions(this.actions, context);
+        ModelWidgetAction.runSubActions(this.actions, context);
     }
 
     /**
@@ -916,7 +927,7 @@ public class ModelForm extends ModelWidget {
     }
 
     public void renderSingleFormString(Appendable writer, Map<String, Object> context, FormStringRenderer formStringRenderer, int positions) throws IOException {
-        List<ModelFormField> tempFieldList = FastList.newInstance();
+        List<ModelFormField> tempFieldList = new LinkedList<ModelFormField>();
         tempFieldList.addAll(this.fieldList);
 
         // Check to see if there is a field, same name and same use-when (could come from extended form)
@@ -1212,7 +1223,7 @@ public class ModelForm extends ModelWidget {
         // in this model: we can have more fields with the same name when use-when
         // conditions are used or when a form is extended or when the fields are
         // automatically retrieved by a service or entity definition.
-        List<ModelFormField> tempFieldList = FastList.newInstance();
+        List<ModelFormField> tempFieldList = new LinkedList<ModelFormField>();
         tempFieldList.addAll(this.fieldList);
         for (int j = 0; j < tempFieldList.size(); j++) {
             ModelFormField modelFormField = tempFieldList.get(j);
@@ -1230,13 +1241,13 @@ public class ModelForm extends ModelWidget {
         // We get a sorted (by position, ascending) set of lists;
         // each list contains all the fields with that position.
         Collection<List<ModelFormField>> fieldListsByPosition = this.getFieldListsByPosition(tempFieldList);
-        List<Map<String, List<ModelFormField>>> fieldRowsByPosition = FastList.newInstance(); // this list will contain maps, each one containing the list of fields for a position
+        List<Map<String, List<ModelFormField>>> fieldRowsByPosition = new LinkedList<Map<String, List<ModelFormField>>>(); // this list will contain maps, each one containing the list of fields for a position
         for (List<ModelFormField> mainFieldList: fieldListsByPosition) {
             int numOfColumns = 0;
 
-            List<ModelFormField> innerDisplayHyperlinkFieldsBegin = FastList.newInstance();
-            List<ModelFormField> innerFormFields = FastList.newInstance();
-            List<ModelFormField> innerDisplayHyperlinkFieldsEnd = FastList.newInstance();
+            List<ModelFormField> innerDisplayHyperlinkFieldsBegin = new LinkedList<ModelFormField>();
+            List<ModelFormField> innerFormFields = new LinkedList<ModelFormField>();
+            List<ModelFormField> innerDisplayHyperlinkFieldsEnd = new LinkedList<ModelFormField>();
 
             // render title for each field, except hidden & ignored, etc
 
@@ -1522,7 +1533,7 @@ public class ModelForm extends ModelWidget {
             int itemIndex = -1;
             Object item = null;
             context.put("wholeFormContext", context);
-            Map<String, Object> previousItem = FastMap.newInstance();
+            Map<String, Object> previousItem = new HashMap<String, Object>();
             while ((item = this.safeNext(iter)) != null) {
                 itemIndex++;
                 if (itemIndex >= highIndex) {
@@ -1556,10 +1567,10 @@ public class ModelForm extends ModelWidget {
                 this.resetBshInterpreter(localContext);
                 localContext.push();
                 localContext.put("previousItem", previousItem);
-                previousItem = FastMap.newInstance();
+                previousItem = new HashMap<String, Object>();
                 previousItem.putAll(itemMap);
 
-                ModelFormAction.runSubActions(this.rowActions, localContext);
+                ModelWidgetAction.runSubActions(this.rowActions, localContext);
 
                 localContext.put("itemIndex", Integer.valueOf(itemIndex - lowIndex));
                 if (UtilValidate.isNotEmpty(context.get("renderFormSeqNumber"))) {
@@ -1571,7 +1582,7 @@ public class ModelForm extends ModelWidget {
                 if (Debug.verboseOn()) Debug.logVerbose("In form got another row, context is: " + localContext, module);
 
                 // Check to see if there is a field, same name and same use-when (could come from extended form)
-                List<ModelFormField> tempFieldList = FastList.newInstance();
+                List<ModelFormField> tempFieldList = new LinkedList<ModelFormField>();
                 tempFieldList.addAll(this.fieldList);
                 for (int j = 0; j < tempFieldList.size(); j++) {
                     ModelFormField modelFormField = tempFieldList.get(j);
@@ -1608,9 +1619,9 @@ public class ModelForm extends ModelWidget {
                     // we have two phases: preprocessing and rendering
                     this.rowCount++;
 
-                    List<ModelFormField> innerDisplayHyperlinkFieldsBegin = FastList.newInstance();
-                    List<ModelFormField> innerFormFields = FastList.newInstance();
-                    List<ModelFormField> innerDisplayHyperlinkFieldsEnd = FastList.newInstance();
+                    List<ModelFormField> innerDisplayHyperlinkFieldsBegin = new LinkedList<ModelFormField>();
+                    List<ModelFormField> innerFormFields = new LinkedList<ModelFormField>();
+                    List<ModelFormField> innerDisplayHyperlinkFieldsEnd = new LinkedList<ModelFormField>();
 
                     // Preprocessing:
                     // all the form fields are evaluated and the ones that will
@@ -1737,7 +1748,7 @@ public class ModelForm extends ModelWidget {
         // render row formatting open
         formStringRenderer.renderFormatItemRowOpen(writer, localContext, this);
         Iterator<ModelFormField> innerDisplayHyperlinkFieldsBeginIter = innerDisplayHyperlinkFieldsBegin.iterator();
-        Map<String, Integer> fieldCount = FastMap.newInstance();
+        Map<String, Integer> fieldCount = new HashMap<String, Integer>();
         while(innerDisplayHyperlinkFieldsBeginIter.hasNext()){
             ModelFormField modelFormField = innerDisplayHyperlinkFieldsBeginIter.next();
             if(fieldCount.containsKey(modelFormField.getFieldName())){
@@ -1862,7 +1873,7 @@ public class ModelForm extends ModelWidget {
     }
 
     public List<ModelFormField> getHiddenIgnoredFields(Map<String, Object> context, Set<String> alreadyRendered, List<ModelFormField> fieldList, int position) {
-        List<ModelFormField> hiddenIgnoredFieldList = FastList.newInstance();
+        List<ModelFormField> hiddenIgnoredFieldList = new LinkedList<ModelFormField>();
         for (ModelFormField modelFormField: fieldList) {
             // with position == -1 then gets all the hidden fields
             if (position != -1 && modelFormField.getPosition() != position) {
@@ -1927,7 +1938,7 @@ public class ModelForm extends ModelWidget {
             Integer position = Integer.valueOf(modelFormField.getPosition());
             List<ModelFormField> fieldListByPosition = fieldsByPosition.get(position);
             if (fieldListByPosition == null) {
-                fieldListByPosition = FastList.newInstance();
+                fieldListByPosition = new LinkedList<ModelFormField>();
                 fieldsByPosition.put(position, fieldListByPosition);
             }
             fieldListByPosition.add(modelFormField);
@@ -1936,7 +1947,7 @@ public class ModelForm extends ModelWidget {
     }
 
     public List<ModelFormField> getFieldListByPosition(List<ModelFormField> modelFormFieldList, int position) {
-        List<ModelFormField> fieldListByPosition = FastList.newInstance();
+        List<ModelFormField> fieldListByPosition = new LinkedList<ModelFormField>();
         for (ModelFormField modelFormField: modelFormFieldList) {
             if (modelFormField.getPosition() == position) {
                 fieldListByPosition.add(modelFormField);
@@ -2061,11 +2072,6 @@ public class ModelForm extends ModelWidget {
         return lstNm;
     }
 
-    @Override
-    public String getName() {
-        return this.name;
-    }
-
     public String getCurrentFormName(Map<String, Object> context) {
         Integer itemIndex = (Integer) context.get("itemIndex");
         String formName = (String) context.get("formName");
@@ -2103,7 +2109,7 @@ public class ModelForm extends ModelWidget {
                     condTrue = boolVal.booleanValue();
                 } else {
                     throw new IllegalArgumentException(
-                        "Return value from target condition eval was not a Boolean: " + retVal.getClass().getName() + " [" + retVal + "] of form " + this.name);
+                        "Return value from target condition eval was not a Boolean: " + retVal.getClass().getName() + " [" + retVal + "] of form " + getName());
                 }
 
                 if (condTrue && !targetType.equals("inter-app")) {
@@ -2111,7 +2117,7 @@ public class ModelForm extends ModelWidget {
                 }
             }
         } catch (EvalError e) {
-            String errmsg = "Error evaluating BeanShell target conditions on form " + this.name;
+            String errmsg = "Error evaluating BeanShell target conditions on form " + getName();
             Debug.logError(e, errmsg, module);
             throw new IllegalArgumentException(errmsg);
         }
@@ -2163,7 +2169,7 @@ public class ModelForm extends ModelWidget {
 
     @Override
     public String getBoundaryCommentName() {
-        return formLocation + "#" + name;
+        return formLocation + "#" + getName();
     }
 
     public void resetBshInterpreter(Map<String, Object> context) {
@@ -2307,13 +2313,6 @@ public class ModelForm extends ModelWidget {
      */
     public void setListName(String string) {
         this.listName = string;
-    }
-
-    /**
-     * @param string
-     */
-    public void setName(String string) {
-        this.name = string;
     }
 
     /**
@@ -2812,7 +2811,7 @@ public class ModelForm extends ModelWidget {
     }
 
     public void setDefaultEntityNameOnUpdateAreas() {
-        List<UpdateArea> allUpdateAreas = FastList.newInstance();
+        List<UpdateArea> allUpdateAreas = new LinkedList<UpdateArea>();
         if (UtilValidate.isNotEmpty(this.onSubmitUpdateAreas)) allUpdateAreas.addAll(this.onSubmitUpdateAreas);
         if (UtilValidate.isNotEmpty(this.onPaginateUpdateAreas)) allUpdateAreas.addAll(this.onPaginateUpdateAreas);
         for (UpdateArea updateArea : allUpdateAreas) {
@@ -2823,7 +2822,7 @@ public class ModelForm extends ModelWidget {
     }
 
     public void setDefaultServiceNameOnUpdateAreas() {
-        List<UpdateArea> allUpdateAreas = FastList.newInstance();
+        List<UpdateArea> allUpdateAreas = new LinkedList<UpdateArea>();
         if (UtilValidate.isNotEmpty(this.onSubmitUpdateAreas)) allUpdateAreas.addAll(this.onSubmitUpdateAreas);
         if (UtilValidate.isNotEmpty(this.onPaginateUpdateAreas)) allUpdateAreas.addAll(this.onPaginateUpdateAreas);
         for (UpdateArea updateArea : allUpdateAreas) {
@@ -2861,11 +2860,11 @@ public class ModelForm extends ModelWidget {
                     }
                 } else {
                     throw new IllegalArgumentException(
-                        "Return value from style condition eval was not a Boolean: " + retVal.getClass().getName() + " [" + retVal + "] of form " + this.name);
+                        "Return value from style condition eval was not a Boolean: " + retVal.getClass().getName() + " [" + retVal + "] of form " + getName());
                 }
             }
         } catch (EvalError e) {
-            String errmsg = "Error evaluating BeanShell style conditions on form " + this.name;
+            String errmsg = "Error evaluating BeanShell style conditions on form " + getName();
             Debug.logError(e, errmsg, module);
             throw new IllegalArgumentException(errmsg);
         }
@@ -2901,7 +2900,7 @@ public class ModelForm extends ModelWidget {
         protected String defaultEntityName;
         protected WidgetWorker.AutoEntityParameters autoEntityParameters;
         protected WidgetWorker.AutoEntityParameters autoServiceParameters;
-        List<WidgetWorker.Parameter> parameterList = FastList.newInstance();
+        protected List<WidgetWorker.Parameter> parameterList = new ArrayList<WidgetWorker.Parameter>();
         /** XML constructor.
          * @param updateAreaElement The <code>&lt;on-xxx-update-area&gt;</code>
          * XML element.
@@ -2950,7 +2949,7 @@ public class ModelForm extends ModelWidget {
             return FlexibleStringExpander.expandString(areaTarget, context);
         }
         public Map<String, String> getParameterMap(Map<String, Object> context) {
-            Map<String, String> fullParameterMap = FastMap.newInstance();
+            Map<String, String> fullParameterMap = new HashMap<String, String>();
             if (autoServiceParameters != null) {
                 fullParameterMap.putAll(autoServiceParameters.getParametersMap(context, defaultServiceName));
             }
@@ -3174,163 +3173,8 @@ public class ModelForm extends ModelWidget {
         }
     }
 
-    public Set<String> getAllEntityNamesUsed() {
-        Set<String> allEntityNamesUsed = FastSet.newInstance();
-        for (AutoFieldsEntity autoFieldsEntity: this.autoFieldsEntities) {
-            allEntityNamesUsed.add(autoFieldsEntity.entityName);
-        }
-        if (this.actions != null) {
-            for (ModelFormAction modelFormAction: this.actions) {
-                if (modelFormAction instanceof ModelFormAction.EntityOne) {
-                    allEntityNamesUsed.add(((ModelFormAction.EntityOne)modelFormAction).finder.getEntityName());
-                } else if (modelFormAction instanceof ModelFormAction.EntityAnd) {
-                    allEntityNamesUsed.add(((ModelFormAction.EntityAnd)modelFormAction).finder.getEntityName());
-                } else if (modelFormAction instanceof ModelFormAction.EntityCondition) {
-                    allEntityNamesUsed.add(((ModelFormAction.EntityCondition)modelFormAction).finder.getEntityName());
-                }
-
-            }
-        }
-        if (this.rowActions != null) {
-            for (ModelFormAction modelFormAction: this.rowActions) {
-                if (modelFormAction instanceof ModelFormAction.EntityOne) {
-                    allEntityNamesUsed.add(((ModelFormAction.EntityOne)modelFormAction).finder.getEntityName());
-                } else if (modelFormAction instanceof ModelFormAction.EntityAnd) {
-                    allEntityNamesUsed.add(((ModelFormAction.EntityAnd)modelFormAction).finder.getEntityName());
-                } else if (modelFormAction instanceof ModelFormAction.EntityCondition) {
-                    allEntityNamesUsed.add(((ModelFormAction.EntityCondition)modelFormAction).finder.getEntityName());
-                }
-            }
-        }
-        for (ModelFormField modelFormField: this.fieldList) {
-            if (UtilValidate.isNotEmpty(modelFormField.getEntityName())) {
-                allEntityNamesUsed.add(modelFormField.getEntityName());
-            }
-            if (modelFormField.getFieldInfo() instanceof ModelFormField.DisplayEntityField) {
-                allEntityNamesUsed.add(((ModelFormField.DisplayEntityField)modelFormField.getFieldInfo()).entityName);
-            }
-            if (modelFormField.getFieldInfo() instanceof ModelFormField.FieldInfoWithOptions) {
-                for (ModelFormField.OptionSource optionSource: ((ModelFormField.FieldInfoWithOptions)modelFormField.getFieldInfo()).optionSources) {
-                    if (optionSource instanceof ModelFormField.EntityOptions) {
-                        allEntityNamesUsed.add(((ModelFormField.EntityOptions)optionSource).entityName);
-                    }
-                }
-            }
-        }
-        return allEntityNamesUsed;
-    }
-
-    public Set<String> getAllServiceNamesUsed() {
-        Set<String> allServiceNamesUsed = FastSet.newInstance();
-        for (AutoFieldsService autoFieldsService: this.autoFieldsServices) {
-            allServiceNamesUsed.add(autoFieldsService.serviceName);
-        }
-        if (this.actions != null) {
-            for (ModelFormAction modelFormAction: this.actions) {
-                try {
-                    ModelFormAction.Service service = (ModelFormAction.Service) modelFormAction;
-                    if (!service.serviceNameExdr.isEmpty()) {
-                        allServiceNamesUsed.add(service.serviceNameExdr.toString());
-                    }
-                } catch (ClassCastException e) {}
-            }
-        }
-        if (this.rowActions != null) {
-            for (ModelFormAction modelFormAction: this.rowActions) {
-                try {
-                    ModelFormAction.Service service = (ModelFormAction.Service) modelFormAction;
-                    if (!service.serviceNameExdr.isEmpty()) {
-                        allServiceNamesUsed.add(service.serviceNameExdr.toString());
-                    }
-                } catch (ClassCastException e) {}
-            }
-        }
-        for (ModelFormField modelFormField: this.fieldList) {
-            if (UtilValidate.isNotEmpty(modelFormField.getServiceName())) {
-                allServiceNamesUsed.add(modelFormField.getServiceName());
-            }
-        }
-        return allServiceNamesUsed;
-    }
-
-    public Set<String> getLinkedRequestsLocationAndUri() throws GeneralException {
-        Set<String> allRequestsUsed = FastSet.newInstance();
-
-        if (this.fieldList != null) {
-            for (ModelFormField modelFormField: this.fieldList) {
-                if (modelFormField.getFieldInfo() instanceof ModelFormField.HyperlinkField) {
-                    ModelFormField.HyperlinkField link = (ModelFormField.HyperlinkField) modelFormField.getFieldInfo();
-                    String target = link.getTarget(null);
-                    String urlMode = link.getTargetType();
-
-                    Set<String> controllerLocAndRequestSet = ConfigXMLReader.findControllerRequestUniqueForTargetType(target, urlMode);
-                    if (controllerLocAndRequestSet != null) {
-                        allRequestsUsed.addAll(controllerLocAndRequestSet);
-                    }
-                } else if (modelFormField.getFieldInfo() instanceof ModelFormField.DisplayEntityField) {
-                    ModelFormField.DisplayEntityField parentField = (ModelFormField.DisplayEntityField) modelFormField.getFieldInfo();
-                    if (parentField.subHyperlink != null) {
-                        Set<String> controllerLocAndRequestSet = ConfigXMLReader.findControllerRequestUniqueForTargetType(parentField.subHyperlink.getTarget(null), parentField.subHyperlink.getTargetType());
-                        if (controllerLocAndRequestSet != null) {
-                            allRequestsUsed.addAll(controllerLocAndRequestSet);
-                        }
-                    }
-                } else if (modelFormField.getFieldInfo() instanceof ModelFormField.TextField) {
-                    ModelFormField.TextField parentField = (ModelFormField.TextField) modelFormField.getFieldInfo();
-                    if (parentField.subHyperlink != null) {
-                        Set<String> controllerLocAndRequestSet = ConfigXMLReader.findControllerRequestUniqueForTargetType(parentField.subHyperlink.getTarget(null), parentField.subHyperlink.getTargetType());
-                        if (controllerLocAndRequestSet != null) {
-                            allRequestsUsed.addAll(controllerLocAndRequestSet);
-                        }
-                    }
-                } else if (modelFormField.getFieldInfo() instanceof ModelFormField.DropDownField) {
-                    ModelFormField.DropDownField parentField = (ModelFormField.DropDownField) modelFormField.getFieldInfo();
-                    if (parentField.subHyperlink != null) {
-                        Set<String> controllerLocAndRequestSet = ConfigXMLReader.findControllerRequestUniqueForTargetType(parentField.subHyperlink.getTarget(null), parentField.subHyperlink.getTargetType());
-                        if (controllerLocAndRequestSet != null) {
-                            allRequestsUsed.addAll(controllerLocAndRequestSet);
-                        }
-                    }
-                } else if (modelFormField.getFieldInfo() instanceof ModelFormField.ImageField) {
-                    ModelFormField.ImageField parentField = (ModelFormField.ImageField) modelFormField.getFieldInfo();
-                    if (parentField.subHyperlink != null) {
-                        Set<String> controllerLocAndRequestSet = ConfigXMLReader.findControllerRequestUniqueForTargetType(parentField.subHyperlink.getTarget(null), parentField.subHyperlink.getTargetType());
-                        if (controllerLocAndRequestSet != null) {
-                            allRequestsUsed.addAll(controllerLocAndRequestSet);
-                        }
-                    }
-                }
-            }
-        }
-        return allRequestsUsed;
-    }
-
-    public Set<String> getTargetedRequestsLocationAndUri() throws GeneralException {
-        Set<String> allRequestsUsed = FastSet.newInstance();
-
-        if (this.altTargets != null) {
-            for (AltTarget altTarget: this.altTargets) {
-                String target = altTarget.targetExdr.getOriginal();
-                String urlMode = "intra-app";
-
-                Set<String> controllerLocAndRequestSet = ConfigXMLReader.findControllerRequestUniqueForTargetType(target, urlMode);
-                if (controllerLocAndRequestSet != null) {
-                    allRequestsUsed.addAll(controllerLocAndRequestSet);
-                }
-            }
-        }
-
-        if (!this.target.isEmpty()) {
-            String target = this.target.getOriginal();
-            String urlMode = UtilValidate.isNotEmpty(this.targetType) ? this.targetType : "intra-app";
-            if (target.indexOf("${") < 0) {
-                Set<String> controllerLocAndRequestSet = ConfigXMLReader.findControllerRequestUniqueForTargetType(target, urlMode);
-                if (controllerLocAndRequestSet != null) {
-                    allRequestsUsed.addAll(controllerLocAndRequestSet);
-                }
-            }
-        }
-
-        return allRequestsUsed;
+    @Override
+    public void accept(ModelWidgetVisitor visitor) {
+        visitor.visit(this);
     }
 }

@@ -27,6 +27,7 @@ import javolution.util.FastMap;
 
 import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.entity.GenericValue;
+import org.ofbiz.entity.util.EntityQuery;
 import org.ofbiz.service.testtools.OFBizTestCase;
 
 public class SalesOrderTest extends OFBizTestCase {
@@ -39,7 +40,7 @@ public class SalesOrderTest extends OFBizTestCase {
 
     @Override
     protected void setUp() throws Exception {
-        userLogin = delegator.findOne("UserLogin", UtilMisc.toMap("userLoginId", "system"), false);
+        userLogin = EntityQuery.use(delegator).from("UserLogin").where("userLoginId", "system").queryOne();
     }
 
     @Override
@@ -114,8 +115,16 @@ public class SalesOrderTest extends OFBizTestCase {
         orderItem.set("unitPrice", new BigDecimal("38.4"));
         orderItem.set("unitListPrice", new BigDecimal("48.0"));
         orderItem.set("statusId", "ITEM_CREATED");
-
         orderItems.add(orderItem);
+        
+        orderItem = delegator.makeValue("OrderItem", UtilMisc.toMap("orderItemSeqId", "00002", "orderItemTypeId", "PRODUCT_ORDER_ITEM", "prodCatalogId", "DemoCatalog", "productId", "GZ-1006-1", "quantity", BigDecimal.ONE, "selectedAmount", BigDecimal.ZERO));
+        orderItem.set("isPromo", "N");
+        orderItem.set("isModifiedPrice", "N");
+        orderItem.set("unitPrice", new BigDecimal("1.99"));
+        orderItem.set("unitListPrice", new BigDecimal("5.99"));
+        orderItem.set("statusId", "ITEM_CREATED");
+        orderItems.add(orderItem);
+        
         ctx.put("orderItems", orderItems);
 
         List<GenericValue> orderTerms = FastList.newInstance();

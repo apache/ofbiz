@@ -20,6 +20,7 @@ package org.ofbiz.service;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
@@ -28,9 +29,6 @@ import java.util.TimeZone;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.transaction.Transaction;
-
-import javolution.util.FastList;
-import javolution.util.FastMap;
 
 import org.ofbiz.base.config.GenericConfigException;
 import org.ofbiz.base.util.Debug;
@@ -49,6 +47,7 @@ import org.ofbiz.entity.transaction.GenericTransactionException;
 import org.ofbiz.entity.transaction.TransactionUtil;
 import org.ofbiz.entity.util.EntityFindOptions;
 import org.ofbiz.entity.util.EntityListIterator;
+import org.ofbiz.entity.util.EntityQuery;
 import org.ofbiz.security.Security;
 import org.ofbiz.service.config.ServiceConfigUtil;
 
@@ -118,7 +117,7 @@ public class ServiceUtil {
     }
 
     public static Map<String, Object> returnProblem(String returnType, String errorMessage, List<? extends Object> errorMessageList, Map<String, ? extends Object> errorMessageMap, Map<String, ? extends Object> nestedResult) {
-        Map<String, Object> result = FastMap.newInstance();
+        Map<String, Object> result = new HashMap<String, Object>();
         result.put(ModelService.RESPONSE_MESSAGE, returnType);
         if (errorMessage != null) {
             result.put(ModelService.ERROR_MESSAGE, errorMessage);
@@ -129,7 +128,7 @@ public class ServiceUtil {
             errorList.addAll(errorMessageList);
         }
 
-        Map<String, Object> errorMap = FastMap.newInstance();
+        Map<String, Object> errorMap = new HashMap<String, Object>();
         if (errorMessageMap != null) {
             errorMap.putAll(errorMessageMap);
         }
@@ -177,7 +176,7 @@ public class ServiceUtil {
      *  and what type of message that is should be determined by the RESPONSE_MESSAGE (and there's another annoyance, it should be RESPONSE_CODE)
      */
     public static Map<String, Object> returnMessage(String code, String message) {
-        Map<String, Object> result = FastMap.newInstance();
+        Map<String, Object> result = new HashMap<String, Object>();
         if (code != null) result.put(ModelService.RESPONSE_MESSAGE, code);
         if (message != null) result.put(ModelService.SUCCESS_MESSAGE, message);
         return result;
@@ -478,7 +477,7 @@ public class ServiceUtil {
             boolean beganTx3 = false;
             GenericValue runtimeData = null;
             EntityListIterator runTimeDataIt = null;
-            List<GenericValue> runtimeDataToDelete = FastList.newInstance();
+            List<GenericValue> runtimeDataToDelete = new LinkedList<GenericValue>();
             long jobsandBoxCount = 0;
             try {
                 // begin this transaction
@@ -624,7 +623,7 @@ public class ServiceUtil {
         Delegator delegator = dctx.getDelegator();
         if (UtilValidate.isNotEmpty(runAsUser)) {
             try {
-                GenericValue runAs = delegator.findOne("UserLogin", true, "userLoginId", runAsUser);
+                GenericValue runAs = EntityQuery.use(delegator).from("UserLogin").where("userLoginId", runAsUser).cache().queryOne();
                 if (runAs != null) {
                     userLogin = runAs;
                 }
@@ -710,7 +709,7 @@ public class ServiceUtil {
      */
     public static Map<String, Object> setServiceFields(LocalDispatcher dispatcher, String serviceName, Map<String, Object> fromMap, GenericValue userLogin,
             TimeZone timeZone, Locale locale) throws GeneralServiceException {
-        Map<String, Object> outMap = FastMap.newInstance();
+        Map<String, Object> outMap = new HashMap<String, Object>();
 
         ModelService modelService = null;
         try {

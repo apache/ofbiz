@@ -20,14 +20,13 @@ package org.ofbiz.widget.screen;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.xml.parsers.ParserConfigurationException;
-
-import javolution.util.FastMap;
 
 import org.ofbiz.base.location.FlexibleLocation;
 import org.ofbiz.base.util.Debug;
@@ -162,7 +161,7 @@ public class ScreenFactory {
     }
 
     public static Map<String, ModelScreen> readScreenDocument(Document screenFileDoc, String sourceLocation) {
-        Map<String, ModelScreen> modelScreenMap = FastMap.newInstance();
+        Map<String, ModelScreen> modelScreenMap = new HashMap<String, ModelScreen>();
         if (screenFileDoc != null) {
             // read document and construct ModelScreen for each screen element
             Element rootElement = screenFileDoc.getDocumentElement();
@@ -202,7 +201,7 @@ public class ScreenFactory {
                 throw new RuntimeException(errMsg);
             }
         } else {
-            modelScreen = parentWidget.getModelScreen().modelScreenMap.get(name);
+            modelScreen = parentWidget.getModelScreen().getModelScreenMap().get(name);
             if (modelScreen == null) {
                 throw new IllegalArgumentException("Could not find screen with name [" + name + "] in the same file as the screen with name [" + parentWidget.getModelScreen().getName() + "]");
             }

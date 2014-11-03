@@ -31,7 +31,9 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -41,9 +43,6 @@ import java.util.TimeZone;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
-
-import javolution.util.FastList;
-import javolution.util.FastMap;
 
 import org.ofbiz.base.location.FlexibleLocation;
 import org.ofbiz.base.util.Debug;
@@ -65,6 +64,7 @@ import freemarker.template.SimpleScalar;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
 import freemarker.template.TemplateExceptionHandler;
+import freemarker.template.TemplateHashModel;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
 import freemarker.template.Version;
@@ -91,7 +91,13 @@ public class FreeMarkerWorker {
         Configuration newConfig = new Configuration(version);
 
         newConfig.setObjectWrapper(wrapper);
-        newConfig.setSharedVariable("Static", wrapper.getStaticModels());
+        TemplateHashModel staticModels = wrapper.getStaticModels();
+        newConfig.setSharedVariable("Static", staticModels);
+        try {
+            newConfig.setSharedVariable("EntityQuery", staticModels.get("org.ofbiz.entity.util.EntityQuery"));
+        } catch (TemplateModelException e) {
+            Debug.logError(e, module);
+        }
         newConfig.setLocalizedLookup(false);
         newConfig.setSharedVariable("StringUtil", new BeanModel(StringUtil.INSTANCE, wrapper));
         newConfig.setTemplateLoader(new FlexibleTemplateLoader());
@@ -467,7 +473,7 @@ public class FreeMarkerWorker {
     public static void checkForLoop(String path, Map<String, Object> ctx) throws IOException {
         List<String> templateList = UtilGenerics.checkList(ctx.get("templateList"));
         if (templateList == null) {
-            templateList = FastList.newInstance();
+            templateList = new LinkedList<String>();
         } else {
             if (templateList.contains(path)) {
                 throw new IOException(path + " has already been visited.");
@@ -478,7 +484,7 @@ public class FreeMarkerWorker {
     }
 
     public static Map<String, Object> createEnvironmentMap(Environment env) {
-        Map<String, Object> templateRoot = FastMap.newInstance();
+        Map<String, Object> templateRoot = new HashMap<String, Object>();
         Set<String> varNames = null;
         try {
             varNames = UtilGenerics.checkSet(env.getKnownVariableNames());
@@ -510,7 +516,7 @@ public class FreeMarkerWorker {
     }
 
     public static Map<String, Object> saveValues(Map<String, Object> context, String [] saveKeyNames) {
-        Map<String, Object> saveMap = FastMap.newInstance();
+        Map<String, Object> saveMap = new HashMap<String, Object>();
         for (String key: saveKeyNames) {
             Object o = context.get(key);
             if (o instanceof Map<?, ?>) {

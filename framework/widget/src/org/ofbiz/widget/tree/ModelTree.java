@@ -20,17 +20,17 @@ package org.ofbiz.widget.tree;
 
 import java.io.IOException;
 import java.io.StringWriter;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.xml.parsers.ParserConfigurationException;
-
-import javolution.util.FastList;
-import javolution.util.FastMap;
 
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.GeneralException;
@@ -43,11 +43,6 @@ import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.base.util.UtilXml;
 import org.ofbiz.base.util.collections.MapStack;
 import org.ofbiz.base.util.string.FlexibleStringExpander;
-import org.ofbiz.widget.WidgetWorker;
-import org.ofbiz.widget.screen.ModelScreen;
-import org.ofbiz.widget.screen.ScreenFactory;
-import org.ofbiz.widget.screen.ScreenStringRenderer;
-import org.ofbiz.widget.screen.ScreenRenderException;
 import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
@@ -56,6 +51,13 @@ import org.ofbiz.entity.model.ModelField;
 import org.ofbiz.entity.util.EntityListIterator;
 import org.ofbiz.service.LocalDispatcher;
 import org.ofbiz.widget.ModelWidget;
+import org.ofbiz.widget.ModelWidgetAction;
+import org.ofbiz.widget.ModelWidgetVisitor;
+import org.ofbiz.widget.WidgetWorker;
+import org.ofbiz.widget.screen.ModelScreen;
+import org.ofbiz.widget.screen.ScreenFactory;
+import org.ofbiz.widget.screen.ScreenRenderException;
+import org.ofbiz.widget.screen.ScreenStringRenderer;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
 
@@ -67,27 +69,24 @@ public class ModelTree extends ModelWidget {
 
     public static final String module = ModelTree.class.getName();
 
-    protected String treeLocation;
-    protected String rootNodeName;
+    protected String defaultEntityName;
+    protected String defaultPkName;
     protected String defaultRenderStyle;
     protected FlexibleStringExpander defaultWrapStyleExdr;
-    protected List<ModelNode> nodeList = FastList.newInstance();
-    protected Map<String, ModelNode> nodeMap = FastMap.newInstance();
     protected Delegator delegator;
     protected LocalDispatcher dispatcher;
     protected FlexibleStringExpander expandCollapseRequestExdr;
-    protected FlexibleStringExpander trailNameExdr;
+    protected boolean forceChildCheck;
+    protected List<ModelNode> nodeList = new ArrayList<ModelNode>();
+    protected Map<String, ModelNode> nodeMap = new HashMap<String, ModelNode>();
     protected int openDepth;
     protected int postTrailOpenDepth;
-    protected String defaultEntityName;
-    protected String defaultPkName;
-    protected boolean forceChildCheck;
+    protected String rootNodeName;
+    protected FlexibleStringExpander trailNameExdr;
+    protected String treeLocation;
 
 // ===== CONSTRUCTORS =====
     /** Default Constructor */
-
-    /** XML Constructor */
-    public ModelTree() {}
 
     public ModelTree(Element treeElement, Delegator delegator, LocalDispatcher dispatcher) {
         super(treeElement);
@@ -126,9 +125,8 @@ public class ModelTree extends ModelWidget {
         }
 
         if (nodeList.size() == 0) {
-            throw new IllegalArgumentException("No node elements found for the tree definition with name: " + this.name);
+            throw new IllegalArgumentException("No node elements found for the tree definition with name: " + getName());
         }
-
     }
 
     public void setDefaultEntityName(String name) {
@@ -205,7 +203,7 @@ public class ModelTree extends ModelWidget {
 
     @Override
     public String getBoundaryCommentName() {
-        return treeLocation + "#" + name;
+        return treeLocation + "#" + getName();
     }
 
     public void setTreeLocation(String treeLocation) {
@@ -227,6 +225,7 @@ public class ModelTree extends ModelWidget {
      *   different tree elements; implementing your own makes it possible to
      *   use the same tree definitions for many types of tree UIs
      */
+    @SuppressWarnings("rawtypes")
     public void renderTreeString(StringBuffer buf, Map<String, Object> context, TreeStringRenderer treeStringRenderer) throws GeneralException {
         Map<String, Object> parameters = UtilGenerics.checkMap(context.get("parameters"));
 
@@ -246,16 +245,16 @@ public class ModelTree extends ModelWidget {
             context.put("rootEntityId", trail.get(0));
             context.put(defaultPkName, trail.get(0));
         } else {
-            trail = FastList.newInstance();
+            trail = new LinkedList<String>();
         }
         context.put("targetNodeTrail", trail);
-        context.put("currentNodeTrail", FastList.newInstance());
+        context.put("currentNodeTrail", new LinkedList());
         StringWriter writer = new StringWriter();
         try {
             node.renderNodeString(writer, context, treeStringRenderer, 0);
             buf.append(writer.toString());
         } catch (IOException e2) {
-            String errMsg = "Error rendering included label with name [" + name + "] : " + e2.toString();
+            String errMsg = "Error rendering included label with name [" + getName() + "] : " + e2.toString();
             Debug.logError(e2, errMsg, module);
             throw new RuntimeException(errMsg);
         }
@@ -274,31 +273,29 @@ public class ModelTree extends ModelWidget {
     }
 
 
-    public static class ModelNode {
+    public static class ModelNode extends ModelWidget {
 
-        protected FlexibleStringExpander screenNameExdr;
-        protected FlexibleStringExpander screenLocationExdr;
-        protected String shareScope;
+        private final List<ModelWidgetAction> actions;
+        protected ModelTreeCondition condition;
+        protected String entityName;
+        protected String entryName;
+        protected String expandCollapseStyle;
+        protected Image image;
         protected Label label;
         protected Link link;
-        protected Image image;
-        protected List<ModelSubNode> subNodeList = FastList.newInstance();
-        protected List<ModelTreeAction> actions = FastList.newInstance();
-        protected String name;
         protected ModelTree modelTree;
-        protected List<Object []> subNodeValues;
-        protected String expandCollapseStyle;
-        protected FlexibleStringExpander wrapStyleExdr;
-        protected ModelTreeCondition condition;
-        protected String renderStyle;
-        protected String entryName;
-        protected String entityName;
+        protected String name;
         protected String pkName;
-
-        public ModelNode() {}
+        protected String renderStyle;
+        protected FlexibleStringExpander screenLocationExdr;
+        protected FlexibleStringExpander screenNameExdr;
+        protected String shareScope;
+        protected List<ModelSubNode> subNodeList = new ArrayList<ModelSubNode>();
+        protected List<Object []> subNodeValues;
+        protected FlexibleStringExpander wrapStyleExdr;
 
         public ModelNode(Element nodeElement, ModelTree modelTree) {
-
+            super(nodeElement);
             this.modelTree = modelTree;
             this.name = nodeElement.getAttribute("name");
             this.expandCollapseStyle = nodeElement.getAttribute("expand-collapse-style");
@@ -308,21 +305,25 @@ public class ModelTree extends ModelWidget {
             setEntityName(nodeElement.getAttribute("entity-name"));
             if (this.pkName == null || nodeElement.hasAttribute("join-field-name"))
                 this.pkName = nodeElement.getAttribute("join-field-name");
-
+            ArrayList<ModelWidgetAction> actions = new ArrayList<ModelWidgetAction>();
+            Element actionsElement = UtilXml.firstChildElement(nodeElement, "actions");
+            if (actionsElement != null) {
+                actions.addAll(ModelTreeAction.readNodeActions(this, actionsElement));
+            }
             Element actionElement = UtilXml.firstChildElement(nodeElement, "entity-one");
             if (actionElement != null) {
-               actions.add(new ModelTreeAction.EntityOne(this, actionElement));
+               actions.add(new ModelWidgetAction.EntityOne(this, actionElement));
             }
-
             actionElement = UtilXml.firstChildElement(nodeElement, "service");
             if (actionElement != null) {
                 actions.add(new ModelTreeAction.Service(this, actionElement));
             }
-
             actionElement = UtilXml.firstChildElement(nodeElement, "script");
             if (actionElement != null) {
                 actions.add(new ModelTreeAction.Script(this, actionElement));
             }
+            actions.trimToSize();
+            this.actions = Collections.unmodifiableList(actions);
 
             Element screenElement = UtilXml.firstChildElement(nodeElement, "include-screen");
             if (screenElement != null) {
@@ -545,13 +546,13 @@ public class ModelTree extends ModelWidget {
         }
 
         public void getChildren(Map<String, Object> context) {
-             this.subNodeValues = FastList.newInstance();
+             this.subNodeValues = new ArrayList<Object []>();
              for (ModelSubNode subNode: subNodeList) {
                  String nodeName = subNode.getNodeName(context);
                  ModelNode node = modelTree.nodeMap.get(nodeName);
-                 List<ModelTreeAction> subNodeActions = subNode.getActions();
+                 List<ModelWidgetAction> subNodeActions = subNode.getActions();
                  //if (Debug.infoOn()) Debug.logInfo(" context.currentValue:" + context.get("currentValue"), module);
-                 ModelTreeAction.runSubActions(subNodeActions, context);
+                 ModelWidgetAction.runSubActions(subNodeActions, context);
                  // List dataFound = (List)context.get("dataFound");
                  Iterator<? extends Map<String, ? extends Object>> dataIter =  subNode.getListIterator();
                  if (dataIter instanceof EntityListIterator) {
@@ -695,40 +696,40 @@ public class ModelTree extends ModelWidget {
             this.pkName = pkName;
         }
 
-        public static class ModelSubNode {
+        public static class ModelSubNode extends ModelWidget {
 
+            private final List<ModelWidgetAction> actions;
             protected ModelNode rootNode;
             protected FlexibleStringExpander nodeNameExdr;
-            protected List<ModelTreeAction> actions = FastList.newInstance();
             protected ListIterator<? extends Map<String, ? extends Object>> listIterator;
 
-            public ModelSubNode() {}
-
-            public ModelSubNode(Element nodeElement, ModelNode modelNode) {
-
+            public ModelSubNode(Element subNodeElement, ModelNode modelNode) {
+                super(subNodeElement);
                 this.rootNode = modelNode;
-                this.nodeNameExdr = FlexibleStringExpander.getInstance(nodeElement.getAttribute("node-name"));
-
-                Element actionElement = UtilXml.firstChildElement(nodeElement, "entity-and");
+                this.nodeNameExdr = FlexibleStringExpander.getInstance(subNodeElement.getAttribute("node-name"));
+                ArrayList<ModelWidgetAction> actions = new ArrayList<ModelWidgetAction>();
+                Element actionsElement = UtilXml.firstChildElement(subNodeElement, "actions");
+                if (actionsElement != null) {
+                    actions.addAll(ModelTreeAction.readNodeActions(this, actionsElement));
+                }
+                Element actionElement = UtilXml.firstChildElement(subNodeElement, "entity-and");
                 if (actionElement != null) {
                    actions.add(new ModelTreeAction.EntityAnd(this, actionElement));
                 }
-
-                actionElement = UtilXml.firstChildElement(nodeElement, "service");
+                actionElement = UtilXml.firstChildElement(subNodeElement, "service");
                 if (actionElement != null) {
                     actions.add(new ModelTreeAction.Service(this, actionElement));
                 }
-
-                actionElement = UtilXml.firstChildElement(nodeElement, "entity-condition");
+                actionElement = UtilXml.firstChildElement(subNodeElement, "entity-condition");
                 if (actionElement != null) {
                     actions.add(new ModelTreeAction.EntityCondition(this, actionElement));
                 }
-
-                actionElement = UtilXml.firstChildElement(nodeElement, "script");
+                actionElement = UtilXml.firstChildElement(subNodeElement, "script");
                 if (actionElement != null) {
                     actions.add(new ModelTreeAction.Script(this, actionElement));
                 }
-
+                actions.trimToSize();
+                this.actions = Collections.unmodifiableList(actions);
             }
 
             public ModelTree.ModelNode getNode() {
@@ -739,7 +740,7 @@ public class ModelTree extends ModelWidget {
                 return this.nodeNameExdr.expandString(context);
             }
 
-            public List<ModelTreeAction> getActions() {
+            public List<ModelWidgetAction> getActions() {
                 return actions;
             }
 
@@ -749,6 +750,11 @@ public class ModelTree extends ModelWidget {
 
             public ListIterator<? extends Map<String, ? extends Object>> getListIterator() {
                 return listIterator;
+            }
+
+            @Override
+            public void accept(ModelWidgetVisitor visitor) {
+                visitor.visit(this);
             }
         }
 
@@ -813,7 +819,7 @@ public class ModelTree extends ModelWidget {
             protected boolean secure = false;
             protected boolean encode = false;
             protected String linkType;
-            protected List<WidgetWorker.Parameter> parameterList = FastList.newInstance();
+            protected List<WidgetWorker.Parameter> parameterList = new ArrayList<WidgetWorker.Parameter>();
 
             public Link() {
                 setText(null);
@@ -936,7 +942,7 @@ public class ModelTree extends ModelWidget {
             }
 
             public Map<String, String> getParameterMap(Map<String, Object> context) {
-                Map<String, String> fullParameterMap = FastMap.newInstance();
+                Map<String, String> fullParameterMap = new HashMap<String, String>();
 
                 /* leaving this here... may want to add it at some point like the hyperlink element:
                 Map<String, String> addlParamMap = this.parametersMapAcsr.get(context);
@@ -1108,7 +1114,15 @@ public class ModelTree extends ModelWidget {
                 }
             }
         }
+
+        @Override
+        public void accept(ModelWidgetVisitor visitor) {
+            visitor.visit(this);
+        }
+    }
+
+    @Override
+    public void accept(ModelWidgetVisitor visitor) {
+        visitor.visit(this);
     }
 }
-
-

@@ -18,15 +18,9 @@
  *******************************************************************************/
 package org.ofbiz.widget.screen;
 
-import java.util.Collection;
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
-
-import javolution.util.FastSet;
 
 import org.ofbiz.base.util.Debug;
-import org.ofbiz.base.util.GeneralException;
 import org.ofbiz.base.util.UtilGenerics;
 import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.base.util.UtilXml;
@@ -36,9 +30,8 @@ import org.ofbiz.entity.GenericEntity;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.transaction.TransactionUtil;
 import org.ofbiz.service.LocalDispatcher;
-import org.ofbiz.webapp.control.ConfigXMLReader;
 import org.ofbiz.widget.ModelWidget;
-import org.ofbiz.widget.ModelWidgetAction;
+import org.ofbiz.widget.ModelWidgetVisitor;
 import org.w3c.dom.Element;
 
 /**
@@ -49,17 +42,12 @@ public class ModelScreen extends ModelWidget {
 
     public static final String module = ModelScreen.class.getName();
 
-    protected String sourceLocation;
-    protected FlexibleStringExpander transactionTimeoutExdr;
-    protected Map<String, ModelScreen> modelScreenMap;
-    protected boolean useTransaction;
-    protected boolean useCache;
-
-    protected ModelScreenWidget.Section section;
-
-    // ===== CONSTRUCTORS =====
-    /** Default Constructor */
-    protected ModelScreen() {}
+    private final String sourceLocation;
+    private final FlexibleStringExpander transactionTimeoutExdr;
+    private final Map<String, ModelScreen> modelScreenMap;
+    private final boolean useTransaction;
+    private final boolean useCache;
+    private final ModelScreenWidget.Section section;
 
     /** XML Constructor */
     public ModelScreen(Element screenElement, Map<String, ModelScreen> modelScreenMap, String sourceLocation) {
@@ -73,259 +61,39 @@ public class ModelScreen extends ModelWidget {
         // read in the section, which will read all sub-widgets too
         Element sectionElement = UtilXml.firstChildElement(screenElement, "section");
         if (sectionElement == null) {
-            throw new IllegalArgumentException("No section found for the screen definition with name: " + this.name);
+            throw new IllegalArgumentException("No section found for the screen definition with name: " + getName());
         }
-        this.section = new ModelScreenWidget.Section(this, sectionElement);
-        this.section.isMainSection = true;
+        this.section = new ModelScreenWidget.Section(this, sectionElement, true);
+    }
+
+    @Override
+    public void accept(ModelWidgetVisitor visitor) {
+        visitor.visit(this);
+    }
+
+    public String getTransactionTimeout() {
+        return transactionTimeoutExdr.getOriginal();
+    }
+
+    public Map<String, ModelScreen> getModelScreenMap() {
+        return modelScreenMap;
+    }
+
+    public boolean getUseTransaction() {
+        return useTransaction;
+    }
+
+    public boolean getUseCache() {
+        return useCache;
+    }
+
+    public ModelScreenWidget.Section getSection() {
+        return section;
     }
 
     public String getSourceLocation() {
         return sourceLocation;
     }
-
-    public Set<String> getAllServiceNamesUsed() {
-        Set<String> allServiceNamesUsed = FastSet.newInstance();
-        findServiceNamesUsedInWidget(this.section, allServiceNamesUsed);
-        return allServiceNamesUsed;
-    }
-
-    protected static void findServiceNamesUsedInWidget(ModelScreenWidget currentWidget, Set<String> allServiceNamesUsed) {
-        if (currentWidget instanceof ModelScreenWidget.Section) {
-            List<ModelWidgetAction> actions = ((ModelScreenWidget.Section)currentWidget).actions;
-            List<ModelScreenWidget> subWidgets = ((ModelScreenWidget.Section)currentWidget).subWidgets;
-            List<ModelScreenWidget> failWidgets = ((ModelScreenWidget.Section)currentWidget).failWidgets;
-            if (actions != null) {
-                for (ModelWidgetAction screenOperation: actions) {
-                    if (screenOperation instanceof ModelWidgetAction.Service) {
-                        String serviceName = ((ModelWidgetAction.Service) screenOperation).getServiceNameExdr().getOriginal();
-                        if (UtilValidate.isNotEmpty(serviceName)) allServiceNamesUsed.add(serviceName);
-                    }
-                }
-            }
-            if (subWidgets != null) {
-                for (ModelScreenWidget widget: subWidgets) {
-                    findServiceNamesUsedInWidget(widget, allServiceNamesUsed);
-                }
-            }
-            if (failWidgets != null) {
-                for (ModelScreenWidget widget: failWidgets) {
-                    findServiceNamesUsedInWidget(widget, allServiceNamesUsed);
-                }
-            }
-        } else if (currentWidget instanceof ModelScreenWidget.DecoratorSection) {
-            ModelScreenWidget.DecoratorSection decoratorSection = (ModelScreenWidget.DecoratorSection)currentWidget;
-            if (decoratorSection.subWidgets != null) {
-                for (ModelScreenWidget widget: decoratorSection.subWidgets) {
-                    findServiceNamesUsedInWidget(widget, allServiceNamesUsed);
-                }
-            }
-        } else if (currentWidget instanceof ModelScreenWidget.DecoratorScreen) {
-            ModelScreenWidget.DecoratorScreen decoratorScreen = (ModelScreenWidget.DecoratorScreen)currentWidget;
-            if (decoratorScreen.sectionMap != null) {
-                Collection<ModelScreenWidget.DecoratorSection> sections = decoratorScreen.sectionMap.values();
-                for (ModelScreenWidget section: sections) {
-                    findServiceNamesUsedInWidget(section, allServiceNamesUsed);
-                }
-            }
-        } else if (currentWidget instanceof ModelScreenWidget.Container) {
-            ModelScreenWidget.Container container = (ModelScreenWidget.Container)currentWidget;
-            if (container.subWidgets != null) {
-                for (ModelScreenWidget widget: container.subWidgets) {
-                    findServiceNamesUsedInWidget(widget, allServiceNamesUsed);
-                }
-            }
-        } else if (currentWidget instanceof ModelScreenWidget.Screenlet) {
-            ModelScreenWidget.Screenlet screenlet = (ModelScreenWidget.Screenlet)currentWidget;
-            if (screenlet.subWidgets != null) {
-                for (ModelScreenWidget widget: screenlet.subWidgets) {
-                    findServiceNamesUsedInWidget(widget, allServiceNamesUsed);
-                }
-            }
-        }
-    }
-    public Set<String> getAllEntityNamesUsed() {
-        Set<String> allEntityNamesUsed = FastSet.newInstance();
-        findEntityNamesUsedInWidget(this.section, allEntityNamesUsed);
-        return allEntityNamesUsed;
-    }
-    protected static void findEntityNamesUsedInWidget(ModelScreenWidget currentWidget, Set<String> allEntityNamesUsed) {
-        if (currentWidget instanceof ModelScreenWidget.Section) {
-            List<ModelWidgetAction> actions = ((ModelScreenWidget.Section)currentWidget).actions;
-            List<ModelScreenWidget> subWidgets = ((ModelScreenWidget.Section)currentWidget).subWidgets;
-            List<ModelScreenWidget> failWidgets = ((ModelScreenWidget.Section)currentWidget).failWidgets;
-            if (actions != null) {
-                for (ModelWidgetAction screenOperation: actions) {
-                    if (screenOperation instanceof ModelWidgetAction.EntityOne) {
-                        String entName = ((ModelWidgetAction.EntityOne) screenOperation).getFinder().getEntityName();
-                        if (UtilValidate.isNotEmpty(entName)) allEntityNamesUsed.add(entName);
-                    } else if (screenOperation instanceof ModelWidgetAction.EntityAnd) {
-                        String entName = ((ModelWidgetAction.EntityAnd) screenOperation).getFinder().getEntityName();
-                        if (UtilValidate.isNotEmpty(entName)) allEntityNamesUsed.add(entName);
-                    } else if (screenOperation instanceof ModelWidgetAction.EntityCondition) {
-                        String entName = ((ModelWidgetAction.EntityCondition) screenOperation).getFinder().getEntityName();
-                        if (UtilValidate.isNotEmpty(entName)) allEntityNamesUsed.add(entName);
-                    } else if (screenOperation instanceof ModelWidgetAction.GetRelated) {
-                        String relationName = ((ModelWidgetAction.GetRelated) screenOperation).getRelationName();
-                        if (UtilValidate.isNotEmpty(relationName)) allEntityNamesUsed.add(relationName);
-                    } else if (screenOperation instanceof ModelWidgetAction.GetRelatedOne) {
-                        String relationName = ((ModelWidgetAction.GetRelatedOne) screenOperation).getRelationName();
-                        if (UtilValidate.isNotEmpty(relationName)) allEntityNamesUsed.add(relationName);
-                    }
-                }
-            }
-            if (subWidgets != null) {
-                for (ModelScreenWidget widget: subWidgets) {
-                    findEntityNamesUsedInWidget(widget, allEntityNamesUsed);
-                }
-            }
-            if (failWidgets != null) {
-                for (ModelScreenWidget widget: failWidgets) {
-                    findEntityNamesUsedInWidget(widget, allEntityNamesUsed);
-                }
-            }
-        } else if (currentWidget instanceof ModelScreenWidget.DecoratorSection) {
-            ModelScreenWidget.DecoratorSection decoratorSection = (ModelScreenWidget.DecoratorSection)currentWidget;
-            if (decoratorSection.subWidgets != null) {
-                for (ModelScreenWidget widget: decoratorSection.subWidgets) {
-                    findEntityNamesUsedInWidget(widget, allEntityNamesUsed);
-                }
-            }
-        } else if (currentWidget instanceof ModelScreenWidget.DecoratorScreen) {
-            ModelScreenWidget.DecoratorScreen decoratorScreen = (ModelScreenWidget.DecoratorScreen)currentWidget;
-            if (decoratorScreen.sectionMap != null) {
-                Collection<ModelScreenWidget.DecoratorSection> sections = decoratorScreen.sectionMap.values();
-                for (ModelScreenWidget section: sections) {
-                    findEntityNamesUsedInWidget(section, allEntityNamesUsed);
-                }
-            }
-        } else if (currentWidget instanceof ModelScreenWidget.Container) {
-            ModelScreenWidget.Container container = (ModelScreenWidget.Container)currentWidget;
-            if (container.subWidgets != null) {
-                for (ModelScreenWidget widget: container.subWidgets) {
-                    findEntityNamesUsedInWidget(widget, allEntityNamesUsed);
-                }
-            }
-        } else if (currentWidget instanceof ModelScreenWidget.Screenlet) {
-            ModelScreenWidget.Screenlet screenlet = (ModelScreenWidget.Screenlet)currentWidget;
-            if (screenlet.subWidgets != null) {
-                for (ModelScreenWidget widget: screenlet.subWidgets) {
-                    findEntityNamesUsedInWidget(widget, allEntityNamesUsed);
-                }
-            }
-        }
-    }
-    public Set<String> getAllFormNamesIncluded() {
-        Set<String> allFormNamesIncluded = FastSet.newInstance();
-        findFormNamesIncludedInWidget(this.section, allFormNamesIncluded);
-        return allFormNamesIncluded;
-    }
-    protected static void findFormNamesIncludedInWidget(ModelScreenWidget currentWidget, Set<String> allFormNamesIncluded) {
-        if (currentWidget instanceof ModelScreenWidget.Form) {
-            ModelScreenWidget.Form form = (ModelScreenWidget.Form) currentWidget;
-            allFormNamesIncluded.add(form.locationExdr.getOriginal() + "#" + form.nameExdr.getOriginal());
-        } else if (currentWidget instanceof ModelScreenWidget.Section) {
-            ModelScreenWidget.Section section = (ModelScreenWidget.Section) currentWidget;
-            if (section.subWidgets != null) {
-                for (ModelScreenWidget widget: section.subWidgets) {
-                    findFormNamesIncludedInWidget(widget, allFormNamesIncluded);
-                }
-            }
-            if (section.failWidgets != null) {
-                for (ModelScreenWidget widget: section.failWidgets) {
-                    findFormNamesIncludedInWidget(widget, allFormNamesIncluded);
-                }
-            }
-        } else if (currentWidget instanceof ModelScreenWidget.DecoratorSection) {
-            ModelScreenWidget.DecoratorSection decoratorSection = (ModelScreenWidget.DecoratorSection) currentWidget;
-            if (decoratorSection.subWidgets != null) {
-                for (ModelScreenWidget widget: decoratorSection.subWidgets) {
-                    findFormNamesIncludedInWidget(widget, allFormNamesIncluded);
-                }
-            }
-        } else if (currentWidget instanceof ModelScreenWidget.DecoratorScreen) {
-            ModelScreenWidget.DecoratorScreen decoratorScreen = (ModelScreenWidget.DecoratorScreen) currentWidget;
-            if (decoratorScreen.sectionMap != null) {
-                Collection<ModelScreenWidget.DecoratorSection> sections = decoratorScreen.sectionMap.values();
-                for (ModelScreenWidget section: sections) {
-                    findFormNamesIncludedInWidget(section, allFormNamesIncluded);
-                }
-            }
-        } else if (currentWidget instanceof ModelScreenWidget.Container) {
-            ModelScreenWidget.Container container = (ModelScreenWidget.Container) currentWidget;
-            if (container.subWidgets != null) {
-                for (ModelScreenWidget widget: container.subWidgets) {
-                    findFormNamesIncludedInWidget(widget, allFormNamesIncluded);
-                }
-            }
-        } else if (currentWidget instanceof ModelScreenWidget.Screenlet) {
-            ModelScreenWidget.Screenlet screenlet = (ModelScreenWidget.Screenlet) currentWidget;
-            if (screenlet.subWidgets != null) {
-                for (ModelScreenWidget widget: screenlet.subWidgets) {
-                    findFormNamesIncludedInWidget(widget, allFormNamesIncluded);
-                }
-            }
-        }
-    }
-
-    public Set<String> getAllRequestsLocationAndUri() throws GeneralException {
-        Set<String> allRequestNamesIncluded = FastSet.newInstance();
-        findRequestNamesLinkedtoInWidget(this.section, allRequestNamesIncluded);
-        return allRequestNamesIncluded;
-    }
-    protected static void findRequestNamesLinkedtoInWidget(ModelScreenWidget currentWidget, Set<String> allRequestNamesIncluded) throws GeneralException {
-        if (currentWidget instanceof ModelScreenWidget.Link) {
-            ModelScreenWidget.Link link = (ModelScreenWidget.Link) currentWidget;
-            String target = link.getTarget(null);
-            String urlMode = link.getUrlMode();
-            // Debug.logInfo("In findRequestNamesLinkedtoInWidget found link [" + link.rawString() + "] with target [" + target + "]", module);
-
-            Set<String> controllerLocAndRequestSet = ConfigXMLReader.findControllerRequestUniqueForTargetType(target, urlMode);
-            if (controllerLocAndRequestSet == null) return;
-            allRequestNamesIncluded.addAll(controllerLocAndRequestSet);
-        } else if (currentWidget instanceof ModelScreenWidget.Section) {
-            ModelScreenWidget.Section section = (ModelScreenWidget.Section) currentWidget;
-            if (section.subWidgets != null) {
-                for (ModelScreenWidget widget: section.subWidgets) {
-                    findRequestNamesLinkedtoInWidget(widget, allRequestNamesIncluded);
-                }
-            }
-            if (section.failWidgets != null) {
-                for (ModelScreenWidget widget: section.failWidgets) {
-                    findRequestNamesLinkedtoInWidget(widget, allRequestNamesIncluded);
-                }
-            }
-        } else if (currentWidget instanceof ModelScreenWidget.DecoratorSection) {
-            ModelScreenWidget.DecoratorSection decoratorSection = (ModelScreenWidget.DecoratorSection) currentWidget;
-            if (decoratorSection.subWidgets != null) {
-                for (ModelScreenWidget widget: decoratorSection.subWidgets) {
-                    findRequestNamesLinkedtoInWidget(widget, allRequestNamesIncluded);
-                }
-            }
-        } else if (currentWidget instanceof ModelScreenWidget.DecoratorScreen) {
-            ModelScreenWidget.DecoratorScreen decoratorScreen = (ModelScreenWidget.DecoratorScreen) currentWidget;
-            if (decoratorScreen.sectionMap != null) {
-                Collection<ModelScreenWidget.DecoratorSection> sections = decoratorScreen.sectionMap.values();
-                for (ModelScreenWidget section: sections) {
-                    findRequestNamesLinkedtoInWidget(section, allRequestNamesIncluded);
-                }
-            }
-        } else if (currentWidget instanceof ModelScreenWidget.Container) {
-            ModelScreenWidget.Container container = (ModelScreenWidget.Container) currentWidget;
-            if (container.subWidgets != null) {
-                for (ModelScreenWidget widget: container.subWidgets) {
-                    findRequestNamesLinkedtoInWidget(widget, allRequestNamesIncluded);
-                }
-            }
-        } else if (currentWidget instanceof ModelScreenWidget.Screenlet) {
-            ModelScreenWidget.Screenlet screenlet = (ModelScreenWidget.Screenlet) currentWidget;
-            if (screenlet.subWidgets != null) {
-                for (ModelScreenWidget widget: screenlet.subWidgets) {
-                    findRequestNamesLinkedtoInWidget(widget, allRequestNamesIncluded);
-                }
-            }
-        }
-    }
-
 
     /**
      * Renders this screen to a String, i.e. in a text format, as defined with the
@@ -361,7 +129,7 @@ public class ModelScreen extends ModelWidget {
                 try {
                     transactionTimeout = Integer.parseInt(transactionTimeoutPar);
                 } catch (NumberFormatException nfe) {
-                    String msg = "TRANSACTION_TIMEOUT parameter for screen [" + this.sourceLocation + "#" + this.name + "] is invalid and it will be ignored: " + nfe.toString();
+                    String msg = "TRANSACTION_TIMEOUT parameter for screen [" + this.sourceLocation + "#" + getName() + "] is invalid and it will be ignored: " + nfe.toString();
                     Debug.logWarning(msg, module);
                 }
             }
@@ -397,7 +165,7 @@ public class ModelScreen extends ModelWidget {
         } catch (ScreenRenderException e) {
             throw e;
         } catch (RuntimeException e) {
-            String errMsg = "Error rendering screen [" + this.sourceLocation + "#" + this.name + "]: " + e.toString();
+            String errMsg = "Error rendering screen [" + this.sourceLocation + "#" + getName() + "]: " + e.toString();
             Debug.logError(errMsg + ". Rolling back transaction.", module);
             try {
                 // only rollback the transaction if we started one...
@@ -408,7 +176,7 @@ public class ModelScreen extends ModelWidget {
             // after rolling back, rethrow the exception
             throw new ScreenRenderException(errMsg, e);
         } catch (Exception e) {
-            String errMsg = "Error rendering screen [" + this.sourceLocation + "#" + this.name + "]: " + e.toString();
+            String errMsg = "Error rendering screen [" + this.sourceLocation + "#" + getName() + "]: " + e.toString();
             Debug.logError(errMsg + ". Rolling back transaction.", module);
             try {
                 // only rollback the transaction if we started one...

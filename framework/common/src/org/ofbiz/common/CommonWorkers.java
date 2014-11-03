@@ -18,9 +18,9 @@
  *******************************************************************************/
 package org.ofbiz.common;
 
+import java.util.LinkedList;
 import java.util.List;
-
-import javolution.util.FastList;
+import java.util.Map;
 
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.StringUtil;
@@ -33,6 +33,7 @@ import org.ofbiz.entity.GenericValue;
 import org.ofbiz.entity.condition.EntityCondition;
 import org.ofbiz.entity.condition.EntityExpr;
 import org.ofbiz.entity.condition.EntityOperator;
+import org.ofbiz.entity.util.EntityQuery;
 import org.ofbiz.entity.util.EntityTypeUtil;
 import org.ofbiz.entity.util.EntityUtilProperties;
 
@@ -44,12 +45,12 @@ public class CommonWorkers {
     public final static String module = CommonWorkers.class.getName();
 
     public static List<GenericValue> getCountryList(Delegator delegator) {
-        List<GenericValue> geoList = FastList.newInstance();
+        List<GenericValue> geoList = new LinkedList<GenericValue>();
         String defaultCountry = EntityUtilProperties.getPropertyValue("general.properties", "country.geo.id.default", delegator);
         GenericValue defaultGeo = null;
         if (UtilValidate.isNotEmpty(defaultCountry)) {
             try {
-                defaultGeo = delegator.findOne("Geo", UtilMisc.toMap("geoId", defaultCountry), true);
+                defaultGeo = EntityQuery.use(delegator).from("Geo").where("geoId", defaultCountry).cache().queryOne();
             } catch (GenericEntityException e) {
                 Debug.logError(e, "Cannot lookup Geo", module);
             }
@@ -62,7 +63,7 @@ public class CommonWorkers {
             exprs.add(EntityCondition.makeCondition("geoId", EntityOperator.IN, countriesAvailable));
         }
 
-        List<GenericValue> countriesList = FastList.newInstance();
+        List<GenericValue> countriesList = new LinkedList<GenericValue>();
         try {
             countriesList = delegator.findList("Geo", EntityCondition.makeCondition(exprs), null, UtilMisc.toList("geoName"), null, true);
         } catch (GenericEntityException e) {
@@ -89,7 +90,7 @@ public class CommonWorkers {
     }
 
     public static List<GenericValue> getStateList(Delegator delegator) {
-        List<GenericValue> geoList = FastList.newInstance();
+        List<GenericValue> geoList = new LinkedList<GenericValue>();
         EntityCondition condition = EntityCondition.makeCondition(EntityOperator.OR, EntityCondition.makeCondition("geoTypeId", "STATE"), EntityCondition.makeCondition("geoTypeId", "PROVINCE"), EntityCondition.makeCondition("geoTypeId", "TERRITORY"),
                 EntityCondition.makeCondition("geoTypeId", "MUNICIPALITY"));
         List<String> sortList = UtilMisc.toList("geoName");
@@ -119,7 +120,7 @@ public class CommonWorkers {
         }
         List<String> sortList = UtilMisc.toList(listOrderBy);
 
-        List<GenericValue> geoList = FastList.newInstance();
+        List<GenericValue> geoList = new LinkedList<GenericValue>();
         try {
             // Check if the country is a country group and get recursively the
             // states

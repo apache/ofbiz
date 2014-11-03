@@ -21,35 +21,24 @@ package org.ofbiz.base.conversion.test;
 import java.math.BigDecimal;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-
-import javolution.util.FastList;
-import javolution.util.FastMap;
 
 import org.ofbiz.base.conversion.Converter;
 import org.ofbiz.base.conversion.ConverterLoader;
 import org.ofbiz.base.conversion.Converters;
-import org.ofbiz.base.conversion.JSONResult;
 import org.ofbiz.base.lang.SourceMonitored;
 import org.ofbiz.base.test.GenericTestCaseBase;
 import org.ofbiz.base.util.UtilGenerics;
 import org.ofbiz.base.util.UtilMisc;
-import org.ofbiz.base.util.collections.LRUMap;
 
 @SourceMonitored
 public class MiscTests extends GenericTestCaseBase {
 
     public MiscTests(String name) {
         super(name);
-    }
-
-    private static <S, T extends JSONResult.Indenting> void assertConversion(String label, String wanted, Class<T> targetClass, Object source, Class<S> sourceClass) throws Exception {
-        Converter<S, T> converter = Converters.getConverter(sourceClass, targetClass);
-        assertTrue(label + " can convert", converter.canConvert(sourceClass, targetClass));
-        assertEquals(label, wanted, converter.convert(UtilGenerics.<S>cast(source)).getResult());
     }
 
     public void testStaticHelperClass() throws Exception {
@@ -64,22 +53,6 @@ public class MiscTests extends GenericTestCaseBase {
 
     public void testLoadContainedConvertersIgnoresException() {
         Converters.loadContainedConverters(MiscTests.class);
-    }
-
-    public void testExtendsImplements() throws Exception {
-        List<String> arraysList = Arrays.asList("a", "b", "c");
-        assertConversion("", "[\n \"a\",\n \"b\",\n \"c\"\n]", JSONResult.Indenting.class, arraysList, arraysList.getClass());
-        Exception caught = null;
-        try {
-            Converters.getConverter(MiscTests.class, String.class);
-        } catch (ClassNotFoundException e) {
-            caught = e;
-        } finally {
-            assertNotNull("ClassNotFoundException thrown for MiscTests.class", caught);
-        }
-        LRUMap<String, String> map = new LRUMap<String, String>();
-        map.put("a", "1");
-        assertConversion("", "{\n \"a\": \"1\"\n}", JSONResult.Indenting.class, map, LRUMap.class);
     }
 
     public static <S> void assertPassThru(Object wanted, Class<S> sourceClass) throws Exception {
@@ -104,12 +77,12 @@ public class MiscTests extends GenericTestCaseBase {
         List<String> baseList = UtilMisc.toList("a", "1", "b", "2", "c", "3");
         ArrayList<String> arrayList = new ArrayList<String>();
         arrayList.addAll(baseList);
-        List<String> fastList = FastList.newInstance();
+        List<String> fastList = new LinkedList<String>();
         fastList.addAll(baseList);
         Map<String, String> baseMap = UtilMisc.toMap("a", "1", "b", "2", "c", "3");
         HashMap<String, String> hashMap = new HashMap<String, String>();
         hashMap.putAll(baseMap);
-        Map<String, String> fastMap = FastMap.newInstance();
+        Map<String, String> fastMap = new HashMap<String, String>();
         fastMap.putAll(baseMap);
         Object[] testObjects = new Object[] {
             string,

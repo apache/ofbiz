@@ -21,6 +21,9 @@ package org.ofbiz.widget;
 import java.io.Serializable;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -30,10 +33,6 @@ import java.util.regex.PatternSyntaxException;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpSession;
 
-import javolution.util.FastList;
-import javolution.util.FastMap;
-
-import org.w3c.dom.Element;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.GeneralException;
 import org.ofbiz.base.util.ObjectType;
@@ -59,6 +58,7 @@ import org.ofbiz.minilang.method.MethodContext;
 import org.ofbiz.service.DispatchContext;
 import org.ofbiz.service.GenericServiceException;
 import org.ofbiz.service.ModelService;
+import org.w3c.dom.Element;
 
 @SuppressWarnings("serial")
 public abstract class ModelWidgetAction implements Serializable {
@@ -75,43 +75,53 @@ public abstract class ModelWidgetAction implements Serializable {
 
     public abstract void runAction(Map<String, Object> context) throws GeneralException;
 
+    public abstract void accept(ModelActionVisitor visitor);
+
+    public static ModelWidgetAction toModelWidgetAction(ModelWidget modelWidget, Element actionElement) {
+        if ("set".equals(actionElement.getNodeName())) {
+            return new SetField(modelWidget, actionElement);
+        } else if ("property-map".equals(actionElement.getNodeName())) {
+            return new PropertyMap(modelWidget, actionElement);
+        } else if ("property-to-field".equals(actionElement.getNodeName())) {
+            return new PropertyToField(modelWidget, actionElement);
+        } else if ("script".equals(actionElement.getNodeName())) {
+            return new Script(modelWidget, actionElement);
+        } else if ("service".equals(actionElement.getNodeName())) {
+            return new Service(modelWidget, actionElement);
+        } else if ("entity-one".equals(actionElement.getNodeName())) {
+            return new EntityOne(modelWidget, actionElement);
+        } else if ("entity-and".equals(actionElement.getNodeName())) {
+            return new EntityAnd(modelWidget, actionElement);
+        } else if ("entity-condition".equals(actionElement.getNodeName())) {
+            return new EntityCondition(modelWidget, actionElement);
+        } else if ("get-related-one".equals(actionElement.getNodeName())) {
+            return new GetRelatedOne(modelWidget, actionElement);
+        } else if ("get-related".equals(actionElement.getNodeName())) {
+            return new GetRelated(modelWidget, actionElement);
+        } else {
+            throw new IllegalArgumentException("Action element not supported with name: " + actionElement.getNodeName());
+        }
+    }
+    
     public static List<ModelWidgetAction> readSubActions(ModelWidget modelWidget, Element parentElement) {
         List<? extends Element> actionElementList = UtilXml.childElementList(parentElement);
         List<ModelWidgetAction> actions = new ArrayList<ModelWidgetAction>(actionElementList.size());
         for (Element actionElement: actionElementList) {
-            if ("set".equals(actionElement.getNodeName())) {
-                actions.add(new SetField(modelWidget, actionElement));
-            } else if ("property-map".equals(actionElement.getNodeName())) {
-                actions.add(new PropertyMap(modelWidget, actionElement));
-            } else if ("property-to-field".equals(actionElement.getNodeName())) {
-                actions.add(new PropertyToField(modelWidget, actionElement));
-            } else if ("script".equals(actionElement.getNodeName())) {
-                actions.add(new Script(modelWidget, actionElement));
-            } else if ("service".equals(actionElement.getNodeName())) {
-                actions.add(new Service(modelWidget, actionElement));
-            } else if ("entity-one".equals(actionElement.getNodeName())) {
-                actions.add(new EntityOne(modelWidget, actionElement));
-            } else if ("entity-and".equals(actionElement.getNodeName())) {
-                actions.add(new EntityAnd(modelWidget, actionElement));
-            } else if ("entity-condition".equals(actionElement.getNodeName())) {
-                actions.add(new EntityCondition(modelWidget, actionElement));
-            } else if ("get-related-one".equals(actionElement.getNodeName())) {
-                actions.add(new GetRelatedOne(modelWidget, actionElement));
-            } else if ("get-related".equals(actionElement.getNodeName())) {
-                actions.add(new GetRelated(modelWidget, actionElement));
-            } else {
-                throw new IllegalArgumentException("Action element not supported with name: " + actionElement.getNodeName());
-            }
+            actions.add(toModelWidgetAction(modelWidget, actionElement));
         }
-        return actions;
+        return Collections.unmodifiableList(actions);
     }
 
-    public static void runSubActions(List<ModelWidgetAction> actions, Map<String, Object> context) throws GeneralException {
+    public static void runSubActions(List<ModelWidgetAction> actions, Map<String, Object> context) {
         if (actions == null) return;
-
-        for (ModelWidgetAction action: actions) {
-            if (Debug.verboseOn()) Debug.logVerbose("Running widget action " + action.getClass().getName(), module);
-            action.runAction(context);
+        for (ModelWidgetAction action : actions) {
+            if (Debug.verboseOn())
+                Debug.logVerbose("Running action " + action.getClass().getName(), module);
+            try {
+                action.runAction(context);
+            } catch (GeneralException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 
@@ -140,6 +150,7 @@ public abstract class ModelWidgetAction implements Serializable {
             }
         }
 
+        @SuppressWarnings("rawtypes")
         @Override
         public void runAction(Map<String, Object> context) {
             String globalStr = this.globalExdr.expandString(context);
@@ -179,9 +190,9 @@ public abstract class ModelWidgetAction implements Serializable {
 
             if (UtilValidate.isNotEmpty(this.type)) {
                 if ("NewMap".equals(this.type)) {
-                    newValue = FastMap.newInstance();
+                    newValue = new HashMap();
                 } else if ("NewList".equals(this.type)) {
-                    newValue = FastList.newInstance();
+                    newValue = new LinkedList();
                 } else {
                     try {
                         newValue = ObjectType.simpleTypeConvert(newValue, this.type, null, (TimeZone) context.get("timeZone"), (Locale) context.get("locale"), true);
@@ -273,6 +284,11 @@ public abstract class ModelWidgetAction implements Serializable {
             }
             return newValue;
         }
+
+        @Override
+        public void accept(ModelActionVisitor visitor) {
+            visitor.visit(this);
+        }
     }
 
     public static class PropertyMap extends ModelWidgetAction {
@@ -327,6 +343,11 @@ public abstract class ModelWidgetAction implements Serializable {
                     }
                 }
             }
+        }
+
+        @Override
+        public void accept(ModelActionVisitor visitor) {
+            visitor.visit(this);
         }
     }
 
@@ -384,6 +405,11 @@ public abstract class ModelWidgetAction implements Serializable {
             }
             fieldAcsr.put(context, value);
         }
+
+        @Override
+        public void accept(ModelActionVisitor visitor) {
+            visitor.visit(this);
+        }
     }
 
     public static class Script extends ModelWidgetAction {
@@ -400,7 +426,7 @@ public abstract class ModelWidgetAction implements Serializable {
         @Override
         public void runAction(Map<String, Object> context) throws GeneralException {
             if (location.endsWith(".xml")) {
-                Map<String, Object> localContext = FastMap.newInstance();
+                Map<String, Object> localContext = new HashMap<String, Object>();
                 localContext.putAll(context);
                 DispatchContext ctx = WidgetWorker.getDispatcher(context).getDispatchContext();
                 MethodContext methodContext = new MethodContext(ctx, localContext, null);
@@ -413,6 +439,11 @@ public abstract class ModelWidgetAction implements Serializable {
             } else {
                 ScriptUtil.executeScript(this.location, this.method, context);
             }
+        }
+
+        @Override
+        public void accept(ModelActionVisitor visitor) {
+            visitor.visit(this);
         }
     }
 
@@ -445,7 +476,7 @@ public abstract class ModelWidgetAction implements Serializable {
                 if ("true".equals(autoFieldMapString)) {
                     DispatchContext dc = WidgetWorker.getDispatcher(context).getDispatchContext();
                     // try a map called "parameters", try it first so values from here are overriden by values in the main context
-                    Map<String, Object> combinedMap = FastMap.newInstance();
+                    Map<String, Object> combinedMap = new HashMap<String, Object>();
                     Map<String, Object> parametersObj = UtilGenerics.toMap(context.get("parameters"));
                     if (parametersObj != null) {
                         combinedMap.putAll(parametersObj);
@@ -460,7 +491,7 @@ public abstract class ModelWidgetAction implements Serializable {
                     }
                 }
                 if (serviceContext == null) {
-                    serviceContext = FastMap.newInstance();
+                    serviceContext = new HashMap<String, Object>();
                 }
 
                 if (this.fieldMap != null) {
@@ -495,6 +526,11 @@ public abstract class ModelWidgetAction implements Serializable {
         public FlexibleStringExpander getServiceNameExdr() {
             return this.serviceNameExdr;
         }
+
+        @Override
+        public void accept(ModelActionVisitor visitor) {
+            visitor.visit(this);
+        }
     }
 
     public static class EntityOne extends ModelWidgetAction {
@@ -518,6 +554,11 @@ public abstract class ModelWidgetAction implements Serializable {
 
         public PrimaryKeyFinder getFinder() {
             return this.finder;
+        }
+
+        @Override
+        public void accept(ModelActionVisitor visitor) {
+            visitor.visit(this);
         }
     }
 
@@ -543,6 +584,11 @@ public abstract class ModelWidgetAction implements Serializable {
         public ByAndFinder getFinder() {
             return this.finder;
         }
+
+        @Override
+        public void accept(ModelActionVisitor visitor) {
+            visitor.visit(this);
+        }
     }
 
     public static class EntityCondition extends ModelWidgetAction {
@@ -566,6 +612,11 @@ public abstract class ModelWidgetAction implements Serializable {
 
         public ByConditionFinder getFinder() {
             return this.finder;
+        }
+
+        @Override
+        public void accept(ModelActionVisitor visitor) {
+            visitor.visit(this);
         }
     }
 
@@ -609,6 +660,11 @@ public abstract class ModelWidgetAction implements Serializable {
 
         public String getRelationName() {
             return this.relationName;
+        }
+
+        @Override
+        public void accept(ModelActionVisitor visitor) {
+            visitor.visit(this);
         }
     }
 
@@ -666,6 +722,11 @@ public abstract class ModelWidgetAction implements Serializable {
 
         public String getRelationName() {
             return this.relationName;
+        }
+
+        @Override
+        public void accept(ModelActionVisitor visitor) {
+            visitor.visit(this);
         }
     }
 }
