@@ -6176,6 +6176,9 @@
         <value xml:lang="th">ยินดีต้อนรับสู้รบบการจัดการรูปภาพ</value>
         <value xml:lang="vi">Chào mừng đến với ứng dụng hình ảnh</value>
     </property>
+    <property key="InventoryFacilityIdRequired">
+        <value xml:lang="en">"Inventory Facility Id Required"</value>
+    </property>
     <property key="MetaDescription">
         <value xml:lang="en">Meta Description</value>
         <value xml:lang="vi">Mô tả tiền tố</value>
