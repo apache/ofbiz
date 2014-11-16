@@ -68,28 +68,25 @@ public class EntityTestSuite extends EntityTestCase {
     }
 
     final static private int _level1max = 3;   // number of TestingNode entities to create
-
+    
     /*
      * Tests storing values with the delegator's .create, .makeValue, and .storeAll methods
      */
     public void testMakeValue() throws Exception {
         // This method call directly stores a new value into the entity engine
-        GenericValue createdValue = delegator.create("TestingType", "testingTypeId", "TEST-MAKE-1", "description", "Testing Type #Make-1");
-        assertTrue("Created value is mutable", createdValue.isMutable());
-        assertFalse("Observable has not changed", createdValue.hasChanged());
+        delegator.create("TestingType", "testingTypeId", "TEST-1", "description", "Testing Type #1");
 
         // This sequence creates the GenericValue entities first, puts them in a List, then calls the delegator to store them all
         List<GenericValue> newValues = new LinkedList<GenericValue>();
 
-        newValues.add(delegator.makeValue("TestingType", "testingTypeId", "TEST-MAKE-2", "description", "Testing Type #Make-2"));
-        newValues.add(delegator.makeValue("TestingType", "testingTypeId", "TEST-MAKE-3", "description", "Testing Type #Make-3"));
-        newValues.add(delegator.makeValue("TestingType", "testingTypeId", "TEST-MAKE-4", "description", "Testing Type #Make-4"));
+        newValues.add(delegator.makeValue("TestingType", "testingTypeId", "TEST-2", "description", "Testing Type #2"));
+        newValues.add(delegator.makeValue("TestingType", "testingTypeId", "TEST-3", "description", "Testing Type #3"));
+        newValues.add(delegator.makeValue("TestingType", "testingTypeId", "TEST-4", "description", "Testing Type #4"));
         delegator.storeAll(newValues);
 
         // finds a List of newly created values.  the second parameter specifies the fields to order results by.
-        EntityCondition condition = EntityCondition.makeCondition("testingTypeId", EntityOperator.LIKE, "TEST-MAKE-%");
-        List<GenericValue> newlyCreatedValues = delegator.findList("TestingType", condition, null, UtilMisc.toList("testingTypeId"), null, false);
-        assertEquals("4 TestingTypes(for make) found", 4, newlyCreatedValues.size());
+        List<GenericValue> newlyCreatedValues = delegator.findList("TestingType", null, null, UtilMisc.toList("testingTypeId"), null, false);
+        assertEquals("4 TestingTypes found", 4, newlyCreatedValues.size());
     }
 
     /*
@@ -97,28 +94,20 @@ public class EntityTestSuite extends EntityTestCase {
      */
     public void testUpdateValue() throws Exception {
         // retrieve a sample GenericValue, make sure it's correct
-        delegator.removeByCondition("TestingType", EntityCondition.makeCondition("testingTypeId", EntityOperator.LIKE, "TEST-UPDATE-%"));
-        GenericValue testValue = delegator.findOne("TestingType", false, "testingTypeId", "TEST-UPDATE-1");
-        assertNull("No pre-existing type value", testValue);
-        delegator.create("TestingType", "testingTypeId", "TEST-UPDATE-1", "description", "Testing Type #Update-1");
-        testValue = delegator.findOne("TestingType", false, "testingTypeId", "TEST-UPDATE-1");
-        assertEquals("Retrieved value has the correct description", "Testing Type #Update-1", testValue.getString("description"));
-        testValue.set("description", "New Testing Type #Update-1");
+        GenericValue testValue = delegator.findOne("TestingType", false, "testingTypeId", "TEST-1");
+        assertEquals("Retrieved value has the correct description", "Testing Type #1", testValue.getString("description"));
+        testValue.put("description", "New Testing Type #1");
         // now store it
         testValue.store();
         // now retrieve it again and make sure that the updated value is correct
-        testValue = delegator.findOne("TestingType", false, "testingTypeId", "TEST-UPDATE-1");
-        assertEquals("Retrieved value has the correct description", "New Testing Type #Update-1", testValue.getString("description"));
+        testValue = delegator.findOne("TestingType", false, "testingTypeId", "TEST-1");
+        assertEquals("Retrieved value has the correct description", "New Testing Type #1", testValue.getString("description"));
     }
 
     public void testRemoveValue() throws Exception {
         // Retrieve a sample GenericValue, make sure it's correct
-        delegator.removeByCondition("TestingType", EntityCondition.makeCondition("testingTypeId", EntityOperator.LIKE, "TEST-REMOVE-%"));
-        GenericValue testValue = delegator.findOne("TestingType", false, "testingTypeId", "TEST-REMOVE-1");
-        assertNull("No pre-existing type value", testValue);
-        delegator.create("TestingType", "testingTypeId", "TEST-REMOVE-1", "description", "Testing Type #Remove-1");
-        testValue = delegator.findOne("TestingType", false, "testingTypeId", "TEST-REMOVE-1");
-        assertEquals("Retrieved value has the correct description", "Testing Type #Remove-1", testValue.getString("description"));
+        GenericValue testValue = delegator.findOne("TestingType", false, "testingTypeId", "TEST-4");
+        assertEquals("Retrieved value has the correct description", "Testing Type #4", testValue.getString("description"));
         testValue.remove();
         // Test immutable
         try {
@@ -140,16 +129,11 @@ public class EntityTestSuite extends EntityTestCase {
      */
     public void testEntityCache() throws Exception {
         // Test primary key cache
-        delegator.removeByCondition("TestingType", EntityCondition.makeCondition("testingTypeId", EntityOperator.LIKE, "TEST-CACHE-%"));
-        delegator.removeByCondition("TestingSubtype", EntityCondition.makeCondition("testingTypeId", EntityOperator.LIKE, "TEST-CACHE-%"));
-        GenericValue testValue = delegator.findOne("TestingType", true, "testingTypeId", "TEST-CACHE-1");
-        assertNull("No pre-existing type value", testValue);
-        delegator.create("TestingType", "testingTypeId", "TEST-CACHE-1", "description", "Testing Type #Cache-1");
-        testValue = delegator.findOne("TestingType", true, "testingTypeId", "TEST-CACHE-1");
-        assertEquals("Retrieved from cache value has the correct description", "Testing Type #Cache-1", testValue.getString("description"));
+        GenericValue testValue = delegator.findOne("TestingType", true, "testingTypeId", "TEST-3");
+        assertEquals("Retrieved from cache value has the correct description", "Testing Type #3", testValue.getString("description"));
         // Test immutable
         try {
-            testValue.put("description", "New Testing Type #Cache-1");
+            testValue.put("description", "New Testing Type #3");
             fail("Modified an immutable GenericValue");
         } catch (IllegalStateException e) {
         }
@@ -160,22 +144,21 @@ public class EntityTestSuite extends EntityTestCase {
         }
         // Test entity value update operation updates the cache
         testValue = (GenericValue) testValue.clone();
-        testValue.put("description", "New Testing Type #Cache-1");
+        testValue.put("description", "New Testing Type #3");
         testValue.store();
-        testValue = delegator.findOne("TestingType", true, "testingTypeId", "TEST-CACHE-1");
-        assertEquals("Retrieved from cache value has the correct description", "New Testing Type #Cache-1", testValue.getString("description"));
+        testValue = delegator.findOne("TestingType", true, "testingTypeId", "TEST-3");
+        assertEquals("Retrieved from cache value has the correct description", "New Testing Type #3", testValue.getString("description"));
         // Test entity value remove operation updates the cache
         testValue = (GenericValue) testValue.clone();
         testValue.remove();
-        testValue = delegator.findOne("TestingType", true, "testingTypeId", "TEST-CACHE-1");
+        testValue = delegator.findOne("TestingType", true, "testingTypeId", "TEST-3");
         assertEquals("Retrieved from cache value is null", null, testValue);
         // Test entity condition cache
-        delegator.create("TestingType", "testingTypeId", "TEST-CACHE-2", "description", "Testing Type #Cache-2");
-        EntityCondition testCondition = EntityCondition.makeCondition("description", EntityOperator.EQUALS, "Testing Type #Cache-2");
+        EntityCondition testCondition = EntityCondition.makeCondition("description", EntityOperator.EQUALS, "Testing Type #2");
         List<GenericValue> testList = delegator.findList("TestingType", testCondition, null, null, null, true);
         assertEquals("Delegator findList returned one value", 1, testList.size());
         testValue = testList.get(0);
-        assertEquals("Retrieved from cache value has the correct description", "Testing Type #Cache-2", testValue.getString("description"));
+        assertEquals("Retrieved from cache value has the correct description", "Testing Type #2", testValue.getString("description"));
         // Test immutable
         try {
             testValue.put("description", "New Testing Type #2");
@@ -189,12 +172,12 @@ public class EntityTestSuite extends EntityTestCase {
         }
         // Test entity value create operation updates the cache
         testValue = (GenericValue) testValue.clone();
-        testValue.put("testingTypeId", "TEST-CACHE-3");
+        testValue.put("testingTypeId", "TEST-9");
         testValue.create();
         testList = delegator.findList("TestingType", testCondition, null, null, null, true);
         assertEquals("Delegator findList returned two values", 2, testList.size());
         // Test entity value update operation updates the cache
-        testValue.put("description", "New Testing Type #Cache-3");
+        testValue.put("description", "New Testing Type #2");
         testValue.store();
         testList = delegator.findList("TestingType", testCondition, null, null, null, true);
         assertEquals("Delegator findList returned one value", 1, testList.size());
@@ -205,21 +188,19 @@ public class EntityTestSuite extends EntityTestCase {
         testList = delegator.findList("TestingType", testCondition, null, null, null, true);
         assertEquals("Delegator findList returned empty list", 0, testList.size());
         // Test view entities in the pk cache - updating an entity should clear pk caches for all view entities containing that entity.
-        testValue = delegator.findOne("TestingSubtype", true, "testingTypeId", "TEST-CACHE-3");
-        assertNull("No pre-existing TestingSubtype", testValue);
-        testValue = delegator.create("TestingSubtype", "testingTypeId", "TEST-CACHE-3", "subtypeDescription", "Testing Subtype #Cache-3");
+        testValue = delegator.create("TestingSubtype", "testingTypeId", "TEST-9", "subtypeDescription", "Testing Subtype #9");
         assertNotNull("TestingSubtype created", testValue);
         // Confirm member entity appears in the view
-        testValue = delegator.findOne("TestingViewPks", true, "testingTypeId", "TEST-CACHE-3");
-        assertEquals("View retrieved from cache has the correct member description", "Testing Subtype #Cache-3", testValue.getString("subtypeDescription"));
-        testValue = delegator.findOne("TestingSubtype", true, "testingTypeId", "TEST-CACHE-3");
+        testValue = delegator.findOne("TestingViewPks", true, "testingTypeId", "TEST-9");
+        assertEquals("View retrieved from cache has the correct member description", "Testing Subtype #9", testValue.getString("subtypeDescription"));
+        testValue = delegator.findOne("TestingSubtype", true, "testingTypeId", "TEST-9");
         // Modify member entity
         testValue = (GenericValue) testValue.clone();
-        testValue.put("subtypeDescription", "New Testing Subtype #Cache-3");
+        testValue.put("subtypeDescription", "New Testing Subtype #9");
         testValue.store();
         // Check if cached view contains the modification
-        testValue = delegator.findOne("TestingViewPks", true, "testingTypeId", "TEST-CACHE-3");
-        assertEquals("View retrieved from cache has the correct member description", "New Testing Subtype #Cache-3", testValue.getString("subtypeDescription"));
+        testValue = delegator.findOne("TestingViewPks", true, "testingTypeId", "TEST-9");
+        assertEquals("View retrieved from cache has the correct member description", "New Testing Subtype #9", testValue.getString("subtypeDescription"));
     }
 
     /*
@@ -301,10 +282,6 @@ public class EntityTestSuite extends EntityTestCase {
      * More tests of storing data with .storeAll.  Also prepares data for testing view-entities (see below.)
      */
     public void testAddMembersToTree() throws Exception {
-        delegator.removeByCondition("TestingType", EntityCondition.makeCondition("testingTypeId", EntityOperator.LIKE, "TEST-TREE-%"));
-        GenericValue testValue = delegator.findOne("TestingType", true, "testingTypeId", "TEST-TREE-1");
-        assertNull("No pre-existing type value", testValue);
-        delegator.create("TestingType", "testingTypeId", "TEST-TREE-1", "description", "Testing Type #Tree-1");
         // get the level1 nodes
         EntityCondition isLevel1 = EntityCondition.makeCondition("primaryParentNodeId", EntityOperator.NOT_EQUAL, GenericEntity.NULL_FIELD);
         List<GenericValue> nodeLevel1 = delegator.findList("TestingNode", isLevel1, null, null, null, false);
@@ -315,7 +292,7 @@ public class EntityTestSuite extends EntityTestCase {
         for (GenericValue node: nodeLevel1) {
             GenericValue testing = delegator.makeValue("Testing",
                             "testingId", delegator.getNextSeqId("Testing"),
-                            "testingTypeId", "TEST-TREE-1"
+                            "testingTypeId", "TEST-1"
                    );
             testing.put("testingName", "leaf-#" + node.getString("testingNodeId"));
             testing.put("description", "level1 leaf");
@@ -338,13 +315,32 @@ public class EntityTestSuite extends EntityTestCase {
         assertEquals("Created/Stored Nodes", newValues.size(), n);
     }
 
+    protected void createNodeMembers(String typeId, String typeDescription, String descriptionPrefix) throws GenericEntityException {
+        delegator.removeByCondition("TestingType", EntityCondition.makeCondition("testingTypeId", EntityOperator.EQUALS, typeId));
+        delegator.create("TestingType", "testingTypeId", typeId, "description", typeDescription);
+        int i = 0;
+        Timestamp now = UtilDateTime.nowTimestamp();
+        for (GenericValue node: delegator.findList("TestingNode", EntityCondition.makeCondition("description", EntityOperator.LIKE, descriptionPrefix + "%"), null, null, null, false)) {
+            if (i % 2 == 0) {
+                GenericValue testing = delegator.create("Testing", "testingId", descriptionPrefix + ":" + node.get("testingNodeId"), "testingTypeId", typeId, "description", node.get("description"));
+                GenericValue member = delegator.makeValue("TestingNodeMember",
+                    "testingNodeId", node.get("testingNodeId"),
+                    "testingId", testing.get("testingId")
+                );
+
+                member.put("fromDate", now);
+                member.put("thruDate", UtilDateTime.getNextDayStart(now));
+                member.create();
+            }
+            i++;
+        }
+    }
+
     /*
      * Tests findByCondition and tests searching on a view-entity
      */
     public void testCountViews() throws Exception {
-        flushAndRecreateTree("countviews");
-        createNodeMembersForEach("TEST-COUNT", "count-views-testing", "countviews");
-        EntityCondition isNodeWithMember = EntityCondition.makeCondition("description", EntityOperator.LIKE, "countviews%");
+        EntityCondition isNodeWithMember = EntityCondition.makeCondition("testingId", EntityOperator.NOT_EQUAL, GenericEntity.NULL_FIELD);
         List<GenericValue> nodeWithMembers = delegator.findList("TestingNodeAndMember", isNodeWithMember, null, null, null, false);
 
         for (GenericValue v: nodeWithMembers) {
@@ -357,8 +353,7 @@ public class EntityTestSuite extends EntityTestCase {
                 Debug.logInfo(field.toString() + " = " + ((value == null) ? "[null]" : value), module);
             }
         }
-        EntityCondition isMember = EntityCondition.makeCondition("testingTypeId", "TEST-COUNT");
-        long testingcount = delegator.findCountByCondition("Testing", isMember, null, null);
+        long testingcount = delegator.findCountByCondition("Testing", null, null, null);
         assertEquals("Number of views should equal number of created entities in the test.", testingcount, nodeWithMembers.size());
     }
 
@@ -436,7 +431,7 @@ public class EntityTestSuite extends EntityTestCase {
     /*
      * Tests foreign key integrity by trying to remove an entity which has foreign-key dependencies.  Should cause an exception.
      */
-    public void testForeignKeyRemove() throws Exception {
+    public void testForeignKeyRemove() {
         try {
             String helperName = delegator.getEntityHelper("TestingNode").getHelperName();
             DatasourceInfo datasourceInfo = EntityConfigUtil.getDatasourceInfo(helperName);
@@ -447,20 +442,13 @@ public class EntityTestSuite extends EntityTestCase {
         } catch (GenericEntityException e) {
             Debug.logError(e, module);
         }
-        flushAndRecreateTree("fkr");
-        createNodeMembers("TEST-FKR", "foreign-key-remove-testing", "fkr");
         GenericEntityException caught = null;
-        int deleteNumber = 0;
-        EntityCondition isLevel1 = EntityCondition.makeCondition("primaryParentNodeId", EntityOperator.NOT_EQUAL, GenericEntity.NULL_FIELD);
         try {
-            long nodeSize = delegator.findCountByCondition("TestingNode", isLevel1, null, null);
-            assertTrue("Deleted foreignKey failed because no element match condition", 0 < nodeSize);
-            deleteNumber = delegator.removeByCondition("TestingNode", isLevel1);
+            EntityCondition isLevel1 = EntityCondition.makeCondition("description", EntityOperator.EQUALS, "node-level #1");
+            delegator.removeByCondition("TestingNode", isLevel1);
         } catch (GenericEntityException e) {
             caught = e;
-            deleteNumber = 0;
         }
-        assertEquals("Deleted TestingNode", 0, deleteNumber);
         assertNotNull("Foreign key referential integrity is not observed for remove (DELETE)", caught);
         Debug.logInfo(caught.toString(), module);
     }
@@ -497,7 +485,7 @@ public class EntityTestSuite extends EntityTestCase {
      */
     public void testStoreByCondition() throws Exception {
         // change the description of all the level1 nodes
-        EntityCondition isLevel1 = EntityCondition.makeCondition("primaryParentNodeId", EntityOperator.NOT_EQUAL, GenericEntity.NULL_FIELD);
+        EntityCondition isLevel1 = EntityCondition.makeCondition("description", EntityOperator.EQUALS, "node-level #1");
         Map<String, String> fieldsToSet = UtilMisc.toMap("description", "node-level #1 (updated)");
         delegator.storeByCondition("TestingNode", fieldsToSet, isLevel1);
         List<GenericValue> updatedNodes = delegator.findByAnd("TestingNode", fieldsToSet);
@@ -806,42 +794,5 @@ public class EntityTestSuite extends EntityTestCase {
         }
         strBufTemp.append(iNum);
         return strBufTemp.toString();
-    }
-
-    protected void createNodeMembers(String typeId, String typeDescription, String descriptionPrefix) throws GenericEntityException {
-        delegator.removeByCondition("TestingType", EntityCondition.makeCondition("testingTypeId", EntityOperator.EQUALS, typeId));
-        delegator.create("TestingType", "testingTypeId", typeId, "description", typeDescription);
-        int i = 0;
-        Timestamp now = UtilDateTime.nowTimestamp();
-        for (GenericValue node: delegator.findList("TestingNode", EntityCondition.makeCondition("description", EntityOperator.LIKE, descriptionPrefix + "%"), null, null, null, false)) {
-            if (i % 2 == 0) {
-                GenericValue testing = delegator.create("Testing", "testingId", descriptionPrefix + ":" + node.get("testingNodeId"), "testingTypeId", typeId, "description", node.get("description"));
-                GenericValue member = delegator.makeValue("TestingNodeMember",
-                        "testingNodeId", node.get("testingNodeId"),
-                        "testingId", testing.get("testingId")
-                        );
-                member.put("fromDate", now);
-                member.put("thruDate", UtilDateTime.getNextDayStart(now));
-                member.create();
-            }
-            i++;
-        }
-    }
-
-    protected void createNodeMembersForEach(String typeId, String typeDescription, String descriptionPrefix) throws GenericEntityException {
-        delegator.removeByCondition("TestingType", EntityCondition.makeCondition("testingTypeId", EntityOperator.EQUALS, typeId));
-        delegator.create("TestingType", "testingTypeId", typeId, "description", typeDescription);
-        Timestamp now = UtilDateTime.nowTimestamp();
-        for (GenericValue node: delegator.findList("TestingNode", EntityCondition.makeCondition("description", EntityOperator.LIKE, descriptionPrefix + "%"), null, null, null, false)) {
-            GenericValue testing = delegator.create("Testing", "testingId", descriptionPrefix + ":" + node.get("testingNodeId"), "testingTypeId", typeId, "description", node.get("description"));
-            GenericValue member = delegator.makeValue("TestingNodeMember",
-                    "testingNodeId", node.get("testingNodeId"),
-                    "testingId", testing.get("testingId")
-                    );
-
-            member.put("fromDate", now);
-            member.put("thruDate", UtilDateTime.getNextDayStart(now));
-            member.create();
-        }
     }
 }

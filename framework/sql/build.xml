@@ -61,7 +61,7 @@ under the License.
     </target>
 
     <target name="classes" depends="prepare,gen-src">
-        <javac17/>
+        <javac16/>
     </target>
 
     <target name="jar" depends="classes">

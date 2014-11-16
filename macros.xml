@@ -23,12 +23,12 @@ under the License.
  </condition>
  <fail unless="antatleast171" message="Please upgrade ant to at least 1.7.1"/>
 
- <condition property="javaatleast17">
+ <condition property="javaatleast16">
   <not>
-   <matches pattern="^1\.[0-6]($|\..*)" string="${ant.java.version}"/>
+   <matches pattern="^1\.[0-5]($|\..*)" string="${ant.java.version}"/>
   </not>
  </condition>
- <fail unless="javaatleast17" message="Please upgrade java to at least 1.6"/>
+ <fail unless="javaatleast16" message="Please upgrade java to at least 1.6"/>
 
  <dirname property="ofbiz.home.dir" file="${ant.file.Ant - Macros}"/>
  <macrodef name="iterate">
@@ -77,8 +77,8 @@ under the License.
   </javac>
  </presetdef>
 
- <presetdef name="javac17">
-  <default-javac compiler="javac1.7" target="1.7" source="1.7" encoding="UTF-8" sourcepathref="src-path" includeantruntime="false">
+ <presetdef name="javac16">
+  <default-javac compiler="javac1.6" target="1.6" source="1.6" encoding="UTF-8" sourcepathref="src-path" includeantruntime="false">
    <compilerarg value="-Xlint:-path"/>
    <!--
    Please leave this line here.  It makes it easier to enable/disable it.
@@ -122,7 +122,7 @@ under the License.
         <exclude name="**/JpCacheIncludeTransform.java"/>             
         <exclude name="**/shark/"/>
       </fileset>
-      <link href="https://docs.oracle.com/javase/7/docs/api/" offline="true" packagelistLoc="${ofbiz.home.dir}/tools/api-java17"/>
+      <link href="http://java.sun.com/javase/6/docs/api/" offline="true" packagelistLoc="${ofbiz.home.dir}/tools/api-java16"/>
     </javadoc>
  </presetdef>
 
