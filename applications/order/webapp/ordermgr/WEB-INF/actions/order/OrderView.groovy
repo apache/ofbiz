@@ -25,7 +25,6 @@ import org.ofbiz.entity.condition.*;
 import org.ofbiz.entity.util.*;
 import org.ofbiz.base.util.*;
 import org.ofbiz.base.util.collections.*;
-import org.ofbiz.entity.util.EntityQuery;
 import org.ofbiz.order.order.*;
 import org.ofbiz.party.contact.*;
 import org.ofbiz.product.inventory.InventoryWorker;
@@ -59,8 +58,8 @@ orderAdjustments = null;
 comments = null;
 
 if (orderId) {
-    orderHeader = delegator.findOne("OrderHeader", [orderId : orderId], false);
-    comments = EntityQuery.use(delegator).select("orderItemSeqId", "changeComments", "changeDatetime", "changeUserLogin").from("OrderItemChange").where(UtilMisc.toList(EntityCondition.makeCondition("orderId", EntityOperator.EQUALS, orderId))).orderBy("-changeDatetime").queryList();
+    orderHeader = from('OrderHeader').where('orderId', orderId).cache(false).queryFirst();
+    comments = select("orderItemSeqId", "changeComments", "changeDatetime", "changeUserLogin").from("OrderItemChange").where(UtilMisc.toList(EntityCondition.makeCondition("orderId", EntityOperator.EQUALS, orderId))).orderBy("-changeDatetime").queryList();
 }
 
 if (orderHeader) {
@@ -325,7 +324,7 @@ if (orderHeader) {
     }
 
     // get inventory summary for each shopping cart product item
-    inventorySummary = dispatcher.runSync("getProductInventorySummaryForItems", [orderItems : orderItems]);
+    inventorySummary = runService('getProductInventorySummaryForItems', [orderItems : orderItems])
     context.availableToPromiseMap = inventorySummary.availableToPromiseMap;
     context.quantityOnHandMap = inventorySummary.quantityOnHandMap;
     context.mktgPkgATPMap = inventorySummary.mktgPkgATPMap;
@@ -337,7 +336,7 @@ if (orderHeader) {
     if (productStore) {
         facility = productStore.getRelatedOne("Facility", false);
         if (facility) {
-            inventorySummaryByFacility = dispatcher.runSync("getProductInventorySummaryForItems", [orderItems : orderItems, facilityId : facility.facilityId]);
+            inventorySummaryByFacility = runService("getProductInventorySummaryForItems", [orderItems : orderItems, facilityId : facility.facilityId]);
             context.availableToPromiseByFacilityMap = inventorySummaryByFacility.availableToPromiseMap;
             context.quantityOnHandByFacilityMap = inventorySummaryByFacility.quantityOnHandMap;
             context.facility = facility;
@@ -396,8 +395,7 @@ if (orderHeader) {
     productionMap = [:];
     productIds.each { productId ->
         if (productId) {  // avoid order items without productIds, such as bulk order items
-            contextInput = [productId : productId, userLogin : userLogin];
-            resultOutput = dispatcher.runSync("getProductManufacturingSummaryByFacility", contextInput);
+            resultOutput = runService("getProductManufacturingSummaryByFacility", [productId : productId]);
             manufacturingInQuantitySummaryByFacility = resultOutput.summaryInByFacility;
             Double productionQuantity = 0;
             manufacturingInQuantitySummaryByFacility.values().each { manQuantity ->
@@ -433,7 +431,7 @@ if (orderHeader) {
 
     // Get a map of returnable items
     returnableItems = [:];
-    returnableItemServiceMap = dispatcher.runSync("getReturnableItems", [orderId : orderId]);
+    returnableItemServiceMap = run service: 'getReturnableItems', with: [orderId : orderId]
     if (returnableItemServiceMap.returnableItems) {
         returnableItems = returnableItemServiceMap.returnableItems;
     }
@@ -524,7 +522,7 @@ if (shipments) {
     context.pickedShipmentId = pickedShipmentId;
     if (pickedShipmentId && shipmentRouteSegment.trackingIdNumber) {
         if ("UPS" == shipmentRouteSegment.carrierPartyId && productStore) {
-            resultMap = dispatcher.runSync('upsShipmentAlternateRatesEstimate', [productStoreId: productStore.productStoreId, shipmentId: pickedShipmentId]);
+            resultMap = runService('upsShipmentAlternateRatesEstimate', [productStoreId: productStore.productStoreId, shipmentId: pickedShipmentId]);
             shippingRates = resultMap.shippingRates;
             shippingRateList = [];
             shippingRates.each { shippingRate ->

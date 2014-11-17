@@ -24,7 +24,7 @@
 
 import org.ofbiz.base.util.*;
 import org.ofbiz.entity.*;
-import org.ofbiz.entity.util.*;
+import org.ofbiz.entity.util.EntityQuery;
 import org.ofbiz.service.*;
 import org.ofbiz.product.product.ProductContentWrapper;
 import org.ofbiz.product.config.ProductConfigWorker;
@@ -52,6 +52,14 @@ if (cart.isSalesOrder()) {
     context.productStoreId = productStoreId;
     facilityId = productStore.inventoryFacilityId;
 }
+
+if (!facilityId) {
+    productStoreFacility = EntityQuery.use(delegator).select("facilityId").from("ProductStoreFacility").where(UtilMisc.toList(EntityCondition.makeCondition("productStoreId", EntityOperator.EQUALS, productStoreId))).queryFirst();
+    if (productStoreFacility) {
+        facilityId = productStoreFacility.facilityId;
+    }
+}
+
 autoUserLogin = session.getAttribute("autoUserLogin");
 userLogin = session.getAttribute("userLogin");
 
