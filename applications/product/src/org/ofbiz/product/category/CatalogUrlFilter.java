@@ -36,7 +36,6 @@ import javolution.util.FastList;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.StringUtil;
 import org.ofbiz.base.util.StringUtil.StringWrapper;
-import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.common.UrlServletHelper;
 import org.ofbiz.entity.Delegator;
@@ -51,37 +50,37 @@ import org.ofbiz.webapp.control.ContextFilter;
 public class CatalogUrlFilter extends ContextFilter {
 
     public final static String module = CatalogUrlFilter.class.getName();
-
+    
     public static final String CONTROL_MOUNT_POINT = "control";
     public static final String PRODUCT_REQUEST = "product";
     public static final String CATEGORY_REQUEST = "category";
-
+    
     protected static String defaultLocaleString = null;
     protected static String redirectUrl = null;
-
+    
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
         HttpServletRequest httpRequest = (HttpServletRequest) request;
         HttpServletResponse httpResponse = (HttpServletResponse) response;
         Delegator delegator = (Delegator) httpRequest.getSession().getServletContext().getAttribute("delegator");
-
-        // Get ServletContext
+        
+        //Get ServletContext
         ServletContext servletContext = config.getServletContext();
-
-        // Set request attribute and session
+        
+        //Set request attribute and session
         UrlServletHelper.setRequestAttributes(request, delegator, servletContext);
-
+        
         // set initial parameters
         String initDefaultLocalesString = config.getInitParameter("defaultLocaleString");
         String initRedirectUrl = config.getInitParameter("redirectUrl");
         defaultLocaleString = UtilValidate.isNotEmpty(initDefaultLocalesString) ? initDefaultLocalesString : "";
         redirectUrl = UtilValidate.isNotEmpty(initRedirectUrl) ? initRedirectUrl : "";
-
+        
         String pathInfo = httpRequest.getServletPath();
         if (UtilValidate.isNotEmpty(pathInfo)) {
             List<String> pathElements = StringUtil.split(pathInfo, "/");
             String alternativeUrl = pathElements.get(0);
-
+            
             String productId = null;
             String productCategoryId = null;
             String urlContentId = null;
@@ -91,13 +90,11 @@ public class CatalogUrlFilter extends ContextFilter {
                     List<EntityCondition> productContentConds = FastList.newInstance();
                     productContentConds.add(EntityCondition.makeCondition("productContentTypeId", "ALTERNATIVE_URL"));
                     productContentConds.add(EntityUtil.getFilterByDateExpr());
-                    List<GenericValue> productContentInfos = delegator.findList("ProductContentAndInfo", EntityCondition.makeCondition(productContentConds), null,
-                            UtilMisc.toList("-fromDate"), null, true);
+                    List<GenericValue> productContentInfos = EntityQuery.use(delegator).from("ProductContentAndInfo").where(productContentConds).orderBy("-fromDate").cache(true).queryList();
                     if (UtilValidate.isNotEmpty(productContentInfos)) {
                         for (GenericValue productContentInfo : productContentInfos) {
                             String contentId = (String) productContentInfo.get("contentId");
-                            List<GenericValue> ContentAssocDataResourceViewTos = delegator.findByAnd("ContentAssocDataResourceViewTo",
-                                    UtilMisc.toMap("contentIdStart", contentId, "caContentAssocTypeId", "ALTERNATE_LOCALE", "drDataResourceTypeId", "ELECTRONIC_TEXT"), null, true);
+                            List<GenericValue> ContentAssocDataResourceViewTos = EntityQuery.use(delegator).where("ContentAssocDataResourceViewTo").where("contentIdStart", contentId, "caContentAssocTypeId", "ALTERNATE_LOCALE", "drDataResourceTypeId", "ELECTRONIC_TEXT").cache(true).queryList();
                             if (UtilValidate.isNotEmpty(ContentAssocDataResourceViewTos)) {
                                 for (GenericValue ContentAssocDataResourceViewTo : ContentAssocDataResourceViewTos) {
                                     GenericValue ElectronicText = ContentAssocDataResourceViewTo.getRelatedOne("ElectronicText", true);
@@ -118,8 +115,7 @@ public class CatalogUrlFilter extends ContextFilter {
                                 }
                             }
                             if (UtilValidate.isEmpty(productId)) {
-                                List<GenericValue> contentDataResourceViews = delegator.findByAnd("ContentDataResourceView",
-                                        UtilMisc.toMap("contentId", contentId, "drDataResourceTypeId", "ELECTRONIC_TEXT"), null, true);
+                                List<GenericValue> contentDataResourceViews = EntityQuery.use(delegator).where("ContentDataResourceView").where("contentId", contentId, "drDataResourceTypeId", "ELECTRONIC_TEXT").cache(true).queryList();
                                 for (GenericValue contentDataResourceView : contentDataResourceViews) {
                                     GenericValue ElectronicText = contentDataResourceView.getRelatedOne("ElectronicText", true);
                                     if (UtilValidate.isNotEmpty(ElectronicText)) {
@@ -143,19 +139,17 @@ public class CatalogUrlFilter extends ContextFilter {
                         }
                     }
                 }
-
+                
                 // look for productCategoryId
                 if (alternativeUrl.endsWith("-c")) {
                     List<EntityCondition> productCategoryContentConds = FastList.newInstance();
                     productCategoryContentConds.add(EntityCondition.makeCondition("prodCatContentTypeId", "ALTERNATIVE_URL"));
                     productCategoryContentConds.add(EntityUtil.getFilterByDateExpr());
-                    List<GenericValue> productCategoryContentInfos = delegator.findList("ProductCategoryContentAndInfo",
-                            EntityCondition.makeCondition(productCategoryContentConds), null, UtilMisc.toList("-fromDate"), null, true);
+                    List<GenericValue> productCategoryContentInfos = EntityQuery.use(delegator).from("ProductCategoryContentAndInfo").where(productCategoryContentConds).orderBy("-fromDate").cache(true).queryList();
                     if (UtilValidate.isNotEmpty(productCategoryContentInfos)) {
                         for (GenericValue productCategoryContentInfo : productCategoryContentInfos) {
                             String contentId = (String) productCategoryContentInfo.get("contentId");
-                            List<GenericValue> ContentAssocDataResourceViewTos = delegator.findByAnd("ContentAssocDataResourceViewTo",
-                                    UtilMisc.toMap("contentIdStart", contentId, "caContentAssocTypeId", "ALTERNATE_LOCALE", "drDataResourceTypeId", "ELECTRONIC_TEXT"), null, true);
+                            List<GenericValue> ContentAssocDataResourceViewTos = EntityQuery.use(delegator).from("ContentAssocDataResourceViewTo").where("contentIdStart", contentId, "caContentAssocTypeId", "ALTERNATE_LOCALE", "drDataResourceTypeId", "ELECTRONIC_TEXT").cache(true).queryList();
                             if (UtilValidate.isNotEmpty(ContentAssocDataResourceViewTos)) {
                                 for (GenericValue ContentAssocDataResourceViewTo : ContentAssocDataResourceViewTos) {
                                     GenericValue ElectronicText = ContentAssocDataResourceViewTo.getRelatedOne("ElectronicText", true);
@@ -178,8 +172,7 @@ public class CatalogUrlFilter extends ContextFilter {
                                 }
                             }
                             if (UtilValidate.isEmpty(productCategoryId)) {
-                                List<GenericValue> contentDataResourceViews = delegator.findByAnd("ContentDataResourceView",
-                                        UtilMisc.toMap("contentId", contentId, "drDataResourceTypeId", "ELECTRONIC_TEXT"), null, true);
+                                List<GenericValue> contentDataResourceViews = EntityQuery.use(delegator).from("ContentDataResourceView").where("contentId", contentId, "drDataResourceTypeId", "ELECTRONIC_TEXT").cache(true).queryList();
                                 for (GenericValue contentDataResourceView : contentDataResourceViews) {
                                     GenericValue ElectronicText = contentDataResourceView.getRelatedOne("ElectronicText", true);
                                     if (UtilValidate.isNotEmpty(ElectronicText)) {
@@ -207,18 +200,17 @@ public class CatalogUrlFilter extends ContextFilter {
             } catch (GenericEntityException e) {
                 Debug.logWarning("Cannot look for product and product category", module);
             }
-
+            
             // generate forward URL
             StringBuilder urlBuilder = new StringBuilder();
             urlBuilder.append("/" + CONTROL_MOUNT_POINT);
-
+            
             if (UtilValidate.isNotEmpty(productId)) {
                 try {
                     List<EntityCondition> conds = FastList.newInstance();
                     conds.add(EntityCondition.makeCondition("productId", productId));
                     conds.add(EntityUtil.getFilterByDateExpr());
-                    List<GenericValue> productCategoryMembers = delegator.findList("ProductCategoryMember", EntityCondition.makeCondition(conds),
-                            UtilMisc.toSet("productCategoryId"), UtilMisc.toList("-fromDate"), null, true);
+                    List<GenericValue> productCategoryMembers = EntityQuery.use(delegator).select("productCategoryId").from("ProductCategoryMember").where(conds).orderBy("-fromDate").cache(true).queryList();
                     if (UtilValidate.isNotEmpty(productCategoryMembers)) {
                         GenericValue productCategoryMember = EntityUtil.getFirst(productCategoryMembers);
                         productCategoryId = productCategoryMember.getString("productCategoryId");
@@ -227,7 +219,7 @@ public class CatalogUrlFilter extends ContextFilter {
                     Debug.logError(e, "Cannot find product category for product: " + productId, module);
                 }
                 urlBuilder.append("/" + PRODUCT_REQUEST);
-
+                
             } else {
                 urlBuilder.append("/" + CATEGORY_REQUEST);
             }
@@ -236,15 +228,14 @@ public class CatalogUrlFilter extends ContextFilter {
             String topCategoryId = CategoryWorker.getCatalogTopCategory(httpRequest, null);
             List<GenericValue> trailCategories = CategoryWorker.getRelatedCategoriesRet(httpRequest, "trailCategories", topCategoryId, false, false, true);
             List<String> trailCategoryIds = EntityUtil.getFieldListFromEntityList(trailCategories, "productCategoryId", true);
-
+            
             // look for productCategoryId from productId
             if (UtilValidate.isNotEmpty(productId)) {
                 try {
                     List<EntityCondition> rolllupConds = FastList.newInstance();
                     rolllupConds.add(EntityCondition.makeCondition("productId", productId));
                     rolllupConds.add(EntityUtil.getFilterByDateExpr());
-                    List<GenericValue> productCategoryMembers = delegator.findList("ProductCategoryMember", EntityCondition.makeCondition(rolllupConds), null,
-                            UtilMisc.toList("-fromDate"), null, true);
+                    List<GenericValue> productCategoryMembers = EntityQuery.use(delegator).from("ProductCategoryMember").where(rolllupConds).orderBy("-fromDate").cache(true).queryList();
                     for (GenericValue productCategoryMember : productCategoryMembers) {
                         String trailCategoryId = productCategoryMember.getString("productCategoryId");
                         if (trailCategoryIds.contains(trailCategoryId)) {
@@ -268,8 +259,7 @@ public class CatalogUrlFilter extends ContextFilter {
                         List<EntityCondition> rolllupConds = FastList.newInstance();
                         rolllupConds.add(EntityCondition.makeCondition("productCategoryId", parentProductCategoryId));
                         rolllupConds.add(EntityUtil.getFilterByDateExpr());
-                        List<GenericValue> productCategoryRollups = delegator.findList("ProductCategoryRollup", EntityCondition.makeCondition(rolllupConds), null,
-                                UtilMisc.toList("-fromDate"), null, true);
+                        List<GenericValue> productCategoryRollups = EntityQuery.use(delegator).from("ProductCategoryRollup").where(rolllupConds).orderBy("-fromDate").cache(true).queryList();
                         if (UtilValidate.isNotEmpty(productCategoryRollups)) {
                             // add only categories that belong to the top category to trail
                             for (GenericValue productCategoryRollup : productCategoryRollups) {
@@ -288,7 +278,7 @@ public class CatalogUrlFilter extends ContextFilter {
                     }
                 }
                 Collections.reverse(trailElements);
-
+                
                 List<String> trail = CategoryWorker.getTrail(httpRequest);
                 if (trail == null) {
                     trail = FastList.newInstance();
@@ -300,7 +290,7 @@ public class CatalogUrlFilter extends ContextFilter {
                     previousCategoryId = trail.get(trail.size() - 1);
                 }
                 trail = CategoryWorker.adjustTrail(trail, productCategoryId, previousCategoryId);
-
+                
                 if (trailElements.size() == 1) {
                     CategoryWorker.setTrail(request, trailElements.get(0), null);
                 } else if (trailElements.size() == 2) {
@@ -322,14 +312,14 @@ public class CatalogUrlFilter extends ContextFilter {
                 }
 
                 request.setAttribute("productCategoryId", productCategoryId);
-
+                
                 if (productId != null) {
                     request.setAttribute("product_id", productId);
                     request.setAttribute("productId", productId);
                 }
             }
-
-            // Set view query parameters
+            
+            //Set view query parameters
             UrlServletHelper.setViewQueryParameters(request, urlBuilder);
             if (UtilValidate.isNotEmpty(productId) || UtilValidate.isNotEmpty(productCategoryId) || UtilValidate.isNotEmpty(urlContentId)) {
                 Debug.logInfo("[Filtered request]: " + pathInfo + " (" + urlBuilder + ")", module);
@@ -337,35 +327,32 @@ public class CatalogUrlFilter extends ContextFilter {
                 dispatch.forward(request, response);
                 return;
             }
-
-            // Check path alias
+            
+            //Check path alias
             UrlServletHelper.checkPathAlias(request, httpResponse, delegator, pathInfo);
         }
-
+        
         // we're done checking; continue on
         chain.doFilter(request, response);
     }
-
-    public static String makeCategoryUrl(HttpServletRequest request, String previousCategoryId, String productCategoryId, String productId, String viewSize, String viewIndex,
-            String viewSort, String searchString) {
+    
+    public static String makeCategoryUrl(HttpServletRequest request, String previousCategoryId, String productCategoryId, String productId, String viewSize, String viewIndex, String viewSort, String searchString) {
         Delegator delegator = (Delegator) request.getAttribute("delegator");
         try {
             GenericValue productCategory = EntityQuery.use(delegator).from("ProductCategory").where("productCategoryId", productCategoryId).cache().queryOne();
             CategoryContentWrapper wrapper = new CategoryContentWrapper(productCategory, request);
             List<String> trail = CategoryWorker.getTrail(request);
-            return makeCategoryUrl(delegator, wrapper, trail, request.getContextPath(), previousCategoryId, productCategoryId, productId, viewSize, viewIndex, viewSort,
-                    searchString);
+            return makeCategoryUrl(delegator, wrapper, trail, request.getContextPath(), previousCategoryId, productCategoryId, productId, viewSize, viewIndex, viewSort, searchString);
         } catch (GenericEntityException e) {
             Debug.logWarning(e, "Cannot create category's URL for: " + productCategoryId, module);
             return redirectUrl;
         }
     }
 
-    public static String makeCategoryUrl(Delegator delegator, CategoryContentWrapper wrapper, List<String> trail, String contextPath, String previousCategoryId,
-            String productCategoryId, String productId, String viewSize, String viewIndex, String viewSort, String searchString) {
+    public static String makeCategoryUrl(Delegator delegator, CategoryContentWrapper wrapper, List<String> trail, String contextPath, String previousCategoryId, String productCategoryId, String productId, String viewSize, String viewIndex, String viewSort, String searchString) {
         String url = "";
         StringWrapper alternativeUrl = wrapper.get("ALTERNATIVE_URL");
-
+        
         if (UtilValidate.isNotEmpty(alternativeUrl) && UtilValidate.isNotEmpty(alternativeUrl.toString())) {
             StringBuilder urlBuilder = new StringBuilder();
             urlBuilder.append(contextPath);
@@ -409,9 +396,9 @@ public class CatalogUrlFilter extends ContextFilter {
                 urlBuilder.append("searchString=" + searchString + "&");
             }
             if (urlBuilder.toString().endsWith("&")) {
-                return urlBuilder.toString().substring(0, urlBuilder.toString().length() - 1);
+                return urlBuilder.toString().substring(0, urlBuilder.toString().length()-1);
             }
-
+            
             url = urlBuilder.toString();
         } else {
             if (UtilValidate.isEmpty(trail)) {
@@ -419,10 +406,10 @@ public class CatalogUrlFilter extends ContextFilter {
             }
             url = CatalogUrlServlet.makeCatalogUrl(contextPath, trail, productId, productCategoryId, previousCategoryId);
         }
-
+        
         return url;
     }
-
+    
     public static String makeProductUrl(HttpServletRequest request, String previousCategoryId, String productCategoryId, String productId) {
         Delegator delegator = (Delegator) request.getAttribute("delegator");
         String url = null;
@@ -438,8 +425,7 @@ public class CatalogUrlFilter extends ContextFilter {
         return url;
     }
 
-    public static String makeProductUrl(Delegator delegator, ProductContentWrapper wrapper, List<String> trail, String contextPath, String previousCategoryId,
-            String productCategoryId, String productId) {
+    public static String makeProductUrl(Delegator delegator, ProductContentWrapper wrapper, List<String> trail, String contextPath, String previousCategoryId, String productCategoryId, String productId) {
         String url = "";
         StringWrapper alternativeUrl = wrapper.get("ALTERNATIVE_URL");
         if (UtilValidate.isNotEmpty(alternativeUrl) && UtilValidate.isNotEmpty(alternativeUrl.toString())) {
