@@ -18,56 +18,64 @@ specific language governing permissions and limitations
 under the License.
 ***********************************************/
 
-//jQuery.noConflict();
-jQuery(document).ready(function() {
-	//Button bar 1. convert buttontext to btn btn-primary
-	jQuery('div.button-bar a.buttontext').each(function(){
-		var text = jQuery(this).html();
-		var icon = "";
-		var isCreate = jQuery(this).hasClass("create");//Check for create class
-		if(isCreate == true){
-			var icon = '<span class="glyphicon glyphicon-plus"></span> '
+//GLOBAL NAMESPACE
+var OFBOOT = window.OFBOOT || {};
+
+/**************************************************
+SCREEN DOM MANIPULATION
+builds main-nav/preferences dropdowns and 
+adds functionality to style layout elements
+**************************************************/
+//Screen transforms
+OFBOOT.screenTransform = function(){
+	if(jQuery('div.screenlet')){
+		jQuery('div.screenlet').removeClass( "screenlet" ).addClass( "panel panel-default" );
+		if('div.screenlet-body'){
+			jQuery('div.screenlet-body').removeClass("screenlet-body").addClass("panel-body");
 		}
-		var isDelete = jQuery(this).hasClass("delete");//Check for delete class
-		if(isDelete == true){
-			var icon = '<span class="glyphicon glyphicon-remove"></span> '
-		}
-		var isRefresh = jQuery(this).hasClass("refresh");//Check for refresh class
-		if(isRefresh == true){
-			var icon = '<span class="glyphicon glyphicon-refresh"></span> '
-		}
-		var isSearch = jQuery(this).hasClass("search");//Check for search class
-		if(isSearch == true){
-			var icon = '<span class="glyphicon glyphicon-search"></span> '
-		}
-		jQuery(this).html(icon+text);
-		jQuery('div.button-bar a.buttontext').removeClass('buttontext').addClass('btn btn-primary btn-sm');
-	});
-	//Screenlet transforms
-	jQuery('div.screenlet').removeClass( "screenlet" ).addClass( "panel panel-default" );
-	jQuery('div.screenlet-title-bar').removeClass( "screenlet-title-bar" ).addClass( "panel-heading" );
+	}
+	if(jQuery('div.screenlet-title-bar')){
+		jQuery('div.screenlet-title-bar').removeClass( "screenlet-title-bar" ).addClass( "panel-heading" );
+	}
 	//Replace panel-heading ul with panel-title for screenlets defined in ftls
-	jQuery('div.panel-heading').each(function(){
-		var hasUl = jQuery(this).has("ul").length;
-		if(!hasUl == 0){
-			//var title = jQuery( "div.panel-heading ul li.h3" ).text();
-			var title = jQuery(this).find("li.h3").text();
-			jQuery(this).find("li.h3").replaceWith(
-					'<div class="pull-left"><h3 class="panel-title">'+ title + '</h3></div>'
-					);
-			jQuery(this).find('div.pull-left').unwrap();
-			jQuery(this).find('li').wrapAll('<ul class="pull-right"></ul>');
-			//jQuery(console.log(title));
-		}
-	});
-	
-	//Table lists transforms for tables defined in xml forms
-	jQuery('tr.alternate-row').removeClass('alternate-row');
-	jQuery('table.basic-table.hover-bar').removeClass().addClass("table").addClass("table-hover").addClass("table-striped").addClass("table-condensed");
-	jQuery('table tr td a.buttontext').removeClass("buttontext").addClass("btn btn-link btn-block").css("text-align","left");
-	
-	//Ftl forms transforms
-	jQuery('div.screenlet-body').removeClass("screenlet-body").addClass("panel-body");
+	if('div.panel-heading'){
+		jQuery('div.panel-heading').each(function(){
+			var hasUl = jQuery(this).has("ul").length;
+			if(!hasUl == 0){
+				//var title = jQuery( "div.panel-heading ul li.h3" ).text();
+				var title = jQuery(this).find("li.h3").text();
+				jQuery(this).find("li.h3").replaceWith(
+						'<div class="pull-left"><h3 class="panel-title">'+ title + '</h3></div>'
+						);
+				jQuery(this).find('div.pull-left').unwrap();
+				jQuery(this).find('li').wrapAll('<ul class="pull-right"></ul>');
+				//jQuery(console.log(title));
+			}
+		});
+	}
+}
+/***********************
+TABLE LISTS TRANSFORMS
+transforming tables  
+*****************************************************/
+OFBOOT.tableTranforms = function(){
+	if(jQuery('tr.alternate-row')){
+		jQuery('tr.alternate-row').removeClass('alternate-row');
+	}
+	if(jQuery('table.basic-table.hover-bar')){
+		jQuery('table.basic-table.hover-bar').removeClass().addClass("table").addClass("table-hover").addClass("table-striped").addClass("table-condensed");
+	}
+	if(jQuery('table tr td a.buttontext')){
+		jQuery('table tr td a.buttontext').removeClass("buttontext").addClass("btn btn-link btn-block").css("text-align","left");
+	}
+}
+/****************************
+ Ftl form transforms
+ ******************************/
+OFBOOT.formTranforms = function(){
+	if(jQuery('div.screenlet-body')){
+		jQuery('div.screenlet-body').removeClass("screenlet-body").addClass("panel-body");
+	}
 	jQuery('form').each(function(){
 		var hasRole = jQuery(this).is("[role]");
 		if(hasRole == false){
@@ -162,10 +170,23 @@ jQuery(document).ready(function() {
 			}*/
 		}
 	});
+}
+/************************
+ * Miscellanous Transforms
+ ******************************/
+OFBOOT.miscTranforms = function(){
 	//Misc transforms
 	jQuery('div.topcontainerhidden').removeClass('topcontainerhidden').addClass('panel panel-default');
 	jQuery('td.label').removeClass('label').addClass('table-label');
 	jQuery('table.basic-table').removeClass('basic-table').addClass('table table-condensed table-striped');
-	//jQuery('button.ui-datepicker-trigger').html('<span class="glyphicon glyphicon-calendar"></span>').addClass('btn btn-primary btn-sm');
+}
+/**************************************************
+LOAD 'EM UP
+**************************************************/
+//LOAD GLOBAL BOOTSTRAP FUNCTIONS
+jQuery(window).load(function(){
+	OFBOOT.screenTransform();
+	OFBOOT.tableTranforms();
+	OFBOOT.formTranforms();
+	OFBOOT.miscTranforms();
 });
-
