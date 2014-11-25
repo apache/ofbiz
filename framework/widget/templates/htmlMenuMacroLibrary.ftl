@@ -31,7 +31,7 @@ under the License.
       <ul>
 </#macro>
 
-<#macro renderMenuEnd boundaryComment="">
+<#macro renderMenuEnd boundaryComment="" style="">
       </ul>
     </li>
   </ul>

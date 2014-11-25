@@ -28,6 +28,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.ofbiz.base.location.FlexibleLocation;
+import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilHttp;
 import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.base.util.UtilXml;
@@ -115,5 +116,33 @@ public class MenuFactory {
             throw new IllegalArgumentException("Could not find menu with name [" + menuName + "] in location [" + resourceName + "]");
         }
         return modelMenu;
+    }
+    
+    public static Map<String, ModelMenu> getMenusFromLocation(String resourceName)
+    	throws IOException, SAXException, ParserConfigurationException {
+    	Map<String, ModelMenu> modelMenuMap = menuLocationCache.get(resourceName);
+    	if (modelMenuMap == null) {
+    		synchronized (MenuFactory.class) {
+    			modelMenuMap = menuLocationCache.get(resourceName);
+    			if (modelMenuMap == null) {
+    				long startTime = System.currentTimeMillis();
+    				URL menuFileUrl = null;
+    				menuFileUrl = FlexibleLocation.resolveLocation(resourceName);
+    				if (menuFileUrl == null) {
+    					throw new IllegalArgumentException("Could not resolve location to URL: " + resourceName);
+    				}
+    				Document menuFileDoc = UtilXml.readXmlDocument(menuFileUrl, true, true);
+    				modelMenuMap = readMenuDocument(menuFileDoc, resourceName);
+    				menuLocationCache.put(resourceName, modelMenuMap);
+    				double totalSeconds = (System.currentTimeMillis() - startTime)/1000.0;
+    				Debug.logInfo("Got " + modelMenuMap.size() + " screens in " + totalSeconds + "s from: " + menuFileUrl.toExternalForm(), module);
+    			}
+    		}
+    	}
+
+    	if (modelMenuMap.isEmpty()) {
+    		throw new IllegalArgumentException("Could not find menu file with name [" + resourceName + "]");
+    	}
+    	return modelMenuMap;
     }
 }
