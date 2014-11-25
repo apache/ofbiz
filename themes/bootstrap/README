@@ -1,0 +1,54 @@
+This is an initial attempt to create a Bootstrap based front-end theme for Apache Ofbiz.
+
+1.	Approach
+
+The following steps were followed in this implementation:
+
+1.1	No screen/form/menu modifications were effected.  This to ensure that other themes are not broken in the process;
+1.2	Existing MacroLibraries were copied from framework/widget/templates to the new theme webapp /includes/templates directory -
+	at this stage only the htmlFormMacroLibrary.ftl, htmlMenuMacroLibrary.ftl and htmlScreenMacroLibrary.ftl files;
+	These files were modified where necessary to accommodate Bootstrap.
+1.3	Bootstrap files were downloaded and placed in the framework/images directory.
+1.4	The Ofbiz Tomahawk theme is used as a base theme (see note on CSS).
+1.5 A javaScript file (bootified.js) has been included to transform widgets defined in ftls. MacroLibraries only cater for widgets defined in *Form.xml,*Menus.xml and *Screens.xml files.
+	It was therefore necessary to provide a small script to perform some DOM manipulations. (See note under issues)
+1.6	It was necessary to make small modifications to two framework java files to achieve greater flexibility with regards to the menu widget:
+	MenuFactory.java - added getMenusFromLocation static method to retieve all menus defined in a particular *Menus.xml;
+	MacroMenuRenderer.java - added "style" to the Map in renderMenuClose method to provide more flexibility;
+	Patches are supplied for both cases. (See note on Navigation)
+	
+2.	CSS
+2.1	A global.css file was created and included as a visualThemeResource.  All stylesheets are imported through this file to ensure that style sheets are loaded in the correct order.
+2.2 The global.css includes (in loading order):
+	@import url("/images/bootstrap/css/bootstrap.css");
+	@import url("legacy.css"); /* Original ofbiz theme stylesheet - in this case style.css in Tomahawk*/
+	@import url("help.css");
+	@import url("javascript.css");
+	@import url("style.css"); /* Base boostrap-ofbiz style - used to style vanilla boostrap */
+2.3 CSS elements in the legacy stylesheet which override the bootstrap.css are commented out.  
+	The idea is not to add new elements to the legacy.css but to systematically reduce it during the course of the development.
+	This will decrease css bloat.
+2.4 All new css elements are defined in the style.css which is loaded last. 
+2.5 More css files can optionally be appended after the style.css.  This can be used to create different skins for the same theme.
+	I have included an additional theme to demonstrate skinning.  Choose the Bootstrap TomaHawk theme to see this in action.
+
+3. Navigation
+3.1	Main Navigation - i.e. Primary and Secondary Apps:  The main navigation is currently not contained/defined in a *Menus.xml file. It is therefore not rendered
+	through the htmlMenuMacroLibrary.ftl.  The header.ftl file is use to produce this nav via getAppBarWebInfosweb method.  Is there a case to define this in a *Menus.xml file?
+3.2	App Navigation:The appheaderTemplate pattern is issued pattern is followed in this case, along with an empty appbar.ftl. This could have been done through the htmlMenuMacroLibrary.ftl, but this method makes dropdowns impossible.
+	Is would be possible to produce an app navigation with dropdowns if sub menus were used in menu definitions.  Although the framework does allow for sub menu definitions, I am yet to see an example of its
+	implementation in Ofbiz. (I stand to be corrected offcourse). In this case dropdown menus are generated using the *TabBar naming pattern - a sub menu is linked to the main item based on the item's name and the sub menu name.
+	Some sub menus are not picked up because of inconsistencies in the naming practices. (See known issues)
+	To get this to work and empty appbar.ftl is used so that the app-nav is is not displayed twice.  Also, the GlobalDecorator screen had to be amended to set the appheaderTemplate location. A patch is provided for this.
+3.3	TabBar Navigation: This is rendered through the htmlMenuMacroLibrary.ftl.
+
+4.	Known Issues
+4.1	Jerky page rendering: Page initially shows unformatted/styled html for a few seconds before showing properly.  This is probably due to the macroLibraries being served as a visualThemeResource.
+	This issue disappears when the widget.properties defs point to the libraries under bootstrap/includes - a restart is required for this!
+	The down side of this is that other themes will not display properly.  This should only be done if you want to use bootstrap themes exclusively.
+4.2 The are probably plenty ftl issues.  A pertinent one is the datepicker.  The datepicker works fine with forms defined in xml.  But FTL forms are problematic.
+
+5.	Work needed
+5.1	Lookup screens;
+5.2	Iconizing buttontext in FTLs.
+5.3	And a lot more ....

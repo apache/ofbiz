@@ -1,0 +1,97 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+ /********************* Tomahawk skin styles *****************/
+
+html,body {
+    background-color: #000;
+}
+
+nav#header-navigation.navbar.navbar-default {
+	background: url("../images/header_top_bg.gif");
+	border-color: #908F8F;
+	}
+	
+nav#app-navigation.navbar.navbar-default {
+	background-image: linear-gradient(to bottom, #fff 0px, #e0e0e0 100%);
+    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.15) inset, 0 1px 5px rgba(0, 0, 0, 0.075);
+}
+
+.navbar-nav li.menuTitle {
+	background-image: linear-gradient(to bottom, #E5B642 0px, #F0D532 100%);
+    background-repeat: repeat-x;
+    background-color: #E5B642;
+}
+.dropdown-menu {
+	background-image: linear-gradient(to bottom, #fff 0px, #e0e0e0 100%);
+}
+
+.panel-default > .panel-heading {
+    background-image: linear-gradient(to bottom, #787777 0px, #F0EFEF 100%);
+    background-repeat: repeat-x;
+}
+
+.panel-default > .panel-heading {
+    background-color: #B1B0B0;
+    border-color: #ddd;
+    color: #fff;
+    text-shadow: 0 1px 0 #484848;
+}
+
+.panel-body {
+    background-color: #F2EFEF;
+}
+
+div.page-title {
+	color:#fff;
+	}
+.nav.navbar-nav li.selected {
+    background-color: #E6BB3F;
+    border-color: #EFD233;
+}
+/********************* Button Styles ************************/
+.btn-primary {
+	background-image: linear-gradient(to bottom, #e5b642 0px, #f0d532 100%);
+    background-repeat: repeat-x;
+    border-color: #EFD978;
+    color: #000;
+}
+/*
+.btn-primary:hover, .btn-primary:focus {
+    background-color: #EFD978;
+    background-position: 0 -15px;
+}
+.btn-primary:active, .btn-primary.active {
+    background-color: #e5b642;
+    border-color: #EFD978;
+}
+*/
+.btn-primary:hover, .btn-primary:focus, .btn-primary:active, .btn-primary.active, .open > .dropdown-toggle.btn-primary {
+    background-color: #EFD978;
+    border-color: #EFD978;
+    color: #000;
+}
+
+td.button-col a {
+	background-image: linear-gradient(to bottom, #e5b642 0px, #f0d532 100%);
+    background-repeat: repeat-x;
+    border-color: #EFD978;
+    border-radius: 2px;
+    color: #000;
+    padding:5px;
+	}
