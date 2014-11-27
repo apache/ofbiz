@@ -32,7 +32,7 @@ under the License.
     <VisualThemeResource visualThemeId="BOOTSTRAP_BASIC" resourceTypeEnumId="VT_HDR_TMPLT_LOC" resourceValue="component://bootstrap/includes/header.ftl" sequenceId="01"/>
     <VisualThemeResource visualThemeId="BOOTSTRAP_BASIC" resourceTypeEnumId="VT_MSG_TMPLT_LOC" resourceValue="component://common/webcommon/includes/messages.ftl" sequenceId="01"/>
     <VisualThemeResource visualThemeId="BOOTSTRAP_BASIC" resourceTypeEnumId="VT_FTR_TMPLT_LOC" resourceValue="component://bootstrap/includes/footer.ftl" sequenceId="01"/>
-    <VisualThemeResource visualThemeId="BOOTSTRAP_BASIC" resourceTypeEnumId="VT_NAV_TMPLT_LOC" resourceValue="component://bootstrap/includes/emptyAppbar.ftl" sequenceId="01"/>
+    <VisualThemeResource visualThemeId="BOOTSTRAP_BASIC" resourceTypeEnumId="VT_NAV_TMPLT_LOC" resourceValue="component://bootstrap/includes/emptyAppBar.ftl" sequenceId="01"/>
     <VisualThemeResource visualThemeId="BOOTSTRAP_BASIC" resourceTypeEnumId="VT_NAV_APPHDR_LOC" resourceValue="component://bootstrap/includes/appbar.ftl" sequenceId="01"/>
     <VisualThemeResource visualThemeId="BOOTSTRAP_BASIC" resourceTypeEnumId="VT_SCREENSHOT" resourceValue="/bootstrap/images/screenshot.jpg" sequenceId="01"/>
     <VisualThemeResource visualThemeId="BOOTSTRAP_BASIC" resourceTypeEnumId="VT_SCRN_MACRO_LIB" resourceValue="component://bootstrap/includes/templates/htmlScreenMacroLibrary.ftl" sequenceId="01"/>
@@ -52,7 +52,7 @@ under the License.
     <VisualThemeResource visualThemeId="BOOTSTRAP_TOMAHAWK" resourceTypeEnumId="VT_HDR_TMPLT_LOC" resourceValue="component://bootstrap/includes/header.ftl" sequenceId="01"/>
     <VisualThemeResource visualThemeId="BOOTSTRAP_TOMAHAWK" resourceTypeEnumId="VT_MSG_TMPLT_LOC" resourceValue="component://common/webcommon/includes/messages.ftl" sequenceId="01"/>
     <VisualThemeResource visualThemeId="BOOTSTRAP_TOMAHAWK" resourceTypeEnumId="VT_FTR_TMPLT_LOC" resourceValue="component://bootstrap/includes/footer.ftl" sequenceId="01"/>
-    <VisualThemeResource visualThemeId="BOOTSTRAP_TOMAHAWK" resourceTypeEnumId="VT_NAV_TMPLT_LOC" resourceValue="component://bootstrap/includes/emptyAppbar.ftl" sequenceId="01"/>
+    <VisualThemeResource visualThemeId="BOOTSTRAP_TOMAHAWK" resourceTypeEnumId="VT_NAV_TMPLT_LOC" resourceValue="component://bootstrap/includes/emptyAppBar.ftl" sequenceId="01"/>
     <VisualThemeResource visualThemeId="BOOTSTRAP_TOMAHAWK" resourceTypeEnumId="VT_NAV_APPHDR_LOC" resourceValue="component://bootstrap/includes/appbar.ftl" sequenceId="01"/>
     <VisualThemeResource visualThemeId="BOOTSTRAP_TOMAHAWK" resourceTypeEnumId="VT_SCREENSHOT" resourceValue="/bootstrap/images/tomahawk_screenshot" sequenceId="01"/>
     <VisualThemeResource visualThemeId="BOOTSTRAP_TOMAHAWK" resourceTypeEnumId="VT_SCRN_MACRO_LIB" resourceValue="component://bootstrap/includes/templates/htmlScreenMacroLibrary.ftl" sequenceId="01"/>
