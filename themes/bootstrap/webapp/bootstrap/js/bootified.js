@@ -28,6 +28,28 @@ adds functionality to style layout elements
 **************************************************/
 //Screen transforms
 OFBOOT.screenTransform = function(){
+	//Transform Layout containers
+	jQuery('div#column-container').addClass('row');
+	if(jQuery('div.left').length > 0){
+		if(jQuery('div.right').length > 0){
+			jQuery('div.left').removeClass('left').addClass('col-sm-2');
+			jQuery('div.right').removeClass('right').addClass('col-sm-2');
+			jQuery('div.center').removeClass('center').addClass('col-sm-8');
+		}else{
+			if(jQuery('div#content-main-section.leftonly')){
+				jQuery('div#content-main-section.leftonly').removeClass('leftonly').addClass('col-sm-10');
+			}
+			jQuery('div.left').removeClass('left').addClass('col-sm-2');
+		}
+	}else{
+		if(jQuery('div.right').length > 0){
+			jQuery('div.right').removeClass('right').addClass('col-sm-2');
+			jQuery('div.rightonly').removeClass('rightonly').addClass('col-sm-10');
+		}else{
+			jQuery('div#content-main-section').addClass('col-sm-12');
+		}
+	}
+	
 	if(jQuery('div.screenlet')){
 		jQuery('div.screenlet').removeClass( "screenlet" ).addClass( "panel panel-default" );
 		if('div.screenlet-body'){
@@ -170,6 +192,100 @@ OFBOOT.formTranforms = function(){
 			}*/
 		}
 	});
+	//Transform lookup field button
+	jQuery('form span.field-lookup a').each(function(){
+		var $id = jQuery(this).attr('id');
+		if ($id.indexOf("_lookupId_button") >= 0){
+			jQuery(this).addClass('btn btn-primary btn-sm').html('<span class="glyphicon glyphicon-search"></span>');
+		}
+	});
+	//Transform a:buttontext
+	jQuery('a.buttontext').removeClass('buttontext').addClass('btn btn-link btn-sm');
+}
+/************************
+ * Navigation Tansforms
+ ************************/
+OFBOOT.navigationTranforms = function(){
+	//Tansform button bar - style 1
+	jQuery('div.button-bar.button-style-1').each(function(){
+		jQuery(this).children('a').each(function(){
+			var btnClass = "btn btn-primary btn-sm";
+			var icon = "";
+			var contents = jQuery(this).text();
+			//jQuery(console.log(contents));
+			if(jQuery(this).hasClass('create')){
+				icon = '<span class="glyphicon glyphicon-plus"></span>';
+				jQuery(this).html(icon+ " "+contents);
+				jQuery(this).removeClass('create');
+			}else{
+				if(jQuery(this).hasClass('delete')){
+					jQuery(console.log(contents));
+					icon = '<span class="glyphicon glyphicon-remove"></span>';
+					jQuery(this).html(icon+ " "+contents);
+					jQuery(this).removeClass('delete');
+				}else{
+					if(jQuery(this).hasClass('search')){
+						jQuery(console.log(contents));
+						icon = '<span class="glyphicon glyphicon-search"></span>';
+						jQuery(this).html(icon+ " "+contents);
+						jQuery(this).removeClass('search');
+					}else{
+						if(jQuery(this).hasClass('refresh')){
+							jQuery(console.log(contents));
+							icon = '<span class="glyphicon glyphicon-refresh"></span>';
+							jQuery(this).html(icon+ " "+contents);
+							jQuery(this).removeClass('refresh');
+						}
+					}
+				}
+			}
+			jQuery(this).addClass(btnClass);
+		});
+		jQuery(this).removeClass('button-bar button-style-1').addClass('btn-group');
+	});
+	//Tansform button bar - style 2
+	jQuery('div.button-bar.button-style-2').each(function(){
+		//Wrap inline forms in form-group
+		var hasForm = jQuery(this).has("form").length;
+		if(!hasForm == 0){
+			jQuery(this).children('form').addClass('form-group').css('display','inline');
+		}
+		//Transform buttons
+		jQuery(this).children('a').each(function(){
+			var btnClass = "btn btn-link btn-sm";
+			var icon = "";
+			var contents = jQuery(this).text();
+			//jQuery(console.log(contents));
+			if(jQuery(this).hasClass('create')){
+				icon = '<span class="glyphicon glyphicon-plus"></span>';
+				jQuery(this).html(icon+ " "+contents);
+				jQuery(this).removeClass('create');
+			}else{
+				if(jQuery(this).hasClass('delete')){
+					jQuery(console.log(contents));
+					icon = '<span class="glyphicon glyphicon-remove"></span>';
+					jQuery(this).html(icon+ " "+contents);
+					jQuery(this).removeClass('delete');
+				}else{
+					if(jQuery(this).hasClass('search')){
+						jQuery(console.log(contents));
+						icon = '<span class="glyphicon glyphicon-search"></span>';
+						jQuery(this).html(icon+ " "+contents);
+						jQuery(this).removeClass('search');
+					}else{
+						if(jQuery(this).hasClass('refresh')){
+							jQuery(console.log(contents));
+							icon = '<span class="glyphicon glyphicon-refresh"></span>';
+							jQuery(this).html(icon+ " "+contents);
+							jQuery(this).removeClass('refresh');
+						}
+					}
+				}
+			}
+			jQuery(this).addClass(btnClass);
+		});
+		jQuery(this).removeClass('button-bar button-style-2').addClass('btn-group');
+	});
 }
 /************************
  * Miscellanous Transforms
@@ -186,6 +302,7 @@ LOAD 'EM UP
 //LOAD GLOBAL BOOTSTRAP FUNCTIONS
 jQuery(window).load(function(){
 	OFBOOT.screenTransform();
+	OFBOOT.navigationTranforms();
 	OFBOOT.tableTranforms();
 	OFBOOT.formTranforms();
 	OFBOOT.miscTranforms();

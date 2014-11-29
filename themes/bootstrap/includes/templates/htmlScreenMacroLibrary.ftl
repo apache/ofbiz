@@ -153,7 +153,7 @@ under the License.
 
 <#macro renderContentFrame fullUrl width height border><iframe src="${fullUrl}" width="${width}" height="${height}" <#if border?has_content>border="${border}"</#if> /></#macro>
 <#macro renderScreenletBegin id title collapsible saveCollapsed collapsibleAreaId expandToolTip collapseToolTip fullUrlString padded menuString showMore collapsed javaScriptEnabled>
-<div class="panel panel-default"<#if id?has_content> id="${id}"</#if>><#-- <#rt/> -->
+<div class="panel panel-default"<#if id?has_content> id="${id}"</#if>>
 <#-- <#if showMore> -->
 <#if title?has_content>
 	<div class="panel-heading">
@@ -161,14 +161,12 @@ under the License.
 			<#assign btnId = "${id}-btn">
 			<div class="pull-left"><h3 class="panel-title">${title}</h3></div>
 			<div class="pull-right">
-				<a id="${btnId}" class="btn btn-default btn-sm" data-toggle="collapse" href="#${collapsibleAreaId}"><span class="glyphicon glyphicon-chevron-up"></span></a>
+				<a id="${btnId}" class="btn btn-default btn-sm" data-toggle="collapse" href="#${collapsibleAreaId}" aria-expanded="true" aria-controls="${btnId}"><span class="glyphicon glyphicon-chevron-up"></span></a>
 			</div>
 			<div class="clear"></div>
 			<script type="text/javascript">
-				jQuery(document).ready( function($){
-					$('#${btnId}').click(function(){
-						$(this).find('span').toggleClass('glyphicon-chevron-down glyphicon-chevron-up');
-					});
+				$('#${btnId}').click(function(){
+					$(this).find('span').toggleClass('glyphicon-chevron-up glyphicon-chevron-down');
 				});
 		    </script>
 		<#else>
@@ -176,24 +174,12 @@ under the License.
 		</#if>
 	</div>
 </#if>
-<#--
-<li class="<#rt/>
-<#if collapsed>
-collapsed"><a <#if javaScriptEnabled>onclick="javascript:toggleScreenlet(this, '${collapsibleAreaId}', '${saveCollapsed?string}', '${expandToolTip}', '${collapseToolTip}');"<#else>href="${fullUrlString}"</#if><#if expandToolTip?has_content> title="${expandToolTip}"</#if>
+${menuString}
+<#if collapsible>
+	<div <#if collapsibleAreaId?has_content> id="${collapsibleAreaId}" </#if> class="panel-body collapse in">
 <#else>
-expanded"><a <#if javaScriptEnabled>onclick="javascript:toggleScreenlet(this, '${collapsibleAreaId}', '${saveCollapsed?string}', '${expandToolTip}', '${collapseToolTip}');"<#else>href="${fullUrlString}"</#if><#if collapseToolTip?has_content> title="${collapseToolTip}"</#if>
+	<div <#if collapsibleAreaId?has_content> id="${collapsibleAreaId}" </#if> class="panel-body">
 </#if>
->&nbsp;</a></li> -->
-<#-- </#if> -->
-<#--
-<#if !collapsed>
-${menuString}
-</#if>
- -->
-${menuString}
-<#-- <br class="clear" /> -->
-<#-- </#if> -->
-<div <#if collapsibleAreaId?has_content> id="${collapsibleAreaId}" <#if collapsed> style="display: none;"</#if></#if><#-- <#if padded> --> class="panel-body" <#-- <#else> class="panel-body no-padding"</#if> -->>
 </#macro>
 <#macro renderScreenletSubWidget></#macro>
 <#macro renderScreenletEnd></div></div></#macro>
