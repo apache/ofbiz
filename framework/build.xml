@@ -24,7 +24,7 @@ under the License.
                entity/build.xml,geronimo/build.xml,
                catalina/build.xml,
                security/build.xml,service/build.xml,entityext/build.xml,
-               bi/build.xml,minilang/build.xml,
+               minilang/build.xml,
                webapp/build.xml,widget/build.xml,
                common/build.xml,datafile/build.xml,
                testtools/build.xml,
