@@ -855,6 +855,7 @@
                     <parameter param-name="contentId"/>
                     <parameter param-name="projectId"/>
                     <parameter param-name="workEffortContentTypeId"/>
+                    <parameter param-name="fromDate"/>
                 </sub-hyperlink>
             </display-entity>
         </field>
@@ -902,27 +903,29 @@
             </entity-one>
         </actions>
 
-        <alt-target use-when="content!=null&amp;&amp;headerItem.equals(&quot;EditTaskContents&quot;)" target="updateTaskContent"/>
-        <alt-target use-when="content==null&amp;&amp;headerItem.equals(&quot;EditProjectContents&quot;)" target="createProjectContent"/>
-        <alt-target use-when="content==null&amp;&amp;headerItem.equals(&quot;EditTaskContents&quot;)" target="createTaskContent"/>
+        <alt-target use-when="workEffortContent!=null&amp;&amp;headerItem.equals(&quot;EditTaskContents&quot;)" target="updateTaskContent"/>
+        <alt-target use-when="workEffortContent==null&amp;&amp;headerItem.equals(&quot;EditProjectContents&quot;)" target="createProjectContent"/>
+        <alt-target use-when="workEffortContent==null&amp;&amp;headerItem.equals(&quot;EditTaskContents&quot;)" target="createTaskContent"/>
 
         <field name="workEffortId" map-name="parameters"><hidden/></field>
         <field name="projectId" map-name="parameters"><hidden/></field>
-        <field use-when="content!=null" name="contentId" tooltip="${uiLabelMap.CommonNotModifRecreat}"><display/></field>
-        <field use-when="content==null" name="contentIdTo" title="${uiLabelMap.FormFieldTitle_existContentId}">
+        <field name="contentId" use-when="workEffortContent!=null" tooltip="${uiLabelMap.CommonNotModifRecreat}"><display-entity entity-name="Content" description="[${contentId}] ${contentName}"/></field>
+        <field name="contentIdTo" use-when="workEffortContent==null" title="${uiLabelMap.FormFieldTitle_existContentId}">
             <lookup target-form-name="LookupTreeContent"/>
         </field>
-        
-        <field name="workEffortContentTypeId">
+        <field name="workEffortContentTypeId" use-when="workEffortContent!=null" map-name="workEffortContent">
+            <display-entity entity-name="WorkEffortContentType" description="${description}"/>
+        </field>
+        <field name="workEffortContentTypeId" use-when="workEffortContent==null">
             <drop-down allow-empty="false">
-                <entity-options description="${description}" entity-name="WorkEffortContentType" key-field-name="workEffortContentTypeId"/>
+                <entity-options description="${description}" entity-name="WorkEffortContentType"/>
             </drop-down>
         </field>
         <!-- note sure if these two are necessray, but they are kind of confusing in this context:
             <field name="ownerContentId"><lookup target-form-name="LookupContent"/></field>
             <field name="dataResourceId"><lookup target-form-name="LookupDataResource"/></field>
         -->
-        <field name="contentTypeId">
+        <field name="contentTypeId" use-when="workEffortContent!=null">
             <drop-down allow-empty="false" no-current-selected-key="DOCUMENT">
                 <entity-options description="${description}" entity-name="ContentType"/>
             </drop-down>
@@ -948,7 +951,7 @@
                 <entity-options description="${description}" entity-name="MimeType" key-field-name="mimeTypeId"/>
             </drop-down>
         </field>
-        <field name="dataResourceName" title="${uiLabelMap.CommonUpload}"><file/></field>
+        <field name="dataResourceName" use-when="workEffortContent==null" title="${uiLabelMap.CommonUpload}"><file/></field>
         <field name="contentIdFrom" title="${uiLabelMap.ContentCompDocParentContentId}"><lookup target-form-name="LookupDetailContentTree"/></field>
         <!--field name="dataCategoryId" use-when="dataResource==null">
             <drop-down allow-empty="false">
@@ -964,8 +967,8 @@
                 <entity-options description="${categoryName}" entity-name="DataCategory" key-field-name="dataCategoryId"/>
             </drop-down>
         </field-->
-        <field name="createButton" use-when="content==null"><submit button-type="button"/></field>
-        <field name="updateButton" use-when="content!=null"><submit button-type="button"/></field>
+        <field name="createButton" use-when="workEffortContent==null"><submit button-type="button"/></field>
+        <field name="updateButton" use-when="workEffortContent!=null"><submit button-type="button"/></field>
     </form>
     <form name="ListPhaseInfo" extends="ListPhaseInfo" extends-resource="component://projectmgr/widget/forms/ProjectForms.xml">
         <field name="phase"><display description="${phaseName}"/></field>
