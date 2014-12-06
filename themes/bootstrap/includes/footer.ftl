@@ -18,13 +18,22 @@ under the License.
 -->
 <div id="footer" class="panel panel-default">
 	<div class="panel-body">
-	    <ul class="pull-right">
-	        <li class="first">${nowTimestamp?datetime?string.short} - <a href="<@ofbizUrl>ListTimezones</@ofbizUrl>">${timeZone.getDisplayName(timeZone.useDaylightTime(), Static["java.util.TimeZone"].LONG, locale)}</a></li>
-	        <li><a href="<@ofbizUrl>ListLocales</@ofbizUrl>">${locale.getDisplayName(locale)}</a></li>
-	    </ul>
-		<p class="pull-left">
-  			${uiLabelMap.CommonCopyright} (c) 2001-${nowTimestamp?string("yyyy")} <a href="http://www.apache.org" target="_blank">The Apache Software Foundation</a>. ${uiLabelMap.CommonPoweredBy} <a href="http://ofbiz.apache.org" target="_blank">Apache OFBiz.</a> <#include "ofbizhome://runtime/svninfo.ftl" />
-  		</p>
+		<div class="col-sm-4">
+			<p class="pull-left">
+  				${uiLabelMap.CommonCopyright} (c) 2001-${nowTimestamp?string("yyyy")} <a href="http://www.apache.org" target="_blank">The Apache Software Foundation</a>.
+  			</p>
+		</div>
+		<div class="col-sm-4">
+			<p style="text-align:center;">
+				${uiLabelMap.CommonPoweredBy} <a href="http://ofbiz.apache.org" target="_blank">Apache OFBiz.</a> <#include "ofbizhome://runtime/svninfo.ftl" />
+			</p>
+		</div>
+		<div class="col-sm-4">
+			<ul class="pull-right">
+		        <li style="display:inline;">${nowTimestamp?datetime?string.short} - <a href="<@ofbizUrl>ListTimezones</@ofbizUrl>">${timeZone.getDisplayName(timeZone.useDaylightTime(), Static["java.util.TimeZone"].LONG, locale)}</a></li>
+		        <li style="display:inline;">${uiLabelMap.CommonLanguageTitle} - <a href="<@ofbizUrl>ListLocales</@ofbizUrl>">${locale.getDisplayName(locale)}</a></li>
+		    </ul>
+		</div>
 	</div>  
 </div>
 </div>

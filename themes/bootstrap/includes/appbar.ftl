@@ -18,24 +18,35 @@ under the License.
 -->
 <#assign appModelMenu = Static["org.ofbiz.widget.menu.MenuFactory"].getMenuFromLocation(applicationMenuLocation,applicationMenuName)>
 <#assign modelMenus = Static["org.ofbiz.widget.menu.MenuFactory"].getMenusFromLocation(applicationMenuLocation)>
-<#--  
 
-<div>${appModelMenu?if_exists}</div>
-<div>${applicationMenuLocation}</div>
-<div>${applicationMenuName}</div>
--->
 <#assign menus = modelMenus.keySet()>
 <#assign menuItemList = appModelMenu.menuItemList>
 <#if menuItemList?has_content>
 	<nav class="navbar navbar-default" role="navigation" id="app-navigation">
 		<ul class="nav navbar-nav">
-			<li class="menuTitle">
-				<a href="#"><span class="glyphicon glyphicon-cog"></span>&nbsp;${applicationTitle}<#--${context}${parameters.componentName?capitalize}--></a>
-			</li>
 			<#list menuItemList as item>
 				<#assign name = item.name>
 				<#assign title = item.getTitle(context)>
-				<#assign target = item.getLink().getTarget(context)>
+				<#if (item.getLink().getTarget(context))?has_content>
+					<#assign target = item.getLink().getTarget(context)>
+					<#else>
+						<#if item.getParentPortalPageId(context)?has_content>
+							<#assign parentPortalPageId = item.getParentPortalPageId(context)>
+							<#assign portalPages = Static["org.ofbiz.widget.PortalPageWorker"].getPortalPages(parentPortalPageId, context)>
+							<#list portalPages as portalPage>
+								<#assign name = portalPage.portalPageName>
+								<#assign link = "showPortalPage?portalPageId=${portalPage.portalPageId}">
+								<#if portalPage.parentPortalPageId?has_content>
+									<#assign target = link+"&amp;parentPortalPageId=${portalPage.parentPortalPageId?if_exists}">
+									<#else>
+										<#assign target = link>
+								</#if>
+								<li>
+									<a href="<@ofbizUrl>${target?if_exists}</@ofbizUrl>">${portalPage.get("portalPageName",locale)}</a>
+								</li>
+							</#list>
+						</#if>
+				</#if>
 				<#-- Get TabBar submenu based on menu name -->
 				<#assign subMenuName = "${name}TabBar">
 				<#if menus?seq_contains("${subMenuName}")>
@@ -80,9 +91,15 @@ under the License.
 						</#if>
 					</#if>
 				<#else>
-					<li>
-						<a href="<@ofbizUrl>${target?if_exists}</@ofbizUrl>">${title?if_exists}</a>
-					</li>
+					<#if name == "main">
+						<li class="menuTitle">
+							<a href="<@ofbizUrl>${target?if_exists}</@ofbizUrl>">${applicationTitle}&nbsp;&nbsp;<span class="glyphicon glyphicon-home"></span>&nbsp;</a>
+						</li>
+						<#else>
+							<li>
+								<a href="<@ofbizUrl>${target?if_exists}</@ofbizUrl>">${title?if_exists}</a>
+							</li>
+					</#if>
 				</#if>
 			</#list>
 		</ul>
