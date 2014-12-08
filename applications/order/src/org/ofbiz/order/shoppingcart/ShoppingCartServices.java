@@ -30,7 +30,6 @@ import java.util.Map;
 import javolution.util.FastList;
 import javolution.util.FastMap;
 
-import org.apache.commons.lang.math.NumberUtils;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.GeneralException;
 import org.ofbiz.base.util.UtilDateTime;
@@ -312,6 +311,7 @@ public class ShoppingCartServices {
             int newShipInfoIndex = cart.addShipInfo();
 
             // shouldn't be gaps in it but allow for that just in case
+            /*
             String cartShipGroupIndexStr = orderItemShipGroup.getString("shipGroupSeqId");
             int cartShipGroupIndex = NumberUtils.toInt(cartShipGroupIndexStr);
 
@@ -321,6 +321,7 @@ public class ShoppingCartServices {
                     newShipInfoIndex = cart.addShipInfo();
                 }
             }
+            */
 
             CartShipInfo cartShipInfo = cart.getShipInfo(newShipInfoIndex);
 
@@ -564,6 +565,9 @@ public class ShoppingCartServices {
                     List<GenericValue> orderItemAdjustments = orh.getOrderItemAdjustments(item);
                     // set the item's ship group info
                     List<GenericValue> shipGroupAssocs = orh.getOrderItemShipGroupAssocs(item);
+                    if (UtilValidate.isNotEmpty(shipGroupAssocs)) {
+                        shipGroupAssocs = EntityUtil.orderBy(shipGroupAssocs, UtilMisc.toList("-shipGroupSeqId"));
+                    }
                     for (int g = 0; g < shipGroupAssocs.size(); g++) {
                         GenericValue sgAssoc = shipGroupAssocs.get(g);
                         BigDecimal shipGroupQty = OrderReadHelper.getOrderItemShipGroupQuantity(sgAssoc);
@@ -572,9 +576,7 @@ public class ShoppingCartServices {
                         }
 
                         String cartShipGroupIndexStr = sgAssoc.getString("shipGroupSeqId");
-                        int cartShipGroupIndex = NumberUtils.toInt(cartShipGroupIndexStr);
-                        cartShipGroupIndex = cartShipGroupIndex - 1;
-
+                        int cartShipGroupIndex = cart.getShipInfoIndex(cartShipGroupIndexStr);
                         if (cartShipGroupIndex > 0) {
                             cart.positionItemToGroup(itemIndex, shipGroupQty, 0, cartShipGroupIndex, false);
                         }
@@ -593,13 +595,13 @@ public class ShoppingCartServices {
                                     "] to ship group with index [" + itemIndex + "]; group quantity is [" + shipGroupQty +
                                     "] item quantity is [" + (cartItem != null ? cartItem.getQuantity() : "no cart item") +
                                     "] cartShipGroupIndex is [" + cartShipGroupIndex + "], csi.shipItemInfo.size(): " +
-                                    csi.shipItemInfo.size(), module);
+                                    (cartShipGroupIndex < 0 ? 0 : csi.shipItemInfo.size()), module);
                         } else {
                             cart.setItemShipGroupQty(itemIndex, shipGroupQty, cartShipGroupIndex);
                         }
 
                         List<GenericValue> shipGroupItemAdjustments = EntityUtil.filterByAnd(orderItemAdjustments, UtilMisc.toMap("shipGroupSeqId", cartShipGroupIndexStr));
-                        if (cartItem == null) {
+                        if (cartItem == null || cartShipGroupIndex < 0) {
                             Debug.logWarning("In loadCartFromOrder could not find cart item for itemIndex=" + itemIndex + ", for orderId=" + orderId, module);
                         } else {
                             CartShipItemInfo cartShipItemInfo = csi.getShipItemInfo(cartItem);
