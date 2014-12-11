@@ -19,6 +19,8 @@
 package org.ofbiz.product.category;
 
 import java.io.IOException;
+import java.net.URLEncoder;
+
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -27,6 +29,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.catalina.servlets.DefaultServlet;
 import org.apache.jasper.servlet.JspServlet;
+import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.webapp.control.ControlServlet;
 
@@ -70,7 +73,8 @@ public class SeoControlServlet extends ControlServlet {
     }
     
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        if (request.getAttribute(REQUEST_IN_ALLOW_LIST) != null) {
+		String uri = URLEncoder.encode(request.getRequestURI(), "UTF-8");
+        if (request.getAttribute(REQUEST_IN_ALLOW_LIST) != null || request.getAttribute("_jsp_" + uri) != null) {
             if (request.getRequestURI().toLowerCase().endsWith(".jsp") || request.getRequestURI().toLowerCase().endsWith(".jspx") ) {
                 JspServlet jspServlet = new JspServlet();
                 jspServlet.init(this.getServletConfig());
