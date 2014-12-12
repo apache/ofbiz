@@ -3181,16 +3181,16 @@ public class MacroFormRenderer implements FormStringRenderer {
         String name = WidgetWorker.makeLinkHiddenFormName(context, modelFormField);
         StringBuilder parameters = new StringBuilder();
         parameters.append("[");
-        for (WidgetWorker.Parameter parameter: parameterList) {
-             if (parameters.length() > 1) {
-                 parameters.append(",");
-             }
-             parameters.append("{'name':'");
-             parameters.append(parameter.getName());
-             parameters.append("'");
-             parameters.append(",'value':'");
-             parameters.append(parameter.getValue(context));
-             parameters.append("'}");
+        for (WidgetWorker.Parameter parameter : parameterList) {
+            if (parameters.length() > 1) {
+                parameters.append(",");
+            }
+            parameters.append("{'name':'");
+            parameters.append(parameter.getName());
+            parameters.append("'");
+            parameters.append(",'value':'");
+            parameters.append(StringUtil.htmlEncoder.encode(parameter.getValue(context)));
+            parameters.append("'}");
         }
         parameters.append("]");
 
