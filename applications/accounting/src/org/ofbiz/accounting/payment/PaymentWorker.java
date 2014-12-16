@@ -29,6 +29,7 @@ import javolution.util.FastList;
 import javolution.util.FastMap;
 
 import org.ofbiz.base.util.Debug;
+import org.ofbiz.base.util.UtilDateTime;
 import org.ofbiz.base.util.UtilFormatOut;
 import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.base.util.UtilNumber;
@@ -161,8 +162,8 @@ public class PaymentWorker {
             paymentAddresses = delegator.findByAnd("PartyContactWithPurpose",
                     UtilMisc.toMap("partyId", partyId, "contactMechPurposeTypeId", "PAYMENT_LOCATION"),
                     UtilMisc.toList("-purposeFromDate"), false);
-            paymentAddresses = EntityUtil.filterByDate(paymentAddresses, null, "contactFromDate", "contactThruDate", true);
-            paymentAddresses = EntityUtil.filterByDate(paymentAddresses, null, "purposeFromDate", "purposeThruDate", true);
+            paymentAddresses = EntityUtil.filterByDate(paymentAddresses, UtilDateTime.nowTimestamp(), "contactFromDate", "contactThruDate", true);
+            paymentAddresses = EntityUtil.filterByDate(paymentAddresses, UtilDateTime.nowTimestamp(), "purposeFromDate", "purposeThruDate", true);
         } catch (GenericEntityException e) {
             Debug.logError(e, "Trouble getting PartyContactWithPurpose view entity list", module);
         }

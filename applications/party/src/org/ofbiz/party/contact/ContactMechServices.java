@@ -813,8 +813,8 @@ public class ContactMechServices {
             Map<String, String> pcmpFindMap = UtilMisc.toMap("partyId", partyId, "contactMechId", contactMechId, "contactMechPurposeTypeId", contactMechPurposeTypeId);
             //Debug.logInfo("pcmpFindMap = " + pcmpFindMap, module);
             List<GenericValue> allPCWPs = delegator.findByAnd("PartyContactWithPurpose", pcmpFindMap, null, false);
-            allPCWPs = EntityUtil.filterByDate(allPCWPs, null, "contactFromDate", "contactThruDate", true);
-            allPCWPs = EntityUtil.filterByDate(allPCWPs, null, "purposeFromDate", "purposeThruDate", true);
+            allPCWPs = EntityUtil.filterByDate(allPCWPs, UtilDateTime.nowTimestamp(), "contactFromDate", "contactThruDate", true);
+            allPCWPs = EntityUtil.filterByDate(allPCWPs, UtilDateTime.nowTimestamp(), "purposeFromDate", "purposeThruDate", true);
 
             tempVal = EntityUtil.getFirst(allPCWPs);
         } catch (GenericEntityException e) {
@@ -876,8 +876,8 @@ public class ContactMechServices {
             Map<String, String> pcmpFindMap = UtilMisc.toMap("partyId", partyId, "contactMechId", contactMechId, "contactMechPurposeTypeId", contactMechPurposeTypeId);
             //Debug.logInfo("pcmpFindMap = " + pcmpFindMap, module);
             List<GenericValue> allPCWPs = delegator.findByAnd("PartyContactWithPurpose", pcmpFindMap, null, false);
-            allPCWPs = EntityUtil.filterByDate(allPCWPs, null, "contactFromDate", "contactThruDate", true);
-            allPCWPs = EntityUtil.filterByDate(allPCWPs, null, "purposeFromDate", "purposeThruDate", true);
+            allPCWPs = EntityUtil.filterByDate(allPCWPs, UtilDateTime.nowTimestamp(), "contactFromDate", "contactThruDate", true);
+            allPCWPs = EntityUtil.filterByDate(allPCWPs, UtilDateTime.nowTimestamp(), "purposeFromDate", "purposeThruDate", true);
 
             tempVal = EntityUtil.getFirst(allPCWPs);
         } catch (GenericEntityException e) {
