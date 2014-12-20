@@ -1104,14 +1104,14 @@ nextProd:
                 Debug.logInfo("set the productId to: " + product.getString("productId"), module);
 
                 // copy the supplier
-                List<GenericValue> supplierProducts = delegator.findByAnd("SupplierProduct", UtilMisc.toMap("productId", productId), null, true);
+                List<GenericValue> supplierProducts = delegator.findByAnd("SupplierProduct", UtilMisc.toMap("productId", productId), null, false);
                 for (GenericValue supplierProduct: supplierProducts) {
                     supplierProduct.set("productId",  product.getString("productId"));
                     supplierProduct.create();
                 }
 
                 // copy the content
-                List<GenericValue> productContents = delegator.findByAnd("ProductContent", UtilMisc.toMap("productId", productId), null, true);
+                List<GenericValue> productContents = delegator.findByAnd("ProductContent", UtilMisc.toMap("productId", productId), null, false);
                 for (GenericValue productContent: productContents) {
                     productContent.set("productId",  product.getString("productId"));
                     productContent.create();
