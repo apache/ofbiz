@@ -86,6 +86,7 @@ public class EntitySaxReader implements javolution.xml.sax.ContentHandler, Error
     protected boolean maintainTxStamps = false;
     protected boolean createDummyFks = false;
     protected boolean checkDataOnly = false;
+    @Deprecated
     protected boolean doCacheClear = true;
     protected boolean disableEeca = false;
     protected List<Object> messageList = null;
@@ -165,10 +166,12 @@ public class EntitySaxReader implements javolution.xml.sax.ContentHandler, Error
         this.checkDataOnly = checkDataOnly;
     }
 
+    @Deprecated
     public boolean getDoCacheClear() {
         return this.doCacheClear;
     }
 
+    @Deprecated
     public void setDoCacheClear(boolean doCacheClear) {
         this.doCacheClear = doCacheClear;
     }
@@ -477,6 +480,7 @@ public class EntitySaxReader implements javolution.xml.sax.ContentHandler, Error
             }
 
             // check the do-cache-clear flag
+            @Deprecated
             CharSequence doCacheClear = attributes.getValue("do-cache-clear");
             if (doCacheClear != null) {
                 this.setDoCacheClear("true".equalsIgnoreCase(doCacheClear.toString()));
