@@ -680,7 +680,9 @@ public class GenericDelegator implements Delegator {
 
     /* (non-Javadoc)
      * @see org.ofbiz.entity.Delegator#create(org.ofbiz.entity.GenericPK, boolean)
+     * @deprecated use {@link #create(GenericPK primaryKey)}
      */
+    @Deprecated
     public GenericValue create(GenericPK primaryKey, boolean doCacheClear) throws GenericEntityException {
         if (primaryKey == null) {
             throw new GenericEntityException("Cannot create from a null primaryKey");
@@ -733,6 +735,7 @@ public class GenericDelegator implements Delegator {
      * @see org.ofbiz.entity.Delegator#createSetNextSeqId(org.ofbiz.entity.GenericValue)
      */
     public GenericValue createSetNextSeqId(GenericValue value) throws GenericEntityException {
+        @Deprecated
         boolean doCacheClear = true;
 
         if (value == null) {
@@ -824,7 +827,9 @@ public class GenericDelegator implements Delegator {
 
     /* (non-Javadoc)
      * @see org.ofbiz.entity.Delegator#create(org.ofbiz.entity.GenericValue, boolean)
+     * @deprecated use {@link #create(GenericValue value)} 
      */
+    @Deprecated
     public GenericValue create(GenericValue value, boolean doCacheClear) throws GenericEntityException {
         boolean beganTransaction = false;
         try {
@@ -881,7 +886,9 @@ public class GenericDelegator implements Delegator {
 
     /* (non-Javadoc)
      * @see org.ofbiz.entity.Delegator#createOrStore(org.ofbiz.entity.GenericValue, boolean)
+     * @deprecated use {@link #createOrStore(GenericValue value)} 
      */
+    @Deprecated
     public GenericValue createOrStore(GenericValue value, boolean doCacheClear) throws GenericEntityException {
         boolean beganTransaction = false;
         try {
@@ -913,7 +920,7 @@ public class GenericDelegator implements Delegator {
      */
     public GenericValue createOrStore(GenericValue value) throws GenericEntityException {
         return createOrStore(value, true);
-    }
+            }
 
     protected void saveEntitySyncRemoveInfo(GenericEntity dummyPK) throws GenericEntityException {
         // don't store remove info on entities where it is disabled
@@ -954,7 +961,9 @@ public class GenericDelegator implements Delegator {
 
     /* (non-Javadoc)
      * @see org.ofbiz.entity.Delegator#removeByPrimaryKey(org.ofbiz.entity.GenericPK, boolean)
+     * @deprecated use {@link #removeByPrimaryKey(GenericPK primaryKey)} 
      */
+    @Deprecated
     public int removeByPrimaryKey(GenericPK primaryKey, boolean doCacheClear) throws GenericEntityException {
         boolean beganTransaction = false;
         try {
@@ -1012,7 +1021,9 @@ public class GenericDelegator implements Delegator {
 
     /* (non-Javadoc)
      * @see org.ofbiz.entity.Delegator#removeValue(org.ofbiz.entity.GenericValue, boolean)
+     * @deprecated use {@link #removeValue(GenericValue value)} 
      */
+    @Deprecated
     public int removeValue(GenericValue value, boolean doCacheClear) throws GenericEntityException {
         // NOTE: this does not call the GenericDelegator.removeByPrimaryKey method because it has more information to pass to the ECA rule hander
         boolean beganTransaction = false;
@@ -1082,14 +1093,18 @@ public class GenericDelegator implements Delegator {
 
     /* (non-Javadoc)
      * @see org.ofbiz.entity.Delegator#removeByAnd(java.lang.String, boolean, java.lang.Object)
+     * @deprecated use {@link #removeByAnd(String entityName, Object... fields)} 
      */
+    @Deprecated
     public int removeByAnd(String entityName, boolean doCacheClear, Object... fields) throws GenericEntityException {
         return removeByAnd(entityName, UtilMisc.<String, Object>toMap(fields), doCacheClear);
     }
 
     /* (non-Javadoc)
      * @see org.ofbiz.entity.Delegator#removeByAnd(java.lang.String, java.util.Map, boolean)
+     * @deprecated use {@link #removeByAnd(String entityName, Map<String, ? extends Object> fields)}}
      */
+    @Deprecated
     public int removeByAnd(String entityName, Map<String, ? extends Object> fields, boolean doCacheClear) throws GenericEntityException {
         EntityCondition ecl = EntityCondition.makeCondition(fields);
         return removeByCondition(entityName, ecl, doCacheClear);
@@ -1104,7 +1119,9 @@ public class GenericDelegator implements Delegator {
 
     /* (non-Javadoc)
      * @see org.ofbiz.entity.Delegator#removeByCondition(java.lang.String, org.ofbiz.entity.condition.EntityCondition, boolean)
+     * @deprecated use {@link #removeByCondition(String entityName, EntityCondition condition)}
      */
+    @Deprecated
     public int removeByCondition(String entityName, EntityCondition condition, boolean doCacheClear) throws GenericEntityException {
         boolean beganTransaction = false;
         try {
@@ -1149,7 +1166,9 @@ public class GenericDelegator implements Delegator {
 
     /* (non-Javadoc)
      * @see org.ofbiz.entity.Delegator#removeRelated(java.lang.String, org.ofbiz.entity.GenericValue, boolean)
+     * @deprecated use {@link #removeRelated(String relationName, GenericValue value)} 
      */
+    @Deprecated
     public int removeRelated(String relationName, GenericValue value, boolean doCacheClear) throws GenericEntityException {
         ModelEntity modelEntity = value.getModelEntity();
         ModelRelation relation = modelEntity.getRelation(relationName);
@@ -1175,7 +1194,9 @@ public class GenericDelegator implements Delegator {
 
     /* (non-Javadoc)
      * @see org.ofbiz.entity.Delegator#refresh(org.ofbiz.entity.GenericValue, boolean)
+     * @deprecated use {@link #refresh(GenericValue value)}
      */
+    @Deprecated
     public void refresh(GenericValue value, boolean doCacheClear) throws GenericEntityException {
         if (doCacheClear) {
             // always clear cache before the operation
@@ -1204,7 +1225,9 @@ public class GenericDelegator implements Delegator {
 
     /* (non-Javadoc)
      * @see org.ofbiz.entity.Delegator#storeByCondition(java.lang.String, java.util.Map, org.ofbiz.entity.condition.EntityCondition, boolean)
+     * @deprecated use {@link #storeByCondition(String entityName, Map<String, ? extends Object> fieldsToSet, EntityCondition condition)} 
      */
+    @Deprecated
     public int storeByCondition(String entityName, Map<String, ? extends Object> fieldsToSet, EntityCondition condition, boolean doCacheClear) throws GenericEntityException {
         boolean beganTransaction = false;
         try {
@@ -1249,7 +1272,9 @@ public class GenericDelegator implements Delegator {
 
     /* (non-Javadoc)
      * @see org.ofbiz.entity.Delegator#store(org.ofbiz.entity.GenericValue, boolean)
+     * @deprecated use {@link #store(GenericValue value)} 
      */
+    @Deprecated
     public int store(GenericValue value, boolean doCacheClear) throws GenericEntityException {
         boolean beganTransaction = false;
         try {
@@ -1309,13 +1334,17 @@ public class GenericDelegator implements Delegator {
 
     /* (non-Javadoc)
      * @see org.ofbiz.entity.Delegator#storeAll(java.util.List, boolean)
+     * @deprecated use {@link #storeAll(List<GenericValue> values)}
+     * TODO: JLR 2013-09-19 - doCacheClear refactoring: to be removed and replaced by  storeAll(List<GenericValue> values, boolean createDummyFks)
      */
+    @Deprecated
     public int storeAll(List<GenericValue> values, boolean doCacheClear) throws GenericEntityException {
         return this.storeAll(values, doCacheClear, false);
     }
 
     /* (non-Javadoc)
      * @see org.ofbiz.entity.Delegator#storeAll(java.util.List, boolean, boolean)
+     * TODO: JLR 2013-09-19 - doCacheClear refactoring: to be changed to storeAll(List<GenericValue> values, boolean createDummyFks)
      */
     public int storeAll(List<GenericValue> values, boolean doCacheClear, boolean createDummyFks) throws GenericEntityException {
         if (values == null) {
@@ -1405,7 +1434,9 @@ public class GenericDelegator implements Delegator {
 
     /* (non-Javadoc)
      * @see org.ofbiz.entity.Delegator#removeAll(java.util.List, boolean)
+     * @deprecated use {@link #removeAll(List<? extends GenericEntity> dummyPKs)}
      */
+    @Deprecated
     public int removeAll(List<? extends GenericEntity> dummyPKs, boolean doCacheClear) throws GenericEntityException {
         if (dummyPKs == null) {
             return 0;
@@ -1804,7 +1835,7 @@ public class GenericDelegator implements Delegator {
 
     /* (non-Javadoc)
      * @see org.ofbiz.entity.Delegator#getRelated(java.lang.String, java.util.Map, java.util.List, org.ofbiz.entity.GenericValue)
-     * @deprecated use {@link #getRelated(String, Map, List, GenericValue, boolean)
+     * @deprecated use {@link #getRelated(String, Map, List, GenericValue, boolean)}
      */
     @Deprecated
     public List<GenericValue> getRelated(String relationName, Map<String, ? extends Object> byAndFields, List<String> orderBy, GenericValue value) throws GenericEntityException {
@@ -1862,7 +1893,7 @@ public class GenericDelegator implements Delegator {
 
     /* (non-Javadoc)
      * @see org.ofbiz.entity.Delegator#getRelatedCache(java.lang.String, org.ofbiz.entity.GenericValue)
-     * @deprecated use {@link #getRelated(String, Map, List, GenericValue, boolean)
+     * @deprecated use {@link #getRelated(String, Map, List, GenericValue, boolean)}
      */
     @Deprecated
     public List<GenericValue> getRelatedCache(String relationName, GenericValue value) throws GenericEntityException {
@@ -1871,7 +1902,7 @@ public class GenericDelegator implements Delegator {
 
     /* (non-Javadoc)
      * @see org.ofbiz.entity.Delegator#getRelatedOne(java.lang.String, org.ofbiz.entity.GenericValue, boolean)
-     * @deprecated use {@link #getRelatedOne(String, GenericValue, boolean)
+     * @deprecated use {@link #getRelatedOne(String, GenericValue, boolean)}
      */
     @Deprecated
     public GenericValue getRelatedOne(String relationName, GenericValue value) throws GenericEntityException {
@@ -1880,7 +1911,7 @@ public class GenericDelegator implements Delegator {
 
     /* (non-Javadoc)
      * @see org.ofbiz.entity.Delegator#getRelatedOneCache(java.lang.String, org.ofbiz.entity.GenericValue, boolean)
-     * @deprecated use {@link #getRelatedOne(String, GenericValue, boolean)
+     * @deprecated use {@link #getRelatedOne(String, GenericValue, boolean)}
      */
     @Deprecated
     public GenericValue getRelatedOneCache(String relationName, GenericValue value) throws GenericEntityException {
