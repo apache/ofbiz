@@ -27,6 +27,7 @@ import org.ofbiz.base.util.Assert;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilURL;
 import org.ofbiz.base.util.UtilXml;
+import org.ofbiz.base.util.cache.OFBizCache;
 import org.ofbiz.base.util.cache.UtilCache;
 import org.ofbiz.service.config.model.Engine;
 import org.ofbiz.service.config.model.ServiceConfig;
@@ -49,7 +50,7 @@ public final class ServiceConfigUtil {
     public static final String engine = "default";
     public static final String SERVICE_ENGINE_XML_FILENAME = "serviceengine.xml";
     // Keep the ServiceConfig instance in a cache - so the configuration can be reloaded at run-time. There will be only one ServiceConfig instance in the cache.
-    private static final UtilCache<String, ServiceConfig> serviceConfigCache = UtilCache.createUtilCache("service.ServiceConfig", 0, 0, false);
+    private static final OFBizCache<String, ServiceConfig> serviceConfigCache = UtilCache.createUtilCache("service.ServiceConfig", 0, 0, false);
     private static final List<ServiceConfigListener> configListeners = new CopyOnWriteArrayList<ServiceConfigListener>();
 
     /**

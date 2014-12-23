@@ -31,6 +31,7 @@ import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilTimer;
 import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.base.util.UtilXml;
+import org.ofbiz.base.util.cache.OFBizCache;
 import org.ofbiz.base.util.cache.UtilCache;
 import org.ofbiz.entity.GenericEntityConfException;
 import org.ofbiz.entity.config.model.Datasource;
@@ -47,7 +48,7 @@ import org.w3c.dom.Element;
 public class ModelFieldTypeReader implements Serializable {
 
     public static final String module = ModelFieldTypeReader.class.getName();
-    protected static final UtilCache<String, ModelFieldTypeReader> readers = UtilCache.createUtilCache("entity.ModelFieldTypeReader", 0, 0);
+    protected static final OFBizCache<String, ModelFieldTypeReader> readers = UtilCache.createUtilCache("entity.ModelFieldTypeReader", 0, 0);
 
     protected static Map<String, ModelFieldType> createFieldTypeCache(Element docElement, String location) {
         docElement.normalize();

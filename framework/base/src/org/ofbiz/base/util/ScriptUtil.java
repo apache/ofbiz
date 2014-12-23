@@ -48,6 +48,7 @@ import javax.script.SimpleScriptContext;
 
 import org.codehaus.groovy.runtime.InvokerHelper;
 import org.ofbiz.base.location.FlexibleLocation;
+import org.ofbiz.base.util.cache.OFBizCache;
 import org.ofbiz.base.util.cache.UtilCache;
 
 /**
@@ -69,7 +70,7 @@ public final class ScriptUtil {
     public static final String RESULT_KEY = "result";
     /** The <code>ScriptHelper</code> key. */
     public static final String SCRIPT_HELPER_KEY = "ofbiz";
-    private static final UtilCache<String, CompiledScript> parsedScripts = UtilCache.createUtilCache("script.ParsedScripts", 0, 0, false);
+    private static final OFBizCache<String, CompiledScript> parsedScripts = UtilCache.createUtilCache("script.ParsedScripts", 0, 0, false);
     private static final Object[] EMPTY_ARGS = {};
     private static ScriptHelperFactory helperFactory = null;
     /** A set of script names - derived from the JSR-223 scripting engines. */

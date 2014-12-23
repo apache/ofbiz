@@ -29,6 +29,7 @@ import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilGenerics;
 import org.ofbiz.base.util.UtilObject;
 import org.ofbiz.base.util.UtilValidate;
+import org.ofbiz.base.util.cache.OFBizCache;
 import org.ofbiz.base.util.cache.UtilCache;
 import org.ofbiz.base.util.string.FlexibleStringExpander;
 import org.ofbiz.base.util.string.UelUtil;
@@ -42,7 +43,7 @@ import org.ofbiz.base.util.string.UelUtil;
 @SuppressWarnings("serial")
 public final class FlexibleMapAccessor<T> implements Serializable, IsEmpty {
     public static final String module = FlexibleMapAccessor.class.getName();
-    private static final UtilCache<String, FlexibleMapAccessor<?>> fmaCache = UtilCache.createUtilCache("flexibleMapAccessor.ExpressionCache");
+    private static final OFBizCache<String, FlexibleMapAccessor<?>> fmaCache = UtilCache.createUtilCache("flexibleMapAccessor.ExpressionCache");
     @SuppressWarnings("unchecked")
     private static final FlexibleMapAccessor nullFma = new FlexibleMapAccessor("");
 

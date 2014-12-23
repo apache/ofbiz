@@ -27,6 +27,7 @@ import java.util.Map;
 
 import org.ofbiz.base.location.FlexibleLocation;
 import org.ofbiz.base.util.UtilXml;
+import org.ofbiz.base.util.cache.OFBizCache;
 import org.ofbiz.base.util.cache.UtilCache;
 import org.ofbiz.minilang.operation.MapProcessor;
 import org.w3c.dom.Document;
@@ -37,8 +38,8 @@ import org.w3c.dom.Element;
  */
 public class SimpleMapProcessor {
 
-    private static final UtilCache<String, Map<String, MapProcessor>> simpleMapProcessorsResourceCache = UtilCache.createUtilCache("minilang.SimpleMapProcessorsResource", 0, 0);
-    private static final UtilCache<URL, Map<String, MapProcessor>> simpleMapProcessorsURLCache = UtilCache.createUtilCache("minilang.SimpleMapProcessorsURL", 0, 0);
+    private static final OFBizCache<String, Map<String, MapProcessor>> simpleMapProcessorsResourceCache = UtilCache.createUtilCache("minilang.SimpleMapProcessorsResource", 0, 0);
+    private static final OFBizCache<URL, Map<String, MapProcessor>> simpleMapProcessorsURLCache = UtilCache.createUtilCache("minilang.SimpleMapProcessorsURL", 0, 0);
 
     protected static Map<String, MapProcessor> getAllProcessors(URL xmlURL) throws MiniLangException {
         Map<String, MapProcessor> mapProcessors = new HashMap<String, MapProcessor>();

@@ -35,6 +35,7 @@ import org.ofbiz.base.util.Assert;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilXml.LocalErrorHandler;
 import org.ofbiz.base.util.UtilXml.LocalResolver;
+import org.ofbiz.base.util.cache.OFBizCache;
 import org.ofbiz.base.util.cache.UtilCache;
 import org.xml.sax.ErrorHandler;
 import org.xml.sax.InputSource;
@@ -50,7 +51,7 @@ public final class WebAppUtil {
 
     public static final String module = WebAppUtil.class.getName();
     private static final String webAppFileName = "/WEB-INF/web.xml";
-    private static final UtilCache<String, WebXml> webXmlCache = UtilCache.createUtilCache("webapp.WebXml");
+    private static final OFBizCache<String, WebXml> webXmlCache = UtilCache.createUtilCache("webapp.WebXml");
 
     /**
      * Returns the control servlet path. The path consists of the web application's mount-point

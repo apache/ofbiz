@@ -34,6 +34,7 @@ import org.apache.bsf.util.IOUtils;
 import org.ofbiz.base.location.FlexibleLocation;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilValidate;
+import org.ofbiz.base.util.cache.OFBizCache;
 import org.ofbiz.base.util.cache.UtilCache;
 import org.ofbiz.webapp.control.ConfigXMLReader;
 
@@ -43,7 +44,7 @@ import org.ofbiz.webapp.control.ConfigXMLReader;
 public class BsfEventHandler implements EventHandler {
 
     public static final String module = BsfEventHandler.class.getName();
-    private static final UtilCache<String, String> eventCache = UtilCache.createUtilCache("webapp.BsfEvents");
+    private static final OFBizCache<String, String> eventCache = UtilCache.createUtilCache("webapp.BsfEvents");
 
     /**
      * @see org.ofbiz.webapp.event.EventHandler#init(javax.servlet.ServletContext)

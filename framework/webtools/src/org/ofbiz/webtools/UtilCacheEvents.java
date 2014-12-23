@@ -28,6 +28,7 @@ import org.ofbiz.base.util.UtilDateTime;
 import org.ofbiz.base.util.UtilHttp;
 import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.base.util.UtilProperties;
+import org.ofbiz.base.util.cache.OFBizCache;
 import org.ofbiz.base.util.cache.UtilCache;
 import org.ofbiz.security.Security;
 
@@ -75,7 +76,7 @@ public class UtilCacheEvents {
             return "error";
         }
 
-        UtilCache<?, ?> utilCache = UtilCache.findCache(name);
+        OFBizCache<?, ?> utilCache = UtilCache.findCache(name);
 
         if (utilCache != null) {
             Object key = null;
@@ -133,7 +134,7 @@ public class UtilCacheEvents {
             request.setAttribute("_ERROR_MESSAGE_", errMsg);
             return "error";
         }
-        UtilCache<?, ?> utilCache = UtilCache.findCache(name);
+        OFBizCache<?, ?> utilCache = UtilCache.findCache(name);
 
         if (utilCache != null) {
             utilCache.clear();
@@ -206,7 +207,7 @@ public class UtilCacheEvents {
             expireTime = Long.valueOf(expireTimeStr);
         } catch (Exception e) {}
 
-        UtilCache<?, ?> utilCache = UtilCache.findCache(name);
+        OFBizCache<?, ?> utilCache = UtilCache.findCache(name);
 
         if (utilCache != null) {
             if (maxInMemory != null)

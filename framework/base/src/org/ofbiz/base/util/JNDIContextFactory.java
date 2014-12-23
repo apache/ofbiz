@@ -25,6 +25,7 @@ import javax.naming.InitialContext;
 
 import org.ofbiz.base.config.GenericConfigException;
 import org.ofbiz.base.config.JNDIConfigUtil;
+import org.ofbiz.base.util.cache.OFBizCache;
 import org.ofbiz.base.util.cache.UtilCache;
 
 /**
@@ -34,7 +35,7 @@ import org.ofbiz.base.util.cache.UtilCache;
 public class JNDIContextFactory {
 
     public static final String module = JNDIContextFactory.class.getName();
-    private static final UtilCache<String, InitialContext> contexts = UtilCache.createUtilCache("entity.JNDIContexts", 0, 0);
+    private static final OFBizCache<String, InitialContext> contexts = UtilCache.createUtilCache("entity.JNDIContexts", 0, 0);
 
     /**
      * Return the initial context according to the entityengine.xml parameters that correspond to the given prefix

@@ -35,6 +35,7 @@ import org.ofbiz.base.lang.LockedBy;
 import org.ofbiz.base.lang.ThreadSafe;
 import org.ofbiz.base.util.Assert;
 import org.ofbiz.base.util.UtilProperties;
+import org.ofbiz.base.util.cache.OFBizCache;
 import org.ofbiz.base.util.cache.UtilCache;
 import org.w3c.dom.Element;
 
@@ -43,7 +44,7 @@ import org.w3c.dom.Element;
  */
 @ThreadSafe
 public final class MetricsFactory {
-    private static final UtilCache<String, Metrics> METRICS_CACHE = UtilCache.createUtilCache("base.metrics", 0, 0);
+    private static final OFBizCache<String, Metrics> METRICS_CACHE = UtilCache.createUtilCache("base.metrics", 0, 0);
     /**
      * A "do-nothing" <code>Metrics</code> instance.
      */

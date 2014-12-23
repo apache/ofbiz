@@ -23,6 +23,7 @@ import java.util.Map;
 
 import org.ofbiz.base.util.HttpClient;
 import org.ofbiz.base.util.HttpClientException;
+import org.ofbiz.base.util.cache.OFBizCache;
 import org.ofbiz.base.util.cache.UtilCache;
 import org.ofbiz.base.util.UtilGenerics;
 import org.ofbiz.base.util.UtilURL;
@@ -40,7 +41,7 @@ import org.apache.bsf.BSFManager;
 public class BSFEngine extends GenericAsyncEngine {
 
     public static final String module = BSFEngine.class.getName();
-    private static final UtilCache<String, String> scriptCache = UtilCache.createUtilCache("BSFScripts", 0, 0);
+    private static final OFBizCache<String, String> scriptCache = UtilCache.createUtilCache("BSFScripts", 0, 0);
 
     public BSFEngine(ServiceDispatcher dispatcher) {
         super(dispatcher);

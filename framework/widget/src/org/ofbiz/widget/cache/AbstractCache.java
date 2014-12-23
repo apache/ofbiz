@@ -18,6 +18,7 @@
  *******************************************************************************/
 package org.ofbiz.widget.cache;
 
+import org.ofbiz.base.util.cache.OFBizCache;
 import org.ofbiz.base.util.cache.UtilCache;
 
 public abstract class AbstractCache {
@@ -44,11 +45,11 @@ public abstract class AbstractCache {
         return getCacheNamePrefix() + widgetName;
     }
 
-    protected <K,V> UtilCache<K,V> getCache(String widgetName) {
+    protected <K,V> OFBizCache<K,V> getCache(String widgetName) {
         return UtilCache.findCache(getCacheName(widgetName));
     }
 
-    protected UtilCache<WidgetContextCacheKey, GenericWidgetOutput> getOrCreateCache(String widgetName) {
+    protected OFBizCache<WidgetContextCacheKey, GenericWidgetOutput> getOrCreateCache(String widgetName) {
         String name = getCacheName(widgetName);
         return UtilCache.getOrCreateUtilCache(name, 0, 0, 0, true, false, name);
     }

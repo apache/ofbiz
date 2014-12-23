@@ -45,6 +45,7 @@ import java.util.ResourceBundle;
 import java.util.Set;
 
 import org.ofbiz.base.location.FlexibleLocation;
+import org.ofbiz.base.util.cache.OFBizCache;
 import org.ofbiz.base.util.cache.UtilCache;
 import org.ofbiz.base.util.collections.ResourceBundleMapWrapper;
 import org.ofbiz.base.util.string.FlexibleStringExpander;
@@ -70,12 +71,12 @@ public class UtilProperties implements Serializable {
     /** An instance of the generic cache for storing the non-locale-specific properties.
      *  Each Properties instance is keyed by the resource String.
      */
-    private static final UtilCache<String, Properties> resourceCache = UtilCache.createUtilCache("properties.UtilPropertiesResourceCache");
+    private static final OFBizCache<String, Properties> resourceCache = UtilCache.createUtilCache("properties.UtilPropertiesResourceCache");
 
     /** An instance of the generic cache for storing the non-locale-specific properties.
      *  Each Properties instance is keyed by the file's URL.
      */
-    private static final UtilCache<String, Properties> urlCache = UtilCache.createUtilCache("properties.UtilPropertiesUrlCache");
+    private static final OFBizCache<String, Properties> urlCache = UtilCache.createUtilCache("properties.UtilPropertiesUrlCache");
 
     protected static Locale fallbackLocale = null;
     protected static Set<Locale> defaultCandidateLocales = null;
@@ -1012,7 +1013,7 @@ public class UtilProperties implements Serializable {
      * properties file format.
      */
     public static class UtilResourceBundle extends ResourceBundle {
-        private static final UtilCache<String, UtilResourceBundle> bundleCache = UtilCache.createUtilCache("properties.UtilPropertiesBundleCache");
+        private static final OFBizCache<String, UtilResourceBundle> bundleCache = UtilCache.createUtilCache("properties.UtilPropertiesBundleCache");
         protected Properties properties = null;
         protected Locale locale = null;
         protected int hashCode = hashCode();

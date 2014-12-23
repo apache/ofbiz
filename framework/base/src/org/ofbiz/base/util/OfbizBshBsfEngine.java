@@ -41,6 +41,7 @@ import org.apache.bsf.BSFException;
 import org.apache.bsf.BSFManager;
 import org.apache.bsf.util.BSFEngineImpl;
 
+import org.ofbiz.base.util.cache.OFBizCache;
 import org.ofbiz.base.util.cache.UtilCache;
 
 /**
@@ -61,7 +62,7 @@ public class OfbizBshBsfEngine extends BSFEngineImpl {
     protected Interpreter interpreter;
     protected boolean installedApplyMethod;
 
-    private static final UtilCache<String, Interpreter.ParsedScript> parsedScripts = UtilCache.createUtilCache("script.BshBsfParsedCache", 0, 0, false);
+    private static final OFBizCache<String, Interpreter.ParsedScript> parsedScripts = UtilCache.createUtilCache("script.BshBsfParsedCache", 0, 0, false);
 
     @SuppressWarnings("unchecked")
     @Override

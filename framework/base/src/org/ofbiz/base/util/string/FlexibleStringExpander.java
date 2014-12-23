@@ -38,6 +38,7 @@ import org.ofbiz.base.util.UtilFormatOut;
 import org.ofbiz.base.util.UtilGenerics;
 import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.base.util.UtilValidate;
+import org.ofbiz.base.util.cache.OFBizCache;
 import org.ofbiz.base.util.cache.UtilCache;
 
 /** Expands String values that contain Unified Expression Language (JSR 245)
@@ -55,7 +56,7 @@ public abstract class FlexibleStringExpander implements Serializable, IsEmpty {
     public static final String module = FlexibleStringExpander.class.getName();
     public static final String openBracket = "${";
     public static final String closeBracket = "}";
-    protected static final UtilCache<Key, FlexibleStringExpander> exprCache = UtilCache.createUtilCache("flexibleStringExpander.ExpressionCache");
+    protected static final OFBizCache<Key, FlexibleStringExpander> exprCache = UtilCache.createUtilCache("flexibleStringExpander.ExpressionCache");
     protected static final FlexibleStringExpander nullExpr = new ConstSimpleElem(new char[0]);
 
     /**

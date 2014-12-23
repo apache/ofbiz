@@ -32,6 +32,7 @@ import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.base.util.UtilXml;
 import org.ofbiz.base.util.URLConnector;
+import org.ofbiz.base.util.cache.OFBizCache;
 import org.ofbiz.base.util.cache.UtilCache;
 import org.ofbiz.base.location.FlexibleLocation;
 import org.ofbiz.base.util.GeneralException;
@@ -56,7 +57,7 @@ import javax.xml.transform.stream.StreamResult;
 public final class XslTransform {
 
     public static final String module = XslTransform.class.getName();
-    private static final UtilCache<String, Templates> xslTemplatesCache = UtilCache.createUtilCache("XsltTemplates", 0, 0);
+    private static final OFBizCache<String, Templates> xslTemplatesCache = UtilCache.createUtilCache("XsltTemplates", 0, 0);
 
     /**
      * @param template the content or url of the xsl template

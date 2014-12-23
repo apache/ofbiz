@@ -34,6 +34,7 @@ import org.ofbiz.base.util.GeneralException;
 import org.ofbiz.base.util.UtilHttp;
 import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.base.util.UtilXml;
+import org.ofbiz.base.util.cache.OFBizCache;
 import org.ofbiz.base.util.cache.UtilCache;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -47,8 +48,8 @@ public class ScreenFactory {
 
     public static final String module = ScreenFactory.class.getName();
 
-    public static final UtilCache<String, Map<String, ModelScreen>> screenLocationCache = UtilCache.createUtilCache("widget.screen.locationResource", 0, 0, false);
-    public static final UtilCache<String, Map<String, ModelScreen>> screenWebappCache = UtilCache.createUtilCache("widget.screen.webappResource", 0, 0, false);
+    public static final OFBizCache<String, Map<String, ModelScreen>> screenLocationCache = UtilCache.createUtilCache("widget.screen.locationResource", 0, 0, false);
+    public static final OFBizCache<String, Map<String, ModelScreen>> screenWebappCache = UtilCache.createUtilCache("widget.screen.webappResource", 0, 0, false);
 
     public static boolean isCombinedName(String combinedName) {
         int numSignIndex = combinedName.lastIndexOf("#");

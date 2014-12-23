@@ -35,6 +35,7 @@ import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilTimer;
 import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.base.util.UtilXml;
+import org.ofbiz.base.util.cache.OFBizCache;
 import org.ofbiz.base.util.cache.UtilCache;
 import org.ofbiz.entity.GenericEntityConfException;
 import org.ofbiz.entity.config.model.DelegatorElement;
@@ -53,7 +54,7 @@ import org.w3c.dom.Node;
 public class ModelGroupReader implements Serializable {
 
     public static final String module = ModelGroupReader.class.getName();
-    private static final UtilCache<String, ModelGroupReader> readers = UtilCache.createUtilCache("entity.ModelGroupReader", 0, 0);
+    private static final OFBizCache<String, ModelGroupReader> readers = UtilCache.createUtilCache("entity.ModelGroupReader", 0, 0);
 
     private Map<String, String> groupCache = null;
     private Set<String> groupNames = null;

@@ -21,6 +21,7 @@ package org.ofbiz.base.util;
 import org.apache.oro.text.regex.MalformedPatternException;
 import org.apache.oro.text.regex.Pattern;
 import org.apache.oro.text.regex.Perl5Compiler;
+import org.ofbiz.base.util.cache.OFBizCache;
 import org.ofbiz.base.util.cache.UtilCache;
 
 /**
@@ -30,7 +31,7 @@ import org.ofbiz.base.util.cache.UtilCache;
 public class PatternFactory {
 
     public static final String module = PatternFactory.class.getName();
-    private static final UtilCache<String, Pattern> compiledPerl5Patterns = UtilCache.createUtilCache("regularExpression.compiledPerl5Patterns", false);
+    private static final OFBizCache<String, Pattern> compiledPerl5Patterns = UtilCache.createUtilCache("regularExpression.compiledPerl5Patterns", false);
 
     /**
      * Compiles and caches a Perl5 regexp pattern for the given string pattern.

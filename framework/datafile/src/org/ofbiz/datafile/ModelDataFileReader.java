@@ -29,6 +29,7 @@ import java.util.Map;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.base.util.UtilXml;
+import org.ofbiz.base.util.cache.OFBizCache;
 import org.ofbiz.base.util.cache.UtilCache;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -41,7 +42,7 @@ import org.w3c.dom.NodeList;
 public final class ModelDataFileReader {
 
     public static final String module = ModelDataFileReader.class.getName();
-    private static final UtilCache<URL, ModelDataFileReader> readers = UtilCache.createUtilCache("ModelDataFile", true);
+    private static final OFBizCache<URL, ModelDataFileReader> readers = UtilCache.createUtilCache("ModelDataFile", true);
 
     public static ModelDataFileReader getModelDataFileReader(URL readerURL) throws DataFileException {
         ModelDataFileReader reader = readers.get(readerURL);

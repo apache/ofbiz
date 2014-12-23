@@ -20,6 +20,7 @@ package org.ofbiz.webapp.ftl;
 
 import freemarker.cache.CacheStorage;
 
+import org.ofbiz.base.util.cache.OFBizCache;
 import org.ofbiz.base.util.cache.UtilCache;
 
 /**
@@ -27,7 +28,7 @@ import org.ofbiz.base.util.cache.UtilCache;
  */
 public class OfbizCacheStorage implements CacheStorage {
     //can't have global cache because names/keys are relative to the webapp
-    protected final UtilCache<Object, Object> localCache;
+    protected final OFBizCache<Object, Object> localCache;
 
     public OfbizCacheStorage(String id) {
         this.localCache = UtilCache.createUtilCache("webapp.FreeMarkerCache." + id, 0, 0, false);

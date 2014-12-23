@@ -24,6 +24,7 @@ import java.net.URL;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilURL;
 import org.ofbiz.base.util.UtilXml;
+import org.ofbiz.base.util.cache.OFBizCache;
 import org.ofbiz.base.util.cache.UtilCache;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -34,9 +35,9 @@ import org.w3c.dom.Element;
 public abstract class ResourceLoader {
 
     public static final String module = ResourceLoader.class.getName();
-    private static final UtilCache<String, ResourceLoader> loaderCache = UtilCache.createUtilCache("resource.ResourceLoaders", 0, 0);
+    private static final OFBizCache<String, ResourceLoader> loaderCache = UtilCache.createUtilCache("resource.ResourceLoaders", 0, 0);
     // This cache is temporary - we will use it until the framework has been refactored to eliminate DOM tree caching, then it can be removed.
-    private static final UtilCache<String, Document> domCache = UtilCache.createUtilCache("resource.DomTrees", 0, 0);
+    private static final OFBizCache<String, Document> domCache = UtilCache.createUtilCache("resource.DomTrees", 0, 0);
 
     public static InputStream loadResource(String xmlFilename, String location, String loaderName) throws GenericConfigException {
         ResourceLoader loader = getLoader(xmlFilename, loaderName);
