@@ -35,7 +35,7 @@ import org.codehaus.groovy.control.CompilationFailedException;
 import org.codehaus.groovy.control.CompilerConfiguration;
 import org.codehaus.groovy.runtime.InvokerHelper;
 import org.ofbiz.base.location.FlexibleLocation;
-import org.ofbiz.base.util.cache.OFBizCache;
+import org.ofbiz.base.util.cache.Cache;
 import org.ofbiz.base.util.cache.UtilCache;
 
 /**
@@ -46,7 +46,7 @@ public class GroovyUtil {
 
     public static final String module = GroovyUtil.class.getName();
 
-    private static final OFBizCache<String, Class<?>> parsedScripts = UtilCache.createUtilCache("script.GroovyLocationParsedCache", 0, 0, false);
+    private static final Cache<String, Class<?>> parsedScripts = UtilCache.createUtilCache("script.GroovyLocationParsedCache", 0, 0, false);
 
     private static final GroovyClassLoader groovyScriptClassLoader;
     static {

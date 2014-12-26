@@ -18,7 +18,7 @@
  *******************************************************************************/
 package org.ofbiz.entity.cache;
 
-import org.ofbiz.base.util.cache.OFBizCache;
+import org.ofbiz.base.util.cache.Cache;
 import org.ofbiz.base.util.cache.UtilCache;
 import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.DelegatorFactory;
@@ -71,11 +71,11 @@ public abstract class AbstractCache<K, V> {
         return names;
     }
 
-    protected OFBizCache<K, V> getCache(String entityName) {
+    protected Cache<K, V> getCache(String entityName) {
         return UtilCache.findCache(getCacheName(entityName));
     }
 
-    protected OFBizCache<K, V> getOrCreateCache(String entityName) {
+    protected Cache<K, V> getOrCreateCache(String entityName) {
         String name = getCacheName(entityName);
         return UtilCache.getOrCreateUtilCache(name, 0, 0, 0, true, false, getCacheNames(entityName));
     }

@@ -41,7 +41,7 @@ import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.FileUtil;
 import org.ofbiz.base.util.GeneralException;
 import org.ofbiz.base.util.UtilValidate;
-import org.ofbiz.base.util.cache.OFBizCache;
+import org.ofbiz.base.util.cache.Cache;
 import org.ofbiz.base.util.cache.UtilCache;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.config.model.DelegatorElement;
@@ -68,7 +68,7 @@ public class ArtifactInfoFactory {
 
     public static final String module = ArtifactInfoFactory.class.getName();
 
-    private static final OFBizCache<String, ArtifactInfoFactory> artifactInfoFactoryCache = UtilCache.createUtilCache("ArtifactInfoFactory");
+    private static final Cache<String, ArtifactInfoFactory> artifactInfoFactoryCache = UtilCache.createUtilCache("ArtifactInfoFactory");
 
     public static final String EntityInfoTypeId = "entity";
     public static final String ServiceInfoTypeId = "service";

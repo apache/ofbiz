@@ -37,7 +37,7 @@ import org.ofbiz.base.util.StringUtil;
 import org.ofbiz.base.util.UtilHttp;
 import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.base.util.UtilValidate;
-import org.ofbiz.base.util.cache.OFBizCache;
+import org.ofbiz.base.util.cache.Cache;
 import org.ofbiz.base.util.cache.UtilCache;
 import org.ofbiz.content.content.ContentWorker;
 import org.ofbiz.content.content.ContentWrapper;
@@ -60,7 +60,7 @@ public class ProductPromoContentWrapper implements ContentWrapper {
     public static final String module = ProductPromoContentWrapper.class.getName();
     public static final String SEPARATOR = "::";    // cache key separator
 
-    private static final OFBizCache<String, String> productPromoContentCache = UtilCache.createUtilCache("product.promo.content.rendered", true);
+    private static final Cache<String, String> productPromoContentCache = UtilCache.createUtilCache("product.promo.content.rendered", true);
 
     public static ProductPromoContentWrapper makeProductPromoContentWrapper(GenericValue productPromo, HttpServletRequest request) {
         return new ProductPromoContentWrapper(productPromo, request);

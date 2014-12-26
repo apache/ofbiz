@@ -20,6 +20,8 @@ package org.ofbiz.base.util.cache;
 
 import java.util.Set;
 
+import org.ofbiz.base.util.cache.impl.OFBizCacheManager;
+
 /**
  * Generalized caching utility. Provides a number of caching features:
  * <ul>
@@ -36,7 +38,7 @@ public class UtilCache<K, V> {
 
     public static final String module = UtilCache.class.getName();
 
-    private static final OFBizCacheManager cacheManager = new OFBizCacheManager("cache");
+    private static final CacheManager cacheManager = CacheManagerFactory.getCacheManager("cache");
 
     public static Set<String> getUtilCacheTableKeySet() {
         return cacheManager.getUtilCacheTableKeySet();
@@ -44,7 +46,7 @@ public class UtilCache<K, V> {
 
     /** Checks for a non-expired key in a specific cache */
     public static boolean validKey(String cacheName, Object key) {
-        OFBizCache<?, ?> cache = findCache(cacheName);
+        Cache<?, ?> cache = findCache(cacheName);
         if (cache != null) {
             if (cache.containsKey(key))
                 return true;
@@ -65,43 +67,43 @@ public class UtilCache<K, V> {
         cacheManager.clearCachesThatStartWith(startsWith);
     }
 
-    public static <K, V> OFBizCache<K, V> getOrCreateUtilCache(String name, int sizeLimit, int maxInMemory, long expireTime, boolean useSoftReference, boolean useFileSystemStore, String... names) {
-        return cacheManager.getOrCreateUtilCache(name, sizeLimit, maxInMemory, expireTime, useSoftReference, useFileSystemStore, names);
+    public static <K, V> Cache<K, V> getOrCreateUtilCache(String name, int sizeLimit, int maxInMemory, long expireTime, boolean useSoftReference, boolean useFileSystemStore, String... names) {
+        return cacheManager.getOrCreateCache(name, sizeLimit, maxInMemory, expireTime, useSoftReference, useFileSystemStore, names);
     }
 
-    public static <K, V> OFBizCache<K, V> createUtilCache(String name, int sizeLimit, int maxInMemory, long expireTime, boolean useSoftReference, boolean useFileSystemStore, String... names) {
-        return cacheManager.createUtilCache(name, sizeLimit, maxInMemory, expireTime, useSoftReference, useFileSystemStore, names);
+    public static <K, V> Cache<K, V> createUtilCache(String name, int sizeLimit, int maxInMemory, long expireTime, boolean useSoftReference, boolean useFileSystemStore, String... names) {
+        return cacheManager.createCache(name, sizeLimit, maxInMemory, expireTime, useSoftReference, useFileSystemStore, names);
     }
 
-    public static <K, V> OFBizCache<K, V> createUtilCache(String name, int sizeLimit, int maxInMemory, long expireTime, boolean useSoftReference, boolean useFileSystemStore) {
-        return cacheManager.createUtilCache(name, sizeLimit, maxInMemory, expireTime, useSoftReference, useFileSystemStore);
+    public static <K, V> Cache<K, V> createUtilCache(String name, int sizeLimit, int maxInMemory, long expireTime, boolean useSoftReference, boolean useFileSystemStore) {
+        return cacheManager.createCache(name, sizeLimit, maxInMemory, expireTime, useSoftReference, useFileSystemStore);
     }
 
-    public static <K,V> OFBizCache<K, V> createUtilCache(String name, int sizeLimit, long expireTime, boolean useSoftReference) {
-        return cacheManager.createUtilCache(name, sizeLimit, expireTime, useSoftReference);
+    public static <K,V> Cache<K, V> createUtilCache(String name, int sizeLimit, long expireTime, boolean useSoftReference) {
+        return cacheManager.createCache(name, sizeLimit, expireTime, useSoftReference);
     }
 
-    public static <K,V> OFBizCache<K, V> createUtilCache(String name, int sizeLimit, long expireTime) {
-        return cacheManager.createUtilCache(name, sizeLimit, expireTime);
+    public static <K,V> Cache<K, V> createUtilCache(String name, int sizeLimit, long expireTime) {
+        return cacheManager.createCache(name, sizeLimit, expireTime);
     }
 
-    public static <K,V> OFBizCache<K, V> createUtilCache(int sizeLimit, long expireTime) {
-        return cacheManager.createUtilCache(sizeLimit, expireTime);
+    public static <K,V> Cache<K, V> createUtilCache(int sizeLimit, long expireTime) {
+        return cacheManager.createCache(sizeLimit, expireTime);
     }
 
-    public static <K,V> OFBizCache<K, V> createUtilCache(String name, boolean useSoftReference) {
-        return cacheManager.createUtilCache(name, useSoftReference);
+    public static <K,V> Cache<K, V> createUtilCache(String name, boolean useSoftReference) {
+        return cacheManager.createCache(name, useSoftReference);
     }
 
-    public static <K,V> OFBizCache<K, V> createUtilCache(String name) {
-        return cacheManager.createUtilCache(name);
+    public static <K,V> Cache<K, V> createUtilCache(String name) {
+        return cacheManager.createCache(name);
     }
 
-    public static <K,V> OFBizCache<K, V> createUtilCache() {
-        return cacheManager.createUtilCache();
+    public static <K,V> Cache<K, V> createUtilCache() {
+        return cacheManager.createCache();
     }
 
-    public static <K, V> OFBizCache<K, V> findCache(String cacheName) {
+    public static <K, V> Cache<K, V> findCache(String cacheName) {
         return cacheManager.findCache(cacheName);
     }
 

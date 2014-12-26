@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  *******************************************************************************/
-package org.ofbiz.base.util.cache;
+package org.ofbiz.base.util.cache.impl;
 
 import java.io.IOException;
 import java.io.NotSerializableException;
@@ -47,6 +47,7 @@ import org.ofbiz.base.util.ObjectType;
 import org.ofbiz.base.util.UtilGenerics;
 import org.ofbiz.base.util.UtilObject;
 import org.ofbiz.base.util.UtilValidate;
+import org.ofbiz.base.util.cache.Cache;
 import org.ofbiz.base.util.cache.CacheListener;
 
 import com.googlecode.concurrentlinkedhashmap.ConcurrentLinkedHashMap;
@@ -65,7 +66,7 @@ import com.googlecode.concurrentlinkedhashmap.EvictionListener;
  *
  */
 @SuppressWarnings("serial")
-public class OFBizCache<K, V> implements Serializable, EvictionListener<Object, CacheLine<V>> {
+public class OFBizCache<K, V> implements Serializable, EvictionListener<Object, CacheLine<V>>, Cache<K, V> {
 
     public static final String module = OFBizCache.class.getName();
 
@@ -229,10 +230,10 @@ public class OFBizCache<K, V> implements Serializable, EvictionListener<Object, 
         }
     }
 
-    public Object getCacheLineTable() {
-        throw new UnsupportedOperationException();
-    }
-
+    /* (non-Javadoc)
+     * @see org.ofbiz.base.util.cache.Cache#isEmpty()
+     */
+    @Override
     public boolean isEmpty() {
         if (fileTable != null) {
             try {
@@ -248,18 +249,26 @@ public class OFBizCache<K, V> implements Serializable, EvictionListener<Object, 
         }
     }
 
-    /** Puts or loads the passed element into the cache
-     * @param key The key for the element, used to reference it in the hashtables and LRU linked list
-     * @param value The value of the element
+    /* (non-Javadoc)
+     * @see org.ofbiz.base.util.cache.Cache#put(K, V)
      */
+    @Override
     public V put(K key, V value) {
         return putInternal(key, value, expireTimeNanos);
     }
 
+    /* (non-Javadoc)
+     * @see org.ofbiz.base.util.cache.Cache#putIfAbsent(K, V)
+     */
+    @Override
     public V putIfAbsent(K key, V value) {
         return putIfAbsentInternal(key, value, expireTimeNanos);
     }
 
+    /* (non-Javadoc)
+     * @see org.ofbiz.base.util.cache.Cache#putIfAbsentAndGet(K, V)
+     */
+    @Override
     public V putIfAbsentAndGet(K key, V value) {
         V cachedValue = putIfAbsent(key, value);
         return (cachedValue != null? cachedValue: value);
@@ -405,10 +414,10 @@ public class OFBizCache<K, V> implements Serializable, EvictionListener<Object, 
         }
     }
 
-    /** Gets an element from the cache according to the specified key.
-     * @param key The key for the element, used to reference it in the hashtables and LRU linked list
-     * @return The value of the element specified by the key
+    /* (non-Javadoc)
+     * @see org.ofbiz.base.util.cache.Cache#get(java.lang.Object)
      */
+    @Override
     public V get(Object key) {
         boolean countGet = true;
         Object nulledKey = fromKey(key);
@@ -441,6 +450,10 @@ public class OFBizCache<K, V> implements Serializable, EvictionListener<Object, 
         return line != null ? line.getValue() : null;
     }
 
+    /* (non-Javadoc)
+     * @see org.ofbiz.base.util.cache.Cache#values()
+     */
+    @Override
     public Collection<V> values() {
         if (fileTable != null) {
             List<V> values = new LinkedList<V>();
@@ -491,6 +504,10 @@ public class OFBizCache<K, V> implements Serializable, EvictionListener<Object, 
         }
     }
 
+    /* (non-Javadoc)
+     * @see org.ofbiz.base.util.cache.Cache#getSizeInBytes()
+     */
+    @Override
     public long getSizeInBytes() {
         long totalSize = 0;
         if (fileTable != null) {
@@ -515,10 +532,10 @@ public class OFBizCache<K, V> implements Serializable, EvictionListener<Object, 
         return totalSize;
     }
 
-    /** Removes an element from the cache according to the specified key
-     * @param key The key for the element, used to reference it in the hashtables and LRU linked list
-     * @return The value of the removed element specified by the key
+    /* (non-Javadoc)
+     * @see org.ofbiz.base.util.cache.Cache#remove(java.lang.Object)
      */
+    @Override
     public V remove(Object key) {
         return this.removeInternal(key, true);
     }
@@ -585,7 +602,10 @@ public class OFBizCache<K, V> implements Serializable, EvictionListener<Object, 
         noteRemoval(UtilGenerics.<K>cast(key), existingCacheLine.getValue());
     }
 
-    /** Removes all elements from this cache */
+    /* (non-Javadoc)
+     * @see org.ofbiz.base.util.cache.Cache#erase()
+     */
+    @Override
     public synchronized void erase() {
         if (fileTable != null) {
             // FIXME: erase from memory too
@@ -620,63 +640,83 @@ public class OFBizCache<K, V> implements Serializable, EvictionListener<Object, 
         }
     }
 
+    /* (non-Javadoc)
+     * @see org.ofbiz.base.util.cache.Cache#clear()
+     */
+    @Override
     public void clear() {
         erase();
         clearCounters();
     }
 
-    /** Getter for the name of the UtilCache instance.
-     * @return The name of the instance
+    /* (non-Javadoc)
+     * @see org.ofbiz.base.util.cache.Cache#getName()
      */
+    @Override
     public String getName() {
         return this.name;
     }
 
-    /** Returns the number of successful hits on the cache
-     * @return The number of successful cache hits
+    /* (non-Javadoc)
+     * @see org.ofbiz.base.util.cache.Cache#getHitCount()
      */
+    @Override
     public long getHitCount() {
         return this.hitCount.get();
     }
 
-    /** Returns the number of cache misses from entries that are not found in the cache
-     * @return The number of cache misses
+    /* (non-Javadoc)
+     * @see org.ofbiz.base.util.cache.Cache#getMissCountNotFound()
      */
+    @Override
     public long getMissCountNotFound() {
         return this.missCountNotFound.get();
     }
 
-    /** Returns the number of cache misses from entries that are expired
-     * @return The number of cache misses
+    /* (non-Javadoc)
+     * @see org.ofbiz.base.util.cache.Cache#getMissCountExpired()
      */
+    @Override
     public long getMissCountExpired() {
         return this.missCountExpired.get();
     }
 
-    /** Returns the number of cache misses from entries that are have had the soft reference cleared out (by garbage collector and such)
-     * @return The number of cache misses
+    /* (non-Javadoc)
+     * @see org.ofbiz.base.util.cache.Cache#getMissCountSoftRef()
      */
+    @Override
     public long getMissCountSoftRef() {
         return this.missCountSoftRef.get();
     }
 
-    /** Returns the number of cache misses caused by any reason
-     * @return The number of cache misses
+    /* (non-Javadoc)
+     * @see org.ofbiz.base.util.cache.Cache#getMissCountTotal()
      */
+    @Override
     public long getMissCountTotal() {
         return getMissCountSoftRef() + getMissCountNotFound() + getMissCountExpired();
     }
 
+    /* (non-Javadoc)
+     * @see org.ofbiz.base.util.cache.Cache#getRemoveHitCount()
+     */
+    @Override
     public long getRemoveHitCount() {
         return this.removeHitCount.get();
     }
 
+    /* (non-Javadoc)
+     * @see org.ofbiz.base.util.cache.Cache#getRemoveMissCount()
+     */
+    @Override
     public long getRemoveMissCount() {
         return this.removeMissCount.get();
     }
 
-    /** Clears the hit and miss counters
+    /* (non-Javadoc)
+     * @see org.ofbiz.base.util.cache.Cache#clearCounters()
      */
+    @Override
     public void clearCounters() {
         this.hitCount.set(0);
         this.missCountNotFound.set(0);
@@ -686,6 +726,10 @@ public class OFBizCache<K, V> implements Serializable, EvictionListener<Object, 
         this.removeMissCount.set(0);
     }
 
+    /* (non-Javadoc)
+     * @see org.ofbiz.base.util.cache.Cache#setMaxInMemory(int)
+     */
+    @Override
     public void setMaxInMemory(int newInMemory) {
         this.maxInMemory = newInMemory;
         Map<Object, CacheLine<V>> oldmap = this.memoryTable;
@@ -706,22 +750,34 @@ public class OFBizCache<K, V> implements Serializable, EvictionListener<Object, 
         this.memoryTable.putAll(oldmap);
     }
 
+    /* (non-Javadoc)
+     * @see org.ofbiz.base.util.cache.Cache#getMaxInMemory()
+     */
+    @Override
     public int getMaxInMemory() {
         return maxInMemory;
     }
 
+    /* (non-Javadoc)
+     * @see org.ofbiz.base.util.cache.Cache#setSizeLimit(int)
+     */
+    @Override
     public void setSizeLimit(int newSizeLimit) {
         this.sizeLimit = newSizeLimit;
     }
 
+    /* (non-Javadoc)
+     * @see org.ofbiz.base.util.cache.Cache#getSizeLimit()
+     */
+    @Override
     public int getSizeLimit() {
         return sizeLimit;
     }
 
-    /** Sets the expire time for the cache elements.
-     * If 0, elements never expire.
-     * @param expireTimeMillis The expire time for the cache elements
+    /* (non-Javadoc)
+     * @see org.ofbiz.base.util.cache.Cache#setExpireTime(long)
      */
+    @Override
     public void setExpireTime(long expireTimeMillis) {
         // if expire time was <= 0 and is now greater, fill expire table now
         if (expireTimeMillis > 0) {
@@ -735,14 +791,18 @@ public class OFBizCache<K, V> implements Serializable, EvictionListener<Object, 
         }
     }
 
-    /** return the current expire time for the cache elements
-     * @return The expire time for the cache elements
+    /* (non-Javadoc)
+     * @see org.ofbiz.base.util.cache.Cache#getExpireTime()
      */
+    @Override
     public long getExpireTime() {
         return TimeUnit.MILLISECONDS.convert(expireTimeNanos, TimeUnit.NANOSECONDS);
     }
 
-    /** Set whether or not the cache lines should use a soft reference to the data */
+    /* (non-Javadoc)
+     * @see org.ofbiz.base.util.cache.Cache#setUseSoftReference(boolean)
+     */
+    @Override
     public void setUseSoftReference(boolean useSoftReference) {
         if (this.useSoftReference != useSoftReference) {
             this.useSoftReference = useSoftReference;
@@ -752,18 +812,26 @@ public class OFBizCache<K, V> implements Serializable, EvictionListener<Object, 
         }
     }
 
-    /** Return whether or not the cache lines should use a soft reference to the data */
+    /* (non-Javadoc)
+     * @see org.ofbiz.base.util.cache.Cache#getUseSoftReference()
+     */
+    @Override
     public boolean getUseSoftReference() {
         return this.useSoftReference;
     }
 
+    /* (non-Javadoc)
+     * @see org.ofbiz.base.util.cache.Cache#getUseFileSystemStore()
+     */
+    @Override
     public boolean getUseFileSystemStore() {
         return this.useFileSystemStore;
     }
 
-    /** Returns the number of elements currently in the cache
-     * @return The number of elements currently in the cache
+    /* (non-Javadoc)
+     * @see org.ofbiz.base.util.cache.Cache#size()
      */
+    @Override
     public long size() {
         if (fileTable != null) {
             int size = 0;
@@ -783,10 +851,10 @@ public class OFBizCache<K, V> implements Serializable, EvictionListener<Object, 
         }
     }
 
-    /** Returns a boolean specifying whether or not an element with the specified key is in the cache.
-     * @param key The key for the element, used to reference it in the hashtables and LRU linked list
-     * @return True is the cache contains an element corresponding to the specified key, otherwise false
+    /* (non-Javadoc)
+     * @see org.ofbiz.base.util.cache.Cache#containsKey(java.lang.Object)
      */
+    @Override
     public boolean containsKey(Object key) {
         Object nulledKey = fromKey(key);
         CacheLine<V> line = memoryTable.get(nulledKey);
@@ -812,11 +880,10 @@ public class OFBizCache<K, V> implements Serializable, EvictionListener<Object, 
         }
     }
 
-    /**
-     * NOTE: this returns an unmodifiable copy of the keySet, so removing from here won't have an effect,
-     * and calling a remove while iterating through the set will not cause a concurrent modification exception.
-     * This behavior is necessary for now for the persisted cache feature.
+    /* (non-Javadoc)
+     * @see org.ofbiz.base.util.cache.Cache#getCacheLineKeys()
      */
+    @Override
     public Set<? extends K> getCacheLineKeys() {
         // note that this must be a HashSet and not a FastSet in order to have a null value
         Set<Object> keys;
@@ -869,6 +936,10 @@ public class OFBizCache<K, V> implements Serializable, EvictionListener<Object, 
         return lineInfo;
     }
 
+    /* (non-Javadoc)
+     * @see org.ofbiz.base.util.cache.Cache#getLineInfos()
+     */
+    @Override
     public Collection<? extends Map<String, Object>> getLineInfos() {
         List<Map<String, Object>> lineInfos = new LinkedList<Map<String, Object>>();
         int keyIndex = 0;
@@ -914,16 +985,25 @@ public class OFBizCache<K, V> implements Serializable, EvictionListener<Object, 
         }
     }
 
-    /** Adds an event listener for key removals */
+    /* (non-Javadoc)
+     * @see org.ofbiz.base.util.cache.Cache#addListener(org.ofbiz.base.util.cache.CacheListener)
+     */
+    @Override
     public void addListener(CacheListener<K, V> listener) {
         listeners.add(listener);
     }
 
-    /** Removes an event listener for key removals */
+    /* (non-Javadoc)
+     * @see org.ofbiz.base.util.cache.Cache#removeListener(org.ofbiz.base.util.cache.CacheListener)
+     */
+    @Override
     public void removeListener(CacheListener<K, V> listener) {
         listeners.remove(listener);
     }
 
+    /* (non-Javadoc)
+     * @see org.ofbiz.base.util.cache.Cache#onEviction(java.lang.Object, org.ofbiz.base.util.cache.CacheLine)
+     */
     @Override
     public void onEviction(Object key, CacheLine<V> value) {
         ExecutionPool.removePulse(value);

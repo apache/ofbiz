@@ -28,12 +28,13 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.ofbiz.base.location.FlexibleLocation;
-import org.ofbiz.base.util.cache.OFBizCache;
+import org.ofbiz.base.util.cache.Cache;
 import org.ofbiz.base.util.cache.UtilCache;
 
 import bsh.BshClassManager;
 import bsh.EvalError;
 import bsh.Interpreter;
+import bsh.Interpreter.ParsedScript;
 import bsh.NameSpace;
 import bsh.ParseException;
 
@@ -46,7 +47,7 @@ public final class BshUtil {
     public static final String module = BshUtil.class.getName();
 
     protected static ConcurrentHashMap<ClassLoader, BshClassManager> masterClassManagers = new ConcurrentHashMap<ClassLoader, BshClassManager>();
-    private static final OFBizCache<String, Interpreter.ParsedScript> parsedScripts = UtilCache.createUtilCache("script.BshLocationParsedCache", 0, 0, false);
+    private static final Cache<String, ParsedScript> parsedScripts = UtilCache.createUtilCache("script.BshLocationParsedCache", 0, 0, false);
 
     /**
      * Evaluate a BSH condition or expression

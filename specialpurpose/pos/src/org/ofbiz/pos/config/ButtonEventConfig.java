@@ -33,7 +33,7 @@ import org.ofbiz.base.util.GeneralException;
 import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.base.util.UtilXml;
 import org.ofbiz.base.util.Debug;
-import org.ofbiz.base.util.cache.OFBizCache;
+import org.ofbiz.base.util.cache.Cache;
 import org.ofbiz.base.util.cache.UtilCache;
 import org.ofbiz.pos.screen.PosScreen;
 
@@ -44,7 +44,7 @@ public class ButtonEventConfig implements java.io.Serializable {
 
     public static final String module = ButtonEventConfig.class.getName();
     public static final String BUTTON_EVENT_CONFIG = "buttonevents.xml";
-    private static transient OFBizCache<String, ButtonEventConfig> buttonConfig = UtilCache.createUtilCache("pos.ButtonEvent", 0, 0, 0, false, true);
+    private static transient Cache<String, ButtonEventConfig> buttonConfig = UtilCache.createUtilCache("pos.ButtonEvent", 0, 0, 0, false, true);
 
     protected String buttonName = null;
     protected String className = null;

@@ -30,7 +30,7 @@ import javax.servlet.http.HttpSession;
 import org.ofbiz.base.util.Assert;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilMisc;
-import org.ofbiz.base.util.cache.OFBizCache;
+import org.ofbiz.base.util.cache.Cache;
 import org.ofbiz.base.util.cache.UtilCache;
 import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericEntityException;
@@ -51,7 +51,7 @@ public final class SecurityFactory {
     // The default implementation stores a Delegator reference, so we will cache by delegator name.
     // The goal is to remove Delegator references in the Security interface, then we can use a singleton
     // and eliminate the cache.
-    private static final OFBizCache<String, Security> authorizationCache = UtilCache.createUtilCache("security.AuthorizationCache");
+    private static final Cache<String, Security> authorizationCache = UtilCache.createUtilCache("security.AuthorizationCache");
 
     /**
      * Returns a <code>Security</code> instance. The method uses Java's

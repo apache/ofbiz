@@ -51,7 +51,7 @@ import org.ofbiz.base.util.UtilGenerics;
 import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.base.util.UtilProperties;
 import org.ofbiz.base.util.UtilValidate;
-import org.ofbiz.base.util.cache.OFBizCache;
+import org.ofbiz.base.util.cache.Cache;
 import org.ofbiz.base.util.cache.UtilCache;
 
 import freemarker.cache.TemplateLoader;
@@ -80,7 +80,7 @@ public class FreeMarkerWorker {
     public static final Version version = new Version(2, 3, 21);
 
     // use soft references for this so that things from Content records don't kill all of our memory, or maybe not for performance reasons... hmmm, leave to config file...
-    private static final OFBizCache<String, Template> cachedTemplates = UtilCache.createUtilCache("template.ftl.general", 0, 0, false);
+    private static final Cache<String, Template> cachedTemplates = UtilCache.createUtilCache("template.ftl.general", 0, 0, false);
     private static final BeansWrapper defaultOfbizWrapper = new BeansWrapperBuilder(version).build();
     private static final Configuration defaultOfbizConfig = makeConfiguration(defaultOfbizWrapper);
 
@@ -329,7 +329,7 @@ public class FreeMarkerWorker {
         return getTemplate(templateLocation, cachedTemplates, defaultOfbizConfig);
     }
 
-    public static Template getTemplate(String templateLocation, OFBizCache<String, Template> cache, Configuration config) throws TemplateException, IOException {
+    public static Template getTemplate(String templateLocation, Cache<String, Template> cache, Configuration config) throws TemplateException, IOException {
         Template template = cache.get(templateLocation);
         if (template == null) {
             // only make the reader if we need it, and then close it right after!

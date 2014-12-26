@@ -16,9 +16,10 @@
  * specific language governing permissions and limitations
  * under the License.
  *******************************************************************************/
-package org.ofbiz.base.util.cache;
+package org.ofbiz.base.util.cache.impl;
 
 import java.io.IOException;
+
 
 import jdbm.RecordManager;
 import jdbm.helper.ISerializationHandler;

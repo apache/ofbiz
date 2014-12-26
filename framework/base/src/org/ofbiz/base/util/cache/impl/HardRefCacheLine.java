@@ -16,37 +16,19 @@
  * specific language governing permissions and limitations
  * under the License.
  *******************************************************************************/
-package org.ofbiz.base.util.cache;
+package org.ofbiz.base.util.cache.impl;
 
-import java.io.IOException;
 
-import jdbm.RecordManager;
-import jdbm.helper.ISerializationHandler;
-import jdbm.helper.Serializer;
+public abstract class HardRefCacheLine<V> extends CacheLine<V> {
+    public final V value;
 
-import org.ofbiz.base.util.UtilObject;
-
-/**
- * JDBC Serializer which uses OFBiz internal serialization
- * (needed do to the fact that we do dynamic class loading)
- *
- */
-@SuppressWarnings({"serial", "unchecked"})
-public class JdbmSerializer implements Serializer, ISerializationHandler {
-
-    public byte[] serialize(Object o) throws IOException {
-        return UtilObject.getBytes(o);
+    public HardRefCacheLine(V value, long loadTimeNanos, long expireTimeNanos) {
+        super(loadTimeNanos, expireTimeNanos);
+        this.value = value;
     }
 
-    public byte[] serialize(RecordManager recman, long recid, Object o) throws IOException {
-        return UtilObject.getBytes(o);
-    }
-
-    public Object deserialize(byte[] bytes) throws IOException {
-        return UtilObject.getObject(bytes);
-    }
-
-    public Object deserialize(RecordManager recman, long recid, byte[] bytes) throws IOException {
-        return UtilObject.getObject(bytes);
+    @Override
+    public V getValue() {
+        return value;
     }
 }

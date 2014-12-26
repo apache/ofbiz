@@ -21,7 +21,7 @@ package org.ofbiz.party.content;
 
 import org.ofbiz.content.content.ContentWrapper;
 import org.ofbiz.content.content.ContentWorker;
-import org.ofbiz.base.util.cache.OFBizCache;
+import org.ofbiz.base.util.cache.Cache;
 import org.ofbiz.base.util.cache.UtilCache;
 import org.ofbiz.base.util.*;
 import org.ofbiz.entity.GenericValue;
@@ -49,7 +49,7 @@ public class PartyContentWrapper implements ContentWrapper {
     public static final String module = PartyContentWrapper.class.getName();
     public static final String CACHE_KEY_SEPARATOR = "::";
 
-    private static final OFBizCache<String, String> partyContentCache = UtilCache.createUtilCache("party.content.rendered", true);
+    private static final Cache<String, String> partyContentCache = UtilCache.createUtilCache("party.content.rendered", true);
 
     protected LocalDispatcher dispatcher;
     protected GenericValue party;

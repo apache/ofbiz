@@ -20,9 +20,9 @@ package org.ofbiz.base.util.cache;
 
 public interface CacheListener<K, V> {
 
-    public void noteKeyRemoval(OFBizCache<K, V> cache, K key, V oldValue);
+    public void noteKeyRemoval(Cache<K, V> cache, K key, V oldValue);
 
-    public void noteKeyAddition(OFBizCache<K, V> cache, K key, V newValue);
+    public void noteKeyAddition(Cache<K, V> cache, K key, V newValue);
 
-    public void noteKeyUpdate(OFBizCache<K, V> cache, K key, V newValue, V oldValue);
+    public void noteKeyUpdate(Cache<K, V> cache, K key, V newValue, V oldValue);
 }

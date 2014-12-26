@@ -27,7 +27,7 @@ import java.util.concurrent.ConcurrentMap;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.base.util.UtilValidate;
-import org.ofbiz.base.util.cache.OFBizCache;
+import org.ofbiz.base.util.cache.Cache;
 import org.ofbiz.base.util.cache.UtilCache;
 import org.ofbiz.entity.GenericEntity;
 import org.ofbiz.entity.GenericPK;
@@ -76,7 +76,7 @@ public abstract class AbstractEntityConditionCache<K, V> extends AbstractCache<E
     }
 
     public void remove(String entityName, EntityCondition condition) {
-        OFBizCache<EntityCondition, ConcurrentMap<K, V>> cache = getCache(entityName);
+        Cache<EntityCondition, ConcurrentMap<K, V>> cache = getCache(entityName);
         if (cache == null) return;
         cache.remove(condition);
     }
@@ -104,13 +104,13 @@ public abstract class AbstractEntityConditionCache<K, V> extends AbstractCache<E
     }
 
     protected ConcurrentMap<K, V> getConditionCache(String entityName, EntityCondition condition) {
-        OFBizCache<EntityCondition, ConcurrentMap<K, V>> cache = getCache(entityName);
+        Cache<EntityCondition, ConcurrentMap<K, V>> cache = getCache(entityName);
         if (cache == null) return null;
         return cache.get(getConditionKey(condition));
     }
 
     protected Map<K, V> getOrCreateConditionCache(String entityName, EntityCondition condition) {
-        OFBizCache<EntityCondition, ConcurrentMap<K, V>> utilCache = getOrCreateCache(entityName);
+        Cache<EntityCondition, ConcurrentMap<K, V>> utilCache = getOrCreateCache(entityName);
         EntityCondition conditionKey = getConditionKey(condition);
         ConcurrentMap<K, V> conditionCache = utilCache.get(conditionKey);
         if (conditionCache == null) {
@@ -183,7 +183,7 @@ public abstract class AbstractEntityConditionCache<K, V> extends AbstractCache<E
     }
 
     protected <T1 extends Map<String, Object>, T2 extends Map<String, Object>> void storeHook(String entityName, boolean isPK, List<T1> oldValues, List<T2> newValues) {
-        OFBizCache<EntityCondition, Map<K, V>> entityCache = UtilCache.findCache(getCacheName(entityName));
+        Cache<EntityCondition, Map<K, V>> entityCache = UtilCache.findCache(getCacheName(entityName));
         // for info about cache clearing
         if (UtilValidate.isEmpty(newValues) || newValues.get(0) == null) {
             //Debug.logInfo("In storeHook (cache clear) for entity name [" + entityName + "], got entity cache with name: " + (entityCache == null ? "[No cache found to remove from]" : entityCache.getName()), module);

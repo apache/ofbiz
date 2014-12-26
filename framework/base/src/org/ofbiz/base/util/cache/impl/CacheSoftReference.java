@@ -16,37 +16,35 @@
  * specific language governing permissions and limitations
  * under the License.
  *******************************************************************************/
-package org.ofbiz.webapp.ftl;
+package org.ofbiz.base.util.cache.impl;
 
-import freemarker.cache.CacheStorage;
+import java.io.Serializable;
 
-import org.ofbiz.base.util.cache.Cache;
-import org.ofbiz.base.util.cache.UtilCache;
+import org.ofbiz.base.util.Debug;
+import org.ofbiz.base.util.ReferenceCleaner;
 
-/**
- * A custom cache wrapper for caching FreeMarker templates
- */
-public class OfbizCacheStorage implements CacheStorage {
-    //can't have global cache because names/keys are relative to the webapp
-    protected final Cache<Object, Object> localCache;
+@SuppressWarnings("serial")
+public abstract class CacheSoftReference<V> extends ReferenceCleaner.Soft<V> implements Serializable {
 
-    public OfbizCacheStorage(String id) {
-        this.localCache = UtilCache.createUtilCache("webapp.FreeMarkerCache." + id, 0, 0, false);
+    public static final String module = CacheSoftReference.class.getName();
+
+    public CacheSoftReference(V o) {
+        super(o);
     }
 
-    public Object get(Object key) {
-        return localCache.get(key);
-    }
-
-    public void put(Object key, Object value) {
-        localCache.put(key, value);
-    }
-
-    public void remove(Object key) {
-        localCache.remove(key);
-    }
-
+    @Override
     public void clear() {
-        localCache.clear();
+        if (Debug.verboseOn()) {
+            Debug.logVerbose(new Exception("UtilCache.CacheSoftRef.clear()"), "Clearing UtilCache SoftReference - " + get(), module);
+        }
+        super.clear();
+    }
+
+    @Override
+    public void finalize() throws Throwable {
+        if (Debug.verboseOn()) {
+            Debug.logVerbose(new Exception("UtilCache.CacheSoftRef.finalize()"), "Finalize UtilCache SoftReference - " + get(), module);
+        }
+        super.finalize();
     }
 }

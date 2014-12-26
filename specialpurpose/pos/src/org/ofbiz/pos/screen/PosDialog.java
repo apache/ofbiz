@@ -43,13 +43,13 @@ import net.xoetrope.xui.XPage;
 import net.xoetrope.xui.XProjectManager;
 
 import org.ofbiz.base.util.Debug;
-import org.ofbiz.base.util.cache.OFBizCache;
+import org.ofbiz.base.util.cache.Cache;
 import org.ofbiz.base.util.cache.UtilCache;
 
 public class PosDialog {
 
     public static final String module = PosDialog.class.getName();
-    private static final OFBizCache<XPage, PosDialog> instances = UtilCache.createUtilCache("pos.Dialogs", 0, 0);
+    private static final Cache<XPage, PosDialog> instances = UtilCache.createUtilCache("pos.Dialogs", 0, 0);
 
     protected final Frame clientFrame = XProjectManager.getCurrentProject().getAppFrame();
     protected final Window appWindow = XProjectManager.getCurrentProject().getAppWindow();

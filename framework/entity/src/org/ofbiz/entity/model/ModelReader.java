@@ -38,7 +38,7 @@ import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilTimer;
 import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.base.util.UtilXml;
-import org.ofbiz.base.util.cache.OFBizCache;
+import org.ofbiz.base.util.cache.Cache;
 import org.ofbiz.base.util.cache.UtilCache;
 import org.ofbiz.entity.GenericEntityConfException;
 import org.ofbiz.entity.GenericEntityException;
@@ -59,7 +59,7 @@ import org.w3c.dom.Node;
 public class ModelReader implements Serializable {
 
     public static final String module = ModelReader.class.getName();
-    private static final OFBizCache<String, ModelReader> readers = UtilCache.createUtilCache("entity.ModelReader", 0, 0);
+    private static final Cache<String, ModelReader> readers = UtilCache.createUtilCache("entity.ModelReader", 0, 0);
 
     protected Map<String, ModelEntity> entityCache = null;
 

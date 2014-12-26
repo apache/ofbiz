@@ -16,18 +16,29 @@
  * specific language governing permissions and limitations
  * under the License.
  *******************************************************************************/
-package org.ofbiz.base.util.cache;
+package org.ofbiz.base.util.cache.impl;
 
-public abstract class HardRefCacheLine<V> extends CacheLine<V> {
-    public final V value;
 
-    public HardRefCacheLine(V value, long loadTimeNanos, long expireTimeNanos) {
+@SuppressWarnings("serial")
+public abstract class SoftRefCacheLine<V> extends CacheLine<V> {
+    public final CacheSoftReference<V> ref;
+
+    public SoftRefCacheLine(V value, long loadTimeNanos, long expireTimeNanos) {
         super(loadTimeNanos, expireTimeNanos);
-        this.value = value;
+        this.ref = new CacheSoftReference<V>(value) {
+            public void remove() {
+                SoftRefCacheLine.this.remove();
+            }
+        };
+    }
+
+    @Override
+    void cancel() {
+        ref.clear();
     }
 
     @Override
     public V getValue() {
-        return value;
+        return ref.get();
     }
 }

@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  *******************************************************************************/
-package org.ofbiz.base.util.cache;
+package org.ofbiz.base.util.cache.impl;
 
 import java.io.IOException;
 import java.util.HashSet;
@@ -27,6 +27,7 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.ofbiz.base.util.Debug;
+import org.ofbiz.base.util.cache.CacheManager;
 
 /**
  * Generalized caching utility. Provides a number of caching features:
@@ -40,7 +41,7 @@ import org.ofbiz.base.util.Debug;
  *
  */
 @SuppressWarnings("serial")
-public class OFBizCacheManager {
+public class OFBizCacheManager implements CacheManager {
 
     public static final String module = OFBizCacheManager.class.getName();
 
@@ -99,7 +100,10 @@ public class OFBizCacheManager {
     }
 
 
-    /** Removes all elements from this cache */
+    /* (non-Javadoc)
+     * @see org.ofbiz.base.util.cache.CacheManager#clearAllCaches()
+     */
+    @Override
     public void clearAllCaches() {
         // We make a copy since clear may take time
         for (OFBizCache<?,?> cache : ofbizCacheTable.values()) {
@@ -107,20 +111,28 @@ public class OFBizCacheManager {
         }
     }
 
+    /* (non-Javadoc)
+     * @see org.ofbiz.base.util.cache.CacheManager#getUtilCacheTableKeySet()
+     */
+    @Override
     public Set<String> getUtilCacheTableKeySet() {
         Set<String> set = new HashSet<String>(ofbizCacheTable.size());
         set.addAll(ofbizCacheTable.keySet());
         return set;
     }
 
-    /** Getter for the name of the UtilCache instance.
-     * @return The name of the instance
+    /* (non-Javadoc)
+     * @see org.ofbiz.base.util.cache.CacheManager#getName()
      */
+    @Override
     public String getName() {
         return this.name;
     }
 
-    /** Checks for a non-expired key in a specific cache */
+    /* (non-Javadoc)
+     * @see org.ofbiz.base.util.cache.CacheManager#validKey(java.lang.String, java.lang.Object)
+     */
+    @Override
     public boolean validKey(String cacheName, Object key) {
         OFBizCache<?, ?> cache = findCache(cacheName);
         if (cache != null) {
@@ -130,6 +142,10 @@ public class OFBizCacheManager {
         return false;
     }
 
+    /* (non-Javadoc)
+     * @see org.ofbiz.base.util.cache.CacheManager#clearCachesThatStartWith(java.lang.String)
+     */
+    @Override
     public void clearCachesThatStartWith(String startsWith) {
         for (Map.Entry<String, OFBizCache<?, ?>> entry: ofbizCacheTable.entrySet()) {
             String name = entry.getKey();
@@ -140,14 +156,22 @@ public class OFBizCacheManager {
         }
     }
 
+    /* (non-Javadoc)
+     * @see org.ofbiz.base.util.cache.CacheManager#clearCache(java.lang.String)
+     */
+    @Override
     public void clearCache(String cacheName) {
         OFBizCache<?, ?> cache = findCache(cacheName);
         if (cache == null) return;
         cache.clear();
     }
 
+    /* (non-Javadoc)
+     * @see org.ofbiz.base.util.cache.CacheManager#getOrCreateUtilCache(java.lang.String, int, int, long, boolean, boolean, java.lang.String)
+     */
+    @Override
     @SuppressWarnings("unchecked")
-    public <K, V> OFBizCache<K, V> getOrCreateUtilCache(String name, int sizeLimit, int maxInMemory, long expireTime, boolean useSoftReference, boolean useFileSystemStore, String... names) {
+    public <K, V> OFBizCache<K, V> getOrCreateCache(String name, int sizeLimit, int maxInMemory, long expireTime, boolean useSoftReference, boolean useFileSystemStore, String... names) {
         OFBizCache<K, V> existingCache = (OFBizCache<K, V>) ofbizCacheTable.get(name);
         if (existingCache != null) return existingCache;
         String cacheName = name + getNextDefaultIndex(name);
@@ -156,42 +180,74 @@ public class OFBizCacheManager {
         return (OFBizCache<K, V>) ofbizCacheTable.get(name);
     }
 
-    public <K, V> OFBizCache<K, V> createUtilCache(String name, int sizeLimit, int maxInMemory, long expireTime, boolean useSoftReference, boolean useFileSystemStore, String... names) {
+    /* (non-Javadoc)
+     * @see org.ofbiz.base.util.cache.CacheManager#createUtilCache(java.lang.String, int, int, long, boolean, boolean, java.lang.String)
+     */
+    @Override
+    public <K, V> OFBizCache<K, V> createCache(String name, int sizeLimit, int maxInMemory, long expireTime, boolean useSoftReference, boolean useFileSystemStore, String... names) {
         String cacheName = name + getNextDefaultIndex(name);
         return storeCache(new OFBizCache<K, V>(this, cacheName, sizeLimit, maxInMemory, expireTime, useSoftReference, useFileSystemStore, name, names));
     }
 
-    public <K, V> OFBizCache<K, V> createUtilCache(String name, int sizeLimit, int maxInMemory, long expireTime, boolean useSoftReference, boolean useFileSystemStore) {
+    /* (non-Javadoc)
+     * @see org.ofbiz.base.util.cache.CacheManager#createUtilCache(java.lang.String, int, int, long, boolean, boolean)
+     */
+    @Override
+    public <K, V> OFBizCache<K, V> createCache(String name, int sizeLimit, int maxInMemory, long expireTime, boolean useSoftReference, boolean useFileSystemStore) {
         String cacheName = name + getNextDefaultIndex(name);
         return storeCache(new OFBizCache<K, V>(this, cacheName, sizeLimit, maxInMemory, expireTime, useSoftReference, useFileSystemStore, name));
     }
 
-    public <K,V> OFBizCache<K, V> createUtilCache(String name, int sizeLimit, long expireTime, boolean useSoftReference) {
+    /* (non-Javadoc)
+     * @see org.ofbiz.base.util.cache.CacheManager#createUtilCache(java.lang.String, int, long, boolean)
+     */
+    @Override
+    public <K,V> OFBizCache<K, V> createCache(String name, int sizeLimit, long expireTime, boolean useSoftReference) {
         String cacheName = name + getNextDefaultIndex(name);
         return storeCache(new OFBizCache<K, V>(this, cacheName, sizeLimit, sizeLimit, expireTime, useSoftReference, false, name));
     }
 
-    public <K,V> OFBizCache<K, V> createUtilCache(String name, int sizeLimit, long expireTime) {
+    /* (non-Javadoc)
+     * @see org.ofbiz.base.util.cache.CacheManager#createUtilCache(java.lang.String, int, long)
+     */
+    @Override
+    public <K,V> OFBizCache<K, V> createCache(String name, int sizeLimit, long expireTime) {
         String cacheName = name + getNextDefaultIndex(name);
         return storeCache(new OFBizCache<K, V>(this, cacheName, sizeLimit, sizeLimit, expireTime, false, false, name));
     }
 
-    public <K,V> OFBizCache<K, V> createUtilCache(int sizeLimit, long expireTime) {
+    /* (non-Javadoc)
+     * @see org.ofbiz.base.util.cache.CacheManager#createUtilCache(int, long)
+     */
+    @Override
+    public <K,V> OFBizCache<K, V> createCache(int sizeLimit, long expireTime) {
         String cacheName = "specified" + getNextDefaultIndex("specified");
         return storeCache(new OFBizCache<K, V>(this, cacheName, sizeLimit, sizeLimit, expireTime, false, false, "specified"));
     }
 
-    public <K,V> OFBizCache<K, V> createUtilCache(String name, boolean useSoftReference) {
+    /* (non-Javadoc)
+     * @see org.ofbiz.base.util.cache.CacheManager#createUtilCache(java.lang.String, boolean)
+     */
+    @Override
+    public <K,V> OFBizCache<K, V> createCache(String name, boolean useSoftReference) {
         String cacheName = name + getNextDefaultIndex(name);
         return storeCache(new OFBizCache<K, V>(this, cacheName, 0, 0, 0, useSoftReference, false, "default", name));
     }
 
-    public <K,V> OFBizCache<K, V> createUtilCache(String name) {
+    /* (non-Javadoc)
+     * @see org.ofbiz.base.util.cache.CacheManager#createUtilCache(java.lang.String)
+     */
+    @Override
+    public <K,V> OFBizCache<K, V> createCache(String name) {
         String cacheName = name + getNextDefaultIndex(name);
         return storeCache(new OFBizCache<K, V>(this, cacheName, 0, 0, 0, false, false, "default", name));
     }
 
-    public <K,V> OFBizCache<K, V> createUtilCache() {
+    /* (non-Javadoc)
+     * @see org.ofbiz.base.util.cache.CacheManager#createUtilCache()
+     */
+    @Override
+    public <K,V> OFBizCache<K, V> createCache() {
         String cacheName = "default" + getNextDefaultIndex("default");
         return storeCache(new OFBizCache<K, V>(this, cacheName, 0, 0, 0, false, false, "default"));
     }
@@ -201,6 +257,10 @@ public class OFBizCacheManager {
         return cache;
     }
 
+    /* (non-Javadoc)
+     * @see org.ofbiz.base.util.cache.CacheManager#findCache(java.lang.String)
+     */
+    @Override
     @SuppressWarnings("unchecked")
     public <K, V> OFBizCache<K, V> findCache(String cacheName) {
         return (OFBizCache<K, V>) ofbizCacheTable.get(cacheName);

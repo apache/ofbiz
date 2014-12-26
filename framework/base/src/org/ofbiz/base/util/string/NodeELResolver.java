@@ -35,7 +35,7 @@ import javax.xml.xpath.XPathFactory;
 
 import org.apache.xerces.dom.NodeImpl;
 import org.ofbiz.base.util.Debug;
-import org.ofbiz.base.util.cache.OFBizCache;
+import org.ofbiz.base.util.cache.Cache;
 import org.ofbiz.base.util.cache.UtilCache;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -52,7 +52,7 @@ import org.w3c.dom.NodeList;
  */
 public class NodeELResolver extends ELResolver {
     private final XPath xpath;
-    private final OFBizCache<String, XPathExpression> exprCache = UtilCache.createUtilCache("nodeElResolver.ExpressionCache");
+    private final Cache<String, XPathExpression> exprCache = UtilCache.createUtilCache("nodeElResolver.ExpressionCache");
     private static final String module = NodeELResolver.class.getName();
 
     /**

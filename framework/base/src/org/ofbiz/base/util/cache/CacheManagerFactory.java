@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -15,29 +15,24 @@
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
  * under the License.
- *******************************************************************************/
+ */
 package org.ofbiz.base.util.cache;
 
-@SuppressWarnings("serial")
-public abstract class SoftRefCacheLine<V> extends CacheLine<V> {
-    public final CacheSoftReference<V> ref;
+import org.ofbiz.base.lang.Factory;
+import org.ofbiz.base.util.Debug;
+import org.ofbiz.base.util.UtilObject;
 
-    public SoftRefCacheLine(V value, long loadTimeNanos, long expireTimeNanos) {
-        super(loadTimeNanos, expireTimeNanos);
-        this.ref = new CacheSoftReference<V>(value) {
-            public void remove() {
-                SoftRefCacheLine.this.remove();
-            }
-        };
-    }
+public abstract class CacheManagerFactory implements Factory<CacheManager, String> {
 
-    @Override
-    void cancel() {
-        ref.clear();
-    }
+    public static final String module = CacheManagerFactory.class.getName();
 
-    @Override
-    public V getValue() {
-        return ref.get();
+    public static CacheManager getCacheManager(String cacheManagerName) {
+        CacheManager cacheManager = null;
+        try {
+            cacheManager = UtilObject.getObjectFromFactory(CacheManagerFactory.class, cacheManagerName);
+        } catch (ClassNotFoundException e) {
+            Debug.logError(e, module);
+        }
+        return cacheManager;
     }
 }

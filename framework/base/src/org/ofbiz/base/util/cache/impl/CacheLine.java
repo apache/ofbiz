@@ -16,35 +16,32 @@
  * specific language governing permissions and limitations
  * under the License.
  *******************************************************************************/
-package org.ofbiz.base.util.cache;
+package org.ofbiz.base.util.cache.impl;
 
-import java.io.Serializable;
+import org.ofbiz.base.concurrent.ExecutionPool;
 
-import org.ofbiz.base.util.Debug;
-import org.ofbiz.base.util.ReferenceCleaner;
+public abstract class CacheLine<V> extends ExecutionPool.Pulse {
+    protected CacheLine(long loadTimeNanos, long expireTimeNanos) {
+        super(loadTimeNanos, expireTimeNanos);
+        // FIXME: this seems very odd to me (ARH)
+        //if (loadTime <= 0) {
+        //    hasExpired = true;
+        //}
+    }
 
-@SuppressWarnings("serial")
-public abstract class CacheSoftReference<V> extends ReferenceCleaner.Soft<V> implements Serializable {
+    abstract CacheLine<V> changeLine(boolean useSoftReference, long expireTimeNanos);
+    abstract void remove();
+    boolean differentExpireTime(long expireTimeNanos) {
+        return this.expireTimeNanos - loadTimeNanos - expireTimeNanos != 0;
+    }
+    public abstract V getValue();
 
-    public static final String module = CacheSoftReference.class.getName();
-
-    public CacheSoftReference(V o) {
-        super(o);
+    void cancel() {
     }
 
     @Override
-    public void clear() {
-        if (Debug.verboseOn()) {
-            Debug.logVerbose(new Exception("UtilCache.CacheSoftRef.clear()"), "Clearing UtilCache SoftReference - " + get(), module);
-        }
-        super.clear();
-    }
-
-    @Override
-    public void finalize() throws Throwable {
-        if (Debug.verboseOn()) {
-            Debug.logVerbose(new Exception("UtilCache.CacheSoftRef.finalize()"), "Finalize UtilCache SoftReference - " + get(), module);
-        }
-        super.finalize();
+    public void run() {
+        remove();
     }
 }
+
