@@ -229,7 +229,7 @@ public class ModelTree extends ModelWidget {
      *   different tree elements; implementing your own makes it possible to
      *   use the same tree definitions for many types of tree UIs
      */
-    public void renderTreeString(StringBuffer buf, Map<String, Object> context, TreeStringRenderer treeStringRenderer) throws GeneralException {
+    public void renderTreeString(Appendable writer, Map<String, Object> context, TreeStringRenderer treeStringRenderer) throws GeneralException {
         Map<String, Object> parameters = UtilGenerics.checkMap(context.get("parameters"));
 
         ModelNode node = nodeMap.get(rootNodeName);
@@ -252,10 +252,8 @@ public class ModelTree extends ModelWidget {
         }
         context.put("targetNodeTrail", trail);
         context.put("currentNodeTrail", FastList.newInstance());
-        StringWriter writer = new StringWriter();
         try {
             node.renderNodeString(writer, context, treeStringRenderer, 0);
-            buf.append(writer.toString());
         } catch (IOException e2) {
             String errMsg = "Error rendering included label with name [" + name + "] : " + e2.toString();
             Debug.logError(e2, errMsg, module);
@@ -855,24 +853,6 @@ public class ModelTree extends ModelWidget {
                 for (Element parameterElement: parameterElementList) {
                     this.parameterList.add(new WidgetWorker.Parameter(parameterElement));
                 }
-            }
-
-            public Link(ModelTree.ModelNode.Link linkElement) {
-                this.textExdr = linkElement.textExdr;
-                this.idExdr = linkElement.idExdr;
-                this.styleExdr = linkElement.styleExdr;
-                this.targetExdr = linkElement.targetExdr;
-                this.targetWindowExdr = linkElement.targetWindowExdr;
-                this.prefixExdr = linkElement.prefixExdr;
-                this.urlMode = linkElement.urlMode;
-                this.fullPath = linkElement.fullPath;
-                this.secure = linkElement.secure;
-                this.encode = linkElement.encode;
-                this.nameExdr = linkElement.nameExdr;
-                this.titleExdr = linkElement.titleExdr;
-                this.linkType = linkElement.linkType;
-                this.parameterList = new ArrayList<WidgetWorker.Parameter>(linkElement.parameterList.size());
-                Collections.copy(this.parameterList, linkElement.parameterList);
             }
 
             public void renderLinkString(Appendable writer, Map<String, Object> context, TreeStringRenderer treeStringRenderer) {

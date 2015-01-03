@@ -930,17 +930,7 @@ public abstract class ModelScreenWidget extends ModelWidget {
             if (treeStringRenderer == null) {
                 throw new IllegalArgumentException("Could not find a treeStringRenderer in the context");
             }
-
-            StringBuffer renderBuffer = new StringBuffer();
-            modelTree.renderTreeString(renderBuffer, context, treeStringRenderer);
-            try {
-                writer.append(renderBuffer.toString());
-            } catch (IOException e) {
-                String errMsg = "Error rendering included tree named [" + name + "] at location [" + location + "]: " + e.toString();
-                Debug.logError(e, errMsg, module);
-                throw new RuntimeException(errMsg);
-            }
-
+            modelTree.renderTreeString(writer, context, treeStringRenderer);
             if (protectScope) {
                 UtilGenerics.<MapStack<String>>cast(context).pop();
             }
