@@ -24,9 +24,9 @@ webSiteList = [];
 webSite = null;
 if (parameters.productStoreId) {
     productStoreId = parameters.productStoreId;
-    webSiteList = delegator.findList("WebSite", EntityCondition.makeCondition("productStoreId", EntityOperator.EQUALS, productStoreId), null, null, null, false);
+    webSiteList = from("WebSite").where("productStoreId", productStoreId).queryList();
     if (parameters.webSiteId) {
-        webSite = delegator.findOne("WebSite", ["webSiteId" : parameters.webSiteId], true);
+        webSite = from("WebSite").where("webSiteId", parameters.webSiteId).cache(true).queryOne();
         context.selectedWebSiteId = parameters.webSiteId;
     } else if (webSiteList) {
         webSite = EntityUtil.getFirst(webSiteList);
@@ -42,7 +42,7 @@ if (parameters.productStoreId) {
     }
     context.countryCode = countryCode;
     if (webSite) {
-        eBayConfig = delegator.findOne("EbayConfig", [productStoreId : productStoreId], false);
+        eBayConfig = from("EbayConfig").where("productStoreId", productStoreId).queryOne();
         context.customXml = eBayConfig.customXml;
         context.webSiteUrl = webSite.getString("standardContentPrefix");
         
@@ -51,7 +51,7 @@ if (parameters.productStoreId) {
         userLogin = parameters.userLogin;
         
         if (productStoreId) {
-            results = dispatcher.runSync("getEbayCategories", [categoryCode : categoryCode, userLogin : userLogin, productStoreId : productStoreId]);
+            results = runService('getEbayCategories', [categoryCode : categoryCode, userLogin : userLogin, productStoreId : productStoreId]);
         }
         
         if (results.categories) {

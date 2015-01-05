@@ -25,17 +25,13 @@ import org.ofbiz.base.util.UtilDateTime;
 
 // get all timesheets of all user, including the planned hours
 timesheets = [];
-performFindInMap = [:];
 inputFields = [:];
-performFindInMap.entityName = "Timesheet";
 
 if (!parameters.noConditionFind) {
     parameters.noConditionFind = "N"
 }
 inputFields.putAll(parameters);
-performFindInMap.inputFields = inputFields;
-performFindInMap.orderBy = "fromDate DESC";
-performFindResults = dispatcher.runSync("performFind", performFindInMap);
+performFindResults = runService('performFind', ["entityName": "Timesheet", "inputFields": inputFields, "orderBy": "fromDate DESC"]);
 if (performFindResults.listSize > 0) {
     timesheetsDb = performFindResults.listIt.getCompleteList();
     performFindResults.listIt.close();
@@ -47,17 +43,13 @@ if (performFindResults.listSize > 0) {
         leaveExprsList.add(EntityCondition.makeCondition("fromDate", EntityOperator.GREATER_THAN_EQUAL_TO, timesheetDb.fromDate));
         leaveExprsList.add(EntityCondition.makeCondition("fromDate", EntityOperator.LESS_THAN_EQUAL_TO, timesheetDb.thruDate));
         leaveExprsList.add(EntityCondition.makeCondition("partyId", EntityOperator.EQUALS, timesheetDb.partyId));
-        emplLeaveList = delegator.find("EmplLeave", EntityCondition.makeCondition(leaveExprsList, EntityOperator.AND), null, null, null, findOpts);
+        emplLeaveList = from("EmplLeave").where(leaveExprsList).cursorScrollInsensitive().distinct().queryIterator();
         leaveHours = 0.00;
         
         while ((emplLeaveMap = emplLeaveList.next())) {
             emplLeaveEntry = emplLeaveMap;
-            inputData = [:];
-            inputData.userLogin = parameters.userLogin;
-            inputData.partyId = emplLeaveEntry.partyId;
-            inputData.leaveTypeId = emplLeaveEntry.leaveTypeId;
-            inputData.fromDate = emplLeaveEntry.fromDate;
-            resultHour = dispatcher.runSync("getPartyLeaveHoursForDate", inputData);
+            resultHour = runService('getPartyLeaveHoursForDate', 
+                ["userLogin": parameters.userLogin, "partyId": emplLeaveEntry.partyId, "leaveTypeId": emplLeaveEntry.leaveTypeId, "fromDate": emplLeaveEntry.fromDate]);
             if (resultHour) {
                 leaveActualHours = resultHour.hours.doubleValue();
                 leaveHours += leaveActualHours;

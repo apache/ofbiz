@@ -40,6 +40,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.StringUtil;
+import org.ofbiz.base.util.UtilCodec;
 import org.ofbiz.base.util.UtilFormatOut;
 import org.ofbiz.base.util.UtilGenerics;
 import org.ofbiz.base.util.UtilHttp;
@@ -92,7 +93,7 @@ public final class MacroFormRenderer implements FormStringRenderer {
     public static final String module = MacroFormRenderer.class.getName();
     private final Template macroLibrary;
     private final WeakHashMap<Appendable, Environment> environments = new WeakHashMap<Appendable, Environment>();
-    private final StringUtil.SimpleEncoder internalEncoder;
+    private final UtilCodec.SimpleEncoder internalEncoder;
     private final RequestHandler rh;
     private final HttpServletRequest request;
     private final HttpServletResponse response;
@@ -107,7 +108,7 @@ public final class MacroFormRenderer implements FormStringRenderer {
         ServletContext ctx = (ServletContext) request.getAttribute("servletContext");
         this.rh = (RequestHandler) ctx.getAttribute("_REQUEST_HANDLER_");
         this.javaScriptEnabled = UtilHttp.isJavaScriptEnabled(request);
-        internalEncoder = StringUtil.getEncoder("string");
+        internalEncoder = UtilCodec.getEncoder("string");
     }
 
     @Deprecated
@@ -157,7 +158,7 @@ public final class MacroFormRenderer implements FormStringRenderer {
         if (UtilValidate.isEmpty(value)) {
             return value;
         }
-        StringUtil.SimpleEncoder encoder = (StringUtil.SimpleEncoder) context.get("simpleEncoder");
+        UtilCodec.SimpleEncoder encoder = (UtilCodec.SimpleEncoder) context.get("simpleEncoder");
         if (modelFormField.getEncodeOutput() && encoder != null) {
             value = encoder.encode(value);
         } else {
@@ -355,7 +356,7 @@ public final class MacroFormRenderer implements FormStringRenderer {
             mask = textField.getMask();
         }
         String ajaxUrl = createAjaxParamsFromUpdateAreas(updateAreas, "", context);
-        boolean disabled = textField.disabled;
+        boolean disabled = textField.getDisabled();
         StringWriter sr = new StringWriter();
         sr.append("<@renderTextField ");
         sr.append("name=\"");
@@ -541,17 +542,21 @@ public final class MacroFormRenderer implements FormStringRenderer {
                 localizedInputTitle = uiLabelMap.get("CommonFormatDateTime");
             }
         }
-        String contextValue = null;
-        // If time-dropdown deactivate encodingOutput for found hour and minutes
+        /*
+         * FIXME: Using a builder here is a hack. Replace the builder with appropriate code.
+         */
+        ModelFormFieldBuilder builder = new ModelFormFieldBuilder(modelFormField);
         boolean memEncodeOutput = modelFormField.getEncodeOutput();
         if (useTimeDropDown)
-            // FIXME: This is not thread-safe! Never modify a model's state!
-            modelFormField.setEncodeOutput(false);
+            // If time-dropdown deactivate encodingOutput for found hour and minutes
+            // FIXME: Encoding should be controlled by the renderer, not by the model.
+            builder.setEncodeOutput(false);
         // FIXME: modelFormField.getEntry ignores shortDateInput when converting Date objects to Strings.
-        // Object type conversion should be done by the renderer, not by the model.
-        contextValue = modelFormField.getEntry(context, dateTimeField.getDefaultValue(context));
-        if (useTimeDropDown)
-            modelFormField.setEncodeOutput(memEncodeOutput);
+        if (useTimeDropDown) {
+            builder.setEncodeOutput(memEncodeOutput);
+        }
+        modelFormField = builder.build();
+        String contextValue = modelFormField.getEntry(context, dateTimeField.getDefaultValue(context));
         String value = contextValue;
         if (UtilValidate.isNotEmpty(value)) {
             if (value.length() > maxlength) {
@@ -2024,7 +2029,7 @@ public final class MacroFormRenderer implements FormStringRenderer {
         }
         String event = modelFormField.getEvent();
         String action = modelFormField.getAction(context);
-        boolean readonly = lookupField.readonly;
+        boolean readonly = lookupField.getReadonly();
         // add lookup pop-up button
         String descriptionFieldName = lookupField.getDescriptionFieldName();
         ModelForm modelForm = modelFormField.getModelForm();
@@ -2937,9 +2942,9 @@ public final class MacroFormRenderer implements FormStringRenderer {
         String encodedDescription = encode(description, modelFormField, context);
         // get the parameterized pagination index and size fields
         int paginatorNumber = WidgetWorker.getPaginatorNumber(context);
-        String viewIndexField = modelFormField.modelForm.getMultiPaginateIndexField(context);
-        String viewSizeField = modelFormField.modelForm.getMultiPaginateSizeField(context);
-        ModelForm modelForm = modelFormField.modelForm;
+        ModelForm modelForm = modelFormField.getModelForm();
+        String viewIndexField = modelForm.getMultiPaginateIndexField(context);
+        String viewSizeField = modelForm.getMultiPaginateSizeField(context);
         int viewIndex = Paginator.getViewIndex(modelForm, context);
         int viewSize = Paginator.getViewSize(modelForm, context);
         if (viewIndexField.equals("viewIndex" + "_" + paginatorNumber)) {
@@ -2951,7 +2956,7 @@ public final class MacroFormRenderer implements FormStringRenderer {
         if ("hidden-form".equals(realLinkType)) {
             parameterMap.put(viewIndexField, Integer.toString(viewIndex));
             parameterMap.put(viewSizeField, Integer.toString(viewSize));
-            if (modelFormField != null && "multi".equals(modelFormField.getModelForm().getType())) {
+            if (modelFormField != null && "multi".equals(modelForm.getType())) {
                 WidgetWorker.makeHiddenFormLinkAnchor(writer, linkStyle, encodedDescription, confirmation, modelFormField, request, response, context);
                 // this is a bit trickier, since we can't do a nested form we'll have to put the link to submit the form in place, but put the actual form def elsewhere, ie after the big form is closed
                 Map<String, Object> wholeFormContext = UtilGenerics.checkMap(context.get("wholeFormContext"));
@@ -3083,7 +3088,7 @@ public final class MacroFormRenderer implements FormStringRenderer {
             parameters.append(parameter.getName());
             parameters.append("'");
             parameters.append(",'value':'");
-            parameters.append(StringUtil.htmlEncoder.encode(parameter.getValue(context)));
+            parameters.append(UtilCodec.getEncoder("html").encode(parameter.getValue(context)));
             parameters.append("'}");
         }
         parameters.append("]");

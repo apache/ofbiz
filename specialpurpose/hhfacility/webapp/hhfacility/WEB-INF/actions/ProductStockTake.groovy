@@ -27,11 +27,11 @@ if (!productId) {
 }
 
 if (productId) {
-    product = delegator.findOne("Product", [productId : productId], true);
+    product = from("Product").where("productId", productId).cache(true).queryOne();
     context.product = product;
 
     facilityId = request.getParameter("facilityId");
-    resultOutput = dispatcher.runSync("getInventoryAvailableByFacility", [productId : productId, facilityId : facilityId]);
+    resultOutput = runService('getInventoryAvailableByFacility', [productId : productId, facilityId : facilityId]);
     quantitySummary = FastMap.newInstance();
     quantitySummary.facilityId = facilityId;
     quantitySummary.atp_qoh = ((Double)resultOutput.availableToPromiseTotal).intValue() + " / " +
@@ -40,8 +40,7 @@ if (productId) {
 
     // For now this just generates a visual list of locations set against the product for this facility.
     // todo: Will need to be able to edit and change these values at some point in the future.
-    productFacilityLocList = delegator.findList("ProductFacilityLocation",
-            EntityCondition.makeCondition([productId : productId, facilityId : facilityId]), null, null, null, false);
+    productFacilityLocList = from("ProductFacilityLocation").where("productId", productId, "facilityId", facilityId).queryList();
     facStr = null;
     productFacilityLocList.each { facilityLoc ->
         if (!facStr) {
@@ -55,8 +54,7 @@ if (productId) {
 
     // Now we build a list of locations for inventory items against the facility.
     // todo: change this to a select from inv_items where productId and facilityId matches distinct (locationSeqId).
-    invItemList = delegator.findList("InventoryItem",
-            EntityCondition.makeCondition([productId : productId, facilityId : facilityId]), null, null, null, false);
+    invItemList = from("InventoryItem").where("productId", productId, "facilityId", facilityId).queryList();
 
     locations = FastMap.newInstance();
 
@@ -80,7 +78,7 @@ if (productId) {
     locationsIter = locations.keySet().iterator();
     while (locationsIter.hasNext()) {
         location = locationsIter.next();
-        resultOutput = dispatcher.runSync("getInventoryAvailableByLocation", [productId : productId, facilityId : facilityId, locationSeqId : location]);
+        resultOutput = runService('getInventoryAvailableByLocation', [productId : productId, facilityId : facilityId, locationSeqId : location]);
         quantitySummary = FastMap.newInstance();
         quantitySummary.productId = productId;
         quantitySummary.facilityId = facilityId;

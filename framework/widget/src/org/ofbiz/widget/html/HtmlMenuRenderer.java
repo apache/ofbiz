@@ -29,6 +29,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.ofbiz.base.util.StringUtil;
+import org.ofbiz.base.util.UtilCodec;
 import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.entity.Delegator;
@@ -157,7 +158,7 @@ public class HtmlMenuRenderer extends HtmlWidgetRenderer implements MenuStringRe
             }
         }
 
-        if (menuItem.getDisabled() || this.isDisableIfEmpty(menuItem, context)) {
+        if (this.isDisableIfEmpty(menuItem, context)) {
             style = menuItem.getDisabledTitleStyle();
         }
 
@@ -185,7 +186,7 @@ public class HtmlMenuRenderer extends HtmlWidgetRenderer implements MenuStringRe
             renderLink(writer, context, link);
         } else {
             String txt = menuItem.getTitle(context);
-            StringUtil.SimpleEncoder simpleEncoder = (StringUtil.SimpleEncoder) context.get("simpleEncoder");
+            UtilCodec.SimpleEncoder simpleEncoder = (UtilCodec.SimpleEncoder) context.get("simpleEncoder");
             if (simpleEncoder != null) {
                 txt = simpleEncoder.encode(txt);
             }
@@ -377,7 +378,7 @@ public class HtmlMenuRenderer extends HtmlWidgetRenderer implements MenuStringRe
     public void renderLink(Appendable writer, Map<String, Object> context, ModelMenuItem.Link link) throws IOException {
         String target = link.getTarget(context);
         ModelMenuItem menuItem = link.getLinkMenuItem();
-        if (menuItem.getDisabled() || isDisableIfEmpty(menuItem, context)) {
+        if (isDisableIfEmpty(menuItem, context)) {
             target = null;
         }
 
@@ -407,7 +408,7 @@ public class HtmlMenuRenderer extends HtmlWidgetRenderer implements MenuStringRe
                 writer.append(uniqueItemName);
                 writer.append("\">");
 
-                StringUtil.SimpleEncoder simpleEncoder = (StringUtil.SimpleEncoder) context.get("simpleEncoder");
+                UtilCodec.SimpleEncoder simpleEncoder = (UtilCodec.SimpleEncoder) context.get("simpleEncoder");
                 for (Map.Entry<String, String> parameter: link.getParameterMap(context).entrySet()) {
                     writer.append("<input name=\"");
                     writer.append(parameter.getKey());

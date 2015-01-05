@@ -33,6 +33,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.StringUtil;
+import org.ofbiz.base.util.UtilCodec;
 import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.base.util.template.FreeMarkerWorker;
@@ -193,7 +194,7 @@ public class MacroMenuRenderer implements MenuStringRenderer {
         Map<String, Object> parameters = new HashMap<String, Object>();
         String target = link.getTarget(context);
         ModelMenuItem menuItem = link.getLinkMenuItem();
-        if (menuItem.getDisabled() || isDisableIfEmpty(menuItem, context)) {
+        if (isDisableIfEmpty(menuItem, context)) {
             target = null;
         }
         parameters.put("id", link.getId(context));
@@ -289,7 +290,7 @@ public class MacroMenuRenderer implements MenuStringRenderer {
                 style = "selected";
             }
         }
-        if (menuItem.getDisabled() || this.isDisableIfEmpty(menuItem, context)) {
+        if (this.isDisableIfEmpty(menuItem, context)) {
             style = menuItem.getDisabledTitleStyle();
         }
         if (style == null) {
@@ -309,7 +310,7 @@ public class MacroMenuRenderer implements MenuStringRenderer {
             linkStr = sw.toString();
         } else {
             linkStr = menuItem.getTitle(context);
-            StringUtil.SimpleEncoder simpleEncoder = (StringUtil.SimpleEncoder) context.get("simpleEncoder");
+            UtilCodec.SimpleEncoder simpleEncoder = (UtilCodec.SimpleEncoder) context.get("simpleEncoder");
             if (simpleEncoder != null) {
                 linkStr = simpleEncoder.encode(linkStr);
             }

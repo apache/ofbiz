@@ -60,24 +60,36 @@ import org.ofbiz.service.GenericServiceException;
 import org.ofbiz.service.ModelService;
 import org.w3c.dom.Element;
 
+/**
+ * Abstract widget action.
+ */
 @SuppressWarnings("serial")
 public abstract class ModelWidgetAction implements Serializable {
+
+    /*
+     * ----------------------------------------------------------------------- *
+     *                     DEVELOPERS PLEASE READ
+     * ----------------------------------------------------------------------- *
+     * 
+     * This model is intended to be a read-only data structure that represents
+     * an XML element. Outside of object construction, the class should not
+     * have any behaviors.
+     * 
+     * Instances of this class will be shared by multiple threads - therefore
+     * it is immutable. DO NOT CHANGE THE OBJECT'S STATE AT RUN TIME!
+     * 
+     */
+
     public static final String module = ModelWidgetAction.class.getName();
 
-    protected ModelWidget modelWidget;
-
-    protected ModelWidgetAction() {}
-
-    public ModelWidgetAction(ModelWidget modelWidget, Element actionElement) {
-        this.modelWidget = modelWidget;
-        if (Debug.verboseOn()) Debug.logVerbose("Reading widget action with name: " + actionElement.getNodeName(), module);
-    }
-
-    public abstract void runAction(Map<String, Object> context) throws GeneralException;
-
-    public abstract void accept(ModelActionVisitor visitor);
-
-    public static ModelWidgetAction toModelWidgetAction(ModelWidget modelWidget, Element actionElement) {
+    /**
+     * Returns a new <code>ModelWidgetAction</code> instance, built from <code>actionElement</code>.
+     * 
+     * @param modelWidget The <code>ModelWidget</code> that contains the &lt;actions&gt; element
+     * @param actionElement
+     * @return A new <code>ModelWidgetAction</code> instance
+     */
+    public static ModelWidgetAction newInstance(ModelWidget modelWidget, Element actionElement) {
         if ("set".equals(actionElement.getNodeName())) {
             return new SetField(modelWidget, actionElement);
         } else if ("property-map".equals(actionElement.getNodeName())) {
@@ -102,18 +114,25 @@ public abstract class ModelWidgetAction implements Serializable {
             throw new IllegalArgumentException("Action element not supported with name: " + actionElement.getNodeName());
         }
     }
-    
+
     public static List<ModelWidgetAction> readSubActions(ModelWidget modelWidget, Element parentElement) {
         List<? extends Element> actionElementList = UtilXml.childElementList(parentElement);
         List<ModelWidgetAction> actions = new ArrayList<ModelWidgetAction>(actionElementList.size());
-        for (Element actionElement: actionElementList) {
-            actions.add(toModelWidgetAction(modelWidget, actionElement));
+        for (Element actionElement : actionElementList) {
+            actions.add(newInstance(modelWidget, actionElement));
         }
         return Collections.unmodifiableList(actions);
     }
 
+    /**
+     * Executes the actions contained in <code>actions</code>.
+     * 
+     * @param actions
+     * @param context
+     */
     public static void runSubActions(List<ModelWidgetAction> actions, Map<String, Object> context) {
-        if (actions == null) return;
+        if (actions == null)
+            return;
         for (ModelWidgetAction action : actions) {
             if (Debug.verboseOn())
                 Debug.logVerbose("Running action " + action.getClass().getName(), module);
@@ -125,182 +144,278 @@ public abstract class ModelWidgetAction implements Serializable {
         }
     }
 
-    public static class SetField extends ModelWidgetAction {
-        protected FlexibleMapAccessor<Object> field;
-        protected FlexibleMapAccessor<Object> fromField;
-        protected FlexibleStringExpander valueExdr;
-        protected FlexibleStringExpander defaultExdr;
-        protected FlexibleStringExpander globalExdr;
-        protected String type;
-        protected String toScope;
-        protected String fromScope;
+    private final ModelWidget modelWidget;
 
-        public SetField(ModelWidget modelWidget, Element setElement) {
-            super (modelWidget, setElement);
-            this.field = FlexibleMapAccessor.getInstance(setElement.getAttribute("field"));
-            this.fromField = FlexibleMapAccessor.getInstance(setElement.getAttribute("from-field"));
-            this.valueExdr = FlexibleStringExpander.getInstance(setElement.getAttribute("value"));
-            this.defaultExdr = FlexibleStringExpander.getInstance(setElement.getAttribute("default-value"));
-            this.globalExdr = FlexibleStringExpander.getInstance(setElement.getAttribute("global"));
-            this.type = setElement.getAttribute("type");
-            this.toScope = setElement.getAttribute("to-scope");
-            this.fromScope = setElement.getAttribute("from-scope");
-            if (!this.fromField.isEmpty() && !this.valueExdr.isEmpty()) {
-                throw new IllegalArgumentException("Cannot specify a from-field [" + setElement.getAttribute("from-field") + "] and a value [" + setElement.getAttribute("value") + "] on the set action in a widget");
-            }
-        }
+    protected ModelWidgetAction() {
+        // FIXME: This should not be null.
+        this.modelWidget = null;
+    }
 
-        @SuppressWarnings("rawtypes")
-        @Override
-        public void runAction(Map<String, Object> context) {
-            String globalStr = this.globalExdr.expandString(context);
-            // default to false
-            boolean global = "true".equals(globalStr);
+    protected ModelWidgetAction(ModelWidget modelWidget, Element actionElement) {
+        this.modelWidget = modelWidget;
+        if (Debug.verboseOn())
+            Debug.logVerbose("Reading widget action with name: " + actionElement.getNodeName(), module);
+    }
 
-            Object newValue = null;
-            if (this.fromScope != null && this.fromScope.equals("user")) {
-                if (!this.fromField.isEmpty()) {
-                    HttpSession session = (HttpSession) context.get("session");
-                    newValue = getInMemoryPersistedFromField(session, context);
-                    if (Debug.verboseOn()) Debug.logVerbose("In user getting value for field from [" + this.fromField.getOriginalName() + "]: " + newValue, module);
-                } else if (!this.valueExdr.isEmpty()) {
-                    newValue = this.valueExdr.expand(context);
-                }
-            } else if (this.fromScope != null && this.fromScope.equals("application")) {
-                if (!this.fromField.isEmpty()) {
-                    ServletContext servletContext = (ServletContext) context.get("application");
-                    newValue = getInMemoryPersistedFromField(servletContext, context);
-                    if (Debug.verboseOn()) Debug.logVerbose("In application getting value for field from [" + this.fromField.getOriginalName() + "]: " + newValue, module);
-                } else if (!this.valueExdr.isEmpty()) {
-                    newValue = this.valueExdr.expandString(context);
-                }
-            } else {
-                if (!this.fromField.isEmpty()) {
-                    newValue = this.fromField.get(context);
-                    if (Debug.verboseOn()) Debug.logVerbose("Getting value for field from [" + this.fromField.getOriginalName() + "]: " + newValue, module);
-                } else if (!this.valueExdr.isEmpty()) {
-                    newValue = this.valueExdr.expand(context);
-                }
-            }
+    public abstract void accept(ModelActionVisitor visitor);
 
-            // If newValue is still empty, use the default value
-            if (ObjectType.isEmpty(newValue) && !this.defaultExdr.isEmpty()) {
-                newValue = this.defaultExdr.expand(context);
-            }
+    /**
+     * Returns the <code>ModelWidget</code> that contains the &lt;actions&gt; element.
+     * 
+     * @return The <code>ModelWidget</code> that contains the &lt;actions&gt; element
+     */
+    public ModelWidget getModelWidget() {
+        return modelWidget;
+    }
 
-            if (UtilValidate.isNotEmpty(this.type)) {
-                if ("NewMap".equals(this.type)) {
-                    newValue = new HashMap();
-                } else if ("NewList".equals(this.type)) {
-                    newValue = new LinkedList();
-                } else {
-                    try {
-                        newValue = ObjectType.simpleTypeConvert(newValue, this.type, null, (TimeZone) context.get("timeZone"), (Locale) context.get("locale"), true);
-                    } catch (GeneralException e) {
-                        String errMsg = "Could not convert field value for the field: [" + this.field.getOriginalName() + "] to the [" + this.type + "] type for the value [" + newValue + "]: " + e.toString();
-                        Debug.logError(e, errMsg, module);
-                        throw new IllegalArgumentException(errMsg);
-                    }
-                }
-            }
+    /**
+     * Executes this action.
+     * 
+     * @param context
+     * @throws GeneralException
+     */
+    public abstract void runAction(Map<String, Object> context) throws GeneralException;
 
-            if (this.toScope != null && this.toScope.equals("user")) {
-                String originalName = this.field.getOriginalName();
-                List<String> currentWidgetTrail = UtilGenerics.toList(context.get("_WIDGETTRAIL_"));
-                String newKey = "";
-                if (currentWidgetTrail != null) {
-                    newKey = StringUtil.join(currentWidgetTrail, "|");
-                }
-                if (UtilValidate.isNotEmpty(newKey)) {
-                    newKey += "|";
-                }
-                newKey += originalName;
-                HttpSession session = (HttpSession)context.get("session");
-                session.setAttribute(newKey, newValue);
-                if (Debug.verboseOn()) Debug.logVerbose("In user setting value for field from [" + this.field.getOriginalName() + "]: " + newValue, module);
-            } else if (this.toScope != null && this.toScope.equals("application")) {
-                String originalName = this.field.getOriginalName();
-                List<String> currentWidgetTrail = UtilGenerics.toList(context.get("_WIDGETTRAIL_"));
-                String newKey = "";
-                if (currentWidgetTrail != null) {
-                    newKey = StringUtil.join(currentWidgetTrail, "|");
-                }
-                if (UtilValidate.isNotEmpty(newKey)) {
-                    newKey += "|";
-                }
-                newKey += originalName;
-                ServletContext servletContext = (ServletContext)context.get("application");
-                servletContext.setAttribute(newKey, newValue);
-                if (Debug.verboseOn()) Debug.logVerbose("In application setting value for field from [" + this.field.getOriginalName() + "]: " + newValue, module);
-            } else {
-                // only do this if it is not global, if global ONLY put it in the global context
-                if (!global) {
-                    if (Debug.verboseOn()) Debug.logVerbose("Setting field [" + this.field.getOriginalName() + "] to value: " + newValue, module);
-                    this.field.put(context, newValue);
-                }
-            }
+    /**
+     * Models the &lt;entity-and&gt; element.
+     * 
+     * @see <code>widget-screen.xsd</code>
+     */
+    public static class EntityAnd extends ModelWidgetAction {
+        private final ByAndFinder finder;
 
-            if (global) {
-                Map<String, Object> globalCtx = UtilGenerics.checkMap(context.get("globalContext"));
-                if (globalCtx != null) {
-                    this.field.put(globalCtx, newValue);
-                } else {
-                    this.field.put(context, newValue);
-                }
-            }
-
-            // this is a hack for backward compatibility with the JPublish page object
-            Map<String, Object> page = UtilGenerics.checkMap(context.get("page"));
-            if (page != null) {
-                this.field.put(page, newValue);
-            }
-        }
-
-        public Object getInMemoryPersistedFromField(Object storeAgent, Map<String, Object> context) {
-            Object newValue = null;
-            String originalName = this.fromField.getOriginalName();
-            List<String> currentWidgetTrail = UtilGenerics.toList(context.get("_WIDGETTRAIL_"));
-            List<String> trailList = new ArrayList<String>();
-            if (currentWidgetTrail != null) {
-                trailList.addAll(currentWidgetTrail);
-            }
-
-            for (int i=trailList.size(); i >= 0; i--) {
-                List<String> subTrail = trailList.subList(0,i);
-                String newKey = null;
-                if (subTrail.size() > 0)
-                    newKey = StringUtil.join(subTrail, "|") + "|" + originalName;
-                else
-                    newKey = originalName;
-
-                if (storeAgent instanceof ServletContext) {
-                    newValue = ((ServletContext)storeAgent).getAttribute(newKey);
-                } else if (storeAgent instanceof HttpSession) {
-                    newValue = ((HttpSession)storeAgent).getAttribute(newKey);
-                }
-                if (newValue != null) {
-                    break;
-                }
-            }
-            return newValue;
+        public EntityAnd(ModelWidget modelWidget, Element entityAndElement) {
+            super(modelWidget, entityAndElement);
+            finder = new ByAndFinder(entityAndElement);
         }
 
         @Override
         public void accept(ModelActionVisitor visitor) {
             visitor.visit(this);
         }
+
+        public ByAndFinder getFinder() {
+            return this.finder;
+        }
+
+        @Override
+        public void runAction(Map<String, Object> context) {
+            try {
+                finder.runFind(context, WidgetWorker.getDelegator(context));
+            } catch (GeneralException e) {
+                String errMsg = "Error doing entity query by condition: " + e.toString();
+                Debug.logError(e, errMsg, module);
+                throw new IllegalArgumentException(errMsg);
+            }
+        }
     }
 
+    /**
+     * Models the &lt;entity-condition&gt; element.
+     * 
+     * @see <code>widget-screen.xsd</code>
+     */
+    public static class EntityCondition extends ModelWidgetAction {
+        private final ByConditionFinder finder;
+
+        public EntityCondition(ModelWidget modelWidget, Element entityConditionElement) {
+            super(modelWidget, entityConditionElement);
+            finder = new ByConditionFinder(entityConditionElement);
+        }
+
+        @Override
+        public void accept(ModelActionVisitor visitor) {
+            visitor.visit(this);
+        }
+
+        public ByConditionFinder getFinder() {
+            return this.finder;
+        }
+
+        @Override
+        public void runAction(Map<String, Object> context) {
+            try {
+                finder.runFind(context, WidgetWorker.getDelegator(context));
+            } catch (GeneralException e) {
+                String errMsg = "Error doing entity query by condition: " + e.toString();
+                Debug.logError(e, errMsg, module);
+                throw new IllegalArgumentException(errMsg);
+            }
+        }
+    }
+
+    /**
+     * Models the &lt;entity-one&gt; element.
+     * 
+     * @see <code>widget-common.xsd</code>
+     */
+    public static class EntityOne extends ModelWidgetAction {
+        private final PrimaryKeyFinder finder;
+
+        public EntityOne(ModelWidget modelWidget, Element entityOneElement) {
+            super(modelWidget, entityOneElement);
+            finder = new PrimaryKeyFinder(entityOneElement);
+        }
+
+        @Override
+        public void accept(ModelActionVisitor visitor) {
+            visitor.visit(this);
+        }
+
+        public PrimaryKeyFinder getFinder() {
+            return this.finder;
+        }
+
+        @Override
+        public void runAction(Map<String, Object> context) {
+            try {
+                finder.runFind(context, WidgetWorker.getDelegator(context));
+            } catch (GeneralException e) {
+                String errMsg = "Error doing entity query by condition: " + e.toString();
+                Debug.logError(e, errMsg, module);
+                throw new IllegalArgumentException(errMsg);
+            }
+        }
+    }
+
+    /**
+     * Models the &lt;get-related&gt; element.
+     * 
+     * @see <code>widget-common.xsd</code>
+     */
+    public static class GetRelated extends ModelWidgetAction {
+        private final FlexibleMapAccessor<List<GenericValue>> listNameAcsr;
+        private final FlexibleMapAccessor<Map<String, Object>> mapAcsr;
+        private final FlexibleMapAccessor<List<String>> orderByListAcsr;
+        private final String relationName;
+        private final boolean useCache;
+        private final FlexibleMapAccessor<Object> valueNameAcsr;
+
+        public GetRelated(ModelWidget modelWidget, Element getRelatedElement) {
+            super(modelWidget, getRelatedElement);
+            this.valueNameAcsr = FlexibleMapAccessor.getInstance(getRelatedElement.getAttribute("value-field"));
+            this.listNameAcsr = FlexibleMapAccessor.getInstance(getRelatedElement.getAttribute("list"));
+            this.relationName = getRelatedElement.getAttribute("relation-name");
+            this.mapAcsr = FlexibleMapAccessor.getInstance(getRelatedElement.getAttribute("map"));
+            this.orderByListAcsr = FlexibleMapAccessor.getInstance(getRelatedElement.getAttribute("order-by-list"));
+            this.useCache = "true".equals(getRelatedElement.getAttribute("use-cache"));
+        }
+
+        @Override
+        public void accept(ModelActionVisitor visitor) {
+            visitor.visit(this);
+        }
+
+        public String getRelationName() {
+            return this.relationName;
+        }
+
+        @Override
+        public void runAction(Map<String, Object> context) {
+            Object valueObject = valueNameAcsr.get(context);
+            if (valueObject == null) {
+                Debug.logVerbose("Value not found with name: " + valueNameAcsr + ", not getting related...", module);
+                return;
+            }
+            if (!(valueObject instanceof GenericValue)) {
+                String errMsg = "Env variable for value-name " + valueNameAcsr.toString()
+                        + " is not a GenericValue object; for the relation-name: " + relationName + "]";
+                Debug.logError(errMsg, module);
+                throw new IllegalArgumentException(errMsg);
+            }
+            GenericValue value = (GenericValue) valueObject;
+            List<String> orderByNames = null;
+            if (!orderByListAcsr.isEmpty()) {
+                orderByNames = orderByListAcsr.get(context);
+            }
+            Map<String, Object> constraintMap = null;
+            if (!mapAcsr.isEmpty()) {
+                constraintMap = mapAcsr.get(context);
+            }
+            try {
+                listNameAcsr.put(context, value.getRelated(relationName, constraintMap, orderByNames, useCache));
+            } catch (GenericEntityException e) {
+                String errMsg = "Problem getting related from entity with name " + value.getEntityName()
+                        + " for the relation-name: " + relationName + ": " + e.getMessage();
+                Debug.logError(e, errMsg, module);
+                throw new IllegalArgumentException(errMsg);
+            }
+        }
+    }
+
+    /**
+     * Models the &lt;get-related-one&gt; element.
+     * 
+     * @see <code>widget-common.xsd</code>
+     */
+    public static class GetRelatedOne extends ModelWidgetAction {
+        private final String relationName;
+        private final FlexibleMapAccessor<Object> toValueNameAcsr;
+        private final boolean useCache;
+        private final FlexibleMapAccessor<Object> valueNameAcsr;
+
+        public GetRelatedOne(ModelWidget modelWidget, Element getRelatedOneElement) {
+            super(modelWidget, getRelatedOneElement);
+            this.valueNameAcsr = FlexibleMapAccessor.getInstance(getRelatedOneElement.getAttribute("value-field"));
+            this.toValueNameAcsr = FlexibleMapAccessor.getInstance(getRelatedOneElement.getAttribute("to-value-field"));
+            this.relationName = getRelatedOneElement.getAttribute("relation-name");
+            this.useCache = "true".equals(getRelatedOneElement.getAttribute("use-cache"));
+        }
+
+        @Override
+        public void accept(ModelActionVisitor visitor) {
+            visitor.visit(this);
+        }
+
+        public String getRelationName() {
+            return this.relationName;
+        }
+
+        @Override
+        public void runAction(Map<String, Object> context) {
+            Object valueObject = valueNameAcsr.get(context);
+            if (valueObject == null) {
+                Debug.logVerbose("Value not found with name: " + valueNameAcsr + ", not getting related...", module);
+                return;
+            }
+            if (!(valueObject instanceof GenericValue)) {
+                String errMsg = "Env variable for value-name " + valueNameAcsr.toString()
+                        + " is not a GenericValue object; for the relation-name: " + relationName + "]";
+                Debug.logError(errMsg, module);
+                throw new IllegalArgumentException(errMsg);
+            }
+            GenericValue value = (GenericValue) valueObject;
+            try {
+                toValueNameAcsr.put(context, value.getRelatedOne(relationName, useCache));
+            } catch (GenericEntityException e) {
+                String errMsg = "Problem getting related one from entity with name " + value.getEntityName()
+                        + " for the relation-name: " + relationName + ": " + e.getMessage();
+                Debug.logError(e, errMsg, module);
+                throw new IllegalArgumentException(errMsg);
+            }
+        }
+    }
+
+    /**
+     * Models the &lt;property-map&gt; element.
+     * 
+     * @see <code>widget-common.xsd</code>
+     */
     public static class PropertyMap extends ModelWidgetAction {
-        protected FlexibleStringExpander resourceExdr;
-        protected FlexibleMapAccessor<ResourceBundleMapWrapper> mapNameAcsr;
-        protected FlexibleStringExpander globalExdr;
+        private final FlexibleStringExpander globalExdr;
+        private final FlexibleMapAccessor<ResourceBundleMapWrapper> mapNameAcsr;
+        private final FlexibleStringExpander resourceExdr;
 
         public PropertyMap(ModelWidget modelWidget, Element setElement) {
-            super (modelWidget, setElement);
+            super(modelWidget, setElement);
             this.resourceExdr = FlexibleStringExpander.getInstance(setElement.getAttribute("resource"));
             this.mapNameAcsr = FlexibleMapAccessor.getInstance(setElement.getAttribute("map-name"));
             this.globalExdr = FlexibleStringExpander.getInstance(setElement.getAttribute("global"));
+        }
+
+        @Override
+        public void accept(ModelActionVisitor visitor) {
+            visitor.visit(this);
         }
 
         @Override
@@ -308,10 +423,8 @@ public abstract class ModelWidgetAction implements Serializable {
             String globalStr = this.globalExdr.expandString(context);
             // default to false
             boolean global = "true".equals(globalStr);
-
             Locale locale = (Locale) context.get("locale");
             String resource = this.resourceExdr.expandString(context, locale);
-
             ResourceBundleMapWrapper existingPropMap = this.mapNameAcsr.get(context);
             if (existingPropMap == null) {
                 this.mapNameAcsr.put(context, UtilProperties.getResourceBundleMap(resource, locale, context));
@@ -323,7 +436,6 @@ public abstract class ModelWidgetAction implements Serializable {
                     Debug.logError(e, "Error adding resource bundle [" + resource + "]: " + e.toString(), module);
                 }
             }
-
             if (global) {
                 Map<String, Object> globalCtx = UtilGenerics.checkMap(context.get("globalContext"));
                 if (globalCtx != null) {
@@ -344,25 +456,24 @@ public abstract class ModelWidgetAction implements Serializable {
                 }
             }
         }
-
-        @Override
-        public void accept(ModelActionVisitor visitor) {
-            visitor.visit(this);
-        }
     }
 
+    /**
+     * Models the &lt;property-to-field&gt; element.
+     * 
+     * @see <code>widget-common.xsd</code>
+     */
     public static class PropertyToField extends ModelWidgetAction {
-
-        protected FlexibleStringExpander resourceExdr;
-        protected FlexibleStringExpander propertyExdr;
-        protected FlexibleMapAccessor<Object> fieldAcsr;
-        protected FlexibleStringExpander defaultExdr;
-        protected boolean noLocale;
-        protected FlexibleMapAccessor<List<? extends Object>> argListAcsr;
-        protected FlexibleStringExpander globalExdr;
+        private final FlexibleMapAccessor<List<? extends Object>> argListAcsr;
+        private final FlexibleStringExpander defaultExdr;
+        private final FlexibleMapAccessor<Object> fieldAcsr;
+        private final FlexibleStringExpander globalExdr;
+        private final boolean noLocale;
+        private final FlexibleStringExpander propertyExdr;
+        private final FlexibleStringExpander resourceExdr;
 
         public PropertyToField(ModelWidget modelWidget, Element setElement) {
-            super (modelWidget, setElement);
+            super(modelWidget, setElement);
             this.resourceExdr = FlexibleStringExpander.getInstance(setElement.getAttribute("resource"));
             this.propertyExdr = FlexibleStringExpander.getInstance(setElement.getAttribute("property"));
             this.fieldAcsr = FlexibleMapAccessor.getInstance(setElement.getAttribute("field"));
@@ -373,15 +484,18 @@ public abstract class ModelWidgetAction implements Serializable {
         }
 
         @Override
+        public void accept(ModelActionVisitor visitor) {
+            visitor.visit(this);
+        }
+
+        @Override
         public void runAction(Map<String, Object> context) {
             //String globalStr = this.globalExdr.expandString(context);
             // default to false
             //boolean global = "true".equals(globalStr);
-
             Locale locale = (Locale) context.get("locale");
             String resource = this.resourceExdr.expandString(context, locale);
             String property = this.propertyExdr.expandString(context, locale);
-
             String value = null;
             if (noLocale) {
                 value = EntityUtilProperties.getPropertyValue(resource, property, WidgetWorker.getDelegator(context));
@@ -391,12 +505,10 @@ public abstract class ModelWidgetAction implements Serializable {
             if (UtilValidate.isEmpty(value)) {
                 value = this.defaultExdr.expandString(context);
             }
-
             // note that expanding the value string here will handle defaultValue and the string from
             //  the properties file; if we decide later that we don't want the string from the properties
             //  file to be expanded we should just expand the defaultValue at the beginning of this method.
             value = FlexibleStringExpander.expandString(value, context);
-
             if (!argListAcsr.isEmpty()) {
                 List<? extends Object> argList = argListAcsr.get(context);
                 if (UtilValidate.isNotEmpty(argList)) {
@@ -405,22 +517,27 @@ public abstract class ModelWidgetAction implements Serializable {
             }
             fieldAcsr.put(context, value);
         }
+    }
+
+    /**
+     * Models the &lt;script&gt; element.
+     * 
+     * @see <code>widget-common.xsd</code>
+     */
+    public static class Script extends ModelWidgetAction {
+        private final String location;
+        private final String method;
+
+        public Script(ModelWidget modelWidget, Element scriptElement) {
+            super(modelWidget, scriptElement);
+            String scriptLocation = scriptElement.getAttribute("location");
+            this.location = WidgetWorker.getScriptLocation(scriptLocation);
+            this.method = WidgetWorker.getScriptMethodName(scriptLocation);
+        }
 
         @Override
         public void accept(ModelActionVisitor visitor) {
             visitor.visit(this);
-        }
-    }
-
-    public static class Script extends ModelWidgetAction {
-        protected String location;
-        protected String method;
-
-        public Script(ModelWidget modelWidget, Element scriptElement) {
-            super (modelWidget, scriptElement);
-            String scriptLocation = scriptElement.getAttribute("location");
-            this.location = WidgetWorker.getScriptLocation(scriptLocation);
-            this.method = WidgetWorker.getScriptMethodName(scriptLocation);
         }
 
         @Override
@@ -440,26 +557,34 @@ public abstract class ModelWidgetAction implements Serializable {
                 ScriptUtil.executeScript(this.location, this.method, context);
             }
         }
+    }
+
+    /**
+     * Models the &lt;service&gt; element.
+     * 
+     * @see <code>widget-screen.xsd</code>
+     */
+    public static class Service extends ModelWidgetAction {
+        private final FlexibleStringExpander autoFieldMapExdr;
+        private final Map<FlexibleMapAccessor<Object>, Object> fieldMap;
+        private final FlexibleMapAccessor<Map<String, Object>> resultMapNameAcsr;
+        private final FlexibleStringExpander serviceNameExdr;
+
+        public Service(ModelWidget modelWidget, Element serviceElement) {
+            super(modelWidget, serviceElement);
+            this.serviceNameExdr = FlexibleStringExpander.getInstance(serviceElement.getAttribute("service-name"));
+            this.resultMapNameAcsr = FlexibleMapAccessor.getInstance(serviceElement.getAttribute("result-map"));
+            this.autoFieldMapExdr = FlexibleStringExpander.getInstance(serviceElement.getAttribute("auto-field-map"));
+            this.fieldMap = EntityFinderUtil.makeFieldMap(serviceElement);
+        }
 
         @Override
         public void accept(ModelActionVisitor visitor) {
             visitor.visit(this);
         }
-    }
 
-    public static class Service extends ModelWidgetAction {
-        protected FlexibleStringExpander serviceNameExdr;
-        protected FlexibleMapAccessor<Map<String, Object>> resultMapNameAcsr;
-        protected FlexibleStringExpander autoFieldMapExdr;
-        protected Map<FlexibleMapAccessor<Object>, Object> fieldMap;
-
-        public Service(ModelWidget modelWidget, Element serviceElement) {
-            super (modelWidget, serviceElement);
-            this.serviceNameExdr = FlexibleStringExpander.getInstance(serviceElement.getAttribute("service-name"));
-            this.resultMapNameAcsr = FlexibleMapAccessor.getInstance(serviceElement.getAttribute("result-map"));
-            if (this.resultMapNameAcsr.isEmpty()) this.resultMapNameAcsr = FlexibleMapAccessor.getInstance(serviceElement.getAttribute("result-map-name"));
-            this.autoFieldMapExdr = FlexibleStringExpander.getInstance(serviceElement.getAttribute("auto-field-map"));
-            this.fieldMap = EntityFinderUtil.makeFieldMap(serviceElement);
+        public FlexibleStringExpander getServiceNameExdr() {
+            return this.serviceNameExdr;
         }
 
         @Override
@@ -468,9 +593,7 @@ public abstract class ModelWidgetAction implements Serializable {
             if (UtilValidate.isEmpty(serviceNameExpanded)) {
                 throw new IllegalArgumentException("Service name was empty, expanded from: " + this.serviceNameExdr.getOriginal());
             }
-
             String autoFieldMapString = this.autoFieldMapExdr.expandString(context);
-
             try {
                 Map<String, Object> serviceContext = null;
                 if ("true".equals(autoFieldMapString)) {
@@ -487,22 +610,20 @@ public abstract class ModelWidgetAction implements Serializable {
                     FlexibleMapAccessor<Object> fieldFma = FlexibleMapAccessor.getInstance(autoFieldMapString);
                     Map<String, Object> autoFieldMap = UtilGenerics.toMap(fieldFma.get(context));
                     if (autoFieldMap != null) {
-                        serviceContext = WidgetWorker.getDispatcher(context).getDispatchContext().makeValidContext(serviceNameExpanded, ModelService.IN_PARAM, autoFieldMap);
+                        serviceContext = WidgetWorker.getDispatcher(context).getDispatchContext()
+                                .makeValidContext(serviceNameExpanded, ModelService.IN_PARAM, autoFieldMap);
                     }
                 }
                 if (serviceContext == null) {
                     serviceContext = new HashMap<String, Object>();
                 }
-
                 if (this.fieldMap != null) {
                     EntityFinderUtil.expandFieldMapToContext(this.fieldMap, context, serviceContext);
                 }
-
                 Map<String, Object> result = WidgetWorker.getDispatcher(context).runSync(serviceNameExpanded, serviceContext);
-
                 if (!this.resultMapNameAcsr.isEmpty()) {
                     this.resultMapNameAcsr.put(context, result);
-                    String queryString = (String)result.get("queryString");
+                    String queryString = (String) result.get("queryString");
                     context.put("queryString", queryString);
                     context.put("queryStringMap", result.get("queryStringMap"));
                     if (UtilValidate.isNotEmpty(queryString)) {
@@ -522,211 +643,182 @@ public abstract class ModelWidgetAction implements Serializable {
                 throw new IllegalArgumentException(errMsg);
             }
         }
-
-        public FlexibleStringExpander getServiceNameExdr() {
-            return this.serviceNameExdr;
-        }
-
-        @Override
-        public void accept(ModelActionVisitor visitor) {
-            visitor.visit(this);
-        }
     }
 
-    public static class EntityOne extends ModelWidgetAction {
-        protected PrimaryKeyFinder finder;
+    /**
+     * Models the &lt;set&gt; element.
+     * 
+     * @see <code>widget-common.xsd</code>
+     */
+    public static class SetField extends ModelWidgetAction {
+        private final FlexibleStringExpander defaultExdr;
+        private final FlexibleMapAccessor<Object> field;
+        private final FlexibleMapAccessor<Object> fromField;
+        private final String fromScope;
+        private final FlexibleStringExpander globalExdr;
+        private final String toScope;
+        private final String type;
+        private final FlexibleStringExpander valueExdr;
 
-        public EntityOne(ModelWidget modelWidget, Element entityOneElement) {
-            super (modelWidget, entityOneElement);
-            finder = new PrimaryKeyFinder(entityOneElement);
-        }
-
-        @Override
-        public void runAction(Map<String, Object> context) {
-            try {
-                finder.runFind(context, WidgetWorker.getDelegator(context));
-            } catch (GeneralException e) {
-                String errMsg = "Error doing entity query by condition: " + e.toString();
-                Debug.logError(e, errMsg, module);
-                throw new IllegalArgumentException(errMsg);
+        public SetField(ModelWidget modelWidget, Element setElement) {
+            super(modelWidget, setElement);
+            this.field = FlexibleMapAccessor.getInstance(setElement.getAttribute("field"));
+            this.fromField = FlexibleMapAccessor.getInstance(setElement.getAttribute("from-field"));
+            this.valueExdr = FlexibleStringExpander.getInstance(setElement.getAttribute("value"));
+            this.defaultExdr = FlexibleStringExpander.getInstance(setElement.getAttribute("default-value"));
+            this.globalExdr = FlexibleStringExpander.getInstance(setElement.getAttribute("global"));
+            this.type = setElement.getAttribute("type");
+            this.toScope = setElement.getAttribute("to-scope");
+            this.fromScope = setElement.getAttribute("from-scope");
+            if (!this.fromField.isEmpty() && !this.valueExdr.isEmpty()) {
+                throw new IllegalArgumentException("Cannot specify a from-field [" + setElement.getAttribute("from-field")
+                        + "] and a value [" + setElement.getAttribute("value") + "] on the set action in a widget");
             }
-        }
-
-        public PrimaryKeyFinder getFinder() {
-            return this.finder;
-        }
-
-        @Override
-        public void accept(ModelActionVisitor visitor) {
-            visitor.visit(this);
-        }
-    }
-
-    public static class EntityAnd extends ModelWidgetAction {
-        protected ByAndFinder finder;
-
-        public EntityAnd(ModelWidget modelWidget, Element entityAndElement) {
-            super (modelWidget, entityAndElement);
-            finder = new ByAndFinder(entityAndElement);
-        }
-
-        @Override
-        public void runAction(Map<String, Object> context) {
-            try {
-                finder.runFind(context, WidgetWorker.getDelegator(context));
-            } catch (GeneralException e) {
-                String errMsg = "Error doing entity query by condition: " + e.toString();
-                Debug.logError(e, errMsg, module);
-                throw new IllegalArgumentException(errMsg);
-            }
-        }
-
-        public ByAndFinder getFinder() {
-            return this.finder;
         }
 
         @Override
         public void accept(ModelActionVisitor visitor) {
             visitor.visit(this);
         }
-    }
 
-    public static class EntityCondition extends ModelWidgetAction {
-        ByConditionFinder finder;
-
-        public EntityCondition(ModelWidget modelWidget, Element entityConditionElement) {
-            super (modelWidget, entityConditionElement);
-            finder = new ByConditionFinder(entityConditionElement);
+        public Object getInMemoryPersistedFromField(Object storeAgent, Map<String, Object> context) {
+            Object newValue = null;
+            String originalName = this.fromField.getOriginalName();
+            List<String> currentWidgetTrail = UtilGenerics.toList(context.get("_WIDGETTRAIL_"));
+            List<String> trailList = new ArrayList<String>();
+            if (currentWidgetTrail != null) {
+                trailList.addAll(currentWidgetTrail);
+            }
+            for (int i = trailList.size(); i >= 0; i--) {
+                List<String> subTrail = trailList.subList(0, i);
+                String newKey = null;
+                if (subTrail.size() > 0)
+                    newKey = StringUtil.join(subTrail, "|") + "|" + originalName;
+                else
+                    newKey = originalName;
+                if (storeAgent instanceof ServletContext) {
+                    newValue = ((ServletContext) storeAgent).getAttribute(newKey);
+                } else if (storeAgent instanceof HttpSession) {
+                    newValue = ((HttpSession) storeAgent).getAttribute(newKey);
+                }
+                if (newValue != null) {
+                    break;
+                }
+            }
+            return newValue;
         }
 
+        @SuppressWarnings("rawtypes")
         @Override
         public void runAction(Map<String, Object> context) {
-            try {
-                finder.runFind(context, WidgetWorker.getDelegator(context));
-            } catch (GeneralException e) {
-                String errMsg = "Error doing entity query by condition: " + e.toString();
-                Debug.logError(e, errMsg, module);
-                throw new IllegalArgumentException(errMsg);
+            String globalStr = this.globalExdr.expandString(context);
+            // default to false
+            boolean global = "true".equals(globalStr);
+            Object newValue = null;
+            if (this.fromScope != null && this.fromScope.equals("user")) {
+                if (!this.fromField.isEmpty()) {
+                    HttpSession session = (HttpSession) context.get("session");
+                    newValue = getInMemoryPersistedFromField(session, context);
+                    if (Debug.verboseOn())
+                        Debug.logVerbose("In user getting value for field from [" + this.fromField.getOriginalName() + "]: "
+                                + newValue, module);
+                } else if (!this.valueExdr.isEmpty()) {
+                    newValue = this.valueExdr.expand(context);
+                }
+            } else if (this.fromScope != null && this.fromScope.equals("application")) {
+                if (!this.fromField.isEmpty()) {
+                    ServletContext servletContext = (ServletContext) context.get("application");
+                    newValue = getInMemoryPersistedFromField(servletContext, context);
+                    if (Debug.verboseOn())
+                        Debug.logVerbose("In application getting value for field from [" + this.fromField.getOriginalName()
+                                + "]: " + newValue, module);
+                } else if (!this.valueExdr.isEmpty()) {
+                    newValue = this.valueExdr.expandString(context);
+                }
+            } else {
+                if (!this.fromField.isEmpty()) {
+                    newValue = this.fromField.get(context);
+                    if (Debug.verboseOn())
+                        Debug.logVerbose("Getting value for field from [" + this.fromField.getOriginalName() + "]: " + newValue,
+                                module);
+                } else if (!this.valueExdr.isEmpty()) {
+                    newValue = this.valueExdr.expand(context);
+                }
             }
-        }
-
-        public ByConditionFinder getFinder() {
-            return this.finder;
-        }
-
-        @Override
-        public void accept(ModelActionVisitor visitor) {
-            visitor.visit(this);
-        }
-    }
-
-    public static class GetRelatedOne extends ModelWidgetAction {
-        protected FlexibleMapAccessor<Object> valueNameAcsr;
-        protected FlexibleMapAccessor<Object> toValueNameAcsr;
-        protected String relationName;
-        protected boolean useCache;
-
-        public GetRelatedOne(ModelWidget modelWidget, Element getRelatedOneElement) {
-            super (modelWidget, getRelatedOneElement);
-            this.valueNameAcsr = FlexibleMapAccessor.getInstance(getRelatedOneElement.getAttribute("value-field"));
-            if (this.valueNameAcsr.isEmpty()) this.valueNameAcsr = FlexibleMapAccessor.getInstance(getRelatedOneElement.getAttribute("value-name"));
-            this.toValueNameAcsr = FlexibleMapAccessor.getInstance(getRelatedOneElement.getAttribute("to-value-field"));
-            if (this.toValueNameAcsr.isEmpty()) this.toValueNameAcsr = FlexibleMapAccessor.getInstance(getRelatedOneElement.getAttribute("to-value-name"));
-            this.relationName = getRelatedOneElement.getAttribute("relation-name");
-            this.useCache = "true".equals(getRelatedOneElement.getAttribute("use-cache"));
-        }
-
-        @Override
-        public void runAction(Map<String, Object> context) {
-            Object valueObject = valueNameAcsr.get(context);
-            if (valueObject == null) {
-                Debug.logVerbose("Value not found with name: " + valueNameAcsr + ", not getting related...", module);
-                return;
+            // If newValue is still empty, use the default value
+            if (ObjectType.isEmpty(newValue) && !this.defaultExdr.isEmpty()) {
+                newValue = this.defaultExdr.expand(context);
             }
-            if (!(valueObject instanceof GenericValue)) {
-                String errMsg = "Env variable for value-name " + valueNameAcsr.toString() + " is not a GenericValue object; for the relation-name: " + relationName + "]";
-                Debug.logError(errMsg, module);
-                throw new IllegalArgumentException(errMsg);
+            if (UtilValidate.isNotEmpty(this.type)) {
+                if ("NewMap".equals(this.type)) {
+                    newValue = new HashMap();
+                } else if ("NewList".equals(this.type)) {
+                    newValue = new LinkedList();
+                } else {
+                    try {
+                        newValue = ObjectType.simpleTypeConvert(newValue, this.type, null, (TimeZone) context.get("timeZone"),
+                                (Locale) context.get("locale"), true);
+                    } catch (GeneralException e) {
+                        String errMsg = "Could not convert field value for the field: [" + this.field.getOriginalName()
+                                + "] to the [" + this.type + "] type for the value [" + newValue + "]: " + e.toString();
+                        Debug.logError(e, errMsg, module);
+                        throw new IllegalArgumentException(errMsg);
+                    }
+                }
             }
-            GenericValue value = (GenericValue) valueObject;
-            try {
-                toValueNameAcsr.put(context, value.getRelatedOne(relationName, useCache));
-            } catch (GenericEntityException e) {
-                String errMsg = "Problem getting related one from entity with name " + value.getEntityName() + " for the relation-name: " + relationName + ": " + e.getMessage();
-                Debug.logError(e, errMsg, module);
-                throw new IllegalArgumentException(errMsg);
+            if (this.toScope != null && this.toScope.equals("user")) {
+                String originalName = this.field.getOriginalName();
+                List<String> currentWidgetTrail = UtilGenerics.toList(context.get("_WIDGETTRAIL_"));
+                String newKey = "";
+                if (currentWidgetTrail != null) {
+                    newKey = StringUtil.join(currentWidgetTrail, "|");
+                }
+                if (UtilValidate.isNotEmpty(newKey)) {
+                    newKey += "|";
+                }
+                newKey += originalName;
+                HttpSession session = (HttpSession) context.get("session");
+                session.setAttribute(newKey, newValue);
+                if (Debug.verboseOn())
+                    Debug.logVerbose("In user setting value for field from [" + this.field.getOriginalName() + "]: " + newValue,
+                            module);
+            } else if (this.toScope != null && this.toScope.equals("application")) {
+                String originalName = this.field.getOriginalName();
+                List<String> currentWidgetTrail = UtilGenerics.toList(context.get("_WIDGETTRAIL_"));
+                String newKey = "";
+                if (currentWidgetTrail != null) {
+                    newKey = StringUtil.join(currentWidgetTrail, "|");
+                }
+                if (UtilValidate.isNotEmpty(newKey)) {
+                    newKey += "|";
+                }
+                newKey += originalName;
+                ServletContext servletContext = (ServletContext) context.get("application");
+                servletContext.setAttribute(newKey, newValue);
+                if (Debug.verboseOn())
+                    Debug.logVerbose("In application setting value for field from [" + this.field.getOriginalName() + "]: "
+                            + newValue, module);
+            } else {
+                // only do this if it is not global, if global ONLY put it in the global context
+                if (!global) {
+                    if (Debug.verboseOn())
+                        Debug.logVerbose("Setting field [" + this.field.getOriginalName() + "] to value: " + newValue, module);
+                    this.field.put(context, newValue);
+                }
             }
-        }
-
-        public String getRelationName() {
-            return this.relationName;
-        }
-
-        @Override
-        public void accept(ModelActionVisitor visitor) {
-            visitor.visit(this);
-        }
-    }
-
-    public static class GetRelated extends ModelWidgetAction {
-        protected FlexibleMapAccessor<Object> valueNameAcsr;
-        protected FlexibleMapAccessor<List<GenericValue>> listNameAcsr;
-        protected FlexibleMapAccessor<Map<String, Object>> mapAcsr;
-        protected FlexibleMapAccessor<List<String>> orderByListAcsr;
-        protected String relationName;
-        protected boolean useCache;
-
-        public GetRelated(ModelWidget modelWidget, Element getRelatedElement) {
-            super (modelWidget, getRelatedElement);
-            this.valueNameAcsr = FlexibleMapAccessor.getInstance(getRelatedElement.getAttribute("value-field"));
-            if (this.valueNameAcsr.isEmpty()) this.valueNameAcsr = FlexibleMapAccessor.getInstance(getRelatedElement.getAttribute("value-name"));
-            this.listNameAcsr = FlexibleMapAccessor.getInstance(getRelatedElement.getAttribute("list"));
-            if (this.listNameAcsr.isEmpty()) this.listNameAcsr = FlexibleMapAccessor.getInstance(getRelatedElement.getAttribute("list-name"));
-            this.relationName = getRelatedElement.getAttribute("relation-name");
-            this.mapAcsr = FlexibleMapAccessor.getInstance(getRelatedElement.getAttribute("map"));
-            if (this.mapAcsr.isEmpty()) this.mapAcsr = FlexibleMapAccessor.getInstance(getRelatedElement.getAttribute("map-name"));
-            this.orderByListAcsr = FlexibleMapAccessor.getInstance(getRelatedElement.getAttribute("order-by-list"));
-            if (this.orderByListAcsr.isEmpty()) this.orderByListAcsr = FlexibleMapAccessor.getInstance(getRelatedElement.getAttribute("order-by-list-name"));
-            this.useCache = "true".equals(getRelatedElement.getAttribute("use-cache"));
-        }
-
-        @Override
-        public void runAction(Map<String, Object> context) {
-            Object valueObject = valueNameAcsr.get(context);
-            if (valueObject == null) {
-                Debug.logVerbose("Value not found with name: " + valueNameAcsr + ", not getting related...", module);
-                return;
+            if (global) {
+                Map<String, Object> globalCtx = UtilGenerics.checkMap(context.get("globalContext"));
+                if (globalCtx != null) {
+                    this.field.put(globalCtx, newValue);
+                } else {
+                    this.field.put(context, newValue);
+                }
             }
-            if (!(valueObject instanceof GenericValue)) {
-                String errMsg = "Env variable for value-name " + valueNameAcsr.toString() + " is not a GenericValue object; for the relation-name: " + relationName + "]";
-                Debug.logError(errMsg, module);
-                throw new IllegalArgumentException(errMsg);
+            // this is a hack for backward compatibility with the JPublish page object
+            Map<String, Object> page = UtilGenerics.checkMap(context.get("page"));
+            if (page != null) {
+                this.field.put(page, newValue);
             }
-            GenericValue value = (GenericValue) valueObject;
-            List<String> orderByNames = null;
-            if (!orderByListAcsr.isEmpty()) {
-                orderByNames = orderByListAcsr.get(context);
-            }
-            Map<String, Object> constraintMap = null;
-            if (!mapAcsr.isEmpty()) {
-                constraintMap = mapAcsr.get(context);
-            }
-            try {
-                listNameAcsr.put(context, value.getRelated(relationName, constraintMap, orderByNames, useCache));
-            } catch (GenericEntityException e) {
-                String errMsg = "Problem getting related from entity with name " + value.getEntityName() + " for the relation-name: " + relationName + ": " + e.getMessage();
-                Debug.logError(e, errMsg, module);
-                throw new IllegalArgumentException(errMsg);
-            }
-        }
-
-        public String getRelationName() {
-            return this.relationName;
-        }
-
-        @Override
-        public void accept(ModelActionVisitor visitor) {
-            visitor.visit(this);
         }
     }
 }

@@ -83,8 +83,7 @@ if (!currencyUomId) currencyUomId = EntityUtilProperties.getPropertyValue("gener
 if (userLogin) {
     exprList = [EntityCondition.makeCondition("partyId", EntityOperator.EQUALS, userLogin.partyId),
                 EntityCondition.makeCondition("listName", EntityOperator.NOT_EQUAL, "auto-save")];
-    condition = EntityCondition.makeCondition(exprList, EntityOperator.AND);
-    allShoppingLists = delegator.findList("ShoppingList", condition, null, ["listName"], null, false);
+    allShoppingLists = from("ShoppingList").where(exprList).orderBy("listName").queryList();
     context.shoppingLists = allShoppingLists;
 }
 
@@ -136,7 +135,7 @@ if (product) {
     if (categoryId) {
         prevNextMap = [categoryId : categoryId, productId : productId];
         prevNextMap.orderByFields = context.orderByFields ?: ["sequenceNum", "productId"];
-        catNextPreviousResult = dispatcher.runSync("getPreviousNextProducts", prevNextMap);
+        catNextPreviousResult = runService('getPreviousNextProducts', prevNextMap);
         if (ServiceUtil.isError(catNextPreviousResult)) {
             request.setAttribute("errorMessageList", [ServiceUtil.getErrorMessage(catNextPreviousResult)]);
             return;
@@ -182,13 +181,13 @@ if (product) {
         priceContext.checkIncludeVat = "Y";
         priceContext.agreementId = cart.getAgreementId();
         priceContext.partyId = cart.getPartyId();  // IMPORTANT: must put this in, or price will be calculated for the CSR instead of the customer
-        priceMap = dispatcher.runSync("calculateProductPrice", priceContext);
+        priceMap = runService('calculateProductPrice', priceContext);
         context.priceMap = priceMap;
     } else {
         // purchase order: run the "calculatePurchasePrice" service
         priceContext = [product : product, currencyUomId : cart.getCurrency(),
                 partyId : cart.getPartyId(), userLogin : userLogin];
-        priceMap = dispatcher.runSync("calculatePurchasePrice", priceContext);
+        priceMap = runService('calculatePurchasePrice', priceContext);
         context.priceMap = priceMap;
     }
 
@@ -219,15 +218,14 @@ if (product) {
         context.daysToShip = productFacility?.daysToShip
         */
 
-        resultOutput = dispatcher.runSync("getInventoryAvailableByFacility", [productId : productId, facilityId : facilityId, useCache : false]);
+        resultOutput = runService('getInventoryAvailableByFacility', [productId : productId, facilityId : facilityId, useCache : false]);
         totalAvailableToPromise = resultOutput.availableToPromiseTotal;
         if (totalAvailableToPromise) {
-            productFacility = delegator.findOne("ProductFacility", [productId : productId, facilityId : facilityId], true);
+            productFacility = from("ProductFacility").where("productId", productId, "facilityId", facilityId).cache(true).queryOne();
             context.daysToShip = productFacility?.daysToShip
         }
     } else {
-       supplierProducts = delegator.findByAnd("SupplierProduct", [productId : productId], ["-availableFromDate"], true);
-       supplierProduct = EntityUtil.getFirst(supplierProducts);
+       supplierProduct = from("SupplierProduct").where("productId", productId).orderBy("-availableFromDate").cache(true).queryFirst();
        if (supplierProduct?.standardLeadTimeDays) {
            standardLeadTimeDays = supplierProduct.standardLeadTimeDays;
            daysToShip = standardLeadTimeDays + 1;
@@ -236,12 +234,12 @@ if (product) {
     }
 
     // get the product distinguishing features
-    disFeatureMap = dispatcher.runSync("getProductFeatures", [productId : productId, type : "DISTINGUISHING_FEAT"]);
+    disFeatureMap = runService('getProductFeatures', [productId : productId, type : "DISTINGUISHING_FEAT"]);
     disFeatureList = disFeatureMap.productFeatures;
     context.disFeatureList = disFeatureList;
 
     // an example of getting features of a certain type to show
-    sizeProductFeatureAndAppls = delegator.findByAnd("ProductFeatureAndAppl", [productId : productId, productFeatureTypeId : "SIZE"], ["sequenceNum", "defaultSequenceNum"], false);
+    sizeProductFeatureAndAppls = from("ProductFeatureAndAppl").where("productId", productId, "productFeatureTypeId", "SIZE").orderBy("sequenceNum", "defaultSequenceNum").queryList();
     context.sizeProductFeatureAndAppls = sizeProductFeatureAndAppls;
     
     // get product variant for Box/Case/Each
@@ -249,7 +247,7 @@ if (product) {
     boolean isAlternativePacking = ProductWorker.isAlternativePacking(delegator, product.productId, null);
     mainProducts = [];
     if(isAlternativePacking){
-        productVirtualVariants = delegator.findByAnd("ProductAssoc", UtilMisc.toMap("productIdTo", product.productId , "productAssocTypeId", "ALTERNATIVE_PACKAGE"), null, true);
+        productVirtualVariants = from("ProductAssoc").where("productIdTo", product.productId , "productAssocTypeId", "ALTERNATIVE_PACKAGE").cache(true).queryList();
         if(productVirtualVariants){
             productVirtualVariants.each { virtualVariantKey ->
                 mainProductMap = [:];
@@ -269,14 +267,14 @@ if (product) {
         if ("VV_FEATURETREE".equals(ProductWorker.getProductVirtualVariantMethod(delegator, productId))) {
             context.featureLists = ProductWorker.getSelectableProductFeaturesByTypesAndSeq(product);
         } else {
-            featureMap = dispatcher.runSync("getProductFeatureSet", [productId : productId]);
+            featureMap = runService('getProductFeatureSet', [productId : productId]);
             featureSet = featureMap.featureSet;
             if (featureSet) {
                 //if order is purchase then don't calculate available inventory for product.
                 if (cart.isPurchaseOrder()) {
-                    variantTreeMap = dispatcher.runSync("getProductVariantTree", [productId : productId, featureOrder : featureSet, checkInventory: false]);
+                    variantTreeMap = runService('getProductVariantTree', [productId : productId, featureOrder : featureSet, checkInventory: false]);
                 } else {
-                    variantTreeMap = dispatcher.runSync("getProductVariantTree", [productId : productId, featureOrder : featureSet, productStoreId : productStoreId]);
+                    variantTreeMap = runService('getProductVariantTree', [productId : productId, featureOrder : featureSet, productStoreId : productStoreId]);
                 }
                 variantTree = variantTreeMap.variantTree;
                 imageMap = variantTreeMap.variantSample;
@@ -300,7 +298,7 @@ if (product) {
                 if (variantTree) {
                     featureOrder = new LinkedList(featureSet);
                     featureOrder.each { featureKey ->
-                        featureValue = delegator.findOne("ProductFeatureType", [productFeatureTypeId : featureKey], true);
+                        featureValue = from("ProductFeatureType").where("productFeatureTypeId", featureKey).cache(true).queryOne();
                         fValue = featureValue.get("description") ?: featureValue.productFeatureTypeId;
                         featureTypes[featureKey] = fValue;
                     }
@@ -392,7 +390,7 @@ if (product) {
                     }
 
                     // make a list of variant sku with requireAmount
-                    variantsRes = dispatcher.runSync("getAssociatedProducts", [productId : productId, type : "PRODUCT_VARIANT", checkViewAllow : true, prodCatalogId : currentCatalogId]);
+                    variantsRes = runService('getAssociatedProducts', [productId : productId, type : "PRODUCT_VARIANT", checkViewAllow : true, prodCatalogId : currentCatalogId]);
                     variants = variantsRes.assocProducts;
                     variantPriceList = [];
                     if (variants) {
@@ -414,7 +412,7 @@ if (product) {
                             priceContext.product = variant;
                             if (cart.isSalesOrder()) {
                                 // sales order: run the "calculateProductPrice" service
-                                variantPriceMap = dispatcher.runSync("calculateProductPrice", priceContext);
+                                variantPriceMap = runService('calculateProductPrice', priceContext);
                                 BigDecimal calculatedPrice = (BigDecimal)variantPriceMap.get("price");
                                 // Get the minimum quantity for variants if MINIMUM_ORDER_PRICE is set for variants.
                                 variantPriceMap.put("minimumQuantity", ShoppingCart.getMinimumOrderQuantity(delegator, calculatedPrice, variant.get("productId")));
@@ -440,7 +438,7 @@ if (product) {
                                 }
                                 variantPriceList.add(variantPriceMap);
                             } else {
-                                variantPriceMap = dispatcher.runSync("calculatePurchasePrice", priceContext);
+                                variantPriceMap = runService('calculatePurchasePrice', priceContext);
                             }
                             amt.append(" if (sku == \"" + variant.productId + "\") return \"" + (variant.requireAmount ?: "N") + "\"; ");
                             if (variantPriceMap && variantPriceMap.basePrice) {
@@ -448,7 +446,7 @@ if (product) {
                             }
                             
                             // make a list of virtual variants sku with requireAmount
-                            virtualVariantsRes = dispatcher.runSync("getAssociatedProducts", [productIdTo : variant.productId, type : "ALTERNATIVE_PACKAGE", checkViewAllow : true, prodCatalogId : currentCatalogId]);
+                            virtualVariantsRes = runService('getAssociatedProducts', [productIdTo : variant.productId, type : "ALTERNATIVE_PACKAGE", checkViewAllow : true, prodCatalogId : currentCatalogId]);
                             virtualVariants = virtualVariantsRes.assocProducts;
                             
                             if(virtualVariants){
@@ -458,7 +456,7 @@ if (product) {
                                     priceContext.product = virtual;
                                     if (cart.isSalesOrder()) {
                                         // sales order: run the "calculateProductPrice" service
-                                        virtualPriceMap = dispatcher.runSync("calculateProductPrice", priceContext);
+                                        virtualPriceMap = runService('calculateProductPrice', priceContext);
                                         BigDecimal calculatedPrice = (BigDecimal)virtualPriceMap.get("price");
                                         // Get the minimum quantity for variants if MINIMUM_ORDER_PRICE is set for variants.
                                         virtualPriceMap.put("minimumQuantity", ShoppingCart.getMinimumOrderQuantity(delegator, calculatedPrice, virtual.get("productId")));
@@ -485,7 +483,7 @@ if (product) {
                                         variantPriceList.add(virtualPriceMap);
                                         variantPriceJS.append("  if (sku == \"" + virtual.productId + "\") return \"" + UtilFormatOut.formatCurrency(variantPriceMap.basePrice, currencyUomId, locale, 10) + "\"; ");
                                     } else {
-                                        virtualPriceMap = dispatcher.runSync("calculatePurchasePrice", priceContext);
+                                        virtualPriceMap = runService('calculatePurchasePrice', priceContext);
                                         variantPriceJS.append("  if (sku == \"" + virtual.productId + "\") return \"" + UtilFormatOut.formatCurrency(variantPriceMap.price, currencyUomId, locale, 10) + "\"; ");
                                     }
                                 }
@@ -512,7 +510,7 @@ if (product) {
             jsBuf.append("<script language=\"JavaScript\" type=\"text/javascript\">");
             
             // make a list of variant sku with requireAmount
-            virtualVariantsRes = dispatcher.runSync("getAssociatedProducts", [productIdTo : productId, type : "ALTERNATIVE_PACKAGE", checkViewAllow : true, prodCatalogId : categoryId]);
+            virtualVariantsRes = runService('getAssociatedProducts', [productIdTo : productId, type : "ALTERNATIVE_PACKAGE", checkViewAllow : true, prodCatalogId : categoryId]);
             virtualVariants = virtualVariantsRes.assocProducts;
             // Format to apply the currency code to the variant price in the javascript
             if (productStore) {
@@ -535,13 +533,13 @@ if (product) {
                     priceContext.product = virtual;
                     if (cart.isSalesOrder()) {
                         // sales order: run the "calculateProductPrice" service
-                        virtualPriceMap = dispatcher.runSync("calculateProductPrice", priceContext);
+                        virtualPriceMap = runService('calculateProductPrice', priceContext);
                         BigDecimal calculatedPrice = (BigDecimal)virtualPriceMap.get("price");
                         // Get the minimum quantity for variants if MINIMUM_ORDER_PRICE is set for variants.
                         virtualVariantPriceList.add(virtualPriceMap);
                         variantPriceJS.append(" if (sku == \"" + virtual.productId + "\") return \"" + UtilFormatOut.formatCurrency(virtualPriceMap.basePrice, currencyUomId, locale, 10) + "\"; ");
                     } else {
-                        virtualPriceMap = dispatcher.runSync("calculatePurchasePrice", priceContext);
+                        virtualPriceMap = runService('calculatePurchasePrice', priceContext);
                         variantPriceJS.append(" if (sku == \"" + virtual.productId + "\") return \"" + UtilFormatOut.formatCurrency(virtualPriceMap.price, currencyUomId, locale, 10) + "\"; ");
                     }
                 }
@@ -560,11 +558,11 @@ if (product) {
 
     // if the product is a MARKETING_PKG_AUTO/PICK, then also get the quantity which can be produced from components
     if (isMarketingPackage) {
-        resultOutput = dispatcher.runSync("getMktgPackagesAvailable", [productId : productId]);
+        resultOutput = runService('getMktgPackagesAvailable', [productId : productId]);
         availableInventory = resultOutput.availableToPromiseTotal;
     } else {
         //get last inventory count from product facility for the product
-        facilities = delegator.findList("ProductFacility", EntityCondition.makeCondition([productId : product.productId]), null, null, null, false)
+        facilities = from("ProductFacility").where("productId", product.productId).queryList();
         if(facilities) {
             facilities.each { facility ->
                 lastInventoryCount = facility.lastInventoryCount;
@@ -577,22 +575,22 @@ if (product) {
     context.availableInventory = availableInventory;
 
     // get product associations
-    alsoBoughtProducts = dispatcher.runSync("getAssociatedProducts", [productId : productId, type : "ALSO_BOUGHT", checkViewAllow : true, prodCatalogId : currentCatalogId, bidirectional : false, sortDescending : true]);
+    alsoBoughtProducts = runService('getAssociatedProducts', [productId : productId, type : "ALSO_BOUGHT", checkViewAllow : true, prodCatalogId : currentCatalogId, bidirectional : false, sortDescending : true]);
     context.alsoBoughtProducts = alsoBoughtProducts.assocProducts;
 
-    obsoleteProducts = dispatcher.runSync("getAssociatedProducts", [productId : productId, type : "PRODUCT_OBSOLESCENCE", checkViewAllow : true, prodCatalogId : currentCatalogId]);
+    obsoleteProducts = runService('getAssociatedProducts', [productId : productId, type : "PRODUCT_OBSOLESCENCE", checkViewAllow : true, prodCatalogId : currentCatalogId]);
     context.obsoleteProducts = obsoleteProducts.assocProducts;
 
-    crossSellProducts = dispatcher.runSync("getAssociatedProducts", [productId : productId, type : "PRODUCT_COMPLEMENT", checkViewAllow : true, prodCatalogId : currentCatalogId]);
+    crossSellProducts = runService('getAssociatedProducts', [productId : productId, type : "PRODUCT_COMPLEMENT", checkViewAllow : true, prodCatalogId : currentCatalogId]);
     context.crossSellProducts = crossSellProducts.assocProducts;
 
-    upSellProducts = dispatcher.runSync("getAssociatedProducts", [productId : productId, type : "PRODUCT_UPGRADE", checkViewAllow : true, prodCatalogId : currentCatalogId]);
+    upSellProducts = runService('getAssociatedProducts', [productId : productId, type : "PRODUCT_UPGRADE", checkViewAllow : true, prodCatalogId : currentCatalogId]);
     context.upSellProducts = upSellProducts.assocProducts;
 
-    obsolenscenseProducts = dispatcher.runSync("getAssociatedProducts", [productIdTo : productId, type : "PRODUCT_OBSOLESCENCE", checkViewAllow : true, prodCatalogId : currentCatalogId]);
+    obsolenscenseProducts = runService('getAssociatedProducts', [productIdTo : productId, type : "PRODUCT_OBSOLESCENCE", checkViewAllow : true, prodCatalogId : currentCatalogId]);
     context.obsolenscenseProducts = obsolenscenseProducts.assocProducts;
 
-    accessoryProducts = dispatcher.runSync("getAssociatedProducts", [productId : productId, type : "PRODUCT_ACCESSORY", checkViewAllow : true, prodCatalogId : currentCatalogId]);
+    accessoryProducts = runService('getAssociatedProducts', [productId : productId, type : "PRODUCT_ACCESSORY", checkViewAllow : true, prodCatalogId : currentCatalogId]);
     context.accessoryProducts = accessoryProducts.assocProducts;
 
     /*
@@ -639,7 +637,7 @@ if (product) {
     */
 
     // get the DIGITAL_DOWNLOAD related Content records to show the contentName/description
-    downloadProductContentAndInfoList = delegator.findByAnd("ProductContentAndInfo", [productId : productId, productContentTypeId : "DIGITAL_DOWNLOAD"], null, true);
+    downloadProductContentAndInfoList = from("ProductContentAndInfo").where("productId", productId, "productContentTypeId", "DIGITAL_DOWNLOAD").cache(true).queryList();
     context.downloadProductContentAndInfoList = downloadProductContentAndInfoList;
 
     // not the best to save info in an action, but this is probably the best place to count a view; it is done async
@@ -647,15 +645,14 @@ if (product) {
 
     //get product image from image management
     productImageList = [];
-    productContentAndInfoImageManamentList = delegator.findByAnd("ProductContentAndInfo", ["productId": productId, productContentTypeId : "IMAGE", "statusId" : "IM_APPROVED", "drIsPublic" : "Y"], ["sequenceNum"], false);
+    productContentAndInfoImageManamentList = from("ProductContentAndInfo").where("productId", productId, "productContentTypeId", "IMAGE", "statusId", "IM_APPROVED", "drIsPublic", "Y").orderBy("sequenceNum").queryList();
     if(productContentAndInfoImageManamentList) {
         productContentAndInfoImageManamentList.each { productContentAndInfoImageManament ->
-            contentAssocThumbList = delegator.findByAnd("ContentAssoc", [contentId : productContentAndInfoImageManament.contentId, contentAssocTypeId : "IMAGE_THUMBNAIL"], null, false);
-            contentAssocThumb = EntityUtil.getFirst(contentAssocThumbList);
+            contentAssocThumb = from("ContentAssoc").where("contentId", productContentAndInfoImageManament.contentId, "contentAssocTypeId", "IMAGE_THUMBNAIL").queryFirst();
             if(contentAssocThumb) {
-                imageContentThumb = delegator.findOne("Content", [contentId : contentAssocThumb.contentIdTo], false);
+                imageContentThumb = from("Content").where("contentId", contentAssocThumb.contentIdTo).queryOne();
                 if(imageContentThumb) {
-                    productImageThumb = delegator.findOne("ContentDataResourceView", [contentId : imageContentThumb.contentId, drDataResourceId : imageContentThumb.dataResourceId], false);
+                    productImageThumb = from("ContentDataResourceView").where("contentId", imageContentThumb.contentId, "drDataResourceId", imageContentThumb.dataResourceId).queryOne();
                     productImageMap = [:];
                     productImageMap.productImageThumb = productImageThumb.drObjectInfo;
                     productImageMap.productImage = productContentAndInfoImageManament.drObjectInfo;
@@ -672,15 +669,11 @@ if (product) {
     }
     
     // get product tags
-    productKeywords = delegator.findByAnd("ProductKeyword", ["productId": productId, "keywordTypeId" : "KWT_TAG", "statusId" : "KW_APPROVED"], null, false);
+    productKeywords = from("ProductKeyword").where("productId": productId, "keywordTypeId" : "KWT_TAG", "statusId" : "KW_APPROVED").queryList();
     keywordMap = [:];
     if (productKeywords) {
         for (productKeyword in productKeywords) {
-            keywordConds = [EntityCondition.makeCondition("keyword", EntityOperator.EQUALS, productKeyword.keyword),
-                            EntityCondition.makeCondition("keywordTypeId", EntityOperator.EQUALS, "KWT_TAG"),
-                            EntityCondition.makeCondition("statusId", EntityOperator.EQUALS, "KW_APPROVED")];
-                keywordCond = EntityCondition.makeCondition(keywordConds, EntityOperator.AND);
-            productKeyWordCount = delegator.findCountByCondition("ProductKeyword", keywordCond, null, null);
+            productKeyWordCount = from("ProductKeyword").where("keyword", productKeyword.keyword, "keywordTypeId", "KWT_TAG", "statusId", "KW_APPROVED").queryCount();
             keywordMap.put(productKeyword.keyword,productKeyWordCount);
         }
         context.productTags = keywordMap;

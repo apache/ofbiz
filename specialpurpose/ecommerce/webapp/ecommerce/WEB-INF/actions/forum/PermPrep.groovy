@@ -102,7 +102,7 @@ if (permissionType.equals("complex")) {
 
     if (!currentValue || !"Content".equals(entityName)) {
         if (thisContentId) {
-            currentValue = delegator.findOne("Content", [contentId : thisContentId], false);
+            currentValue = from("Content").where("contentId", thisContentId).queryOne();
         }
     }
     if ("add".equals(mode)) {
@@ -128,7 +128,7 @@ if (permissionType.equals("complex")) {
     }
 
     //org.ofbiz.base.util.Debug.logInfo("in permprep, mapIn:" + mapIn, null);
-    result = dispatcher.runSync("checkContentPermission", mapIn);
+    result = runService('checkContentPermission', mapIn);
     permissionStatus = result.permissionStatus;
     //org.ofbiz.base.util.Debug.logInfo("in permprep, permissionStatus:" + permissionStatus, null);
     if ("granted".equals(permissionStatus)) {

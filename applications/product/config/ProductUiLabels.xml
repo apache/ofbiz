@@ -3632,7 +3632,7 @@
         <value xml:lang="zh_TW">取消數量</value>
     </property>
     <property key="FormFieldTitle_canclAutmExtTime">
-        <value xml:lang="en">The time period (before the end of the thrudate) after which the automatic extension of the subscription will be executed</value>
+        <value xml:lang="en">Time period (before the end of the thrudate) for automatic extension of the subscription</value>
         <value xml:lang="fr">Durée durant laquelle l'abonnement sera automatiquement étendu (avant la date de fin)</value>
         <value xml:lang="it">Il periodo di tempo (prima della data di termine) dopo che l'estensione automatica dell'abbonamento verrà eseguita</value>
         <value xml:lang="ja">(終了日前に)申込を自動継続する期間</value>
@@ -13616,7 +13616,7 @@
         <value xml:lang="zh_TW">型錄管理</value>
     </property>
     <property key="ProductCatalogEmptyWarning">
-        <value xml:lang="en">If you don't populate a Catalog with Categories, it will not shown in the Browse Catalogs/Categories tree</value>
+        <value xml:lang="en">If you don't populate a Catalog with Categories, it will not be shown in the Browse Catalogs/Categories tree</value>
         <value xml:lang="fr">Si vous ne créez pas de catégories pour un catalogue, il n'apparaitra pas dans l'arbre des Catalogues/catégories</value>
         <value xml:lang="it">Se un catalogo non viene valorizzato con delle categorie, questo non verrà mostrato nell'albero Sfoglia cataloghi/categorie</value>
         <value xml:lang="ja">カタログがカテゴリに属していない場合、カタログ/カテゴリツリーは表示されません</value>

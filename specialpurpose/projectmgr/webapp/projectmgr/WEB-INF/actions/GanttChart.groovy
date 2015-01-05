@@ -32,7 +32,7 @@ projectId = parameters.projectId;
 userLogin = parameters.userLogin;
 
 //project info
-result = dispatcher.runSync("getProject", [projectId : projectId, userLogin : userLogin]);
+result = runService('getProject', [projectId : projectId, userLogin : userLogin]);
 project = result.projectInfo;
 if (project && project.startDate)
     context.chartStart = project.startDate;
@@ -46,7 +46,7 @@ else
 if (project == null) return;
 
 ganttList = new LinkedList();
-result = dispatcher.runSync("getProjectPhaseList", [userLogin : userLogin , projectId : projectId]);
+result = runService('getProjectPhaseList', [userLogin : userLogin , projectId : projectId]);
 phases = result.phaseList;
 if (phases) {
     phases.each { phase ->
@@ -71,10 +71,10 @@ if (phases) {
                 EntityCondition.makeCondition("currentStatusId", EntityOperator.NOT_EQUAL, "PTS_CANCELLED"),
                 EntityCondition.makeCondition("workEffortParentId", EntityOperator.EQUALS, phase.phaseId)
                 ], EntityOperator.AND);
-        tasks = delegator.findList("WorkEffort", cond, null, ["sequenceNum","workEffortName"], null, false);
+        tasks = from("WorkEffort").where(cond).orderBy("sequenceNum","workEffortName").queryList();
         if (tasks) {
             tasks.each { task ->
-                resultTaskInfo = dispatcher.runSync("getProjectTask", [userLogin : userLogin , taskId : task.workEffortId]);
+                resultTaskInfo = runService('getProjectTask', [userLogin : userLogin , taskId : task.workEffortId]);
                 taskInfo = resultTaskInfo.taskInfo;
                 taskInfo.taskNr = task.workEffortId;
                 taskInfo.phaseNr = phase.phaseId;
@@ -117,7 +117,7 @@ if (phases) {
                 }
 
                 // dependency can only show one in the ganttchart, so onl show the latest one..
-                preTasks = delegator.findByAnd("WorkEffortAssoc", ["workEffortIdTo" : task.workEffortId], ["workEffortIdFrom"], false);
+                preTasks = from("WorkEffortAssoc").where("workEffortIdTo", task.workEffortId).orderBy("workEffortIdFrom").queryList();
                 latestTaskIds = new LinkedList();
                 preTasks.each { preTask ->
                     wf = preTask.getRelatedOne("FromWorkEffort", false);

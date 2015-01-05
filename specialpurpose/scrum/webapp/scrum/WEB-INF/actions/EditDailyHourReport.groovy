@@ -40,7 +40,7 @@ if (!partyId) {
 timesheet = null;
 timesheetId = parameters.timesheetId;
 if (timesheetId) {
-    timesheet = delegator.findOne("Timesheet", ["timesheetId" : timesheetId], false);
+    timesheet = from("Timesheet").where("timesheetId", timesheetId).queryOne();
     partyId = timesheet.partyId; // use the party from this timesheet
 } else {
     // make sure because of timezone changes, not a duplicate timesheet is created
@@ -50,13 +50,13 @@ if (timesheetId) {
         EntityCondition.makeCondition("thruDate", EntityComparisonOperator.GREATER_THAN, midweek),
         EntityCondition.makeCondition("partyId", EntityComparisonOperator.EQUALS, partyId)
         ], EntityOperator.AND);
-    entryIterator = delegator.find("Timesheet", entryExprs, null, null, null, null);
+    entryIterator = from("Timesheet").where(entryExprs).queryIterator();
     timesheet = entryIterator.next();
     entryIterator.close();
     if (timesheet == null) {
-        result = dispatcher.runSync("createProjectTimesheet", ["userLogin" : parameters.userLogin, "partyId" : partyId]);
+        result = runService('createProjectTimesheet', ["userLogin" : parameters.userLogin, "partyId" : partyId]);
         if (result && result.timesheetId) {
-            timesheet = delegator.findOne("Timesheet", ["timesheetId" : result.timesheetId], false);
+            timesheet = from("Timesheet").where("timesheetId", result.timesheetId).queryOne();
         }
     }
 }
@@ -65,9 +65,9 @@ context.timesheet = timesheet;
 context.weekNumber = UtilDateTime.weekNumber(timesheet.fromDate);
 
 // get the user names
-context.partyNameView = delegator.findOne("PartyNameView",["partyId" : partyId], false);
+context.partyNameView = from("PartyNameView").where("partyId", partyId).queryOne();
 // get the default rate for this person
-rateTypes = EntityUtil.filterByDate(delegator.findByAnd("PartyRate", ["partyId" : partyId, "defaultRate" : "Y"], null, false));
+rateTypes = from("PartyRate").where("partyId", partyId, "defaultRate", "Y").filterByDate().queryList();
 if (rateTypes) {
     context.defaultRateTypeId = rateTypes[0].rateTypeId;
 }
@@ -108,7 +108,7 @@ void retrieveWorkEffortData() {
             //entry.plannedHours = pHours;
             planHours = 0.0;
             planHours = lastTimeEntry.planHours;
-            lastTimeEntryOfTasks = delegator.findByAnd("TimeEntry", ["workEffortId" : lastTimeEntry.workEffortId, "partyId" : partyId], ["-fromDate"], false);
+            lastTimeEntryOfTasks = from("TimeEntry").where("workEffortId", lastTimeEntry.workEffortId, "partyId", partyId).orderBy("-fromDate").queryList();
             if (lastTimeEntryOfTasks.size() != 0) lastTimeEntry = lastTimeEntryOfTasks[0];
             if (planHours < 1) {
                 planHours = estimatedHour;
@@ -141,7 +141,7 @@ void retrieveWorkEffortData() {
             // get project/phase information
             entry.workEffortId = entryWorkEffort.workEffortId;
             entry.workEffortName = entryWorkEffort.workEffortName;
-            result = dispatcher.runSync("getProjectInfoFromTask", ["userLogin" : parameters.userLogin,"taskId" : entryWorkEffort.workEffortId]);
+            result = runService('getProjectInfoFromTask', ["userLogin" : parameters.userLogin,"taskId" : entryWorkEffort.workEffortId]);
                 entry.phaseId = result.phaseId;
                 entry.phaseName = result.phaseName;
                 entry.projectId = result.projectId;
@@ -211,12 +211,8 @@ while (te.hasNext()) {
 void retrieveEmplLeaveData() {
         if (lastEmplLeaveEntry) {
             //service get Hours
-            inputMap = [:];
-            inputMap.userLogin = parameters.userLogin;
-            inputMap.partyId = lastEmplLeaveEntry.partyId;
-            inputMap.leaveTypeId = lastEmplLeaveEntry.leaveTypeId;
-            inputMap.fromDate = lastEmplLeaveEntry.fromDate;
-            result = dispatcher.runSync("getPartyLeaveHoursForDate", inputMap);
+            result = runService('getPartyLeaveHoursForDate', 
+                ["userLogin": parameters.userLogin, "partyId": lastEmplLeaveEntry.partyId, "leaveTypeId": lastEmplLeaveEntry.leaveTypeId, "fromDate": lastEmplLeaveEntry.fromDate]);
             if (result.hours) {
                 leaveEntry.plannedHours = result.hours;
                 leaveEntry.planHours =  result.hours;
@@ -242,12 +238,11 @@ void retrieveEmplLeaveData() {
    }
 
 // define condition
-findOpts = new EntityFindOptions(true, EntityFindOptions.TYPE_SCROLL_INSENSITIVE, EntityFindOptions.CONCUR_READ_ONLY, true);
 leaveExprs = [];
 leaveExprs.add(EntityCondition.makeCondition("fromDate", EntityOperator.GREATER_THAN_EQUAL_TO, timesheet.fromDate));
 leaveExprs.add(EntityCondition.makeCondition("fromDate", EntityOperator.LESS_THAN_EQUAL_TO, timesheet.thruDate));
 leaveExprs.add(EntityCondition.makeCondition("partyId", EntityOperator.EQUALS, partyId));
-emplLeave = delegator.find("EmplLeave", EntityCondition.makeCondition(leaveExprs, EntityOperator.AND), null, null, null, findOpts);
+emplLeave = from("EmplLeave").where(leaveExprs).cursorScrollInsensitive().distinct().queryIterator();
 
 while ((emplLeaveMap = emplLeave.next())) {
     if (emplLeaveEntry!=void) {
@@ -261,21 +256,13 @@ while ((emplLeaveMap = emplLeave.next())) {
             !lastEmplLeaveEntry.partyId.equals(emplLeaveEntry.partyId))) {
             retrieveEmplLeaveData();
         }
-    input = [:];
-    input.userLogin = parameters.userLogin;
-    input.partyId = emplLeaveEntry.partyId;
-    input.leaveTypeId = emplLeaveEntry.leaveTypeId;
-    input.fromDate = emplLeaveEntry.fromDate;
-    resultHours = dispatcher.runSync("getPartyLeaveHoursForDate", input);
+    resultHours = runService('getPartyLeaveHoursForDate', 
+        ["userLogin": parameters.userLogin, "partyId": emplLeaveEntry.partyId, "leaveTypeId": emplLeaveEntry.leaveTypeId, "fromDate": emplLeaveEntry.fromDate]);
     
     if (resultHours.hours) {
         leaveDayNumber = "d" + (emplLeaveEntry.fromDate.getTime() - timesheet.fromDate.getTime()) / (24*60*60*1000);
-        inputMap = [:];
-        inputMap.userLogin = parameters.userLogin;
-        inputMap.partyId = emplLeaveEntry.partyId;
-        inputMap.leaveTypeId = emplLeaveEntry.leaveTypeId;
-        inputMap.fromDate = emplLeaveEntry.fromDate;
-        resultHours = dispatcher.runSync("getPartyLeaveHoursForDate", inputMap);
+        resultHours = runService('getPartyLeaveHoursForDate', 
+            ["userLogin": parameters.userLogin, "partyId": emplLeaveEntry.partyId, "leaveTypeId": emplLeaveEntry.leaveTypeId, "fromDate": emplLeaveEntry.fromDate]);
         leaveHours = resultHours.hours.doubleValue();
         leaveEntry.put(String.valueOf(leaveDayNumber), leaveHours);
         if (leaveDayNumber.equals("d0")) day0Total += leaveHours;
@@ -289,12 +276,8 @@ while ((emplLeaveMap = emplLeave.next())) {
     }
     if (resultHours.hours) {
         leavePlanDay = "pd" + (emplLeaveEntry.fromDate.getTime() - timesheet.fromDate.getTime()) / (24*60*60*1000);
-        inputMap = [:];
-        inputMap.userLogin = parameters.userLogin;
-        inputMap.partyId = emplLeaveEntry.partyId;
-        inputMap.leaveTypeId = emplLeaveEntry.leaveTypeId;
-        inputMap.fromDate = emplLeaveEntry.fromDate;
-        resultPlanHours = dispatcher.runSync("getPartyLeaveHoursForDate", inputMap);
+        resultPlanHours = runService('getPartyLeaveHoursForDate', 
+            ["userLogin": parameters.userLogin, "partyId": emplLeaveEntry.partyId, "leaveTypeId": emplLeaveEntry.leaveTypeId, "fromDate": emplLeaveEntry.fromDate]);
         leavePlanHours = resultPlanHours.hours.doubleValue();
         leaveEntry.put(String.valueOf(leavePlanDay), leavePlanHours);
         if (leavePlanDay.equals("pd0")) pDay0Total += leavePlanHours;
@@ -350,7 +333,7 @@ if (timeEntry || emplLeaveEntry) {
 }
 context.timeEntries = entries;
 // get all timesheets of this user, including the planned hours
-timesheetsDb = delegator.findByAnd("Timesheet", ["partyId" : partyId], ["fromDate DESC"], false);
+timesheetsDb = from("Timesheet").where("partyId", partyId).orderBy("fromDate DESC").queryList();
 timesheets = new LinkedList();
 timesheetsDb.each { timesheetDb ->
     //get hours from EmplLeave;
@@ -359,17 +342,13 @@ timesheetsDb.each { timesheetDb ->
     leaveExprsList.add(EntityCondition.makeCondition("fromDate", EntityOperator.GREATER_THAN_EQUAL_TO, timesheetDb.fromDate));
     leaveExprsList.add(EntityCondition.makeCondition("fromDate", EntityOperator.LESS_THAN_EQUAL_TO, timesheetDb.thruDate));
     leaveExprsList.add(EntityCondition.makeCondition("partyId", EntityOperator.EQUALS, partyId));
-    emplLeaveList = delegator.find("EmplLeave", EntityCondition.makeCondition(leaveExprsList, EntityOperator.AND), null, null, null, findOpts);
+    emplLeaveList = from("EmplLeave").where(leaveExprsList).cursorScrollInsensitive().distinct().queryIterator();
     leaveHours = 0.00;
     
     while ((emplLeaveMap = emplLeaveList.next())) {
         emplLeaveEntry = emplLeaveMap;
-        inputData = [:];
-        inputData.userLogin = parameters.userLogin;
-        inputData.partyId = emplLeaveEntry.partyId;
-        inputData.leaveTypeId = emplLeaveEntry.leaveTypeId;
-        inputData.fromDate = emplLeaveEntry.fromDate;
-        resultHour = dispatcher.runSync("getPartyLeaveHoursForDate", inputData);
+        resultHour = runService('getPartyLeaveHoursForDate', 
+            ["userLogin": parameters.userLogin, "partyId": emplLeaveEntry.partyId, "leaveTypeId": emplLeaveEntry.leaveTypeId, "fromDate": emplLeaveEntry.fromDate]);
         if (resultHour) {
             leaveActualHours = resultHour.hours.doubleValue();
             leaveHours += leaveActualHours;
@@ -396,19 +375,19 @@ context.timesheets = timesheets;
 taskList=[];
 projectSprintBacklogAndTaskList = [];
 backlogIndexList = [];
-projectAndTaskList = delegator.findByAnd("ProjectSprintBacklogAndTask", ["sprintTypeId" : "SCRUM_SPRINT","taskCurrentStatusId" : "STS_CREATED"], ["projectName ASC","taskActualStartDate DESC"], false);
+projectAndTaskList = from("ProjectSprintBacklogAndTask").where("sprintTypeId" : "SCRUM_SPRINT","taskCurrentStatusId" : "STS_CREATED").orderBy("projectName ASC","taskActualStartDate DESC").queryList();
 projectAndTaskList.each { projectAndTaskMap ->
 userLoginId = userLogin.partyId;
     sprintId = projectAndTaskMap.sprintId;
-    workEffortList = delegator.findByAnd("WorkEffortAndProduct", ["workEffortId" : projectAndTaskMap.projectId], null, false);
+    workEffortList = from("WorkEffortAndProduct").where("workEffortId", projectAndTaskMap.projectId).queryList();
     backlogIndexList.add(workEffortList[0].productId);
 	
-    partyAssignmentSprintList = delegator.findByAnd("WorkEffortPartyAssignment", ["workEffortId" : sprintId, "partyId" : userLoginId], null, false);
+    partyAssignmentSprintList = from("WorkEffortPartyAssignment").where("workEffortId", sprintId, "partyId", userLoginId).queryList();
     partyAssignmentSprintMap = partyAssignmentSprintList[0];
     // if this userLoginId is a member of sprint
     if (partyAssignmentSprintMap) {
         workEffortId = projectAndTaskMap.taskId;
-        partyAssignmentTaskList = delegator.findByAnd("WorkEffortPartyAssignment", ["workEffortId" : workEffortId], null, false);
+        partyAssignmentTaskList = from("WorkEffortPartyAssignment").where("workEffortId", workEffortId).queryList();
         partyAssignmentTaskMap = partyAssignmentTaskList[0];
         // if the task do not assigned
         if (partyAssignmentTaskMap) {
@@ -427,24 +406,24 @@ userLoginId = userLogin.partyId;
 unplanList=[];
 if (backlogIndexList) {
     backlogIndex = new HashSet(backlogIndexList);
-    custRequestList = delegator.findByAnd("CustRequest", ["custRequestTypeId" : "RF_UNPLAN_BACKLOG","statusId" : "CRQ_REVIEWED"],["custRequestDate DESC"], false);
+    custRequestList = from("CustRequest").where("custRequestTypeId", "RF_UNPLAN_BACKLOG","statusId", "CRQ_REVIEWED").orderBy("custRequestDate DESC").queryList();
     if (custRequestList) {
         custRequestList.each { custRequestMap ->
             custRequestItemList = custRequestMap.getRelated("CustRequestItem", null, null, false);
 			custRequestItem =  
 			productOut = custRequestItemList[0].productId;
-			product = delegator.findOne("Product", ["productId" : productOut], false);
+			product = from("Product").where("productId", productOut).queryOne();
             backlogIndex.each { backlogProduct ->
                 productId = backlogProduct
                 if (productId.equals(productOut)) {
-                    custRequestWorkEffortList = delegator.findByAnd("CustRequestWorkEffort", ["custRequestId" : custRequestItemList[0].custRequestId], null, false);
+                    custRequestWorkEffortList = from("CustRequestWorkEffort").where("custRequestId", custRequestItemList[0].custRequestId).queryList();
                     custRequestWorkEffortList.each { custRequestWorkEffortMap ->
-                        partyAssignmentTaskList = delegator.findByAnd("WorkEffortPartyAssignment", ["workEffortId" : custRequestWorkEffortMap.workEffortId], null, false);
+                        partyAssignmentTaskList = from("WorkEffortPartyAssignment").where("workEffortId", custRequestWorkEffortMap.workEffortId).queryList();
                         partyAssignmentTaskMap = partyAssignmentTaskList[0];
                         // if the task do not assigned
                         if (!partyAssignmentTaskMap) {
                             result = [:];
-                            workEffortMap = delegator.findOne("WorkEffort", ["workEffortId" : custRequestWorkEffortMap.workEffortId], false);
+                            workEffortMap = from("WorkEffort").where("workEffortId", custRequestWorkEffortMap.workEffortId).queryOne();
                             result.description = custRequestMap.description;
                             result.productName = product.internalName;
                             result.taskId = workEffortMap.workEffortId;

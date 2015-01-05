@@ -237,7 +237,7 @@ public class LoginWorker {
         // check if they have permission for this login attempt; if not log them out
         if (userLogin != null) {
             List<Object> errorMessageList = UtilGenerics.checkList(request.getAttribute("_ERROR_MESSAGE_LIST"));
-            if (!hasBasePermission(userLogin, request) || isFlaggedLoggedOut(userLogin)) {
+            if (!hasBasePermission(userLogin, request) || isFlaggedLoggedOut(userLogin, userLogin.getDelegator())) {
                 if (errorMessageList == null) {
                     errorMessageList = new LinkedList<Object>();
                     request.setAttribute("_ERROR_MESSAGE_LIST", errorMessageList);
@@ -1020,7 +1020,7 @@ public class LoginWorker {
 
         EntityConditionList<EntityCondition> condition = EntityCondition.makeCondition(conds);
         Debug.logInfo("Doing issuer lookup: " + condition.toString(), module);
-        long count = delegator.findCountByCondition("X509IssuerProvision", condition, null, null);
+        long count = EntityQuery.use(delegator).from("X509IssuerProvision").where(condition).queryCount();
         return count > 0;
     }
 
@@ -1066,8 +1066,8 @@ public class LoginWorker {
         return "success";
     }
 
-    public static boolean isFlaggedLoggedOut(GenericValue userLogin) {
-        if ("true".equalsIgnoreCase(UtilProperties.getPropertyValue("security.properties", "login.disable.global.logout"))) {
+    public static boolean isFlaggedLoggedOut(GenericValue userLogin, Delegator delegator) {
+        if ("true".equalsIgnoreCase(EntityUtilProperties.getPropertyValue("security.properties", "login.disable.global.logout", delegator))) {
             return false;
         }
         if (userLogin == null || userLogin.get("userLoginId") == null) {
@@ -1180,7 +1180,7 @@ public class LoginWorker {
         if (reqToChangePwdInDays > 0) {
             List<GenericValue> passwordHistories = null;
             try {
-                passwordHistories = delegator.findByAnd("UserLoginPasswordHistory", UtilMisc.toMap("userLoginId", userName), null, false);
+                passwordHistories = EntityQuery.use(delegator).from("UserLoginPasswordHistory").where("userLoginId", userName).queryList();
             } catch (GenericEntityException e) {
                 Debug.logError(e, "Cannot get user's password history record: " + e.getMessage(), module);
             }

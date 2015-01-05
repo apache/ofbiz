@@ -43,7 +43,7 @@ import org.ofbiz.widget.ModelWidgetAction;
 import org.w3c.dom.Element;
 
 /**
- * Widget Library - Screen model class
+ * Abstract menu action.
  */
 public abstract class ModelMenuAction {
 
@@ -56,22 +56,27 @@ public abstract class ModelMenuAction {
             if ("set".equals(actionElement.getNodeName())) {
                 actions.add(new SetField(modelMenu, actionElement));
             } else {
-                actions.add(ModelWidgetAction.toModelWidgetAction(modelMenu, actionElement));
+                actions.add(ModelWidgetAction.newInstance(modelMenu, actionElement));
             }
         }
         return Collections.unmodifiableList(actions);
     }
 
+    /**
+     * Models the &lt;set&gt; element.
+     * 
+     * @see <code>widget-common.xsd</code>
+     */
     @SuppressWarnings("serial")
     public static class SetField extends ModelWidgetAction {
-        protected FlexibleMapAccessor<Object> field;
-        protected FlexibleMapAccessor<Object> fromField;
-        protected FlexibleStringExpander valueExdr;
-        protected FlexibleStringExpander defaultExdr;
-        protected FlexibleStringExpander globalExdr;
-        protected String type;
-        protected String toScope;
-        protected String fromScope;
+        private final FlexibleMapAccessor<Object> field;
+        private final FlexibleMapAccessor<Object> fromField;
+        private final FlexibleStringExpander valueExdr;
+        private final FlexibleStringExpander defaultExdr;
+        private final FlexibleStringExpander globalExdr;
+        private final String type;
+        private final String toScope;
+        private final String fromScope;
 
         public SetField(ModelMenu modelMenu, Element setElement) {
             super (modelMenu, setElement);

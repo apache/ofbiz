@@ -32,7 +32,7 @@ import javax.xml.transform.stream.StreamSource;
 
 import org.apache.fop.apps.Fop;
 import org.ofbiz.base.util.Debug;
-import org.ofbiz.base.util.StringUtil;
+import org.ofbiz.base.util.UtilCodec;
 import org.ofbiz.base.util.UtilProperties;
 import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.entity.Delegator;
@@ -57,6 +57,7 @@ public class ScreenFopViewHandler extends AbstractViewHandler {
     /**
      * @see org.ofbiz.webapp.view.ViewHandler#init(javax.servlet.ServletContext)
      */
+    @Override
     public void init(ServletContext context) throws ViewHandlerException {
         this.servletContext = context;
     }
@@ -64,9 +65,10 @@ public class ScreenFopViewHandler extends AbstractViewHandler {
     /**
      * @see org.ofbiz.webapp.view.ViewHandler#render(java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
      */
+    @Override
     public void render(String name, String page, String info, String contentType, String encoding, HttpServletRequest request, HttpServletResponse response) throws ViewHandlerException {
 
-    	Delegator delegator = (Delegator) request.getAttribute("delegator");
+        Delegator delegator = (Delegator) request.getAttribute("delegator");
         // render and obtain the XSL-FO
         Writer writer = new StringWriter();
         try {
@@ -80,7 +82,7 @@ public class ScreenFopViewHandler extends AbstractViewHandler {
 
             // this is the object used to render forms from their definitions
             screens.getContext().put("formStringRenderer", formStringRenderer);
-            screens.getContext().put("simpleEncoder", StringUtil.getEncoder(EntityUtilProperties.getPropertyValue("widget", getName() + ".encoder", delegator)));
+            screens.getContext().put("simpleEncoder", UtilCodec.getEncoder(EntityUtilProperties.getPropertyValue("widget", getName() + ".encoder", delegator)));
             screens.render(page);
         } catch (Exception e) {
             renderError("Problems with the response writer/output stream", e, "[Not Yet Rendered]", request, response);

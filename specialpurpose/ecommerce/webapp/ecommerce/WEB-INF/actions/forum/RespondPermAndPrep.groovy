@@ -55,7 +55,7 @@ if (!pubPt) {
 }
 */
 
-contentToValue = delegator.findOne("Content", [contentId : contentIdTo], false);
+contentToValue = from("Content").where("contentId", contentIdTo).queryOne();
 contentToPurposeList = contentToValue.getRelated("ContentPurpose", null, null, true);
 currentValue = delegator.makeValue("Content", [contentTypeId : "DOCUMENT", statusId : "CTNT_PUBLISHED", privilegeEnumId : "_00_"]);
 
@@ -79,7 +79,7 @@ mapIn.entityOperation = "_CREATE";
 mapIn.contentPurposeList = ["RESPONSE"];
 
 //org.ofbiz.base.util.Debug.logInfo("in permprep, mapIn:" + mapIn, null);
-result = dispatcher.runSync("checkContentPermission", mapIn);
+result = runService('checkContentPermission', mapIn);
 permissionStatus = result.permissionStatus;
 //org.ofbiz.base.util.Debug.logInfo("permissionStatus:" + permissionStatus, null);
 if (!"granted".equals(permissionStatus)) {

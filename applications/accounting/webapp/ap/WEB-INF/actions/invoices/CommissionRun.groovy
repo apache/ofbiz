@@ -35,11 +35,11 @@ if (fromDate) {
     if (context.salesRepPartyList) {
         invoiceCond.add(EntityCondition.makeCondition("invoiceRolePartyId", EntityOperator.IN, context.salesRepPartyList));
     }
-    invoiceList = delegator.findList("InvoiceAndRole", EntityCondition.makeCondition(invoiceCond, EntityOperator.AND), null, null, null, false);
+    invoiceList = from("InvoiceAndRole").where(invoiceCond).queryList();
 
     List invoices = [];
     if (invoiceList) {
-        resultMap = dispatcher.runSync("getInvoicesFilterByAssocType", [invoiceItemAssocTypeId : "COMMISSION_INVOICE", invoiceList : invoiceList, userLogin : userLogin]);
+        resultMap = runService('getInvoicesFilterByAssocType', [invoiceItemAssocTypeId : "COMMISSION_INVOICE", invoiceList : invoiceList, userLogin : userLogin]);
         invoices = resultMap.filteredInvoiceList; 
         context.invoices = invoices;
     }

@@ -1119,6 +1119,7 @@ nextProd:
                 // copy the supplier
                 List<GenericValue> supplierProducts = EntityQuery.use(delegator).from("SupplierProduct").where("productId", productId).cache(true).queryList();
                 for (GenericValue supplierProduct: supplierProducts) {
+                    supplierProduct = (GenericValue) supplierProduct.clone();
                     supplierProduct.set("productId",  product.getString("productId"));
                     supplierProduct.create();
                 }
@@ -1126,6 +1127,7 @@ nextProd:
                 // copy the content
                 List<GenericValue> productContents = EntityQuery.use(delegator).from("ProductContent").where("productId", productId).cache(true).queryList();
                 for (GenericValue productContent: productContents) {
+                    productContent = (GenericValue) productContent.clone();
                     productContent.set("productId",  product.getString("productId"));
                     productContent.create();
                 }

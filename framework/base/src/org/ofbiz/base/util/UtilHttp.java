@@ -53,8 +53,6 @@ import org.apache.oro.text.regex.MalformedPatternException;
 import org.apache.oro.text.regex.Pattern;
 import org.apache.oro.text.regex.PatternMatcher;
 import org.apache.oro.text.regex.Perl5Matcher;
-import org.owasp.esapi.errors.EncodingException;
-import org.owasp.esapi.errors.IntrusionException;
 
 import com.ibm.icu.util.Calendar;
 
@@ -155,10 +153,6 @@ public class UtilHttp {
         return canonicalizeParameterMap(paramMap);
     }
 
-    public static Map<String, Object> getQueryStringOnlyParameterMap(HttpServletRequest request) {
-        return getQueryStringOnlyParameterMap(request.getQueryString());
-    }
-
     public static Map<String, Object> getQueryStringOnlyParameterMap(String queryString) {
         Map<String, Object> paramMap = new HashMap<String, Object>();
         if (UtilValidate.isNotEmpty(queryString)) {
@@ -232,13 +226,9 @@ public class UtilHttp {
     }
 
     public static Map<String, Object> getUrlOnlyParameterMap(HttpServletRequest request) {
-        return getUrlOnlyParameterMap(request.getQueryString(), request.getPathInfo());
-    }
-
-    public static Map<String, Object> getUrlOnlyParameterMap(String queryString, String pathInfo) {
         // NOTE: these have already been through canonicalizeParameterMap, so not doing it again here
-        Map<String, Object> paramMap = getQueryStringOnlyParameterMap(queryString);
-        paramMap.putAll(getPathInfoOnlyParameterMap(pathInfo, null, null));
+        Map<String, Object> paramMap = getQueryStringOnlyParameterMap(request.getQueryString());
+        paramMap.putAll(getPathInfoOnlyParameterMap(request.getPathInfo(), null, null));
         return paramMap;
     }
 
@@ -259,10 +249,11 @@ public class UtilHttp {
 
     public static String canonicalizeParameter(String paramValue) {
         try {
-            String cannedStr = StringUtil.defaultWebEncoder.canonicalize(paramValue, StringUtil.esapiCanonicalizeStrict);
+            /** calling canonicalize with strict flag set to false so we only get warnings about double encoding, etc; can be set to true for exceptions and more security */
+            String cannedStr = UtilCodec.canonicalize(paramValue, false);
             if (Debug.verboseOn()) Debug.logVerbose("Canonicalized parameter with " + (cannedStr.equals(paramValue) ? "no " : "") + "change: original [" + paramValue + "] canned [" + cannedStr + "]", module);
             return cannedStr;
-        } catch (IntrusionException e) {
+        } catch (Exception e) {
             Debug.logError(e, "Error in canonicalize parameter value [" + paramValue + "]: " + e.toString(), module);
             return paramValue;
         }
@@ -799,22 +790,14 @@ public class UtilHttp {
                                 buf.append("&");
                             }
                         }
-                        try {
-                            buf.append(StringUtil.defaultWebEncoder.encodeForURL(name));
-                        } catch (EncodingException e) {
-                            Debug.logError(e, module);
-                        }
+                        buf.append(UtilCodec.getEncoder("url").encode(name));
                         /* the old way: try {
                             buf.append(URLEncoder.encode(name, "UTF-8"));
                         } catch (UnsupportedEncodingException e) {
                             Debug.logError(e, module);
                         } */
                         buf.append('=');
-                        try {
-                            buf.append(StringUtil.defaultWebEncoder.encodeForURL(valueStr));
-                        } catch (EncodingException e) {
-                            Debug.logError(e, module);
-                        }
+                        buf.append(UtilCodec.getEncoder("url").encode(valueStr));
                         /* the old way: try {
                             buf.append(URLEncoder.encode(valueStr, "UTF-8"));
                         } catch (UnsupportedEncodingException e) {

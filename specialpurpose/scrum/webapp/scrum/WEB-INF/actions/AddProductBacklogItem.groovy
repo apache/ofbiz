@@ -28,8 +28,6 @@ import sun.util.calendar.LocalGregorianCalendar.Date;
 def module = "AddProductBacklogItem.groovy";
 
 // find cust request and items
-def performFindInMap = [:];
-performFindInMap.entityName = "CustRequestAndCustRequestItem";
 def inputFields = [:];
 
 if(parameters.statusId == null){
@@ -39,9 +37,7 @@ if(parameters.statusId == null){
 }
 inputFields.putAll(parameters);
 inputFields.custRequestTypeId = "RF_PROD_BACKLOG";
-performFindInMap.inputFields = inputFields;
-performFindInMap.orderBy = "custSequenceNum";
-def performFindResults = dispatcher.runSync("performFind", performFindInMap);
+def performFindResults = runService('performFind', ["entityName": "CustRequestAndCustRequestItem", "inputFields": inputFields, "orderBy": "custSequenceNum"]);
 def custRequestAndItems = performFindResults.listIt.getCompleteList();
 performFindResults.listIt.close();
 
@@ -54,11 +50,11 @@ custRequestAndItems.each() { custRequestAndItem ->
     tempCustRequestAndItem.custSequenceNum = countSequence;
     tempCustRequestAndItem.realSequenceNum = custRequestAndItem.custSequenceNum;
     // if custRequest has task then get Actual Hours
-    custWorkEffortList = delegator.findByAnd("CustRequestWorkEffort",["custRequestId" : custRequestAndItem.custRequestId], null, false);
+    custWorkEffortList = from("CustRequestWorkEffort").where("custRequestId", custRequestAndItem.custRequestId).queryList();
     if (custWorkEffortList) {
         actualHours = 0.00;
         custWorkEffortList.each() { custWorkEffortMap ->
-            result = dispatcher.runSync("getScrumActualHour", ["taskId" : custWorkEffortMap.workEffortId,"partyId" : null, "userLogin" : userLogin]);
+            result = runService('getScrumActualHour', ["taskId" : custWorkEffortMap.workEffortId,"partyId" : null, "userLogin" : userLogin]);
             actualHours += result.actualHours;
         }
         if(actualHours) {
@@ -101,9 +97,8 @@ conditions = EntityCondition.makeCondition(conditionList, EntityOperator.AND);
 
 mainConditionList.add(orConditions);
 mainConditionList.add(conditions);
-mainConditions = EntityCondition.makeCondition(mainConditionList, EntityOperator.AND);
 
-unplannedList = delegator.findList("CustRequestAndCustRequestItem", mainConditions, ["custRequestId", "custSequenceNum", "statusId", "description", "custEstimatedMilliSeconds", "custRequestName", "parentCustRequestId"] as Set, ["custSequenceNum"], null, false);
+unplannedList = select("custRequestId", "custSequenceNum", "statusId", "description", "custEstimatedMilliSeconds", "custRequestName", "parentCustRequestId").from("CustRequestAndCustRequestItem").where(mainConditionList).orderBy("custSequenceNum").queryList();
 
 def countSequenceUnplanned = 1;
 def unplanBacklogItems = [];
@@ -113,11 +108,11 @@ unplannedList.each() { unplannedItem ->
     tempUnplanned.custSequenceNum = countSequenceUnplanned;
     tempUnplanned.realSequenceNum = unplannedItem.custSequenceNum;
     // if custRequest has task then get Actual Hours
-    unplanCustWorkEffortList = delegator.findByAnd("CustRequestWorkEffort",["custRequestId" : unplannedItem.custRequestId], null, false);
+    unplanCustWorkEffortList = from("CustRequestWorkEffort").where("custRequestId", unplannedItem.custRequestId).queryList();
     if (unplanCustWorkEffortList) {
         actualHours = 0.00;
         unplanCustWorkEffortList.each() { custWorkEffortMap ->
-            result = dispatcher.runSync("getScrumActualHour", ["taskId" : custWorkEffortMap.workEffortId,"partyId" : null, "userLogin" : userLogin]);
+            result = runService('getScrumActualHour', ["taskId" : custWorkEffortMap.workEffortId,"partyId" : null, "userLogin" : userLogin]);
             actualHours += result.actualHours;
         }
         if(actualHours) {

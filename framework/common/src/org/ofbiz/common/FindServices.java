@@ -53,6 +53,7 @@ import org.ofbiz.entity.model.ModelEntity;
 import org.ofbiz.entity.model.ModelField;
 import org.ofbiz.entity.util.EntityFindOptions;
 import org.ofbiz.entity.util.EntityListIterator;
+import org.ofbiz.entity.util.EntityQuery;
 import org.ofbiz.entity.util.EntityUtil;
 import org.ofbiz.entity.util.EntityUtilProperties;
 import org.ofbiz.service.DispatchContext;
@@ -617,8 +618,15 @@ public class FindServices {
         int listSize = 0;
         try {
             if (noConditionFind || (entityConditionList != null && entityConditionList.getConditionListSize() > 0)) {
-                listIt = delegator.find(entityName, entityConditionList, null, fieldSet, orderByList,
-                        new EntityFindOptions(true, EntityFindOptions.TYPE_SCROLL_INSENSITIVE, EntityFindOptions.CONCUR_READ_ONLY, -1, maxRows, distinct));
+                listIt = EntityQuery.use(delegator)
+                                    .select(fieldSet)
+                                    .from(entityName)
+                                    .where(entityConditionList)
+                                    .orderBy(orderByList)
+                                    .cursorScrollInsensitive()
+                                    .maxRows(maxRows)
+                                    .distinct(distinct)
+                                    .queryIterator();
                 listSize = listIt.getResultsSizeAfterPartialList();
             }
         } catch (GenericEntityException e) {

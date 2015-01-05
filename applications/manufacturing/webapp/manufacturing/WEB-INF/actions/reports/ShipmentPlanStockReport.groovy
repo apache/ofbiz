@@ -22,16 +22,16 @@ import org.ofbiz.base.util.*;
 
 inventoryStock = [:];
 shipmentId = parameters.shipmentId;
-shipment = delegator.findOne("Shipment", [shipmentId : shipmentId], false);
+shipment = from("Shipment").where("shipmentId", shipmentId).queryOne();
 
 context.shipmentIdPar = shipment.shipmentId;
 context.estimatedReadyDatePar = shipment.estimatedReadyDate;
 context.estimatedShipDatePar = shipment.estimatedShipDate;
 records = [];
 if (shipment) {
-    shipmentPlans = delegator.findByAnd("OrderShipment", [shipmentId : shipmentId], null, false);
+    shipmentPlans = from("OrderShipment").where("shipmentId", shipmentId).queryList();
     shipmentPlans.each { shipmentPlan ->
-        orderLine = delegator.findOne("OrderItem", [orderId : shipmentPlan.orderId , orderItemSeqId : shipmentPlan.orderItemSeqId], false);
+        orderLine = from("OrderItem").where("orderId", shipmentPlan.orderId , "orderItemSeqId", shipmentPlan.orderItemSeqId).queryOne();
         recordGroup = [:];
         recordGroup.ORDER_ID = shipmentPlan.orderId;
         recordGroup.ORDER_ITEM_SEQ_ID = shipmentPlan.orderItemSeqId;
@@ -40,7 +40,7 @@ if (shipment) {
 
         recordGroup.PRODUCT_ID = orderLine.productId;
         recordGroup.QUANTITY = shipmentPlan.quantity;
-        product = delegator.findOne("Product", [productId : orderLine.productId], false);
+        product = from("Product").where("productId", orderLine.productId).queryOne();
         recordGroup.PRODUCT_NAME = product.internalName;
 
         inputPar = [productId : orderLine.productId,
@@ -49,7 +49,7 @@ if (shipment) {
                                      userLogin: userLogin];
 
         result = [:];
-        result = dispatcher.runSync("getNotAssembledComponents",inputPar);
+        result = runService('getNotAssembledComponents',inputPar);
         if (result) {
             components = (List)result.get("notAssembledComponents");
         }
@@ -63,7 +63,7 @@ if (shipment) {
             if (facilityId) {
                 if (!inventoryStock.containsKey(oneComponent.getProduct().productId)) {
                     serviceInput = [productId : oneComponent.getProduct().productId , facilityId : facilityId];
-                    serviceOutput = dispatcher.runSync("getInventoryAvailableByFacility",serviceInput);
+                    serviceOutput = runService('getInventoryAvailableByFacility',serviceInput);
                     qha = serviceOutput.quantityOnHandTotal ?: 0.0;
                     inventoryStock.put(oneComponent.getProduct().productId, qha);
                 }
@@ -75,7 +75,7 @@ if (shipment) {
             // Now we get the products qty already reserved by production runs
             serviceInput = [productId : oneComponent.getProduct().productId,
                                           userLogin : userLogin];
-            serviceOutput = dispatcher.runSync("getProductionRunTotResQty", serviceInput);
+            serviceOutput = runSevice('getProductionRunTotResQty', serviceInput);
             resQty = serviceOutput.reservedQuantity;
             record.reservedQuantity = resQty;
             records.add(record);

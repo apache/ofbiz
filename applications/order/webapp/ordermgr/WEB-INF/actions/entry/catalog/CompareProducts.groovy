@@ -54,15 +54,14 @@ compareList.each { product ->
     priceContext.agreementId = cart.getAgreementId();
     priceContext.partyId = cart.getPartyId();  // IMPORTANT: otherwise it'll be calculating prices using the logged in user which could be a CSR instead of the customer
     priceContext.checkIncludeVat = "Y";
-    productData.priceMap = dispatcher.runSync("calculateProductPrice", priceContext);
+    productData.priceMap = runService('calculateProductPrice', priceContext);
     
     condList = [
                 EntityCondition.makeCondition("productId", product.productId),
                 EntityUtil.getFilterByDateExpr(),
                 EntityCondition.makeCondition("productFeatureApplTypeId", EntityOperator.IN, ["STANDARD_FEATURE", "DISTINGUISHING_FEAT", "SELECTABLE_FEATURE"])
                ];
-    cond = EntityCondition.makeCondition(condList);
-    productFeatureAppls = delegator.findList("ProductFeatureAppl", cond, null, ["sequenceNum"], null, true);
+    productFeatureAppls = from("ProductFeatureAppl").where(condList).orderBy("sequenceNum").cache(true).queryList();
     productFeatureAppls.each { productFeatureAppl ->
         productFeature = productFeatureAppl.getRelatedOne("ProductFeature", true);
         if (!productData[productFeature.productFeatureTypeId]) {
@@ -76,5 +75,5 @@ compareList.each { product ->
     } 
 }
 productFeatureTypeIds.each { productFeatureTypeId ->
-    productFeatureTypeMap[productFeatureTypeId] = delegator.findOne("ProductFeatureType", [productFeatureTypeId : productFeatureTypeId], true);
+    productFeatureTypeMap[productFeatureTypeId] = from("ProductFeatureType").where("productFeatureTypeId", productFeatureTypeId).cache(true).queryOne();
 }

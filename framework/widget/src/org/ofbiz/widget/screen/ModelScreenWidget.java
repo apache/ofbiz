@@ -33,16 +33,14 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.GeneralException;
-import org.ofbiz.base.util.StringUtil;
+import org.ofbiz.base.util.UtilCodec;
 import org.ofbiz.base.util.UtilGenerics;
-import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.base.util.UtilXml;
 import org.ofbiz.base.util.collections.MapStack;
 import org.ofbiz.base.util.string.FlexibleStringExpander;
 import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
-import org.ofbiz.entity.condition.EntityCondition;
 import org.ofbiz.entity.util.EntityQuery;
 import org.ofbiz.widget.ModelWidget;
 import org.ofbiz.widget.ModelWidgetAction;
@@ -607,7 +605,7 @@ public abstract class ModelScreenWidget extends ModelWidget {
 
         public String getTitle(Map<String, Object> context) {
             String title = this.titleExdr.expandString(context);
-            StringUtil.SimpleEncoder simpleEncoder = (StringUtil.SimpleEncoder) context.get("simpleEncoder");
+            UtilCodec.SimpleEncoder simpleEncoder = (UtilCodec.SimpleEncoder) context.get("simpleEncoder");
             if (simpleEncoder != null) {
                 title = simpleEncoder.encode(title);
             }
@@ -893,7 +891,8 @@ public abstract class ModelScreenWidget extends ModelWidget {
 
         public String getText(Map<String, Object> context) {
             String text = this.textExdr.expandString(context);
-            StringUtil.SimpleEncoder simpleEncoder = (StringUtil.SimpleEncoder) context.get("simpleEncoder");
+            // FIXME: Encoding should be done by the renderer, not by the model.
+            UtilCodec.SimpleEncoder simpleEncoder = (UtilCodec.SimpleEncoder) context.get("simpleEncoder");
             if (simpleEncoder != null) {
                 text = simpleEncoder.encode(text);
             }
@@ -1042,16 +1041,7 @@ public abstract class ModelScreenWidget extends ModelWidget {
                 Debug.logError(e, errMsg, module);
                 throw new RuntimeException(errMsg);
             }
-            StringBuffer renderBuffer = new StringBuffer();
-            modelTree.renderTreeString(renderBuffer, context, treeStringRenderer);
-            try {
-                writer.append(renderBuffer.toString());
-            } catch (IOException e) {
-                String errMsg = "Error rendering included tree named [" + name + "] at location [" + location + "]: " + e.toString();
-                Debug.logError(e, errMsg, module);
-                throw new RuntimeException(errMsg);
-            }
-
+            modelTree.renderTreeString(writer, context, treeStringRenderer);
             if (protectScope) {
                 UtilGenerics.<MapStack<String>>cast(context).pop();
             }
@@ -1470,7 +1460,8 @@ public abstract class ModelScreenWidget extends ModelWidget {
 
         public String getText(Map<String, Object> context) {
             String text = this.textExdr.expandString(context);
-            StringUtil.SimpleEncoder simpleEncoder = (StringUtil.SimpleEncoder) context.get("simpleEncoder");
+            // FIXME: Encoding should be done by the renderer, not by the model.
+            UtilCodec.SimpleEncoder simpleEncoder = (UtilCodec.SimpleEncoder) context.get("simpleEncoder");
             if (simpleEncoder != null) {
                 text = simpleEncoder.encode(text);
             }
@@ -1487,9 +1478,9 @@ public abstract class ModelScreenWidget extends ModelWidget {
 
         public String getTarget(Map<String, Object> context) {
             Map<String, Object> expanderContext = context;
-            StringUtil.SimpleEncoder simpleEncoder = context == null ? null : (StringUtil.SimpleEncoder) context.get("simpleEncoder");
+            UtilCodec.SimpleEncoder simpleEncoder = context == null ? null : (UtilCodec.SimpleEncoder) context.get("simpleEncoder");
             if (simpleEncoder != null) {
-                expanderContext = StringUtil.HtmlEncodingMapWrapper.getHtmlEncodingMapWrapper(context, simpleEncoder);
+                expanderContext = UtilCodec.HtmlEncodingMapWrapper.getHtmlEncodingMapWrapper(context, simpleEncoder);
             }
             return this.targetExdr.expandString(expanderContext);
         }
@@ -1632,7 +1623,8 @@ public abstract class ModelScreenWidget extends ModelWidget {
 
         public String getAlt(Map<String, Object> context) {
             String alt = this.alt.expandString(context);
-            StringUtil.SimpleEncoder simpleEncoder = (StringUtil.SimpleEncoder) context.get("simpleEncoder");
+            // FIXME: Encoding should be done by the renderer, not by the model.
+            UtilCodec.SimpleEncoder simpleEncoder = (UtilCodec.SimpleEncoder) context.get("simpleEncoder");
             if (simpleEncoder != null) {
                 alt = simpleEncoder.encode(alt);
             }
@@ -1671,8 +1663,10 @@ public abstract class ModelScreenWidget extends ModelWidget {
                     portalPage = PortalPageWorker.getPortalPage(expandedPortalPageId, context);
                 } else {
                     try {
-                        portalPage = EntityQuery.use(delegator).from("PortalPage").where("portalPageId", expandedPortalPageId)
-                                .cache().queryOne();
+                        portalPage = EntityQuery.use(delegator)
+                                                .from("PortalPage")
+                                                .where("portalPageId", expandedPortalPageId)
+                                                .cache().queryOne();
                     } catch (GenericEntityException e) {
                         throw new RuntimeException(e);
                     }
@@ -1695,9 +1689,13 @@ public abstract class ModelScreenWidget extends ModelWidget {
                 List<GenericValue> portletAttributes = null;
                 GenericValue portalPage = getPortalPageValue(context);
                 String actualPortalPageId = portalPage.getString("portalPageId");
-                portalPageColumns = delegator.findByAnd("PortalPageColumn", UtilMisc.toMap("portalPageId", actualPortalPageId),
-                        UtilMisc.toList("columnSeqId"), true);
-
+                portalPageColumns = EntityQuery.use(delegator)
+                                               .from("PortalPageColumn")
+                                               .where("portalPageId", actualPortalPageId)
+                                               .orderBy("columnSeqId")
+                                               .cache(true)
+                                               .queryList();
+                
                 // Renders the portalPage header
                 screenStringRenderer.renderPortalPageBegin(writer, context, this);
                 
@@ -1714,8 +1712,11 @@ public abstract class ModelScreenWidget extends ModelWidget {
                     screenStringRenderer.renderPortalPageColumnBegin(writer, context, this, columnValue);
 
                     // Get the Portlets located in the current column
-                    portalPagePortlets = delegator.findByAnd("PortalPagePortletView", UtilMisc.toMap("portalPageId", portalPage.getString("portalPageId"), "columnSeqId", columnSeqId), UtilMisc.toList("sequenceNum"), false);
-                    
+                    portalPagePortlets = EntityQuery.use(delegator)
+                                                    .from("PortalPagePortletView")
+                                                    .where("portalPageId", portalPage.getString("portalPageId"), "columnSeqId", columnSeqId)
+                                                    .orderBy("sequenceNum")
+                                                    .queryList();
                     // First Portlet in a Column has no previous Portlet
                     String prevPortletId = "";
                     String prevPortletSeqId = "";
@@ -1748,9 +1749,11 @@ public abstract class ModelScreenWidget extends ModelWidget {
                         context.put("nextColumnSeqId", nextColumnSeqId);
                        
                         // Get portlet's attributes
-                        portletAttributes = delegator.findList("PortletAttribute",
-                            EntityCondition.makeCondition(UtilMisc.toMap("portalPageId", portletValue.get("portalPageId"), "portalPortletId", portletValue.get("portalPortletId"), "portletSeqId", portletValue.get("portletSeqId"))),
-                            null, null, null, false);
+                        portletAttributes = EntityQuery.use(delegator)
+                                                       .from("PortletAttribute")
+                                                       .where("portalPageId", portletValue.get("portalPageId"), "portalPortletId", portletValue.get("portalPortletId"), "portletSeqId", portletValue.get("portletSeqId"))
+                                                       .queryList();
+                        
                         ListIterator <GenericValue>attributesIterator = portletAttributes.listIterator();
                         while (attributesIterator.hasNext()) {
                             GenericValue attribute = attributesIterator.next();

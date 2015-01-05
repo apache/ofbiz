@@ -46,7 +46,7 @@ import javax.mail.internet.MimeMessage;
 import org.ofbiz.base.metrics.Metrics;
 import org.ofbiz.base.metrics.MetricsFactory;
 import org.ofbiz.base.util.Debug;
-import org.ofbiz.base.util.StringUtil;
+import org.ofbiz.base.util.UtilCodec;
 import org.ofbiz.base.util.UtilDateTime;
 import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.base.util.UtilProperties;
@@ -56,6 +56,7 @@ import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
 import org.ofbiz.entity.model.ModelEntity;
 import org.ofbiz.entity.transaction.TransactionUtil;
+import org.ofbiz.entity.util.EntityQuery;
 import org.ofbiz.service.DispatchContext;
 import org.ofbiz.service.GenericServiceException;
 import org.ofbiz.service.LocalDispatcher;
@@ -63,7 +64,6 @@ import org.ofbiz.service.ModelService;
 import org.ofbiz.service.ServiceSynchronization;
 import org.ofbiz.service.ServiceUtil;
 import org.ofbiz.service.mail.MimeMessageWrapper;
-import org.owasp.esapi.errors.EncodingException;
 
 /**
  * Common Services
@@ -506,7 +506,7 @@ public class CommonServices {
 
         long count = -1;
         try {
-            count = delegator.findCountByCondition("SequenceValueItem", null, null, null);
+            count = EntityQuery.use(delegator).from("SequenceValueItem").queryCount();
         } catch (GenericEntityException e) {
             Debug.logError(e.getMessage(), module);
             return ServiceUtil.returnError(UtilProperties.getMessage(resource, "CommonPingDatasourceCannotConnect", locale));
@@ -538,17 +538,15 @@ public class CommonServices {
     }
 
     public static Map<String, Object> resetMetric(DispatchContext dctx, Map<String, ?> context) {
-        String name = (String) context.get("name");
-        try {
-            name = StringUtil.defaultWebEncoder.decodeFromURL(name);
-        } catch (EncodingException e) {
-            return ServiceUtil.returnError("Exception thrown while decoding metric name \"" + name + "\"");
+        String originalName = (String) context.get("name");
+        String name = UtilCodec.getDecoder("url").decode(originalName);
+        if (name == null) {
+            return ServiceUtil.returnError("Exception thrown while decoding metric name \"" + originalName + "\"");
         }
         Metrics metric = MetricsFactory.getMetric(name);
         if (metric != null) {
             metric.reset();
             return ServiceUtil.returnSuccess();
-
         }
         return ServiceUtil.returnError("Metric \"" + name + "\" not found.");
     }

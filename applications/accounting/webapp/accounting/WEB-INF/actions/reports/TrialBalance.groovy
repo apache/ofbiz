@@ -29,19 +29,19 @@ parties.each { party ->
 context.partyNameList = partyNameList;
 
 if (parameters.customTimePeriodId) {
-    customTimePeriod = delegator.findOne('CustomTimePeriod', [customTimePeriodId:parameters.customTimePeriodId], true)
+    customTimePeriod = from("CustomTimePeriod").where("customTimePeriodId", parameters.customTimePeriodId).cache(true).queryOne();
     exprList = [];
     exprList.add(EntityCondition.makeCondition('organizationPartyId', EntityOperator.IN, partyIds))
     exprList.add(EntityCondition.makeCondition('fromDate', EntityOperator.LESS_THAN, customTimePeriod.getDate('thruDate').toTimestamp()))
     exprList.add(EntityCondition.makeCondition(EntityCondition.makeCondition('thruDate', EntityOperator.GREATER_THAN_EQUAL_TO, customTimePeriod.getDate('fromDate').toTimestamp()), EntityOperator.OR, EntityCondition.makeCondition('thruDate', EntityOperator.EQUALS, null)))
-    List organizationGlAccounts = delegator.findList('GlAccountOrganizationAndClass', EntityCondition.makeCondition(exprList, EntityOperator.AND), null, ['accountCode'], null, false)
+    List organizationGlAccounts = from("GlAccountOrganizationAndClass").where(exprList).orderBy("accountCode").queryList();
 
     accountBalances = []
     postedDebitsTotal = 0
     postedCreditsTotal = 0
     organizationGlAccounts.each { organizationGlAccount ->
         accountBalance = [:]
-        accountBalance = dispatcher.runSync('computeGlAccountBalanceForTimePeriod', [organizationPartyId: organizationGlAccount.organizationPartyId, customTimePeriodId: customTimePeriod.customTimePeriodId, glAccountId: organizationGlAccount.glAccountId, userLogin: userLogin]);
+        accountBalance = runService('computeGlAccountBalanceForTimePeriod', [organizationPartyId: organizationGlAccount.organizationPartyId, customTimePeriodId: customTimePeriod.customTimePeriodId, glAccountId: organizationGlAccount.glAccountId]);
         if (accountBalance.postedDebits != 0 || accountBalance.postedCredits != 0) {
             accountBalance.glAccountId = organizationGlAccount.glAccountId
             accountBalance.accountCode = organizationGlAccount.accountCode

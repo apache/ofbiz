@@ -23,6 +23,7 @@
  */
 import org.ofbiz.entity.util.EntityUtil;
 import org.ofbiz.base.util.*;
+import org.ofbiz.party.party.PartyHelper;
 import org.ofbiz.product.catalog.*;
 import org.ofbiz.product.category.*;
 import javolution.util.FastMap;
@@ -41,20 +42,19 @@ existParties =  FastList.newInstance();
 subtopLists =  FastList.newInstance();
 
 //internalOrg list
-partyRelationships = EntityUtil.filterByDate(delegator.findByAnd("PartyRelationship", [partyIdFrom : partyId, partyRelationshipTypeId : "GROUP_ROLLUP"], null, false));
+partyRelationships = from("PartyRelationship").where("partyIdFrom", partyId, "partyRelationshipTypeId", "GROUP_ROLLUP").filterByDate().queryList();
 if (partyRelationships) {
     //root
-    partyRoot = delegator.findOne("PartyGroup", [partyId : partyId], false);
+    partyRoot = from("PartyGroup").where("partyId", partyId).queryOne();
     partyRootMap = FastMap.newInstance();
     partyRootMap.put("partyId", partyId);
     partyRootMap.put("groupName", partyRoot.getString("groupName"));
 
     //child
     for(partyRelationship in partyRelationships) {
-        partyGroup = delegator.findOne("PartyGroup", [partyId : partyRelationship.getString("partyIdTo")], false);
-        partyGroupMap = FastMap.newInstance();
-        partyGroupMap.put("partyId", partyGroup.getString("partyId"));
-        partyGroupMap.put("groupName", partyGroup.getString("groupName"));
+        partyGroupMap = [:];
+        partyGroupMap.put("partyId", partyRelationship.getString("partyIdTo"));
+        partyGroupMap.put("groupName", PartyHelper.getPartyName(delegator, partyRelationship.getString("partyIdTo"), false));
         completedTreeContext.add(partyGroupMap);
 
         subtopLists.addAll(partyRelationship.getString("partyIdTo"));
