@@ -175,8 +175,8 @@ under the License.
                   ${finAccountTrans.finAccountTransId?if_exists}</td>
               <td>${finAccountTransType.description?if_exists}</td>
               <td><#if partyName?has_content>${(partyName.firstName)!} ${(partyName.lastName)!} ${(partyName.groupName)!}<a href="/partymgr/control/viewprofile?partyId=${partyName.partyId}">[${(partyName.partyId)!}]</a></#if></td>
-              <td>${finAccountTrans.transactionDate?if_exists}</td>
-              <td>${finAccountTrans.entryDateId?if_exists}</td>
+              <td>${finAccountTrans.transactionDate!}</td>
+              <td>${finAccountTrans.entryDate!}</td>
               <td><@ofbizCurrency amount=finAccountTrans.amount isoCode=defaultOrganizationPartyCurrencyUomId/></td>
               <td>
                 <#if finAccountTrans.paymentId?has_content>
