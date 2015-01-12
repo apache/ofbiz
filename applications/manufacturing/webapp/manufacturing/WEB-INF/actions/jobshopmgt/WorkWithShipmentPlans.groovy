@@ -147,7 +147,7 @@ if (shipmentPlans) {
         }
         rows.add(oneRow);
         // Select the production runs, if available
-        productionRuns = delegator.findByAnd("WorkOrderItemFulfillment", [orderId : shipmentPlan.orderId, orderItemSeqId : shipmentPlan.orderItemSeqId, shipGroupSeqId : shipmentPlan.shipGroupSeqId],["workEffortId"], null, false); // TODO: add shipmentId
+        productionRuns = delegator.findByAnd("WorkOrderItemFulfillment", [orderId : shipmentPlan.orderId, orderItemSeqId : shipmentPlan.orderItemSeqId, shipGroupSeqId : shipmentPlan.shipGroupSeqId],["workEffortId"], false); // TODO: add shipmentId
         if (productionRuns) {
             workInProgress = "true";
             productionRunsId = "";
