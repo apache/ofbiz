@@ -18,13 +18,11 @@
  *******************************************************************************/
 package org.ofbiz.base.util;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * URL Utilities - Simple Class for flexibly working with properties files
@@ -33,6 +31,7 @@ import java.net.URL;
 public class UtilURL {
 
     public static final String module = UtilURL.class.getName();
+    private static final Map<String, URL> urlMap = new ConcurrentHashMap<String, URL>();
 
     public static <C> URL fromClass(Class<C> contextClass) {
         String resourceName = contextClass.getName();
@@ -44,6 +43,16 @@ public class UtilURL {
         return fromResource(contextClass, resourceName);
     }
 
+    /**
+     * Returns a <code>URL</code> instance from a resource name. Returns
+     * <code>null</code> if the resource is not found.
+     * <p>This method uses various ways to locate the resource, and in all
+     * cases it tests to see if the resource exists - so it
+     * is very inefficient.</p>
+     * 
+     * @param resourceName
+     * @return
+     */
     public static URL fromResource(String resourceName) {
         return fromResource(resourceName, null);
     }
@@ -55,7 +64,26 @@ public class UtilURL {
             return fromResource(resourceName, contextClass.getClassLoader());
     }
 
+    /**
+     * Returns a <code>URL</code> instance from a resource name. Returns
+     * <code>null</code> if the resource is not found.
+     * <p>This method uses various ways to locate the resource, and in all
+     * cases it tests to see if the resource exists - so it
+     * is very inefficient.</p>
+     * 
+     * @param resourceName
+     * @param loader
+     * @return
+     */
     public static URL fromResource(String resourceName, ClassLoader loader) {
+        URL url = urlMap.get(resourceName);
+        if (url != null) {
+            try {
+                return new URL(url.toString());
+            } catch (MalformedURLException e) {
+                Debug.logWarning(e, "Exception thrown while copying URL: ", module);
+            }
+        }
         if (loader == null) {
             try {
                 loader = Thread.currentThread().getContextClassLoader();
@@ -65,37 +93,31 @@ public class UtilURL {
                 loader = utilURL.getClass().getClassLoader();
             }
         }
-        URL url = loader.getResource(resourceName);
+        url = loader.getResource(resourceName);
         if (url != null) {
+            // Do not cache URLs from ClassLoader - interferes with EntityClassLoader operation
+            //urlMap.put(resourceName, url);
             return url;
-        }
-        String propertiesResourceName = null;
-        if (!resourceName.endsWith(".properties")) {
-            propertiesResourceName = resourceName.concat(".properties");
-            url = loader.getResource(propertiesResourceName);
-            if (url != null) {
-                return url;
-            }
         }
         url = ClassLoader.getSystemResource(resourceName);
         if (url != null) {
+            urlMap.put(resourceName, url);
             return url;
-        }
-        if (propertiesResourceName != null) {
-            url = ClassLoader.getSystemResource(propertiesResourceName);
-            if (url != null) {
-                return url;
-            }
         }
         url = fromFilename(resourceName);
         if (url != null) {
+            urlMap.put(resourceName, url);
             return url;
         }
         url = fromOfbizHomePath(resourceName);
         if (url != null) {
+            urlMap.put(resourceName, url);
             return url;
         }
         url = fromUrlString(resourceName);
+        if (url != null) {
+            urlMap.put(resourceName, url);
+        }
         return url;
     }
 
@@ -145,34 +167,5 @@ public class UtilURL {
             path = path.substring(ofbizHome.length()+1);
         }
         return path;
-    }
-
-    public static String readUrlText(URL url) throws IOException {
-        InputStream stream = url.openStream();
-
-        StringBuilder buf = new StringBuilder();
-        BufferedReader in = null;
-        try {
-            in = new BufferedReader(new InputStreamReader(stream));
-
-            String str;
-            while ((str = in.readLine()) != null) {
-                buf.append(str);
-                buf.append(System.getProperty("line.separator"));
-            }
-        } catch (IOException e) {
-            Debug.logError(e, "Error reading text from URL [" + url + "]: " + e.toString(), module);
-            throw e;
-        } finally {
-            if (in != null) {
-                try {
-                    in.close();
-                } catch (IOException e) {
-                    Debug.logError(e, "Error closing after reading text from URL [" + url + "]: " + e.toString(), module);
-                }
-            }
-        }
-
-        return buf.toString();
     }
 }
