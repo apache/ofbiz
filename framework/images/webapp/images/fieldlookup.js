@@ -703,18 +703,18 @@ var re_id = new RegExp('id=(\\d+)');
 var num_id = (re_id.exec(String(window.location)) ? new Number(RegExp.$1) : 0);
 var obj_caller;
 try {
-	obj_caller = (window.opener && window.opener.lookups? window.opener.lookups[num_id]: null);
-	if (obj_caller == null && window.opener != null) {
-		obj_caller = window.opener;
-	} else if (obj_caller == null && window.opener == null) {
-		obj_caller = parent;
-	}
+    obj_caller = (window.opener && window.opener.lookups? window.opener.lookups[num_id]: null);
+    if (obj_caller == null && window.opener != null) {
+        obj_caller = window.opener;
+    } else if (obj_caller == null && window.opener == null) {
+        obj_caller = parent;
+    }
 }
 catch (err) {
     obj_caller = parent;
-	if (console) {
-		console.log(err);
-	}
+    if (console) {
+        console.log(err);
+    }
 }
 
 function setSourceColor(src) {
