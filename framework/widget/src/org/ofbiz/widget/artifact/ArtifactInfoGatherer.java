@@ -23,83 +23,83 @@ import java.util.Set;
 import org.ofbiz.base.util.GeneralException;
 import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.webapp.control.ConfigXMLReader;
-import org.ofbiz.widget.ModelActionVisitor;
-import org.ofbiz.widget.ModelFieldVisitor;
-import org.ofbiz.widget.ModelWidgetAction;
-import org.ofbiz.widget.ModelWidgetAction.EntityAnd;
-import org.ofbiz.widget.ModelWidgetAction.EntityCondition;
-import org.ofbiz.widget.ModelWidgetAction.EntityOne;
-import org.ofbiz.widget.ModelWidgetAction.GetRelated;
-import org.ofbiz.widget.ModelWidgetAction.GetRelatedOne;
-import org.ofbiz.widget.ModelWidgetAction.PropertyMap;
-import org.ofbiz.widget.ModelWidgetAction.PropertyToField;
-import org.ofbiz.widget.ModelWidgetAction.Script;
-import org.ofbiz.widget.ModelWidgetAction.Service;
-import org.ofbiz.widget.ModelWidgetAction.SetField;
-import org.ofbiz.widget.ModelWidgetVisitor;
-import org.ofbiz.widget.form.FieldInfo;
-import org.ofbiz.widget.form.ModelForm;
-import org.ofbiz.widget.form.ModelForm.AltTarget;
-import org.ofbiz.widget.form.ModelForm.AutoFieldsEntity;
-import org.ofbiz.widget.form.ModelForm.AutoFieldsService;
-import org.ofbiz.widget.form.ModelFormAction;
-import org.ofbiz.widget.form.ModelFormAction.CallParentActions;
-import org.ofbiz.widget.form.ModelFormField;
-import org.ofbiz.widget.form.ModelFormField.CheckField;
-import org.ofbiz.widget.form.ModelFormField.ContainerField;
-import org.ofbiz.widget.form.ModelFormField.DateFindField;
-import org.ofbiz.widget.form.ModelFormField.DateTimeField;
-import org.ofbiz.widget.form.ModelFormField.DisplayEntityField;
-import org.ofbiz.widget.form.ModelFormField.DisplayField;
-import org.ofbiz.widget.form.ModelFormField.DropDownField;
-import org.ofbiz.widget.form.ModelFormField.FieldInfoWithOptions;
-import org.ofbiz.widget.form.ModelFormField.FileField;
-import org.ofbiz.widget.form.ModelFormField.HiddenField;
-import org.ofbiz.widget.form.ModelFormField.HyperlinkField;
-import org.ofbiz.widget.form.ModelFormField.IgnoredField;
-import org.ofbiz.widget.form.ModelFormField.ImageField;
-import org.ofbiz.widget.form.ModelFormField.LookupField;
-import org.ofbiz.widget.form.ModelFormField.PasswordField;
-import org.ofbiz.widget.form.ModelFormField.RadioField;
-import org.ofbiz.widget.form.ModelFormField.RangeFindField;
-import org.ofbiz.widget.form.ModelFormField.ResetField;
-import org.ofbiz.widget.form.ModelFormField.SubmitField;
-import org.ofbiz.widget.form.ModelFormField.TextField;
-import org.ofbiz.widget.form.ModelFormField.TextFindField;
-import org.ofbiz.widget.form.ModelFormField.TextareaField;
-import org.ofbiz.widget.menu.ModelMenu;
-import org.ofbiz.widget.menu.ModelMenuAction;
-import org.ofbiz.widget.menu.ModelMenuItem;
-import org.ofbiz.widget.screen.HtmlWidget;
-import org.ofbiz.widget.screen.HtmlWidget.HtmlTemplate;
-import org.ofbiz.widget.screen.HtmlWidget.HtmlTemplateDecorator;
-import org.ofbiz.widget.screen.HtmlWidget.HtmlTemplateDecoratorSection;
-import org.ofbiz.widget.screen.IterateSectionWidget;
-import org.ofbiz.widget.screen.ModelScreen;
-import org.ofbiz.widget.screen.ModelScreenWidget;
-import org.ofbiz.widget.screen.ModelScreenWidget.Column;
-import org.ofbiz.widget.screen.ModelScreenWidget.ColumnContainer;
-import org.ofbiz.widget.screen.ModelScreenWidget.Container;
-import org.ofbiz.widget.screen.ModelScreenWidget.Content;
-import org.ofbiz.widget.screen.ModelScreenWidget.DecoratorScreen;
-import org.ofbiz.widget.screen.ModelScreenWidget.DecoratorSection;
-import org.ofbiz.widget.screen.ModelScreenWidget.DecoratorSectionInclude;
-import org.ofbiz.widget.screen.ModelScreenWidget.Form;
-import org.ofbiz.widget.screen.ModelScreenWidget.HorizontalSeparator;
-import org.ofbiz.widget.screen.ModelScreenWidget.Image;
-import org.ofbiz.widget.screen.ModelScreenWidget.IncludeScreen;
-import org.ofbiz.widget.screen.ModelScreenWidget.Label;
-import org.ofbiz.widget.screen.ModelScreenWidget.Link;
-import org.ofbiz.widget.screen.ModelScreenWidget.Menu;
-import org.ofbiz.widget.screen.ModelScreenWidget.PlatformSpecific;
-import org.ofbiz.widget.screen.ModelScreenWidget.PortalPage;
-import org.ofbiz.widget.screen.ModelScreenWidget.Screenlet;
-import org.ofbiz.widget.screen.ModelScreenWidget.Section;
-import org.ofbiz.widget.screen.ModelScreenWidget.Tree;
-import org.ofbiz.widget.tree.ModelTree;
-import org.ofbiz.widget.tree.ModelTree.ModelNode;
-import org.ofbiz.widget.tree.ModelTree.ModelNode.ModelSubNode;
-import org.ofbiz.widget.tree.ModelTreeAction;
+import org.ofbiz.widget.model.AbstractModelAction.EntityAnd;
+import org.ofbiz.widget.model.AbstractModelAction.EntityCondition;
+import org.ofbiz.widget.model.AbstractModelAction.EntityOne;
+import org.ofbiz.widget.model.AbstractModelAction.GetRelated;
+import org.ofbiz.widget.model.AbstractModelAction.GetRelatedOne;
+import org.ofbiz.widget.model.AbstractModelAction.PropertyMap;
+import org.ofbiz.widget.model.AbstractModelAction.PropertyToField;
+import org.ofbiz.widget.model.AbstractModelAction.Script;
+import org.ofbiz.widget.model.AbstractModelAction.Service;
+import org.ofbiz.widget.model.AbstractModelAction.SetField;
+import org.ofbiz.widget.model.FieldInfo;
+import org.ofbiz.widget.model.HtmlWidget;
+import org.ofbiz.widget.model.HtmlWidget.HtmlTemplate;
+import org.ofbiz.widget.model.HtmlWidget.HtmlTemplateDecorator;
+import org.ofbiz.widget.model.HtmlWidget.HtmlTemplateDecoratorSection;
+import org.ofbiz.widget.model.IterateSectionWidget;
+import org.ofbiz.widget.model.ModelAction;
+import org.ofbiz.widget.model.ModelActionVisitor;
+import org.ofbiz.widget.model.ModelFieldVisitor;
+import org.ofbiz.widget.model.ModelForm;
+import org.ofbiz.widget.model.ModelForm.AltTarget;
+import org.ofbiz.widget.model.ModelForm.AutoFieldsEntity;
+import org.ofbiz.widget.model.ModelForm.AutoFieldsService;
+import org.ofbiz.widget.model.ModelFormAction;
+import org.ofbiz.widget.model.ModelFormAction.CallParentActions;
+import org.ofbiz.widget.model.ModelFormField;
+import org.ofbiz.widget.model.ModelFormField.CheckField;
+import org.ofbiz.widget.model.ModelFormField.ContainerField;
+import org.ofbiz.widget.model.ModelFormField.DateFindField;
+import org.ofbiz.widget.model.ModelFormField.DateTimeField;
+import org.ofbiz.widget.model.ModelFormField.DisplayEntityField;
+import org.ofbiz.widget.model.ModelFormField.DisplayField;
+import org.ofbiz.widget.model.ModelFormField.DropDownField;
+import org.ofbiz.widget.model.ModelFormField.FieldInfoWithOptions;
+import org.ofbiz.widget.model.ModelFormField.FileField;
+import org.ofbiz.widget.model.ModelFormField.HiddenField;
+import org.ofbiz.widget.model.ModelFormField.HyperlinkField;
+import org.ofbiz.widget.model.ModelFormField.IgnoredField;
+import org.ofbiz.widget.model.ModelFormField.ImageField;
+import org.ofbiz.widget.model.ModelFormField.LookupField;
+import org.ofbiz.widget.model.ModelFormField.PasswordField;
+import org.ofbiz.widget.model.ModelFormField.RadioField;
+import org.ofbiz.widget.model.ModelFormField.RangeFindField;
+import org.ofbiz.widget.model.ModelFormField.ResetField;
+import org.ofbiz.widget.model.ModelFormField.SubmitField;
+import org.ofbiz.widget.model.ModelFormField.TextField;
+import org.ofbiz.widget.model.ModelFormField.TextFindField;
+import org.ofbiz.widget.model.ModelFormField.TextareaField;
+import org.ofbiz.widget.model.ModelMenu;
+import org.ofbiz.widget.model.ModelMenuAction;
+import org.ofbiz.widget.model.ModelMenuItem;
+import org.ofbiz.widget.model.ModelScreen;
+import org.ofbiz.widget.model.ModelScreenWidget;
+import org.ofbiz.widget.model.ModelScreenWidget.Column;
+import org.ofbiz.widget.model.ModelScreenWidget.ColumnContainer;
+import org.ofbiz.widget.model.ModelScreenWidget.Container;
+import org.ofbiz.widget.model.ModelScreenWidget.Content;
+import org.ofbiz.widget.model.ModelScreenWidget.DecoratorScreen;
+import org.ofbiz.widget.model.ModelScreenWidget.DecoratorSection;
+import org.ofbiz.widget.model.ModelScreenWidget.DecoratorSectionInclude;
+import org.ofbiz.widget.model.ModelScreenWidget.Form;
+import org.ofbiz.widget.model.ModelScreenWidget.HorizontalSeparator;
+import org.ofbiz.widget.model.ModelScreenWidget.IncludeScreen;
+import org.ofbiz.widget.model.ModelScreenWidget.Label;
+import org.ofbiz.widget.model.ModelScreenWidget.Menu;
+import org.ofbiz.widget.model.ModelScreenWidget.PlatformSpecific;
+import org.ofbiz.widget.model.ModelScreenWidget.PortalPage;
+import org.ofbiz.widget.model.ModelScreenWidget.ScreenImage;
+import org.ofbiz.widget.model.ModelScreenWidget.ScreenLink;
+import org.ofbiz.widget.model.ModelScreenWidget.Screenlet;
+import org.ofbiz.widget.model.ModelScreenWidget.Section;
+import org.ofbiz.widget.model.ModelScreenWidget.Tree;
+import org.ofbiz.widget.model.ModelTree;
+import org.ofbiz.widget.model.ModelTree.ModelNode;
+import org.ofbiz.widget.model.ModelTree.ModelNode.ModelSubNode;
+import org.ofbiz.widget.model.ModelTreeAction;
+import org.ofbiz.widget.model.ModelWidgetVisitor;
 
 /**
  * An object that gathers artifact information from screen widgets.
@@ -113,58 +113,88 @@ public final class ArtifactInfoGatherer implements ModelWidgetVisitor, ModelActi
     }
 
     @Override
-    public void visit(CallParentActions callParentActions) {
+    public void visit(CallParentActions callParentActions) throws Exception {
     }
 
     @Override
-    public void visit(EntityAnd entityAnd) {
+    public void visit(Column column) throws Exception {
+    }
+
+    @Override
+    public void visit(ColumnContainer columnContainer) throws Exception {
+        for (Column column : columnContainer.getColumns()) {
+            for (ModelScreenWidget widget : column.getSubWidgets()) {
+                widget.accept(this);
+            }
+        }
+    }
+
+    @Override
+    public void visit(Container container) throws Exception {
+        for (ModelScreenWidget widget : container.getSubWidgets()) {
+            widget.accept(this);
+        }
+    }
+
+    @Override
+    public void visit(Content content) throws Exception {
+        infoContext.addEntityName("Content");
+        if (!content.getDataResourceId().isEmpty()) {
+            infoContext.addEntityName("DataResource");
+        }
+    }
+
+    @Override
+    public void visit(DecoratorScreen decoratorScreen) throws Exception {
+        for (ModelScreenWidget section : decoratorScreen.getSectionMap().values()) {
+            section.accept(this);
+        }
+    }
+
+    @Override
+    public void visit(DecoratorSection decoratorSection) throws Exception {
+        for (ModelScreenWidget widget : decoratorSection.getSubWidgets()) {
+            widget.accept(this);
+        }
+    }
+
+    @Override
+    public void visit(DecoratorSectionInclude decoratorSectionInclude) throws Exception {
+    }
+
+    @Override
+    public void visit(EntityAnd entityAnd) throws Exception {
         infoContext.addEntityName(entityAnd.getFinder().getEntityName());
     }
 
     @Override
-    public void visit(EntityCondition entityCondition) {
+    public void visit(EntityCondition entityCondition) throws Exception {
         infoContext.addEntityName(entityCondition.getFinder().getEntityName());
     }
 
     @Override
-    public void visit(EntityOne entityOne) {
+    public void visit(EntityOne entityOne) throws Exception {
         infoContext.addEntityName(entityOne.getFinder().getEntityName());
     }
 
     @Override
-    public void visit(GetRelated getRelated) {
+    public void visit(Form form) throws Exception {
+        String formLocation = form.getLocation().concat("#").concat(form.getName());
+        infoContext.addFormLocation(formLocation);
+    }
+
+    @Override
+    public void visit(GetRelated getRelated) throws Exception {
         infoContext.addEntityName(getRelated.getRelationName());
     }
 
     @Override
-    public void visit(GetRelatedOne getRelatedOne) {
+    public void visit(GetRelatedOne getRelatedOne) throws Exception {
         infoContext.addEntityName(getRelatedOne.getRelationName());
     }
 
     @Override
-    public void visit(PropertyMap propertyMap) {
-    }
-
-    @Override
-    public void visit(PropertyToField propertyToField) {
-    }
-
-    @Override
-    public void visit(Script script) {
-    }
-
-    @Override
-    public void visit(Service service) {
-        infoContext.addServiceName(service.getServiceNameExdr().getOriginal());
-        // TODO: Look for entityName in performFind service call
-    }
-
-    @Override
-    public void visit(SetField setField) {
-    }
-
-    @Override
-    public void visit(HtmlWidget htmlWidget) throws Exception {
+    public void visit(HorizontalSeparator horizontalSeparator) throws Exception {
     }
 
     @Override
@@ -180,6 +210,14 @@ public final class ArtifactInfoGatherer implements ModelWidgetVisitor, ModelActi
     }
 
     @Override
+    public void visit(HtmlWidget htmlWidget) throws Exception {
+    }
+
+    @Override
+    public void visit(IncludeScreen includeScreen) throws Exception {
+    }
+
+    @Override
     public void visit(IterateSectionWidget iterateSectionWidget) throws Exception {
         for (Section section : iterateSectionWidget.getSectionList()) {
             section.accept(this);
@@ -187,14 +225,22 @@ public final class ArtifactInfoGatherer implements ModelWidgetVisitor, ModelActi
     }
 
     @Override
+    public void visit(Label label) throws Exception {
+    }
+
+    @Override
+    public void visit(Menu menu) throws Exception {
+    }
+
+    @Override
     public void visit(ModelForm modelForm) throws Exception {
         if (modelForm.getActions() != null) {
-            for (ModelWidgetAction action : modelForm.getActions()) {
+            for (ModelAction action : modelForm.getActions()) {
                 action.accept(this);
             }
         }
         if (modelForm.getRowActions() != null) {
-            for (ModelWidgetAction action : modelForm.getRowActions()) {
+            for (ModelAction action : modelForm.getRowActions()) {
                 action.accept(this);
             }
         }
@@ -265,7 +311,7 @@ public final class ArtifactInfoGatherer implements ModelWidgetVisitor, ModelActi
     }
 
     @Override
-    public void visit(ModelFormAction.Service service) {
+    public void visit(ModelFormAction.Service service) throws Exception {
         infoContext.addServiceName(service.getServiceName());
         // TODO: Look for entityName in performFind service call
     }
@@ -275,11 +321,15 @@ public final class ArtifactInfoGatherer implements ModelWidgetVisitor, ModelActi
     }
 
     @Override
-    public void visit(ModelMenuAction.SetField setField) {
+    public void visit(ModelMenuAction.SetField setField) throws Exception {
     }
 
     @Override
     public void visit(ModelMenuItem modelMenuItem) throws Exception {
+    }
+
+    @Override
+    public void visit(ModelNode modelNode) throws Exception {
     }
 
     @Override
@@ -290,71 +340,58 @@ public final class ArtifactInfoGatherer implements ModelWidgetVisitor, ModelActi
     }
 
     @Override
-    public void visit(ColumnContainer columnContainer) throws Exception {
-        for (Column column : columnContainer.getColumns()) {
-            for (ModelScreenWidget widget : column.getSubWidgets()) {
-                widget.accept(this);
-            }
-        }
+    public void visit(ModelSubNode modelSubNode) throws Exception {
     }
 
     @Override
-    public void visit(Container container) throws Exception {
-        for (ModelScreenWidget widget : container.getSubWidgets()) {
+    public void visit(ModelTree modelTree) throws Exception {
+    }
+
+    @Override
+    public void visit(ModelTreeAction.EntityAnd entityAnd) throws Exception {
+    }
+
+    @Override
+    public void visit(ModelTreeAction.EntityCondition entityCondition) throws Exception {
+    }
+
+    @Override
+    public void visit(ModelTreeAction.Script script) throws Exception {
+    }
+
+    @Override
+    public void visit(ModelTreeAction.Service service) throws Exception {
+    }
+
+    @Override
+    public void visit(PlatformSpecific platformSpecific) throws Exception {
+    }
+
+    @Override
+    public void visit(PortalPage portalPage) throws Exception {
+    }
+
+    @Override
+    public void visit(PropertyMap propertyMap) throws Exception {
+    }
+
+    @Override
+    public void visit(PropertyToField propertyToField) throws Exception {
+    }
+
+    @Override
+    public void visit(ScreenImage image) throws Exception {
+    }
+
+    @Override
+    public void visit(Screenlet screenlet) throws Exception {
+        for (ModelScreenWidget widget : screenlet.getSubWidgets()) {
             widget.accept(this);
         }
     }
 
     @Override
-    public void visit(Content content) throws Exception {
-        infoContext.addEntityName("Content");
-        if (!content.getDataResourceId().isEmpty()) {
-            infoContext.addEntityName("DataResource");
-        }
-    }
-
-    @Override
-    public void visit(DecoratorScreen decoratorScreen) throws Exception {
-        for (ModelScreenWidget section : decoratorScreen.getSectionMap().values()) {
-            section.accept(this);
-        }
-    }
-
-    @Override
-    public void visit(DecoratorSection decoratorSection) throws Exception {
-        for (ModelScreenWidget widget : decoratorSection.getSubWidgets()) {
-            widget.accept(this);
-        }
-    }
-
-    @Override
-    public void visit(DecoratorSectionInclude decoratorSectionInclude) throws Exception {
-    }
-
-    @Override
-    public void visit(Form form) throws Exception {
-        String formLocation = form.getLocation().concat("#").concat(form.getName());
-        infoContext.addFormLocation(formLocation);
-    }
-
-    @Override
-    public void visit(HorizontalSeparator horizontalSeparator) throws Exception {
-    }
-
-    @Override
-    public void visit(Image image) throws Exception {
-    }
-
-    @Override
-    public void visit(IncludeScreen includeScreen) throws Exception {
-    }
-
-    @Override
-    public void visit(Label label) throws Exception {
-    }
-
-    @Override
-    public void visit(Link link) throws Exception {
+    public void visit(ScreenLink link) throws Exception {
         String target = link.getTarget(null);
         String urlMode = link.getUrlMode();
         try {
@@ -370,27 +407,12 @@ public final class ArtifactInfoGatherer implements ModelWidgetVisitor, ModelActi
     }
 
     @Override
-    public void visit(Menu menu) throws Exception {
-    }
-
-    @Override
-    public void visit(PlatformSpecific platformSpecific) throws Exception {
-    }
-
-    @Override
-    public void visit(PortalPage portalPage) throws Exception {
-    }
-
-    @Override
-    public void visit(Screenlet screenlet) throws Exception {
-        for (ModelScreenWidget widget : screenlet.getSubWidgets()) {
-            widget.accept(this);
-        }
+    public void visit(Script script) throws Exception {
     }
 
     @Override
     public void visit(Section section) throws Exception {
-        for (ModelWidgetAction action : section.getActions()) {
+        for (ModelAction action : section.getActions()) {
             action.accept(this);
         }
         for (ModelScreenWidget subWidget : section.getSubWidgets()) {
@@ -402,35 +424,17 @@ public final class ArtifactInfoGatherer implements ModelWidgetVisitor, ModelActi
     }
 
     @Override
+    public void visit(Service service) throws Exception {
+        infoContext.addServiceName(service.getServiceNameExdr().getOriginal());
+        // TODO: Look for entityName in performFind service call
+    }
+
+    @Override
+    public void visit(SetField setField) throws Exception {
+    }
+
+    @Override
     public void visit(Tree tree) throws Exception {
-    }
-
-    @Override
-    public void visit(ModelTree modelTree) throws Exception {
-    }
-
-    @Override
-    public void visit(ModelNode modelNode) throws Exception {
-    }
-
-    @Override
-    public void visit(ModelSubNode modelSubNode) throws Exception {
-    }
-
-    @Override
-    public void visit(ModelTreeAction.EntityAnd entityAnd) {
-    }
-
-    @Override
-    public void visit(ModelTreeAction.EntityCondition entityCondition) {
-    }
-
-    @Override
-    public void visit(ModelTreeAction.Script script) {
-    }
-
-    @Override
-    public void visit(ModelTreeAction.Service service) {
     }
 
     private class FieldInfoGatherer implements ModelFieldVisitor {
@@ -469,7 +473,7 @@ public final class ArtifactInfoGatherer implements ModelWidgetVisitor, ModelActi
         public void visit(DisplayEntityField displayField) {
             if (displayField.getSubHyperlink() != null) {
                 String target = displayField.getSubHyperlink().getTarget(null);
-                String urlMode = displayField.getSubHyperlink().getTargetType();
+                String urlMode = displayField.getSubHyperlink().getUrlMode();
                 addRequestLocations(target, urlMode);
             }
         }
@@ -482,7 +486,7 @@ public final class ArtifactInfoGatherer implements ModelWidgetVisitor, ModelActi
         public void visit(DropDownField dropDownField) {
             if (dropDownField.getSubHyperlink() != null) {
                 String target = dropDownField.getSubHyperlink().getTarget(null);
-                String urlMode = dropDownField.getSubHyperlink().getTargetType();
+                String urlMode = dropDownField.getSubHyperlink().getUrlMode();
                 addRequestLocations(target, urlMode);
             }
         }
@@ -491,7 +495,7 @@ public final class ArtifactInfoGatherer implements ModelWidgetVisitor, ModelActi
         public void visit(FileField textField) {
             if (textField.getSubHyperlink() != null) {
                 String target = textField.getSubHyperlink().getTarget(null);
-                String urlMode = textField.getSubHyperlink().getTargetType();
+                String urlMode = textField.getSubHyperlink().getUrlMode();
                 addRequestLocations(target, urlMode);
             }
         }
@@ -503,7 +507,7 @@ public final class ArtifactInfoGatherer implements ModelWidgetVisitor, ModelActi
         @Override
         public void visit(HyperlinkField hyperlinkField) {
             String target = hyperlinkField.getTarget(null);
-            String urlMode = hyperlinkField.getTargetType();
+            String urlMode = hyperlinkField.getUrlMode();
             addRequestLocations(target, urlMode);
         }
 
@@ -515,7 +519,7 @@ public final class ArtifactInfoGatherer implements ModelWidgetVisitor, ModelActi
         public void visit(ImageField imageField) {
             if (imageField.getSubHyperlink() != null) {
                 String target = imageField.getSubHyperlink().getTarget(null);
-                String urlMode = imageField.getSubHyperlink().getTargetType();
+                String urlMode = imageField.getSubHyperlink().getUrlMode();
                 addRequestLocations(target, urlMode);
             }
         }
