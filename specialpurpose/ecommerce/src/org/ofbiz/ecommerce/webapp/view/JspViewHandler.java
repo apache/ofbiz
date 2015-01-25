@@ -78,14 +78,14 @@ public class JspViewHandler extends AbstractViewHandler {
         }
 
         try {
-        	if (UtilValidate.isEmpty(request.getServletPath())) {
-        		// no context or filter to service this page, so we have to forward it directly and let SeoControlServlet to resolve it
-        		String uri = URLEncoder.encode(request.getContextPath() + page, "UTF-8");
-        		request.setAttribute("_jsp_" + uri, Boolean.TRUE);
-        		rd.forward(request, response);
-        	} else {
-        		rd.include(request, response);
-        	}
+            if (UtilValidate.isEmpty(request.getServletPath())) {
+                // no context or filter to service this page, so we have to forward it directly and let SeoControlServlet to resolve it
+                String uri = URLEncoder.encode(request.getContextPath() + page, "UTF-8");
+                request.setAttribute("_jsp_" + uri, Boolean.TRUE);
+                rd.forward(request, response);
+            } else {
+                rd.include(request, response);
+            }
         } catch (IOException ie) {
             throw new ViewHandlerException("IO Error in view", ie);
         } catch (ServletException e) {

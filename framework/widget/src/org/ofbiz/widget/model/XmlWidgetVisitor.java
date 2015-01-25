@@ -32,6 +32,7 @@ import org.ofbiz.widget.model.ModelScreenWidget.DecoratorScreen;
 import org.ofbiz.widget.model.ModelScreenWidget.DecoratorSection;
 import org.ofbiz.widget.model.ModelScreenWidget.DecoratorSectionInclude;
 import org.ofbiz.widget.model.ModelScreenWidget.Form;
+import org.ofbiz.widget.model.ModelScreenWidget.Grid;
 import org.ofbiz.widget.model.ModelScreenWidget.HorizontalSeparator;
 import org.ofbiz.widget.model.ModelScreenWidget.IncludeScreen;
 import org.ofbiz.widget.model.ModelScreenWidget.Label;
@@ -236,7 +237,7 @@ public class XmlWidgetVisitor extends XmlAbstractWidgetVisitor implements ModelW
     }
 
     @Override
-    public void visit(ModelForm modelForm) throws Exception {
+    public void visit(ModelSingleForm modelForm) throws Exception {
         writer.append("<form");
         visitModelWidget(modelForm);
         if (modelForm.getParentModelForm() != null) {
@@ -341,6 +342,21 @@ public class XmlWidgetVisitor extends XmlAbstractWidgetVisitor implements ModelW
         visitUpdateAreas(modelForm.getOnSortColumnUpdateAreas());
         visitUpdateAreas(modelForm.getOnSubmitUpdateAreas());
         writer.append("</form>");
+    }
+
+    @Override
+    public void visit(ModelGrid modelGrid) throws Exception {
+        // TODO: Finish implementation
+        
+    }
+
+    @Override
+    public void visit(Grid grid) throws Exception {
+        writer.append("<include-grid");
+        visitModelWidget(grid);
+        visitAttribute("location", grid.getLocationExdr());
+        visitAttribute("share-scope", grid.getShareScopeExdr());
+        writer.append("/>");
     }
 
     @Override

@@ -2102,12 +2102,15 @@ public class ModelFormField {
         private final FlexibleStringExpander description;
         private final boolean requestConfirmation;
         private final Link link;
+
         public HyperlinkField(Element element, ModelFormField modelFormField) {
             super(element, modelFormField);
             this.alsoHidden = !"false".equals(element.getAttribute("also-hidden"));
             this.confirmationMsgExdr = FlexibleStringExpander.getInstance(element.getAttribute("confirmation-message"));
             this.description = FlexibleStringExpander.getInstance(element.getAttribute("description"));
             this.requestConfirmation = "true".equals(element.getAttribute("request-confirmation"));
+            // Backwards-compatible fix
+            element.setAttribute("url-mode", element.getAttribute("target-type"));
             this.link = new Link(element);
         }
 
@@ -3145,6 +3148,9 @@ public class ModelFormField {
         public SubHyperlink(Element element, ModelFormField modelFormField) {
             this.description = FlexibleStringExpander.getInstance(element.getAttribute("description"));
             this.useWhen = FlexibleStringExpander.getInstance(element.getAttribute("use-when"));
+            // Backwards compatible support
+            element.setAttribute("style", element.getAttribute("link-style"));
+            element.setAttribute("url-mode", element.getAttribute("target-type"));
             this.link = new Link(element);
             this.modelFormField = modelFormField;
         }

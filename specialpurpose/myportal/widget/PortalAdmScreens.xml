@@ -30,7 +30,7 @@ under the License.
                 <set field="titleProperty" value="PageTitleFindPortalPage"/>
             </actions>
             <widgets>
-                <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                <decorator-screen name="AdminDecorator" location="${parameters.mainDecoratorLocation}">
                     <decorator-section name="body">
                         <section>
                             <condition>
@@ -39,10 +39,10 @@ under the License.
                             <widgets>
                                 <decorator-screen name="FindScreenDecorator" location="component://common/widget/CommonScreens.xml">
                                     <decorator-section name="search-options">
-                                        <include-form name="FindPortalPages" location="component://webtools/widget/PortalAdmForms.xml"/>
+                                        <include-form name="FindPortalPages" location="component://myportal/widget/PortalAdmForms.xml"/>
                                     </decorator-section>
                                     <decorator-section name="search-results">
-                                        <include-form name="ListPortalPages" location="component://webtools/widget/PortalAdmForms.xml"/>
+                                        <include-form name="ListPortalPages" location="component://myportal/widget/PortalAdmForms.xml"/>
                                     </decorator-section>
                                 </decorator-screen>
                             </widgets>
@@ -69,7 +69,7 @@ under the License.
                                 <set field="portalPage.portalPageId" value=""/>
                                 <set field="editPortalPageId" value="Y"/>
                             </actions>
-                            <widgets><include-form name="EditPortalPage" location="component://webtools/widget/PortalAdmForms.xml"/></widgets>
+                            <widgets><include-form name="EditPortalPage" location="component://myportal/widget/PortalAdmForms.xml"/></widgets>
                         </section>
                     </decorator-section>
                 </decorator-screen>
@@ -95,8 +95,8 @@ under the License.
                             <actions><set field="targetPortalPage" value="updatePortalPageAdm"/></actions>
                             <widgets>
                                 <screenlet title="${uiLabelMap.CommonPortalEditPage}" navigation-menu-name="PortalPageAdmin">
-                                    <include-menu name="PortalPageAdmin" location="component://webtools/widget/Menus.xml"/>
-                                    <include-form name="EditPortalPage" location="component://webtools/widget/PortalAdmForms.xml"/>
+                                    <include-menu name="PortalPageAdmin" location="component:/myportal/widget/MyPortalMenus.xml"/>
+                                    <include-form name="EditPortalPage" location="component://myportal/widget/PortalAdmForms.xml"/>
                                 </screenlet>
                             </widgets>
                         </section>
