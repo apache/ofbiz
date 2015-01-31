@@ -273,6 +273,7 @@ under the License.
         <entity-and list="oisgirs" entity-name="OrderItemShipGrpInvRes">
             <field-map field-name="orderId" from-field="orderItemShipGrpInvRes.orderId"/>
             <field-map field-name="orderItemSeqId" from-field="orderItemShipGrpInvRes.orderItemSeqId"/>
+            <field-map field-name="inventoryItemId" from-field="orderItemShipGrpInvRes.inventoryItemId"/>
         </entity-and>
     </simple-method>
 
