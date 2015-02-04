@@ -198,5 +198,6 @@ if (action) {
         }
     }
 }
+context.overrideListSize = rows.size();
 context.inventoryByProduct = rows;
 context.searchParameterString = searchParameterString;
