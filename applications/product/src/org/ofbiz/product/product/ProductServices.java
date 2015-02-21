@@ -983,9 +983,16 @@ public class ProductServices {
         Locale locale = (Locale) context.get("locale");
 
         if (UtilValidate.isNotEmpty(context.get("_uploadedFile_fileName"))) {
-            String imageFilenameFormat = UtilProperties.getPropertyValue("catalog", "image.filename.additionalviewsize.format");
-            String imageServerPath = FlexibleStringExpander.expandString(EntityUtilProperties.getPropertyValue("catalog", "image.server.path", delegator), context);
-            String imageUrlPrefix = EntityUtilProperties.getPropertyValue("catalog", "image.url.prefix", delegator);
+            Map<String, Object>imageContext = FastMap.newInstance();
+            imageContext.putAll(context);
+            imageContext.put("delegator", delegator);
+            imageContext.put("tenantId",delegator.getDelegatorTenantId());
+            String imageFilenameFormat = EntityUtilProperties.getPropertyValue("catalog", "image.filename.additionalviewsize.format", delegator);
+
+            String imageServerPath = FlexibleStringExpander.expandString(EntityUtilProperties.getPropertyValue("catalog", "image.server.path", delegator), imageContext);
+            String imageUrlPrefix = FlexibleStringExpander.expandString(EntityUtilProperties.getPropertyValue("catalog", "image.url.prefix", delegator), imageContext);
+            imageServerPath = imageServerPath.endsWith("/") ? imageServerPath.substring(0, imageServerPath.length()-1) : imageServerPath;
+            imageUrlPrefix = imageUrlPrefix.endsWith("/") ? imageUrlPrefix.substring(0, imageUrlPrefix.length()-1) : imageUrlPrefix;
 
             FlexibleStringExpander filenameExpander = FlexibleStringExpander.getInstance(imageFilenameFormat);
             String viewNumber = String.valueOf(productContentTypeId.charAt(productContentTypeId.length() - 1));
@@ -1076,9 +1083,6 @@ public class ProductServices {
             /* scale Image in different sizes */
             Map<String, Object> resultResize = FastMap.newInstance();
             try {
-                Map<String, Object>imageContext = FastMap.newInstance();
-                imageContext.putAll(context);
-                imageContext.put("delegator", delegator);
                 resultResize.putAll(ScaleImage.scaleImageInAllSize(imageContext, filenameToUse, "additional", viewNumber));
             } catch (IOException e) {
                 Debug.logError(e, "Scale additional image in all different sizes is impossible : " + e.toString(), module);
@@ -1277,9 +1281,15 @@ public class ProductServices {
         Locale locale = (Locale) context.get("locale");
 
         if (UtilValidate.isNotEmpty(context.get("_uploadedFile_fileName"))) {
-            String imageFilenameFormat = UtilProperties.getPropertyValue("catalog", "image.filename.format");
-            String imageServerPath = FlexibleStringExpander.expandString(EntityUtilProperties.getPropertyValue("catalog", "image.server.path",delegator), context);
-            String imageUrlPrefix = EntityUtilProperties.getPropertyValue("catalog", "image.url.prefix", delegator);
+            Map<String, Object>imageContext = FastMap.newInstance();
+            imageContext.putAll(context);
+            imageContext.put("tenantId",delegator.getDelegatorTenantId());
+            String imageFilenameFormat = EntityUtilProperties.getPropertyValue("catalog", "image.filename.format", delegator);
+
+            String imageServerPath = FlexibleStringExpander.expandString(EntityUtilProperties.getPropertyValue("catalog", "image.server.path",delegator), imageContext);
+            String imageUrlPrefix = FlexibleStringExpander.expandString(EntityUtilProperties.getPropertyValue("catalog", "image.url.prefix", delegator), imageContext);
+            imageServerPath = imageServerPath.endsWith("/") ? imageServerPath.substring(0, imageServerPath.length()-1) : imageServerPath;
+            imageUrlPrefix = imageUrlPrefix.endsWith("/") ? imageUrlPrefix.substring(0, imageUrlPrefix.length()-1) : imageUrlPrefix;
 
             FlexibleStringExpander filenameExpander = FlexibleStringExpander.getInstance(imageFilenameFormat);
             String id = productPromoId + "_Image_" + productPromoContentTypeId.charAt(productPromoContentTypeId.length() - 1);

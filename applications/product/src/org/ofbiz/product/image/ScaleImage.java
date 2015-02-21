@@ -106,8 +106,13 @@ public class ScaleImage {
         index = filenameToUse.lastIndexOf(".");
         String imgExtension = filenameToUse.substring(index + 1);
         // paths
-        String imageServerPath = FlexibleStringExpander.expandString(EntityUtilProperties.getPropertyValue("catalog", "image.server.path", (Delegator)context.get("delegator")), context);
-        String imageUrlPrefix = EntityUtilProperties.getPropertyValue("catalog", "image.url.prefix", (Delegator)context.get("delegator"));
+        Map<String, Object>imageContext = FastMap.newInstance();
+        imageContext.putAll(context);
+        imageContext.put("tenantId",((Delegator)context.get("delegator")).getDelegatorTenantId());
+        String imageServerPath = FlexibleStringExpander.expandString(EntityUtilProperties.getPropertyValue("catalog", "image.server.path", (Delegator)context.get("delegator")), imageContext);
+        String imageUrlPrefix = FlexibleStringExpander.expandString(EntityUtilProperties.getPropertyValue("catalog", "image.url.prefix", (Delegator)context.get("delegator")), imageContext);
+        imageServerPath = imageServerPath.endsWith("/") ? imageServerPath.substring(0, imageServerPath.length()-1) : imageServerPath;
+        imageUrlPrefix = imageUrlPrefix.endsWith("/") ? imageUrlPrefix.substring(0, imageUrlPrefix.length()-1) : imageUrlPrefix;
         
         FlexibleStringExpander filenameExpander;
         String fileLocation = null;
@@ -282,9 +287,15 @@ public class ScaleImage {
         String imgName = filenameToUse.substring(0, index - 1);
         String imgExtension = filenameToUse.substring(index + 1);
         // paths
-        String mainFilenameFormat = UtilProperties.getPropertyValue("catalog", "image.filename.format");
-        String imageServerPath = FlexibleStringExpander.expandString(EntityUtilProperties.getPropertyValue("catalog", "image.server.path", (Delegator)context.get("delegator")), context);
-        String imageUrlPrefix = EntityUtilProperties.getPropertyValue("catalog", "image.url.prefix",(Delegator)context.get("delegator"));
+        Map<String, Object>imageContext = FastMap.newInstance();
+        imageContext.putAll(context);
+        imageContext.put("tenantId",((Delegator)context.get("delegator")).getDelegatorTenantId());
+        String mainFilenameFormat = EntityUtilProperties.getPropertyValue("catalog", "image.filename.format", (Delegator) context.get("delegator"));
+
+        String imageServerPath = FlexibleStringExpander.expandString(EntityUtilProperties.getPropertyValue("catalog", "image.server.path", (Delegator)context.get("delegator")), imageContext);
+        String imageUrlPrefix = FlexibleStringExpander.expandString(EntityUtilProperties.getPropertyValue("catalog", "image.url.prefix",(Delegator)context.get("delegator")), imageContext);
+        imageServerPath = imageServerPath.endsWith("/") ? imageServerPath.substring(0, imageServerPath.length()-1) : imageServerPath;
+        imageUrlPrefix = imageUrlPrefix.endsWith("/") ? imageUrlPrefix.substring(0, imageUrlPrefix.length()-1) : imageUrlPrefix;
 
         String id = null;
         String type = null;
