@@ -3506,6 +3506,8 @@ public class OrderServices {
         String orderItemTypeId = (String) context.get("orderItemTypeId");
         String changeComments = (String) context.get("changeComments");
         Boolean calcTax = (Boolean) context.get("calcTax");
+        Map<String, String> itemAttributesMap = UtilGenerics.checkMap(context.get("itemAttributesMap"));
+        
         if (calcTax == null) {
             calcTax = Boolean.TRUE;
         }
@@ -3544,9 +3546,9 @@ public class OrderServices {
 
         // add in the new product
         try {
+            ShoppingCartItem item = null;
             if ("PURCHASE_ORDER".equals(cart.getOrderType())) {
                 GenericValue supplierProduct = cart.getSupplierProduct(productId, quantity, dispatcher);
-                ShoppingCartItem item = null;
                 if (supplierProduct != null) {
                     item = ShoppingCartItem.makePurchaseOrderItem(null, productId, null, quantity, null, null, prodCatalogId, null, orderItemTypeId, null, dispatcher, cart, supplierProduct, itemDesiredDeliveryDate, itemDesiredDeliveryDate, null);
                     cart.addItem(0, item);
@@ -3564,7 +3566,7 @@ public class OrderServices {
                 cart.clearItemShipInfo(item);
                 cart.setItemShipGroupQty(item, item.getQuantity(), shipGroupIdx);
             } else {
-                ShoppingCartItem item = ShoppingCartItem.makeItem(null, productId, null, quantity, null, null, null, null, null, null, null, null, prodCatalogId, null, null, null, dispatcher, cart, null, null, null, Boolean.FALSE, Boolean.FALSE);
+                item = ShoppingCartItem.makeItem(null, productId, null, quantity, null, null, null, null, null, null, null, null, prodCatalogId, null, null, null, dispatcher, cart, null, null, null, Boolean.FALSE, Boolean.FALSE);
                 if (basePrice != null && overridePrice != null) {
                     item.setBasePrice(basePrice);
                     // special hack to make sure we re-calc the promos after a price change
@@ -3578,6 +3580,23 @@ public class OrderServices {
                 item.setDesiredDeliveryDate(itemDesiredDeliveryDate);
                 cart.clearItemShipInfo(item);
                 cart.setItemShipGroupQty(item, item.getQuantity(), shipGroupIdx);
+            }
+            // set the order item attributes
+            if (itemAttributesMap != null) {
+                // go through the item attributes map once to get a list of key names
+                Set<String> attributeNames =FastSet.newInstance();
+                Set<String> keys  = itemAttributesMap.keySet();
+                for (String key : keys) {
+                    attributeNames.add(key);
+                }
+                String attrValue = null;
+                for (String attrName : attributeNames) {
+                    attrValue = itemAttributesMap.get(attrName);
+                    if (UtilValidate.isNotEmpty(attrName)) {
+                        item.setOrderItemAttribute(attrName, attrValue);
+                        Debug.logInfo("Set item attribute Name: " + attrName + " , Value:" + attrValue, module);
+                    }
+                }
             }
         } catch (CartItemModifyException e) {
             Debug.logError(e, module);
