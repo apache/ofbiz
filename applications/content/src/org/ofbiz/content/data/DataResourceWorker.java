@@ -590,7 +590,7 @@ public class DataResourceWorker  implements org.ofbiz.widget.DataResourceWorkerI
         if (dataResource != null) {
             String dataTemplateTypeId = dataResource.getString("dataTemplateTypeId");
             if ("FTL".equals(dataTemplateTypeId)) {
-                FreeMarkerWorker.clearTemplateFromCache("DataResource:" + dataResourceId);        
+                FreeMarkerWorker.clearTemplateFromCache(delegator.getDelegatorName() + ":DataResource:" + dataResourceId);
             }
         }
     }
@@ -628,7 +628,7 @@ public class DataResourceWorker  implements org.ofbiz.widget.DataResourceWorkerI
             String disableCache = UtilProperties.getPropertyValue("content", "disable.ftl.template.cache");
             if (disableCache == null || !disableCache.equalsIgnoreCase("true")) {
                 try {
-                    Template cachedTemplate = FreeMarkerWorker.getTemplate("DataResource:" + dataResourceId);
+                    Template cachedTemplate = FreeMarkerWorker.getTemplate(delegator.getDelegatorName() + ":DataResource:" + dataResourceId);
                     if (cachedTemplate != null) {
                         String subContentId = (String) templateContext.get("subContentId");
                         if (UtilValidate.isNotEmpty(subContentId)) {
@@ -688,7 +688,7 @@ public class DataResourceWorker  implements org.ofbiz.widget.DataResourceWorkerI
                     }
 
                     // render the FTL template
-                    FreeMarkerWorker.renderTemplate("DataResource:" + dataResourceId, templateText, templateContext, out);
+                    FreeMarkerWorker.renderTemplate(delegator.getDelegatorName() + ":DataResource:" + dataResourceId, templateText, templateContext, out);
                 } catch (TemplateException e) {
                     throw new GeneralException("Error rendering FTL template", e);
                 }
