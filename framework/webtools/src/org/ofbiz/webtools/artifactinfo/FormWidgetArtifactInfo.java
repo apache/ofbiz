@@ -33,7 +33,9 @@ import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.base.util.UtilURL;
 import org.ofbiz.widget.artifact.ArtifactInfoContext;
 import org.ofbiz.widget.artifact.ArtifactInfoGatherer;
-import org.ofbiz.widget.form.ModelForm;
+import org.ofbiz.widget.model.ModelForm;
+import org.ofbiz.widget.model.ModelGrid;
+import org.ofbiz.widget.model.ModelSingleForm;
 import org.xml.sax.SAXException;
 
 /**
@@ -73,7 +75,11 @@ public class FormWidgetArtifactInfo extends ArtifactInfoBase {
         ArtifactInfoContext infoContext = new ArtifactInfoContext();
         ArtifactInfoGatherer infoGatherer = new ArtifactInfoGatherer(infoContext);
         try {
-            infoGatherer.visit(this.modelForm);
+            if (this.modelForm instanceof ModelSingleForm) {
+                infoGatherer.visit((ModelSingleForm) this.modelForm);
+            } else {
+                infoGatherer.visit((ModelGrid) this.modelForm);
+            }
         } catch (Exception e) {
             throw new GeneralException(e);
         }
