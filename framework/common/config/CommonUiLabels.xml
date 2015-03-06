@@ -1987,7 +1987,6 @@
     </property>
     <property key="CommonConfirmAdd">
         <value xml:lang="ar">هل تؤكد الإضافة ؟</value>
-        <value xml:lang="ar">ØªØ£ÙƒÙŠØ¯</value>
         <value xml:lang="cs">Potvrzujete přidání?</value>
         <value xml:lang="de">BestÃ¤tigen</value>
         <value xml:lang="en">Do you confirm the addition?</value>
@@ -2007,7 +2006,6 @@
     </property>
     <property key="CommonConfirmDelete">
         <value xml:lang="ar">هل تؤكد الحذف؟</value>
-        <value xml:lang="ar">ØªØ£ÙƒÙŠØ¯</value>
         <value xml:lang="cs">Souhlasíte se zrušením?</value>
         <value xml:lang="de">BestÃ¤tigen</value>
         <value xml:lang="en">Do you confirm the suppression?</value>
