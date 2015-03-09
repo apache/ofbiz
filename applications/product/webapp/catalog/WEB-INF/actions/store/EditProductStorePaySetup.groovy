@@ -82,8 +82,6 @@ if (!paymentMethodTypeId || !paymentServiceTypeEnumId) {
 }
 if (paymentServiceTypeEnumId == "PRDS_PAY_EXTERNAL") {
     context.paymentCustomMethods = null;
-} else if (customMethodsCond) { 
-    context.paymentCustomMethods = from("CustomMethod").where(customMethodsCond).orderBy("description").queryList();
 } else {
-    context.paymentCustomMethods = from("CustomMethod").orderBy("description").queryList();
+    context.paymentCustomMethods = from("CustomMethod").where(customMethodsCond).orderBy("description").queryList();
 }
