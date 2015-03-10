@@ -63,6 +63,7 @@ import org.ofbiz.entity.model.ModelEntity;
 import org.ofbiz.entity.model.ModelField;
 import org.ofbiz.entity.model.ModelReader;
 import org.ofbiz.entity.util.EntityUtil;
+import org.ofbiz.entity.util.EntityUtilProperties;
 import org.ofbiz.service.DispatchContext;
 import org.ofbiz.service.GenericServiceException;
 import org.ofbiz.service.ModelParam;
@@ -2002,19 +2003,14 @@ public class ModelFormField {
                     throw new IllegalArgumentException(errMsg);
                 }
             } else if ("date".equals(this.type) && retVal.length() > 10) {
-                Locale locale = (Locale) context.get("locale");
-                if (locale == null) {
-                    locale = Locale.getDefault();
-                }
-
                 StringToTimestamp stringToTimestamp = new DateTimeConverters.StringToTimestamp();
                 Timestamp timestamp = null;
                 try {
                     timestamp = stringToTimestamp.convert(retVal);
                     Date date = new Date(timestamp.getTime());
-
-                    DateFormat dateFormatter = DateFormat.getDateInstance(DateFormat.SHORT, locale);
-                    retVal = dateFormatter.format(date);
+                    Delegator delegator = (Delegator)context.get("delegator");
+                    String displayDateFormat = EntityUtilProperties.getPropertyValue("general.properties", "displayDateFormat", "dd-MM-yyyy", delegator);
+                    retVal = UtilDateTime.toDateString(date, displayDateFormat);
                 }
                 catch (ConversionException e) {
                     String errMsg = "Error formatting date using default instead [" + retVal + "]: " + e.toString();
@@ -2024,23 +2020,14 @@ public class ModelFormField {
                 }
 
             } else if ("date-time".equals(this.type) && retVal.length() > 16) {
-                Locale locale = (Locale) context.get("locale");
-                TimeZone timeZone = (TimeZone) context.get("timeZone");
-                if (locale == null) {
-                    locale = Locale.getDefault();
-                }
-                if (timeZone == null) {
-                    timeZone = TimeZone.getDefault();
-                }
-
                 StringToTimestamp stringToTimestamp = new DateTimeConverters.StringToTimestamp();
                 Timestamp timestamp = null;
                 try {
                     timestamp = stringToTimestamp.convert(retVal);
                     Date date = new Date(timestamp.getTime());
-
-                    DateFormat dateFormatter = UtilDateTime.toDateTimeFormat(null, timeZone, locale);
-                    retVal = dateFormatter.format(date);
+                    Delegator delegator = (Delegator)context.get("delegator");
+                    String displayDateTimeFormat = EntityUtilProperties.getPropertyValue("general.properties", "displayDateTimeFormat", "dd-MM-yyyy HH:mm:ss.SSS", delegator);
+                    retVal = UtilDateTime.toDateString(date, displayDateTimeFormat);
                 }
                 catch (ConversionException e) {
                     String errMsg = "Error formatting date/time using default instead [" + retVal + "]: " + e.toString();
@@ -3525,6 +3512,7 @@ public class ModelFormField {
 
     public static class LookupField extends TextField {
         protected FlexibleStringExpander formName;
+        protected String parentFormName;
         protected String descriptionFieldName;
         protected String targetParameter;
         protected String lookupPresentation;
@@ -3538,6 +3526,7 @@ public class ModelFormField {
         public LookupField(Element element, ModelFormField modelFormField) {
             super(element, modelFormField);
             this.formName = FlexibleStringExpander.getInstance(element.getAttribute("target-form-name"));
+            this.parentFormName = element.getAttribute("form-name");
             this.descriptionFieldName = element.getAttribute("description-field-name");
             this.targetParameter = element.getAttribute("target-parameter");
             this.lookupPresentation = element.getAttribute("presentation");
@@ -3565,6 +3554,10 @@ public class ModelFormField {
 
         public String getFormName(Map<String, Object> context) {
             return this.formName.expandString(context);
+        }
+
+        public String getParentFormName() {
+            return this.parentFormName;
         }
 
         public List<String> getTargetParameterList() {
