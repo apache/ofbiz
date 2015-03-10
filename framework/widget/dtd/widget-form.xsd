@@ -681,7 +681,6 @@ under the License.
             <xs:sequence>
                 <xs:element ref="in-place-editor" minOccurs="0" maxOccurs="1"/>
             </xs:sequence>
-                        <xs:enumeration value="date-fix" />
             <xs:attributeGroup ref="attlist.display"/>
         </xs:complexType>
     </xs:element>

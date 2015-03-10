@@ -50,7 +50,6 @@ import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.base.util.string.FlexibleStringExpander;
 import org.ofbiz.base.util.template.FreeMarkerWorker;
 import org.ofbiz.entity.Delegator;
-import org.ofbiz.entity.util.EntityUtilProperties;
 import org.ofbiz.webapp.control.RequestHandler;
 import org.ofbiz.webapp.taglib.ContentUrlTag;
 import org.ofbiz.widget.ModelWidget;
@@ -668,11 +667,6 @@ public class MacroFormRenderer implements FormStringRenderer {
                 formattedMask = "9999-99-99 99:99:99";
             }
         }
-        Delegator delegator = (Delegator) request.getAttribute("delegator");
-        String timeFormat = "";
-        if (UtilValidate.isNotEmpty(delegator)) {
-            timeFormat = EntityUtilProperties.getPropertyValue("general", "displayTimeFormat", delegator);
-        }
         StringWriter sr = new StringWriter();
         sr.append("<@renderDateTimeField ");
         sr.append("name=\"");
@@ -737,8 +731,6 @@ public class MacroFormRenderer implements FormStringRenderer {
         sr.append(formName);
         sr.append("\" mask=\"");
         sr.append(formattedMask);
-        sr.append("\" timeFormat=\"");
-        sr.append(timeFormat);
         sr.append("\" />");
         executeMacro(writer, sr.toString());
         this.addAsterisks(writer, context, modelFormField);
@@ -1610,10 +1602,6 @@ public class MacroFormRenderer implements FormStringRenderer {
                 oddRowStyle = FlexibleStringExpander.expandString(modelForm.getOddRowStyle(), context);
             }
         }
-        
-        Delegator delegator = (Delegator)context.get("delegator");
-        String defaultDateFormat = EntityUtilProperties.getPropertyValue("general.properties", "displayDateFindFormat", "yy-mm-dd", delegator);
-
         StringWriter sr = new StringWriter();
         sr.append("<@renderFormatItemRowOpen ");
         sr.append(" formName=\"");
@@ -1966,7 +1954,7 @@ public class MacroFormRenderer implements FormStringRenderer {
         int size = 25;
         int maxlength = 30;
         String dateType =  dateFindField.getType();
-        if ("date".equals(dateType) || "date-fix".equals(dateType)) {
+        if ("date".equals(dateType)) {
             size = maxlength = 10;
             if (uiLabelMap != null) {
                 localizedInputTitle = uiLabelMap.get("CommonFormatDate");
@@ -2062,8 +2050,6 @@ public class MacroFormRenderer implements FormStringRenderer {
         sr.append(opUpThruDay);
         sr.append("\" opIsEmpty=\"");
         sr.append(opIsEmpty);
-        sr.append("\" defaultDateFormat=\"");
-        sr.append(defaultDateFormat);
         sr.append("\" />");
         executeMacro(writer, sr.toString());
 
