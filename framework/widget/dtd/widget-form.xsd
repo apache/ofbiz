@@ -679,7 +679,6 @@ under the License.
                     <xs:restriction base="xs:token">
                         <xs:enumeration value="timestamp" />
                         <xs:enumeration value="date" />
-                        <xs:enumeration value="date-fix" />
                         <xs:enumeration value="time" />
                     </xs:restriction>
                 </xs:simpleType>
