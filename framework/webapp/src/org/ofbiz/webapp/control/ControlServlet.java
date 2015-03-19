@@ -71,7 +71,11 @@ public class ControlServlet extends HttpServlet {
     @Override
     public void init(ServletConfig config) throws ServletException {
         super.init(config);
-        if (Debug.infoOn()) Debug.logInfo("LOADING WEBAPP [" + config.getServletContext().getContextPath().substring(1) + "] " + config.getServletContext().getServletContextName() + ", located at " + config.getServletContext().getRealPath("/"), module);
+        if (Debug.infoOn()) {
+            ServletContext servletContext = config.getServletContext();
+            String webappName = servletContext.getContextPath().length() != 0 ? servletContext.getContextPath().substring(1) : "";
+            Debug.logInfo("LOADING WEBAPP [" + webappName + "] " + servletContext.getServletContextName() + ", located at " + servletContext.getRealPath("/"), module);
+        }
 
         // configure custom BSF engines
         configureBsf();
