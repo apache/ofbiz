@@ -116,6 +116,7 @@ public class ModelFormField {
     protected Boolean sortField = null;
     protected String headerLink;
     protected String headerLinkStyle;
+    protected String parentFormName;
 
     /** On Change Event areas to be updated. */
     protected List<UpdateArea> onChangeUpdateAreas;
@@ -161,6 +162,7 @@ public class ModelFormField {
         this.sortField = fieldElement.hasAttribute("sort-field") ? "true".equals(fieldElement.getAttribute("sort-field")) : null;
         this.headerLink = fieldElement.getAttribute("header-link");
         this.headerLinkStyle = fieldElement.getAttribute("header-link-style");
+        this.parentFormName = fieldElement.getAttribute("form-name");
 
 
         String positionStr = fieldElement.getAttribute("position");
@@ -973,7 +975,12 @@ public class ModelFormField {
 
     public String getIdName() {
         if (UtilValidate.isNotEmpty(idName)) return idName;
-        return this.modelForm.getName() + "_" + this.getFieldName();
+        String parentFormName = this.getParentFormName();
+        if (UtilValidate.isNotEmpty(parentFormName)) {
+            return parentFormName + "_" + this.getFieldName();
+        } else {
+           return this.modelForm.getName() + "_" + this.getFieldName();
+        }
     }
 
     public String getCurrentContainerId(Map<String, Object> context) {
@@ -1257,6 +1264,11 @@ public class ModelFormField {
      */
     public void setModelForm(ModelForm modelForm) {
         this.modelForm = modelForm;
+    }
+
+
+    public String getParentFormName() {
+        return this.parentFormName;
     }
 
 
