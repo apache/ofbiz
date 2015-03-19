@@ -2019,7 +2019,7 @@ public class MacroFormRenderer implements FormStringRenderer {
         boolean readonly = lookupField.readonly;
         // add lookup pop-up button
         String descriptionFieldName = lookupField.getDescriptionFieldName();
-        String formName = lookupField.getParentFormName();
+        String formName = modelFormField.getParentFormName();
         if (UtilValidate.isEmpty(formName)) {
             formName = modelFormField.getModelForm().getCurrentFormName(context);
         }
