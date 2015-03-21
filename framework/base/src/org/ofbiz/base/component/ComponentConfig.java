@@ -769,13 +769,8 @@ public class ComponentConfig {
 
             this.position = element.getAttribute("position");
 
-            // default mount point is name if none specified
-            if (UtilValidate.isEmpty(this.mountPoint)) {
-                this.mountPoint = this.name;
-            }
-
             // check the mount point and make sure it is properly formatted
-            if (!"/".equals(this.mountPoint)) {
+            if (UtilValidate.isNotEmpty(this.mountPoint)) {
                 if (!this.mountPoint.startsWith("/")) {
                     this.mountPoint = "/" + this.mountPoint;
                 }
