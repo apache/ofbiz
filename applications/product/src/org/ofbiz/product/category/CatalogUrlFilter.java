@@ -66,7 +66,9 @@ public class CatalogUrlFilter extends ContextFilter {
         
         //Get ServletContext
         ServletContext servletContext = config.getServletContext();
-        
+
+        ContextFilter.setCharacterEncoding(request);
+
         //Set request attribute and session
         UrlServletHelper.setRequestAttributes(request, delegator, servletContext);
         

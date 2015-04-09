@@ -64,6 +64,9 @@ public class ContentUrlFilter extends ContextFilter {
         
         //Get ServletContext
         ServletContext servletContext = config.getServletContext();
+
+        ContextFilter.setCharacterEncoding(request);
+
         //Set request attribute and session
         UrlServletHelper.setRequestAttributes(request, delegator, servletContext);
         String urlContentId = null;
@@ -91,7 +94,7 @@ public class ContentUrlFilter extends ContextFilter {
                 StringBuilder urlBuilder = new StringBuilder();
                 urlBuilder.append("/" + CONTROL_MOUNT_POINT);
                 urlBuilder.append("/" + config.getInitParameter("viewRequest") + "?contentId=" + urlContentId);
-                
+
                 //Set view query parameters
                 UrlServletHelper.setViewQueryParameters(request, urlBuilder);
                 Debug.logInfo("[Filtered request]: " + pathInfo + " (" + urlBuilder + ")", module);
