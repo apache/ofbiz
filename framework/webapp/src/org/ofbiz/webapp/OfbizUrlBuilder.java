@@ -95,7 +95,7 @@ public final class OfbizUrlBuilder {
             servletPath = WebAppUtil.getControlServletPath(webAppInfo);
         }
         if (webSiteProps == null) {
-            webSiteProps = WebSiteProperties.defaults();
+            webSiteProps = WebSiteProperties.defaults(delegator);
         }
         return new OfbizUrlBuilder(config, webSiteProps, servletPath);
     }
