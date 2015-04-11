@@ -50,6 +50,7 @@ import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
+import org.ofbiz.entity.util.EntityUtilProperties;
 import org.ofbiz.webapp.event.EventFactory;
 import org.ofbiz.webapp.event.EventHandler;
 import org.ofbiz.webapp.event.EventHandlerException;
@@ -940,11 +941,12 @@ public class RequestHandler {
     }
 
     public static String getDefaultServerRootUrl(HttpServletRequest request, boolean secure) {
-        String httpsPort = UtilProperties.getPropertyValue("url.properties", "port.https", "443");
-        String httpsServer = UtilProperties.getPropertyValue("url.properties", "force.https.host");
-        String httpPort = UtilProperties.getPropertyValue("url.properties", "port.http", "80");
-        String httpServer = UtilProperties.getPropertyValue("url.properties", "force.http.host");
-        boolean useHttps = UtilProperties.propertyValueEqualsIgnoreCase("url.properties", "port.https.enabled", "Y");
+        Delegator delegator = (Delegator) request.getAttribute("delegator");
+        String httpsPort = EntityUtilProperties.getPropertyValue("url.properties", "port.https", "443", delegator);
+        String httpsServer = EntityUtilProperties.getPropertyValue("url.properties", "force.https.host", delegator);
+        String httpPort = EntityUtilProperties.getPropertyValue("url.properties", "port.http", "80", delegator);
+        String httpServer = EntityUtilProperties.getPropertyValue("url.properties", "force.http.host", delegator);
+        boolean useHttps = EntityUtilProperties.propertyValueEqualsIgnoreCase("url.properties", "port.https.enabled", "Y", delegator);
 
         if (ClassLoaderContainer.portOffset != 0) {
             Integer httpPortValue = Integer.valueOf(httpPort);
@@ -1082,19 +1084,19 @@ public class RequestHandler {
 
         // fill in any missing properties with fields from the global file
         if (UtilValidate.isEmpty(httpsPort)) {
-            httpsPort = UtilProperties.getPropertyValue("url.properties", "port.https", "443");
+            httpsPort = EntityUtilProperties.getPropertyValue("url.properties", "port.https", "443", delegator);
         }
         if (UtilValidate.isEmpty(httpsServer)) {
-            httpsServer = UtilProperties.getPropertyValue("url.properties", "force.https.host");
+            httpsServer = EntityUtilProperties.getPropertyValue("url.properties", "force.https.host", delegator);
         }
         if (UtilValidate.isEmpty(httpPort)) {
-            httpPort = UtilProperties.getPropertyValue("url.properties", "port.http", "80");
+            httpPort = EntityUtilProperties.getPropertyValue("url.properties", "port.http", "80", delegator);
         }
         if (UtilValidate.isEmpty(httpServer)) {
-            httpServer = UtilProperties.getPropertyValue("url.properties", "force.http.host");
+            httpServer = EntityUtilProperties.getPropertyValue("url.properties", "force.http.host", delegator);
         }
         if (enableHttps == null) {
-            enableHttps = UtilProperties.propertyValueEqualsIgnoreCase("url.properties", "port.https.enabled", "Y");
+            enableHttps = EntityUtilProperties.propertyValueEqualsIgnoreCase("url.properties", "port.https.enabled", "Y", delegator);
         }
 
         if (ClassLoaderContainer.portOffset != 0) {

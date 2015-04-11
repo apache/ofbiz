@@ -35,12 +35,12 @@ import org.ofbiz.base.component.ComponentConfig.WebappInfo;
 import org.ofbiz.base.container.ClassLoaderContainer;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilMisc;
-import org.ofbiz.base.util.UtilProperties;
 import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.base.util.UtilXml;
 import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
+import org.ofbiz.entity.util.EntityUtilProperties;
 import org.ofbiz.webapp.control.RequestHandler;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -127,19 +127,19 @@ public class OfbizUrlTransform implements TemplateTransformModel {
                         }
                         // fill in any missing properties with fields from the global file
                         if (UtilValidate.isEmpty(httpsPort)) {
-                            httpsPort = UtilProperties.getPropertyValue("url.properties", "port.https", "443");
+                            httpsPort = EntityUtilProperties.getPropertyValue("url.properties", "port.https", "443", delegator);
                         }
                         if (UtilValidate.isEmpty(httpsServer)) {
-                            httpsServer = UtilProperties.getPropertyValue("url.properties", "force.https.host");
+                            httpsServer = EntityUtilProperties.getPropertyValue("url.properties", "force.https.host", delegator);
                         }
                         if (UtilValidate.isEmpty(httpPort)) {
-                            httpPort = UtilProperties.getPropertyValue("url.properties", "port.http", "80");
+                            httpPort = EntityUtilProperties.getPropertyValue("url.properties", "port.http", "80", delegator);
                         }
                         if (UtilValidate.isEmpty(httpServer)) {
-                            httpServer = UtilProperties.getPropertyValue("url.properties", "force.http.host");
+                            httpServer = EntityUtilProperties.getPropertyValue("url.properties", "force.http.host", delegator);
                         }
                         if (enableHttps == null) {
-                            enableHttps = UtilProperties.propertyValueEqualsIgnoreCase("url.properties", "port.https.enabled", "Y");
+                            enableHttps = EntityUtilProperties.propertyValueEqualsIgnoreCase("url.properties", "port.https.enabled", "Y", delegator);
                         }
                         
                         if (ClassLoaderContainer.portOffset != 0) {

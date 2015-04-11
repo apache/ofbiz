@@ -40,6 +40,7 @@ import org.ofbiz.base.util.template.FreeMarkerWorker;
 import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
+import org.ofbiz.entity.util.EntityUtilProperties;
 import org.ofbiz.service.DispatchContext;
 import org.ofbiz.service.GenericServiceException;
 import org.ofbiz.service.LocalDispatcher;
@@ -295,19 +296,19 @@ public class NotificationServices {
 
             // fill in any missing properties with fields from the global file
             if (UtilValidate.isEmpty(httpsPort)) {
-                httpsPort = UtilProperties.getPropertyValue("url.properties", "port.https", "443");
+                httpsPort = EntityUtilProperties.getPropertyValue("url.properties", "port.https", "443", delegator);
             }
             if (UtilValidate.isEmpty(httpsServer)) {
-                httpsServer = UtilProperties.getPropertyValue("url.properties", "force.https.host", localServer);
+                httpsServer = EntityUtilProperties.getPropertyValue("url.properties", "force.https.host", localServer, delegator);
             }
             if (UtilValidate.isEmpty(httpPort)) {
-                httpPort = UtilProperties.getPropertyValue("url.properties", "port.http", "80");
+                httpPort = EntityUtilProperties.getPropertyValue("url.properties", "port.http", "80", delegator);
             }
             if (UtilValidate.isEmpty(httpServer)) {
-                httpServer = UtilProperties.getPropertyValue("url.properties", "force.http.host", localServer);
+                httpServer = EntityUtilProperties.getPropertyValue("url.properties", "force.http.host", localServer, delegator);
             }
             if (UtilValidate.isEmpty(enableHttps)) {
-                enableHttps = (UtilProperties.propertyValueEqualsIgnoreCase("url.properties", "port.https.enabled", "Y")) ? Boolean.TRUE : Boolean.FALSE;
+                enableHttps = (EntityUtilProperties.propertyValueEqualsIgnoreCase("url.properties", "port.https.enabled", "Y", delegator)) ? Boolean.TRUE : Boolean.FALSE;
             }
 
             if (ClassLoaderContainer.portOffset != 0) {
