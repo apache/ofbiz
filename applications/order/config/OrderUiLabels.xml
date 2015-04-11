@@ -5657,6 +5657,9 @@
         <value xml:lang="vi">Các hoàn trả của tôi</value>
         <value xml:lang="zh">我的退货</value>
     </property>
+    <property key="OrderNoItemsQuote">
+       <value xml:lang="en">No Items in quote</value>
+    </property>
     <property key="OrderNOTEMultipleShipmentsExist">
         <value xml:lang="de">Anmerkung: Mehrere Lieferungen vorhanden, verwenden Sie Lieferung aufteilen.</value>
         <value xml:lang="en">NOTE: Multiple shipments exist, use Split Shipment.</value>
