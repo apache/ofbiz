@@ -151,7 +151,7 @@ public final class SetOperation extends MethodOperation {
         if (ObjectType.isEmpty(newValue) && !this.defaultFse.isEmpty()) {
             newValue = this.defaultFse.expand(methodContext.getEnvMap());
         }
-        if (!setIfNull && newValue == null && !"NewMap".equals(this.type) && "NewList".equals(this.type)) {
+        if (!setIfNull && newValue == null && !"NewMap".equals(this.type) && !"NewList".equals(this.type)) {
             if (Debug.verboseOn())
                 Debug.logVerbose("Field value not found (null) with name [" + fromFma + "] and value [" + valueFse + "], and there was not default value, not setting field", module);
             return true;
