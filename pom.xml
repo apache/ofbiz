@@ -71,6 +71,11 @@ under the License.
           <artifactId>maven-jar-plugin</artifactId>
           <version>2.2</version>
         </plugin>
+        <plugin>
+          <groupId>org.commonjava.maven.plugins</groupId>
+          <artifactId>directory-maven-plugin</artifactId>
+          <version>0.1</version>
+        </plugin>
       </plugins>
     </pluginManagement>
     <plugins>
@@ -152,6 +157,40 @@ under the License.
           <source>1.7</source>
           <target>1.7</target>
         </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.commonjava.maven.plugins</groupId>
+        <artifactId>directory-maven-plugin</artifactId>
+        <configuration>
+          <property>ofbiz.home.dir</property>
+          <project>
+            <groupId>org.apache.ofbiz</groupId>
+            <artifactId>ofbiz-parent</artifactId>
+          </project>
+        </configuration>
+        <executions>
+          <execution>
+            <id>ofbiz-home-dir.clean</id>
+            <goals>
+              <goal>highest-basedir</goal>
+            </goals>
+            <phase>pre-clean</phase>
+          </execution>
+          <execution>
+            <id>ofbiz-home-dir.default</id>
+            <goals>
+              <goal>highest-basedir</goal>
+            </goals>
+            <phase>validate</phase>
+          </execution>
+          <execution>
+            <id>ofbiz-home-dir.site</id>
+            <goals>
+              <goal>highest-basedir</goal>
+            </goals>
+            <phase>pre-site</phase>
+          </execution>
+        </executions>
       </plugin>
     </plugins>
   </build>

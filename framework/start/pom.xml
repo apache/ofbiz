@@ -53,7 +53,7 @@ under the License.
             <phase>package</phase>
             <configuration>
               <tasks>
-                <copy todir="${project.parent.relativePath}/..">
+                <copy todir="${ofbiz.home.dir}">
                   <fileset dir="${project.build.directory}" includes="ofbiz.jar"/>
                 </copy>
               </tasks>
