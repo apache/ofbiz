@@ -82,6 +82,11 @@ under the License.
           <artifactId>directory-maven-plugin</artifactId>
           <version>0.1</version>
         </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-surefire-plugin</artifactId>
+          <version>2.18.1</version>
+        </plugin>
       </plugins>
     </pluginManagement>
     <plugins>
@@ -169,6 +174,19 @@ under the License.
             <arg>-Xlint:unchecked</arg>
             -->
           </compilerArgs>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
+          <createDependencyReducedPom>false</createDependencyReducedPom>
+          <additionalClasspathElements>
+            <additionalClasspathElement>${project.basedir}/config</additionalClasspathElement>
+          </additionalClasspathElements>
+          <systemPropertyVariables>
+            <ofbiz.home>${ofbiz.home.dir}</ofbiz.home>
+          </systemPropertyVariables>
         </configuration>
       </plugin>
       <plugin>
