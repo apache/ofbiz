@@ -200,6 +200,6 @@ under the License.
   </reporting>
 
   <modules>
-    <module>framework/start</module>
+    <module>framework</module>
   </modules>
 </project>
