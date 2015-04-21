@@ -22,22 +22,35 @@ under the License.
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>org.apache.ofbiz</groupId>
-    <artifactId>ofbiz-parent</artifactId>
+    <artifactId>ofbiz-framework</artifactId>
     <version>TRUNK</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
-  <artifactId>ofbiz-framework</artifactId>
-  <packaging>pom</packaging>
+  <artifactId>ofbiz-entity</artifactId>
 
-  <modules>
-    <module>start</module>
-    <module>base/lib</module>
-    <module>base/lib/commons</module>
-    <module>base/lib/j2eespecs</module>
-    <module>base/lib/scripting</module>
-    <module>base</module>
-    <module>entity/lib</module>
-    <module>entity/lib/jdbc</module>
-    <module>entity</module>
-  </modules>
+  <dependencies>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>ofbiz-base-lib-commons</artifactId>
+      <version>TRUNK</version>
+      <type>pom</type>
+    </dependency>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>ofbiz-base-lib-j2eespecs</artifactId>
+      <version>TRUNK</version>
+      <type>pom</type>
+    </dependency>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>ofbiz-base</artifactId>
+      <version>TRUNK</version>
+    </dependency>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>ofbiz-entity-lib</artifactId>
+      <version>TRUNK</version>
+      <type>pom</type>
+    </dependency>
+  </dependencies>
 </project>

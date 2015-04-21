@@ -22,22 +22,20 @@ under the License.
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>org.apache.ofbiz</groupId>
-    <artifactId>ofbiz-parent</artifactId>
+    <artifactId>ofbiz-framework</artifactId>
     <version>TRUNK</version>
-    <relativePath>../pom.xml</relativePath>
+    <relativePath>../../../pom.xml</relativePath>
   </parent>
-  <artifactId>ofbiz-framework</artifactId>
+  <artifactId>ofbiz-entity-lib-jdbc</artifactId>
   <packaging>pom</packaging>
 
-  <modules>
-    <module>start</module>
-    <module>base/lib</module>
-    <module>base/lib/commons</module>
-    <module>base/lib/j2eespecs</module>
-    <module>base/lib/scripting</module>
-    <module>base</module>
-    <module>entity/lib</module>
-    <module>entity/lib/jdbc</module>
-    <module>entity</module>
-  </modules>
+  <dependencies>
+    <dependency>
+      <groupId>derby</groupId>
+      <artifactId>derby</artifactId>
+      <version>10.11.1.1</version>
+      <scope>system</scope>
+      <systemPath>${project.basedir}/derby-10.11.1.1.jar</systemPath>
+    </dependency>
+  </dependencies>
 </project>
