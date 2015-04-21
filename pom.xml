@@ -31,11 +31,17 @@ under the License.
   <build>
     <directory>build/lib</directory>
     <outputDirectory>build/classes</outputDirectory>
+    <testOutputDirectory>build/test-classes</testOutputDirectory>
     <finalName>${project.artifactId}</finalName>
     <sourceDirectory>src</sourceDirectory>
+    <testSourceDirectory>src</testSourceDirectory>
     <resources>
       <resource>
         <directory>src</directory>
+        <excludes>
+          <exclude>main/**</exclude>
+          <exclude>test/**</exclude>
+        </excludes>
         <includes>
           <include>**/*.properties</include>
           <include>**/*.groovy</include>
@@ -49,12 +55,23 @@ under the License.
         </includes>
       </resource>
       <resource>
+        <directory>src/main/resources</directory>
+      </resource>
+      <resource>
         <directory>dtd</directory>
         <includes>
           <include>*.dtd</include>
         </includes>
       </resource>
     </resources>
+    <testResources>
+      <testResource>
+        <directory>src/test/resources</directory>
+        <includes>
+          <include>META-INF/**</include>
+        </includes>
+      </testResource>
+    </testResources>
     <scriptSourceDirectory>scripts</scriptSourceDirectory>
     <pluginManagement>
       <plugins>
@@ -134,6 +151,11 @@ under the License.
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-dependency-plugin</artifactId>
         <version>2.3</version>
+        <configuration>
+          <includes>**/*</includes>
+          <overWriteReleases>true</overWriteReleases>
+          <overWriteSnapshots>true</overWriteSnapshots>
+        </configuration>
         <executions>
           <execution>
             <id>unpack-LICENSE+NOTICE</id>
@@ -154,9 +176,27 @@ under the License.
                   <includes>*</includes>
                 </artifactItem>
               </artifactItems>
-              <includes>**/*</includes>
-              <overWriteReleases>true</overWriteReleases>
-              <overWriteSnapshots>true</overWriteSnapshots>
+            </configuration>
+          </execution>
+          <execution>
+            <id>unpack-LICENSE+NOTICE-test</id>
+            <phase>process-test-resources</phase>
+            <goals>
+              <goal>unpack</goal>
+            </goals>
+            <configuration>
+              <artifactItems>
+                <artifactItem>
+                  <groupId>org.apache.ofbiz</groupId>
+                  <artifactId>ofbiz-parent</artifactId>
+                  <version>TRUNK</version>
+                  <type>zip</type>
+                  <classifier>assembly-LICENSE+NOTICE</classifier>
+                  <overWrite>true</overWrite>
+                  <outputDirectory>${project.build.testOutputDirectory}/META-INF</outputDirectory>
+                  <includes>*</includes>
+                </artifactItem>
+              </artifactItems>
             </configuration>
           </execution>
         </executions>
@@ -175,6 +215,50 @@ under the License.
             -->
           </compilerArgs>
         </configuration>
+        <executions>
+          <execution>
+            <id>default-compile</id>
+            <phase>compile</phase>
+            <configuration>
+              <excludes>
+                <exclude>**/test/*.java</exclude>
+              </excludes>
+            </configuration>
+          </execution>
+          <execution>
+            <id>default-testCompile</id>
+            <phase>test-compile</phase>
+            <configuration>
+              <testIncludes>
+                <testInclude>**/test/*.java</testInclude>
+              </testIncludes>
+              <testExcludes>
+                <testExclude>*</testExclude>
+              </testExcludes>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>default-test-jar</id>
+            <goals>
+              <goal>test-jar</goal>
+            </goals>
+            <configuration>
+              <testIncludes>
+                <testInclude>**/test/*</testInclude>
+                <testInclude>**/META-INF/*</testInclude>
+              </testIncludes>
+              <testExcludes>
+                <testExclude>**</testExclude>
+              </testExcludes>
+            </configuration>
+          </execution>
+        </executions>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
