@@ -31,5 +31,10 @@ under the License.
 
   <modules>
     <module>start</module>
+    <module>base/lib</module>
+    <module>base/lib/commons</module>
+    <module>base/lib/j2eespecs</module>
+    <module>base/lib/scripting</module>
+    <module>base</module>
   </modules>
 </project>

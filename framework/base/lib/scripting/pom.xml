@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<project>
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>org.apache.ofbiz</groupId>
+    <artifactId>ofbiz-framework</artifactId>
+    <version>TRUNK</version>
+    <relativePath>../../../pom.xml</relativePath>
+  </parent>
+  <artifactId>ofbiz-base-lib-scripting</artifactId>
+  <packaging>pom</packaging>
+
+  <dependencies>
+    <dependency>
+      <groupId>antlr</groupId>
+      <artifactId>antlr</artifactId>
+      <version>2.7.6</version>
+      <scope>system</scope>
+      <systemPath>${project.basedir}/antlr-2.7.6.jar</systemPath>
+    </dependency>
+    <dependency>
+      <groupId>asm</groupId>
+      <artifactId>asm</artifactId>
+      <version>3.2</version>
+      <scope>system</scope>
+      <systemPath>${project.basedir}/asm-3.2.jar</systemPath>
+    </dependency>
+    <dependency>
+      <groupId>bsf</groupId>
+      <artifactId>bsf</artifactId>
+      <version>2.4.0</version>
+      <scope>system</scope>
+      <systemPath>${project.basedir}/bsf-2.4.0.jar</systemPath>
+    </dependency>
+    <dependency>
+      <groupId>bsh</groupId>
+      <artifactId>bsh</artifactId>
+      <version>2.0b4</version>
+      <scope>system</scope>
+      <systemPath>${project.basedir}/bsh-2.0b4.jar</systemPath>
+    </dependency>
+    <dependency>
+      <groupId>groovy-all</groupId>
+      <artifactId>groovy-all</artifactId>
+      <version>2.2.1</version>
+      <scope>system</scope>
+      <systemPath>${project.basedir}/groovy-all-2.2.1.jar</systemPath>
+    </dependency>
+    <dependency>
+      <groupId>apache-oro</groupId>
+      <artifactId>oro</artifactId>
+      <version>2.0.8</version>
+      <scope>system</scope>
+      <systemPath>${project.basedir}/jakarta-oro-2.0.8.jar</systemPath>
+    </dependency>
+    <dependency>
+      <groupId>jython-nooro</groupId>
+      <artifactId>jython-nooro</artifactId>
+      <version>0.1</version>
+      <scope>system</scope>
+      <systemPath>${project.basedir}/jython-nooro.jar</systemPath>
+    </dependency>
+  </dependencies>
+</project>
