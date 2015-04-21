@@ -28,7 +28,7 @@ under the License.
   <build>
     <directory>build/lib</directory>
     <outputDirectory>build/classes</outputDirectory>
-    <finalName>${artifactId}</finalName>
+    <finalName>${project.artifactId}</finalName>
     <sourceDirectory>src</sourceDirectory>
     <resources>
       <resource>
