@@ -156,6 +156,13 @@ under the License.
         <configuration>
           <source>1.7</source>
           <target>1.7</target>
+          <compilerArgs>
+            <arg>-Xlint:-path</arg>
+            <!--
+            Please leave this line here.  It makes it easier to enable/disable it.
+            <arg>-Xlint:unchecked</arg>
+            -->
+          </compilerArgs>
         </configuration>
       </plugin>
       <plugin>
