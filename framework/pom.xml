@@ -41,5 +41,7 @@ under the License.
     <module>entity</module>
     <module>geronimo/lib</module>
     <module>geronimo</module>
+    <module>catalina/lib</module>
+    <module>catalina</module>
   </modules>
 </project>

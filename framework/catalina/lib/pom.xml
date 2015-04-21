@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<project>
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>org.apache.ofbiz</groupId>
+    <artifactId>ofbiz-framework</artifactId>
+    <version>TRUNK</version>
+    <relativePath>../../pom.xml</relativePath>
+  </parent>
+  <artifactId>ofbiz-catalina-lib</artifactId>
+  <packaging>pom</packaging>
+
+  <dependencies>
+    <dependency>
+      <groupId>apache-tomcat</groupId>
+      <artifactId>catalina</artifactId>
+      <version>7.0.59</version>
+      <scope>system</scope>
+      <systemPath>${project.basedir}/tomcat-7.0.59-catalina.jar</systemPath>
+    </dependency>
+    <dependency>
+      <groupId>apache-tomcat</groupId>
+      <artifactId>catalina-ha</artifactId>
+      <version>7.0.59</version>
+      <scope>system</scope>
+      <systemPath>${project.basedir}/tomcat-7.0.59-catalina-ha.jar</systemPath>
+    </dependency>
+    <dependency>
+      <groupId>apache-tomcat</groupId>
+      <artifactId>catalina-tribes</artifactId>
+      <version>7.0.59</version>
+      <scope>system</scope>
+      <systemPath>${project.basedir}/tomcat-7.0.59-catalina-tribes.jar</systemPath>
+    </dependency>
+    <dependency>
+      <groupId>apache-tomcat</groupId>
+      <artifactId>jasper</artifactId>
+      <version>7.0.59</version>
+      <scope>system</scope>
+      <systemPath>${project.basedir}/tomcat-7.0.59-jasper.jar</systemPath>
+    </dependency>
+    <dependency>
+      <groupId>apache-tomcat</groupId>
+      <artifactId>tomcat-api</artifactId>
+      <version>7.0.59</version>
+      <scope>system</scope>
+      <systemPath>${project.basedir}/tomcat-7.0.59-tomcat-api.jar</systemPath>
+    </dependency>
+    <dependency>
+      <groupId>apache-tomcat</groupId>
+      <artifactId>tomcat-coyote</artifactId>
+      <version>7.0.59</version>
+      <scope>system</scope>
+      <systemPath>${project.basedir}/tomcat-7.0.59-tomcat-coyote.jar</systemPath>
+    </dependency>
+    <dependency>
+      <groupId>apache-tomcat</groupId>
+      <artifactId>tomcat-util</artifactId>
+      <version>7.0.59</version>
+      <scope>system</scope>
+      <systemPath>${project.basedir}/tomcat-7.0.59-tomcat-util.jar</systemPath>
+    </dependency>
+    <dependency>
+      <groupId>apache-tomcat-extras</groupId>
+      <artifactId>tomcat-juli-adapters</artifactId>
+      <version>7.0.59</version>
+      <scope>system</scope>
+      <systemPath>${project.basedir}/tomcat-extras-7.0.59-tomcat-juli-adapters.jar</systemPath>
+    </dependency>
+    <dependency>
+      <groupId>apache-tomcat-extras</groupId>
+      <artifactId>tomcat-juli</artifactId>
+      <version>7.0.59</version>
+      <scope>system</scope>
+      <systemPath>${project.basedir}/tomcat-extras-7.0.59-tomcat-juli.jar</systemPath>
+    </dependency>
+    <dependency>
+      <groupId>ecj</groupId>
+      <artifactId>ecj</artifactId>
+      <version>4.4</version>
+      <scope>system</scope>
+      <systemPath>${project.basedir}/ecj-4.4.jar</systemPath>
+    </dependency>
+  </dependencies>
+</project>
