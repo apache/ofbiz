@@ -48,6 +48,12 @@ under the License.
           <include>META-INF/**</include>
         </includes>
       </resource>
+      <resource>
+        <directory>dtd</directory>
+        <includes>
+          <include>*.dtd</include>
+        </includes>
+      </resource>
     </resources>
     <scriptSourceDirectory>scripts</scriptSourceDirectory>
     <pluginManagement>
