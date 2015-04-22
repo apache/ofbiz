@@ -1,12 +1,16 @@
 applications/*/build
+applications/*/lib/**/build
 framework/*/build
+framework/*/lib/**/build
 framework/base/lib/cobertura-*.jar
 framework/base/lib/asm*.jar
 framework/base/lib/oro*.jar
 framework/entity/lib/jdbc/*.jar
 !framework/entity/lib/jdbc/derby*.jar
 hot-deploy/*/build
+hot-deploy/*/lib/**/build
 specialpurpose/*/build
+specialpurpose/*/lib/**/build
 applications/content/index/
 bin/
 ofbiz.jar
