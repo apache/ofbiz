@@ -1194,31 +1194,37 @@ public class UtilDateTime {
         }
 
         @Override
+        @Deprecated
         public void setYear(int year) {
             throw new UnsupportedOperationException();
         }
 
         @Override
+        @Deprecated
         public void setMonth(int month) {
             throw new UnsupportedOperationException();
         }
 
         @Override
+        @Deprecated
         public void setDate(int date) {
             throw new UnsupportedOperationException();
         }
 
         @Override
+        @Deprecated
         public void setHours(int hours) {
             throw new UnsupportedOperationException();
         }
 
         @Override
+        @Deprecated
         public void setMinutes(int minutes) {
             throw new UnsupportedOperationException();
         }
 
         @Override
+        @Deprecated
         public void setSeconds(int seconds) {
             throw new UnsupportedOperationException();
         }
