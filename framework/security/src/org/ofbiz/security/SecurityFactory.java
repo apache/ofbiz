@@ -102,6 +102,7 @@ public final class SecurityFactory {
         }
 
         @Override
+        @Deprecated
         public Iterator<GenericValue> findUserLoginSecurityGroupByUserLoginId(String userLoginId) {
             try {
                 List<GenericValue> collection = EntityUtil.filterByDate(EntityQuery.use(delegator).from("UserLoginSecurityGroup").where("userLoginId", userLoginId).cache(true).queryList());
@@ -113,6 +114,7 @@ public final class SecurityFactory {
         }
 
         @Override
+        @Deprecated
         public Delegator getDelegator() {
             return this.delegator;
         }
@@ -261,6 +263,7 @@ public final class SecurityFactory {
         }
 
         @Override
+        @Deprecated
         public boolean securityGroupPermissionExists(String groupId, String permission) {
             try {
                 return EntityQuery.use(delegator).from("SecurityGroupPermission").where("groupId", groupId, "permissionId", permission).cache(true).queryOne() != null;
@@ -271,6 +274,7 @@ public final class SecurityFactory {
         }
 
         @Override
+        @Deprecated
         public void setDelegator(Delegator delegator) {
             if (this.delegator != null) {
                 throw new IllegalStateException("This object has been initialized already.");
