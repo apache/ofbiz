@@ -110,6 +110,11 @@ under the License.
           <artifactId>maven-clean-plugin</artifactId>
           <version>2.3</version>
         </plugin>
+        <plugin>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>cobertura-maven-plugin</artifactId>
+          <version>2.7</version>
+        </plugin>
       </plugins>
     </pluginManagement>
     <plugins>
@@ -302,6 +307,21 @@ under the License.
           <systemPropertyVariables>
             <ofbiz.home>${ofbiz.home.dir}</ofbiz.home>
           </systemPropertyVariables>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>cobertura-maven-plugin</artifactId>
+        <configuration>
+          <formats>
+            <format>html</format>
+            <format>xml</format>
+          </formats>
+          <instrumentation>
+            <includes>
+              <include>org/ofbiz/**/*.class</include>
+            </includes>
+          </instrumentation>
         </configuration>
       </plugin>
       <plugin>
