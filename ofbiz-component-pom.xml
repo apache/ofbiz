@@ -342,7 +342,7 @@ under the License.
   </build>
 
   <reporting>
-    <outputDirectory>target/site</outputDirectory>
+    <outputDirectory>build/site</outputDirectory>
   </reporting>
 
 </project>
