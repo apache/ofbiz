@@ -51,5 +51,6 @@ under the License.
     <module>webapp/lib</module>
     <module>webapp</module>
     <module>widget</module>
+    <module>common</module>
   </modules>
 </project>
