@@ -33,9 +33,6 @@ under the License.
     <dependency>
       <groupId>derby</groupId>
       <artifactId>derby</artifactId>
-      <version>10.11.1.1</version>
-      <scope>system</scope>
-      <systemPath>${project.basedir}/derby-10.11.1.1.jar</systemPath>
     </dependency>
   </dependencies>
 </project>

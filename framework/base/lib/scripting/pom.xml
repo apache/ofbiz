@@ -33,51 +33,30 @@ under the License.
     <dependency>
       <groupId>antlr</groupId>
       <artifactId>antlr</artifactId>
-      <version>2.7.6</version>
-      <scope>system</scope>
-      <systemPath>${project.basedir}/antlr-2.7.6.jar</systemPath>
     </dependency>
     <dependency>
       <groupId>asm</groupId>
       <artifactId>asm</artifactId>
-      <version>3.2</version>
-      <scope>system</scope>
-      <systemPath>${project.basedir}/asm-3.2.jar</systemPath>
     </dependency>
     <dependency>
       <groupId>bsf</groupId>
       <artifactId>bsf</artifactId>
-      <version>2.4.0</version>
-      <scope>system</scope>
-      <systemPath>${project.basedir}/bsf-2.4.0.jar</systemPath>
     </dependency>
     <dependency>
       <groupId>bsh</groupId>
       <artifactId>bsh</artifactId>
-      <version>2.0b4</version>
-      <scope>system</scope>
-      <systemPath>${project.basedir}/bsh-2.0b4.jar</systemPath>
     </dependency>
     <dependency>
       <groupId>groovy-all</groupId>
       <artifactId>groovy-all</artifactId>
-      <version>2.2.1</version>
-      <scope>system</scope>
-      <systemPath>${project.basedir}/groovy-all-2.2.1.jar</systemPath>
     </dependency>
     <dependency>
       <groupId>apache-oro</groupId>
       <artifactId>oro</artifactId>
-      <version>2.0.8</version>
-      <scope>system</scope>
-      <systemPath>${project.basedir}/jakarta-oro-2.0.8.jar</systemPath>
     </dependency>
     <dependency>
       <groupId>jython-nooro</groupId>
       <artifactId>jython-nooro</artifactId>
-      <version>0.1</version>
-      <scope>system</scope>
-      <systemPath>${project.basedir}/jython-nooro.jar</systemPath>
     </dependency>
   </dependencies>
 </project>

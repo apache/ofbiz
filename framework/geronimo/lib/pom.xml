@@ -33,9 +33,6 @@ under the License.
     <dependency>
       <groupId>geronimo</groupId>
       <artifactId>geronimo-transaction</artifactId>
-      <version>3.1.1</version>
-      <scope>system</scope>
-      <systemPath>${project.basedir}/geronimo-transaction-3.1.1.jar</systemPath>
     </dependency>
   </dependencies>
 </project>

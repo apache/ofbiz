@@ -38,107 +38,62 @@ ant-1.9.0-ant-launcher.jar
     <dependency>
       <groupId>avalon-framework</groupId>
       <artifactId>avalon-framework</artifactId>
-      <version>4.2.0</version>
-      <scope>system</scope>
-      <systemPath>${project.basedir}/avalon-framework-4.2.0.jar</systemPath>
     </dependency>
     <dependency>
       <groupId>barcode4j</groupId>
       <artifactId>barcode4j-fop-ext-complete</artifactId>
-      <version>2.1</version>
-      <scope>system</scope>
-      <systemPath>${project.basedir}/barcode4j-2.1-barcode4j-fop-ext-complete.jar</systemPath>
     </dependency>
     <dependency>
       <groupId>batik</groupId>
       <artifactId>batik-all</artifactId>
-      <version>1.7</version>
-      <scope>system</scope>
-      <systemPath>${project.basedir}/batik-all-1.7.jar</systemPath>
     </dependency>
     <dependency>
       <groupId>bsh-engine</groupId>
       <artifactId>bsh</artifactId>
-      <version>2.0b4</version>
-      <scope>system</scope>
-      <systemPath>${project.basedir}/bsh-engine-modified.jar</systemPath>
     </dependency>
     <dependency>
       <groupId>clhm</groupId>
       <artifactId>clhm-release-lru</artifactId>
-      <version>1.0</version>
-      <scope>system</scope>
-      <systemPath>${project.basedir}/clhm-release-1.0-lru.jar</systemPath>
     </dependency>
     <dependency>
       <groupId>esapi</groupId>
       <artifactId>esapi</artifactId>
-      <version>2.1.0</version>
-      <scope>system</scope>
-      <systemPath>${project.basedir}/esapi-2.1.0.jar</systemPath>
     </dependency>
     <dependency>
       <groupId>fop</groupId>
       <artifactId>fop</artifactId>
-      <version>1.1</version>
-      <scope>system</scope>
-      <systemPath>${project.basedir}/fop-1.1.jar</systemPath>
     </dependency>
     <dependency>
       <groupId>freemarker</groupId>
       <artifactId>freemarker</artifactId>
-      <version>2.3.22</version>
-      <scope>system</scope>
-      <systemPath>${project.basedir}/freemarker-2.3.22.jar</systemPath>
     </dependency>
     <dependency>
       <groupId>hamcrest-all</groupId>
       <artifactId>hamcrest-all</artifactId>
-      <version>1.2</version>
-      <scope>system</scope>
-      <systemPath>${project.basedir}/hamcrest-all-1.2.jar</systemPath>
     </dependency>
     <dependency>
       <groupId>httpclient</groupId>
       <artifactId>httpclient</artifactId>
-      <version>4.3.6</version>
-      <scope>system</scope>
-      <systemPath>${project.basedir}/httpclient-4.3.6.jar</systemPath>
     </dependency>
     <dependency>
       <groupId>httpclient-cache</groupId>
       <artifactId>httpclient-cache</artifactId>
-      <version>4.3.6</version>
-      <scope>system</scope>
-      <systemPath>${project.basedir}/httpclient-cache-4.3.6.jar</systemPath>
     </dependency>
     <dependency>
       <groupId>httpcore</groupId>
       <artifactId>httpcore</artifactId>
-      <version>4.3.3</version>
-      <scope>system</scope>
-      <systemPath>${project.basedir}/httpcore-4.3.3.jar</systemPath>
     </dependency>
     <dependency>
       <groupId>httpunit</groupId>
       <artifactId>httpunit</artifactId>
-      <version>1.7</version>
-      <scope>system</scope>
-      <systemPath>${project.basedir}/httpunit-1.7.jar</systemPath>
     </dependency>
     <dependency>
       <groupId>ical4j</groupId>
       <artifactId>ical4j</artifactId>
-      <version>1.0-rc2</version>
-      <scope>system</scope>
-      <systemPath>${project.basedir}/ical4j-1.0-rc2.jar</systemPath>
     </dependency>
     <dependency>
       <groupId>icu4j</groupId>
       <artifactId>icu4j</artifactId>
-      <version>52_1</version>
-      <scope>system</scope>
-      <systemPath>${project.basedir}/icu4j-52_1.jar</systemPath>
     </dependency>
 <!--
 ivy-2.2.0.jar
@@ -146,226 +101,130 @@ ivy-2.2.0.jar
     <dependency>
       <groupId>jackson</groupId>
       <artifactId>jackson-annotations</artifactId>
-      <version>2.4.0</version>
-      <scope>system</scope>
-      <systemPath>${project.basedir}/jackson-annotations-2.4.0.jar</systemPath>
     </dependency>
     <dependency>
       <groupId>jackson</groupId>
       <artifactId>jackson-core</artifactId>
-      <version>2.4.2</version>
-      <scope>system</scope>
-      <systemPath>${project.basedir}/jackson-core-2.4.2.jar</systemPath>
     </dependency>
     <dependency>
       <groupId>jackson</groupId>
       <artifactId>jackson-databind</artifactId>
-      <version>2.4.2</version>
-      <scope>system</scope>
-      <systemPath>${project.basedir}/jackson-databind-2.4.2.jar</systemPath>
     </dependency>
     <dependency>
       <groupId>javolution</groupId>
       <artifactId>javolution</artifactId>
-      <version>5.4.3</version>
-      <scope>system</scope>
-      <systemPath>${project.basedir}/javolution-5.4.3.jar</systemPath>
     </dependency>
     <dependency>
       <groupId>jdbm</groupId>
       <artifactId>jdbm</artifactId>
-      <version>1.0-SNAPSHOT</version>
-      <scope>system</scope>
-      <systemPath>${project.basedir}/jdbm-1.0-SNAPSHOT.jar</systemPath>
     </dependency>
     <dependency>
       <groupId>jdom</groupId>
       <artifactId>jdom</artifactId>
-      <version>1.1</version>
-      <scope>system</scope>
-      <systemPath>${project.basedir}/jdom-1.1.jar</systemPath>
     </dependency>
     <dependency>
       <groupId>jpim</groupId>
       <artifactId>jpim</artifactId>
-      <version>0.1</version>
-      <scope>system</scope>
-      <systemPath>${project.basedir}/jpim-0.1.jar</systemPath>
     </dependency>
     <dependency>
       <groupId>juel-impl</groupId>
       <artifactId>juel-impl</artifactId>
-      <version>2.2.7</version>
-      <scope>system</scope>
-      <systemPath>${project.basedir}/juel-impl-2.2.7.jar</systemPath>
     </dependency>
     <dependency>
       <groupId>juel-spi</groupId>
       <artifactId>juel-spi</artifactId>
-      <version>2.2.7</version>
-      <scope>system</scope>
-      <systemPath>${project.basedir}/juel-spi-2.2.7.jar</systemPath>
     </dependency>
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit-dep</artifactId>
-      <version>4.10</version>
-      <scope>system</scope>
-      <systemPath>${project.basedir}/junit-dep-4.10.jar</systemPath>
     </dependency>
     <dependency>
       <groupId>log4j</groupId>
       <artifactId>log4j-1.2-api</artifactId>
-      <version>2.2</version>
-      <scope>system</scope>
-      <systemPath>${project.basedir}/log4j-1.2-api-2.2.jar</systemPath>
     </dependency>
     <dependency>
       <groupId>log4j</groupId>
       <artifactId>log4j-api</artifactId>
-      <version>2.2</version>
-      <scope>system</scope>
-      <systemPath>${project.basedir}/log4j-api-2.2.jar</systemPath>
     </dependency>
     <dependency>
       <groupId>log4j</groupId>
       <artifactId>log4j-core</artifactId>
-      <version>2.2</version>
-      <scope>system</scope>
-      <systemPath>${project.basedir}/log4j-core-2.2.jar</systemPath>
     </dependency>
     <dependency>
       <groupId>log4j</groupId>
       <artifactId>log4j-nosql</artifactId>
-      <version>2.2</version>
-      <scope>system</scope>
-      <systemPath>${project.basedir}/log4j-nosql-2.2.jar</systemPath>
     </dependency>
     <dependency>
       <groupId>log4j</groupId>
       <artifactId>log4j-slf4j-impl</artifactId>
-      <version>2.2</version>
-      <scope>system</scope>
-      <systemPath>${project.basedir}/log4j-slf4j-impl-2.2.jar</systemPath>
     </dependency>
     <dependency>
       <groupId>mail</groupId>
       <artifactId>mail</artifactId>
-      <version>1.5.1</version>
-      <scope>system</scope>
-      <systemPath>${project.basedir}/mail-1.5.1.jar</systemPath>
     </dependency>
     <dependency>
       <groupId>nekohtml</groupId>
       <artifactId>nekohtml</artifactId>
-      <version>1.9.16</version>
-      <scope>system</scope>
-      <systemPath>${project.basedir}/nekohtml-1.9.16.jar</systemPath>
     </dependency>
     <dependency>
       <groupId>resolver</groupId>
       <artifactId>resolver</artifactId>
-      <version>2.9.1</version>
-      <scope>system</scope>
-      <systemPath>${project.basedir}/resolver-2.9.1.jar</systemPath>
     </dependency>
     <dependency>
       <groupId>serializer</groupId>
       <artifactId>serializer</artifactId>
-      <version>2.9.1</version>
-      <scope>system</scope>
-      <systemPath>${project.basedir}/serializer-2.9.1.jar</systemPath>
     </dependency>
     <dependency>
       <groupId>slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
-      <version>1.6.4</version>
-      <scope>system</scope>
-      <systemPath>${project.basedir}/slf4j-api-1.6.4.jar</systemPath>
     </dependency>
     <dependency>
       <groupId>ws</groupId>
       <artifactId>ws-commons-java5</artifactId>
-      <version>1.0.1</version>
-      <scope>system</scope>
-      <systemPath>${project.basedir}/ws-commons-java5-1.0.1.jar</systemPath>
     </dependency>
     <dependency>
       <groupId>ws</groupId>
       <artifactId>ws-commons-util</artifactId>
-      <version>1.0.2</version>
-      <scope>system</scope>
-      <systemPath>${project.basedir}/ws-commons-util-1.0.2.jar</systemPath>
     </dependency>
     <dependency>
       <groupId>xalan</groupId>
       <artifactId>xalan</artifactId>
-      <version>2.7.1</version>
-      <scope>system</scope>
-      <systemPath>${project.basedir}/xalan-2.7.1.jar</systemPath>
     </dependency>
     <dependency>
       <groupId>xerces</groupId>
       <artifactId>xerces</artifactId>
-      <version>2.9.1</version>
-      <scope>system</scope>
-      <systemPath>${project.basedir}/xercesImpl-2.9.1.jar</systemPath>
     </dependency>
     <dependency>
       <groupId>xml-apis</groupId>
       <artifactId>xml-apis</artifactId>
-      <version>2.9.1</version>
-      <scope>system</scope>
-      <systemPath>${project.basedir}/xml-apis-2.9.1.jar</systemPath>
     </dependency>
     <dependency>
       <groupId>xml-apis</groupId>
       <artifactId>xml-apis-ext</artifactId>
-      <version>1.3.04</version>
-      <scope>system</scope>
-      <systemPath>${project.basedir}/xml-apis-ext-1.3.04.jar</systemPath>
     </dependency>
     <dependency>
       <groupId>xmlgraphics-commons</groupId>
       <artifactId>xmlgraphics-commons</artifactId>
-      <version>1.5</version>
-      <scope>system</scope>
-      <systemPath>${project.basedir}/xmlgraphics-commons-1.5.jar</systemPath>
     </dependency>
     <dependency>
       <groupId>xmlrpc</groupId>
       <artifactId>xmlrpc-client</artifactId>
-      <version>3.1.2</version>
-      <scope>system</scope>
-      <systemPath>${project.basedir}/xmlrpc-client-3.1.2.jar</systemPath>
     </dependency>
     <dependency>
       <groupId>xmlrpc</groupId>
       <artifactId>xmlrpc-common</artifactId>
-      <version>3.1.2</version>
-      <scope>system</scope>
-      <systemPath>${project.basedir}/xmlrpc-common-3.1.2.jar</systemPath>
     </dependency>
     <dependency>
       <groupId>xmlrpc</groupId>
       <artifactId>xmlrpc-server</artifactId>
-      <version>3.1.2</version>
-      <scope>system</scope>
-      <systemPath>${project.basedir}/xmlrpc-server-3.1.2.jar</systemPath>
     </dependency>
     <dependency>
       <groupId>xpp3</groupId>
       <artifactId>xpp3</artifactId>
-      <version>1.1.4c</version>
-      <scope>system</scope>
-      <systemPath>${project.basedir}/xpp3-1.1.4c.jar</systemPath>
     </dependency>
     <dependency>
       <groupId>xstream</groupId>
       <artifactId>xstream</artifactId>
-      <version>1.4.6</version>
-      <scope>system</scope>
-      <systemPath>${project.basedir}/xstream-1.4.6.jar</systemPath>
     </dependency>
   </dependencies>
 </project>

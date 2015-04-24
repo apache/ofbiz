@@ -33,72 +33,42 @@ under the License.
     <dependency>
       <groupId>apache-tomcat</groupId>
       <artifactId>catalina</artifactId>
-      <version>7.0.59</version>
-      <scope>system</scope>
-      <systemPath>${project.basedir}/tomcat-7.0.59-catalina.jar</systemPath>
     </dependency>
     <dependency>
       <groupId>apache-tomcat</groupId>
       <artifactId>catalina-ha</artifactId>
-      <version>7.0.59</version>
-      <scope>system</scope>
-      <systemPath>${project.basedir}/tomcat-7.0.59-catalina-ha.jar</systemPath>
     </dependency>
     <dependency>
       <groupId>apache-tomcat</groupId>
       <artifactId>catalina-tribes</artifactId>
-      <version>7.0.59</version>
-      <scope>system</scope>
-      <systemPath>${project.basedir}/tomcat-7.0.59-catalina-tribes.jar</systemPath>
     </dependency>
     <dependency>
       <groupId>apache-tomcat</groupId>
       <artifactId>jasper</artifactId>
-      <version>7.0.59</version>
-      <scope>system</scope>
-      <systemPath>${project.basedir}/tomcat-7.0.59-jasper.jar</systemPath>
     </dependency>
     <dependency>
       <groupId>apache-tomcat</groupId>
       <artifactId>tomcat-api</artifactId>
-      <version>7.0.59</version>
-      <scope>system</scope>
-      <systemPath>${project.basedir}/tomcat-7.0.59-tomcat-api.jar</systemPath>
     </dependency>
     <dependency>
       <groupId>apache-tomcat</groupId>
       <artifactId>tomcat-coyote</artifactId>
-      <version>7.0.59</version>
-      <scope>system</scope>
-      <systemPath>${project.basedir}/tomcat-7.0.59-tomcat-coyote.jar</systemPath>
     </dependency>
     <dependency>
       <groupId>apache-tomcat</groupId>
       <artifactId>tomcat-util</artifactId>
-      <version>7.0.59</version>
-      <scope>system</scope>
-      <systemPath>${project.basedir}/tomcat-7.0.59-tomcat-util.jar</systemPath>
     </dependency>
     <dependency>
       <groupId>apache-tomcat-extras</groupId>
       <artifactId>tomcat-juli-adapters</artifactId>
-      <version>7.0.59</version>
-      <scope>system</scope>
-      <systemPath>${project.basedir}/tomcat-extras-7.0.59-tomcat-juli-adapters.jar</systemPath>
     </dependency>
     <dependency>
       <groupId>apache-tomcat-extras</groupId>
       <artifactId>tomcat-juli</artifactId>
-      <version>7.0.59</version>
-      <scope>system</scope>
-      <systemPath>${project.basedir}/tomcat-extras-7.0.59-tomcat-juli.jar</systemPath>
     </dependency>
     <dependency>
       <groupId>ecj</groupId>
       <artifactId>ecj</artifactId>
-      <version>4.4</version>
-      <scope>system</scope>
-      <systemPath>${project.basedir}/ecj-4.4.jar</systemPath>
     </dependency>
   </dependencies>
 </project>

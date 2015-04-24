@@ -33,9 +33,6 @@ under the License.
     <dependency>
       <groupId>commons-dbcp2</groupId>
       <artifactId>commons-dbcp2</artifactId>
-      <version>2.1</version>
-      <scope>system</scope>
-      <systemPath>${project.basedir}/commons-dbcp2-2.1.jar</systemPath>
     </dependency>
   </dependencies>
 </project>
