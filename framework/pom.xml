@@ -46,5 +46,6 @@ under the License.
     <module>security</module>
     <module>service/lib</module>
     <module>service</module>
+    <module>entityext</module>
   </modules>
 </project>
