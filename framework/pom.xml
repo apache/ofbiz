@@ -50,5 +50,6 @@ under the License.
     <module>minilang</module>
     <module>webapp/lib</module>
     <module>webapp</module>
+    <module>widget</module>
   </modules>
 </project>
