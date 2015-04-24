@@ -34,16 +34,26 @@ under the License.
       <artifactId>ofbiz-geronimo-lib</artifactId>
       <version>TRUNK</version>
       <type>pom</type>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>ofbiz-base-lib-j2eespecs</artifactId>
+      <version>TRUNK</version>
+      <type>pom</type>
+      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>ofbiz-base</artifactId>
       <version>TRUNK</version>
+      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>ofbiz-entity</artifactId>
       <version>TRUNK</version>
+      <scope>provided</scope>
     </dependency>
   </dependencies>
 </project>
