@@ -100,7 +100,18 @@ under the License.
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-assembly-plugin</artifactId>
+          <version>2.5.3</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-dependency-plugin</artifactId>
+          <version>2.3</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-resources-plugin</artifactId>
+          <version>2.7</version>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
@@ -108,7 +119,7 @@ under the License.
           <version>3.3</version>
         </plugin>
         <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
+          <groupId>org.codehaus.mojo</groupId>
           <artifactId>rmic-maven-plugin</artifactId>
           <version>1.2.1</version>
         </plugin>
@@ -213,7 +224,6 @@ under the License.
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-dependency-plugin</artifactId>
-        <version>2.3</version>
         <configuration>
           <includes>**/*</includes>
           <overWriteReleases>true</overWriteReleases>
