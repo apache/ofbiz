@@ -272,6 +272,7 @@ under the License.
           <target>1.7</target>
           <compilerArgs>
             <arg>-Xlint:-path</arg>
+            <arg>-Xmaxerrs</arg><arg>10000</arg>
             <!--
             Please leave this line here.  It makes it easier to enable/disable it.
             <arg>-Xlint:unchecked</arg>
