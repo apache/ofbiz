@@ -48,8 +48,8 @@ ant-1.9.0-ant-launcher.jar
       <artifactId>batik-all</artifactId>
     </dependency>
     <dependency>
-      <groupId>bsh-engine</groupId>
-      <artifactId>bsh</artifactId>
+      <groupId>bsh</groupId>
+      <artifactId>bsh-engine-modified</artifactId>
     </dependency>
     <dependency>
       <groupId>clhm</groupId>

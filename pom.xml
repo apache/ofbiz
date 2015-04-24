@@ -62,8 +62,8 @@ under the License.
         <systemPath>${user.dir}/framework/base/lib/batik-all-1.7.jar</systemPath>
       </dependency>
       <dependency>
-        <groupId>bsh-engine</groupId>
-        <artifactId>bsh</artifactId>
+        <groupId>bsh</groupId>
+        <artifactId>bsh-engine-modified</artifactId>
         <version>2.0b4</version>
         <scope>system</scope>
         <systemPath>${user.dir}/framework/base/lib/bsh-engine-modified.jar</systemPath>
