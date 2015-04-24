@@ -37,5 +37,6 @@ under the License.
     <module>workeffort</module>
     <module>product/lib</module>
     <module>product</module>
+    <module>marketing</module>
   </modules>
 </project>
