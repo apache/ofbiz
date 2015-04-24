@@ -766,6 +766,29 @@ under the License.
         <scope>system</scope>
         <systemPath>${user.dir}/framework/service/lib/XmlSchema-1.4.3.jar</systemPath>
       </dependency>
+
+      <!-- framework/service/lib -->
+      <dependency>
+        <groupId>ezmorph</groupId>
+        <artifactId>ezmorph</artifactId>
+        <version>0.9.1</version>
+        <scope>system</scope>
+        <systemPath>${user.dir}/framework/webapp/lib/ezmorph-0.9.1.jar</systemPath>
+      </dependency>
+      <dependency>
+        <groupId>iText</groupId>
+        <artifactId>iText</artifactId>
+        <version>2.1.7</version>
+        <scope>system</scope>
+        <systemPath>${user.dir}/framework/webapp/lib/iText-2.1.7.jar</systemPath>
+      </dependency>
+      <dependency>
+        <groupId>rome</groupId>
+        <artifactId>rome</artifactId>
+        <version>0.9</version>
+        <scope>system</scope>
+        <systemPath>${user.dir}/framework/webapp/lib/rome-0.9.jar</systemPath>
+      </dependency>
     </dependencies>
   </dependencyManagement>
 

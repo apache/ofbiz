@@ -24,31 +24,23 @@ under the License.
     <groupId>org.apache.ofbiz</groupId>
     <artifactId>ofbiz-parent</artifactId>
     <version>TRUNK</version>
-    <relativePath>../pom.xml</relativePath>
+    <relativePath>../../../pom.xml</relativePath>
   </parent>
-  <artifactId>ofbiz-framework</artifactId>
+  <artifactId>ofbiz-webapp-lib</artifactId>
   <packaging>pom</packaging>
 
-  <modules>
-    <module>start</module>
-    <module>base/lib</module>
-    <module>base/lib/commons</module>
-    <module>base/lib/j2eespecs</module>
-    <module>base/lib/scripting</module>
-    <module>base</module>
-    <module>entity/lib</module>
-    <module>entity/lib/jdbc</module>
-    <module>entity</module>
-    <module>geronimo/lib</module>
-    <module>geronimo</module>
-    <module>catalina/lib</module>
-    <module>catalina</module>
-    <module>security</module>
-    <module>service/lib</module>
-    <module>service</module>
-    <module>entityext</module>
-    <module>minilang</module>
-    <module>webapp/lib</module>
-    <module>webapp</module>
-  </modules>
+  <dependencies>
+    <dependency>
+      <groupId>ezmorph</groupId>
+      <artifactId>ezmorph</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>iText</groupId>
+      <artifactId>iText</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>rome</groupId>
+      <artifactId>rome</artifactId>
+    </dependency>
+  </dependencies>
 </project>
