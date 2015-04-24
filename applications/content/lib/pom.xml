@@ -24,14 +24,39 @@ under the License.
     <groupId>org.apache.ofbiz</groupId>
     <artifactId>ofbiz-parent</artifactId>
     <version>TRUNK</version>
-    <relativePath>../pom.xml</relativePath>
+    <relativePath>../../../pom.xml</relativePath>
   </parent>
-  <artifactId>ofbiz-applications</artifactId>
+  <artifactId>ofbiz-content-lib</artifactId>
   <packaging>pom</packaging>
 
-  <modules>
-    <module>content/lib</module>
-    <module>content/lib/uno</module>
-    <module>content</module>
-  </modules>
+  <dependencies>
+    <dependency>
+      <groupId>dom4j</groupId>
+      <artifactId>dom4j</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>fontbox</groupId>
+      <artifactId>fontbox</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>jempbox</groupId>
+      <artifactId>jempbox</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>pdfbox</groupId>
+      <artifactId>pdfbox</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>apache-poi</groupId>
+      <artifactId>poi</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>tika</groupId>
+      <artifactId>tika-core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>tika</groupId>
+      <artifactId>tika-parsers</artifactId>
+    </dependency>
+  </dependencies>
 </project>

@@ -818,6 +818,59 @@ under the License.
         <scope>system</scope>
         <systemPath>${user.dir}/framework/testtools/lib/org.springframework.test-3.1.0.M2.jar</systemPath>
       </dependency>
+
+      <!-- applications/content/lib -->
+      <dependency>
+        <groupId>dom4j</groupId>
+        <artifactId>dom4j</artifactId>
+        <version>1.6.1</version>
+        <scope>system</scope>
+        <systemPath>${user.dir}/applications/content/lib/dom4j-1.6.1.jar</systemPath>
+      </dependency>
+      <dependency>
+        <groupId>fontbox</groupId>
+        <artifactId>fontbox</artifactId>
+        <version>1.7.1</version>
+        <scope>system</scope>
+        <systemPath>${user.dir}/applications/content/lib/fontbox-1.7.1.jar</systemPath>
+      </dependency>
+      <dependency>
+        <groupId>jempbox</groupId>
+        <artifactId>jempbox</artifactId>
+        <version>1.7.1</version>
+        <scope>system</scope>
+        <systemPath>${user.dir}/applications/content/lib/jempbox-1.7.1.jar</systemPath>
+      </dependency>
+      <dependency>
+        <groupId>pdfbox</groupId>
+        <artifactId>pdfbox</artifactId>
+        <version>1.7.1</version>
+        <scope>system</scope>
+        <systemPath>${user.dir}/applications/content/lib/pdfbox-1.7.1.jar</systemPath>
+      </dependency>
+      <dependency>
+        <groupId>apache-poi</groupId>
+        <artifactId>poi</artifactId>
+        <version>3.10.1-20140818</version>
+        <scope>system</scope>
+        <systemPath>${user.dir}/applications/content/lib/poi-3.10.1-20140818.jar</systemPath>
+      </dependency>
+      <dependency>
+        <groupId>tika</groupId>
+        <artifactId>tika-core</artifactId>
+        <version>1.7</version>
+        <scope>system</scope>
+        <systemPath>${user.dir}/applications/content/lib/tika-core-1.7.jar</systemPath>
+      </dependency>
+      <dependency>
+        <groupId>tika</groupId>
+        <artifactId>tika-parsers</artifactId>
+        <version>1.7</version>
+        <scope>system</scope>
+        <systemPath>${user.dir}/applications/content/lib/tika-parsers-1.7.jar</systemPath>
+      </dependency>
+
+      <!-- applications/content/lib/uno -->
     </dependencies>
   </dependencyManagement>
 
