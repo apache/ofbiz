@@ -30,6 +30,7 @@ under the License.
 
   <modules>
     <module>framework</module>
+    <module>applications</module>
   </modules>
 
   <dependencyManagement>
