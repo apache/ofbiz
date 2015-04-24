@@ -47,5 +47,6 @@ under the License.
     <module>service/lib</module>
     <module>service</module>
     <module>entityext</module>
+    <module>minilang</module>
   </modules>
 </project>
