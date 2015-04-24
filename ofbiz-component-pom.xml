@@ -28,17 +28,22 @@ under the License.
   </parent>
   <artifactId>ofbiz-component</artifactId>
   <packaging>pom</packaging>
+  <properties>
+    <component.build.dir>build</component.build.dir>
+    <component.src.dir>src</component.src.dir>
+    <component.lib.dir>lib</component.lib.dir>
+  </properties>
 
   <build>
-    <directory>build/lib</directory>
-    <outputDirectory>build/classes</outputDirectory>
-    <testOutputDirectory>build/test-classes</testOutputDirectory>
+    <directory>${component.build.dir}/lib</directory>
+    <outputDirectory>${component.build.dir}/classes</outputDirectory>
+    <testOutputDirectory>${component.build.dir}/test-classes</testOutputDirectory>
     <finalName>${project.artifactId}</finalName>
-    <sourceDirectory>src</sourceDirectory>
-    <testSourceDirectory>src</testSourceDirectory>
+    <sourceDirectory>${component.src.dir}</sourceDirectory>
+    <testSourceDirectory>${component.src.dir}</testSourceDirectory>
     <resources>
       <resource>
-        <directory>src</directory>
+        <directory>${component.src.dir}</directory>
         <excludes>
           <exclude>main/**</exclude>
           <exclude>test/**</exclude>
@@ -56,7 +61,7 @@ under the License.
         </includes>
       </resource>
       <resource>
-        <directory>src/main/resources</directory>
+        <directory>${component.src.dir}/main/resources</directory>
       </resource>
       <resource>
         <directory>dtd</directory>
@@ -67,7 +72,7 @@ under the License.
     </resources>
     <testResources>
       <testResource>
-        <directory>src/test/resources</directory>
+        <directory>${component.src.dir}/test/resources</directory>
         <includes>
           <include>META-INF/**</include>
         </includes>
@@ -89,6 +94,11 @@ under the License.
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-compiler-plugin</artifactId>
           <version>3.3</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>rmic-maven-plugin</artifactId>
+          <version>1.2.1</version>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
@@ -131,7 +141,7 @@ under the License.
             <fileset>
               <directory>.</directory>
               <includes>
-                <include>build</include>
+                <include>${component.build.dir}</include>
               </includes>
             </fileset>
           </filesets>
@@ -380,7 +390,7 @@ under the License.
   </build>
 
   <reporting>
-    <outputDirectory>build/site</outputDirectory>
+    <outputDirectory>${component.build.dir}/site</outputDirectory>
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
