@@ -59,10 +59,13 @@ under the License.
       <groupId>apache-tomcat</groupId>
       <artifactId>catalina-tribes</artifactId>
     </dependency>
+<!--
     <dependency>
       <groupId>apache-tomcat</groupId>
       <artifactId>jasper</artifactId>
+      <scope>runtime</scope>
     </dependency>
+-->
     <dependency>
       <groupId>apache-tomcat</groupId>
       <artifactId>tomcat-api</artifactId>
@@ -75,17 +78,26 @@ under the License.
       <groupId>apache-tomcat</groupId>
       <artifactId>tomcat-util</artifactId>
     </dependency>
+<!--
     <dependency>
       <groupId>apache-tomcat-extras</groupId>
       <artifactId>tomcat-juli-adapters</artifactId>
+      <scope>runtime</scope>
     </dependency>
     <dependency>
       <groupId>apache-tomcat-extras</groupId>
       <artifactId>tomcat-juli</artifactId>
+      <scope>runtime</scope>
     </dependency>
     <dependency>
       <groupId>ecj</groupId>
       <artifactId>ecj</artifactId>
+      <scope>runtime</scope>
+    </dependency>
+-->
+    <dependency>
+      <groupId>javax.servlet</groupId>
+      <artifactId>servlet-api</artifactId>
     </dependency>
   </dependencies>
 </project>

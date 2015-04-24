@@ -36,6 +36,14 @@ under the License.
       <scope>provided</scope>
     </dependency>
     <dependency>
+      <groupId>apache-oro</groupId>
+      <artifactId>oro</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>commons-codec</groupId>
+      <artifactId>commons-codec</artifactId>
+    </dependency>
+    <dependency>
       <groupId>commons-collections</groupId>
       <artifactId>commons-collections</artifactId>
     </dependency>
@@ -48,12 +56,24 @@ under the License.
       <artifactId>commons-pool2</artifactId>
     </dependency>
     <dependency>
+      <groupId>freemarker</groupId>
+      <artifactId>freemarker</artifactId>
+    </dependency>
+    <dependency>
       <groupId>geronimo</groupId>
       <artifactId>geronimo-jta</artifactId>
     </dependency>
     <dependency>
+      <groupId>groovy-all</groupId>
+      <artifactId>groovy-all</artifactId>
+    </dependency>
+    <dependency>
       <groupId>javolution</groupId>
       <artifactId>javolution</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit-dep</artifactId>
     </dependency>
   </dependencies>
 </project>

@@ -43,6 +43,10 @@ under the License.
     </dependency>
     <dependency>
       <groupId>geronimo</groupId>
+      <artifactId>geronimo-jta</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>geronimo</groupId>
       <artifactId>geronimo-transaction</artifactId>
     </dependency>
   </dependencies>
