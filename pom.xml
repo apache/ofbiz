@@ -871,6 +871,22 @@ under the License.
       </dependency>
 
       <!-- applications/content/lib/uno -->
+
+      <!-- applications/product/lib -->
+      <dependency>
+        <groupId>dozer</groupId>
+        <artifactId>dozer</artifactId>
+        <version>4.2.1</version>
+        <scope>system</scope>
+        <systemPath>${user.dir}/applications/product/lib/dozer-4.2.1.jar</systemPath>
+      </dependency>
+      <dependency>
+        <groupId>watermarker</groupId>
+        <artifactId>watermarker</artifactId>
+        <version>0.0.4</version>
+        <scope>system</scope>
+        <systemPath>${user.dir}/applications/product/lib/watermarker-0.0.4.jar</systemPath>
+      </dependency>
     </dependencies>
   </dependencyManagement>
 

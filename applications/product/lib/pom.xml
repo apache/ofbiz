@@ -24,18 +24,19 @@ under the License.
     <groupId>org.apache.ofbiz</groupId>
     <artifactId>ofbiz-parent</artifactId>
     <version>TRUNK</version>
-    <relativePath>../pom.xml</relativePath>
+    <relativePath>../../../pom.xml</relativePath>
   </parent>
-  <artifactId>ofbiz-applications</artifactId>
+  <artifactId>ofbiz-product-lib</artifactId>
   <packaging>pom</packaging>
 
-  <modules>
-    <module>content/lib</module>
-    <module>content/lib/uno</module>
-    <module>content</module>
-    <module>party</module>
-    <module>workeffort</module>
-    <module>product/lib</module>
-    <module>product</module>
-  </modules>
+  <dependencies>
+    <dependency>
+      <groupId>dozer</groupId>
+      <artifactId>dozer</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>watermarker</groupId>
+      <artifactId>watermarker</artifactId>
+    </dependency>
+  </dependencies>
 </project>
