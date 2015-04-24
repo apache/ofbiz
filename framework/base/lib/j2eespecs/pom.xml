@@ -22,9 +22,9 @@ under the License.
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>org.apache.ofbiz</groupId>
-    <artifactId>ofbiz-component</artifactId>
+    <artifactId>ofbiz-parent</artifactId>
     <version>TRUNK</version>
-    <relativePath>../../../../ofbiz-component-pom.xml</relativePath>
+    <relativePath>../../../../pom.xml</relativePath>
   </parent>
   <artifactId>ofbiz-base-lib-j2eespecs</artifactId>
   <packaging>pom</packaging>
