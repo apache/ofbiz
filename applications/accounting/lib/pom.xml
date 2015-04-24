@@ -24,23 +24,11 @@ under the License.
     <groupId>org.apache.ofbiz</groupId>
     <artifactId>ofbiz-parent</artifactId>
     <version>TRUNK</version>
-    <relativePath>../pom.xml</relativePath>
+    <relativePath>../../../../pom.xml</relativePath>
   </parent>
-  <artifactId>ofbiz-applications</artifactId>
+  <artifactId>ofbiz-accounting-lib</artifactId>
   <packaging>pom</packaging>
 
-  <modules>
-    <module>content/lib</module>
-    <module>content/lib/uno</module>
-    <module>content</module>
-    <module>party</module>
-    <module>workeffort</module>
-    <module>product/lib</module>
-    <module>product</module>
-    <module>marketing</module>
-    <module>order</module>
-    <module>manufacturing</module>
-    <module>accounting/lib</module>
-    <module>accounting</module>
-  </modules>
+  <dependencies>
+  </dependencies>
 </project>
