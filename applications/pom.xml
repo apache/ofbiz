@@ -33,5 +33,6 @@ under the License.
     <module>content/lib</module>
     <module>content/lib/uno</module>
     <module>content</module>
+    <module>party</module>
   </modules>
 </project>
