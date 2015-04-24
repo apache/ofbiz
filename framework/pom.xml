@@ -55,5 +55,6 @@ under the License.
     <module>datafile</module>
     <module>testtools/lib</module>
     <module>testtools</module>
+    <module>webtools</module>
   </modules>
 </project>
