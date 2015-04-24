@@ -22,27 +22,28 @@ under the License.
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>org.apache.ofbiz</groupId>
-    <artifactId>ofbiz-parent</artifactId>
+    <artifactId>ofbiz-component</artifactId>
     <version>TRUNK</version>
-    <relativePath>../pom.xml</relativePath>
+    <relativePath>../../ofbiz-component-pom.xml</relativePath>
   </parent>
-  <artifactId>ofbiz-framework</artifactId>
-  <packaging>pom</packaging>
+  <artifactId>ofbiz-security</artifactId>
 
-  <modules>
-    <module>start</module>
-    <module>base/lib</module>
-    <module>base/lib/commons</module>
-    <module>base/lib/j2eespecs</module>
-    <module>base/lib/scripting</module>
-    <module>base</module>
-    <module>entity/lib</module>
-    <module>entity/lib/jdbc</module>
-    <module>entity</module>
-    <module>geronimo/lib</module>
-    <module>geronimo</module>
-    <module>catalina/lib</module>
-    <module>catalina</module>
-    <module>security</module>
-  </modules>
+  <dependencies>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>ofbiz-base</artifactId>
+      <version>TRUNK</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>ofbiz-entity</artifactId>
+      <version>TRUNK</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>javax.servlet</groupId>
+      <artifactId>servlet-api</artifactId>
+    </dependency>
+  </dependencies>
 </project>
