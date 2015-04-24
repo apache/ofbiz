@@ -44,5 +44,7 @@ under the License.
     <module>catalina/lib</module>
     <module>catalina</module>
     <module>security</module>
+    <module>service/lib</module>
+    <module>service</module>
   </modules>
 </project>
