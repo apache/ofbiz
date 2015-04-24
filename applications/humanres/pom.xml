@@ -22,27 +22,22 @@ under the License.
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>org.apache.ofbiz</groupId>
-    <artifactId>ofbiz-parent</artifactId>
+    <artifactId>ofbiz-component</artifactId>
     <version>TRUNK</version>
-    <relativePath>../pom.xml</relativePath>
+    <relativePath>../../ofbiz-component-pom.xml</relativePath>
   </parent>
-  <artifactId>ofbiz-applications</artifactId>
-  <packaging>pom</packaging>
+  <artifactId>ofbiz-humanres</artifactId>
 
-  <modules>
-    <module>content/lib</module>
-    <module>content/lib/uno</module>
-    <module>content</module>
-    <module>party</module>
-    <module>workeffort</module>
-    <module>product/lib</module>
-    <module>product</module>
-    <module>marketing</module>
-    <module>order</module>
-    <module>manufacturing</module>
-    <module>accounting/lib</module>
-    <module>accounting</module>
-    <module>securityext</module>
-    <module>humanres</module>
-  </modules>
+  <dependencies>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>ofbiz-base</artifactId>
+      <version>TRUNK</version>
+    </dependency>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>ofbiz-entity</artifactId>
+      <version>TRUNK</version>
+    </dependency>
+  </dependencies>
 </project>
