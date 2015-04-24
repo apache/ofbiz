@@ -42,5 +42,6 @@ under the License.
     <module>manufacturing</module>
     <module>accounting/lib</module>
     <module>accounting</module>
+    <module>securityext</module>
   </modules>
 </project>
