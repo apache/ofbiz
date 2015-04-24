@@ -22,36 +22,22 @@ under the License.
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>org.apache.ofbiz</groupId>
-    <artifactId>ofbiz-parent</artifactId>
+    <artifactId>ofbiz-component</artifactId>
     <version>TRUNK</version>
-    <relativePath>../pom.xml</relativePath>
+    <relativePath>../../ofbiz-component-pom.xml</relativePath>
   </parent>
-  <artifactId>ofbiz-framework</artifactId>
-  <packaging>pom</packaging>
+  <artifactId>ofbiz-datafile</artifactId>
 
-  <modules>
-    <module>start</module>
-    <module>base/lib</module>
-    <module>base/lib/commons</module>
-    <module>base/lib/j2eespecs</module>
-    <module>base/lib/scripting</module>
-    <module>base</module>
-    <module>entity/lib</module>
-    <module>entity/lib/jdbc</module>
-    <module>entity</module>
-    <module>geronimo/lib</module>
-    <module>geronimo</module>
-    <module>catalina/lib</module>
-    <module>catalina</module>
-    <module>security</module>
-    <module>service/lib</module>
-    <module>service</module>
-    <module>entityext</module>
-    <module>minilang</module>
-    <module>webapp/lib</module>
-    <module>webapp</module>
-    <module>widget</module>
-    <module>common</module>
-    <module>datafile</module>
-  </modules>
+  <dependencies>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>ofbiz-base</artifactId>
+      <version>TRUNK</version>
+    </dependency>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>ofbiz-common</artifactId>
+      <version>TRUNK</version>
+    </dependency>
+  </dependencies>
 </project>
