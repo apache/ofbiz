@@ -39,5 +39,6 @@ under the License.
     <module>product</module>
     <module>marketing</module>
     <module>order</module>
+    <module>manufacturing</module>
   </modules>
 </project>
