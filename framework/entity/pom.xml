@@ -31,44 +31,29 @@ under the License.
   <dependencies>
     <dependency>
       <groupId>${project.groupId}</groupId>
-      <artifactId>ofbiz-base-lib</artifactId>
-      <version>TRUNK</version>
-      <type>pom</type>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>${project.groupId}</groupId>
-      <artifactId>ofbiz-base-lib-commons</artifactId>
-      <version>TRUNK</version>
-      <type>pom</type>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>${project.groupId}</groupId>
-      <artifactId>ofbiz-base-lib-j2eespecs</artifactId>
-      <version>TRUNK</version>
-      <type>pom</type>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>${project.groupId}</groupId>
-      <artifactId>ofbiz-base-lib-scripting</artifactId>
-      <version>TRUNK</version>
-      <type>pom</type>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>${project.groupId}</groupId>
       <artifactId>ofbiz-base</artifactId>
       <version>TRUNK</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
-      <groupId>${project.groupId}</groupId>
-      <artifactId>ofbiz-entity-lib</artifactId>
-      <version>TRUNK</version>
-      <type>pom</type>
-      <scope>provided</scope>
+      <groupId>commons-collections</groupId>
+      <artifactId>commons-collections</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>commons-dbcp2</groupId>
+      <artifactId>commons-dbcp2</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>commons-pool2</groupId>
+      <artifactId>commons-pool2</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>geronimo</groupId>
+      <artifactId>geronimo-jta</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>javolution</groupId>
+      <artifactId>javolution</artifactId>
     </dependency>
   </dependencies>
 </project>

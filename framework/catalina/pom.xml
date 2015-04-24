@@ -29,34 +29,6 @@ under the License.
   <artifactId>ofbiz-catalina</artifactId>
 
   <dependencies>
-   <!--
-    <dependency>
-      <groupId>${project.groupId}</groupId>
-      <artifactId>ofbiz-base-lib-commons</artifactId>
-      <version>TRUNK</version>
-      <type>pom</type>
-    </dependency>
-    <dependency>
-      <groupId>${project.groupId}</groupId>
-      <artifactId>ofbiz-base-lib-j2eespecs</artifactId>
-      <version>TRUNK</version>
-      <type>pom</type>
-    </dependency>
--->
-    <dependency>
-      <groupId>${project.groupId}</groupId>
-      <artifactId>ofbiz-catalina-lib</artifactId>
-      <version>TRUNK</version>
-      <type>pom</type>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>${project.groupId}</groupId>
-      <artifactId>ofbiz-base-lib-j2eespecs</artifactId>
-      <version>TRUNK</version>
-      <type>pom</type>
-      <scope>provided</scope>
-    </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>ofbiz-start</artifactId>
@@ -74,6 +46,46 @@ under the License.
       <artifactId>ofbiz-entity</artifactId>
       <version>TRUNK</version>
       <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>apache-tomcat</groupId>
+      <artifactId>catalina</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>apache-tomcat</groupId>
+      <artifactId>catalina-ha</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>apache-tomcat</groupId>
+      <artifactId>catalina-tribes</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>apache-tomcat</groupId>
+      <artifactId>jasper</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>apache-tomcat</groupId>
+      <artifactId>tomcat-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>apache-tomcat</groupId>
+      <artifactId>tomcat-coyote</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>apache-tomcat</groupId>
+      <artifactId>tomcat-util</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>apache-tomcat-extras</groupId>
+      <artifactId>tomcat-juli-adapters</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>apache-tomcat-extras</groupId>
+      <artifactId>tomcat-juli</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>ecj</groupId>
+      <artifactId>ecj</artifactId>
     </dependency>
   </dependencies>
 </project>

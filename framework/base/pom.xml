@@ -29,7 +29,6 @@ under the License.
   <artifactId>ofbiz-base</artifactId>
 
   <dependencies>
-    <!-- internal dependencies -->
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>ofbiz-start</artifactId>
@@ -37,32 +36,121 @@ under the License.
       <scope>provided</scope>
     </dependency>
     <dependency>
-      <groupId>${project.groupId}</groupId>
-      <artifactId>ofbiz-base-lib</artifactId>
-      <version>TRUNK</version>
-      <type>pom</type>
-      <scope>provided</scope>
+      <groupId>apache-oro</groupId>
+      <artifactId>oro</artifactId>
     </dependency>
     <dependency>
-      <groupId>${project.groupId}</groupId>
-      <artifactId>ofbiz-base-lib-commons</artifactId>
-      <version>TRUNK</version>
-      <type>pom</type>
-      <scope>provided</scope>
+      <groupId>bsf</groupId>
+      <artifactId>bsf</artifactId>
     </dependency>
     <dependency>
-      <groupId>${project.groupId}</groupId>
-      <artifactId>ofbiz-base-lib-j2eespecs</artifactId>
-      <version>TRUNK</version>
-      <type>pom</type>
-      <scope>provided</scope>
+      <groupId>bsh</groupId>
+      <artifactId>bsh</artifactId>
     </dependency>
     <dependency>
-      <groupId>${project.groupId}</groupId>
-      <artifactId>ofbiz-base-lib-scripting</artifactId>
-      <version>TRUNK</version>
-      <type>pom</type>
-      <scope>provided</scope>
+      <groupId>bsh</groupId>
+      <artifactId>bsh-engine-modified</artifactId>
+      <!--<scope>test</scope>-->
+    </dependency>
+    <dependency>
+      <groupId>clhm</groupId>
+      <artifactId>clhm-release-lru</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>commons-io</groupId>
+      <artifactId>commons-io</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>commons-codec</groupId>
+      <artifactId>commons-codec</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>commons-lang</groupId>
+      <artifactId>commons-lang</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>commons-validator</groupId>
+      <artifactId>commons-validator</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>esapi</groupId>
+      <artifactId>esapi</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>freemarker</groupId>
+      <artifactId>freemarker</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>groovy-all</groupId>
+      <artifactId>groovy-all</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>hamcrest-all</groupId>
+      <artifactId>hamcrest-all</artifactId>
+      <!--<scope>test</scope>-->
+    </dependency>
+    <dependency>
+      <groupId>icu4j</groupId>
+      <artifactId>icu4j</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>jackson</groupId>
+      <artifactId>jackson-annotations</artifactId>
+      <!--<scope>test</scope>-->
+    </dependency>
+    <dependency>
+      <groupId>jackson</groupId>
+      <artifactId>jackson-core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>jackson</groupId>
+      <artifactId>jackson-databind</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>javax.el</groupId>
+      <artifactId>el-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>javax.servlet</groupId>
+      <artifactId>servlet-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>jdbm</groupId>
+      <artifactId>jdbm</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>juel-impl</groupId>
+      <artifactId>juel-impl</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit-dep</artifactId>
+      <!--<scope>test</scope>-->
+    </dependency>
+    <dependency>
+      <groupId>log4j</groupId>
+      <artifactId>log4j-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>log4j</groupId>
+      <artifactId>log4j-core</artifactId>
+      <!--<scope>test</scope>-->
+    </dependency>
+    <dependency>
+      <groupId>nekohtml</groupId>
+      <artifactId>nekohtml</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>xerces</groupId>
+      <artifactId>xerces</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>xpp3</groupId>
+      <artifactId>xpp3</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>xstream</groupId>
+      <artifactId>xstream</artifactId>
     </dependency>
   </dependencies>
   <build>
