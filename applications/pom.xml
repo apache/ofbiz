@@ -38,5 +38,6 @@ under the License.
     <module>product/lib</module>
     <module>product</module>
     <module>marketing</module>
+    <module>order</module>
   </modules>
 </project>
