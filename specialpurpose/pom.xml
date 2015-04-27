@@ -43,5 +43,6 @@ under the License.
     <module>googlebase</module>
     <module>googlecheckout</module>
     <module>googlecheckout/lib</module>
+    <module>hhfacility</module>
   </modules>
 </project>
