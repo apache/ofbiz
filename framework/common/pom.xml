@@ -32,32 +32,32 @@ under the License.
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>ofbiz-base</artifactId>
-      <version>TRUNK</version>
+      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>ofbiz-entity</artifactId>
-      <version>TRUNK</version>
+      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>ofbiz-security</artifactId>
-      <version>TRUNK</version>
+      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>ofbiz-service</artifactId>
-      <version>TRUNK</version>
+      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>ofbiz-webapp</artifactId>
-      <version>TRUNK</version>
+      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>ofbiz-widget</artifactId>
-      <version>TRUNK</version>
+      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>commons-io</groupId>

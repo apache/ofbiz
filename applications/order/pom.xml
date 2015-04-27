@@ -32,67 +32,67 @@ under the License.
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>ofbiz-base</artifactId>
-      <version>TRUNK</version>
+      <version>${project.version}</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>ofbiz-entity</artifactId>
-      <version>TRUNK</version>
+      <version>${project.version}</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>ofbiz-security</artifactId>
-      <version>TRUNK</version>
+      <version>${project.version}</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>ofbiz-service</artifactId>
-      <version>TRUNK</version>
+      <version>${project.version}</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>ofbiz-common</artifactId>
-      <version>TRUNK</version>
+      <version>${project.version}</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>ofbiz-content</artifactId>
-      <version>TRUNK</version>
+      <version>${project.version}</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>ofbiz-datafile</artifactId>
-      <version>TRUNK</version>
+      <version>${project.version}</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>ofbiz-marketing</artifactId>
-      <version>TRUNK</version>
+      <version>${project.version}</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>ofbiz-party</artifactId>
-      <version>TRUNK</version>
+      <version>${project.version}</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>ofbiz-product</artifactId>
-      <version>TRUNK</version>
+      <version>${project.version}</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>ofbiz-webapp</artifactId>
-      <version>TRUNK</version>
+      <version>${project.version}</version>
       <scope>provided</scope>
     </dependency>
     <dependency>

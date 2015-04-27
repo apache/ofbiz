@@ -32,12 +32,12 @@ under the License.
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>ofbiz-base</artifactId>
-      <version>TRUNK</version>
+      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>ofbiz-common</artifactId>
-      <version>TRUNK</version>
+      <version>${project.version}</version>
     </dependency>
   </dependencies>
 </project>
