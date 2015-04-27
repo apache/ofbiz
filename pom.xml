@@ -1170,6 +1170,15 @@ under the License.
         <systemPath>${user.dir}/specialpurpose/googlecheckout/lib/checkout-sdk-0.8.8.jar</systemPath>
       </dependency>
 
+      <!-- specialpurpose/ldap/lib -->
+      <dependency>
+        <groupId>cas</groupId>
+        <artifactId>cas-server-core</artifactId>
+        <version>3.3</version>
+        <scope>system</scope>
+        <systemPath>${user.dir}/specialpurpose/ldap/lib/cas-server-core-3.3.jar</systemPath>
+      </dependency>
+
     </dependencies>
   </dependencyManagement>
 
