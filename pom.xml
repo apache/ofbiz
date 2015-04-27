@@ -1179,6 +1179,29 @@ under the License.
         <systemPath>${user.dir}/specialpurpose/ldap/lib/cas-server-core-3.3.jar</systemPath>
       </dependency>
 
+      <!-- specialpurpose/lucene/lib -->
+      <dependency>
+        <groupId>lucene</groupId>
+        <artifactId>lucene-analyzers-common</artifactId>
+        <version>4.9.0</version>
+        <scope>system</scope>
+        <systemPath>${user.dir}/specialpurpose/lucene/lib/lucene-analyzers-common-4.9.0.jar</systemPath>
+      </dependency>
+      <dependency>
+        <groupId>lucene</groupId>
+        <artifactId>lucene-core</artifactId>
+        <version>4.9.0</version>
+        <scope>system</scope>
+        <systemPath>${user.dir}/specialpurpose/lucene/lib/lucene-core-4.9.0.jar</systemPath>
+      </dependency>
+      <dependency>
+        <groupId>lucene</groupId>
+        <artifactId>lucene-queryparser</artifactId>
+        <version>4.9.0</version>
+        <scope>system</scope>
+        <systemPath>${user.dir}/specialpurpose/lucene/lib/lucene-queryparser-4.9.0.jar</systemPath>
+      </dependency>
+
     </dependencies>
   </dependencyManagement>
 
