@@ -1131,6 +1131,36 @@ under the License.
         <systemPath>${user.dir}/specialpurpose/birt/lib/viewservlets.jar</systemPath>
       </dependency>
 
+      <!-- specialpurpose/ebaystore/lib -->
+      <dependency>
+        <groupId>attributes</groupId>
+        <artifactId>attributes</artifactId>
+        <version>x.x</version>
+        <scope>system</scope>
+        <systemPath>${user.dir}/specialpurpose/ebaystore/lib/attributes.jar</systemPath>
+      </dependency>
+      <dependency>
+        <groupId>ebaycalls</groupId>
+        <artifactId>ebaycalls</artifactId>
+        <version>x.x</version>
+        <scope>system</scope>
+        <systemPath>${user.dir}/specialpurpose/ebaystore/lib/ebaycalls.jar</systemPath>
+      </dependency>
+      <dependency>
+        <groupId>ebaysdkcore</groupId>
+        <artifactId>ebaysdkcore</artifactId>
+        <version>x.x</version>
+        <scope>system</scope>
+        <systemPath>${user.dir}/specialpurpose/ebaystore/lib/ebaysdkcore.jar</systemPath>
+      </dependency>
+      <dependency>
+        <groupId>helper</groupId>
+        <artifactId>helper</artifactId>
+        <version>x.x</version>
+        <scope>system</scope>
+        <systemPath>${user.dir}/specialpurpose/ebaystore/lib/helper.jar</systemPath>
+      </dependency>
+
     </dependencies>
   </dependencyManagement>
 
