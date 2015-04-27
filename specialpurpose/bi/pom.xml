@@ -22,37 +22,27 @@ under the License.
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>org.apache.ofbiz</groupId>
-    <artifactId>ofbiz-parent</artifactId>
+    <artifactId>ofbiz-component</artifactId>
     <version>TRUNK</version>
-    <relativePath>../pom.xml</relativePath>
+    <relativePath>../../ofbiz-component-pom.xml</relativePath>
   </parent>
-  <artifactId>ofbiz-specialpurpose</artifactId>
-  <packaging>pom</packaging>
+  <artifactId>ofbiz-specialpurpose-bi</artifactId>
 
-  <modules>
-    <module>assetmaint</module>
-    <module>birt/lib</module>
-    <module>birt/lib/scriptlib</module>
-    <module>birt</module>
-    <module>ebay</module>
-    <module>ebaystore/lib</module>
-    <module>ebaystore</module>
-    <module>ecommerce</module>
-    <module>example/lib</module>
-    <module>example</module>
-    <module>googlebase</module>
-    <module>googlecheckout</module>
-    <module>googlecheckout/lib</module>
-    <module>hhfacility</module>
-    <module>ldap/lib</module>
-    <module>ldap</module>
-    <module>lucene/lib</module>
-    <module>lucene</module>
-    <module>oagis</module>
-    <module>pos</module>
-    <module>pos/lib</module>
-    <module>projectmgr</module>
-    <module>scrum</module>
-    <module>bi</module>
-  </modules>
+  <dependencies>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>ofbiz-base</artifactId>
+      <version>TRUNK</version>
+    </dependency>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>ofbiz-entity</artifactId>
+      <version>TRUNK</version>
+    </dependency>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>ofbiz-service</artifactId>
+      <version>TRUNK</version>
+    </dependency>
+  </dependencies>
 </project>
