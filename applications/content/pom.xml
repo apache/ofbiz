@@ -27,6 +27,8 @@ under the License.
     <relativePath>../../ofbiz-component-pom.xml</relativePath>
   </parent>
   <artifactId>ofbiz-content</artifactId>
+  <name>OFBiz - Content Component</name>
+  <description>Content Component</description>
 
   <dependencies>
     <dependency>

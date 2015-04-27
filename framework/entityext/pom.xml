@@ -27,6 +27,8 @@ under the License.
     <relativePath>../../ofbiz-component-pom.xml</relativePath>
   </parent>
   <artifactId>ofbiz-entityext</artifactId>
+  <name>OFBiz - Entity Extensions</name>
+  <description>Entity Extensions Component</description>
 
   <dependencies>
     <dependency>

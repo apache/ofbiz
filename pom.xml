@@ -24,6 +24,7 @@ under the License.
   <artifactId>ofbiz-parent</artifactId>
   <version>TRUNK</version>
   <packaging>pom</packaging>
+  <name>OFBiz Main Build</name>
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>

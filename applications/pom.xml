@@ -28,6 +28,7 @@ under the License.
   </parent>
   <artifactId>ofbiz-applications</artifactId>
   <packaging>pom</packaging>
+  <name>OFBiz Applications Build</name>
 
   <modules>
     <module>content/lib</module>

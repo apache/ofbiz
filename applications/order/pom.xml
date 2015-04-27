@@ -27,6 +27,8 @@ under the License.
     <relativePath>../../ofbiz-component-pom.xml</relativePath>
   </parent>
   <artifactId>ofbiz-order</artifactId>
+  <name>OFBiz - Order Component</name>
+  <description>Order Component</description>
 
   <dependencies>
     <dependency>

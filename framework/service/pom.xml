@@ -27,6 +27,8 @@ under the License.
     <relativePath>../../ofbiz-component-pom.xml</relativePath>
   </parent>
   <artifactId>ofbiz-service</artifactId>
+  <name>OFBiz - Service</name>
+  <description>Service Component</description>
 
   <dependencies>
     <dependency>

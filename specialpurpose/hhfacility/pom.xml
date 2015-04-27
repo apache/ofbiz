@@ -27,6 +27,8 @@ under the License.
     <relativePath>../../ofbiz-component-pom.xml</relativePath>
   </parent>
   <artifactId>ofbiz-specialpurpose-hhfacility</artifactId>
+  <name>OFBiz - HHFacility</name>
+  <description>HHFacility Component</description>
 
   <dependencies>
     <dependency>

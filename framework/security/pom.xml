@@ -27,6 +27,8 @@ under the License.
     <relativePath>../../ofbiz-component-pom.xml</relativePath>
   </parent>
   <artifactId>ofbiz-security</artifactId>
+  <name>OFBiz - Security</name>
+  <description>Security Component</description>
 
   <dependencies>
     <dependency>

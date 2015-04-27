@@ -27,6 +27,8 @@ under the License.
     <relativePath>../../ofbiz-component-pom.xml</relativePath>
   </parent>
   <artifactId>ofbiz-workeffort</artifactId>
+  <name>OFBiz - Work Effort Component</name>
+  <description>Work Effort Component</description>
 
   <dependencies>
     <dependency>

@@ -27,6 +27,8 @@ under the License.
     <relativePath>../../ofbiz-component-pom.xml</relativePath>
   </parent>
   <artifactId>ofbiz-base</artifactId>
+  <name>OFBiz - Base</name>
+  <description>Base API</description>
 
   <dependencies>
     <dependency>

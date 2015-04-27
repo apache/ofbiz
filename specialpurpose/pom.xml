@@ -28,6 +28,7 @@ under the License.
   </parent>
   <artifactId>ofbiz-specialpurpose</artifactId>
   <packaging>pom</packaging>
+  <name>OFBiz Special Purpose Applications Build</name>
 
   <modules>
     <module>assetmaint</module>

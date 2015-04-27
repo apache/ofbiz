@@ -28,6 +28,7 @@ under the License.
   </parent>
   <artifactId>ofbiz-framework</artifactId>
   <packaging>pom</packaging>
+  <name>OFBiz Framework Build</name>
 
   <modules>
     <module>start</module>

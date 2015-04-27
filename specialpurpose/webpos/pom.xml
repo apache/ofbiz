@@ -27,6 +27,8 @@ under the License.
     <relativePath>../../ofbiz-component-pom.xml</relativePath>
   </parent>
   <artifactId>ofbiz-specialpurpose-webpos</artifactId>
+  <name>OFBiz - Web Pos Component</name>
+  <description>Web Pos Component</description>
 
   <dependencies>
     <dependency>

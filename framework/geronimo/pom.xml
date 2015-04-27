@@ -27,6 +27,8 @@ under the License.
     <relativePath>../../ofbiz-component-pom.xml</relativePath>
   </parent>
   <artifactId>ofbiz-geronimo</artifactId>
+  <name>geronimo</name>
+  <description>Geronimo Transaction Manager, and possibly others too</description>
 
   <dependencies>
     <dependency>

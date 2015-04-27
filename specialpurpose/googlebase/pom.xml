@@ -27,6 +27,8 @@ under the License.
     <relativePath>../../ofbiz-component-pom.xml</relativePath>
   </parent>
   <artifactId>ofbiz-specialpurpose-googlebase</artifactId>
+  <name>OFBiz - Google Base Component</name>
+  <description>Google Base Component</description>
 
   <dependencies>
     <dependency>

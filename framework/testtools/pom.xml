@@ -27,6 +27,8 @@ under the License.
     <relativePath>../../ofbiz-component-pom.xml</relativePath>
   </parent>
   <artifactId>ofbiz-testtools</artifactId>
+  <name>OFBiz - Test Tools Component</name>
+  <description>Test Tools Component</description>
 
   <dependencies>
     <dependency>

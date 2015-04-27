@@ -27,6 +27,8 @@ under the License.
     <relativePath>../../ofbiz-component-pom.xml</relativePath>
   </parent>
   <artifactId>ofbiz-webapp</artifactId>
+  <name>OFBiz - WebApp Component</name>
+  <description>Web App Component</description>
 
   <dependencies>
     <dependency>
