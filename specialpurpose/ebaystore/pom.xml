@@ -96,6 +96,4 @@ under the License.
       <artifactId>servlet-api</artifactId>
     </dependency>
   </dependencies>
-  <!--
--->
 </project>

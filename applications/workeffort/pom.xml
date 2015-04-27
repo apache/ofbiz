@@ -84,28 +84,4 @@ under the License.
       <artifactId>servlet-api</artifactId>
     </dependency>
   </dependencies>
-  <!--
-  <build>
-    <plugins>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-compiler-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>default-compile</id>
-            <configuration>
-              <excludes>
-                <exclude>**/test/*.java</exclude>
-                <exclude>**/org/ofbiz/webapp/view/JasperReportsPdfViewHandler.java</exclude>
-                <exclude>**/org/ofbiz/webapp/view/JasperReportsXmlViewHandler.java</exclude>
-                <exclude>**/org/ofbiz/webapp/view/JasperReportsJXlsViewHandler.java</exclude>
-                <exclude>**/org/ofbiz/webapp/view/JasperReportsPoiXlsViewHandler.java</exclude>
-              </excludes>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-    </plugins>
-  </build>
--->
 </project>
