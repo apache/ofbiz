@@ -33,36 +33,43 @@ under the License.
       <groupId>${project.groupId}</groupId>
       <artifactId>ofbiz-base</artifactId>
       <version>TRUNK</version>
+      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>ofbiz-entity</artifactId>
       <version>TRUNK</version>
+      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>ofbiz-security</artifactId>
       <version>TRUNK</version>
+      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>ofbiz-service</artifactId>
       <version>TRUNK</version>
+      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>ofbiz-webapp</artifactId>
       <version>TRUNK</version>
+      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>ofbiz-content</artifactId>
       <version>TRUNK</version>
+      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>ofbiz-common</artifactId>
       <version>TRUNK</version>
+      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>ical4j</groupId>

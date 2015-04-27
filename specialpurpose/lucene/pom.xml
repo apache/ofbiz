@@ -33,21 +33,25 @@ under the License.
       <groupId>${project.groupId}</groupId>
       <artifactId>ofbiz-base</artifactId>
       <version>TRUNK</version>
+      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>ofbiz-entity</artifactId>
       <version>TRUNK</version>
+      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>ofbiz-service</artifactId>
       <version>TRUNK</version>
+      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>ofbiz-content</artifactId>
       <version>TRUNK</version>
+      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>javax.servlet</groupId>
