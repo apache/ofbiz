@@ -48,5 +48,6 @@ under the License.
     <module>ldap</module>
     <module>lucene/lib</module>
     <module>lucene</module>
+    <module>oagis</module>
   </modules>
 </project>
