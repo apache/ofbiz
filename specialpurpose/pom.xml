@@ -34,5 +34,6 @@ under the License.
     <module>birt/lib</module>
     <module>birt/lib/scriptlib</module>
     <module>birt</module>
+    <module>ebay</module>
   </modules>
 </project>
