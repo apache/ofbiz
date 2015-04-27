@@ -1161,6 +1161,15 @@ under the License.
         <systemPath>${user.dir}/specialpurpose/ebaystore/lib/helper.jar</systemPath>
       </dependency>
 
+      <!-- specialpurpose/googlecheckout/lib -->
+      <dependency>
+        <groupId>googlecheckout</groupId>
+        <artifactId>checkout-sdk</artifactId>
+        <version>0.8.8</version>
+        <scope>system</scope>
+        <systemPath>${user.dir}/specialpurpose/googlecheckout/lib/checkout-sdk-0.8.8.jar</systemPath>
+      </dependency>
+
     </dependencies>
   </dependencyManagement>
 
