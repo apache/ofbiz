@@ -54,5 +54,6 @@ under the License.
     <module>projectmgr</module>
     <module>scrum</module>
     <module>bi</module>
+    <module>webpos</module>
   </modules>
 </project>
