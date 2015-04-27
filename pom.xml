@@ -1202,6 +1202,43 @@ under the License.
         <systemPath>${user.dir}/specialpurpose/lucene/lib/lucene-queryparser-4.9.0.jar</systemPath>
       </dependency>
 
+      <!-- specialpurpose/pos/lib -->
+      <dependency>
+        <groupId>jcl</groupId>
+        <artifactId>jcl</artifactId>
+        <version>x.x</version>
+        <scope>system</scope>
+        <systemPath>${user.dir}/specialpurpose/pos/lib/jcl.jar</systemPath>
+      </dependency>
+      <dependency>
+        <groupId>jpos18-controls</groupId>
+        <artifactId>jpos18-controls</artifactId>
+        <version>x.x</version>
+        <scope>system</scope>
+        <systemPath>${user.dir}/specialpurpose/pos/lib/jpos18-controls.jar</systemPath>
+      </dependency>
+      <dependency>
+        <groupId>looks</groupId>
+        <artifactId>looks</artifactId>
+        <version>2.0.2</version>
+        <scope>system</scope>
+        <systemPath>${user.dir}/specialpurpose/pos/lib/looks-2.0.2.jar</systemPath>
+      </dependency>
+      <dependency>
+        <groupId>xui</groupId>
+        <artifactId>xui-core-swing</artifactId>
+        <version>v3.2rc2b</version>
+        <scope>system</scope>
+        <systemPath>${user.dir}/specialpurpose/pos/lib/XuiCoreSwing-v3.2rc2b.jar</systemPath>
+      </dependency>
+      <dependency>
+        <groupId>xui</groupId>
+        <artifactId>xui-optional</artifactId>
+        <version>v3.2rc2b</version>
+        <scope>system</scope>
+        <systemPath>${user.dir}/specialpurpose/pos/lib/XuiOptional-v3.2rc2b.jar</systemPath>
+      </dependency>
+
     </dependencies>
   </dependencyManagement>
 

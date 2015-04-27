@@ -24,32 +24,31 @@ under the License.
     <groupId>org.apache.ofbiz</groupId>
     <artifactId>ofbiz-parent</artifactId>
     <version>TRUNK</version>
-    <relativePath>../pom.xml</relativePath>
+    <relativePath>../../../pom.xml</relativePath>
   </parent>
-  <artifactId>ofbiz-specialpurpose</artifactId>
+  <artifactId>ofbiz-specialpurpose-pos-lib</artifactId>
   <packaging>pom</packaging>
 
-  <modules>
-    <module>assetmaint</module>
-    <module>birt/lib</module>
-    <module>birt/lib/scriptlib</module>
-    <module>birt</module>
-    <module>ebay</module>
-    <module>ebaystore/lib</module>
-    <module>ebaystore</module>
-    <module>ecommerce</module>
-    <module>example/lib</module>
-    <module>example</module>
-    <module>googlebase</module>
-    <module>googlecheckout</module>
-    <module>googlecheckout/lib</module>
-    <module>hhfacility</module>
-    <module>ldap/lib</module>
-    <module>ldap</module>
-    <module>lucene/lib</module>
-    <module>lucene</module>
-    <module>oagis</module>
-    <module>pos</module>
-    <module>pos/lib</module>
-  </modules>
+  <dependencies>
+    <dependency>
+      <groupId>jcl</groupId>
+      <artifactId>jcl</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>jpos18-controls</groupId>
+      <artifactId>jpos18-controls</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>looks</groupId>
+      <artifactId>looks</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>xui</groupId>
+      <artifactId>xui-core-swing</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>xui</groupId>
+      <artifactId>xui-optional</artifactId>
+    </dependency>
+  </dependencies>
 </project>
