@@ -34,18 +34,6 @@ under the License.
     <component.lib.dir>lib</component.lib.dir>
   </properties>
 
-  <dependencyManagement>
-    <dependencies>
-      <dependency>
-        <groupId>org.apache.ofbiz</groupId>
-        <artifactId>ofbiz-parent</artifactId>
-        <version>TRUNK</version>
-        <scope>import</scope>
-        <type>pom</type>
-      </dependency>
-    </dependencies>
-  </dependencyManagement>
-
   <build>
     <directory>${component.build.dir}/lib</directory>
     <outputDirectory>${component.build.dir}/classes</outputDirectory>
