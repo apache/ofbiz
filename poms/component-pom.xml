@@ -79,6 +79,15 @@ under the License.
       </testResource>
     </testResources>
     <scriptSourceDirectory>scripts</scriptSourceDirectory>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>${project.groupId}</groupId>
+          <artifactId>ofbiz-maven-support</artifactId>
+          <version>${project.version}</version>
+        </plugin>
+      </plugins>
+    </pluginManagement>
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -128,24 +137,6 @@ under the License.
         </executions>
       </plugin>
       <plugin>
-        <artifactId>maven-assembly-plugin</artifactId>
-        <inherited>false</inherited>
-        <configuration>
-          <descriptors>
-            <descriptor>${project.basedir}/assembly/LICENSE+NOTICE.xml</descriptor>
-          </descriptors>
-        </configuration>
-        <executions>
-          <execution>
-            <id>make-assembly</id>
-            <phase>initialize</phase>
-            <goals>
-              <goal>single</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-dependency-plugin</artifactId>
         <configuration>
@@ -164,7 +155,7 @@ under the License.
               <artifactItems>
                 <artifactItem>
                   <groupId>org.apache.ofbiz</groupId>
-                  <artifactId>ofbiz-parent</artifactId>
+                  <artifactId>ofbiz-maven-support</artifactId>
                   <version>TRUNK</version>
                   <type>zip</type>
                   <classifier>assembly-LICENSE+NOTICE</classifier>
@@ -185,7 +176,7 @@ under the License.
               <artifactItems>
                 <artifactItem>
                   <groupId>org.apache.ofbiz</groupId>
-                  <artifactId>ofbiz-parent</artifactId>
+                  <artifactId>ofbiz-maven-support</artifactId>
                   <version>TRUNK</version>
                   <type>zip</type>
                   <classifier>assembly-LICENSE+NOTICE</classifier>

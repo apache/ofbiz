@@ -30,6 +30,7 @@ under the License.
   </properties>
 
   <modules>
+    <module>poms/maven-support.xml</module>
     <module>framework</module>
     <module>applications</module>
     <module>specialpurpose</module>

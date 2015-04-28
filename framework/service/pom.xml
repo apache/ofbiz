@@ -116,7 +116,7 @@ under the License.
               <artifactItems>
                 <artifactItem>
                   <groupId>org.apache.ofbiz</groupId>
-                  <artifactId>ofbiz-parent</artifactId>
+                  <artifactId>ofbiz-maven-support</artifactId>
                   <version>TRUNK</version>
                   <type>zip</type>
                   <classifier>assembly-LICENSE+NOTICE</classifier>
