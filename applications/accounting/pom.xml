@@ -147,11 +147,8 @@ under the License.
       </activation>
       <dependencies>
         <dependency>
-          <groupId>payflow</groupId>
+          <groupId>verisign</groupId>
           <artifactId>payflow</artifactId>
-          <version>x.x</version>
-          <scope>system</scope>
-          <systemPath>${user.dir}/applications/accounting/lib/payflow.jar</systemPath>
         </dependency>
       </dependencies>
       <build>
