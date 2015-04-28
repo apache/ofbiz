@@ -24,7 +24,7 @@ under the License.
     <groupId>org.apache.ofbiz</groupId>
     <artifactId>ofbiz-component</artifactId>
     <version>TRUNK</version>
-    <relativePath>../../ofbiz-component-pom.xml</relativePath>
+    <relativePath>../../poms/component-pom.xml</relativePath>
   </parent>
   <artifactId>ofbiz-specialpurpose-projectmgr</artifactId>
   <name>OFBiz - Project Management</name>
