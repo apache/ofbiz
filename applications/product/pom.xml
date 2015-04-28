@@ -29,6 +29,10 @@ under the License.
   <artifactId>ofbiz-product</artifactId>
   <name>OFBiz - Product Component</name>
   <description>Product Component</description>
+  <properties>
+    <product:sun.comm:serial-phase>-undefined</product:sun.comm:serial-phase>
+    <product:sun.browser:plugin-phase>-undefined</product:sun.browser:plugin-phase>
+  </properties>
 
   <dependencies>
     <dependency>
@@ -149,4 +153,89 @@ under the License.
       </plugin>
     </plugins>
   </build>
+
+  <profiles>
+    <!-- the following 3 profiles need to be explained.  The first two
+         are fairly standard; detect a file, set a property to an
+         empty value, add a dependency.
+
+         However, if the either 2 profiles are *not* auto-activated,
+         then these properties will have the value set above at the
+         top of this file.  Then, when the <phase> is expanded on the
+         compiler plugin, it will evaluate to something like
+         "compile-undefined-undefined".  Since this is not a standard
+         phase, the plugin will not be executed.
+
+         When both of the first 2 profiles are active, however, then
+         both properties are set to the empty value, and the phase is
+         evaluated as "compile".  The plugin will then be executed.
+
+         All this, to support conditional compilation when using 2
+         conditions.
+    -->
+    <profile>
+      <id>product:sun.comm:serial</id>
+      <activation>
+        <file>
+          <exists>${user.dir}/applications/product/lib/comm.jar</exists>
+        </file>
+      </activation>
+      <dependencies>
+        <dependency>
+          <groupId>sun.comm</groupId>
+          <artifactId>serial</artifactId>
+        </dependency>
+      </dependencies>
+      <properties>
+        <product:sun.comm:serial-phase></product:sun.comm:serial-phase>
+      </properties>
+    </profile>
+    <profile>
+      <id>product:sun.browser:plugin</id>
+      <activation>
+        <file>
+          <exists>${user.dir}/framework/base/lib/plugin.jar</exists>
+        </file>
+      </activation>
+      <dependencies>
+        <dependency>
+          <groupId>sun.browser</groupId>
+          <artifactId>plugin</artifactId>
+        </dependency>
+      </dependencies>
+      <properties>
+        <product:sun.browser:plugin-phase></product:sun.browser:plugin-phase>
+      </properties>
+    </profile>
+    <profile>
+      <id>product:ShipmentScaleApplet</id>
+      <activation>
+        <file>
+          <exists>pom.xml</exists>
+        </file>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-compiler-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>product-ShipmentScaleApplet-compile</id>
+                <phase>compile${product:sun.comm:serial-phase}${product:sun.browser:plugin-phase}</phase>
+                <goals>
+                  <goal>compile</goal>
+                </goals>
+                <configuration>
+                  <includes>
+                    <include>**/ShipmentScaleApplet.java</include>
+                  </includes>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
 </project>

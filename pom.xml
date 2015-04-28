@@ -1242,11 +1242,25 @@ under the License.
 
       <!-- optional, activated deps -->
       <dependency>
+        <groupId>sun.browser</groupId>
+        <artifactId>plugin</artifactId>
+        <version>x.x</version>
+        <scope>system</scope>
+        <systemPath>${user.dir}/framework/base/lib/plugin.jar</systemPath>
+      </dependency>
+      <dependency>
         <groupId>verisign</groupId>
         <artifactId>payflow</artifactId>
         <version>x.x</version>
         <scope>system</scope>
         <systemPath>${user.dir}/applications/accounting/lib/payflow.jar</systemPath>
+      </dependency>
+      <dependency>
+        <groupId>sun.comm</groupId>
+        <artifactId>serial</artifactId>
+        <version>x.x</version>
+        <scope>system</scope>
+        <systemPath>${user.dir}/applications/product/lib/comm.jar</systemPath>
       </dependency>
 
     </dependencies>
