@@ -29,6 +29,9 @@ under the License.
   <artifactId>ofbiz-accounting</artifactId>
   <name>OFBiz - Accounting Component</name>
   <description>Accounting Component</description>
+  <properties>
+    <ofbiz-accounting:verisign:payflow-phase>-undefined</ofbiz-accounting:verisign:payflow-phase>
+  </properties>
 
   <dependencies>
     <dependency>
@@ -139,7 +142,7 @@ under the License.
 
   <profiles>
     <profile>
-      <id>accounting:verisign</id>
+      <id>ofbiz-accounting:verisign:payflow</id>
       <activation>
         <file>
           <exists>${user.dir}/applications/accounting/lib/payflow.jar</exists>
@@ -149,8 +152,22 @@ under the License.
         <dependency>
           <groupId>verisign</groupId>
           <artifactId>payflow</artifactId>
+          <version>x.x</version>
+          <scope>system</scope>
+          <systemPath>${user.dir}/applications/accounting/lib/payflow.jar</systemPath>
         </dependency>
       </dependencies>
+      <properties>
+        <ofbiz-accounting:verisign:payflow-phase></ofbiz-accounting:verisign:payflow-phase>
+      </properties>
+    </profile>
+    <profile>
+      <id>accounting:verisign</id>
+      <activation>
+        <file>
+          <exists>pom.xml</exists>
+        </file>
+      </activation>
       <build>
         <plugins>
           <plugin>
@@ -159,7 +176,7 @@ under the License.
             <executions>
               <execution>
                 <id>accounting-verisign-compile</id>
-                <phase>compile</phase>
+                <phase>compile${ofbiz-accounting:verisign:payflow}</phase>
                 <goals>
                   <goal>compile</goal>
                 </goals>
@@ -174,7 +191,7 @@ under the License.
               </execution>
               <execution>
                 <id>accounting-verisign-testCompile</id>
-                <phase>test-compile</phase>
+                <phase>test-compile${ofbiz-accounting:verisign:payflow}</phase>
                 <goals>
                   <goal>testCompile</goal>
                 </goals>

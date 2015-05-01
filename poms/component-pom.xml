@@ -32,6 +32,7 @@ under the License.
     <component.build.dir>build</component.build.dir>
     <component.src.dir>src</component.src.dir>
     <component.lib.dir>lib</component.lib.dir>
+    <ofbiz:sun.browser:plugin-phase>-undefined</ofbiz:sun.browser:plugin-phase>
   </properties>
 
   <build>
@@ -351,5 +352,28 @@ under the License.
       </plugin>
     </plugins>
   </reporting>
+
+  <profiles>
+    <profile>
+      <id>ofbiz:sun.browser:plugin</id>
+      <activation>
+        <file>
+          <exists>${user.dir}/framework/base/lib/plugin.jar</exists>
+        </file>
+      </activation>
+      <dependencies>
+        <dependency>
+          <groupId>sun.browser</groupId>
+          <artifactId>plugin</artifactId>
+          <version>x.x</version>
+          <scope>system</scope>
+          <systemPath>${user.dir}/framework/base/lib/plugin.jar</systemPath>
+        </dependency>
+      </dependencies>
+      <properties>
+        <ofbiz:sun.browser:plugin-phase></ofbiz:sun.browser:plugin-phase>
+      </properties>
+    </profile>
+  </profiles>
 
 </project>

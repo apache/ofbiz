@@ -30,8 +30,7 @@ under the License.
   <name>OFBiz - Product Component</name>
   <description>Product Component</description>
   <properties>
-    <product:sun.comm:serial-phase>-undefined</product:sun.comm:serial-phase>
-    <product:sun.browser:plugin-phase>-undefined</product:sun.browser:plugin-phase>
+    <ofbiz-product:sun.comm:serial-phase>-undefined</ofbiz-product:sun.comm:serial-phase>
   </properties>
 
   <dependencies>
@@ -174,7 +173,7 @@ under the License.
          conditions.
     -->
     <profile>
-      <id>product:sun.comm:serial</id>
+      <id>ofbiz-product:sun.comm:serial</id>
       <activation>
         <file>
           <exists>${user.dir}/applications/product/lib/comm.jar</exists>
@@ -184,27 +183,13 @@ under the License.
         <dependency>
           <groupId>sun.comm</groupId>
           <artifactId>serial</artifactId>
+          <version>x.x</version>
+          <scope>system</scope>
+          <systemPath>${user.dir}/applications/product/lib/comm.jar</systemPath>
         </dependency>
       </dependencies>
       <properties>
-        <product:sun.comm:serial-phase></product:sun.comm:serial-phase>
-      </properties>
-    </profile>
-    <profile>
-      <id>product:sun.browser:plugin</id>
-      <activation>
-        <file>
-          <exists>${user.dir}/framework/base/lib/plugin.jar</exists>
-        </file>
-      </activation>
-      <dependencies>
-        <dependency>
-          <groupId>sun.browser</groupId>
-          <artifactId>plugin</artifactId>
-        </dependency>
-      </dependencies>
-      <properties>
-        <product:sun.browser:plugin-phase></product:sun.browser:plugin-phase>
+        <ofbiz-product:sun.comm:serial-phase></ofbiz-product:sun.comm:serial-phase>
       </properties>
     </profile>
     <profile>
@@ -222,7 +207,7 @@ under the License.
             <executions>
               <execution>
                 <id>product-ShipmentScaleApplet-compile</id>
-                <phase>compile${product:sun.comm:serial-phase}${product:sun.browser:plugin-phase}</phase>
+                <phase>compile${ofbiz-product:sun.comm:serial-phase}${ofbiz:sun.browser:plugin-phase}</phase>
                 <goals>
                   <goal>compile</goal>
                 </goals>
