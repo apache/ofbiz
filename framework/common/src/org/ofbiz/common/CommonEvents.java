@@ -344,7 +344,7 @@ public class CommonEvents {
         }
 
         JSONObject jsonUiLabel = new JSONObject();
-        Locale locale = request.getLocale();
+        Locale locale = UtilHttp.getLocale(request);
         if(!uiLabelObject.isEmpty()) {
             Set<String> resourceSet = UtilGenerics.checkSet(uiLabelObject.keySet());
             // Iterate over the resouce set
@@ -382,7 +382,7 @@ public class CommonEvents {
         }
 
         JSONArray jsonUiLabel = new JSONArray();
-        Locale locale = request.getLocale();
+        Locale locale = UtilHttp.getLocale(request);
         if(!uiLabelObject.isEmpty()) {
             Set<String> resourceSet = UtilGenerics.checkSet(uiLabelObject.keySet());
             // Iterate over the resource set
