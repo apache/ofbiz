@@ -17,7 +17,8 @@
  * under the License.
  */
 
-import java.awt.Dimension
+import java.awt.Dimension;
+import org.ofbiz.entity.condition.EntityCondition;
 import org.ofbiz.entity.util.*
 import org.ofbiz.manufacturing.jobshopmgt.ProductionRun
 import org.ofbiz.manufacturing.jobshopmgt.ProductionRunHelper
