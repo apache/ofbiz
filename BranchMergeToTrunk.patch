@@ -1,0 +1,80 @@
+Index: .
+===================================================================
+--- .	(revision 1680319)
++++ .	(working copy)
+
+Property changes on: .
+___________________________________________________________________
+Modified: svn:mergeinfo
+   Merged /ofbiz/branches/boostrap_theme:r1641659
+Index: framework/common/widget/CommonScreens.xml
+===================================================================
+--- framework/common/widget/CommonScreens.xml	(revision 1680314)
++++ framework/common/widget/CommonScreens.xml	(working copy)
+@@ -191,6 +191,7 @@
+                         <set field="appbarTemplateLocation" from-field="layoutSettings.VT_NAV_TMPLT_LOC[0]" />
+                         <set field="appbarOpenTemplateLocation" from-field="layoutSettings.VT_NAV_OPEN_TMPLT[0]" />
+                         <set field="appbarCloseTemplateLocation" from-field="layoutSettings.VT_NAV_CLOSE_TMPLT[0]" />
++                        <set field="appheaderTemplate" from-field="layoutSettings.VT_NAV_APPHDR_LOC[0]"/>
+                         <set field="messagesTemplateLocation" from-field="layoutSettings.VT_MSG_TMPLT_LOC[0]" />
+                         <set field="layoutSettings.suppressTab" value="ofbizsetup"/><!-- diseable ofbiz setup by default -->
+                     </actions>
+Index: framework/widget/src/org/ofbiz/widget/model/MenuFactory.java
+===================================================================
+--- framework/widget/src/org/ofbiz/widget/model/MenuFactory.java	(revision 1680329)
++++ framework/widget/src/org/ofbiz/widget/model/MenuFactory.java	(working copy)
+@@ -88,6 +88,16 @@
+     }
+ 
+     public static ModelMenu getMenuFromLocation(String resourceName, String menuName) throws IOException, SAXException, ParserConfigurationException {
++        Map<String, ModelMenu> modelMenuMap = getMenusFromLocation(resourceName);
++        ModelMenu modelMenu = modelMenuMap.get(menuName);
++        if (modelMenu == null) {
++            throw new IllegalArgumentException("Could not find menu with name [" + menuName + "] in location [" + resourceName + "]");
++        }
++        return modelMenu;
++    }
++
++    public static Map<String, ModelMenu> getMenusFromLocation(String resourceName) throws IOException, SAXException,
++            ParserConfigurationException {
+         Map<String, ModelMenu> modelMenuMap = menuLocationCache.get(resourceName);
+         if (modelMenuMap == null) {
+             URL menuFileUrl = FlexibleLocation.resolveLocation(resourceName);
+@@ -100,11 +110,6 @@
+         if (UtilValidate.isEmpty(modelMenuMap)) {
+             throw new IllegalArgumentException("Could not find menu file in location [" + resourceName + "]");
+         }
+-
+-        ModelMenu modelMenu = modelMenuMap.get(menuName);
+-        if (modelMenu == null) {
+-            throw new IllegalArgumentException("Could not find menu with name [" + menuName + "] in location [" + resourceName + "]");
+-        }
+-        return modelMenu;
++        return modelMenuMap;
+     }
+ }
+Index: framework/widget/src/org/ofbiz/widget/renderer/macro/MacroMenuRenderer.java
+===================================================================
+--- framework/widget/src/org/ofbiz/widget/renderer/macro/MacroMenuRenderer.java	(revision 1680314)
++++ framework/widget/src/org/ofbiz/widget/renderer/macro/MacroMenuRenderer.java	(working copy)
+@@ -273,6 +273,7 @@
+             StringBuilder sb = new StringBuilder("End Menu Widget ");
+             sb.append(menu.getBoundaryCommentName());
+             parameters.put("boundaryComment", sb.toString());
++            parameters.put("style", menu.getMenuContainerStyle(context));
+         }
+         try {
+             executeMacro(writer, "renderMenuEnd", parameters);
+Index: framework/widget/templates/htmlMenuMacroLibrary.ftl
+===================================================================
+--- framework/widget/templates/htmlMenuMacroLibrary.ftl	(revision 1680314)
++++ framework/widget/templates/htmlMenuMacroLibrary.ftl	(working copy)
+@@ -31,7 +31,7 @@
+       <ul>
+ </#macro>
+ 
+-<#macro renderMenuEnd boundaryComment="">
++<#macro renderMenuEnd boundaryComment="" style="">
+       </ul>
+     </li>
+   </ul>
