@@ -76,7 +76,7 @@ under the License.
 	      jQuery(".navbar-pills.pull-right li a.buttontext.create").each(function(){
 	      	var linkText = jQuery(this).html();
 	      	var data = '<span class="glyphicon glyphicon-plus"></span> '+linkText;
-	      	jQuery(this).removeClass('buttontext').removeClass('create').addClass("btn btn-primary btn-sm");
+	      	jQuery(this).removeClass('buttontext').removeClass('create').addClass("btn btn-primary btn-xs");
 	      	jQuery(this).html(data);
 	      	});
 	    </script>

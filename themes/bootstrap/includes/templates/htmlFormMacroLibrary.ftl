@@ -189,7 +189,7 @@ under the License.
         })
         <#if mask?has_content>.mask("${mask}")</#if>
         ;
-        jQuery('.ui-datepicker-trigger').removeClass('ui-datepicker-trigger').addClass('btn btn-primary btn-sm').html('<span class="glyphicon glyphicon-calendar"></span>');
+        jQuery('.ui-datepicker-trigger').removeClass('ui-datepicker-trigger').addClass('btn btn-primary btn-xs').html('<span class="glyphicon glyphicon-calendar"></span>');
       </script>
     </#if>
     <#if timeDropdown?has_content && timeDropdown=="time-dropdown">
@@ -557,7 +557,7 @@ under the License.
   </span>
 	<script type="text/javascript">
 	    jQuery(document).ready(function(){
-	    	jQuery('.ui-datepicker-trigger').removeClass('ui-datepicker-trigger').addClass('btn btn-primary btn-sm').html('<span class="glyphicon glyphicon-calendar"></span>');
+	    	jQuery('.ui-datepicker-trigger').removeClass('ui-datepicker-trigger').addClass('btn btn-primary btn-xs').html('<span class="glyphicon glyphicon-calendar"></span>');
 	    });
 	</script>
 </#macro>

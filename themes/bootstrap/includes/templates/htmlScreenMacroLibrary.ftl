@@ -156,29 +156,29 @@ under the License.
 <div class="panel panel-default"<#if id?has_content> id="${id}"</#if>>
 <#-- <#if showMore> -->
 <#if title?has_content>
-	<div class="panel-heading">
-		<#if collapsible>
-			<#assign btnId = "${id}-btn">
-			<div class="pull-left"><h3 class="panel-title">${title}</h3></div>
-			<div class="pull-right">
-				<a id="${btnId}" class="btn btn-default btn-sm" data-toggle="collapse" href="#${collapsibleAreaId}" aria-expanded="true" aria-controls="${btnId}"><span class="glyphicon glyphicon-chevron-up"></span></a>
-			</div>
-			<div class="clear"></div>
-			<script type="text/javascript">
-				$('#${btnId}').click(function(){
-					$(this).find('span').toggleClass('glyphicon-chevron-up glyphicon-chevron-down');
-				});
-		    </script>
-		<#else>
-			<h3 class="panel-title">${title}</h3>
-		</#if>
-	</div>
+    <div class="panel-heading">
+        <#if collapsible>
+            <#assign btnId = "${id}-btn">
+            <div class="pull-left"><h3 class="panel-title">${title}</h3></div>
+            <div class="pull-right">
+                <a id="${btnId}" class="btn btn-default btn-xs" data-toggle="collapse" href="#${collapsibleAreaId}" aria-expanded="true" aria-controls="${btnId}"><span class="glyphicon glyphicon-chevron-up"></span></a>
+            </div>
+            <div class="clear"></div>
+            <script type="text/javascript">
+                $('#${btnId}').click(function(){
+                    $(this).find('span').toggleClass('glyphicon-chevron-up glyphicon-chevron-down');
+                });
+            </script>
+        <#else>
+            <h3 class="panel-title">${title}</h3>
+        </#if>
+    </div>
 </#if>
 ${menuString}
 <#if collapsible>
-	<div <#if collapsibleAreaId?has_content> id="${collapsibleAreaId}" </#if> class="panel-body collapse in">
+    <div <#if collapsibleAreaId?has_content> id="${collapsibleAreaId}" </#if> class="panel-body collapse in">
 <#else>
-	<div <#if collapsibleAreaId?has_content> id="${collapsibleAreaId}" </#if> class="panel-body">
+    <div <#if collapsibleAreaId?has_content> id="${collapsibleAreaId}" </#if> class="panel-body">
 </#if>
 </#macro>
 <#macro renderScreenletSubWidget></#macro>
