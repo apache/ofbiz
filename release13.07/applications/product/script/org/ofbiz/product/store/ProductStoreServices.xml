@@ -1,0 +1,818 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<simple-methods xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/simple-methods-v2.xsd">
+    <simple-method method-name="createProductStore" short-description="Create a Product Store">
+        <check-permission permission="CATALOG" action="_CREATE">
+            <fail-property resource="ProductUiLabels" property="ProductCatalogCreatePermissionError"/>
+        </check-permission>
+        <check-errors/>
+        
+        <if-compare field="parameters.oneInventoryFacility" operator="equals" value="Y">
+            <if-empty field="parameters.inventoryFacilityId">
+                <add-error>
+                    <fail-property property="InventoryFacilityIdRequired" resource="ProductUiLabels"/>
+                </add-error>
+            </if-empty>
+            <check-errors/>
+        </if-compare>
+
+        <if-compare field="parameters.showPricesWithVatTax" operator="equals" value="Y">
+            <if-empty field="parameters.vatTaxAuthGeoId">
+                <add-error>
+                    <fail-property property="ProductVatTaxAuthGeoNotSet" resource="ProductUiLabels"/>
+                </add-error>
+            </if-empty>
+            <if-empty field="parameters.vatTaxAuthPartyId">
+                <add-error>
+                    <fail-property property="ProductVatTaxAuthPartyNotSet" resource="ProductUiLabels"/>
+                </add-error>
+            </if-empty>
+            <check-errors/>
+        </if-compare>
+
+        <make-value value-field="newEntity" entity-name="ProductStore"/>
+        <set-nonpk-fields map="parameters" value-field="newEntity"/>
+
+        <sequenced-id sequence-name="ProductStore" field="productStoreId"/>
+        <set from-field="productStoreId" field="newEntity.productStoreId"/>
+
+        <field-to-result field="productStoreId" result-name="productStoreId"/>
+        <create-value value-field="newEntity"/>
+
+        <!-- create the ProductStoreFacility record -->
+        <now-timestamp field="nowTimestamp"/>
+
+        <if-not-empty field="newEntity.inventoryFacilityId">
+            <make-value value-field="storeFacility" entity-name="ProductStoreFacility"/>
+            <set from-field="newEntity.inventoryFacilityId" field="storeFacility.facilityId"/>
+            <set from-field="newEntity.productStoreId" field="storeFacility.productStoreId"/>
+            <set from-field="nowTimestamp" field="storeFacility.fromDate"/>
+            <create-value value-field="storeFacility"/>
+        </if-not-empty>
+    </simple-method>
+    <simple-method method-name="updateProductStore" short-description="Update a Product Store">
+        <check-permission permission="CATALOG" action="_UPDATE">
+            <fail-property resource="ProductUiLabels" property="ProductCatalogUpdatePermissionError"/>
+        </check-permission>
+        <check-errors/>
+        
+         <if-compare field="parameters.oneInventoryFacility" operator="equals" value="Y">
+            <if-empty field="parameters.inventoryFacilityId">
+                <add-error>
+                    <fail-property property="InventoryFacilityIdRequired" resource="ProductUiLabels"/>
+                </add-error>
+            </if-empty>
+            <check-errors/>
+        </if-compare>
+
+        <set from-field="parameters.productStoreId" field="lookupPKMap.productStoreId"/>
+        <find-by-primary-key entity-name="ProductStore" map="lookupPKMap" value-field="store"/>
+        <set from-field="store.inventoryFacilityId" field="oldFacilityId"/>
+        <set-nonpk-fields map="parameters" value-field="store"/>
+
+        <if-compare field="store.showPricesWithVatTax" operator="equals" value="Y">
+            <if-empty field="store.vatTaxAuthGeoId">
+                <add-error>
+                    <fail-property property="ProductVatTaxAuthGeoNotSet" resource="ProductUiLabels"/>
+                </add-error>
+            </if-empty>
+            <if-empty field="store.vatTaxAuthPartyId">
+                <add-error>
+                    <fail-property property="ProductVatTaxAuthPartyNotSet" resource="ProductUiLabels"/>
+                </add-error>
+            </if-empty>
+            <check-errors/>
+        </if-compare>
+
+        <store-value value-field="store"/>
+
+        <!-- update the ProductStoreFacility record -->
+        <now-timestamp field="nowTimestamp"/>
+        <if-compare-field field="store.inventoryFacilityId" to-field="oldFacilityId" operator="not-equals">
+            <if-compare field="store.oneInventoryFacility" operator="equals" value="Y">
+                <!-- expire all the facilities -->
+                <set from-field="store.productStoreId" field="lookupPFMap.productStoreId"/>
+                <find-by-and entity-name="ProductStoreFacility" map="lookupPFMap" list="storeFacilities"/>
+                <filter-list-by-date list="storeFacilities"/>
+                <iterate list="storeFacilities" entry="facility">
+                    <set from-field="nowTimestamp" field="facility.thruDate"/>
+                    <store-value value-field="facility"/>
+                </iterate>
+            </if-compare>
+            <!-- create the new entry -->
+            <make-value value-field="storeFacility" entity-name="ProductStoreFacility"/>
+            <set from-field="store.inventoryFacilityId" field="storeFacility.facilityId"/>
+            <set from-field="store.productStoreId" field="storeFacility.productStoreId"/>
+            <set from-field="nowTimestamp" field="storeFacility.fromDate"/>
+            <create-value value-field="storeFacility"/>
+        </if-compare-field>
+    </simple-method>
+
+    <!-- ProductStore and ProdCatalog services -->
+    <simple-method method-name="createProductStoreCatalog" short-description="Create ProductStoreCatalog">
+        <check-permission permission="CATALOG" action="_CREATE">
+            <fail-property resource="ProductUiLabels" property="ProductCatalogCreatePermissionError"/>
+        </check-permission>
+        <check-errors/>
+
+        <make-value value-field="newEntity" entity-name="ProductStoreCatalog"/>
+        <set-pk-fields map="parameters" value-field="newEntity"/>
+        <set-nonpk-fields map="parameters" value-field="newEntity"/>
+
+        <if-empty field="newEntity.fromDate">
+            <now-timestamp field="nowTimestamp"/>
+            <set from-field="nowTimestamp" field="newEntity.fromDate"/>
+        </if-empty>
+
+        <create-value value-field="newEntity"/>
+    </simple-method>
+    <simple-method method-name="updateProductStoreCatalog" short-description="Update ProductStoreCatalog">
+        <check-permission permission="CATALOG" action="_UPDATE">
+            <fail-property resource="ProductUiLabels" property="ProductCatalogUpdatePermissionError"/>
+        </check-permission>
+        <check-errors/>
+
+        <make-value value-field="lookupPKMap" entity-name="ProductStoreCatalog"/>
+        <set-pk-fields map="parameters" value-field="lookupPKMap"/>
+        <find-by-primary-key map="lookupPKMap" value-field="lookedUpValue"/>
+        <set-nonpk-fields map="parameters" value-field="lookedUpValue"/>
+        <store-value value-field="lookedUpValue"/>
+    </simple-method>
+    <simple-method method-name="deleteProductStoreCatalog" short-description="Delete ProductStoreCatalog">
+        <check-permission permission="CATALOG" action="_DELETE">
+            <fail-property resource="ProductUiLabels" property="ProductCatalogDeletePermissionError"/>
+        </check-permission>
+        <check-errors/>
+
+        <make-value value-field="lookupPKMap" entity-name="ProductStoreCatalog"/>
+        <set-pk-fields map="parameters" value-field="lookupPKMap"/>
+        <find-by-primary-key map="lookupPKMap" value-field="lookedUpValue"/>
+        <remove-value value-field="lookedUpValue"/>
+    </simple-method>
+
+    <!-- ProductStore Payment Setting Services -->
+    <simple-method method-name="createProductStorePaymentSetting" short-description="Create a Product Store Payment Setting">
+        <check-permission permission="CATALOG" action="_CREATE">
+            <fail-property resource="ProductUiLabels" property="ProductCatalogCreatePermissionError"/>
+        </check-permission>
+        <check-errors/>
+
+        <make-value value-field="newEntity" entity-name="ProductStorePaymentSetting"/>
+        <set-pk-fields map="parameters" value-field="newEntity"/>
+        <set-nonpk-fields map="parameters" value-field="newEntity"/>
+        <create-value value-field="newEntity"/>
+    </simple-method>
+    <simple-method method-name="updateProductStorePaymentSetting" short-description="Update a Product Store Payment Setting">
+        <check-permission permission="CATALOG" action="_UPDATE">
+            <fail-property resource="ProductUiLabels" property="ProductCatalogUpdatePermissionError"/>
+        </check-permission>
+        <check-errors/>
+
+        <make-value value-field="lookupPKMap" entity-name="ProductStorePaymentSetting"/>
+        <set-pk-fields map="parameters" value-field="lookupPKMap"/>
+        <find-by-primary-key entity-name="ProductStorePaymentSetting" map="lookupPKMap" value-field="setting"/>
+        <set-nonpk-fields map="parameters" value-field="setting"/>
+        <store-value value-field="setting"/>
+    </simple-method>
+    <simple-method method-name="deleteProductStorePaymentSetting" short-description="Delete a Product Store Payment Setting">
+        <check-permission permission="CATALOG" action="_DELETE">
+            <fail-property resource="ProductUiLabels" property="ProductCatalogDeletePermissionError"/>
+        </check-permission>
+        <check-errors/>
+
+        <make-value value-field="lookupPKMap" entity-name="ProductStorePaymentSetting"/>
+        <set-pk-fields map="parameters" value-field="lookupPKMap"/>
+        <find-by-primary-key entity-name="ProductStorePaymentSetting" map="lookupPKMap" value-field="setting"/>
+        <set-nonpk-fields map="parameters" value-field="setting"/>
+        <remove-value value-field="setting"/>
+    </simple-method>
+
+    <!-- ProductStore Email Services -->
+    <simple-method method-name="createProductStoreEmail" short-description="Create Product Store Email Setting">
+        <check-permission permission="CATALOG" action="_CREATE">
+            <fail-property resource="ProductUiLabels" property="ProductCatalogCreatePermissionError"/>
+        </check-permission>
+        <check-errors/>
+
+        <make-value value-field="newEntity" entity-name="ProductStoreEmailSetting"/>
+        <set-nonpk-fields map="parameters" value-field="newEntity"/>
+        <set-pk-fields map="parameters" value-field="newEntity"/>
+
+        <create-value value-field="newEntity"/>
+    </simple-method>
+    <simple-method method-name="updateProductStoreEmail" short-description="Update Product Store Email Setting">
+        <check-permission permission="CATALOG" action="_UPDATE">
+            <fail-property resource="ProductUiLabels" property="ProductCatalogUpdatePermissionError"/>
+        </check-permission>
+        <check-errors/>
+
+        <make-value value-field="lookupKeyValue" entity-name="ProductStoreEmailSetting"/>
+        <set-pk-fields map="parameters" value-field="lookupKeyValue"/>
+        <find-by-primary-key entity-name="ProductStoreEmailSetting" map="lookupKeyValue" value-field="lookedUpValue"/>
+        <set-nonpk-fields map="parameters" value-field="lookedUpValue"/>
+        <store-value value-field="lookedUpValue"/>
+    </simple-method>
+    <simple-method method-name="removeProductStoreEmail" short-description="Remove Product Store Email Setting">
+        <check-permission permission="CATALOG" action="_DELETE">
+            <fail-property resource="ProductUiLabels" property="ProductCatalogDeletePermissionError"/>
+        </check-permission>
+        <check-errors/>
+
+        <make-value value-field="lookupPKMap" entity-name="ProductStoreEmailSetting"/>
+        <set-pk-fields map="parameters" value-field="lookupPKMap"/>
+        <find-by-primary-key entity-name="ProductStoreEmailSetting" map="lookupPKMap" value-field="lookedUpValue"/>
+        <remove-value value-field="lookedUpValue"/>
+    </simple-method>
+
+    <!-- ProductStore Vendor Payment Services -->
+    <simple-method method-name="createProductStoreVendorPayment" short-description="Create a ProductStoreVendorPayment">
+        <check-permission permission="CATALOG" action="_CREATE">
+            <fail-property resource="ProductUiLabels" property="ProductCatalogCreatePermissionError"/>
+        </check-permission>
+        <check-errors/>
+
+        <make-value entity-name="ProductStoreVendorPayment" value-field="newEntity"/>
+        <set-pk-fields value-field="newEntity" map="parameters"/>
+        <create-value value-field="newEntity"/>
+    </simple-method>
+    <simple-method method-name="deleteProductStoreVendorPayment" short-description="Remove the ProductStoreVendorPayment">
+        <check-permission permission="CATALOG" action="_DELETE">
+            <fail-property resource="ProductUiLabels" property="ProductCatalogDeletePermissionError"/>
+        </check-permission>
+        <check-errors/>
+
+        <make-value entity-name="ProductStoreVendorPayment" value-field="lookedUpValue"/>
+        <set-pk-fields value-field="lookedUpValue" map="parameters"/>
+        <remove-value value-field="lookedUpValue"/>
+    </simple-method>
+
+    <!-- ProductStore Carrier Shipment Services -->
+    <simple-method method-name="createProductStoreShipMeth" short-description="Create Product Store Carrier Shipment Method">
+        <check-permission permission="CATALOG" action="_CREATE">
+            <fail-property resource="ProductUiLabels" property="ProductCatalogCreatePermissionError"/>
+        </check-permission>
+        <check-errors/>
+
+        <make-value value-field="newEntity" entity-name="ProductStoreShipmentMeth"/>
+        <set-nonpk-fields map="parameters" value-field="newEntity"/>
+        <sequenced-id sequence-name="ProductStoreShipmentMeth" field="newEntity.productStoreShipMethId"/>
+
+        <create-value value-field="newEntity"/>
+    </simple-method>
+    <simple-method method-name="updateProductStoreShipMeth" short-description="Update Product Store Carrier Shipment Method">
+        <check-permission permission="CATALOG" action="_UPDATE">
+            <fail-property resource="ProductUiLabels" property="ProductCatalogUpdatePermissionError"/>
+        </check-permission>
+        <check-errors/>
+
+        <make-value value-field="lookupKeyValue" entity-name="ProductStoreShipmentMeth"/>
+        <set-pk-fields map="parameters" value-field="lookupKeyValue"/>
+        <find-by-primary-key entity-name="ProductStoreShipmentMeth" map="lookupKeyValue" value-field="lookedUpValue"/>
+        <set-nonpk-fields map="parameters" value-field="lookedUpValue"/>
+        <store-value value-field="lookedUpValue"/>
+    </simple-method>
+    <simple-method method-name="removeProductStoreShipMeth" short-description="Remove Product Store Carrier Shipment Method">
+        <check-permission permission="CATALOG" action="_DELETE">
+            <fail-property resource="ProductUiLabels" property="ProductCatalogDeletePermissionError"/>
+        </check-permission>
+        <check-errors/>
+
+        <make-value value-field="lookupPKMap" entity-name="ProductStoreShipmentMeth"/>
+        <set-pk-fields map="parameters" value-field="lookupPKMap"/>
+        <find-by-primary-key entity-name="ProductStoreShipmentMeth" map="lookupPKMap" value-field="lookedUpValue"/>
+        <remove-value value-field="lookedUpValue"/>
+    </simple-method>
+
+    <!-- Product Store Role Services -->
+    <simple-method method-name="createProductStoreRole" short-description="Create ProductStoreRole">
+        <check-permission permission="CATALOG" action="_CREATE">
+            <fail-property resource="ProductUiLabels" property="ProductCatalogCreatePermissionError"/>
+        </check-permission>
+        <check-errors/>
+
+        <make-value value-field="newEntity" entity-name="ProductStoreRole"/>
+        <set-pk-fields map="parameters" value-field="newEntity"/>
+        <set-nonpk-fields map="parameters" value-field="newEntity"/>
+
+        <if-empty field="newEntity.fromDate">
+            <now-timestamp field="nowTimestamp"/>
+            <set from-field="nowTimestamp" field="newEntity.fromDate"/>
+        </if-empty>
+
+        <create-value value-field="newEntity"/>
+    </simple-method>
+    <simple-method method-name="updateProductStoreRole" short-description="Update a ProductStoreRole">
+        <check-permission permission="CATALOG" action="_UPDATE">
+            <fail-property resource="ProductUiLabels" property="ProductCatalogUpdatePermissionError"/>
+        </check-permission>
+        <check-errors/>
+
+        <make-value value-field="lookupPKMap" entity-name="ProductStoreRole"/>
+        <set-pk-fields map="parameters" value-field="lookupPKMap"/>
+        <find-by-primary-key map="lookupPKMap" value-field="lookedUpValue"/>
+        <set-nonpk-fields map="parameters" value-field="lookedUpValue"/>
+        <store-value value-field="lookedUpValue"/>
+    </simple-method>
+    <simple-method method-name="removeProductStoreRole" short-description="Remove ProductStoreRole">
+        <check-permission permission="CATALOG" action="_DELETE">
+            <fail-property resource="ProductUiLabels" property="ProductCatalogDeletePermissionError"/>
+        </check-permission>
+        <check-errors/>
+
+        <make-value value-field="lookupPKMap" entity-name="ProductStoreRole"/>
+        <set-pk-fields map="parameters" value-field="lookupPKMap"/>
+        <find-by-primary-key map="lookupPKMap" value-field="lookedUpValue"/>
+        <set-nonpk-fields map="parameters" value-field="lookedUpValue"/>
+
+        <if-empty field="lookedUpValue.thruDate">
+            <now-timestamp field="nowTimestamp"/>
+            <set from-field="nowTimestamp" field="lookedUpValue.thruDate"/>
+        </if-empty>
+        <store-value value-field="lookedUpValue"/>
+    </simple-method>
+
+    <!-- Product Store Keyword Override Services -->
+    <simple-method method-name="createProductStoreKeywordOvrd" short-description="Create a ProductStoreKeywordOvrd">
+        <check-permission permission="CATALOG" action="_CREATE">
+            <fail-property resource="ProductUiLabels" property="ProductCatalogCreatePermissionError"/>
+        </check-permission>
+        <check-errors/>
+
+        <make-value value-field="newEntity" entity-name="ProductStoreKeywordOvrd"/>
+        <set-pk-fields map="parameters" value-field="newEntity"/>
+        <set-nonpk-fields map="parameters" value-field="newEntity"/>
+
+        <if-empty field="newEntity.fromDate">
+            <now-timestamp field="nowTimestamp"/>
+            <set from-field="nowTimestamp" field="newEntity.fromDate"/>
+        </if-empty>
+
+        <!-- make sure the keyword is lower cased -->
+        <call-object-method obj-field="newEntity.keyword" method-name="toLowerCase" ret-field="newEntity.keyword"/>
+
+        <create-value value-field="newEntity"/>
+    </simple-method>
+    <simple-method method-name="updateProductStoreKeywordOvrd" short-description="Update a ProductStoreKeywordOvrd">
+        <check-permission permission="CATALOG" action="_UPDATE">
+            <fail-property resource="ProductUiLabels" property="ProductCatalogUpdatePermissionError"/>
+        </check-permission>
+        <check-errors/>
+
+        <make-value value-field="lookupPKMap" entity-name="ProductStoreKeywordOvrd"/>
+        <set-pk-fields map="parameters" value-field="lookupPKMap"/>
+        <find-by-primary-key map="lookupPKMap" value-field="lookedUpValue"/>
+        <set-nonpk-fields map="parameters" value-field="lookedUpValue"/>
+        <store-value value-field="lookedUpValue"/>
+    </simple-method>
+    <simple-method method-name="deleteProductStoreKeywordOvrd" short-description="Delete a ProductStoreKeywordOvrd">
+        <check-permission permission="CATALOG" action="_DELETE">
+            <fail-property resource="ProductUiLabels" property="ProductCatalogDeletePermissionError"/>
+        </check-permission>
+        <check-errors/>
+
+        <make-value value-field="lookupPKMap" entity-name="ProductStoreKeywordOvrd"/>
+        <set-pk-fields map="parameters" value-field="lookupPKMap"/>
+        <find-by-primary-key map="lookupPKMap" value-field="lookedUpValue"/>
+        <remove-value value-field="lookedUpValue"/>
+    </simple-method>
+
+    <!-- Product Store Survey Appl Services -->
+    <simple-method method-name="createProductStoreSurveyAppl" short-description="Create ProductStoreSurveyAppl">
+        <check-permission permission="CATALOG" action="_CREATE">
+            <fail-property resource="ProductUiLabels" property="ProductCatalogCreatePermissionError"/>
+        </check-permission>
+        <check-errors/>
+
+        <make-value value-field="newEntity" entity-name="ProductStoreSurveyAppl"/>
+        <sequenced-id sequence-name="ProductStoreSurveyAppl" field="productStoreSurveyId"/>
+        <set from-field="productStoreSurveyId" field="newEntity.productStoreSurveyId"/>
+        <field-to-result field="productStoreSurveyId" result-name="productStoreSurveyId"/>
+        <set-nonpk-fields map="parameters" value-field="newEntity"/>
+
+        <if-empty field="newEntity.fromDate">
+            <now-timestamp field="nowTimestamp"/>
+            <set from-field="nowTimestamp" field="newEntity.fromDate"/>
+        </if-empty>
+
+        <create-value value-field="newEntity"/>
+    </simple-method>
+    <simple-method method-name="removeProductStoreSurveyAppl" short-description="Remove ProductStoreSurveyAppl">
+        <check-permission permission="CATALOG" action="_DELETE">
+            <fail-property resource="ProductUiLabels" property="ProductCatalogDeletePermissionError"/>
+        </check-permission>
+        <check-errors/>
+
+        <make-value value-field="lookupPKMap" entity-name="ProductStoreSurveyAppl"/>
+        <set-pk-fields map="parameters" value-field="lookupPKMap"/>
+        <find-by-primary-key map="lookupPKMap" value-field="lookedUpValue"/>
+        <set-nonpk-fields map="parameters" value-field="lookedUpValue"/>
+
+        <if-empty field="lookedUpValue.thruDate">
+            <now-timestamp field="nowTimestamp"/>
+            <set from-field="nowTimestamp" field="lookedUpValue.thruDate"/>
+        </if-empty>
+        <store-value value-field="lookedUpValue"/>
+    </simple-method>
+
+    <!-- Product Store FinAccount Settings -->
+    <simple-method method-name="createProductStoreFinActSetting" short-description="Create a ProductStoreFinActSetting">
+        <check-permission permission="CATALOG" action="_CREATE">
+            <fail-property resource="ProductUiLabels" property="ProductCatalogCreatePermissionError"/>
+        </check-permission>
+        <check-errors/>
+
+        <make-value value-field="finAcctSetting" entity-name="ProductStoreFinActSetting"/>
+        <set-pk-fields value-field="finAcctSetting" map="parameters"/>
+        <set-nonpk-fields value-field="finAcctSetting" map="parameters"/>
+        <create-value value-field="finAcctSetting"/>
+    </simple-method>
+    <simple-method method-name="updateProductStoreFinActSetting" short-description="Update a ProductStoreFinActSetting">
+        <check-permission permission="CATALOG" action="_UPDATE">
+            <fail-property resource="ProductUiLabels" property="ProductCatalogUpdatePermissionError"/>
+        </check-permission>
+        <check-errors/>
+
+        <make-value value-field="lookupPk" entity-name="ProductStoreFinActSetting"/>
+        <set-pk-fields value-field="lookupPk" map="parameters"/>
+        <find-by-primary-key map="lookupPk" value-field="finAccountSetting"/>
+
+        <set-nonpk-fields value-field="finAccountSetting" map="parameters"/>
+        <store-value value-field="finAccountSetting"/>
+    </simple-method>
+    <simple-method method-name="removeProductStoreFinActSetting" short-description="Remove a ProductStoreFinActSetting">
+        <check-permission permission="CATALOG" action="_DELETE">
+            <fail-property resource="ProductUiLabels" property="ProductCatalogDeletePermissionError"/>
+        </check-permission>
+        <check-errors/>
+
+        <make-value value-field="lookupPk" entity-name="ProductStoreFinActSetting"/>
+        <set-pk-fields value-field="lookupPk" map="parameters"/>
+        <find-by-primary-key map="lookupPk" value-field="finAccountSetting"/>
+        <remove-value value-field="finAccountSetting"/>
+    </simple-method>
+
+    <!-- Store Inventory Services -->
+    <simple-method method-name="reserveStoreInventory" short-description="Reserve Store Inventory">
+        <entity-one entity-name="Product" value-field="product" use-cache="true"/>
+        <entity-one entity-name="ProductStore" value-field="productStore" use-cache="true"/>
+        <entity-one entity-name="OrderHeader" value-field="orderHeader" use-cache="true"/>
+        <set field="parameters.priority" from-field="orderHeader.priority"/>
+        <if-empty field="productStore">
+            <add-error>
+                <fail-property resource="ProductUiLabels" property="ProductProductStoreNotFound"/>
+            </add-error>
+            <check-errors/>
+        </if-empty>
+
+        <!-- if prodCatalog is set to not reserve inventory, break here -->
+        <if-compare value="N" operator="equals" field="productStore.reserveInventory">
+            <!-- note: if not set, defaults to yes, reserve inventory -->
+            <log level="verbose" message="ProductStore with id ${productStore.productStoreId}, is set to NOT reserve inventory, not reserving inventory"/>
+            <field-to-result field="parameters.quantity" result-name="quantityNotReserved"/>
+            <return response-code="success"/>
+        </if-compare>
+
+        <call-simple-method method-name="isStoreInventoryRequiredInline"/>
+
+        <set from-field="parameters.facilityId" field="facilityId"/>
+        <if-empty field="facilityId">
+            <if-compare value="Y" field="productStore.oneInventoryFacility" operator="equals">
+                <if-empty field="productStore.inventoryFacilityId">
+                    <add-error>
+                        <fail-property resource="ProductUiLabels" property="ProductProductStoreNoSpecifiedInventoryFacility"/>
+                    </add-error>
+                    <check-errors/>
+                </if-empty>
+                <set-service-fields map="parameters" to-map="callServiceMap" service-name="reserveProductInventoryByFacility"/>
+                <set from-field="productStore.inventoryFacilityId" field="callServiceMap.facilityId"/>
+                <set from-field="requireInventory" field="callServiceMap.requireInventory"/>
+                <set from-field="productStore.reserveOrderEnumId" field="callServiceMap.reserveOrderEnumId"/>
+                <call-service service-name="reserveProductInventoryByFacility" in-map-name="callServiceMap">
+                    <result-to-field result-name="quantityNotReserved"/>
+                </call-service>
+
+                <if-compare value="0" field="quantityNotReserved" operator="equals" type="BigDecimal">
+                    <log level="info" message="Inventory IS reserved in facility with id [${productStore.inventoryFacilityId}] for product id [${parameters.productId}]; desired quantity was ${parameters.quantity}"/>
+                <else>
+                    <log level="info" message="There is insufficient inventory available in facility with id [${productStore.inventoryFacilityId}] for product id [${parameters.productId}]; desired quantity is ${parameters.quantity}, amount could not reserve is ${quantityNotReserved}"/>
+                </else>
+                </if-compare>
+            <else>
+                <entity-and entity-name="ProductStoreFacility" list="productStoreFacilities" use-cache="true">
+                    <field-map from-field="productStore.productStoreId" field-name="productStoreId"/>
+                    <order-by field-name="sequenceNum"/>
+                </entity-and>
+                <iterate list="productStoreFacilities" entry="productStoreFacility">
+                    <!-- in this case quantityNotReserved will always be empty until it finds a facility it can totally reserve from, then it will be 0.0 and we are done -->
+                    <if-empty field="storeFound">
+                        <!-- TODO: must entire quantity be available in one location? -->
+                        <!-- Right now the answer is yes, it only succeeds if one facility has sufficient inventory for the order. -->
+                        <set from-field="parameters.productId" field="callServiceMap.productId"/>
+                        <set from-field="productStoreFacility.facilityId" field="callServiceMap.facilityId"/>
+                        <log level="info" message="ProductStoreService:In productStoreFacilities loop: [${parameters.facilityId}]"/>
+                        <call-service service-name="getInventoryAvailableByFacility" in-map-name="callServiceMap">
+                            <result-to-field result-name="availableToPromiseTotal"/>
+                        </call-service>
+                        <clear-field field="callServiceMap"/>
+
+                        <if-compare-field field="availableToPromiseTotal" to-field="parameters.quantity" operator="greater-equals" type="BigDecimal">
+                            <set field="storeFound" from-field="productStoreFacility"/>
+                        </if-compare-field>
+                        <clear-field field="availableToPromiseTotal"/>
+                    </if-empty>
+                </iterate>
+
+                <!-- didn't find anything? Take the first facility from list -->
+                <if-empty field="storeFound">
+                    <first-from-list list="productStoreFacilities" entry="storeFound"/>
+                </if-empty>
+                <set from-field="storeFound.facilityId" field="facilityId" default-value=""/>
+                <set-service-fields map="parameters" to-map="callServiceMap" service-name="reserveProductInventoryByFacility"/>
+                <set from-field="facilityId" field="callServiceMap.facilityId"/>
+                <set from-field="requireInventory" field="callServiceMap.requireInventory"/>
+                <set from-field="productStore.reserveOrderEnumId" field="callServiceMap.reserveOrderEnumId"/>
+                <call-service service-name="reserveProductInventoryByFacility" in-map-name="callServiceMap">
+                    <result-to-field result-name="quantityNotReserved"/>
+                </call-service>
+                <log level="info" message="Inventory IS reserved in facility with id [${storeFound.facilityId}] for product id [${parameters.productId}]; desired quantity was ${parameters.quantity}"/>
+            </else>
+            </if-compare>
+        <else>
+            <entity-and entity-name="ProductStoreFacility" list="productStoreFacilities" use-cache="true">
+                <field-map from-field="productStore.productStoreId" field-name="productStoreId"/>
+                <field-map from-field="facilityId" field-name="facilityId"/>
+                <order-by field-name="sequenceNum"/>
+            </entity-and>
+            <iterate list="productStoreFacilities" entry="productStoreFacility">
+                <!-- Search Product Store Facilities to insure the facility passed in is associated to the Product Store passed in -->
+                <set field="facilityFound" from-field="productStoreFacility"/>
+                <log level="info" message="ProductStoreService:Facility Found : [${facilityFound}]"/>
+            </iterate>
+            <if-empty field="facilityFound">
+                <add-error>
+                    <fail-property resource="ProductUiLabels" property="FacilityNoAssociatedWithProcuctStore"/>
+                </add-error>
+                <check-errors/>
+            </if-empty>
+            <set-service-fields map="parameters" to-map="callServiceMap" service-name="reserveProductInventoryByFacility"/>
+            <set from-field="facilityId" field="callServiceMap.facilityId"/>
+            <set from-field="requireInventory" field="callServiceMap.requireInventory"/>
+            <set from-field="productStore.reserveOrderEnumId" field="callServiceMap.reserveOrderEnumId"/>
+            <call-service service-name="reserveProductInventoryByFacility" in-map-name="callServiceMap">
+                <result-to-field result-name="quantityNotReserved"/>
+            </call-service>
+            <if-compare value="0" field="quantityNotReserved" operator="equals" type="BigDecimal">
+                <log level="info" message="Inventory IS reserved in facility with id [${facilityId}] for product id [${parameters.productId}]; desired quantity was ${parameters.quantity}"/>
+            <else>
+                <log level="info" message="There is insufficient inventory available in facility with id [${facilityId}] for product id [${parameters.productId}]; desired quantity is ${parameters.quantity}, amount could not reserve is ${quantityNotReserved}"/>
+            </else>
+            </if-compare>
+        </else>
+        </if-empty>
+        <field-to-result field="quantityNotReserved"/>
+    </simple-method>
+
+    <simple-method method-name="isStoreInventoryRequired" short-description="Is Store Inventory Required" login-required="false">
+        <if-empty field="parameters.productStore">
+            <entity-one entity-name="ProductStore" value-field="productStore" use-cache="true"/>
+        <else>
+            <set from-field="parameters.productStore" field="productStore"/>
+        </else>
+        </if-empty>
+        <if-empty field="parameters.product">
+            <entity-one entity-name="Product" value-field="product" use-cache="true"/>
+        <else>
+            <set from-field="parameters.product" field="product"/>
+        </else>
+        </if-empty>
+
+        <call-simple-method method-name="isStoreInventoryRequiredInline"/>
+        <field-to-result field="requireInventory"/>
+    </simple-method>
+    <simple-method method-name="isStoreInventoryRequiredInline" short-description="Is Store Inventory Required" login-required="false">
+        <set from-field="product.requireInventory" field="requireInventory"/>
+        <if-empty field="requireInventory">
+            <set from-field="productStore.requireInventory" field="requireInventory"/>
+        </if-empty>
+        <if-empty field="requireInventory">
+            <set value="Y" field="requireInventory"/>
+        </if-empty>
+    </simple-method>
+
+    <simple-method method-name="isStoreInventoryAvailable" short-description="Is Store Inventory Available" login-required="false">
+        <if-empty field="parameters.productStore">
+            <entity-one entity-name="ProductStore" value-field="productStore" use-cache="true"/>
+        <else>
+            <set from-field="parameters.productStore" field="productStore"/>
+        </else>
+        </if-empty>
+        <if-empty field="parameters.product">
+            <entity-one entity-name="Product" value-field="product" use-cache="true"/>
+        <else>
+            <set from-field="parameters.product" field="product"/>
+        </else>
+        </if-empty>
+
+        <!-- If the given product is a SERVICE or DIGITAL_GOOD -->
+        <if>
+            <condition>
+                <or>
+                    <if-compare field="product.productTypeId" operator="equals" value="SERVICE"/>
+                    <if-compare field="product.productTypeId" operator="equals" value="DIGITAL_GOOD"/>
+                </or>
+            </condition>
+            <then>
+                <log level="verbose" message="Product with id ${product.productId}, is of type ${product.productTypeId}, returning true for inventory available check"/>
+                <set value="Y" field="available"/>
+                <field-to-result field="available"/>
+                <return/>
+            </then>
+        </if>
+
+        <!-- TODO: what to do with ASSET_USAGE? Only done elsewhere? Would need date/time range info to check availability -->
+
+        <!-- if prodCatalog is set to not check inventory break here -->
+        <if-compare value="N" field="productStore.checkInventory" operator="equals">
+            <!-- note: if not set, defaults to yes, check inventory -->
+            <log level="verbose" message="ProductStore with id ${productStore.productStoreId}, is set to NOT check inventory, returning true for inventory available check"/>
+            <set value="Y" field="available"/>
+            <field-to-result field="available"/>
+            <return/>
+        </if-compare>
+
+        <if-compare value="Y" operator="equals" field="productStore.oneInventoryFacility">
+            <if-empty field="productStore.inventoryFacilityId">
+                <add-error>
+                    <fail-property resource="ProductUiLabels" property="ProductProductStoreNotCheckAvailability"/>
+                </add-error>
+                <check-errors/>
+            </if-empty>
+
+            <set from-field="parameters.productId" field="callServiceMap.productId"/>
+            <set from-field="productStore.inventoryFacilityId" field="callServiceMap.facilityId"/>
+            <set field="isMarketingPkg" value="${groovy: org.ofbiz.entity.util.EntityTypeUtil.hasParentType(delegator, 'ProductType', 'productTypeId', product.productTypeId, 'parentTypeId', 'MARKETING_PKG')}" type="Boolean"/>
+            <if-compare field="isMarketingPkg" operator="equals" value="true" type="Boolean">
+                <call-service service-name="getMktgPackagesAvailable" in-map-name="callServiceMap">
+                    <result-to-field result-name="availableToPromiseTotal"/>
+                </call-service>
+                <else>
+                    <call-service service-name="getInventoryAvailableByFacility" in-map-name="callServiceMap">
+                        <result-to-field result-name="availableToPromiseTotal"/>
+                    </call-service>
+                </else>
+            </if-compare>
+            <!-- check to see if we got enough back... -->
+            <if-compare-field field="availableToPromiseTotal" to-field="parameters.quantity" operator="greater-equals" type="BigDecimal">
+                <set value="Y" field="available"/>
+                <log level="info" message="Inventory IS available in facility with id ${productStore.inventoryFacilityId} for product id ${parameters.productId}; desired quantity is ${parameters.quantity}, available quantity is ${availableToPromiseTotal}"/>
+            <else>
+                <set value="N" field="available"/>
+                <log level="info" message="Returning false because there is insufficient inventory available in facility with id ${productStore.inventoryFacilityId} for product id ${parameters.productId}; desired quantity is ${parameters.quantity}, available quantity is ${availableToPromiseTotal}"/>
+            </else>
+            </if-compare-field>
+        <else>
+            <entity-and entity-name="ProductStoreFacility" list="productStoreFacilities" use-cache="true">
+                <field-map from-field="productStore.productStoreId" field-name="productStoreId"/>
+                <order-by field-name="sequenceNum"/>
+            </entity-and>
+
+            <set value="N" field="available"/>
+            <iterate list="productStoreFacilities" entry="productStoreFacility">
+                <if-compare value="N" field="available" operator="equals">
+                    <!-- TODO: must entire quantity be available in one location? -->
+                    <!-- Right now the answer is yes, it only succeeds if one facility has sufficient inventory for the order. -->
+                    <set from-field="parameters.productId" field="callServiceMap.productId"/>
+                    <set from-field="productStoreFacility.facilityId" field="callServiceMap.facilityId"/>
+                    <set field="isMarketingPkg" value="${groovy: org.ofbiz.entity.util.EntityTypeUtil.hasParentType(delegator, 'ProductType', 'productTypeId', product.productTypeId, 'parentTypeId', 'MARKETING_PKG')}" type="Boolean"/>
+                    <if-compare field="isMarketingPkg" operator="equals" value="true" type="Boolean">
+                        <call-service service-name="getMktgPackagesAvailable" in-map-name="callServiceMap">
+                            <result-to-field result-name="availableToPromiseTotal"/>
+                        </call-service>
+                        <else>
+                            <call-service service-name="getInventoryAvailableByFacility" in-map-name="callServiceMap">
+                                <result-to-field result-name="availableToPromiseTotal"/>
+                            </call-service>
+                        </else>
+                    </if-compare>
+
+                    <clear-field field="callServiceMap"/>
+
+                    <if-compare-field field="availableToPromiseTotal" to-field="parameters.quantity" operator="greater-equals" type="BigDecimal">
+                        <set value="Y" field="available"/>
+                        <log level="info" message="Inventory IS available in facility with id ${productStoreFacility.facilityId} for product id ${parameters.productId}; desired quantity is ${parameters.quantity}, available quantity is ${availableToPromiseTotal}"/>
+                    </if-compare-field>
+                    <clear-field field="availableToPromiseTotal"/>
+                </if-compare>
+            </iterate>
+        </else>
+        </if-compare>
+
+        <field-to-result field="available"/>
+
+        <!--
+            /* TODO: must entire quantity be available in one location?
+             *  Right now the answer is yes, it only succeeds if one facility has sufficient inventory for the order.
+             *  When we get into splitting options it is much more complicated. There are various options like:
+             *  - allow split between facilities
+             *  - in split order facilities by highest quantities
+             *  - in split order facilities by lowest quantities
+             *  - in split order facilities by order in database, ie sequence numbers on facility-store join table
+             *  - in split order facilities by nearest locations to customer (not an easy one there...)
+             */
+
+            // loop through all facilities attached to this catalog and check for individual or cumulative sufficient inventory
+        -->
+    </simple-method>
+
+    <simple-method method-name="isStoreInventoryAvailableOrNotRequired" short-description="Is Store Inventory Available or Not Required" login-required="false">
+        <if-empty field="parameters.productStore">
+            <entity-one entity-name="ProductStore" value-field="productStore" use-cache="true"/>
+        <else>
+            <set from-field="parameters.productStore" field="productStore"/>
+        </else>
+        </if-empty>
+        <if-empty field="parameters.product">
+            <entity-one entity-name="Product" value-field="product" use-cache="true"/>
+        <else>
+            <set from-field="parameters.product" field="product"/>
+        </else>
+        </if-empty>
+
+        <call-simple-method method-name="isStoreInventoryRequiredInline"/>
+
+        <if-compare field="requireInventory" operator="not-equals" value="Y">
+            <set value="Y" field="availableOrNotRequired"/>
+            <field-to-result field="availableOrNotRequired"/>
+        <else>
+            <set-service-fields map="parameters" to-map="callServiceMap" service-name="isStoreInventoryAvailable"/>
+            <call-service service-name="isStoreInventoryAvailable" in-map-name="callServiceMap">
+                <result-to-result result-name="available" service-result-name="availableOrNotRequired"/>
+            </call-service>
+        </else>
+        </if-compare>
+    </simple-method>
+
+    <!-- ProductStore Vendor Shipment Services -->
+    <simple-method method-name="createProductStoreVendorShipment" short-description="Create a ProductStoreVendorShipment">
+        <check-permission permission="CATALOG" action="_CREATE">
+            <fail-property resource="ProductUiLabels" property="ProductCatalogCreatePermissionError"/>
+        </check-permission>
+        <check-errors/>
+        <make-value entity-name="ProductStoreVendorShipment" value-field="newEntity"/>
+        <set-pk-fields value-field="newEntity" map="parameters"/>
+        <create-value value-field="newEntity"/>
+    </simple-method>
+    <simple-method method-name="deleteProductStoreVendorShipment" short-description="Remove the ProductStoreVendorShipment">
+        <check-permission permission="CATALOG" action="_DELETE">
+            <fail-property resource="ProductUiLabels" property="ProductCatalogDeletePermissionError"/>
+        </check-permission>
+        <check-errors/>
+        <make-value entity-name="ProductStoreVendorShipment" value-field="lookedUpValue"/>
+        <set-pk-fields value-field="lookedUpValue" map="parameters"/>
+        <remove-value value-field="lookedUpValue"/>
+    </simple-method>
+
+    <simple-method method-name="checkProductStoreGroupRollup" short-description="When product store group hierarchy has been operate, synchronize primaryParentGroupId with ProductStoreGroupRollup">
+        <entity-one value-field="productStoreGroup" entity-name="ProductStoreGroup"/>
+        <if-empty field="parameters.primaryParentGroupId">
+            <entity-one value-field="productStoreGroupRollup" entity-name="ProductStoreGroupRollup"/>
+            <if-not-empty field="productStoreGroupRollup">
+                <set field="productStoreGroup.primaryParentGroupId"/>
+                <set-service-fields service-name="updateProductStoreGroup" to-map="productStoreGroupMap" map="productStoreGroup"/>
+                <call-service service-name="updateProductStoreGroup" in-map-name="productStoreGroupMap"/>
+            </if-not-empty>
+            <else>
+                <entity-and list="productStoreGroupRollups" entity-name="ProductStoreGroupRollup" filter-by-date="true">
+                    <field-map field-name="productStoreGroupId" from-field="productStoreGroup.productStoreGroupId"/>
+                    <field-map field-name="parentGroupId" from-field="parameters.primaryParentGroupId"/>
+                </entity-and>
+                <if-empty field="productStoreGroupRollups">
+                    <set field="productStoreGroupRollupMap.productStoreGroupId" from="productStoreGroup.productStoreGroupId"/>
+                    <set field="productStoreGroupRollupMap.parentGroupId" from="parameters.primaryParentGroupId"/>
+                    <set field="productStoreGroupRollupMap.fromDate" from="date:nowTimestamp()"/>
+                    <call-service service-name="createProductStoreGroupRollup" in-map-name="productStoreGroupRollupMap"/>
+                </if-empty>
+            </else>
+        </if-empty>
+    </simple-method>
+</simple-methods>
+

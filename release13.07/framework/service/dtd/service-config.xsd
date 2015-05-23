@@ -1,0 +1,324 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified">
+
+    <xs:element name="service-config">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element minOccurs="1" maxOccurs="unbounded" ref="service-engine" />
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="service-engine">
+        <xs:annotation>
+            <xs:documentation>
+                A service engine configuration instance. The schema supports multiple configuration
+                instances, but the OFBiz framework supports only one - named "default". 
+            </xs:documentation>
+        </xs:annotation>
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="authorization" />
+                <xs:element ref="thread-pool" />
+                <xs:element minOccurs="0" maxOccurs="unbounded" ref="engine" />
+                <xs:element minOccurs="0" maxOccurs="unbounded" ref="service-location" />
+                <xs:element minOccurs="0" maxOccurs="unbounded" ref="notification-group" />
+                <xs:element minOccurs="0" maxOccurs="unbounded" ref="startup-service" />
+                <xs:element minOccurs="0" maxOccurs="unbounded" ref="resource-loader" />
+                <xs:element minOccurs="0" maxOccurs="unbounded" ref="global-services" />
+                <xs:element minOccurs="0" maxOccurs="unbounded" ref="service-groups" />
+                <xs:element minOccurs="0" maxOccurs="unbounded" ref="service-ecas" />
+                <xs:element minOccurs="0" maxOccurs="unbounded" ref="jms-service" />
+            </xs:sequence>
+            <xs:attribute name="name" type="xs:string" use="required" />
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="authorization">
+        <xs:complexType>
+            <xs:attribute name="service-name" type="xs:string" use="required" />
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="thread-pool">
+        <xs:annotation>
+            <xs:documentation>
+                Configures the Job Manager and Job Poller.
+            </xs:documentation>
+        </xs:annotation>
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="run-from-pool" minOccurs="0" maxOccurs="unbounded">
+                    <xs:annotation>
+                        <xs:documentation>
+                            The Job Pool(s) this server should service. Only valid when the
+                            thread-pool element poll-enabled attribute is set to "true".
+                            A database can contain any number of job pools, and different
+                            servers can service different pools. Since the pools are in a common
+                            (shared) database, there is the potential for database locking problems
+                            when multiple servers service the pools.
+                        </xs:documentation>
+                    </xs:annotation>
+                    <xs:complexType>
+                        <xs:attribute type="xs:string" name="name" use="required" />
+                    </xs:complexType>
+                </xs:element>
+            </xs:sequence>
+            <xs:attribute name="send-to-pool" type="xs:string" use="required">
+                <xs:annotation>
+                    <xs:documentation>
+                        The Job Pool that jobs originating on this server should be sent to.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="purge-job-days" type="xs:nonNegativeInteger" default="30">
+                <xs:annotation>
+                    <xs:documentation>
+                        The number of days to keep completed/canceled jobs in the database.
+                        Only valid when the poll-enabled attribute is set to "true".
+                        This value should be reduced for applications that create a lot of jobs.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="failed-retry-min" type="xs:nonNegativeInteger" default="30">
+                <xs:annotation>
+                    <xs:documentation>
+                        The number of minutes to wait before retrying a failed job.
+                        Only valid when the poll-enabled attribute is set to "true".
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="ttl" type="xs:nonNegativeInteger">
+                <xs:annotation>
+                    <xs:documentation>
+                        Idle queue service thread lifespan in milliseconds. Defaults to "120000" (2 minutes).
+                        This setting should be a multiple of the poll-db-millis attribute value. If there are
+                        no jobs after multiple database polls, then idle queue service threads should be
+                        released - to help keep the system responsive.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="jobs" type="xs:nonNegativeInteger">
+                <xs:annotation>
+                    <xs:documentation>
+                        Job queue size. Defaults to "100".
+                        The default setting is for "normal" installations. If an application generates a lot of jobs,
+                        then this setting should be increased. If you are getting "Unable to queue job"
+                        exceptions, then increase this setting gradually until the exceptions stop appearing. 
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="min-threads" type="xs:nonNegativeInteger">
+                <xs:annotation>
+                    <xs:documentation>
+                        Minimum number of queue service threads. Defaults to "1".
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="max-threads" type="xs:nonNegativeInteger">
+                <xs:annotation>
+                    <xs:documentation>
+                        Maximum number of queue service threads. Defaults to "5".
+                        The Job Poller will add jobs to the job queue until it is full, then it will add
+                        queue service threads until the maximum in this setting is reached. The additional
+                        queue service threads are released when they are idle for the period of time
+                        set in the ttl attribute.
+                        The default setting is for a server with two CPUs. The value can be increased
+                        on servers with more CPUs. Higher values do not always result in better throughput -
+                        additional threads can slow the server down because of thread maintenance overhead.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="poll-enabled">
+                <xs:annotation>
+                    <xs:documentation>
+                        Enable database polling. Defaults to "true".
+                        In multi-server (load balanced) environments, only one server should have this
+                        attribute set to "true" - otherwise you might experience database locking problems.
+                    </xs:documentation>
+                </xs:annotation>
+                <xs:simpleType>
+                    <xs:restriction base="xs:token">
+                        <xs:enumeration value="true" />
+                        <xs:enumeration value="false" />
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:attribute>
+            <xs:attribute name="poll-db-millis" type="xs:nonNegativeInteger">
+                <xs:annotation>
+                    <xs:documentation>
+                        Database polling interval in milliseconds. Defaults to "30000" (30 seconds).
+                        Only valid when the poll-enabled attribute is set to "true".
+                        When the database is polled, there will be a burst of activity (database "hits")
+                        while the Job Manager queues jobs, then after the burst each queued job will
+                        update the database after it runs. Decreasing this value will increase database activity.
+                        Increasing this value will reduce the timeliness of job servicing.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="engine">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="parameter" minOccurs="0" maxOccurs="unbounded">
+                    <xs:annotation>
+                        <xs:documentation>
+                            Parameters used by the engine.
+                        </xs:documentation>
+                    </xs:annotation>
+                    <xs:complexType>
+                        <xs:attribute name="name" type="xs:string" use="required" />
+                        <xs:attribute name="value" type="xs:string" use="required" />
+                    </xs:complexType>
+                </xs:element>
+            </xs:sequence>
+            <xs:attribute name="name" type="xs:string" use="required" />
+            <xs:attribute name="class" type="xs:string" use="required" />
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="startup-service">
+        <xs:complexType>
+            <xs:attribute name="name" type="xs:string" use="required" />
+            <xs:attribute name="runtime-data-id" type="xs:string" />
+            <xs:attribute name="runtime-delay" type="xs:nonNegativeInteger" default="0" />
+            <xs:attribute name="run-in-pool" type="xs:string" />
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="service-location">
+        <xs:complexType>
+            <xs:attribute name="name" type="xs:string" use="required" />
+            <xs:attribute name="location" type="xs:string" use="required" />
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="resource-loader">
+        <xs:complexType>
+            <xs:attribute name="name" type="xs:string" use="required" />
+            <xs:attribute name="class" type="xs:string" use="required" />
+            <xs:attribute name="prepend-env" type="xs:string" />
+            <xs:attribute name="prefix" type="xs:string" />
+        </xs:complexType>
+    </xs:element>
+
+    <xs:attributeGroup name="loader-and-location-required">
+        <xs:attribute name="loader" type="xs:string" use="required" />
+        <xs:attribute name="location" type="xs:string" use="required" />
+    </xs:attributeGroup>
+
+    <xs:element name="global-services">
+        <xs:complexType>
+            <xs:attributeGroup ref="loader-and-location-required"/>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="service-groups">
+        <xs:complexType>
+            <xs:attributeGroup ref="loader-and-location-required"/>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="service-ecas">
+        <xs:complexType>
+            <xs:attributeGroup ref="loader-and-location-required"/>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="jms-service">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="server" maxOccurs="unbounded">
+                    <xs:complexType>
+                        <xs:attribute name="jndi-server-name" type="xs:string" use="required" />
+                        <xs:attribute name="jndi-name" type="xs:string" use="required" />
+                        <xs:attribute name="topic-queue" type="xs:string" use="required" />
+                        <xs:attribute name="type" use="required">
+                            <xs:simpleType>
+                                <xs:restriction base="xs:token">
+                                    <xs:enumeration value="topic" />
+                                    <xs:enumeration value="queue" />
+                                </xs:restriction>
+                            </xs:simpleType>
+                        </xs:attribute>
+                        <xs:attribute name="username" type="xs:string" />
+                        <xs:attribute name="password" type="xs:string" />
+                        <xs:attribute name="client-id" type="xs:string" />
+                        <xs:attribute name="listen" default="false">
+                            <xs:simpleType>
+                                <xs:restriction base="xs:token">
+                                    <xs:enumeration value="true" />
+                                    <xs:enumeration value="false" />
+                                </xs:restriction>
+                            </xs:simpleType>
+                        </xs:attribute>
+                        <xs:attribute type="xs:string" name="listener-class" />
+                    </xs:complexType>
+                </xs:element>
+            </xs:sequence>
+            <xs:attribute name="name" type="xs:string" use="required" />
+            <xs:attribute name="send-mode" default="none">
+                <xs:simpleType>
+                    <xs:restriction base="xs:token">
+                        <xs:enumeration value="none" />
+                        <xs:enumeration value="all" />
+                        <xs:enumeration value="first-available" />
+                        <xs:enumeration value="random" />
+                        <xs:enumeration value="round-robin" />
+                        <xs:enumeration value="least-load" />
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:attribute>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="notification-group">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="notification" minOccurs="1" maxOccurs="1">
+                    <xs:complexType>
+                        <xs:attribute name="subject" type="xs:string" use="required" />
+                        <xs:attribute name="screen" type="xs:string" use="required" />
+                        <xs:attribute name="service" type="xs:string" default="sendMailFromScreen" />
+                    </xs:complexType>
+                </xs:element>
+                <xs:element name="notify" minOccurs="2" maxOccurs="unbounded">
+                    <xs:complexType mixed="true">
+                        <xs:attribute name="type" use="required">
+                            <xs:simpleType>
+                                <xs:restriction base="xs:token">
+                                    <xs:enumeration value="to" />
+                                    <xs:enumeration value="cc" />
+                                    <xs:enumeration value="bcc" />
+                                    <xs:enumeration value="from" />
+                                </xs:restriction>
+                            </xs:simpleType>
+                        </xs:attribute>
+                    </xs:complexType>
+                </xs:element>
+            </xs:sequence>
+            <xs:attribute name="name" type="xs:string" use="required" />
+        </xs:complexType>
+    </xs:element>
+
+</xs:schema>
