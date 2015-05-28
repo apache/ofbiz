@@ -1746,7 +1746,7 @@ public class MacroFormRenderer implements FormStringRenderer {
     public void renderTextFindField(Appendable writer, Map<String, Object> context, TextFindField textFindField) throws IOException {
         ModelFormField modelFormField = textFindField.getModelFormField();
 
-        String defaultOption = textFindField.getDefaultOption();
+        String defaultOption = textFindField.getDefaultOption(context);
         String className = "";
         String alert = "false";
         String opEquals = "";
@@ -1791,7 +1791,7 @@ public class MacroFormRenderer implements FormStringRenderer {
         }
 
         String ignoreCase = UtilProperties.getMessage("conditional", "ignore_case", locale);
-        boolean ignCase = textFindField.getIgnoreCase();
+        boolean ignCase = textFindField.getIgnoreCase(context);
         boolean hideIgnoreCase = textFindField.getHideIgnoreCase();
         StringWriter sr = new StringWriter();
         sr.append("<@renderTextFindField ");
