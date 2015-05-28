@@ -1711,7 +1711,7 @@ public final class MacroFormRenderer implements FormStringRenderer {
 
     public void renderTextFindField(Appendable writer, Map<String, Object> context, TextFindField textFindField) throws IOException {
         ModelFormField modelFormField = textFindField.getModelFormField();
-        String defaultOption = textFindField.getDefaultOption();
+        String defaultOption = textFindField.getDefaultOption(context);
         String className = "";
         String alert = "false";
         String opEquals = "";
@@ -1752,7 +1752,7 @@ public final class MacroFormRenderer implements FormStringRenderer {
             titleStyle = modelFormField.getTitleStyle();
         }
         String ignoreCase = UtilProperties.getMessage("conditional", "ignore_case", locale);
-        boolean ignCase = textFindField.getIgnoreCase();
+        boolean ignCase = textFindField.getIgnoreCase(context);
         boolean hideIgnoreCase = textFindField.getHideIgnoreCase();
         StringWriter sr = new StringWriter();
         sr.append("<@renderTextFindField ");
