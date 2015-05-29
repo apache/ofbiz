@@ -1995,14 +1995,14 @@ public class MacroFormRenderer implements FormStringRenderer {
         if (value2 == null) {
             value2 = "";
         }
-        if(context.containsKey("parameters")){
-            Map<String, Object>parameters = (Map<String, Object>)context.get("parameters");
-            if(parameters.containsKey(name + "_fld0_value")){
-                value = (String)parameters.get(name + "_fld0_value");   
+        if (context.containsKey("parameters")) {
+            Map<String, Object> parameters = (Map<String, Object>)context.get("parameters");
+            if (parameters.containsKey(name + "_fld0_value")) {
+                value = (String)parameters.get(name + "_fld0_value");
             }
-            if(parameters.containsKey(name + "_fld1_value")){
-                value2 = (String)parameters.get(name + "_fld1_value");  
-            }  
+            if (parameters.containsKey(name + "_fld1_value")) {
+                value2 = (String)parameters.get(name + "_fld1_value");
+            }
         }
         String titleStyle = "";
         if (UtilValidate.isNotEmpty(modelFormField.getTitleStyle())) {
