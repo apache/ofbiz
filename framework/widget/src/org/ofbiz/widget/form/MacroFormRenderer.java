@@ -1896,17 +1896,33 @@ public class MacroFormRenderer implements FormStringRenderer {
         String formName = "";
         String defaultDateTimeString = "";
         StringBuilder imgSrc = new StringBuilder();
+
         // add calendar pop-up button and seed data IF this is not a "time" type date-find
         if (!"time".equals(dateFindField.getType())) {
             formName = modelFormField.getModelForm().getCurrentFormName(context);
             defaultDateTimeString = UtilHttp.encodeBlanks(modelFormField.getEntry(context, dateFindField.getDefaultDateTimeString(context)));
             this.appendContentUrl(imgSrc, "/images/cal.gif");
         }
-        String defaultOptionFrom = dateFindField.getDefaultOptionFrom();
-        String defaultOptionThru = dateFindField.getDefaultOptionThru();
+        String defaultOptionFrom = dateFindField.getDefaultOptionFrom(context);
+        String defaultOptionThru = dateFindField.getDefaultOptionThru(context);
         String value2 = modelFormField.getEntry(context);
         if (value2 == null) {
             value2 = "";
+        }
+
+        //check if values are present on parameters (from a previous search)
+        if (context.containsKey("parameters")) {
+            Map<String, Object> parameters = UtilGenerics.checkMap(context.get("parameters"));
+            if (name != null) {
+                String nameValue0 = name.concat("_fld0_value");
+                if (parameters.containsKey(nameValue0)) {
+                    value = (String)parameters.get(nameValue0);   
+                }
+                String nameValue1 = name.concat("_fld1_value");
+                if (parameters.containsKey(nameValue1)) {
+                    value2 = (String)parameters.get(nameValue1);  
+                }  
+            }
         }
         String titleStyle = "";
         if (UtilValidate.isNotEmpty(modelFormField.getTitleStyle())) {
@@ -1924,6 +1940,8 @@ public class MacroFormRenderer implements FormStringRenderer {
         sr.append(localizedInputTitle);
         sr.append("\" value=\"");
         sr.append(value);
+        sr.append("\" value2=\"");
+        sr.append(value2);
         sr.append("\" size=\"");
         sr.append(Integer.toString(size));
         sr.append("\" maxlength=\"");
