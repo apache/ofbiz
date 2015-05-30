@@ -31,7 +31,9 @@ nav#app-navigation.navbar.navbar-default {
 	background-image: linear-gradient(to bottom, #fff 0px, #e0e0e0 100%);
     box-shadow: 0 1px 0 rgba(255, 255, 255, 0.15) inset, 0 1px 5px rgba(0, 0, 0, 0.075);
 }
-
+nav.paginate-nav {
+    padding-bottom: 15px;
+}
 .navbar-nav li.menuTitle {
 	background-image: linear-gradient(to bottom, #E5B642 0px, #F0D532 100%);
     background-repeat: repeat-x;

@@ -752,14 +752,14 @@ Parameter: lastViewName, String, optional - If the ajaxEnabled parameter is true
 <#macro renderNextPrev paginateStyle paginateFirstStyle viewIndex highIndex listSize viewSize ajaxEnabled javaScriptEnabled ajaxFirstUrl firstUrl paginateFirstLabel paginatePreviousStyle ajaxPreviousUrl previousUrl paginatePreviousLabel pageLabel ajaxSelectUrl selectUrl ajaxSelectSizeUrl selectSizeUrl commonDisplaying paginateNextStyle ajaxNextUrl nextUrl paginateNextLabel paginateLastStyle ajaxLastUrl lastUrl paginateLastLabel paginateViewSizeLabel>
   <#if listSize gt viewSize>
     <#-- <div class="${paginateStyle}">&nbsp; -->
-      <nav>
+      <nav class="paginate-nav">
       <ul class="pagination pull-left">
-        <li class="${paginateFirstStyle}<#if viewIndex gt 0>"><a href="javascript:void(0)" onclick="<#if ajaxEnabled>ajaxUpdateAreas('${ajaxFirstUrl}')<#else>submitPagination(this, '${firstUrl}')</#if>" title="${paginateFirstLabel}">${paginateFirstLabel}</a><#else>-disabled"><span class="glyphicon glyphicon-step-backward"></span></#if></li>
-        <li class="${paginatePreviousStyle}<#if viewIndex gt 0>"><a href="javascript:void(0)" onclick="<#if ajaxEnabled>ajaxUpdateAreas('${ajaxPreviousUrl}')<#else>submitPagination(this, '${previousUrl}')</#if>" title="${paginatePreviousLabel}">${paginatePreviousLabel}</a><#else>-disabled"><span class="glyphicon glyphicon-backward"></span></#if></li>
-        <li class="${paginateNextStyle}<#if highIndex lt listSize>"><a href="javascript:void(0)" onclick="<#if ajaxEnabled>ajaxUpdateAreas('${ajaxNextUrl}')<#else>submitPagination(this, '${nextUrl}')</#if>" title="${paginateNextLabel}"><span class="glyphicon glyphicon-forward"></a><#else>-disabled"><span class="glyphicon glyphicon-forward"></span></#if></li>
-        <li class="${paginateLastStyle}<#if highIndex lt listSize>"><a href="javascript:void(0)" onclick="<#if ajaxEnabled>ajaxUpdateAreas('${ajaxLastUrl}')<#else>submitPagination(this, '${lastUrl}')</#if>" title="${paginateLastLabel}"><span class="glyphicon glyphicon-step-forward"></span></a><#else>-disabled"><span class="glyphicon glyphicon-step-forward"></span></#if></li>
-		</ul>
-		<ul class="pagination pull-right">
+        <li class="${paginateFirstStyle}<#if viewIndex gt 0>"><a href="javascript:void(0)" onclick="<#if ajaxEnabled>ajaxUpdateAreas('${ajaxFirstUrl}')<#else>submitPagination(this, '${firstUrl}')</#if>" title="${paginateFirstLabel}"><span class="glyphicon glyphicon-step-backward"></span></a><#else> disabled"><a><span class="glyphicon glyphicon-step-backward"></span></a></#if></li>
+        <li class="${paginatePreviousStyle}<#if viewIndex gt 0>"><a href="javascript:void(0)" onclick="<#if ajaxEnabled>ajaxUpdateAreas('${ajaxPreviousUrl}')<#else>submitPagination(this, '${previousUrl}')</#if>" title="${paginatePreviousLabel}"><span class="glyphicon glyphicon-step-backward"></span></a><#else> disabled"><a><span class="glyphicon glyphicon-backward"></span></a></#if></li>
+        <li class="${paginateNextStyle}<#if highIndex lt listSize>"><a href="javascript:void(0)" onclick="<#if ajaxEnabled>ajaxUpdateAreas('${ajaxNextUrl}')<#else>submitPagination(this, '${nextUrl}')</#if>" title="${paginateNextLabel}"><span class="glyphicon glyphicon-forward"></a><#else> disabled"><a><span class="glyphicon glyphicon-forward"></span></a></#if></li>
+        <li class="${paginateLastStyle}<#if highIndex lt listSize>"><a href="javascript:void(0)" onclick="<#if ajaxEnabled>ajaxUpdateAreas('${ajaxLastUrl}')<#else>submitPagination(this, '${lastUrl}')</#if>" title="${paginateLastLabel}"><span class="glyphicon glyphicon-step-forward"></span></a><#else> disabled"><a><span class="glyphicon glyphicon-step-forward"></span></a></#if></li>
+      </ul>
+      <ul class="pagination pull-right">
         <#if listSize gt 0 && javaScriptEnabled><li class="nav-page-select">${pageLabel} <select style="margin:0px;font-size:100%;" name="page" size="1" onchange="<#if ajaxEnabled>ajaxUpdateAreas('${ajaxSelectUrl}')<#else>submitPagination(this, '${selectUrl}'+this.value)</#if>"><#rt/>
           <#assign x=(listSize/viewSize)?ceiling>
             <#list 1..x as i>
