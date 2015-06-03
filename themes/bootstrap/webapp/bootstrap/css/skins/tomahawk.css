@@ -19,28 +19,92 @@
  /********************* Tomahawk skin styles *****************/
 
 html,body {
-    background-color: #000;
+    background-color: #ececec;
 }
 
 nav#header-navigation.navbar.navbar-default {
-	background: url("../images/header_top_bg.gif");
-	border-color: #908F8F;
-	}
-	
+    background: url("../images/header_top_bg.gif");
+    background-color: #fbc02d;
+    border-radius: 0;
+    border: none;
+    z-index: 5;
+}
+
 nav#app-navigation.navbar.navbar-default {
-	background-image: linear-gradient(to bottom, #fff 0px, #e0e0e0 100%);
-    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.15) inset, 0 1px 5px rgba(0, 0, 0, 0.075);
+    border-radius: 0;
+    z-index: 1;
+    background: #fcd269;
+    box-shadow: none;
+    border: none;
+}
+
+#app-navigation {
+    position: fixed;
+    top: 50px;
+    width:100%;
+    margin:0;
+    padding: 0;
 }
 nav.paginate-nav {
     padding-bottom: 15px;
 }
-.navbar-nav li.menuTitle {
-	background-image: linear-gradient(to bottom, #E5B642 0px, #F0D532 100%);
-    background-repeat: repeat-x;
-    background-color: #E5B642;
+
+.menuTitle {
+    position: fixed;
+    top: 12px;
+    left: 50px;
+    color: #fff;
+    font-size: 17px;
+    font-weight: bold;
+    z-index: 10;
+}
+.menuTitle:hover {
+    text-decoration: none;
+    color: #fff;
+}
+.main-containt {
+    width: 80%;
+}
+.navbar-brand{
+    position: absolute;
+    right: 47%;
+}
+.navbar-brand img {
+    height: 40px;
+}
+#secondary-application-menu{
+    position: relative;
+    left: 300px;
+}
+.button-navbar{
+    border:none;
+    background-color: transparent;
+    color: #fff;
+    font-size: large;
+    position: relative;
+    top: 10px;
+    padding-right: 10px;
+}
+.badge-red{
+    position: relative;
+    left:-15px;
+    border-radius:2px;
+    background: #F44336 none repeat scroll 0% 0%;
+    color: #fff;
+    font-size: 10px;
+    padding: 0 2px 0 2px;
 }
 .dropdown-menu {
-	background-image: linear-gradient(to bottom, #fff 0px, #e0e0e0 100%);
+    background-image: linear-gradient(to bottom, #fff 0px, #e0e0e0 100%);
+}
+
+.dropdown-main-navbar{
+    background-image: none;
+    top: 51px;
+    left: -17px;
+    z-index: 20;
+    border-radius: 0;
+    border: none;
 }
 
 .panel-default > .panel-heading {
@@ -63,7 +127,7 @@ div.page-title {
 	color:#fff;
 	}
 .nav.navbar-nav li.selected {
-    background-color: #E6BB3F;
+    background-color: #fbc02d;
     border-color: #EFD233;
 }
 /********************* Button Styles ************************/

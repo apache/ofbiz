@@ -48,7 +48,7 @@ under the License.
     <VisualThemeResource visualThemeId="BOOTSTRAP_TOMAHAWK" resourceTypeEnumId="VT_FTR_JAVASCRIPT" resourceValue="/bootstrap/js/bootified.js" sequenceId="01"/>
     <VisualThemeResource visualThemeId="BOOTSTRAP_TOMAHAWK" resourceTypeEnumId="VT_FTR_JAVASCRIPT" resourceValue="/bootstrap/js/bootstrap.min.js" sequenceId="02"/>
     <VisualThemeResource visualThemeId="BOOTSTRAP_TOMAHAWK" resourceTypeEnumId="VT_SHORTCUT_ICON" resourceValue="/images/ofbiz.ico" sequenceId="01"/>
-    <VisualThemeResource visualThemeId="BOOTSTRAP_TOMAHAWK" resourceTypeEnumId="VT_HDR_IMAGE_URL" resourceValue="/bootstrap/images/logo.png" sequenceId="01"/>
+    <VisualThemeResource visualThemeId="BOOTSTRAP_TOMAHAWK" resourceTypeEnumId="VT_HDR_IMAGE_URL" resourceValue="/bootstrap/images/Logo-OFBiz.svg" sequenceId="01"/>
     <VisualThemeResource visualThemeId="BOOTSTRAP_TOMAHAWK" resourceTypeEnumId="VT_HDR_TMPLT_LOC" resourceValue="component://bootstrap/includes/header.ftl" sequenceId="01"/>
     <VisualThemeResource visualThemeId="BOOTSTRAP_TOMAHAWK" resourceTypeEnumId="VT_MSG_TMPLT_LOC" resourceValue="component://common/webcommon/includes/messages.ftl" sequenceId="01"/>
     <VisualThemeResource visualThemeId="BOOTSTRAP_TOMAHAWK" resourceTypeEnumId="VT_FTR_TMPLT_LOC" resourceValue="component://bootstrap/includes/footer.ftl" sequenceId="01"/>
