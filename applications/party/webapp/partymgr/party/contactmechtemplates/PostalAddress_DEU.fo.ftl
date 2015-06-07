@@ -16,6 +16,7 @@ KIND, either express or implied.  See the License for the
 specific language governing permissions and limitations
 under the License.
 -->
+<#escape x as x?xml>
   <fo:block>${postalAddress.address1?if_exists}</fo:block>
   <#if postalAddress.address2?has_content><fo:block>${postalAddress.address2?if_exists}</fo:block></#if>
   <fo:block>${postalAddress.postalCode?if_exists} ${postalAddress.city?if_exists}</fo:block>
@@ -25,3 +26,4 @@ under the License.
       ${country.get("geoName", locale)?default(country.geoId)}
     </fo:block>
   </#if>
+</#escape>
