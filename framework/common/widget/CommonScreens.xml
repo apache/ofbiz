@@ -396,6 +396,8 @@ under the License.
                         <set field="layoutSettings.javaScripts[]" value="/images/fieldlookup.js" global="true"/>
 
                         <set field="messagesTemplateLocation" from-field="layoutSettings.VT_MSG_TMPLT_LOC[0]" default-value="component://common/webcommon/includes/messages.ftl"/>
+                        <set field="lookupBodyTemplateLocation" from-field="layoutSettings.VT_LKUP_TEMP_LOC[0]" default-value="component://common/webcommon/includes/lookup.ftl"/>
+                        <set field="lookupFooterTemplateLocation" from-field="layoutSettings.VT_LKUP_FOOTER_LOC[0]" default-value="component://common/webcommon/includes/lookupFooter.ftl"/>
                     </actions>
                     <widgets>
                         <section>
@@ -403,7 +405,7 @@ under the License.
                                 <if-compare value="layer" operator="not-equals" field="parameters.presentation"/>
                         </condition>
                             <widgets>
-                                <platform-specific><html><html-template location="component://common/webcommon/includes/lookup.ftl" /></html></platform-specific>
+                            	<platform-specific><html><html-template location="${lookupBodyTemplateLocation}" /></html></platform-specific> 
                             </widgets>
                         </section>
                         <platform-specific><html><html-template location="${messagesTemplateLocation}"/></html></platform-specific>
@@ -432,7 +434,7 @@ under the License.
                             <if-compare value="layer" operator="not-equals" field="parameters.presentation"/>
                         </condition>
                             <widgets>
-                                <platform-specific><html><html-template location="component://common/webcommon/includes/lookupFooter.ftl"/></html></platform-specific>
+                            	<platform-specific><html><html-template location="${lookupFooterTemplateLocation}"/></html></platform-specific>
                             </widgets>
                         </section>
                     </widgets>

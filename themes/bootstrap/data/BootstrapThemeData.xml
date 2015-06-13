@@ -20,6 +20,8 @@ under the License.
 
 <entity-engine-xml>
 	<Enumeration enumId="VT_NAV_APPHDR_LOC" enumTypeId="VT_RES_TYPE" sequenceId="30" description="Location of Application header."/>
+	<Enumeration enumId="VT_LKUP_TEMP_LOC" enumTypeId="VT_RES_TYPE" sequenceId="30" description="Location of Lookup Screen Body FTL template."/>
+<Enumeration enumId="VT_LKUP_FOOTER_LOC" enumTypeId="VT_RES_TYPE" sequenceId="30" description="Location of Lookup Screen Footer FTL template."/>
 
     <VisualTheme visualThemeId="BOOTSTRAP_BASIC" visualThemeSetId="BACKOFFICE" description="Boostrap Basic Theme - Floating Layout, Sight-Impaired Accessible, Bidirectional"/>
     <VisualThemeResource visualThemeId="BOOTSTRAP_BASIC" resourceTypeEnumId="VT_NAME" resourceValue="BOOTSTRAP_BASIC" sequenceId="01"/>
@@ -39,6 +41,8 @@ under the License.
     <VisualThemeResource visualThemeId="BOOTSTRAP_BASIC" resourceTypeEnumId="VT_FORM_MACRO_LIB" resourceValue="component://bootstrap/includes/templates/htmlFormMacroLibrary.ftl" sequenceId="01"/>
     <!--  <VisualThemeResource visualThemeId="BOOTSTRAP_BASIC" resourceTypeEnumId="VT_TREE_MACRO_LIB" resourceValue="component://bootstrap/includes/templates/htmlTreeMacroLibrary.ftl" sequenceId="01"/> -->
     <VisualThemeResource visualThemeId="BOOTSTRAP_BASIC" resourceTypeEnumId="VT_MENU_MACRO_LIB" resourceValue="component://bootstrap/includes/templates/htmlMenuMacroLibrary.ftl" sequenceId="01"/>
+    <VisualThemeResource visualThemeId="BOOTSTRAP_BASIC" resourceTypeEnumId="VT_LKUP_TEMP_LOC" resourceValue="component://bootstrap/includes/lookup.ftl" sequenceId="01"/>
+<VisualThemeResource visualThemeId="BOOTSTRAP_BASIC" resourceTypeEnumId="VT_LKUP_FOOTER_LOC" resourceValue="component://bootstrap/includes/lookupFooter.ftl" sequenceId="01"/>
     
     <VisualTheme visualThemeId="BOOTSTRAP_TOMAHAWK" visualThemeSetId="BACKOFFICE" description="Boostrap Tomahawk Theme - Based on original Tomakawk Theme"/>
     <VisualThemeResource visualThemeId="BOOTSTRAP_TOMAHAWK" resourceTypeEnumId="VT_NAME" resourceValue="BOOTSTRAP_TOMAHAWK" sequenceId="01"/>

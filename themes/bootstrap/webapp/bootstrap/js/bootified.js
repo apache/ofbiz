@@ -90,6 +90,9 @@ OFBOOT.tableTranforms = function(){
 	if(jQuery('table tr td a.buttontext')){
 		jQuery('table tr td a.buttontext').removeClass("buttontext").addClass("btn btn-link btn-block").css("text-align","left");
 	}
+	if(jQuery('table tr td a.smallSubmit')){
+		jQuery('table tr td a.smallSubmit').removeClass("smallSubmit").addClass("btn btn-primary btn-block btn-xs").css("text-align","left");
+	}
 }
 /****************************
  Ftl form transforms
@@ -192,10 +195,12 @@ OFBOOT.formTranforms = function(){
 			}*/
 		}
 	});
+
 	//Transform lookup field button
 	jQuery('form span.field-lookup a').each(function(){
 		var $id = jQuery(this).attr('id');
-		if ($id.indexOf("_lookupId_button") >= 0){
+		
+		if ($id && $id.indexOf("_lookupId_button") >= 0){
 			jQuery(this).addClass('btn btn-primary btn-sm').html('<span class="glyphicon glyphicon-search"></span>');
 		}
 	});
@@ -296,6 +301,7 @@ OFBOOT.miscTranforms = function(){
 	jQuery('td.label').removeClass('label').addClass('table-label');
 	jQuery('table.basic-table').removeClass('basic-table').addClass('table table-condensed table-striped');
 }
+
 /**************************************************
 LOAD 'EM UP
 **************************************************/
@@ -307,3 +313,90 @@ jQuery(window).load(function(){
 	OFBOOT.formTranforms();
 	OFBOOT.miscTranforms();
 });
+
+function boot_lookupModal(modalId,url,fieldId,fieldName){
+	jQuery('#'+ modalId).modal({
+		backdrop:'static'
+	});
+	jQuery('#'+modalId).on('shown.bs.modal', function (event){
+		event.preventDefault();
+		jQuery(console.log("Url:" + url));
+		jQuery(console.log("Modal should be next"));
+		jQuery(console.log("ModalId:" + modalId));
+		
+		jQuery.ajax({
+			url: url,
+			async: false,
+        	type: 'POST',
+			success: function(data) {
+            	jQuery('#'+modalId).find('.modal-content').html(data);
+        	}
+		});
+		//Modal Layout Fix
+		boot_fixModalLayout(modalId);
+		//Get the form ready for ajax submit
+		var thisForm = jQuery('#'+modalId+'.modal').find('form');
+		//1. Get form attributes
+		var formId = jQuery(thisForm).attr('id');
+		jQuery(console.log("Form Id - before submit:" + formId));
+		//2. Remove default onsubmit="javascript:submitFormDisableSubmits(this)" attribute.
+		valueRef = "javascript:boot_submitFormDisableSubmits(this,'"+modalId+"','"+fieldName+"','"+fieldId+"')";
+		jQuery(thisForm).attr('onsubmit',valueRef);
+	});
+}
+
+function boot_submitFormDisableSubmits(form, modalId, fieldName, fieldId){
+	jQuery("#"+ this.modalId).modal("show");
+	
+	//Do ajax
+	jQuery.ajax({
+		url: jQuery(form).attr("action"),
+		data: jQuery(form).serialize(),
+		async: false,
+		type: 'POST',
+		success: function(data) {
+        	jQuery('#'+modalId).find('.modal-content').html(data);
+    	}
+	});
+	// Transform the set_value funtion
+	boot_fixModalLayout(modalId);
+	if('#'+ modalId + ' table'){
+			jQuery('#'+modalId+ ' table tr td a.smallSubmit').each(function(){
+				jQuery(this).removeClass("smallSubmit").addClass("btn btn-primary btn-block btn-xs").css("text-align","left");
+				//Get the html
+				var returnValue = jQuery(this).html().trim();
+				//Replace href
+				//Put value reference in string
+				valueRef = "javascript:boot_set_value('"+returnValue+"','"+fieldName+"','"+fieldId+"','"+modalId+"')";
+				jQuery(this).attr('href',valueRef);
+			});
+	}
+}
+
+function boot_set_value(returnValue,fieldName, fieldId, modalId){
+	jQuery('#'+modalId).modal('hide');
+	jQuery('#'+modalId).on('hidden.bs.modal', function (e) {
+		//Set the field value
+		jQuery('#'+ fieldId ).val(returnValue);
+	});
+}
+
+function boot_fixModalLayout(modalId){
+	jQuery(console.log("Fix modal layout called:" + modalId));
+	jQuery('#'+modalId+'.modal').find('div.form-group div.col-sm-2').each(function(){
+		jQuery(this).removeClass('col-sm-2').addClass('col-sm-3');
+	});
+	jQuery('#'+modalId+'.modal').find('div.form-group div.col-sm-4').each(function(){
+		jQuery(this).removeClass('col-sm-4').addClass('col-sm-9');
+	});
+	jQuery('#'+modalId+'.modal form input').each(function(){
+		var type = jQuery(this).attr("type");
+		if(type == "submit"){
+			jQuery(this).removeClass("smallSubmit").addClass("btn btn-primary btn-sm");
+		}
+	});
+	jQuery('#'+modalId+'.modal .panel.panel-default').css('margin-bottom','0px');
+}
+
+
+

@@ -685,44 +685,10 @@ Parameter: lastViewName, String, optional - If the ajaxEnabled parameter is true
           </#if>
         </#if>
       </#if>
-      <script type="text/javascript">
-        jQuery(document).ready(function(){
-          var options = {
-            requestUrl : "${fieldFormName}",
-            inputFieldId : "${id}",
-            dialogTarget : document.${formName?html}.${name?html},
-            dialogOptionalTarget : <#if descriptionFieldName?has_content>document.${formName?html}.${descriptionFieldName}<#else>null</#if>,
-            formName : "${formName?html}",
-            width : "${width}",
-            height : "${height}",
-            position : "${position}",
-            modal : "${fadeBackground}",
-            ajaxUrl : <#if ajaxEnabled?has_content && ajaxEnabled>"${ajaxUrl}"<#else>""</#if>,
-            showDescription : <#if ajaxEnabled?has_content && ajaxEnabled>"${showDescription}"<#else>false</#if>,
-            presentation : "${presentation!}",
-            defaultMinLength : "${defaultMinLength!2}",
-            defaultDelay : "${defaultDelay!300}",
-            args :
-              <#rt/>
-                <#if targetParameterIter?has_content>
-                  <#assign isFirst = true>
-                  <#lt/>[<#rt/>
-                  <#list targetParameterIter as item>
-                    <#if isFirst>
-                      <#lt/>document.${formName}.${item}<#rt/>
-                      <#assign isFirst = false>
-                    <#else>
-                      <#lt/> ,document.${formName}.${item}<#rt/>
-                    </#if>
-                  </#list>
-                  <#lt/>]<#rt/>
-                <#else>[]
-                </#if>
-                <#lt/>
-          };
-          new Lookup(options).init();
-        });
-      </script>
+	 <#assign modalId = "${id}-Modal">
+	 <#assign fieldName = "${name}"> 	
+	<a class="btn btn-primary btn-sm" href="javascript:boot_lookupModal('${modalId}','${fieldFormName}','${id}','${name}');"><span class="glyphicon glyphicon-search"></span></a>
+
     </#if>
     <#if readonly?has_content && readonly>
       <a id="${id}_clear" 
@@ -736,38 +702,98 @@ Parameter: lastViewName, String, optional - If the ajaxEnabled parameter is true
       </a>
     </#if>
   </span>
+  	
+  	<div class="modal fade bs-example-modal-lg" id="${modalId}" tabindex="-1" role="dialog" aria-labelledby="${modalId}" aria-hidden="true">
+		<div class="modal-dialog modal-lg">
+			<div class="modal-content">
+			</div>
+		</div>
+	</div>
+	
   <#if ajaxEnabled?has_content && ajaxEnabled && (presentation?has_content && presentation == "window")>
     <#if ajaxUrl?index_of("_LAST_VIEW_NAME_") < 0>
       <#local ajaxUrl = ajaxUrl + "&amp;_LAST_VIEW_NAME_=" + lastViewName />
     </#if>
     <script language="JavaScript" type="text/javascript">ajaxAutoCompleter('${ajaxUrl}', ${showDescription}, ${defaultMinLength!2}, ${defaultDelay!300});</script><#t/>
   </#if>
-  <script type="text/javascript">
-  	jQuery(document).ready(function(){
-  		jQuery('.field-lookup a').html('<button class="btn btn-primary btn-sm"><span class="glyphicon glyphicon-search"></span></button>');
-  	});
-  </script>
+
 </#macro>
 
 <#macro renderNextPrev paginateStyle paginateFirstStyle viewIndex highIndex listSize viewSize ajaxEnabled javaScriptEnabled ajaxFirstUrl firstUrl paginateFirstLabel paginatePreviousStyle ajaxPreviousUrl previousUrl paginatePreviousLabel pageLabel ajaxSelectUrl selectUrl ajaxSelectSizeUrl selectSizeUrl commonDisplaying paginateNextStyle ajaxNextUrl nextUrl paginateNextLabel paginateLastStyle ajaxLastUrl lastUrl paginateLastLabel paginateViewSizeLabel>
   <#if listSize gt viewSize>
-    <#-- <div class="${paginateStyle}">&nbsp; -->
-      <nav class="paginate-nav">
-      <ul class="pagination pull-left">
-        <li class="${paginateFirstStyle}<#if viewIndex gt 0>"><a href="javascript:void(0)" onclick="<#if ajaxEnabled>ajaxUpdateAreas('${ajaxFirstUrl}')<#else>submitPagination(this, '${firstUrl}')</#if>" title="${paginateFirstLabel}"><span class="glyphicon glyphicon-step-backward"></span></a><#else> disabled"><a><span class="glyphicon glyphicon-step-backward"></span></a></#if></li>
-        <li class="${paginatePreviousStyle}<#if viewIndex gt 0>"><a href="javascript:void(0)" onclick="<#if ajaxEnabled>ajaxUpdateAreas('${ajaxPreviousUrl}')<#else>submitPagination(this, '${previousUrl}')</#if>" title="${paginatePreviousLabel}"><span class="glyphicon glyphicon-step-backward"></span></a><#else> disabled"><a><span class="glyphicon glyphicon-backward"></span></a></#if></li>
-        <li class="${paginateNextStyle}<#if highIndex lt listSize>"><a href="javascript:void(0)" onclick="<#if ajaxEnabled>ajaxUpdateAreas('${ajaxNextUrl}')<#else>submitPagination(this, '${nextUrl}')</#if>" title="${paginateNextLabel}"><span class="glyphicon glyphicon-forward"></a><#else> disabled"><a><span class="glyphicon glyphicon-forward"></span></a></#if></li>
-        <li class="${paginateLastStyle}<#if highIndex lt listSize>"><a href="javascript:void(0)" onclick="<#if ajaxEnabled>ajaxUpdateAreas('${ajaxLastUrl}')<#else>submitPagination(this, '${lastUrl}')</#if>" title="${paginateLastLabel}"><span class="glyphicon glyphicon-step-forward"></span></a><#else> disabled"><a><span class="glyphicon glyphicon-step-forward"></span></a></#if></li>
-      </ul>
-      <ul class="pagination pull-right">
-        <#if listSize gt 0 && javaScriptEnabled><li class="nav-page-select">${pageLabel} <select style="margin:0px;font-size:100%;" name="page" size="1" onchange="<#if ajaxEnabled>ajaxUpdateAreas('${ajaxSelectUrl}')<#else>submitPagination(this, '${selectUrl}'+this.value)</#if>"><#rt/>
+      <nav id="pagination-navigation" class="navbar navbar-default" role="navigation" style="border:none;">
+      <ul class="pagination pull-left" style="margin:0;">
+   		<#if viewIndex gt 0>
+        	<li>
+        		<a href="javascript:void(0)" onclick="
+        			<#if ajaxEnabled>ajaxUpdateAreas('${ajaxFirstUrl}')
+        				<#else>submitPagination(this, '${firstUrl}')
+    				</#if>" title="${paginateFirstLabel}">${paginateFirstLabel}
+				</a>
+			<#else>
+				<li class="disabled">
+				<a href="#">
+					<span class="glyphicon glyphicon-step-backward"></span>
+				</a>
+			</#if>
+		</li>
+		<#if viewIndex gt 1>
+			<li>
+				<a href="javascript:void(0)" onclick="
+					<#if ajaxEnabled>ajaxUpdateAreas('${ajaxPreviousUrl}')
+						<#else>submitPagination(this, '${previousUrl}')
+					</#if>" title="${paginatePreviousLabel}">${paginatePreviousLabel}
+				</a>
+			<#else>
+			<li class="disabled">
+				<a href="#">
+					<span class="glyphicon glyphicon-backward"></span>
+				</a>
+			</#if>
+		</li>
+        <#-- <li class="${paginatePreviousStyle}<#if viewIndex gt 0>"><a href="javascript:void(0)" onclick="<#if ajaxEnabled>ajaxUpdateAreas('${ajaxPreviousUrl}')<#else>submitPagination(this, '${previousUrl}')</#if>" title="${paginatePreviousLabel}">${paginatePreviousLabel}</a><#else>-disabled"><span class="glyphicon glyphicon-backward"></span></#if></li> -->
+        <#if highIndex lt listSize>
+        	<li>
+        		<a href="javascript:void(0)" onclick="
+        			<#if ajaxEnabled>ajaxUpdateAreas('${ajaxNextUrl}')
+        				<#else>submitPagination(this, '${nextUrl}')
+    				</#if>" 
+    					title="${paginateNextLabel}">${paginateNextLabel}
+				</a>
+			<#else>
+				<li class="disabled">
+					<a href="#">
+						<span class="glyphicon glyphicon-backward"></span>
+					</a>
+			</#if>
+		</li>
+        <#-- <li class="${paginateNextStyle}<#if highIndex lt listSize>"><a href="javascript:void(0)" onclick="<#if ajaxEnabled>ajaxUpdateAreas('${ajaxNextUrl}')<#else>submitPagination(this, '${nextUrl}')</#if>" title="${paginateNextLabel}"><span class="glyphicon glyphicon-forward"></a><#else>-disabled"><span class="glyphicon glyphicon-forward"></span></#if></li> -->
+        <#if highIndex lt listSize>
+        	<li>
+        		<a href="javascript:void(0)" onclick="
+        			<#if ajaxEnabled>ajaxUpdateAreas('${ajaxLastUrl}')
+        				<#else>submitPagination(this, '${lastUrl}')
+    				</#if>" 
+    					title="${paginateLastLabel}">${paginateLastLabel}
+				</a>
+			<#else>
+				<li class="disabled">
+					<a href="#">
+						<span class="glyphicon glyphicon-backward"></span>
+					</a>
+			</#if>
+		</li>
+		<#-- <li class="${paginateLastStyle}<#if highIndex lt listSize>"><a href="javascript:void(0)" onclick="<#if ajaxEnabled>ajaxUpdateAreas('${ajaxLastUrl}')<#else>submitPagination(this, '${lastUrl}')</#if>" title="${paginateLastLabel}"><span class="glyphicon glyphicon-step-forward"></span></a><#else>-disabled"><span class="glyphicon glyphicon-step-forward"></span></#if></li> -->
+		</ul>
+		<ul class="pagination pull-right" style="margin:0;">
+        <#if listSize gt 0 && javaScriptEnabled><li class="nav-page-select">${pageLabel} <select class="form-control form-control-inline" style="margin:0px;font-size:100%;" name="page" size="1" onchange="<#if ajaxEnabled>ajaxUpdateAreas('${ajaxSelectUrl}')<#else>submitPagination(this, '${selectUrl}'+this.value)</#if>"><#rt/>
           <#assign x=(listSize/viewSize)?ceiling>
             <#list 1..x as i>
               <#if i == (viewIndex+1)><option selected="selected" value="<#else><option value="</#if>${i-1}">${i}</option>
             </#list>
           </select></li>
         </#if>
-        <#if javaScriptEnabled><li class="nav-pagesize"><select name="pageSize" size="1" onchange="<#if ajaxEnabled>ajaxUpdateAreas('${ajaxSelectSizeUrl}')<#else>submitPagination(this, '${selectSizeUrl}')</#if>"><#rt/>
+        <#if javaScriptEnabled><li class="nav-pagesize"><select class="form-control form-control-inline" name="pageSize" size="1" onchange="<#if ajaxEnabled>ajaxUpdateAreas('${ajaxSelectSizeUrl}')<#else>submitPagination(this, '${selectSizeUrl}')</#if>"><#rt/>
             <#assign availPageSizes = [20, 30, 50, 100, 200]>
           <#list availPageSizes as ps>
             <option <#if viewSize == ps> selected="selected" </#if> value="${ps}">${ps}</option>
@@ -777,7 +803,6 @@ Parameter: lastViewName, String, optional - If the ajaxEnabled parameter is true
         <li class="nav-displaying">${commonDisplaying}</li>
       </ul>
       </nav>
-    <#-- </div> -->
   </#if>
 </#macro>
 
