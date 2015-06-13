@@ -417,4 +417,11 @@ div#footer.panel.panel-default {
     border-color: #e7e7e7;
 }
 
+/**************** Custom Styles ****************/
+.form-control-inline {
+    min-width: 0;
+    width: auto;
+    display: inline;
+}
+
 
