@@ -210,8 +210,8 @@ border-top: #f7e893 solid 0.1em;
 border-left: #f7e893 solid 0.1em;
 border-right: #999999 solid 0.1em;
 
-background-image: url(../images/button_whitegray.jpg);
-background-repeat:repeat-x;
+/*background-image: url(../images/button_whitegray.jpg);
+background-repeat:repeat-x;*/
 
 color: #000000;
 font-size: 1em;
@@ -1230,7 +1230,7 @@ display: block;
 }
 
 .screenlet-title-bar {
-background:url(../images/bkgd_header.gif) repeat-x;
+/*background:url(../images/bkgd_header.gif) repeat-x;*/
 min-height: 21px;
 padding-top: 1px;
 }
@@ -1694,7 +1694,7 @@ padding: 2em 1.5em 0 0;
 
 .basic-table tr.header-row,
 .basic-table tr.header-row-2 {
-background:url(../images/bkgd_subheader.gif) repeat-x bottom;
+/*background:url(../images/bkgd_subheader.gif) repeat-x bottom;*/
 text-transform:uppercase;
 }
 
@@ -1781,8 +1781,8 @@ visibility: collapse;
 /* ===== Alternate table header style ===== */
 .basic-table .header-row-2 th,.basic-table .header-row-2 td {
 background-color: #1e1e1d;
-background-image: url(../images/bkgd_header.gif);
-background-repeat:repeat-x;
+/*background-image: url(../images/bkgd_header.gif);
+background-repeat:repeat-x;*/
 border-bottom: 0;
 padding-left:5px;
 border-left: 0.1em solid #81817f;
@@ -1802,7 +1802,7 @@ text-decoration: none;
 
 /* ===== Sort field style ===== */
 .basic-table .header-row-2 th .sort-order-asc,.basic-table .header-row-2 td .sort-order-asc {
-background: url(../images/arrow-gr-up.png) no-repeat right;
+/*background: url(../images/arrow-gr-up.png) no-repeat right;*/
 padding-right: 20px;
 }
 
@@ -2108,17 +2108,18 @@ height:23px;
 .nav-pager ul .nav-pagesize {
 padding: 0 30px 0 30px;
 }
-
+/*
 .field-lookup a{
 background: url(../images/fieldlookup.png) no-repeat 0 0;
 display: inline-block;
 /* margin: 3px 10px 0px 4px; */
+/*
 vertical-align:top;
 margin-top:3px;
 width:35px;
 height:22px;
 }
-
+*/
 .CalLookupImage {
 display:inline-block;
 background: url(../images/cal.png) no-repeat;
