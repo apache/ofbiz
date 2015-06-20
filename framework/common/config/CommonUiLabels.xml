@@ -14645,6 +14645,9 @@
         <value xml:lang="zh">你不拥有页面'${portalPage.portalPageName}' [${portalPage.portalPageId}]，所以你不能修改它！</value>
         <value xml:lang="zh-TW">你不擁有頁面'${portalPage.portalPageName}' [${portalPage.portalPageId}]，所以你不能修改它！</value>
     </property>
+    <property key="PortalPageViewPermissionError">
+        <value xml:lang="en">Security Error : To view this page you must have PORTALPAGE permission.</value>
+    </property>
     <property key="Project">
         <value xml:lang="ar">مشروع</value>
         <value xml:lang="cs">Projekt</value>
