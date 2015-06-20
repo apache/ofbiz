@@ -29,6 +29,7 @@ import org.ofbiz.order.order.*;
 import org.ofbiz.party.contact.*;
 import org.ofbiz.product.inventory.InventoryWorker;
 import org.ofbiz.product.catalog.CatalogWorker;
+import org.ofbiz.product.store.ProductStoreWorker;
 import org.ofbiz.accounting.payment.*;
 
 import javolution.util.FastMap;
@@ -404,8 +405,19 @@ if (orderHeader) {
     context.shippingContactMechList = shippingContactMechList;
 
     // list to find all the shipmentMethods from the view named "ProductStoreShipmentMethView".
-    if (productStore) {
-        context.productStoreShipmentMethList = delegator.findByAnd('ProductStoreShipmentMethView', [productStoreId: productStore.productStoreId], ['sequenceNumber'], true);
+    shipGroupShippingMethods = [:];
+    shipGroups.each { shipGroup ->
+        shipGroupSeqId = shipGroup.shipGroupSeqId;
+        shippableItemFeatures = orderReadHelper.getFeatureIdQtyMap(shipGroupSeqId);
+        shippableTotal = orderReadHelper.getShippableTotal(shipGroupSeqId);
+        shippableWeight = orderReadHelper.getShippableWeight(shipGroupSeqId);
+        shippableItemSizes = orderReadHelper.getShippableSizes(shipGroupSeqId);
+        shippingAddress = orderReadHelper.getShippingAddress(shipGroupSeqId);
+
+        List<GenericValue> productStoreShipmentMethList = ProductStoreWorker.getAvailableStoreShippingMethods(delegator, orderReadHelper.getProductStoreId(),
+                shippingAddress, shippableItemSizes, shippableItemFeatures, shippableWeight, shippableTotal);
+        shipGroupShippingMethods.put(shipGroupSeqId, productStoreShipmentMethList);
+        context.shipGroupShippingMethods = shipGroupShippingMethods;
     }
 
     // Get a map of returnable items
