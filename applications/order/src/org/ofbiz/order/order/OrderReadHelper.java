@@ -3013,5 +3013,18 @@ public class OrderReadHelper {
             return ZERO;
         }
     }
+    
+    public List<BigDecimal> getShippableSizes(String shipGrouSeqId) {
+        List<BigDecimal> shippableSizes = FastList.newInstance();
+        List<GenericValue> validItems = getValidOrderItems(shipGrouSeqId);
+        if (validItems != null) {
+            Iterator<GenericValue> i = validItems.iterator();
+            while (i.hasNext()) {
+                GenericValue item = i.next();
+                shippableSizes.add(this.getItemSize(item));
+            }
+        }
+        return shippableSizes;
+    }
 
 }
