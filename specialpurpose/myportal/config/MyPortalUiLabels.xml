@@ -248,4 +248,7 @@
         <value xml:lang="zh">我的门户页面</value>
         <value xml:lang="zh_TW">入口網頁</value>
     </property>
+    <property key="PortalPageViewPermissionError">
+        <value xml:lang="en">Security Error : To view this page you must have PORTALPAGE permission.</value>
+    </property>
 </resource>
