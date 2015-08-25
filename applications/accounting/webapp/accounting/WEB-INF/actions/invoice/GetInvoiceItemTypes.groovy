@@ -75,7 +75,7 @@ if ("SALES_INVOICE".equals(invoice.invoiceTypeId)) {
     glAccountOrganizationAndClassList = delegator.findByAnd("GlAccountOrganizationAndClass", [organizationPartyId : invoice.partyId], null, false);
 } else {
     map = delegator.findByAnd("InvoiceItemTypeMap", [invoiceTypeId : invoice.invoiceTypeId], null, true);
-    invoiceItemTypes = EntityUtil.getRelated("InvoiceItemType", map, null, false);
+    invoiceItemTypes = EntityUtil.getRelated("InvoiceItemType", null, map, false);
 }
 context.invoiceItemTypes = invoiceItemTypes;
 
