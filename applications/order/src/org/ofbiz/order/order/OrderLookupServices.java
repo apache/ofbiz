@@ -20,9 +20,11 @@
 package org.ofbiz.order.order;
 
 import java.math.BigDecimal;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 
 import javolution.util.FastList;
 
@@ -75,7 +77,7 @@ public class OrderLookupServices {
         }
 
         // list of fields to select (initial list)
-        List<String> fieldsToSelect = FastList.newInstance();
+        Set<String> fieldsToSelect = new LinkedHashSet<String>();
         fieldsToSelect.add("orderId");
         fieldsToSelect.add("orderName");
         fieldsToSelect.add("statusId");
