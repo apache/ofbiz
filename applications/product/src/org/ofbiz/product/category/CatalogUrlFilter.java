@@ -354,7 +354,7 @@ public class CatalogUrlFilter extends ContextFilter {
 
     public static String makeCategoryUrl(Delegator delegator, CategoryContentWrapper wrapper, List<String> trail, String contextPath, String previousCategoryId, String productCategoryId, String productId, String viewSize, String viewIndex, String viewSort, String searchString) {
         String url = "";
-        StringWrapper alternativeUrl = wrapper.get("ALTERNATIVE_URL");
+        StringWrapper alternativeUrl = wrapper.get("ALTERNATIVE_URL", "url");
         
         if (UtilValidate.isNotEmpty(alternativeUrl) && UtilValidate.isNotEmpty(alternativeUrl.toString())) {
             StringBuilder urlBuilder = new StringBuilder();
@@ -430,7 +430,7 @@ public class CatalogUrlFilter extends ContextFilter {
 
     public static String makeProductUrl(Delegator delegator, ProductContentWrapper wrapper, List<String> trail, String contextPath, String previousCategoryId, String productCategoryId, String productId) {
         String url = "";
-        StringWrapper alternativeUrl = wrapper.get("ALTERNATIVE_URL");
+        StringWrapper alternativeUrl = wrapper.get("ALTERNATIVE_URL", "url");
         if (UtilValidate.isNotEmpty(alternativeUrl) && UtilValidate.isNotEmpty(alternativeUrl.toString())) {
             StringBuilder urlBuilder = new StringBuilder();
             urlBuilder.append(contextPath);
