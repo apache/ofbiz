@@ -492,8 +492,8 @@ public class CategoryServices {
                         CategoryContentWrapper categoryContentWrapper = new CategoryContentWrapper(cate, request);
                         
                         String title = null;
-                        if (UtilValidate.isNotEmpty(categoryContentWrapper.get(catNameField))) {
-                            title = categoryContentWrapper.get(catNameField)+" "+"["+catId+"]";
+                        if (UtilValidate.isNotEmpty(categoryContentWrapper.get(catNameField, "html"))) {
+                            title = new StringBuffer(categoryContentWrapper.get(catNameField, "html").toString()).append(" [").append(catId).append("]").toString();
                             dataMap.put("title", title);
                         } else {
                             title = catId.toString();
