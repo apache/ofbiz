@@ -33,7 +33,7 @@ if(!UtilValidate.isEmpty(parentCategoryStr)) {
         categoryContentWrapper = new CategoryContentWrapper(category, request);
         
         pathTemp = pathTemp + path;
-        cateMap.title = categoryContentWrapper.CATEGORY_NAME;
+        cateMap.title = categoryContentWrapper.get("DESCRIPTION", "html");
         cateMap.productCategoryId = category.productCategoryId;
         cateMap.parentCategory = pathTemp;
         
@@ -46,6 +46,6 @@ if(!UtilValidate.isEmpty(parentCategoryStr)) {
 }
 currentCategory = from("ProductCategory").where("productCategoryId", productCategoryId).queryOne();
 currentCategoryContentWrapper = new CategoryContentWrapper(currentCategory, request);
-context.currentCategoryName = currentCategoryContentWrapper.CATEGORY_NAME;
-context.currentCategoryDescription = currentCategoryContentWrapper.DESCRIPTION;
+context.currentCategoryName = currentCategoryContentWrapper.get("CATEGORY_NAME", "html");
+context.currentCategoryDescription = currentCategoryContentWrapper.get("DESCRIPTION", "html");
 context.currentCategoryId = productCategoryId;
