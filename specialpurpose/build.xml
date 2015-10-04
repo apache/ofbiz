@@ -36,8 +36,7 @@
         crowd/build.xml,
         webpos/build.xml
         googlecheckout/build.xml,
-        example/build.xml,
-        passport/build.xml
+        example/build.xml
     "/>
     <!-- For the old OFBiz Workflow Engine add "workflow/build.xml" to the list above -->
     <!-- For Shark add "shark/build.xml" to the list above, in the specialpurpose-builds list (after workflow) -->

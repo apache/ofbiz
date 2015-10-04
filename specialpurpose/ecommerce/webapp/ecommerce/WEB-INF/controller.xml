@@ -20,9 +20,6 @@ under the License.
 
 <site-conf xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/site-conf.xsd">
-    <!-- 
-    <include location="component://passport/webapp/passport/WEB-INF/controller-passport.xml"/>
-     -->
     <description>OFBiz: eCommerce Controller Configuration File</description>
     <errorpage>/error/error.jsp</errorpage>
 
