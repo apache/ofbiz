@@ -20,6 +20,9 @@ under the License.
 
 <site-conf xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/site-conf.xsd">
+    <!-- 
+    <include location="component://passport/webapp/passport/WEB-INF/controller-passport.xml"/>
+     -->
     <description>OFBiz: eCommerce Controller Configuration File</description>
     <errorpage>/error/error.jsp</errorpage>
 
@@ -81,7 +84,7 @@ under the License.
         <description>Verify a user is logged in.</description>
         <security https="true" auth="false"/>
         <event type="java" path="org.ofbiz.securityext.login.LoginEvents" invoke="storeCheckLogin"/>
-        <response name="success" type="view-last" value="main"/>
+        <response name="success" type="view" value="main"/>
         <response name="error" type="view" value="login"/>
     </request-map>
     <request-map uri="login">
@@ -851,7 +854,7 @@ under the License.
     </request-map>
     <request-map uri="category">
         <security https="false" auth="false"/>
-        <response name="success" type="view" value="category" save-current-view="true"/>
+        <response name="success" type="view" value="category"/>
     </request-map>
     <request-map uri="product">
         <security https="false" auth="false"/>
@@ -1027,7 +1030,7 @@ under the License.
     <request-map uri="deleteContactMech">
         <security https="true" auth="true"/>
         <event type="service" invoke="deletePartyContactMech"/>
-        <response name="success" type="view" value="viewprofile"/>
+        <response name="success" type="view" value="editcontactmech"/>
         <response name="error" type="view" value="editcontactmech"/>
     </request-map>
 
@@ -1320,20 +1323,20 @@ under the License.
     <request-map uri="signUpForContactList">
         <security https="false" auth="false"/>
         <event type="service" invoke="signUpForContactList"/>
-        <response name="success" type="view-last"/>
-        <response name="error" type="view-last" value="main"/>
+        <response name="success" type="view" value="main"/>
+        <response name="error" type="view" value="main"/>
     </request-map>
     <request-map uri="unsubscribeContactListParty">
         <security https="false" auth="false"/>
         <event type="service" invoke="unsubscribeContactListParty"/>
-        <response name="success" type="view-last"/>
-        <response name="error" type="view-last" value="main"/>
+        <response name="success" type="view" value="main"/>
+        <response name="error" type="view" value="main"/>
     </request-map>
     <request-map uri="unsubscribeContactListPartyContachMech">
         <security https="false" auth="false"/>
         <event type="service" invoke="unsubscribeContactListPartyContachMech"/>
-        <response name="success" type="view-last"/>
-        <response name="error" type="view-last" value="main"/>
+        <response name="success" type="view" value="main"/>
+        <response name="error" type="view" value="main"/>
     </request-map>
     <request-map uri="contactListOptOut" track-serverhit="false" track-visit="false">
         <security https="false" auth="false"/>
@@ -1940,7 +1943,7 @@ under the License.
     
     <request-map uri="ProductUomDropDownOnly">
         <security auth="false" https="false"/>
-        <response name="success" type="view" value="ProductUomDropDownOnly" save-current-view="false" />
+        <response name="success" type="view" value="ProductUomDropDownOnly" save-last-view="true"/>
     </request-map>
     
     <!-- Captcha: Image request, the captcha code is stored in the session using _CAPTCHA_CODE_ as the key -->

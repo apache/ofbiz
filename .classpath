@@ -214,6 +214,7 @@
     <classpathentry excluding="org/enhydra/|org/ofbiz/" kind="src" path="specialpurpose/shark/src"/>
     <classpathentry kind="src" path="specialpurpose/webpos/src"/>
     <classpathentry kind="src" path="specialpurpose/workflow/src"/>
+    <classpathentry kind="src" path="specialpurpose/passport/src"/>
     <classpathentry exported="true" kind="con" path="GROOVY_DSL_SUPPORT"/>
     <classpathentry kind="output" path="bin"/>
 </classpath>
