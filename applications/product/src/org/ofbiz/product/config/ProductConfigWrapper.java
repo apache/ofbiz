@@ -462,7 +462,7 @@ public class ProductConfigWrapper implements Serializable {
                 question = configItemAssoc.getString("description");
             } else {
                 if (content != null) {
-                    question = content.get("DESCRIPTION");
+                    question = content.get("DESCRIPTION", "html").toString();
                 } else {
                     question = (configItem.getString("description") != null? configItem.getString("description"): "");
                 }
@@ -476,7 +476,7 @@ public class ProductConfigWrapper implements Serializable {
                 description = configItemAssoc.getString("longDescription");
             } else {
                 if (content != null) {
-                    description = content.get("LONG_DESCRIPTION");
+                    description = content.get("LONG_DESCRIPTION", "html").toString();
                 } else {
                     description = (configItem.getString("longDescription") != null? configItem.getString("longDescription"): "");
                 }
@@ -669,7 +669,7 @@ public class ProductConfigWrapper implements Serializable {
         }
 
         public String getOptionName(Locale locale) {
-        	
+            
             return (configOption.getString("configOptionName") != null? (String) configOption.get("configOptionName", locale): "no option name");
         }
 
