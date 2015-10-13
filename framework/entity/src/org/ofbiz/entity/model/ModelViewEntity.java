@@ -46,7 +46,6 @@ import org.ofbiz.entity.condition.EntityFunction;
 import org.ofbiz.entity.condition.EntityJoinOperator;
 import org.ofbiz.entity.condition.EntityOperator;
 import org.ofbiz.entity.jdbc.SqlJdbcUtil;
-import org.ofbiz.entity.util.EntityUtil;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
@@ -1303,16 +1302,11 @@ public class ModelViewEntity extends ModelEntity {
         }
 
         public EntityCondition getWhereCondition(ModelFieldTypeReader modelFieldTypeReader, List<String> entityAliasStack) {
-
-            List<EntityCondition> conditionList = new LinkedList<EntityCondition>();
-            if(this.filterByDate) {
-                conditionList.add(EntityUtil.getFilterByDateExpr());
-            }
             if (this.whereCondition != null) {
-                conditionList.add(whereCondition.createCondition(modelFieldTypeReader, entityAliasStack));
+                return this.whereCondition.createCondition(modelFieldTypeReader, entityAliasStack);
+            } else {
+                return null;
             }
-
-            return EntityCondition.makeCondition(conditionList, EntityOperator.AND);
         }
 
         public EntityCondition getHavingCondition(ModelFieldTypeReader modelFieldTypeReader, List<String> entityAliasStack) {
@@ -1416,42 +1410,30 @@ public class ModelViewEntity extends ModelEntity {
                 rhs = EntityFieldValue.makeFieldValue(this.relFieldName, this.relEntityAlias, entityAliasStack, this.viewEntityCondition.modelViewEntity);
             }
 
-            EntityCondition entityCondition;
-
             if (this.operator == EntityOperator.NOT_EQUAL && value != null) {
                 // since some databases don't consider nulls in != comparisons, explicitly include them
                 // this makes more sense logically, but if anyone ever needs it to not behave this way we should add an "or-null" attribute that is true by default
                 if (ignoreCase) {
-                    entityCondition = EntityCondition.makeCondition(
+                    return EntityCondition.makeCondition(
                             EntityCondition.makeCondition(EntityFunction.UPPER(lhs), this.operator, EntityFunction.UPPER(rhs)),
                             EntityOperator.OR,
                             EntityCondition.makeCondition(lhs, EntityOperator.EQUALS, null));
                 } else {
-                    entityCondition = EntityCondition.makeCondition(
+                    return EntityCondition.makeCondition(
                             EntityCondition.makeCondition(lhs, this.operator, rhs),
                             EntityOperator.OR,
                             EntityCondition.makeCondition(lhs, EntityOperator.EQUALS, null));
                 }
             } else if ( value == null && this.relFieldName == null && (this.operator == EntityOperator.EQUALS || this.operator == EntityOperator.NOT_EQUAL)) {
-                entityCondition = EntityCondition.makeCondition(lhs, this.operator, null);
+                return EntityCondition.makeCondition(lhs, this.operator, null);
             } else {
                 if (ignoreCase) {
                     // use the stuff to upper case both sides
-                    entityCondition = EntityCondition.makeCondition(EntityFunction.UPPER(lhs), this.operator, EntityFunction.UPPER(rhs));
+                    return EntityCondition.makeCondition(EntityFunction.UPPER(lhs), this.operator, EntityFunction.UPPER(rhs));
                 } else {
-                    entityCondition = EntityCondition.makeCondition(lhs, this.operator, rhs);
+                    return EntityCondition.makeCondition(lhs, this.operator, rhs);
                 }
             }
-
-            if(this.viewEntityCondition.filterByDate) {
-                List<EntityCondition> conditionList = new LinkedList<EntityCondition>();
-                conditionList.add(entityCondition);
-                conditionList.add(EntityUtil.getFilterByDateExpr());
-                return EntityCondition.makeCondition(conditionList, EntityOperator.AND);
-            } else {
-                return entityCondition;
-            }
-
         }
     }
 
@@ -1508,14 +1490,6 @@ public class ModelViewEntity extends ModelEntity {
                 if (econd != null) {
                     entityConditionList.add(econd);
                 }
-            }
-
-            if(this.viewEntityCondition.filterByDate) {
-                entityConditionList.add(EntityUtil.getFilterByDateExpr());
-            }
-
-            if(this.viewEntityCondition.filterByDate) {
-                entityConditionList.add(EntityUtil.getFilterByDateExpr());
             }
 
             return EntityCondition.makeCondition(entityConditionList, this.operator);
