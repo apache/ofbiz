@@ -322,7 +322,9 @@ under the License.
         <permission-service service-name="humanResManagerPermission" main-action="CREATE"/>
         <auto-attributes mode="IN" include="pk" optional="false"/>
         <auto-attributes mode="IN" include="nonpk" optional="true"/>
-        <override type="String" mode="IN" name="salaryStepSeqId" optional="true"/>
+        <attribute name="payGradeId" mode="IN" type="String"/>
+        <attribute name="fromDate" mode="IN" type="Timestamp"/>
+        <attribute name="salaryStepSeqId" mode="OUT" type="String"/>
     </service>
 
     <service name="updateSalaryStep" engine="simple" default-entity-name="SalaryStep"
