@@ -551,7 +551,6 @@ under the License.
       <relation type="one-nofk" fk-name="PAY_HIST_SSTP" rel-entity-name="SalaryStep">
         <key-map field-name="salaryStepSeqId"/>
         <key-map field-name="payGradeId"/>
-        <key-map field-name="fromDate"/>
       </relation>
       <relation type="one" fk-name="PAY_HIST_PDTP" rel-entity-name="PeriodType">
         <key-map field-name="periodTypeId"/>
@@ -598,15 +597,10 @@ under the License.
             title="Salary Step Entity">
       <field name="salaryStepSeqId" type="id-ne"></field>
       <field name="payGradeId" type="id-ne"></field>
-      <field name="fromDate" type="date-time"></field>
-      <field name="thruDate" type="date-time"></field>
       <field name="dateModified" type="date-time"></field>
       <field name="amount" type="currency-amount"></field>
-      <field name="createdByUserLogin" type="id-vlong"></field>
-      <field name="lastModifiedByUserLogin" type="id-vlong"></field>
       <prim-key field="salaryStepSeqId"/>
       <prim-key field="payGradeId"/>
-      <prim-key field="fromDate"/>
       <relation type="one" fk-name="SLRY_STP_PGRD" rel-entity-name="PayGrade">
         <key-map field-name="payGradeId"/>
       </relation>
@@ -841,7 +835,6 @@ under the License.
     <relation type="one-nofk" fk-name="EMPL_PTPRT_SSTP" rel-entity-name="SalaryStep">
       <key-map field-name="salaryStepSeqId"/>
       <key-map field-name="payGradeId"/>
-      <key-map field-name="fromDate"/>
     </relation>
     <relation type="one-nofk" fk-name="EMPL_PTPRT_RTTYP" rel-entity-name="RateType">
       <key-map field-name="rateTypeId"/>
