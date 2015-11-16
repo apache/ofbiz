@@ -42,7 +42,7 @@ framework/base/lib/xml-apis-2.9.1.jar
 framework/base/lib/commons/commons-beanutils-1.7.0.jar
 framework/base/lib/commons/commons-cli-1.0.jar
 framework/base/lib/commons/commons-codec-1.4.jar
-framework/base/lib/commons/commons-collections-3.2.jar
+framework/base/lib/commons/commons-collections-3.2.2.jar
 framework/base/lib/commons/commons-compress-1.4.jar
 framework/base/lib/commons/commons-digester-1.8.jar
 framework/base/lib/commons/commons-discovery-0.4.jar

@@ -66,7 +66,7 @@
     <classpathentry kind="lib" path="framework/base/lib/commons/commons-beanutils-1.7.0.jar"/>
     <classpathentry kind="lib" path="framework/base/lib/commons/commons-cli-1.0.jar"/>
     <classpathentry kind="lib" path="framework/base/lib/commons/commons-codec-1.4.jar"/>
-    <classpathentry kind="lib" path="framework/base/lib/commons/commons-collections-3.2.jar"/>
+    <classpathentry kind="lib" path="framework/base/lib/commons/commons-collections-3.2.1jar"/>
     <classpathentry kind="lib" path="framework/base/lib/commons/commons-compress-1.4.jar"/>
     <classpathentry kind="lib" path="framework/base/lib/commons/commons-digester-1.8.jar"/>
     <classpathentry kind="lib" path="framework/base/lib/commons/commons-discovery-0.4.jar"/>
@@ -162,7 +162,7 @@
     <classpathentry kind="lib" path="specialpurpose/pos/lib/XuiOptional-v3.2rc2b.jar"/>
     <classpathentry kind="lib" path="specialpurpose/pos/lib/jcl.jar"/>
     <classpathentry kind="lib" path="specialpurpose/pos/lib/jpos18-controls.jar"/>
-    <classpathentry kind="lib" path="specialpurpose/pos/lib/looks-2.0.2.jar"/>    
+    <classpathentry kind="lib" path="specialpurpose/pos/lib/looks-2.0.2.jar"/>
     <classpathentry kind="lib" path="specialpurpose/ebaystore/lib/attributes.jar"/>
     <classpathentry kind="lib" path="specialpurpose/ebaystore/lib/ebaycalls.jar"/>
     <classpathentry kind="lib" path="specialpurpose/ebaystore/lib/ebaysdkcore.jar"/>
