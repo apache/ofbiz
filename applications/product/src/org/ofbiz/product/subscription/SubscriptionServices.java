@@ -150,17 +150,17 @@ public class SubscriptionServices {
                             null, null, updateSubscriptionResult);
                 }
             } else {
-                Map<String, Object> createPartyRoleMap = FastMap.newInstance();
+                Map<String, Object> ensurePartyRoleMap = FastMap.newInstance();
                 if (UtilValidate.isNotEmpty(roleTypeId)) {
-                    createPartyRoleMap.put("partyId", partyId);
-                    createPartyRoleMap.put("roleTypeId", roleTypeId);
-                    createPartyRoleMap.put("userLogin", userLogin);
-                    Map<String, Object> createPartyRoleResult = dispatcher.runSync("createPartyRole", createPartyRoleMap);
-                    if (ServiceUtil.isError(createPartyRoleResult)) {
+                    ensurePartyRoleMap.put("partyId", partyId);
+                    ensurePartyRoleMap.put("roleTypeId", roleTypeId);
+                    ensurePartyRoleMap.put("userLogin", userLogin);
+                    Map<String, Object> ensurePartyRoleResult = dispatcher.runSync("ensurePartyRole", ensurePartyRoleMap);
+                    if (ServiceUtil.isError(ensurePartyRoleResult)) {
                         return ServiceUtil.returnError(UtilProperties.getMessage(resource, 
                                 "ProductSubscriptionPartyRoleCreationError", 
                                 UtilMisc.toMap("subscriptionResourceId", subscriptionResourceId), locale),
-                                null, null, createPartyRoleResult);
+                                null, null, ensurePartyRoleResult);
                     }
                 }
                 Map<String, Object> createSubscriptionMap = dctx.getModelService("createSubscription").makeValid(newSubscription, ModelService.IN_PARAM);
