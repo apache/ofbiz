@@ -22,7 +22,7 @@ under the License.
                xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/application_5.xsd"
                version="5">
 
-    <description>Open For Business - Deployment</description>
+    <description>Apache OFBiz - Deployment</description>
     <display-name>OFBiz</display-name>
 
 <#list webApps as webapp>

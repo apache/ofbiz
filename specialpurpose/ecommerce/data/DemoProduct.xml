@@ -47,7 +47,7 @@ under the License.
     <FacilityLocationGeoPoint facilityId="WebStoreWarehouse" locationSeqId="TLTLTLLL03" geoPointId="9000" fromDate="2009-01-09 00:00:00.000"/>
     <FacilityLocationGeoPoint facilityId="WebStoreWarehouse" locationSeqId="TLTLTLUL04" geoPointId="9000" fromDate="2009-01-09 00:00:00.000"/>
 
-    <ProductStore productStoreId="9000" storeName="OFBiz E-Commerce Store" companyName="Open For Business" title="Open For Commerce"
+    <ProductStore productStoreId="9000" storeName="OFBiz E-Commerce Store" companyName="Apache OFBiz" title="Open For Commerce"
         subtitle="Part of the Apache OFBiz Family of Open Source Software" payToPartyId="Company" daysToCancelNonPay="30" prorateShipping="Y" prorateTaxes="Y"
         inventoryFacilityId="WebStoreWarehouse" oneInventoryFacility="Y" checkInventory="Y" reserveInventory="Y" balanceResOnOrderCreation="Y" reserveOrderEnumId="INVRO_FIFO_REC" requireInventory="N"
         defaultLocaleString="en_US" defaultCurrencyUomId="USD" defaultSalesChannelEnumId="WEB_SALES_CHANNEL" allowPassword="Y" explodeOrderItems="N" retryFailedAuths="Y" reqReturnInventoryReceive="N"
