@@ -114,6 +114,7 @@
         <value xml:lang="zh_TW">OFBiz:場所管理程式</value>
     </property>
     <property key="FacilityCompanySubtitle">
+        <value xml:lang="de">Teil der Open For Business Familie von Open Source Software</value>
         <value xml:lang="en">Part of the Open For Business Family of Open Source Software</value>
         <value xml:lang="fr">Un module de la famille Open For Business, logiciel libre de gestion d'entreprise.</value>
         <value xml:lang="it">Un modulo della famiglia di software open source Open For Business</value>
