@@ -27,6 +27,7 @@ exprList = [];
 exprList.add(EntityCondition.makeCondition("orderDate", EntityOperator.GREATER_THAN_EQUAL_TO, UtilDateTime.getDayStart(filterDate)));
 exprList.add(EntityCondition.makeCondition("orderDate", EntityOperator.LESS_THAN_EQUAL_TO, UtilDateTime.getDayEnd(filterDate)));
 exprList.add(EntityCondition.makeCondition("orderTypeId", EntityOperator.EQUALS, "SALES_ORDER"));
+exprList.add(EntityCondition.makeCondition("statusId", EntityOperator.NOT_EQUAL, "ORDER_CANCELLED"));
 
 orderHeaderList = delegator.findList("OrderHeader", EntityCondition.makeCondition(exprList, EntityOperator.AND), null, null, null, false);
 
@@ -35,6 +36,7 @@ orderHeaderList.each { orderHeader ->
     exprList.add(EntityCondition.makeCondition("orderId", EntityOperator.EQUALS, orderHeader.orderId));
     exprList.add(EntityCondition.makeCondition("orderItemTypeId", EntityOperator.EQUALS, "PRODUCT_ORDER_ITEM"));
     exprList.add(EntityCondition.makeCondition("isPromo", EntityOperator.EQUALS, "N"));
+    exprList.add(EntityCondition.makeCondition("statusId", EntityOperator.NOT_EQUAL, "ITEM_CANCELLED"));
     orderItemList = delegator.findList("OrderItem", EntityCondition.makeCondition(exprList, EntityOperator.AND), null, null, null, false);
     
     orderItemList.each { orderItem ->
