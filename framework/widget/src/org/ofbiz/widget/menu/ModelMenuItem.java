@@ -648,11 +648,7 @@ public class ModelMenuItem {
         }
 
         public String getStyle(Map<String, Object> context) {
-            String style = this.styleExdr.expandString(context);
-            if (UtilValidate.isEmpty(style)) {
-                style = this.linkMenuItem.getWidgetStyle();
-            }
-            return style;
+            return this.styleExdr.expandString(context);
         }
 
         public String getName(Map<String, Object> context) {
