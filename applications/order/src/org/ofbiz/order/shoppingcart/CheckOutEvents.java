@@ -707,6 +707,7 @@ public class CheckOutEvents {
         String shipAfterDate = null;
         String internalOrderNotes = null;
         String shippingNotes = null;
+        String shipToPartyId = null;
 
         String mode = request.getParameter("finalizeMode");
         Debug.logInfo("FinalizeMode: " + mode, module);
@@ -808,6 +809,13 @@ public class CheckOutEvents {
                     String supplierPartyId = request.getParameter(shipGroupIndex + "_supplierPartyId");
                     if (UtilValidate.isNotEmpty(facilityId)) {
                         cart.setShipGroupFacilityId(shipGroupIndex, facilityId);
+                    }
+                    // If shipTo party is different than order party
+                    shipToPartyId = request.getParameter("shipToPartyId");
+                    if (UtilValidate.isNotEmpty(shipToPartyId)) {
+                        cart.setShipToCustomerPartyId(shipToPartyId);
+                    } else {
+                        cart.setShipToCustomerPartyId(request.getParameter("orderPartyId"));
                     }
                     callResult = checkOutHelper.finalizeOrderEntryShip(shipGroupIndex, shippingContactMechId, supplierPartyId);
                     ServiceUtil.addErrors(errorMessages, errorMaps, callResult);
