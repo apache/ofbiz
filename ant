@@ -19,8 +19,6 @@
 #####################################################################
 
 # location of java executable
-JAVA_HOME=/opt/java/jdk1.8.0_65
-
 if [ -f "$JAVA_HOME/bin/java" ]; then
   JAVA="$JAVA_HOME/bin/java"
 else
