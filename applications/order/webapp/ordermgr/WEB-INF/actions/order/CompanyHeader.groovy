@@ -232,7 +232,7 @@ if (selPayments) {
 // Tax ID Info
 partyTaxAuthInfoList = delegator.findByAnd("PartyTaxAuthInfo", [partyId : partyId], null, false);
 if (partyTaxAuthInfoList) {
-    if (address.countryGeoId) {
+    if (address?.countryGeoId) {
         // if we have an address with country filter by that
         partyTaxAuthInfoList.eachWithIndex { partyTaxAuthInfo, i ->
             if (partyTaxAuthInfo.taxAuthGeoId.equals(address.countryGeoId)) {
