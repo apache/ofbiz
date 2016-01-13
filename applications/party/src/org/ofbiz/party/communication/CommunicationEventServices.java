@@ -26,6 +26,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.ByteBuffer;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Locale;
@@ -646,8 +647,8 @@ public class CommunicationEventServices {
 
         // attachments
         try {
-            createAttachmentContent(dispatcher, wrapper, communicationEventId, userLogin);
-        } catch (GenericServiceException e) {
+            createAttachmentContent(dispatcher, dctx.getDelegator(), wrapper, communicationEventId, userLogin);
+        } catch (GenericServiceException | GenericEntityException e) {
             return ServiceUtil.returnError(e.getMessage());
         }
 
@@ -904,7 +905,7 @@ public class CommunicationEventServices {
             Debug.logInfo("Persisting New Email: " + aboutThisEmail + " into CommunicationEventId: " + communicationEventId, module);
 
             // handle the attachments
-            createAttachmentContent(dispatcher, wrapper, communicationEventId, userLogin);
+            createAttachmentContent(dispatcher, delegator, wrapper, communicationEventId, userLogin);
 
             // For all addresses create a CommunicationEventRoles
             createCommEventRoles(userLogin, delegator, dispatcher, communicationEventId, toParties, "ADDRESSEE");
@@ -975,14 +976,34 @@ public class CommunicationEventServices {
         if (UtilValidate.isNotEmpty(bccString)) commEventMap.put("bccString", bccString);
     }
 
-    private static void createAttachmentContent(LocalDispatcher dispatcher, MimeMessageWrapper wrapper, String communicationEventId, GenericValue userLogin) throws GenericServiceException {
+    private static List<String> getCommEventAttachmentNames(Delegator delegator, String communicationEventId) throws GenericEntityException {
+        List<GenericValue> commEventContentAssocList = delegator.findList("CommEventContentDataResource", EntityCondition.makeCondition("communicationEventId", communicationEventId), null, null, null, false);
+        commEventContentAssocList = EntityUtil.filterByDate(commEventContentAssocList);
+
+        List<String> attachmentNames = new ArrayList<String>();
+        for (GenericValue commEventContentAssoc : commEventContentAssocList) {
+            String dataResourceName = commEventContentAssoc.getString("drDataResourceName");
+            attachmentNames.add(dataResourceName);
+        }
+
+        return attachmentNames;
+    }
+
+    private static void createAttachmentContent(LocalDispatcher dispatcher, Delegator delegator, MimeMessageWrapper wrapper, String communicationEventId, GenericValue userLogin) throws  GenericServiceException, GenericEntityException {
         // handle the attachments
         String subject = wrapper.getSubject();
         List<String> attachmentIndexes = wrapper.getAttachmentIndexes();
+        List<String> currentAttachmentNames = getCommEventAttachmentNames(delegator, communicationEventId);
 
         if (attachmentIndexes.size() > 0) {
             Debug.logInfo("=== message has attachments [" + attachmentIndexes.size() + "] =====", module);
             for (String attachmentIdx : attachmentIndexes) {
+                String attFileName = wrapper.getPartFilename(attachmentIdx);
+                if (currentAttachmentNames.contains(attFileName)) {
+                    Debug.logWarning(String.format("CommunicationEvent [%s] already has attachment named '%s'", communicationEventId, attFileName), module);
+                    continue;
+                }
+
                 Map<String, Object> attachmentMap = FastMap.newInstance();
                 attachmentMap.put("communicationEventId", communicationEventId);
                 attachmentMap.put("contentTypeId", "DOCUMENT");
@@ -992,7 +1013,6 @@ public class CommunicationEventServices {
                     subject = subject.substring(0,80); // make sure not too big for database field. (20 characters for filename)
                 }
 
-                String attFileName = wrapper.getPartFilename(attachmentIdx);
                 String attContentType = wrapper.getPartContentType(attachmentIdx);
                 if (attContentType != null && attContentType.indexOf(";") > -1) {
                     attContentType = attContentType.toLowerCase().substring(0, attContentType.indexOf(";"));
