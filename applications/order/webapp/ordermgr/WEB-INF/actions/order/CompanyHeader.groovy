@@ -42,10 +42,14 @@ fromPartyId = parameters.fromPartyId;
 
 if (!orderHeader && orderId) {
     orderHeader = from("OrderHeader").where("orderId", orderId).queryOne();
-    if (parameters.facilityId) {
-        response.setHeader("Content-Disposition","attachment; filename=\"PickSheet" + orderId + ".pdf" + "\";");
-    } else {
-        response.setHeader("Content-Disposition","attachment; filename=\"" + orderId + ".pdf" + "\";");
+    try {
+        if (parameters.facilityId) {
+            response.setHeader("Content-Disposition","attachment; filename=\"PickSheet" + orderId + ".pdf" + "\";");
+        } else {
+            response.setHeader("Content-Disposition","attachment; filename=\"" + orderId + ".pdf" + "\";");
+        }
+    } catch (MissingPropertyException e) {
+        // This hack for OFBIZ-6792 to avoid "groovy.lang.MissingPropertyException: No such property: response for class: CompanyHeader" when response does exist (in sendOrderConfirmation service)
     }
 } else if (shipmentId) {
     shipment = from("Shipment").where("shipmentId", shipmentId).queryOne();
@@ -54,7 +58,11 @@ if (!orderHeader && orderId) {
 
 if (!invoice && invoiceId)    {
     invoice = from("Invoice").where("invoiceId", invoiceId).queryOne();
-    response.setHeader("Content-Disposition","attachment; filename=\"" + invoiceId + ".pdf" + "\";");
+    try {
+        response.setHeader("Content-Disposition","attachment; filename=\"" + invoiceId + ".pdf" + "\";");
+    } catch (MissingPropertyException e) {
+        // This hack for OFBIZ-6792 to avoid "groovy.lang.MissingPropertyException: No such property: response for class: CompanyHeader" when response does exist (in sendOrderConfirmation service)
+    }
 }
 
 if (!returnHeader && returnId) {
