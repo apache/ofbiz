@@ -648,47 +648,47 @@
         <value xml:lang="en">Keyboard Shortcuts</value>
         <value xml:lang="it">Tasti funzione</value>
     </property>
-    <property key="WebPosProductSearch">
+    <property key="WebPosShortcutF1">
         <value xml:lang="en">PRODUCT SEARCH</value>
         <value xml:lang="it">RICERCA PRODOTTO</value>
     </property>
-    <property key="WebPosPartySearch">
+    <property key="WebPosShortcutF2">
         <value xml:lang="en">PARTY SEARCH</value>
         <value xml:lang="it">RICERCA SOGGETTO</value>
     </property>
-    <property key="WebPosPayCash">
+    <property key="WebPosShortcutF3">
         <value xml:lang="en">PAY CASH</value>
         <value xml:lang="it">PAGA IN CONTANTI</value>
     </property>
-    <property key="WebPosPayCheck">
+    <property key="WebPosShortcutF4">
         <value xml:lang="en">PAY CHECK</value>
         <value xml:lang="it">PAGA CON ASSEGNO</value>
     </property>
-    <property key="WebPosPayGiftCard">
+    <property key="WebPosShortcutF5">
         <value xml:lang="en">PAY GIFT CARD</value>
         <value xml:lang="it">PAGA C.REGALO</value>
     </property>
-    <property key="WebPosPayByCC">
+    <property key="WebPosShortcutF6">
         <value xml:lang="en">PAY BY CC</value>
         <value xml:lang="it">PAGA C.CREDITO</value>
     </property>
-    <property key="WebPosCheckout">
+    <property key="WebPosShortcutF7">
         <value xml:lang="en">CHECKOUT</value>
         <value xml:lang="it">CHECKOUT</value>
     </property>
-    <property key="WebPosChangeQuantity">
+    <property key="WebPosShortcutF8">
         <value xml:lang="en">CHANGE QUANTITY</value>
         <value xml:lang="it">CAMBIA QUANTITA'</value>
     </property>
-    <property key="WebPosAddQuantity">
+    <property key="WebPosShortcutF9">
         <value xml:lang="en">ADD QUANTITY</value>
         <value xml:lang="it">AGGIUNGI QUANTITA'</value>
     </property>
-    <property key="WebPosSubtractQuantity">
+    <property key="WebPosShortcutF10">
         <value xml:lang="en">SUBTRACT QUANTITY</value>
         <value xml:lang="it">SOTTRAI QUANTITA'</value>
     </property>
-    <property key="WebPosEmptyCart">
+    <property key="WebPosShortcutF11">
         <value xml:lang="en">EMPTY CART</value>
         <value xml:lang="it">SVUOTA CARRELLO</value>
     </property>
