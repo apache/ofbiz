@@ -34,6 +34,7 @@
         <value xml:lang="zh_TW">年收入</value>
     </property>
     <property key="FormFieldTitle_birthDate">
+        <value xml:lang="cs">Datum narození</value>
         <value xml:lang="de">Geburtsdatum</value>
         <value xml:lang="en">Birth Date</value>
         <value xml:lang="es">Fecha de nacimiento</value>
@@ -82,6 +83,7 @@
         <value xml:lang="zh_TW">憑證字串</value>
     </property>
     <property key="FormFieldTitle_cityLocality">
+        <value xml:lang="cs">Poloha města</value>
         <value xml:lang="de">Stadt Örtlichkeit </value>
         <value xml:lang="en">City Locality</value>
         <value xml:lang="es">Localidad Ciudad</value>
@@ -277,6 +279,7 @@
         <value xml:lang="zh_TW">內容媒體類型識別</value>
     </property>
     <property key="FormFieldTitle_country">
+        <value xml:lang="cs">Stát</value>
         <value xml:lang="de">Land</value>
         <value xml:lang="en">Country</value>
         <value xml:lang="es">País</value>
@@ -305,6 +308,7 @@
         <value xml:lang="zh_TW">忌日</value>
     </property>
     <property key="FormFieldTitle_defaultRate">
+        <value xml:lang="cs">Výchozí sazba</value>
         <value xml:lang="de">Standard Ansatz</value>
         <value xml:lang="en">Default Rate</value>
         <value xml:lang="es">Tasa por defecto</value>
@@ -320,6 +324,7 @@
         <value xml:lang="zh_TW">預設費率</value>
     </property>
     <property key="FormFieldTitle_deleteEmail">
+        <value xml:lang="cs">Smazat e-mail</value>
         <value xml:lang="de">Email löschen</value>
         <value xml:lang="en">Delete email</value>
         <value xml:lang="fr">Supprimer mél</value>
@@ -332,6 +337,7 @@
         <value xml:lang="zh_TW">刪除電子郵件</value>
     </property>
     <property key="FormFieldTitle_destinationFacilityId">
+        <value xml:lang="cs">ID polohy zařízení</value>
         <value xml:lang="de">Zieleinrichtung</value>
         <value xml:lang="en">Destination Facility Id</value>
         <value xml:lang="fr">Lieu de stockage de destination</value>
@@ -345,6 +351,7 @@
         <value xml:lang="zh_TW">目的機構識別</value>
     </property>
     <property key="FormFieldTitle_disabledDateTime">
+        <value xml:lang="cs">Datum a čas zákazu</value>
         <value xml:lang="de">Ausgeschaltet Zeitpunkt</value>
         <value xml:lang="en">Disabled Date Time</value>
         <value xml:lang="es">Fecha/hora deshabilitado</value>
@@ -362,6 +369,7 @@
         <value xml:lang="zh_TW">無效的日期時間</value>
     </property>
     <property key="FormFieldTitle_editContent">
+        <value xml:lang="cs">Upravit obsah</value>
         <value xml:lang="de">Inhalt bearbeiten</value>
         <value xml:lang="en">Edit Content</value>
         <value xml:lang="es">Editar contenido</value>
@@ -443,6 +451,7 @@
         <value xml:lang="zh_TW">客戶?</value>
     </property>
     <property key="FormFieldTitle_firstName">
+        <value xml:lang="cs">Jméno</value>
         <value xml:lang="de">Vorname</value>
         <value xml:lang="en">First Name</value>
         <value xml:lang="es">Primer nombre</value>
@@ -494,6 +503,7 @@
         <value xml:lang="zh_TW">來自團體識別</value>
     </property>
     <property key="FormFieldTitle_gender">
+        <value xml:lang="cs">Pohlaví</value>
         <value xml:lang="de">Geschlecht</value>
         <value xml:lang="en">Gender</value>
         <value xml:lang="es">Sexo</value>
@@ -511,6 +521,7 @@
         <value xml:lang="zh_TW">性別</value>
     </property>
     <property key="FormFieldTitle_groupName">
+        <value xml:lang="cs">Název skupiny</value>
         <value xml:lang="de">Gruppenname</value>
         <value xml:lang="en">Group Name</value>
         <value xml:lang="es">Nombre del grupo</value>
@@ -528,6 +539,7 @@
         <value xml:lang="zh_TW">群組名稱</value>
     </property>
     <property key="FormFieldTitle_groupNameLocal">
+        <value xml:lang="cs">Lokalizovaný název organizace</value>
         <value xml:lang="de">Gruppenname lokal</value>
         <value xml:lang="en">Group Name Local</value>
         <value xml:lang="es">Nombre local del grupo</value>
@@ -545,6 +557,7 @@
         <value xml:lang="zh_TW">群組名稱(原名)</value>
     </property>
     <property key="FormFieldTitle_height">
+        <value xml:lang="cs">Výška</value>
         <value xml:lang="de">Grösse</value>
         <value xml:lang="en">Height</value>
         <value xml:lang="es">Altura</value>
@@ -626,6 +639,7 @@
         <value xml:lang="zh_TW">上次邀請日期</value>
     </property>
     <property key="FormFieldTitle_lastName">
+        <value xml:lang="cs">Příjmení</value>
         <value xml:lang="de">Nachname</value>
         <value xml:lang="en">Last Name</value>
         <value xml:lang="es">Apellido</value>
@@ -1031,6 +1045,7 @@
         <value xml:lang="zh_TW">位址2</value>
     </property>
     <property key="FormFieldTitle_paPostalCode">
+        <value xml:lang="cs">Poštovní kód</value>
         <value xml:lang="de">Postleitzahl</value>
         <value xml:lang="en">Postal Code</value>
         <value xml:lang="es">Código postal</value>
@@ -1046,6 +1061,7 @@
         <value xml:lang="zh_TW">郵遞區號</value>
     </property>
     <property key="FormFieldTitle_parentCommEventId">
+        <value xml:lang="cs">Id rodičovské události</value>
         <value xml:lang="de">Übergeordnetes Kommunikationsereignis ID</value>
         <value xml:lang="en">Parent Comm Event Id</value>
         <value xml:lang="es">Codigo Precursor del evento de comunicación</value>
@@ -1061,6 +1077,7 @@
         <value xml:lang="zh_TW">上層通訊事件</value>
     </property>
     <property key="FormFieldTitle_parentGroupId">
+        <value xml:lang="cs">ID rodičovského partnera</value>
         <value xml:lang="de">Übergeordnete Gruppe ID</value>
         <value xml:lang="en">Parent Group Id</value>
         <value xml:lang="es">Código Precursos de grupo</value>
@@ -1079,6 +1096,7 @@
     </property>
     <property key="FormFieldTitle_parentTypeId">
         <value xml:lang="ar">تعريف نوع الوالد</value>
+        <value xml:lang="cs">ID typu rodiče</value>
         <value xml:lang="de">Übergeordneter Typ ID</value>
         <value xml:lang="en">Parent Type Id</value>
         <value xml:lang="es">Código Precursos de tipo</value>
@@ -1096,6 +1114,7 @@
         <value xml:lang="zh_TW">上層類型</value>
     </property>
     <property key="FormFieldTitle_partyClassificationGroupId">
+        <value xml:lang="cs">Id klasifikační skupiny partnera</value>
         <value xml:lang="de">Akteur Klassifizierungsgruppe ID</value>
         <value xml:lang="en">Party Classification Group Id</value>
         <value xml:lang="es">Código Grupo de clasificación</value>
@@ -1143,6 +1162,7 @@
     </property>
     <property key="FormFieldTitle_partyId">
         <value xml:lang="ar">تعريف الطرف</value>
+        <value xml:lang="cs">ID partnera</value>
         <value xml:lang="de">Akteur ID</value>
         <value xml:lang="en">Party Id</value>
         <value xml:lang="es">Id Grupo</value>
@@ -1160,6 +1180,7 @@
         <value xml:lang="zh_TW">團體識別</value>
     </property>
     <property key="FormFieldTitle_partyIdFrom">
+        <value xml:lang="cs">Od partnera ID</value>
         <value xml:lang="de">Akteur ID von</value>
         <value xml:lang="en">From Party ID</value>
         <value xml:lang="es">Id Grupo Origen</value>
@@ -1177,6 +1198,7 @@
         <value xml:lang="zh_TW">來自團體識別</value>
     </property>
     <property key="FormFieldTitle_partyIdTo">
+        <value xml:lang="cs">Partnerovi ID</value>
         <value xml:lang="de">Akteur ID zu</value>
         <value xml:lang="en">To Party ID</value>
         <value xml:lang="es">Id Grupo Destino</value>
@@ -1265,6 +1287,7 @@
         <value xml:lang="zh_TW">團體關連類型識別</value>
     </property>
     <property key="FormFieldTitle_partyTaxId">
+        <value xml:lang="cs">DIČ</value>
         <value xml:lang="de">Akteur Steuer ID</value>
         <value xml:lang="en">Party Tax Id</value>
         <value xml:lang="es">CIF/NIF</value>
@@ -1282,6 +1305,7 @@
         <value xml:lang="zh_TW">團體稅務識別</value>
     </property>
     <property key="FormFieldTitle_partyTypeId">
+        <value xml:lang="cs">Typ partnera ID</value>
         <value xml:lang="de">Gruppen Typ ID</value>
         <value xml:lang="en">Party Type Id</value>
         <value xml:lang="hi_IN">पार्टी के प्रकार का क्रमांक</value>
@@ -1310,6 +1334,7 @@
         <value xml:lang="zh_TW">護照過期日</value>
     </property>
     <property key="FormFieldTitle_passportNumber">
+        <value xml:lang="cs">Číslo pasu</value>
         <value xml:lang="de">Passnummer</value>
         <value xml:lang="en">Passport Number</value>
         <value xml:lang="es">Número de pasaporte</value>
@@ -1373,6 +1398,7 @@
         <value xml:lang="zh_TW">已用百分比</value>
     </property>
     <property key="FormFieldTitle_personalTitle">
+        <value xml:lang="cs">Titul</value>
         <value xml:lang="de">Titel</value>
         <value xml:lang="en">Personal Title</value>
         <value xml:lang="es">Título personal</value>
@@ -1390,6 +1416,7 @@
         <value xml:lang="zh_TW">稱謂</value>
     </property>
     <property key="FormFieldTitle_personalImage">
+        <value xml:lang="cs">Fotografie</value>
         <value xml:lang="de">Persönliches Bild</value>
         <value xml:lang="en">Personal Image</value>
         <value xml:lang="ja">個人画像</value>
@@ -1398,6 +1425,7 @@
         <value xml:lang="zh_TW">個人圖片</value>
     </property>
     <property key="FormFieldTitle_preferredContactMechId">
+        <value xml:lang="cs">Preferovaný způsob kontaktu</value>
         <value xml:lang="de">Bevorzugter Kontaktmechanismus ID</value>
         <value xml:lang="en">Preferred Contact Mech Id</value>
         <value xml:lang="es">Código Mecanismo de Contacto preferido</value>
@@ -1415,6 +1443,7 @@
         <value xml:lang="zh_TW">優先使用聯絡方式識別</value>
     </property>
     <property key="FormFieldTitle_preferredCurrencyUomId">
+        <value xml:lang="cs">ID preferované měny</value>
         <value xml:lang="de">Bevorzugte Währungseinheit ID</value>
         <value xml:lang="en">Preferred Currency Uom Id</value>
         <value xml:lang="es">Código de moneda preferida</value>
@@ -1703,6 +1732,7 @@
         <value xml:lang="zh_TW">到名稱</value>
     </property>
     <property key="FormFieldTitle_toPartyId">
+        <value xml:lang="cs">K partnerovi s ID</value>
         <value xml:lang="de">Empfänger ID</value>
         <value xml:lang="en">To Party Id</value>
         <value xml:lang="fr">Acteur destinataire</value>
@@ -2347,6 +2377,7 @@
         <value xml:lang="zh_TW">尋找相符</value>
     </property>
     <property key="PageTitleFindParty">
+        <value xml:lang="cs">Vyhledat partnera</value>
         <value xml:lang="de">Akteur(e) suchen</value>
         <value xml:lang="en">Find Party(s)</value>
         <value xml:lang="es">Buscar participante(s)</value>
@@ -3156,6 +3187,7 @@
         <value xml:lang="zh_TW">收件者</value>
     </property>
     <property key="PartyAddrToName">
+        <value xml:lang="cs">Komu</value>
         <value xml:lang="de">An</value>
         <value xml:lang="en">To</value>
         <value xml:lang="es">Para</value>
@@ -3174,7 +3206,7 @@
         <value xml:lang="zh_TW">收件者</value>
     </property>
     <property key="PartyAddressLine1">
-        <value xml:lang="cs">Adresa 1. Řádek</value>
+        <value xml:lang="cs">Adresa 1. řádek</value>
         <value xml:lang="de">Adresse 1. Zeile</value>
         <value xml:lang="en">Address Line 1</value>
         <value xml:lang="es">Linea de Dirección 1</value>
@@ -3193,6 +3225,7 @@
         <value xml:lang="zh_TW">位址行1</value>
     </property>
     <property key="PartyAddressLine1Missing">
+        <value xml:lang="cs">Chybí první řádek adresy</value>
         <value xml:lang="de">Adresszeile 1 fehlt</value>
         <value xml:lang="en">Address Line 1 is missing</value>
         <value xml:lang="es">Falta ingresar dirección línea 1</value>
@@ -3211,7 +3244,7 @@
         <value xml:lang="zh_TW">缺少位址行1</value>
     </property>
     <property key="PartyAddressLine1MissingError">
-        <value xml:lang="cs">1. Řádek adresy chybí</value>
+        <value xml:lang="cs">1. řádek adresy chybí</value>
         <value xml:lang="de">Adresszeile 1 fehlt</value>
         <value xml:lang="en">Address Line 1 is missing</value>
         <value xml:lang="es">Falta Linea de Dirección 1</value>
@@ -3230,7 +3263,7 @@
         <value xml:lang="zh_TW">沒有找到位址行1</value>
     </property>
     <property key="PartyAddressLine2">
-        <value xml:lang="cs">Adresa 2. Řádek</value>
+        <value xml:lang="cs">Adresa 2. řádek</value>
         <value xml:lang="de">Adresse 2. Zeile</value>
         <value xml:lang="en">Address Line 2</value>
         <value xml:lang="es">Linea de Dirección 2</value>
@@ -3249,6 +3282,7 @@
         <value xml:lang="zh_TW">位址行2</value>
     </property>
     <property key="PartyAddressMailingShipping">
+        <value xml:lang="cs">Poštovní/zasílací adresa</value>
         <value xml:lang="de">Versandadresse</value>
         <value xml:lang="en">Mailing/Shipping Address</value>
         <value xml:lang="es">Dirección de envío</value>
@@ -3400,6 +3434,7 @@
         <value xml:lang="zh_TW">全部通訊事件</value>
     </property>
     <property key="PartyAllEvents">
+        <value xml:lang="cs">celá komunikace</value>
         <value xml:lang="de">Alle Ereignisse</value>
         <value xml:lang="en">All Communications</value>
         <value xml:lang="fr">Toutes les communications</value>
@@ -3491,6 +3526,7 @@
         <value xml:lang="zh_TW">如果你已經有帳戶了</value>
     </property>
     <property key="PartyAnyRole">
+        <value xml:lang="cs">(Nějaká role)</value>
         <value xml:lang="de">(Alle Rollen)</value>
         <value xml:lang="en">(Any Role)</value>
         <value xml:lang="hi_IN">(कोई भूमिका)</value>
@@ -3534,6 +3570,7 @@
         <value xml:lang="zh_TW">區碼</value>
     </property>
     <property key="PartyAreaCodeMissingError">
+        <value xml:lang="cs">Chybí kód oblasti</value>
         <value xml:lang="de">Ortsvorwahl fehlt</value>
         <value xml:lang="en">Area code is missing</value>
         <value xml:lang="fr">Le code régional manque</value>
@@ -3562,6 +3599,7 @@
         <value xml:lang="zh_TW">附加內容</value>
     </property>
     <property key="PartyAttachFile">
+        <value xml:lang="cs">Připojit soubor</value>
         <value xml:lang="de">Datei anfügen</value>
         <value xml:lang="en">Attach File</value>
         <value xml:lang="hi_IN">फाइल संलग्न करे</value>
@@ -3573,7 +3611,7 @@
         <value xml:lang="zh_TW">附加檔</value>
     </property>
     <property key="PartyAttentionName">
-        <value xml:lang="cs">Jméno</value>
+        <value xml:lang="cs">K rukám</value>
         <value xml:lang="de">Zu Händen von</value>
         <value xml:lang="en">Attention Name</value>
         <value xml:lang="es">A la Atención de</value>
@@ -3592,6 +3630,7 @@
         <value xml:lang="zh_TW">收件者</value>
     </property>
     <property key="PartyAttribute">
+        <value xml:lang="cs">Atribut partnera</value>
         <value xml:lang="de">Akteur Attribut</value>
         <value xml:lang="en">Party Attribute</value>
         <value xml:lang="es">Atributo</value>
@@ -3609,6 +3648,7 @@
         <value xml:lang="zh_TW">團體屬性</value>
     </property>
     <property key="PartyAttributes">
+        <value xml:lang="cs">Attributy partnera</value>
         <value xml:lang="de">Akteur Attribute</value>
         <value xml:lang="en">Party Attribute(s)</value>
         <value xml:lang="es">Atributo(s)</value>
@@ -3660,6 +3700,7 @@
         <value xml:lang="zh_TW">位址驗證服務字串</value>
     </property>
     <property key="PartyBank">
+        <value xml:lang="cs">Banka</value>
         <value xml:lang="de">Bank</value>
         <value xml:lang="en">Bank</value>
         <value xml:lang="es">Banco</value>
@@ -4713,6 +4754,7 @@
         <value xml:lang="zh_TW">預設聯絡方式類型識別</value>
     </property>
     <property key="PartyContactMechanismSuccessfullyCreated">
+        <value xml:lang="cs">Kontakt byl úspěšně vytvořen.</value>
         <value xml:lang="de">Kontaktmechanismus erfolgreich erstellt.</value>
         <value xml:lang="en">Contact Mechanism successfully created.</value>
         <value xml:lang="es">El mecanismo de conacto se ha creado con éxito.</value>
@@ -4729,6 +4771,7 @@
         <value xml:lang="zh_TW">已成功新建聯絡方式.</value>
     </property>
     <property key="PartyContactMechanismSuccessfullyUpdated">
+        <value xml:lang="cs">Kontakt byl úspěšně aktualizován.</value>
         <value xml:lang="de">Kontaktmechanismus erfolgreich aktualisiert.</value>
         <value xml:lang="en">Contact Mechanism successfully updated.</value>
         <value xml:lang="es">El mecanismo de contacto se ha actualizado con éxito.</value>
@@ -4761,6 +4804,7 @@
         <value xml:lang="zh_TW">聯絡方式</value>
     </property>
     <property key="PartyContactMobilePhoneNumber">
+        <value xml:lang="cs">Mobilní telefonní číslo</value>
         <value xml:lang="de">Mobiltelefonnummer</value>
         <value xml:lang="en">Mobile Phone Number</value>
         <value xml:lang="es">Número de teléfono móvil</value>
@@ -5135,6 +5179,7 @@
         <value xml:lang="zh_TW">為這個信用卡新建一個寄送帳單位址</value>
     </property>
     <property key="PartyCreateNewContact">
+        <value xml:lang="cs">Vytvořit nový kontakt</value>
         <value xml:lang="de">Neue Kontaktinformation erstellen</value>
         <value xml:lang="en">Create New Contact Information</value>
         <value xml:lang="es">Crear nuevo contacto</value>
@@ -5854,6 +5899,7 @@
         <value xml:lang="zh_TW">編輯聯絡資訊</value>
     </property>
     <property key="PartyEditContactInformation">
+        <value xml:lang="cs">Upravit kontaktní informaci</value>
         <value xml:lang="de">Kontaktinformationen bearbeiten</value>
         <value xml:lang="en">Edit Contact Information</value>
         <value xml:lang="es">Editar información de contacto</value>
@@ -6038,6 +6084,7 @@
         <value xml:lang="zh_TW">必須有電子郵件地址</value>
     </property>
     <property key="PartyEmailAddressSuccessfullyCreated">
+        <value xml:lang="cs">E-mailová adresa byla úspěšně vytvořena.</value>
         <value xml:lang="de">E-Mail Adresse erfolgreich erstellt.</value>
         <value xml:lang="en">Email Address successfully created.</value>
         <value xml:lang="es">La dirección de correo electrónico se ha creado con éxito.</value>
@@ -6054,6 +6101,7 @@
         <value xml:lang="zh_TW">已成功新建電子郵件位址.</value>
     </property>
     <property key="PartyEmailAddressSuccessfullyUpdated">
+        <value xml:lang="cs">E-mailová adresa byla úspěšně aktualizována.</value>
         <value xml:lang="de">E-Mail Adresse erfolgreich aktualisiert.</value>
         <value xml:lang="en">Email Address successfully updated.</value>
         <value xml:lang="es">La dirección de correo electrónico se ha actualizado con éxito.</value>
@@ -6635,6 +6683,7 @@
         <value xml:lang="zh_TW">到清單</value>
     </property>
     <property key="PartyGroupName">
+        <value xml:lang="cs">Název organizace</value>
         <value xml:lang="de">Gruppenname</value>
         <value xml:lang="en">Group Name</value>
         <value xml:lang="es">Nombre del grupo</value>
@@ -6652,6 +6701,7 @@
         <value xml:lang="zh_TW">群組名稱</value>
     </property>
     <property key="PartyGroupNameMissing">
+        <value xml:lang="cs">Chybí název organizace</value>
         <value xml:lang="de">Gruppenname fehlt</value>
         <value xml:lang="en">Group Name is missing</value>
         <value xml:lang="es">Falta nombre del grupo</value>
@@ -7066,6 +7116,7 @@
         <value xml:lang="zh_TW">群組結合</value>
     </property>
     <property key="PartyInvitationGroupAssocPartyIdTo">
+        <value xml:lang="cs">Příjemce</value>
         <value xml:lang="de">Akteur ID an</value>
         <value xml:lang="en">Party Id To</value>
         <value xml:lang="es">Codigo Participante a</value>
@@ -7194,6 +7245,7 @@
         <value xml:lang="zh_TW">發票付款</value>
     </property>
     <property key="PartyIpAddressSuccessfullyCreated">
+        <value xml:lang="cs">IP adresa byla úspěšně vytvořena.</value>
         <value xml:lang="de">Web IP-Adresse erfolgreich erstellt.</value>
         <value xml:lang="en">Web IP Address successfully created.</value>
         <value xml:lang="es">Dirección IP creada con éxito.</value>
@@ -7210,6 +7262,7 @@
         <value xml:lang="zh_TW">已成功新建網站IP位址.</value>
     </property>
     <property key="PartyIpAddressSuccessfullyUpdated">
+        <value xml:lang="cs">IP adresa byla úspěšně aktualizována.</value>
         <value xml:lang="de">Web IP-Adresse erfolgreich aktualisiert.</value>
         <value xml:lang="en">Web IP Address successfully updated.</value>
         <value xml:lang="es">Direccion IP actualizada con éxito.</value>
@@ -7655,6 +7708,7 @@
         <value xml:lang="zh_TW">尋找團體與使用者登入與人員</value>
     </property>
     <property key="PartyLookupPartyByName">
+        <value xml:lang="cs">Vyhledat partnera podle jména</value>
         <value xml:lang="de">Akteur mit Name suchen</value>
         <value xml:lang="en">Lookup Party by Name</value>
         <value xml:lang="es">Buscar participante por nombre</value>
@@ -7828,6 +7882,7 @@
         <value xml:lang="zh_TW">母親婚前姓氏</value>
     </property>
     <property key="PartyMainRole">
+        <value xml:lang="cs">Hlavní role</value>
         <value xml:lang="de">Haupt Rolle</value>
         <value xml:lang="en">Main Role</value>
         <value xml:lang="fr">Rôle principal</value>
@@ -8828,6 +8883,7 @@
         <value xml:lang="zh_TW">沒有上層</value>
     </property>
     <property key="PartyNoPartiesFound">
+        <value xml:lang="cs">Nenalezen žádný partner.</value>
         <value xml:lang="de">Keine Akteure gefunden.</value>
         <value xml:lang="en">No parties found.</value>
         <value xml:lang="es">No se encontraron participantes</value>
@@ -9492,6 +9548,7 @@
         <value xml:lang="zh_TW">不存在團體來自！</value>
     </property>
     <property key="PartyPartyGroupInformation">
+        <value xml:lang="cs">Informace o skupině</value>
         <value xml:lang="de">Akteurgruppe Information</value>
         <value xml:lang="en">Party Group Information</value>
         <value xml:lang="es">Información del grupo</value>
@@ -9510,6 +9567,7 @@
         <value xml:lang="zh_TW">團體群組資訊</value>
     </property>
     <property key="PartyPartyGroupName">
+        <value xml:lang="cs">Název organizace partnera</value>
         <value xml:lang="de">Akteurgruppe Namen</value>
         <value xml:lang="en">Party Group Name</value>
         <value xml:lang="es">Nombre del grupo</value>
@@ -9528,6 +9586,7 @@
         <value xml:lang="zh_TW">團體群組名稱</value>
     </property>
     <property key="PartyPartyGroupSuccessfullyCreated">
+        <value xml:lang="cs">Partner pro organizaci úspěšně vytvořen.</value>
         <value xml:lang="de">Akteurgruppe erfolgreich erstellt.</value>
         <value xml:lang="en">Party Group successfully created.</value>
         <value xml:lang="es">EL grupo se ha creado con exito.</value>
@@ -9544,6 +9603,7 @@
         <value xml:lang="zh_TW">成功建立團體群組.</value>
     </property>
     <property key="PartyPartyGroupSuccessfullyUpdated">
+        <value xml:lang="cs">Partner pro organizaci byl aktualizován.</value>
         <value xml:lang="de">Akteurgruppe erfolgreich aktualisiert.</value>
         <value xml:lang="en">Party Group successfully updated.</value>
         <value xml:lang="es">El grupo se ha actualizado con éxito.</value>
@@ -9579,6 +9639,7 @@
     </property>
     <property key="PartyPartyId">
         <value xml:lang="ar">دليل الصلة</value>
+        <value xml:lang="cs">Id partnera</value>
         <value xml:lang="de">Akteur ID</value>
         <value xml:lang="en">Party ID</value>
         <value xml:lang="es">Código de participante</value>
@@ -10133,6 +10194,7 @@
         <value xml:lang="zh_TW">找不到個人資訊</value>
     </property>
     <property key="PartyPersonalTitle">
+        <value xml:lang="cs">Titul</value>
         <value xml:lang="de">Titel</value>
         <value xml:lang="en">Personal Title</value>
         <value xml:lang="es">Título</value>
@@ -10188,6 +10250,7 @@
         <value xml:lang="zh_TW">找不到電話號碼資訊</value>
     </property>
     <property key="PartyPhoneNumberRequired">
+        <value xml:lang="cs">Je požadováné alespoň jedno telefonní číslo</value>
         <value xml:lang="de">Mindestens eine Telefonnummer wird im folgenden benötigt</value>
         <value xml:lang="en">At least one phone number is required below</value>
         <value xml:lang="es">Se requiere al menos un número de teléfono debajo</value>
@@ -10239,6 +10302,7 @@
         <value xml:lang="zh_TW">點來自</value>
     </property>
     <property key="PartyPostal">
+        <value xml:lang="cs">Poštovní</value>
         <value xml:lang="de">Post</value>
         <value xml:lang="en">Postal</value>
         <value xml:lang="es">Postal</value>
@@ -10256,6 +10320,7 @@
         <value xml:lang="zh_TW">郵政</value>
     </property>
     <property key="PartyPostalAddressSuccessfullyCreated">
+        <value xml:lang="cs">Poštovní adresa úspěšně vytvořena.</value>
         <value xml:lang="de">Postadresse erfolgreich erstellt.</value>
         <value xml:lang="en">Postal Address successfully created.</value>
         <value xml:lang="es">Direccion postal creada con éxito.</value>
@@ -10272,6 +10337,7 @@
         <value xml:lang="zh_TW">已成功新建通信地址.</value>
     </property>
     <property key="PartyPostalAddressSuccessfullyUpdated">
+        <value xml:lang="cs">Poštovní adresa úspěšně aktualizována.</value>
         <value xml:lang="de">Postadresse erfolgreich aktualisisert.</value>
         <value xml:lang="en">Postal Address successfully updated.</value>
         <value xml:lang="es">Dirección postal actualizada con éxito.</value>
@@ -10288,6 +10354,7 @@
         <value xml:lang="zh_TW">已成功更新通信地址.</value>
     </property>
     <property key="PartyPostalCode">
+        <value xml:lang="cs">Poštovní směrovací číslo</value>
         <value xml:lang="de">Postleitzahl</value>
         <value xml:lang="en">Postal Code</value>
         <value xml:lang="es">Código postal</value>
@@ -10304,6 +10371,7 @@
         <value xml:lang="zh_TW">郵遞區號</value>
     </property>
     <property key="PartyPostalCodeMissing">
+        <value xml:lang="cs">Chybí PSČ</value>
         <value xml:lang="de">Postleitzahl fehlt</value>
         <value xml:lang="en">Zip/Postal Code is missing</value>
         <value xml:lang="es">Falta código postal</value>
@@ -10355,6 +10423,7 @@
         <value xml:lang="zh_TW">找不到郵政資訊</value>
     </property>
     <property key="PartyPrice">
+        <value xml:lang="cs">Cena</value>
         <value xml:lang="de">Preis</value>
         <value xml:lang="en">Price</value>
         <value xml:lang="es">Precio</value>
@@ -10372,6 +10441,7 @@
         <value xml:lang="zh_TW">價格</value>
     </property>
     <property key="PartyPrimaryPhone">
+        <value xml:lang="cs">Primární telefoní číslo</value>
         <value xml:lang="de">Haupttelefonnummer</value>
         <value xml:lang="en">Primary Phone Number</value>
         <value xml:lang="es">Teléfono principal</value>
@@ -10389,6 +10459,7 @@
         <value xml:lang="zh_TW">第一個電話號碼</value>
     </property>
     <property key="PartyProduct">
+        <value xml:lang="cs">Produkt</value>
         <value xml:lang="de">Produkt</value>
         <value xml:lang="en">Product</value>
         <value xml:lang="es">Producto</value>
@@ -10406,6 +10477,7 @@
         <value xml:lang="zh_TW">產品</value>
     </property>
     <property key="PartyProductAdd">
+        <value xml:lang="cs">Přidat produkt</value>
         <value xml:lang="de">Produkt hinzufügen</value>
         <value xml:lang="en">Product Add</value>
         <value xml:lang="hi_IN">उत्पाद जोड़ें</value>
@@ -10417,6 +10489,7 @@
         <value xml:lang="zh_TW">新增產品</value>
     </property>
     <property key="PartyProductId">
+        <value xml:lang="cs">ID produktu</value>
         <value xml:lang="de">Produkt ID</value>
         <value xml:lang="en">Product Id</value>
         <value xml:lang="es">Código de producto</value>
@@ -10502,6 +10575,7 @@
         <value xml:lang="zh_TW">找不到州/省</value>
     </property>
     <property key="PartyPublic">
+        <value xml:lang="cs">Veřejný</value>
         <value xml:lang="de">Öffentlich</value>
         <value xml:lang="en">Public</value>
         <value xml:lang="es">Público</value>
@@ -10592,6 +10666,7 @@
         <value xml:lang="zh_TW">推送網址</value>
     </property>
     <property key="PartyQuantity">
+        <value xml:lang="cs">Množství</value>
         <value xml:lang="de">Menge</value>
         <value xml:lang="en">Quantity</value>
         <value xml:lang="es">Cantidad</value>
@@ -10674,6 +10749,7 @@
         <value xml:lang="zh_TW">當你的新帳戶被核准時,你會收到密碼的電子郵件</value>
     </property>
     <property key="PartyRelatedCompany">
+        <value xml:lang="cs">Společnost</value>
         <value xml:lang="de">Zugehöriges Unternehmen</value>
         <value xml:lang="en">Related Company</value>
         <value xml:lang="fr">Société associée</value>
@@ -10686,6 +10762,7 @@
         <value xml:lang="zh_TW">相關的公司</value>
     </property>
     <property key="PartyRelationSecurity">
+        <value xml:lang="cs">Vztah partnera k zabezpečení</value>
         <value xml:lang="de">Akteur Beziehung Sicherheit</value>
         <value xml:lang="en">Party Relationship Security</value>
         <value xml:lang="es">Relación de seguridad del participante</value>
@@ -10764,6 +10841,7 @@
         <value xml:lang="zh_TW">有效的到-角色類型</value>
     </property>
     <property key="PartyRelationships">
+        <value xml:lang="cs">Vztahy</value>
         <value xml:lang="de">Beziehungen</value>
         <value xml:lang="en">Relationships</value>
         <value xml:lang="es">Relaciones</value>
@@ -10938,6 +11016,7 @@
         <value xml:lang="zh_TW">再輸入一次以確認密碼</value>
     </property>
     <property key="PartyReply">
+        <value xml:lang="cs">Odpovědět</value>
         <value xml:lang="de">Antworten</value>
         <value xml:lang="en">Reply</value>
         <value xml:lang="es">Responder</value>
@@ -10955,6 +11034,7 @@
         <value xml:lang="zh_TW">回覆</value>
     </property>
     <property key="PartyReplyAll">
+        <value xml:lang="cs">Odpovědět všem</value>
         <value xml:lang="de">Allen Antworten</value>
         <value xml:lang="en">Reply All</value>
         <value xml:lang="fr">Répondre à tous</value>
@@ -10967,6 +11047,7 @@
         <value xml:lang="zh_TW">全部回覆</value>
     </property>
     <property key="PartyReplyPrefix">
+        <value xml:lang="cs">RE:</value>
         <value xml:lang="de">AW:</value>
         <value xml:lang="en">RE:</value>
         <value xml:lang="es">RE:</value>
@@ -11020,6 +11101,7 @@
         <value xml:lang="zh_TW">(*) 是必填項.</value>
     </property>
     <property key="PartyRole">
+        <value xml:lang="cs">Role</value>
         <value xml:lang="de">Rolle</value>
         <value xml:lang="en">Role</value>
         <value xml:lang="es">Rol</value>
@@ -11037,6 +11119,7 @@
         <value xml:lang="zh_TW">角色</value>
     </property>
     <property key="PartyRoleType">
+        <value xml:lang="cs">Typ role</value>
         <value xml:lang="de">Rolle Typ</value>
         <value xml:lang="en">Role Type</value>
         <value xml:lang="es">Tipo de rol</value>
@@ -11160,6 +11243,7 @@
     </property>
     <property key="PartyRoles">
         <value xml:lang="ar">الأدوار</value>
+        <value xml:lang="cs">Role</value>
         <value xml:lang="de">Rolle(n)</value>
         <value xml:lang="en">Role(s)</value>
         <value xml:lang="es">Rol(es)</value>
@@ -11306,6 +11390,7 @@
         <value xml:lang="zh_TW">分區</value>
     </property>
     <property key="PartySelectContactType">
+        <value xml:lang="cs">Vyberte typ kontaktu</value>
         <value xml:lang="de">Kontakttyp auswählen</value>
         <value xml:lang="en">Select Contact Type</value>
         <value xml:lang="es">Seleccionar tipo de contacto</value>
@@ -11424,6 +11509,7 @@
         <value xml:lang="zh_TW">序列識別</value>
     </property>
     <property key="PartyServer">
+        <value xml:lang="cs">Server</value>
         <value xml:lang="de">Server</value>
         <value xml:lang="en">Server</value>
         <value xml:lang="es">Servidor</value>
@@ -11907,6 +11993,7 @@
         <value xml:lang="zh_TW">稅務資訊</value>
     </property>
     <property key="PartyTaxId">
+        <value xml:lang="cs">DIČ</value>
         <value xml:lang="de">Steuer ID</value>
         <value xml:lang="en">Tax ID</value>
         <value xml:lang="en_IN">TIN</value>
@@ -11925,6 +12012,7 @@
         <value xml:lang="zh_TW">稅務識別</value>
     </property>
     <property key="PartyTaxIdentification">
+        <value xml:lang="cs">DIČ and osvobození od daně</value>
         <value xml:lang="de">Steuernummer und Befreiung</value>
         <value xml:lang="en">Tax Identification and Exemption</value>
         <value xml:lang="es">Identificación tributaria y extempción</value>
@@ -11942,6 +12030,7 @@
         <value xml:lang="zh_TW">稅務識別和免除</value>
     </property>
     <property key="PartyTaxIsExempt">
+        <value xml:lang="cs">Je osvobozeno?</value>
         <value xml:lang="de">Befreit?</value>
         <value xml:lang="en">Is Exempt?</value>
         <value xml:lang="es">es extempto</value>
@@ -11959,6 +12048,7 @@
         <value xml:lang="zh_TW">免稅嗎?</value>
     </property>
     <property key="PartyTelecom">
+        <value xml:lang="cs">Telefonický kontakt</value>
         <value xml:lang="de">Telekom</value>
         <value xml:lang="en">Telecom</value>
         <value xml:lang="es">Teléfono</value>
@@ -11976,6 +12066,7 @@
         <value xml:lang="zh_TW">電信</value>
     </property>
     <property key="PartyTelecomNumberSuccessfullyCreated">
+        <value xml:lang="cs">Telefonní číslo úspěšně vloženo.</value>
         <value xml:lang="de">Telefonnummer erfolgreich erstellt.</value>
         <value xml:lang="en">Telecom Number successfully created.</value>
         <value xml:lang="es">Telefono creado con éxito.</value>
@@ -11992,6 +12083,7 @@
         <value xml:lang="zh_TW">已成功新建電話號碼.</value>
     </property>
     <property key="PartyTelecomNumberSuccessfullyUpdated">
+        <value xml:lang="cs">Telefonní číslo bylo úspěšně aktualizováno.</value>
         <value xml:lang="de">Telefonnummer erfolgreich aktualisiert.</value>
         <value xml:lang="en">Telecom Number successfully updated.</value>
         <value xml:lang="es">Teléfono actualizado con éxito.</value>
@@ -12009,6 +12101,7 @@
     </property>
     <property key="PartyTerm">
         <value xml:lang="ar">بند</value>
+        <value xml:lang="cs">Podmínky</value>
         <value xml:lang="de">Bedingung</value>
         <value xml:lang="en">Term</value>
         <value xml:lang="es">Condición</value>
@@ -12028,6 +12121,7 @@
     </property>
     <property key="PartyTermType">
         <value xml:lang="ar">نوع البند</value>
+        <value xml:lang="cs">Druh podmínky</value>
         <value xml:lang="de">Bedingung Typ</value>
         <value xml:lang="en">Term Type</value>
         <value xml:lang="es">Tipo de condición</value>
@@ -12047,6 +12141,7 @@
     </property>
     <property key="PartyTermValue">
         <value xml:lang="ar">قيمة البند</value>
+        <value xml:lang="cs">Hodnota smluvní podmínky</value>
         <value xml:lang="de">Bedingung Wert</value>
         <value xml:lang="en">Term Value</value>
         <value xml:lang="es">Condiciones</value>
@@ -12066,6 +12161,7 @@
     </property>
     <property key="PartyTerms">
         <value xml:lang="ar">بنود</value>
+        <value xml:lang="cs">Podmínky</value>
         <value xml:lang="de">Bedingungen</value>
         <value xml:lang="en">Terms</value>
         <value xml:lang="es">Condiciones</value>
@@ -12103,6 +12199,7 @@
         <value xml:lang="zh_TW">基本資料</value>
     </property>
     <property key="PartyTime">
+        <value xml:lang="cs">Čas</value>
         <value xml:lang="de">Zeit</value>
         <value xml:lang="en">Time</value>
         <value xml:lang="es">Tiempo</value>
@@ -12121,6 +12218,7 @@
         <value xml:lang="zh_TW">時間</value>
     </property>
     <property key="PartyToBePaidTo">
+        <value xml:lang="cs">Komu má být vyplaceno:</value>
         <value xml:lang="de">Zahlbar an:</value>
         <value xml:lang="en">To be paid to:</value>
         <value xml:lang="fr">A payer à :</value>
@@ -12133,6 +12231,7 @@
         <value xml:lang="zh_TW">要付款給:</value>
     </property>
     <property key="PartyToBeReceivedFrom">
+        <value xml:lang="cs">Kdo bude plátcem:</value>
         <value xml:lang="de">Empfangen von:</value>
         <value xml:lang="en">To be received from:</value>
         <value xml:lang="fr">A recevoir de :</value>
@@ -12145,6 +12244,7 @@
         <value xml:lang="zh_TW">接收來自:</value>
     </property>
     <property key="PartyToCart">
+        <value xml:lang="cs">Do košíku</value>
         <value xml:lang="de">Zum Warenkorb</value>
         <value xml:lang="en">To Cart</value>
         <value xml:lang="es">Al carro</value>
@@ -12228,6 +12328,7 @@
         <value xml:lang="zh_TW">收件名稱</value>
     </property>
     <property key="PartyTotal">
+        <value xml:lang="cs">Celkem</value>
         <value xml:lang="de">Total</value>
         <value xml:lang="en">Total</value>
         <value xml:lang="es">Total</value>
@@ -12281,6 +12382,7 @@
         <value xml:lang="zh_TW">工作經歷年數合計不是有效數字</value>
     </property>
     <property key="PartyType">
+        <value xml:lang="cs">Typ</value>
         <value xml:lang="de">Typ</value>
         <value xml:lang="en">Type</value>
         <value xml:lang="es">Tipo</value>
@@ -12299,6 +12401,7 @@
         <value xml:lang="zh_TW">類型</value>
     </property>
     <property key="PartyTypeId">
+        <value xml:lang="cs">Typ partnera</value>
         <value xml:lang="de">Akteur Typ ID</value>
         <value xml:lang="en">Party Type Id</value>
         <value xml:lang="es">Código Tipo de participante</value>
@@ -12325,10 +12428,12 @@
         <value xml:lang="zh_TW">無法定位目的;不能刪除</value>
     </property>
     <property key="PartyURI">
+        <value xml:lang="cs">URI</value>
         <value xml:lang="en">URI</value>
         <value xml:lang="hi_IN">यूआरआइ(URI)</value>
     </property>
     <property key="PartyUnknown">
+        <value xml:lang="cs">Neznámý</value>
         <value xml:lang="de">Unbekannt</value>
         <value xml:lang="en">Unknown</value>
         <value xml:lang="es">Desconocido</value>
@@ -12467,6 +12572,7 @@
         <value xml:lang="zh_TW">使用當前位址</value>
     </property>
     <property key="PartyUserCreated">
+        <value xml:lang="cs">Uživatel vytvořen</value>
         <value xml:lang="de">Benutzer erstellt</value>
         <value xml:lang="en">User Created</value>
         <value xml:lang="es">Usuario creado</value>
@@ -12485,6 +12591,7 @@
         <value xml:lang="zh_TW">已新建的使用者</value>
     </property>
     <property key="PartyUserLogin">
+        <value xml:lang="cs">Uživatelské jméno</value>
         <value xml:lang="de">Benutzeranmeldung</value>
         <value xml:lang="en">User Login</value>
         <value xml:lang="es">Usuario</value>
@@ -12522,6 +12629,7 @@
         <value xml:lang="zh_TW">找不到使用者名稱</value>
     </property>
     <property key="PartyUserLoginsForSecurityGroup">
+        <value xml:lang="cs">Uživatelská jména pro skupinu s ID</value>
         <value xml:lang="de">Benutzeranmeldungen für Sicherheitsgruppe mit der ID</value>
         <value xml:lang="en">UserLogins for SecurityGroup with ID</value>
         <value xml:lang="es">Usuarios para el grupo de seguridad con código</value>
@@ -12540,6 +12648,7 @@
         <value xml:lang="zh_TW">安全群組使用者登入其識別為</value>
     </property>
     <property key="PartyUserName">
+        <value xml:lang="cs">Uživatelské jméno/jména</value>
         <value xml:lang="de">Benutzername(n)</value>
         <value xml:lang="en">User Name(s)</value>
         <value xml:lang="es">Usuario(s)</value>
@@ -12558,6 +12667,7 @@
         <value xml:lang="zh_TW">使用者名稱</value>
     </property>
     <property key="PartyUserNameInUse">
+        <value xml:lang="cs">Uživatelské jméno již existuje, prosím zvolte jiné.</value>
         <value xml:lang="de">Benutzername vergeben, bitte anderen auswählen.</value>
         <value xml:lang="en">Username in use, please choose another.</value>
         <value xml:lang="fr">Identifiant de connexion déjà utilisé, choisissez en un autre SVP.</value>
@@ -12622,6 +12732,7 @@
         <value xml:lang="zh_TW">依工作投入等級值</value>
     </property>
     <property key="PartyVendor">
+        <value xml:lang="cs">Poskytovatel</value>
         <value xml:lang="de">Verkäufer</value>
         <value xml:lang="en">Vendor</value>
         <value xml:lang="es">Proveedor</value>
@@ -12680,6 +12791,7 @@
         <value xml:lang="zh_TW">檢視通訊產品</value>
     </property>
     <property key="PartyViewCommunicationEvent">
+        <value xml:lang="cs">Zobrazit komunikační událost</value>
         <value xml:lang="de">Kommunikationsereignis anzeigen</value>
         <value xml:lang="en">View Communication Event</value>
         <value xml:lang="es">Ver evento de comunicación</value>
@@ -12697,6 +12809,7 @@
         <value xml:lang="zh_TW">檢視通訊事件</value>
     </property>
     <property key="PartyViewImage">
+        <value xml:lang="cs">Zobrazit obrázek</value>
         <value xml:lang="de">Bild anzeigen</value>
         <value xml:lang="en">View Image</value>
         <value xml:lang="es">Ver imagen</value>
@@ -12714,6 +12827,7 @@
         <value xml:lang="zh_TW">檢視圖像</value>
     </property>
     <property key="PartyViewPostalAddressBoundaryPermissionError">
+        <value xml:lang="cs">Chyba zabezpečení: pro spuštění getPostalAddressBoundary musíte mít oprávnění PARTY_VIEW nebo PARTY_ADMIN</value>
         <value xml:lang="de">Sicherheitsfehler: um getPostalAddressBoundary auszuführen müssen Sie die Berechtigung PARTYMGR_VIEW oder PARTYMGR_ADMIN besitzen</value>
         <value xml:lang="en">Security Error: to run getPostalAddressBoundary you must have the PARTY_VIEW or PARTY_ADMIN permission</value>
         <value xml:lang="es">Error de seguridad: Para ejecutar esta funcionalidad necesita los permisos PARTY_VIEW o PARTY_ADMIN</value>
@@ -12731,6 +12845,7 @@
         <value xml:lang="zh_TW">安全錯誤: 要執行 getPostalAddressBoundary,您必須具有 PARTY_VIEW 或 PARTY_ADMIN 權限</value>
     </property>
     <property key="PartyViewSegmentRoles">
+        <value xml:lang="cs">Zobrazení segmentu rolí partnera</value>
         <value xml:lang="de">Akteur Segment Rolle anzeigen</value>
         <value xml:lang="en">View Party Segment Roles</value>
         <value xml:lang="es">Ver roles de segmento</value>
@@ -12748,6 +12863,7 @@
         <value xml:lang="zh_TW">檢視團體分區角色</value>
     </property>
     <property key="PartyVisitDetail">
+        <value xml:lang="cs">Detail návštěvy</value>
         <value xml:lang="de">Webseite Besuchsdetails</value>
         <value xml:lang="en">Visit Detail</value>
         <value xml:lang="es">Detalle de visita</value>
@@ -12765,6 +12881,7 @@
         <value xml:lang="zh_TW">訪問細項</value>
     </property>
     <property key="PartyVisitIDSessionID">
+        <value xml:lang="cs">ID návštěvy/ SessionID</value>
         <value xml:lang="de">Besuchs ID / Session ID</value>
         <value xml:lang="en">VisitID / SessionID</value>
         <value xml:lang="es">Código de visita / código de sesión</value>
@@ -12782,6 +12899,7 @@
         <value xml:lang="zh_TW">拜訪識別 / 活動識別</value>
     </property>
     <property key="PartyVisitId">
+        <value xml:lang="cs">Id návštěvy</value>
         <value xml:lang="de">Besuchs Id</value>
         <value xml:lang="en">Visit Id</value>
         <value xml:lang="es">Código de visita</value>
@@ -12799,6 +12917,7 @@
         <value xml:lang="zh_TW">拜訪識別</value>
     </property>
     <property key="PartyVisitListing">
+        <value xml:lang="cs">Seznam návštěv</value>
         <value xml:lang="de">Liste der Webseitenbesuche</value>
         <value xml:lang="en">Visit Listing</value>
         <value xml:lang="es">Lista de visitas</value>
@@ -12816,6 +12935,7 @@
         <value xml:lang="zh_TW">拜訪清單</value>
     </property>
     <property key="PartyVisitorId">
+        <value xml:lang="cs">ID návštěvníka</value>
         <value xml:lang="de">Besucher ID</value>
         <value xml:lang="en">Visitor ID</value>
         <value xml:lang="es">Código Visitante</value>
@@ -12833,6 +12953,7 @@
         <value xml:lang="zh_TW">拜訪者識別</value>
     </property>
     <property key="PartyVisits">
+        <value xml:lang="cs">Návštěvy</value>
         <value xml:lang="de">Webseiten Besuche</value>
         <value xml:lang="en">Visits</value>
         <value xml:lang="es">Visitas</value>
@@ -12851,6 +12972,7 @@
         <value xml:lang="zh_TW">拜訪</value>
     </property>
     <property key="PartyWebAddressSuccessfullyCreated">
+        <value xml:lang="cs">Webová adresa úspěšně vytvořena.</value>
         <value xml:lang="de">Web Adresse erfolgreich erstellt.</value>
         <value xml:lang="en">Web Address Successfully created.</value>
         <value xml:lang="es">Direccion web creada con éxito.</value>
@@ -12867,6 +12989,7 @@
         <value xml:lang="zh_TW">已成功新建網址.</value>
     </property>
     <property key="PartyWebAddressSuccessfullyUpdated">
+        <value xml:lang="cs">Webová adresa úspěšně aktualizována.</value>
         <value xml:lang="de">Web Adresse erfolgreich aktualisiert.</value>
         <value xml:lang="en">Web Address successfully updated.</value>
         <value xml:lang="es">Dirección web actualizada con éxito.</value>
@@ -12883,6 +13006,7 @@
         <value xml:lang="zh_TW">已成功更新網址.</value>
     </property>
     <property key="PartyWebApp">
+        <value xml:lang="cs">Webová aplikace</value>
         <value xml:lang="de">Webanwendung</value>
         <value xml:lang="en">WebApp</value>
         <value xml:lang="es">Aplicación web</value>
@@ -12920,6 +13044,7 @@
         <value xml:lang="zh_TW">體重</value>
     </property>
     <property key="PartyWeightNotValidNumber">
+        <value xml:lang="cs">Váha není platné číslo</value>
         <value xml:lang="de">Gewicht ist keine gültige Zahl</value>
         <value xml:lang="en">Weight is not a valid number</value>
         <value xml:lang="es">El peso no es un número válido</value>
@@ -12937,6 +13062,7 @@
         <value xml:lang="zh_TW">體重不是有效數字</value>
     </property>
     <property key="PartyYearsWork">
+        <value xml:lang="cs">Odpracovaných let</value>
         <value xml:lang="de">Arbeitsjahre</value>
         <value xml:lang="en">Years Work</value>
         <value xml:lang="es">Años de experiencia</value>
@@ -12955,6 +13081,7 @@
         <value xml:lang="zh_TW">年資</value>
     </property>
     <property key="PartyYouHave">
+        <value xml:lang="cs">Máte</value>
         <value xml:lang="de">Sie haben</value>
         <value xml:lang="en">You have</value>
         <value xml:lang="es">Usted tiene</value>

@@ -479,6 +479,7 @@
         <value xml:lang="zh_TW">網站</value>
     </property>
     <property key="ContactMechPurposeType.description.BILLING_EMAIL">
+        <value xml:lang="cs">Email pro platby</value>
         <value xml:lang="de">Rechnungs E-Mail-Adresse</value>
         <value xml:lang="en">Billing (AP) Email</value>
         <value xml:lang="es">Correo electrónico de facturación</value>
@@ -495,6 +496,7 @@
         <value xml:lang="zh_TW">寄送帳單電子郵件</value>
     </property>
     <property key="ContactMechPurposeType.description.BILLING_LOCATION">
+        <value xml:lang="cs">Adresa pro platby</value>
         <value xml:lang="de">Rechnungsadresse</value>
         <value xml:lang="en">Billing (AP) Address</value>
         <value xml:lang="es">Dirección de facturación</value>
@@ -512,6 +514,7 @@
         <value xml:lang="zh_TW">寄送帳單位址</value>
     </property>
     <property key="ContactMechPurposeType.description.FAX_BILLING">
+        <value xml:lang="cs">FAX pro platby</value>
         <value xml:lang="de">Rechnungs Faxnumer</value>
         <value xml:lang="en">Billing Destination Fax Number</value>
         <value xml:lang="fr">Numéro de télécopie du service comptabilité</value>
@@ -521,6 +524,7 @@
         <value xml:lang="zh_TW">寄送帳單目的地傳真號碼</value>
     </property>
     <property key="ContactMechPurposeType.description.FAX_NUMBER">
+        <value xml:lang="cs">Hlavní faxové číslo</value>
         <value xml:lang="de">Haupt-Faxnummer</value>
         <value xml:lang="en">Main Fax Number</value>
         <value xml:lang="es">Número de fax principal</value>
@@ -538,6 +542,7 @@
         <value xml:lang="zh_TW">主要傳真號碼</value>
     </property>
     <property key="ContactMechPurposeType.description.FAX_NUMBER_SEC">
+        <value xml:lang="cs">Druhé faxové číslo</value>
         <value xml:lang="de">2. Faxnummer</value>
         <value xml:lang="en">Secondary Fax Number</value>
         <value xml:lang="es">Número de fax secundario</value>
@@ -555,6 +560,7 @@
         <value xml:lang="zh_TW">第二個傳真號碼</value>
     </property>
     <property key="ContactMechPurposeType.description.FAX_SHIPPING">
+        <value xml:lang="cs">Faxové číslo pro doručení</value>
         <value xml:lang="de">Liefer Faxnumer</value>
         <value xml:lang="en">Shipping Destination Fax Number</value>
         <value xml:lang="fr">Numéro de télécopie du service expédition</value>
@@ -564,6 +570,7 @@
         <value xml:lang="zh_TW">送貨目的地傳真號碼</value>
     </property>
     <property key="ContactMechPurposeType.description.GENERAL_LOCATION">
+        <value xml:lang="cs">Všeobecná korespondenční adresa</value>
         <value xml:lang="de">Allgemeine Korrespondenzadresse</value>
         <value xml:lang="en">General Correspondence Address</value>
         <value xml:lang="es">Dirección general</value>
@@ -581,12 +588,14 @@
         <value xml:lang="zh_TW">通信地址</value>
     </property>
     <property key="ContactMechPurposeType.description.ICAL_URL">
+        <value xml:lang="cs">iCalendar URL</value>
         <value xml:lang="en">iCalendar URL</value>
         <value xml:lang="fr">Adresse du calendrier (URL)</value>
         <value xml:lang="zh">iCalendar网址</value>
         <value xml:lang="zh_TW">iCalendar網址</value>
     </property>
     <property key="ContactMechPurposeType.description.MARKETING_EMAIL">
+        <value xml:lang="cs">Primární marketingový email</value>
         <value xml:lang="en">Primary Marketing Email Address</value>
         <value xml:lang="fr">Adresse courriel du service marketing</value>
         <value xml:lang="ja">主マーケティング電子メールアドレス</value>
@@ -595,6 +604,7 @@
         <value xml:lang="zh_TW">主要的市場電子郵件位址</value>
     </property>
     <property key="ContactMechPurposeType.description.ORDER_EMAIL">
+        <value xml:lang="cs">Email pro notifikaci o objednávce</value>
         <value xml:lang="de">Auftrags-Benachrichtigungen E-Mail-Adresse</value>
         <value xml:lang="en">Order Notification Email Address</value>
         <value xml:lang="es">Correo electrónico de notificación de pedidos</value>
@@ -612,6 +622,7 @@
         <value xml:lang="zh_TW">訂單通知電子郵件位址</value>
     </property>
     <property key="ContactMechPurposeType.description.OTHER_EMAIL">
+        <value xml:lang="cs">Jiná emailová adresa</value>
         <value xml:lang="de">Andere E-Mail-Adresse</value>
         <value xml:lang="en">Other Email Address</value>
         <value xml:lang="es">Otro correo electrónico</value>
@@ -629,6 +640,7 @@
         <value xml:lang="zh_TW">其他電子郵件位址</value>
     </property>
     <property key="ContactMechPurposeType.description.PAYMENT_EMAIL">
+        <value xml:lang="cs">Email pro platby</value>
         <value xml:lang="de">Zahlung E-Mail-Adresse</value>
         <value xml:lang="en">Payment (AR) Email</value>
         <value xml:lang="es">Correo electrónico de pago</value>
@@ -645,6 +657,7 @@
         <value xml:lang="zh_TW">付款電子郵件</value>
     </property>
     <property key="ContactMechPurposeType.description.PAYMENT_LOCATION">
+        <value xml:lang="cs">Adresa pro platby</value>
         <value xml:lang="de">Zahlungsadresse</value>
         <value xml:lang="en">Payment (AR) Address</value>
         <value xml:lang="es">Dirección de pago</value>
@@ -662,6 +675,7 @@
         <value xml:lang="zh_TW">付款位址</value>
     </property>
     <property key="ContactMechPurposeType.description.PHONE_ASSISTANT">
+        <value xml:lang="cs">Telefonní číslo asistenta</value>
         <value xml:lang="de">Telefonnummer Assistent</value>
         <value xml:lang="en">Assistant's Phone Number</value>
         <value xml:lang="es">Número de teléfono de asistente</value>
@@ -679,6 +693,7 @@
         <value xml:lang="zh_TW">助理的電話號碼</value>
     </property>
     <property key="ContactMechPurposeType.description.PHONE_BILLING">
+        <value xml:lang="cs">Telefonní číslo pro fakturaci</value>
         <value xml:lang="de">Fakturierung Telefonnummer</value>
         <value xml:lang="en">Billing (AP) Phone Number</value>
         <value xml:lang="es">Teléfono de facturación</value>
@@ -695,6 +710,7 @@
         <value xml:lang="zh_TW">寄送帳單電話號碼</value>
     </property>
     <property key="ContactMechPurposeType.description.PHONE_DID">
+        <value xml:lang="cs">Telefonní číslo přímé volby</value>
         <value xml:lang="en">Direct Inward Dialing Phone Number</value>
         <value xml:lang="fr">Numéro de téléphone interne directe</value>
         <value xml:lang="hi_IN">डायरेक्ट आवक डायलन फोन नंबर</value>
@@ -706,6 +722,7 @@
         <value xml:lang="zh_TW">直撥電話號碼</value>
     </property>
     <property key="ContactMechPurposeType.description.PHONE_HOME">
+        <value xml:lang="cs">Soukromé telefonní číslo</value>
         <value xml:lang="de">Privat Telefonnummer</value>
         <value xml:lang="en">Main Home Phone Number</value>
         <value xml:lang="es">Teléfono principal privado</value>
@@ -723,6 +740,7 @@
         <value xml:lang="zh_TW">主要家庭電話號碼</value>
     </property>
     <property key="ContactMechPurposeType.description.PHONE_MOBILE">
+        <value xml:lang="cs">Soukromé mobilní číslo</value>
         <value xml:lang="de">Privat Mobilfunknummer</value>
         <value xml:lang="en">Main Mobile Phone Number</value>
         <value xml:lang="es">Teléfono móvil principal privado</value>
@@ -740,6 +758,7 @@
         <value xml:lang="zh_TW">主要行動電話號碼</value>
     </property>
     <property key="ContactMechPurposeType.description.PHONE_PAYMENT">
+        <value xml:lang="cs">Telefonní číslo pro platby</value>
         <value xml:lang="de">Zahlung Telefonnummer</value>
         <value xml:lang="en">Payment (AR) Phone Number</value>
         <value xml:lang="es">Teléfono Pagos</value>
@@ -757,6 +776,7 @@
         <value xml:lang="zh_TW">付款電話號碼</value>
     </property>
     <property key="ContactMechPurposeType.description.PHONE_QUICK">
+        <value xml:lang="cs">Quick Calls Phone Number</value>
         <value xml:lang="en">Quick Calls Phone Number</value>
         <value xml:lang="fr">Numéro de téléphone d'appels express</value>
         <value xml:lang="hi_IN">त्वरित कॉल फ़ोन नंबर</value>
@@ -768,6 +788,7 @@
         <value xml:lang="zh_TW">快速呼叫電話號碼</value>
     </property>
     <property key="ContactMechPurposeType.description.PHONE_SHIPPING">
+        <value xml:lang="cs">Telefon na dodací místo</value>
         <value xml:lang="de">Telefonnummer Versandadresse</value>
         <value xml:lang="en">Shipping Destination Phone Number</value>
         <value xml:lang="es">Teléfono dirección de envío</value>
@@ -785,6 +806,7 @@
         <value xml:lang="zh_TW">貨運目的地電話號碼</value>
     </property>
     <property key="ContactMechPurposeType.description.PHONE_SHIP_ORIG">
+        <value xml:lang="cs">Telefon na odesílací místo</value>
         <value xml:lang="de">Telefonnummer Absenderadresse</value>
         <value xml:lang="en">Shipping Origin Phone Number</value>
         <value xml:lang="es">Teléfono origen de envíos</value>
@@ -801,6 +823,7 @@
         <value xml:lang="zh_TW">貨運發貨地電話號碼</value>
     </property>
     <property key="ContactMechPurposeType.description.PHONE_WORK">
+        <value xml:lang="cs">Primární pracovní telefon</value>
         <value xml:lang="de">Geschäftliche Telefonnummer</value>
         <value xml:lang="en">Main Work Phone Number</value>
         <value xml:lang="es">Teléfono principal trabajo</value>
@@ -818,6 +841,7 @@
         <value xml:lang="zh_TW">主要工作電話號碼</value>
     </property>
     <property key="ContactMechPurposeType.description.PHONE_WORK_SEC">
+        <value xml:lang="cs">Sekundární pracovní telefon</value>
         <value xml:lang="de">Weitere Geschäftliche Telefonnummer</value>
         <value xml:lang="en">Secondary Work Phone Number</value>
         <value xml:lang="es">Teléfono secundario trabajo</value>
@@ -834,6 +858,7 @@
         <value xml:lang="zh_TW">第二個工作電話號碼</value>
     </property>
     <property key="ContactMechPurposeType.description.PREVIOUS_LOCATION">
+        <value xml:lang="cs">Předchozí adresa</value>
         <value xml:lang="de">Vorherige Adresse</value>
         <value xml:lang="en">Previous Address</value>
         <value xml:lang="es">Dirección anterior</value>
@@ -850,6 +875,7 @@
         <value xml:lang="zh_TW">上一個位址</value>
     </property>
     <property key="ContactMechPurposeType.description.PRIMARY_EMAIL">
+        <value xml:lang="cs">Primární emailová adresa</value>
         <value xml:lang="de">Haupt-E-Mail-Adresse</value>
         <value xml:lang="en">Primary Email Address</value>
         <value xml:lang="es">Correo electrónico principal</value>
@@ -867,6 +893,7 @@
         <value xml:lang="zh_TW">第一個電子郵件位址</value>
     </property>
     <property key="ContactMechPurposeType.description.PRIMARY_LOCATION">
+        <value xml:lang="cs">Primární adresa</value>
         <value xml:lang="de">Adresse</value>
         <value xml:lang="en">Primary Address</value>
         <value xml:lang="es">Dirección principal</value>
@@ -884,6 +911,7 @@
         <value xml:lang="zh_TW">首選位址</value>
     </property>
     <property key="ContactMechPurposeType.description.PRIMARY_PHONE">
+        <value xml:lang="cs">Primární telefonní číslo</value>
         <value xml:lang="de">Haupt-Telefonnummer</value>
         <value xml:lang="en">Primary Phone Number</value>
         <value xml:lang="es">Teléfono principal</value>
@@ -901,6 +929,7 @@
         <value xml:lang="zh_TW">第一個電話號碼</value>
     </property>
     <property key="ContactMechPurposeType.description.PRIMARY_WEB_URL">
+        <value xml:lang="cs">Primární URL</value>
         <value xml:lang="de">1. Webseite URL</value>
         <value xml:lang="en">Primary Website URL</value>
         <value xml:lang="es">Sitio web principal</value>
@@ -918,6 +947,7 @@
         <value xml:lang="zh_TW">第一個網站網址</value>
     </property>
     <property key="ContactMechPurposeType.description.PUR_RET_LOCATION">
+        <value xml:lang="cs">Adresa pro vrácení zboží</value>
         <value xml:lang="de">Einkauf Rückgabe Adresse</value>
         <value xml:lang="en">Purchase Return Address</value>
         <value xml:lang="es">Dirección devolución de compras</value>
@@ -935,6 +965,7 @@
         <value xml:lang="zh_TW">購物退貨位址</value>
     </property>
     <property key="ContactMechPurposeType.description.SHIPPING_LOCATION">
+        <value xml:lang="cs">Dodací adresa</value>
         <value xml:lang="de">Versandresse</value>
         <value xml:lang="en">Shipping Destination Address</value>
         <value xml:lang="es">Dirección de envíos</value>
@@ -952,6 +983,7 @@
         <value xml:lang="zh_TW">貨運目的位址</value>
     </property>
     <property key="ContactMechPurposeType.description.SHIP_ORIG_LOCATION">
+        <value xml:lang="cs">Odesílací adresa</value>
         <value xml:lang="de">Absenderadresse</value>
         <value xml:lang="en">Shipping Origin Address</value>
         <value xml:lang="es">Dirección de origen de envíos</value>
@@ -969,6 +1001,7 @@
         <value xml:lang="zh_TW">貨運發貨位址</value>
     </property>
     <property key="ContactMechType.description.DOMAIN_NAME">
+        <value xml:lang="cs">Jméno domény</value>
         <value xml:lang="de">Internet Domain Name</value>
         <value xml:lang="en">Internet Domain Name</value>
         <value xml:lang="es">Nombre de dominio Internet</value>
@@ -986,6 +1019,7 @@
         <value xml:lang="zh_TW">網際網路功能變數名稱</value>
     </property>
     <property key="ContactMechType.description.ELECTRONIC_ADDRESS">
+        <value xml:lang="cs">Elektronická adresa</value>
         <value xml:lang="de">Elektronische Adresse</value>
         <value xml:lang="en">Electronic Address</value>
         <value xml:lang="es">Dirección electrónica</value>
@@ -1003,6 +1037,7 @@
         <value xml:lang="zh_TW">電子位址</value>
     </property>
     <property key="ContactMechType.description.EMAIL_ADDRESS">
+        <value xml:lang="cs">E-mail</value>
         <value xml:lang="de">E-Mail-Adresse</value>
         <value xml:lang="en">Email Address</value>
         <value xml:lang="es">Correo electrónico</value>
@@ -1020,6 +1055,7 @@
         <value xml:lang="zh_TW">電子郵件位址</value>
     </property>
     <property key="ContactMechType.description.INTERNAL_PARTYID">
+        <value xml:lang="cs">Interní poznámka</value>
         <value xml:lang="en">Internal Party Note</value>
         <value xml:lang="fr">Note Interne</value>
         <value xml:lang="ja">内部取引先連絡</value>
@@ -1028,6 +1064,7 @@
         <value xml:lang="zh_TW">內部團體便箋</value>
     </property>
     <property key="ContactMechType.description.IP_ADDRESS">
+        <value xml:lang="cs">IP Adresa</value>
         <value xml:lang="de">Internet IP Adresse</value>
         <value xml:lang="en">Internet IP Address</value>
         <value xml:lang="es">Dirección IP</value>
@@ -1045,6 +1082,7 @@
         <value xml:lang="zh_TW">網際網路IP位址</value>
     </property>
     <property key="ContactMechType.description.LDAP_ADDRESS">
+        <value xml:lang="cs">LDAP adresa</value>
         <value xml:lang="en">LDAP Address</value>
         <value xml:lang="fr">Annuaire (URL)</value>
         <value xml:lang="ja">LDAPアドレス</value>
@@ -1053,6 +1091,7 @@
         <value xml:lang="zh_TW">LDAP位址</value>
     </property>
     <property key="ContactMechType.description.POSTAL_ADDRESS">
+        <value xml:lang="cs">Adresa</value>
         <value xml:lang="de">Postadresse</value>
         <value xml:lang="en">Postal Address</value>
         <value xml:lang="es">Dirección postal</value>
@@ -1070,6 +1109,7 @@
         <value xml:lang="zh_TW">郵政位址</value>
     </property>
     <property key="ContactMechType.description.TELECOM_NUMBER">
+        <value xml:lang="cs">Telefonní číslo</value>
         <value xml:lang="de">Telefonnummer</value>
         <value xml:lang="en">Phone Number</value>
         <value xml:lang="es">Número de teléfono</value>
@@ -1087,6 +1127,7 @@
         <value xml:lang="zh_TW">電話號碼</value>
     </property>
     <property key="ContactMechType.description.WEB_ADDRESS">
+        <value xml:lang="cs">Adresa webových stránek</value>
         <value xml:lang="de">Web URL/Adresse</value>
         <value xml:lang="en">Web URL/Address</value>
         <value xml:lang="es">Dirección web (URL)</value>
@@ -1104,6 +1145,7 @@
         <value xml:lang="zh_TW">網站網址</value>
     </property>
     <property key="PartyClassificationGroup.description.ASSEMBLY">
+        <value xml:lang="cs">Sestavení</value>
         <value xml:lang="de">Montage</value>
         <value xml:lang="en">ASSEMBLY</value>
         <value xml:lang="es">Ensamblado</value>
@@ -1148,6 +1190,7 @@
         <value xml:lang="zh_TW">化學</value>
     </property>
     <property key="PartyClassificationGroup.description.DIRECTEUR">
+        <value xml:lang="cs">Ředitel</value>
         <value xml:lang="de">Direktor</value>
         <value xml:lang="en">DIRECTEUR</value>
         <value xml:lang="es">Director</value>
@@ -1163,6 +1206,7 @@
         <value xml:lang="zh_TW">經理</value>
     </property>
     <property key="PartyClassificationGroup.description.EMPLOYE">
+        <value xml:lang="cs">Zaměstnanec</value>
         <value xml:lang="de">Angestellter</value>
         <value xml:lang="en">EMPLOYEE</value>
         <value xml:lang="es">Empleado</value>
@@ -1178,6 +1222,7 @@
         <value xml:lang="zh_TW">員工</value>
     </property>
     <property key="PartyClassificationGroup.description.MANUFACTURING">
+        <value xml:lang="cs">Výroba</value>
         <value xml:lang="de">Produktion</value>
         <value xml:lang="en">MANUFACTURING</value>
         <value xml:lang="es">Producción</value>
@@ -1193,6 +1238,7 @@
         <value xml:lang="zh_TW">製造</value>
     </property>
     <property key="PartyClassificationType.description.ANNUAL_REVENUE">
+        <value xml:lang="cs">Roční příjem</value>
         <value xml:lang="de">Jahreseinkommen</value>
         <value xml:lang="en">Annual Revenue</value>
         <value xml:lang="es">Ingresos anuales</value>
@@ -1218,6 +1264,7 @@
         <value xml:lang="zh_TW">公平就業機會委員會</value>
     </property>
     <property key="PartyClassificationType.description.INCOME_CLASSIFICATIO">
+        <value xml:lang="cs">Příjem</value>
         <value xml:lang="de">Einkommen</value>
         <value xml:lang="en">Income</value>
         <value xml:lang="es">Ingreso</value>
@@ -1235,6 +1282,7 @@
         <value xml:lang="zh_TW">收入</value>
     </property>
     <property key="PartyClassificationType.description.INDUSTRY_CLASSIFICAT">
+        <value xml:lang="cs">Průmysl</value>
         <value xml:lang="de">Industrie</value>
         <value xml:lang="en">Industry</value>
         <value xml:lang="es">Industria</value>
@@ -1282,6 +1330,7 @@
         <value xml:lang="zh_TW">員工人數</value>
     </property>
     <property key="PartyClassificationType.description.ORGANIZATION_CLASSIF">
+        <value xml:lang="cs">Organizace</value>
         <value xml:lang="de">Organisation</value>
         <value xml:lang="en">Organization</value>
         <value xml:lang="es">Organización</value>
@@ -1454,6 +1503,7 @@
         <value xml:lang="zh_TW">賣家送貨資訊</value>
     </property>
     <property key="PartyRelationshipType.partyRelationshipName.ACCOUNT">
+        <value xml:lang="cs">Účet</value>
         <value xml:lang="en">Account Owned by</value>
         <value xml:lang="es">Cuenta</value>
         <value xml:lang="fr">Compte</value>
