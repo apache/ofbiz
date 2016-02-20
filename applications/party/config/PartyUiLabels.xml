@@ -4770,6 +4770,9 @@
         <value xml:lang="zh">已成功创建联系方式。</value>
         <value xml:lang="zh_TW">已成功新建聯絡方式.</value>
     </property>
+    <property key="PartyContactMechanismSuccessfullyDeleted">
+        <value xml:lang="en">Record deleted successfully.</value>
+    </property>
     <property key="PartyContactMechanismSuccessfullyUpdated">
         <value xml:lang="cs">Kontakt byl úspěšně aktualizován.</value>
         <value xml:lang="de">Kontaktmechanismus erfolgreich aktualisiert.</value>
