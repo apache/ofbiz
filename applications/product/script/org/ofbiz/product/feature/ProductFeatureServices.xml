@@ -345,6 +345,7 @@ under the License.
         <set-pk-fields map="parameters" value-field="newEntity"/>
 
         <create-value value-field="newEntity"/>
+        <field-to-result field="newEntity.productFeatureTypeId" result-name="productFeatureTypeId"/>
     </simple-method>
     <simple-method method-name="updateProductFeatureType" short-description="Update an Product Feature Type">
         <check-permission permission="CATALOG" action="_UPDATE">
