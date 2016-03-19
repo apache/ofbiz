@@ -84,6 +84,11 @@ public class CatalogUrlServlet extends HttpServlet {
 
         String productId = null;
         String categoryId = null;
+
+        if (pathElements == null) {
+            RequestDispatcher rd = request.getRequestDispatcher("/" + CONTROL_MOUNT_POINT + "/main");
+            rd.forward(request, response);
+        } else {
         try {
             String lastPathElement = pathElements.get(pathElements.size() - 1);
             if (lastPathElement.startsWith("p_")) {
@@ -148,6 +153,7 @@ public class CatalogUrlServlet extends HttpServlet {
 
         RequestDispatcher rd = request.getRequestDispatcher("/" + CONTROL_MOUNT_POINT + "/" + (productId != null ? PRODUCT_REQUEST : CATEGORY_REQUEST));
         rd.forward(request, response);
+        }
     }
 
     /**
