@@ -750,7 +750,7 @@ public class ShoppingCartHelper {
                     } else {
                         quantity = (BigDecimal) ObjectType.simpleTypeConvert(quantString, "BigDecimal", null, locale);
                         //For quantity we should test if we allow to add decimal quantity for this product an productStore : if not then round to 0
-                        if (!ProductWorker.isDecimalQuantityOrderAllowed(delegator, item.getProductId(), cart.getProductStoreId()) && parameterName.startsWith("update")) {
+                        if(! ProductWorker.isDecimalQuantityOrderAllowed(delegator, item.getProductId(), cart.getProductStoreId())){
                             quantity = quantity.setScale(0, UtilNumber.getBigDecimalRoundingMode("order.rounding"));
                         }                
                         else {
