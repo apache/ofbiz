@@ -62,7 +62,7 @@
     <classpathentry kind="lib" path="framework/base/lib/xmlrpc-client-3.1.2.jar"/>
     <classpathentry kind="lib" path="framework/base/lib/xmlrpc-common-3.1.2.jar"/>
     <classpathentry kind="lib" path="framework/base/lib/xmlrpc-server-3.1.2.jar"/>
-    <classpathentry kind="lib" path="framework/base/lib/xstream-1.4.6.jar"/>
+    <classpathentry kind="lib" path="framework/base/lib/xstream-1.4.9.jar"/>
     <classpathentry kind="lib" path="framework/base/lib/xpp3-1.1.4c.jar"/>
     <classpathentry kind="lib" path="framework/base/lib/commons/commons-beanutils-1.7.0.jar"/>
     <classpathentry kind="lib" path="framework/base/lib/commons/commons-cli-1.0.jar"/>
