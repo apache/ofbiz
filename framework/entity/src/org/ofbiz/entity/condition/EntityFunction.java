@@ -182,6 +182,7 @@ public abstract class EntityFunction<T extends Comparable<?>> extends EntityCond
     protected EntityConditionValue nested = null;
     protected Object value = null;
     protected Fetcher<T> fetcher = null;
+    protected ModelField field;
 
     protected EntityFunction() {}
 
@@ -275,9 +276,14 @@ public abstract class EntityFunction<T extends Comparable<?>> extends EntityCond
         if (nested != null) {
             return nested.getModelField(modelEntity);
         }
-        return null;
+        return field;
     }
 
+    @Override
+    public void setModelField(ModelField field) {
+        this.field = field;
+    }
+    
     @Override
     public void validateSql(ModelEntity modelEntity) throws GenericModelException {
         if (nested != null) {
