@@ -135,6 +135,11 @@ public class EntityFieldValue extends EntityConditionValue implements Reusable {
     }
 
     @Override
+    public void setModelField(ModelField field) {
+        // do nothing
+    }
+
+    @Override
     public void addSqlValue(StringBuilder sql, Map<String, String> tableAliases, ModelEntity modelEntity, List<EntityConditionParam> entityConditionParams, boolean includeTableNamePrefix, DatasourceInfo datasourceInfo) {
         if (this.modelViewEntity != null) {
             // NOTE: this section is a bit of a hack; the other code is terribly complex and really needs to be refactored to incorporate support for this

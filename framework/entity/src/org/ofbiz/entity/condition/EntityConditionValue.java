@@ -38,6 +38,8 @@ public abstract class EntityConditionValue extends EntityConditionBase {
 
     public abstract ModelField getModelField(ModelEntity modelEntity);
 
+    public abstract void setModelField(ModelField modelEntity);
+
     public void addSqlValue(StringBuilder sql, ModelEntity modelEntity, List<EntityConditionParam> entityConditionParams, boolean includeTableNamePrefix,
             DatasourceInfo datasourceinfo) {
         addSqlValue(sql, emptyAliases, modelEntity, entityConditionParams, includeTableNamePrefix, datasourceinfo);
