@@ -191,7 +191,6 @@
 	<classpathentry kind="lib" path="specialpurpose/solr/lib/runtime/noggit-0.6.jar"/>
 	<classpathentry kind="lib" path="specialpurpose/solr/lib/runtime/org.restlet-2.3.0.jar"/>
 	<classpathentry kind="lib" path="specialpurpose/solr/lib/runtime/org.restlet.ext.servlet-2.3.0.jar"/>
-
 	<classpathentry kind="lib" path="framework/catalina/lib/tomcat-7.0.68-catalina-ha.jar"/>
 	<classpathentry kind="lib" path="framework/catalina/lib/tomcat-7.0.68-catalina-tribes.jar"/>
 	<classpathentry kind="lib" path="framework/catalina/lib/tomcat-7.0.68-catalina.jar"/>
@@ -202,5 +201,6 @@
 	<classpathentry kind="lib" path="framework/catalina/lib/tomcat-extras-7.0.68-tomcat-juli-adapters.jar"/>
 	<classpathentry kind="lib" path="framework/catalina/lib/tomcat-extras-7.0.68-tomcat-juli.jar"/>
 	<classpathentry kind="lib" path="framework/base/lib/xstream-1.4.9.jar"/>
+	<classpathentry exported="true" kind="con" path="GROOVY_DSL_SUPPORT"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
