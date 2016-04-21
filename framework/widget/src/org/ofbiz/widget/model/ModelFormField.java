@@ -2480,6 +2480,10 @@ public class ModelFormField {
         public List<Parameter> getParameterList() {
             return link.getParameterList();
         }
+        
+        public Map<String, String> getParameterMap(Map<String, Object> context, String defaultEntityName, String defaultServiceName) {
+            return link.getParameterMap(context, defaultEntityName, defaultServiceName);
+        }
 
         public Map<String, String> getParameterMap(Map<String, Object> context) {
             return link.getParameterMap(context);
@@ -3592,6 +3596,10 @@ public class ModelFormField {
             return link.getParameterList();
         }
 
+        public Map<String, String> getParameterMap(Map<String, Object> context, String defaultEntityName, String defaultServiceName) {
+            return link.getParameterMap(context, defaultEntityName, defaultServiceName);
+        }
+        
         public Map<String, String> getParameterMap(Map<String, Object> context) {
             return link.getParameterMap(context);
         }
