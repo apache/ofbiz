@@ -479,6 +479,20 @@ public final class CommonWidgetModels {
             return fullParameterMap;
         }
 
+        public Map<String, String> getParameterMap(Map<String, Object> context, String defaultEntityName, String defaultServiceName) {
+            Map<String, String> fullParameterMap = new HashMap<String, String>();
+            for (Parameter parameter : this.parameterList) {
+                fullParameterMap.put(parameter.getName(), parameter.getValue(context));
+            }
+            if (autoServiceParameters != null) {
+                fullParameterMap.putAll(autoServiceParameters.getParametersMap(context, defaultServiceName));
+            }
+            if (autoEntityParameters != null) {
+                fullParameterMap.putAll(autoEntityParameters.getParametersMap(context, defaultEntityName));
+            }
+            return fullParameterMap;
+        }
+
         public String getPrefix(Map<String, Object> context) {
             return this.prefixExdr.expandString(context);
         }
