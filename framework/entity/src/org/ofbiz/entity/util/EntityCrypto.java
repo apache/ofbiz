@@ -19,7 +19,9 @@
 package org.ofbiz.entity.util;
 
 import java.io.IOException;
+import java.security.Key;
 import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.util.Random;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
@@ -39,8 +41,8 @@ import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.EntityCryptoException;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
-import org.ofbiz.entity.transaction.TransactionUtil;
 import org.ofbiz.entity.model.ModelField.EncryptMethod;
+import org.ofbiz.entity.transaction.TransactionUtil;
 
 public final class EntityCrypto {
 
@@ -317,7 +319,7 @@ public final class EntityCrypto {
             byte[] saltBytes;
             switch (encryptMethod) {
                 case SALT:
-                    Random random = new Random();
+                    Random random = new SecureRandom();
                     // random length 5-16
                     saltBytes = new byte[5 + random.nextInt(11)];
                     random.nextBytes(saltBytes);
