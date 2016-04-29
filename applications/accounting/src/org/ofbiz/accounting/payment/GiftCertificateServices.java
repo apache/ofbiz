@@ -19,6 +19,7 @@
 package org.ofbiz.accounting.payment;
 
 import java.math.BigDecimal;
+import java.security.SecureRandom;
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.Locale;
@@ -1449,7 +1450,7 @@ public class GiftCertificateServices {
             length = 19;
         }
 
-        Random rand = new Random();
+        Random rand = new SecureRandom();
         boolean isValid = false;
         StringBuilder number = null;
         while (!isValid) {

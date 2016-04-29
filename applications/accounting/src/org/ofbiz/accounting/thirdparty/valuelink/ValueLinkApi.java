@@ -29,6 +29,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
+import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -581,7 +582,7 @@ public class ValueLinkApi {
 
         // 8 bytes random data
         byte[] random = new byte[8];
-        Random ran = new Random();
+        Random ran = new SecureRandom();
         ran.nextBytes(random);
 
 
@@ -827,7 +828,7 @@ public class ValueLinkApi {
     }
 
     protected byte[] getRandomBytes(int length) {
-        Random rand = new Random();
+        Random rand = new SecureRandom();
         byte[] randomBytes = new byte[length];
         rand.nextBytes(randomBytes);
         return randomBytes;
