@@ -198,7 +198,6 @@ public class GenericHelperDAO implements GenericHelper {
     }
 
     /** 
-     * 增加JDBC批处理保存
      * 
      * Store the Entity from the GenericValue to the persistent store
      *@param value GenericValue instance containing the entity
