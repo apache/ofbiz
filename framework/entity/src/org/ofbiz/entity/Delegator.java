@@ -913,5 +913,128 @@ public interface Delegator {
      * Get use of Distributed Cache Clear mechanism status
      * @return boolean true if this delegator uses a Distributed Cache Clear mechanism 
      */
-    boolean useDistributedCacheClear();   
+    boolean useDistributedCacheClear();
+
+    /**
+     * Store the Entities from the List GenericValue instances to the persistent
+     * store. <br/>This is different than the normal store method in that the
+     * store method only does an update, while the storeAll method checks to see
+     * if each entity exists, then either does an insert or an update as
+     * appropriate. <br/>These updates all happen in one transaction, so they
+     * will either all succeed or all fail, if the data source supports
+     * transactions. This is just like to othersToStore feature of the
+     * GenericEntity on a create or store. <br/> This is defferent from the normal 
+     * storeAll method in that the store method use jdbc batch does updates or inserts. 
+     *
+     * @param values
+     *            List of GenericValue instances containing the entities to
+     *            store
+     * @return int representing number of rows effected by this operation
+     */
+    public int storeAllBatch(List<GenericValue> toBeStored) throws GenericEntityException;
+   
+    /**
+     * Store the Entities from the List GenericValue instances to the persistent
+     * store. <br/>This is different than the normal store method in that the
+     * store method only does an update, while the storeAll method checks to see
+     * if each entity exists, then either does an insert or an update as
+     * appropriate. <br/>These updates all happen in one transaction, so they
+     * will either all succeed or all fail, if the data source supports
+     * transactions. This is just like to othersToStore feature of the
+     * GenericEntity on a create or store. <br/> This is defferent from the normal 
+     * storeAll method in that the store method use jdbc batch does updates or inserts. 
+     *
+     * @param values
+     *            List of GenericValue instances containing the entities to
+     *            store
+     * @param doCacheClear
+     *            boolean that specifies whether or not to automatically clear
+     *            cache entries related to this operation. This should always be
+     *            <code>true</code> - otherwise you will lose data integrity.
+     * @return int representing number of rows effected by this operation
+     */
+	public int storeAllBatch(List<GenericValue> toBeStored,boolean doCacheClear) throws GenericEntityException;
+	
+	 /**
+     * Store the Entities from the List GenericValue instances to the persistent
+     * store. <br/>This is different than the normal store method in that the
+     * store method only does an update, while the storeAll method checks to see
+     * if each entity exists, then either does an insert or an update as
+     * appropriate. <br/>These updates all happen in one transaction, so they
+     * will either all succeed or all fail, if the data source supports
+     * transactions. This is just like to othersToStore feature of the
+     * GenericEntity on a create or store. <br/> This is defferent from the normal 
+     * storeAll method in that the store method use jdbc batch does updates or inserts. 
+     *
+     * @param values
+     *            List of GenericValue instances containing the entities to
+     *            store
+     * @param doCacheClear
+     *            boolean that specifies whether or not to automatically clear
+     *            cache entries related to this operation. This should always be
+     *            <code>true</code> - otherwise you will lose data integrity.
+     * @param createDummyFks
+     *            boolean that specifies whether or not to automatically create
+     *            "dummy" place holder FKs
+     * @return int representing number of rows effected by this operation
+     */
+	public int storeAllBatch(List<GenericValue> toBeStored,boolean doCacheClear ,boolean createDummyFks) throws GenericEntityException;
+	
+	
+	/**
+     * Remove the Entities from the List GenericValue instances to the persistent
+     * store.
+     *
+     * @param toBeRemoved
+     *            List of GenericEntity instances containing the primary key of the entity list to remove.
+     * @return int representing number of rows effected by this operation
+     */
+	public int removeAllByPrimaryKeyBatch(List<GenericEntity> toBeRemoved) throws GenericEntityException;
+	
+	
+	/**
+     * Remove the Entities from the List EntityCondition instances to the persistent
+     * store.
+     *
+     * @param modelEntity
+     * 			 The modelEntity of the entity list to remove.	
+     * @param toBeRemovedCondition
+     *            List of EntityCondition instances containing the condition of the entity list to remove.
+     * @return int representing number of rows effected by this operation
+     */
+	public int removeAllByAndBatch(ModelEntity modelEntity, List<EntityCondition> toBeRemovedCondition) throws GenericEntityException;
+	
+	/**
+     * Remove the Entities from the List GenericValue instances to the persistent
+     * store.
+     *
+     * @param toBeRemoved
+     *            List of GenericEntity instances containing the primary key of the entity list to remove.
+     * @param doCacheClear
+     *            boolean that specifies whether or not to automatically clear
+     *            cache entries related to this operation. This should always be
+     *            <code>true</code> - otherwise you will lose data integrity.           
+     *             
+     * @return int representing number of rows effected by this operation
+     */
+	public int removeAllByPrimaryKeyBatch(List<GenericEntity> toBeRemoved,boolean doCacheClear) throws GenericEntityException;
+	
+	/**
+     * Remove the Entities from the List GenericValue instances to the persistent
+     * store.
+     *
+     * @param modelEntity
+     * 			 The modelEntity of the entity list to remove.	
+     * @param toBeRemovedCondition
+     *            List of EntityCondition instances containing the condition of the entity list to remove.
+     * @param doCacheClear
+     *            boolean that specifies whether or not to automatically clear
+     *            cache entries related to this operation. This should always be
+     *            <code>true</code> - otherwise you will lose data integrity.           
+     *           
+     * @return int representing number of rows effected by this operation
+     */
+	public int removeAllByAndBatch(ModelEntity modelEntity,  List<EntityCondition> toBeRemovedCondition,boolean doCacheClear) throws GenericEntityException;
+
+
 }

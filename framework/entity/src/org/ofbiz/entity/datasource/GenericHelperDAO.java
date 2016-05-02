@@ -18,6 +18,7 @@
  *******************************************************************************/
 package org.ofbiz.entity.datasource;
 
+import java.sql.SQLException;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
@@ -26,6 +27,7 @@ import java.util.Set;
 
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.entity.Delegator;
+import org.ofbiz.entity.GenericEntity;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericPK;
 import org.ofbiz.entity.GenericValue;
@@ -194,4 +196,45 @@ public class GenericHelperDAO implements GenericHelper {
     public void checkDataSource(Map<String, ModelEntity> modelEntities, List<String> messages, boolean addMissing) throws GenericEntityException {
         genericDAO.checkDb(modelEntities, messages, addMissing);
     }
+
+    /** 
+     * 增加JDBC批处理保存
+     * 
+     * Store the Entity from the GenericValue to the persistent store
+     *@param value GenericValue instance containing the entity
+     *@return int representing number of rows effected by this operation
+     *@throws GenericEntityException SQLException 
+     */
+	public int store(Delegator delegator, List<GenericValue> values) throws GenericEntityException, SQLException {
+		if (values == null) {
+            return 0;
+        }
+        return genericDAO.update(delegator,values);
+	}
+
+	@Override
+	public int create(Delegator delegator,List<GenericValue> values) throws GenericEntityException, SQLException {
+		if (values == null) {
+            return 0;
+        }
+        return genericDAO.create(delegator,values);
+	}
+
+
+	@Override
+	public int removeAllByPrimaryKey(Delegator delegator,List<GenericEntity> delStoreList) throws GenericEntityException, SQLException {
+		if (delStoreList == null) {
+            return 0;
+        }
+        return genericDAO.removeAllByPrimaryKey(delegator,delStoreList);
+	}
+
+	@Override
+	public int removeAllByAnd(Delegator delegator,ModelEntity modelEntity, List<EntityCondition> delStoreList)
+			throws GenericEntityException, SQLException {
+		if (delStoreList == null) {
+            return 0;
+        }
+        return genericDAO.removeAllByAnd(delegator,modelEntity,delStoreList);
+	}
 }

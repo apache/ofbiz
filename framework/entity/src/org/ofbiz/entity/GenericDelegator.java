@@ -2699,4 +2699,388 @@ public class GenericDelegator implements Delegator {
         List<String> curValList = getUserIdentifierStack();
         return curValList.size() > 0 ? curValList.get(0) : null;
     }
+
+    /* (non-Javadoc)
+     * @see org.ofbiz.entity.Delegator#storeAllBatch(java.util.List,boolean)
+     */
+	@Override
+	public int storeAllBatch(List<GenericValue> toBeStored, boolean doCacheClear) throws GenericEntityException {
+		return storeAllBatch(toBeStored, true,false);
+	}
+	
+	/* (non-Javadoc)
+     * @see org.ofbiz.entity.Delegator#storeAllBatch(java.util.List)
+     */
+	@Override
+	public int storeAllBatch(List<GenericValue> toBeStored) throws GenericEntityException {
+		return storeAllBatch(toBeStored, true);
+	}
+	
+	/* (non-Javadoc)
+     * @see org.ofbiz.entity.Delegator#storeAllBatch(java.util.List,boolean,boolean)
+     */
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	@Override
+	public int storeAllBatch(List<GenericValue> toBeStored, boolean doCacheClear, boolean createDummyFks)
+			throws GenericEntityException {
+        if (toBeStored == null) {
+            return 0;
+        }
+
+        int numberChanged = 0;
+        boolean beganTransaction = false;
+        try {
+            beganTransaction = TransactionUtil.begin();
+            Map<String,Map> batchMap = new HashMap<>();
+            
+            for (GenericValue value: toBeStored) {
+               String entityName = value.getEntityName();
+               GenericPK primaryKey = value.getPrimaryKey();
+//             GenericHelper helper = GenericHelperFactory.getHelper(helperInfo);
+               String groupName = getEntityGroupName(entityName);
+               GenericHelper helper = null;
+               List<GenericValue> addStoreList = null;
+               List<GenericValue> udpateStoreList = null;
+               if(! batchMap.containsKey(entityName)){
+            	   helper = GenericHelperFactory.getHelper(getGroupHelperInfo(groupName));  
+            	   addStoreList = new LinkedList<>();
+            	   udpateStoreList = new LinkedList<>();
+            	   Map<String,Object> groupMap = new HashMap<>();
+            	   groupMap.put("helper", helper);
+            	   groupMap.put("addStoreList", addStoreList);
+            	   groupMap.put("udpateStoreList", udpateStoreList);
+            	   batchMap.put(entityName, groupMap);
+               }else{
+            	   helper = (GenericHelper) batchMap.get(entityName).get("helper");
+            	   addStoreList = ( List<GenericValue>) batchMap.get(entityName).get("addStoreList");
+            	   udpateStoreList = ( List<GenericValue>) batchMap.get(entityName).get("udpateStoreList");
+               }
+               
+                // exists?
+                // NOTE: don't use findByPrimaryKey because we don't want to the ECA events to fire and such
+                if (!primaryKey.isPrimaryKey()) {
+                    throw new GenericModelException("[GenericDelegator.storeAllBatch] One of the passed primary keys is not a valid primary key: " + primaryKey);
+                }
+                GenericValue existing = null;
+                try {
+                    existing = helper.findByPrimaryKey(primaryKey);
+                } catch (GenericEntityNotFoundException e) {
+                    existing = null;
+                }
+
+                if (existing == null) {
+                    if (createDummyFks) {
+                        value.checkFks(true);
+                    }
+                    //this.create(value, doCacheClear);
+                    addStoreList.add(value);
+                    numberChanged++;
+                } else {
+                    // don't send fields that are the same, and if no fields have changed, update nothing
+                    ModelEntity modelEntity = value.getModelEntity();
+                    GenericValue toStore = GenericValue.create(this, modelEntity, value.getPrimaryKey());
+                    boolean atLeastOneField = false;
+                    Iterator<ModelField> nonPksIter = modelEntity.getNopksIterator();
+                    while (nonPksIter.hasNext()) {
+                        ModelField modelField = nonPksIter.next();
+                        String fieldName = modelField.getName();
+                        if (value.containsKey(fieldName)) {
+                            Object fieldValue = value.get(fieldName);
+                            Object oldValue = existing.get(fieldName);
+                            if (!UtilObject.equalsHelper(oldValue, fieldValue)) {
+                                toStore.put(fieldName, fieldValue);
+                                atLeastOneField = true;
+                            }
+                        }
+                    }
+
+                    if (atLeastOneField) {
+                        if (createDummyFks) {
+                            value.checkFks(true);
+                        }
+                        udpateStoreList.add(toStore);
+                        //numberChanged += this.store(toStore, doCacheClear);
+                    }
+                }
+            }
+            
+            try {
+            	
+            	 for(String entityName : batchMap.keySet()){
+                 	GenericHelper helper = (GenericHelper) batchMap.get(entityName).get("helper");
+                 	List<GenericValue> addStoreList = ( List<GenericValue>) batchMap.get(entityName).get("addStoreList");
+                 	List<GenericValue> udpateStoreList = ( List<GenericValue>) batchMap.get(entityName).get("udpateStoreList");
+                 	
+                    EntityEcaRuleRunner<?> ecaRunner = this.getEcaRuleRunner(entityName);
+                    for( GenericValue value :addStoreList){
+                    	ecaRunner.evalRules(EntityEcaHandler.EV_VALIDATE, EntityEcaHandler.OP_CREATE, value, false);
+                    	ecaRunner.evalRules(EntityEcaHandler.EV_RUN, EntityEcaHandler.OP_CREATE, value, false);
+                    	if (value.getModelEntity().getHasFieldWithAuditLog()) {
+                            createEntityAuditLogAll(value, true, false);
+                        }
+                    }
+                 	
+                    
+                 	if(UtilValidate.isNotEmpty(addStoreList)){
+                 		helper.create(this,addStoreList);
+                 	}
+                 	for( GenericValue value :addStoreList){
+                 		ecaRunner.evalRules(EntityEcaHandler.EV_RETURN, EntityEcaHandler.OP_CREATE, value, false);
+                	    if (doCacheClear) {
+                	    	ecaRunner.evalRules(EntityEcaHandler.EV_CACHE_CLEAR, EntityEcaHandler.OP_CREATE, value, false);
+                	    	this.clearCacheLine(value);
+                        }
+                	    if (testMode) {
+                	    	GenericValue updatedEntity = this.findOne(value.getEntityName(), value.getPrimaryKey(), false);
+                            storeForTestRollback(new TestOperation(OperationType.INSERT, updatedEntity));
+                        }
+                	    
+                    }
+                 	
+                 	
+                 	 for( GenericValue value :udpateStoreList){
+                     	ecaRunner.evalRules(EntityEcaHandler.EV_VALIDATE, EntityEcaHandler.OP_STORE, value, false);
+                     	ecaRunner.evalRules(EntityEcaHandler.EV_RUN, EntityEcaHandler.OP_STORE, value, false);
+                     	if (value.getModelEntity().getHasFieldWithAuditLog()) {
+                             createEntityAuditLogAll(value, true, false);
+                         }
+                     }
+                  	
+                 	
+                 	if(UtilValidate.isNotEmpty(udpateStoreList)){
+                 		helper.store(this,udpateStoreList);
+                 	}
+                 	
+                 	for( GenericValue value :udpateStoreList){
+                 		ecaRunner.evalRules(EntityEcaHandler.EV_RETURN, EntityEcaHandler.OP_STORE, value, false);
+                	    if (doCacheClear) {
+                	    	ecaRunner.evalRules(EntityEcaHandler.EV_CACHE_CLEAR, EntityEcaHandler.OP_STORE, value, false);
+                	    	this.clearCacheLine(value);
+                        }
+                	    if (testMode) {
+                	    	GenericValue updatedEntity = this.findOne(value.getEntityName(), value.getPrimaryKey(), false);
+                            storeForTestRollback(new TestOperation(OperationType.UPDATE, updatedEntity));
+                        }
+                    }
+                 	
+                 }
+            	 
+			} catch (Exception e) {
+				Debug.logError(e, "Failure in storeAll storeAllBatch", module);
+				throw new GenericEntityException(e);
+			}
+            
+            
+            TransactionUtil.commit(beganTransaction);
+            return numberChanged;
+        } catch (Exception e) {
+            String errMsg = "Failure in storeAll operation: " + e.toString() + ". Rolling back transaction.";
+            Debug.logError(e, errMsg, module);
+            TransactionUtil.rollback(beganTransaction, errMsg, e);
+            throw new GenericEntityException(e);
+        }
+    }
+
+	
+	/* (non-Javadoc)
+     * @see org.ofbiz.entity.Delegator#removeAllByPrimaryKeyBatch(java.util.List)
+     */
+	@Override
+	public int removeAllByPrimaryKeyBatch(List<GenericEntity> toBeRemoved) throws GenericEntityException {
+		return removeAllByPrimaryKeyBatch(toBeRemoved,true);
+	}
+	
+	
+	/* (non-Javadoc)
+     * @see org.ofbiz.entity.Delegator#removeAllByAndBatch(ModelEntity,java.util.List)
+     */
+	@Override
+	public int removeAllByAndBatch(ModelEntity modelEntity, List<EntityCondition> toBeRemovedCondition)
+			throws GenericEntityException {
+		return removeAllByAndBatch(modelEntity,toBeRemovedCondition,true);
+	}
+
+	/* (non-Javadoc)
+     * @see org.ofbiz.entity.Delegator#removeAllByPrimaryKeyBatch(java.util.List,boolean)
+     */
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@Override
+	public int removeAllByPrimaryKeyBatch(List<GenericEntity> toBeRemoved, boolean doCacheClear)
+			throws GenericEntityException {
+
+		if (toBeRemoved == null) {
+            return 0;
+        }
+
+        int numberChanged = 0;
+
+        boolean beganTransaction = false;
+        try {
+
+        	beganTransaction = TransactionUtil.begin();
+            Map<String,Map> batchMap = new HashMap<>();
+            
+            for (GenericEntity value: toBeRemoved) {
+               String entityName = value.getEntityName();
+               String groupName = getEntityGroupName(entityName);
+               GenericHelper helper = null;
+               List<GenericEntity> delStoreList = null;
+               if(! batchMap.containsKey(entityName)){
+            	   helper = GenericHelperFactory.getHelper(getGroupHelperInfo(groupName));  
+            	   delStoreList = new LinkedList<>();
+            	   Map<String,Object> groupMap = new HashMap<>();
+            	   groupMap.put("helper", helper);
+            	   groupMap.put("delStoreList", delStoreList);
+            	   batchMap.put(entityName, groupMap);
+               }else{
+            	   helper = (GenericHelper) batchMap.get(entityName).get("helper");
+            	   delStoreList = ( List<GenericEntity>) batchMap.get(entityName).get("delStoreList");
+               }
+               delStoreList.add(value) ;
+            }
+            
+            try {
+            	
+            	 for(String entityName : batchMap.keySet()){
+                 	GenericHelper helper = (GenericHelper) batchMap.get(entityName).get("helper");
+                 	List<GenericEntity> delStoreList = ( List<GenericEntity>) batchMap.get(entityName).get("delStoreList");
+                 	if(UtilValidate.isNotEmpty(delStoreList)){
+                 		EntityEcaRuleRunner<?> ecaRunner = this.getEcaRuleRunner(entityName);
+                 		 for( GenericEntity value :delStoreList){
+	                 		  
+	                          ecaRunner.evalRules(EntityEcaHandler.EV_VALIDATE, EntityEcaHandler.OP_REMOVE, value.getPrimaryKey(), false);
+	                          ecaRunner.evalRules(EntityEcaHandler.EV_RUN, EntityEcaHandler.OP_REMOVE, value.getPrimaryKey(), false);
+	                          // if audit log on for any fields, save old value before removing so it's still there
+	                          if (value.getPrimaryKey().getModelEntity().getHasFieldWithAuditLog()) {
+	                              createEntityAuditLogAll(this.findOne(value.getEntityName(), value.getPrimaryKey(), false), true, true);
+	                          }
+                 		 }
+                 		
+                 		 helper.removeAllByPrimaryKey(this,delStoreList);
+                 		
+                 		 for( GenericEntity value :delStoreList){
+                 			 GenericPK primaryKey =  value.getPrimaryKey();
+                 			 GenericValue  removedEntity = null;
+	                 		 if (testMode) {
+	                             removedEntity = this.findOne(primaryKey.getEntityName(), primaryKey, false);
+	                         }
+	                         if (doCacheClear) {
+	                             ecaRunner.evalRules(EntityEcaHandler.EV_CACHE_CLEAR, EntityEcaHandler.OP_REMOVE, primaryKey, false);
+	                             this.clearCacheLine(primaryKey);
+	                         }
+	                         this.saveEntitySyncRemoveInfo(primaryKey);
+	                         if (testMode) {
+	                             if (removedEntity != null) {
+	                                 storeForTestRollback(new TestOperation(OperationType.DELETE, removedEntity));
+	                             }
+	                         }
+	                         ecaRunner.evalRules(EntityEcaHandler.EV_RETURN, EntityEcaHandler.OP_REMOVE, primaryKey, false);
+                 		 }
+                 		
+                 	}
+                 }
+            	 
+			} catch (Exception e) {
+				Debug.logError(e, "Failure in removeAllByPrimaryKey", module);
+				throw new GenericEntityException(e);
+			}
+            
+            
+            TransactionUtil.commit(beganTransaction);
+            return numberChanged;
+        } catch (Exception e) {
+            String errMsg = "Failure in removeAllByPrimaryKey operation: " + e.toString() + ". Rolling back transaction.";
+            Debug.logError(e, errMsg, module);
+            TransactionUtil.rollback(beganTransaction, errMsg, e);
+            throw new GenericEntityException(e);
+        }
+    
+	}
+
+	
+	/* (non-Javadoc)
+     * @see org.ofbiz.entity.Delegator#removeAllByAndBatch(ModelEntity,java.util.List,boolean)
+     */
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@Override
+	public int removeAllByAndBatch(ModelEntity modelEntity, List<EntityCondition> toBeRemovedCondition,
+			boolean doCacheClear) throws GenericEntityException {
+
+		if (toBeRemovedCondition == null) {
+            return 0;
+        }
+
+        int numberChanged = 0;
+
+        boolean beganTransaction = false;
+        try {
+
+        	beganTransaction = TransactionUtil.begin();
+            Map<String,Map> batchMap = new HashMap<>();
+            
+            for (EntityCondition value: toBeRemovedCondition) {
+               String entityName = modelEntity.getEntityName();
+               String groupName = getEntityGroupName(entityName);
+               GenericHelper helper = null;
+               List<EntityCondition> delStoreList = null;
+               if(! batchMap.containsKey(entityName)){
+            	   helper = GenericHelperFactory.getHelper(getGroupHelperInfo(groupName));  
+            	   delStoreList = new LinkedList<>();
+            	   Map<String,Object> groupMap = new HashMap<>();
+            	   groupMap.put("helper", helper);
+            	   groupMap.put("delStoreList", delStoreList);
+            	   batchMap.put(entityName, groupMap);
+               }else{
+            	   helper = (GenericHelper) batchMap.get(entityName).get("helper");
+            	   delStoreList = ( List<EntityCondition>) batchMap.get(entityName).get("delStoreList");
+               }
+               
+               delStoreList.add(value) ;
+                
+            }
+            
+            try {
+            	
+            	 for(String entityName : batchMap.keySet()){
+                 	GenericHelper helper = (GenericHelper) batchMap.get(entityName).get("helper");
+                 	List<EntityCondition> delStoreList = ( List<EntityCondition>) batchMap.get(entityName).get("delStoreList");
+                 	 
+                 	if(UtilValidate.isNotEmpty(delStoreList)){
+                 		
+                 		 numberChanged = helper.removeAllByAnd(this,modelEntity,delStoreList);
+                         if (numberChanged > 0 && doCacheClear) {
+                             this.clearCacheLine(entityName);
+                         }
+
+                         if (testMode) {
+							for (EntityCondition condition : delStoreList) {
+								List<GenericValue> removedEntities = this.findList(entityName, condition, null, null,
+										null, false);
+								for (GenericValue entity : removedEntities) {
+									storeForTestRollback(new TestOperation(OperationType.DELETE, entity));
+								}
+							}
+                         }
+                 	}
+                 	
+                 }
+            	 
+			} catch (Exception e) {
+				Debug.logError(e, "保存失败", module);
+				throw new GenericEntityException(e);
+			}
+            
+            
+            TransactionUtil.commit(beganTransaction);
+            return numberChanged;
+        } catch (Exception e) {
+            String errMsg = "Failure in storeAll operation: " + e.toString() + ". Rolling back transaction.";
+            Debug.logError(e, errMsg, module);
+            TransactionUtil.rollback(beganTransaction, errMsg, e);
+            throw new GenericEntityException(e);
+        }
+    
+	}
+
+	
 }
