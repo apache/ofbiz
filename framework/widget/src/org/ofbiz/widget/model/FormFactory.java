@@ -119,7 +119,8 @@ public class FormFactory {
     }
 
     public static ModelForm createModelForm(Document formFileDoc, ModelReader entityModelReader, DispatchContext dispatchContext, String formLocation, String formName) {
-        Element formElement = UtilXml.firstChildElement(formFileDoc.getDocumentElement(), "form", "name", formName);
+        Element rootElement = formFileDoc.getDocumentElement();
+        Element formElement = UtilXml.firstChildElement(rootElement, "form", "name", formName);
         if (formElement == null) {
             formElement = UtilXml.firstChildElement(rootElement, "grid", "name", formName);
         }
