@@ -653,7 +653,7 @@ public class ShoppingCartEvents {
         try {
             GenericValue product = delegator.findOne("Product", UtilMisc.toMap("productId", productId), false); 
             //Reset shipment method information in cart only if shipping applies on product.
-            if (ProductWorker.shippingApplies(product)) {
+            if (UtilValidate.isNotEmpty(product) && ProductWorker.shippingApplies(product)) {
                 for (int shipGroupIndex = 0; shipGroupIndex < cart.getShipGroupSize(); shipGroupIndex++) {
                     String shipContactMechId = cart.getShippingContactMechId(shipGroupIndex);
                     if (UtilValidate.isNotEmpty(shipContactMechId)) {
