@@ -1311,6 +1311,7 @@ public class ShoppingCartEvents {
         String termValueStr = request.getParameter("termValue");
         String termDaysStr = request.getParameter("termDays");
         String textValue = request.getParameter("textValue");
+        String description = request.getParameter("description");
 
         GenericValue termType = null;
         Delegator delegator = (Delegator) request.getAttribute("delegator");
@@ -1355,7 +1356,7 @@ public class ShoppingCartEvents {
 
         removeOrderTerm(request, response);
 
-        cart.addOrderTerm(termTypeId, termValue, termDays, textValue);
+        cart.addOrderTerm(termTypeId, null, termValue, termDays, textValue, description);
 
         return "success";
     }
