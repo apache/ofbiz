@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified">
+    <xs:element name="service-mca">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element maxOccurs="unbounded" ref="mca"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="mca">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:choice minOccurs="0" maxOccurs="unbounded">
+                    <xs:element ref="condition-field"/>
+                    <xs:element ref="condition-header"/>
+                    <xs:element ref="condition-service"/>
+                </xs:choice>
+                <xs:element maxOccurs="unbounded" ref="action"/>
+            </xs:sequence>
+            <xs:attributeGroup ref="attlist.mca"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:attributeGroup name="attlist.mca">
+        <xs:attribute type="xs:string" name="mail-rule-name" use="required"/>
+    </xs:attributeGroup>
+    <xs:element name="condition-field">
+        <xs:complexType>
+            <xs:attributeGroup ref="attlist.condition-field"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:attributeGroup name="attlist.condition-field">
+        <xs:attribute type="xs:string" name="field-name" use="required"/>
+        <xs:attribute name="operator" use="required">
+            <xs:simpleType>
+                <xs:restriction base="xs:token">
+                    <xs:enumeration value="equals"/>
+                    <xs:enumeration value="not-equals"/>
+                    <xs:enumeration value="empty"/>
+                    <xs:enumeration value="not-empty"/>
+                    <xs:enumeration value="matches"/>
+                    <xs:enumeration value="not-matches"/>
+                </xs:restriction>
+            </xs:simpleType>
+        </xs:attribute>
+        <xs:attribute type="xs:string" name="value"/>
+    </xs:attributeGroup>
+    <xs:element name="condition-header">
+        <xs:complexType>
+            <xs:attributeGroup ref="attlist.condition-header"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:attributeGroup name="attlist.condition-header">
+        <xs:attribute type="xs:string" name="header-name" use="required"/>
+        <xs:attribute name="operator" use="required">
+            <xs:simpleType>
+                <xs:restriction base="xs:token">
+                    <xs:enumeration value="equals"/>
+                    <xs:enumeration value="not-equals"/>
+                    <xs:enumeration value="empty"/>
+                    <xs:enumeration value="not-empty"/>
+                    <xs:enumeration value="matches"/>
+                    <xs:enumeration value="not-matches"/>
+                </xs:restriction>
+            </xs:simpleType>
+        </xs:attribute>
+        <xs:attribute type="xs:string" name="value"/>
+    </xs:attributeGroup>
+    <xs:element name="condition-service">
+        <xs:complexType>
+            <xs:attributeGroup ref="attlist.condition-service"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:attributeGroup name="attlist.condition-service">
+        <xs:attribute type="xs:string" name="service-name"/>
+    </xs:attributeGroup>
+    <xs:element name="action">
+        <xs:complexType>
+            <xs:attributeGroup ref="attlist.action"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:attributeGroup name="attlist.action">
+        <xs:attribute type="xs:string" name="service" use="required"/>
+        <xs:attribute name="mode" use="required">
+            <xs:simpleType>
+                <xs:restriction base="xs:token">
+                    <xs:enumeration value="sync"/>
+                    <xs:enumeration value="async"/>
+                </xs:restriction>
+            </xs:simpleType>
+        </xs:attribute>
+        <xs:attribute type="xs:string" name="run-as-user"/>
+        <xs:attribute name="persist" default="false">
+            <xs:simpleType>
+                <xs:restriction base="xs:token">
+                    <xs:enumeration value="true"/>
+                    <xs:enumeration value="false"/>
+                </xs:restriction>
+            </xs:simpleType>
+        </xs:attribute>
+    </xs:attributeGroup>
+</xs:schema>
+<!--
+    <service-mca>
+        <mca mail-rule-name="someRuleName">
+          <condition-field field-name="to" operator="equals" value="test@ofbiz.org"/>
+          <action service="testScv" mode="sync"/>
+          <action service="testScv" mode="sync"/>
+        </mca>
+    </service-mca>
+-->

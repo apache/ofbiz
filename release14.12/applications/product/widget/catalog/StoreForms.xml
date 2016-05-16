@@ -1,0 +1,251 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<forms xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/widget-form.xsd">
+
+    <form name="FindProductStoreRole" type="single" target="FindProductStoreRoles" default-entity-name="ProductStoreRole">
+        <field name="noConditionFind"><hidden value="Y"/><!-- if this isn't there then with all fields empty no query will be done --></field>
+        <field name="productStoreId" title="${uiLabelMap.ProductStoreId}"><hidden/></field>
+        <field name="partyId" title="${uiLabelMap.PartyPartyId}"><lookup target-form-name="LookupPartyName"/></field>
+        <field name="roleTypeId" title="${uiLabelMap.PartyRoleTypeId}">
+            <drop-down allow-empty="true">
+                <entity-options description="${description}" entity-name="RoleType" key-field-name="roleTypeId"/>
+            </drop-down>
+        </field>
+        <field name="fromDate" position="1"><date-time/></field>
+        <field name="thruDate" position="2"><date-time/></field>
+        <field name="sequenceNum"><text/></field>
+        <field name="searchButton" title="${uiLabelMap.CommonFind}" widget-style="smallSubmit"><submit button-type="button"/></field>
+    </form>
+
+    <form name="ListProductStoreRole" type="list" list-name="listIt" paginate-target="FindProductStoreRoles" default-entity-name="ProductStoreRole" separate-columns="true"
+        odd-row-style="alternate-row" header-row-style="header-row-2" default-table-style="basic-table hover-bar">
+        <actions>
+            <service service-name="performFind" result-map="result" result-map-list="listIt">
+                <field-map field-name="inputFields" from-field="parameters"/>
+                <field-map field-name="entityName" value="ProductStoreRole"/>
+                <field-map field-name="orderBy" from-field="parameters.sortField"/>
+                <field-map field-name="viewIndex" from-field="viewIndex"/>
+                <field-map field-name="viewSize" from-field="viewSize"/>
+            </service>
+        </actions>
+        <field name="partyId" title="${uiLabelMap.PartyPartyId}">
+            <display-entity entity-name="PartyNameView" key-field-name="partyId" description="${groupName}${lastName},${firstName}">
+                <sub-hyperlink target="/partymgr/control/viewprofile" target-type="inter-app" description="[${partyId}]" >
+                    <parameter param-name="partyId"/>
+                </sub-hyperlink>
+            </display-entity>
+        </field>
+        <field name="roleTypeId" title="${uiLabelMap.PartyRoleTypeId}"><display-entity entity-name="RoleType"/></field>
+        <field name="fromDate"><display/></field>
+        <field name="thruDate"><display/></field>
+        <field name="sequenceNum"><display/></field>
+        <field name="editLink" widget-style="buttontext" title="${uiLabelMap.CommonEdit}">
+           <hyperlink target="FindProductStoreRoles" description="${uiLabelMap.CommonEdit}">
+                <parameter param-name="partyId"/>
+                <parameter param-name="productStoreId"/>
+                <parameter param-name="roleTypeId"/>
+                <parameter param-name="fromDate"/>
+            </hyperlink>
+        </field>
+        <field name="deleteLink" widget-style="buttontext" title="${uiLabelMap.CommonDelete}">
+            <hyperlink target="storeRemoveRole" description="${uiLabelMap.CommonDelete}">
+                <parameter param-name="partyId"/>
+                <parameter param-name="productStoreId"/>
+                <parameter param-name="roleTypeId"/>
+                <parameter param-name="fromDate"/>
+            </hyperlink>
+        </field>
+    </form>
+
+    <form name="EditProductStoreRole" type="single" target="storeUpdateRole" default-map-name="productStoreRole"
+            header-row-style="header-row" default-table-style="basic-table">
+        <alt-target use-when="productStoreRole==null" target="storeCreateRole"/>
+        <field name="partyId" use-when="productStoreRole==null" title="${uiLabelMap.PartyPartyId}" tooltip="${uiLabelMap.CommonRequired}"><lookup target-form-name="LookupPartyName"/></field>
+        <field name="partyId" use-when="productStoreRole!=null" title="${uiLabelMap.PartyPartyId}"><display/></field>
+        <field name="productStoreId"><hidden/></field>
+        <field name="roleTypeId" use-when="productStoreRole==null" title="${uiLabelMap.PartyRoleTypeId}" tooltip="${uiLabelMap.CommonRequired}">
+            <drop-down allow-empty="true">
+                <entity-options description="${description}" entity-name="RoleType" key-field-name="roleTypeId"/>
+            </drop-down>
+        </field>
+        <field name="roleTypeId" use-when="productStoreRole!=null" title="${uiLabelMap.PartyRoleTypeId}"><display-entity entity-name="RoleType"/></field>
+        <field name="fromDate" use-when="productStoreRole==null" title="${uiLabelMap.CommonFromDate}"><date-time/></field>
+        <field name="fromDate" use-when="productStoreRole!=null" title="${uiLabelMap.CommonFromDate}"><display/></field>
+        <field name="thruDate"><date-time/></field>
+        <field name="sequenceNum"><text/></field>
+        <field name="submitButton" title="${uiLabelMap.CommonAdd}" use-when="productStoreRole==null" widget-style="smallSubmit">
+            <submit button-type="button"/>
+        </field>
+        <field name="submitButton" title="${uiLabelMap.CommonSubmit}" use-when="productStoreRole!=null" widget-style="smallSubmit">
+            <submit button-type="button"/>
+        </field>
+    </form>
+
+    <!-- ProductStoreFacility forms -->
+    <form name="ListProductStoreFacility" type="list" list-name="listIt" target=""
+            default-table-style="basic-table hover-bar" odd-row-style="alternate-row">
+        <actions>
+            <entity-and entity-name="ProductStoreFacility">
+                <field-map field-name="productStoreId" from-field="parameters.productStoreId"/>
+                <order-by field-name="sequenceNum"/>
+                <order-by field-name="fromDate"/>
+            </entity-and>
+        </actions>
+        
+        <field name="submitButton" title=" " >
+            <hyperlink target="javascript:ajaxUpdateArea('ProductStoreFacilityEditArea', 'editProductStoreFacility', 'productStoreId=${productStoreId}&amp;facilityId=${facilityId}&amp;fromDate=${fromDate}');" 
+                target-type="plain" image-location="/images/mini-edit.png" image-title="${uiLabelMap.CommonEdit}"/>
+        </field>
+        <field name="productStoreId"><hidden /></field>
+        <field name="facilityId">
+            <display-entity entity-name="Facility"  description="${facilityName}">
+                <sub-hyperlink link-style="link" description="[${facilityId}]"  target="/facility/control/EditFacility" target-type="inter-app">
+                    <parameter param-name="facilityId"/>
+                </sub-hyperlink>
+            </display-entity>    
+        </field>
+        <field name="sequenceNum" ><display /></field>
+        <field name="fromDate" ><display type="date-time" /></field>
+        <field name="thruDate" ><display type="date-time" /></field>
+        <field name="deleteLink" title=" " >
+            <hyperlink target="javascript:ajaxUpdateArea('PP_ProductStoreFacilityPrdStoreFacilityMgmt00001', 'deleteProductStoreFacility', 'productStoreId=${productStoreId}&amp;facilityId=${facilityId}&amp;fromDate=${fromDate}');"
+               target-type="plain" request-confirmation="true" image-location="/images/mini-trash.png" image-title="${uiLabelMap.CommonRemove}">
+            </hyperlink>
+        </field>
+     </form>
+
+     <form name="EditProductStoreFacility" type="single" focus-field-name="facilityId"
+               target="addProductStoreFacility" title="" default-map-name="productStoreFacility" >
+        <alt-target target="updateProductStoreFacility" use-when="productStoreFacility != null"/>
+
+        <field name="productStoreId"><hidden /></field>
+        <field name="facilityId" use-when="productStoreFacility != null"><display/></field>
+        <field name="facilityId" use-when="productStoreFacility == null">
+            <drop-down allow-empty="false">
+                <entity-options description="${facilityName} [${facilityId}]" entity-name="Facility"/>
+            </drop-down>
+        </field>
+        <field name="sequenceNum" ><text size="3"/></field>
+        <field name="fromDate"   use-when="productStoreFacility != null"><display type="date-time"/></field>
+        <field name="fromDate"   use-when="productStoreFacility == null"><date-time type="date" input-method="time-dropdown"/></field>
+        <field name="thruDate"><date-time type="date" input-method="time-dropdown"/></field>
+        <field name="submitButton" title="${groovy: productStoreFacility == null ? uiLabelMap.CommonAdd : uiLabelMap.CommonUpdate}" widget-style="smallSubmit">
+            <submit button-type="button"/>
+        </field>
+        <on-event-update-area event-type="submit" area-id="PP_ProductStoreFacilityPrdStoreFacilityMgmt00001" area-target="ListProductStoreFacilityFormOnly?portalPortletId=PrdStoreFacilityMgmt&amp;productStoreId=${parameters.productStoreId}"/>
+     </form>
+
+     <!-- ProductStoreGroup Forms -->
+     <form name="ListParentProductStoreGroup" type="list" target="EditProductStoreGroup" paginate="false"
+        odd-row-style="alternate-row" default-table-style="basic-table hover-bar">
+        <actions>
+            <entity-condition entity-name="ProductStoreGroup">
+                <condition-expr field-name="primaryParentGroupId" from-field="nullField"/>
+                <order-by field-name="productStoreGroupName"/>
+            </entity-condition>
+        </actions>
+        <field name="productStoreGroupId"><hidden/></field>
+        <field name="productStoreGroupName">
+            <hyperlink target="ListParentProductStoreGroup" description="${productStoreGroupName} [${productStoreGroupId}]">
+                <parameter param-name="productStoreGroupId"/>
+            </hyperlink>
+        </field>
+        <field name="productStoreGroupTypeId"><display-entity entity-name="ProductStoreGroupType"/></field>
+        <field name="description"><display/></field>
+        <field name="selectButton" title="${uiLabelMap.CommonSelect}" widget-style="smallSubmit"><submit button-type="button"/></field>
+    </form>
+    <form name="EditProductStoreGroup" target="updateProductStoreGroup" type="single" default-map-name="productStoreGroup">
+        <alt-target use-when="productStoreGroup == null" target="createProductStoreGroup"/>
+        <auto-fields-entity entity-name="ProductStoreGroup"/>
+        <field name="productStoreGroupId"><hidden/></field>
+        <field name="productStoreGroupTypeId">
+            <drop-down>
+                <entity-options description="${description}" entity-name="ProductStoreGroupType"/>
+            </drop-down>
+        </field>
+        <field name="primaryParentGroupId" use-when="productStoreGroup == null"><ignored/></field>
+        <field name="primaryParentGroupId" use-when="productStoreGroup != null">
+            <drop-down allow-empty="true">
+                <entity-options description="${productStoreGroupName} [${productStoreGroupId}]" entity-name="ProductStoreGroup" key-field-name="productStoreGroupId">
+                    <entity-constraint name="productStoreGroupId" operator="not-equals" env-name="productStoreGroup.productStoreGroupId"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="submitButton" title="${uiLabelMap.Common${groovy: context.productStoreGroup?'Submit':'Create'}" widget-style="smallSubmit"><submit/></field>
+    </form>
+    <form name="ListProductStoreGroupAssoc" type="list"
+           odd-row-style="alternate-row" default-table-style="basic-table hover-bar">
+        <actions>
+            <entity-and entity-name="ProductStoreGroupRollup" filter-by-date="true">
+                <field-map field-name="parentGroupId" from-field="productStoreGroup.productStoreGroupId"/>
+            </entity-and>
+        </actions>
+        <field name="productStoreGroupId">
+            <display-entity entity-name="ProductStoreGroup" description="${productStoreGroupName}">
+                <sub-hyperlink target="EditProductStoreGroupAndAssoc" description=" [${productStoreGroupId}]">
+                    <parameter param-name="productStoreId"/>
+                </sub-hyperlink>
+            </display-entity>
+        </field>
+        <field name="fromDate"><display type="date"/></field>
+        <field name="thruDate"><display type="date"/></field>
+        <field name="submitButton" title=" ">
+            <hyperlink target="updateProductStoreGroupRollup" request-confirmation="true" description="${uiLabelMap.CommonDelete}">
+                <parameter param-name="productStoreGroupId"/>
+                <parameter param-name="parentGroupId"/>
+                <parameter param-name="fromDate"/>
+                <parameter param-name="thruDate" from-field="date:nowTimestamp()"/>
+            </hyperlink>
+        </field>
+    </form>
+    <form name="ListProductStoreAssoc" type="list"
+           odd-row-style="alternate-row" default-table-style="basic-table hover-bar">
+        <actions>
+            <entity-and entity-name="ProductStoreGroupAndMember" filter-by-date="true">
+                <field-map field-name="productStoreGroupId" from-field="productStoreGroup.productStoreGroupId"/>
+            </entity-and>
+        </actions>
+        <field name="productStoreId">
+            <hyperlink target="EditProductStore" description="${productStoreId}">
+                <parameter param-name="productStoreId"/>
+            </hyperlink>
+        </field>
+        <field name="storeName"><display/></field>
+        <field name="fromDate"><display type="date"/></field>
+        <field name="thruDate"><display type="date"/></field>
+    </form>
+    <form name="AddProductStoreAssoc" type="single" target="AddProductStoreToGroup">
+        <field name="productStoreGroupId"><hidden/></field>
+        <field name="productStoreId">
+            <drop-down>
+                <entity-options description="${storeName} [${productStoreId}]" entity-name="ProductStore">
+                    <entity-order-by field-name="storeName"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="fromDate"><date-time type="date" default-value="${nowTimestamp}"/></field>
+        <field name="addButton" widget-style="smallSubmit"><submit/></field>
+        <on-event-update-area area-target="EditProductStoreGroupAndAssoc" event-type="submit" area-id="centerdiv">
+            <parameter param-name="productStoreGroupId" from-field="productStoreGroup.productStoreGroupId"/>
+        </on-event-update-area>
+    </form>
+</forms>
