@@ -23,6 +23,6 @@ context.invoicePaymentInfoList = []
 
 if (parameters.daysOffset) { // it's not the initialisation but a real search request
     serviceCtx = dispatcher.getDispatchContext().makeValidContext("getInvoicePaymentInfoListByDueDateOffset", "IN", parameters);
-    result = runService("getInvoicePaymentInfoListByDueDateOffset", serviceCtx)
+    result = dispatcher.runSync("getInvoicePaymentInfoListByDueDateOffset", serviceCtx)
     context.invoicePaymentInfoList = result.invoicePaymentInfoList 
 }
