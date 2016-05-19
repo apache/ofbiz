@@ -30,6 +30,7 @@ under the License.
     <form method="post" action="<@ofbizUrl>login${previousParams}</@ofbizUrl>" name="loginform">
       <input type="hidden" name="requirePasswordChange" value="Y"/>
       <input type="hidden" name="USERNAME" value="${username}"/>
+      <input type="hidden" name="posTerminalId" value="${parameters.posTerminalId}"/>
       <div>
         ${uiLabelMap.CommonUsername}:&nbsp;${username}
       </div>
