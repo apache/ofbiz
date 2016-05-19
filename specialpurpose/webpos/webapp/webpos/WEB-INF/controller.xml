@@ -461,6 +461,13 @@
         <response name="success" type="request" value="json"/>
         <response name="error" type="request" value="json"/>
     </request-map>
+
+    <request-map uri="forgotPassword">
+        <security https="true" auth="false"/>
+        <event type="java" path="org.ofbiz.securityext.login.LoginEvents" invoke="forgotPassword"/>
+        <response name="success" type="view" value="ForgotPassword"/>
+        <response name="error" type="view" value="ForgotPassword"/>
+    </request-map>
     <!-- end of Ajax requests -->
     
     <!-- View Mappings -->
@@ -485,5 +492,6 @@
     <view-map name="SearchSalesRepsList" type="screen" page="component://webpos/widget/SearchScreens.xml#SearchSalesRepsList"/>
     <view-map name="SideDeepCategory" type="screen" page="component://webpos/widget/CatalogScreens.xml#SideDeepCategory"/>
     <view-map name="CategoryDetail" type="screen" page="component://webpos/widget/CatalogScreens.xml#CategoryDetail"/>
+    <view-map name="ForgotPassword" type="screen" page="component://webpos/widget/CommonScreens.xml#ForgotPassword"/>
     <!-- End of View Mappings -->
 </site-conf>
