@@ -50,7 +50,7 @@ under the License.
 </#macro>
 <#macro renderHyperlinkField></#macro>
 
-<#macro renderTextField name className alert value textSize maxlength id event action disabled clientAutocomplete ajaxUrl ajaxEnabled mask><@makeBlock className value /></#macro>
+<#macro renderTextField name className alert value textSize maxlength id event action disabled clientAutocomplete ajaxUrl ajaxEnabled mask placeholder=""><@makeBlock className value /></#macro>
 
 <#macro renderTextareaField name className alert cols rows id readonly value visualEditorEnable language buttons><@makeBlock className value /></#macro>
 
@@ -125,7 +125,7 @@ under the License.
 <@makeBlock className value />
 </#macro>
 
-<#macro renderLookupField className alert name value size maxlength id event action readonly autocomplete descriptionFieldName formName fieldFormName targetParameterIter imgSrc ajaxUrl ajaxEnabled presentation width height position fadeBackground clearText showDescription initiallyCollapsed></#macro>
+<#macro renderLookupField className alert name value size maxlength id event action readonly autocomplete descriptionFieldName formName fieldFormName targetParameterIter imgSrc ajaxUrl ajaxEnabled presentation width height position fadeBackground clearText showDescription initiallyCollapsed lastViewName=""></#macro>
 <#macro renderNextPrev paginateStyle paginateFirstStyle viewIndex highIndex listSize viewSize ajaxEnabled javaScriptEnabled ajaxFirstUrl firstUrl paginateFirstLabel paginatePreviousStyle ajaxPreviousUrl previousUrl paginatePreviousLabel pageLabel ajaxSelectUrl selectUrl ajaxSelectSizeUrl selectSizeUrl commonDisplaying paginateNextStyle ajaxNextUrl nextUrl paginateNextLabel paginateLastStyle ajaxLastUrl lastUrl paginateLastLabel paginateViewSizeLabel></#macro>
 <#macro renderFileField className alert name value size maxlength autocomplete><@makeBlock className value /></#macro>
 <#macro renderPasswordField className alert name value size maxlength id autocomplete><@makeBlock className "" /></#macro>
