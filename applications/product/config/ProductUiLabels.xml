@@ -30416,6 +30416,9 @@
         <value xml:lang="zh">未知; 请指定类型</value>
         <value xml:lang="zh_TW">未知; 請指定類型</value>
     </property>
+    <property key="ProductQuantityUom">
+        <value xml:lang="en">Quantity Uom</value>
+    </property>    
     <property key="ProductUomId">
         <value xml:lang="en">Uom Id</value>
         <value xml:lang="es">Código de UDM</value>
