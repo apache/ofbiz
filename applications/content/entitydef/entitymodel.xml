@@ -160,7 +160,7 @@ under the License.
       <field name="statusId" type="id"></field>
       <field name="privilegeEnumId" type="id"></field>
       <field name="serviceName" type="long-varchar"></field>
-      <field name="contentName" type="name"></field>
+      <field name="contentName" type="value"></field>
       <field name="description" type="description"></field>
       <field name="localeString" type="very-short"></field>
       <field name="mimeTypeId" type="id-vlong"></field>
@@ -760,7 +760,7 @@ under the License.
       <field name="dataCategoryId" type="id-ne"></field>
       <field name="dataSourceId" type="id"></field>
       <field name="statusId" type="id"></field>
-      <field name="dataResourceName" type="name"></field>
+      <field name="dataResourceName" type="value"></field>
       <field name="localeString" type="very-short"></field>
       <field name="mimeTypeId" type="id-vlong"></field>
       <field name="characterSetId" type="id-long"></field>
