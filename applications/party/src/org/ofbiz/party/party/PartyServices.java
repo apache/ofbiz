@@ -219,7 +219,7 @@ public class PartyServices {
             GenericValue party = delegator.findOne("Party", UtilMisc.toMap("partyId", partyId), false);
 
             if (party.get("statusId") == null) { // old records
-                party.set("statusId", "PARTY_ENABLED");
+                party.set("statusId", statusId);
             }
 
             String oldStatusId = party.getString("statusId");
