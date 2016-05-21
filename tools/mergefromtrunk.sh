@@ -83,7 +83,7 @@ case "$cmd" in
 		# do not run any of the following commands in a complex
 		# chained pipe; if one of the commands in the pipe fails,
 		# it isn't possible to detect the failure.
-		printf "Applied fix from trunk for revision: %s \n===\n\n" "$rev" > runtime/merge-state/log-message
+		printf "Applied fix from trunk for revision: %s \n------------------------------------------------------------------------\n\n" "$rev" > runtime/merge-state/log-message
 		svn log https://svn.apache.org/repos/asf/ofbiz/trunk -r "$rev" > runtime/merge-state/log.txt
 		set -- $(wc -l runtime/merge-state/log.txt)
 		head -n $(($1 - 1)) < runtime/merge-state/log.txt > runtime/merge-state/log.txt.head
