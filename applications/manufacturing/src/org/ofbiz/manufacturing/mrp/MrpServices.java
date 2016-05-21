@@ -96,7 +96,7 @@ public class MrpServices {
         listResult = null;
         List<GenericValue> listResultRoles = FastList.newInstance();
         try {
-            listResult = delegator.findByAnd("Requirement", UtilMisc.toMap("requirementTypeId", "PRODUCT_REQUIREMENT", "statusId", "REQ_PROPOSED"), null, false);
+            listResult = delegator.findByAnd("Requirement", UtilMisc.toMap("requirementTypeId", "PRODUCT_REQUIREMENT", "statusId", "REQ_PROPOSED", "facilityId", facilityId), null, false);
         } catch (GenericEntityException e) {
             return ServiceUtil.returnError(UtilProperties.getMessage(resource, "ManufacturingMrpEventFindError", locale));
         }
@@ -114,7 +114,7 @@ public class MrpServices {
         }
         listResult = null;
         try {
-            listResult = delegator.findByAnd("Requirement", UtilMisc.toMap("requirementTypeId", "INTERNAL_REQUIREMENT", "statusId", "REQ_PROPOSED"), null, false);
+            listResult = delegator.findByAnd("Requirement", UtilMisc.toMap("requirementTypeId", "INTERNAL_REQUIREMENT", "statusId", "REQ_PROPOSED", "facilityId", facilityId), null, false);
         } catch (GenericEntityException e) {
             return ServiceUtil.returnError(UtilProperties.getMessage(resource, "ManufacturingMrpEventFindError", locale));
         }
