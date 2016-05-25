@@ -1498,8 +1498,7 @@ public class ShoppingCartEvents {
                                     && ((String)adjustment.get("description")).startsWith("Tax adjustment due")) {
                                 cart.addAdjustment(adjustment);
                             }
-                        if ( adjustment.get("comments") != null
-                                && ((String)adjustment.get("comments")).startsWith("Added manually by")) {
+                        if ("Y".equals(adjustment.getString("isManual"))) {
                             cart.addAdjustment(adjustment);
                         }
                     }
