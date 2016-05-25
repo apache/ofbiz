@@ -1640,7 +1640,7 @@ public class OrderServices {
         BigDecimal totalManuallyAddedOrderTax = ZERO;
         for (GenericValue orderTaxAdjustment : orderTaxAdjustments) {
             String comment = orderTaxAdjustment.getString("comments");
-            if (orderTaxAdjustment.get("amount") != null && comment !=null && comment.startsWith("Added manually by")) {
+            if (orderTaxAdjustment.get("amount") != null && "Y".equals(orderTaxAdjustment.getString("isManual"))) {
                 totalManuallyAddedOrderTax = totalManuallyAddedOrderTax.add(orderTaxAdjustment.getBigDecimal("amount").setScale(taxDecimals, taxRounding));
             }
         }
@@ -4325,7 +4325,7 @@ public class OrderServices {
                             // Removing objects from toStore list for old Shipping and Handling Charges Adjustment and Sales Tax Adjustment.
                             removeList.add(stored);
                         }
-                        if (stored.get("comments") != null && ((String)stored.get("comments")).startsWith("Added manually by")) {
+                        if ("Y".equals(stored.getString("isManual"))) {
                             // Removing objects from toStore list for Manually added Adjustment.
                             removeList.add(stored);
                         }
@@ -4335,7 +4335,7 @@ public class OrderServices {
             }
             for (GenericValue toAdd: toAddList) {
                 if ("OrderAdjustment".equals(toAdd.getEntityName())) {
-                    if (toAdd.get("comments") != null && ((String)toAdd.get("comments")).startsWith("Added manually by") && (("PROMOTION_ADJUSTMENT".equals(toAdd.get("orderAdjustmentTypeId"))) ||
+                    if ("Y".equals(toAdd.getString("isManual"))  && (("PROMOTION_ADJUSTMENT".equals(toAdd.get("orderAdjustmentTypeId"))) ||
                             ("SHIPPING_CHARGES".equals(toAdd.get("orderAdjustmentTypeId"))) || ("SALES_TAX".equals(toAdd.get("orderAdjustmentTypeId"))))) {
                         toStore.add(toAdd);
                     }
