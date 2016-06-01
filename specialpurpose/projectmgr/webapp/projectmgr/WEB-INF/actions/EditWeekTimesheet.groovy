@@ -78,6 +78,7 @@ day0Total = 0.00; day1Total=0.00; day2Total=0.00; day3Total=0.00; day4Total=0.00
 pHours = 0.00;
 timeEntry = null;
 lastTimeEntry = null;
+workEffortId = null;
 
 // retrieve work effort data when the workeffortId has changed.
 void retrieveWorkEffortData() {
@@ -206,3 +207,4 @@ timesheetsDb.each { timesheetDb ->
     timesheets.add(timesheet);
 }
 context.timesheets = timesheets;
+context.workEffortId = workEffortId;
