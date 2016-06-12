@@ -2016,7 +2016,7 @@ public class PartyServices {
                                 Map<String, Object> person = UtilMisc.toMap(
                                         "partyId", newPartyId,
                                         "firstName", rec.get("firstName"),
-                                        "middleName", rec.get("midleName"),
+                                        "middleName", rec.get("middleName"),
                                         "lastName", rec.get("lastName"),
                                         "preferredCurrencyUomId", rec.get("preferredCurrencyUomId"),
                                         "userLogin", userLogin
