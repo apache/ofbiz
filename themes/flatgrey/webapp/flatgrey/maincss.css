@@ -694,6 +694,7 @@ display: inline; /* IE Fix */
 .button-bar ul li ul li {
 float: left;
 font-weight: bold;
+margin-right: 0.5em;
 }
 
 .button-bar ul .opposed {
@@ -1449,11 +1450,12 @@ textarea {
 	vertical-align: middle;
 }
 
+.button-bar li.buttontext a,
 a.buttontext,
 a.buttontextbig,
 .smallSubmit,
 .smallSubmit:hover,
-.mediumSubmit, 
+.mediumSubmit,
 .largeSubmit, 
 .loginButton,
 .button-style-1 a,
