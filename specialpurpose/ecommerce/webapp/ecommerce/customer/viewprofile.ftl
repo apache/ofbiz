@@ -408,7 +408,7 @@ under the License.
         <#assign mimeType = content.getRelatedOne("MimeType", true)?if_exists />
         <#assign status = content.getRelatedOne("StatusItem", true) />
           <tr>
-            <td><a href="<@ofbizUrl>img/${content.contentName?if_exists}?imgId=${content.dataResourceId?if_exists}</@ofbizUrl>" class="button">${content.contentId}</a></td>
+            <td><a href="<@ofbizUrl>img?imgId=${content.dataResourceId?if_exists}</@ofbizUrl>" class="button">${content.contentId}</a></td>
             <td>${content.contentName?if_exists}</td>
             <td>${(contentType.get("description",locale))?if_exists}</td>
             <td>${mimeType?if_exists.description?if_exists}</td>
@@ -420,7 +420,7 @@ under the License.
                 <input name="contentId" type="hidden" value="${contentRole.contentId}"/>
                 <input name="roleTypeId" type="hidden" value="${contentRole.roleTypeId}"/>
               </form>
-              <a href="<@ofbizUrl>img/${content.contentName?if_exists}?imgId=${content.dataResourceId?if_exists}</@ofbizUrl>" class="button">${uiLabelMap.CommonView}</a>
+              <a href="<@ofbizUrl>img?imgId=${content.dataResourceId?if_exists}</@ofbizUrl>" class="button">${uiLabelMap.CommonView}</a>
               <a href="javascript:document.removeContent_${contentRole.contentId}.submit();" class="button">${uiLabelMap.CommonRemove}</a>
             </td>
           </tr>
