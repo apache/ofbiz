@@ -115,7 +115,8 @@ public class DBCPConnectionFactory implements ConnectionFactoryInterface {
         PoolableConnectionFactory factory = new PoolableManagedConnectionFactory(xacf, pool, null, null, true, true);
         factory.setValidationQuery("select 1 from entity_key_store where key_name = ''");
         factory.setDefaultReadOnly(false);
-
+        factory.setRollbackOnReturn(false);
+        factory.setEnableAutoCommitOnReturn(false);
         String transIso = jdbcElement.getIsolationLevel();
         if (UtilValidate.isNotEmpty(transIso)) {
             if ("Serializable".equals(transIso)) {
