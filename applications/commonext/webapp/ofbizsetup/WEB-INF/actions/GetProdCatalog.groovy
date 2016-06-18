@@ -16,10 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
- import org.ofbiz.base.util.*
+ import org.ofbiz.base.util.UtilValidate;
  import org.ofbiz.entity.util.EntityUtil;
- import javolution.util.FastList;
- import org.ofbiz.product.catalog.*;
+ import org.ofbiz.product.catalog.CatalogWorker;
  
  prodCatalog = null;
  prodCatalogId = parameters.prodCatalogId;
@@ -33,7 +32,7 @@
  if(UtilValidate.isEmpty(productStore)){
      errMsgList.add("Product Store not set!");
      showScreen = "message";
- }else{
+ } else{
      facility = delegator.findOne("Facility", [facilityId : productStore.inventoryFacilityId], false);
      webSite = EntityUtil.getFirst(delegator.findByAnd("WebSite", [productStoreId: productStore.productStoreId], null, false));
      
