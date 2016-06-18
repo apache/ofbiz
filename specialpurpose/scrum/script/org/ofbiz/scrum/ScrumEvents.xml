@@ -1577,6 +1577,8 @@
                     </if-empty>
                     <set field="newInput.roleTypeId" from-field="taskOwnerRoles[0].roleTypeId"/>
                     <set field="newInput.statusId" value="SCAS_ASSIGNED"/>
+                    <set field="newInput.fromDate" from-field="parameters.fromDate"/>
+                    <set field="newInput.thruDate" from-field="parameters.thruDate"/>
                     <call-service service-name="assignPartyToWorkEffort" in-map-name="newInput"/>
                 </else>
                 </if-not-empty>
