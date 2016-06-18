@@ -37,7 +37,7 @@ under the License.
   <tr<#if currentPeriod> class="current-period"<#else><#if (period.calendarEntries?size > 0)> class="active-period"</#if></#if>>
     <td class="label">
       ${period.start?time?string.short}<br />
-      <a href="<@ofbizUrl>${newCalEventUrl}?period=day&amp;form=edit&amp;parentTypeId=${parentTypeId?if_exists}&amp;start=${parameters.start?if_exists}&amp;currentStatusId=CAL_TENTATIVE&amp;estimatedStartDate=${period.start?string("yyyy-MM-dd HH:mm:ss")}&amp;estimatedCompletionDate=${period.end?string("yyyy-MM-dd HH:mm:ss")}${urlParam?if_exists}${addlParam?if_exists}</@ofbizUrl>">${uiLabelMap.CommonAddNew}</a>
+      <a href="<@ofbizUrl>${newCalEventUrl}?period=day&amp;form=edit&amp;parentTypeId=${parentTypeId?if_exists}&amp;startTime=${parameters.start?if_exists}&amp;currentStatusId=CAL_TENTATIVE&amp;estimatedStartDate=${period.start?string("yyyy-MM-dd HH:mm:ss")}&amp;estimatedCompletionDate=${period.end?string("yyyy-MM-dd HH:mm:ss")}${urlParam?if_exists}${addlParam?if_exists}</@ofbizUrl>">${uiLabelMap.CommonAddNew}</a>
     </td>
       <#list period.calendarEntries as calEntry>
         <#if calEntry.workEffort.actualStartDate?exists>
