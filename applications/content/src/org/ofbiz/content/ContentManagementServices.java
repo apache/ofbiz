@@ -366,6 +366,10 @@ public class ContentManagementServices {
             }
         }
 
+        // Put contentId
+        if (UtilValidate.isNotEmpty(contentId)) {
+            contentAssoc.put("contentIdTo", contentId);
+        }
         // If parentContentIdTo or parentContentIdFrom exists, create association with newly created content
         if (Debug.infoOn()) {
             Debug.logInfo("CREATING contentASSOC contentAssocTypeId:" + contentAssocTypeId, null);
