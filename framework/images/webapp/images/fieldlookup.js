@@ -181,7 +181,7 @@ var Lookup = function(options) {
         dialogTarget : options.dialogTarget || "",
         dialogOptionalTarget : options.dialogOptionalTarget || "",
         formName : options.formName || "",
-        width : options.width || "620",
+        width : options.width || "640",
         height : options.height || "500",
         position : options.position || "topleft",
         modal : options.modal || "true",
