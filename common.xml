@@ -17,7 +17,7 @@ KIND, either express or implied.  See the License for the
 specific language governing permissions and limitations
 under the License.
 -->
-<project name="Ant - Common">
+<project name="Ant - Common" xmlns:ivy="antlib:org.apache.ivy.ant">
     <dirname property="Ant - Common.dir" file="${ant.file.Ant - Common}"/>
     <import file="${Ant - Common.dir}/macros.xml"/>
 
@@ -48,6 +48,13 @@ under the License.
     <target name="prepare" depends="init">
         <mkdir dir="${build.dir}/classes"/>
         <mkdir dir="${build.dir}/lib"/>
+        <if>
+            <available file="ivy.xml"/>
+            <then>
+                <mkdir dir="${lib.dir}/"/>
+                <ivy:retrieve type="jar,bundle"/>
+            </then>
+        </if>
     </target>
 
     <target name="prepare-docs" depends="init">
