@@ -16,6 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+ 
+import java.sql.Timestamp;
+import org.ofbiz.base.util.Debug;
 
 def module = "BalanceSheetParameters.groovy";
 
@@ -30,6 +33,7 @@ try {
     birtParameters.glFiscalTypeId = parameters.glFiscalTypeId;
     birtParameters.organizationPartyId = parameters.organizationPartyId;
     birtParameters.userLoginId = userLogin.userLoginId;
+    birtParameters.locale = locale;
     request.setAttribute("birtParameters", birtParameters);
 } catch (e) {
     Debug.logError(e, module);
