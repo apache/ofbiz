@@ -38,6 +38,13 @@ if (!glFiscalTypeId) {
     return;
 }
 
+organizationPartyId = null
+if(context.organizationPartyId) {
+    organizationPartyId = context.organizationPartyId;
+} else {
+    organizationPartyId = parameters.get('ApplicationDecorator|organizationPartyId')
+}
+
 // Setup the divisions for which the report is executed
 List partyIds = PartyWorker.getAssociatedPartyIdsByRelationshipType(delegator, organizationPartyId, 'GROUP_ROLLUP');
 partyIds.add(organizationPartyId);
