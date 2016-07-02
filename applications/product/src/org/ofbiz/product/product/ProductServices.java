@@ -166,7 +166,7 @@ public class ProductServices {
         try {
             Map<String, String> fields = UtilMisc.toMap("productId", productId, "productFeatureApplTypeId", productFeatureApplTypeId);
             List<String> order = UtilMisc.toList("sequenceNum", "productFeatureTypeId");
-            List<GenericValue> features = delegator.findByAnd("ProductFeatureAndAppl", fields, order, true);
+            List<GenericValue> features = EntityUtil.filterByDate(delegator.findByAnd("ProductFeatureAndAppl", fields, order, true));
             for (GenericValue v: features) {
                 featureSet.add(v.getString("productFeatureTypeId"));
             }
