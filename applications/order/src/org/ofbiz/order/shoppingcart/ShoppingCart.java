@@ -1432,7 +1432,7 @@ public class ShoppingCart implements Iterable<ShoppingCartItem>, Serializable {
             // clear the list
             if (autoSaveListId != null) {
                 try {
-                    org.ofbiz.order.shoppinglist.ShoppingListEvents.clearListInfo(this.getDelegator(), autoSaveListId);
+                    org.ofbiz.order.shoppinglist.ShoppingListEvents.clearListInfoBatch(this.getDelegator(), autoSaveListId);
                 } catch (GenericEntityException e) {
                     Debug.logError(e, module);
                 }

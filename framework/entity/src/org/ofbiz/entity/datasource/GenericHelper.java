@@ -20,12 +20,15 @@
 package org.ofbiz.entity.datasource;
 
 
+import java.sql.SQLException;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import org.ofbiz.entity.Delegator;
+import org.ofbiz.entity.GenericDelegator;
+import org.ofbiz.entity.GenericEntity;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericPK;
 import org.ofbiz.entity.GenericValue;
@@ -125,4 +128,34 @@ public interface GenericHelper {
      *@param addMissing Flag indicating whether or not to add missing entities and fields on the server
      */
     public void checkDataSource(Map<String, ModelEntity> modelEntities, List<String> messages, boolean addMissing) throws GenericEntityException;
+
+    
+    /** Store the List of Entity  from the GenericValue to the persistent store
+     *@param values GenericValue instance containing the entity
+     *@return int representing number of rows effected by this operation
+     */
+    public int store(Delegator delegator,List<GenericValue> values) throws GenericEntityException , SQLException;
+
+    
+    /** Create the List of Entity  from the GenericValue to the persistent store
+     *@param values GenericValue instance containing the entity
+     *@return int representing number of rows effected by this operation
+     */
+    public int create(Delegator delegator,List<GenericValue> values) throws GenericEntityException, SQLException;
+    
+    
+    /** Create the List of Entity  from the GenericValue to the persistent store
+     *@param delStoreList GenericValue instance containing the entity
+     *@return int representing number of rows effected by this operation
+     */
+	public int removeAllByPrimaryKey(Delegator delegator,List<GenericEntity> delStoreList)throws GenericEntityException , SQLException;
+
+	
+	 /** Removes/deletes Generic Entity records found by all the specified condition
+     *@param modelEntity The ModelEntity of the Entity as defined in the entity XML file
+     *@param delStoreList The condition that restricts the list of removed values
+     *@return int representing number of rows effected by this operation
+     */
+	public int removeAllByAnd(Delegator delegator,ModelEntity modelEntity, List<EntityCondition> delStoreList)throws GenericEntityException , SQLException;
+
 }

@@ -18,6 +18,7 @@
  *******************************************************************************/
 package org.ofbiz.entity.datasource;
 
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
@@ -34,6 +35,7 @@ import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.ofbiz.base.util.Debug;
+import org.ofbiz.base.util.UtilGenerics;
 import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.EntityLockedException;
@@ -50,10 +52,12 @@ import org.ofbiz.entity.condition.EntityOperator;
 import org.ofbiz.entity.config.model.Datasource;
 import org.ofbiz.entity.config.model.EntityConfig;
 import org.ofbiz.entity.jdbc.DatabaseUtil;
+import org.ofbiz.entity.jdbc.JdbcValueHandler;
 import org.ofbiz.entity.jdbc.SQLProcessor;
 import org.ofbiz.entity.jdbc.SqlJdbcUtil;
 import org.ofbiz.entity.model.ModelEntity;
 import org.ofbiz.entity.model.ModelField;
+import org.ofbiz.entity.model.ModelFieldType;
 import org.ofbiz.entity.model.ModelFieldTypeReader;
 import org.ofbiz.entity.model.ModelKeyMap;
 import org.ofbiz.entity.model.ModelRelation;
@@ -1228,4 +1232,314 @@ public class GenericDAO {
         DatabaseUtil dbUtil = new DatabaseUtil(this.helperInfo);
         return dbUtil.induceModelFromDb(messages);
     }
+    
+	public int update(Delegator delegator,List<GenericValue> values) throws GenericEntityException, SQLException {
+		SQLProcessor sqlP = new SQLProcessor(delegator,helperInfo);
+		int retVal = 0;
+		PreparedStatement ps = null;
+		List<ModelField> partialFields = null ;
+		for(int x = 0; x < values.size(); x++){
+			GenericValue value = values.get(x);
+			ModelEntity modelEntity = value.getModelEntity();
+	        if (modelEntity == null) {
+	            throw new GenericModelException("Could not find ModelEntity record for entityName: " + value.getEntityName());
+	        }
+	        if(x == 0){
+		        // we don't want to update ALL fields, just the nonpk fields that are in the passed GenericEntity
+	        	partialFields  = new LinkedList<ModelField>();
+		        Collection<String> keys = value.getAllKeys();
+	
+		        Iterator<ModelField> nopkIter = modelEntity.getNopksIterator();
+		        while (nopkIter.hasNext()) {
+		            ModelField curField = nopkIter.next();
+		            if (keys.contains(curField.getName())) {
+		                partialFields.add(curField);
+		            }
+		        }
+	
+		        //return customUpdate(value, modelEntity, partialFields);
+		        if (modelEntity instanceof ModelViewEntity) {
+		            singleUpdateView(value, (ModelViewEntity) modelEntity, partialFields, sqlP);
+		        }
+	
+		        // no non-primaryKey fields, update doesn't make sense, so don't do it
+		        if (partialFields.size() <= 0) {
+		            if (Debug.verboseOn()) Debug.logVerbose("Trying to do an update on an entity with no non-PK fields, returning having done nothing; entity=" + value, module);
+		            // returning one because it was effectively updated, ie the same thing, so don't trigger any errors elsewhere
+		            return 1;
+		        }
+	
+		        if (modelEntity.lock()) {
+		            GenericEntity entityCopy = GenericEntity.createGenericEntity(value);
+	
+		            select(entityCopy, sqlP);
+		            Object stampField = value.get(ModelEntity.STAMP_FIELD);
+	
+		            if ((stampField != null) && (!stampField.equals(entityCopy.get(ModelEntity.STAMP_FIELD)))) {
+		                String lockedTime = entityCopy.getTimestamp(ModelEntity.STAMP_FIELD).toString();
+	
+		                throw new EntityLockedException("You tried to update an old version of this data. Version locked: (" + lockedTime + ")");
+		            }
+		        }
+	
+		        // if we have a STAMP_TX_FIELD then set it with NOW, always do this before the STAMP_FIELD
+		        // NOTE: these fairly complicated if statements have a few objectives:
+		        //   1. don't run the TransationUtil.getTransaction*Stamp() methods when we don't need to
+		        //   2. don't set the stamp values if it is from an EntitySync (ie maintain original values), unless the stamps are null then set it anyway, ie even if it was from an EntitySync (also used for imports and such)
+		        if (modelEntity.isField(ModelEntity.STAMP_TX_FIELD) && (!value.getIsFromEntitySync() || value.get(ModelEntity.STAMP_TX_FIELD) == null)) {
+		        	value.set(ModelEntity.STAMP_TX_FIELD, TransactionUtil.getTransactionStartStamp());
+		            addFieldIfMissing(partialFields, ModelEntity.STAMP_TX_FIELD, modelEntity);
+		        }
+	
+		        // if we have a STAMP_FIELD then update it with NOW.
+		        if (modelEntity.isField(ModelEntity.STAMP_FIELD) && (!value.getIsFromEntitySync() || value.get(ModelEntity.STAMP_FIELD) == null)) {
+		        	value.set(ModelEntity.STAMP_FIELD, TransactionUtil.getTransactionUniqueNowStamp());
+		            addFieldIfMissing(partialFields, ModelEntity.STAMP_FIELD, modelEntity);
+		        }
+	
+		        StringBuilder sql = new StringBuilder().append("UPDATE ").append(modelEntity.getTableName(datasource)).append(" SET ");
+		        modelEntity.colNameString(partialFields, sql, "", "=?, ", "=?", false);
+		        sql.append(" WHERE ");
+		        SqlJdbcUtil.makeWhereStringFromFields(sql, modelEntity.getPkFieldsUnmodifiable(), value, "AND");
+		        sqlP.prepareStatement(sql.toString());
+	        }
+        	int i = 1;
+        	ps = sqlP.getPreparedStatement();
+            for (; i <= partialFields.size(); i++) {
+            	ModelField curField = partialFields.get(i-1);
+            	ModelFieldType mft = modelFieldTypeReader.getModelFieldType(curField.getType());
+            	JdbcValueHandler<Object>  handler = UtilGenerics.cast(mft.getJdbcValueHandler());
+            	Object fieldValue = value.dangerousGetNoCheckButFast(curField);
+            	if(UtilValidate.isNotEmpty(fieldValue)){
+            		handler.setValue(ps, i, fieldValue);	
+            	}else{
+            		handler.setValue(ps, i, fieldValue);	
+            	}
+            }
+            Iterator<ModelField> pksIter = modelEntity.getPksIterator();
+            while (pksIter.hasNext()) {
+                ModelField curField = pksIter.next();
+                ModelFieldType mft = modelFieldTypeReader.getModelFieldType(curField.getType());
+            	JdbcValueHandler<Object>  handler = UtilGenerics.cast(mft.getJdbcValueHandler());
+            	Object fieldValue = value.dangerousGetNoCheckButFast(curField);
+                // for where clause variables only setValue if not null...
+                if (UtilValidate.isNotEmpty(fieldValue)) {
+                    handler.setValue(ps, i, fieldValue);	
+                }
+                i++;
+            }
+            ps.addBatch();
+            value.synchronizedWithDatasource();
+		}
+		
+		try {
+			int[] count = sqlP.getPreparedStatement().executeBatch();
+			for (int i : count) {
+				retVal = retVal + i;
+			}
+		} finally {
+			sqlP.close();
+		}
+		if (retVal == 0) {
+			throw new GenericEntityNotFoundException("Tried to update an entity that does not exist, entity list: " + values.toString());
+		}
+         return retVal;
+	}
+
+	public int create(Delegator delegator,List<GenericValue> values) throws GenericEntityException, SQLException {
+		SQLProcessor sqlP = new SQLProcessor(delegator,helperInfo);
+		int retVal = 0;
+		List<ModelField> fieldsToSave = null; 
+		PreparedStatement ps = null;
+		for(int x = 0; x < values.size(); x++){
+			GenericValue value = values.get(x);
+			if(UtilValidate.isEmpty(value)){
+				 throw new GenericEntityNotFoundException("Tried to update an entity that does not exist, entity list: " + value.toString());
+			}
+			if(x ==0){
+				ModelEntity modelEntity = value.getModelEntity();
+		        if (modelEntity == null) {
+		            throw new GenericModelException("Could not find ModelEntity record for entityName: " + value.getEntityName());
+		        }
+		        fieldsToSave = modelEntity.getFieldsUnmodifiable();
+				if (modelEntity instanceof ModelViewEntity) {
+		            singleUpdateView(value, (ModelViewEntity) modelEntity,fieldsToSave , sqlP);
+		        }
+	
+		        // if we have a STAMP_TX_FIELD or CREATE_STAMP_TX_FIELD then set it with NOW, always do this before the STAMP_FIELD
+		        // NOTE: these fairly complicated if statements have a few objectives:
+		        //   1. don't run the TransationUtil.getTransaction*Stamp() methods when we don't need to
+		        //   2. don't set the stamp values if it is from an EntitySync (ie maintain original values), unless the stamps are null then set it anyway, ie even if it was from an EntitySync (also used for imports and such)
+		        boolean stampTxIsField = modelEntity.isField(ModelEntity.STAMP_TX_FIELD);
+		        boolean createStampTxIsField = modelEntity.isField(ModelEntity.CREATE_STAMP_TX_FIELD);
+		        if ((stampTxIsField || createStampTxIsField) && (!value.getIsFromEntitySync() || (stampTxIsField && value.get(ModelEntity.STAMP_TX_FIELD) == null) || (createStampTxIsField && value.get(ModelEntity.CREATE_STAMP_TX_FIELD) == null))) {
+		            Timestamp txStartStamp = TransactionUtil.getTransactionStartStamp();
+		            if (stampTxIsField && (!value.getIsFromEntitySync() || value.get(ModelEntity.STAMP_TX_FIELD) == null)) {
+		            	value.set(ModelEntity.STAMP_TX_FIELD, txStartStamp);
+		                addFieldIfMissing(fieldsToSave, ModelEntity.STAMP_TX_FIELD, modelEntity);
+		            }
+		            if (createStampTxIsField && (!value.getIsFromEntitySync() || value.get(ModelEntity.CREATE_STAMP_TX_FIELD) == null)) {
+		            	value.set(ModelEntity.CREATE_STAMP_TX_FIELD, txStartStamp);
+		                addFieldIfMissing(fieldsToSave, ModelEntity.CREATE_STAMP_TX_FIELD, modelEntity);
+		            }
+		        }
+	
+		        // if we have a STAMP_FIELD or CREATE_STAMP_FIELD then set it with NOW
+		        boolean stampIsField = modelEntity.isField(ModelEntity.STAMP_FIELD);
+		        boolean createStampIsField = modelEntity.isField(ModelEntity.CREATE_STAMP_FIELD);
+		        if ((stampIsField || createStampIsField)  && (!value.getIsFromEntitySync() || (stampIsField && value.get(ModelEntity.STAMP_FIELD) == null) || (createStampIsField && value.get(ModelEntity.CREATE_STAMP_FIELD) == null))) {
+		            Timestamp startStamp = TransactionUtil.getTransactionUniqueNowStamp();
+		            if (stampIsField && (!value.getIsFromEntitySync() || value.get(ModelEntity.STAMP_FIELD) == null)) {
+		            	value.set(ModelEntity.STAMP_FIELD, startStamp);
+		                addFieldIfMissing(fieldsToSave, ModelEntity.STAMP_FIELD, modelEntity);
+		            }
+		            if (createStampIsField && (!value.getIsFromEntitySync() || value.get(ModelEntity.CREATE_STAMP_FIELD) == null)) {
+		            	value.set(ModelEntity.CREATE_STAMP_FIELD, startStamp);
+		                addFieldIfMissing(fieldsToSave, ModelEntity.CREATE_STAMP_FIELD, modelEntity);
+		            }
+		        }
+
+		        StringBuilder sqlB = new StringBuilder("INSERT INTO ").append(modelEntity.getTableName(datasource)).append(" (");
+	
+		        modelEntity.colNameString(fieldsToSave, sqlB, "");
+		        sqlB.append(") VALUES (");
+		        modelEntity.fieldsStringList(fieldsToSave, sqlB, "?", ", ");
+		        String sql = sqlB.append(")").toString();
+	        	sqlP.prepareStatement(sql);
+	        	ps = sqlP.getPreparedStatement();
+	        	
+        	}
+			if(UtilValidate.isNotEmpty(ps)){
+				int i = 1;
+	            for (; i <= fieldsToSave.size(); i++) {
+	            	ModelField curField = fieldsToSave.get(i-1);
+	            	ModelFieldType mft = modelFieldTypeReader.getModelFieldType(curField.getType());
+	            	JdbcValueHandler<Object>  handler = UtilGenerics.cast(mft.getJdbcValueHandler());
+	            	Object fieldValue = value.dangerousGetNoCheckButFast(curField);
+	            	if(UtilValidate.isNotEmpty(fieldValue)){
+	            		handler.setValue(ps, i, fieldValue);	
+	            	}else{
+	            		handler.setValue(ps, i, fieldValue);	
+	            	}
+	            }
+	            ps.addBatch();
+	            value.synchronizedWithDatasource();
+            }
+		}
+		
+		try {
+			int[] count = sqlP.getPreparedStatement().executeBatch();
+			for (int i : count) {
+				retVal = retVal + i;
+			}
+		} finally {
+			sqlP.close();
+		}
+        if (retVal == 0) {
+           throw new GenericEntityNotFoundException("Tried to update an entity that does not exist, entity list: " + values.toString());
+        }
+        return retVal;
+	}
+
+	public int removeAllByAnd(Delegator delegator,ModelEntity modelEntity, List<EntityCondition> values) throws GenericEntityException, SQLException {
+
+		SQLProcessor sqlP = new SQLProcessor(delegator,helperInfo);
+		int retVal = 0;
+		PreparedStatement ps = null;
+		for(int x = 0; x < values.size(); x++){
+			EntityCondition value = values.get(x);
+			if (UtilValidate.isEmpty(value)) {
+				throw new GenericEntityNotFoundException("Tried to update an entity that does not exist, entity list: " + value.toString());
+			}
+			if (modelEntity == null) {
+				throw new GenericModelException("Could not find ModelEntity record for entity");
+			}
+			if (modelEntity instanceof ModelViewEntity) {
+				throw new org.ofbiz.entity.GenericNotImplementedException("Operation delete not supported yet for view entities");
+			}
+			StringBuilder sql = new StringBuilder("DELETE FROM ").append(modelEntity.getTableName(this.datasource));
+	        String whereCondition = value.makeWhereString(modelEntity, null, this.datasource);
+	        if (UtilValidate.isNotEmpty(whereCondition)) {
+	            sql.append(" WHERE ").append(whereCondition);
+	        }
+			if (x == 0) {
+				sqlP.prepareStatement(sql.toString());
+				ps = sqlP.getPreparedStatement();
+			}else{
+				ps.addBatch(sql.toString());
+			}
+		}
+		
+		try {
+			int[] count = sqlP.getPreparedStatement().executeBatch();
+			for (int i : count) {
+				retVal = retVal + i;
+			}
+		} finally {
+			sqlP.close();
+		}
+        if (retVal == 0) {
+           throw new GenericEntityNotFoundException("Tried to update an entity that does not exist, entity list: " + values.toString());
+        }
+        return retVal;
+	
+	}
+
+	public int removeAllByPrimaryKey(Delegator delegator,List<GenericEntity> values) throws GenericEntityException, SQLException {
+		SQLProcessor sqlP = new SQLProcessor(delegator,helperInfo);
+		int retVal = 0;
+		PreparedStatement ps = null;
+		for(int x = 0; x < values.size(); x++){
+			GenericEntity value = values.get(x);
+			ModelEntity modelEntity = value.getModelEntity();
+			if (x == 0) {
+				if (UtilValidate.isEmpty(value)) {
+					throw new GenericEntityNotFoundException("Tried to update an entity that does not exist, entity list: " + value.toString());
+				}
+				if (modelEntity == null) {
+					throw new GenericModelException("Could not find ModelEntity record for entityName: " + value.getEntityName());
+				}
+				if (modelEntity instanceof ModelViewEntity) {
+					throw new org.ofbiz.entity.GenericNotImplementedException("Operation delete not supported yet for view entities");
+				}
+				StringBuilder sql = new StringBuilder().append("DELETE FROM ").append(modelEntity.getTableName(datasource)).append(" WHERE ");
+				SqlJdbcUtil.makeWhereStringFromFields(sql, modelEntity.getPkFieldsUnmodifiable(), value, "AND");
+				sqlP.prepareStatement(sql.toString());
+				ps = sqlP.getPreparedStatement();
+			}
+			if(UtilValidate.isNotEmpty(ps)){
+				int i = 1;
+				Iterator<ModelField> pksIter = modelEntity.getPksIterator();
+				while (pksIter.hasNext()) {
+					ModelField curField = pksIter.next();
+					ModelFieldType mft = modelFieldTypeReader.getModelFieldType(curField.getType());
+					JdbcValueHandler<Object> handler = UtilGenerics.cast(mft.getJdbcValueHandler());
+					Object fieldValue = value.dangerousGetNoCheckButFast(curField);
+					// for where clause variables only setValue if not null...
+					if (UtilValidate.isNotEmpty(fieldValue)) {
+						handler.setValue(ps, i, fieldValue);
+					}
+					i++;
+				}
+				ps.addBatch();
+            }
+		}
+		
+		try {
+			int[] count = sqlP.getPreparedStatement().executeBatch();
+			for (int i : count) {
+				retVal = retVal + i;
+			}
+		} finally {
+			sqlP.close();
+		}
+        if (retVal == 0) {
+           throw new GenericEntityNotFoundException("Tried to update an entity that does not exist, entity list: " + values.toString());
+        }
+        return retVal;
+	
+	}
+    
+    
+    
 }
