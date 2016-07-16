@@ -9081,6 +9081,9 @@
         <value xml:lang="zh">没有为这个会员找到访问。</value>
         <value xml:lang="zh_TW">沒有為這個成員找到訪問。</value>
     </property>
+    <property key="PartyNotModifRecreateAttribute">
+        <value xml:lang="en">This cannot be changed without re-creating the Attribute.</value>
+    </property>
     <property key="PartyNotModifRecreatSecurityGroup">
         <value xml:lang="de">Kann nicht geändert werden ohne die Sicherheitsgruppe neu zu erstellen.</value>
         <value xml:lang="en">This cannot be changed without re-creating the securityGroup.</value>
