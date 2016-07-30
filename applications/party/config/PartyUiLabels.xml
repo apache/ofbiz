@@ -1943,6 +1943,9 @@
         <value xml:lang="zh">添加会员分区角色</value>
         <value xml:lang="zh_TW">增加團體分區角色</value>
     </property>
+    <property key="PartyTaxAuthPartyAndGeoNotAvailable">
+        <value xml:lang="en">Tax authority is not availble for provided Tax Authority Party and Tax Authority Geo.</value>
+    </property>
     <property key="PageTitleAddPartyTaxAuthInfos">
         <value xml:lang="de">Informationen zur Steuerbehörde Akteur hinzufügen</value>
         <value xml:lang="en">Add Party Tax Authority Info</value>
