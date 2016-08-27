@@ -672,7 +672,7 @@ public class CheckOutHelper {
             String requirementId = shoppingCartItem.getRequirementId();
             if (requirementId != null) {
                 try {
-                    /*Creating OrderRequirementCommitment which will be used to update requirement at the time of approval of PO. OrderRequirementCommitment will also be updated if ordered & required quantity differs*/
+                     /* OrderRequirementCommitment records will map which POs which are created from which requirements. With the help of this mapping requirements will be updated to Ordered when POs will be approved.  */
                     Map<String, Object> inputMap = UtilMisc.toMap("userLogin", userLogin, "orderId", orderId, "orderItemSeqId", shoppingCartItem.getOrderItemSeqId(), "requirementId", requirementId, "quantity", shoppingCartItem.getQuantity());
                     dispatcher.runSync("createOrderRequirementCommitment", inputMap);
                 } catch (Exception e) {
