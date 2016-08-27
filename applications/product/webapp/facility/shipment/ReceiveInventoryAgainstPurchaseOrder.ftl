@@ -40,7 +40,7 @@ under the License.
         <br class="clear"/>
     </div>
     <div class="screenlet-body">
-    
+
     <#if ! isPurchaseShipment>
         <div class="errorMessage">
             <#assign uiLabelWithVar=uiLabelMap.ProductErrorShipmentNotPurchaseShipment?interpret><@uiLabelWithVar/>
@@ -72,19 +72,27 @@ under the License.
     </#if>
 </#if>
 
-<form name="ReceiveInventoryAgainstPurchaseOrder" action="<@ofbizUrl>ReceiveInventoryAgainstPurchaseOrder</@ofbizUrl>">
+  <form name="ReceiveInventoryAgainstPurchaseOrder" action="<@ofbizUrl>ReceiveInventoryAgainstPurchaseOrder</@ofbizUrl>">
     <input type="hidden" name="clearAll" value="Y"/>
-    <div>
-        <span class="label">${uiLabelMap.ProductShipmentId}</span>&nbsp;<input type="text" size="20" name="shipmentId" value="${shipmentId!}"/>
-        <span class="label">${uiLabelMap.ProductOrderId}</span>&nbsp;
-        <span>
-            <@htmlTemplate.lookupField value="${orderId!}" formName="ReceiveInventoryAgainstPurchaseOrder" name="purchaseOrderId" id="purchaseOrderId" fieldFormName="LookupOrderHeaderAndShipInfo"/>
-        </span>
-        <span class="label">${uiLabelMap.ProductOrderShipGroupId}</span>&nbsp;<input type="text" size="20" name="shipGroupSeqId" value="${shipGroupSeqId!}"/>
-        <input type="submit" value="${uiLabelMap.CommonSelect}" class="smallSubmit"/>
-    </div>
-</form>
-
+    <table class="basic-table" cellspacing="0">
+      <tr>
+        <td class="label">${uiLabelMap.ProductShipmentId}</td>
+        <td><input type="text" size="20" name="shipmentId" value="${shipmentId!}"/></td>
+      </tr>
+      <tr>
+        <td class="label">${uiLabelMap.ProductOrderId}</td>
+        <td><@htmlTemplate.lookupField value="${orderId!}" formName="ReceiveInventoryAgainstPurchaseOrder" name="purchaseOrderId" id="purchaseOrderId" fieldFormName="LookupOrderHeaderAndShipInfo"/></td>
+      </tr>
+      <tr>
+        <td class="label">${uiLabelMap.ProductOrderShipGroupId}</td>
+        <td><input type="text" size="20" name="shipGroupSeqId" value="${shipGroupSeqId!}"/></td>
+      </tr>
+      <tr>
+        <td>&nbsp;</td>
+        <td><input type="submit" value="${uiLabelMap.CommonSelect}" class="smallSubmit"/></td>
+      </tr>
+    </table>
+  </form>
 <#if shipment??>
     <#if isPurchaseShipment>
 
