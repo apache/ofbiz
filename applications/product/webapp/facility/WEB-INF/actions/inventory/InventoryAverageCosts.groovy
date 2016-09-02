@@ -29,6 +29,7 @@ facilityId = context.get("facilityId");
 EntityCondition whereConditions = EntityCondition.makeCondition("facilityId", EntityOperator.EQUALS, facilityId);
 inventoryItems = select("productId").from("InventoryItem").where("facilityId", facilityId).orderBy("productId").queryList();
 inventoryItemProducts = EntityUtil.getFieldListFromEntityList(inventoryItems, "productId", true);
+searchParameterString = "action=Y&facilityId=" + facilityId;
 
 inventoryAverageCosts = [];
 inventoryItemProducts.each { productId ->
@@ -47,4 +48,5 @@ inventoryItemProducts.each { productId ->
     }
 }
 
+context.searchParameterString = searchParameterString;
 context.inventoryAverageCosts = inventoryAverageCosts;
