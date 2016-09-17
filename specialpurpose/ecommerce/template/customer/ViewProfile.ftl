@@ -17,8 +17,9 @@ specific language governing permissions and limitations
 under the License.
 -->
 
+<div class="col-lg-12 col-md-12">
 <#if party??>
-<#-- Main Heading -->
+<#-- Main Heading >
 <table width="100%" cellpadding="0" cellspacing="0" border="0">
   <tr>
     <td>
@@ -46,19 +47,21 @@ under the License.
     </td>
   </tr>
 </table>
-
-<div class="screenlet">
-  <div class="boxlink">
-    <a href="<@ofbizUrl>editperson</@ofbizUrl>" class="submenutextright">
-    <#if person??>${uiLabelMap.CommonUpdate}<#else>${uiLabelMap.CommonCreate}</#if></a>
+-->
+<div class="panel panel-default">
+  <div class="panel-heading">
+    <span class="pull-right">
+      <a href="<@ofbizUrl>editperson</@ofbizUrl>" class="submenutextright">
+      <#if person??>${uiLabelMap.CommonUpdate}<#else>${uiLabelMap.CommonCreate}</#if></a>
+    </span>
+    ${uiLabelMap.PartyPersonalInformation}
   </div>
-  <h3>${uiLabelMap.PartyPersonalInformation}</h3>
-  <div class="screenlet-body">
+  <div class="panel-body">
     <#if person??>
     <div>
-      <table width="100%" border="0" cellpadding="0" cellspacing="0">
+      <table class="table">
         <tr>
-          <td align="right">${uiLabelMap.PartyName}</td>
+          <td>${uiLabelMap.PartyName}</td>
           <td>
               ${person.personalTitle!}
               ${person.firstName!}
@@ -89,24 +92,24 @@ under the License.
 
 <#-- ============================================================= -->
 <#if monthsToInclude?? && totalSubRemainingAmount?? && totalOrders??>
-<div class="screenlet">
-  <h3>${uiLabelMap.EcommerceLoyaltyPoints}</h3>
-  <div class="screenlet-body">
+<div class="panel panel-default">
+  <div class="panel-heading">${uiLabelMap.EcommerceLoyaltyPoints}</div>
+  <div class="panel-body">
     <label>${uiLabelMap.EcommerceYouHave} ${totalSubRemainingAmount} ${uiLabelMap.EcommercePointsFrom} ${totalOrders} ${uiLabelMap.EcommerceOrderInLast} ${monthsToInclude} ${uiLabelMap.EcommerceMonths}</label>
   </div>
 </div>
 </#if>
 
 <#-- ============================================================= -->
-<div class="screenlet">
-  <div class="boxlink">
-    <a href="<@ofbizUrl>editcontactmech</@ofbizUrl>" class="submenutextright">${uiLabelMap.CommonCreateNew}</a>
+<div class="panel panel-default">
+  <div class="panel-heading">
+    <a class="pull-right" href="<@ofbizUrl>editcontactmech</@ofbizUrl>" class="submenutextright">${uiLabelMap.CommonCreateNew}</a>
+    ${uiLabelMap.PartyContactInformation}
   </div>
-  <h3>${uiLabelMap.PartyContactInformation}</h3>
-  <div class="screenlet-body">
+  <div class="panel-body">
   <#if partyContactMechValueMaps?has_content>
-    <table width="100%" border="0" cellpadding="0">
-      <tr valign="bottom">
+    <table class="table">
+      <tr>
         <th>${uiLabelMap.PartyContactType}</th>
         <th></th>
         <th>${uiLabelMap.CommonInformation}</th>
@@ -118,9 +121,8 @@ under the License.
         <#assign contactMech = partyContactMechValueMap.contactMech! />
         <#assign contactMechType = partyContactMechValueMap.contactMechType! />
         <#assign partyContactMech = partyContactMechValueMap.partyContactMech! />
-          <tr><td colspan="7"></td></tr>
           <tr>
-            <td align="right" valign="top">
+            <td>
               ${contactMechType.get("description",locale)}
             </td>
             <td>&nbsp;</td>
@@ -154,8 +156,8 @@ under the License.
                     <#if postalAddress.attnName?has_content>${uiLabelMap.PartyAddrAttnName}: ${postalAddress.attnName}<br /></#if>
                     ${postalAddress.address1}<br />
                     <#if postalAddress.address2?has_content>${postalAddress.address2}<br /></#if>
-                    ${postalAddress.city}<#if partyContactMechValueMap.stateProvinceGeoName?has_content>,&nbsp;${partyContactMechValueMap.stateProvinceGeoName}</#if>&nbsp;${postalAddress.postalCode!}
-                    <#if partyContactMechValueMap.countryGeoName?has_content><br />${partyContactMechValueMap.countryGeoName}</#if>
+                    ${postalAddress.city}<#if postalAddress.stateProvinceGeoId?has_content>,&nbsp;${postalAddress.stateProvinceGeoId}</#if>&nbsp;${postalAddress.postalCode!}
+                    <#if postalAddress.countryGeoId?has_content><br />${postalAddress.countryGeoId}</#if>
                     <#if (!postalAddress.countryGeoId?has_content || postalAddress.countryGeoId! = "USA")>
                       <#assign addr1 = postalAddress.address1! />
                       <#if (addr1.indexOf(" ") > 0)>
@@ -223,13 +225,17 @@ under the License.
 
 <#-- ============================================================= -->
 
-<div class="screenlet">
-  <div class="boxlink">
-    <a href="<@ofbizUrl>editcreditcard</@ofbizUrl>" class="submenutext">${uiLabelMap.PartyCreateNewCreditCard}</a><a href="<@ofbizUrl>editgiftcard</@ofbizUrl>" class="submenutext">${uiLabelMap.PartyCreateNewGiftCard}</a><a href="<@ofbizUrl>editeftaccount</@ofbizUrl>" class="submenutextright">${uiLabelMap.PartyCreateNewEftAccount}</a>
+<div class="panel panel-default">
+  <div class="panel-heading">
+    <div class="list-unstyled pull-right">
+      <a href="<@ofbizUrl>editcreditcard</@ofbizUrl>" class="submenutext">${uiLabelMap.PartyCreateNewCreditCard}</a>&nbsp;&nbsp;
+      <a href="<@ofbizUrl>editgiftcard</@ofbizUrl>" class="submenutext">${uiLabelMap.PartyCreateNewGiftCard}</a>&nbsp;&nbsp;
+      <a href="<@ofbizUrl>editeftaccount</@ofbizUrl>" class="submenutextright">${uiLabelMap.PartyCreateNewEftAccount}</a>
+    </div>
+    ${uiLabelMap.AccountingPaymentMethodInformation}
   </div>
-  <h3>${uiLabelMap.AccountingPaymentMethodInformation}</h3>
-  <div class="screenlet-body">
-    <table width="100%" border="0" cellpadding="1">
+  <div class="panel-body">
+    <table class="table">
       <tr>
         <td>
           <#if paymentMethodValueMaps?has_content>
@@ -318,7 +324,7 @@ under the License.
                       <input type="hidden" name="productStoreId" value="${productStoreId}" />
                       <input type="hidden" name="defaultPayMeth" value="${paymentMethod.paymentMethodId}" />
                       <input type="hidden" name="partyId" value="${party.partyId}" />
-                      <input type="submit" value="${uiLabelMap.EcommerceSetDefault}" class="button" />
+                      <button type="submit" class="btn btn-default">${uiLabelMap.EcommerceSetDefault}</button>
                     </form>
                   </#if>
                 </td>
@@ -335,47 +341,43 @@ under the License.
 </div>
 
 <#-- ============================================================= -->
-<div class="screenlet">
-  <h3>${uiLabelMap.PartyTaxIdentification}</h3>
-  <div class="screenlet-body">
+<div class="panel panel-default">
+  <div class="panel-heading">${uiLabelMap.PartyTaxIdentification}</div>
+  <div class="panel-body">
     <form method="post" action="<@ofbizUrl>createCustomerTaxAuthInfo</@ofbizUrl>" name="createCustTaxAuthInfoForm">
-      <div>
+      <div class="form-group">
       <input type="hidden" name="partyId" value="${party.partyId}"/>
       ${screens.render("component://order/widget/ordermgr/OrderEntryOrderScreens.xml#customertaxinfo")}
-      <input type="submit" value="${uiLabelMap.CommonAdd}" class="smallSubmit"/>
+      <button type="submit" class="btn btn-default">${uiLabelMap.CommonAdd}</button>
       </div>
     </form>
   </div>
 </div>
 
 <#-- ============================================================= -->
-<div class="screenlet">
-  <div class="boxlink">
-    <a href="<@ofbizUrl>changepassword</@ofbizUrl>" class="submenutextright">${uiLabelMap.PartyChangePassword}</a>
+<div class="panel panel-default">
+  <div class="panel-heading">
+    <a class="pull-right" href="<@ofbizUrl>changepassword</@ofbizUrl>" class="submenutextright">${uiLabelMap.PartyChangePassword}</a>
+    ${uiLabelMap.CommonUsername} &amp; ${uiLabelMap.CommonPassword}
   </div>
-  <h3>${uiLabelMap.CommonUsername} &amp; ${uiLabelMap.CommonPassword}</h3>
-  <div class="screenlet-body">
-    <table width="100%" border="0" cellpadding="1">
-      <tr>
-        <td align="right" valign="top">${uiLabelMap.CommonUsername}</td>
-        <td>&nbsp;</td>
-        <td valign="top">${userLogin.userLoginId}</td>
-      </tr>
-    </table>
+  <div class="panel-body">
+    <dl class="dl-horizontal">
+      <dt>${uiLabelMap.CommonUsername}</dt>
+      <dd>${userLogin.userLoginId}</dd>
+    </dl>
   </div>
 </div>
 
 <#-- ============================================================= -->
-<form name="setdefaultshipmeth" action="<@ofbizUrl>setprofiledefault/viewprofile</@ofbizUrl>" method="post">
-<div>
-  <input type="hidden" name="productStoreId" value="${productStoreId}" />
-  <div class="screenlet">
-    <div class="boxlink">
-      <#if profiledefs?has_content && profiledefs.defaultShipAddr?has_content && carrierShipMethods?has_content><a href="javascript:document.setdefaultshipmeth.submit();" class="submenutextright">${uiLabelMap.EcommerceSetDefault}</a></#if>
-    </div>
-    <h3>${uiLabelMap.EcommerceDefaultShipmentMethod}</h3>
-    <div class="screenlet-body">
-      <table width="100%" border="0" cellpadding="1">
+<div class="panel panel-default">
+  <div class="panel-heading">
+    <#if profiledefs?has_content && profiledefs.defaultShipAddr?has_content && carrierShipMethods?has_content><a href="javascript:document.setdefaultshipmeth.submit();" class="submenutextright">${uiLabelMap.EcommerceSetDefault}</a></#if>
+    ${uiLabelMap.EcommerceDefaultShipmentMethod}
+  </div>
+  <div class="panel-body">
+    <form name="setdefaultshipmeth" action="<@ofbizUrl>setprofiledefault/viewprofile</@ofbizUrl>" method="post">
+      <input type="hidden" name="productStoreId" value="${productStoreId}" />
+      <table class="table">
         <#if profiledefs?has_content && profiledefs.defaultShipAddr?has_content && carrierShipMethods?has_content>
           <#list carrierShipMethods as shipMeth>
             <#assign shippingMethod = shipMeth.shipmentMethodTypeId + "@" + shipMeth.partyId />
@@ -391,16 +393,15 @@ under the License.
         <tr><td>${uiLabelMap.EcommerceDefaultShipmentMethodMsg}</td></tr>
         </#if>
       </table>
-    </div>
+    </form>
   </div>
 </div>
-</form>
 
 <#-- ============================================================= -->
-<div class="screenlet">
-  <h3>${uiLabelMap.EcommerceFileManager}</h3>
-  <div class="screenlet-body">
-    <table width="100%" border="0" cellpadding="1">
+<div class="panel panel-default">
+  <div class="panel-heading">${uiLabelMap.EcommerceFileManager}</div>
+  <div class="panel-body">
+    <table class="table">
       <#if partyContent?has_content>
         <#list partyContent as contentRole>
         <#assign content = contentRole.getRelatedOne("Content", false) />
@@ -430,7 +431,6 @@ under the License.
       </#if>
     </table>
     <div>&nbsp;</div>
-    <label>${uiLabelMap.EcommerceUploadNewFile}</label>
     <div>
       <form method="post" enctype="multipart/form-data" action="<@ofbizUrl>uploadPartyContent</@ofbizUrl>">
       <div>
@@ -439,20 +439,33 @@ under the License.
         <input type="hidden" name="contentTypeId" value="DOCUMENT"/>
         <input type="hidden" name="statusId" value="CTNT_PUBLISHED"/>
         <input type="hidden" name="roleTypeId" value="OWNER"/>
-        <input type="file" name="uploadedFile" size="50" class="inputBox"/>
-        <select name="partyContentTypeId" class="selectBox">
-          <option value="">${uiLabelMap.PartySelectPurpose}</option>
-          <#list partyContentTypes as partyContentType>
-            <option value="${partyContentType.partyContentTypeId}">${partyContentType.get("description", locale)?default(partyContentType.partyContentTypeId)}</option>
-          </#list>
-        </select>
-        <select name="mimeTypeId" class="selectBox">
-          <option value="">${uiLabelMap.PartySelectMimeType}</option>
-          <#list mimeTypes as mimeType>
-            <option value="${mimeType.mimeTypeId}">${mimeType.get("description", locale)?default(mimeType.mimeTypeId)}</option>
-          </#list>
-        </select>
-        <input type="submit" value="${uiLabelMap.CommonUpload}" class="smallSubmit"/>
+        <div class="row">
+          <div class="form-group col-lg-4 col-md-4">
+            <label>${uiLabelMap.EcommerceUploadNewFile}</label>
+            <input type="file" name="uploadedFile" size="50"/>
+          </div>
+        </div>
+        <div class="row">
+          <div class="form-group col-lg-4 col-md-4">
+            <select name="partyContentTypeId" class="form-control">
+              <option value="">${uiLabelMap.PartySelectPurpose}</option>
+              <#list partyContentTypes as partyContentType>
+                <option value="${partyContentType.partyContentTypeId}">${partyContentType.get("description", locale)?default(partyContentType.partyContentTypeId)}</option>
+              </#list>
+            </select>
+          </div>
+        </div>
+        <div class="row">
+          <div class="form-group col-lg-4 col-md-4">
+            <select name="mimeTypeId" class="form-control">
+              <option value="">${uiLabelMap.PartySelectMimeType}</option>
+              <#list mimeTypes as mimeType>
+                <option value="${mimeType.mimeTypeId}">${mimeType.get("description", locale)?default(mimeType.mimeTypeId)}</option>
+              </#list>
+            </select>
+          </div>
+        </div>
+        <button type="submit" class="btn btn-default">${uiLabelMap.CommonUpload}</button>
         </div>
       </form>
     </div>
@@ -460,10 +473,11 @@ under the License.
 </div>
 
 <#-- ============================================================= -->
-<div class="screenlet">
-  <h3>${uiLabelMap.PartyContactLists}</h3>
-  <div class="screenlet-body">
-    <table width="100%" border="0" cellpadding="1" cellspacing="0">
+<div class="panel panel-default">
+  <div class="panel-heading">${uiLabelMap.PartyContactLists}</div>
+  <div class="panel-body">
+    <table class="table table-condensed">
+      <thead>
       <tr>
         <th>${uiLabelMap.EcommerceListName}</th>
         <#-- <th >${uiLabelMap.OrderListType}</th> -->
@@ -474,12 +488,13 @@ under the License.
         <th>&nbsp;</th>
         <th>&nbsp;</th>
       </tr>
+      </thead>
+      <tbody>
       <#list contactListPartyList as contactListParty>
       <#assign contactList = contactListParty.getRelatedOne("ContactList", false)! />
       <#assign statusItem = contactListParty.getRelatedOne("StatusItem", true)! />
       <#assign emailAddress = contactListParty.getRelatedOne("PreferredContactMech", true)! />
       <#-- <#assign contactListType = contactList.getRelatedOne("ContactListType", true)/> -->
-      <tr><td colspan="7"></td></tr>
       <tr>
         <td>${contactList.contactListName!}<#if contactList.description?has_content>&nbsp;-&nbsp;${contactList.description}</#if></td>
         <#-- <td><div>${contactListType.get("description",locale)!}</div></td> -->
@@ -499,7 +514,7 @@ under the License.
               <input type="hidden" name="preferredContactMechId" value="${contactListParty.preferredContactMechId}"/>
               <input type="hidden" name="fromDate" value="${contactListParty.fromDate}"/>
               <input type="hidden" name="statusId" value="CLPT_REJECTED"/>
-              <input type="submit" value="${uiLabelMap.EcommerceUnsubscribe}" class="smallSubmit"/>
+              <button type="submit" class="btn btn-default">${uiLabelMap.EcommerceUnsubscribe}</button>
               </div>
             </form>
           <#elseif (contactListParty.statusId! == "CLPT_PENDING")>
@@ -510,8 +525,8 @@ under the License.
               <input type="hidden" name="preferredContactMechId" value="${contactListParty.preferredContactMechId}"/>
               <input type="hidden" name="fromDate" value="${contactListParty.fromDate}"/>
               <input type="hidden" name="statusId" value="CLPT_ACCEPTED"/>
-              <input type="text" size="10" name="optInVerifyCode" value="" class="inputBox"/>
-              <input type="submit" value="${uiLabelMap.EcommerceVerifySubscription}" class="smallSubmit"/>
+              <input type="text" size="10" name="optInVerifyCode" value="" class="form-control"/>
+              <button type="submit" class="btn btn-default">${uiLabelMap.EcommerceVerifySubscription}</button>
               </div>
             </form>
           <#elseif (contactListParty.statusId! == "CLPT_REJECTED")>
@@ -522,13 +537,14 @@ under the License.
               <input type="hidden" name="preferredContactMechId" value="${contactListParty.preferredContactMechId}"/>
               <input type="hidden" name="fromDate" value="${contactListParty.fromDate}"/>
               <input type="hidden" name="statusId" value="CLPT_PENDING"/>
-              <input type="submit" value="${uiLabelMap.EcommerceSubscribe}" class="smallSubmit"/>
+              <button type="submit" class="btn btn-default">${uiLabelMap.EcommerceSubscribe}</button>
               </div>
             </form>
           </#if>
         </td>
       </tr>
       </#list>
+      </tbody>
     </table>
     <div>
       <form method="post" action="<@ofbizUrl>createContactListParty</@ofbizUrl>" name="clistPendingForm">
@@ -536,20 +552,24 @@ under the License.
         <input type="hidden" name="partyId" value="${party.partyId}"/>
         <input type="hidden" name="statusId" value="CLPT_PENDING"/>
         <span class="tableheadtext">${uiLabelMap.EcommerceNewListSubscription}: </span>
-        <select name="contactListId" class="selectBox">
+        <div class="form-group">
+        <select name="contactListId" class="form-control">
           <#list publicContactLists as publicContactList>
             <#-- <#assign publicContactListType = publicContactList.getRelatedOne("ContactListType", true)> -->
             <#assign publicContactMechType = publicContactList.getRelatedOne("ContactMechType", true)! />
             <option value="${publicContactList.contactListId}">${publicContactList.contactListName!} <#-- ${publicContactListType.get("description",locale)} --> <#if publicContactMechType?has_content>[${publicContactMechType.get("description",locale)}]</#if></option>
           </#list>
         </select>
-        <select name="preferredContactMechId" class="selectBox">
+        </div>
+        <div class="form-group">
+        <select name="preferredContactMechId" class="form-control">
         <#-- <option></option> -->
           <#list partyAndContactMechList as partyAndContactMech>
             <option value="${partyAndContactMech.contactMechId}"><#if partyAndContactMech.infoString?has_content>${partyAndContactMech.infoString}<#elseif partyAndContactMech.tnContactNumber?has_content>${partyAndContactMech.tnCountryCode!}-${partyAndContactMech.tnAreaCode!}-${partyAndContactMech.tnContactNumber}<#elseif partyAndContactMech.paAddress1?has_content>${partyAndContactMech.paAddress1}, ${partyAndContactMech.paAddress2!}, ${partyAndContactMech.paCity!}, ${partyAndContactMech.paStateProvinceGeoId!}, ${partyAndContactMech.paPostalCode!}, ${partyAndContactMech.paPostalCodeExt!} ${partyAndContactMech.paCountryGeoId!}</#if></option>
           </#list>
         </select>
-        <input type="submit" value="${uiLabelMap.EcommerceSubscribe}" class="smallSubmit"/>
+        </div>
+        <button type="submit" class="btn btn-default">${uiLabelMap.EcommerceSubscribe}</button>
         </div>
       </form>
     </div>
@@ -559,10 +579,10 @@ under the License.
 
 <#-- ============================================================= -->
 <#if surveys?has_content>
-<div class="screenlet">
-  <h3>${uiLabelMap.EcommerceSurveys}</h3>
-  <div class="screenlet-body">
-    <table width="100%" border="0" cellpadding="1">
+<div class="panel panel-default">
+  <div class="panel-heading">${uiLabelMap.EcommerceSurveys}</div>
+  <div class="panel-body">
+    <table class="table">
       <#list surveys as surveyAppl>
         <#assign survey = surveyAppl.getRelatedOne("Survey", false) />
         <tr>
@@ -607,3 +627,4 @@ ${screens.render('component://ecommerce/widget/CustomerScreens.xml#showProductRe
 <#else>
     <h3>${uiLabelMap.PartyNoPartyForCurrentUserName}: ${userLogin.userLoginId}</h3>
 </#if>
+</div>

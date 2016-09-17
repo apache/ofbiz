@@ -18,9 +18,9 @@ under the License.
 -->
 
 <#if reviews?has_content>
-<div class="screenlet">
-  <h3>${uiLabelMap.ProductReviews}</h3>
-  <div class="screenlet-body">
+<div class="panel panel-default">
+  <div class="panel-heading">${uiLabelMap.ProductReviews}</div>
+  <div class="panel-body">
     <table width="100%" border="0" cellpadding="1">
       <tr>
         <th>${uiLabelMap.EcommerceSentDate}</th>

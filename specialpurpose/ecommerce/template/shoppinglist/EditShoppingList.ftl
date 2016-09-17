@@ -82,15 +82,17 @@ under the License.
 </#if>
 </#macro>
 
-<div class="screenlet">
-        <div class="boxlink">
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <div class="pull-right">
             <form id="createEmptyShoppingList" action="<@ofbizUrl>createEmptyShoppingList</@ofbizUrl>" method="post">
                <input type="hidden" name="productStoreId" value="${productStoreId!}" />
                <a href="javascript:document.getElementById('createEmptyShoppingList').submit();" class="submenutextright">${uiLabelMap.CommonCreateNew}</a>
             </form>
         </div>
-    <h3>${uiLabelMap.EcommerceShoppingLists}</h3>
-    <div class="screenlet-body">
+        ${uiLabelMap.EcommerceShoppingLists}
+    </div>
+    <div class="panel-body">
         <#if shoppingLists?has_content>
           <form id="selectShoppingList" method="post" action="<@ofbizUrl>editShoppingList</@ofbizUrl>">
             <fieldset>
@@ -119,16 +121,16 @@ under the License.
 <#if shoppingList?has_content>
     <#if canView>
 
-<div class="screenlet">
-    <div class="screenlet-title-bar">
-        <div class="boxlink">
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <div class="pull-right">
           <a class='submenutext' href='javascript:document.createCustRequestFromShoppingList.submit();'>${uiLabelMap.OrderCreateCustRequestFromShoppingList}</a>
           <a class='submenutext' href='javascript:document.createQuoteFromShoppingList.submit();'>${uiLabelMap.OrderCreateQuoteFromShoppingList}</a>
           <a href="javascript:document.updateList.submit();" class="submenutextright">${uiLabelMap.CommonSave}</a>
         </div>
-        <h3>${uiLabelMap.EcommerceShoppingListDetail} - ${shoppingList.listName}</h3>
+        ${uiLabelMap.EcommerceShoppingListDetail} - ${shoppingList.listName}
     </div>
-    <div class="screenlet-body">
+    <div class="panel-body">
       <form name= "createCustRequestFromShoppingList" method= "post" action= "<@ofbizUrl>createCustRequestFromShoppingList</@ofbizUrl>">
         <fieldset>
           <input type= "hidden" name= "shoppingListId" value= "${shoppingList.shoppingListId}"/>
@@ -208,19 +210,17 @@ under the License.
 
 <#if shoppingListType?? && shoppingListType.shoppingListTypeId == "SLT_AUTO_REODR">
   <#assign nowTimestamp = Static["org.apache.ofbiz.base.util.UtilDateTime"].monthBegin()>
-<div class="screenlet">
-    <div class="screenlet-title-bar">
-        <div class="boxlink">
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <div class="pull-right">
             <a href="javascript:document.reorderinfo.submit();" class="submenutextright">${uiLabelMap.CommonSave}</a>
         </div>
-        <h3>
             ${uiLabelMap.EcommerceShoppingListReorder} - ${shoppingList.listName}
             <#if shoppingList.isActive?default("N") == "N">
                 ${uiLabelMap.EcommerceOrderNotActive}
             </#if>
-        </h3>
     </div>
-    <div class="screenlet-body">
+    <div class="panel-body">
         <form name="reorderinfo" method="post" action="<@ofbizUrl>updateShoppingList</@ofbizUrl>">
           <fieldset class="inline">
             <input type="hidden" name="shoppingListId" value="${shoppingList.shoppingListId}" />
@@ -355,14 +355,14 @@ under the License.
 </#if>
 
 <#if childShoppingListDatas?has_content>
-<div class="screenlet">
-    <div class="screenlet-title-bar">
-        <div class="boxlink">
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <div class="pull-right">
             <a href="<@ofbizUrl>addListToCart?shoppingListId=${shoppingList.shoppingListId}&amp;includeChild=yes</@ofbizUrl>" class="submenutextright">${uiLabelMap.EcommerceAddChildListsToCart}</a>
         </div>
-        <h3>&nbsp;${uiLabelMap.EcommerceChildShoppingList} - ${shoppingList.listName}</h3>
+        &nbsp;${uiLabelMap.EcommerceChildShoppingList} - ${shoppingList.listName}
     </div>
-    <div class="screenlet-body">
+    <div class="panel-body">
         <table>
           <thead>
 	          <tr>
@@ -403,14 +403,14 @@ under the License.
 </div>
 </#if>
 
-<div class="screenlet">
-    <div class="screenlet-title-bar">
-        <div class="boxlink">
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <div class="pull-right">
             <a href="<@ofbizUrl>addListToCart?shoppingListId=${shoppingList.shoppingListId}</@ofbizUrl>" class="submenutextright">${uiLabelMap.EcommerceAddListToCart}</a>
         </div>
-        <h3>${uiLabelMap.EcommerceListItems} - ${shoppingList.listName}</h3>
+        ${uiLabelMap.EcommerceListItems} - ${shoppingList.listName}
     </div>
-    <div class="screenlet-body">
+    <div class="panel-body">
         <#if shoppingListItemDatas?has_content>
             <#-- Pagination -->
             <@paginationControls/>
@@ -547,9 +547,9 @@ under the License.
     </div>
 </div>
 
-<div class="screenlet">
-    <h3>${uiLabelMap.EcommerceShoppingListPriceTotals} - ${shoppingList.listName}</h3>
-    <div class="screenlet-body">
+<div class="panel panel-default">
+    <div class="panel-heading">${uiLabelMap.EcommerceShoppingListPriceTotals} - ${shoppingList.listName}</div>
+    <div class="panel-body">
       <div>
         <label>${uiLabelMap.EcommerceChildListTotalPrice}</label>
         <@ofbizCurrency amount=shoppingListChildTotal isoCode=currencyUomId/>
@@ -565,9 +565,9 @@ under the License.
     </div>
 </div>
 
-<div class="screenlet">
-    <h3>${uiLabelMap.CommonQuickAddList}</h3>
-    <div class="screenlet-body">
+<div class="panel panel-default">
+    <div class="panel-heading">${uiLabelMap.CommonQuickAddList}</div>
+    <div class="panel-body">
         <form name="addToShoppingList" method="post" action="<@ofbizUrl>addItemToShoppingList</@ofbizUrl>">
           <fieldset class="inline>
             <input type="hidden" name="shoppingListId" value="${shoppingList.shoppingListId}" />

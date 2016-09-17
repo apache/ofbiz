@@ -30,15 +30,10 @@ under the License.
   </#if>
 </#if>
 
-<div id="factoids" class="screenlet">
-  <div class="screenlet-title-bar">
+<div class="panel panel-default">
+  <div class="panel-heading">${uiLabelMap.EcommerceFactoids}</div>
+  <div class="panel-body">
     <ul>
-      <li class="h3">${uiLabelMap.EcommerceFactoids}</li>
-    </ul>
-    <br class="clear"/>
-  </div>
-  <div class="screenlet-body">
-    <ul class="browsecategorylist">
       <#assign count_1=0/>
       <@limitedSubContent contentId=factoidRootId viewIndex=0 viewSize=9999 orderBy="contentName" limitSize="2">
         <li class="browsecategorytext">

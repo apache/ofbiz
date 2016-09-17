@@ -17,82 +17,56 @@ specific language governing permissions and limitations
 under the License.
 -->
 
-
-<div id="ecom-header">
-  <div id="left">
-    <#if sessionAttributes.overrideLogo??>
+<nav class="navbar navbar-default">
+  <!-- Brand and toggle get grouped for better mobile display -->
+  <div class="navbar-header">
+    <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+      <span class="sr-only">Toggle navigation</span>
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+    </button>
+    <a class="navbar-brand" href="<@ofbizUrl>main</@ofbizUrl>">
+      <#if sessionAttributes.overrideLogo??>
       <img src="<@ofbizContentUrl>${sessionAttributes.overrideLogo}</@ofbizContentUrl>" alt="Logo"/>
-    <#elseif catalogHeaderLogo??>
-      <img src="<@ofbizContentUrl>${catalogHeaderLogo}</@ofbizContentUrl>" alt="Logo"/>
-    <#elseif layoutSettings.VT_HDR_IMAGE_URL?has_content>
-      <img src="<@ofbizContentUrl>${layoutSettings.VT_HDR_IMAGE_URL.get(0)}</@ofbizContentUrl>" alt="Logo"/>
-    </#if>
+      <#elseif catalogHeaderLogo??>
+        <img src="<@ofbizContentUrl>${catalogHeaderLogo}</@ofbizContentUrl>" alt="Logo"/>
+      <#elseif layoutSettings.VT_HDR_IMAGE_URL?has_content>
+        <img src="<@ofbizContentUrl>${layoutSettings.VT_HDR_IMAGE_URL.get(0)}</@ofbizContentUrl>" alt="Logo"/>
+      </#if>
+    </a>
   </div>
-  <div id="right">
-    ${screens.render("component://ecommerce/widget/CartScreens.xml#microcart")}
-  </div>
-  <div id="middle">
-    <#if !productStore??>
-      <h2>${uiLabelMap.EcommerceNoProductStore}</h2>
-    </#if>
-    <#if (productStore.title)??>
-      <div id="company-name">${productStore.title}</div>
-    </#if>
-    <#if (productStore.subtitle)??>
-      <div id="company-subtitle">${productStore.subtitle}</div>
-    </#if>
-    <div id="welcome-message">
-    <#if sessionAttributes.autoName?has_content>
-      ${uiLabelMap.CommonWelcome}&nbsp;${sessionAttributes.autoName?html}!
-      (${uiLabelMap.CommonNotYou}?&nbsp;
-      <a href="<@ofbizUrl>autoLogout</@ofbizUrl>" class="linktext">${uiLabelMap.CommonClickHere}</a>)
-    <#else>
-      ${uiLabelMap.CommonWelcome}!
-    </#if>
-  </div>
-  </div>
-</div>
 
-<div id="ecom-header-bar">
-  <ul id="left-links">
-    <#if userLogin?has_content && userLogin.userLoginId != "anonymous">
-      <li id="header-bar-logout"><a href="<@ofbizUrl>logout</@ofbizUrl>">${uiLabelMap.CommonLogout}</a></li>
-    <#else>
-      <li id="header-bar-login"><a href="<@ofbizUrl>${checkLoginUrl}</@ofbizUrl>">${uiLabelMap.CommonLogin}</a></li>
-      <li id="header-bar-register"><a href="<@ofbizUrl>newcustomer</@ofbizUrl>">${uiLabelMap.EcommerceRegister}</a></li>
-    </#if>
-    <li id="header-bar-contactus">
-    <#if userLogin?has_content && userLogin.userLoginId != "anonymous">
-      <a href="<@ofbizUrl>contactus</@ofbizUrl>">${uiLabelMap.CommonContactUs}</a></li>
-    <#else>
-      <a href="<@ofbizUrl>AnonContactus</@ofbizUrl>">${uiLabelMap.CommonContactUs}</a></li>
-    </#if>
-    <li id="header-bar-main"><a href="<@ofbizUrl>main</@ofbizUrl>">${uiLabelMap.CommonMain}</a></li>
-  </ul>
-  <ul id="right-links">
-    <!-- NOTE: these are in reverse order because they are stacked right to left instead of left to right -->
-    <#if !userLogin?has_content || (userLogin.userLoginId)! != "anonymous">
-      <li id="header-bar-viewprofile">
-        <a href="<@ofbizUrl>viewprofile</@ofbizUrl>">${uiLabelMap.CommonProfile}</a>
+  <!-- Collect the nav links, forms, and other content for toggling -->
+  <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+    <ul class="nav navbar-nav navbar-right">
+      <li id="header-bar-contactus">
+        <#if userLogin?has_content && userLogin.userLoginId != "anonymous">
+          <a href="<@ofbizUrl>contactus</@ofbizUrl>">${uiLabelMap.CommonContactUs}</a></li>
+        <#else>
+          <a href="<@ofbizUrl>AnonContactus</@ofbizUrl>">${uiLabelMap.CommonContactUs}</a></li>
+        </#if>
       </li>
-      <li id="header-bar-ListMessages">
-        <a href="<@ofbizUrl>messagelist</@ofbizUrl>">${uiLabelMap.CommonMessages}</a>
-      </li>
-      <li id="header-bar-ListQuotes">
-        <a href="<@ofbizUrl>ListQuotes</@ofbizUrl>">${uiLabelMap.OrderOrderQuotes}</a>
-      </li>
-      <li id="header-bar-ListRequests">
-        <a href="<@ofbizUrl>ListRequests</@ofbizUrl>">${uiLabelMap.OrderRequests}</a>
-      </li>
-      <li id="header-bar-editShoppingList">
-        <a href="<@ofbizUrl>editShoppingList</@ofbizUrl>">${uiLabelMap.EcommerceShoppingLists}</a>
-      </li>
-      <li id="header-bar-orderhistory">
-        <a href="<@ofbizUrl>orderhistory</@ofbizUrl>">${uiLabelMap.EcommerceOrderHistory}</a>
-      </li>
-    </#if>
-    <#if catalogQuickaddUse>
-      <li id="header-bar-quickadd"><a href="<@ofbizUrl>quickadd</@ofbizUrl>">${uiLabelMap.CommonQuickAdd}</a></li>
-    </#if>
-  </ul>
-</div>
+      <#if userLogin?has_content && userLogin.userLoginId != "anonymous">
+        <li id="header-bar-logout"><a href="<@ofbizUrl>logout</@ofbizUrl>">${uiLabelMap.CommonLogout}</a></li>
+      <#else>
+        <li id="header-bar-register"><a href="<@ofbizUrl>newcustomer</@ofbizUrl>">${uiLabelMap.EcommerceRegister}</a></li>
+        <li id="header-bar-login"><a href="<@ofbizUrl>${checkLoginUrl}</@ofbizUrl>">${uiLabelMap.CommonLogin}</a></li>
+      </#if>
+      <#if userLogin?has_content && (userLogin.userLoginId) != "anonymous">
+        <li class="dropdown">
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">${uiLabelMap.Account} <span class="caret"></span></a>
+          <ul class="dropdown-menu">
+            <li id="header-bar-viewprofile"><a href="<@ofbizUrl>viewprofile</@ofbizUrl>">${uiLabelMap.CommonProfile}</a></li>
+            <#--This list already shown on profile screen
+              <li id="header-bar-ListMessages"><a href="<@ofbizUrl>messagelist</@ofbizUrl>">${uiLabelMap.CommonMessages}</a></li>-->
+            <li id="header-bar-ListQuotes"><a href="<@ofbizUrl>ListQuotes</@ofbizUrl>">${uiLabelMap.OrderOrderQuotes}</a></li>
+            <li id="header-bar-ListRequests"><a href="<@ofbizUrl>ListRequests</@ofbizUrl>">${uiLabelMap.OrderRequests}</a></li>
+            <li id="header-bar-editShoppingList"><a href="<@ofbizUrl>editShoppingList</@ofbizUrl>">${uiLabelMap.EcommerceShoppingLists}</a></li>
+            <li id="header-bar-orderhistory"><a href="<@ofbizUrl>orderhistory</@ofbizUrl>">${uiLabelMap.EcommerceOrderHistory}</a></li>
+          </ul>
+        </li>
+      </#if>
+    </ul>
+  </div><!-- /.navbar-collapse -->
+</nav>

@@ -39,7 +39,7 @@ under the License.
               <set field="hidebottomlinks" value="N"/>
           </actions>
             <widgets>
-                <platform-specific><html><html-template location="component://order/template/entry/cart/MiniCart.ftl"/></html></platform-specific>
+                <platform-specific><html><html-template location="component://ecommerce/template/cart/MiniCart.ftl"/></html></platform-specific>
             </widgets>
         </section>
     </screen>

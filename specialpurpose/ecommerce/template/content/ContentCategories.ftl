@@ -30,22 +30,14 @@ under the License.
   </#if>
 </#if>
 
-<div id="content_catagories" class="screenlet">
-  <div class="screenlet-title-bar">
-    <ul>
-      <li class="h3">${uiLabelMap.ProductBrowseContent}</li>
-    </ul>
-    <br class="clear"/>
-  </div>
-  <div class="screenlet-body">
-    <ul class="browsecategorylist">
+<div class="panel panel-default">
+  <div class="panel-heading">${uiLabelMap.ProductBrowseContent}</div>
+  <div class="panel-body">
+    <ul class="list-unstyled">
       <#assign count_1=0/>
       <@loopSubContent contentId=contentRootId viewIndex=0 viewSize=9999 orderBy="contentName">
         <li class="browsecategorytext">
-          <a href="<@ofbizUrl>showcontenttree?contentId=${subContentId}&amp;nodeTrailCsv=${subContentId}</@ofbizUrl>"
-              class="browsecategorybutton">
-            ${content.contentName}
-          </a>
+          <a href="<@ofbizUrl>showcontenttree?contentId=${subContentId}&amp;nodeTrailCsv=${subContentId}</@ofbizUrl>" class="browsecategorybutton">${content.contentName}</a>
         </li>
         <#assign count_1=(count_1 + 1)/>
       </@loopSubContent>

@@ -17,30 +17,23 @@ specific language governing permissions and limitations
 under the License.
 -->
 
-<div id="choose-language" class="screenlet">
-  <div class="screenlet-title-bar">
-    <ul>
-      <li class="h3">${uiLabelMap.CommonLanguageTitle}</li>
-    </ul>
-    <br class="clear"/>
-  </div>
-  <div class="screenlet-body">
+<div class="panel panel-default">
+  <div class="panel-heading">${uiLabelMap.CommonLanguageTitle}</div>
+  <div class="panel-body">
     <form method="post" name="chooseLanguage" action="<@ofbizUrl>setSessionLocale</@ofbizUrl>">
-      <select name="newLocale" class="selectBox" style="width:95%" onchange="submit()">
-        <#assign availableLocales = Static["org.apache.ofbiz.base.util.UtilMisc"].availableLocales()/>
-        <#list availableLocales as availableLocale>
-          <#assign langAttr = availableLocale.toString()?replace("_", "-")>
-          <#assign langDir = "ltr">
-          <#if "ar.iw"?contains(langAttr?substring(0, 2))>
-            <#assign langDir = "rtl">
-          </#if>
-          <option lang="${langAttr}" dir="${langDir}"
-              value="${availableLocale.toString()}"<#if locale.toString() = availableLocale.toString()>
-              selected="selected"</#if>>
-            ${availableLocale.getDisplayName(availableLocale)}
-          </option>
-        </#list>
-      </select>
+      <div class="form-group">
+        <select name="newLocale" class="form-control" onchange="submit()">
+          <#assign availableLocales = Static["org.apache.ofbiz.base.util.UtilMisc"].availableLocales()/>
+          <#list availableLocales as availableLocale>
+            <#assign langAttr = availableLocale.toString()?replace("_", "-")>
+            <#assign langDir = "ltr">
+            <#if "ar.iw"?contains(langAttr?substring(0, 2))>
+              <#assign langDir = "rtl">
+            </#if>
+            <option lang="${langAttr}" dir="${langDir}" value="${availableLocale.toString()}"<#if locale.toString() = availableLocale.toString()> selected="selected"</#if>>${availableLocale.getDisplayName(availableLocale)}</option>
+          </#list>
+        </select>
+      </div>
     </form>
   </div>
 </div>

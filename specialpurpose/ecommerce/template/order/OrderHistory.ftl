@@ -17,10 +17,11 @@ specific language governing permissions and limitations
 under the License.
 -->
 
-<div>
-  <div class="screenlet">
-    <h3>${uiLabelMap.OrderSalesHistory}</h3>
-    <table id="orderSalesHistory" summary="This table display order sales history.">
+<div class="col-lg-9 col-md-9">
+  <div class="panel panel-default">
+    <div class="panel-heading">${uiLabelMap.OrderSalesHistory}</div>
+    <div class="panel-body">
+    <table class="table" id="orderSalesHistory" summary="This table display order sales history.">
       <thead>
         <tr>
           <th>${uiLabelMap.CommonDate}</th>
@@ -46,19 +47,13 @@ under the License.
               <#if distinctInvoiceIds?has_content>
                 <td>
                   <#list distinctInvoiceIds as invoiceId>
-                     <a href="<@ofbizUrl>invoice.pdf?invoiceId=${invoiceId}</@ofbizUrl>" class="buttontext">
-                       (${invoiceId} PDF)
-                     </a>
+                     <a href="<@ofbizUrl>invoice.pdf?invoiceId=${invoiceId}</@ofbizUrl>" class="buttontext">(${invoiceId} PDF) </a>
                   </#list>
                 </td>
               <#else>
                 <td></td>
               </#if>
-              <td>
-                <a href="<@ofbizUrl>orderstatus?orderId=${orderHeader.orderId}</@ofbizUrl>" class="button">
-                  ${uiLabelMap.CommonView}
-                </a>
-              </td>
+              <td><a href="<@ofbizUrl>orderstatus?orderId=${orderHeader.orderId}</@ofbizUrl>" class="button">${uiLabelMap.CommonView}</a></td>
             </tr>
           </#list>
         <#else>
@@ -66,10 +61,12 @@ under the License.
         </#if>
       </tbody>
     </table>
+    </div>
   </div>
-  <div class="screenlet">
-    <h3>${uiLabelMap.OrderPurchaseHistory}</h3>
-    <table id="orderPurchaseHistory" summary="This table display order purchase history.">
+  <div class="panel panel-default">
+    <div class="panel-heading">${uiLabelMap.OrderPurchaseHistory}</div>
+    <div class="panel-body">
+    <table class="table" id="orderPurchaseHistory" summary="This table display order purchase history.">
       <thead>
         <tr>
           <th>${uiLabelMap.CommonDate}</th>
@@ -88,12 +85,7 @@ under the License.
               <td>${porderHeader.orderId}</td>
               <td><@ofbizCurrency amount=porderHeader.grandTotal isoCode=porderHeader.currencyUom /></td>
               <td>${pstatus.get("description",locale)}</td>
-              <td>
-                <a href="<@ofbizUrl>orderstatus?orderId=${porderHeader.orderId}</@ofbizUrl>"
-                    class="button">
-                  ${uiLabelMap.CommonView}
-                </a>
-              </td>
+              <td><a href="<@ofbizUrl>orderstatus?orderId=${porderHeader.orderId}</@ofbizUrl>" class="button">${uiLabelMap.CommonView}</a></td>
             </tr>
           </#list>
         <#else>
@@ -101,10 +93,12 @@ under the License.
         </#if>
       </tbody>
     </table>
+    </div>
   </div>
-  <div class="screenlet">
-    <h3>${uiLabelMap.EcommerceDownloadsAvailableTitle}</h3>
-    <table id="availableTitleDownload" summary="This table display available title for download.">
+  <div class="panel panel-default">
+    <div class="panel-heading">${uiLabelMap.EcommerceDownloadsAvailableTitle}</div>
+    <div class="panel-body">
+    <table class="table" id="availableTitleDownload" summary="This table display available title for download.">
       <thead>
         <tr>
           <th>${uiLabelMap.OrderOrder} ${uiLabelMap.CommonNbr}</th>
@@ -132,5 +126,7 @@ under the License.
         </#if>
       </tbody>
     </table>
+    </div>
   </div>
+</div>
 </div>

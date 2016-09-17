@@ -16,11 +16,11 @@ KIND, either express or implied.  See the License for the
 specific language governing permissions and limitations
 under the License.
 -->
-
-<div class="screenlet">
-    <h3>${uiLabelMap.EcommerceRequestHistory}</h3>
-    <div class="screenlet-body">
-        <table>
+<div class="col-lg-9 col-md-9">
+<div class="panel panel-default">
+    <div class="panel-heading">${uiLabelMap.EcommerceRequestHistory}</div>
+    <div class="panel-body">
+        <table class="table">
             <tr>
                 <td width="10%">
                     <div><span style="white-space: nowrap;">${uiLabelMap.OrderRequest} ${uiLabelMap.CommonNbr}</span></div>
@@ -92,4 +92,5 @@ under the License.
             </#if>
         </table>
     </div>
+</div>
 </div>

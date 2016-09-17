@@ -40,7 +40,7 @@ under the License.
                 <script location="component://order/groovyScripts/entry/catalog/KeywordSearchOptions.groovy"/>
             </actions>
             <widgets>
-                <platform-specific><html><html-template location="component://order/template/entry/catalog/KeywordSearchBox.ftl"/></html></platform-specific>
+                <platform-specific><html><html-template location="component://ecommerce/template/catalog/KeywordSearchBox.ftl"/></html></platform-specific>
             </widgets>
         </section>
     </screen>
@@ -600,6 +600,13 @@ under the License.
             </actions>
             <widgets>
                 <platform-specific><html><html-template location="component://ecommerce/template/catalog/PopularTags.ftl"/></html></platform-specific>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="compareproductslist">
+        <section>
+            <widgets>
+                <platform-specific><html><html-template location="component://ecommerce/template/catalog/CompareProductsList.ftl"/></html></platform-specific>
             </widgets>
         </section>
     </screen>

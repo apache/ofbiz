@@ -18,8 +18,11 @@ under the License.
 -->
 <#assign janrainEnabled = Static["org.apache.ofbiz.entity.util.EntityUtilProperties"].getPropertyValue("ecommerce", "janrain.enabled", delegator)>
 <#assign appName = Static["org.apache.ofbiz.entity.util.EntityUtilProperties"].getPropertyValue("ecommerce", "janrain.appName", delegator)>
-<#if janrainEnabled == "Y">
-<script type="text/javascript">
+<div class="container-fluid">
+  <div class="row">
+  
+    <#if janrainEnabled == "Y">
+      <script type="text/javascript">
 (function() {
     if (typeof window.janrain !== 'object') window.janrain = {};
     window.janrain.settings = {};
@@ -47,87 +50,129 @@ under the License.
     s.parentNode.insertBefore(e, s);
 })();
 </script>
-<h1>${uiLabelMap.CommonLogin}</h1>
-<div class="screenlet">
-  <div class="screenlet-title-bar"><h3>${uiLabelMap.CommonRegistered}</h3></div>
-  <div class="screenlet-body">
-  <table width="100%" class="Signlogin">
-      <tr>
-          <td>
-          <form method="post" action="<@ofbizUrl>login</@ofbizUrl>" name="loginform" class="horizontal">
-            <fieldset>
-              <div>
+
+      <div class="col-lg-6 col-md-6">
+        <div class="panel panel-default">
+          <div class="panel-heading">${uiLabelMap.CommonLogin}</div>
+          <div class="panel-body">
+            <form method="post" action="<@ofbizUrl>login</@ofbizUrl>" name="loginform">
+              <div class="form-group">
+                <label for="exampleInputEmail1">Email address</label>
+                <input type="email" class="form-control" id="exampleInputEmail1" placeholder="Email">
+              </div>
+              <div class="form-group">
                 <label for="userName">${uiLabelMap.CommonUsername}</label>
-                <input type="text" id="userName" name="USERNAME" value="<#if requestParameters.USERNAME?has_content>${requestParameters.USERNAME}<#elseif autoUserLogin?has_content>${autoUserLogin.userLoginId}</#if>"/>
+                <input type="text" id="userName" name="USERNAME" class="form-control" value="<#if requestParameters.USERNAME?has_content>${requestParameters.USERNAME}<#elseif autoUserLogin?has_content>${autoUserLogin.userLoginId}</#if>"/>
               </div>
               <#if autoUserLogin?has_content>
                 <p>(${uiLabelMap.CommonNot} ${autoUserLogin.userLoginId}? <a href="<@ofbizUrl>${autoLogoutUrl}</@ofbizUrl>">${uiLabelMap.CommonClickHere}</a>)</p>
               </#if>
-              <div>
+              <div class="form-group">
                 <label for="password">${uiLabelMap.CommonPassword}:</label>
-                <input type="password" id="password" name="PASSWORD" value=""/>
+                <input type="password" class="form-control" id="password" name="PASSWORD" value=""/>
               </div>
-              <div>
-                <input type="submit" class="button" value="${uiLabelMap.CommonLogin}"/>
-              </div>
+              <button type="submit" class="btn btn-primary">${uiLabelMap.CommonLogin}</button>
               <div>
                 <label for="newcustomer_submit">${uiLabelMap.CommonMayCreateNewAccountHere}:</label>
                 <a href="<@ofbizUrl>newcustomer</@ofbizUrl>">${uiLabelMap.CommonMayCreate}</a>
               </div>
-            </fieldset>
-          </form>
-          </td>
-          <td><div id="janrainEngageEmbed"></div></td>
-      </tr>
-  </table>
-  </div>
-</div>
-<#else>
-<h1>${uiLabelMap.CommonLogin}</h1>
-<div class="screenlet">
-  <div class="screenlet-title-bar"><h3>${uiLabelMap.CommonRegistered}</h3></div>
-  <div class="screenlet-body">
-    <form method="post" action="<@ofbizUrl>login</@ofbizUrl>" name="loginform" class="horizontal">
-      <fieldset>
-        <div>
-          <label for="userName">${uiLabelMap.CommonUsername}</label>
-          <input type="text" id="userName" name="USERNAME" value="<#if requestParameters.USERNAME?has_content>${requestParameters.USERNAME}<#elseif autoUserLogin?has_content>${autoUserLogin.userLoginId}</#if>"/>
+            </form>
+          </div>
         </div>
-        <#if autoUserLogin?has_content>
-          <p>(${uiLabelMap.CommonNot} ${autoUserLogin.userLoginId}? <a href="<@ofbizUrl>${autoLogoutUrl}</@ofbizUrl>">${uiLabelMap.CommonClickHere}</a>)</p>
-        </#if>
-        <div>
-          <label for="password">${uiLabelMap.CommonPassword}:</label>
-          <input type="password" id="password" name="PASSWORD" value=""/>
-        </div>
-        <div>
-          <input type="submit" class="button" value="${uiLabelMap.CommonLogin}"/>
-        </div>
-        <div>
-          <label for="newcustomer_submit">${uiLabelMap.CommonMayCreateNewAccountHere}:</label>
-          <a href="<@ofbizUrl>newcustomer</@ofbizUrl>">${uiLabelMap.CommonMayCreate}</a>
-        </div>
-      </fieldset>
-    </form>
-  </div>
-</div>
-</#if>
+      </div>
 
-<div class="screenlet">
-  <div class="screenlet-title-bar"><h3>${uiLabelMap.CommonForgotYourPassword}</h3></div>
-  <div class="screenlet-body">
-  <form method="post" action="<@ofbizUrl>forgotpassword</@ofbizUrl>" class="horizontal">
-    <div>
-      <label for="forgotpassword_userName">${uiLabelMap.CommonUsername}</label>
-      <input type="text" id="forgotpassword_userName" name="USERNAME" value="<#if requestParameters.USERNAME?has_content>${requestParameters.USERNAME}<#elseif autoUserLogin?has_content>${autoUserLogin.userLoginId}</#if>"/>
-    </div>
-    <div class="buttons">
-      <input type="submit" class="button" name="GET_PASSWORD_HINT" value="${uiLabelMap.CommonGetPasswordHint}"/>
-      <input type="submit" class="button" name="EMAIL_PASSWORD" value="${uiLabelMap.CommonEmailPassword}"/>
-    </div>
-  </form>
-  </div>
-</div>
+      <h1>${uiLabelMap.CommonLogin}</h1>
+      <div class="panel panel-default">
+        <div class="panle panel-heading">${uiLabelMap.CommonRegistered}</div>
+        <div class="panel-body">
+          <table width="100%" class="Signlogin">
+            <tr>
+                <td>
+                <form method="post" action="<@ofbizUrl>login</@ofbizUrl>" name="loginform" class="horizontal">
+                  <fieldset>
+                    <div>
+                      <label for="userName">${uiLabelMap.CommonUsername}</label>
+                      <input type="text" id="userName" name="USERNAME" value="<#if requestParameters.USERNAME?has_content>${requestParameters.USERNAME}<#elseif autoUserLogin?has_content>${autoUserLogin.userLoginId}</#if>"/>
+                    </div>
+                    <#if autoUserLogin?has_content>
+                      <p>(${uiLabelMap.CommonNot} ${autoUserLogin.userLoginId}? <a href="<@ofbizUrl>${autoLogoutUrl}</@ofbizUrl>">${uiLabelMap.CommonClickHere}</a>)</p>
+                    </#if>
+                    <div>
+                      <label for="password">${uiLabelMap.CommonPassword}:</label>
+                      <input type="password" id="password" name="PASSWORD" value=""/>
+                    </div>
+                    <div>
+                      <input type="submit" class="button" value="${uiLabelMap.CommonLogin}"/>
+                    </div>
+                    <div>
+                      <label for="newcustomer_submit">${uiLabelMap.CommonMayCreateNewAccountHere}:</label>
+                      <a href="<@ofbizUrl>newcustomer</@ofbizUrl>">${uiLabelMap.CommonMayCreate}</a>
+                    </div>
+                  </fieldset>
+                </form>
+                </td>
+                <td><div id="janrainEngageEmbed"></div></td>
+            </tr>
+        </table>
+        </div>
+      </div>
+    <#else>
+
+      <div class="col-lg-6 col-md-6">
+        <div class="panel panel-default">
+          <div class="panel-heading">${uiLabelMap.CommonLogin}</div>
+          <div class="panel-body">
+            <form method="post" action="<@ofbizUrl>login</@ofbizUrl>" name="loginform">
+              <div class="row">
+                <div class="col-lg-12 col-md-12">
+                  <div class="form-group">
+                    <label for="userName">${uiLabelMap.CommonUsername}</label>
+                    <input type="text" class="form-control col-sm-2 control-label" id="userName" name="USERNAME" value="<#if requestParameters.USERNAME?has_content>${requestParameters.USERNAME}<#elseif autoUserLogin?has_content>${autoUserLogin.userLoginId}</#if>"/>
+                  </div>
+                </div>
+              </div>
+              <#if autoUserLogin?has_content>
+                <p>(${uiLabelMap.CommonNot} ${autoUserLogin.userLoginId}? <a href="<@ofbizUrl>${autoLogoutUrl}</@ofbizUrl>">${uiLabelMap.CommonClickHere}</a>)</p>
+              </#if>
+              <div class="row">
+                <div class="col-lg-12 col-md-12">
+                  <div class="form-group">
+                    <label for="password">${uiLabelMap.CommonPassword}:</label>
+                    <input type="password" class="form-control" id="password" name="PASSWORD" value=""/>
+                  </div>
+                </div>
+              </div>
+              <button type="submit" class="btn btn-primary">${uiLabelMap.CommonLogin}</button>
+              <div>
+                <label for="newcustomer_submit">${uiLabelMap.CommonMayCreateNewAccountHere}:</label>
+                <a href="<@ofbizUrl>newcustomer</@ofbizUrl>">${uiLabelMap.CommonMayCreate}</a>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </#if>
+
+    <div class="col-lg-6 col-md-6">
+      <div class="panel panel-default">
+        <div class="panel-heading">${uiLabelMap.CommonForgotYourPassword}</div>
+        <div class="panel-body">
+          <form method="post" action="<@ofbizUrl>forgotpassword</@ofbizUrl>" class="horizontal">
+            <div class="row">
+              <div class="col-lg-12 col-md-12">
+                <div class="form-group">
+                  <label class="control-label" for="forgotpassword_userName">${uiLabelMap.CommonUsername}</label>
+                  <input type="text" class="form-control" id="forgotpassword_userName" name="USERNAME" value="<#if requestParameters.USERNAME?has_content>${requestParameters.USERNAME}<#elseif autoUserLogin?has_content>${autoUserLogin.userLoginId}</#if>"/>
+                </div>
+              </div>
+            </div>
+            <input type="submit" class="btn btn-primary" name="GET_PASSWORD_HINT" value="${uiLabelMap.CommonGetPasswordHint}"/>
+            <input type="submit" class="btn btn-default" name="EMAIL_PASSWORD" value="${uiLabelMap.CommonEmailPassword}"/>
+          </form>
+          </div>
+        </div>
+      </div>
+
 <#--    
 <div class="screenlet">
   <h3>${uiLabelMap.CommonNewUser}</h3>
@@ -139,7 +184,8 @@ under the License.
   </form>
 </div>
 -->
-<div class="endcolumns">&nbsp;</div>
+  </div>
+</div>
 
 <script language="JavaScript" type="text/javascript">
   <#if autoUserLogin?has_content>document.loginform.PASSWORD.focus();</#if>

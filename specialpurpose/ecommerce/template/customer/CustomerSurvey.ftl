@@ -17,19 +17,16 @@ specific language governing permissions and limitations
 under the License.
 -->
 
-<div class="screenlet">
-  <div class="screenlet-title-bar">
-    <div class="h3">${survey.surveyName}</div>
-  </div>
-  <div class="screenlet-body">
-  <#-- Render the survey -->
-  <#if surveyWrapper?has_content>
-    <form method="post" enctype="multipart/form-data" action="<@ofbizUrl>profilesurvey/profilesurvey</@ofbizUrl>"
-        style="margin: 0;">
-      ${surveyWrapper.render()}
-    </form>
-  <#else>
-    <h1>${uiLabelMap.OrderNothingToDoHere}</h1>
-  </#if>
-  </div>
+<div class="panel panel-default">
+  <div class="panel-heading">${survey.surveyName}</div>
+  <div class="panel-body">
+        <#-- Render the survey -->
+        <#if surveyWrapper?has_content>
+            <form method="post" enctype="multipart/form-data" action="<@ofbizUrl>profilesurvey/profilesurvey</@ofbizUrl>" style="margin: 0;">
+              ${surveyWrapper.render()}
+            </form>
+        <#else>
+            <h1>${uiLabelMap.OrderNothingToDoHere}</h1>
+        </#if>
+    </div>
 </div>

@@ -39,6 +39,10 @@ under the License.
 
                 <!-- The default (main) java scripts -->
                 <!-- NOTE: this should be included on each screen that uses it to avoid including it in all screens: -->
+                <set field="layoutSettings.styleSheets[+0]" value="/images/bootstrap/css/style.css" global="true" />
+                <set field="layoutSettings.styleSheets[+0]" value="/images/bootstrap/css/bootstrap.min.css" global="true" />
+                <set field="layoutSettings.styleSheets[+0]" value="/images/fontawesome/font-awesome.css" global="true" />
+
                 <set field="layoutSettings.javaScripts[]" value="/images/OfbizUtil.js" global="true"/>
                 <set field="initialLocaleComplete" type="String" value="${groovy:parameters?.userLogin?.lastLocale}" default-value="${groovy:locale.toString()}"/>
                 <set field="layoutSettings.javaScripts[+0]" value="${groovy: org.apache.ofbiz.common.JsLanguageFilesMapping.dateTime.getFilePath(initialLocaleComplete)}" global="true"/>
@@ -51,6 +55,7 @@ under the License.
                 <set field="layoutSettings.javaScripts[]" value="/images/jquery/plugins/Readmore.js-master/readmore.js" global="true"/>
                 <set field="layoutSettings.javaScripts[]" value="/images/jquery/plugins/jquery-jgrowl/1.4.1/jquery.jgrowl.min.js" global="true"/>
                 <set field="layoutSettings.styleSheets[+0]" value="/images/jquery/plugins/jquery-jgrowl/1.4.1/jquery.jgrowl.min.css" global="true" />
+                <set field="layoutSettings.javaScripts[+1]" value="/images/bootstrap/js/bootstrap.min.js" global="true"/>
 
                 <script location="component://ecommerce/groovyScripts/EcommerceSetup.groovy"/>
 
@@ -69,33 +74,28 @@ under the License.
                 <set field="layoutSettings.javaScripts[]" value="/images/miscAjaxFunctions.js" global="true" />
             </actions>
             <widgets>
-               <section>
-                  <condition>
-                     <not><if-empty field="globalContext.productStore"/></not>
-                  </condition>
-                  <widgets>
-                     <platform-specific><html><html-template location="component://ecommerce/template/includes/HeaderHead.ftl"/></html></platform-specific>
-                     <platform-specific><html><html-template location="component://common/template/includes/OpenHtmlBody.ftl"/></html></platform-specific>
-                     <!-- render header -->
-                     <container id="header"><platform-specific><html><html-template location="${headerTemplateLocation}"/></html></platform-specific></container>
+                <section>
+                    <condition>
+                       <not><if-empty field="globalContext.productStore"/></not>
+                    </condition>
+                    <widgets>
+                        <platform-specific><html><html-template location="component://ecommerce/template/includes/HeaderHead.ftl"/></html></platform-specific>
+                        <platform-specific><html><html-template location="component://ecommerce/template/includes/OpenHtmlBody.ftl"/></html></platform-specific>
+                        <!-- render header -->
+                        <platform-specific><html><html-template location="${headerTemplateLocation}"/></html></platform-specific>
 
-                     <container id="ecom-mainarea">
-                        <!-- by default will render left-bar only if left/rightbarScreenName value not empty -->
-                        <container id="div1" style="left"><include-screen name="${leftbarScreenName}" location="${leftbarScreenLocation}"/></container>
-                        <container id="div2" style="right"><include-screen name="${rightbarScreenName}" location="${rightbarScreenLocation}"/></container>
+                        <container style="row">
+                            <platform-specific><html><html-template location="component://ecommerce/template/LeftBarContainer.ftl"/></html></platform-specific>
+                            <platform-specific><html><html-template location="component://ecommerce/template/RightBarContainer.ftl"/></html></platform-specific>
 
-                        <container id="div3" style="${MainColumnStyle}">
-                           <!-- render messages -->
-                           <platform-specific><html><html-template location="component://common/template/includes/Messages.ftl"/></html></platform-specific>
-                           <decorator-section-include name="body"/>
+                            <!-- render messages -->
+                            <platform-specific><html><html-template location="component://common/template/includes/Messages.ftl"/></html></platform-specific>
+                            <decorator-section-include name="body"/>
                         </container>
 
-                        <container id="div4" style="endcolumns"/>
-                    </container>
-
-                    <!-- render footer -->
-                    <container id="footer"><platform-specific><html><html-template location="${footerTemplateLocation}"/></html></platform-specific></container>
-                    <platform-specific><html><html-template location="component://common/template/includes/CloseHtmlBody.ftl"/></html></platform-specific>
+                        <!-- render footer -->
+                        <platform-specific><html><html-template location="${footerTemplateLocation}"/></html></platform-specific>
+                        <platform-specific><html><html-template location="component://ecommerce/template/includes/CloseHtmlBody.ftl"/></html></platform-specific>
                   </widgets>
                   <fail-widgets>
                      <label text="A Product Store has not been defined for this ecommerce site.  A Product Store can be created using the ofbizsetup wizard."/>
@@ -109,34 +109,14 @@ under the License.
     <screen name="leftbar">
         <section>
             <widgets>
-                    <include-screen name="choosecatalog" location="component://ecommerce/widget/CatalogScreens.xml"/>
-                    <include-screen name="keywordsearchbox" location="component://ecommerce/widget/CatalogScreens.xml"/>
-                    <!--include-screen name="sidedeepcategory" location="component://ecommerce/widget/CatalogScreens.xml"/-->
-                    <include-screen name="productCategories" location="component://ecommerce/widget/CatalogScreens.xml"/>
-                    <include-screen name="LayeredNavBar" location="component://ecommerce/widget/CatalogScreens.xml"/>
-                    <include-screen name="minireorderprods" location="component://ecommerce/widget/CatalogScreens.xml"/>
-                    <include-screen name="signupforcontactlist" location="component://ecommerce/widget/EmailContactListScreens.xml"/>
-                    <include-screen name="minipoll" location="component://ecommerce/widget/ContentScreens.xml"/>
-                    <include-screen name="forums" location="component://ecommerce/widget/ForumScreens.xml"/>
-                    <include-screen name="content_categories" location="component://ecommerce/widget/ContentScreens.xml"/>
-                    <include-screen name="blogs" location="component://ecommerce/widget/blog/BlogScreens.xml"/>
+                <platform-specific><html><html-template location="component://ecommerce/template/LeftBarContainer.ftl"/></html></platform-specific>
             </widgets>
         </section>
     </screen>
     <screen name="rightbar">
         <section>
             <widgets>
-                    <include-screen name="language"/>
-                    <include-screen name="minicart" location="component://ecommerce/widget/CartScreens.xml"/>
-                    <include-screen name="compareproductslist" location="component://order/widget/ordermgr/OrderEntryCatalogScreens.xml"/>
-                    <include-screen name="minipromotext" location="component://ecommerce/widget/CartScreens.xml"/>
-                    <include-screen name="miniassocprods" location="component://ecommerce/widget/CatalogScreens.xml"/>
-                    <include-screen name="factoids" location="component://ecommerce/widget/ContentScreens.xml"/>
-                    <include-screen name="minilastviewedcategories" location="component://ecommerce/widget/CatalogScreens.xml"/>
-                    <include-screen name="minilastviewedproducts" location="component://ecommerce/widget/CatalogScreens.xml"/>
-                    <include-screen name="minilastproductsearches" location="component://ecommerce/widget/CatalogScreens.xml"/>
-                    <include-screen name="recentlyviewed" location="component://ecommerce/widget/ContentScreens.xml"/>
-                    <include-screen name="populartags" location="component://ecommerce/widget/CatalogScreens.xml"/>
+                <platform-specific><html><html-template location="component://ecommerce/template/RightBarContainer.ftl"/></html></platform-specific>
             </widgets>
         </section>
     </screen>

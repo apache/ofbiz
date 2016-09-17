@@ -16,11 +16,11 @@ KIND, either express or implied.  See the License for the
 specific language governing permissions and limitations
 under the License.
 -->
-<div class="screenlet">
-    <div class="screenlet-title-bar">
-        <div class="h3">${uiLabelMap.OrderRequestRoles}</div>
+<div class="panel panel-default">
+    <div class="panel-heading">
+        ${uiLabelMap.OrderRequestRoles}
     </div>
-    <div class="screenlet-body">
+    <div class="panel-body">
         <table cellspacing="0" class="basic-table">
          <#assign row = 1>
          <#list requestParties as requestParty>
