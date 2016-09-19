@@ -97,7 +97,6 @@ under the License.
                 <parameter param-name="partyQualTypeId"/>
             </hyperlink>
         </field>
-        <field name="submitButton" title="${uiLabelMap.CommonSubmit}" widget-style="smallSubmit"><submit/></field>
     </form>
     <form name="AddPartyQual" type="single" target="createPartyQual"
         header-row-style="header-row" default-table-style="basic-table">
