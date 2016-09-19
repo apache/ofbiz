@@ -23,13 +23,9 @@ under the License.
 <#if (orderHeader.externalId)?exists && (orderHeader.externalId)?has_content >
   <#assign externalOrder = "(" + orderHeader.externalId + ")"/>
 </#if>
-
-<div id="orderHeader">
-<#-- left side -->
-<div class="columnLeft">
-<div class="screenlet">
-  <h3>
-    <#if maySelectItems?default("N") == "Y" && returnLink?default("N") == "Y" && (orderHeader.statusId)?if_exists == "ORDER_COMPLETED" && roleTypeId?if_exists == "PLACING_CUSTOMER">
+    <div class="screenlet">
+      <h3>
+      <#if maySelectItems?default("N") == "Y" && returnLink?default("N") == "Y" && (orderHeader.statusId)! == "ORDER_COMPLETED" && roleTypeId! == "PLACING_CUSTOMER">
       <a href="<@ofbizUrl fullPath="true">makeReturn?orderId=${orderHeader.orderId}</@ofbizUrl>" class="submenutextright">${uiLabelMap.OrderRequestReturn}</a>
     </#if>
     ${uiLabelMap.OrderOrder}
@@ -226,15 +222,15 @@ under the License.
           </#list>
         </li>
       </#if>
-    </ul>
-  </#if>
-</div>
-</div>
-<#-- right side -->
-<div class="screenlet columnRight">
-  <#if orderItemShipGroups?has_content>
-    <h3>${uiLabelMap.OrderShippingInformation}</h3>
-    <#-- shipping address -->
+        </ul>
+      </#if>
+    </div>
+
+  <#-- right side -->
+  <div class="screenlet">
+    <#if orderItemShipGroups?has_content>
+      <h3>${uiLabelMap.OrderShippingInformation}</h3>
+      <#-- shipping address -->
     <#assign groupIdx = 0>
     <#list orderItemShipGroups as shipGroup>
       <#if orderHeader?has_content>
@@ -358,8 +354,6 @@ under the License.
       </ul>
       <#assign groupIdx = groupIdx + 1>
     </#list><#-- end list of orderItemShipGroups -->
-  </#if>
-</div>
+    </#if>
+  </div>
 
-<div class="clearBoth"></div>
-</div>
