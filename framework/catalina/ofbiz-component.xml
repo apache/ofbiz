@@ -116,7 +116,7 @@ under the License.
             <property name="address" value="0.0.0.0"/>
             <property name="bufferSize" value="2048"/>
             <property name="compression" value="on"/>
-            <property name="compressableMimeType" value="text/html,text/xml,text/plain,text/javascript,text/css"/>
+            <property name="compressableMimeType" value="text/html,text/xml,text/plain,text/javascript,text/css,application/json"/>
             <property name="noCompressionUserAgents" value=""/>
             <property name="connectionLinger" value="-1"/>
             <property name="connectionTimeout" value="60000"/>
@@ -154,7 +154,7 @@ under the License.
             <property name="address" value="0.0.0.0"/>
             <property name="bufferSize" value="2048"/>
             <property name="compression" value="on"/>
-            <property name="compressableMimeType" value="text/html,text/xml,text/plain,text/javascript,text/css"/>
+            <property name="compressableMimeType" value="text/html,text/xml,text/plain,text/javascript,text/css,application/json"/>
             <property name="noCompressionUserAgents" value=""/>
             <property name="connectionLinger" value="-1"/>
             <property name="connectionTimeout" value="60000"/>
@@ -274,7 +274,7 @@ under the License.
             <property name="acceptCount" value="10"/>
             <property name="address" value="0.0.0.0"/>
             <property name="bufferSize" value="2048"/>
-            <property name="compressableMimeType" value="text/html,text/xml,text/plain"/>
+            <property name="compressableMimeType" value="text/html,text/xml,text/plain,text/javascript,text/css,application/json"/>
             <property name="compression" value="on"/>
             <property name="connectionLinger" value="-1"/>
             <property name="connectionTimeout" value="60000"/>
@@ -312,7 +312,7 @@ under the License.
             <property name="acceptCount" value="10"/>
             <property name="address" value="0.0.0.0"/>
             <property name="bufferSize" value="2048"/>
-            <property name="compressableMimeType" value="text/html,text/xml,text/plain"/>
+            <property name="compressableMimeType" value="text/html,text/xml,text/plain,text/javascript,text/css,application/json"/>
             <property name="compression" value="on"/>
             <property name="connectionLinger" value="-1"/>
             <property name="connectionTimeout" value="60000"/>
