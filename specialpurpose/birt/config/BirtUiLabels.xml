@@ -78,10 +78,6 @@
         <value xml:lang="en">Net Before Overhead Report</value>
         <value xml:lang="fr">Net avant frais généraux</value>
     </property>
-    <property key="BirtOrderReportOrderByReferrer">
-        <value xml:lang="en">Order By Referrer</value>
-        <value xml:lang="fr">Commandes par apporteurs d'affaires</value>
-    </property>
     <property key="BirtOrderReportProductDemandReport">
         <value xml:lang="en">Product Demand Report</value>
         <value xml:lang="fr">Demandes par produit</value>
