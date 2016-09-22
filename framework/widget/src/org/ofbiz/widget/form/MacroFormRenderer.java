@@ -22,7 +22,6 @@ import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
 import java.io.StringWriter;
-import java.net.URLEncoder;
 import java.rmi.server.UID;
 import java.sql.Timestamp;
 import java.util.HashSet;
@@ -30,15 +29,13 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.WeakHashMap;
-import java.util.Map.Entry;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import javolution.util.FastList;
 
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.StringUtil;
@@ -83,6 +80,7 @@ import com.ibm.icu.util.Calendar;
 import freemarker.core.Environment;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
+import javolution.util.FastList;
 
 /**
  * Widget Library - Form Renderer implementation based on Freemarker macros
@@ -2762,8 +2760,6 @@ public class MacroFormRenderer implements FormStringRenderer {
             }
             String newQueryString = sb.toString();
             String urlPath = UtilHttp.removeQueryStringFromTarget(paginateTarget);
-            linkUrl = rh.makeLink(this.request, this.response, urlPath.concat(newQueryString));
-            linkUrl = URLEncoder.encode(linkUrl, "UTF-8");
         }
         StringWriter sr = new StringWriter();
         sr.append("<@renderSortField ");
