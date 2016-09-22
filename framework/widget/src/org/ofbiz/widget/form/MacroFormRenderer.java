@@ -2760,6 +2760,7 @@ public class MacroFormRenderer implements FormStringRenderer {
             }
             String newQueryString = sb.toString();
             String urlPath = UtilHttp.removeQueryStringFromTarget(paginateTarget);
+            linkUrl = rh.makeLink(this.request, this.response, urlPath.concat(newQueryString));
         }
         StringWriter sr = new StringWriter();
         sr.append("<@renderSortField ");
