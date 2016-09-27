@@ -179,7 +179,7 @@ under the License.
                 <set field="entityName" value="PartyRoleAndPartyDetail"/>
                 <set field="parameters.roleTypeId" value="CONTACT"/>
                 <set field="searchFields" value="[partyId, firstName, middleName, lastName]"/>
-                <script location="component://party/groovyScripts/party/StatusCondition.groovy"/>
+                <script location="component://party/webapp/partymgr/WEB-INF/actions/party/StatusCondition.groovy"/>
                 <set field="andCondition" value="${groovy: return org.ofbiz.entity.condition.EntityCondition.makeCondition([ 
                     org.ofbiz.entity.condition.EntityCondition.makeCondition('roleTypeId', 'CONTACT')])}"/>
             </actions>
