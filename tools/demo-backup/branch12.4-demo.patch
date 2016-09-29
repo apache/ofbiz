@@ -60,7 +60,7 @@ Index: framework/webapp/config/url.properties
  # HTTPS Port (Secure port)
 -port.https.enabled=Y
 -port.https=8443
-+port.https.enabled=N
++port.https.enabled=Y
 +port.https=28443
  force.https.host=
  
