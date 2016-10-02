@@ -579,10 +579,11 @@ public class UtilProperties implements Serializable {
         if (bundle == null) return name;
 
         String value = null;
-        try {
+        if (bundle.containsKey(name)) {
             value = bundle.getString(name);
-        } catch (Exception e) {
-            //Debug.logInfo(e, module);
+        } else {
+            Debug.logInfo(name + " misses in " + resource + " for locale " + locale, module);
+            return name;
         }
         return value == null ? name : value.trim();
     }
