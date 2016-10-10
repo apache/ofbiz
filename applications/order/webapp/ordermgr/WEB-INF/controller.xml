@@ -1876,6 +1876,13 @@ under the License.
         <security https="true" auth="true"/>
         <response name="success" type="view" value="orderreportlist"/>
     </request-map>
+    
+    <request-map uri="deleteCustomerTaxAuthInfo">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="deletePartyTaxAuthInfo"/>
+        <response name="success" type="view" value="viewprofile"/>
+        <response name="error" type="view" value="viewprofile"/>
+    </request-map>
 
 
     <view-map name="orderreportlist" type="screen" page="component://order/widget/ordermgr/OrderReportScreens.xml#OrderReportList"/>
