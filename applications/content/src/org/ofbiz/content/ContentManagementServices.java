@@ -21,14 +21,11 @@ package org.ofbiz.content;
 import java.math.BigDecimal;
 import java.nio.ByteBuffer;
 import java.sql.Timestamp;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
-
-import javolution.util.FastList;
-import javolution.util.FastMap;
-import javolution.util.FastSet;
 
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.StringUtil;
@@ -57,6 +54,10 @@ import org.ofbiz.service.ServiceAuthException;
 import org.ofbiz.service.ServiceUtil;
 
 import com.ibm.icu.util.Calendar;
+
+import javolution.util.FastList;
+import javolution.util.FastMap;
+import javolution.util.FastSet;
 
 /**
  * ContentManagementServices Class
@@ -668,6 +669,16 @@ public class ContentManagementServices {
               }
           } else if (dataResourceTypeId.equals("SHORT_TEXT")) {
           } else if (dataResourceTypeId.startsWith("SURVEY")) {
+          } else if (dataResourceTypeId.indexOf("_FILE") >=0) {
+              Map<String, Object> uploadImage = new HashMap<String, Object>();
+              uploadImage.put("userLogin", userLogin);
+              uploadImage.put("dataResourceId", dataResourceId);
+              uploadImage.put("dataResourceTypeId", dataResourceTypeId);
+              uploadImage.put("rootDir", context.get("objectInfo"));
+              uploadImage.put("uploadedFile", imageDataBytes);
+              uploadImage.put("_uploadedFile_fileName", (String) context.get("_imageData_fileName"));
+              uploadImage.put("_uploadedFile_contentType", (String) context.get("_imageData_contentType"));
+              dispatcher.runSync("attachUploadToDataResource", uploadImage);
           } else {
               // assume ELECTRONIC_TEXT
               if (UtilValidate.isNotEmpty(textData)) {
@@ -701,6 +712,16 @@ public class ContentManagementServices {
               }
           } else if (dataResourceTypeId.equals("SHORT_TEXT")) {
           } else if (dataResourceTypeId.startsWith("SURVEY")) {
+          } else if (dataResourceTypeId.indexOf("_FILE") >=0) {
+              Map<String, Object> uploadImage = new HashMap<String, Object>();
+              uploadImage.put("userLogin", userLogin);
+              uploadImage.put("dataResourceId", dataResourceId);
+              uploadImage.put("dataResourceTypeId", dataResourceTypeId);
+              uploadImage.put("rootDir", context.get("objectInfo"));
+              uploadImage.put("uploadedFile", imageDataBytes);
+              uploadImage.put("_uploadedFile_fileName", (String) context.get("_imageData_fileName"));
+              uploadImage.put("_uploadedFile_contentType", (String) context.get("_imageData_contentType"));
+              dispatcher.runSync("attachUploadToDataResource", uploadImage);
           } else {
               if (UtilValidate.isNotEmpty(textData) || "true".equalsIgnoreCase(forceElectronicText)) {
                   fileContext.put("dataResourceId", dataResourceId);
@@ -712,17 +733,6 @@ public class ContentManagementServices {
                   }
               }
           }
-      }
-      if (dataResourceTypeId.indexOf("_FILE") >=0) {
-          Map<String, Object> uploadImage = FastMap.newInstance();
-          uploadImage.put("userLogin", userLogin);
-          uploadImage.put("dataResourceId", dataResourceId);
-          uploadImage.put("dataResourceTypeId", dataResourceTypeId);
-          uploadImage.put("rootDir", context.get("objectInfo"));
-          uploadImage.put("uploadedFile", imageDataBytes);
-          uploadImage.put("_uploadedFile_fileName", (String) context.get("_imageData_fileName"));
-          uploadImage.put("_uploadedFile_contentType", (String) context.get("_imageData_contentType"));
-          dispatcher.runSync("attachUploadToDataResource", uploadImage);
       }
       result.put("dataResourceId", dataResourceId);
       result.put("drDataResourceId", dataResourceId);
