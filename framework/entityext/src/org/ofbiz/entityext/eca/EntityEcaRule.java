@@ -26,6 +26,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.ofbiz.base.util.Debug;
+import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.base.util.UtilXml;
 import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericEntity;
@@ -134,8 +135,10 @@ public final class EntityEcaRule implements java.io.Serializable {
         if( !fieldsToLoad.isEmpty()) {
             Delegator delegator = dctx.getDelegator();
             GenericValue oldValue =  delegator.findOne(entityName, value.getPrimaryKey(), false);
-            for( String fieldName : fieldsToLoad) {
-                value.put(fieldName, oldValue.get(fieldName));
+            if(UtilValidate.isNotEmpty(oldValue)) {
+                for (String fieldName : fieldsToLoad) {
+                    value.put(fieldName, oldValue.get(fieldName));
+                }
             }
         }
 
