@@ -21,7 +21,7 @@ under the License.
     <div class="panel-heading">${uiLabelMap.PageTitleDigitalProductList}</div>
     <div class="panel-body">
        <div>&nbsp;<a href="<@ofbizUrl>digitalproductedit</@ofbizUrl>" class="buttontext">${uiLabelMap.EcommerceDigitalNewProduct}</a></div>
-        <table width="100%" cellpadding="1" cellspacing="0" border="0">
+        <table class="table table-striped" cellpadding="1" cellspacing="0" border="0">
           <tr>
             <td width="30%">
               <div><b>${uiLabelMap.ProductProductName}</b></div>

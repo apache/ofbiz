@@ -203,7 +203,7 @@ under the License.
       <form method="post" action="<@ofbizUrl>modifycart</@ofbizUrl>" name="cartform">
         <fieldset>
           <input type="hidden" name="removeSelected" value="false" />
-          <table>
+          <table class="table table-striped">
             <thead>
               <tr>
                 <th></th>
@@ -224,7 +224,7 @@ under the License.
                 </#if>
                 <#if fixedAssetExist == true>
                   <td>
-                    <table>
+                    <table class="table table-striped">
                       <tr>
                         <td>- ${uiLabelMap.EcommerceStartDate} -</td>
                         <td>- ${uiLabelMap.EcommerceNbrOfDays} -</td>
@@ -400,7 +400,7 @@ under the License.
                     <#if cartLine.getIsPromo() || cartLine.getShoppingListId()??>
                       <#if fixedAssetExist == true>
                         <#if cartLine.getReservStart()??>
-                          <table >
+                          <table class="table table-striped">
                             <tr>
                               <td>&nbsp;</td>
                               <td>${cartLine.getReservStart()?string("yyyy-mm-dd")}</td>
@@ -410,7 +410,7 @@ under the License.
                               <td>${cartLine.getReservPersons()?string.number}</td>
                               <td>
                         <#else>
-                          <table >
+                          <table class="table table-striped">
                             <tr>
                               <td >--</td>
                               <td>--</td>
@@ -426,7 +426,7 @@ under the License.
                     <#else><#-- Is Promo or Shoppinglist -->
                       <#if fixedAssetExist == true>
                         <#if cartLine.getReservStart()??>
-                          <table>
+                          <table class="table table-striped">
                             <tr>
                               <td>&nbsp;</td>
                               <td>
@@ -446,7 +446,7 @@ under the License.
                               </td>
                               <td>
                         <#else>
-                          <table>
+                          <table class="table table-striped">
                             <tr>
                               <td>--</td>
                               <td>--</td>
@@ -481,7 +481,7 @@ under the License.
               </#list>
             </tbody>
           </table>
-          <table>
+          <table class="table table-striped">
             <#if shoppingCart.getAdjustments()?has_content>
               <tr>
                 <th>${uiLabelMap.CommonSubTotal}:</th>

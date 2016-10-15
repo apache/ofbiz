@@ -26,7 +26,7 @@ under the License.
     <h2>${uiLabelMap.PartyCreateNewContactInfo}</h2>
     <form method="post" action='<@ofbizUrl>editcontactmechnosave</@ofbizUrl>' name="createcontactmechform">
       <div>
-        <table width="90%" border="0" cellpadding="2" cellspacing="0">
+        <table class="table table-striped" border="0" cellpadding="2" cellspacing="0">
           <tr>
             <td>${uiLabelMap.PartySelectContactType}:</td>
             <td>
@@ -52,7 +52,7 @@ under the License.
     <h2>${uiLabelMap.PartyCreateNewContactInfo}</h2>
     <a href='<@ofbizUrl>${donePage}</@ofbizUrl>' class="button">${uiLabelMap.CommonGoBack}</a>
     <a href="javascript:document.editcontactmechform.submit()" class="button">${uiLabelMap.CommonSave}</a>
-    <table width="90%" border="0" cellpadding="2" cellspacing="0">
+    <table class="table table-striped" border="0" cellpadding="2" cellspacing="0">
     <form method="post" action='<@ofbizUrl>${reqName}</@ofbizUrl>' name="editcontactmechform" id="editcontactmechform">
     <div>
       <input type='hidden' name='contactMechTypeId' value='${contactMechTypeId}'/>
@@ -72,12 +72,12 @@ under the License.
       <h2>${uiLabelMap.PartyEditContactInfo}</h2>
       <a href="<@ofbizUrl>${donePage}</@ofbizUrl>" class="button">${uiLabelMap.CommonGoBack}</a>
       <a href="javascript:document.editcontactmechform.submit()" class="button">${uiLabelMap.CommonSave}</a>
-    <table width="90%" border="0" cellpadding="2" cellspacing="0">
+    <table class="table table-striped" border="0" cellpadding="2" cellspacing="0">
       <tr>
         <td align="right" valign="top">${uiLabelMap.PartyContactPurposes}</td>
         <td>&nbsp;</td>
         <td>
-          <table border="0" cellspacing="1">
+          <table class="table table-striped" border="0" cellspacing="1">
             <#list partyContactMechPurposes! as partyContactMechPurpose>
               <#assign contactMechPurposeType = partyContactMechPurpose.getRelatedOne("ContactMechPurposeType", true) />
               <tr>

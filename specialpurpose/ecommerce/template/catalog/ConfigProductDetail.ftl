@@ -161,7 +161,7 @@ ${virtualJavaScript!}
 </script>
 
 <div id="productdetail">
-<table>
+<table class="table table-striped">
 <#-- Category next/previous -->
 <#if category??>
   <tr>
@@ -185,7 +185,7 @@ ${virtualJavaScript!}
   </tr>
 <#-- Product image/name/price -->
   <tr>
-    <td valign="top" width="0">
+    <td valign="top">
     <#assign productLargeImageUrl = productContentWrapper.get("LARGE_IMAGE_URL", "url")!>
     <#-- remove the next two lines to always display the virtual image first (virtual images must exist) -->
     <#if firstLargeImage?has_content>
@@ -429,7 +429,7 @@ ${virtualJavaScript!}
       <#assign imageKeys = variantSample.keySet()>
       <#assign imageMap = variantSample>
       <p>&nbsp;</p>
-      <table cellspacing="0" cellpadding="0">
+      <table class="table table-striped" cellspacing="0" cellpadding="0">
         <tr>
           <#assign maxIndex = 7>
           <#assign indexer = 0>
@@ -488,7 +488,7 @@ ${virtualJavaScript!}
         <input type='hidden' name='quantity' value='1'/>
 
         <input type='hidden' name='product_id' value='${product.productId}'/>
-        <table>
+        <table class="table table-striped">
           <tr>
             <td>
               <div>
@@ -684,7 +684,7 @@ ${virtualJavaScript!}
     <#assign postedPerson = postedUserLogin.getRelatedOne("Person", false)!>
     <tr>
       <td colspan="2">
-        <table border="0" cellpadding="0" cellspacing='0'>
+        <table class="table table-striped" border="0" cellpadding="0" cellspacing='0'>
           <tr>
             <td>
               <div>${uiLabelMap.CommonBy}:
@@ -788,7 +788,7 @@ ${virtualJavaScript!}
 <#assign listIndex = 1>
 ${setRequestAttribute("productValue", productValue)}
 
-  <table>
+  <table class="table table-striped">
   <#-- obsolete -->
   <@associated assocProducts=obsoleteProducts beforeName="" showName="Y"
       afterName=" is made obsolete by these products:" formNamePrefix="obs" targetRequestName=""/>

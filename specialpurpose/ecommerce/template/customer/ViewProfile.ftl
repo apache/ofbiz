@@ -239,7 +239,7 @@ under the License.
       <tr>
         <td>
           <#if paymentMethodValueMaps?has_content>
-          <table width="100%" cellpadding="2" cellspacing="0" border="0">
+          <table cellpadding="2" cellspacing="0" border="0">
             <#list paymentMethodValueMaps as paymentMethodValueMap>
               <#assign paymentMethod = paymentMethodValueMap.paymentMethod! />
               <#assign creditCard = paymentMethodValueMap.creditCard! />

@@ -21,7 +21,7 @@ under the License.
 <div class="panel panel-default">
   <div class="panel-heading">${uiLabelMap.ProductReviews}</div>
   <div class="panel-body">
-    <table width="100%" border="0" cellpadding="1">
+    <table class="table table-striped" border="0" cellpadding="1">
       <tr>
         <th>${uiLabelMap.EcommerceSentDate}</th>
         <th>${uiLabelMap.ProductProductId}</th>

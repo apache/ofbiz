@@ -19,20 +19,20 @@ under the License.
 
 
 <form method="post"  action="<@ofbizUrl>searchContent</@ofbizUrl>"  name="searchQuery">
-  <table border="0" cellpadding="2" cellspacing="0">
+  <table class="table table-striped" border="0" cellpadding="2" cellspacing="0">
     <tr>
-      <td width="20%" align="right">
+      <td align="right">
         <span class="tableheadtext">${uiLabelMap.EcommerceEnterQueryParameters}</span>
       </td>
       <td>&nbsp;</td>
-      <td width="80%">
+      <td>
         <input type="text" class="inputBox" name="queryLine" size="60"/>
       </td>
     </tr>
     <tr>
       <!-- category form -->
     <tr>
-    <table>
+    <table class="table table-striped">
       <tr>
         <td align="right" valign="middle">
           <div>${uiLabelMap.ProductFeatures}:</div>
@@ -86,9 +86,9 @@ under the License.
           </td>
         </tr>
       </#if>
-      <td width="20%" align="right">&nbsp;</td>
+      <td align="right">&nbsp;</td>
       <td>&nbsp;</td>
-      <td width="80%" colspan="4">
+      <td colspan="4">
         <input type="submit" class="smallSubmit" name="submitButton" value="${uiLabelMap.CommonQuery}"/>
       </td>
       </tr>

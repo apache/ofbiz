@@ -60,7 +60,7 @@ function toggleBillingAccount(box) {
     <div class="panel panel-default">
         <div class="panel-heading">${uiLabelMap.OrderWhereShallWeShipIt}?</div>
         <div class="panel-body">
-            <table class="table">
+            <table class="table table-striped">
               <tr>
                 <td colspan="2">
                   <a href="<@ofbizUrl>splitship</@ofbizUrl>" class="buttontext">${uiLabelMap.OrderSplitShipment}</a>
@@ -135,7 +135,7 @@ function toggleBillingAccount(box) {
   </fieldset>
 </form>
 
-<table width="100%">
+<table class="table table-striped">
   <tr valign="top">
     <td>
       &nbsp;<a href="javascript:submitForm(document.checkoutInfoForm, 'CS', '');" class="buttontextbig">${uiLabelMap.OrderBacktoShoppingCart}</a>

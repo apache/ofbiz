@@ -36,7 +36,7 @@ under the License.
               <li><a href="<@ofbizUrl>onePageCheckout</@ofbizUrl>" class="button">${uiLabelMap.EcommerceOnePageCheckout}</a></li>
             </ul>
           </#if>
-          <table class="table">
+          <table class="table table-striped">
             <thead>
               <tr>
                 <th>${uiLabelMap.OrderQty}</th>

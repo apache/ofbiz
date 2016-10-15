@@ -87,7 +87,7 @@ under the License.
         style="position: relative; margin-top: ${height}px;"</#if>
         class="productsummary-container<#if (numCol?int > 1)> matrix</#if>">
       <#if (numCol?int > 1)>
-        <table>
+        <table class="table table-striped">
       </#if>
       <#list productIds as productId>
         <#if (numCol?int == 1)>

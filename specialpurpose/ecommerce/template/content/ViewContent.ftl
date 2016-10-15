@@ -63,13 +63,13 @@ under the License.
     <br/>
     <h1>${uiLabelMap.EcommerceContentFor} [${subContentId}] ${subContent.contentName!}
       - ${subContent.description!}:</h1><br/>
-    <table border="0" class="blogtext">
+    <table class="table table-striped" border="0" class="blogtext">
       <tr>
-        <td width="40">&nbsp;</td>
+        <td>&nbsp;</td>
         <td>
           <@renderSubContentCache subContentId=subContentId />
         </td>
-        <td width="40" valign="bottom">
+        <td valign="bottom">
         <#--
         <@wrapSubContentCache subContentId=subContentId wrapTemplateId="WRAP_VIEW" >
         </@wrapSubContentCache >
@@ -108,7 +108,7 @@ under the License.
   <#local csv = "">
   <#local counter = 0>
   <#local len = trail?size>
-  <table border="0" cellspacing="4">
+  <table class="table table-striped" border="0" cellspacing="4">
     <#list trail as content>
       <#if counter < (len - endIndexOffset) && startIndex <= counter >
         <#if 0 < counter >

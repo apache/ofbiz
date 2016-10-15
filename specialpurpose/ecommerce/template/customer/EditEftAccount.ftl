@@ -34,53 +34,53 @@ under the License.
   <a href="<@ofbizUrl>${donePage}</@ofbizUrl>" class="button">${uiLabelMap.CommonGoBack}</a>&nbsp;
   <a href="javascript:document.editeftaccountform.submit()" class="button">${uiLabelMap.CommonSave}</a>
   <p/>
-  <table width="90%" border="0" cellpadding="2" cellspacing="0">
+  <table class="table table-striped" border="0" cellpadding="2" cellspacing="0">
     <tr>
-      <td width="26%" align="right" valign="top">
+      <td align="right" valign="top">
         <div>${uiLabelMap.AccountingNameOnAccount}</div>
       </td>
-      <td width="5">&nbsp;</td>
-      <td width="74%">
+      <td>&nbsp;</td>
+      <td>
         <input type="text" class="inputBox" size="30" maxlength="60" name="nameOnAccount"
             value="${eftAccountData.nameOnAccount!}"/>*
       </td>
     </tr>
     <tr>
-      <td width="26%" align="right" valign="top">
+      <td align="right" valign="top">
         <div>${uiLabelMap.AccountingCompanyNameOnAccount}</div>
       </td>
-      <td width="5">&nbsp;</td>
-      <td width="74%">
+      <td>&nbsp;</td>
+      <td>
         <input type="text" class="inputBox" size="30" maxlength="60" name="companyNameOnAccount"
             value="${eftAccountData.companyNameOnAccount!}"/>
       </td>
     </tr>
     <tr>
-      <td width="26%" align="right" valign="top">
+      <td align="right" valign="top">
         <div>${uiLabelMap.AccountingBankName}</div>
       </td>
-      <td width="5">&nbsp;</td>
-      <td width="74%">
+      <td>&nbsp;</td>
+      <td>
         <input type="text" class="inputBox" size="30" maxlength="60"
             name="bankName"value="${eftAccountData.bankName!}"/>*
       </td>
     </tr>
     <tr>
-      <td width="26%" align="right" valign="top">
+      <td align="right" valign="top">
         <div>${uiLabelMap.AccountingRoutingNumber}</div>
       </td>
-      <td width="5">&nbsp;</td>
-      <td width="74%">
+      <td>&nbsp;</td>
+      <td>
         <input type="text" class="inputBox" size="10" maxlength="30"
             name="routingNumber" value="${eftAccountData.routingNumber!}"/>*
       </td>
     </tr>
     <tr>
-      <td width="26%" align="right" valign="top">
+      <td align="right" valign="top">
         <div>${uiLabelMap.AccountingAccountType}</div>
       </td>
-      <td width="5">&nbsp;</td>
-      <td width="74%">
+      <td>&nbsp;</td>
+      <td>
         <select name="accountType" class="selectBox">
           <option>${eftAccountData.accountType!}</option>
           <option></option>
@@ -90,42 +90,42 @@ under the License.
       </td>
     </tr>
     <tr>
-      <td width="26%" align="right" valign="top">
+      <td align="right" valign="top">
         <div>${uiLabelMap.AccountingAccountNumber}</div>
       </td>
-      <td width="5">&nbsp;</td>
-      <td width="74%">
+      <td>&nbsp;</td>
+      <td>
         <input type="text" class="inputBox" size="20" maxlength="40" name="accountNumber"
                value="${eftAccountData.accountNumber!}"/>*
       </td>
     </tr>
     <tr>
-      <td width="26%" align="right" valign="top">
+      <td align="right" valign="top">
         <div>${uiLabelMap.CommonDescription}</div>
       </td>
-      <td width="5">&nbsp;</td>
-      <td width="74%">
+      <td>&nbsp;</td>
+      <td>
         <input type="text" class="inputBox" size="30" maxlength="60" name="description"
             value="${paymentMethodData.description!}"/>
       </td>
     </tr>
     <tr>
-      <td width="26%" align="right" valign="top">
+      <td align="right" valign="top">
         <div>${uiLabelMap.PartyBillingAddress}</div>
       </td>
-      <td width="5">&nbsp;</td>
-      <td width="74%">
+      <td>&nbsp;</td>
+      <td>
         <#-- Removed because is confusing, can add but would have to come back here with all data populated as before...
         <a href="<@ofbizUrl>editcontactmech</@ofbizUrl>" class="buttontext">
           [Create New Address]</a>&nbsp;&nbsp;
         -->
-        <table width="100%" border="0" cellpadding="1">
+        <table class="table table-striped" border="0" cellpadding="1">
           <#if curPostalAddress??>
             <tr>
-              <td align="right" valign="top" width="1%">
+              <td align="right" valign="top">
                 <input type="radio" name="contactMechId" value="${curContactMechId}" checked="checked"/>
               </td>
-              <td valign="top" width="80%">
+              <td valign="top">
                 <div><b>${uiLabelMap.PartyUseCurrentAddress}:</b></div>
                 <#list curPartyContactMechPurposes as curPartyContactMechPurpose>
                   <#assign curContactMechPurposeType =
@@ -181,10 +181,10 @@ under the License.
             <#assign postalAddress = postalAddressInfo.postalAddress>
             <#assign partyContactMech = postalAddressInfo.partyContactMech>
             <tr>
-              <td align="right" valign="top" width="1%">
+              <td align="right" valign="top">
                 <input type="radio" name="contactMechId" value="${contactMech.contactMechId}"/>
               </td>
-              <td valign="top" width="80%">
+              <td valign="top">
                 <#list partyContactMechPurposes as partyContactMechPurpose>
                   <#assign contactMechPurposeType =
                       partyContactMechPurpose.getRelatedOne("ContactMechPurposeType", true)>

@@ -32,7 +32,7 @@ under the License.
     </#if>
       <input type="hidden" name="webSiteId" value="${context.webSiteId!}">
     <#if !cancel??>
-      <table>
+      <table class="table table-striped">
         <tr>
           <td>${uiLabelMap.CommonYouremail}:</td>
           <td><input type="text" name="sendFrom" size="30"/></td>

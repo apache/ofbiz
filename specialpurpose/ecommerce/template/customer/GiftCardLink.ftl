@@ -27,7 +27,7 @@ under the License.
   <#if userLogin?has_content>
     <input type="hidden" name="partyId" value="${userLogin.partyId}"/>
   </#if>
-  <table align="center">
+  <table class="table table-striped" align="center">
     <tr>
       <td colspan="2" align="center">
         <div class="tableheadtext">${uiLabelMap.AccountingPhysicalCard}</div>

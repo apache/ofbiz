@@ -16,7 +16,7 @@ KIND, either express or implied.  See the License for the
 specific language governing permissions and limitations
 under the License.
 -->
-<table>
+<table class="table table-striped">
   <tr>
     <td colspan="2">
       <h1>
@@ -27,7 +27,7 @@ under the License.
 </table>
 
 <#if sessionAttributes.lastViewedProducts?? && sessionAttributes.lastViewedProducts?has_content>
-  <table>
+  <table class="table table-striped">
     <#list sessionAttributes.lastViewedProducts as productId>
       <tr>
         <td>
@@ -39,7 +39,7 @@ under the License.
     </#list>
   </table>
 <#else>
-  <table>
+  <table class="table table-striped">
     <tr>
       <td>
         <div class='tabletext'>${uiLabelMap.ProductNotViewedAnyProducts}.</div>

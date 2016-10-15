@@ -20,7 +20,7 @@ under the License.
 <#if productCategoryList?has_content>
   <h1>Popular Categories</h1>
   <div class="productsummary-container matrix">
-    <table>
+    <table class="table table-striped">
       <tbody>
         <#list productCategoryList as childCategoryList>
           <tr>

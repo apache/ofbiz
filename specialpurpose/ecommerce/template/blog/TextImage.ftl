@@ -79,40 +79,40 @@
 <input type="hidden" name="textDataResourceId" value="${textDataResourceId}"/>
 <input type="hidden" name="imageDataResourceId" value="${imageDataResourceId}"/>
 
-<table>
+<table class="table table-striped">
   <tr>
-    <td width="10%" align="right">
+    <td align="right">
       <span class="treeHeader"> </span>
     </td>
     <td>&nbsp;</td>
-    <td width="5%" valign="top">
+    <td valign="top">
       <div class="inputBox">
         <input type="checkBox" ${text_check} name="drMimeTypeId_TEXT" value="Y"/>
         Text
       </div>
     </td>
     <td>&nbsp;</td>
-    <td width="60%">
+    <td>
       <textarea class="textAreaBox" class="inputBox" name="textData" cols="60" rows="24">
         ${textData!}
       </textarea>
     </td>
-    <td width="10%" align="right">
+    <td align="right">
       <span class="treeHeader"> </span>
     </td>
   </tr>
   <tr>
-    <td width="10%" align="right">
+    <td align="right">
       <span class="treeHeader"> </span>
     </td>
     <td>&nbsp;</td>
-    <td width="5%" valign="top">
+    <td valign="top">
       <div class="inputBox"><input type="checkbox" ${img_check} name="drMimeTypeId_IMAGE" value="Y"/>
         Image
       </div>
     </td>
     <td>&nbsp;</td>
-    <td width="60%">
+    <td>
       <div class="inputBox">
         Existing file name:
         <#if imageContent?has_content && imageContent.drObjectInfo?has_content>
@@ -128,7 +128,7 @@
       Top-left:<input type="radio" ${topleft_check} class="inputBox" name="templateId" value="BLOG_TPL_TOPLEFT"/>&nbsp;
       Top-center:<input type="radio" ${topcenter_check} class="inputBox" name="templateId" value="BLOG_TPL_TOPCENTER"/>
     </td>
-    <td width="10%" align="right">
+    <td align="right">
       <span class="treeHeader">&nbsp;</span>
     </td>
   </tr>

@@ -22,7 +22,7 @@ under the License.
         ${uiLabelMap.ProductSubscriptions}
     </div>
     <div class="panel-body">
-        <table width="100%" cellspacing="0" cellpadding="2">
+        <table class="table table-striped" cellspacing="0" cellpadding="2">
             <thead>
                 <tr class="header-row">
                     <td><div class="tableheadtext">${uiLabelMap.ProductSubscription} ${uiLabelMap.CommonId}</div></td>

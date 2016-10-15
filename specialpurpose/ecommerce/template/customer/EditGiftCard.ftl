@@ -34,13 +34,13 @@ under the License.
       <a href="<@ofbizUrl>${donePage}</@ofbizUrl>" class="button">${uiLabelMap.CommonGoBack}</a>&nbsp;
       <a href="javascript:document.editgiftcardform.submit()" class="button">${uiLabelMap.CommonSave}</a>
       <p/>
-      <table width="90%" border="0" cellpadding="2" cellspacing="0">
+      <table class="table table-striped" border="0" cellpadding="2" cellspacing="0">
         <tr>
-          <td width="26%" align="right" valign="top">
+          <td align="right" valign="top">
             <div>${uiLabelMap.AccountingCardNumber}</div>
           </td>
-          <td width="5">&nbsp;</td>
-          <td width="74%">
+          <td>&nbsp;</td>
+          <td>
             <#if giftCardData?has_content && giftCardData.cardNumber?has_content>
               <#assign pcardNumberDisplay = "">
               <#assign pcardNumber = giftCardData.cardNumber!>
@@ -60,21 +60,21 @@ under the License.
           </td>
         </tr>
         <tr>
-          <td width="26%" align="right" valign="top">
+          <td align="right" valign="top">
             <div>${uiLabelMap.AccountingPINNumber}</div>
           </td>
-          <td width="5">&nbsp;</td>
-          <td width="74%">
+          <td>&nbsp;</td>
+          <td>
             <input type="password" class="inputBox" size="10" maxlength="60" name="pinNumber"
                 value="${giftCardData.pinNumber!}"/>
           </td>
         </tr>
         <tr>
-          <td width="26%" align="right" valign="top">
+          <td align="right" valign="top">
             <div>${uiLabelMap.AccountingExpirationDate}</div>
           </td>
-          <td width="5">&nbsp;</td>
-          <td width="74%">
+          <td>&nbsp;</td>
+          <td>
             <#assign expMonth = "">
             <#assign expYear = "">
             <#if giftCardData?? && giftCardData.expireDate??>
@@ -109,11 +109,11 @@ under the License.
           </td>
         </tr>
         <tr>
-          <td width="26%" align="right" valign="top">
+          <td align="right" valign="top">
             <div>${uiLabelMap.CommonDescription}</div>
           </td>
-          <td width="5">&nbsp;</td>
-          <td width="74%">
+          <td>&nbsp;</td>
+          <td>
             <input type="text" class="inputBox" size="30" maxlength="60" name="description"
                 value="${paymentMethodData.description!}"/>
           </td>

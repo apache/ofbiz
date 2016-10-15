@@ -23,7 +23,7 @@ under the License.
 <br/>
 
 <br/>
-<table align="center">
+<table align="center" class="table table-striped">
   <#if requestAttributes.processResult??>
     <tr>
       <td colspan="2">

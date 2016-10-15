@@ -29,7 +29,7 @@ under the License.
       &nbsp;<a href="javascript:document.editpersonform.submit()" class="button">${uiLabelMap.CommonSave}</a>
       <p/>
       <input type="hidden" name="partyId" value="${person.partyId!}"/>
-      <table width="90%" border="0" cellpadding="2" cellspacing="0">
+      <table class="table table-striped" border="0" cellpadding="2" cellspacing="0">
         <tr>
           <td align="right">${uiLabelMap.CommonTitle}</td>
           <td>

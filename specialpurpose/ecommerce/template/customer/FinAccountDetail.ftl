@@ -17,9 +17,9 @@ specific language governing permissions and limitations
 under the License.
 -->
 
-<table border="0" cellpadding="1">
+<table class="table table-striped" border="0" cellpadding="1">
   <tr>
-    <td align="right" width="25%">
+    <td align="right">
       <div class="tableheadtext">Account Number:</div>
     </td>
     <td>
@@ -62,7 +62,7 @@ under the License.
 </#if>
 </table>
 
-<table border="0" cellpadding="1" border="2">
+<table class="table table-striped" border="0" cellpadding="1" border="2">
   <tr>
     <th>Transaction ${uiLabelMap.CommonDate}</th>
     <th>ID</th>
@@ -100,7 +100,7 @@ under the License.
 </table>
 
 <#if ownedFinAccountAuthList?has_content>
-  <table border="0" cellpadding="1">
+  <table class="table table-striped" border="0" cellpadding="1">
     <tr>
       <th>Authorization ${uiLabelMap.CommonDate}</th>
       <th>ID</th>

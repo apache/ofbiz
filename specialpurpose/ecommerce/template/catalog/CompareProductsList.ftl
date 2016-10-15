@@ -21,7 +21,7 @@ under the License.
   <div class="panel-body">
   <#assign productCompareList = Static["org.apache.ofbiz.product.product.ProductEvents"].getProductCompareList(request)/>
   <#if productCompareList?has_content>
-    <table class="table">
+    <table class="table table-striped">
     <#list productCompareList as product>
       <tr>
         <td>

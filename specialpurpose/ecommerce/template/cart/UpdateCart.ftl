@@ -21,7 +21,7 @@ under the License.
   <h3>${uiLabelMap.EcommerceStep} 1: ${uiLabelMap.PageTitleShoppingCart}</h3>
   <div id="cartSummaryPanel" style="display: none;">
     <a href="javascript:void(0);" id="openCartPanel" class="button">${uiLabelMap.EcommerceClickHereToEdit}</a>
-    <table id="cartSummaryPanel_cartItems" summary="This table displays the list of item added into Shopping Cart.">
+    <table class="table table-striped" id="cartSummaryPanel_cartItems" summary="This table displays the list of item added into Shopping Cart.">
       <thead>
         <tr>
           <th id="orderItem">${uiLabelMap.OrderItem}</th>
@@ -112,7 +112,7 @@ under the License.
       <fieldset>
         <input type="hidden" name="removeSelected" value="false" />
         <div id="cartFormServerError" class="errorMessage"></div>
-        <table id="editCartPanel_cartItems">
+        <table class="table table-striped" id="editCartPanel_cartItems">
           <thead>
             <tr>
               <th id="editOrderItem">${uiLabelMap.OrderItem}</th>
