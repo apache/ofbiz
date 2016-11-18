@@ -227,7 +227,7 @@ under the License.
                     <process field="shipToCity"><copy to-field="city"/><not-empty><fail-property resource="PartyUiLabels" property="PartyCityMissing"/></not-empty></process>
                     <process field="shipToStateProvinceGeoId"><copy to-field="stateProvinceGeoId"/></process>
                     <process field="shipToPostalCode"><copy to-field="postalCode"/><not-empty><fail-property resource="PartyUiLabels"  property="PartyPostalCodeMissing"/></not-empty></process>
-                    <process field="shipToCountryGeoId"><copy to-field="countryGeoId"/><not-empty><fail-property resource="PartyUiLabels" property="PartyCountryMissing"/></not-empty></process>
+                    <process field="shipToCountryGeoId"><copy to-field="countryGeoId"/><not-empty><fail-property resource="CommonUiLabels" property="CommonCountryMissing"/></not-empty></process>
                     <process field="shipToPostalAddressAllowSol"><copy to-field="allowSolicitation"/></process>
                 </simple-map-processor>
             </call-map-processor>
@@ -261,7 +261,7 @@ under the License.
                         <process field="billToCity"><copy to-field="city"/><not-empty><fail-property resource="PartyUiLabels" property="PartyCityMissing"/></not-empty></process>
                         <process field="billToStateProvinceGeoId"><copy to-field="stateProvinceGeoId"/></process>
                         <process field="billToPostalCode"><copy to-field="postalCode"/><not-empty><fail-property resource="PartyUiLabels"  property="PartyPostalCodeMissing"/></not-empty></process>
-                        <process field="billToCountryGeoId"><copy to-field="countryGeoId"/><not-empty><fail-property resource="PartyUiLabels" property="PartyCountryMissing"/></not-empty></process>
+                        <process field="billToCountryGeoId"><copy to-field="countryGeoId"/><not-empty><fail-property resource="CommonUiLabels" property="CommonCountryMissing"/></not-empty></process>
                         <process field="billToPostalAddressAllowSol"><copy to-field="allowSolicitation"/></process>
                     </simple-map-processor>
                 </call-map-processor>

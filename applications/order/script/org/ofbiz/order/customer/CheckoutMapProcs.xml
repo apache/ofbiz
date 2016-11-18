@@ -28,7 +28,7 @@ under the License.
         <process field="countryCode">
             <copy/>
             <not-empty>
-                <fail-property resource="PartyUiLabels" property="PartyCountryCodeMissing"/>
+                <fail-property resource="CommonUiLabels" property="CommonCountryCodeMissing"/>
             </not-empty>
         </process>
         <process field="areaCode">
@@ -88,7 +88,7 @@ under the License.
         <process field="shipToCountryGeoId">
             <copy to-field="countryGeoId"/>
             <not-empty>
-                <fail-property resource="PartyUiLabels" property="PartyCountryMissing"/>
+                <fail-property resource="CommonUiLabels" property="CommonCountryMissing"/>
             </not-empty>
         </process>
     </simple-map-processor>
@@ -133,7 +133,7 @@ under the License.
         <process field="billToCountryGeoId">
             <copy to-field="countryGeoId"/>
             <not-empty>
-                <fail-property resource="PartyUiLabels" property="PartyCountryMissing"/>
+                <fail-property resource="CommonUiLabels" property="CommonCountryMissing"/>
             </not-empty>
         </process>
     </simple-map-processor>
@@ -141,7 +141,7 @@ under the License.
     <simple-map-processor name="shipToPhone">
         <process field="shipToCountryCode">
             <copy to-field="countryCode"/>
-            <not-empty><fail-property resource="PartyUiLabels" property="PartyCountryCodeMissing"/></not-empty>
+            <not-empty><fail-property resource="CommonUiLabels" property="CommonCountryCodeMissing"/></not-empty>
         </process>
         <process field="shipToAreaCode">
             <copy to-field="areaCode"/>
@@ -157,7 +157,7 @@ under the License.
     <simple-map-processor name="billToPhone">
         <process field="billToCountryCode">
             <copy to-field="countryCode"/>
-            <not-empty><fail-property resource="PartyUiLabels" property="PartyCountryCodeMissing"/></not-empty>
+            <not-empty><fail-property resource="CommonUiLabels" property="CommonCountryCodeMissing"/></not-empty>
         </process>
         <process field="billToAreaCode">
             <copy to-field="areaCode"/>

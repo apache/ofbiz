@@ -86,7 +86,7 @@ under the License.
                     </process>
                     <process field="countryGeoId">
                         <copy/>
-                        <not-empty><fail-property resource="PartyUiLabels" property="PartyCountryMissing"/></not-empty>
+                        <not-empty><fail-property resource="CommonUiLabels" property="CommonCountryMissing"/></not-empty>
                     </process>
                     <process field="allowSolicitation"><copy/></process>
                 </simple-map-processor>
