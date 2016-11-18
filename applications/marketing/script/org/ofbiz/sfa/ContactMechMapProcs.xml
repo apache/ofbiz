@@ -43,7 +43,7 @@ under the License.
         <process field="city"><copy/><not-empty><fail-property resource="PartyUiLabels" property="PartyCityMissing"/></not-empty></process>
         <process field="state"><copy to-field="stateProvinceGeoId"/></process>
         <process field="postalCode"><copy/><not-empty><fail-property resource="PartyUiLabels" property="PartyPostalCodeMissing"/></not-empty></process>
-        <process field="country"><copy to-field="countryGeoId"/><not-empty><fail-property resource="PartyUiLabels" property="PartyCountryMissing"/></not-empty></process>
+        <process field="country"><copy to-field="countryGeoId"/><not-empty><fail-property resource="CommonUiLabels" property="CommonCountryMissing"/></not-empty></process>
         <process field="addressAllowSol"><copy to-field="allowSolicitation"/></process>
     </simple-map-processor>
 

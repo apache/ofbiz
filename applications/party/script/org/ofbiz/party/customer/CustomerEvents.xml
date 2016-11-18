@@ -118,7 +118,7 @@ under the License.
                         <process field="CUSTOMER_CITY"><copy to-field="city"/><not-empty><fail-property resource="PartyUiLabels" property="PartyCityMissing"/></not-empty></process>
                         <process field="CUSTOMER_STATE"><copy to-field="stateProvinceGeoId"/></process>
                         <process field="CUSTOMER_POSTAL_CODE"><copy to-field="postalCode"/><not-empty><fail-property resource="PartyUiLabels" property="PartyPostalCodeMissing"/></not-empty></process>
-                        <process field="CUSTOMER_COUNTRY"><copy to-field="countryGeoId"/><not-empty><fail-property resource="PartyUiLabels" property="PartyCountryMissing"/></not-empty></process>
+                        <process field="CUSTOMER_COUNTRY"><copy to-field="countryGeoId"/><not-empty><fail-property resource="CommonUiLabels" property="CommonCountryMissing"/></not-empty></process>
                         <process field="CUSTOMER_ADDRESS_ALLOW_SOL"><copy to-field="allowSolicitation"/></process>
                     </simple-map-processor>
                 </call-map-processor>

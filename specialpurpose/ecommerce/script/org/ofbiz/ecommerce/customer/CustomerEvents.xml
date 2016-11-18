@@ -149,7 +149,7 @@ under the License.
                         </process>
                         <process field="CUSTOMER_COUNTRY">
                             <copy to-field="countryGeoId"/>
-                            <not-empty><fail-property resource="PartyUiLabels" property="PartyCountryMissing"/></not-empty>
+                            <not-empty><fail-property resource="CommonUiLabels" property="CommonCountryMissing"/></not-empty>
                         </process>
                         <process field="CUSTOMER_ADDRESS_ALLOW_SOL"><copy to-field="allowSolicitation"/></process>
                     </simple-map-processor>
@@ -757,7 +757,7 @@ under the License.
                 </process>
                 <process field="countryGeoId">
                     <copy/>
-                    <not-empty><fail-property resource="PartyUiLabels" property="PartyCountryMissing"/></not-empty>
+                    <not-empty><fail-property resource="CommonUiLabels" property="CommonCountryMissing"/></not-empty>
                 </process>
                 <process field="allowSolicitation"><copy/></process>
                 <process field="yearsAtAddress"><convert type="Long" to-field="yearsWithContactMech"><fail-property resource="EcommerceUiLabels" property="EcommerceYearsAtAddressNotValid"/></convert></process>
