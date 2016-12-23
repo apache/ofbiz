@@ -22,7 +22,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.apache.ofbiz.base.component.ComponentConfig;
@@ -31,7 +30,6 @@ import org.apache.ofbiz.base.start.StartupCommand;
 import org.apache.ofbiz.base.start.StartupException;
 import org.apache.ofbiz.base.start.StartupLoader;
 import org.apache.ofbiz.base.util.Debug;
-import org.apache.ofbiz.base.util.StringUtil;
 import org.apache.ofbiz.base.util.UtilValidate;
 
 import edu.emory.mathcs.backport.java.util.Collections;
@@ -51,18 +49,13 @@ public class ContainerLoader implements StartupLoader {
     private final List<Container> loadedContainers = new LinkedList<Container>();
 
     /**
-     * @see org.apache.ofbiz.base.start.StartupLoader#load(Config, String[])
+     * @see org.apache.ofbiz.base.start.StartupLoader#load(Config, List)
      */
     @Override
     public synchronized void load(Config config, List<StartupCommand> ofbizCommands) throws StartupException {
 
         // loaders defined in startup (e.g. main, test, load-data, etc ...)
-        List<String> loaders = null;
-        for (Map<String,String> loaderMap: config.loaders) {
-            if (module.equals(loaderMap.get("class"))) {
-                loaders = StringUtil.split((String)loaderMap.get("profiles"), ",");
-            }
-        }
+        List<String> loaders = config.loaders;
 
         // load containers defined in ofbiz-containers.xml
         Debug.logInfo("[Startup] Loading containers...", module);

@@ -287,7 +287,7 @@ under the License.
         <field name="agreementId"><hidden value="${agreement.agreementId}"/></field>
         <field name="agreementItemSeqId">
             <drop-down allow-empty="false">
-                <option key=" " description="_NA_"/>
+                <option key="_NA_" description=" "/>
                 <entity-options entity-name="AgreementItem" description="${agreementItemSeqId}">
                     <entity-constraint name="agreementId" env-name="agreement.agreementId"/>
                     <entity-order-by field-name="agreementItemSeqId"/>
@@ -463,7 +463,7 @@ under the License.
         <auto-fields-entity entity-name="AgreementProductAppl" default-field-type="edit"/>
         <field name="agreementId"><hidden/></field>
         <field name="agreementItemSeqId"><hidden/></field>
-        <field name="productId" use-when="agreementProductAppl==null">
+        <field name="productId" use-when="agreementProductAppl==null" required-field="true">
             <lookup target-form-name="LookupProduct"/>
         </field>
         <field name="productId" use-when="agreementProductAppl!=null"><display/></field>
@@ -477,7 +477,7 @@ under the License.
         <auto-fields-entity entity-name="AgreementFacilityAppl" default-field-type="edit"/>
         <field name="agreementId"><hidden/></field>
         <field name="agreementItemSeqId"><hidden/></field>
-        <field name="facilityId" use-when="agreementFacilityAppl==null">
+        <field name="facilityId" use-when="agreementFacilityAppl==null" required-field="true">
             <lookup target-form-name="LookupFacility"/>
         </field>
         <field name="facilityId" use-when="agreementFacilityAppl!=null"><display/></field>
@@ -613,7 +613,7 @@ under the License.
         <auto-fields-entity entity-name="AgreementPartyApplic" default-field-type="edit"/>
         <field name="agreementId"><hidden/></field>
         <field name="agreementItemSeqId"><hidden/></field>
-        <field name="partyId" use-when="agreementPartyApplic==null">
+        <field name="partyId" use-when="agreementPartyApplic==null" required-field="true">
             <lookup target-form-name="LookupPartyName"/>
         </field>
         <field name="partyId" use-when="agreementPartyApplic!=null"><display/></field>
@@ -661,7 +661,7 @@ under the License.
         <field name="agreementId"><hidden value="${agreementId}"/></field>
         <field name="agreementItemSeqId">
             <drop-down allow-empty="false">
-                <option key="${uiLabelMap.CommonNA}" description="_NA_"/>
+                <option key="_NA_" description="${uiLabelMap.CommonNA}"/>
                 <entity-options entity-name="AgreementItem" description="${agreementItemSeqId}">
                     <entity-constraint name="agreementId" operator="equals" env-name="agreementId"/>
                     <entity-order-by field-name="agreementItemSeqId"/>
@@ -713,8 +713,8 @@ under the License.
         header-row-style="header-row" default-table-style="basic-table">
         <auto-fields-entity entity-name="AgreementRole" default-field-type="edit"/>
         <field name="agreementId"><hidden/></field>
-        <field name="partyId" title="${uiLabelMap.PartyPartyId}"><lookup target-form-name="LookupPartyName"/></field>
-        <field name="roleTypeId" title="${uiLabelMap.PartyRoleTypeId}">
+        <field name="partyId" title="${uiLabelMap.PartyPartyId}" required-field="true"><lookup target-form-name="LookupPartyName"/></field>
+        <field name="roleTypeId" title="${uiLabelMap.PartyRoleTypeId}" required-field="true">
             <drop-down allow-empty="true">
                 <entity-options entity-name="RoleType" key-field-name="roleTypeId"/>
             </drop-down>

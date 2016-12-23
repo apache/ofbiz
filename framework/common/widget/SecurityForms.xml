@@ -67,12 +67,12 @@ under the License.
         <auto-fields-service service-name="createUserLogin"/>
         <field name="partyId"><hidden/></field>
         <field name="enabled"><hidden/></field>
-        <field name="currentPassword"><password/></field>
-        <field name="currentPasswordVerify"><password/></field>
+        <field name="currentPassword" required-field="true"><password/></field>
+        <field name="currentPasswordVerify" required-field="true"><password/></field>
         <field name="requirePasswordChange">
             <drop-down allow-empty="false" no-current-selected-key="N">
-                <option key="${uiLabelMap.CommonY}" description="Y"/>
-                <option key="${uiLabelMap.CommonN}" description="N"/>
+                <option key="Y" description="${uiLabelMap.CommonY}"/>
+                <option key="N" description="${uiLabelMap.CommonN}"/>
             </drop-down>
         </field>
         <field name="securityQuestion">

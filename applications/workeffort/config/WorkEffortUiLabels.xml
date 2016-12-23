@@ -4737,6 +4737,9 @@
         <value xml:lang="zh">显示这个明细的便笺</value>
         <value xml:lang="zh-TW">顯示這個細項的便箋</value>
     </property>
+    <property key="WorkEffortSkills">
+        <value xml:lang="en">Skills</value>
+    </property>
     <property key="WorkEffortStartDate">
         <value xml:lang="de">Anfangsdatum</value>
         <value xml:lang="en">Start Date</value>
@@ -5411,9 +5414,6 @@
     </property>
     <property key="WorkEffortRequiredFieldMissingCustRequestId">
         <value xml:lang="en">Required Field Missing : Cust Request Id.</value>
-    </property>
-    <property key="WorkEffortRequiredFieldMissingWorkEffortId">
-        <value xml:lang="en">Required Field Missing : WorkEffort Id.</value>
     </property>
     <property key="WorkEffortRequiredFieldMissingWorkEffortId">
         <value xml:lang="en">Required Field Missing : WorkEffort Id.</value>
