@@ -21,7 +21,6 @@ package org.apache.ofbiz.widget.renderer;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
@@ -47,10 +46,12 @@ import org.apache.ofbiz.base.util.template.FreeMarkerWorker;
 import org.apache.ofbiz.entity.Delegator;
 import org.apache.ofbiz.entity.GenericEntity;
 import org.apache.ofbiz.entity.GenericValue;
+import org.apache.ofbiz.entity.util.EntityUtilProperties;
 import org.apache.ofbiz.security.Security;
 import org.apache.ofbiz.service.DispatchContext;
 import org.apache.ofbiz.service.GenericServiceException;
 import org.apache.ofbiz.service.LocalDispatcher;
+import org.apache.ofbiz.webapp.control.ExternalLoginKeysManager;
 import org.apache.ofbiz.webapp.control.LoginWorker;
 import org.apache.ofbiz.webapp.website.WebSiteWorker;
 import org.apache.ofbiz.widget.cache.GenericWidgetOutput;
@@ -257,7 +258,11 @@ public class ScreenRenderer {
         context.put("contextRoot", request.getAttribute("_CONTEXT_ROOT_"));
         context.put("serverRoot", request.getAttribute("_SERVER_ROOT_URL_"));
         context.put("checkLoginUrl", LoginWorker.makeLoginUrl(request));
-        String externalLoginKey = LoginWorker.getExternalLoginKey(request);
+        String externalLoginKey = null;
+        boolean externalLoginKeyEnabled = "true".equals(EntityUtilProperties.getPropertyValue("security", "security.login.externalLoginKey.enabled", "true", (Delegator) request.getAttribute("delegator")));
+        if (externalLoginKeyEnabled) {
+            externalLoginKey = ExternalLoginKeysManager.getExternalLoginKey(request);
+        }
         String externalKeyParam = externalLoginKey == null ? "" : "&amp;externalLoginKey=" + externalLoginKey;
         context.put("externalLoginKey", externalLoginKey);
         context.put("externalKeyParam", externalKeyParam);

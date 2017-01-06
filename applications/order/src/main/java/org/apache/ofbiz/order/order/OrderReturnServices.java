@@ -1598,7 +1598,7 @@ public class OrderReturnServices {
         try {
             GenericValue response = EntityQuery.use(delegator).from("ReturnItemResponse").where("returnItemResponseId", responseId).queryOne();
             if (response == null) {
-            	 return ServiceUtil.returnError(UtilProperties.getMessage(resource_error, "OrderReturnItemResponseNotFound", UtilMisc.toMap("errorMsg", errorMsg,"responseId", responseId), locale));
+                 return ServiceUtil.returnError(UtilProperties.getMessage(resource_error, "OrderReturnItemResponseNotFound", UtilMisc.toMap("errorMsg", errorMsg,"responseId", responseId), locale));
             }
             BigDecimal responseAmount = response.getBigDecimal("responseAmount").setScale(decimals, rounding);
             String paymentId = response.getString("paymentId");
@@ -1818,7 +1818,7 @@ public class OrderReturnServices {
                                     newItem.set("itemDescription", orderItem.get("itemDescription"));
                                 } else {
                                     newItem.set("productId", refurbItem.get("productId"));
-                                    newItem.set("itemDescription", ProductContentWrapper.getProductContentAsText(refurbItem, "PRODUCT_NAME", locale, null, "html"));
+                                    newItem.set("itemDescription", ProductContentWrapper.getProductContentAsText(refurbItem, "PRODUCT_NAME", locale, dispatcher, "html"));
                                 }
                                 newItem.set("orderItemTypeId", orderItem.get("orderItemTypeId"));
                                 newItem.set("productFeatureId", orderItem.get("productFeatureId"));
@@ -1933,7 +1933,7 @@ public class OrderReturnServices {
                                                 newItem.set("productId", repairItemProduct.get("productId"));
                                                 // TODO: orderItemTypeId, prodCatalogId, productCategoryId
                                                 newItem.set("quantity", repairQuantity);
-                                                newItem.set("itemDescription", ProductContentWrapper.getProductContentAsText(repairItemProduct, "PRODUCT_NAME", locale, null, "html"));
+                                                newItem.set("itemDescription", ProductContentWrapper.getProductContentAsText(repairItemProduct, "PRODUCT_NAME", locale, dispatcher, "html"));
                                                 newItem.set("statusId", "ITEM_CREATED");
                                                 orderItems.add(newItem);
                                                 additionalItemTotal = additionalItemTotal.add(repairQuantity.multiply(repairUnitPrice));
@@ -2188,7 +2188,7 @@ public class OrderReturnServices {
     }
 
     /**
-     * Takes a List of returnItems and returns a Map of orderId -> items and a Map of orderId -> orderTotal
+     * Takes a List of returnItems and returns a Map of orderId -&gt; items and a Map of orderId -&gt; orderTotal
      * @param returnItems a List of return items
      * @param returnItemsByOrderId the return items by order id
      * @param totalByOrder the total by order id
@@ -2548,7 +2548,7 @@ public class OrderReturnServices {
     }
 
     /**
-     * Get the total return adjustments for a set of key -> value condition pairs.  Done for code efficiency.
+     * Get the total return adjustments for a set of key -&gt; value condition pairs.  Done for code efficiency.
      * @param delegator the delegator
      * @param condition the conditions to use
      * @return return the total return adjustments

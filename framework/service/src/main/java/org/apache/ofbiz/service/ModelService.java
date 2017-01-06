@@ -600,6 +600,22 @@ public class ModelService extends AbstractMap<String, Object> implements Seriali
     }
 
     /**
+     * Check a Map against the IN parameter information, uses the validate() method for that
+     * Always called with only IN_PARAM, so to be called before the service is called with the passed context
+     * @param context the passed context
+     * @param locale the actual locale to use
+     * @return boolean True is the service called with these IN_PARAM is valid
+     */
+    public boolean isValid(Map<String, Object> context, Locale locale) {
+        try {
+            validate(context, IN_PARAM, locale);
+        } catch (ServiceValidationException e) {
+            return false;
+        }
+        return true;
+    }
+
+    /**
      * Validates a map of name, object types to a map of name, objects
      * @param info The map of name, object types
      * @param test The map to test its value types.

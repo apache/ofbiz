@@ -462,10 +462,15 @@ time consuming
 
 #### Setup eclipse project for OFBiz
 
-Thanks to some gradle magic, setting up OFBiz on eclipse is very
-easy. All you need is to execute one command and then you can
-import the project to eclipse. This command will generate
-the necessary __.classpath__ and __.project__ files for eclipse.
+Setting up OFBiz on eclipse is easy by simply running the below command
+and then importing the project to eclipse. This command will generate
+the necessary __.classpath__ and __.project__ files for eclipse and it
+will also make the source code for external libraries available in
+eclipse (i.e. you can view source through Ctrl + Click)
+
+The first time you run this command it will take a long time to execute
+because it will download source packages available for project
+dependencies.
 
 `gradlew eclipse`
 
@@ -576,11 +581,11 @@ To get tab completion (auto complete gradle commands by pressing tab)
 you can download the script from the below link and place it in the
 appropriate location for your system.
 
-[Gradle tab completion](https://gist.github.com/nolanlawson/8694399)
+[Gradle tab completion](https://gist.github.com/Ea87/46401a96df31cd208a87)
 
 For example, on debian based systems, you can use the following command:
 
-`sudo curl -L -s https://gist.github.com/nolanlawson/8694399/raw/gradle-tab-completion.bash -o /etc/bash_completion.d/gradle-tab-completion.bash`
+`sudo curl -L -s https://gist.github.com/Ea87/46401a96df31cd208a87/raw/gradle-tab-completion.bash -o /etc/bash_completion.d/gradle-tab-completion.bash`
 
 Crypto notice
 -------------

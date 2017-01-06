@@ -18,6 +18,20 @@
  *******************************************************************************/
 package org.apache.ofbiz.content.search;
 
+import java.io.IOException;
+import java.sql.Timestamp;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
+
+import org.apache.lucene.document.Document;
+import org.apache.lucene.document.DoublePoint;
+import org.apache.lucene.document.Field;
+import org.apache.lucene.document.LongPoint;
+import org.apache.lucene.document.StringField;
+import org.apache.lucene.document.TextField;
+import org.apache.lucene.index.Term;
 import org.apache.ofbiz.base.util.Debug;
 import org.apache.ofbiz.base.util.GeneralException;
 import org.apache.ofbiz.base.util.UtilDateTime;
@@ -32,21 +46,6 @@ import org.apache.ofbiz.entity.condition.EntityOperator;
 import org.apache.ofbiz.entity.util.EntityQuery;
 import org.apache.ofbiz.entity.util.EntityUtil;
 import org.apache.ofbiz.entity.util.EntityUtilProperties;
-
-import org.apache.lucene.document.Document;
-import org.apache.lucene.document.DoubleField;
-import org.apache.lucene.document.Field;
-import org.apache.lucene.document.LongField;
-import org.apache.lucene.document.StringField;
-import org.apache.lucene.document.TextField;
-import org.apache.lucene.index.Term;
-
-import java.io.IOException;
-import java.sql.Timestamp;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
 
 public class ProductDocument implements LuceneDocument {
     private static final String module = ProductDocument.class.getName();
@@ -88,9 +87,11 @@ public class ProductDocument implements LuceneDocument {
                 this.addTextFieldByWeight(doc, "description", product.getString("description"), "index.weight.Product.description", 0, false, "fullText", delegator);
                 this.addTextFieldByWeight(doc, "longDescription", product.getString("longDescription"), "index.weight.Product.longDescription", 0, false, "fullText", delegator);
                 //doc.add(new StringField("introductionDate", checkValue(product.getString("introductionDate")), Store.NO));
-                doc.add(new LongField("introductionDate", quantizeTimestampToDays(product.getTimestamp("introductionDate")), Field.Store.NO));
+//                doc.add(new LongField("introductionDate", quantizeTimestampToDays(product.getTimestamp("introductionDate")), Field.Store.NO));
+                doc.add(new LongPoint("introductionDate", quantizeTimestampToDays(product.getTimestamp("introductionDate"))));
                 nextReIndex = this.checkSetNextReIndex(product.getTimestamp("introductionDate"), nextReIndex);
-                doc.add(new LongField("salesDiscontinuationDate", quantizeTimestampToDays(product.getTimestamp("salesDiscontinuationDate")), Field.Store.NO));
+//                doc.add(new LongField("salesDiscontinuationDate", quantizeTimestampToDays(product.getTimestamp("salesDiscontinuationDate")), Field.Store.NO));
+                doc.add(new LongPoint("salesDiscontinuationDate", quantizeTimestampToDays(product.getTimestamp("salesDiscontinuationDate"))));
                 nextReIndex = this.checkSetNextReIndex(product.getTimestamp("salesDiscontinuationDate"), nextReIndex);
                 doc.add(new StringField("isVariant", product.get("isVariant") != null && product.getBoolean("isVariant") ? "true" : "false", Field.Store.NO));
 
@@ -204,7 +205,7 @@ public class ProductDocument implements LuceneDocument {
                         }
                         try {
                             Map<String, Object> drContext = UtilMisc.<String, Object>toMap("product", product);
-                            String contentText = DataResourceWorker.renderDataResourceAsText(delegator, productContentAndInfo.getString("dataResourceId"), drContext, null, null, false);
+                            String contentText = DataResourceWorker.renderDataResourceAsText(null, delegator, productContentAndInfo.getString("dataResourceId"), drContext, null, null, false);
                             this.addTextFieldByWeight(doc, "content", contentText, null, weight, false, "fullText", delegator);
                         } catch (IOException e1) {
                             Debug.logError(e1, "Error getting content text to index", module);
@@ -247,7 +248,8 @@ public class ProductDocument implements LuceneDocument {
                     fieldNameSb.append('_');
                     fieldNameSb.append(productPrice.getString("productStoreGroupId"));
                     fieldNameSb.append("_price");
-                    doc.add(new DoubleField(fieldNameSb.toString(), productPrice.getDouble("price"), Field.Store.NO));
+//                    doc.add(new DoubleField(fieldNameSb.toString(), productPrice.getDouble("price"), Field.Store.NO));
+                    doc.add(new DoublePoint(fieldNameSb.toString(), productPrice.getDouble("price")));
                 }
 
                 // Index ProductSuppliers
