@@ -216,18 +216,18 @@
 <l:gentext key="hyphenation-character" text="-" lang="en"/>
 <l:gentext key="hyphenation-push-character-count" text="2" lang="en"/>
 <l:gentext key="hyphenation-remain-character-count" text="2" lang="en"/>
-<l:context name="webhelp"><l:template name="Search" text="Search" lang="en"/>
-<l:template name="Enter_a_term_and_click" text="Enter a term and click " lang="en"/>
-<l:template name="Go" text="Go" lang="en"/>
-<l:template name="to_perform_a_search" text=" to perform a search." lang="en"/>
-<l:template name="txt_filesfound" text="Results" lang="en"/>
-<l:template name="txt_enter_at_least_1_char" text="You must enter at least one character." lang="en"/>
-<l:template name="txt_browser_not_supported" text="JavaScript is disabled on your browser. Please enable JavaScript to enjoy all the features of this site." lang="en"/>
-<l:template name="txt_please_wait" text="Please wait. Search in progress..." lang="en"/>
-<l:template name="txt_results_for" text="Results for: " lang="en"/>
-<l:template name="TableofContents" text="Contents" lang="en"/>
-<l:template name="HighlightButton" text="Toggle search result highlighting" lang="en"/>
-<l:template name="Your_search_returned_no_results" text="Your search returned no results." lang="en"/>
+<l:context name="webhelp"><l:template name="Search" text="Keresés" lang="en"/>
+<l:template name="Enter_a_term_and_click" text="Add meg a kifejezéset és kattintsd a " lang="en"/>
+<l:template name="Go" text="Keresés" lang="en"/>
+<l:template name="to_perform_a_search" text=" gombot keresni." lang="en"/>
+<l:template name="txt_filesfound" text="Találhatók" lang="en"/>
+<l:template name="txt_enter_at_least_1_char" text="Írj be legalább egy karaktert." lang="en"/>
+<l:template name="txt_browser_not_supported" text="Engedélyezd a Javascript használatát a weboldalon a teljes funkciókra." lang="en"/>
+<l:template name="txt_please_wait" text="Várj. A keresés folyamatban..." lang="en"/>
+<l:template name="txt_results_for" text="Találhatóak erre: " lang="en"/>
+<l:template name="TableofContents" text="Tartalomjegyzék" lang="en"/>
+<l:template name="HighlightButton" text="Kiemelés" lang="en"/>
+<l:template name="Your_search_returned_no_results" text="A keresés nem járt találhatóval." lang="en"/>
 </l:context>
 <l:context name="styles"><l:template name="person-name" text="last-first"/>
 </l:context>
