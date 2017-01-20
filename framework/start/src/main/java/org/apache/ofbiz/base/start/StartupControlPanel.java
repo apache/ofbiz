@@ -251,6 +251,7 @@ final class StartupControlPanel {
             sb.append(path);
         }
         System.setProperty("java.library.path", sb.toString());
+        serverState.compareAndSet(ServerState.STARTING, ServerState.RUNNING);
     }
 
     private static void executeShutdownAfterLoadIfConfigured(
