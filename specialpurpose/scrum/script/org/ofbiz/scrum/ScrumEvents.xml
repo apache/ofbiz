@@ -3606,7 +3606,7 @@
                     <make-value value-field="newEntity" entity-name="CustRequestNote"/>
                     <set from-field="custRequestId" field="newEntity.custRequestId"/>
                     <set from-field="noteId" field="newEntity.noteId"/>
-                    <log level="always" message=">>>>>>>>>>>>>>>>>> newEntity : ${newEntity}"></log>
+                    <log level="info" message=">>>>>>>>>>>>>>>>>> newEntity : ${newEntity}"></log>
                     <create-value value-field="newEntity"/>
                 </if-not-empty>
                 <!-- add new backlog to sprint -->
