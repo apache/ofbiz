@@ -350,7 +350,7 @@
     </simple-method>
 
     <simple-method method-name="checkProjectMembership" short-description="check if a party is member of a project, input either 'taskId', 'phaseId' or 'projectId', returns 'isMember' ">
-        <!--log level="always" message="==========object = ${sec_object}, check project membershhip with the following data.. taskId: ${taskId} phaseId: ${phaseId} projectId: ${projectId} party: ${partyId}"></log-->
+        <!--log level="info" message="==========object = ${sec_object}, check project membershhip with the following data.. taskId: ${taskId} phaseId: ${phaseId} projectId: ${projectId} party: ${partyId}"></log-->
         <set field="isMember" value="false" type="Boolean"/>
         <if-empty field="projectId">
             <if-empty field="phaseId">
