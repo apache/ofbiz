@@ -35,7 +35,6 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Hex;
-import org.apache.commons.collections.map.LinkedMap;
 import org.ofbiz.base.lang.Appender;
 
 /**
