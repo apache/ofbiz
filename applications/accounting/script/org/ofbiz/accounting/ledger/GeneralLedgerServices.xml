@@ -483,7 +483,7 @@ under the License.
                     <condition>
                         <and>
                             <not><if-empty field="fixedAssetTypeGlAccount.accDepGlAccountId"/></not>
-                            <if-compare field="parameters.debitCreditFlag" operator="equals" value="D"/>
+                            <if-compare field="parameters.debitCreditFlag" operator="equals" value="C"/>
                         </and>
                     </condition>
                     <then>
@@ -495,7 +495,7 @@ under the License.
                     <condition>
                         <and>
                             <not><if-empty field="fixedAssetTypeGlAccount.depGlAccountId"/></not>
-                            <if-compare field="parameters.debitCreditFlag" operator="equals" value="C"/>
+                            <if-compare field="parameters.debitCreditFlag" operator="equals" value="D"/>
                         </and>
                     </condition>
                     <then>
