@@ -1374,6 +1374,7 @@ under the License.
         <event type="rome" invoke="generateBlogRssFeed"/>
         <response name="success" type="none"/>
         <response name="error" type="view" value="error"/>
+        <response name="io-error" type="none"/>
     </request-map>
 
     <request-map uri="ViewResponse">
