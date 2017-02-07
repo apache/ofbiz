@@ -20,8 +20,10 @@ package org.ofbiz.birt;
 
 import java.io.OutputStream;
 import java.sql.SQLException;
+import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.logging.Level;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
@@ -29,6 +31,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.eclipse.birt.report.engine.api.EXCELRenderOption;
+import org.eclipse.birt.report.engine.api.EngineConfig;
 import org.eclipse.birt.report.engine.api.EngineException;
 import org.eclipse.birt.report.engine.api.HTMLRenderOption;
 import org.eclipse.birt.report.engine.api.HTMLServerImageHandler;
@@ -41,6 +44,7 @@ import org.eclipse.birt.report.engine.api.RenderOption;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.GeneralException;
 import org.ofbiz.base.util.UtilGenerics;
+import org.ofbiz.base.util.UtilProperties;
 import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.entity.Delegator;
 import org.ofbiz.security.Security;
@@ -58,6 +62,18 @@ public class BirtWorker {
     public final static String BIRT_OUTPUT_FILE_NAME = "birtOutputFileName";
 
     private static HTMLServerImageHandler imageHandler = new HTMLServerImageHandler();
+
+    public static final Map<Integer, Level> levelIntMap = new HashMap<>();
+    static {
+        levelIntMap.put(Debug.ERROR, Level.SEVERE);
+        levelIntMap.put(Debug.TIMING, Level.FINE);
+        levelIntMap.put(Debug.INFO, Level.INFO);
+        levelIntMap.put(Debug.IMPORTANT, Level.INFO);
+        levelIntMap.put(Debug.WARNING, Level.WARNING);
+        levelIntMap.put(Debug.ERROR, Level.SEVERE);
+        levelIntMap.put(Debug.FATAL, Level.ALL);
+        levelIntMap.put(Debug.ALWAYS, Level.ALL);
+    }
 
     /**
      * export report
@@ -192,5 +208,22 @@ public class BirtWorker {
         if (UtilValidate.isNotEmpty(security)) {
             appContext.put("security", security);
         }
+    }
+
+    /**
+     * initialize configuration log with the low level present on debug.properties
+     * @param config
+     */
+    public static void setLogConfig(EngineConfig config) {
+        String ofbizHome = System.getProperty("ofbiz.home");
+        int lowerLevel = 0;
+        //resolve the lower level open on debug.properties, maybe it's better to implement correctly log4j here
+        for (int i = 1; i < 7; i++) {
+            if (Debug.isOn(i)) {
+                lowerLevel = i;
+                break;
+            }
+        }
+        config.setLogConfig(UtilProperties.getPropertyValue("debug", "log4j.appender.css.dir", ofbizHome + "/runtime/logs/"), levelIntMap.get(lowerLevel));
     }
 }

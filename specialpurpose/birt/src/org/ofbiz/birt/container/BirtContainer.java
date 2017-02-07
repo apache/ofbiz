@@ -19,8 +19,6 @@
 package org.ofbiz.birt.container;
 
 import java.io.File;
-import java.util.logging.Level;
-
 import org.eclipse.birt.core.exception.BirtException;
 import org.eclipse.birt.core.framework.Platform;
 import org.eclipse.birt.report.IBirtConstants;
@@ -32,11 +30,12 @@ import org.ofbiz.base.container.ContainerConfig;
 import org.ofbiz.base.container.ContainerException;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.birt.BirtFactory;
+import org.ofbiz.birt.BirtWorker;
 
 public class BirtContainer implements Container {
 
     public static final String module = BirtContainer.class.getName();
-    
+
     protected String configFile;
 
     private String name;
@@ -68,10 +67,12 @@ public class BirtContainer implements Container {
         EngineConfig config = new EngineConfig();
         String ofbizHome = System.getProperty("ofbiz.home");
         config.setTempDir(ofbizHome + File.separatorChar + "runtime" + File.separatorChar + "tempfiles");
-        config.setLogConfig(ofbizHome + File.separatorChar + "runtime" + File.separatorChar + "logs" + File.separatorChar + "birt", Level.ALL);
 
         // set system properties
         System.setProperty(IBirtConstants.SYS_PROP_WORKING_PATH, config.getTempDir());
+
+        //Set log config
+        BirtWorker.setLogConfig(config);
 
         // startup platform
         try {
