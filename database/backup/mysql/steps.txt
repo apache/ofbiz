@@ -1,0 +1,9 @@
+Determine Database size
+********************
+Choosing a Lock Strategy
+	The locking strategy chosen will determine if your application can perform database write operations during the execution of a backup. By default, mysqldump performs a table level lock to ensure a consistent version of all data using the LOCK TABLES command. This occurs with the --lock-tables command line option, which is not enabled by default. This option is part of the --opt option that is enabled by default. You can elect to not lock tables; however, this may not ensure a consistent backup. When using the MyISAM storage engine, --lock-tables is necessary to ensure a consistent backup.
+Alternatively, mysqldump provides the --single-transaction option that creates a consistent version snapshot of all tables in a single transaction. This option is only applicable when using a storage engine that supports multiversioning. InnoDB is the only storage engine included in a default MySQL installation that is applicable. When specified, this option automatically turns off --lock-tables.
+********************
+Execution Time
+********************
+Combining Information
