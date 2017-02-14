@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<entity-engine-xml>
+    <SecurityPermission description="View operations in the Contract Component." permissionId="CONTRACT_VIEW"/>
+    <SecurityPermission description="Create operations in the Contract Component." permissionId="CONTRACT_CREATE"/>
+    <SecurityPermission description="Update operations in the Contract Component." permissionId="CONTRACT_UPDATE"/>
+    <SecurityPermission description="Delete operations in the Contract Component." permissionId="CONTRACT_DELETE"/>
+    <SecurityPermission description="ALL operations in the Contract Component." permissionId="CONTRACT_ADMIN"/>
+
+    <SecurityGroupPermission groupId="SUPER" permissionId="CONTRACT_ADMIN"/>
+
+</entity-engine-xml>

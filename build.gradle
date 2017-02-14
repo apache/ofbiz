@@ -88,6 +88,7 @@ dependencies {
     compile 'com.google.zxing:core:3.2.1'
     compile 'com.googlecode.concurrentlinkedhashmap:concurrentlinkedhashmap-lru:1.0'
     compile 'com.googlecode.ez-vcard:ez-vcard:0.9.10'
+    compile 'com.google.guava:guava:17.0'
     compile 'com.googlecode.owasp-java-html-sanitizer:owasp-java-html-sanitizer:20160628.1'
     compile 'com.ibm.icu:icu4j:57.1'
     compile 'com.lowagie:itext:2.1.7'
@@ -131,6 +132,7 @@ dependencies {
     compile 'org.zapodot:jackson-databind-java-optional:2.4.2'
     compile 'oro:oro:2.0.8'
     compile 'wsdl4j:wsdl4j:1.6.2'
+    compile 'mysql:mysql-connector-java:5.1.40'
 
     // ofbiz unit-test compile libs
     testCompile 'org.mockito:mockito-core:1.+'
@@ -148,6 +150,24 @@ dependencies {
     runtime 'org.apache.logging.log4j:log4j-jul:2.6.2' // for external jars using the java.util.logging: routes logging to log4j 2
     runtime 'org.apache.logging.log4j:log4j-slf4j-impl:2.6.2' // for external jars using slf4j: routes logging to log4j 2
     runtime 'org.codeartisans.thirdparties.swing:batik-all:1.8pre-r1084380'
+
+
+    /* TODO We suspect that all the below dependencies are not needed and can be
+     * deleted from this file. They used to be compile time dependencies and we
+     * converted them to runtime and OFBiz seems to operate normally without them.
+     * We are keeping them until thorough testing is done to ensure correct
+     * operation without these libraries.
+     */
+    runtime 'apache-xerces:resolver:2.9.1'
+    runtime 'commons-el:commons-el:1.0'
+    runtime 'net.sf.dozer:dozer:4.2.1'
+    runtime 'org.apache.axis2:axis2-adb:1.7.1'
+    runtime 'org.apache.httpcomponents:httpcore:4.4.1'
+    runtime 'org.apache.servicemix.bundles:org.apache.servicemix.bundles.xpp3:1.1.4c_7'
+    runtime 'org.apache.tomcat.extras:tomcat-extras-juli-adapters:8.0.39'
+    runtime 'org.apache.xalan:com.springsource.org.apache.xml.serializer:2.7.1'
+    runtime 'ws-commons-java5:ws-commons-java5:1.0.1'
+
 
     // plugin libs
     subprojects.each { subProject ->

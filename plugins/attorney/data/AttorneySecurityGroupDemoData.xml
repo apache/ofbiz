@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<entity-engine-xml>
+    <SecurityGroupPermission groupId="FULLADMIN" permissionId="ATTORNEY_ADMIN"/>
+    <SecurityGroupPermission groupId="FLEXADMIN" permissionId="ATTORNEY_CREATE"/>
+    <SecurityGroupPermission groupId="FLEXADMIN" permissionId="ATTORNEY_DELETE"/>
+    <SecurityGroupPermission groupId="FLEXADMIN" permissionId="ATTORNEY_UPDATE"/>
+    <SecurityGroupPermission groupId="FLEXADMIN" permissionId="ATTORNEY_VIEW"/>
+    <SecurityGroupPermission groupId="VIEWADMIN" permissionId="ATTORNEY_VIEW"/>
+    <SecurityGroupPermission groupId="BIZADMIN" permissionId="ATTORNEY_ADMIN"/>
+</entity-engine-xml>

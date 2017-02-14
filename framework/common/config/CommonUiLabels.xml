@@ -15531,4 +15531,35 @@
         <value xml:lang="zh-CN">中文</value>
         <value xml:lang="zh-TW">中文</value>
     </property>
+
+    <property key="Templetes">
+        <value xml:lang="zh">范本</value>
+        <value xml:lang="zh-CN">范本</value>
+    </property>
+
+    <property key="Contract">
+        <value xml:lang="zh">合同</value>
+        <value xml:lang="zh-CN">合同</value>
+    </property>
+
+    <property key="Case">
+        <value xml:lang="zh">案件</value>
+        <value xml:lang="zh-CN">案件</value>
+    </property>
+    
+    <property key="Attorney">
+        <value xml:lang="zh">律师</value>
+        <value xml:lang="zh-CN">律师</value>
+    </property>
+    
+    <property key="Opposite">
+        <value xml:lang="zh">相对方</value>
+        <value xml:lang="zh-CN">相对方</value>
+    </property>
+
+    <property key="System Management">
+        <value xml:lang="zh">系统管理</value>
+        <value xml:lang="zh-CN">系统管理</value>
+    </property>
+
 </resource>

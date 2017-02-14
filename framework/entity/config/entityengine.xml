@@ -52,21 +52,21 @@ access. For a detailed description see the core/docs/entityconfig.html file.
     <debug-xa-resources value="false" />  <!-- see https://issues.apache.org/jira/browse/OFBIZ-4282 for more -->
     
     <delegator name="default" entity-model-reader="main" entity-group-reader="main" entity-eca-reader="main" distributed-cache-clear-enabled="false">
-        <group-map group-name="org.apache.ofbiz" datasource-name="localderby"/>
-        <group-map group-name="org.apache.ofbiz.olap" datasource-name="localderbyolap"/>
-        <group-map group-name="org.apache.ofbiz.tenant" datasource-name="localderbytenant"/>
+        <group-map group-name="org.apache.ofbiz" datasource-name="localmysql"/>
+        <group-map group-name="org.apache.ofbiz.olap" datasource-name="localmysqlolap"/>
+        <group-map group-name="org.apache.ofbiz.tenant" datasource-name="localmysqltenant"/>
     </delegator>
     <delegator name="default-no-eca" entity-model-reader="main" entity-group-reader="main" entity-eca-reader="main" entity-eca-enabled="false" distributed-cache-clear-enabled="false">
-        <group-map group-name="org.apache.ofbiz" datasource-name="localderby"/>
-        <group-map group-name="org.apache.ofbiz.olap" datasource-name="localderbyolap"/>
-        <group-map group-name="org.apache.ofbiz.tenant" datasource-name="localderbytenant"/>
+        <group-map group-name="org.apache.ofbiz" datasource-name="localmysql"/>
+        <group-map group-name="org.apache.ofbiz.olap" datasource-name="localmysqlolap"/>
+        <group-map group-name="org.apache.ofbiz.tenant" datasource-name="localmysqltenant"/>
     </delegator>
 
     <!-- be sure that your default delegator (or the one you use) uses the same datasource for test. You must run "gradlew loadDefault" before running "gradlew testIntegration" -->
     <delegator name="test" entity-model-reader="main" entity-group-reader="main" entity-eca-reader="main">
-        <group-map group-name="org.apache.ofbiz" datasource-name="localderby"/>
-        <group-map group-name="org.apache.ofbiz.olap" datasource-name="localderbyolap"/>
-        <group-map group-name="org.apache.ofbiz.tenant" datasource-name="localderbytenant"/>
+        <group-map group-name="org.apache.ofbiz" datasource-name="localmysql"/>
+        <group-map group-name="org.apache.ofbiz.olap" datasource-name="localmysqlolap"/>
+        <group-map group-name="org.apache.ofbiz.tenant" datasource-name="localmysqltenant"/>
     </delegator>
    
     <!-- need to at least define a name for each component to use -->
@@ -332,8 +332,8 @@ access. For a detailed description see the core/docs/entityconfig.html file.
             alias-view-columns="false"
             drop-fk-use-foreign-key-keyword="true"
             table-type="InnoDB"
-            character-set="latin1"
-            collate="latin1_general_cs">
+            character-set="utf8"
+            collate="utf8_general_ci">
         <read-data reader-name="tenant"/>
         <read-data reader-name="seed"/>
         <read-data reader-name="seed-initial"/>
@@ -365,8 +365,8 @@ access. For a detailed description see the core/docs/entityconfig.html file.
             alias-view-columns="false"
             drop-fk-use-foreign-key-keyword="true"
             table-type="InnoDB"
-            character-set="latin1"
-            collate="latin1_general_cs">
+            character-set="utf8"
+            collate="utf8_general_ci">
         <read-data reader-name="tenant"/>
         <read-data reader-name="seed"/>
         <read-data reader-name="seed-initial"/>
@@ -398,8 +398,8 @@ access. For a detailed description see the core/docs/entityconfig.html file.
             alias-view-columns="false"
             drop-fk-use-foreign-key-keyword="true"
             table-type="InnoDB"
-            character-set="latin1"
-            collate="latin1_general_cs">
+            character-set="utf8"
+            collate="utf8_general_ci">
         <read-data reader-name="tenant"/>
         <read-data reader-name="seed"/>
         <read-data reader-name="seed-initial"/>
@@ -431,8 +431,8 @@ access. For a detailed description see the core/docs/entityconfig.html file.
             alias-view-columns="false"
             drop-fk-use-foreign-key-keyword="true"
             table-type="InnoDB"
-            character-set="latin1"
-            collate="latin1_general_cs">
+            character-set="utf8"
+            collate="utf8_general_ci">
         <read-data reader-name="tenant"/>
         <read-data reader-name="seed"/>
         <inline-jdbc

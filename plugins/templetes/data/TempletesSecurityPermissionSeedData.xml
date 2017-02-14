@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<entity-engine-xml>
+    <SecurityPermission description="View operations in the Templetes Component." permissionId="TEMPLETES_VIEW"/>
+    <SecurityPermission description="Create operations in the Templetes Component." permissionId="TEMPLETES_CREATE"/>
+    <SecurityPermission description="Update operations in the Templetes Component." permissionId="TEMPLETES_UPDATE"/>
+    <SecurityPermission description="Delete operations in the Templetes Component." permissionId="TEMPLETES_DELETE"/>
+    <SecurityPermission description="ALL operations in the Templetes Component." permissionId="TEMPLETES_ADMIN"/>
+
+    <SecurityGroupPermission groupId="SUPER" permissionId="TEMPLETES_ADMIN"/>
+
+</entity-engine-xml>

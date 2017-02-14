@@ -50,5 +50,6 @@ under the License.
         server="default-server"
         location="webapp/partymgr"
         base-permission="OFBTOOLS,PARTYMGR"
-        mount-point="/partymgr"/>
+        mount-point="/partymgr"
+    />
 </ofbiz-component>

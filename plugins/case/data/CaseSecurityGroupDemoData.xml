@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<entity-engine-xml>
+    <SecurityGroupPermission groupId="FULLADMIN" permissionId="CASE_ADMIN"/>
+    <SecurityGroupPermission groupId="FLEXADMIN" permissionId="CASE_CREATE"/>
+    <SecurityGroupPermission groupId="FLEXADMIN" permissionId="CASE_DELETE"/>
+    <SecurityGroupPermission groupId="FLEXADMIN" permissionId="CASE_UPDATE"/>
+    <SecurityGroupPermission groupId="FLEXADMIN" permissionId="CASE_VIEW"/>
+    <SecurityGroupPermission groupId="VIEWADMIN" permissionId="CASE_VIEW"/>
+    <SecurityGroupPermission groupId="BIZADMIN" permissionId="CASE_ADMIN"/>
+</entity-engine-xml>

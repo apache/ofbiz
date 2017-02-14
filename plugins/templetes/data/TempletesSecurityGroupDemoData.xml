@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<entity-engine-xml>
+    <SecurityGroupPermission groupId="FULLADMIN" permissionId="TEMPLETES_ADMIN"/>
+    <SecurityGroupPermission groupId="FLEXADMIN" permissionId="TEMPLETES_CREATE"/>
+    <SecurityGroupPermission groupId="FLEXADMIN" permissionId="TEMPLETES_DELETE"/>
+    <SecurityGroupPermission groupId="FLEXADMIN" permissionId="TEMPLETES_UPDATE"/>
+    <SecurityGroupPermission groupId="FLEXADMIN" permissionId="TEMPLETES_VIEW"/>
+    <SecurityGroupPermission groupId="VIEWADMIN" permissionId="TEMPLETES_VIEW"/>
+    <SecurityGroupPermission groupId="BIZADMIN" permissionId="TEMPLETES_ADMIN"/>
+</entity-engine-xml>

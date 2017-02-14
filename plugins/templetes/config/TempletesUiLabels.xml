@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resource xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/ofbiz-properties.xsd">
+    <property key="TempletesApplication">
+        <value xml:lang="en">Templetes Application</value>
+        <value xml:lang="zh">Templetes应用程序</value>
+        <value xml:lang="zh-CN">范本管理</value>
+    </property>
+    <property key="TempletesCompanyName">
+        <value xml:lang="en">HY: Templetes</value>
+        <value xml:lang="zh-CN">和英智远: 范本管理</value>
+    </property>
+    <property key="TempletesCompanySubtitle">
+        <value xml:lang="en">Part of the Contract and Legal Management Family of HY Insight</value>
+        <value xml:lang="zh">和英智远合同法务管理系统的组成部分</value>
+        <value xml:lang="zh-CN">和英智远合同法务管理系统的组成部分</value>
+    </property>
+    <property key="TempletesViewPermissionError">
+        <value xml:lang="en">You are not allowed to view this page.</value>
+        <value xml:lang="zh">不允许你浏览这个页面。</value>
+        <value xml:lang="zh-CN">不允许你浏览这个页面.</value>
+    </property>
+
+    <property key="TempletesList">
+        <value xml:lang="en">Templetes List</value>
+        <value xml:lang="zh">范本列表</value>
+        <value xml:lang="zh-CN">范本列表</value>
+    </property>
+</resource>
