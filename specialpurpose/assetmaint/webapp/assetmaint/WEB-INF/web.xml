@@ -53,6 +53,11 @@
         <param-name>fixedAssetMaintDecoratorLocation</param-name>
         <param-value>component://assetmaint/widget/AssetmaintScreens.xml</param-value>
     </context-param>
+    <context-param>
+        <description>The location of the CommonPartyDecorator screen to use for this webapp; referred to as a context variable in screen def XML files.</description>
+        <param-name>partyDecoratorLocation</param-name>
+        <param-value>component://accounting/widget/CommonScreens.xml</param-value>
+    </context-param>
 
     <filter>
         <display-name>ControlFilter</display-name>
