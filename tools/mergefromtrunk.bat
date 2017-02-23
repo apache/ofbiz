@@ -29,7 +29,7 @@ set /p version=version to merge :
 set /a prevRev=%version% - 1
 
 rem build the comment
-echo "Applied fix from trunk for revision: %version%" > comment.tmp
+echo "Applied fix from trunk framework for revision: %version%" > comment.tmp
 svn log https://svn.apache.org/repos/asf/ofbiz/ofbiz-framework/trunk -r %version% > log.tmp
 copy comment.tmp + log.tmp = comment.tmp
 del log.tmp
