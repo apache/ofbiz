@@ -27,6 +27,7 @@ under the License.
     </li>
 </#if>    
     <#-- Show the category branch -->
+  <#if session.getAttribute("_BREAD_CRUMB_TRAIL_")??>
     <#assign crumbs = Static["org.ofbiz.product.category.CategoryWorker"].getTrail(request)/>
     <#list crumbs as crumb>
          <#if catContentWrappers?exists && catContentWrappers[crumb]?exists>
@@ -57,6 +58,7 @@ under the License.
             <#assign previousCategoryId = crumb />
          </#if>
     </#list>    
+  </#if>
     <#-- Show the product, if there is one -->
     <#if productContentWrapper?exists>
       <#if isDefaultTheme>        
