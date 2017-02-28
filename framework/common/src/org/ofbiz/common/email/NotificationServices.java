@@ -27,6 +27,8 @@ import java.net.UnknownHostException;
 import java.util.Locale;
 import java.util.Map;
 
+import javolution.util.FastMap;
+
 import org.ofbiz.base.container.ClassLoaderContainer;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilGenerics;
@@ -46,7 +48,6 @@ import org.ofbiz.service.ModelService;
 import org.ofbiz.service.ServiceUtil;
 
 import freemarker.template.TemplateException;
-import javolution.util.FastMap;
 
 /**
  * Provides generic services related to preparing and
@@ -266,7 +267,6 @@ public class NotificationServices {
             String httpPort = null;
             String httpServer = null;
             Boolean enableHttps = null;
-            Boolean dontAdd = false;
 
             try {
                 // using just the IP address of localhost if we don't have a defined server
@@ -296,10 +296,7 @@ public class NotificationServices {
 
             // fill in any missing properties with fields from the global file
             if (UtilValidate.isEmpty(httpsPort)) {
-                httpsPort = EntityUtilProperties.getPropertyValue("url.properties", "port.https", "8443", delegator);
-                if ("8443" != httpsPort) {
-                    dontAdd = true; // Here we can't initialise the port from a request, so we assume it's set in properties or DB, we don't add the portOffset anyway
-                }
+                httpsPort = EntityUtilProperties.getPropertyValue("url.properties", "port.https", "443", delegator);
             }
             if (UtilValidate.isEmpty(httpsServer)) {
                 httpsServer = EntityUtilProperties.getPropertyValue("url.properties", "force.https.host", localServer, delegator);
@@ -318,13 +315,9 @@ public class NotificationServices {
                 Integer httpPortValue = Integer.valueOf(httpPort);
                 httpPortValue += ClassLoaderContainer.portOffset;
                 httpPort = httpPortValue.toString();
-                if (!dontAdd) {
-                    Integer httpsPortValue = Integer.valueOf(httpsPort);
-                    if (!httpsPort.isEmpty()) {
-                        httpsPortValue += ClassLoaderContainer.portOffset;
-                    }
-                    httpsPort = httpsPortValue.toString();
-                }
+                Integer httpsPortValue = Integer.valueOf(httpsPort);
+                httpsPortValue += ClassLoaderContainer.portOffset;
+                httpsPort = httpsPortValue.toString();
             }
 
             // prepare the (non-secure) URL
