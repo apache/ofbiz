@@ -34,8 +34,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import javolution.util.FastMap;
-
 import org.ofbiz.base.container.ClassLoaderContainer;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.SSLUtil;
@@ -60,6 +58,8 @@ import org.ofbiz.webapp.view.ViewHandler;
 import org.ofbiz.webapp.view.ViewHandlerException;
 import org.ofbiz.webapp.website.WebSiteWorker;
 import org.owasp.esapi.errors.EncodingException;
+
+import javolution.util.FastMap;
 
 /**
  * RequestHandler - Request Processor Object
@@ -942,7 +942,12 @@ public class RequestHandler {
 
     public static String getDefaultServerRootUrl(HttpServletRequest request, boolean secure) {
         Delegator delegator = (Delegator) request.getAttribute("delegator");
-        String httpsPort = EntityUtilProperties.getPropertyValue("url.properties", "port.https", "443", delegator);
+        Boolean dontAdd = false;
+        String httpsPort = EntityUtilProperties.getPropertyValue("url.properties", "port.https", delegator);
+        if (httpsPort.isEmpty() ) {
+            httpsPort = String.valueOf(request.getServerPort());
+            dontAdd = true; // We take the port from the request, don't add the portOffset
+        }
         String httpsServer = EntityUtilProperties.getPropertyValue("url.properties", "force.https.host", delegator);
         String httpPort = EntityUtilProperties.getPropertyValue("url.properties", "port.http", "80", delegator);
         String httpServer = EntityUtilProperties.getPropertyValue("url.properties", "force.http.host", delegator);
@@ -952,9 +957,13 @@ public class RequestHandler {
             Integer httpPortValue = Integer.valueOf(httpPort);
             httpPortValue += ClassLoaderContainer.portOffset;
             httpPort = httpPortValue.toString();
-            Integer httpsPortValue = Integer.valueOf(httpsPort);
-            httpsPortValue += ClassLoaderContainer.portOffset;
-            httpsPort = httpsPortValue.toString();
+            if (!dontAdd) {
+                Integer httpsPortValue = Integer.valueOf(httpsPort);
+                if (!httpsPort.isEmpty()) {
+                    httpsPortValue += ClassLoaderContainer.portOffset;
+                }
+                httpsPort = httpsPortValue.toString();
+            }
         }
         
         StringBuilder newURL = new StringBuilder();
@@ -1064,6 +1073,7 @@ public class RequestHandler {
         String httpPort = null;
         String httpServer = null;
         Boolean enableHttps = null;
+        Boolean dontAdd = false;
 
         // load the properties from the website entity
         GenericValue webSite;
@@ -1084,7 +1094,11 @@ public class RequestHandler {
 
         // fill in any missing properties with fields from the global file
         if (UtilValidate.isEmpty(httpsPort)) {
-            httpsPort = EntityUtilProperties.getPropertyValue("url.properties", "port.https", "443", delegator);
+            httpsPort = EntityUtilProperties.getPropertyValue("url.properties", "port.https", delegator);
+            if (httpsPort.isEmpty() ) {
+                httpsPort = String.valueOf(request.getServerPort());
+                dontAdd = true; // We take the port from the request, don't add the portOffset
+            }
         }
         if (UtilValidate.isEmpty(httpsServer)) {
             httpsServer = EntityUtilProperties.getPropertyValue("url.properties", "force.https.host", delegator);
@@ -1103,9 +1117,13 @@ public class RequestHandler {
             Integer httpPortValue = Integer.valueOf(httpPort);
             httpPortValue += ClassLoaderContainer.portOffset;
             httpPort = httpPortValue.toString();
-            Integer httpsPortValue = Integer.valueOf(httpsPort);
-            httpsPortValue += ClassLoaderContainer.portOffset;
-            httpsPort = httpsPortValue.toString();
+            if (!dontAdd) {
+                Integer httpsPortValue = Integer.valueOf(httpsPort);
+                if (!httpsPort.isEmpty()) {
+                    httpsPortValue += ClassLoaderContainer.portOffset;
+                }
+                httpsPort = httpsPortValue.toString();
+            }
         }
         
         // create the path the the control servlet
