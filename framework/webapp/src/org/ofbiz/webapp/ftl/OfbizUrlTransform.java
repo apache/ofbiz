@@ -104,7 +104,6 @@ public class OfbizUrlTransform implements TemplateTransformModel {
                     BeanModel res = (BeanModel) env.getVariable("response");
                     Object prefix = env.getVariable("urlPrefix");
                     if (UtilValidate.isNotEmpty(webSiteId)) {
-                        Boolean dontAdd = false;
                         HttpServletRequest request = (HttpServletRequest) req.getWrappedObject();
                         Delegator delegator = (Delegator) request.getAttribute("delegator");
                         String httpsPort = null;
@@ -128,11 +127,7 @@ public class OfbizUrlTransform implements TemplateTransformModel {
                         }
                         // fill in any missing properties with fields from the global file
                         if (UtilValidate.isEmpty(httpsPort)) {
-                            httpsPort = EntityUtilProperties.getPropertyValue("url.properties", "port.https", delegator);
-                            if (httpsPort.isEmpty() ) {
-                                httpsPort = String.valueOf(request.getServerPort());
-                                dontAdd = true; // We take the port from the request, don't add the portOffset
-                            }
+                            httpsPort = EntityUtilProperties.getPropertyValue("url.properties", "port.https", "443", delegator);
                         }
                         if (UtilValidate.isEmpty(httpsServer)) {
                             httpsServer = EntityUtilProperties.getPropertyValue("url.properties", "force.https.host", delegator);
@@ -151,14 +146,11 @@ public class OfbizUrlTransform implements TemplateTransformModel {
                             Integer httpPortValue = Integer.valueOf(httpPort);
                             httpPortValue += ClassLoaderContainer.portOffset;
                             httpPort = httpPortValue.toString();
-                            if (!dontAdd) {
-                                Integer httpsPortValue = Integer.valueOf(httpsPort);
-                                if (!httpsPort.isEmpty()) {
-                                    httpsPortValue += ClassLoaderContainer.portOffset;
-                                }
-                                httpsPort = httpsPortValue.toString();
-                            }
+                            Integer httpsPortValue = Integer.valueOf(httpsPort);
+                            httpsPortValue += ClassLoaderContainer.portOffset;
+                            httpsPort = httpsPortValue.toString();
                         }
+
                         if (secure && enableHttps) {
                             String server = httpsServer;
                             if (UtilValidate.isEmpty(server)) {
