@@ -4,7 +4,7 @@
 The passport component is to support users to login with a third party OAuth2 authentication such as GitHub, LinkedIn and etc.
 
 
-## more information
+## More information
 ---------------------------------------
 GitHub OAuth2 Configuration Quick Start
 ---------------------------------------
