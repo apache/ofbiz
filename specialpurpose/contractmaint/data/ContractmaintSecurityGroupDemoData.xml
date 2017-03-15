@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<entity-engine-xml>
+    <SecurityGroupPermission groupId="FULLADMIN" permissionId="CONTRACTMAINT_ADMIN"/>
+    <SecurityGroupPermission groupId="FLEXADMIN" permissionId="CONTRACTMAINT_CREATE"/>
+    <SecurityGroupPermission groupId="FLEXADMIN" permissionId="CONTRACTMAINT_DELETE"/>
+    <SecurityGroupPermission groupId="FLEXADMIN" permissionId="CONTRACTMAINT_UPDATE"/>
+    <SecurityGroupPermission groupId="FLEXADMIN" permissionId="CONTRACTMAINT_VIEW"/>
+    <SecurityGroupPermission groupId="VIEWADMIN" permissionId="CONTRACTMAINT_VIEW"/>
+    <SecurityGroupPermission groupId="BIZADMIN" permissionId="CONTRACTMAINT_ADMIN"/>
+</entity-engine-xml>

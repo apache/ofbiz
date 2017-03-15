@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<entitymodel xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/entitymodel.xsd">
+    <!-- ========================================================= -->
+    <!-- ======================== Defaults ======================= -->
+    <!-- ========================================================= -->
+    <title>Entity of Contractmaint Component</title>
+    <description>None</description>
+    <copyright></copyright>
+    <version>1.0</version>
+
+    <entity entity-name="Contract" package-name="org.ofbiz.contractmaint" title="Contract Entity">
+        <field name="contractId" type="id-ne"><description>primary sequenced ID</description></field>
+        <field name="contractName" type="name"></field>
+        <field name="longDescription" type="very-long"></field>
+        <field name="createDate" type="date-time"></field>
+        <field name="startDate" type="date-time"></field>
+        <field name="dateTo" type="date-time"></field>
+        <field name="amount" type="floating-point"></field>
+        <field name="currency" type="description"></field>
+        <field name="exchangeRate" type="floating-point"></field>
+        <field name="supplierId" type="id-ne"></field>
+        <field name="partyId" type="id-ne"></field>
+        <prim-key field="contractId"/>
+        <relation type="one" fk-name="CONTRACT_SUP_ID" rel-entity-name="Supplier">
+            <key-map field-name="supplierId"/>
+        </relation>
+        <relation type="one" fk-name="CONTRACT_LS_ID" rel-entity-name="LibStaff">
+            <key-map field-name="libStaffId"/>
+        </relation>
+    </entity>
+
+    <entity entity-name="Supplier" package-name="org.ofbiz.contractmaint" title="Supplier Entity">
+        <field name="supplierId" type="id-ne"><description>primary sequenced ID</description></field>
+        <field name="supplierName" type="name"></field>
+        <field name="personInCharge" type="name"></field>
+        <field name="email" type="description"></field>
+        <field name="phoneNum" type="description"></field>
+        <prim-key field="supplierId"/>
+    </entity>
+
+    <entity entity-name="LibStaff" package-name="org.ofbiz.contractmaint" title="Library Staff Entity">
+        <field name="libStaffId" type="id-ne"><description>primary sequenced ID</description></field>
+        <field name="libStaffName" type="name"></field>
+        <field name="email" type="description"></field>
+        <prim-key field="libStaffId"/>
+    </entity>
+
+</entitymodel>

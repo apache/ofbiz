@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/services.xsd">
+    <description>Contractmaint Services</description>
+    <vendor></vendor>
+    <version>1.0</version>
+
+    <service name="createContract" default-entity-name="Contract" engine="entity-auto" invoke="create" auth="true">
+        <description>Create a Contract</description>
+        <auto-attributes include="pk" mode="OUT" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+        <override name="supplierId" optional="false"/>
+        <override name="libStaffId" optional="false"/>
+    </service>
+
+    <service name="createSupplier" default-entity-name="Supplier" engine="entity-auto" invoke="create" auth="true">
+        <description>Create a Supplier</description>
+        <auto-attributes include="pk" mode="OUT" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="false"/>
+        <override name="phoneNum" optional="true"/>
+    </service>
+
+    <service name="createLibStaff" default-entity-name="LibStaff" engine="entity-auto" invoke="create" auth="true">
+        <description>Create a Library Staff</description>
+        <auto-attributes include="pk" mode="OUT" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="false"/>
+    </service>
+</services>

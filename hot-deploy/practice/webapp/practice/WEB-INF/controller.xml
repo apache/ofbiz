@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<site-conf xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/site-conf.xsd">
+    <include location="component://common/webcommon/WEB-INF/common-controller.xml"/>
+    <description>Practice Component Site Configuration File</description>
+    <owner>Copyright 2001-2009 The Apache Software Foundation</owner>
+    <handler name="screen" type="view" class="org.ofbiz.widget.screen.ScreenWidgetViewHandler"/>
+    <!-- Request Mappings -->
+    <request-map uri="main">
+        <security https="false" auth="false"/>
+        <response name="success" type="view" value="main"/>
+    </request-map>
+    <!-- end of request mappings -->
+    <!-- View Mappings -->
+    <view-map name="main" type="screen" page="component://practice/widget/PracticeScreens.xml#main"/>
+    <!-- change the path to the following if the above doesn't work for you -->
+     <!--<view-map name="main" type="screen" page="component://practice/webapp/practice/widget/PracticeScreens.xml#main"/>-->
+
+    <!-- end of view mappings -->
+</site-conf>

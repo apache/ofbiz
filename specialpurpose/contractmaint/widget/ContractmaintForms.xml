@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<forms xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+        xmlns="http://ofbiz.apache.org/Widget-Form" xsi:schemaLocation="http://ofbiz.apache.org/Widget-Form http://ofbiz.apache.org/dtds/widget-form.xsd">
+
+    <form name="AddContract" type="single" target="createContract">
+        <!-- We have this utility in OFBiz to render form based on service definition.
+             Service attributes will automatically lookedup and will be shown on form
+        -->
+        <auto-fields-service service-name="createContract"/>
+        <field name="supplierId" title="${uiLabelMap.CommonType}">
+            <drop-down allow-empty="false" current-description="">
+                <!---We have made this drop down options dynamic(Values from db) using this -->
+                <entity-options description="${supplierName}" key-field-name="supplierId" entity-name="Supplier">
+                    <entity-order-by field-name="supplierName"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="submitButton" title="${uiLabelMap.CommonAdd}"><submit button-type="button"/></field>
+    </form>
+</forms>
