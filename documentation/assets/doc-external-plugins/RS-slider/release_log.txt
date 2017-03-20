@@ -1,0 +1,19 @@
+version 1.2.1
+- feature :	slidehorizontal, slidevertical Transitions added (depending on direction it slides left / right or up/down the slides)
+
+version 1.2
+
+- Feature added: Random Transitions with random Slots can be used now
+- Bug Repaired: IE8 Thumbnail Hover shows only white Box
+- Hardened: If Container has no height, default grid height will be set automatically by loading 
+
+version 1.1.5
+- fix for Bootstraps : In case Bootstrap Theme is used, a img full-width:none !important overwrite bootstrap responsivity.
+
+version 1.1.4
+- workaround: JS Plugin resize the height of the Holder Container in case no default height has been set
+
+version 1.0 - 27.06.2012
+
+	first release
+

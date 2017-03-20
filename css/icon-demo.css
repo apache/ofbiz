@@ -1,0 +1,58 @@
+@charset "utf-8";
+/* CSS Document */
+
+.iconsDemoCustom li i, [class*="foundicon-"] {
+    color:#777;
+}
+
+/* font icon test */
+ul.iconsTest{ margin:0;}
+
+.iconsTest li {
+    display:block;
+    float:left;
+}
+
+
+
+.ico1 {
+    color: #00CCFF;
+    font-size: 1em;
+}
+.ico2{
+    color: #3366FF;
+    font-size: 3em;
+
+}
+.ico3{
+    color: #6666CC;
+    font-size: 6em;
+}
+
+.ico4{
+    color: #FFFFFF;
+    font-size: 6em;
+    
+    text-shadow: 0 2px 2px #777777;
+}
+
+
+/* Custom icons Set */
+
+.iconsDemoCustom li {
+    display:inline-block !important;
+    font-size:1em;
+    height: 1.5em;
+    line-height: 1.5em;
+    margin-bottom:1em;
+    width:150px;
+}
+
+.iconsDemoCustom li i {
+    font-size:2em;
+    float:left;
+    padding-right:10px;
+}
+.iconsDemoCustom .i-name{font-size:0.75em;}
+
+.i-code{display:none!important;}

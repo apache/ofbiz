@@ -1,0 +1,1018 @@
+<!DOCTYPE html>
+<html>
+  <head><!--[if lt IE 9]>
+    <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+    <meta charset="UTF-8"><style type="text/css">.clearfix {
+  *zoom: 1;
+}
+.clearfix:before,
+.clearfix:after {
+  display: table;
+  content: "";
+  line-height: 0;
+}
+.clearfix:after {
+  clear: both;
+}
+.hide-text {
+  font: 0/0 a;
+  color: transparent;
+  text-shadow: none;
+  background-color: transparent;
+  border: 0;
+}
+.input-block-level {
+  display: block;
+  width: 100%;
+  min-height: 30px;
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+}
+article,
+aside,
+details,
+figcaption,
+figure,
+footer,
+header,
+hgroup,
+nav,
+section {
+  display: block;
+}
+audio,
+canvas,
+video {
+  display: inline-block;
+  *display: inline;
+  *zoom: 1;
+}
+audio:not([controls]) {
+  display: none;
+}
+html {
+  font-size: 100%;
+  -webkit-text-size-adjust: 100%;
+  -ms-text-size-adjust: 100%;
+}
+a:focus {
+  outline: thin dotted #333;
+  outline: 5px auto -webkit-focus-ring-color;
+  outline-offset: -2px;
+}
+a:hover,
+a:active {
+  outline: 0;
+}
+sub,
+sup {
+  position: relative;
+  font-size: 75%;
+  line-height: 0;
+  vertical-align: baseline;
+}
+sup {
+  top: -0.5em;
+}
+sub {
+  bottom: -0.25em;
+}
+img {
+/* Responsive images (ensure images don't scale beyond their parents) */
+  max-width: 100%;
+/* Part 1: Set a maxium relative to the parent */
+  width: auto 9;
+/* IE7-8 need help adjusting responsive images */
+  height: auto;
+/* Part 2: Scale the height according to the width, otherwise you get stretching */
+  vertical-align: middle;
+  border: 0;
+  -ms-interpolation-mode: bicubic;
+}
+#map_canvas img,
+.google-maps img {
+  max-width: none;
+}
+button,
+input,
+select,
+textarea {
+  margin: 0;
+  font-size: 100%;
+  vertical-align: middle;
+}
+button,
+input {
+  *overflow: visible;
+  line-height: normal;
+}
+button::-moz-focus-inner,
+input::-moz-focus-inner {
+  padding: 0;
+  border: 0;
+}
+button,
+html input[type="button"],
+input[type="reset"],
+input[type="submit"] {
+  -webkit-appearance: button;
+  cursor: pointer;
+}
+input[type="search"] {
+  -webkit-box-sizing: content-box;
+  -moz-box-sizing: content-box;
+  box-sizing: content-box;
+  -webkit-appearance: textfield;
+}
+input[type="search"]::-webkit-search-decoration,
+input[type="search"]::-webkit-search-cancel-button {
+  -webkit-appearance: none;
+}
+textarea {
+  overflow: auto;
+  vertical-align: top;
+}
+body {
+  margin: 0;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 14px;
+  line-height: 20px;
+  color: #333;
+  background-color: #fff;
+}
+a {
+  color: #08c;
+  text-decoration: none;
+}
+a:hover {
+  color: #005580;
+  text-decoration: underline;
+}
+.img-rounded {
+  -webkit-border-radius: 6px;
+  -moz-border-radius: 6px;
+  border-radius: 6px;
+}
+.img-polaroid {
+  padding: 4px;
+  background-color: #fff;
+  border: 1px solid #ccc;
+  border: 1px solid rgba(0,0,0,0.2);
+  -webkit-box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  -moz-box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+.img-circle {
+  -webkit-border-radius: 500px;
+  -moz-border-radius: 500px;
+  border-radius: 500px;
+}
+.row {
+  margin-left: -20px;
+  *zoom: 1;
+}
+.row:before,
+.row:after {
+  display: table;
+  content: "";
+  line-height: 0;
+}
+.row:after {
+  clear: both;
+}
+[class*="span"] {
+  float: left;
+  min-height: 1px;
+  margin-left: 20px;
+}
+.container,
+.navbar-static-top .container,
+.navbar-fixed-top .container,
+.navbar-fixed-bottom .container {
+  width: 940px;
+}
+.span12 {
+  width: 940px;
+}
+.span11 {
+  width: 860px;
+}
+.span10 {
+  width: 780px;
+}
+.span9 {
+  width: 700px;
+}
+.span8 {
+  width: 620px;
+}
+.span7 {
+  width: 540px;
+}
+.span6 {
+  width: 460px;
+}
+.span5 {
+  width: 380px;
+}
+.span4 {
+  width: 300px;
+}
+.span3 {
+  width: 220px;
+}
+.span2 {
+  width: 140px;
+}
+.span1 {
+  width: 60px;
+}
+.offset12 {
+  margin-left: 980px;
+}
+.offset11 {
+  margin-left: 900px;
+}
+.offset10 {
+  margin-left: 820px;
+}
+.offset9 {
+  margin-left: 740px;
+}
+.offset8 {
+  margin-left: 660px;
+}
+.offset7 {
+  margin-left: 580px;
+}
+.offset6 {
+  margin-left: 500px;
+}
+.offset5 {
+  margin-left: 420px;
+}
+.offset4 {
+  margin-left: 340px;
+}
+.offset3 {
+  margin-left: 260px;
+}
+.offset2 {
+  margin-left: 180px;
+}
+.offset1 {
+  margin-left: 100px;
+}
+.row-fluid {
+  width: 100%;
+  *zoom: 1;
+}
+.row-fluid:before,
+.row-fluid:after {
+  display: table;
+  content: "";
+  line-height: 0;
+}
+.row-fluid:after {
+  clear: both;
+}
+.row-fluid [class*="span"] {
+  display: block;
+  width: 100%;
+  min-height: 30px;
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+  float: left;
+  margin-left: 2.127659574468085%;
+  *margin-left: 2.074468085106383%;
+}
+.row-fluid [class*="span"]:first-child {
+  margin-left: 0;
+}
+.row-fluid .controls-row [class*="span"] + [class*="span"] {
+  margin-left: 2.127659574468085%;
+}
+.row-fluid .span12 {
+  width: 100%;
+  *width: 99.94680851063829%;
+}
+.row-fluid .span11 {
+  width: 91.48936170212765%;
+  *width: 91.43617021276594%;
+}
+.row-fluid .span10 {
+  width: 82.97872340425532%;
+  *width: 82.92553191489361%;
+}
+.row-fluid .span9 {
+  width: 74.46808510638297%;
+  *width: 74.41489361702126%;
+}
+.row-fluid .span8 {
+  width: 65.95744680851064%;
+  *width: 65.90425531914893%;
+}
+.row-fluid .span7 {
+  width: 57.44680851063829%;
+  *width: 57.39361702127659%;
+}
+.row-fluid .span6 {
+  width: 48.93617021276595%;
+  *width: 48.88297872340425%;
+}
+.row-fluid .span5 {
+  width: 40.42553191489362%;
+  *width: 40.37234042553192%;
+}
+.row-fluid .span4 {
+  width: 31.914893617021278%;
+  *width: 31.861702127659576%;
+}
+.row-fluid .span3 {
+  width: 23.404255319148934%;
+  *width: 23.351063829787233%;
+}
+.row-fluid .span2 {
+  width: 14.893617021276595%;
+  *width: 14.840425531914894%;
+}
+.row-fluid .span1 {
+  width: 6.382978723404255%;
+  *width: 6.329787234042553%;
+}
+.row-fluid .offset12 {
+  margin-left: 104.25531914893617%;
+  *margin-left: 104.14893617021275%;
+}
+.row-fluid .offset12:first-child {
+  margin-left: 102.12765957446808%;
+  *margin-left: 102.02127659574467%;
+}
+.row-fluid .offset11 {
+  margin-left: 95.74468085106382%;
+  *margin-left: 95.6382978723404%;
+}
+.row-fluid .offset11:first-child {
+  margin-left: 93.61702127659574%;
+  *margin-left: 93.51063829787232%;
+}
+.row-fluid .offset10 {
+  margin-left: 87.23404255319149%;
+  *margin-left: 87.12765957446807%;
+}
+.row-fluid .offset10:first-child {
+  margin-left: 85.1063829787234%;
+  *margin-left: 84.99999999999999%;
+}
+.row-fluid .offset9 {
+  margin-left: 78.72340425531914%;
+  *margin-left: 78.61702127659572%;
+}
+.row-fluid .offset9:first-child {
+  margin-left: 76.59574468085106%;
+  *margin-left: 76.48936170212764%;
+}
+.row-fluid .offset8 {
+  margin-left: 70.2127659574468%;
+  *margin-left: 70.10638297872339%;
+}
+.row-fluid .offset8:first-child {
+  margin-left: 68.08510638297872%;
+  *margin-left: 67.9787234042553%;
+}
+.row-fluid .offset7 {
+  margin-left: 61.70212765957446%;
+  *margin-left: 61.59574468085106%;
+}
+.row-fluid .offset7:first-child {
+  margin-left: 59.574468085106375%;
+  *margin-left: 59.46808510638297%;
+}
+.row-fluid .offset6 {
+  margin-left: 53.191489361702125%;
+  *margin-left: 53.085106382978715%;
+}
+.row-fluid .offset6:first-child {
+  margin-left: 51.063829787234035%;
+  *margin-left: 50.95744680851063%;
+}
+.row-fluid .offset5 {
+  margin-left: 44.68085106382979%;
+  *margin-left: 44.57446808510638%;
+}
+.row-fluid .offset5:first-child {
+  margin-left: 42.5531914893617%;
+  *margin-left: 42.4468085106383%;
+}
+.row-fluid .offset4 {
+  margin-left: 36.170212765957444%;
+  *margin-left: 36.06382978723405%;
+}
+.row-fluid .offset4:first-child {
+  margin-left: 34.04255319148936%;
+  *margin-left: 33.93617021276596%;
+}
+.row-fluid .offset3 {
+  margin-left: 27.659574468085104%;
+  *margin-left: 27.5531914893617%;
+}
+.row-fluid .offset3:first-child {
+  margin-left: 25.53191489361702%;
+  *margin-left: 25.425531914893618%;
+}
+.row-fluid .offset2 {
+  margin-left: 19.148936170212764%;
+  *margin-left: 19.04255319148936%;
+}
+.row-fluid .offset2:first-child {
+  margin-left: 17.02127659574468%;
+  *margin-left: 16.914893617021278%;
+}
+.row-fluid .offset1 {
+  margin-left: 10.638297872340425%;
+  *margin-left: 10.53191489361702%;
+}
+.row-fluid .offset1:first-child {
+  margin-left: 8.51063829787234%;
+  *margin-left: 8.404255319148938%;
+}
+[class*="span"].hide,
+.row-fluid [class*="span"].hide {
+  display: none;
+}
+[class*="span"].pull-right,
+.row-fluid [class*="span"].pull-right {
+  float: right;
+}
+.container {
+  margin-right: auto;
+  margin-left: auto;
+  *zoom: 1;
+}
+.container:before,
+.container:after {
+  display: table;
+  content: "";
+  line-height: 0;
+}
+.container:after {
+  clear: both;
+}
+.container-fluid {
+  padding-right: 20px;
+  padding-left: 20px;
+  *zoom: 1;
+}
+.container-fluid:before,
+.container-fluid:after {
+  display: table;
+  content: "";
+  line-height: 0;
+}
+.container-fluid:after {
+  clear: both;
+}
+p {
+  margin: 0 0 10px;
+}
+.lead {
+  margin-bottom: 20px;
+  font-size: 21px;
+  font-weight: 200;
+  line-height: 30px;
+}
+small {
+  font-size: 85%;
+}
+strong {
+  font-weight: bold;
+}
+em {
+  font-style: italic;
+}
+cite {
+  font-style: normal;
+}
+.muted {
+  color: #999;
+}
+.text-warning {
+  color: #c09853;
+}
+a.text-warning:hover {
+  color: #a47e3c;
+}
+.text-error {
+  color: #b94a48;
+}
+a.text-error:hover {
+  color: #953b39;
+}
+.text-info {
+  color: #3a87ad;
+}
+a.text-info:hover {
+  color: #2d6987;
+}
+.text-success {
+  color: #468847;
+}
+a.text-success:hover {
+  color: #356635;
+}
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  margin: 10px 0;
+  font-family: inherit;
+  font-weight: bold;
+  line-height: 20px;
+  color: inherit;
+  text-rendering: optimizelegibility;
+}
+h1 small,
+h2 small,
+h3 small,
+h4 small,
+h5 small,
+h6 small {
+  font-weight: normal;
+  line-height: 1;
+  color: #999;
+}
+h1,
+h2,
+h3 {
+  line-height: 40px;
+}
+h1 {
+  font-size: 38.5px;
+}
+h2 {
+  font-size: 31.5px;
+}
+h3 {
+  font-size: 24.5px;
+}
+h4 {
+  font-size: 17.5px;
+}
+h5 {
+  font-size: 14px;
+}
+h6 {
+  font-size: 11.9px;
+}
+h1 small {
+  font-size: 24.5px;
+}
+h2 small {
+  font-size: 17.5px;
+}
+h3 small {
+  font-size: 14px;
+}
+h4 small {
+  font-size: 14px;
+}
+.page-header {
+  padding-bottom: 9px;
+  margin: 20px 0 30px;
+  border-bottom: 1px solid #eee;
+}
+ul,
+ol {
+  padding: 0;
+  margin: 0 0 10px 25px;
+}
+ul ul,
+ul ol,
+ol ol,
+ol ul {
+  margin-bottom: 0;
+}
+li {
+  line-height: 20px;
+}
+ul.unstyled,
+ol.unstyled {
+  margin-left: 0;
+  list-style: none;
+}
+dl {
+  margin-bottom: 20px;
+}
+dt,
+dd {
+  line-height: 20px;
+}
+dt {
+  font-weight: bold;
+}
+dd {
+  margin-left: 10px;
+}
+.dl-horizontal {
+  *zoom: 1;
+}
+.dl-horizontal:before,
+.dl-horizontal:after {
+  display: table;
+  content: "";
+  line-height: 0;
+}
+.dl-horizontal:after {
+  clear: both;
+}
+.dl-horizontal dt {
+  float: left;
+  width: 160px;
+  clear: left;
+  text-align: right;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.dl-horizontal dd {
+  margin-left: 180px;
+}
+hr {
+  margin: 20px 0;
+  border: 0;
+  border-top: 1px solid #eee;
+  border-bottom: 1px solid #fff;
+}
+abbr[title],
+abbr[data-original-title] {
+  cursor: help;
+  border-bottom: 1px dotted #999;
+}
+abbr.initialism {
+  font-size: 90%;
+  text-transform: uppercase;
+}
+blockquote {
+  padding: 0 0 0 15px;
+  margin: 0 0 20px;
+  border-left: 5px solid #eee;
+}
+blockquote p {
+  margin-bottom: 0;
+  font-size: 16px;
+  font-weight: 300;
+  line-height: 25px;
+}
+blockquote small {
+  display: block;
+  line-height: 20px;
+  color: #999;
+}
+blockquote small:before {
+  content: '4  A0';
+}
+blockquote.pull-right {
+  float: right;
+  padding-right: 15px;
+  padding-left: 0;
+  border-right: 5px solid #eee;
+  border-left: 0;
+}
+blockquote.pull-right p,
+blockquote.pull-right small {
+  text-align: right;
+}
+blockquote.pull-right small:before {
+  content: '';
+}
+blockquote.pull-right small:after {
+  content: ' A0 4';
+}
+q:before,
+q:after,
+blockquote:before,
+blockquote:after {
+  content: "";
+}
+address {
+  display: block;
+  margin-bottom: 20px;
+  font-style: normal;
+  line-height: 20px;
+}
+body {
+  margin-top: 90px;
+}
+.header {
+  position: fixed;
+  top: 0;
+  left: 50%;
+  margin-left: -480px;
+  background-color: #fff;
+  border-bottom: 1px solid #ddd;
+  padding-top: 10px;
+  z-index: 10;
+}
+.the-icons li {
+  font-size: 14px;
+  line-height: 24px;
+  height: 24px;
+}
+.switch {
+  position: absolute;
+  right: 0;
+  bottom: 10px;
+  color: #666;
+}
+.switch input {
+  margin-right: 0.3em;
+}
+.codesOn .i-name {
+  display: none;
+}
+.codesOn .i-code {
+  display: inline;
+}
+.i-code {
+  display: none;
+}
+</style>
+    <link rel="stylesheet" href="css/custom-icons.css"><!--[if IE 7]>
+    <link rel="stylesheet" href="css/custom-icons-ie7.css"><![endif]-->
+    <script>
+      function toggleCodes(on) {
+        var obj = document.getElementById('icons');
+        
+        if (on) {
+          obj.className += ' codesOn';
+        } else {
+          obj.className = obj.className.replace(' codesOn', '');
+        }
+      }
+      
+    </script>
+  </head>
+  <body>
+    <div class="container header">
+      <h1>
+        custom-icons
+         <small>font demo</small>
+      </h1>
+      <label class="switch">
+        <input type="checkbox" onclick="toggleCodes(this.checked)">show codes
+      </label>
+    </div>
+    <div id="icons" class="container">
+      <div class="row">
+        <div class="span3">
+          <ul class="the-icons unstyled">
+            <li title="Code: 0x2b"><i class="icon-plus"></i> <span class="i-name">icon-plus</span><span class="i-code">0x2b</span></li>
+            <li title="Code: 0x2d"><i class="icon-minus"></i> <span class="i-name">icon-minus</span><span class="i-code">0x2d</span></li>
+            <li title="Code: 0x2190"><i class="icon-left"></i> <span class="i-name">icon-left</span><span class="i-code">0x2190</span></li>
+            <li title="Code: 0x2191"><i class="icon-up"></i> <span class="i-name">icon-up</span><span class="i-code">0x2191</span></li>
+            <li title="Code: 0x2192"><i class="icon-right"></i> <span class="i-name">icon-right</span><span class="i-code">0x2192</span></li>
+            <li title="Code: 0x2193"><i class="icon-down"></i> <span class="i-name">icon-down</span><span class="i-code">0x2193</span></li>
+            <li title="Code: 0x2302"><i class="icon-home"></i> <span class="i-name">icon-home</span><span class="i-code">0x2302</span></li>
+            <li title="Code: 0x2389"><i class="icon-pause"></i> <span class="i-name">icon-pause</span><span class="i-code">0x2389</span></li>
+            <li title="Code: 0x23e9"><i class="icon-fast-fw"></i> <span class="i-name">icon-fast-fw</span><span class="i-code">0x23e9</span></li>
+            <li title="Code: 0x23ea"><i class="icon-fast-bw"></i> <span class="i-name">icon-fast-bw</span><span class="i-code">0x23ea</span></li>
+            <li title="Code: 0x23ed"><i class="icon-to-end"></i> <span class="i-name">icon-to-end</span><span class="i-code">0x23ed</span></li>
+            <li title="Code: 0x23ee"><i class="icon-to-start"></i> <span class="i-name">icon-to-start</span><span class="i-code">0x23ee</span></li>
+            <li title="Code: 0x25aa"><i class="icon-stop"></i> <span class="i-name">icon-stop</span><span class="i-code">0x25aa</span></li>
+            <li title="Code: 0x25b4"><i class="icon-up-dir"></i> <span class="i-name">icon-up-dir</span><span class="i-code">0x25b4</span></li>
+            <li title="Code: 0x25b6"><i class="icon-play"></i> <span class="i-name">icon-play</span><span class="i-code">0x25b6</span></li>
+            <li title="Code: 0x25b8"><i class="icon-right-dir"></i> <span class="i-name">icon-right-dir</span><span class="i-code">0x25b8</span></li>
+            <li title="Code: 0x25be"><i class="icon-down-dir"></i> <span class="i-name">icon-down-dir</span><span class="i-code">0x25be</span></li>
+            <li title="Code: 0x25c2"><i class="icon-left-dir"></i> <span class="i-name">icon-left-dir</span><span class="i-code">0x25c2</span></li>
+            <li title="Code: 0x2601"><i class="icon-cloud"></i> <span class="i-name">icon-cloud</span><span class="i-code">0x2601</span></li>
+            <li title="Code: 0x2602"><i class="icon-umbrella"></i> <span class="i-name">icon-umbrella</span><span class="i-code">0x2602</span></li>
+            <li title="Code: 0x2605"><i class="icon-star"></i> <span class="i-name">icon-star</span><span class="i-code">0x2605</span></li>
+            <li title="Code: 0x2606"><i class="icon-star-empty"></i> <span class="i-name">icon-star-empty</span><span class="i-code">0x2606</span></li>
+            <li title="Code: 0x2611"><i class="icon-check"></i> <span class="i-name">icon-check</span><span class="i-code">0x2611</span></li>
+            <li title="Code: 0x261c"><i class="icon-left-hand"></i> <span class="i-name">icon-left-hand</span><span class="i-code">0x261c</span></li>
+            <li title="Code: 0x261d"><i class="icon-up-hand"></i> <span class="i-name">icon-up-hand</span><span class="i-code">0x261d</span></li>
+            <li title="Code: 0x261e"><i class="icon-right-hand"></i> <span class="i-name">icon-right-hand</span><span class="i-code">0x261e</span></li>
+            <li title="Code: 0x261f"><i class="icon-down-hand"></i> <span class="i-name">icon-down-hand</span><span class="i-code">0x261f</span></li>
+            <li title="Code: 0x2630"><i class="icon-th-list"></i> <span class="i-name">icon-th-list</span><span class="i-code">0x2630</span></li>
+            <li title="Code: 0x2661"><i class="icon-heart-empty"></i> <span class="i-name">icon-heart-empty</span><span class="i-code">0x2661</span></li>
+            <li title="Code: 0x2665"><i class="icon-heart"></i> <span class="i-name">icon-heart</span><span class="i-code">0x2665</span></li>
+            <li title="Code: 0x266b"><i class="icon-music"></i> <span class="i-name">icon-music</span><span class="i-code">0x266b</span></li>
+            <li title="Code: 0x268f"><i class="icon-th"></i> <span class="i-name">icon-th</span><span class="i-code">0x268f</span></li>
+            <li title="Code: 0x2691"><i class="icon-flag"></i> <span class="i-name">icon-flag</span><span class="i-code">0x2691</span></li>
+            <li title="Code: 0x2699"><i class="icon-cog"></i> <span class="i-name">icon-cog</span><span class="i-code">0x2699</span></li>
+            <li title="Code: 0x26a0"><i class="icon-attention"></i> <span class="i-name">icon-attention</span><span class="i-code">0x26a0</span></li>
+            <li title="Code: 0x26a1"><i class="icon-flash"></i> <span class="i-name">icon-flash</span><span class="i-code">0x26a1</span></li>
+            <li title="Code: 0x26ef"><i class="icon-cog-alt"></i> <span class="i-name">icon-cog-alt</span><span class="i-code">0x26ef</span></li>
+            <li title="Code: 0x2702"><i class="icon-scissors"></i> <span class="i-name">icon-scissors</span><span class="i-code">0x2702</span></li>
+            <li title="Code: 0x2708"><i class="icon-flight"></i> <span class="i-name">icon-flight</span><span class="i-code">0x2708</span></li>
+            <li title="Code: 0x2709"><i class="icon-mail"></i> <span class="i-name">icon-mail</span><span class="i-code">0x2709</span></li>
+            <li title="Code: 0x270d"><i class="icon-edit"></i> <span class="i-name">icon-edit</span><span class="i-code">0x270d</span></li>
+            <li title="Code: 0x270e"><i class="icon-pencil"></i> <span class="i-name">icon-pencil</span><span class="i-code">0x270e</span></li>
+            <li title="Code: 0x2713"><i class="icon-ok"></i> <span class="i-name">icon-ok</span><span class="i-code">0x2713</span></li>
+            <li title="Code: 0x2714"><i class="icon-ok-circle"></i> <span class="i-name">icon-ok-circle</span><span class="i-code">0x2714</span></li>
+            <li title="Code: 0x2715"><i class="icon-cancel"></i> <span class="i-name">icon-cancel</span><span class="i-code">0x2715</span></li>
+            <li title="Code: 0x2716"><i class="icon-cancel-circle"></i> <span class="i-name">icon-cancel-circle</span><span class="i-code">0x2716</span></li>
+            <li title="Code: 0x2731"><i class="icon-asterisk"></i> <span class="i-name">icon-asterisk</span><span class="i-code">0x2731</span></li>
+            <li title="Code: 0x2757"><i class="icon-attention-circle"></i> <span class="i-name">icon-attention-circle</span><span class="i-code">0x2757</span></li>
+            <li title="Code: 0x2795"><i class="icon-plus-circle"></i> <span class="i-name">icon-plus-circle</span><span class="i-code">0x2795</span></li>
+            <li title="Code: 0x2796"><i class="icon-minus-circle"></i> <span class="i-name">icon-minus-circle</span><span class="i-code">0x2796</span></li>
+            <li title="Code: 0x27a6"><i class="icon-forward"></i> <span class="i-name">icon-forward</span><span class="i-code">0x27a6</span></li>
+            <li title="Code: 0x27f2"><i class="icon-ccw"></i> <span class="i-name">icon-ccw</span><span class="i-code">0x27f2</span></li>
+            <li title="Code: 0x27f3"><i class="icon-cw"></i> <span class="i-name">icon-cw</span><span class="i-code">0x27f3</span></li>
+            <li title="Code: 0x2b0c"><i class="icon-resize-vertical"></i> <span class="i-name">icon-resize-vertical</span><span class="i-code">0x2b0c</span></li>
+            <li title="Code: 0x2b0d"><i class="icon-resize-horizontal"></i> <span class="i-name">icon-resize-horizontal</span><span class="i-code">0x2b0d</span></li>
+            <li title="Code: 0x2ecf"><i class="icon-eject"></i> <span class="i-name">icon-eject</span><span class="i-code">0x2ecf</span></li>
+            <li title="Code: 0xe4a1"><i class="icon-left-circle"></i> <span class="i-name">icon-left-circle</span><span class="i-code">0xe4a1</span></li>
+          </ul>
+        </div>
+        <div class="span3">
+          <ul class="the-icons unstyled">
+            <li title="Code: 0xe4a2"><i class="icon-right-circle"></i> <span class="i-name">icon-right-circle</span><span class="i-code">0xe4a2</span></li>
+            <li title="Code: 0xe4a3"><i class="icon-up-circle"></i> <span class="i-name">icon-up-circle</span><span class="i-code">0xe4a3</span></li>
+            <li title="Code: 0xe4a4"><i class="icon-down-circle"></i> <span class="i-name">icon-down-circle</span><span class="i-code">0xe4a4</span></li>
+            <li title="Code: 0xe701"><i class="icon-star-half"></i> <span class="i-name">icon-star-half</span><span class="i-code">0xe701</span></li>
+            <li title="Code: 0xe702"><i class="icon-ok-circle2"></i> <span class="i-name">icon-ok-circle2</span><span class="i-code">0xe702</span></li>
+            <li title="Code: 0xe703"><i class="icon-cancel-circle2"></i> <span class="i-name">icon-cancel-circle2</span><span class="i-code">0xe703</span></li>
+            <li title="Code: 0xe704"><i class="icon-help-circle"></i> <span class="i-name">icon-help-circle</span><span class="i-code">0xe704</span></li>
+            <li title="Code: 0xe705"><i class="icon-info-circle"></i> <span class="i-name">icon-info-circle</span><span class="i-code">0xe705</span></li>
+            <li title="Code: 0xe708"><i class="icon-th-large"></i> <span class="i-name">icon-th-large</span><span class="i-code">0xe708</span></li>
+            <li title="Code: 0xe70a"><i class="icon-eye"></i> <span class="i-name">icon-eye</span><span class="i-code">0xe70a</span></li>
+            <li title="Code: 0xe70b"><i class="icon-eye-off"></i> <span class="i-name">icon-eye-off</span><span class="i-code">0xe70b</span></li>
+            <li title="Code: 0xe70c"><i class="icon-tag"></i> <span class="i-name">icon-tag</span><span class="i-code">0xe70c</span></li>
+            <li title="Code: 0xe801"><i class="icon-tag-1"></i> <span class="i-name">icon-tag-1</span><span class="i-code">0xe801</span></li>
+            <li title="Code: 0xe70d"><i class="icon-tags"></i> <span class="i-name">icon-tags</span><span class="i-code">0xe70d</span></li>
+            <li title="Code: 0xe70f"><i class="icon-camera-alt"></i> <span class="i-name">icon-camera-alt</span><span class="i-code">0xe70f</span></li>
+            <li title="Code: 0xe715"><i class="icon-export"></i> <span class="i-name">icon-export</span><span class="i-code">0xe715</span></li>
+            <li title="Code: 0xe716"><i class="icon-print"></i> <span class="i-name">icon-print</span><span class="i-code">0xe716</span></li>
+            <li title="Code: 0xe717"><i class="icon-retweet"></i> <span class="i-name">icon-retweet</span><span class="i-code">0xe717</span></li>
+            <li title="Code: 0xe718"><i class="icon-comment"></i> <span class="i-name">icon-comment</span><span class="i-code">0xe718</span></li>
+            <li title="Code: 0xe803"><i class="icon-comment-1"></i> <span class="i-name">icon-comment-1</span><span class="i-code">0xe803</span></li>
+            <li title="Code: 0xe720"><i class="icon-chat-1"></i> <span class="i-name">icon-chat-1</span><span class="i-code">0xe720</span></li>
+            <li title="Code: 0xe724"><i class="icon-location"></i> <span class="i-name">icon-location</span><span class="i-code">0xe724</span></li>
+            <li title="Code: 0xe729"><i class="icon-trash"></i> <span class="i-name">icon-trash</span><span class="i-code">0xe729</span></li>
+            <li title="Code: 0xe73a"><i class="icon-rss"></i> <span class="i-name">icon-rss</span><span class="i-code">0xe73a</span></li>
+            <li title="Code: 0xe73d"><i class="icon-basket"></i> <span class="i-name">icon-basket</span><span class="i-code">0xe73d</span></li>
+            <li title="Code: 0xe740"><i class="icon-login"></i> <span class="i-name">icon-login</span><span class="i-code">0xe740</span></li>
+            <li title="Code: 0xe741"><i class="icon-logout"></i> <span class="i-name">icon-logout</span><span class="i-code">0xe741</span></li>
+            <li title="Code: 0xe744"><i class="icon-resize-full"></i> <span class="i-name">icon-resize-full</span><span class="i-code">0xe744</span></li>
+            <li title="Code: 0xe746"><i class="icon-resize-small"></i> <span class="i-name">icon-resize-small</span><span class="i-code">0xe746</span></li>
+            <li title="Code: 0xe750"><i class="icon-zoom-in"></i> <span class="i-name">icon-zoom-in</span><span class="i-code">0xe750</span></li>
+            <li title="Code: 0xe751"><i class="icon-zoom-out"></i> <span class="i-name">icon-zoom-out</span><span class="i-code">0xe751</span></li>
+            <li title="Code: 0xe758"><i class="icon-down-circle2"></i> <span class="i-name">icon-down-circle2</span><span class="i-code">0xe758</span></li>
+            <li title="Code: 0xe75b"><i class="icon-up-circle2"></i> <span class="i-name">icon-up-circle2</span><span class="i-code">0xe75b</span></li>
+            <li title="Code: 0xe75c"><i class="icon-down-open"></i> <span class="i-name">icon-down-open</span><span class="i-code">0xe75c</span></li>
+            <li title="Code: 0xe75d"><i class="icon-left-open"></i> <span class="i-name">icon-left-open</span><span class="i-code">0xe75d</span></li>
+            <li title="Code: 0xe75e"><i class="icon-right-open"></i> <span class="i-name">icon-right-open</span><span class="i-code">0xe75e</span></li>
+            <li title="Code: 0xe75f"><i class="icon-up-open"></i> <span class="i-name">icon-up-open</span><span class="i-code">0xe75f</span></li>
+            <li title="Code: 0xe760"><i class="icon-arrows-cw"></i> <span class="i-name">icon-arrows-cw</span><span class="i-code">0xe760</span></li>
+            <li title="Code: 0xe761"><i class="icon-play-circle2"></i> <span class="i-name">icon-play-circle2</span><span class="i-code">0xe761</span></li>
+            <li title="Code: 0xe762"><i class="icon-to-end-alt"></i> <span class="i-name">icon-to-end-alt</span><span class="i-code">0xe762</span></li>
+            <li title="Code: 0xe763"><i class="icon-to-start-alt"></i> <span class="i-name">icon-to-start-alt</span><span class="i-code">0xe763</span></li>
+            <li title="Code: 0xe777"><i class="icon-inbox"></i> <span class="i-name">icon-inbox</span><span class="i-code">0xe777</span></li>
+            <li title="Code: 0xe779"><i class="icon-font"></i> <span class="i-name">icon-font</span><span class="i-code">0xe779</span></li>
+            <li title="Code: 0xe77a"><i class="icon-bold"></i> <span class="i-name">icon-bold</span><span class="i-code">0xe77a</span></li>
+            <li title="Code: 0xe77b"><i class="icon-italic"></i> <span class="i-name">icon-italic</span><span class="i-code">0xe77b</span></li>
+            <li title="Code: 0xe77c"><i class="icon-text-height"></i> <span class="i-name">icon-text-height</span><span class="i-code">0xe77c</span></li>
+            <li title="Code: 0xe77d"><i class="icon-text-width"></i> <span class="i-name">icon-text-width</span><span class="i-code">0xe77d</span></li>
+            <li title="Code: 0xe77e"><i class="icon-align-left"></i> <span class="i-name">icon-align-left</span><span class="i-code">0xe77e</span></li>
+            <li title="Code: 0xe77f"><i class="icon-align-center"></i> <span class="i-name">icon-align-center</span><span class="i-code">0xe77f</span></li>
+            <li title="Code: 0xe780"><i class="icon-align-right"></i> <span class="i-name">icon-align-right</span><span class="i-code">0xe780</span></li>
+            <li title="Code: 0xe781"><i class="icon-align-justify"></i> <span class="i-name">icon-align-justify</span><span class="i-code">0xe781</span></li>
+            <li title="Code: 0xe782"><i class="icon-list"></i> <span class="i-name">icon-list</span><span class="i-code">0xe782</span></li>
+            <li title="Code: 0xe783"><i class="icon-indent-left"></i> <span class="i-name">icon-indent-left</span><span class="i-code">0xe783</span></li>
+            <li title="Code: 0xe784"><i class="icon-indent-right"></i> <span class="i-name">icon-indent-right</span><span class="i-code">0xe784</span></li>
+            <li title="Code: 0xe78e"><i class="icon-off"></i> <span class="i-name">icon-off</span><span class="i-code">0xe78e</span></li>
+            <li title="Code: 0xe78f"><i class="icon-road"></i> <span class="i-name">icon-road</span><span class="i-code">0xe78f</span></li>
+            <li title="Code: 0xe790"><i class="icon-list-alt"></i> <span class="i-name">icon-list-alt</span><span class="i-code">0xe790</span></li>
+          </ul>
+        </div>
+        <div class="span3">
+          <ul class="the-icons unstyled">
+            <li title="Code: 0xe791"><i class="icon-qrcode"></i> <span class="i-name">icon-qrcode</span><span class="i-code">0xe791</span></li>
+            <li title="Code: 0xe792"><i class="icon-barcode"></i> <span class="i-name">icon-barcode</span><span class="i-code">0xe792</span></li>
+            <li title="Code: 0xe793"><i class="icon-ajust"></i> <span class="i-name">icon-ajust</span><span class="i-code">0xe793</span></li>
+            <li title="Code: 0xe794"><i class="icon-tint"></i> <span class="i-name">icon-tint</span><span class="i-code">0xe794</span></li>
+            <li title="Code: 0xe7a1"><i class="icon-magnet"></i> <span class="i-name">icon-magnet</span><span class="i-code">0xe7a1</span></li>
+            <li title="Code: 0xf047"><i class="icon-move"></i> <span class="i-name">icon-move</span><span class="i-code">0xf047</span></li>
+            <li title="Code: 0xf08e"><i class="icon-link-ext"></i> <span class="i-name">icon-link-ext</span><span class="i-code">0xf08e</span></li>
+            <li title="Code: 0xf096"><i class="icon-check-empty"></i> <span class="i-name">icon-check-empty</span><span class="i-code">0xf096</span></li>
+            <li title="Code: 0xf097"><i class="icon-bookmark-empty"></i> <span class="i-name">icon-bookmark-empty</span><span class="i-code">0xf097</span></li>
+            <li title="Code: 0xf098"><i class="icon-phone-squared"></i> <span class="i-name">icon-phone-squared</span><span class="i-code">0xf098</span></li>
+            <li title="Code: 0xf099"><i class="icon-twitter"></i> <span class="i-name">icon-twitter</span><span class="i-code">0xf099</span></li>
+            <li title="Code: 0xf09e"><i class="icon-rss-1"></i> <span class="i-name">icon-rss-1</span><span class="i-code">0xf09e</span></li>
+            <li title="Code: 0xf0a0"><i class="icon-hdd"></i> <span class="i-name">icon-hdd</span><span class="i-code">0xf0a0</span></li>
+            <li title="Code: 0xf0a3"><i class="icon-certificate"></i> <span class="i-name">icon-certificate</span><span class="i-code">0xf0a3</span></li>
+            <li title="Code: 0xf0a8"><i class="icon-left-circled"></i> <span class="i-name">icon-left-circled</span><span class="i-code">0xf0a8</span></li>
+            <li title="Code: 0xf0a9"><i class="icon-right-circled"></i> <span class="i-name">icon-right-circled</span><span class="i-code">0xf0a9</span></li>
+            <li title="Code: 0xf0aa"><i class="icon-up-circled"></i> <span class="i-name">icon-up-circled</span><span class="i-code">0xf0aa</span></li>
+            <li title="Code: 0xf0ab"><i class="icon-down-circled"></i> <span class="i-name">icon-down-circled</span><span class="i-code">0xf0ab</span></li>
+            <li title="Code: 0xf0ae"><i class="icon-tasks"></i> <span class="i-name">icon-tasks</span><span class="i-code">0xf0ae</span></li>
+            <li title="Code: 0xf0b0"><i class="icon-filter"></i> <span class="i-name">icon-filter</span><span class="i-code">0xf0b0</span></li>
+            <li title="Code: 0xf0b2"><i class="icon-resize-full-alt"></i> <span class="i-name">icon-resize-full-alt</span><span class="i-code">0xf0b2</span></li>
+            <li title="Code: 0xf0c3"><i class="icon-beaker"></i> <span class="i-name">icon-beaker</span><span class="i-code">0xf0c3</span></li>
+            <li title="Code: 0xf0c5"><i class="icon-docs"></i> <span class="i-name">icon-docs</span><span class="i-code">0xf0c5</span></li>
+            <li title="Code: 0xf0c8"><i class="icon-blank"></i> <span class="i-name">icon-blank</span><span class="i-code">0xf0c8</span></li>
+            <li title="Code: 0xf0c9"><i class="icon-menu"></i> <span class="i-name">icon-menu</span><span class="i-code">0xf0c9</span></li>
+            <li title="Code: 0xf0ca"><i class="icon-list-bullet"></i> <span class="i-name">icon-list-bullet</span><span class="i-code">0xf0ca</span></li>
+            <li title="Code: 0xf0cb"><i class="icon-list-numbered"></i> <span class="i-name">icon-list-numbered</span><span class="i-code">0xf0cb</span></li>
+            <li title="Code: 0xf0cc"><i class="icon-strike"></i> <span class="i-name">icon-strike</span><span class="i-code">0xf0cc</span></li>
+            <li title="Code: 0xf0cd"><i class="icon-underline"></i> <span class="i-name">icon-underline</span><span class="i-code">0xf0cd</span></li>
+            <li title="Code: 0xf0ce"><i class="icon-table"></i> <span class="i-name">icon-table</span><span class="i-code">0xf0ce</span></li>
+            <li title="Code: 0xf0d0"><i class="icon-magic"></i> <span class="i-name">icon-magic</span><span class="i-code">0xf0d0</span></li>
+            <li title="Code: 0xf0d2"><i class="icon-pinterest-circled"></i> <span class="i-name">icon-pinterest-circled</span><span class="i-code">0xf0d2</span></li>
+            <li title="Code: 0xf0d5"><i class="icon-gplus"></i> <span class="i-name">icon-gplus</span><span class="i-code">0xf0d5</span></li>
+            <li title="Code: 0xf0d6"><i class="icon-money"></i> <span class="i-name">icon-money</span><span class="i-code">0xf0d6</span></li>
+            <li title="Code: 0xf0db"><i class="icon-columns"></i> <span class="i-name">icon-columns</span><span class="i-code">0xf0db</span></li>
+            <li title="Code: 0xf0dc"><i class="icon-sort"></i> <span class="i-name">icon-sort</span><span class="i-code">0xf0dc</span></li>
+            <li title="Code: 0xf0dd"><i class="icon-sort-down"></i> <span class="i-name">icon-sort-down</span><span class="i-code">0xf0dd</span></li>
+            <li title="Code: 0xf0de"><i class="icon-sort-up"></i> <span class="i-name">icon-sort-up</span><span class="i-code">0xf0de</span></li>
+            <li title="Code: 0xf0e0"><i class="icon-mail-alt"></i> <span class="i-name">icon-mail-alt</span><span class="i-code">0xf0e0</span></li>
+            <li title="Code: 0xf0e4"><i class="icon-gauge"></i> <span class="i-name">icon-gauge</span><span class="i-code">0xf0e4</span></li>
+            <li title="Code: 0xf0e5"><i class="icon-comment-2"></i> <span class="i-name">icon-comment-2</span><span class="i-code">0xf0e5</span></li>
+            <li title="Code: 0xf0e6"><i class="icon-chat"></i> <span class="i-name">icon-chat</span><span class="i-code">0xf0e6</span></li>
+            <li title="Code: 0xf0e8"><i class="icon-sitemap"></i> <span class="i-name">icon-sitemap</span><span class="i-code">0xf0e8</span></li>
+            <li title="Code: 0xf0ea"><i class="icon-paste"></i> <span class="i-name">icon-paste</span><span class="i-code">0xf0ea</span></li>
+            <li title="Code: 0xf200"><i class="icon-user-md"></i> <span class="i-name">icon-user-md</span><span class="i-code">0xf200</span></li>
+            <li title="Code: 0xf300"><i class="icon-facebook"></i> <span class="i-name">icon-facebook</span><span class="i-code">0xf300</span></li>
+            <li title="Code: 0xf303"><i class="icon-twitter-bird"></i> <span class="i-name">icon-twitter-bird</span><span class="i-code">0xf303</span></li>
+            <li title="Code: 0xf304"><i class="icon-icq"></i> <span class="i-name">icon-icq</span><span class="i-code">0xf304</span></li>
+            <li title="Code: 0xf305"><i class="icon-yandex"></i> <span class="i-name">icon-yandex</span><span class="i-code">0xf305</span></li>
+            <li title="Code: 0xf308"><i class="icon-github"></i> <span class="i-name">icon-github</span><span class="i-code">0xf308</span></li>
+            <li title="Code: 0xf30b"><i class="icon-skype"></i> <span class="i-name">icon-skype</span><span class="i-code">0xf30b</span></li>
+            <li title="Code: 0xf30c"><i class="icon-odnoklassniki"></i> <span class="i-name">icon-odnoklassniki</span><span class="i-code">0xf30c</span></li>
+            <li title="Code: 0xf30f"><i class="icon-vimeo"></i> <span class="i-name">icon-vimeo</span><span class="i-code">0xf30f</span></li>
+            <li title="Code: 0xf311"><i class="icon-tumblr"></i> <span class="i-name">icon-tumblr</span><span class="i-code">0xf311</span></li>
+            <li title="Code: 0xf312"><i class="icon-friendfeed"></i> <span class="i-name">icon-friendfeed</span><span class="i-code">0xf312</span></li>
+            <li title="Code: 0xf314"><i class="icon-blogger"></i> <span class="i-name">icon-blogger</span><span class="i-code">0xf314</span></li>
+            <li title="Code: 0xf316"><i class="icon-deviantart"></i> <span class="i-name">icon-deviantart</span><span class="i-code">0xf316</span></li>
+          </ul>
+        </div>
+        <div class="span3">
+          <ul class="the-icons unstyled">
+            <li title="Code: 0xf317"><i class="icon-jabber"></i> <span class="i-name">icon-jabber</span><span class="i-code">0xf317</span></li>
+            <li title="Code: 0xf318"><i class="icon-lastfm"></i> <span class="i-name">icon-lastfm</span><span class="i-code">0xf318</span></li>
+            <li title="Code: 0xf31a"><i class="icon-linkedin"></i> <span class="i-name">icon-linkedin</span><span class="i-code">0xf31a</span></li>
+            <li title="Code: 0xf31c"><i class="icon-picasa"></i> <span class="i-name">icon-picasa</span><span class="i-code">0xf31c</span></li>
+            <li title="Code: 0xf31d"><i class="icon-wordpress"></i> <span class="i-name">icon-wordpress</span><span class="i-code">0xf31d</span></li>
+            <li title="Code: 0xf31e"><i class="icon-instagram"></i> <span class="i-name">icon-instagram</span><span class="i-code">0xf31e</span></li>
+            <li title="Code: 0x1f304"><i class="icon-picture"></i> <span class="i-name">icon-picture</span><span class="i-code">0x1f304</span></li>
+            <li title="Code: 0x1f30e"><i class="icon-globe"></i> <span class="i-name">icon-globe</span><span class="i-code">0x1f30e</span></li>
+            <li title="Code: 0x1f342"><i class="icon-leaf"></i> <span class="i-name">icon-leaf</span><span class="i-code">0x1f342</span></li>
+            <li title="Code: 0x1f34b"><i class="icon-lemon"></i> <span class="i-name">icon-lemon</span><span class="i-code">0x1f34b</span></li>
+            <li title="Code: 0x1f378"><i class="icon-glass"></i> <span class="i-name">icon-glass</span><span class="i-code">0x1f378</span></li>
+            <li title="Code: 0x1f381"><i class="icon-gift"></i> <span class="i-name">icon-gift</span><span class="i-code">0x1f381</span></li>
+            <li title="Code: 0x1f3a5"><i class="icon-videocam"></i> <span class="i-name">icon-videocam</span><span class="i-code">0x1f3a5</span></li>
+            <li title="Code: 0x1f3a7"><i class="icon-headphones"></i> <span class="i-name">icon-headphones</span><span class="i-code">0x1f3a7</span></li>
+            <li title="Code: 0x1f3ac"><i class="icon-video"></i> <span class="i-name">icon-video</span><span class="i-code">0x1f3ac</span></li>
+            <li title="Code: 0x1f3af"><i class="icon-target"></i> <span class="i-name">icon-target</span><span class="i-code">0x1f3af</span></li>
+            <li title="Code: 0x1f3c9"><i class="icon-award"></i> <span class="i-name">icon-award</span><span class="i-code">0x1f3c9</span></li>
+            <li title="Code: 0x1f44d"><i class="icon-thumbs-up"></i> <span class="i-name">icon-thumbs-up</span><span class="i-code">0x1f44d</span></li>
+            <li title="Code: 0x1f44e"><i class="icon-thumbs-down"></i> <span class="i-name">icon-thumbs-down</span><span class="i-code">0x1f44e</span></li>
+            <li title="Code: 0xe800"><i class="icon-user-1"></i> <span class="i-name">icon-user-1</span><span class="i-code">0xe800</span></li>
+            <li title="Code: 0x1f464"><i class="icon-user"></i> <span class="i-name">icon-user</span><span class="i-code">0x1f464</span></li>
+            <li title="Code: 0x1f465"><i class="icon-users"></i> <span class="i-name">icon-users</span><span class="i-code">0x1f465</span></li>
+            <li title="Code: 0x1f4b3"><i class="icon-credit-card"></i> <span class="i-name">icon-credit-card</span><span class="i-code">0x1f4b3</span></li>
+            <li title="Code: 0x1f4bc"><i class="icon-briefcase"></i> <span class="i-name">icon-briefcase</span><span class="i-code">0x1f4bc</span></li>
+            <li title="Code: 0x1f4be"><i class="icon-floppy"></i> <span class="i-name">icon-floppy</span><span class="i-code">0x1f4be</span></li>
+            <li title="Code: 0x1f4c1"><i class="icon-folder"></i> <span class="i-name">icon-folder</span><span class="i-code">0x1f4c1</span></li>
+            <li title="Code: 0x1f4c2"><i class="icon-folder-open"></i> <span class="i-name">icon-folder-open</span><span class="i-code">0x1f4c2</span></li>
+            <li title="Code: 0x1f4c4"><i class="icon-doc"></i> <span class="i-name">icon-doc</span><span class="i-code">0x1f4c4</span></li>
+            <li title="Code: 0x1f4c5"><i class="icon-calendar"></i> <span class="i-name">icon-calendar</span><span class="i-code">0x1f4c5</span></li>
+            <li title="Code: 0x1f4ca"><i class="icon-chart-bar"></i> <span class="i-name">icon-chart-bar</span><span class="i-code">0x1f4ca</span></li>
+            <li title="Code: 0x1f4cc"><i class="icon-pin"></i> <span class="i-name">icon-pin</span><span class="i-code">0x1f4cc</span></li>
+            <li title="Code: 0x1f4ce"><i class="icon-attach"></i> <span class="i-name">icon-attach</span><span class="i-code">0x1f4ce</span></li>
+            <li title="Code: 0x1f4d5"><i class="icon-book"></i> <span class="i-name">icon-book</span><span class="i-code">0x1f4d5</span></li>
+            <li title="Code: 0x1f4de"><i class="icon-phone"></i> <span class="i-name">icon-phone</span><span class="i-code">0x1f4de</span></li>
+            <li title="Code: 0x1f4e3"><i class="icon-megaphone"></i> <span class="i-name">icon-megaphone</span><span class="i-code">0x1f4e3</span></li>
+            <li title="Code: 0x1f4e4"><i class="icon-upload"></i> <span class="i-name">icon-upload</span><span class="i-code">0x1f4e4</span></li>
+            <li title="Code: 0x1f4e5"><i class="icon-download"></i> <span class="i-name">icon-download</span><span class="i-code">0x1f4e5</span></li>
+            <li title="Code: 0x1f4f6"><i class="icon-signal"></i> <span class="i-name">icon-signal</span><span class="i-code">0x1f4f6</span></li>
+            <li title="Code: 0x1f4f7"><i class="icon-camera"></i> <span class="i-name">icon-camera</span><span class="i-code">0x1f4f7</span></li>
+            <li title="Code: 0x1f500"><i class="icon-shuffle"></i> <span class="i-name">icon-shuffle</span><span class="i-code">0x1f500</span></li>
+            <li title="Code: 0x1f507"><i class="icon-volume-off"></i> <span class="i-name">icon-volume-off</span><span class="i-code">0x1f507</span></li>
+            <li title="Code: 0x1f509"><i class="icon-volume-down"></i> <span class="i-name">icon-volume-down</span><span class="i-code">0x1f509</span></li>
+            <li title="Code: 0x1f50a"><i class="icon-volume-up"></i> <span class="i-name">icon-volume-up</span><span class="i-code">0x1f50a</span></li>
+            <li title="Code: 0x1f50d"><i class="icon-search"></i> <span class="i-name">icon-search</span><span class="i-code">0x1f50d</span></li>
+            <li title="Code: 0x1f511"><i class="icon-key"></i> <span class="i-name">icon-key</span><span class="i-code">0x1f511</span></li>
+            <li title="Code: 0x1f512"><i class="icon-lock"></i> <span class="i-name">icon-lock</span><span class="i-code">0x1f512</span></li>
+            <li title="Code: 0x1f513"><i class="icon-lock-open"></i> <span class="i-name">icon-lock-open</span><span class="i-code">0x1f513</span></li>
+            <li title="Code: 0x1f514"><i class="icon-bell"></i> <span class="i-name">icon-bell</span><span class="i-code">0x1f514</span></li>
+            <li title="Code: 0x1f516"><i class="icon-bookmark"></i> <span class="i-name">icon-bookmark</span><span class="i-code">0x1f516</span></li>
+            <li title="Code: 0x1f517"><i class="icon-link"></i> <span class="i-name">icon-link</span><span class="i-code">0x1f517</span></li>
+            <li title="Code: 0x1f525"><i class="icon-fire"></i> <span class="i-name">icon-fire</span><span class="i-code">0x1f525</span></li>
+            <li title="Code: 0x1f527"><i class="icon-wrench"></i> <span class="i-name">icon-wrench</span><span class="i-code">0x1f527</span></li>
+            <li title="Code: 0x1f528"><i class="icon-hammer"></i> <span class="i-name">icon-hammer</span><span class="i-code">0x1f528</span></li>
+            <li title="Code: 0xe802"><i class="icon-clock-1"></i> <span class="i-name">icon-clock-1</span><span class="i-code">0xe802</span></li>
+            <li title="Code: 0x1f554"><i class="icon-clock"></i> <span class="i-name">icon-clock</span><span class="i-code">0x1f554</span></li>
+            <li title="Code: 0x1f69a"><i class="icon-truck"></i> <span class="i-name">icon-truck</span><span class="i-code">0x1f69a</span></li>
+            <li title="Code: 0x1f6ab"><i class="icon-block"></i> <span class="i-name">icon-block</span><span class="i-code">0x1f6ab</span></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

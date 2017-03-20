@@ -1,0 +1,44 @@
+#contact h1 { margin: 10px 0 10px; font-size: 24px; color: #333333; }
+#contact hr { color: inherit; height: 0; margin: 6px 0 6px 0; padding: 0; border: 1px solid #d9d9d9; border-style: none none solid; }
+
+#contact { display: block; margin: 50px auto; padding: 35px; border: 1px solid #cbcbcb; background-color: #FFF; -moz-border-radius:5px; -webkit-border-radius:5px; }
+
+/* Form style */
+
+#contact label { display: inline-block; float: left; height: 26px; line-height: 26px; width: 155px; font-size: 1.5em; -moz-border-radius:5px; -webkit-border-radius:5px; }
+#contact input, textarea, select { width: 280px; margin: 0;  color: #666; background: #f5f5f5; border: 1px solid #ccc; margin: 5px 0; -moz-border-radius:5px; -webkit-border-radius:5px; }
+#contact input:focus, textarea:focus, select:focus { border: 1px solid #999; background-color: #fff; color:#333; }
+#contact input.submit { width: 85px; cursor: pointer; border: 1px solid #222; background:#333; color:#fff; }
+#contact input.submit:hover { background:#444; }
+#contact input[type="submit"][disabled] { background:#888; cursor: default; }
+#contact fieldset { padding:20px; border:1px solid #eee; moz-border-radius:5px; -webkit-border-radius:5px; }
+#contact legend { padding:7px 10px; font-weight:bold; color:#000; border:1px solid #eee; -moz-border-radius:5px; -webkit-border-radius:5px; margin-bottom:0 !important; margin-bottom:20px; }
+#contact label.radio { display:block; width:100%; margin-top:10px; margin-bottom:5px; }
+#contact span.required{ font-size: 13px; color: #ff0000; } /* Select the colour of the * if the field is required. */
+
+#message { margin: 10px 0 0 0; padding: 0; }
+
+.error_message { display: block; line-height: 22px; background: #FBE3E4 url('../img/error.gif') no-repeat 10px 6px; padding: 3px 10px 3px 35px; color:#8a1f11;border: 1px solid #FBC2C4; -moz-border-radius:5px; -webkit-border-radius:5px; }
+
+ul.error_messages { margin: 0 0 0 15px; padding: 0; }
+ul.error_messages li { height: 22px; line-height: 22px; color:#333; }
+
+.loader { padding: 0 10px; }
+
+#success_page h1 { background: url('../img/success.gif') left no-repeat; padding-left:22px; color:#5E5E5E}
+
+acronym { border-bottom:1px dotted #ccc; }
+
+input[type="checkbox"] {
+  width:20px !important;
+  margin: 4px 0 0;
+  margin-top: 1px \9;
+  float: left;
+  *margin-top: 0;
+  line-height: normal;
+  cursor: pointer;
+}
+
+input[type="radio"] {
+  width:20px !important;
+}

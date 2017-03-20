@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<!--[if lt IE 7 ]><html class="ie ie6" lang="en"> <![endif]-->
+<!--[if IE 7 ]><html class="ie ie7" lang="en"> <![endif]-->
+<!--[if IE 8 ]><html class="ie ie8" lang="en"> <![endif]-->
+<!--[if (gte IE 9)|!(IE)]><!-->
+<head>
+<meta charset="utf-8">
+<title>The Apache OFBiz &trade; Project</title>
+<meta name="description" content="Apache OFBiz (The Apache Open For Business
+    Project) is an open source enterprise automation software project licensed
+    under the Apache License Version 2.0. Being open source under the Apache 2.0
+    license and driven by a community Apache OFBiz offers both flexibility by
+    design and by access to code, and a solution where you're not alone but
+    rather can work with many others to get things done.">
+<meta name="keywords" content="Open Source ERP,Open Source CRM,
+    Open Source E-Commerce,Open Source eCommerce,Open Source POS,Open Source SCM,
+    Open Source MRP,Open Source CMMS,Open Source EAM,web services,workflow,
+    ebusiness,e-business,ecommerce,e-commerce,automation,enterprise software,
+    open source,entity engine,service engine,erp,crm,party,accounting,facility,
+    supply,chain,management,catalog,order,project,task,work effort,financial,
+    ledger,content management,customer,inventory"/>
+
+<meta name="Robots" content="index,follow" />
+<!-- Mobile Specific Metas
+    ================================================== -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- CSS
+    ================================================== -->
+<!-- Bootstrap  -->
+<link type="text/css" rel="stylesheet" href="bootstrap/css/bootstrap.min.css">
+<!-- web font  -->
+<link href="http://fonts.googleapis.com/css?family=Open+Sans:400,300,800" rel="stylesheet" type="text/css">
+<!-- plugin css  -->
+<link rel="stylesheet" type="text/css" href="js-plugin/pretty-photo/css/prettyPhoto.css" />
+<link rel="stylesheet" type="text/css" href="js-plugin/rs-plugin/css/settings.css" media="screen" />
+<link type="text/css" rel="stylesheet" href="js-plugin/hoverdir/css/style.css">
+<!-- icon fonts -->
+<link type="text/css" rel="stylesheet" href="font-icons/custom-icons/css/custom-icons.css">
+<link type="text/css" rel="stylesheet" href="font-icons/custom-icons/css/custom-icons-ie7.css">
+<!-- Custom css -->
+<link type="text/css" rel="stylesheet" href="css/layout.css">
+<link type="text/css" id="colors" rel="stylesheet" href="css/colors.css">
+<!--[if lt IE 9]><script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+<!--[if gte IE 9]><style type="text/css">.iconBig, .active, .hover a , .Shover a { filter: none !important; } </style> <![endif]-->
+<script src="js/modernizr-2.6.1.min.js"></script>
+<!-- Favicons
+    ================================================== -->
+<link rel="shortcut icon" href="images/favicon.ico">
+<link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+<link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+<link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+<link rel="apple-touch-icon" sizes="144x144" href="images/apple-touch-icon-144x144.png">
+</head>
+<body>
+<!-- header -->
+<header id="mainHeader" class="clearfix">
+  <div class="navbar navbar-fixed-top">
+    <div class="navbar-inner">
+      <div class="container"> <a href="index.html" class="brand"><img src="images/OFBiz-logoV3-apache.png" alt="Apache OFBiz Logo"/></a>
+        <nav id="mainMenu" class="clearfix">
+          <ul>
+            <li><a href="index.html" class="firstLevel">Home</a></li>
+            <li><a href="" class="firstLevel">Getting Started</a>
+              <ul>
+                <li><a href="developers.html" class="">Developers</a></li>
+                <li><a href="business-users.html" class="last">Business Users</a></li>
+              </ul>
+            </li>
+            <li><a href="" class="firstLevel">News</a>
+              <ul>
+                <li><a href="https://twitter.com/apacheofbiz">Twitter</a></li>
+                <li><a href="https://blogs.apache.org/ofbiz/">Blog</a></li>
+                <li><a href="user-stories.html">User Stories and References</a></li>
+                <li><a href="" class="last">Press</a></li>
+              </ul>
+            </li>
+            <li><a href="" class="firstLevel">Documentation</a>
+              <ul>
+                <li><a href="" class="">User Documentation</a></li>
+                <li><a href="https://cwiki.apache.org/confluence/display/OFBIZ/OFBiz+Technical+Documentation+-+Home+Page" class="">Technical Documentation</a></li>
+                <li><a href="https://cwiki.apache.org/confluence/display/OFBIZ/Home" class="">Wiki</a></li>
+                <li><a href="https://ci.apache.org/projects/ofbiz/site/javadocs/" class="last">API Reference</a></li>
+              </ul>
+            </li>
+            <li><a href="" class="firstLevel">Community</a>
+              <ul>
+                <li><a href="getting-involved.html">Getting Involved</a></li>
+                <li><a href="https://cwiki.apache.org/confluence/display/OFBIZ/Events">Meetups / Events</a></li>
+                <li><a href="mailinglists.html">Mailing Lists</a></li>
+                <li><a href="">Source Repository</a></li>
+                <li><a href="https://issues.apache.org/jira/browse/OFBIZ/?selectedTab=com.atlassian.jira.jira-projects-plugin:summary-panel">Issue Tracker</a></li>
+                <li><a href="service-providers.html">Service Providers</a></li>
+                <li><a href="faqs.html" class="last">FAQ</a></li>
+              </ul>
+            </li>
+            <li><a href="" class="firstLevel">Users</a>
+              <ul>
+                <li><a href="our-users.html">e-Commerce / e-business</a></li>
+                <li><a href="our-users.html">Manufacturing</a></li>
+                <li><a href="our-users.html">Retail</a></li>
+                <li><a href="our-users.html">Distribution</a></li>
+                <li><a href="our-users.html">Service Industries</a></li>
+                <li><a href="our-users.html" class="last">Other</a></li>
+              </ul>
+            </li>
+          </ul>
+        </nav>
+      </div>
+    </div>
+  </div>
+</header>
+<!-- header -->
+<!-- globalWrapper -->
+<div id="globalWrapper">
+  <!-- content -->
+  <section id="content" class="portfolio">
+    <header class="headerPage">
+      <div class="container clearfix">
+        <div class="row">
+          <h1 class="span8">Service Providers</h1>
+          <div class="span4" id="navTrail"> <a href="index.html" class="homeLink"> home</a><span>/</span><a href="portfolio-2columns.html">community</a><span>/</span><span class="current">Service Providers</span> </div>
+        </div>
+      </div>
+    </header>
+    <div class="container clearfix">
+      <div class="row">
+        <nav id="filter" class="eight columns">
+          <ul>
+            <li class="filterTitle">
+              <h3>Categories:</h3>
+            </li>
+            <li><a href="" class="current btn btn-3d btnSmall" data-filter="*">All</a></li>
+            <li><a href="" class="btn btn-3d btnSmall"  data-filter=".global">Global</a></li>
+	    <li><a href="" class="btn btn-3d btnSmall"  data-filter=".europe">Europe</a></li>
+	    <li><a href="" class="btn btn-3d btnSmall"  data-filter=".africa">Africa</a></li>
+	    <li><a href="" class="btn btn-3d btnSmall"  data-filter=".asia">Asia</a></li>
+	    <li><a href="" class="btn btn-3d btnSmall"  data-filter=".america">America</a></li>
+	    <li><a href="" class="btn btn-3d btnSmall"  data-filter=".australasia">Australasia</a></li>
+          </ul>
+        </nav>
+      </div>
+    </div>
+    <div class="slice clearfix">
+      <div class="container" id="fourColumns">
+        <div class="row">
+          <div class="portfolio-items isotopeWrapper clearfix da-thumbs" id="4">
+            <article class="span3 isotopeItem men masoneryBloc"> <a class="sizer" href="">
+                <section class="imgWrapper"> <img src="images/portfolio/ecomify.jpg" alt=""/></section>
+                <div> <span class="iconWrapper iconLink"><i class="icon-plus"></i></span> </div>
+              </a>
+              <section class="hiddenInfo">
+                <h3>Lorem ipsum dolor sit amet</h3>
+                <p class="boxTextWrapper">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi vulputate nunc ut tellus sollicitudin placerat. Sed ac consectetur leo. Pellentesque habitant morbi tristique senectus et netus... <a href="portfolio-project-video.html" class="moreLink">&rarr; read more</a></p>
+              </section>
+            </article>
+            <article class="span3 isotopeItem men masoneryBloc"> <a class="sizer" href="">
+                <section class="imgWrapper"> <img src="images/portfolio/Nereide-Logo-Complet-Verticale.jpg" alt=""/></section>
+                <div> <span class="iconWrapper iconLink"><i class="icon-plus"></i></span> </div>
+              </a>
+              <section class="hiddenInfo">
+                <h3>Lorem ipsum dolor sit amet</h3>
+                <p class="boxTextWrapper">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi vulputate nunc ut tellus sollicitudin placerat. Sed ac consectetur leo. Pellentesque habitant morbi tristique senectus et netus... <a href="portfolio-project-fullwidth-carousel.html" class="moreLink">&rarr; read more</a></p>
+              </section>
+            </article>
+            <article class="span3 isotopeItem  women masoneryBloc"> <a class="sizer" href="">
+                <section class="imgWrapper"> <img src="images/portfolio/Hotwax-Systems.jpg" alt=""/></section>
+                <div> <span class="iconWrapper iconLink"><i class="icon-plus"></i></span> </div>
+              </a>
+              <section class="hiddenInfo">
+                <h3>Lorem ipsum dolor sit amet</h3>
+                <p class="boxTextWrapper">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi vulputate nunc ut tellus sollicitudin placerat. Sed ac consectetur leo. Pellentesque habitant morbi tristique senectus et netus... <a href="portfolio-project-image.html" class="moreLink">&rarr; read more</a></p>
+              </section>
+            </article>
+            <article class="span3 isotopeItem  cats masoneryBloc"> <a class="sizer" href="">
+                <section class="imgWrapper"> <img src="images/portfolio/les-arts-informatiques.jpg" alt=""/></section>
+                <div> <span class="iconWrapper iconLink"><i class="icon-plus"></i></span> </div>
+              </a>
+              <section class="hiddenInfo">
+                <h3>Lorem ipsum dolor sit amet</h3>
+                <p class="boxTextWrapper">Lorem ipsum dolorsit amet, consectetur adipiscing elit. Morbi vulputate nunc ut tellus sollicitudin placerat. Sed ac consectetur leo. Pellentesque habitant morbi tristique senectus et netus... <a href="portfolio-project-image.html" class="moreLink">&rarr; read more</a></p>
+              </section>
+            </article>
+            <article class="span3 isotopeItem  men masoneryBloc"> <a class="sizer" href="">
+                <section class="imgWrapper"> <img src="images/portfolio/Ant-Logo.jpg" alt=""/></section>
+                <div> <span class="iconWrapper iconLink"><i class="icon-plus"></i></span> </div>
+              </a>
+              <section class="hiddenInfo">
+                <h3>Lorem ipsum dolor sit amet</h3>
+                <p class="boxTextWrapper">Lorem ipsum dolorsit amet, consectetur adipiscing elit. Morbi vulputate nunc ut tellus sollicitudin placerat. Sed ac consectetur leo. Pellentesque habitant morbi tristique senectus et netus... <a href="portfolio-project-image.html" class="moreLink">&rarr; read more</a></p>
+              </section>
+            </article>
+            <article class="span3 isotopeItem cats masoneryBloc"> <a class="sizer" href="">
+                <section class="imgWrapper"> <img src="images/portfolio/vign6.jpg" alt=""/></section>
+                <div> <span class="iconWrapper iconLink"><i class="icon-plus"></i></span> </div>
+              </a>
+              <section class="hiddenInfo">
+                <h3>Lorem ipsum dolor sit amet</h3>
+                <p class="boxTextWrapper">Lorem ipsum dolorsit amet, consectetur adipiscing elit. Morbi vulputate nunc ut tellus sollicitudin placerat. Sed ac consectetur leo. Pellentesque habitant morbi tristique senectus et netus... <a href="portfolio-project-image.html" class="moreLink">&rarr; read more</a></p>
+              </section>
+            </article>
+            <article class="span3 isotopeItem cats masoneryBloc"> <a class="sizer" href="">
+                <section class="imgWrapper"> <img src="images/portfolio/vign7.jpg" alt=""/></section>
+                <div class="mask"> <span class="iconWrapper iconLink"><i class="icon-plus"></i></span> </div>
+              </a>
+              <section class="hiddenInfo">
+                <h3>Lorem ipsum dolor sit amet</h3>
+                <p class="boxTextWrapper">Lorem ipsum dolorsit amet, consectetur adipiscing elit. Morbi vulputate nunc ut tellus sollicitudin placerat. Sed ac consectetur leo. Pellentesque habitant morbi tristique senectus et netus... <a href="portfolio-project-fullwidth-carousel.html" class="moreLink">&rarr; read more</a></p>
+              </section>
+            </article>
+            <article class="span3 isotopeItem cats masoneryBloc"> <a class="sizer" href="">
+                <section class="imgWrapper"> <img src="images/portfolio/vign7.jpg" alt=""/></section>
+                <div> <span class="iconWrapper iconLink"><i class="icon-plus"></i></span> </div>
+              </a>
+              <section class="hiddenInfo">
+                <h3>Lorem ipsum dolor sit amet</h3>
+                <p class="boxTextWrapper">Lorem ipsum dolorsit amet, consectetur adipiscing elit. Morbi vulputate nunc ut tellus sollicitudin placerat. Sed ac consectetur leo. Pellentesque habitant morbi tristique senectus et netus... <a href="portfolio-project-image.html" class="moreLink">&rarr; read more</a></p>
+              </section>
+            </article>
+            <article class="span3 isotopeItem women masoneryBloc"> <a class="sizer" href="">
+                <section class="imgWrapper"> <img src="images/portfolio/vign8.jpg" alt=""/></section>
+                <div> <span class="iconWrapper iconLink"><i class="icon-plus"></i></span> </div>
+              </a>
+              <section class="hiddenInfo">
+                <h3>Lorem ipsum dolor sit amet</h3>
+                <p class="boxTextWrapper"> Lorem ipsum dolorsit amet, consectetur adipiscing elit. Morbi vulputate nunc ut tellus sollicitudin placerat. Sed ac consectetur leo. Pellentesque habitant morbi tristique senectus et netus... <a href="portfolio-project-image.html" class="moreLink">&rarr; read more</a> </p>
+              </section>
+            </article>
+            <article class="span3 isotopeItem women masoneryBloc"> <a class="sizer" href="">
+                <section class="imgWrapper"> <img src="images/portfolio/vign9.jpg" alt=""/></section>
+                <div> <span class="iconWrapper iconLink"><i class="icon-plus"></i></span> </div>
+              </a>
+              <section class="hiddenInfo">
+                <h3>Lorem ipsum dolor sit amet</h3>
+                <p class="boxTextWrapper">Lorem ipsum dolorsit amet, consectetur adipiscing elit. Morbi vulputate nunc ut tellus sollicitudin placerat. Sed ac consectetur leo. Pellentesque habitant morbi tristique senectus et netus... <a href="portfolio-project-fullwidth-carousel.html" class="moreLink">&rarr; read more</a></p>
+              </section>
+            </article>
+            <article class="span3 isotopeItem  women masoneryBloc"> <a class="sizer" href="">
+                <section class="imgWrapper"> <img src="images/portfolio/ecomify.jpg" alt=""/></section>
+                <div> <span class="iconWrapper iconLink"><i class="icon-plus"></i></span> </div>
+              </a>
+              <section class="hiddenInfo">
+                <h3>Lorem ipsum dolor sit amet</h3>
+                <p class="boxTextWrapper">Lorem ipsum dolorsit amet, consectetur adipiscing elit. Morbi vulputate nunc ut tellus sollicitudin placerat. Sed ac consectetur leo. Pellentesque habitant morbi tristique senectus et netus... <a href="portfolio-project-fullwidth-carousel.html" class="moreLink">&rarr; read more</a></p>
+              </section>
+            </article>
+            <article class="span3 isotopeItem  cats masoneryBloc"> <a class="sizer" href="">
+                <section class="imgWrapper"> <img src="images/portfolio/Nereide-Logo-Complet-Verticale.jpg" alt=""/></section>
+                <div> <span class="iconWrapper iconLink"><i class="icon-plus"></i></span> </div>
+              </a>
+              <section class="hiddenInfo">
+                <h3>Lorem ipsum dolor sit amet</h3>
+                <p class="boxTextWrapper">Lorem ipsum dolorsit amet, consectetur adipiscing elit. Morbi vulputate nunc ut tellus sollicitudin placerat. Sed ac consectetur leo. Pellentesque habitant morbi tristique senectus et netus... <a href="portfolio-project-video.html" class="moreLink">&rarr; read more</a></p>
+              </section>
+            </article>
+            <article class="span3 isotopeItem  men masoneryBloc"> <a class="sizer" href="">
+                <section class="imgWrapper"> <img src="images/portfolio/Hotwax-Systems.jpg" alt=""/></section>
+                <div> <span class="iconWrapper iconLink"><i class="icon-plus"></i></span> </div>
+              </a>
+              <section class="hiddenInfo">
+                <h3>Lorem ipsum dolor sit amet</h3>
+                <p class="boxTextWrapper">Lorem ipsum dolorsit amet, consectetur adipiscing elit. Morbi vulputate nunc ut tellus sollicitudin placerat. Sed ac consectetur leo. Pellentesque habitant morbi tristique senectus et netus... <a href="portfolio-project-fullwidth-image.html" class="moreLink">&rarr; read more</a></p>
+              </section>
+            </article>
+            <article class="span3 isotopeItem  men masoneryBloc"> <a class="sizer" href="">
+                <section class="imgWrapper"> <img src="images/portfolio/les-arts-informatiques.jpg" alt=""/></section>
+                <div> <span class="iconWrapper iconLink"><i class="icon-plus"></i></span> </div>
+              </a>
+              <section class="hiddenInfo">
+                <h3>Lorem ipsum dolor sit amet</h3>
+                <p class="boxTextWrapper">Lorem ipsum dolorsit amet, consectetur adipiscing elit. Morbi vulputate nunc ut tellus sollicitudin placerat. Sed ac consectetur leo. Pellentesque habitant morbi tristique senectus et netus... <a href="portfolio-project-image.html" class="moreLink">&rarr; read more</a></p>
+              </section>
+            </article>
+            <article class="span3 isotopeItem  women masoneryBloc"> <a class="sizer" href="">
+                <section class="imgWrapper"> <img src="images/portfolio/Ant-Logo.jpg" alt=""/></section>
+                <div> <span class="iconWrapper iconLink"><i class="icon-plus"></i></span> </div>
+              </a>
+              <section class="hiddenInfo">
+                <h3>Lorem ipsum dolor sit amet</h3>
+                <p class="boxTextWrapper">Lorem ipsum dolorsit amet, consectetur adipiscing elit. Morbi vulputate nunc ut tellus sollicitudin placerat. Sed ac consectetur leo. Pellentesque habitant morbi tristique senectus et netus... <a href="portfolio-project-fullwidth-video.html" class="moreLink">&rarr; read more</a></p>
+              </section>
+            </article>
+            <article class="span3 isotopeItem  cats masoneryBloc"> <a class="sizer" href="">
+                <section class="imgWrapper"> <img src="images/portfolio/vign6.jpg" alt=""/></section>
+                <div> <span class="iconWrapper iconLink"><i class="icon-plus"></i></span> </div>
+              </a>
+              <section class="hiddenInfo">
+                <h3>Lorem ipsum dolor sit amet</h3>
+                <p class="boxTextWrapper">Lorem ipsum dolorsit amet, consectetur adipiscing elit. Morbi vulputate nunc ut tellus sollicitudin placerat. Sed ac consectetur leo. Pellentesque habitant morbi tristique senectus et netus... <a href="portfolio-project-carousel.html" class="moreLink">&rarr; read more</a></p>
+              </section>
+            </article>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  
+</div>
+
+<!-- footer -->
+<footer class="footer1">
+  <div class="container" id="footer">
+    <div class="row">
+      <div class="span6 timelineWidget">
+        <h2>Latest tweets</h2>
+        <div class="divider"><span></span></div>
+        <ul class="socialNetwork nav">
+          <li>
+            <a href="https://twitter.com/ApacheOfbiz" class="icon-twitter-bird socialIcon tips"
+              target="_blank" title="follow us on Twitter"><span>twitter</span></a>
+          </li>
+	 <li><a href="https://www.youtube.com/user/ofbiz" class="icon-play socialIcon tips"  title="follow us on Youtube"><span>Youtube</span></a></li>
+          <!--<li><a href="#" class="icon-rss socialIcon tips"  title="Our rss feed"><span>rss feed</span></a></li>
+          <li><a href="#" class="icon-facebook socialIcon tips"  title="follow us on Facebook"><span>facebook</span></a></li>
+          <li><a href="#" class="icon-gplus socialIcon tips"  title="follow us on Google +"><span>google +</span></a></li>
+          <li><a href="#" class="icon-instagram socialIcon tips"  title="follow us on Instagram"><span>instagram</span></a></li>
+          <li><a href="#" class="icon-linkedin socialIcon tips"  title="follow us on Linkedin"><span>linkedin</span></a></li>
+          <li><a href="#" class="icon-pinterest-circled socialIcon tips"  title="follow us on Pinterest"><span>Pinterest</span></a></li>-->
+        </ul>
+        <div id="twitterFrame"> <a class="twitter-timeline" href="https://twitter.com/ApacheOfbiz?height=250" data-widget-id="588661945194192896"  data-tweet-limit="2" data-theme="dark" data-chrome="nofooter noheader transparent" >Tweets by @ApacheOfbiz</a>
+          <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+        </div>
+      </div>
+      <div class="span3 contactWidget">
+        <h2>Contact Community</h2>
+        <div class="divider"><span></span></div>
+        <ul>
+          <li><a href="mailinglists.html">Mailing Lists</a></li>
+          <li><a href="source-repositories.html">Source Repository (SVN)</a></li>
+          <li><a href="https://issues.apache.org/jira/browse/OFBIZ" target="external">Issue Tracker (Jira)</a></li>
+          <li><a href="https://www.youtube.com/user/ofbiz" target="external">OFBiz Youtube Channel</a></li>
+          <li><a href="https://www.hipchat.com/g4vOayvmc" target="external">OFBiz HipChat Room</a></li>
+        </ul>
+      </div>
+      <div class="span3 sociallWidget">
+        <h2>ASF Information</h2>
+        <div class="divider"><span></span></div>
+        <ul>
+          <li><a href="#">Apache Software Foundation</a></li>
+          <li><a href="#">Sponsorship</a></li>
+          <li><a href="#">Thanks</a></li>
+          <li><a href="#">Security</a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</footer>
+<footer class="footer2" id="footerRights">
+  <div class="container">
+    <div class="row">
+      <div class="span12">
+        <p>
+          Copyright © 2016 The Apache Software Foundation. Licensed under the
+          Apache License, Version 2.0. Apache OFBiz, OFBiz, the project logo
+          and the Apache feather logo are trademarks of The Apache Software
+          Foundation.
+        </p>
+      </div>
+    </div>
+  </div>
+</footer>
+<!-- footer -->
+</div>
+<!-- globalWrapper -->
+<script type="text/javascript" src="js-plugin/respond/respond.min.js"></script>
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
+<script type="text/javascript" src="js-plugin/jquery-ui/jquery-ui-1.8.23.custom.min.js"></script>
+<!-- third party plugins  -->
+<script type="text/javascript" src="bootstrap/js/bootstrap.js"></script>
+<script type="text/javascript" src="bootstrap/js/bootstrap-carousel.js"></script>
+<script type="text/javascript" src="js-plugin/easing/jquery.easing.1.3.js"></script>
+<script type="text/javascript" src="js-plugin/pretty-photo/js/jquery.prettyPhoto.js"></script>
+<script type="text/javascript" src="js-plugin/hoverdir/jquery.hoverdir.js"></script>
+<!-- jQuery KenBurn Slider  -->
+<script type="text/javascript" src="js-plugin/rs-plugin/js/jquery.themepunch.plugins.min.js"></script>
+<script type="text/javascript" src="js-plugin/rs-plugin/js/jquery.themepunch.revolution.min.js"></script>
+<!-- Custom  -->
+<script type="text/javascript" src="js/custom.js"></script>
+<script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', UA]);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+</script>
+</body>
+</html>
