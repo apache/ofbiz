@@ -146,7 +146,7 @@
           <div class="ctaText">
             <h3>Go ahead and take OFBiz for a spin!</h3>
             <p>Download <strong>OFBiz</strong> and try it out for yourself.
-             All you is need is to install the Java Development Kit and then follow
+             All you need is to install the Java Development Kit and then follow
               the instructions in the README file.</p>
           </div>
         </div>
