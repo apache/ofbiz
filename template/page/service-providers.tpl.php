@@ -33,7 +33,7 @@
       <div class="container" id="fourColumns">
         <div class="row">
           <div class="portfolio-items isotopeWrapper clearfix da-thumbs" id="4">
-            <article class="span3 isotopeItem men masoneryBloc"> <a class="sizer" href="">
+            <article class="span3 isotopeItem europe masoneryBloc"> <a class="sizer" href="">
                 <section class="imgWrapper"> <img src="images/portfolio/ecomify.jpg" alt=""/></section>
                 <div> <span class="iconWrapper iconLink"><i class="icon-plus"></i></span> </div>
               </a>
@@ -42,7 +42,7 @@
                 <p class="boxTextWrapper">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi vulputate nunc ut tellus sollicitudin placerat. Sed ac consectetur leo. Pellentesque habitant morbi tristique senectus et netus... <a href="portfolio-project-video.html" class="moreLink">&rarr; read more</a></p>
               </section>
             </article>
-            <article class="span3 isotopeItem men masoneryBloc"> <a class="sizer" href="">
+            <article class="span3 isotopeItem europe masoneryBloc"> <a class="sizer" href="">
                 <section class="imgWrapper"> <img src="images/portfolio/Nereide-Logo-Complet-Verticale.jpg" alt=""/></section>
                 <div> <span class="iconWrapper iconLink"><i class="icon-plus"></i></span> </div>
               </a>
@@ -97,7 +97,7 @@
               </section>
             </article>
             <article class="span3 isotopeItem cats masoneryBloc"> <a class="sizer" href="">
-                <section class="imgWrapper"> <img src="images/portfolio/vign7.jpg" alt=""/></section>
+                <section class="imgWrapper"> <img src="images/portfolio/solveda-logo.jpg" alt=""/></section>
                 <div> <span class="iconWrapper iconLink"><i class="icon-plus"></i></span> </div>
               </a>
               <section class="hiddenInfo">
@@ -106,7 +106,7 @@
               </section>
             </article>
             <article class="span3 isotopeItem women masoneryBloc"> <a class="sizer" href="">
-                <section class="imgWrapper"> <img src="images/portfolio/pyt_rgb.jpg" alt=""/></section>
+                <section class="imgWrapper"> <img src="images/portfolio/vign1.jpg" alt=""/></section>
                 <div> <span class="iconWrapper iconLink"><i class="icon-plus"></i></span> </div>
               </a>
               <section class="hiddenInfo">
@@ -124,7 +124,7 @@
               </section>
             </article>
             <article class="span3 isotopeItem  women masoneryBloc"> <a class="sizer" href="">
-                <section class="imgWrapper"> <img src="images/portfolio/ecomify.jpg" alt=""/></section>
+                <section class="imgWrapper"> <img src="images/portfolio/vign2.jpg" alt=""/></section>
                 <div> <span class="iconWrapper iconLink"><i class="icon-plus"></i></span> </div>
               </a>
               <section class="hiddenInfo">
@@ -133,7 +133,7 @@
               </section>
             </article>
             <article class="span3 isotopeItem  cats masoneryBloc"> <a class="sizer" href="">
-                <section class="imgWrapper"> <img src="images/portfolio/Nereide-Logo-Complet-Verticale.jpg" alt=""/></section>
+                <section class="imgWrapper"> <img src="images/portfolio/vign3.jpg" alt=""/></section>
                 <div> <span class="iconWrapper iconLink"><i class="icon-plus"></i></span> </div>
               </a>
               <section class="hiddenInfo">
@@ -142,7 +142,7 @@
               </section>
             </article>
             <article class="span3 isotopeItem  men masoneryBloc"> <a class="sizer" href="">
-                <section class="imgWrapper"> <img src="images/portfolio/Hotwax-Systems.jpg" alt=""/></section>
+                <section class="imgWrapper"> <img src="images/portfolio/vign4.jpg" alt=""/></section>
                 <div> <span class="iconWrapper iconLink"><i class="icon-plus"></i></span> </div>
               </a>
               <section class="hiddenInfo">
@@ -151,7 +151,7 @@
               </section>
             </article>
             <article class="span3 isotopeItem  men masoneryBloc"> <a class="sizer" href="">
-                <section class="imgWrapper"> <img src="images/portfolio/les-arts-informatiques.jpg" alt=""/></section>
+                <section class="imgWrapper"> <img src="images/portfolio/vign5.jpg" alt=""/></section>
                 <div> <span class="iconWrapper iconLink"><i class="icon-plus"></i></span> </div>
               </a>
               <section class="hiddenInfo">
@@ -160,7 +160,7 @@
               </section>
             </article>
             <article class="span3 isotopeItem  women masoneryBloc"> <a class="sizer" href="">
-                <section class="imgWrapper"> <img src="images/portfolio/Ant-Logo.jpg" alt=""/></section>
+                <section class="imgWrapper"> <img src="images/portfolio/vign6.jpg" alt=""/></section>
                 <div> <span class="iconWrapper iconLink"><i class="icon-plus"></i></span> </div>
               </a>
               <section class="hiddenInfo">
@@ -169,7 +169,7 @@
               </section>
             </article>
             <article class="span3 isotopeItem  cats masoneryBloc"> <a class="sizer" href="">
-                <section class="imgWrapper"> <img src="images/portfolio/isu_logo.jpg" alt=""/></section>
+                <section class="imgWrapper"> <img src="images/portfolio/vign7.jpg" alt=""/></section>
                 <div> <span class="iconWrapper iconLink"><i class="icon-plus"></i></span> </div>
               </a>
               <section class="hiddenInfo">
