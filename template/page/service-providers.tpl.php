@@ -79,7 +79,7 @@
               </section>
             </article>
             <article class="span3 isotopeItem cats masoneryBloc"> <a class="sizer" href="">
-                <section class="imgWrapper"> <img src="images/portfolio/vign6.jpg" alt=""/></section>
+                <section class="imgWrapper"> <img src="images/portfolio/isu_logo.jpg" alt=""/></section>
                 <div> <span class="iconWrapper iconLink"><i class="icon-plus"></i></span> </div>
               </a>
               <section class="hiddenInfo">
@@ -88,7 +88,7 @@
               </section>
             </article>
             <article class="span3 isotopeItem cats masoneryBloc"> <a class="sizer" href="">
-                <section class="imgWrapper"> <img src="images/portfolio/vign7.jpg" alt=""/></section>
+                <section class="imgWrapper"> <img src="images/portfolio/pyt_rgb.jpg" alt=""/></section>
                 <div class="mask"> <span class="iconWrapper iconLink"><i class="icon-plus"></i></span> </div>
               </a>
               <section class="hiddenInfo">
@@ -106,7 +106,7 @@
               </section>
             </article>
             <article class="span3 isotopeItem women masoneryBloc"> <a class="sizer" href="">
-                <section class="imgWrapper"> <img src="images/portfolio/vign8.jpg" alt=""/></section>
+                <section class="imgWrapper"> <img src="images/portfolio/pyt_rgb.jpg" alt=""/></section>
                 <div> <span class="iconWrapper iconLink"><i class="icon-plus"></i></span> </div>
               </a>
               <section class="hiddenInfo">
@@ -169,7 +169,7 @@
               </section>
             </article>
             <article class="span3 isotopeItem  cats masoneryBloc"> <a class="sizer" href="">
-                <section class="imgWrapper"> <img src="images/portfolio/vign6.jpg" alt=""/></section>
+                <section class="imgWrapper"> <img src="images/portfolio/isu_logo.jpg" alt=""/></section>
                 <div> <span class="iconWrapper iconLink"><i class="icon-plus"></i></span> </div>
               </a>
               <section class="hiddenInfo">
