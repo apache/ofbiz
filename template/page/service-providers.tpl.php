@@ -106,7 +106,7 @@
               </section>
             </article>
             <article class="span3 isotopeItem cats masoneryBloc"> <a class="sizer" href="">
-                <section class="imgWrapper"> <img src="images/portfolio/vign2.jpg" alt=""/></section>
+                <section class="imgWrapper"> <img src="images/portfolio/provolve_logo.jpg" alt=""/></section>
                 <div> <span class="iconWrapper iconLink"><i class="icon-plus"></i></span> </div>
               </a>
               <section class="hiddenInfo">
