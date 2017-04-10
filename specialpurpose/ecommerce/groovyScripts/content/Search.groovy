@@ -30,6 +30,7 @@ import org.apache.ofbiz.product.feature.ParametricSearch
 import org.apache.lucene.search.*
 import org.apache.lucene.index.DirectoryReader
 import org.apache.lucene.store.Directory
+import org.apache.ofbiz.base.util.UtilProperties
 
 paramMap = UtilHttp.getParameterMap(request)
 queryLine = paramMap.queryLine.toString()
@@ -40,19 +41,20 @@ siteId = paramMap.siteId ?: "WebStoreCONTENT"
 featureIdByType = ParametricSearch.makeFeatureIdByTypeMap(paramMap)
 //Debug.logInfo("in search, featureIdByType:" + featureIdByType, "")
 
-combQuery = new BooleanQuery()
-Directory directory = FSDirectory.open(new File(SearchWorker.getIndexPath("content")).toPath())
-DirectoryReader reader = DirectoryReader.open(directory)
+combQuery = new BooleanQuery.Builder()
 IndexSearcher searcher = null
 Analyzer analyzer = null
 
 try {
+    Directory directory = FSDirectory.open(new File(SearchWorker.getIndexPath("content")).toPath())
+    DirectoryReader reader = DirectoryReader.open(directory)
     searcher = new IndexSearcher(reader)
     analyzer = new StandardAnalyzer()
 } catch (java.io.FileNotFoundException e) {
-    Debug.logError(e, "Search.groovy")
-    request.setAttribute("errorMsgReq", "No index file exists.")
+    context.errorMessageList.add(UtilProperties.getMessage("ContentErrorUiLabels", "ContentSearchNotIndexed", locale))
+    return
 }
+
 termQuery = new TermQuery(new Term("site", siteId.toString()))
 combQuery.add(termQuery, BooleanClause.Occur.MUST)
 //Debug.logInfo("in search, termQuery:" + termQuery.toString(), "")
@@ -66,7 +68,7 @@ if (queryLine && analyzer) {
 }
 
 if (featureIdByType) {
-    featureQuery = new BooleanQuery()
+    featureQuery = new BooleanQuery.Builder()
     featuresRequired = BooleanClause.Occur.MUST
     if ("any".equals(paramMap.anyOrAll)) {
         featuresRequired = BooleanClause.Occur.SHOULD
@@ -79,13 +81,13 @@ if (featureIdByType) {
             //Debug.logInfo("in search searchFeature3, termQuery:" + termQuery.toString(), "")
         }
     }
-    combQuery.add(featureQuery, featuresRequired)
+    combQuery.add(featureQuery.build(), featuresRequired)
 }
 
 if (searcher) {
     Debug.logInfo("in search searchFeature3, combQuery:" + combQuery.toString(), "")
     TopScoreDocCollector collector = TopScoreDocCollector.create(100) //defaulting to 100 results
-    searcher.search(combQuery, collector)
+    searcher.search(combQuery.build(), collector)
     ScoreDoc[] hits = collector.topDocs().scoreDocs
     Debug.logInfo("in search, hits:" + collector.getTotalHits(), "")
 
