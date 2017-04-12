@@ -53,7 +53,7 @@ under the License.
                         <set field="layoutSettings.javaScripts[]" value="/example/js/ExamplePushNotifications.js" global="true"/>
                     </actions>
                 </section>
-                <include-screen name="GlobalDecorator" location="component://common/widget/CommonScreens.xml"/>
+                <include-screen name="ApplicationDecorator" location="component://commonext/widget/CommonScreens.xml"/>
             </widgets>
         </section>
     </screen>
