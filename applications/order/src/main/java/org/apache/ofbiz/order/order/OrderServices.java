@@ -4205,7 +4205,7 @@ public class OrderServices {
             }
         }
 
-        toStore.addAll(cart.makeOrderItems());
+        toStore.addAll(cart.makeOrderItems(false, true, dispatcher));
         toStore.addAll(cart.makeAllAdjustments());
 
         long groupIndex = cart.getShipInfoSize();
