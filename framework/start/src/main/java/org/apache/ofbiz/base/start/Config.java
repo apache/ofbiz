@@ -225,8 +225,7 @@ public final class Config {
         int calculatedAdminPort;
         try {
             calculatedAdminPort = Integer.parseInt(adminPortStr);
-            calculatedAdminPort = calculatedAdminPort != 0 ? calculatedAdminPort : 10523; // This is necessary because the ASF machines don't allow ports 1 to 3, see  INFRA-6790
-            calculatedAdminPort += portOffsetValue;
+            calculatedAdminPort = calculatedAdminPort != 0 ? calculatedAdminPort + portOffsetValue : 0;
         } catch (Exception e) {
             System.out.println("Error while parsing admin port number (so default to 10523) = " + e);
             calculatedAdminPort = 10523;
