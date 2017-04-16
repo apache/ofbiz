@@ -59,7 +59,7 @@ under the License.
         <field name="workEffortTypeId" use-when="routing==null"><hidden value="ROUTING"/></field>
         <field name="currentStatusId" use-when="routing==null"><hidden value="ROU_ACTIVE"/></field>
         <field name="workEffortId" use-when="routing!=null"><hidden/></field>
-        <field name="workEffortName" title="${uiLabelMap.ManufacturingRoutingName}"><text/></field>
+        <field name="workEffortName" title="${uiLabelMap.ManufacturingRoutingName}" required-field="true"><text/></field>
         <field name="description"><text/></field>
         <field name="quantityToProduce" title="${uiLabelMap.ManufacturingQuantityToProduce}"><text/></field>
         <field name="submitButton" title="${uiLabelMap.CommonSubmit}">
