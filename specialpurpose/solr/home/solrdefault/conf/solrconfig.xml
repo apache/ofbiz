@@ -101,7 +101,7 @@
        replication is in use, this should match the replication
        configuration.
     -->
-  <dataDir>${solr.data.dir:plugins/solr/home/solrdefault/runtime/indexes/}</dataDir>
+  <dataDir>${solr.data.dir:home/solrdefault/runtime/indexes/}</dataDir>
 
 
   <!-- The DirectoryFactory to use for indexes.
