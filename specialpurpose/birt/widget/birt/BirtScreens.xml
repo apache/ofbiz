@@ -108,31 +108,6 @@ under the License.
         </section>
     </screen>
 
-    <screen name="Report">
-        <section>
-            <actions>
-                <set field="tabButtonItem" value="Report"/>
-            </actions>
-            <widgets>
-                <decorator-screen name="CommonBirtDecorator" location="${parameters.mainDecoratorLocation}">
-                    <decorator-section name="body">
-                        <section>
-                            <widgets>
-                                <screenlet title="Using report tag">
-                                    <platform-specific>
-                                        <html>
-                                            <html-template location="component://birt/template/Report.ftl"/>
-                                        </html>
-                                    </platform-specific>
-                                </screenlet>
-                            </widgets>
-                        </section>
-                    </decorator-section>
-                </decorator-screen>
-            </widgets>
-        </section>
-    </screen>
-
     <screen name="EditMail">
         <section>
             <actions>
@@ -145,29 +120,6 @@ under the License.
                             <widgets>
                                 <screenlet title="Send BIRT report by mail">
                                     <include-form name="EditMail" location="component://birt/widget/birt/BirtForms.xml"/>
-                                </screenlet>
-                            </widgets>
-                        </section>
-                    </decorator-section>
-                </decorator-screen>
-            </widgets>
-        </section>
-    </screen>
-
-    <screen name="chartReport">
-        <section>
-            <actions>
-                <set field="tabButtonItem" value="chartReport"/>
-            </actions>
-            <widgets>
-                <decorator-screen name="CommonBirtDecorator" location="${parameters.mainDecoratorLocation}">
-                    <decorator-section name="body">
-                        <section>
-                            <widgets>
-                                <screenlet title="Using report tag">
-                                    <platform-specific>
-                                        <html><html-template location="component://birt/template/ChartReport.ftl"/></html>
-                                    </platform-specific>
                                 </screenlet>
                             </widgets>
                         </section>

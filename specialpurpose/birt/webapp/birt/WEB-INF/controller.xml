@@ -46,10 +46,6 @@ under the License.
         <security https="true" auth="true"/>
         <response name="success" type="view" value="main"/>
     </request-map>
-    <request-map uri="Report">
-        <security https="true" auth="true"/>
-        <response name="success" type="view" value="Report"/>
-    </request-map>
     <request-map uri="Mail">
         <security https="true" auth="true"/>
         <response name="success" type="view" value="Mail"/>
@@ -64,17 +60,6 @@ under the License.
         <security https="true" auth="true"/>
         <response name="success" type="view" value="ViewHandler"/>
     </request-map>
-
-    <!-- BIRT example Requests -->
-    <request-map uri="BirtMain">
-        <security https="true" auth="true"/>
-        <response name="success" type="view" value="BirtMain"/>
-    </request-map>
-
-    <request-map uri="chartReport">
-        <security https="true" auth="true"/>
-        <response name="success" type="view" value="chartReport"/>
-    </request-map>
     <request-map uri="chartViewHandler">
         <security https="true" auth="true"/>
         <response name="success" type="view" value="chartViewHandler"/>
@@ -84,8 +69,6 @@ under the License.
 
     <!-- View Mappings -->
     <view-map name="main" type="screen" page="component://birt/widget/birt/BirtScreens.xml#main"/>
-    <view-map name="Report" type="screen" page="component://birt/widget/birt/BirtScreens.xml#Report"/>
-    <view-map name="chartReport" type="screen" page="component://birt/widget/birt/BirtScreens.xml#chartReport"/>
     <view-map name="Mail" type="screen" page="component://birt/widget/birt/BirtScreens.xml#EditMail"/>
     
     <!-- Supported Content Types -->
