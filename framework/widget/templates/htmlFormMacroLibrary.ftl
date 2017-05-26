@@ -102,7 +102,7 @@ under the License.
   </#if>
 </#macro>
 
-<#macro renderDateTimeField name className alert title value size maxlength id dateType shortDateInput timeDropdownParamName defaultDateTimeString localizedIconTitle timeDropdown timeHourName classString hour1 hour2 timeMinutesName minutes isTwelveHour ampmName amSelected pmSelected compositeType formName mask="" event="" action="" step="" timeValues="">
+<#macro renderDateTimeField name className alert title value size maxlength id dateType shortDateInput timeDropdownParamName defaultDateTimeString localizedIconTitle timeDropdown timeHourName classString hour1 hour2 timeMinutesName minutes isTwelveHour ampmName amSelected pmSelected compositeType formName="" mask="" event="" action="" step="" timeValues="">
   <span class="view-calendar">
     <#if dateType!="time" >
       <input type="text" name="${name}_i18n" <@renderClass className alert /><#rt/>
