@@ -40,19 +40,6 @@ under the License.
     </context-param>
 
     <filter>
-        <display-name>ControlFilter</display-name>
-        <filter-name>ControlFilter</filter-name>
-        <filter-class>org.apache.ofbiz.webapp.control.ControlFilter</filter-class>
-        <init-param>
-            <param-name>allowedPaths</param-name>
-            <param-value>/cms:/select:/index.html:/index.jsp:/default.html:/default.jsp:/images</param-value>
-        </init-param>
-        <init-param>
-            <param-name>redirectPath</param-name>
-            <param-value>/cms</param-value>
-        </init-param>
-    </filter>
-    <filter>
         <display-name>ContextFilter</display-name>
         <filter-name>ContextFilter</filter-name>
         <filter-class>org.apache.ofbiz.webapp.control.ContextFilter</filter-class>
@@ -62,10 +49,6 @@ under the License.
         <filter-name>WebSiteFilter</filter-name>
         <filter-class>org.apache.ofbiz.cmssite.multisite.WebSiteFilter</filter-class>
     </filter>
-    <filter-mapping>
-        <filter-name>ControlFilter</filter-name>
-        <url-pattern>/*</url-pattern>
-    </filter-mapping>
     <filter-mapping>
         <filter-name>ContextFilter</filter-name>
         <url-pattern>/*</url-pattern>
