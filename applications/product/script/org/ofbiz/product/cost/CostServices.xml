@@ -109,7 +109,6 @@ under the License.
             <if-compare field="productCost" operator="equals" value="0" type="BigDecimal">
                 <clear-field field="costsAndMap"/>
                 <set from-field="parameters.productId" field="costsAndMap.productId"/>
-                <set from-field="parameters.productPriceTypeId" field="costsAndMap.productPriceTypeId"/>
                 <find-by-and entity-name="SupplierProduct" map="costsAndMap" list="priceCosts" order-by-list="orderByList"/>
                 <filter-list-by-date list="priceCosts" from-field-name="availableFromDate" thru-field-name="availableThruDate"/>
                 <first-from-list list="priceCosts" entry="priceCost"/>
