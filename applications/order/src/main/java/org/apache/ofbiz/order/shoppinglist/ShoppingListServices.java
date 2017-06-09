@@ -35,6 +35,7 @@ import org.apache.ofbiz.base.util.UtilValidate;
 import org.apache.ofbiz.entity.Delegator;
 import org.apache.ofbiz.entity.GenericEntityException;
 import org.apache.ofbiz.entity.GenericValue;
+import org.apache.ofbiz.entity.transaction.GenericTransactionException;
 import org.apache.ofbiz.entity.transaction.TransactionUtil;
 import org.apache.ofbiz.entity.util.EntityListIterator;
 import org.apache.ofbiz.entity.util.EntityQuery;
@@ -125,13 +126,18 @@ public class ShoppingListServices {
         Locale locale = (Locale) context.get("locale");
 
         boolean beganTransaction = false;
+        try {
+            beganTransaction = TransactionUtil.begin();
+        } catch (GenericTransactionException e1) {
+            Debug.logError(e1, "[Delegator] Could not begin transaction: " + e1.toString(), module);
+        }
+        
         try (EntityListIterator eli = EntityQuery.use(delegator)
                 .from("ShoppingList")
                 .where("shoppingListTypeId", "SLT_AUTO_REODR", "isActive", "Y")
                 .orderBy("-lastOrderedDate")
                 .queryIterator()) {
 
-            beganTransaction = TransactionUtil.begin();
             if (eli != null) {
                 GenericValue shoppingList;
                 while (((shoppingList = eli.next()) != null)) {
