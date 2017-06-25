@@ -50,14 +50,10 @@
 		<p>Anyone can checkout or browse the source code in the OFBiz public Subversion (SVN) repository.</p>
 		<p>To checkout the source code, simply use the following command (if you are using a GUI client, configure it appropriately).</p>
 		<ul class="iconsList">
-                  <li><i class="icon-pin"></i> <strong>ofbiz-framework trunk</strong> : $ svn co http://svn.apache.org/repos/asf/ofbiz/ofbiz-framework/trunk ofbiz-framework.</li>
-		  <li><i class="icon-pin"></i> <strong>ofbiz-framework trunk</strong> : $ svn co http://svn.apache.org/repos/asf/ofbiz/ofbiz-plugins/trunk ofbiz-framework.</li>
+          <li><i class="icon-pin"></i> <strong>ofbiz-framework trunk</strong> : $ svn co http://svn.apache.org/repos/asf/ofbiz/ofbiz-framework/trunk ofbiz-framework.</li>
+		  <li><i class="icon-pin"></i> <strong>ofbiz-plugins trunk</strong> : $ svn co http://svn.apache.org/repos/asf/ofbiz/ofbiz-plugins/trunk ofbiz-framework.</li>
 		  <li><i class="icon-pin"></i> <strong>branch release16.11 (stable)</strong>: $ svn co http://svn.apache.org/repos/asf/ofbiz/branches/release16.11 ofbiz.16.11</li>
-		  <li><i class="icon-pin"></i> <strong>branch release15.12</strong>: $ svn co http://svn.apache.org/repos/asf/ofbiz/branches/release15.12 ofbiz.15.12</li>
-		  <li><i class="icon-pin"></i> <strong>branch release14.12</strong>: $ svn co http://svn.apache.org/repos/asf/ofbiz/branches/release14.12 ofbiz.14.12</li>
- 		  <li><i class="icon-pin"></i> <strong>branch release13.07 (stable)</strong>: $ svn co http://svn.apache.org/repos/asf/ofbiz/branches/release13.07 ofbiz.13.07</li>
- 		  <li><i class="icon-pin"></i> <strong>branch release12.04</strong>: $ svn co http://svn.apache.org/repos/asf/ofbiz/branches/release12.04 ofbiz.12.04</li>
-                </ul>
+        </ul>
 		</div>
             </section>
 
@@ -121,7 +117,7 @@
                 <div class="divider"><span></span></div>
                 <p>We have a range of technical documenentation and help for developers. Please see the links below.</p>
 		<ul class="iconsList">
-                  <li><i class="icon-pin"></i> <a href="https://cwiki.apache.org/confluence/display/OFBIZ/OFBiz+Technical+Documentation+-+Home+Page"><strong>OFBiz Technical Documentation</strong></a></li>
+                  <li><i class="icon-pin"></i> <a href="https://cwiki.apache.org/confluence/display/OFBIZ/Technical+Documentation"><strong>OFBiz Technical Documentation</strong></a></li>
   		  <li><i class="icon-pin"></i> <a href="https://ci.apache.org/projects/ofbiz/site/javadocs/"><strong>OFBiz API Reference</strong></a></li>
   		  <li><i class="icon-pin"></i> <a href="https://cwiki.apache.org/confluence/display/OFBIZ/FAQ+-+Tips+-+Tricks+-+Cookbook+-+HowTo"><strong>Developer and Technical FAQs</strong></a></li>
 		</ul>
