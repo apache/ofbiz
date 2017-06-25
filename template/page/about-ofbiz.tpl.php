@@ -34,12 +34,12 @@
 	
                <p>The user list is intended for help or issues with OFBiz installation, deployment, custom development and usage related topics.</p>
 	       <p> Please remember if you are reporting an issue to include the following:</p>
-		<ol class="iconsList">
-                  <li ><span class="iconWrapper iconMini">1</span> What you were looking for?</li>
-                  <li><span class="iconWrapper iconMini">2</span> How did you try to achieve it?</li>
-                  <li><span class="iconWrapper iconMini">3</span> What did you expect as results?</li>
-                  <li><span class="iconWrapper iconMini">4</span> What you actually got as results?</li>
-                 </ol>  
+		   <ol class="iconsList">
+               <li><span class="iconWrapper iconMini">1</span> What you were looking for?</li>
+               <li><span class="iconWrapper iconMini">2</span> How did you try to achieve it?</li>
+               <li><span class="iconWrapper iconMini">3</span> What did you expect as results?</li>
+               <li><span class="iconWrapper iconMini">4</span> What you actually got as results?</li>
+            </ol>  
             <a class="btn btnSmall" href="http://ofbiz.135035.n4.nabble.com/OFBiz-User-f135036.html">User List</a> </div>
 
 	<div class="span4">
