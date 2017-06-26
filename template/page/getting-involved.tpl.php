@@ -31,16 +31,20 @@
               <div class="span10">
                 <h2>Introduction</h2>
                 <div class="divider"><span></span></div>
-		<p>Getting involved with the Apache OFBiz Community is easy!</p>    
-		<p>We are an open source community governed by the Apache Software Foundation. We strive to be open and transparent with our community. Our source code is open source and easily accessible from our source control system and our mailings lists for all our discussions and decsisions are made on our mailing lists </p>            
+		<p>Getting involved with the Apache OFBiz Community is <strong>easy!</strong></p>    
+		<p>Apache OFBiz is an open source community project governed by rules and <a href="http://apache.org/foundation/policies/conduct.html">Code of Conduct</a> of <a href="http://apache.org/">the Apache Software Foundation</a>
+All Apache projects value key concepts such as community, consensus, openness and transparency.</p>
+		<p>A popular Apache mantra is <strong>"Community over Code"</strong> meaning that being able to work and collaborate as a community is more important than producing code</p>
+		<p>The Apache OFBiz source code is free, open source and provided under the <a href="http://apache.org/licenses/">Apache Licence.</a> It is also easily accessible from the Apache source code repository. The project mailing lists contain all project releated discussions and decsisions. </p>            
 		</div> 
-            </section>
+            </section> 
 
 	    <section  id="GInvWho" class="slice row clearfix">
               <div class="span10">
                 <h2>Who Are We Looking For?</h2>
                 <div class="divider"><span></span></div>
-		<p>We are lookin for you! We welcome participation from anyone willing to work with us The Apache Way and make a contribution to the project.</p>
+		<p><strong>We are looking for you!</strong></p>
+ 		<p>We welcome participation from anyone willing to work with us <a href="https://www.apache.org/foundation/how-it-works.html">The Apache Way</a> and make a contribution to the project.</p>
   		<p>Don't worry if you are not a developer. You don't have to be a developer to contribute to the project out. In fact we are constantly looking for a range of people including anyone that wants to help out us with documentation, translations, testing tasks. </p>
 		<p>Perhaps you are one of our OFBiz users? That's good too - you can help us by telling us about features you like (or dont like!) and any new improvements that you'd like to see. That is also a way of helping and contributing to improving OFBiz. </p>
               </div> 
