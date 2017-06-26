@@ -486,7 +486,7 @@ under the License.
                     // clear out the login fields from the cart
                     try {
                         if (cart!=null) cart.setAutoUserLogin(null, dispatcher);
-                    } catch (CartItemModifyException e) {
+                    } catch (org.apache.ofbiz.order.shoppingcart.CartItemModifyException e) {
                         Debug.logError(e, module);
                     }
                 </script>
@@ -506,7 +506,7 @@ under the License.
                             // clear out the login fields from the cart
                             try {
                                 if (cart!=null) cart.setUserLogin(userLogin, dispatcher);
-                            } catch (CartItemModifyException e) {
+                            } catch (org.apache.ofbiz.order.shoppingcart.CartItemModifyException e) {
                                 Debug.logError(e, module);
                             }
                         </script>
