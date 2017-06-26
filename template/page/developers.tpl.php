@@ -33,8 +33,9 @@
                 <h2>Pre-Requisites</h2>
                 <div class="divider"><span></span></div>
  		<ul class="iconsList">                  
-		  <li><i class="icon-pin"></i> For 14.12, 15.12, 16.11 and the ofbiz-framework trunk the minimum requirement you need installed is Java 1.8 SDK.</li>
-                  <li><i class="icon-pin"></i> For 13.07 the minimum requirement you need installed is Java 1.7 SDK.</li> 		
+		  <li><i class="icon-pin"></i> For 16.11, the ofbiz-framework trunk and ofbiz-plugins trunk the minimum requirement you need installed is Java 1.8 SDK.</li>
+		  <li><i class="icon-pin"></i> >Apache OFBiz can be downloaded and run on both Unix based and Windows based systems</li>
+                 <p><strong>NOTE:</strong> If you are running an older release or branch then please refer to our Wiki for details</p> 		
                 </ul>
                </div>
             </section>
@@ -44,7 +45,7 @@
                 <div class="divider"><span></span></div>
                 <p>There are two ways to download the OFBiz source code</p>
 		<h3>Using a Download Mirror</h3>
-		<p>Download your required version from one of our <a href="download.html">download mirrors</a> </p>
+		<p>Download your required version from one of our <a href="download.html">download mirrors</a> and extract the zip file </p>
 		<h3>Checkout the Source Code</h3>
 		<p>Checkout the source code from the repository</p>
 		<p>Anyone can checkout or browse the source code in the OFBiz public Subversion (SVN) repository.</p>
@@ -62,27 +63,27 @@
                 <h2>Build and Run</h2>
                 <div class="divider"><span></span></div>
                 <p>Once you have downloaded the source code it will need to be built. The command to built.</p>
-		<h3>Building and Running 16.11 or the ofbiz-framework trunk</h3>
+		<h3>Building 16.11 or the ofbiz-framework trunk</h3>
 		<p>Release 16.11  and our ofbiz-framework trunk uses Gradle as it's build system so the command to build and run it are different to the previous releases. </p>
-		<p>To build the trunk, navigate to the trunk directory and run the following command</p>
-		<p><strong>./gradlew ofbiz loadDefault</strong></p>
+		<p>To build the trunk, navigate to the trunk directory and;</p>
+		<p>Run the following command for Unix-like OS</p>
+		<code>./gradlew cleanAll loadDefault</code><p></p>
+		<p>Run the following command for MS Windows</p>
+		<code>gradlew cleanAll loadDefault</code>
 		<p></p>
-		<p>To start OFBiz running locally, navigate to the trunk directory and type the following command</p> 
+		<h3>Starting and Running 16.11 or the ofbiz-framework trunk</h3>
+		<p>To start OFBiz running locally, navigate to the trunk directory and;</p>
+		<p>Run the following command for Unix-like OS</p> 
+		<code>./gradlew ofbiz</code><p></p>
+		<p>Run the following command for MS Windows</p>
+		<code>gradlew ofbiz</code>
 		<p></p>
-		<p><strong>./gradlew 'ofbiz -start'</strong></p>
-		<p> NOTE: The use of quotation marks in the command. For further details and a full list of all available commands, please take a look at the readme.md file</p>
+		<p>NOTE: For further details and a full list of all available commands, please take a look at the readme.md file</p>
+		<p></p>
 		<p>To log into OFBiz, navigate with your browser to </p>
-		<p>http://localhost:8080/accounting</p>
+		<p>https://localhost:8443/accounting</p>
 		<p>and login with username <strong>"admin" </strong>and password <strong>"ofbiz"</strong></p>
-		<h3>Building and Running the OFBiz branch releases 15.12 or earlier</h3>
- 		<p>Our branch releases for 15.12 or below use Apache Ant as their build system so the command to build and run it is different to the trunk (which uses Gradle). </p>
-		<p>To build the branch release, navigate to the release directory and run the following command</p>
-		<p><strong>./ant load-demo start</strong></p>
-		<p></p>
-		<p>NOTE: This will build OFBiz and start it running.</p> 
-		<p>To log into OFBiz, navigate with your browser to </p>
-		<p>http://localhost:8080/accounting</p>
-		<p>and login with username <strong>"admin"</strong> and password <strong>"ofbiz"</strong></p>
+		<p><strong>NOTE:</strong> Please see our Wiki for details of running earlier releases</p>
             </div>
             </section>
             
@@ -92,11 +93,15 @@
                 <div class="divider"><span></span></div>
                 <p>You can browse the repository using any of the following links.</p>
                 <ul class="iconsList">
-                  <li><i class="icon-pin"></i> <a href="https://fisheye6.atlassian.com/browse/ofbiz/branches"><strong>SVN - FishEye</strong></a></li>
-  		  <li><i class="icon-pin"></i> <a href="http://svn.apache.org/repos/asf/ofbiz/"><strong>SVN - WebDAV</strong></a></li>
+                   <li><i class="icon-pin"></i> <a href="http://svn.apache.org/repos/asf/ofbiz/"><strong>SVN - WebDAV</strong></a></li>
   		  <li><i class="icon-pin"></i> <a href="http://svn.apache.org/viewvc/ofbiz/"><strong>SVN - ViewVC</strong></a></li>
 		</ul>		
-		<p></p>		
+		<p></p>	
+<p>Our ofbiz-framework trunk and ofbiz-plugins trunk are also available on Git at the links below:</p>
+<ul class="iconsList">
+	 <li><i class="icon-pin"></i> <a href="https://github.com/apache/ofbiz-framework"><strong>ofbiz-framework trunk on Github</strong></a></li>
+<li><i class="icon-pin"></i> <a href="https://github.com/apache/ofbiz-plugins"><strong>ofbiz-plugins trunk on Github</strong></a></li>
+</ul>	
             </div>
             </section>
 
