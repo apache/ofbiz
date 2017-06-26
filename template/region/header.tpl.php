@@ -29,7 +29,7 @@
             <li><a href="" class="firstLevel<?php if (basename($page_name) == 'documentation.tpl.php'):?> active<?php endif;?>">Documentation</a>
               <ul>
                 <li><a href="" class="">User Documentation</a></li>
-                <li><a href="https://cwiki.apache.org/confluence/display/OFBIZ/OFBiz+Technical+Documentation+-+Home+Page" target="_blank" class="">Technical Documentation</a></li>
+                <li><a href="https://cwiki.apache.org/confluence/display/OFBIZ/Technical+Documentation" target="_blank" class="">Technical Documentation</a></li>
                 <li><a href="https://cwiki.apache.org/confluence/display/OFBIZ/Home" target="_blank" class="">Wiki</a></li>
                 <li><a href="https://ci.apache.org/projects/ofbiz/site/javadocs/" target="_blank" class="last">API Reference</a></li>
               </ul>
