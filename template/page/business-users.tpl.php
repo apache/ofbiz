@@ -32,12 +32,12 @@
                 <div class="divider"><span></span></div>
 		<p>Getting started with OFBiz is easy and you also have the choice about where you want to start. We have a range of information about OFBiz modules and features as well as an online demo that you can try. After taking a look you want to download and install OFBiz too, then you'll find details about how to do this later in this page.</p>
 		<ul class="iconsList">
-                  <li><i class="icon-pin"></i> To see what OFBiz looks like and how it works, try our <a href="ofbiz-demos.html"><strong>Online Demos</strong></a></li>
-  		  <li><i class="icon-pin"></i> To get details about the modules and features, take a look at the <a href="#UsrModules"><strong>Modules and Features</strong></a> </li>
-  		  <li><i class="icon-pin"></i> To download your own version of OFBiz, take a look at the <a href="#UsrInstall"><strong>Download and Install OFBiz</strong></a> </li>
+                  <li><i class="icon-pin"></i> To see what OFBiz looks like and how it works, please try our <a href="ofbiz-demos.html"><strong>Online Demos</strong></a></li>
+  		  <li><i class="icon-pin"></i> To get details about what modules and features Apache OFBiz has, please take a look at <a href="#UsrModules"><strong>Modules and Features</strong></a> </li>
+  		  <li><i class="icon-pin"></i> To download your own version of Apache OFBiz, please take a look at <a href="#UsrInstall"><strong>Download and Install OFBiz</strong></a> </li>
 		</ul>
-                <p>If you are still unsure or have any questions then please feel free to use our user mailing list.</p>
-		</div>
+                <p>If you are still unsure or have any questions then please feel free to use our <a href="https://lists.apache.org/list.html?user@ofbiz.apache.org" target="_blank"><strong>User Mailing List</strong></a> </p>
+		</div
             </section>
  	    <section  id="UsrDemo" class="slice row clearfix">
               <div class="span10">
@@ -189,21 +189,27 @@
                 <div class="divider"><span></span></div>
 
 		<h3>Downloading OFBiz</h3>
-		<p>You can download OFBiz from one of our <a href="download.html">download mirrors</a> </p>
-		<p>Please make sure that you use our latest stable release as this version has been verified by the project as suitable for our users.</p>
+		<p>You can download Apache OFBiz from one of our <a href="download.html">download mirrors</a>. Once downloaded, extract the file to create the OFBiz directory. </p>
+		<p><strong>NOTE</strong>:Please make sure that you use our latest stable release as this version has been verified by the project as suitable for our users.</p>
 		<h3>Build and Running OFBiz</h3>
                 <div class="divider"><span></span></div>
-               	<p>Once you have downloaded the source code it will need to be built. To build a release, navigate to the trunk directory and run the following command</p>
-		<p><strong>./gradlew ofbiz loadDefault</strong></p>
+               	<p>Once you have downloaded OFBiz it needs to be built before you can run it. To build OFBiz and start it running, you will need to:</p>
+		<ul class="iconsList">
+		    <li><i class="icon-pin"></i>open a command line window and;</li>
+		    <li><i class="icon-pin"></i> navigate to the OFBiz directory then:</li>
+		</ul>
+		<p>Run the following command for Unix-like OS</p>
+		<code>./gradlew ofbiz loadDefault</code>
 		<p></p>
-		<p>To start OFBiz running locally, navigate to the trunk directory and type the following command</p> 
+   		<p>Run the following command for Windows</p>
+		<code>gradlew ofbiz loadDefault</code>
 		<p></p>
-		<p><strong>./gradlew 'ofbiz -start'</strong></p>
-		<p>NOTE: The use of quotation marks in the command. For further details and a full list of all available commands, please take a look at the readme.md file</p>
+		<p><strong>NOTE</strong>: It is completely normal for the command line window to remain active while OFBiz is running.</p>	
 		<p>To log into OFBiz, navigate with your browser to </p>
-		<p>http://localhost:8080/accounting</p>
-		<p>and login with username <strong>"admin"</strong> and password <strong>"ofbiz" </strong> </p>		
-              </div>
+		<p><code>https://localhost:8443/accounting</code></p>
+		<p>and login with username <strong>"admin" </strong>and password <strong>"ofbiz"</strong></p>		
+		<p>NOTE: For further details and a full list of all available commands, please take a look at the readme.md file</p>		
+		</div>
             </section>
             
 	    <section  id="UsrDocs" class="slice row clearfix">
