@@ -117,7 +117,7 @@
               <article class="one_third"> <a href="" class="iconWrapper iconBig ch-item"> <i class=" icon-th-list"></i>
                   <div class="ch-info"> <span> CRM & ERP </span> </div>
                 </a>
-                <h2 class="smallHeading">Mature ERP Solution</h2>
+                <h2 class="smallHeading">Mature CRM &  ERP Solution</h2>
                 <p>An Apache top level project for  10 years, OFBiz has shown it's stability and maturity as an enterprise-wide 
                   ERP solution that is flexible enough to change with your business.</p>
               </article>
@@ -137,12 +137,29 @@
       </div>
     </div>
   </section>
+
+
  
   <!-- three blocs -->
   <!-- carousel works-->
   <section class="slice">
     <div class="container">
       <div class="row">
+
+	<div class="span12">
+          <h2><span>Where to Start?</h2>
+            <div class="divider"><span></span></div>
+		<p>Developer or Business User, getting started with OFBiz is easy!. We have a range of information about OFBiz modules and features as well as an online demo that you can try.</p>
+		<ul class="iconsList">                  
+  		  <li><i class="icon-pin"></i> Developers can get started on our <a href="developers.html"><strong> Developers page</strong></a> </li>
+  		  <li><i class="icon-pin"></i> Business Users can get started on our <a href="business-users.html"><strong>Business Users page</strong></a> </li>
+		  <li><i class="icon-pin"></i> To see what OFBiz looks like and how it works, please try our <a href="ofbiz-demos.html"><strong>Online Demos</strong></a></li>
+		</ul>
+               	
+        </div>   
+<p></p>     
+
+
         <div class="span12">
           <h2><span>Features and Benefits</h2>
             <div class="divider"><span></span></div>
@@ -151,55 +168,38 @@
             <div class="row-fluid">
               <div class="span4">
                 <h3 class="mediumIconH3"><span class="iconWrapper iconMedium"><i class="icon-users" ></i></span> Modules</h3>
-	       <p>Apache OFBiz comes with a range of core modules out-of-the-box (OOTB).</p>
-	        <p> These are as follows:</p>
-		<ol class="iconsList">
+	        <p>Apache OFBiz comes with a range of core modules out-of-the-box (OOTB) including:</p>
+	         <ol class="iconsList">
                   <li><i class="icon-pin"></i></span> Accounting (GL,AR,AP,FA)</li>
-		  <li><i class="icon-pin"></i></span> Asset Maintenance</li>
-  		  <li><i class="icon-pin"></i></span> Asset Maintenance</li>
-  		  <li><i class="icon-pin"></i></span> Order Management</li>
+		  <li><i class="icon-pin"></i></span> CRM,Order Management & E-Commerce</li>
   		  <li><i class="icon-pin"></i></span> Warehousing and Inventory</li>
- 		  <li><i class="icon-pin"></i></span> Manufacturing & MRP</li>
- 		  <li><i class="icon-pin"></i></span> E-Commerce</li>
-		  <li><i class="icon-pin"></i></span>  WebPOS</li>                         
- 		</ol> 
-		  <p>Can add more text here.</p> 		 
+ 		  <li><i class="icon-pin"></i></span> Manufacturing & MRP</li>                         
+ 		 </ol> 		 		 
 		</div>
 	   	<div class="span4">
                   <h3 class="mediumIconH3"><span class="iconWrapper iconMedium"><i class="icon-cog-alt"></i></span> Features</h3>
-               	  <p>Apache OFBiz has a full set useful business features.</p>
-		  <p> These are as follows:</p>
-		<ol class="iconsList">
-                  <li><i class="icon-pin"></i></span> Advanced Ecommerce and Storefront</li>
-		  <li><i class="icon-pin"></i></span> Catalog Management</li>
-  		  <li><i class="icon-pin"></i></span> romotion & Pricing Management</li>
-  		  <li><i class="icon-pin"></i></span> Fulfillment (Stock Move,Pick & Ship</li>
-  		  <li><i class="icon-pin"></i></span> Contracts, Payments & Billing</li>
- 		  <li><i class="icon-pin"></i></span> Work Effort (events, task, projects)</li>
- 		  <li><i class="icon-pin"></i></span> Service Desk</li>
-		  <li><i class="icon-pin"></i></span> ???S</li>   
- 		</ol> 
-		  <p>Can add more text here.</p> 		                
+               	  <p>Apache OFBiz has a full set useful business features including:</p>
+		 <ol class="iconsList">                  
+		  <li><i class="icon-pin"></i></span> Product & Catalog Management</li>
+  		  <li><i class="icon-pin"></i></span> Promotion & Pricing Management</li>
+  		  <li><i class="icon-pin"></i></span> Supply Chain Fulfillment</li>
+  		  <li><i class="icon-pin"></i></span> Contracts, Payments & Billing</li> 		  
+ 		 </ol> 		 		                
 		</div>
                 <div class="span4">
                   <h3 class="mediumIconH3"><span class="iconWrapper iconMedium"><i class="icon-resize-full-alt"></i></span> Benefits</h3>
-                  <p>There are a range of benefits associated with using Apache OFBiz.</p>
-		  <p> These are as follows:</p>
+                  <p>There are a range of benefits associated with using Apache OFBiz including:.</p>		
 		 <ol class="iconsList">                  
   		  <li><i class="icon-pin"></i></span> Free and open source - No upfront costs</li>
 		  <li><i class="icon-pin"></i></span> Scalable, reliable enterprise solution</li>
   		  <li><i class="icon-pin"></i></span> Fully Customisable</li>
-  		  <li><i class="icon-pin"></i></span> Flexible to grow with your business</li>
-  		  <li><i class="icon-pin"></i></span> ????</li>
- 		  <li><i class="icon-pin"></i></span> ???</li>
- 		  <li><i class="icon-pin"></i></span> ????</li>
-		  <li><i class="icon-pin"></i></span> ???S</li>
- 		</ol> 
-		  <p>Can add more text here.</p> 		  
+  		  <li><i class="icon-pin"></i></span> Flexible to grow with your business</li>  		 
+ 		</ol> 		  		  
                 </div>
             </div>
-          </section>    
-        
+ <p>If you are still unsure or have any questions then please feel free to use our <a href="https://lists.apache.org/list.html?user@ofbiz.apache.org" target="_blank"><strong>User Mailing List</strong></a> </p>
+          </section>   
+
       </div>
     </div>
   </section>
