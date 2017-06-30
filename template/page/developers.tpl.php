@@ -8,7 +8,7 @@
       <div class="container clearfix">
         <div class="row">
           <h1 class="span8">Getting Started - Developers</h1>
-          <div class="span4" id="navTrail"> <a href="index.html" class="homeLink">home</a><span>/</span><a href="template-columns.html">Getting Started</a><span>/</span><span class="current">Developers</span> </div>
+          <div class="span4" id="navTrail"> <a href="index.html" class="homeLink">home</a><span>/</span><a href="">Getting Started</a><span>/</span><span class="current">Developers</span> </div>
         </div>
       </div>
     </header>
