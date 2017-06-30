@@ -113,65 +113,86 @@
 <!-- header -->
 <!-- globalWrapper -->
 <div id="globalWrapper">
-    
+   
   <!-- page content -->
-  <section id="content" class="fullWidth">
+ <section id="content" class="fullWidth">
     <header class="headerPage">
       <div class="container clearfix">
         <div class="row">
           <h1 class="span8">OFBiz Demos</h1>
-          <div class="span4" id="navTrail"> <a href="index.html" class="homeLink">home</a><span>/</span><a href="">Geting Started</a><span>/</span><span class="current">OFBiz Demos</span> </div>
+  	  <div class="span4" id="navTrail"> <a href="index.html" class="homeLink">home</a><span>/</span><a href="#">Community</a><span>/</span><span class="current">OFBiz Demos</span> </div>
         </div>
       </div>
     </header>
-    <section class="slice clearfix">
+  <section id="content" class="features" >
+    <div class="slice clearfix">
       <div class="container">
-        <div class="row">
-          <section class="mb15 clearfix">
-            <div class="span6"> <img src="images/no-slider-pic.png" alt="premium website template for you"/> </div>
-            <div class="span6">
-              <h2>Getting Started - Business Users</h2>
-              <div class="divider"><span></span></div>
-              <p> We have a three different community mailing lists. See below for details. </p>
-              <h3>Community Help and Support</h3>
-              <p>Our Community is keen to share information and support other OFBiz users in their implementations. Please dont hesitate to view or participate in our mailing list discussions.</p>
-	      <p>To subscribe to a mailing list please use the links below. In your first email you will recieve instructions about how to use the mailing list manager program (EZMLM)</p>
-	      <p>To unsubscribe from any of the following lists, send an empty, subjectless email to unsubscribe address listed below. In other words, click the appropriate unsubscribe link below and press send. </p>
-            </div>
-          </section>
-          <section class="span12 mb15">
-            <div class="row-fluid">
-              <div class="span4">
-                <h3 class="mediumIconH3"><span class="iconWrapper iconMedium"><i class="icon-resize-full-alt" ></i></span> User Mailing List</h3>
-	
-               <p>The user list is intended for help or issues with OFBiz installation, deployment, custom development and usage related topics.</p>
-	       <p> Please remember if you are reporting an issue to include the following:</p>
-		<ol class="iconsList">
-                  <li ><span class="iconWrapper iconMini">1</span> What you were looking for?</li>
-                  <li><span class="iconWrapper iconMini">2</span> How did you try to achieve it?</li>
-                  <li><span class="iconWrapper iconMini">3</span> What did you expect as results?</li>
-                  <li><span class="iconWrapper iconMini">4</span> What you actually got as results?</li>
-                 </ol>  
-            <a class="btn btnSmall" href="http://ofbiz.135035.n4.nabble.com/OFBiz-User-f135036.html">User List</a> </div>
+        <div class="row ">
+          <aside class="span2 PortfolioStickyMenu" id="sidebar">
+            <ul  id="subnav" class="nav nav-stacked sidenav scrollspyNav">
+              <li> <a href="#OFDemoAbout"> About our Demos </a> </li>
+   	      <li> <a href="#OFDemoCurrent"> Release 16.11 </a> </li>
+              <li> <a href="#OFDemoTrunk"> Trunk</a> </li>
+ 	      <li> <a href="#OFDemoPrevious"> Release 13.07 </a> </li>                
+   	     </ul>
+          </aside>
+          <div class="span10">
+            <section  id="OFDemoAbout" class="slice row clearfix">
+              <div class="span10">
+                <h2>About our Demos</h2>
+                <div class="divider"><span></span></div>
+		<p>We have several online OFBiz demos that you can try out. Each demo is split into two areas: E-Commerce webstore and the backend ERP applications</strong>.</p>
+		<p> The E-Commerce webstore is what customers will see and allows you to order products, request returns or register as a new customer. It also gives you some examples of what you can inlcude on your website. </p>
+		<p>The backend applications are where you can do any adminstrative setup that can be seen in the webstore. They also allow you to setup and manage accounting, customer orders (with or without the e-commerce store), inventory, manufacturing, human resources, CRM, and all the process that a standard business would need.</p>  
+		<p><strong>NOTE:</strong> The default user login is <strong>"admin"</strong> and password <strong> "ofbiz"</strong>. Also all demo user logins such as DemoCustomer and DemoSupplier have the default passwords set as <strong> "ofbiz"</strong></p>
+		</div>
+            </section> 
 
-	<div class="span4">
-                <h3 class="mediumIconH3"><span class="iconWrapper iconMedium"><i class="icon-twitter"></i></span> Developer Mailing List</h3>
-                <p>The developer list is strictly for topics related to the design and development of the OFBiz Project itself.</p>
-		<p>Please don't ask questions relevant to User Mailing List in this Mailing List.</p>
- 		<p>If you are not sure to which list to post to then use the User Mailing List..</p>
-                <a class="btn btnSmall" href="http://ofbiz.135035.n4.nabble.com/OFBiz-Dev-f165671.html">Developer List</a> </div>
-              <div class="span4">
-                <h3 class="mediumIconH3"><span class="iconWrapper iconMedium"><i class="icon-star"></i></span> Commit Mailing List</h3>
-                <p>The commits list is used to notify subscribers of commits to the OFBiz SVN repository.</p>
-		<p> It is not used for discussions only for reference.</p>
-                <a class="btn btnSmall" href="#">Commits List</a> </div>
-            </div>
-          </section>
-          
+	    <section  id="OFDemoCurrent" class="slice row clearfix">
+              <div class="span10">
+                <h2>Current Stable Release 16.11 - Demo</h2>
+                <div class="divider"><span></span></div>
+
+		<p><i class="icon-pin"></i><a href="https://demo-stable.ofbiz.apache.org/accounting/control/main?USERNAME=admin&PASSWORD=ofbiz&JavaScriptEnabled=Y" target="_blank"><strong>Backend Management (ERP) Applications</strong></a> </p> 	 
+		<p><i class="icon-pin"></i><a href="https://demo-stable.ofbiz.apache.org/ecommerce/control/main" target="_blank"><strong>Front End E-Commerce Webstore</strong></a> </p> 
+		
+              </div> 
+            </section>
+
+ 	    <section  id="OFDemoTrunk" class="slice row clearfix">
+              <div class="span10">
+                <h2>Developer Trunk - Demo </h2>
+                <div class="divider"><span></span></div>
+                <p>Please note that the trunk version is not recommended for a production environment. It is experimental code and contains developments in progress that once stablised will become part of future stable releases.</p>
+		<p><i class="icon-pin"></i><a href="https://demo-trunk.ofbiz.apache.org/accounting/control/main?USERNAME=admin&PASSWORD=ofbiz&JavaScriptEnabled=Y" target="_blank"><strong>Backend Management (ERP) Applications</strong></a> </p> 	 
+		<p><i class="icon-pin"></i><a href="https://demo-trunk.ofbiz.apache.org/ecomseo" target="_blank"><strong>Front End E-Commerce Webstore</strong></a> </p> 
+
+	
+ 	     </div>
+            </section>
+
+	   <section  id="OFDemoPrevious" class="slice row clearfix">
+              <div class="span10">
+                <h2>Previous Stable Release 13.07 - Demo</h2>
+                <div class="divider"><span></span></div>
+                <p>This demo is for the previous OFBiz release. </p>
+
+		<p><i class="icon-pin"></i><a href="https://ofbiz-vm2.apache.org:28443/accounting/control/main?USERNAME=admin&PASSWORD=ofbiz&JavaScriptEnabled=Y" target="_blank"><strong>Backend Management (ERP) Applications</strong></a> </p> 	 
+		<p><i class="icon-pin"></i><a href=" http://ofbiz-vm2.apache.org:28080/ecommerce/control/main" target="_blank"><strong>Front End E-Commerce Webstore</strong></a> </p> 
+
+	      </div>
+            </section> 	  
+
+	   
+
+ 	           
+	   
+          </div>
         </div>
       </div>
-    </section>
-  </section>
+    </div>
+   </section>
+ </section>
   <!-- page content -->
  
 <!-- footer -->
