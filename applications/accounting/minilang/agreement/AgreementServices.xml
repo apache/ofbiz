@@ -57,6 +57,7 @@ under the License.
                 <clear-field field="createAgreementTermInMap"/>
                 <set-service-fields service-name="createAgreementTerm" map="agreementTerm" to-map="createAgreementTermInMap"/>
                 <set from-field="agreementIdTo" field="createAgreementTermInMap.agreementId"/>
+                <set field="createAgreementTermInMap.agreementTermId" from-field="nullField"/>
                 <call-service service-name="createAgreementTerm" in-map-name="createAgreementTermInMap"/>
             </iterate>
         </if-compare>
