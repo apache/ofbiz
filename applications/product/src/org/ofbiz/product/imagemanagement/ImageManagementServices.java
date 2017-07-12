@@ -33,9 +33,6 @@ import java.util.Map;
 
 import javax.imageio.ImageIO;
 
-import javolution.util.FastList;
-import javolution.util.FastMap;
-
 import org.jdom.JDOMException;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilDateTime;
@@ -55,6 +52,9 @@ import org.ofbiz.service.DispatchContext;
 import org.ofbiz.service.GenericServiceException;
 import org.ofbiz.service.LocalDispatcher;
 import org.ofbiz.service.ServiceUtil;
+
+import javolution.util.FastList;
+import javolution.util.FastMap;
 
 /**
  * Product Services
@@ -336,8 +336,8 @@ public class ImageManagementServices {
         index = filenameToUse.lastIndexOf(".");
         String imgExtension = filenameToUse.substring(index + 1);
         // paths
-        String imageServerPath = FlexibleStringExpander.expandString(EntityUtilProperties.getPropertyValue("catalog", "image.management.path", (Delegator) context.get("delegator")), context);
-        String imageServerUrl = FlexibleStringExpander.expandString(EntityUtilProperties.getPropertyValue("catalog", "image.management.url", (Delegator) context.get("delegator")), context);
+        String imageServerPath = FlexibleStringExpander.expandString(EntityUtilProperties.getPropertyValue("catalog", "image.management.path", dctx.getDelegator()), context);
+        String imageServerUrl = FlexibleStringExpander.expandString(EntityUtilProperties.getPropertyValue("catalog", "image.management.url", dctx.getDelegator()), context);
         
         
         /* get original BUFFERED IMAGE */
@@ -762,7 +762,7 @@ public class ImageManagementServices {
     }
     
     public static Map<String, Object> resizeImageOfProduct(DispatchContext dctx, Map<String, ? extends Object> context) {
-    	Delegator delegator = dctx.getDelegator();
+        Delegator delegator = dctx.getDelegator();
         String imageServerPath = FlexibleStringExpander.expandString(EntityUtilProperties.getPropertyValue("catalog", "image.management.path", delegator), context);
         String productId = (String) context.get("productId");
         String dataResourceName = (String) context.get("dataResourceName");
