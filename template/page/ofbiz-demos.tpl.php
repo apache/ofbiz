@@ -8,7 +8,7 @@
       <div class="container clearfix">
         <div class="row">
           <h1 class="span8">OFBiz Demos</h1>
-  	  <div class="span4" id="navTrail"> <a href="index.html" class="homeLink">home</a><span>/</span><a href="#">Community</a><span>/</span><span class="current">OFBiz Demos</span> </div>
+  	  <div class="span4" id="navTrail"> <a href="index.html" class="homeLink">home</a><span>/</span><a href="#">Community</a><span>/</span><span class="current">Demos</span> </div>
         </div>
       </div>
     </header>
@@ -29,10 +29,17 @@
               <div class="span10">
                 <h2>About our Demos</h2>
                 <div class="divider"><span></span></div>
-		<p>We have several online OFBiz demos that you can try out. Each demo is split into two areas: E-Commerce webstore and the backend ERP applications</strong>.</p>
-		<p> The E-Commerce webstore is what customers will see and allows you to order products, request returns or register as a new customer. It also gives you some examples of what you can inlcude on your website. </p>
-		<p>The backend applications are where you can do any adminstrative setup that can be seen in the webstore. They also allow you to setup and manage accounting, customer orders (with or without the e-commerce store), inventory, manufacturing, human resources, CRM, and all the process that a standard business would need.</p>  
-		<p><strong>NOTE:</strong> The default user login is <strong>"admin"</strong> and password <strong> "ofbiz"</strong>. Also all demo user logins such as DemoCustomer and DemoSupplier have the default passwords set as <strong> "ofbiz"</strong></p>
+		<p>We have several online OFBiz demos that you can try out. Each demo is split into two areas:
+<ul class="iconsList">
+		<li><i class="icon-pin"></i> E-Commerce webstore and</li>
+		<li><i class="icon-pin"></i> the backend ERP applications</li>
+		</ul>
+
+		<p> The <strong>E-Commerce webstore </strong>is what your customers will see and allows them to order products, request returns or register as a new customer. Our demo also gives you some examples other things (Surveys, Blogs, Factoids, etc) also provided within OFBiz that you can include on your website. </p>
+		<p>The <strong>backend ERP applications </strong> allow you to setup and use accounting, customer orders (with or without the e-commerce store), inventory, manufacturing, human resources, CRM, and all the process that a standard business would need. You can also do the admin setup for the webstore</p> 
+		
+
+<blockquote><strong>NOTE:</strong> The default user login is <strong>"admin"</strong> and password <strong> "ofbiz"</strong>. All demo user logins such as DemoCustomer, DemoSupplier, DemoEmployee etc have the default password <strong> "ofbiz"</strong></blockquote>
 		</div>
             </section> 
 
