@@ -149,9 +149,7 @@
 			 <li><i class="icon-pin"></i> Email Integration</li>
 			 <li><i class="icon-pin"></i> Customer Service and Case Managment</li>
 			 <li><i class="icon-pin"></i> Quotes, Order Entry and Order Management</li>
-			 <li><i class="icon-pin"></i> Manage marketing campaign including tracking code reporting</li>
-			 <li><i class="icon-pin"></i> Address lookup ??? </li>
-  		  	 <li><i class="icon-pin"></i> Integration with Asterisk ???</li>
+			 <li><i class="icon-pin"></i> Manage marketing campaign including tracking code reporting</li>			 
  		       </ul>
                       </div>
 
@@ -197,11 +195,11 @@
    		<p>Run the following command for Windows</p>
 		<code>gradlew ofbiz loadDefault</code>
 		<p></p>
-		<p><strong>NOTE</strong>: It is completely normal for the command line window to remain active while OFBiz is running.</p>	
+		<p><strong>NOTE</strong>: It is completely normal for the command line window to remain active while OFBiz is running (e.g at 91%).</p>	
 		<p>To log into OFBiz, navigate with your browser to </p>
 		<p><code>https://localhost:8443/accounting</code></p>
 		<p>and login with username <strong>"admin" </strong>and password <strong>"ofbiz"</strong></p>		
-		<p>NOTE: For further details and a full list of all available commands, please take a look at the readme.md file</p>		
+		<p><strong>NOTE:</strong> These commands will build OFBiz and include demo data. For further details of how to build OFBiz without any demo data and a full list of all available commands, please take a look at the readme.md file</p>		
 		</div>
             </section>
             
@@ -209,10 +207,10 @@
               <div class="span10">
                 <h2>Documentation and Help</h2>
                 <div class="divider"><span></span></div>
-                <p>Add link to User Documentation.</p>
-		<p><a href="https://cwiki.apache.org/confluence/display/OFBIZ/Home" target="_blank"><strong>OFBiz Wiki</strong></a></p>
+		<p><a href="https://cwiki.apache.org/confluence/display/OFBIZ/Documentation#Documentation-End-UserDocumentation" target="external"><strong>User Documentation</strong></a></p>
+                <p><a href="https://cwiki.apache.org/confluence/display/OFBIZ/Home" target="external"><strong>OFBiz Wiki</strong></a></p>
 		<p><a href="faqs.html" target="_blank"><strong>OFBiz Frequently Asksed Questions (FAQs)</strong></a></p>
-		<p><a href="" target="_blank"><strong>OFBiz End User Guide</strong></a></p>		
+				
             </div>
             </section>
 
