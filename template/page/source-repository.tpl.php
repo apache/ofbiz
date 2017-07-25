@@ -49,7 +49,7 @@
 		<p>To checkout the source code, simply use the following command (if you are using a GUI client, configure it appropriately).</p>
 		<ul class="iconsList">
                   <li><i class="icon-pin"></i> <strong>ofbiz-framework trunk</strong> : <code>$ svn co http://svn.apache.org/repos/asf/ofbiz/ofbiz-framework/trunk ofbiz-framework</code></li>
-		  <li><i class="icon-pin"></i> <strong>ofbiz-plugins trunk</strong> : <code>$ svn co http://svn.apache.org/repos/asf/ofbiz/ofbiz-plugins/trunk ofbiz-framework </code></li>
+		  <li><i class="icon-pin"></i> <strong>ofbiz-plugins trunk</strong> : <code>$ svn co http://svn.apache.org/repos/asf/ofbiz/ofbiz-plugins/trunk ofbiz-plugins </code></li>
  		  <li><i class="icon-pin"></i> <strong>ofbiz tools</strong> : <code>$ svn co https://svn.apache.org/repos/asf/ofbiz/tools ofbiz-tools </code></li>
 		  <li><i class="icon-pin"></i> <strong>branch release16.11 (stable)</strong>: <code>$ svn co http://svn.apache.org/repos/asf/ofbiz/branches/release16.11 ofbiz.16.11</code></li>
  		  <li><i class="icon-pin"></i> <strong>ofbiz website</strong> : <code>$ website: $ svn co http://svn.apache.org/repos/asf/ofbiz/site ofbiz-website </code></li>
