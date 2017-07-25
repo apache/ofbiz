@@ -209,12 +209,12 @@ under the License.
             <hyperlink also-hidden="true"
                 target-type="plain" description="${uiLabelMap.CommonUpload}"
                 target="javascript:
-                    (document.uploadContentForProduct.datetimeStarted.value=document.EditEmailForProduct.datetimeStarted.value),
-                    (document.uploadContentForProduct.partyIdTo.value=document.EditEmailForProduct.partyIdTo.value),
-                    (document.uploadContentForProduct.subject.value=document.EditEmailForProduct.subject.value),
-                    (document.uploadContentForProduct.productId.value=document.EditEmailForProduct.productId.value),
-                    (document.uploadContentForProduct.content.value=document.EditEmailForProduct.content.value),
-                    (document.uploadContentForProduct.submit())"/>
+                    (document.UploadContentForProduct.datetimeStarted.value=document.EditEmailForProduct.datetimeStarted.value),
+                    (document.UploadContentForProduct.partyIdTo.value=document.EditEmailForProduct.partyIdTo.value),
+                    (document.UploadContentForProduct.subject.value=document.EditEmailForProduct.subject.value),
+                    (document.UploadContentForProduct.productId.value=document.EditEmailForProduct.productId.value),
+                    (document.UploadContentForProduct.content.value=document.EditEmailForProduct.content.value),
+                    (document.UploadContentForProduct.submit())"/>
         </field>
     </form>
     <form name="ListCommEventsForProduct" type="list" paginate="true" list-name="commEvents" extends="ListCommEvents" extends-resource="component://party/widget/partymgr/CommunicationEventForms.xml"
