@@ -15,7 +15,7 @@
     <div class="fullwidthbanner" >
       <ul>
         <li data-transition="fade" data-slotamount="1"  data-masterspeed="2000"> <img src="images/slider/rs/thumb.png" alt="slide"/>
-          <div class="caption lfr" data-x="50" data-y="26" data-speed="1000" data-start="300" data-easing="easeOutExpo"><img src="images/slider/rs/ofbiz1.png" alt="slide" class="ie8PngFix"/></div>
+          <div class="caption lfr" data-x="50" data-y="26" data-speed="1000" data-start="300" data-easing="easeOutExpo"><img src="images/slider/rs/ofbiz1.jpg" alt="slide" class="ie8PngFix"/></div>
           <div class="caption sft" data-x="495" data-y="50" data-speed="300" data-start="600" data-easing="easeOutExpo" >
             <h2>What our users are saying..</h2>
           </div>
@@ -33,7 +33,7 @@
           </div>
         </li>
         <li data-transition="fade" data-slotamount="2"> <img src="images/slider/rs/thumb.png" alt="slide"/>
-          <div class="caption lfl" data-x="450" data-y="65" data-speed="900" data-start="800" data-easing="easeOutBack"><img src="images/slider/rs/ofbiz3.png" alt="slide" class="ie8PngFix"/></div>
+          <div class="caption lfl" data-x="450" data-y="65" data-speed="900" data-start="800" data-easing="easeOutBack"><img src="images/slider/rs/ofbiz3.jpg" alt="slide" class="ie8PngFix"/></div>
           <div class="caption sft" data-x="70" data-y="120" data-speed="300" data-start="1600" data-easing="easeOutExpo" >
             <h2>Enjoy the benefits</h2>
           </div>
@@ -46,9 +46,9 @@
           </div>
         </li>
         <li data-transition="fade" data-slotamount="1"> <img src="images/slider/rs/thumb.png" alt="slide"/>
-          <div class="caption lfr" data-x="0" data-y="60" data-speed="800" data-start="300" data-easing="easeOutBack"><img src="images/slider/rs/screen1.png" alt="slide" class="ie8PngFix"/></div>
-          <div class="caption lfl" data-x="150" data-y="200" data-speed="600" data-start="700" data-easing="easeOutExpo"><img src="images/slider/rs/screen2.png" alt="slide" class="ie8PngFix"/></div>
-          <div class="caption lfb" data-x="250" data-y="300" data-speed="400" data-start="1000" data-easing="easeOutBack"><img src="images/slider/rs/screen3.png" alt="slide" class="ie8PngFix"/></div>
+          <div class="caption lfr" data-x="0" data-y="60" data-speed="800" data-start="300" data-easing="easeOutBack"><img src="images/slider/rs/screen1.jpg" alt="slide" class="ie8PngFix"/></div>
+          <div class="caption lfl" data-x="150" data-y="200" data-speed="600" data-start="700" data-easing="easeOutExpo"><img src="images/slider/rs/screen2.jpg" alt="slide" class="ie8PngFix"/></div>
+          <div class="caption lfb" data-x="250" data-y="300" data-speed="400" data-start="1000" data-easing="easeOutBack"><img src="images/slider/rs/screen3.jpg " alt="slide" class="ie8PngFix"/></div>
           <div class="caption sft" data-x="465" data-y="48" data-speed="300" data-start="500" data-easing="easeOutExpo" >
             <h2>Flexible OFBiz Solutions, </h2>
           </div>
@@ -67,7 +67,7 @@
           </div>
         </li>
         <li data-transition="fade" data-slotamount="2"> <img src="images/slider/rs/thumb.png" alt="slide"/>
-          <div class="caption lfl" data-x="400" data-y="30" data-speed="900" data-start="800" data-easing="easeOutBack"><img src="images/slider/rs/ofbiz2.png" alt="slide" class="ie8PngFix"/></div>
+          <div class="caption lfl" data-x="400" data-y="30" data-speed="900" data-start="800" data-easing="easeOutBack"><img src="images/slider/rs/ofbiz2.jpg" alt="slide" class="ie8PngFix"/></div>
           <div class="caption sft" data-x="50" data-y="60" data-speed="300" data-start="1600" data-easing="easeOutExpo" >
             <h2>The best things in life are free!</h2>
           </div>
