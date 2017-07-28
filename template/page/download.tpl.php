@@ -212,7 +212,7 @@
           <div class="span8">
             <h2>Download Apache OFBiz</h2>
             <div class="divider"><span></span></div>
-            <div class="imgWrapper"> <img src="images/download.png" alt="image fullwidth"> </div>
+            <div class="imgWrapper"> <img src="images/Download.jpg" alt="image fullwidth"> </div>
             <p> <strong> Use the links below to download Apache OFBiz releases from the "Apache Download Mirrors" page. The download page also includes instructions on how to verify the integrity of the release file using the signature and hashes (PGP, MD5, SHA512) available for each release. </strong> </p>
             <p> <strong>PLEASE NOTE:</strong> Despite our best efforts to maintain up to three active release branches, support for older branches can decrease because our project volunteers may be focused on other issues. We recommend using releases from the most recent branch wherever possible. </p>
             <h2>Apache OFBiz 16.11.03</h2>
