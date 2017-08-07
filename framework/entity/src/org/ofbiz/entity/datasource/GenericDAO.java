@@ -43,7 +43,6 @@ import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.EntityLockedException;
 import org.ofbiz.entity.GenericDataSourceException;
 import org.ofbiz.entity.GenericEntity;
-import org.ofbiz.entity.GenericEntityConfException;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericEntityNotFoundException;
 import org.ofbiz.entity.GenericModelException;
@@ -52,9 +51,8 @@ import org.ofbiz.entity.GenericValue;
 import org.ofbiz.entity.condition.EntityCondition;
 import org.ofbiz.entity.condition.EntityConditionParam;
 import org.ofbiz.entity.condition.EntityOperator;
-import org.ofbiz.entity.config.model.Datasource;
-import org.ofbiz.entity.config.model.EntityConfig;
 import org.ofbiz.entity.config.EntityConfigUtil;
+import org.ofbiz.entity.config.model.Datasource;
 import org.ofbiz.entity.jdbc.DatabaseUtil;
 import org.ofbiz.entity.jdbc.SQLProcessor;
 import org.ofbiz.entity.jdbc.SqlJdbcUtil;
@@ -1035,6 +1033,7 @@ public class GenericDAO {
         }
 
         boolean isGroupBy = false;
+        boolean isCountGroup = false;
         ModelViewEntity modelViewEntity = null;
         if (modelEntity instanceof ModelViewEntity) {
             modelViewEntity = (ModelViewEntity) modelEntity;
@@ -1065,11 +1064,20 @@ public class GenericDAO {
                     // if the field has a function already we don't want to count just it, would be meaningless
                     sqlBuffer.append("COUNT(DISTINCT *) ");
                 } else {
-                    sqlBuffer.append("COUNT(DISTINCT ");
-                    // this only seems to support a single column, which is not desirable but seems a lot better than no columns or in certain cases all columns
-                    sqlBuffer.append(firstSelectField.getColValue());
-                    // sqlBuffer.append(modelEntity.colNameString(selectFields, ", ", "", datasource.aliasViews));
-                    sqlBuffer.append(")");
+                    isCountGroup = true;
+                    StringBuilder sqlBufferTMP = new StringBuilder("SELECT COUNT(*) FROM(");
+                    sqlBuffer.append("DISTINCT ");
+                    for (int i = 0; i < selectFields.size() - 1; i++) {
+                        ModelViewEntity.ModelAlias tmpMA = modelViewEntity != null ? modelViewEntity.getAlias(selectFields.get(i).getName()) : null;
+                        if (tmpMA != null && !tmpMA.getColAlias().isEmpty()) {
+                            sqlBuffer.append(selectFields.get(i).getColValue() + " as " + tmpMA.getColAlias() + ",");
+                        } else {
+                            sqlBuffer.append(selectFields.get(i).getColValue() + ",");
+                        }
+                    }
+                    sqlBuffer.append(selectFields.get(selectFields.size() - 1).getColValue());
+                    sqlBufferTMP.append(sqlBuffer);
+                    sqlBuffer = sqlBufferTMP;
                 }
             } else {
                 sqlBuffer.append("COUNT(DISTINCT *) ");
@@ -1108,6 +1116,9 @@ public class GenericDAO {
 
         if (isGroupBy) {
             sqlBuffer.append(") TEMP_NAME");
+        }
+        if (isCountGroup) {
+            sqlBuffer.append(") TEMP_COUNT_NAME");
         }
 
         String sql = sqlBuffer.toString();
