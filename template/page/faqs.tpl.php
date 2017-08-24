@@ -28,7 +28,7 @@
                 <div class="accordion-heading"> <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordionFaq" href="#collapseOne"> <i class="icon-down-circle"></i> What is Apache OFBiz? </a> </div>
                 <div id="collapseOne" class="accordion-body collapse in">
                   <div class="accordion-inner">
-                    <p> Apache OFBiz is suite of business applications is flexible enough to be used across any industry. A common architecture allows developers to enhance or extend it to create custom features. It is an open source ERP. </p>
+                    <p> Apache OFBiz is suite of business applications that is flexible enough to be used across any industry. A common architecture allows developers to enhance or extend it to create custom features. It is an open source ERP that can also be used as a framework. </p>
                   </div>
                 </div>
               </div>
@@ -51,7 +51,7 @@
                 <div class="accordion-heading"> <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordionFaq" href="#collapseFour"> <i class="icon-right-circle"></i> Who maintains and updates Apache OFBiz? </a> </div>
                 <div id="collapseFour" class="accordion-body collapse">
                   <div class="accordion-inner">
-                    <p>Apache OFBiz is maintained by it's community. The community works together to identify and resolve any bugs or issues found. The changes are updated and if required backported to previous releases </p>
+                    <p>Apache OFBiz is maintained by its community. The community works together to identify and resolve any bugs or issues found. The changes are updated and if required backported to previous releases </p>
 		  </div>
                 </div>
               </div>
