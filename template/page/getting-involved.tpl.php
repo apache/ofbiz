@@ -34,7 +34,7 @@
 		<p>Getting involved with the Apache OFBiz Community is <strong>easy!</strong></p>    
 		<p>Apache OFBiz is an open source community project governed by rules and <a href="http://apache.org/foundation/policies/conduct.html" target="_blank">Code of Conduct</a> of <a href="http://apache.org/" target="_blank">the Apache Software Foundation.</a> All Apache projects value key concepts such as community, consensus, openness and transparency.</p>
 		<p>A popular Apache mantra is <strong>"Community over Code"</strong> meaning that being able to work and collaborate as a community is more important than producing code</p>
-		<p>The Apache OFBiz source code is free, open source and provided under the <a href="http://apache.org/licenses/">Apache Licence.</a> It is also easily accessible from the Apache source code repository. The project mailing lists contain all project releated discussions and decsisions. </p>            
+		<p>The Apache OFBiz source code is free, open source and provided under the <a href="http://apache.org/licenses/">Apache Licence.</a> It is also easily accessible from the Apache source code repository. The project mailing lists contain all project releated discussions and decisions. </p>            
 		</div>
             </section> 
 
