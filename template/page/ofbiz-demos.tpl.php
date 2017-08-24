@@ -48,7 +48,7 @@
                 <h2>Current Stable Release 16.11 - Demo</h2>
                 <div class="divider"><span></span></div>
 
-		<p><i class="icon-pin"></i><a href="https://demo-stable.ofbiz.apache.org/accounting/control/main?USERNAME=admin&PASSWORD=ofbiz&JavaScriptEnabled=Y" target="_blank"><strong>Backend Management (ERP) Applications</strong></a> </p> 	 
+		<p><i class="icon-pin"></i><a href="https://demo-stable.ofbiz.apache.org/ordermgr/control/main?USERNAME=admin&PASSWORD=ofbiz&JavaScriptEnabled=Y" target="_blank"><strong>Backend Management (ERP) Applications</strong></a> </p> 	 
 		<p><i class="icon-pin"></i><a href="https://demo-stable.ofbiz.apache.org/ecommerce/control/main" target="_blank"><strong>Front End E-Commerce Webstore</strong></a> </p> 
 		
               </div> 
@@ -59,7 +59,7 @@
                 <h2>Developer Trunk - Demo </h2>
                 <div class="divider"><span></span></div>
                 <p>Please note that the trunk version is not recommended for a production environment. It is experimental code and contains developments in progress that once stablised will become part of future stable releases.</p>
-		<p><i class="icon-pin"></i><a href="https://demo-trunk.ofbiz.apache.org/accounting/control/main?USERNAME=admin&PASSWORD=ofbiz&JavaScriptEnabled=Y" target="_blank"><strong>Backend Management (ERP) Applications</strong></a> </p> 	 
+		<p><i class="icon-pin"></i><a href="https://demo-trunk.ofbiz.apache.org/ordermgr/control/main?USERNAME=admin&PASSWORD=ofbiz&JavaScriptEnabled=Y" target="_blank"><strong>Backend Management (ERP) Applications</strong></a> </p> 	 
 		<p><i class="icon-pin"></i><a href="https://demo-trunk.ofbiz.apache.org/ecomseo" target="_blank"><strong>Front End E-Commerce Webstore</strong></a> </p> 
 
 	
@@ -72,15 +72,11 @@
                 <div class="divider"><span></span></div>
                 <p>This demo is for the previous OFBiz release. </p>
 
-		<p><i class="icon-pin"></i><a href="https://ofbiz-vm2.apache.org:28443/accounting/control/main?USERNAME=admin&PASSWORD=ofbiz&JavaScriptEnabled=Y" target="_blank"><strong>Backend Management (ERP) Applications</strong></a> </p> 	 
+		<p><i class="icon-pin"></i><a href="https://ofbiz-vm2.apache.org:28443/ordermgr/control/main?USERNAME=admin&PASSWORD=ofbiz&JavaScriptEnabled=Y" target="_blank"><strong>Backend Management (ERP) Applications</strong></a> </p> 	 
 		<p><i class="icon-pin"></i><a href=" http://ofbiz-vm2.apache.org:28080/ecommerce/control/main" target="_blank"><strong>Front End E-Commerce Webstore</strong></a> </p> 
 
 	      </div>
-            </section> 	  
-
-	   
-
- 	           
+            </section> 	          
 	   
           </div>
         </div>
