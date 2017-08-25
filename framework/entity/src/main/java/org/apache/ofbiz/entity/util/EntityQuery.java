@@ -515,7 +515,7 @@ public class EntityQuery {
         EntityListIterator genericValueEli = null;
         try {
             genericValueEli = queryIterator();
-            if (this.distinct) {
+            if (Boolean.TRUE.equals(this.distinct)) {
                 Set<T> distinctSet = new HashSet<T>();
                 GenericValue value = null;
                 while ((value = genericValueEli.next()) != null) {
