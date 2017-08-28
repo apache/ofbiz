@@ -65,7 +65,7 @@
                 <p>To find out what is happening on the project, please subscribe to our mailing lists.</p>
 		<p> Our <strong>dev@ofbiz.apache.org mailing list </strong> is where additions or changes to OFBiz are discussed. The list is open to everyone and all are encouraged to give their feedback and opinions of anything discussed.</p>
 		<p>Our <strong>user@ofbiz.apache.org mailing list</strong> is for our users. Use this list to ask questions and get advice on setting up OFBiz and also if you are an end-user interested in helping other OFBiz users.</p>
-		<p>Our <a href="mailinglists.html">mailing lists </a> are also a great place for you to introduce yourself and join our community.</p>
+		<p>Our <a href="mailing-lists.html">mailing lists </a> are also a great place for you to introduce yourself and join our community.</p>
 		
  	     </div>
             </section>

@@ -31,8 +31,8 @@
         <h2>Contact Community</h2>
         <div class="divider"><span></span></div>
         <ul>
-          <li><a href="mailinglists.html">Mailing Lists</a></li>
-          <li><a href="source-repository.html">Source Repository (SVN)</a></li>
+          <li><a href="mailing-lists.html">Mailing Lists</a></li>
+          <li><a href="source-repositories.html">Source Repository (SVN)</a></li>
           <li><a href="https://issues.apache.org/jira/browse/OFBIZ" target="external">Issue Tracker (Jira)</a></li>
           <li><a href="https://www.youtube.com/user/ofbiz" target="external">OFBiz Youtube Channel</a></li>
           <li><a href="https://vimeo.com/channels/apacheofbiz" target="external">OFBiz Vimeo Channel</a></li>
