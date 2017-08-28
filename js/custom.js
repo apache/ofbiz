@@ -569,7 +569,10 @@ if($('#shareme').length){
 });
 }
 
-
+//INCLUDE HTML file
+$('[data-load]').each(function() {
+  $(this).load($(this).data("load"));
+});
 
 //END DOCUMENT READY   
 });
