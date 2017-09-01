@@ -466,7 +466,7 @@ under the License.
         <field name="description" position="2">
             <text size="60"/>
         </field>
-        <field name="mimeTypeId" position="1">
+        <field name="mimeTypeId" position="1" encode-output="false">
             <drop-down allow-empty="true">
                 <entity-options description="${mimeTypeId} - ${description}" entity-name="MimeType" key-field-name="mimeTypeId">
                     <entity-order-by field-name="mimeTypeId"/>
@@ -526,7 +526,7 @@ under the License.
                 <entity-options description="${description}" entity-name="DataTemplateType" key-field-name="dataTemplateTypeId"/>
             </drop-down>
         </field>
-        <field name="drMimeTypeId" position="1">
+        <field name="drMimeTypeId" position="1" encode-output="false">
             <drop-down allow-empty="true">
                 <entity-options description="${mimeTypeId} - ${description}" entity-name="MimeType" key-field-name="mimeTypeId">
                     <entity-order-by field-name="mimeTypeId"/>
