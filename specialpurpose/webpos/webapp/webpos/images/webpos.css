@@ -292,6 +292,7 @@ input[type="text"]:focus, input[type="password"]:focus {
 #CartHeader {
     height: 100px;
     width: 100%;
+    margin-bottom: 35px;
 }
 #Cart {
     height: 460px;
