@@ -13,7 +13,7 @@
 	{
 		Constants.request = {};
 	}
-	Constants.request.format = '<%= ParameterAccessor.getFormat(request) %>';
+	Constants.request.format = '<%= ParameterAccessor.htmlEncode(ParameterAccessor.getFormat(request)) %>';
 	Constants.request.rtl = <%= ParameterAccessor.isRtl( request ) %>;
 	Constants.request.isDesigner = <%= ParameterAccessor.isDesigner() %>;
 	Constants.request.servletPath = "<%= request.getAttribute( "ServletPath" ) %>".substr(1);
