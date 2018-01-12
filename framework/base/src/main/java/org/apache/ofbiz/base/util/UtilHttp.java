@@ -56,6 +56,7 @@ import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.ssl.SSLContexts;
+import org.apache.ofbiz.entity.util.EntityUtilProperties;
 import org.apache.oro.text.regex.MalformedPatternException;
 import org.apache.oro.text.regex.Pattern;
 import org.apache.oro.text.regex.PatternMatcher;
@@ -1047,8 +1048,6 @@ public final class UtilHttp {
      * @throws IOException
      */
     public static void streamContent(OutputStream out, InputStream in, int length) throws IOException {
-        int bufferSize = 512; // same as the default buffer size; change as needed
-
         // make sure we have something to write to
         if (out == null) {
             throw new IOException("Attempt to write to null output stream");
@@ -1065,6 +1064,9 @@ public final class UtilHttp {
         }
 
         // initialize the buffered streams
+
+        int bufferSize = EntityUtilProperties.getPropertyAsInteger("content", "stream.buffersize", 8192);
+
         BufferedOutputStream bos = new BufferedOutputStream(out, bufferSize);
         BufferedInputStream bis = new BufferedInputStream(in, bufferSize);
 
