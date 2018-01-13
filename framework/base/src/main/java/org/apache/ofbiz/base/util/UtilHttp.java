@@ -1064,31 +1064,17 @@ public final class UtilHttp {
         }
 
         // initialize the buffered streams
-
         int bufferSize = EntityUtilProperties.getPropertyAsInteger("content", "stream.buffersize", 8192);
-
-        BufferedOutputStream bos = new BufferedOutputStream(out, bufferSize);
-        BufferedInputStream bis = new BufferedInputStream(in, bufferSize);
-
-        byte[] buffer = new byte[length];
+        byte[] buffer = new byte[bufferSize];
         int read = 0;
-        try {
+        try (BufferedOutputStream bos = new BufferedOutputStream(out, bufferSize);
+                BufferedInputStream bis = new BufferedInputStream(in, bufferSize)) {
             while ((read = bis.read(buffer, 0, buffer.length)) != -1) {
                 bos.write(buffer, 0, read);
             }
         } catch (IOException e) {
             Debug.logError(e, "Problem reading/writing buffers", module);
-            bis.close();
-            bos.close();
             throw e;
-        } finally {
-            if (bis != null) {
-                bis.close();
-            }
-            if (bos != null) {
-                bos.flush();
-                bos.close();
-            }
         }
     }
 
