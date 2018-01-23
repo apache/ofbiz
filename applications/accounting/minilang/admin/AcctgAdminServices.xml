@@ -42,7 +42,7 @@ under the License.
     </simple-method>
 
     <simple-method method-name="getPartyAccountingPreferences"
-            short-description="Get the accounting preference settings for a party (organization)" l>
+            short-description="Get the accounting preference settings for a party (organization)">
         <make-value entity-name="PartyAcctgPreference" value-field="aggregatedPartyAcctgPref"/>
         <set field="currentOrganizationPartyId" from-field="parameters.organizationPartyId"/>
         <set field="containsEmptyFields" type="Boolean" value="true"/>
