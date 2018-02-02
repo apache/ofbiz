@@ -41,6 +41,15 @@ body {
     font-size: 1.0em;
 }
 
+div.popup {
+    max-width: 1200px;
+    width: 250px;
+    padding: 5px;
+    background-color: white;
+    position: absolute;
+    z-index: 1;
+}
+
 #ecom-mainarea {
     clear: both;
     width: 900px;
