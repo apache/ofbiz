@@ -43,6 +43,7 @@ import javax.servlet.jsp.PageContext;
 import javax.transaction.Transaction;
 
 import org.apache.ofbiz.base.component.ComponentConfig;
+import org.apache.ofbiz.base.component.ComponentConfig.WebappInfo;
 import org.apache.ofbiz.base.util.Debug;
 import org.apache.ofbiz.base.util.GeneralException;
 import org.apache.ofbiz.base.util.KeyStoreUtil;
@@ -556,7 +557,9 @@ public class LoginWorker {
             } catch (GenericServiceException e) {
                 Debug.logError(e, "Error setting user preference", module);
             }
-
+            // start with a clean state, in case the user has quit the session w/o login out
+            autoLogoutCleanCookies(userLogin, request, response);
+            
             // finally do the main login routine to set everything else up in the session, etc
             return doMainLogin(request, response, userLogin, userLoginSession);
         } else {
@@ -666,7 +669,8 @@ public class LoginWorker {
         GenericValue userLogin = (GenericValue) request.getSession().getAttribute("userLogin");
 
         doBasicLogout(userLogin, request, response);
-
+        
+        autoLogoutCleanCookies(userLogin, request, response);
         if (request.getAttribute("_AUTO_LOGIN_LOGOUT_") == null) {
             return autoLoginCheck(request, response);
         }
@@ -815,6 +819,34 @@ public class LoginWorker {
             request.setAttribute("_AUTO_LOGIN_LOGOUT_", Boolean.TRUE);
             return logout(request, response);
         }
+        return "success";
+    }
+    
+    // Removes all the autoLoginCookies but if the webapp requires keeping it
+public static String autoLogoutCleanCookies(GenericValue userLogin, HttpServletRequest request, HttpServletResponse response) {
+        HttpSession session = request.getSession();
+
+        Cookie[] cookies = request.getCookies();
+        if (Debug.verboseOn()) {
+            Debug.logVerbose("Cookies: " + Arrays.toString(cookies), module);
+        }
+        if (cookies != null && userLogin != null) {
+            for (Cookie autoLoginCookie: cookies) {
+                String autoLoginName = autoLoginCookie.getName().replace(".autoUserLoginId", "");
+                WebappInfo webappInfo = ComponentConfig.getWebappInfo("default-server", autoLoginName);
+                if (webappInfo != null && !webappInfo.getKeepAutologinCookie()) {
+                    autoLoginCookie.setMaxAge(0);
+                    autoLoginCookie.setPath("/");
+                    response.addCookie(autoLoginCookie);
+                }
+            }
+        }
+
+        // remove the session attributes
+        session.removeAttribute("autoUserLogin");
+        session.removeAttribute("autoName");
+
+        request.setAttribute("_AUTO_LOGIN_LOGOUT_", Boolean.TRUE);
         return "success";
     }
 
