@@ -24,7 +24,6 @@ import java.math.BigInteger;
 import java.security.cert.X509Certificate;
 import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
@@ -828,9 +827,7 @@ public static String autoLogoutCleanCookies(GenericValue userLogin, HttpServletR
         HttpSession session = request.getSession();
 
         Cookie[] cookies = request.getCookies();
-        if (Debug.verboseOn()) {
-            Debug.logVerbose("Cookies: " + Arrays.toString(cookies), module);
-        }
+        if (Debug.verboseOn()) Debug.logVerbose("Cookies:" + cookies, module);
         if (cookies != null && userLogin != null) {
             for (Cookie autoLoginCookie: cookies) {
                 String autoLoginName = autoLoginCookie.getName().replace(".autoUserLoginId", "");
