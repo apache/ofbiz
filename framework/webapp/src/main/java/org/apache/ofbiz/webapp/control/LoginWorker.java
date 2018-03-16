@@ -1071,7 +1071,8 @@ public static String autoLogoutCleanCookies(GenericValue userLogin, HttpServletR
             GenericValue currentUserLogin = (GenericValue) session.getAttribute("userLogin");
             if (currentUserLogin != null) {
                 if (currentUserLogin.getString("userLoginId").equals(userLogin.getString("userLoginId"))) {
-                    // is the same user, just carry on...
+                    // same user, just make sure the autoUserLogin is set to the same and that the client cookie has the correct userLoginId
+                    LoginWorker.autoLoginSet(request, response);
                     return "success";
                 }
 
@@ -1085,6 +1086,9 @@ public static String autoLogoutCleanCookies(GenericValue userLogin, HttpServletR
             Debug.logWarning("Could not find userLogin for external login key: " + externalKey, module);
         }
 
+        // make sure the autoUserLogin is set to the same and that the client cookie has the correct userLoginId
+        LoginWorker.autoLoginSet(request, response);
+        
         return "success";
     }
 
