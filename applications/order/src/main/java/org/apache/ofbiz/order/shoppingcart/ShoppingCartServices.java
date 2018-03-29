@@ -200,7 +200,11 @@ public class ShoppingCartServices {
         cart.setOrderType(orderTypeId);
         cart.setChannelType(orderHeader.getString("salesChannelEnumId"));
         cart.setInternalCode(orderHeader.getString("internalCode"));
-        cart.setOrderDate(UtilDateTime.nowTimestamp());
+        if ("Y".equals(createAsNewOrder)) {
+            cart.setOrderDate(UtilDateTime.nowTimestamp());
+        } else {
+            cart.setOrderDate(orderHeader.getTimestamp("orderDate"));
+        }
         cart.setOrderId(orderHeader.getString("orderId"));
         cart.setOrderName(orderHeader.getString("orderName"));
         cart.setOrderStatusId(orderHeader.getString("statusId"));
@@ -212,12 +216,6 @@ public class ShoppingCartServices {
         } catch (CartItemModifyException e) {
             Debug.logError(e, module);
             return ServiceUtil.returnError(e.getMessage());
-        }
-
-        // set the order name
-        String orderName = orh.getOrderName();
-        if (orderName != null) {
-            cart.setOrderName(orderName);
         }
 
         // set the role information
