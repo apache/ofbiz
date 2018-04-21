@@ -104,7 +104,7 @@ under the License.
     <Uom abbreviation="MGA" description="Malagascy Ariary" uomId="MGA" uomTypeId="CURRENCY_MEASURE"/>
     <Uom abbreviation="MNT" description="Mongolian Tugrik" uomId="MNT" uomTypeId="CURRENCY_MEASURE"/>
     <Uom abbreviation="MOP" description="Macao Pataca" uomId="MOP" uomTypeId="CURRENCY_MEASURE"/>
-    <Uom abbreviation="MRO" description="Mauritanian Ouguiya" uomId="MRO" uomTypeId="CURRENCY_MEASURE"/>
+    <Uom abbreviation="MRU" description="Mauritanian Ouguiya" uomId="MRU" uomTypeId="CURRENCY_MEASURE"/>
     <Uom abbreviation="MUR" description="Mauritius Rupee" uomId="MUR" uomTypeId="CURRENCY_MEASURE"/>
     <Uom abbreviation="MVR" description="Maldive Rufiyaa" uomId="MVR" uomTypeId="CURRENCY_MEASURE"/>
     <Uom abbreviation="MWK" description="Malawi Kwacha" uomId="MWK" uomTypeId="CURRENCY_MEASURE"/>
@@ -140,7 +140,7 @@ under the License.
     <Uom abbreviation="SLL" description="Leone" uomId="SLL" uomTypeId="CURRENCY_MEASURE"/>
     <Uom abbreviation="SOS" description="Somalian Shilling" uomId="SOS" uomTypeId="CURRENCY_MEASURE"/>
     <Uom abbreviation="SRD" description="Surinam Dollar" uomId="SRD" uomTypeId="CURRENCY_MEASURE"/>
-    <Uom abbreviation="STD" description="Sao Tome / Principe Dobra" uomId="STD" uomTypeId="CURRENCY_MEASURE"/>
+    <Uom abbreviation="STN" description="Sao Tome and Principe Dobra" uomId="STN" uomTypeId="CURRENCY_MEASURE"/>
     <Uom abbreviation="SVC" description="El Salvador Colon" uomId="SVC" uomTypeId="CURRENCY_MEASURE"/>
     <Uom abbreviation="SYP" description="Syrian Pound" uomId="SYP" uomTypeId="CURRENCY_MEASURE"/>
     <Uom abbreviation="SZL" description="Swaziland Lilangeni" uomId="SZL" uomTypeId="CURRENCY_MEASURE"/>
@@ -158,7 +158,7 @@ under the License.
     <Uom abbreviation="USD" description="United States Dollar" uomId="USD" uomTypeId="CURRENCY_MEASURE"/>
     <Uom abbreviation="UYU" description="Uruguay Peso" uomId="UYU" uomTypeId="CURRENCY_MEASURE"/>
     <Uom abbreviation="UYI" description="Uruguay Peso en Unidades Indexadas (UI)" uomId="UYI" uomTypeId="CURRENCY_MEASURE"/>
-    <Uom abbreviation="VEF" description="Venezuelan Bolívar" uomId="VEF" uomTypeId="CURRENCY_MEASURE"/>
+    <Uom abbreviation="VES" description="Venezuelan Bolívar Soberano" uomId="VES" uomTypeId="CURRENCY_MEASURE"/>
     <Uom abbreviation="VND" description="Vietnamese Dong" uomId="VND" uomTypeId="CURRENCY_MEASURE"/>
     <Uom abbreviation="VUV" description="Vanuatu Vatu" uomId="VUV" uomTypeId="CURRENCY_MEASURE"/>
     <Uom abbreviation="WST" description="Samoan Tala" uomId="WST" uomTypeId="CURRENCY_MEASURE"/>
