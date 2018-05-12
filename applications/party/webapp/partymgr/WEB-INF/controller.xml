@@ -1102,6 +1102,12 @@ under the License.
         <response name="success" type="view" value="viewprofile"/>
         <response name="error" type="view" value="viewprofile"/>
     </request-map>
+    <request-map uri="createBillingAccountAndRole">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="createBillingAccountAndRole"/>
+        <response name="success" type="view" value="EditBillingAccount"/>
+        <response name="error" type="view" value="EditBillingAccount"/>
+    </request-map>
 
     <!-- Order communication event requests -->
     <request-map uri="UpdateCommOrders">
