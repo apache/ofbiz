@@ -1213,10 +1213,15 @@ public class RequestHandler {
             ConfigXMLReader.RequestMap requestMap = null;
             try {
                 requestMap = getControllerConfig().getRequestMapMap().get(uriString);
+                if (requestMap == null) {
+                    requestMap = getControllerConfig().getRequestMapMap().get(getControllerConfig().getDefaultRequest());
+                    if (requestMap == null) {
+                        return false;
+                    }
+                }
             } catch (WebAppConfigurationException e) {
                 Debug.logError(e, "Exception thrown while parsing controller.xml file: ", module);
             }
-            if (requestMap == null) return false;
             return requestMap.trackServerHit;
         } else {
             return false;
@@ -1232,10 +1237,15 @@ public class RequestHandler {
             ConfigXMLReader.RequestMap requestMap = null;
             try {
                 requestMap = getControllerConfig().getRequestMapMap().get(uriString);
+                if (requestMap == null) {
+                    requestMap = getControllerConfig().getRequestMapMap().get(getControllerConfig().getDefaultRequest());
+                    if (requestMap == null) {
+                        return false;
+                    }
+                }
             } catch (WebAppConfigurationException e) {
                 Debug.logError(e, "Exception thrown while parsing controller.xml file: ", module);
             }
-            if (requestMap == null) return false;
             return requestMap.trackVisit;
         } else {
             return false;
