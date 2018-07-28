@@ -139,10 +139,10 @@ background: #fffeee;
 }
 
 .blogtitle, A.blogtitle {
-color: white;
+color: white!important;
 font-weight: bold;
 text-align: left;
-text-decoration: none;
+text-decoration: none!important;
 display: inline;
 }
 
