@@ -18,7 +18,7 @@
  * Options:
  *   colors - colors array (by default display 256 web safe colors)
  *   color  - current (selected) color
- *   class - css class for display "button" (element on wich plugin was called)
+ *   class - css class for display "button" (element on which plugin was called)
  *   paletteClass - css class for colors palette
  *   palettePosition - string indicate where palette will created:
  *      'inner' - palette will attach to element (acceptable in most cases)

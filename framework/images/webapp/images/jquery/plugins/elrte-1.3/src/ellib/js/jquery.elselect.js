@@ -20,7 +20,7 @@
  * Options:
  *   src       - object with pairs value:label to create drop-down list 
  *   value     - current (selected) value
- *   class     - css class for display "button" (element on wich plugin was called)
+ *   class     - css class for display "button" (element on which plugin was called)
  *   listClass - css class for drop down elements list
  *   select    - callback, called when value was selected (by default write value to console.log)
  *   name      - hidden text field in wich selected value will saved

@@ -370,7 +370,7 @@ public class EntitySyncContext {
                 }
                 eli.close();
 
-                // definately remove this message and related data gathering
+                // definitely remove this message and related data gathering
                 //long preCount = delegator.findCountByCondition(modelEntity.getEntityName(), findValCondition, null);
                 //long entityTotalCount = delegator.findCountByCondition(modelEntity.getEntityName(), null, null);
                 //if (entityTotalCount > 0 || preCount > 0 || valuesPerEntity > 0) Debug.logInfo("Got " + valuesPerEntity + "/" + preCount + "/" + entityTotalCount + " values for entity " + modelEntity.getEntityName(), module);
