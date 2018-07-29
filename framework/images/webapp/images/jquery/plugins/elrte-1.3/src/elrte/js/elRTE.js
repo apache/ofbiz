@@ -350,7 +350,7 @@ elRTE.prototype.open = function() {
 }
 
 /**
- * Hide editor and display elements on wich editor was created
+ * Hide editor and display elements on which editor was created
  *
  * @return void
  **/

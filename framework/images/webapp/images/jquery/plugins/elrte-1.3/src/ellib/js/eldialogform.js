@@ -26,7 +26,7 @@
  *   ajaxForm  - arguments for ajaxForm, if needed (dont forget include jquery.form.js)
  *   tabs      - arguments for ui.tabs
  *   dialog    - arguments for ui.dialog
- *   name      - hidden text field in wich selected value will saved
+ *   name      - hidden text field in which selected value will saved
  *
  * Notice!
  * When close dialog, it will destroing insead of dialog('close'). Reason - strange bug with tabs in dialog on secondary opening. 
