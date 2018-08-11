@@ -168,13 +168,13 @@ function partySearchAgain() {
                 '&searchByPartyFirstName=' + jQuery('#searchByPartyFirstName').val() +
                 '&searchByPartyIdValue=' + jQuery('#searchByPartyIdValue').val();
     
-    if (jQuery('#billingLoc').attr('checked') == true) {
+    if (jQuery('#billingLoc').prop('checked') == true) {
         param = param + '&billingLocation=Y';
     } else {
         param = param + '&billingLocation=N';
     }
     
-    if (jQuery('#shippingLoc').attr('checked') == true) {
+    if (jQuery('#shippingLoc').prop('checked') == true) {
         param = param + '&shippingLocation=Y';
     } else {
         param = param + '&shippingLocation=N';
