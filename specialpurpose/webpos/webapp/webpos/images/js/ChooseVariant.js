@@ -262,14 +262,14 @@ function getResultOfGetProductAndPrice(data) {
         var price = data.price;
         var currencyUomId = data.currencyUomId;
         if (product.productName != null) {
-            jQuery('#variantProductDescription').update(product.productName);
+            jQuery('#variantProductDescription').val(product.productName);
         } else if (product.productDescription != null) {
-            jQuery('#variantProductDescription').update(product.productDescription);
+            jQuery('#variantProductDescription').val(product.productDescription);
         } else if (product.longDescription != null) {
-            jQuery('#variantProductDescription').update(product.longDescription);
+            jQuery('#variantProductDescription').val(product.longDescription);
         }
         var formattedPrice = getFormattedAmount(price, currencyUomId);
-        jQuery('#variantProductPrice').update(formattedPrice);
+        jQuery('#variantProductPrice').val(formattedPrice);
     }
 }
 
