@@ -175,7 +175,8 @@
             <if-empty field="parameters.skillTypeId">
                 <set field="parameters.skillTypeId" value="_NA_"/>
             </if-empty>
-            <call-simple-method method-name="createWorkEffortSkillStandard" xml-resource="component://workeffort/minilang/workeffort/WorkEffortSimpleServices.xml"/>
+            <set-service-fields service-name="createWorkEffortSkillStandard" map="parameters" to-map="createWorkEffortSkillStandard"/>
+            <call-service service-name="createWorkEffortSkillStandard" in-map-name="createWorkEffortSkillStandard"/>
         </if-not-empty>
     </simple-method>
 
