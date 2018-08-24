@@ -626,7 +626,7 @@ function updateBillingSummary() {
         var billToGeo = jQuery('#billToCity').val()+", "+jQuery('#billToCountryGeoId').val()+" "+jQuery('#billToPostalCode').val();
     }
     else {
-        var billToGeo = jQuery('#billToCity').val()+", "+jQuery('#billToStateProvinceGeoId').val() +" "+jQuery('#billToCountryGeoId')+" "+jQuery('#billToPostalCode').val();
+        var billToGeo = jQuery('#billToCity').val()+", "+jQuery('#billToStateProvinceGeoId').val() +" "+jQuery('#billToCountryGeoId').val()+" "+jQuery('#billToPostalCode').val();
     }
     jQuery('#completedBillToGeo').html(billToGeo);
     jQuery('#paymentMethod').html(jQuery('#paymentMethodTypeId').val());
