@@ -169,7 +169,6 @@ under the License.
             </widgets>
         </section>
     </screen>
-    <screen name="EditSurveyQuestions">
         <section>
             <actions>
 
