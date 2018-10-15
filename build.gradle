@@ -39,6 +39,11 @@ if (project.hasProperty('jvmArgs')) {
 }
 ext.ofbizMainClass = 'org.apache.ofbiz.base.start.Start'
 javadoc.failOnError = false
+javadoc.options {
+    encoding "UTF-8"
+    charSet "UTF-8"
+}
+
 sourceCompatibility = '1.8'
 targetCompatibility = '1.8'
 
