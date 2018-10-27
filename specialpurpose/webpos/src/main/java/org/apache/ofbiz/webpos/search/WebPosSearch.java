@@ -145,7 +145,10 @@ public class WebPosSearch {
         }
         andExprs.add(EntityCondition.makeCondition("partyTypeId", EntityOperator.EQUALS, "PERSON"));
         andExprs.add(EntityCondition.makeCondition("contactMechTypeId", EntityOperator.EQUALS, "POSTAL_ADDRESS"));
-        
+
+        if (UtilValidate.isNotEmpty(shippingLocation) && "N".equalsIgnoreCase(shippingLocation) && UtilValidate.isNotEmpty(billingLocation) && "N".equalsIgnoreCase(billingLocation)) {
+            andExprs.add(EntityCondition.makeCondition("contactMechPurposeTypeId", EntityOperator.IN, UtilMisc.toList("SHIPPING_LOCATION", "BILLING_LOCATION")));
+        }
         mainCond = EntityCondition.makeCondition(andExprs, EntityOperator.AND);
         
         orderBy.add("lastName");

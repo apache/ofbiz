@@ -67,6 +67,7 @@ under the License.
           <td><b>${uiLabelMap.PartyPartyId}</b></td>
           <td><b>${uiLabelMap.PartyLastName}</b></td>
           <td><b>${uiLabelMap.PartyFirstName}</b></td>
+          <td><b>${uiLabelMap.PartyPartyIdentification}</b></td>
           <td><b>${uiLabelMap.PartyAddressLine1}</b></td>
           <td><b>${uiLabelMap.PartyCity}</b></td>
           <td><b>${uiLabelMap.PartyPostalCode}</b></td>

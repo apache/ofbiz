@@ -77,6 +77,7 @@ function buildPartiesResults(parties, fromPartySearch) {
         }
         lastName = checkNull(party.lastName);
         firstName = checkNull(party.firstName);
+        partyIdentificationNumber = checkNull(party.idValue);
         address1 = checkNull(party.address1);
         city = checkNull(party.city);
         postalCode = checkNull(party.postalCode);
@@ -99,6 +100,7 @@ function buildPartiesResults(parties, fromPartySearch) {
         tableList = tableList + "<td><a href=\"javascript:setParty(\'" + party.partyId + "\', \'" + party.contactMechId + "\', \'" + party.contactMechPurposeTypeId +"\');\">" + party.partyId + "</a></td>";
         tableList = tableList + "<td><a href=\"javascript:setParty(\'" + party.partyId + "\', \'" + party.contactMechId + "\', \'" + party.contactMechPurposeTypeId +"\');\">" + lastName + "</a></td>";
         tableList = tableList + "<td><a href=\"javascript:setParty(\'" + party.partyId + "\', \'" + party.contactMechId + "\', \'" + party.contactMechPurposeTypeId +"\');\">" + firstName + "</a></td>";
+        tableList = tableList + "<td>" + partyIdentificationNumber + "</td>";
         tableList = tableList + "<td>" + address1 + "</td>";
         tableList = tableList + "<td>" + city + "</td>";
         tableList = tableList + "<td>" + postalCode + "</td>";
