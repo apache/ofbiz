@@ -507,7 +507,7 @@ ${virtualJavaScript!}
                 <a name='#${question.getConfigItem().getString("configItemId")}'></a>
                 <div>${StringUtil.wrapString(question.description!)}</div>
                 <#assign instructions = question.content.get("INSTRUCTIONS", "html")!>
-                <#if instructions?has_content>
+                <#if instructions?has_content && instructions != "">
                   <a href="javascript:showErrorAlert("${uiLabelMap.CommonErrorMessage2}","${instructions}");"
                   class="buttontext">Instructions</a>
                 </#if>
