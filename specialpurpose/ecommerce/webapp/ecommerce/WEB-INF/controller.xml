@@ -54,6 +54,7 @@ under the License.
         <event name="checkTrackingCodeUrlParam" type="java" path="org.apache.ofbiz.marketing.tracking.TrackingCodeEvents" invoke="checkTrackingCodeUrlParam"/>
         <event name="checkPartnerTrackingCodeUrlParam" type="java" path="org.apache.ofbiz.marketing.tracking.TrackingCodeEvents" invoke="checkPartnerTrackingCodeUrlParam"/>
         <event name="keepCartUpdated" type="java" path="org.apache.ofbiz.order.shoppingcart.ShoppingCartEvents" invoke="keepCartUpdated"/>
+        <event name="autoLoginCheck" type="java" path="org.apache.ofbiz.webapp.control.LoginWorker" invoke="autoLoginCheck"/>
     </preprocessor>
 
     <!-- Events to run on every request after all other processing (chains exempt) -->
@@ -93,7 +94,7 @@ under the License.
     </request-map>
     <request-map uri="logout">
         <security https="true" auth="true"/>
-        <event type="java" path="org.apache.ofbiz.webapp.control.LoginWorker" invoke="logout"/>
+        <event type="java" path="org.apache.ofbiz.webapp.control.LoginWorker" invoke="autoLoginRemove"/>
         <response name="success" type="request-redirect" value="main"/>
         <response name="error" type="view" value="main"/>
     </request-map>
