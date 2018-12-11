@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Licensed to the Apache Software Foundation (ASF) under one
+    or more contributor license agreements.  See the NOTICE file
+    distributed with this work for additional information
+    regarding copyright ownership.  The ASF licenses this file
+    to you under the Apache License, Version 2.0 (the
+    "License"); you may not use this file except in compliance
+    with the License.  You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+    KIND, either express or implied.  See the License for the
+    specific language governing permissions and limitations
+    under the License.
+-->
+<entity-engine-xml>
+
+    <PortletCategory portletCategoryId="ACCOUNTING" description="Accounting related data"/>
+
+    <PortalPortlet portalPortletId="ListCustomerInvoices" portletName="List Customer Invoices"
+        screenName="ListCustomerInvoices"
+        screenLocation="component://accounting/widget/InvoiceScreens.xml"
+        description="List Invoices for a certain customer who is just logged in"
+        securityServiceName="portalPermissionIsCustomer" securityMainAction="VIEW"/>
+    <PortletPortletCategory portalPortletId="ListCustomerInvoices" portletCategoryId="ACCOUNTING"/>
+
+    <PortalPortlet portalPortletId="ListBankAccount"
+        portletName="List bank account"
+        screenName="ListBankAccount"
+        screenLocation="component://accounting/widget/FinAccountScreens.xml"
+        description="List all financial account with type BANK_ACCOUNT" securityServiceName="portalPermissionIsEmployee" securityMainAction="VIEW"/>
+    <PortalPage portalPageId="FinAccountPortalPage" sequenceNum="0" portalPageName="Fin account portal page" description="Fin account main screen using flexible portal technology" ownerUserLoginId="_NA_"/>
+    <PortalPageColumn portalPageId="FinAccountPortalPage" columnSeqId="00001"/>
+    <PortalPagePortlet portalPageId="FinAccountPortalPage" portalPortletId="ListBankAccount" portletSeqId="00001" columnSeqId="00001" sequenceNum="0"/>
+
+    <!--Portlet data for AP -->
+    <PortalPortlet portalPortletId="ArPastDueInvoices" portletName="AR Past Due Invoices" screenName="ArPastDueInvoices"
+            screenLocation="component://accounting/widget/ar/CommonScreens.xml" description="List of Past Due Invoices in AR"/>
+    <PortalPortlet portalPortletId="ArInvoicesDueSoon" portletName="AR Invoices Due Soon" screenName="ArInvoicesDueSoon"
+            screenLocation="component://accounting/widget/ar/CommonScreens.xml" description="List of Invoices Due Soon in AR"/>
+
+    <PortletPortletCategory portalPortletId="ArPastDueInvoices" portletCategoryId="ACCOUNTING"/>
+    <PortletPortletCategory portalPortletId="ArInvoicesDueSoon" portletCategoryId="ACCOUNTING"/>
+
+    <PortalPage portalPageId="ArPortalPage" sequenceNum="0" portalPageName="Main" description="Portal page for Past Due Invoices and Invoices Due Soon in AR" ownerUserLoginId="_NA_"/>
+
+    <PortalPageColumn portalPageId="ArPortalPage" columnSeqId="00001"/>
+
+    <PortalPagePortlet portalPageId="ArPortalPage" portalPortletId="ArPastDueInvoices" portletSeqId="00001" columnSeqId="00001" sequenceNum="0"/>
+    <PortalPagePortlet portalPageId="ArPortalPage" portalPortletId="ArInvoicesDueSoon" portletSeqId="00001" columnSeqId="00001" sequenceNum="1"/>
+
+    <!--Portlet data for AP -->
+    <PortalPortlet portalPortletId="ApPastDueInvoices" portletName="Ap Past Due Invoices" screenName="ApPastDueInvoices"
+            screenLocation="component://accounting/widget/ap/CommonScreens.xml" description="List of Past Due Invoices in AP"/>
+    <PortalPortlet portalPortletId="ApInvoicesDueSoon" portletName="AP Invoices Due Soon" screenName="ApInvoicesDueSoon"
+            screenLocation="component://accounting/widget/ap/CommonScreens.xml" description="List of Invoices Due Soon in AP"/>
+
+    <PortletPortletCategory portalPortletId="ApPastDueInvoices" portletCategoryId="ACCOUNTING"/>
+    <PortletPortletCategory portalPortletId="ApInvoicesDueSoon" portletCategoryId="ACCOUNTING"/>
+
+    <PortalPage portalPageId="ApPortalPage" sequenceNum="0" portalPageName="Main" description="Portal page for Past Due Invoices and Invoices Due Soon in AP" ownerUserLoginId="_NA_"/>
+
+    <PortalPageColumn portalPageId="ApPortalPage" columnSeqId="00001"/>
+
+    <PortalPagePortlet portalPageId="ApPortalPage" portalPortletId="ApPastDueInvoices" portletSeqId="00001" columnSeqId="00001" sequenceNum="0"/>
+    <PortalPagePortlet portalPageId="ApPortalPage" portalPortletId="ApInvoicesDueSoon" portletSeqId="00001" columnSeqId="00001" sequenceNum="1"/>
+
+    <PortalPortlet portalPortletId="ListSupplierInvoices" portletName="List Supplier Invoices"
+        screenName="ListSupplierInvoices"
+        screenLocation="component://accounting/widget/InvoiceScreens.xml"
+        description="List Invoices for a certain supplier who is just logged in"/>
+    <PortletPortletCategory portalPortletId="ListSupplierInvoices" portletCategoryId="ACCOUNTING"/>
+
+    <PortalPortlet portalPortletId="ListPayments" portletName="List Customer Payments"
+        screenName="ListPayments"
+        screenLocation="component://accounting/widget/PaymentScreens.xml"
+        description="List of Payments"
+        editFormName="EditPaymentAttributes" editFormLocation="component://accounting/widget/PaymentForms.xml"/>
+    <PortletPortletCategory portalPortletId="ListPayments" portletCategoryId="ACCOUNTING"/>
+</entity-engine-xml>

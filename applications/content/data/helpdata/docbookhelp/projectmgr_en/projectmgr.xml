@@ -1,0 +1,476 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+
+<book version="5.0" xmlns="http://docbook.org/ns/docbook"
+      xmlns:xlink="http://www.w3.org/1999/xlink"
+      xmlns:xi="http://www.w3.org/2001/XInclude"
+      xmlns:svg="http://www.w3.org/2000/svg"
+      xmlns:m="http://www.w3.org/1998/Math/MathML"
+      xmlns:html="http://www.w3.org/1999/xhtml"
+      xmlns:db="http://docbook.org/ns/docbook">
+  <info>
+    <title>Project Manager</title>
+
+    <author>
+      <personname><firstname/><surname/></personname>
+
+      <affiliation>
+        <orgname/>
+      </affiliation>
+    </author>
+
+    <pubdate/>
+  </info>
+
+  <chapter>
+    <title>Introduction</title>
+
+    <para>The project manager allows you to manage a project which in its
+    simplest form consists out of phases and tasks. A project consists out of
+    one or more phases of which each phase can have one or more tasks. A task
+    always has a single parentPhase. Time registration is only done on a task
+    level.</para>
+
+    <para>Estimated and actual dates are only maintained at the task level.
+    For reporting they are calculated to the higher levels. Project views are
+    created to support this.</para>
+
+    <section>
+      <title>Status management</title>
+
+      <para>Status is managed at task level, Project and Phase statuses shown
+      on screen are tasks status compilation. Task statuses are :</para>
+
+      <itemizedlist>
+        <listitem>
+          <para>PTS_CREATED, ...Created : after task creation</para>
+        </listitem>
+
+        <listitem>
+          <para>PTS_CREATED_UA, Unassigned : currently not used by an
+          automatic process</para>
+        </listitem>
+
+        <listitem>
+          <para>PTS_CREATED_AS, Assigned : after a resource is assigned</para>
+        </listitem>
+
+        <listitem>
+          <para>PTS_CREATED_IP, In Progress : after a time entry is created on
+          the task</para>
+        </listitem>
+
+        <listitem>
+          <para>PTS_COMPLETED, .Completed : Manually changed by button</para>
+        </listitem>
+
+        <listitem>
+          <para>PTS_ON_HOLD, ...On Hold :</para>
+        </listitem>
+
+        <listitem>
+          <para>PTS_CANCELLED, .Cancelled :</para>
+        </listitem>
+      </itemizedlist>
+
+      <para>Project or Phase is completed if all included tasks are completed
+      (or cancelled)</para>
+    </section>
+
+    <section>
+      <title>Resources</title>
+
+      <para>You can describe a customer (company and contact) and who provides
+      the task (named provider) in the resource portlet. To be able to
+      associate someone to a project he should have, two (or more) project
+      roleType, first PROJECT_TEAM to appear in Party drop-down, and at least
+      one of the PROJECT_TEAM sub-roles for the second drop-down. Look at
+      parameters section to have the complete project roletypes list. Go to
+      the party profile to associate a role type to a party.</para>
+    </section>
+
+    <section>
+      <title>Parameters</title>
+
+      <itemizedlist>
+        <listitem>
+          <para>RoleType with PROJECT_TEAM as parentTypeId, used in a lot of
+          screens; default proposed roleTypes are :</para>
+        </listitem>
+
+        <listitem>
+          <para>CLIENT% : used to select parties which appears in Projects
+          Parties info, client side</para>
+        </listitem>
+
+        <listitem>
+          <para>CLIENT_MANAGER : user login associated to a project with this
+          roleType view it in ListCustomerProjects</para>
+        </listitem>
+
+        <listitem>
+          <para>CLIENT_ANALYST : same as CLIENT_MANAGER for
+          ListCustomerProjects</para>
+        </listitem>
+
+        <listitem>
+          <para>CLIENT_BILLING : partyId which will be invoiced; same as
+          CLIENT_MANAGER for ListCustomerProjects; appears in Company part of
+          Project Parties info, other CLIENT% role appears in contact
+          part</para>
+        </listitem>
+
+        <listitem>
+          <para>PROVIDER% : all parties which provide the project. In Projects
+          Parties info, provider part, all roleType not equals to CLIENT% will
+          appear</para>
+        </listitem>
+
+        <listitem>
+          <para>PROVIDER_MANAGER : currently no process or specific
+          selection</para>
+        </listitem>
+
+        <listitem>
+          <para>PROVIDER_ACCOUNTING : currently no process or specific
+          selection</para>
+        </listitem>
+
+        <listitem>
+          <para>PROVIDER_ANALYST : currently no process or specific
+          selection</para>
+        </listitem>
+
+        <listitem>
+          <para>PROVIDER_FUNCTIONAL : currently no process or specific
+          selection</para>
+        </listitem>
+
+        <listitem>
+          <para>PROVIDER_VALIDATOR or PROVIDER_TESTER: used to define at
+          project level who will validate a task, used when assigning a party
+          to a task with status not equals to "PAS_COMPLETED", if the party
+          has not this role, all parties with this role at the project level
+          will be added to this task (this action is done by ECA, commented in
+          default configuration, if you want it un-comment it)</para>
+        </listitem>
+      </itemizedlist>
+    </section>
+  </chapter>
+
+  <chapter xml:id="projectmgr_main">
+    <title>Main</title>
+
+    <screenshot>
+      <mediaobject>
+        <imageobject>
+          <imagedata align="center"
+                     fileref="../projectmgr_en_images/main.jpg"
+                     scalefit="1" width="100%"/>
+        </imageobject>
+      </mediaobject>
+    </screenshot>
+
+    <para>This is the startup screen of the project manager. It will show all
+    active projects with some statistical data.</para>
+  </chapter>
+
+  <chapter xml:id="projectmgr_MyTasks">
+    <title>My Tasks</title>
+
+    <screenshot>
+      <mediaobject>
+        <imageobject>
+          <imagedata align="center"
+                     fileref="../projectmgr_en_images/MyTasks.jpg"
+                     scalefit="1" width="100%"/>
+        </imageobject>
+      </mediaobject>
+    </screenshot>
+
+    <para>This screen provides an overview of all tasks in the module</para>
+  </chapter>
+
+  <chapter xml:id="projectmgr_MyTimesheet">
+    <title>My Time</title>
+
+    <screenshot>
+      <mediaobject>
+        <imageobject>
+          <imagedata align="center"
+                     fileref="../projectmgr_en_images/MyTimesheet.jpg"
+                     scalefit="1" width="100%"/>
+        </imageobject>
+      </mediaobject>
+    </screenshot>
+
+    <para>Here the user enters the hours worked on tasks.</para>
+
+    <para>It also provides an overview of all timesheets the user has filled
+    out. It also shows the status of the timesheets.</para>
+  </chapter>
+
+  <chapter xml:id="projectmgr_FindProject">
+    <title>Projects</title>
+
+    <screenshot>
+      <mediaobject>
+        <imageobject>
+          <imagedata align="center"
+                     fileref="../projectmgr_en_images/FindProject.jpg"
+                     scalefit="1" width="100%"/>
+        </imageobject>
+      </mediaobject>
+    </screenshot>
+
+    <para>This is the startup screen of the project manager. It will show all
+    active projects with some statistical data.</para>
+
+    <sect1 xml:id="projectmgr_projectView">
+      <title>Project Summary</title>
+
+      <screenshot>
+        <mediaobject>
+          <imageobject>
+            <imagedata align="center"
+                       fileref="../projectmgr_en_images/projectView.jpg"
+                       scalefit="1" width="100%"/>
+          </imageobject>
+        </mediaobject>
+      </screenshot>
+
+      <para>This dashboard gives a one page overview of project details,
+      resources, phases and task. It is also the starting point to navigate to
+      the various sub screens related to a project.</para>
+
+      <para><emphasis role="bold">Sub Screens</emphasis></para>
+
+      <para>Following sub screens are provided:</para>
+
+      <itemizedlist>
+        <listitem>
+          <para>Gantt Chart</para>
+        </listitem>
+
+        <listitem>
+          <para>Mailing List</para>
+        </listitem>
+
+        <listitem>
+          <para>Phases</para>
+        </listitem>
+
+        <listitem>
+          <para>Tasks</para>
+        </listitem>
+
+        <listitem>
+          <para>Orders</para>
+        </listitem>
+
+        <listitem>
+          <para>Resources</para>
+        </listitem>
+
+        <listitem>
+          <para>Content</para>
+        </listitem>
+
+        <listitem>
+          <para>Notes</para>
+        </listitem>
+
+        <listitem>
+          <para>Sub Projects</para>
+        </listitem>
+
+        <listitem>
+          <para>Billing</para>
+        </listitem>
+      </itemizedlist>
+
+      <para><emphasis role="bold">Project Information</emphasis></para>
+
+      <para>This section provides detailed information about the project, e.g.
+      the type and scope, the description and planned and actual start and end
+      dates and planned and actual hours</para>
+
+      <para><emphasis role="bold">Resources</emphasis></para>
+
+      <para>This section provides detailed information about the participants
+      (organizations and persons) of the project. For the participating
+      persons this section provides information regarding the role in the
+      project and the hours registered and processed.</para>
+
+      <para><emphasis role="bold">Sub Projects</emphasis></para>
+
+      <para>This section provides detailed information about the project that
+      are registered as sub projects of the project.</para>
+
+      <para><emphasis role="bold">Phases</emphasis></para>
+
+      <para>This section provides an overview of the phases of the project,
+      incl. status, priority, start and end date and the hours planned and
+      registered.</para>
+
+      <para><emphasis role="bold">Tasks</emphasis></para>
+
+      <para>This section provides provides an overview of the tasks of the
+      project, incl. status, priority, start and end date, the first assigned
+      resource and hours planned and registered.</para>
+
+      <para><emphasis role="bold">Notes</emphasis></para>
+
+      <para>This section provides detailed information about notes registered
+      with the project.</para>
+
+      <para><emphasis role="bold">Content</emphasis></para>
+
+      <para>This section provides an overview of content (documents and other
+      files)registered with the project.</para>
+
+      <para><emphasis role="bold">Orders</emphasis></para>
+
+      <para>This section provides an overview of orders linked to the
+      project.</para>
+    </sect1>
+
+    <sect1 xml:id="projectmgr_EditProject">
+      <title>Edit Project</title>
+
+      <screenshot>
+        <mediaobject>
+          <imageobject>
+            <imagedata align="center"
+                       fileref="../projectmgr_en_images/EditProject.jpg"
+                       scalefit="1" width="100%"/>
+          </imageobject>
+        </mediaobject>
+      </screenshot>
+
+      <para>The Project Manager can edit various details regarding the
+      project.</para>
+    </sect1>
+  </chapter>
+
+  <chapter xml:id="projectmgr_FindTask">
+    <title>Tasks</title>
+
+    <screenshot>
+      <mediaobject>
+        <imageobject>
+          <imagedata align="center"
+                     fileref="../projectmgr_en_images/FindTask.jpg"
+                     format="jpg" scalefit="1" width="100%"/>
+        </imageobject>
+      </mediaobject>
+    </screenshot>
+
+    <para>This overview outlines all tasks the user has been assigned
+    to.</para>
+  </chapter>
+
+  <chapter xml:id="projectmgr_FindResource">
+    <title>Resources</title>
+
+    <screenshot>
+      <mediaobject>
+        <imageobject>
+          <imagedata align="center"
+                     fileref="../projectmgr_en_images/FindResource.jpg"
+                     scalefit="1" width="100%"/>
+        </imageobject>
+      </mediaobject>
+    </screenshot>
+
+    <para>The project manager allows you to manage a project which in its
+    simplest form consists out of phases and tasks.</para>
+
+    <para>A project consists out of one or more phases of which each phase can
+    have one or more tasks. A task always has a single parentPhase. Time
+    registration is only done on a task level.</para>
+
+    <para>Estimated and actual dates are only maintained at the task level.
+    For reporting they are calculated to the higher levels. Project views are
+    created to support this.</para>
+  </chapter>
+
+  <chapter xml:id="projectmgr_FindTimeSheet">
+    <title>Timesheet</title>
+
+    <screenshot>
+      <mediaobject>
+        <imageobject>
+          <imagedata align="center"
+                     fileref="../projectmgr_en_images/MyTimesheet.jpg"
+                     scalefit="1" width="100%"/>
+        </imageobject>
+      </mediaobject>
+    </screenshot>
+
+    <para>Here the user enters the hours worked on tasks.</para>
+
+    <para>It also provides an overview of all timesheets the user has filled
+    out. It also shows the status of the timesheets.</para>
+  </chapter>
+
+  <chapter xml:id="projectmgr_EditSkillTypes">
+    <title>Skill Type</title>
+
+    <screenshot>
+      <mediaobject>
+        <imageobject>
+          <imagedata align="center"
+                     fileref="../projectmgr_en_images/EditSkillTypes.jpg"
+                     scalefit="1" width="100%"/>
+        </imageobject>
+      </mediaobject>
+    </screenshot>
+
+    <para>The project manager allows you to manage a project which in its
+    simplest form consists out of phases and tasks.</para>
+
+    <para>A project consists out of one or more phases of which each phase can
+    have one or more tasks. A task always has a single parentPhase. Time
+    registration is only done on a task level.</para>
+
+    <para>Estimated and actual dates are only maintained at the task level.
+    For reporting they are calculated to the higher levels. Project views are
+    created to support this.</para>
+  </chapter>
+
+  <chapter xml:id="projectmgr_RequestList">
+    <title>Request List</title>
+
+    <screenshot>
+      <mediaobject>
+        <imageobject>
+          <imagedata align="center"
+                     fileref="../projectmgr_en_images/RequestList.jpg"
+                     scalefit="1" width="100%"/>
+        </imageobject>
+      </mediaobject>
+    </screenshot>
+
+    <para>This screen provides an overview of all customer request regarding
+    projects.</para>
+  </chapter>
+</book>

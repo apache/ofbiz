@@ -1,0 +1,689 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<screens xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/widget-screen.xsd">
+
+    <screen name="CommonGlSetupDecorator">
+        <section>
+            <actions>
+                <set field="tabButtonItemTop" value="Admin"/>
+                <entity-one entity-name="PartyNameView" value-field="currentOrganization" auto-field-map="false">
+                    <field-map field-name="partyId" from-field="organizationPartyId"/>
+                </entity-one>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonPartyDecorator" location="${parameters.partyDecoratorLocation}">
+                    <decorator-section name="body">
+                        <include-menu name="PartyAdminTabBar" location="component://accounting/widget/AccountingMenus.xml"/>
+                        <section>
+                            <condition>
+                                <if-compare field="tabButtonItem" operator="equals" value="GlAccountAssignment"/>
+                            </condition>
+                            <widgets>
+                                <include-menu name="PartyAdminAssignTabBar" location="component://accounting/widget/AccountingMenus.xml"/>
+                            </widgets>
+                        </section>
+                        <label style="h1">${labelTitleProperty} ${uiLabelMap.CommonFor}: ${currentOrganization.groupName} [${organizationPartyId}]</label>
+                        <decorator-section-include name="body"/>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="ListCompanies">
+        <section>
+            <actions>
+                <set field="titleProperty" value="AccountingAvailableInternalOrganizations"/>
+                <set field="headerItem" value="companies"/>
+                <set field="labelTitleProperty" value="${uiLabelMap.AccountingAvailableInternalOrganizations}"/>
+                <entity-condition entity-name="PartyAcctgPreference" list="parties"/>
+                <service service-name="acctgPrefPermissionCheck" result-map="permResult">
+                    <field-map field-name="mainAction" value="UPDATE"/>
+                </service>
+                <set field="hasPrefPermission" from-field="permResult.hasPermission"/>
+                <service service-name="basicGeneralLedgerPermissionCheck" result-map="permResult">
+                    <field-map field-name="mainAction" value="VIEW"/>
+                </service>
+                <set field="hasBasicPermission" from-field="permResult.hasPermission"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <screenlet title="${uiLabelMap.AccountingAvailableInternalOrganizations}" navigation-menu-name="newAccountOrganization">
+                            <include-menu location="component://accounting/widget/AccountingMenus.xml" name="newAccountOrganization"/>
+                            <include-form name="ListCompanies" location="component://accounting/widget/GlSetupForms.xml"/>
+                        </screenlet>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="AddCompany">
+        <section>
+            <actions>
+                <set field="titleProperty" value="AccountingNewCompany"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <screenlet title="${uiLabelMap.AccountingNewCompany}">
+                            <include-form name="AddCompany" location="component://accounting/widget/GlSetupForms.xml"/>
+                        </screenlet>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="ImportExport">
+        <section>
+            <actions>
+                <set field="titleProperty" value="CommonImportExport"/>
+                <entity-one entity-name="PartyGroup" value-field="partyGroup">
+                    <field-map field-name="partyId" from-field="parameters.organizationPartyId"/>
+                </entity-one>
+            </actions>
+            <widgets>
+                <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <screenlet title="${uiLabelMap.AccountingInvoice} ${uiLabelMap.CommonImportExport}  ${uiLabelMap.CommonFor}: ${partyGroup.groupName} [${parameters.organizationPartyId}]">
+                            <container style="lefthalf">
+                                <label style="h2">${uiLabelMap.CommonImport}</label>
+                                <include-form name="ImportInvoice" location="component://accounting/widget/GlSetupForms.xml"/>
+                            </container>
+                            <container style="righthalf">
+                                <label style="h2">${uiLabelMap.CommonExport}</label>
+                                <include-form name="ExportInvoice" location="component://accounting/widget/GlSetupForms.xml"/>
+                            </container>
+                         </screenlet>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="ExportInvoiceCsv">
+        <section>
+            <actions>
+                <property-map resource="CommonUiLabels" map-name="uiLabelMap" global="true"/>
+                <property-map resource="AccountingUiLabels" map-name="uiLabelMap" global="true"/>
+                <set field="organizationPartyId" from-field="parameters.organizationPartyId"/>
+            </actions>
+            <widgets>
+                    <include-form name="ExportInvoiceCsv" location="component://accounting/widget/GlSetupForms.xml"/>           
+            </widgets>
+        </section>
+    </screen>
+    <screen name="ListGlAccountOrganization">
+        <section>
+            <actions>
+                <property-map resource="AccountingUiLabels" map-name="uiLabelMap" global="true"/>
+                <set field="titleProperty" value="AccountingChartOfAcctsMenu"/>
+                <set field="tabButtonItem" value="ListGlAccountOrganization"/>
+                <set field="labelTitleProperty" value="${uiLabelMap.AccountingChartOfAcctsMenu}"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonGlSetupDecorator" location="${parameters.commonGlSetupDecoratorLocation}">
+                    <decorator-section name="body">
+                        <screenlet id="GlAccountOrganizationPanel" title="${uiLabelMap.AccountingChartOfAcctsMenu}" collapsible="true">
+                            <include-form name="AssignGlAccount" location="component://accounting/widget/GlSetupForms.xml"/>
+                        </screenlet>
+                        <link text="${uiLabelMap.AccountingExportAsCsv}" style="button" target="ListGlAccountOrgCsv.csv">
+                            <parameter param-name="organizationPartyId"/>
+                        </link>
+                        <link text="${uiLabelMap.AccountingExportAsPdf}" style="button" target="ListGlAccountOrgPdf.pdf" target-window="_BLANK">
+                            <parameter param-name="organizationPartyId"/>
+                        </link>
+                        <include-form name="ListGlAccountOrganization" location="component://accounting/widget/GlSetupForms.xml"/>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="TimePeriods">
+        <section>
+            <actions>
+                <property-map resource="AccountingUiLabels" map-name="uiLabelMap" global="true"/>
+                <set field="titleProperty" value="AccountingTimePeriod"/>
+                <set field="labelTitleProperty" value="${uiLabelMap.AccountingTimePeriod}"/>
+                <set field="tabButtonItem" value="TimePeriods"/>
+                <set field="organizationPartyId" from-field="parameters.organizationPartyId"/>
+                <entity-condition entity-name="CustomTimePeriod" list="openTimePeriods">
+                    <condition-list>
+                        <condition-expr field-name="organizationPartyId" operator="equals" from-field="organizationPartyId"/>
+                        <condition-expr field-name="isClosed" operator="equals" value="N"/>
+                    </condition-list>
+                    <order-by field-name="thruDate"/>
+                </entity-condition>
+                <entity-condition entity-name="CustomTimePeriod" list="closedTimePeriods">
+                    <condition-list>
+                        <condition-expr field-name="organizationPartyId" operator="equals" from-field="organizationPartyId"/>
+                        <condition-expr field-name="isClosed" operator="equals" value="Y"/>
+                    </condition-list>
+                    <order-by field-name="periodTypeId"/>
+                    <order-by field-name="periodNum"/>
+                    <order-by field-name="thruDate"/>
+                </entity-condition>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonGlSetupDecorator" location="${parameters.commonGlSetupDecoratorLocation}">
+                    <decorator-section name="body">
+                        <screenlet title="${uiLabelMap.AccountingOpenTimePeriods}">
+                            <include-form name="ListOpenTimePeriods" location="component://accounting/widget/GlSetupForms.xml"/>
+                        </screenlet>
+                        <screenlet title="${uiLabelMap.AccountingClosedTimePeriods}">
+                            <include-form name="ListClosedTimePeriods" location="component://accounting/widget/GlSetupForms.xml"/>
+                        </screenlet>
+                        <screenlet title="${uiLabelMap.CommonNew}">
+                            <include-form name="CreateTimePeriod" location="component://accounting/widget/GlSetupForms.xml"/>
+                        </screenlet>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="PartyAcctgPreference">
+        <section>
+            <actions>
+                <property-map resource="AccountingUiLabels" map-name="uiLabelMap" global="true"/>
+                <set field="titleProperty" value="AccountingPreference"/>
+                <set field="labelTitleProperty" value="${uiLabelMap.AccountingPreference}"/>
+                <set field="tabButtonItem" value="PartyAcctgPreference"/>
+                <set field="organizationPartyId" from-field="parameters.organizationPartyId"/>
+                <property-to-field field="defaultCurrencyUomId" resource="general" property="currency.uom.id.default" default="USD"/>
+                <set field="partyId" from-field="parameters.organizationPartyId"/>
+                <entity-one entity-name="PartyAcctgPreference" value-field="partyAcctgPreference"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonGlSetupDecorator" location="${parameters.commonGlSetupDecoratorLocation}">
+                    <decorator-section name="body">
+                        <screenlet title="${uiLabelMap.AccountingPreference}">
+                            <include-form name="PartyAcctgPreference" location="component://accounting/widget/GlSetupForms.xml"/>
+                        </screenlet>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="SetupGlJournals">
+        <section>
+            <actions>
+                <property-map resource="AccountingUiLabels" map-name="uiLabelMap" global="true"/>
+                <set field="titleProperty" value="AccountingGlJournals"/>
+                <set field="labelTitleProperty" value="${uiLabelMap.AccountingGlJournals}"/>
+                <set field="tabButtonItem" value="SetupGlJournals"/>
+                <set field="organizationPartyId" from-field="parameters.organizationPartyId"/>
+                <entity-one entity-name="GlJournal" value-field="glJournal"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonGlSetupDecorator" location="${parameters.commonGlSetupDecoratorLocation}">
+                    <decorator-section name="body">
+                        <screenlet id="GlJournalPanel" title="${uiLabelMap.AccountingGlJournals}" collapsible="true">
+                            <include-form name="EditGlJournal" location="component://accounting/widget/GlSetupForms.xml"/>
+                        </screenlet>
+                        <include-form name="ListGlJournals" location="component://accounting/widget/GlSetupForms.xml"/>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="GlAccountTypeDefaults">
+        <section>
+            <actions>
+                <property-map resource="AccountingUiLabels" map-name="uiLabelMap" global="true"/>
+                <set field="titleProperty" value="AccountingGlAccountTypeDefaults"/>
+                <set field="labelTitleProperty" value="${uiLabelMap.AccountingGlAccountTypeDefaults}"/>
+                <set field="tabButtonItem" value="GlAccountAssignment"/>
+                <set field="tabButtonItem2" value="GlAccountTypeDefaults"/>
+                <set field="organizationPartyId" from-field="parameters.organizationPartyId"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonGlSetupDecorator" location="${parameters.commonGlSetupDecoratorLocation}">
+                    <decorator-section name="body">
+                        <screenlet id="GlAccountTypeDefaultPanel" title="${uiLabelMap.CommonAdd}" collapsible="true">
+                            <include-form name="EditGlAccountTypeDefault" location="component://accounting/widget/GlSetupForms.xml"/>
+                        </screenlet>
+                        <include-form name="ListGlAccountTypeDefaults" location="component://accounting/widget/GlSetupForms.xml"/>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="GlAccountSalInvoice">
+        <section>
+            <actions>
+                <property-map resource="AccountingUiLabels" map-name="uiLabelMap" global="true"/>
+                <set field="titleProperty" value="AccountingInvoiceSales"/>
+                <set field="labelTitleProperty" value="${uiLabelMap.AccountingInvoiceSales}"/>
+                <set field="tabButtonItem" value="GlAccountAssignment"/>
+                <set field="tabButtonItem2" value="GlAccountSalInvoice"/>
+                <set field="organizationPartyId" from-field="parameters.organizationPartyId"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonGlSetupDecorator" location="${parameters.commonGlSetupDecoratorLocation}">
+                    <decorator-section name="body">
+                        <screenlet id="SalInvoiceItemTypeGlAsigmtPanel" title="${uiLabelMap.AccountingAssignSalesInvoiceToRevenue}" collapsible="true">
+                            <include-form name="AddSalInvoiceItemTypeGlAssignment" location="component://accounting/widget/GlSetupForms.xml"/>
+                        </screenlet>
+                        <include-form name="ListSalInvoiceItemTypeGlAssignments" location="component://accounting/widget/GlSetupForms.xml"/>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="GlAccountPurInvoice">
+        <section>
+            <actions>
+                <property-map resource="AccountingUiLabels" map-name="uiLabelMap" global="true"/>
+                <set field="titleProperty" value="AccountingInvoicePurchase"/>
+                <set field="tabButtonItem" value="GlAccountAssignment"/>
+                <set field="tabButtonItem2" value="GlAccountPurInvoice"/>
+                <set field="organizationPartyId" from-field="parameters.organizationPartyId"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonGlSetupDecorator" location="${parameters.commonGlSetupDecoratorLocation}">
+                    <decorator-section name="body">
+                        <screenlet id="PurInvoiceItemTypeGlAsigmtPanel" title="${uiLabelMap.AccountingAssignPurchaseInvoiceToRevenue}" collapsible="true">
+                            <include-form name="AddPurInvoiceItemTypeGlAssignment" location="component://accounting/widget/GlSetupForms.xml"/>
+                        </screenlet>
+                        <include-form name="ListPurInvoiceItemTypeGlAssignments" location="component://accounting/widget/GlSetupForms.xml"/>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="GlAccountTypePaymentType">
+        <section>
+            <actions>
+                <property-map resource="AccountingUiLabels" map-name="uiLabelMap" global="true"/>
+                <set field="titleProperty" value="${uiLabelMap.AccountingPaymentType}/${uiLabelMap.FormFieldTitle_glAccountTypeId}"/>
+                <set field="tabButtonItem" value="GlAccountAssignment"/>
+                <set field="tabButtonItem2" value="GlAccountTypePaymentType"/>
+                <set field="organizationPartyId" from-field="parameters.organizationPartyId"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonGlSetupDecorator" location="${parameters.commonGlSetupDecoratorLocation}">
+                    <decorator-section name="body">
+                        <screenlet id="PaymentTypeGlAsigmtPanel" title="${uiLabelMap.AccountingPaymentTypeAssignAccountType}" collapsible="true">
+                            <include-form name="AddPaymentTypeGlAssignment" location="component://accounting/widget/GlSetupForms.xml"/>
+                        </screenlet>
+                        <include-form name="ListPaymentTypeGlAssignments" location="component://accounting/widget/GlSetupForms.xml"/>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="GlAccountNrPaymentMethod">
+        <section>
+            <actions>
+                <property-map resource="AccountingUiLabels" map-name="uiLabelMap" global="true"/>
+                <set field="titleProperty" value="${uiLabelMap.AccountingPaymentMethodId}/${uiLabelMap.AccountingGlAccountId}"/>
+                <set field="tabButtonItem" value="GlAccountAssignment"/>
+                <set field="tabButtonItem2" value="GlAccountNrPaymentMethod"/>
+                <set field="organizationPartyId" from-field="parameters.organizationPartyId"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonGlSetupDecorator" location="${parameters.commonGlSetupDecoratorLocation}">
+                    <decorator-section name="body">
+                        <screenlet id="PaymentMethodTypeGlAsigmtPanel" title="${uiLabelMap.AccountingPaymentMethodAssignAccountType}" collapsible="true">
+                            <include-form name="AddPaymentMethodTypeGlAssignment" location="component://accounting/widget/GlSetupForms.xml"/>
+                        </screenlet>
+                        <include-form name="ListPaymentMethodTypeGlAssignments" location="component://accounting/widget/GlSetupForms.xml"/>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="EditProductGlAccounts">
+        <section>
+            <actions>
+                <property-map resource="AccountingUiLabels" map-name="uiLabelMap" global="true"/>
+                <set field="titleProperty" value="AccountingProductGlAccount"/>
+                <set field="labelTitleProperty" value="${uiLabelMap.AccountingProductGlAccount}"/>
+                <set field="tabButtonItem" value="GlAccountAssignment"/>
+                <set field="tabButtonItem2" value="ProductGlAccounts"/>
+                <set field="organizationPartyId" from-field="parameters.organizationPartyId"/>
+
+                <entity-condition entity-name="ProductGlAccount" list="productGlAccounts">
+                    <condition-expr field-name="organizationPartyId" from-field="organizationPartyId"/>
+                    <order-by field-name="glAccountTypeId"/>
+                </entity-condition>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonGlSetupDecorator" location="${parameters.commonGlSetupDecoratorLocation}">
+                    <decorator-section name="body">
+                        <screenlet id="ProductGlAccountPanel" title="${uiLabelMap.ProductAddGlAccount}" collapsible="true">
+                            <include-form name="AddProductGlAccount" location="component://accounting/widget/GlSetupForms.xml"/>
+                        </screenlet>
+                        <include-form name="ListProductGlAccounts" location="component://accounting/widget/GlSetupForms.xml"/>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="EditFinAccountTypeGlAccounts">
+        <section>
+            <actions>
+                <property-map resource="AccountingUiLabels" map-name="uiLabelMap" global="true"/>
+                <set field="titleProperty" value="AccountingFinAccountTypeGlAccount"/>
+                <set field="labelTitleProperty" value="${uiLabelMap.AccountingFinAccountTypeGlAccount}"/>
+                <set field="tabButtonItem" value="GlAccountAssignment"/>
+                <set field="tabButtonItem2" value="FinAccountTypeGlAccounts"/>
+                <set field="organizationPartyId" from-field="parameters.organizationPartyId"/>
+
+                 <entity-condition entity-name="FinAccountTypeGlAccount" list="finAccountTypeGlAccounts">
+                    <condition-expr field-name="organizationPartyId" operator="equals" from-field="organizationPartyId"/>
+                    <order-by field-name="finAccountTypeId"/>
+                </entity-condition>
+                <entity-condition entity-name="FinAccountType" list="finAccountTypes" use-cache="true">
+                    <order-by field-name="finAccountTypeId"/>
+                </entity-condition>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonGlSetupDecorator" location="${parameters.commonGlSetupDecoratorLocation}">
+                    <decorator-section name="body">
+                        <screenlet id="FinAccountTypeGlAccountPanel" title="${uiLabelMap.AccountingAddFinAccountTypeGlAccount}" collapsible="true">
+                            <include-form name="AddFinAccountTypeGlAccount" location="component://accounting/widget/GlSetupForms.xml"/>
+                        </screenlet>
+                        <include-form name="ListFinAccountTypeGlAccounts" location="component://accounting/widget/GlSetupForms.xml"/>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="EditProductCategoryGlAccounts">
+        <section>
+            <actions>
+                <property-map resource="AccountingUiLabels" map-name="uiLabelMap" global="true"/>
+                <property-map resource="ProductUiLabels" map-name="uiLabelMap" global="true"/>
+                <set field="titleProperty" value="AccountingProductCategoryGlAccount"/>
+                <set field="labelTitleProperty" value="${uiLabelMap.AccountingProductCategoryGlAccount}"/>
+                <set field="tabButtonItem" value="GlAccountAssignment"/>
+                <set field="tabButtonItem2" value="ProductCategoryGlAccounts"/>
+                <set field="organizationPartyId" from-field="parameters.organizationPartyId"/>
+
+                <entity-condition entity-name="ProductCategoryGlAccount" list="productCategoryGlAccounts">
+                    <condition-expr field-name="organizationPartyId" from-field="organizationPartyId"/>
+                    <order-by field-name="glAccountTypeId"/>
+                </entity-condition>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonGlSetupDecorator" location="${parameters.commonGlSetupDecoratorLocation}">
+                    <decorator-section name="body">
+                        <screenlet id="ProductCategoryGlAccountPanel" title="${uiLabelMap.ProductAddCategoryGlAccount}" collapsible="true">
+                            <include-form name="AddProductCategoryGlAccount" location="component://accounting/widget/GlSetupForms.xml"/>
+                        </screenlet>
+                        <include-form name="ListProductCategoryGlAccounts" location="component://accounting/widget/GlSetupForms.xml"/>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="EditVarianceReasonGlAccounts">
+        <section>
+            <actions>
+                <property-map resource="AccountingUiLabels" map-name="uiLabelMap" global="true"/>
+                <set field="titleProperty" value="AccountingVarianceReasonGlAccounts"/>
+                <set field="tabButtonItem" value="GlAccountAssignment"/>
+                <set field="tabButtonItem2" value="VarianceReasonGlAccounts"/>
+                <set field="labelTitleProperty" value="${uiLabelMap.AccountingVarianceReasonGlAccounts}"/>
+                <set field="organizationPartyId" from-field="parameters.organizationPartyId"/>
+
+                <entity-condition entity-name="VarianceReasonGlAccount" list="varianceReasonGlAccounts">
+                    <condition-expr field-name="organizationPartyId" from-field="organizationPartyId"/>
+                    <order-by field-name="glAccountId"/>
+                </entity-condition>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonGlSetupDecorator" location="${parameters.commonGlSetupDecoratorLocation}">
+                    <decorator-section name="body">
+                        <screenlet id="VarianceReasonGlAccountPanel" title="${uiLabelMap.AccountingVarianceReasonGlAccounts}" collapsible="true">
+                            <include-form name="AddVarianceReasonGlAccount" location="component://accounting/widget/GlSetupForms.xml"/>
+                        </screenlet>
+                        <include-form name="ListVarianceReasonGlAccounts" location="component://accounting/widget/GlSetupForms.xml"/>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="EditCreditCardTypeGlAccounts">
+        <section>
+            <actions>
+                <property-map resource="AccountingUiLabels" map-name="uiLabelMap" global="true"/>
+                <set field="titleProperty" value="AccountingCreditCardTypeGlAccount"/>
+                <set field="tabButtonItem" value="GlAccountAssignment"/>
+                <set field="tabButtonItem2" value="CreditCardTypeGlAccount"/>
+                <set field="labelTitleProperty" value="${uiLabelMap.AccountingCreditCardTypeGlAccount}"/>
+                <set field="organizationPartyId" from-field="parameters.organizationPartyId"/>
+                <entity-condition entity-name="CreditCardTypeGlAccount" list="creditCardTypeGlAccounts">
+                    <condition-expr field-name="organizationPartyId" from-field="organizationPartyId"/>
+                </entity-condition>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonGlSetupDecorator" location="${parameters.commonGlSetupDecoratorLocation}">
+                    <decorator-section name="body">
+                        <screenlet id="CreditCardTypeGlAccountPanel" title="${uiLabelMap.AccountingCreditCardTypeGlAccount}" collapsible="true">
+                            <include-form name="AddCreditCardTypeGlAccount" location="component://accounting/widget/GlSetupForms.xml"/>
+                        </screenlet>
+                        <include-form name="ListCreditCardTypeGlAccounts" location="component://accounting/widget/GlSetupForms.xml"/>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="EditOrganizationTaxAuthorityGlAccounts">
+        <section>
+            <actions>
+                <property-map resource="AccountingUiLabels" map-name="uiLabelMap" global="true"/>
+                <set field="titleProperty" value="PageTitleEditTaxAuthorityGlAccounts"/>
+                <set field="tabButtonItem" value="GlAccountAssignment"/>
+                <set field="tabButtonItem2" value="TaxAuthorityGlAccounts"/>
+                <set field="labelTitleProperty" value="${uiLabelMap.PageTitleEditTaxAuthorityGlAccounts}"/>
+                <set field="organizationPartyId" from-field="parameters.organizationPartyId"/>
+                <entity-condition entity-name="TaxAuthorityGlAccount" list="taxAuthorityGlAccounts">
+                    <condition-expr field-name="organizationPartyId" from-field="organizationPartyId"/>
+                    <order-by field-name="taxAuthGeoId"/>
+                    <order-by field-name="taxAuthPartyId"/>
+                </entity-condition>
+                <script location="component://accounting/webapp/accounting/WEB-INF/actions/chartofaccounts/TaxAuthorityGlAccounts.groovy"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonGlSetupDecorator" location="${parameters.commonGlSetupDecoratorLocation}">
+                    <decorator-section name="body">
+                        <screenlet id="OrgTaxAuthorityGlAccountPanel" title="${uiLabelMap.AccountingAddTaxAuthorityGlAccount}" collapsible="true">
+                            <include-form name="AddTaxAuthorityGlAccount" location="component://accounting/widget/GlSetupForms.xml"/>
+                        </screenlet>
+                        <include-form name="ListTaxAuthorityGlAccounts" location="component://accounting/widget/GlSetupForms.xml"/>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="EditPartyGlAccount">
+        <section>
+            <actions>
+                <property-map resource="AccountingUiLabels" map-name="uiLabelMap" global="true"/>
+                <set field="titleProperty" value="PageTitleEditPartyGlAccounts"/>
+                <set field="labelTitleProperty" value="${uiLabelMap.PageTitleEditPartyGlAccounts}"/>
+                <set field="tabButtonItem" value="GlAccountAssignment"/>
+                <set field="tabButtonItem2" value="PartyGlAccounts"/>
+                <set field="organizationPartyId" from-field="parameters.organizationPartyId"/>
+                <entity-condition entity-name="PartyGlAccount" list="partyGlAccounts">
+                    <condition-expr field-name="organizationPartyId" from-field="organizationPartyId"/>
+                    <order-by field-name="partyId"/>
+                </entity-condition>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonGlSetupDecorator" location="${parameters.commonGlSetupDecoratorLocation}">
+                    <decorator-section name="body">
+                        <screenlet id="PartyGlAccountPanel" title="${uiLabelMap.AccountingAddPartyGlAccount}" collapsible="true">
+                            <include-form name="AddPartyGlAccount" location="component://accounting/widget/GlSetupForms.xml"/>
+                        </screenlet>
+                        <include-form name="ListPartyGlAccounts" location="component://accounting/widget/GlSetupForms.xml"/>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="FixedAssetTypeGlAccounts">
+        <section>
+            <actions>
+                <property-map resource="AccountingUiLabels" map-name="uiLabelMap" global="true"/>
+                <set field="titleProperty" value="FixedAssetTypeGlAccounts"/>
+                <set field="labelTitleProperty" value="${uiLabelMap.FixedAssetTypeGlAccounts}"/>
+                <set field="tabButtonItem" value="GlAccountAssignment"/>
+                <set field="tabButtonItem2" value="FixedAssetTypeGlAccounts"/>
+                <set field="organizationPartyId" from-field="parameters.organizationPartyId"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonGlSetupDecorator" location="${parameters.commonGlSetupDecoratorLocation}">
+                    <decorator-section name="body">
+                        <screenlet id="FixedAssetTypeGlAccountPanel" title="${uiLabelMap.CommonAdd}" collapsible="true">
+                            <include-form name="AddFixedAssetTypeGlAccount" location="component://accounting/widget/GlSetupForms.xml"/>
+                        </screenlet>
+                        <include-form name="FixedAssetTypeGlAccounts" location="component://accounting/widget/GlSetupForms.xml"/>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="ListGlAccountOrgPdf">
+        <section>
+            <actions>
+                <property-map resource="CommonUiLabels" map-name="uiLabelMap" global="true"/>
+                <property-map resource="AccountingUiLabels" map-name="uiLabelMap" global="true"/>
+                <set field="organizationPartyId" from-field="parameters.organizationPartyId"/>
+                <entity-condition entity-name="GlAccountOrganizationAndClass" list="glAccountOrgAndClassList">
+                    <condition-expr field-name="organizationPartyId" from-field="organizationPartyId"/>
+                    <order-by field-name="glAccountId"/>
+                </entity-condition>
+            </actions>
+            <widgets>
+                <platform-specific>
+                    <xsl-fo>
+                        <html-template location="component://accounting/webapp/accounting/reports/ChartOfAccount.fo.ftl"/>
+                    </xsl-fo>
+                </platform-specific>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="ListGlAccountOrgCsv">
+        <section>
+            <actions>
+                <property-map resource="CommonUiLabels" map-name="uiLabelMap" global="true"/>
+                <property-map resource="AccountingUiLabels" map-name="uiLabelMap" global="true"/>
+                <set field="organizationPartyId" from-field="parameters.organizationPartyId"/>
+            </actions>
+            <widgets>
+                    <include-form name="ListGlAccountOrgCsv" location="component://accounting/widget/GlSetupForms.xml"/>           
+            </widgets>
+        </section>
+    </screen>
+    <screen name="FindGlAccountCategory">
+        <section>
+            <actions>
+                <set field="titleProperty" value="FormFieldTitle_findGlAccountCategory"/>
+                <set field="tabButtonItem" value="FindGlAccountCategory"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="GlobalGLSettingsDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <section>
+                            <condition>
+                                <if-service-permission service-name="acctgBasePermissionCheck" main-action="VIEW"/>
+                            </condition>
+                            <widgets>
+                                <decorator-screen name="FindScreenDecorator" location="component://common/widget/CommonScreens.xml">
+                                    <decorator-section name="menu-bar">
+                                        <container style="button-bar">
+                                            <link target="EditGlAccountCategory" text="${uiLabelMap.FormFieldTitle_newGlAccountCategory}" style="buttontext"/>
+                                        </container>
+                                    </decorator-section>
+                                    <decorator-section name="search-options">
+                                        <include-form name="FindGlAccountCategory" location="component://accounting/widget/GlSetupForms.xml"/>
+                                    </decorator-section>
+                                     <decorator-section name="search-results">
+                                        <include-form name="ListGlAccountCategory" location="component://accounting/widget/GlSetupForms.xml"/>
+                                    </decorator-section>
+                                </decorator-screen>
+                            </widgets>
+                             <fail-widgets>
+                                <label style="h3">${uiLabelMap.AccountingViewPermissionError}</label>
+                            </fail-widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="EditGlAccountCategory">
+        <section>
+            <actions>
+                <set field="titleProperty" value="FormFieldTitle_glAccountCategory"/>
+                <set field="tabButtonItem" value="FindGlAccountCategory"/>
+                <set field="tabButtonItem2" value="EditGlAccountCategory"/>
+                <set field="glAccountCategoryId" from-field="parameters.glAccountCategoryId"/>
+                <set field="glAccountCategoryTypeId" from-field="parameters.glAccountCategoryTypeId"/>
+                <entity-one entity-name="GlAccountCategory" value-field="glAccountCategory" auto-field-map="true"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="GlobalGLSettingsDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <section>
+                            <condition>
+                                <not><if-empty field="glAccountCategory"/></not>
+                            </condition>
+                            <widgets>
+                                <container style="h1"><label>${uiLabelMap.FormFieldTitle_editGlAccountCategory}</label></container>
+                                <include-menu name="GlAccountCategoryTabBar" location="component://accounting/widget/AccountingMenus.xml"/>
+                            </widgets>
+                            <fail-widgets>
+                                <container style="h1"><label>${uiLabelMap.FormFieldTitle_newGlAccountCategory}</label></container>
+                            </fail-widgets>
+                        </section>
+                        <include-form name="EditGlAccountCategory" location="component://accounting/widget/GlSetupForms.xml"/>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="EditGlAccountCategoryMember">
+        <section>
+            <actions>
+                <set field="titleProperty" value="FormFieldTitle_editGlAccountCategoryMember"/>
+                <set field="tabButtonItem" value="FindGlAccountCategory"/>
+                <set field="tabButtonItem2" value="EditGlAccountCategoryMember"/>
+                <set field="glAccountCategoryId" from-field="parameters.glAccountCategoryId"/>
+            </actions>
+            <widgets>
+               <decorator-screen name="GlobalGLSettingsDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <screenlet>
+                            <container style="h1"><label>${uiLabelMap.FormFieldTitle_editGlAccountCategoryMember}</label></container>
+                            <include-menu name="GlAccountCategoryTabBar" location="component://accounting/widget/AccountingMenus.xml"/>
+                            <include-form  name="ListGlAccountCategoryMember" location="component://accounting/widget/GlSetupForms.xml"/>
+                            <include-form name="AddGlAccountCategoryMember" location="component://accounting/widget/GlSetupForms.xml"/>
+                        </screenlet>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+</screens>

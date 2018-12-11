@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<entity-engine-xml>
+    <Geo abbreviation="ACT" geoCode="ACT" geoId="AU-ACT" geoName="Australian Capital Territory" geoTypeId="TERRITORY"/>
+    <Geo abbreviation="NSW" geoCode="NSW" geoId="AU-NSW" geoName="New South Wales" geoTypeId="STATE"/>
+    <Geo abbreviation="NT" geoCode="NT" geoId="AU-NT" geoName="Northern Territory" geoTypeId="TERRITORY"/>
+    <Geo abbreviation="QLD" geoCode="QLD" geoId="AU-QLD" geoName="Queensland" geoTypeId="STATE"/>
+    <Geo abbreviation="SA" geoCode="SA" geoId="AU-SA" geoName="South Australia" geoTypeId="STATE"/>
+    <Geo abbreviation="TAS" geoCode="TAS" geoId="AU-TAS" geoName="Tasmania" geoTypeId="STATE"/>
+    <Geo abbreviation="VIC" geoCode="VIC" geoId="AU-VIC" geoName="Victoria" geoTypeId="STATE"/>
+    <Geo abbreviation="WA" geoCode="WA" geoId="AU-WA" geoName="Western Australia" geoTypeId="STATE"/>
+
+    <GeoAssoc geoId="AUS" geoIdTo="AU-ACT" geoAssocTypeId="REGIONS"/>
+    <GeoAssoc geoId="AUS" geoIdTo="AU-NSW" geoAssocTypeId="REGIONS"/>
+    <GeoAssoc geoId="AUS" geoIdTo="AU-NT" geoAssocTypeId="REGIONS"/>
+    <GeoAssoc geoId="AUS" geoIdTo="AU-QLD" geoAssocTypeId="REGIONS"/>
+    <GeoAssoc geoId="AUS" geoIdTo="AU-SA" geoAssocTypeId="REGIONS"/>
+    <GeoAssoc geoId="AUS" geoIdTo="AU-TAS" geoAssocTypeId="REGIONS"/>
+    <GeoAssoc geoId="AUS" geoIdTo="AU-VIC" geoAssocTypeId="REGIONS"/>
+    <GeoAssoc geoId="AUS" geoIdTo="AU-WA" geoAssocTypeId="REGIONS"/>
+</entity-engine-xml>

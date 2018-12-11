@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<entity-engine-xml>
+    <!-- GeoPoint for DemoCustomer and other demonstrations (in Orem, Utah, USA) -->
+    <!-- For demonstration purpose, it's also used with other entities: fixed asset, facility location, postal address and other parties (notably company) -->
+    <GeoPoint
+        geoPointId="9000"
+        dataSourceId="GEOPT_GOOGLE"
+        latitude="40.297264"
+        longitude="-111.696625"
+        elevation="4770"
+        elevationUomId="LEN_ft"
+        information="A testing GeoPoint for contactMechId=9015 (DemoCustomer)"
+    />
+    <!--  GeoPoint for EuroCustomer (in Amsterdam,  Netherlands) -->
+    <GeoPoint
+        geoPointId="9001"
+        dataSourceId="GEOPT_GOOGLE"
+        latitude="52.350"
+        longitude="4.917"
+        elevation="10"
+        elevationUomId="LEN_m"
+        information="A testing GeoPoint for contactMechId=EUROCUSTOMER (EuroCustomer)"
+    />
+    <!-- GeoPoint for FrenchCustomer (at 400E Chemin de la Mouline, Poussan, France) -->
+    <GeoPoint
+        geoPointId="9002"
+        dataSourceId="GEOPT_GOOGLE"
+        latitude="43.492"
+        longitude="3.684"
+        elevation="30"
+        elevationUomId="LEN_m"
+        information="A testing GeoPoint for contactMechId=FRENCHCUSTOMER (FrenchCustomer)"
+    />
+</entity-engine-xml>

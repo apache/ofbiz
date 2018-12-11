@@ -1,0 +1,236 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<forms xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/widget-form.xsd">
+    <form name="EditReturn" type="single" target="updateReturn" default-map-name="returnHeader" id="editReturn"
+        header-row-style="header-row" default-table-style="basic-table">
+        <actions>
+            <entity-one entity-name="StatusItem" value-field="currentStatus" auto-field-map="false">
+                <field-map field-name="statusId" from-field="returnHeader.statusId"/>
+            </entity-one>
+        </actions>
+        <alt-target use-when="returnHeader==null" target="createReturn"/>
+        <auto-fields-service service-name="updateReturnHeader"/>
+        <field use-when="returnHeader!=null" name="returnId" tooltip="${uiLabelMap.OrderReturnCannotBeChanged}"><display/></field>
+        <field use-when="returnHeader==null&amp;&amp;returnId!=null" name="returnId" tooltip="${uiLabelMap.OrderReturnCannotBeFound} ${returnId}"><text size="20" maxlength="20"/></field>
+        <field use-when="returnHeader==null&amp;&amp;returnId==null" name="returnId"><ignored/></field>
+        <field name="returnHeaderTypeId" id-name="returnHeaderTypeId">
+            <drop-down allow-empty="false">
+                <entity-options entity-name="ReturnHeaderType" description="${description}"/>
+            </drop-down>
+        </field>
+        <field name="statusId" use-when="returnHeader==null" id-name="statusId">
+            <drop-down>
+                <entity-options entity-name="StatusItem" description="${description}">
+                    <entity-constraint name="statusTypeId" value="ORDER_RETURN_STTS"/>
+                    <entity-order-by field-name="sequenceId"/>
+                </entity-options>
+                <list-options key-name="statusIdTo" list-name="returnStatus" description="${transitionName}"/>
+            </drop-down>
+        </field>
+        <field name="statusId" use-when="returnHeader!=null">
+            <drop-down current-description="${currentStatus.description}">
+                <entity-options entity-name="StatusValidChangeToDetail" key-field-name="statusIdTo" description="${transitionName} (${description})">
+                    <entity-constraint name="statusId" env-name="returnHeader.statusId"/>
+                    <entity-order-by field-name="sequenceId"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="currencyUomId" use-when="returnHeader==null">
+            <drop-down no-current-selected-key="${defaultOrganizationPartyCurrencyUomId}">
+                <entity-options key-field-name="uomId" description="${description} - ${abbreviation}" entity-name="Uom">
+                    <entity-constraint name="uomTypeId" operator="equals" value="CURRENCY_MEASURE"/>
+                    <entity-order-by field-name="description"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="currencyUomId" use-when="returnHeader!=null">
+            <display-entity entity-name="Uom" key-field-name="uomId" description="${abbreviation} - ${description}"/>
+        </field>
+        <field name="destinationFacilityId">
+            <drop-down allow-empty="true">
+                <entity-options entity-name="Facility" key-field-name="facilityId" description="${facilityName}">
+                    <entity-order-by field-name="facilityName"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="fromPartyId"><lookup target-form-name="LookupPartyName"/></field>
+        <field name="toPartyId"><lookup target-form-name="LookupPartyName"/></field>
+        <field name="originContactMechId" use-when="returnHeader!=null">
+            <display-entity entity-name="PostalAddress" key-field-name="contactMechId" description="${toName} ${attnName} ${address1} ${address2} ${city} ${stateProvinceGeoId} ${postalCode} ${countryGeoId}"/>
+        </field>
+        <field name="originContactMechId" use-when="returnHeader!=null&amp;&amp;&quot;RETURN_REQUESTED&quot;.equals(returnHeader.getString(&quot;statusId&quot;))">
+            <drop-down allow-empty="true">
+                <list-options key-name="postalAddress.contactMechId" list-name="addresses" description="${postalAddress.toName} ${postalAddress.attnName} ${postalAddress.address1} ${postalAddress.address2} ${postalAddress.city} ${postalAddress.stateProvinceGeoId} ${postalAddress.postalCode} ${postalAddress.countryGeoId}"/>
+            </drop-down>
+        </field>
+        <field name="billingAccountId" use-when="billingAccountList!=null&amp;&amp;billingAccountList.size()&gt;0">
+            <drop-down allow-empty="true">
+                <list-options key-name="billingAccountId" list-name="billingAccountList" description="${billingAccountId}: ${description}"/>
+            </drop-down>
+        </field>
+        <field name="finAccountId" use-when="finAccounts!=null&amp;&amp;finAccounts.size()&gt;0">
+            <drop-down allow-empty="true">
+                <list-options key-name="finAccountId" list-name="finAccounts" description="${finAccountId}: ${finAccountName}"/>
+            </drop-down>
+        </field>
+        <field name="paymentMethodId" use-when="creditCardList!=null&amp;&amp;creditCardList.size()&gt;0">
+            <drop-down allow-empty="true">
+                <list-options list-name="creditCardList" list-entry-name="creditCardPm" key-name="creditCardPm.paymentMethodId" description="${bsh:org.ofbiz.party.contact.ContactHelper.formatCreditCard(creditCardPm.getRelatedOne(&quot;CreditCard&quot;, false))}"/>
+            </drop-down>
+        </field>
+        <field name="newCreditCard" widget-style="buttontext" use-when="returnHeader!=null&amp;&amp;returnHeader.getString(&quot;fromPartyId&quot;)!=null">
+            <hyperlink also-hidden="false" target="/partymgr/control/editcreditcard" target-window="partymgr" description="${uiLabelMap.AccountingCreateNewCreditCard}" target-type="inter-app">
+                <parameter param-name="partyId" from-field="returnHeader.fromPartyId"/>
+            </hyperlink>
+        </field>
+        <field name="needsInventoryReceive" tooltip="${uiLabelMap.OrderReturnNecessaryReceiveInventoryMessage}">
+            <drop-down no-current-selected-key="N"><option key="N"/><option key="Y"/></drop-down>
+        </field>
+        <field name="createdBy"><display/></field>
+        <field name="submitButton" title="${uiLabelMap.CommonSubmit}" widget-style="smallSubmit"><submit button-type="button"/></field>
+    </form>
+    <!-- UNUSED FORM
+    <form name="ReturnItems" type="multi" list-name="orderItems" target="createReturnItem"
+        odd-row-style="alternate-row" default-table-style="basic-table hover-bar">
+        <auto-fields-service service-name="createReturnItem"/>
+        <field name="itemDescription"><display/></field>
+        <field name="returnId"><hidden/></field>
+        <field name="orderId"><hidden/></field>
+        <field name="orderItemSeqId"><hidden/></field>
+        <field name="statusId"><ignored/></field>
+    </form>
+    -->
+    <form name="FindReturns" type="single"  target="findreturn" title=""
+        header-row-style="header-row" default-table-style="basic-table">
+        <field name="returnHeaderTypeId">
+            <drop-down allow-empty="true">
+                <entity-options entity-name="ReturnHeaderType" description="${description}"/>
+            </drop-down>
+        </field>
+        <field name="returnId" title="${uiLabelMap.OrderReturnId}"><text-find/></field>
+        <field name="fromPartyId" title="${uiLabelMap.OrderReturnFromParty}">
+            <lookup target-form-name="LookupPartyName"/>
+        </field>
+        <field name="billingAccountId" title="${uiLabelMap.AccountingBillingAccount}">
+            <text-find/>
+        </field>
+        <field name="statusId" title="${uiLabelMap.CommonStatus}">
+            <drop-down allow-empty="true">
+                <entity-options entity-name="StatusItem" description="${description}">
+                    <entity-constraint name="statusTypeId" operator="equals" value="ORDER_RETURN_STTS"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="entryDate" title="${uiLabelMap.OrderEntryDate}">
+            <date-find/>
+        </field>
+        <field name="noConditionFind"><hidden value="Y"/><!-- if this isn't there then with all fields empty no query will be done --></field>
+        <field name="submitButton" title="${uiLabelMap.CommonFind}" widget-style="smallSubmit">
+            <submit button-type="button"/>
+        </field>
+    </form>
+
+    <form name="ListReturns" type="list"  target="findreturn" title="" list-name="listIt"
+        odd-row-style="alternate-row" default-table-style="basic-table hover-bar" paginate-target="findreturn">
+        <actions>
+            <service service-name="performFind"  result-map="result" result-map-list="listIt">
+                <field-map field-name="inputFields" from-field="requestParameters"/>
+                <field-map field-name="entityName" value="ReturnHeader"/>
+                <field-map field-name="orderBy" value="entryDate DESC"/>
+                <field-map field-name="viewIndex" from-field="viewIndex"/>
+                <field-map field-name="viewSize" from-field="viewSize"/>
+            </service>
+        </actions>
+        <field name="returnId"  widget-style="buttontext" title="${uiLabelMap.OrderReturnId}">
+            <hyperlink description="${returnId}" target="returnMain">
+                <parameter param-name="returnId"/>
+            </hyperlink>
+        </field>
+        <field name="entryDate" title="${uiLabelMap.OrderEntryDate}">
+            <display/>
+        </field>
+        <field name="fromPartyId" title="${uiLabelMap.OrderReturnFromParty}">
+            <display-entity entity-name="PartyNameView" key-field-name="partyId" description="${groupName} ${firstName} ${lastName}">
+                <sub-hyperlink link-style="buttontext" target-type="inter-app" description="${fromPartyId}" target="/partymgr/control/viewprofile">
+                    <parameter param-name="partyId" from-field="fromPartyId"/>
+                </sub-hyperlink>
+            </display-entity>
+        </field>
+        <field name="destinationFacilityId" widget-style="buttontext" title="${uiLabelMap.OrderReturnDestinationFacility}">
+            <hyperlink target-type="inter-app" description="${destinationFacilityId}" target="/facility/control/EditFacility">
+                <parameter param-name="facilityId" from-field="destinationFacilityId"/>
+            </hyperlink>
+        </field>
+        <field name="statusId" title="${uiLabelMap.CommonStatus}">
+            <display-entity entity-name="StatusItem" key-field-name="statusId" description="${description}"/>
+        </field>
+    </form>
+
+    <form name="ReturnStatusHistory" type="list" list-name="orderReturnStatusHistories"
+            odd-row-style="alternate-row" header-row-style="header-row-2" default-table-style="basic-table hover-bar">
+        <field name="returnId"><display/></field>
+        <field name="returnItemSeqId"><display/></field>
+        <field name="statusId"><display-entity entity-name="StatusItem" description="${description}"/></field>
+        <field name="statusDatetime" title="${uiLabelMap.CommonDate}"><display/></field>
+        <field name="changeByUserLoginId" title="${uiLabelMap.FormFieldTitle_modifiedByUserLoginId}"><display/></field>
+    </form>
+    <form name="ReturnAndReceivedQuantityHistory" type="list" list-name="orderReturnItemHistories"
+            odd-row-style="alternate-row" header-row-style="header-row-2" default-table-style="basic-table hover-bar">
+        <field name="returnId"><display description="${returnId}"/></field>
+        <field name="oldValueText"><display/></field>
+        <field name="newValueText"><display/></field>
+        <field name="changedDate" title="${uiLabelMap.CommonDate}"><display/></field>
+        <field name="changedByInfo" title="${uiLabelMap.FormFieldTitle_modifiedByUserLoginId}"><display/></field>
+    </form>
+    <form name="ReturnReasonHistory" type="list" list-name="orderReturnItemHistories"
+            odd-row-style="alternate-row" header-row-style="header-row-2" default-table-style="basic-table hover-bar">
+        <field name="returnId"><display description="${returnId}"/></field>
+        <field name="oldValueText">
+            <display-entity entity-name="ReturnReason" description="${description}" key-field-name="returnReasonId"/>
+        </field>
+        <field name="newValueText">
+            <display-entity entity-name="ReturnReason" description="${description}" key-field-name="returnReasonId"/>
+        </field>
+        <field name="changedDate" title="${uiLabelMap.CommonDate}"><display/></field>
+        <field name="changedByInfo" title="${uiLabelMap.FormFieldTitle_modifiedByUserLoginId}"><display/></field>
+    </form>
+    <form name="ReturnTypeHistory" type="list" list-name="orderReturnItemHistories"
+            odd-row-style="alternate-row" header-row-style="header-row-2" default-table-style="basic-table hover-bar">
+        <field name="returnId"><display description="${returnId}"/></field>
+        <field name="oldValueText">
+            <display-entity entity-name="ReturnType" description="${description}" key-field-name="returnTypeId"/>
+        </field>
+        <field name="newValueText">
+            <display-entity entity-name="ReturnType" description="${description}" key-field-name="returnTypeId"/>
+        </field>
+        <field name="changedDate" title="${uiLabelMap.CommonDate}"><display/></field>
+        <field name="changedByInfo" title="${uiLabelMap.FormFieldTitle_modifiedByUserLoginId}"><display/></field>
+    </form>
+    <form name="ReturnPriceHistory" type="list" list-name="orderReturnItemHistories"
+            odd-row-style="alternate-row" header-row-style="header-row-2" default-table-style="basic-table hover-bar">
+        <field name="returnId"><display description="${returnId}"/></field>
+        <field name="oldValueText"><display type="currency"/></field>
+        <field name="newValueText"><display type="currency"/></field>
+        <field name="changedDate" title="${uiLabelMap.CommonDate}"><display/></field>
+        <field name="changedByInfo" title="${uiLabelMap.FormFieldTitle_modifiedByUserLoginId}"><display/></field>
+    </form>
+</forms>
