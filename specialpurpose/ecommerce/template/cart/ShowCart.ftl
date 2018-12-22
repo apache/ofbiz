@@ -427,13 +427,13 @@ under the License.
                               <td>
                         </#if>
                               <input size="6" class="inputBox" type="text" name="update_${cartLineIndex}"
-                                  value="${cartLine.getQuantity()?string.number}" />
+                                  value="${cartLine.getQuantity()?string.number}" min="1" />
                               </td>
                             </tr>
                           </table>
                         <#else><#-- fixedAssetExist -->
                           <input size="6" class="inputBox" type="text" name="update_${cartLineIndex}"
-                              value="${cartLine.getQuantity()?string.number}" />
+                              value="${cartLine.getQuantity()?string.number}" min="1" />
                         </#if>
                     </#if>
                   </td>
