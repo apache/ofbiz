@@ -958,6 +958,12 @@
     <property key="ContentContentCreatedSuccessfully">
         <value xml:lang="en">Content created successfully.</value>
     </property>
+    <property key="ContentContentAssocCreatedSuccessfully">
+        <value xml:lang="en">Content Association created successfully.</value>
+    </property>
+    <property key="ContentContentAssocUpdatedSuccessfully">
+        <value xml:lang="en">Content Association updated successfully.</value>
+    </property>
     <property key="ContentContentCreatingError">
         <value xml:lang="en">Error creating content in ${serviceName}</value>
         <value xml:lang="fr">Erreur de création du document dans le service ${serviceName}</value>
