@@ -91,7 +91,15 @@ public final class UtilXml {
 
     private static XStream createXStream() {
         XStream xstream = new XStream();
-        xstream.registerConverter(new UnsupportedClassConverter());
+        /* This method is a pure helper method for XStream 1.4.x. 
+         * It initializes an XStream instance with a white list of well-known and simply types of the Java runtime
+         *  as it is done in XStream 1.5.x by default. This method will do therefore nothing in XStream 1.5
+         *  and could be removed them  
+         */ 
+        XStream.setupDefaultSecurity(xstream); 
+        /* You may want to enhance the white list created by XStream::setupDefaultSecurity (or by default with XStream 1.5) 
+         * using xstream::allowTypesByWildcard with your own classes
+         */  
         return xstream;
     }
 
@@ -1116,6 +1124,11 @@ public final class UtilXml {
         }
     }
 
+    /** This method is now useless
+     * Enhance rather the white list created by XStream::setupDefaultSecurity
+     * using xstream::allowTypesByWildcard with your own classes  
+     */
+    @Deprecated
     private static class UnsupportedClassConverter implements Converter {
 
         @Override
@@ -1140,7 +1153,7 @@ public final class UtilXml {
     /**
      * get node name without any prefix
      * @param node
-     * @return
+     * @return nodeName
      */
     public static String getNodeNameIgnorePrefix(Node node){
         if (node==null) return null;
@@ -1155,8 +1168,8 @@ public final class UtilXml {
     /**
      * get tag name without any prefix
      * @param node
-     * @return
-     */
+     * @return tagName
+     */ 
     public static String getTagNameIgnorePrefix(Element element){
         if (element==null) return null;
         String tagName = element.getTagName();
@@ -1170,7 +1183,7 @@ public final class UtilXml {
     /**
      * get attribute value ignoring prefix in attribute name
      * @param node
-     * @return
+     * @return The value of the node, depending on its type; see the table Node class
      */
     public static String getAttributeValueIgnorePrefix(Element element, String attributeName){
         if (element==null) return "";
