@@ -747,7 +747,7 @@ public class LoginWorker {
             Cookie autoLoginCookie = new Cookie(getAutoLoginCookieName(request), userLogin.getString("userLoginId"));
             autoLoginCookie.setMaxAge(60 * 60 * 24 * 365);
             autoLoginCookie.setDomain(domain);
-            autoLoginCookie.setPath("/");
+            autoLoginCookie.setPath("/" + UtilHttp.getApplicationName(request).replaceAll("/","_"));
             response.addCookie(autoLoginCookie);
             return autoLoginCheck(delegator, session, userLogin.getString("userLoginId"));
         } else {
