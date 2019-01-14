@@ -765,8 +765,7 @@ public class LoginWorker {
         if (Debug.verboseOn()) Debug.logVerbose("Cookies:" + cookies, module);
         if (cookies != null) {
             for (Cookie cookie: cookies) {
-                if (cookie.getName().equals(getAutoLoginCookieName(request)) 
-                        && cookie.getMaxAge() > 0) {
+                if (cookie.getName().equals(getAutoLoginCookieName(request))) {
                     autoUserLoginId = cookie.getValue();
                     break;
                 }
@@ -816,9 +815,11 @@ public class LoginWorker {
 
         // remove the cookie
         if (userLogin != null) {
+            Delegator delegator = (Delegator) request.getAttribute("delegator");
             Cookie autoLoginCookie = new Cookie(getAutoLoginCookieName(request), userLogin.getString("userLoginId"));
             autoLoginCookie.setMaxAge(0);
-            autoLoginCookie.setPath("/");
+            autoLoginCookie.setDomain(EntityUtilProperties.getPropertyValue("url", "cookie.domain", delegator));
+            autoLoginCookie.setPath("/" + UtilHttp.getApplicationName(request));
             response.addCookie(autoLoginCookie);
         }
         // remove the session attributes
