@@ -743,10 +743,12 @@ public class LoginWorker {
         HttpSession session = request.getSession();
         GenericValue userLogin = (GenericValue) session.getAttribute("userLogin");
         String domain = EntityUtilProperties.getPropertyValue("url", "cookie.domain", delegator);
+        String applicationName = UtilHttp.getApplicationName(request);
+        
         if (userLogin != null) {
             Cookie autoLoginCookie = new Cookie(getAutoLoginCookieName(request), userLogin.getString("userLoginId"));
             autoLoginCookie.setMaxAge(60 * 60 * 24 * 365);
-            autoLoginCookie.setDomain(EntityUtilProperties.getPropertyValue("url", "cookie.domain", delegator));
+            autoLoginCookie.setDomain(domain);
             autoLoginCookie.setPath( applicationName.equals("root") ? "/" : request.getContextPath());
             autoLoginCookie.setSecure(true);
             autoLoginCookie.setHttpOnly(true);
