@@ -746,8 +746,10 @@ public class LoginWorker {
         if (userLogin != null) {
             Cookie autoLoginCookie = new Cookie(getAutoLoginCookieName(request), userLogin.getString("userLoginId"));
             autoLoginCookie.setMaxAge(60 * 60 * 24 * 365);
-            autoLoginCookie.setDomain(domain);
-            autoLoginCookie.setPath("/" + UtilHttp.getApplicationName(request));
+            autoLoginCookie.setDomain(EntityUtilProperties.getPropertyValue("url", "cookie.domain", delegator));
+            autoLoginCookie.setPath( applicationName.equals("root") ? "/" : request.getContextPath());
+            autoLoginCookie.setSecure(true);
+            autoLoginCookie.setHttpOnly(true);
             response.addCookie(autoLoginCookie);
             return autoLoginCheck(delegator, session, userLogin.getString("userLoginId"));
         } else {
@@ -816,10 +818,11 @@ public class LoginWorker {
         // remove the cookie
         if (userLogin != null) {
             Delegator delegator = (Delegator) request.getAttribute("delegator");
+            String applicationName = UtilHttp.getApplicationName(request);
             Cookie autoLoginCookie = new Cookie(getAutoLoginCookieName(request), userLogin.getString("userLoginId"));
             autoLoginCookie.setMaxAge(0);
             autoLoginCookie.setDomain(EntityUtilProperties.getPropertyValue("url", "cookie.domain", delegator));
-            autoLoginCookie.setPath("/" + UtilHttp.getApplicationName(request));
+            autoLoginCookie.setPath( applicationName.equals("root") ? "/" : request.getContextPath());
             response.addCookie(autoLoginCookie);
         }
         // remove the session attributes
