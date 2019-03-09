@@ -119,7 +119,7 @@ dependencies {
     compile 'org.apache.geronimo.specs:geronimo-jms_1.1_spec:1.1.1'
     compile 'org.apache.httpcomponents:httpclient-cache:4.4.1'
     compile 'org.apache.logging.log4j:log4j-api:2.6.2' // the API of log4j 2
-    compile 'org.apache.poi:poi:3.14'
+    compile 'org.apache.poi:poi:3.17'
     compile 'org.apache.shiro:shiro-core:1.3.0'
     compile 'org.apache.tika:tika-core:1.12'
     compile 'org.apache.tika:tika-parsers:1.12'
