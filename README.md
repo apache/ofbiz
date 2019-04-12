@@ -37,7 +37,10 @@ The only requirement to run OFBiz is to have the Java Development Kit (JDK)
 version 8 installed on your system (not just the JRE, but the full JDK) which
 you can download from the below link.
 
-[JDK download](http://www.oracle.com/technetwork/java/javase/downloads/index.html)
+[JDK download](https://adoptopenjdk.net/)
+
+[To know more about the JDK](https://medium.com/@javachampions/java-is-still-free-2-0-0-6b9aa8d6d244)
+
 
 >_Note_: if you are using Eclipse, make sure of running the appropriate Eclipse
 command `gradlew eclipse` before creating the project in Eclipse.
