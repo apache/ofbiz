@@ -517,8 +517,7 @@ public class EmailServices {
                 }
                 isMultiPart = true;
                 // start processing fo pdf attachment
-                try {
-                    Writer writer = new StringWriter();
+                try (Writer writer = new StringWriter(); ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
                     MapStack<String> screenContextAtt = MapStack.create();
                     // substitute the freemarker variables...
                     ScreenStringRenderer foScreenStringRenderer = new MacroScreenRenderer(EntityUtilProperties.getPropertyValue("widget", "screenfop.name", dctx.getDelegator()),
@@ -532,14 +531,9 @@ public class EmailServices {
                     StreamSource src = new StreamSource(new StringReader(writer.toString()));
 
                     // create the output stream for the generation
-                    ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
                     Fop fop = ApacheFopWorker.createFopInstance(baos, MimeConstants.MIME_PDF);
                     ApacheFopWorker.transform(src, null, fop);
-
-                    // and generate the PDF
-                    baos.flush();
-                    baos.close();
 
                     // store in the list of maps for sendmail....
                     bodyParts.add(UtilMisc.<String, Object> toMap("content", baos.toByteArray(), "type", "application/pdf", "filename",
