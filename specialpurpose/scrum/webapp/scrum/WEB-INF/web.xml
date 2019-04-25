@@ -34,16 +34,6 @@ under the License.
         <param-name>mainDecoratorLocation</param-name>
         <param-value>component://scrum/widget/CommonScreens.xml</param-value>
     </context-param>
-    <context-param>
-        <description>Enable widget boundary comments. See org.apache.ofbiz.widget.model.ModelWidget.widgetBoundaryCommentsEnabled().</description>
-        <param-name>widgetVerbose</param-name>
-        <param-value>false</param-value>
-    </context-param>
-    <context-param>
-        <description>Remove unnecessary whitespace from HTML output.</description>
-        <param-name>compressHTML</param-name>
-        <param-value>false</param-value>
-    </context-param>
 
     <filter>
         <display-name>ControlFilter</display-name>
