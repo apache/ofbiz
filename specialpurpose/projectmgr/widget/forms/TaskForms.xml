@@ -161,9 +161,6 @@
             <check all-checked="false">
                 <entity-options entity-name="StatusItem" key-field-name="statusId">
                     <entity-constraint name="statusTypeId" value="PROJECT_TASK_STATUS"/>
-                    <entity-constraint name="statusId" operator="not-equals" value="PTS_CREATED_UA"/>
-                    <entity-constraint name="statusId" operator="not-equals" value="PTS_CREATED_AS"/>
-                    <entity-constraint name="statusId" operator="not-equals" value="PTS_CREATED_IP"/>
                     <entity-order-by field-name="description"/>
                 </entity-options>
             </check>
