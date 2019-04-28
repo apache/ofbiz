@@ -488,11 +488,11 @@ under the License.
                     </td>
                     <td>
                         <a href="javascript:TimestampSubmit(listform_${shoppingListItem.shoppingListItemSeqId});" class="button">${uiLabelMap.CommonUpdate}</a>
-                        <a href="javascript:document.removeFromShoppingList.submit();" class="button">${uiLabelMap.CommonRemove}</a>
                         <form name="removeFromShoppingList" method="post" action="<@ofbizUrl>removeFromShoppingList</@ofbizUrl>">
                           <fieldset>
                             <input type="hidden" name="shoppingListId" value="${shoppingListItem.shoppingListId!}">
                             <input type="hidden" name="shoppingListItemSeqId" value="${shoppingListItem.shoppingListItemSeqId}">
+                            <input type="submit" value="${uiLabelMap.CommonRemove}"/>
                           </fieldset>
                         </form>
                       <#if isVirtual && productVariantAssocs?has_content>
