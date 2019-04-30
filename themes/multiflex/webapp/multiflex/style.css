@@ -4020,7 +4020,7 @@ button.ui-button::-moz-focus-inner {
 
 /* Calendar Button and Image */
 .view-calendar button {
-    background: url(images/cal.gif) no-repeat !important;
+    background: url(/images/cal.gif) no-repeat !important;
     display: inline-block;
     border: none;
     vertical-align: center;
