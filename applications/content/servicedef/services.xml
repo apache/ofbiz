@@ -426,6 +426,7 @@
     <service name="createArticleContent" engine="simple" transaction-timeout="300" auth="true"
             location="component://content/minilang/content/ContentServices.xml" invoke="createArticleContent">
         <description>Creates content records for a blog entry</description>
+        <permission-service service-name="genericContentPermission" main-action="CREATE"/>
         <implements service="createContentFromUploadedFile" optional="true"/>
         <implements service="createTextContent" optional="true"/>
         <attribute name="contentIdFrom" type="String" mode="IN" optional="false"/>
@@ -820,6 +821,7 @@
     <service name="createBlogEntry" engine="simple" auth="true"
         location="component://content/minilang/blog/BlogServices.xml" invoke="createBlogEntry">
         <description>Creates content records for a blog entry</description>
+        <permission-service service-name="genericContentPermission" main-action="CREATE"/>
         <implements service="uploadFileInterface" optional="true"/>
         <attribute name="blogContentId" type="String" mode="INOUT" optional="false"/>
         <attribute name="contentId" type="String" mode="OUT" optional="false"/>
@@ -833,6 +835,7 @@
     <service name="updateBlogEntry" engine="simple" auth="true"
         location="component://content/minilang/blog/BlogServices.xml" invoke="updateBlogEntry">
         <description>Updates content records for a blog entry</description>
+        <permission-service service-name="genericContentPermission" main-action="CREATE"/>
         <implements service="uploadFileInterface" optional="true"/>
         <attribute name="blogContentId" type="String" mode="INOUT" optional="false"/>
         <attribute name="contentId" type="String" mode="INOUT" optional="false"/>
