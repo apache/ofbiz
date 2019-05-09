@@ -26,4 +26,6 @@ under the License.
     <StatusItem description="PaidIn" sequenceId="30" statusCode="PAID_IN" statusId="POSTX_PAID_IN" statusTypeId="POSTX_STATUS"/>
     <StatusItem description="PaidOut" sequenceId="40" statusCode="PAID_OUT" statusId="POSTX_PAID_OUT" statusTypeId="POSTX_STATUS"/>
     <StatusItem description="Closed" sequenceId="50" statusCode="CLOSED" statusId="POSTX_CLOSED" statusTypeId="POSTX_STATUS"/>
+
+    <Enumeration description="POS Channel" enumCode="POS_CHANNEL" enumId="POS_SALES_CHANNEL" sequenceId="02" enumTypeId="ORDER_SALES_CHANNEL"/>
 </entity-engine-xml>
