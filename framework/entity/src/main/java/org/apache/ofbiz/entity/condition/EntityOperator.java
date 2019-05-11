@@ -66,8 +66,8 @@ public abstract class EntityOperator<L, R, T> extends EntityConditionBase {
 
     public static <L,R,T> void register(String name, EntityOperator<L,R,T> operator) {
         registerCase(name, operator);
-        registerCase(name.replaceAll("-", "_"), operator);
-        registerCase(name.replaceAll("_", "-"), operator);
+        registerCase(name.replace("-", "_"), operator);
+        registerCase(name.replace("_", "-"), operator);
     }
 
     public static <L,R,T> EntityOperator<L,R,T> lookup(String name) {

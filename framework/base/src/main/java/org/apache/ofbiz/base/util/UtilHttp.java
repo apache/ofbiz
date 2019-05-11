@@ -925,7 +925,7 @@ public final class UtilHttp {
     }
 
     public static String encodeBlanks(String htmlString) {
-        return htmlString.replaceAll(" ", "%20");
+        return htmlString.replace(" ", "%20");
     }
 
     public static String setResponseBrowserProxyNoCache(HttpServletRequest request, HttpServletResponse response) {

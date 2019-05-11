@@ -151,7 +151,7 @@ public final class KeyStoreUtil {
         for (String opt: x500Opts) {
             if (opt.indexOf("=") > -1) {
                 String[] nv = opt.split("\\=", 2);
-                x500Map.put(nv[0].replaceAll("&com;", ","), nv[1].replaceAll("&com;", ","));
+                x500Map.put(nv[0].replace("&com;", ","), nv[1].replace("&com;", ","));
             }
         }
 
