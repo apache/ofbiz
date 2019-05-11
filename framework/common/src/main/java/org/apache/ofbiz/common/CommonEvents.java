@@ -35,6 +35,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.Random;
 
 import javax.imageio.ImageIO;
 import javax.servlet.http.HttpServletRequest;
@@ -427,7 +428,8 @@ public class CommonEvents {
             //Generating some circles for background noise
             g.setColor(circleColor);
             for (int i = 0; i < circlesToDraw; i++) {
-                int circleRadius = (int) (Math.random() * height / 2.0);
+		Random rand = new Random();
+                int circleRadius = (int) (rand.nextDouble() * height / 2.0);
                 int circleX = (int) (Math.random() * width - circleRadius);
                 int circleY = (int) (Math.random() * height - circleRadius);
                 g.drawOval(circleX, circleY, circleRadius * 2, circleRadius * 2);

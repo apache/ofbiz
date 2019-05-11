@@ -27,6 +27,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
 import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
@@ -131,7 +132,8 @@ public final class ProductDisplayWorker {
 
             // randomly remove products while there are more than 3
             while (cartAssocs.size() > 3) {
-                int toRemove = (int) (Math.random() *  cartAssocs.size());
+		Random rand = new Random()
+                int toRemove = (int) (rand.nextDouble()  *  cartAssocs.size());
                 cartAssocs.remove(toRemove);
             }
         } catch (GenericEntityException e) {
