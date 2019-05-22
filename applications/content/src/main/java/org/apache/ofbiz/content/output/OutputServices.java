@@ -62,7 +62,6 @@ import org.apache.ofbiz.entity.util.EntityUtilProperties;
 import org.apache.ofbiz.service.DispatchContext;
 import org.apache.ofbiz.service.ServiceUtil;
 import org.apache.ofbiz.webapp.view.ApacheFopWorker;
-import org.apache.ofbiz.widget.model.ThemeFactory;
 import org.apache.ofbiz.widget.renderer.ScreenRenderer;
 import org.apache.ofbiz.widget.renderer.ScreenStringRenderer;
 import org.apache.ofbiz.widget.renderer.fo.FoFormRenderer;
@@ -81,9 +80,6 @@ public class OutputServices {
 
     public static Map<String, Object> sendPrintFromScreen(DispatchContext dctx, Map<String, ? extends Object> serviceContext) {
         Locale locale = (Locale) serviceContext.get("locale");
-        if (visualTheme == null) {
-            visualTheme = ThemeFactory.resolveVisualTheme(null);
-        }        
         String screenLocation = (String) serviceContext.remove("screenLocation");
         Map<String, Object> screenContext = UtilGenerics.checkMap(serviceContext.remove("screenContext"));
         String contentType = (String) serviceContext.remove("contentType");
@@ -199,9 +195,6 @@ public class OutputServices {
     public static Map<String, Object> createFileFromScreen(DispatchContext dctx, Map<String, ? extends Object> serviceContext) {
         Locale locale = (Locale) serviceContext.get("locale");
         Delegator delegator = dctx.getDelegator();
-        if (visualTheme == null) {
-            visualTheme = ThemeFactory.resolveVisualTheme(null);
-        }        
         String screenLocation = (String) serviceContext.remove("screenLocation");
         Map<String, Object> screenContext = UtilGenerics.checkMap(serviceContext.remove("screenContext"));
         String contentType = (String) serviceContext.remove("contentType");
