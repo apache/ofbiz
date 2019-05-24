@@ -590,7 +590,11 @@ public class ModelService extends AbstractMap<String, Object> implements Seriali
                 if (context.get(modelParam.name) != null && ("String".equals(modelParam.type) || "java.lang.String".equals(modelParam.type)) 
                         && !"any".equals(modelParam.allowHtml) && ("INOUT".equals(modelParam.mode) || "IN".equals(modelParam.mode))) {
                     String value = (String) context.get(modelParam.name);
-                    UtilCodec.checkStringForHtmlStrictNone(modelParam.name, value, errorMessageList);
+                    if ("none".equals(modelParam.allowHtml)) {
+                        UtilCodec.checkStringForHtmlStrictNone(modelParam.name, value, errorMessageList, (Locale) context.get("locale"));
+                    } else if ("safe".equals(modelParam.allowHtml)) {
+                        UtilCodec.checkStringForHtmlSafe(modelParam.name, value, errorMessageList, (Locale) context.get("locale"));
+                    }
                 }
             }
             if (errorMessageList.size() > 0) {
