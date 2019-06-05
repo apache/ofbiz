@@ -213,7 +213,7 @@ under the License.
                 <set field="rightbarScreenName" value="rightbar"/>
                 <set field="MainColumnStyle" value="rightonly"/>
 
-                <set field="titleProperty" value="PageTitleLogin"/>
+                <set field="titleProperty" value="${uiLabelMap.CommonContactUs}"/>
                 <set field="pageHeader" value="${uiLabelMap.CommonContactUs}"/>
                 <set field="headerItem" value="contactus"/>
                 <set field="submitRequest" value="contactsubmit"/>
@@ -638,7 +638,7 @@ under the License.
                 <set field="rightbarScreenName" value="rightbar"/>
                 <set field="MainColumnStyle" value="rightonly"/>
 
-                <set field="titleProperty" value="PageTitleLogin"/>
+                <set field="titleProperty" value="${uiLabelMap.CommonContactUs}"/>
                 <set field="pageHeader" value="${uiLabelMap.CommonContactUs}"/>
                 <set field="headerItem" value="contactus"/>
                 <set field="submitRequest" value="contactsubmit"/>
