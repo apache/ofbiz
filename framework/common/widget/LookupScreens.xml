@@ -172,6 +172,8 @@ under the License.
                 <set field="parameters.presentation" value="window"/>
                 <entity-one entity-name="WebSite" value-field="webSite"/>
                 <set field="visualThemeSetId" from-field="webSite.visualThemeSetId" default-value="BACKOFFICE" />
+                <set field="layoutSettings.styleSheets[]" value="/images/jquery/plugins/featherlight/featherlight-1.7.13.min.css" global="true"/>
+                <set field="layoutSettings.javaScripts[+0]" value="/images/jquery/plugins/featherlight/featherlight-1.7.13.min.js" global="true"/>
                 <entity-condition entity-name="VisualTheme" list="visualThemes">
                     <condition-expr field-name="visualThemeSetId" from-field="visualThemeSetId" />
                 </entity-condition>

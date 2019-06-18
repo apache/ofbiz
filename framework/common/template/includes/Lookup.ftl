@@ -34,8 +34,9 @@ under the License.
           if (typeof(jQuery) == 'undefined') {
               if (!jQueryLibLoaded) {
                   jQueryLibLoaded = true;
-                  document.write("<scr" + "ipt type=\"text/javascript\" src=\"<@ofbizContentUrl>/images/jquery/jquery-1.11.0.min.js</@ofbizContentUrl>\"></scr" + "ipt>");
-                  document.write("<scr" + "ipt type=\"text/javascript\" src=\"<@ofbizContentUrl>/images/jquery/jquery-migrate-1.2.1.js</@ofbizContentUrl>\"></scr" + "ipt>");
+                  document.write("<scr" + "ipt type=\"text/javascript\" src=\"<@ofbizContentUrl>/images/jquery/jquery-3.4.1.min.js</@ofbizContentUrl>\"></scr" + "ipt>");
+                  document.write("<scr" + "ipt type=\"text/javascript\" src=\"<@ofbizContentUrl>/images/jquery/jquery-migrate-3.0.0.min.js</@ofbizContentUrl>\"></scr" + "ipt>");
+                  document.write("<scr" + "ipt type=\"text/javascript\" src=\"<@ofbizContentUrl>/images/jquery/plugins/browser-plugin/jquery.browser-0.1.0.min.js</@ofbizContentUrl>\"></scr" + "ipt>");
               }
               setTimeout("initJQuery()", 50);
           }
