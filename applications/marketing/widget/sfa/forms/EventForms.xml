@@ -58,6 +58,7 @@ under the License.
                 </sub-hyperlink>
             </display-entity>
         </field>
+        <field name="workEffortName" title="${uiLabelMap.WorkEffortEventName}" required-field="true"><text/></field>
         <sort-order>
             <sort-field name="workEffortId"/>
             <sort-field name="workEffortPurposeTypeId"/>
