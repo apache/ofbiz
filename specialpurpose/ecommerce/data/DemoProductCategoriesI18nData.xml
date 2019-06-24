@@ -286,4 +286,46 @@
 
     <ContentAssoc contentId="CPROMO-001DESCEN" contentIdTo="CPROMO-001DESCFR" contentAssocTypeId="ALTERNATE_LOCALE" fromDate="2007-12-28 00:00:00.0"/>
 
+    <!-- Services category -->
+    <DataResource dataResourceId="DRSERV-001DESCFR" dataResourceTypeId="ELECTRONIC_TEXT" localeString="fr"/>
+    <DataResource dataResourceId="DRSERV-001DESCEN" dataResourceTypeId="ELECTRONIC_TEXT" localeString="en"/>
+
+    <ElectronicText dataResourceId="DRSERV-001DESCFR" textData="Prestations de service"/>
+    <ElectronicText dataResourceId="DRSERV-001DESCEN" textData="Services"/>
+
+    <Content contentId="CSERV-001DESCFR" contentTypeId="DOCUMENT" dataResourceId="DRSERV-001DESCFR" description="DESCRIPTION FR Prestations de service" localeString="fr"/>
+    <Content contentId="CSERV-001DESCEN" contentTypeId="DOCUMENT" dataResourceId="DRSERV-001DESCEN" description="DESCRIPTION EN Services" localeString="en"/>
+
+    <ProductCategoryContent productCategoryId="SERV-001" contentId="CSERV-001DESCEN" prodCatContentTypeId="CATEGORY_NAME" fromDate="2007-12-28 00:00:00.0"/>
+
+    <ContentAssoc contentId="CSERV-001DESCEN" contentIdTo="CSERV-001DESCFR" contentAssocTypeId="ALTERNATE_LOCALE" fromDate="2007-12-28 00:00:00.0"/>
+
+    <!-- Dropship  Products category -->
+    <DataResource dataResourceId="DRDS-001DESCFR" dataResourceTypeId="ELECTRONIC_TEXT" localeString="fr"/>
+    <DataResource dataResourceId="DRDS-001DESCEN" dataResourceTypeId="ELECTRONIC_TEXT" localeString="en"/>
+
+    <ElectronicText dataResourceId="DRDS-001DESCFR" textData="Produits vendus en mode DropShip"/>
+    <ElectronicText dataResourceId="DRDS-001DESCEN" textData="DropShip Products"/>
+
+    <Content contentId="CDS-001DESCFR" contentTypeId="DOCUMENT" dataResourceId="DRDS-001DESCFR" description="DESCRIPTION FR Produits DropShip" localeString="fr"/>
+    <Content contentId="CDS-001DESCEN" contentTypeId="DOCUMENT" dataResourceId="DRDS-001DESCEN" description="DESCRIPTION EN DropShip Products" localeString="en"/>
+
+    <ProductCategoryContent productCategoryId="dropShip" contentId="CDS-001DESCEN" prodCatContentTypeId="CATEGORY_NAME" fromDate="2007-12-28 00:00:00.0"/>
+
+    <ContentAssoc contentId="CDS-001DESCEN" contentIdTo="CDS-001DESCFR" contentAssocTypeId="ALTERNATE_LOCALE" fromDate="2007-12-28 00:00:00.0"/>
+
+    <!-- Account Activation category -->
+    <DataResource dataResourceId="DRAA-001DESCFR" dataResourceTypeId="ELECTRONIC_TEXT" localeString="fr"/>
+    <DataResource dataResourceId="DRAA-001DESCEN" dataResourceTypeId="ELECTRONIC_TEXT" localeString="en"/>
+
+    <ElectronicText dataResourceId="DRAA-001DESCFR" textData="Activation de compte"/>
+    <ElectronicText dataResourceId="DRAA-001DESCEN" textData="Account Activation"/>
+
+    <Content contentId="CAA-001DESCFR" contentTypeId="DOCUMENT" dataResourceId="DRAA-001DESCFR" description="DESCRIPTION FR Activation de compte" localeString="fr"/>
+    <Content contentId="CAA-001DESCEN" contentTypeId="DOCUMENT" dataResourceId="DRAA-001DESCEN" description="DESCRIPTION EN Account Activation" localeString="en"/>
+
+    <ProductCategoryContent productCategoryId="FA-100" contentId="CAA-001DESCEN" prodCatContentTypeId="CATEGORY_NAME" fromDate="2007-12-28 00:00:00.0"/>
+
+    <ContentAssoc contentId="CAA-001DESCEN" contentIdTo="CAA-001DESCFR" contentAssocTypeId="ALTERNATE_LOCALE" fromDate="2007-12-28 00:00:00.0"/>
+
 </entity-engine-xml>
