@@ -168,6 +168,20 @@ under the License.
                 </if-compare>
             </else>
         </if-compare>
+        <if-compare operator="not-equals" field="parameters.UNUSEEMAIL" value="on">
+            <if>
+                <condition>
+                    <not>
+                        <if-regexp field="parameters.USERNAME" expr="^[a-zA-Z0-9_-]+$"></if-regexp>
+                    </not>
+                </condition>
+                <then>
+                    <add-error>
+                        <fail-property resource="PartyUiLabels" property="NotValidUserName"/>
+                    </add-error>
+                </then>
+            </if>
+        </if-compare>
 
         <!-- Create the Home Phone -->
         <if-not-empty field="parameters.CUSTOMER_HOME_CONTACT">
