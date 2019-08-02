@@ -109,4 +109,25 @@ public final class JsLanguageFilesMapping {
             return dateTime.defaultDateTime;
         }
     }
+
+    public static class cookieBar {
+        private static Map<String, String> localeFiles = new HashMap<String, String>();
+        private static String defaultCookieBar = "/images/webapp/images/jquery/plugins/jquery.cookieBar/localization/jquery-cookieBar-en-US.js";
+
+        static {
+            <#list cookieBar.keySet() as cookieBarFiles>
+            <#assign filePath = cookieBar.get(cookieBarFiles)! />
+            localeFiles.put("${cookieBarFiles}", "${filePath}");
+            </#list>
+        }
+
+        public static String getFilePath(String locale) {
+            if (cookieBar.localeFiles.containsKey(locale)) {
+                return cookieBar.localeFiles.get(locale);
+            }
+            return cookieBar.defaultCookieBar;
+        }
+    }
+
+
 }

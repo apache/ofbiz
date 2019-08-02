@@ -27,6 +27,13 @@ var AJAX_REQUEST_TIMEOUT = 5000;
 $(document).ready(function() {
     // bindObservers will add observer on passed html section when DOM is ready.
     bindObservers("body");
+    if (jQuery.cookieBar !== undefined) {
+        jQuery.cookieBar({
+            infoLink: "/ecommerce/control/CookiePolicy",
+            privacy: "popup",
+            privacyContent: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
+        });
+    }
 });
 
 /* bindObservers function contains the code of adding observers and it can be called for specific section as well

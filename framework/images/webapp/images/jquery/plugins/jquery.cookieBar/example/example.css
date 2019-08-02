@@ -1,0 +1,15 @@
+pre {
+	padding: 5px;
+}
+
+h1,
+h2,
+h3,
+h4 {
+	margin-bottom: 1.5rem;
+}
+
+hr {
+	margin-top: 1.5rem;
+	margin-bottom: 1.5rem;
+}

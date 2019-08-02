@@ -125,6 +125,11 @@ under the License.
     <request-map uri="main"><security https="false" auth="false"/><response name="success" type="view" value="main" save-current-view="true"/></request-map>
     <request-map uri="policies"><security https="false" auth="false"/><response name="success" type="view" value="policies"/></request-map>
 
+    <request-map uri="CookiePolicy">
+        <security https="false" auth="false"/>
+        <response name="success" type="view" value="CookiePolicy"/>
+    </request-map>
+
     <!-- Session Setting Requests -->
     <request-map uri="setSessionLocale">
         <security https="false" auth="false"/>
@@ -1881,6 +1886,7 @@ under the License.
     <view-map name="error" page="/error/error.jsp"/>
     <view-map name="main" type="screen" page="component://ecommerce/widget/CommonScreens.xml#main"/>
     <view-map name="policies" type="screen" page="component://ecommerce/widget/CommonScreens.xml#policies"/>
+    <view-map name="CookiePolicy" type="screen" page="component://ecommerce/widget/CommonScreens.xml#CookiePolicy"/>
     <view-map name="login" type="screen" page="component://ecommerce/widget/CommonScreens.xml#login"/>
     <view-map name="requirePasswordChange" type="screen" page="component://ecommerce/widget/CommonScreens.xml#requirePasswordChange"/>
 

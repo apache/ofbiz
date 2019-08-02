@@ -1,0 +1,216 @@
+@charset "UTF-8";
+/*!
+ * Cookie Bar component (https://github.com/kovarp/jquery.cookieBar)
+ * Version 1.2.0
+ *
+ * Copyright 2018 Pavel Kovář - Frontend developer [www.pavelkovar.cz]
+ * Licensed under MIT (https://github.com/kovarp/jquery.cookieBar/blob/master/LICENSE)
+ */
+/* Settings */
+/* Cookie Bar styles */
+.cookie-bar__inner {
+  background-color: #000;
+  color: #fff;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-size: .875rem;
+  padding: .375rem .5rem;
+  text-align: center;
+}
+
+@media (min-width: 62rem) {
+  .cookie-bar__inner {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-pack: center;
+        -ms-flex-pack: center;
+            justify-content: center;
+    -webkit-box-align: center;
+        -ms-flex-align: center;
+            align-items: center;
+  }
+}
+
+.cookie-bar__buttons {
+  display: block;
+  margin-top: .375rem;
+}
+
+@media (min-width: 62rem) {
+  .cookie-bar__buttons {
+    display: inline;
+    margin-top: 0;
+  }
+}
+
+.cookie-bar__btn {
+  background-color: #0275d8;
+  color: #fff;
+  border: none;
+  margin: 0 .875rem;
+  padding: .125rem .875rem;
+  -webkit-transition: background-color .3s;
+  -o-transition: background-color .3s;
+  transition: background-color .3s;
+  cursor: pointer;
+}
+
+@media (max-width: 36rem) {
+  .cookie-bar__btn {
+    display: block;
+    margin: 0 auto .25rem;
+  }
+}
+
+.cookie-bar__btn:hover {
+  background-color: #0267bf;
+}
+
+.cookie-bar__btn:active {
+  background-color: #0262b5;
+}
+
+.cookie-bar__link {
+  margin: 0 .5rem;
+}
+
+.cookie-bar a {
+  color: #fff;
+  text-decoration: underline;
+}
+
+.cookie-bar a:hover {
+  text-decoration: none;
+}
+
+/* Privacy popup */
+.cookie-bar-privacy-popup {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-pack: center;
+      -ms-flex-pack: center;
+          justify-content: center;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+}
+
+.cookie-bar-privacy-popup.cookie-bar-privacy-popup--hidden {
+  display: none;
+}
+
+.cookie-bar-privacy-popup__dialog {
+  background-color: white;
+  width: 100%;
+  max-width: 50rem;
+  max-height: 90vh;
+  overflow: auto;
+  padding: 2rem 1.5rem 1.5rem;
+  position: relative;
+}
+
+.cookie-bar-privacy-popup__dialog__close {
+  position: absolute;
+  top: 0;
+  right: 0;
+  background-color: black;
+  color: white;
+  display: block;
+  width: 2rem;
+  height: 2rem;
+  border: none;
+  cursor: pointer;
+}
+
+.cookie-bar-privacy-popup__dialog__close:before, .cookie-bar-privacy-popup__dialog__close:after {
+  content: '';
+  display: block;
+  width: 1rem;
+  height: .25rem;
+  background-color: white;
+  position: absolute;
+  top: 50%;
+  left: 25%;
+  -webkit-transform-origin: center center;
+      -ms-transform-origin: center center;
+          transform-origin: center center;
+  margin-top: -.125rem;
+}
+
+.cookie-bar-privacy-popup__dialog__close:before {
+  -webkit-transform: rotate(45deg);
+      -ms-transform: rotate(45deg);
+          transform: rotate(45deg);
+}
+
+.cookie-bar-privacy-popup__dialog__close:after {
+  -webkit-transform: rotate(-45deg);
+      -ms-transform: rotate(-45deg);
+          transform: rotate(-45deg);
+}
+
+.cookie-bar-privacy-popup__dialog p:last-child {
+  margin-bottom: 0;
+}
+
+/* Cookie Bar layouts */
+.cookie-bar--bottom-left,
+.cookie-bar--bottom-right,
+.cookie-bar--bottom {
+  z-index: 100;
+  position: fixed;
+}
+
+.cookie-bar--bottom {
+  right: 0;
+  bottom: 0;
+  left: 0;
+}
+
+.cookie-bar--bottom-left {
+  left: 0.9375rem;
+}
+
+.cookie-bar--bottom-right {
+  right: 0.9375rem;
+}
+
+.cookie-bar--bottom-right,
+.cookie-bar--bottom-left {
+  bottom: 0.9375rem;
+}
+
+@media (min-width: 48rem) {
+  .cookie-bar--bottom-right,
+  .cookie-bar--bottom-left {
+    width: 22.5rem;
+  }
+}
+
+@media (min-width: 48rem) {
+  .cookie-bar--bottom-right .cookie-bar__inner,
+  .cookie-bar--bottom-left .cookie-bar__inner,
+  .cookie-bar--bottom-right .cookie-bar__buttons,
+  .cookie-bar--bottom-left .cookie-bar__buttons {
+    display: block;
+  }
+}
+
+@media (min-width: 48rem) {
+  .cookie-bar--bottom-right .cookie-bar__buttons,
+  .cookie-bar--bottom-left .cookie-bar__buttons {
+    margin-top: .375rem;
+  }
+}
+
+.cookie-bar--bottom-right .cookie-bar__inner,
+.cookie-bar--bottom-left .cookie-bar__inner {
+  line-height: 1.3;
+}

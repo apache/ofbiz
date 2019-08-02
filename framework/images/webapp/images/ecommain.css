@@ -1824,3 +1824,18 @@ button.ui-button::-moz-focus-inner { border: 0; padding: 0; } /* reset extra pad
     vertical-align: top;
     width: 22px;
 }
+
+/*Custom styling for Cookie Bar plugin*/
+.cookie-bar a {
+    color: #fff!important;
+    text-decoration: underline!important;
+}
+button.cookie-bar__btn:hover{
+    background-color: #0267bf!important;
+    color: #fff!important;
+    border: none!important;
+}
+
+.cookie-bar__inner {
+    background-color: #1C334D;
+}

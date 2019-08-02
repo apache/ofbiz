@@ -52,6 +52,7 @@ public class JsLanguageFileMappingCreator {
         Map<String, String> dateJsLocaleFile = new LinkedHashMap<String, String>();
         Map<String, String> validationLocaleFile = new LinkedHashMap<String, String>();
         Map<String, String> dateTimePickerLocaleFile = new LinkedHashMap<String, String>();
+        Map<String, String> cookieBarLocaleFile = new LinkedHashMap<String, String>();
 
         // setup some variables to locate the js files
         String componentRoot = "component://images/webapp";
@@ -59,12 +60,15 @@ public class JsLanguageFileMappingCreator {
         String dateJsLocaleRelPath = "/images/jquery/plugins/datejs/";
         String validateRelPath = "/images/jquery/plugins/validate/localization/";
         String dateTimePickerJsLocaleRelPath = "/images/jquery/plugins/datetimepicker/localization/";
+        String cookieBarRelPath = "/images/jquery/plugins/jquery.cookieBar/localization/";
         String jsFilePostFix = ".js";
         String dateJsLocalePrefix = "date-";
         String validateLocalePrefix = "messages_";
         String jqueryUiLocalePrefix = "jquery.ui.datepicker-";
         String dateTimePickerPrefix = "jquery-ui-timepicker-";
+        String cookieBarPrefix = "jquery-cookieBar-";
         String defaultLocaleDateJs = "en-US";
+        String defaultLocaleCookieBar = "en-US";
         String defaultLocaleJquery = "en"; // Beware to keep the OFBiz specific jquery.ui.datepicker-en.js file when upgrading...
 
         for (Locale locale : localeList) {
@@ -176,16 +180,39 @@ public class JsLanguageFileMappingCreator {
                 }
             }
             dateTimePickerLocaleFile.put(displayCountry, fileUrl);
+
+
+            /*
+             * Try to open the jquery cookiebar language file
+             */
+            fileName = componentRoot + cookieBarRelPath + cookieBarPrefix + strippedLocale + jsFilePostFix;
+            file = FileUtil.getFile(fileName);
+
+            if (file.exists()) {
+                fileUrl = cookieBarRelPath + cookieBarPrefix + strippedLocale + jsFilePostFix;
+            } else {
+                // Try to guess a language
+                fileName = componentRoot + cookieBarRelPath + cookieBarPrefix + modifiedDisplayCountry + jsFilePostFix;
+                file = FileUtil.getFile(fileName);
+                if (file.exists()) {
+                    fileUrl = cookieBarRelPath + cookieBarPrefix + modifiedDisplayCountry + jsFilePostFix;
+                } else {
+                    // use default language en as fallback
+                    fileUrl = cookieBarRelPath + cookieBarPrefix + defaultLocaleCookieBar + jsFilePostFix;
+                }
+            }
+            cookieBarLocaleFile.put(displayCountry, fileUrl);
         }
 
         // check the template file
         String template = "framework/common/template/JsLanguageFilesMapping.ftl";
-        String output = "framework/common/src/org/apache/ofbiz/common/JsLanguageFilesMapping.java";
+        String output = "framework/common/src/main/java/org/apache/ofbiz/common/JsLanguageFilesMapping.java";
         Map<String, Object> mapWrapper = new HashMap<String, Object>();
         mapWrapper.put("datejs", dateJsLocaleFile);
         mapWrapper.put("jquery", jQueryLocaleFile);
         mapWrapper.put("validation", validationLocaleFile);
         mapWrapper.put("dateTime", dateTimePickerLocaleFile);
+        mapWrapper.put("cookieBar", cookieBarLocaleFile);
 
         // some magic to create a new java file: render it as FTL
         Writer writer = new StringWriter();
