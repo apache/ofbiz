@@ -30,7 +30,6 @@ import java.awt.image.RenderedImage;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
-import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.ByteBuffer;
 import java.util.HashMap;
@@ -338,16 +337,8 @@ public class FrameImage {
         String imageServerPath = FlexibleStringExpander.expandString(EntityUtilProperties.getPropertyValue("catalog", "image.management.path", delegator), context);
         
         String productId = request.getParameter("productId");
-        String imageName = null;
-        try {
-            imageName = URLEncoder.encode(request.getParameter("imageName"), "UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            Debug.logError(e, "Error while saving TrackingCodeVisit", module);
-            request.setAttribute("_ERROR_MESSAGE_", e.getMessage());
-            return "error";
-        }
-        
-        
+        String imageName = request.getParameter("imageName");
+
         String dirPath = "/preview/";
         File dir = new File(imageServerPath + dirPath);
         if (!dir.exists()) {
@@ -384,11 +375,12 @@ public class FrameImage {
             request.setAttribute("_ERROR_MESSAGE_", e.getMessage());
             return "error";
         }
+        
         if (UtilValidate.isNotEmpty(imageName)) {
             File file = new File(imageServerPath + "/preview/" +"/previewImage.jpg");
             file.delete();
             // Image Frame
-            BufferedImage bufImg1 = ImageIO.read(new File(imageServerPath + "/" + productId + "/" + imageName).getCanonicalFile());
+            BufferedImage bufImg1 = ImageIO.read(new File(URLEncoder.encode(imageServerPath + "/" + productId + "/" + imageName, "UTF-8")).getCanonicalFile());
             BufferedImage bufImg2 = ImageIO.read(new File(imageServerPath + "/frame/" + frameImageName));
             
             int bufImgType;
