@@ -338,7 +338,7 @@ task testIntegration(group: ofbizServer) {
 }
 
 task terminateOfbiz(group: ofbizServer,
-    description: 'Force termination of any running OFBiz servers, only use if \"--shutdown\" command fails') << {
+    description: 'Force termination of any running OFBiz servers, only use if \"--shutdown\" command fails') doLast {
     if (os.contains('windows')) {
         Runtime.getRuntime().exec("wmic process where \"CommandLine Like \'%org.apache.ofbiz.base.start.Start%\'\" Call Terminate")
     } else {
@@ -403,7 +403,7 @@ task createTenant(group: ofbizServer, description: 'Create a new tenant in your 
 
     def databaseTemplateFile = "${rootDir}/framework/resources/templates/AdminNewTenantData-Derby.xml"
 
-    task prepareAndValidateTenantArguments << {
+    task prepareAndValidateTenantArguments doLast {
         if (!project.hasProperty('tenantId')) {
             throw new GradleException('Project property tenantId is missing')
         }
@@ -423,7 +423,7 @@ task createTenant(group: ofbizServer, description: 'Create a new tenant in your 
         }
     }
 
-    task generateDatabaseTemplateFile(dependsOn: prepareAndValidateTenantArguments) << {
+    task generateDatabaseTemplateFile(dependsOn: prepareAndValidateTenantArguments) doLast {
         def filterTokens = ['tenantId': tenantId,
             'tenantName': project.hasProperty('tenantName')? tenantName : tenantId,
             'domainName': project.hasProperty('domainName')? domainName : 'org.apache.ofbiz',
@@ -435,7 +435,7 @@ task createTenant(group: ofbizServer, description: 'Create a new tenant in your 
             filterTokens, 'tmpFilteredTenantData.xml')
     }
 
-    task generateAdminUserTemplateFile(dependsOn: prepareAndValidateTenantArguments) << {
+    task generateAdminUserTemplateFile(dependsOn: prepareAndValidateTenantArguments) doLast {
         generateFileFromTemplate(
             "${rootDir}/framework/resources/templates/AdminUserLoginData.xml",
             'runtime/tmp',
@@ -484,7 +484,7 @@ task createTenant(group: ofbizServer, description: 'Create a new tenant in your 
 }
 
 // ========== System Administration tasks ==========
-task createTestReports(group: sysadminGroup, description: 'Generate HTML reports from junit XML output') << {
+task createTestReports(group: sysadminGroup, description: 'Generate HTML reports from junit XML output') doLast {
     ant.taskdef(name: 'junitreport',
         classname: 'org.apache.tools.ant.taskdefs.optional.junit.XMLResultAggregator',
         classpath: configurations.junitReport.asPath)
@@ -507,7 +507,7 @@ gradle.taskGraph.afterTask { Task task, TaskState state ->
 }
 
 // ========== OFBiz Plugin Management ==========
-task createPlugin(group: ofbizPlugin, description: 'create a new plugin component based on specified templates') << {
+task createPlugin(group: ofbizPlugin, description: 'create a new plugin component based on specified templates') doLast {
     if (!project.hasProperty('pluginResourceName')) {
         ext.pluginResourceName = pluginId.capitalize()
     }
@@ -696,7 +696,7 @@ task pushPlugin(group: ofbizPlugin, description: 'push an existing plugin to loc
     }
 }
 
-task pullPlugin(group: ofbizPlugin, description: 'Download and install a plugin with all dependencies') << {
+task pullPlugin(group: ofbizPlugin, description: 'Download and install a plugin with all dependencies') doLast {
     if (!project.hasProperty('dependencyId')) {
         throw new GradleException('You must pass the dependencyId of the plugin')
     }
@@ -738,44 +738,44 @@ task pullPlugin(group: ofbizPlugin, description: 'Download and install a plugin 
 }
 
 // ========== Clean up tasks ==========
-task cleanCatalina(group: cleanupGroup, description: 'Clean Catalina data in runtime/catalina/work') << {
+task cleanCatalina(group: cleanupGroup, description: 'Clean Catalina data in runtime/catalina/work') doLast {
     delete "${rootDir}/runtime/catalina/work"
 }
-task cleanData(group: cleanupGroup, description: 'Clean all DB data (Derby) under runtime/data') << {
+task cleanData(group: cleanupGroup, description: 'Clean all DB data (Derby) under runtime/data') doLast {
     deleteAllInDirWithExclusions("${rootDir}/runtime/data/", ['README', 'derby.properties'])
 }
-task cleanDownloads(group: cleanupGroup, description: 'Clean all downloaded files') << {
+task cleanDownloads(group: cleanupGroup, description: 'Clean all downloaded files') doLast {
     delete fileTree(dir: "${rootDir}/framework/base/lib", includes: ['activemq-*.jar'])
     delete fileTree(dir: "${rootDir}/framework/entity/lib/jdbc", includes: ['postgresql-*.jar'])
     delete fileTree(dir: "${rootDir}/framework/entity/lib/jdbc", includes: ['mysql-*.jar'])
 }
-task cleanLogs(group: cleanupGroup, description: 'Clean all logs in runtime/logs') << {
+task cleanLogs(group: cleanupGroup, description: 'Clean all logs in runtime/logs') doLast {
     deleteAllInDirWithExclusions("${rootDir}/runtime/logs/", ['README'])
 }
-task cleanOutput(group: cleanupGroup, description: 'Clean runtime/output directory') << {
+task cleanOutput(group: cleanupGroup, description: 'Clean runtime/output directory') doLast {
     deleteAllInDirWithExclusions("${rootDir}/runtime/output/", ['README'])
 }
-task cleanIndexes(group: cleanupGroup, description: 'Remove search indexes (e.g. Lucene) from runtime/indexes') << {
+task cleanIndexes(group: cleanupGroup, description: 'Remove search indexes (e.g. Lucene) from runtime/indexes') doLast {
     deleteAllInDirWithExclusions("${rootDir}/runtime/indexes/", ['README', 'index.properties'])
 }
-task cleanTempfiles(group: cleanupGroup, description: 'Remove file in runtime/tempfiles') << {
+task cleanTempfiles(group: cleanupGroup, description: 'Remove file in runtime/tempfiles') doLast {
     deleteAllInDirWithExclusions("${rootDir}/runtime/tempfiles/", ['README'])
     deleteAllInDirWithExclusions("${rootDir}/runtime/tmp/", ['README'])
 }
-task cleanUploads(group: cleanupGroup, description: 'Remove uploaded files.') << {
+task cleanUploads(group: cleanupGroup, description: 'Remove uploaded files.') doLast {
     deleteAllInDirWithExclusions("${rootDir}/runtime/uploads/", [])
 }
-task cleanXtra(group: cleanupGroup, description: 'Clean extra generated files like .rej, .DS_Store, etc.') << {
+task cleanXtra(group: cleanupGroup, description: 'Clean extra generated files like .rej, .DS_Store, etc.') doLast {
     delete fileTree(dir: "${rootDir}", includes: ['**/.nbattrs', '**/*~','**/.#*', '**/.DS_Store', '**/*.rej', '**/*.orig'])
 }
-task cleanGradle(group: cleanupGroup, description: 'clean generated files from Gradle') << {
+task cleanGradle(group: cleanupGroup, description: 'clean generated files from Gradle') doLast {
     delete file("${rootDir}/.gradle")
 }
-task cleanFooterFiles(group: cleanupGroup, description: 'clean generated footer files') << {
+task cleanFooterFiles(group: cleanupGroup, description: 'clean generated footer files') doLast {
     delete gitFooterFile
     delete svnFooterFile
 }
-task cleanAnt(group: cleanupGroup, type: Delete, description: "clean old artifacts generated by Ant") << {
+task cleanAnt(group: cleanupGroup, type: Delete, description: "clean old artifacts generated by Ant") doLast {
     /* TODO this task is temporary and should be deleted after some
      * time when users have updated their trees. */
     ['framework', 'specialpurpose', 'applications'].each { componentGroup ->
@@ -798,7 +798,7 @@ task cleanAll(group: cleanupGroup, dependsOn: [cleanTasks, clean]) {
 
 // ========== Tasks for OFBiz committers ==========
 def websiteDir = "${rootDir}/../site"
-task copyDtds(group: committerGroup, description: 'Copy all DTDs from OFBiz instance to website') << {
+task copyDtds(group: committerGroup, description: 'Copy all DTDs from OFBiz instance to website') doLast {
     mkdir websiteDir+'/dtds'
     copy {
         from (fileTree("${rootDir}").files) {
@@ -813,7 +813,7 @@ task copyDtds(group: committerGroup, description: 'Copy all DTDs from OFBiz inst
     }
 }
 
-task gitInfoFooter(group: committerGroup, description: 'Update the Git Branch-revision info in the footer if Git is used') << {
+task gitInfoFooter(group: committerGroup, description: 'Update the Git Branch-revision info in the footer if Git is used') doLast {
     def branch
     def revision
     def timestamp = new Date().format 'yyyy-MM-dd HH:mm:ss'
@@ -845,7 +845,7 @@ task gitInfoFooter(group: committerGroup, description: 'Update the Git Branch-re
     gitFooterFile << '${uiLabelMap.CommonJavaVersion} : ' + "${org.gradle.internal.jvm.Jvm.current()}"
 }
 
-task svnInfoFooter(group: committerGroup, description: 'Update the Subversion revision info in the footer if Subversion is used') << {
+task svnInfoFooter(group: committerGroup, description: 'Update the Subversion revision info in the footer if Subversion is used') doLast {
     def timestamp = new Date().format 'yyyy-MM-dd HH:mm:ss'
     def svnOutput = new ByteArrayOutputStream()
     def svnFolder = new File('.svn')
