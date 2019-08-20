@@ -27,12 +27,14 @@ GRADLE_WRAPPER_URI="https://dl.bintray.com/apacheofbiz/GradleWrapper/v$RELEASE/"
 GRADLE_WRAPPER_URI_BACKUP="https://github.com/gradle/gradle/raw/v$RELEASE/gradle/wrapper/"
 
 # Embded checksum shasum to control the download
-SHASUM_GRADLE_WRAPPER_FILES="12478d9829998a5433231ad971bae52978279a3d  gradle/wrapper/gradle-wrapper.jar
-05d4ab69d3f2143e017710b0917b740f75a75c07  gradle/wrapper/gradle-wrapper.properties"
+SHASUM_GRADLE_WRAPPER_FILES="1d7e78262e0da9bbc9afe401fb000607a4dec5e5  gradle/wrapper/gradle-wrapper.jar
+9d35a70e249236902a8abeb155c64d66c0b16294  gradle/wrapper/gradle-wrapper.properties
+6019961ecd5de0e0513ae39a2e97e73c7eaa8fc9  gradlew"
 
 GRADLE_WRAPPER_JAR="gradle-wrapper.jar"
 GRADLE_WRAPPER_PROPERTIES="gradle-wrapper.properties"
 GRADLE_WRAPPER_FILES="$GRADLE_WRAPPER_JAR $GRADLE_WRAPPER_PROPERTIES"
+GRADLE_WRAPPER_SCRIPT="gradlew"
 
 whereIsBinary() {
     whereis $1 | grep /
@@ -69,6 +71,9 @@ if [ ! -d "$GRADLE_OFBIZ_PATH" ]; then
     echo "Location seems to be uncorrected, please take care to run 'sh gradle/init-gradle-wrapper.sh' at the Apache OFBiz home";
     exit 1;
 fi
+if [ ! -d "$GRADLE_WRAPPER_OFBIZ_PATH" ]; then
+    mkdir $GRADLE_WRAPPER_OFBIZ_PATH;
+fi
 
 # check if we have on binary to download missing wrapper
 if [ -z "$(whereIsBinary curl)" ] && [ -z "$(whereIsBinary wget)" ]; then
@@ -87,6 +92,14 @@ if [ ! -r "$GRADLE_WRAPPER_OFBIZ_PATH/$GRADLE_WRAPPER_JAR" ]; then
         rm -f $GRADLE_WRAPPER_OFBIZ_PATH/*
         echo "\nDownload files $GRADLE_WRAPPER_FILES from $GRADLE_WRAPPER_URI failed.\nPlease check the log to found the reason and run the script again."
     fi
+
+    if [ ! -r "$GRADLE_WRAPPER_SCRIPT" ]; then
+         echo " === Download script wrapper ==="
+         resolveFile $GRADLE_WRAPPER_SCRIPT
+         mv "$GRADLE_WRAPPER_OFBIZ_PATH/$GRADLE_WRAPPER_SCRIPT" .
+         chmod u+x $GRADLE_WRAPPER_SCRIPT
+    fi
+
     echo " === Control downloaded files ==="
     if [ -n "$(whereIsBinary shasum)" ]; then
         echo "$SHASUM_GRADLE_WRAPPER_FILES" | shasum -c -;
