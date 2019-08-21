@@ -41,11 +41,22 @@ you can download from the below link.
 
 [To know more about the JDK](https://medium.com/@javachampions/java-is-still-free-2-0-0-6b9aa8d6d244)
 
-The second requirement is to have Gradle installed:
+The second requirement is to setup the Gradle wrapper files that are used
+to build the system.
+In order to fulfill this requirement, you can run the following command:
+
+MS Windows:
+`\gradle\init-gradle-wrapper.ps1`
+
+Unix-like OS:
+`./gradle/init-gradle-wrapper`
+
+The script will download all the Gradle wrapper files required to build the system. 
+Alternatively, after you have Gradle installed:
 
 [Installing Gradle](https://docs.gradle.org/current/userguide/installation.html)
 
-Then you should setup the Gradle wrapper for OFBiz by executing the following from
+you can setup the Gradle wrapper for OFBiz by executing the following from
 the command line at the OFBiz top level directory (folder):
  
 `gradle wrapper --gradle-version 2.13`

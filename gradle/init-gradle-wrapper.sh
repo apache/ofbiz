@@ -26,7 +26,7 @@ RELEASE="2.13"
 GRADLE_WRAPPER_URI="https://dl.bintray.com/apacheofbiz/GradleWrapper/v$RELEASE/"
 GRADLE_WRAPPER_URI_BACKUP="https://github.com/gradle/gradle/raw/v$RELEASE/gradle/wrapper/"
 
-# Embded checksum shasum to control the download
+# checksum to verify the downloaded files
 SHASUM_GRADLE_WRAPPER_FILES="1d7e78262e0da9bbc9afe401fb000607a4dec5e5  gradle/wrapper/gradle-wrapper.jar
 9d35a70e249236902a8abeb155c64d66c0b16294  gradle/wrapper/gradle-wrapper.properties
 6019961ecd5de0e0513ae39a2e97e73c7eaa8fc9  gradlew"
@@ -40,7 +40,7 @@ whereIsBinary() {
     whereis $1 | grep /
 }
 
-# Resolve the command to use for calling and realize the download
+# Perform the download using curl or wget
 downloadFile() {
    if [ -n "$(whereIsBinary curl)" ]; then
        GET_CMD="curl -L -o $GRADLE_WRAPPER_OFBIZ_PATH/$1 -s -w %{http_code} $2/$1";
@@ -57,7 +57,7 @@ downloadFile() {
    return 1
 }
 
-# Call and if not succes try to use backup
+# Download the file from the main URI; if the download fails then use the backup URI
 resolveFile() {
    downloadFile $1 $GRADLE_WRAPPER_URI;
    if [ $? -eq 1 ]; then
@@ -66,9 +66,9 @@ resolveFile() {
 }
 
 echo " === Prepare operation ===";
-# Control that we work the script on a good directory
+# Verify that the script is executed from the right location
 if [ ! -d "$GRADLE_OFBIZ_PATH" ]; then
-    echo "Location seems to be uncorrected, please take care to run 'sh gradle/init-gradle-wrapper.sh' at the Apache OFBiz home";
+    echo "Location seems to be incorrect, please run 'sh gradle/init-gradle-wrapper.sh' from the Apache OFBiz home";
     exit 1;
 fi
 if [ ! -d "$GRADLE_WRAPPER_OFBIZ_PATH" ]; then
@@ -77,7 +77,7 @@ fi
 
 # check if we have on binary to download missing wrapper
 if [ -z "$(whereIsBinary curl)" ] && [ -z "$(whereIsBinary wget)" ]; then
-   echo "No command curl or wget found, please install one or install yourself gradle (more information see README.adoc or https://gradle.org/install)";
+   echo "curl or wget not found, please install one of them or install yourself gradle (for more information see README.md or https://gradle.org/install)";
    exit 1
 fi
 
@@ -90,7 +90,7 @@ if [ ! -r "$GRADLE_WRAPPER_OFBIZ_PATH/$GRADLE_WRAPPER_JAR" ]; then
     done
     if [ ! $? -eq 0 ]; then
         rm -f $GRADLE_WRAPPER_OFBIZ_PATH/*
-        echo "\nDownload files $GRADLE_WRAPPER_FILES from $GRADLE_WRAPPER_URI failed.\nPlease check the log to found the reason and run the script again."
+        echo "\nDownload files $GRADLE_WRAPPER_FILES from $GRADLE_WRAPPER_URI failed.\nPlease check the logs, fix the problem and run the script again."
     fi
 
     if [ ! -r "$GRADLE_WRAPPER_SCRIPT" ]; then
@@ -106,7 +106,7 @@ if [ ! -r "$GRADLE_WRAPPER_OFBIZ_PATH/$GRADLE_WRAPPER_JAR" ]; then
         exit 0;
     fi
 
-    echo " Warning: shasum not found, skip the control process"
+    echo " Warning: shasum not found, the downloaded files could not be verified"
     exit 1;
 fi
-echo " Nothing todo"
+echo " Nothing to be done"
