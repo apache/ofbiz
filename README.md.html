@@ -5,7 +5,7 @@
   <meta name="generator" content="pandoc" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
   <title>README</title>
-  <style>
+  <style type="text/css">
       code{white-space: pre-wrap;}
       span.smallcaps{font-variant: small-caps;}
       span.underline{text-decoration: underline;}
@@ -44,7 +44,7 @@ under the License.
 <p><a href="https://adoptopenjdk.net/">JDK download</a></p>
 <p><a href="https://medium.com/@javachampions/java-is-still-free-2-0-0-6b9aa8d6d244">To know more about the JDK</a></p>
 <p>The second requirement is to setup the Gradle wrapper files that are used to build the system. In order to fulfill this requirement, you can run the following command:</p>
-<p>MS Windows: <code>\gradle\init-gradle-wrapper.ps1</code></p>
+<p>MS Windows: <code>init-gradle-wrapper</code></p>
 <p>Unix-like OS: <code>./gradle/init-gradle-wrapper</code></p>
 <p>The script will download all the Gradle wrapper files required to build the system. Alternatively, after you have Gradle installed:</p>
 <p><a href="https://docs.gradle.org/current/userguide/installation.html">Installing Gradle</a></p>
@@ -90,7 +90,7 @@ under the License.
 <p>There are two types of tasks designed for OFBiz in Gradle:</p>
 <ul>
 <li><p><strong>Standard tasks</strong>: To execute general standard Gradle tasks</p></li>
-<li><p><strong>OFBiz server tasks</strong>: To execute OFBiz startup commands. These tasks start with one of the following words:</p>
+<li><strong>OFBiz server tasks</strong>: To execute OFBiz startup commands. These tasks start with one of the following words:
 <ul>
 <li><strong>ofbiz</strong> : standard server commands</li>
 <li><strong>ofbizDebug</strong> : server commands running in remote debug mode</li>
@@ -99,28 +99,28 @@ under the License.
 </ul>
 <p>Tips:</p>
 <ul>
-<li><p>OFBiz <strong>server commands</strong> require <strong>“quoting”</strong> the commands. For example: <code>gradlew "ofbiz --help"</code></p></li>
+<li><p>OFBiz <strong>server commands</strong> require <strong>“quoting”</strong> the commands. For example: <code>gradlew &quot;ofbiz --help&quot;</code></p></li>
 <li><p>Shortcuts to task names can be used by writing the first letter of every word in a task name. However, you cannot use the shortcut form for OFBiz server tasks. Example: <code>gradlew loadAdminUserLogin -PuserLoginId=myadmin</code> = <code>gradlew lAUL -PuserLoginId=myadmin</code></p></li>
 </ul>
 <h4 id="example-standard-tasks">Example standard tasks</h4>
 <p><code>gradlew build</code></p>
 <p><code>gradlew cleanAll loadDefault testIntegration</code></p>
 <h4 id="example-ofbiz-server-tasks">Example OFBiz server tasks</h4>
-<p><code>gradlew "ofbiz --help"</code></p>
-<p><code>gradlew "ofbizDebug --test"</code></p>
-<p><code>gradlew "ofbizBackground --start --portoffset 10000"</code></p>
-<p><code>gradlew "ofbiz --shutdown --portoffset 10000"</code></p>
+<p><code>gradlew &quot;ofbiz --help&quot;</code></p>
+<p><code>gradlew &quot;ofbizDebug --test&quot;</code></p>
+<p><code>gradlew &quot;ofbizBackground --start --portoffset 10000&quot;</code></p>
+<p><code>gradlew &quot;ofbiz --shutdown --portoffset 10000&quot;</code></p>
 <p><code>gradlew ofbiz</code> (default is –start)</p>
 <h4 id="example-mixed-tasks-standard-and-ofbiz-server">Example mixed tasks (standard and OFBiz server)</h4>
-<p><code>gradlew cleanAll loadDefault "ofbiz --start"</code></p>
+<p><code>gradlew cleanAll loadDefault &quot;ofbiz --start&quot;</code></p>
 <hr />
 <h2 id="quick-reference">Quick reference</h2>
-<p>You can use the below common list of tasks as a quick reference for controlling the system. This document uses the windows task syntax, if you are on a Unix-like system, you need to add the <code>./</code> to gradlew i.e. <code>./gradlew</code></p>
+<p>You can use the below common list of tasks as a quick reference for controlling the system. This document uses the windows task syntax, if you are on a Unix-like system, you need to add the <code>./</code> to gradlew i.e. <code>./gradlew</code></p>
 <hr />
 <h3 id="help-tasks">Help tasks</h3>
 <h4 id="list-ofbiz-server-commands">List OFBiz server commands</h4>
 <p>List all available commands to control the OFBiz server</p>
-<p><code>gradlew "ofbiz --help"</code></p>
+<p><code>gradlew &quot;ofbiz --help&quot;</code></p>
 <h4 id="list-build-tasks">List build tasks</h4>
 <p>List all available tasks from the build system</p>
 <p><code>gradlew tasks</code></p>
@@ -133,35 +133,35 @@ under the License.
 <hr />
 <h3 id="server-command-tasks">Server command tasks</h3>
 <h4 id="start-ofbiz-1">Start OFBiz</h4>
-<p><code>gradlew "ofbiz --start"</code></p>
+<p><code>gradlew &quot;ofbiz --start&quot;</code></p>
 <p>start is the default server task so this also works:</p>
 <p><code>gradlew ofbiz</code></p>
 <h4 id="shutdown-ofbiz">Shutdown OFBiz</h4>
-<p><code>gradlew "ofbiz --shutdown"</code></p>
+<p><code>gradlew &quot;ofbiz --shutdown&quot;</code></p>
 <h4 id="get-ofbiz-status">Get OFBiz status</h4>
-<p><code>gradlew "ofbiz --status"</code></p>
+<p><code>gradlew &quot;ofbiz --status&quot;</code></p>
 <h4 id="force-ofbiz-shutdown">Force OFBiz shutdown</h4>
 <p>Terminate all running OFBiz server instances by calling the appropriate operating system kill command. Use this command to force OFBiz termination if the –shutdown command does not work. Usually this is needed when in the middle of data loading or testing in OFBiz.</p>
 <p>Warning: Be careful in using this command as force termination might lead to inconsistent state / data</p>
 <p><code>gradlew terminateOfbiz</code></p>
 <h4 id="start-ofbiz-in-remote-debug-mode">Start OFBiz in remote debug mode</h4>
 <p>Starts OFBiz in remote debug mode and waits for debugger or IDEs to connect on port <strong>5005</strong></p>
-<p><code>gradlew "ofbizDebug --start"</code></p>
+<p><code>gradlew &quot;ofbizDebug --start&quot;</code></p>
 <p>OR</p>
 <p><code>gradlew ofbizDebug</code></p>
 <h4 id="start-ofbiz-on-a-different-port">Start OFBiz on a different port</h4>
 <p>Start OFBiz of the network port offsetted by the range provided in the argument to –portoffset</p>
-<p><code>gradlew "ofbiz --start --portoffset 10000"</code></p>
+<p><code>gradlew &quot;ofbiz --start --portoffset 10000&quot;</code></p>
 <h4 id="start-ofbiz-in-the-background">Start OFBiz in the background</h4>
 <p>Start OFBiz in the background by forking it to a new process and redirecting the output to <strong>runtime/logs/console.log</strong></p>
-<p><code>gradlew "ofbizBackground --start"</code></p>
+<p><code>gradlew &quot;ofbizBackground --start&quot;</code></p>
 <p>OR</p>
 <p><code>gradlew ofbizBackground</code></p>
 <p>You can also offset the port, for example:</p>
-<p><code>gradlew "ofbizBackground --start --portoffset 10000"</code></p>
+<p><code>gradlew &quot;ofbizBackground --start --portoffset 10000&quot;</code></p>
 <h4 id="passing-jvm-runtime-options-to-ofbiz">Passing JVM runtime options to OFBiz</h4>
 <p>You can pass JVM runtime options by specifying the project property <code>-PjvmArgs</code>.</p>
-<p><code>gradlew ofbiz -PjvmArgs="-Xms1024M -Xmx2048M" -Dsome.parameter=hello</code></p>
+<p><code>gradlew ofbiz -PjvmArgs=&quot;-Xms1024M -Xmx2048M&quot; -Dsome.parameter=hello</code></p>
 <p>If you do not specify <code>jvmArgs</code>, a default of <code>-Xms128M -Xmx1024M</code> is set.</p>
 <hr />
 <h3 id="data-loading-tasks">Data loading tasks</h3>
@@ -175,26 +175,26 @@ under the License.
 <li><strong>ext-demo</strong>: External Demo Data (custom)</li>
 </ul>
 <p>you can choose which data readers to pass in the following syntax:</p>
-<p><code>gradlew "ofbiz --load-data readers=&lt;readers-here-comma-separated&gt;"</code></p>
+<p><code>gradlew &quot;ofbiz --load-data readers=&lt;readers-here-comma-separated&gt;&quot;</code></p>
 <p>Example:</p>
-<p><code>gradlew "ofbiz --load-data readers=seed,seed-initial,ext,ext-demo"</code></p>
+<p><code>gradlew &quot;ofbiz --load-data readers=seed,seed-initial,ext,ext-demo&quot;</code></p>
 <h4 id="load-default-ofbiz-data">Load default OFBiz data</h4>
 <p>Loads default data set; meant for initial loading of generic OFBiz data. Can be applied for development, testing, demonstration, etc. purposes. Be aware that executing this task can result in your data being overwritten in your database of choice. Use with caution in production environments. The default data set is defined by datasource using the read-data attribute, followed by the name of the data set, into the datasource element of the ‘entityengine.xml’ file.</p>
 <p><code>gradlew loadDefault</code></p>
 <p>OR</p>
-<p><code>gradlew "ofbiz --load-data"</code></p>
+<p><code>gradlew &quot;ofbiz --load-data&quot;</code></p>
 <h4 id="load-seed-data">Load seed data</h4>
 <p>Load ONLY the seed data (not seed-initial, demo, ext* or anything else); meant for use after an update of the code to reload the seed data as it is generally maintained along with the code and needs to be in sync for operation</p>
-<p><code>gradlew "ofbiz --load-data readers=seed"</code></p>
+<p><code>gradlew &quot;ofbiz --load-data readers=seed&quot;</code></p>
 <h4 id="load-ext-data">load ext data</h4>
 <p>Load seed, seed-initial and ext data; meant for manual/generic testing, development, or going into production with a derived system based on stock OFBiz where the ext data basically replaces the demo data</p>
-<p><code>gradlew "ofbiz --load-data readers=seed,seed-initial,ext"</code></p>
+<p><code>gradlew &quot;ofbiz --load-data readers=seed,seed-initial,ext&quot;</code></p>
 <h4 id="load-ext-test-data">load ext test data</h4>
 <p>Load seed, seed-initial, ext and ext-test data; meant for automated testing with a derived system based on stock OFBiz</p>
-<p><code>gradlew "ofbiz --load-data readers=seed,seed-initial,ext,ext-test"</code></p>
+<p><code>gradlew &quot;ofbiz --load-data readers=seed,seed-initial,ext,ext-test&quot;</code></p>
 <h4 id="load-data-from-an-entity-file">load data from an entity file</h4>
 <p>Load data from an XML file holding entity data.</p>
-<p><code>gradlew "ofbiz --load-data file=foo/bar/FileNameHere.xml"</code></p>
+<p><code>gradlew &quot;ofbiz --load-data file=foo/bar/FileNameHere.xml&quot;</code></p>
 <h4 id="create-a-new-tenant">create a new tenant</h4>
 <p>Create a new tenant in your environment, create the delegator, load initial data with admin-user and password (needs multitenant=Y in general.properties). The following project parameters are passed:</p>
 <ul>
@@ -208,7 +208,7 @@ under the License.
 <li>dbPassword: optional, password of the database</li>
 </ul>
 <p><code>gradlew createTenant -PtenantId=mytenant</code></p>
-<p><code>gradlew createTenant -PtenantId=mytenant -PtenantName="My Name" -PdomainName=com.example -PtenantReaders=seed,seed-initial,ext -PdbPlatform=M -PdbIp=127.0.0.1 -PdbUser=mydbuser -PdbPassword=mydbpass</code></p>
+<p><code>gradlew createTenant -PtenantId=mytenant -PtenantName=&quot;My Name&quot; -PdomainName=com.example -PtenantReaders=seed,seed-initial,ext -PdbPlatform=M -PdbIp=127.0.0.1 -PdbUser=mydbuser -PdbPassword=mydbpass</code></p>
 <p>If run successfully, the system creates a new tenant having:</p>
 <ul>
 <li>delegator: default#${tenandId} (e.g. default#mytenant)</li>
@@ -234,15 +234,15 @@ under the License.
 <p><code>gradlew 'ofbiz --test'</code></p>
 <h4 id="execute-an-integration-test-case">Execute an integration test case</h4>
 <p>run a test case, in this example the componnet is “entity” and the case name is “entity-tests”</p>
-<p><code>gradlew "ofbiz --test component=entity --test case=entity-tests"</code></p>
+<p><code>gradlew &quot;ofbiz --test component=entity --test case=entity-tests&quot;</code></p>
 <h4 id="execute-an-integration-test-case-in-debug-mode">Execute an integration test case in debug mode</h4>
 <p>listens on port <strong>5005</strong></p>
-<p><code>gradlew "ofbizDebug --test component=entity --test case=entity-tests"</code></p>
+<p><code>gradlew &quot;ofbizDebug --test component=entity --test case=entity-tests&quot;</code></p>
 <h4 id="execute-an-integration-test-suite">Execute an integration test suite</h4>
-<p><code>gradlew "ofbiz --test component=widget --test suitename=org.apache.ofbiz.widget.test.WidgetMacroLibraryTests"</code></p>
+<p><code>gradlew &quot;ofbiz --test component=widget --test suitename=org.apache.ofbiz.widget.test.WidgetMacroLibraryTests&quot;</code></p>
 <h4 id="execute-an-integration-test-suite-in-debug-mode">Execute an integration test suite in debug mode</h4>
 <p>listens on port <strong>5005</strong></p>
-<p><code>gradlew "ofbizDebug --test component=widget --test suitename=org.apache.ofbiz.widget.test.WidgetMacroLibraryTests"</code></p>
+<p><code>gradlew &quot;ofbizDebug --test component=widget --test suitename=org.apache.ofbiz.widget.test.WidgetMacroLibraryTests&quot;</code></p>
 <hr />
 <h3 id="miscellaneous-tasks">Miscellaneous tasks</h3>
 <h4 id="launch-a-graphical-user-interface-of-gradle">Launch a graphical user interface of Gradle</h4>
@@ -274,11 +274,11 @@ under the License.
 </blockquote>
 <h3 id="pull-download-and-install-a-plugin-automatically">Pull (download and install) a plugin automatically</h3>
 <p>Download a plugin with all its dependencies (plugins) and install them one-by-one starting with the dependencies and ending with the plugin itself.</p>
-<p><code>gradlew pullPlugin -PdependencyId="org.apache.ofbiz.plugin:myplugin:0.1.0"</code></p>
+<p><code>gradlew pullPlugin -PdependencyId=&quot;org.apache.ofbiz.plugin:myplugin:0.1.0&quot;</code></p>
 <p>If the plugin resides in a custom maven repository (not jcenter or localhost) then you can use specify the repository using below command:</p>
-<p><code>gradlew pullPlugin -PrepoUrl="http://www.example.com/custom-maven" -PdependencyId="org.apache.ofbiz.plugin:myplugin:0.1.0"</code></p>
+<p><code>gradlew pullPlugin -PrepoUrl=&quot;http://www.example.com/custom-maven&quot; -PdependencyId=&quot;org.apache.ofbiz.plugin:myplugin:0.1.0&quot;</code></p>
 <p>If you need username and password to access the custom repository:</p>
-<p><code>gradlew pullPlugin -PrepoUrl="http://www.example.com/custom-maven" -PrepoUser=myuser -PrepoPassword=mypassword -PdependencyId="org.apache.ofbiz.plugin:myplugin:0.1.0"</code></p>
+<p><code>gradlew pullPlugin -PrepoUrl=&quot;http://www.example.com/custom-maven&quot; -PrepoUser=myuser -PrepoPassword=mypassword -PdependencyId=&quot;org.apache.ofbiz.plugin:myplugin:0.1.0&quot;</code></p>
 <h3 id="install-a-plugin">Install a plugin</h3>
 <p>If you have a plugin called mycustomplugin and want to install it in OFBiz follow the below instructions:</p>
 <ul>
@@ -327,7 +327,7 @@ under the License.
 <li>pluginDescription: optional, defaults to “Publication of OFBiz plugin ${pluginId}”</li>
 </ul>
 <p><code>gradlew pushPlugin -PpluginId=myplugin</code></p>
-<p><code>gradlew pushPlugin -PpluginId=mycompany -PpluginGroup=com.mycompany.ofbiz.plugin -PpluginVersion=1.2.3 -PpluginDescription="Introduce special functionality X"</code></p>
+<p><code>gradlew pushPlugin -PpluginId=mycompany -PpluginGroup=com.mycompany.ofbiz.plugin -PpluginVersion=1.2.3 -PpluginDescription=&quot;Introduce special functionality X&quot;</code></p>
 <hr />
 <h2 id="useful-tips">Useful Tips</h2>
 <h3 id="gradle-tab-completion-on-unix-like-systems">Gradle tab-completion on Unix-like systems:</h3>

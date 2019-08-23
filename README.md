@@ -46,7 +46,7 @@ to build the system.
 In order to fulfill this requirement, you can run the following command:
 
 MS Windows:
-`\gradle\init-gradle-wrapper.ps1`
+`init-gradle-wrapper`
 
 Unix-like OS:
 `./gradle/init-gradle-wrapper`
